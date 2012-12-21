@@ -25,16 +25,16 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name="int")
 public final class XmlIntEntry extends XmlAbstractMapEntry<Integer> {
-	
+
 	private final Integer value;
-	
+
 	/**
 	 * Default constructor.
 	 */
 	public XmlIntEntry() {
 		value = null;
 	}
-	
+
 	/**
 	 * Constructs the map entry with integer value.
 	 * @param k Entry key.
@@ -48,5 +48,10 @@ public final class XmlIntEntry extends XmlAbstractMapEntry<Integer> {
 	@Override
 	public final Integer getValue() {
 		return value;
+	}
+
+	@Override
+	public Class<Integer> getValueClass() {
+		return Integer.class;
 	}
 }

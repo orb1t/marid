@@ -19,16 +19,12 @@ package org.marid.data.xml.entries;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
 
 /**
  * XML abstract map entry.
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 @XmlRootElement(name="entry")
-@XmlSeeAlso({
-	XmlIntEntry.class
-})
 public abstract class XmlAbstractMapEntry<T> {
 
 	@XmlAttribute
@@ -62,4 +58,10 @@ public abstract class XmlAbstractMapEntry<T> {
 	 * @return Entry value.
 	 */
 	public abstract T getValue();
+
+	/**
+	 * Get value class.
+	 * @return Value class.
+	 */
+	public abstract Class<T> getValueClass();
 }
