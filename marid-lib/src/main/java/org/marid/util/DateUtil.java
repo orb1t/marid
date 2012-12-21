@@ -19,6 +19,7 @@ package org.marid.util;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
+import static java.util.Calendar.*;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
@@ -35,19 +36,16 @@ public class DateUtil {
 	 * Possible formats are:
 	 * <ol>
 	 *	<li>yyyy-MM-dd'T'HH:mm:ss.SSSZ (28 characters)</li>
-	 *  <li>yyyy-MM-dd'T'HH:mm:ss.SSS z (27 characters)</li>
+	 *  <li>yyyy-MM-dd'T'HH:mm:ss.SSSz (26 characters)</li>
 	 *  <li>yyyy-MM-dd'T'HH:mm:ss.SSS (23 characters)</li>
-	 *	<li>yyyy-MM-dd'T'HH:mm.ssZ (25 characters)</li>
-	 *  <li>yyyy-MM-dd'T'HH:mm:ss z (24 characters)</li>
-	 *	<li>yyyy-MM-dd'T'HH:mm:ss (20 characters)</li>
+	 *	<li>yyyy-MM-dd'T'HH:mm.ssZ (24 characters)</li>
+	 *  <li>yyyy-MM-dd'T'HH:mm:ssz (22 characters)</li>
+	 *	<li>yyyy-MM-dd'T'HH:mm:ss (19 characters)</li>
 	 *  <li>yyyy-MM-dd'T'HH:mmZ (21 characters)</li>
-	 *  <li>yyyy-MM-dd'T'HH:mm z (20 characters)</li>
 	 *  <li>yyyy-MM-dd'T'HH:mm (16 characters)</li>
 	 *  <li>yyyy-MM-dd'T'HHZ (18 characters)</li>
-	 *  <li>yyyy-MM-dd'T'HH z (17 characters)</li>
 	 *	<li>yyyy-MM-dd'T'HH (13 characters)</li>
 	 *	<li>yyyy-MM-ddZ (15 characters)</li>
-	 *  <li>yyyy-MM-dd z (14 characters)</li>
 	 *  <li>yyyy-MM-dd (10 characters)</li>
 	 *  <li>HH:mm:ss.SSS (12 characters)</li>
 	 *  <li>HH:mm:ss (8 characters)</li>
@@ -60,28 +58,85 @@ public class DateUtil {
 		int l = date.length();
 		switch (l) {
 			case 28:
-				z = TimeZone.getTimeZone("GMT" + date.substring(23, 26) +
-						":" + date.substring(26, 28));
-				break;
-			case 27:
-				z = TimeZone.getTimeZone(date.substring(24, 27));
-				break;
-			case 25:
-				z = TimeZone.getTimeZone("GMT" + date.substring(20, 23) +
-						":" + date.substring(23, 25));
-				break;
 			case 24:
-				z = TimeZone.getTimeZone(date.substring(21, 24));
-				break;
 			case 21:
-				z = TimeZone.getTimeZone("GMT" + date.substring(16, 19) +
-						":" + date.substring(19, 21));
+			case 18:
+			case 15:
+				z = getTimeZone(date, true);
+				break;
+			case 26:
+			case 22:
+				z = getTimeZone(date, false);
 				break;
 			default:
 				z = TimeZone.getDefault();
 				break;
 		}
-		Calendar c = new GregorianCalendar(z, Locale.ENGLISH);
+		Calendar c = new GregorianCalendar(z, Locale.ITALY);
+		if (l != 12 && l >= 10) {
+			switch (l) {
+				case 28:
+				case 26:
+				case 23:
+					c.set(HOUR_OF_DAY, parseInt(date, 11, 2));
+					c.set(MINUTE, parseInt(date, 14, 2));
+					c.set(SECOND, parseInt(date, 17, 2));
+					c.set(MILLISECOND, parseInt(date, 20, 3));
+					break;
+				case 24:
+				case 22:
+				case 19:
+					c.set(HOUR_OF_DAY, parseInt(date, 11, 2));
+					c.set(MINUTE, parseInt(date, 14, 2));
+					c.set(SECOND, parseInt(date, 17, 2));
+					c.set(MILLISECOND, 0);
+					break;
+				case 21:
+				case 16:
+					c.set(HOUR_OF_DAY, parseInt(date, 11, 2));
+					c.set(MINUTE, parseInt(date, 14, 2));
+					c.set(SECOND, 0);
+					c.set(MILLISECOND, 0);
+					break;
+				case 18:
+				case 13:
+					c.set(HOUR_OF_DAY, parseInt(date, 11, 2));
+					c.set(MINUTE, 0);
+					c.set(SECOND, 0);
+					c.set(MILLISECOND, 0);
+					break;
+				case 15:
+				case 10:
+					break;
+				default:
+					throw new IllegalArgumentException(date);
+			}
+			c.set(YEAR, parseInt(date, 0, 4));
+			c.set(MONTH, parseInt(date, 5, 2) - 1);
+			c.set(DATE, parseInt(date, 8, 2));
+		} else {
+			switch (l) {
+				case 12:
+					c.set(MILLISECOND, parseInt(date, l - 3, 3));
+					c.set(SECOND, parseInt(date, l - 6, 2));
+					break;
+				case 8:
+					c.set(MILLISECOND, 0);
+					c.set(SECOND, parseInt(date, l - 2, 2));
+					break;
+				case 5:
+					c.set(MILLISECOND, 0);
+					c.set(SECOND, 0);
+					break;
+				default:
+					throw new IllegalArgumentException(date);
+			}
+			c.set(MINUTE, parseInt(date, 3, 2));
+			c.set(HOUR_OF_DAY, parseInt(date, 0, 2));
+			c.set(YEAR, 1970);
+			c.set(MONTH, 0);
+			c.set(DATE, 1);
+		}
 		return c;
 	}
 
@@ -110,5 +165,18 @@ public class DateUtil {
 	 */
 	public static Timestamp isoToTimestamp(String date) {
 		return new Timestamp(isoToMillis(date));
+	}
+
+	private static TimeZone getTimeZone(String s, boolean rfc) {
+		int l = s.length();
+		if (rfc) {
+			String h = s.substring(l - 5, l - 2);
+			String m = s.substring(l - 2, l);
+			return TimeZone.getTimeZone("GMT" + h + ":" + m);
+		} else return TimeZone.getTimeZone(s.substring(l - 3, l));
+	}
+
+	private static int parseInt(String s, int off, int len) {
+		return Integer.parseInt(s.substring(off, off + len));
 	}
 }
