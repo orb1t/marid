@@ -35,17 +35,17 @@ public class DateUtil {
 	 * @param date ISO-formatted date.
 	 * Possible formats are:
 	 * <ol>
-	 *	<li>yyyy-MM-dd'T'HH:mm:ss.SSSZ (28 characters)</li>
+	 *  <li>yyyy-MM-dd'T'HH:mm:ss.SSSZ (28 characters)</li>
 	 *  <li>yyyy-MM-dd'T'HH:mm:ss.SSSz (26 characters)</li>
 	 *  <li>yyyy-MM-dd'T'HH:mm:ss.SSS (23 characters)</li>
-	 *	<li>yyyy-MM-dd'T'HH:mm.ssZ (24 characters)</li>
+	 *  <li>yyyy-MM-dd'T'HH:mm.ssZ (24 characters)</li>
 	 *  <li>yyyy-MM-dd'T'HH:mm:ssz (22 characters)</li>
-	 *	<li>yyyy-MM-dd'T'HH:mm:ss (19 characters)</li>
+	 *  <li>yyyy-MM-dd'T'HH:mm:ss (19 characters)</li>
 	 *  <li>yyyy-MM-dd'T'HH:mmZ (21 characters)</li>
 	 *  <li>yyyy-MM-dd'T'HH:mm (16 characters)</li>
 	 *  <li>yyyy-MM-dd'T'HHZ (18 characters)</li>
-	 *	<li>yyyy-MM-dd'T'HH (13 characters)</li>
-	 *	<li>yyyy-MM-ddZ (15 characters)</li>
+	 *  <li>yyyy-MM-dd'T'HH (13 characters)</li>
+	 *  <li>yyyy-MM-ddZ (15 characters)</li>
 	 *  <li>yyyy-MM-dd (10 characters)</li>
 	 *  <li>HH:mm:ss.SSS (12 characters)</li>
 	 *  <li>HH:mm:ss (8 characters)</li>
