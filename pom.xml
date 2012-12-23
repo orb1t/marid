@@ -18,8 +18,14 @@
 	<properties>
 		<netbeans.hint.license>marid-agpl30</netbeans.hint.license>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.libs>${project.build.directory}/lib</project.libs>
 	</properties>
+
+	<scm>
+		<connection>https://git.code.sf.net/p/marid/code</connection>
+		<developerConnection>
+			ssh://git.code.sf.net/p/marid/code
+		</developerConnection>
+	</scm>
 
 	<licenses>
 		<license>
@@ -80,6 +86,9 @@
 								<goal>copy-dependencies</goal>
 							</goals>
 							<phase>package</phase>
+							<configuration>
+								<includeScope>runtime</includeScope>
+							</configuration>
 						</execution>
 					</executions>
 				</plugin>

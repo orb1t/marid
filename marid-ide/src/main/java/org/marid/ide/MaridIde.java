@@ -17,11 +17,15 @@
  */
 package org.marid.ide;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.InputStream;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.UIManager;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import org.marid.image.MaridImage;
 import org.marid.logging.Logging;
 
 /**
@@ -43,13 +47,11 @@ public class MaridIde {
 	 * Entry point.
 	 * @param args Command-line arguments.
 	 */
-	public static void main(String... args) {
+	public static void main(String... args) throws Exception{
 		Logging.init(MaridIde.class, "res.messages");
-		try {
-			UIManager.setLookAndFeel(new NimbusLookAndFeel());
-		} catch (Exception x) {
-			Log.l.log(Level.WARNING, "Unsupported look and feel", x);
-		}
+		BufferedImage img = MaridImage.getIcon(512);
+		ImageIO.write(img, "PNG", new File("/home/dmitry/marid512.png"));
+		JOptionPane.showMessageDialog(null, new JLabel(new ImageIcon(img)));
 	}
 
 	private static class Log {

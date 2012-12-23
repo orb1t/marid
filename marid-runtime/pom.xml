@@ -40,7 +40,6 @@
 						</manifest>
 						<manifestEntries>
 							<Class-Path>.</Class-Path>
-							<Built-By>Dmitry Ovchinnikov</Built-By>
 						</manifestEntries>
 					</archive>
 				</configuration>
@@ -48,10 +47,7 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jarsigner-plugin</artifactId>
-				<version>1.2</version>
-				<configuration>
-				</configuration>
+				<artifactId>maven-dependency-plugin</artifactId>
 			</plugin>
 
 			<plugin>
@@ -67,47 +63,6 @@
 							<goal>assembly</goal>
 						</goals>
 						<phase>package</phase>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.3.2</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.7</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.2.1</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.5.1</version>
-				<configuration>
-					<outputDirectory>${project.libs}</outputDirectory>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
 					</execution>
 				</executions>
 			</plugin>
