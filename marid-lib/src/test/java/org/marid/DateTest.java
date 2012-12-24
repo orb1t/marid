@@ -18,7 +18,6 @@
 package org.marid;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,7 +40,7 @@ public class DateTest extends Assert {
 		assertEquals(std, DateUtil.isoToDate("2011-03-02T00:10:59.001+0100"));
 		assertEquals(std, DateUtil.isoToDate("2011-03-02T00:10:59.001CET"));
 	}
-	
+
 	@Test
 	public void testIsoFullDateWithoutTimeZone() throws Exception {
 		SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
@@ -49,7 +48,7 @@ public class DateTest extends Assert {
 		assertEquals(std, DateUtil.isoToDate("2011-03-02 00:10:59.001"));
 		assertEquals(std, DateUtil.isoToDate("2011-03-02T00:10:59.001"));
 	}
-	
+
 	@Test
 	public void testIsoWithoutMS() throws Exception {
 		SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -58,12 +57,22 @@ public class DateTest extends Assert {
 		assertEquals(std, DateUtil.isoToDate("2011-03-02T00:10:59+0100"));
 		assertEquals(std, DateUtil.isoToDate("2011-03-02T00:10:59CET"));
 	}
-	
+
 	@Test
 	public void testIsoWithoutMSAndTimeZone() throws Exception {
 		SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		Date std = f.parse("2011-03-02T00:10:59");
 		assertEquals(std, DateUtil.isoToDate("2011-03-02 00:10:59"));
 		assertEquals(std, DateUtil.isoToDate("2011-03-02T00:10:59"));
+	}
+
+	@Test
+	public void testIsoHhmm() throws Exception {
+		SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+		Date std = f.parse("2011-03-02T00:10+0100");
+		assertEquals(std, DateUtil.isoToDate("2011-03-02 00:10+0100"));
+		assertEquals(std, DateUtil.isoToDate("2011-03-02T00:10+0100"));
+		assertEquals(std, DateUtil.isoToDate("2011-03-02T00:10:00+0100"));
+		assertEquals(std, DateUtil.isoToDate("2011-03-02T00:10:00.000+0100"));
 	}
 }

@@ -27,6 +27,18 @@
 		</developerConnection>
 	</scm>
 
+	<distributionManagement>
+		<site>
+			<id>marid.sf.net</id>
+			<url>sftp://frs.sf.net/home/frs/project/marid/${project.version}</url>
+		</site>
+		<repository>
+			<id>marid.sf.net</id>
+			<name>Marid repo</name>
+			<url>sftp://frs.sf.net/home/frs/project/marid/deploy</url>
+		</repository>
+	</distributionManagement>
+
 	<licenses>
 		<license>
 			<name>GNU Affero General Public License version 3.0</name>
@@ -41,6 +53,13 @@
 	</modules>
 
 	<build>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>2.3</version>
+			</extension>
+		</extensions>
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -92,6 +111,26 @@
 						</execution>
 					</executions>
 				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-changelog-plugin</artifactId>
+					<version>2.2</version>
+					<configuration>
+						<outputEncoding>UTF-8</outputEncoding>
+					</configuration>
+					<executions>
+						<execution>
+							<id>make-changelog</id>
+							<goals>
+								<goal>changelog</goal>
+							</goals>
+							<phase>deploy</phase>
+						</execution>
+					</executions>
+				</plugin>
+
+
 			</plugins>
 		</pluginManagement>
 	</build>
