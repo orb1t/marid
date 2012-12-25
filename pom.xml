@@ -16,6 +16,18 @@
 	<url>http://sf.net/projects/marid</url>
 	<description>Data acquisition and visualization system</description>
 
+	<developers>
+		<developer>
+			<id>dmovc</id>
+			<name>Dmitry Ovchinnikov</name>
+			<timezone>GMT+4:00</timezone>
+			<email>d.ovchinnikow@gmail.com</email>
+			<roles>
+				<role>Project Lead</role>
+			</roles>
+		</developer>
+	</developers>
+
 	<properties>
 		<netbeans.hint.license>marid-agpl30</netbeans.hint.license>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -137,20 +149,6 @@
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>2.2.1</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>jar</goal>
-							</goals>
-							<phase>deploy</phase>
-						</execution>
-					</executions>
-				</plugin>
-
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
 					<version>3.2</version>
 					<configuration>
@@ -165,6 +163,12 @@
 							<phase>deploy</phase>
 						</execution>
 					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-project-info-reports-plugin</artifactId>
+					<version>2.6</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
