@@ -4,7 +4,7 @@
 
     <groupId>org.marid</groupId>
     <artifactId>marid</artifactId>
-    <version>0.1.7</version>
+    <version>0.1.7-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>marid</name>
@@ -179,6 +179,7 @@
                     <version>2.3.2</version>
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <username>eosms,marid</username>
                     </configuration>
                 </plugin>
             </plugins>
