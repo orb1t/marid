@@ -18,7 +18,6 @@
 package org.marid.ide.l10n;
 
 import java.text.MessageFormat;
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
@@ -52,29 +51,19 @@ public interface Localized {
          * @return String.
          */
         public static String s(String key, Object... ps) {
-            String r;
-            try {
-                r = STRINGS.getString(key);
-            } catch (MissingResourceException x) {
-                r = key;
-            }
+            String r = STRINGS.containsKey(key) ? STRINGS.getString(key) : key;
             return ps == null || ps.length == 0 ? r : String.format(r, ps);
         }
 
         /**
          * Get a message from message resource bundle.
          *
-         * @param key Message key.
+         * @param k Message key.
          * @param v Message parameters.
          * @return Message.
          */
-        public static String m(String key, Object... v) {
-            String r;
-            try {
-                r = MESSAGES.getString(key);
-            } catch (MissingResourceException x) {
-                r = key;
-            }
+        public static String m(String k, Object... v) {
+            String r = MESSAGES.containsKey(k) ? MESSAGES.getString(k) : k;
             return v == null || v.length == 0 ? r : MessageFormat.format(r, v);
         }
     }
