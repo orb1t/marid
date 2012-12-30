@@ -179,7 +179,7 @@
                     <version>2.3.2</version>
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <username>eosms</username>
+                        <username>eosms,marid</username>
                     </configuration>
                 </plugin>
             </plugins>
