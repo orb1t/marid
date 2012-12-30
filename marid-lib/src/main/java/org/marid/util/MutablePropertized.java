@@ -19,59 +19,67 @@ package org.marid.util;
 
 /**
  * Mutable propertized.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface MutablePropertized extends Propertized {
-	/**
-	 * Removes the entry by key.
-	 * @param key Entry key.
-	 * @return Old value.
-	 */
-	public Object remove(String key);
 
-	/**
-	 * Removes an entry when there is a entry with value.equals(val).
-	 * @param key Entry key.
-	 * @param val Old value.
-	 * @return True if an entry was removed successfully.
-	 */
-	public boolean remove(String key, Object val);
+    /**
+     * Removes the entry by key.
+     *
+     * @param key Entry key.
+     * @return Old value.
+     */
+    public Object remove(String key);
 
-	/**
-	 * Puts an entry.
-	 * @param key Entry key.
-	 * @param val Entry value.
-	 * @return Old value.
-	 */
-	public Object put(String key, Object val);
+    /**
+     * Removes an entry when there is a entry with value.equals(val).
+     *
+     * @param key Entry key.
+     * @param val Old value.
+     * @return True if an entry was removed successfully.
+     */
+    public boolean remove(String key, Object val);
 
-	/**
-	 * Puts an entry if no entries with given key are present.
-	 * @param key Entry key.
-	 * @param val Entry value.
-	 * @return Old value.
-	 */
-	public Object putIfAbsent(String key, Object val);
+    /**
+     * Puts an entry.
+     *
+     * @param key Entry key.
+     * @param val Entry value.
+     * @return Old value.
+     */
+    public Object put(String key, Object val);
 
-	/**
-	 * Replaces the entry value.
-	 * @param key Entry key.
-	 * @param val Entry value.
-	 * @return Old value.
-	 */
-	public Object replace(String key, Object val);
+    /**
+     * Puts an entry if no entries with given key are present.
+     *
+     * @param key Entry key.
+     * @param val Entry value.
+     * @return Old value.
+     */
+    public Object putIfAbsent(String key, Object val);
 
-	/**
-	 * Replaces the entry value if there is an entry with value.equals(old).
-	 * @param key Entry key.
-	 * @param old Old value.
-	 * @param val Entry value.
-	 * @return Replacing result.
-	 */
-	public boolean replace(String key, Object old, Object val);
+    /**
+     * Replaces the entry value.
+     *
+     * @param key Entry key.
+     * @param val Entry value.
+     * @return Old value.
+     */
+    public Object replace(String key, Object val);
 
-	/**
-	 * Clears all the keys.
-	 */
-	public void clear();
+    /**
+     * Replaces the entry value if there is an entry with value.equals(old).
+     *
+     * @param key Entry key.
+     * @param old Old value.
+     * @param val Entry value.
+     * @return Replacing result.
+     */
+    public boolean replace(String key, Object old, Object val);
+
+    /**
+     * Clears all the keys.
+     */
+    public void clear();
 }

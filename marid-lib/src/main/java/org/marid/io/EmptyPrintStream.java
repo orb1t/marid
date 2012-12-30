@@ -21,13 +21,15 @@ import java.io.PrintStream;
 
 /**
  * Empty print stream.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class EmptyPrintStream extends PrintStream {
-	/**
-	 * Default constructor.
-	 */
-	public EmptyPrintStream() {
-		super(new EmptyOutputStream());
-	}
+
+    /**
+     * Default constructor.
+     */
+    public EmptyPrintStream() {
+        super(new EmptyOutputStream());
+    }
 }

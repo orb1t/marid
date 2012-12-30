@@ -19,8 +19,8 @@ package org.marid.ide;
 
 /**
  * IDE graphics.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class IdeGraphics {
-	
 }

@@ -23,35 +23,36 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-@XmlRootElement(name="int")
+@XmlRootElement(name = "int")
 public final class XmlIntEntry extends XmlAbstractMapEntry<Integer> {
 
-	private final Integer value;
+    private final Integer value;
 
-	/**
-	 * Default constructor.
-	 */
-	public XmlIntEntry() {
-		value = null;
-	}
+    /**
+     * Default constructor.
+     */
+    public XmlIntEntry() {
+        value = null;
+    }
 
-	/**
-	 * Constructs the map entry with integer value.
-	 * @param k Entry key.
-	 * @param v Entry value.
-	 */
-	public XmlIntEntry(String k, Integer v) {
-		super(k);
-		value = v;
-	}
+    /**
+     * Constructs the map entry with integer value.
+     *
+     * @param k Entry key.
+     * @param v Entry value.
+     */
+    public XmlIntEntry(String k, Integer v) {
+        super(k);
+        value = v;
+    }
 
-	@Override
-	public final Integer getValue() {
-		return value;
-	}
+    @Override
+    public final Integer getValue() {
+        return value;
+    }
 
-	@Override
-	public Class<Integer> getValueClass() {
-		return Integer.class;
-	}
+    @Override
+    public Class<Integer> getValueClass() {
+        return Integer.class;
+    }
 }

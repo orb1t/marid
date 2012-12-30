@@ -21,13 +21,14 @@ import java.io.IOException;
 
 /**
  * Configurable handler interface.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface ConfigurableHandler {
-	
-	public String getLoggerName();
-	
-	public void setLoggerName();
-	
-	public void configure() throws IOException;
+
+    public String getLoggerName();
+
+    public void setLoggerName();
+
+    public void configure() throws IOException;
 }

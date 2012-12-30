@@ -28,26 +28,28 @@ import org.junit.Test;
 
 /**
  * Map tests.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class MapTest extends Assert {
-	
-	private static final int SIZE = 100000;
-	private static final int THREADS = 100;
-	
-	private ConcurrentMap<String, Object> map;
-	private AtomicLong time;
-	private List<String> ids;
-	
-	@Before
-	public void init() {
-		time = new AtomicLong(0L);
-		ids = new ArrayList<>(SIZE);
-		for (int i = 0; i < SIZE; i++) ids.add(UUID.randomUUID().toString());
-	}
-	
-	@Test
-	public void test1() throws Exception {
-		assertTrue(true);
-	}
+
+    private static final int SIZE = 100000;
+    private static final int THREADS = 100;
+    private ConcurrentMap<String, Object> map;
+    private AtomicLong time;
+    private List<String> ids;
+
+    @Before
+    public void init() {
+        time = new AtomicLong(0L);
+        ids = new ArrayList<>(SIZE);
+        for (int i = 0; i < SIZE; i++) {
+            ids.add(UUID.randomUUID().toString());
+        }
+    }
+
+    @Test
+    public void test1() throws Exception {
+        assertTrue(true);
+    }
 }

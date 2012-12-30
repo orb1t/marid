@@ -30,31 +30,32 @@ import org.marid.logging.Logging;
 
 /**
  * Main IDE class.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class MaridIde {
 
-	static {
-		Class<?> c = MaridIde.class;
-		try (InputStream is = c.getResourceAsStream("/ide.properties")) {
+    static {
+        Class<?> c = MaridIde.class;
+        try (InputStream is = c.getResourceAsStream("/ide.properties")) {
+        } catch (Exception x) {
+        }
+    }
 
-		} catch (Exception x) {
+    /**
+     * Entry point.
+     *
+     * @param args Command-line arguments.
+     */
+    public static void main(String... args) throws Exception {
+        Logging.init(MaridIde.class, "res.messages");
+        BufferedImage img = MaridImage.getIcon(512);
+        ImageIO.write(img, "PNG", new File("/home/dmitry/marid512.png"));
+        JOptionPane.showMessageDialog(null, new JLabel(new ImageIcon(img)));
+    }
 
-		}
-	}
+    private static class Log {
 
-	/**
-	 * Entry point.
-	 * @param args Command-line arguments.
-	 */
-	public static void main(String... args) throws Exception{
-		Logging.init(MaridIde.class, "res.messages");
-		BufferedImage img = MaridImage.getIcon(512);
-		ImageIO.write(img, "PNG", new File("/home/dmitry/marid512.png"));
-		JOptionPane.showMessageDialog(null, new JLabel(new ImageIcon(img)));
-	}
-
-	private static class Log {
-		private static final Logger l = Logger.getLogger("ide", "res.messages");
-	}
+        private static final Logger l = Logger.getLogger("ide", "res.messages");
+    }
 }

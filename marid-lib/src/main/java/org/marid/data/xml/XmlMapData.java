@@ -24,22 +24,22 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * XML map data.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-@XmlRootElement(name="data")
+@XmlRootElement(name = "data")
 public class XmlMapData {
 
-	@XmlAttribute
-	private final XmlMapType type = XmlMapType.LINKED_HASH_MAP;
+    @XmlAttribute
+    private final XmlMapType type = XmlMapType.LINKED_HASH_MAP;
+    @XmlTransient
+    private Map<String, Object> map;
 
-	@XmlTransient
-	private Map<String, Object> map;
+    public XmlMapType getType() {
+        return type;
+    }
 
-	public XmlMapType getType() {
-		return type;
-	}
-
-	public Map<String, Object> getMap() {
-		return map;
-	}
+    public Map<String, Object> getMap() {
+        return map;
+    }
 }

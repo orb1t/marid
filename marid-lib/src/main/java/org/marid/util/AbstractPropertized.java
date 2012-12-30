@@ -19,18 +19,19 @@ package org.marid.util;
 
 /**
  * Abstract propertized object class.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public abstract class AbstractPropertized implements Propertized {
-	@Override
-	public Object get(String key, Object def) {
-		Object v = get(key);
-		return v == null ? def : v;
-	}
 
-	@Override
-	public <T> T get(Class<T> c, String key, T def) {
-		Object v = get(key);
-		return v == null ? def : TypeBindings.cast(this, c, v);
-	}
+    @Override
+    public Object get(String key, Object def) {
+        Object v = get(key);
+        return v == null ? def : v;
+    }
+
+    @Override
+    public <T> T get(Class<T> c, String key, T def) {
+        return c.cast(get(key, def));
+    }
 }

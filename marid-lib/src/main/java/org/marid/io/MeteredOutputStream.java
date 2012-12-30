@@ -22,55 +22,57 @@ import java.io.OutputStream;
 
 /**
  * Metered output stream.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class MeteredOutputStream extends OutputStream implements MeteredWrite {
-	
-	private long count;
-	private OutputStream stream;
-	
-	/**
-	 * Constructs the metered output stream.
-	 * @param os Wrapped output stream.
-	 */
-	public MeteredOutputStream(OutputStream os) {
-		stream = os;
-	}
-	
-	@Override
-	public void write(byte[] b) throws IOException {
-		stream.write(b);
-		count += b.length;
-	}
 
-	@Override
-	public void write(int b) throws IOException {
-		stream.write(b);
-		count++;
-	}
+    private long count;
+    private OutputStream stream;
 
-	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
-		stream.write(b, off, len);
-		count += len;
-	}
+    /**
+     * Constructs the metered output stream.
+     *
+     * @param os Wrapped output stream.
+     */
+    public MeteredOutputStream(OutputStream os) {
+        stream = os;
+    }
 
-	@Override
-	public long getWrittenCount() {
-		return count;
-	}
+    @Override
+    public void write(byte[] b) throws IOException {
+        stream.write(b);
+        count += b.length;
+    }
 
-	@Override
-	public void close() throws IOException {
-		try {
-			stream.close();
-		} finally {
-			stream = null;
-		}
-	}
+    @Override
+    public void write(int b) throws IOException {
+        stream.write(b);
+        count++;
+    }
 
-	@Override
-	public void flush() throws IOException {
-		stream.flush();
-	}
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        stream.write(b, off, len);
+        count += len;
+    }
+
+    @Override
+    public long getWrittenCount() {
+        return count;
+    }
+
+    @Override
+    public void close() throws IOException {
+        try {
+            stream.close();
+        } finally {
+            stream = null;
+        }
+    }
+
+    @Override
+    public void flush() throws IOException {
+        stream.flush();
+    }
 }

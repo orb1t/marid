@@ -30,84 +30,101 @@ import org.marid.io.EmptyPrintStream;
 
 /**
  * Marid application context.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class Context {
 
-	/**
-	 * Shutdown port.
-	 */
-	public static final int SHUTDOWN_PORT;
+    /**
+     * Shutdown port.
+     */
+    public static final int SHUTDOWN_PORT;
+    /**
+     * Application identifier.
+     */
+    public static final String APP_ID;
+    /**
+     * Localhost only shutdown filter flag.
+     */
+    public static final boolean LOSFF;
 
-	/**
-	 * Application identifier.
-	 */
-	public static final String APP_ID;
+    private static int getShutdownPort(Properties p, List<Exception> exs) {
+        try {
+            return Integer.parseInt(p.getProperty("shutdownPort", "10090"));
+        } catch (Exception x) {
+            exs.add(new IllegalStateException("Shutdown port", x));
+            return 10090;
+        }
+    }
 
-	/**
-	 * Localhost only shutdown filter flag.
-	 */
-	public static final boolean LOSFF;
+    @SuppressWarnings("UseSpecificCatch")
+    private static PrintStream ps(Properties p, List<Exception> xs, String n) {
+        PrintStream ps = null;
+        if (p.containsKey("stdoutDir")) {
+            try {
+                Path f = Paths.get(p.getProperty("stdoutDir"));
+                if (!Files.isDirectory(f)) {
+                    f = Files.createDirectories(f);
+                }
+                f = f.resolve(n);
+                ps = new PrintStream(Files.newOutputStream(f), true, "UTF-8");
+            } catch (Exception x) {
+                xs.add(new IllegalStateException("Setting " + n, x));
+            }
+        }
+        if (ps != null) {
+            return ps;
+        }
+        URL url = Context.class.getResource("/log.properties");
+        if (url != null && "file".equals(url.getProtocol())) {
+            try {
+                Path f = Paths.get(url.toURI()).getParent().resolve(n);
+                ps = new PrintStream(Files.newOutputStream(f), true, "UTF-8");
+            } catch (Exception x) {
+                xs.add(new IllegalStateException("Setting " + n + " to jarDir", x));
+            }
+        }
+        if (ps != null) {
+            return ps;
+        }
+        try {
+            String userHome = System.getProperty("user.home");
+            Path f = Paths.get(userHome, "marid");
+            if (!Files.isDirectory(f)) {
+                f = Files.createDirectory(f);
+            }
+            f = f.resolve(n);
+            ps = new PrintStream(Files.newOutputStream(f), true, "UTF-8");
+        } catch (Exception x) {
+            xs.add(new IllegalStateException("Setting " + n + " to home", x));
+        }
+        if (ps != null) {
+            return ps;
+        } else {
+            xs.add(new IllegalStateException("Empty print stream: " + n));
+            return new EmptyPrintStream();
+        }
+    }
 
-	private static int getShutdownPort(Properties p, List<Exception> exs) {
-		try {
-			return Integer.parseInt(p.getProperty("shutdownPort", "10090"));
-		} catch (Exception x) {
-			exs.add(new IllegalStateException("Shutdown port", x));
-			return 10090;
-		}
-	}
-
-	@SuppressWarnings("UseSpecificCatch")
-	private static PrintStream ps(Properties p, List<Exception> xs, String n) {
-		PrintStream ps = null;
-		if (p.containsKey("stdoutDir")) try {
-			Path f = Paths.get(p.getProperty("stdoutDir"));
-			if (!Files.isDirectory(f)) f = Files.createDirectories(f);
-			f = f.resolve(n);
-			ps = new PrintStream(Files.newOutputStream(f), true, "UTF-8");
-		} catch (Exception x) {
-			xs.add(new IllegalStateException("Setting " + n, x));
-		}
-		if (ps != null) return ps;
-		URL url = Context.class.getResource("/log.properties");
-		if (url != null && "file".equals(url.getProtocol())) try {
-			Path f = Paths.get(url.toURI()).getParent().resolve(n);
-			ps = new PrintStream(Files.newOutputStream(f), true, "UTF-8");
-		} catch (Exception x) {
-			xs.add(new IllegalStateException("Setting " + n + " to jarDir", x));
-		}
-		if (ps != null) return ps;
-		try {
-			String userHome = System.getProperty("user.home");
-			Path f = Paths.get(userHome, "marid");
-			if (!Files.isDirectory(f)) f = Files.createDirectory(f);
-			f = f.resolve(n);
-			ps = new PrintStream(Files.newOutputStream(f), true, "UTF-8");
-		} catch (Exception x) {
-			xs.add(new IllegalStateException("Setting " + n + " to home", x));
-		}
-		if (ps != null) return ps; else {
-			xs.add(new IllegalStateException("Empty print stream: " + n));
-			return new EmptyPrintStream();
-		}
-	}
-
-	static {
-		ArrayList<Exception> exs = new ArrayList<>();
-		Properties props = new Properties();
-		String propsName = "/marid.properties";
-		try (InputStream is = Context.class.getResourceAsStream(propsName)) {
-			if (is != null) props.load(is);
-		} catch (Exception x) {
-			exs.add(new IllegalStateException("Marid properties", x));
-		}
-		SHUTDOWN_PORT = getShutdownPort(props, exs);
-		APP_ID = props.getProperty("appid", "marid");
-		LOSFF = "true".equals(props.getProperty("losff"));
-		System.setOut(ps(props, exs, "marid.log"));
-		System.setErr(ps(props, exs, "marid.err"));
-		for (Exception x: exs) x.printStackTrace(System.err);
-		exs.clear();
-	}
+    static {
+        ArrayList<Exception> exs = new ArrayList<>();
+        Properties props = new Properties();
+        String propsName = "/marid.properties";
+        try (InputStream is = Context.class.getResourceAsStream(propsName)) {
+            if (is != null) {
+                props.load(is);
+            }
+        } catch (Exception x) {
+            exs.add(new IllegalStateException("Marid properties", x));
+        }
+        SHUTDOWN_PORT = getShutdownPort(props, exs);
+        APP_ID = props.getProperty("appid", "marid");
+        LOSFF = "true".equals(props.getProperty("losff"));
+        System.setOut(ps(props, exs, "marid.log"));
+        System.setErr(ps(props, exs, "marid.err"));
+        for (Exception x : exs) {
+            x.printStackTrace(System.err);
+        }
+        exs.clear();
+    }
 }

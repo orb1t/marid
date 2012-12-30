@@ -19,43 +19,43 @@ package org.marid.util;
 
 /**
  * Concurrent mutable propertized object.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class ConcurrentMutablePropertized extends
-		ConcurrentPropertized implements MutablePropertized {
+public class ConcurrentMutablePropertized extends ConcurrentPropertized implements MutablePropertized {
 
-	@Override
-	public Object remove(String key) {
-		return map.remove(key);
-	}
+    @Override
+    public Object remove(String key) {
+        return map.remove(key);
+    }
 
-	@Override
-	public boolean remove(String key, Object val) {
-		return map.remove(key, val);
-	}
+    @Override
+    public boolean remove(String key, Object val) {
+        return map.remove(key, val);
+    }
 
-	@Override
-	public Object put(String key, Object val) {
-		return val == null ? map.remove(key) : map.put(key, val);
-	}
+    @Override
+    public Object put(String key, Object val) {
+        return val == null ? map.remove(key) : map.put(key, val);
+    }
 
-	@Override
-	public Object putIfAbsent(String key, Object val) {
-		return val == null ? map.remove(key) : map.putIfAbsent(key, val);
-	}
+    @Override
+    public Object putIfAbsent(String key, Object val) {
+        return val == null ? map.remove(key) : map.putIfAbsent(key, val);
+    }
 
-	@Override
-	public Object replace(String key, Object val) {
-		return val == null ? map.remove(key) : map.replace(key, val);
-	}
+    @Override
+    public Object replace(String key, Object val) {
+        return val == null ? map.remove(key) : map.replace(key, val);
+    }
 
-	@Override
-	public boolean replace(String key, Object old, Object val) {
-		return val == null ? map.remove(key, old) : map.replace(key, old, val);
-	}
+    @Override
+    public boolean replace(String key, Object old, Object val) {
+        return val == null ? map.remove(key, old) : map.replace(key, old, val);
+    }
 
-	@Override
-	public void clear() {
-		map.clear();
-	}
+    @Override
+    public void clear() {
+        map.clear();
+    }
 }

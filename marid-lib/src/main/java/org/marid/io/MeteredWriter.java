@@ -22,67 +22,69 @@ import java.io.Writer;
 
 /**
  * Metered writer.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class MeteredWriter extends Writer implements MeteredWrite {
-	
-	private long count;
-	private Writer writer;
-	
-	/**
-	 * Constructs the metered writer.
-	 * @param w Wrapped writer.
-	 */
-	public MeteredWriter(Writer w) {
-		writer = w;
-	}
 
-	@Override
-	public void write(String str) throws IOException {
-		writer.write(str);
-		count += str.length();
-	}
+    private long count;
+    private Writer writer;
 
-	@Override
-	public void write(char[] cbuf) throws IOException {
-		writer.write(cbuf);
-		count += cbuf.length;
-	}
+    /**
+     * Constructs the metered writer.
+     *
+     * @param w Wrapped writer.
+     */
+    public MeteredWriter(Writer w) {
+        writer = w;
+    }
 
-	@Override
-	public void write(int c) throws IOException {
-		writer.write(c);
-		count++;
-	}
+    @Override
+    public void write(String str) throws IOException {
+        writer.write(str);
+        count += str.length();
+    }
 
-	@Override
-	public void write(String str, int off, int len) throws IOException {
-		writer.write(str, off, len);
-		count += len;
-	}
+    @Override
+    public void write(char[] cbuf) throws IOException {
+        writer.write(cbuf);
+        count += cbuf.length;
+    }
 
-	@Override
-	public void write(char[] cbuf, int off, int len) throws IOException {
-		writer.write(cbuf, off, len);
-		count += len;
-	}
+    @Override
+    public void write(int c) throws IOException {
+        writer.write(c);
+        count++;
+    }
 
-	@Override
-	public void close() throws IOException {
-		try {
-			writer.close();
-		} finally {
-			writer = null;
-		}
-	}
+    @Override
+    public void write(String str, int off, int len) throws IOException {
+        writer.write(str, off, len);
+        count += len;
+    }
 
-	@Override
-	public void flush() throws IOException {
-		writer.flush();
-	}
+    @Override
+    public void write(char[] cbuf, int off, int len) throws IOException {
+        writer.write(cbuf, off, len);
+        count += len;
+    }
 
-	@Override
-	public long getWrittenCount() {
-		return count;
-	}
+    @Override
+    public void close() throws IOException {
+        try {
+            writer.close();
+        } finally {
+            writer = null;
+        }
+    }
+
+    @Override
+    public void flush() throws IOException {
+        writer.flush();
+    }
+
+    @Override
+    public long getWrittenCount() {
+        return count;
+    }
 }

@@ -21,15 +21,16 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * Concurrent propertized object.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class ConcurrentPropertized extends AbstractPropertized {
 
-	protected final ConcurrentSkipListMap<String, Object> map =
-			new ConcurrentSkipListMap<>();
+    protected final ConcurrentSkipListMap<String, Object> map =
+            new ConcurrentSkipListMap<>();
 
-	@Override
-	public Object get(String key) {
-		return map.get(key);
-	}
+    @Override
+    public Object get(String key) {
+        return map.get(key);
+    }
 }

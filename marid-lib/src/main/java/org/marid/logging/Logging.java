@@ -22,22 +22,29 @@ import java.util.logging.LogManager;
 
 /**
  * Base logging utilities.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class Logging {
-	/**
-	 * Initializes the logging system.
-	 * @param c Calling class.
-	 * @param res Log properties resource.
-	 */
-	public static void init(Class<?> c, String res) {
-		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		if (cl == null) cl = c.getClassLoader();
-		try (InputStream is = cl.getResourceAsStream(res)) {
-			LogManager lm = LogManager.getLogManager();
-			if (is != null) lm.readConfiguration(is);
-		} catch (Exception x) {
-			x.printStackTrace(System.err);
-		}
-	}
+
+    /**
+     * Initializes the logging system.
+     *
+     * @param c Calling class.
+     * @param res Log properties resource.
+     */
+    public static void init(Class<?> c, String res) {
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        if (cl == null) {
+            cl = c.getClassLoader();
+        }
+        try (InputStream is = cl.getResourceAsStream(res)) {
+            LogManager lm = LogManager.getLogManager();
+            if (is != null) {
+                lm.readConfiguration(is);
+            }
+        } catch (Exception x) {
+            x.printStackTrace(System.err);
+        }
+    }
 }

@@ -27,17 +27,19 @@ import org.marid.data.AbstractMapImporter;
 
 /**
  * XML map importer.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class XmlMapImporter extends AbstractMapImporter {
-	@Override
-	public Map importMap(Reader r) throws IOException {
-		try {
-			JAXBContext ctx = JAXBContext.newInstance(XmlMapData.class);
-			Unmarshaller u = ctx.createUnmarshaller();
-			return ((XmlMapData)u.unmarshal(r)).getMap();
-		} catch (JAXBException x) {
-			throw new IOException(x);
-		}
-	}
+
+    @Override
+    public Map importMap(Reader r) throws IOException {
+        try {
+            JAXBContext ctx = JAXBContext.newInstance(XmlMapData.class);
+            Unmarshaller u = ctx.createUnmarshaller();
+            return ((XmlMapData) u.unmarshal(r)).getMap();
+        } catch (JAXBException x) {
+            throw new IOException(x);
+        }
+    }
 }

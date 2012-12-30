@@ -22,46 +22,51 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * XML abstract map entry.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-@XmlRootElement(name="entry")
+@XmlRootElement(name = "entry")
 public abstract class XmlAbstractMapEntry<T> {
 
-	@XmlAttribute
-	private final String key;
+    @XmlAttribute
+    private final String key;
 
-	/**
-	 * Default constructor.
-	 */
-	public XmlAbstractMapEntry() {
-		key = null;
-	}
+    /**
+     * Default constructor.
+     */
+    public XmlAbstractMapEntry() {
+        key = null;
+    }
 
-	/**
-	 * Constructs the abstract map entry.
-	 * @param k Entry key.
-	 */
-	public XmlAbstractMapEntry(String k) {
-		key = k;
-	}
+    /**
+     * Constructs the abstract map entry.
+     *
+     * @param k Entry key.
+     */
+    public XmlAbstractMapEntry(String k) {
+        key = k;
+    }
 
-	/**
-	 * Get the entry key.
-	 * @return Entry key.
-	 */
-	public String getKey() {
-		return key;
-	}
+    /**
+     * Get the entry key.
+     *
+     * @return Entry key.
+     */
+    public String getKey() {
+        return key;
+    }
 
-	/**
-	 * Get the entry value.
-	 * @return Entry value.
-	 */
-	public abstract T getValue();
+    /**
+     * Get the entry value.
+     *
+     * @return Entry value.
+     */
+    public abstract T getValue();
 
-	/**
-	 * Get value class.
-	 * @return Value class.
-	 */
-	public abstract Class<T> getValueClass();
+    /**
+     * Get value class.
+     *
+     * @return Value class.
+     */
+    public abstract Class<T> getValueClass();
 }

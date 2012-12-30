@@ -31,90 +31,92 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * XML map type.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 @XmlType
 public enum XmlMapType {
-	@XmlEnumValue(value="hash-map")
-	HASH_MAP {
-		@Override
-		public Map<String, ?> newMap() {
-			return new HashMap<>();
-		}
-	},
-	@XmlEnumValue(value="linked-hash-map")
-	LINKED_HASH_MAP {
-		@Override
-		public Map<String, ?> newMap() {
-			return new LinkedHashMap<>();
-		}
-	},
-	@XmlEnumValue(value="tree-map")
-	TREE_MAP {
-		@Override
-		public Map<String, ?> newMap() {
-			return new TreeMap<>();
-		}
-	},
-	@XmlEnumValue(value="weak-hash-map")
-	WEAK_HASH_MAP {
-		@Override
-		public Map<String, ?> newMap() {
-			return new WeakHashMap<>();
-		}
-	},
-	@XmlEnumValue(value="concurrent-hash-map")
-	CONCURRENT_HASH_MAP {
-		@Override
-		public Map<String, ?> newMap() {
-			return new ConcurrentHashMap<>();
-		}
-	},
-	@XmlEnumValue(value="concurrent-skip-list-map")
-	CONCURRENT_SKIP_LIST_MAP {
-		@Override
-		public Map<String, ?> newMap() {
-			return new ConcurrentSkipListMap<>();
-		}
-	},
-	@XmlEnumValue(value="sync-hash-map")
-	SYNC_HASH_MAP {
-		@Override
-		public Map<String, ?> newMap() {
-			return Collections.synchronizedMap(new HashMap<String, Object>());
-		}
-	},
-	@XmlEnumValue(value="sync-linked-hash-map")
-	SYNC_LINKED_HASH_MAP {
-		@Override
-		public Map<String, ?> newMap() {
-			return Collections.synchronizedMap(
-					new LinkedHashMap<String, Object>());
-		}
-	},
-	@XmlEnumValue(value="sync-tree-map")
-	SYNC_TREE_MAP {
-		@Override
-		public Map<String, ?> newMap() {
-			return Collections.synchronizedSortedMap(
-					new TreeMap<String, Object>());
-		}
-	},
-	@XmlEnumValue(value="sync-weak-hash-map")
-	SYNC_WEAK_HASH_MAP {
-		@Override
-		public Map<String, ?> newMap() {
-			return Collections.synchronizedMap(
-					new WeakHashMap<String, Object>());
-		}
-	},
-	@XmlEnumValue(value="properties")
-	PROPERTIES {
-		@Override
-		public Map<String, ?> newMap() {
-			return (Map)new Properties();
-		}
-	};
-	
-	public abstract Map<String, ?> newMap();
+
+    @XmlEnumValue(value = "hash-map")
+    HASH_MAP {
+        @Override
+        public Map<String, ?> newMap() {
+            return new HashMap<>();
+        }
+    },
+    @XmlEnumValue(value = "linked-hash-map")
+    LINKED_HASH_MAP {
+        @Override
+        public Map<String, ?> newMap() {
+            return new LinkedHashMap<>();
+        }
+    },
+    @XmlEnumValue(value = "tree-map")
+    TREE_MAP {
+        @Override
+        public Map<String, ?> newMap() {
+            return new TreeMap<>();
+        }
+    },
+    @XmlEnumValue(value = "weak-hash-map")
+    WEAK_HASH_MAP {
+        @Override
+        public Map<String, ?> newMap() {
+            return new WeakHashMap<>();
+        }
+    },
+    @XmlEnumValue(value = "concurrent-hash-map")
+    CONCURRENT_HASH_MAP {
+        @Override
+        public Map<String, ?> newMap() {
+            return new ConcurrentHashMap<>();
+        }
+    },
+    @XmlEnumValue(value = "concurrent-skip-list-map")
+    CONCURRENT_SKIP_LIST_MAP {
+        @Override
+        public Map<String, ?> newMap() {
+            return new ConcurrentSkipListMap<>();
+        }
+    },
+    @XmlEnumValue(value = "sync-hash-map")
+    SYNC_HASH_MAP {
+        @Override
+        public Map<String, ?> newMap() {
+            return Collections.synchronizedMap(new HashMap<String, Object>());
+        }
+    },
+    @XmlEnumValue(value = "sync-linked-hash-map")
+    SYNC_LINKED_HASH_MAP {
+        @Override
+        public Map<String, ?> newMap() {
+            return Collections.synchronizedMap(
+                    new LinkedHashMap<String, Object>());
+        }
+    },
+    @XmlEnumValue(value = "sync-tree-map")
+    SYNC_TREE_MAP {
+        @Override
+        public Map<String, ?> newMap() {
+            return Collections.synchronizedSortedMap(
+                    new TreeMap<String, Object>());
+        }
+    },
+    @XmlEnumValue(value = "sync-weak-hash-map")
+    SYNC_WEAK_HASH_MAP {
+        @Override
+        public Map<String, ?> newMap() {
+            return Collections.synchronizedMap(
+                    new WeakHashMap<String, Object>());
+        }
+    },
+    @XmlEnumValue(value = "properties")
+    PROPERTIES {
+        @Override
+        public Map<String, ?> newMap() {
+            return (Map) new Properties();
+        }
+    };
+
+    public abstract Map<String, ?> newMap();
 }

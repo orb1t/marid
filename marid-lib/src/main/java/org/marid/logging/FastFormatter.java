@@ -23,25 +23,27 @@ import java.util.logging.LogRecord;
 
 /**
  * Marid log formatter.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public abstract class FastFormatter extends Formatter {
-	
-	/**
-	 * Formats the record into print writer.
-	 * @param r A log record.
-	 * @param a An appendable object.
-	 */
-	public abstract void format(LogRecord r, Appendable a) throws IOException;
-	
-	@Override
-	public String format(LogRecord record) {
-		StringBuilder sb = new StringBuilder();
-		try {
-			format(record, sb);
-		} catch (IOException x) {
-			throw new IllegalArgumentException(x);
-		}
-		return sb.toString();
-	}
+
+    /**
+     * Formats the record into print writer.
+     *
+     * @param r A log record.
+     * @param a An appendable object.
+     */
+    public abstract void format(LogRecord r, Appendable a) throws IOException;
+
+    @Override
+    public String format(LogRecord record) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            format(record, sb);
+        } catch (IOException x) {
+            throw new IllegalArgumentException(x);
+        }
+        return sb.toString();
+    }
 }

@@ -33,54 +33,54 @@ import org.marid.util.TreeMapMutablePropertized;
 
 /**
  * Abstract map importer.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public abstract class AbstractMapImporter extends
-		TreeMapMutablePropertized implements MapImporter {
+public abstract class AbstractMapImporter extends TreeMapMutablePropertized implements MapImporter {
 
-	@Override
-	public Map importMap(File file) throws IOException {
-		Charset c = StandardCharsets.UTF_8;
-		try (BufferedReader r = Files.newBufferedReader(file.toPath(), c)) {
-			return importMap(r);
-		}
-	}
+    @Override
+    public Map importMap(File file) throws IOException {
+        Charset c = StandardCharsets.UTF_8;
+        try (BufferedReader r = Files.newBufferedReader(file.toPath(), c)) {
+            return importMap(r);
+        }
+    }
 
-	@Override
-	public Map importMap(Path path) throws IOException {
-		Charset c = StandardCharsets.UTF_8;
-		try (BufferedReader r = Files.newBufferedReader(path, c)) {
-			return importMap(r);
-		}
-	}
+    @Override
+    public Map importMap(Path path) throws IOException {
+        Charset c = StandardCharsets.UTF_8;
+        try (BufferedReader r = Files.newBufferedReader(path, c)) {
+            return importMap(r);
+        }
+    }
 
-	@Override
-	public Map importMap(String s) throws IOException {
-		try (StringReader r = new StringReader(s)) {
-			return importMap(r);
-		}
-	}
+    @Override
+    public Map importMap(String s) throws IOException {
+        try (StringReader r = new StringReader(s)) {
+            return importMap(r);
+        }
+    }
 
-	@Override
-	public Map importMap(StringBuffer sb) throws IOException {
-		return importMap(sb.toString()); // TODO: need for better implementation
-	}
+    @Override
+    public Map importMap(StringBuffer sb) throws IOException {
+        return importMap(sb.toString()); // TODO: need for better implementation
+    }
 
-	@Override
-	public Map importMap(StringBuilder sb) throws IOException {
-		return importMap(sb.toString()); // TODO: need for better implementation
-	}
+    @Override
+    public Map importMap(StringBuilder sb) throws IOException {
+        return importMap(sb.toString()); // TODO: need for better implementation
+    }
 
-	@Override
-	public Map importMap(URI uri) throws IOException {
-		return importMap(uri.toURL());
-	}
+    @Override
+    public Map importMap(URI uri) throws IOException {
+        return importMap(uri.toURL());
+    }
 
-	@Override
-	public Map importMap(URL url) throws IOException {
-		Charset c = StandardCharsets.UTF_8;
-		try (InputStreamReader r = new InputStreamReader(url.openStream(), c)) {
-			return importMap(r);
-		}
-	}
+    @Override
+    public Map importMap(URL url) throws IOException {
+        Charset c = StandardCharsets.UTF_8;
+        try (InputStreamReader r = new InputStreamReader(url.openStream(), c)) {
+            return importMap(r);
+        }
+    }
 }

@@ -19,53 +19,61 @@ package org.marid.util;
 
 /**
  * TreeMap-based mutable propertized object.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class TreeMapMutablePropertized extends
-		TreeMapPropertized implements MutablePropertized {
+public class TreeMapMutablePropertized extends TreeMapPropertized implements MutablePropertized {
 
-	@Override
-	public Object remove(String key) {
-		return map.remove(key);
-	}
+    @Override
+    public Object remove(String key) {
+        return map.remove(key);
+    }
 
-	@Override
-	public boolean remove(String key, Object val) {
-		Object o = get(key);
-		if (o != null && o.equals(val)) {
-			map.remove(key);
-			return true;
-		} else return false;
-	}
+    @Override
+    public boolean remove(String key, Object val) {
+        Object o = get(key);
+        if (o != null && o.equals(val)) {
+            map.remove(key);
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	@Override
-	public Object put(String key, Object val) {
-		return val == null ? map.remove(key) : map.put(key, val);
-	}
+    @Override
+    public Object put(String key, Object val) {
+        return val == null ? map.remove(key) : map.put(key, val);
+    }
 
-	@Override
-	public Object putIfAbsent(String key, Object val) {
-		Object o = get(key);
-		return o == null ? null : val == null ?
-				map.remove(key) : map.put(key, val);
-	}
+    @Override
+    public Object putIfAbsent(String key, Object val) {
+        Object o = get(key);
+        return o == null ? null : val == null
+                ? map.remove(key) : map.put(key, val);
+    }
 
-	@Override
-	public Object replace(String key, Object val) {
-		return putIfAbsent(key, val);
-	}
+    @Override
+    public Object replace(String key, Object val) {
+        return putIfAbsent(key, val);
+    }
 
-	@Override
-	public boolean replace(String key, Object old, Object val) {
-		Object o = get(key);
-		if (o != null && o.equals(old)) {
-			if (val == null) remove(key); else put(key, val);
-			return true;
-		} else return false;
-	}
+    @Override
+    public boolean replace(String key, Object old, Object val) {
+        Object o = get(key);
+        if (o != null && o.equals(old)) {
+            if (val == null) {
+                remove(key);
+            } else {
+                put(key, val);
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	@Override
-	public void clear() {
-		map.clear();
-	}
+    @Override
+    public void clear() {
+        map.clear();
+    }
 }

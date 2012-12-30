@@ -21,14 +21,15 @@ import java.util.TreeMap;
 
 /**
  * TreeMap-based propertized object.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class TreeMapPropertized extends AbstractPropertized {
 
-	protected final TreeMap<String, Object> map = new TreeMap<>();
+    protected final TreeMap<String, Object> map = new TreeMap<>();
 
-	@Override
-	public Object get(String key) {
-		return map.get(key);
-	}
+    @Override
+    public Object get(String key) {
+        return map.get(key);
+    }
 }

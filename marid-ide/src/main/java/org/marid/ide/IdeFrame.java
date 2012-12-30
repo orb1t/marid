@@ -22,14 +22,15 @@ import org.marid.ide.l10n.Localized;
 
 /**
  * IDE frame.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class IdeFrame extends JFrame implements Localized {
 
-	/**
-	 * Constructs the IDE frame.
-	 */
-	public IdeFrame() {
-		super(L.s("Marid IDE"));
-	}
+    /**
+     * Constructs the IDE frame.
+     */
+    public IdeFrame() {
+        super(L.s("Marid IDE"));
+    }
 }

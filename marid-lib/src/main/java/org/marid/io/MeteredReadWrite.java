@@ -19,6 +19,7 @@ package org.marid.io;
 
 /**
  * Metered read/write object interface.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface MeteredReadWrite extends MeteredRead, MeteredWrite {

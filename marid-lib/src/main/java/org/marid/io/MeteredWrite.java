@@ -19,9 +19,10 @@ package org.marid.io;
 
 /**
  * Metered writable object interface.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface MeteredWrite {
-	
-	public long getWrittenCount();
+
+    public long getWrittenCount();
 }

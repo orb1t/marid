@@ -23,57 +23,59 @@ import java.util.ResourceBundle;
 
 /**
  * Localized resource interface.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface Localized {
 
-	/**
-	 * Messages.
-	 */
-	public static final ResourceBundle MESSAGES =
-			ResourceBundle.getBundle("res.messages");
+    /**
+     * Messages.
+     */
+    public static final ResourceBundle MESSAGES =
+            ResourceBundle.getBundle("res.messages");
+    /**
+     * Strings.
+     */
+    public static final ResourceBundle STRINGS =
+            ResourceBundle.getBundle("res.strings");
 
-	/**
-	 * Strings.
-	 */
-	public static final ResourceBundle STRINGS =
-			ResourceBundle.getBundle("res.strings");
+    /**
+     * Localization utilities class.
+     */
+    public static class L {
 
-	/**
-	 * Localization utilities class.
-	 */
-	public static class L {
+        /**
+         * Get a string from strings resource bundle.
+         *
+         * @param key String key.
+         * @param ps String parameters.
+         * @return String.
+         */
+        public static String s(String key, Object... ps) {
+            String r;
+            try {
+                r = STRINGS.getString(key);
+            } catch (MissingResourceException x) {
+                r = key;
+            }
+            return ps == null || ps.length == 0 ? r : String.format(r, ps);
+        }
 
-		/**
-		 * Get a string from strings resource bundle.
-		 * @param key String key.
-		 * @param ps String parameters.
-		 * @return String.
-		 */
-		public static String s(String key, Object... ps) {
-			String r;
-			try {
-				r = STRINGS.getString(key);
-			} catch (MissingResourceException x) {
-				r = key;
-			}
-			return ps == null || ps.length == 0 ? r : String.format(r, ps);
-		}
-
-		/**
-		 * Get a message from message resource bundle.
-		 * @param key Message key.
-		 * @param v Message parameters.
-		 * @return Message.
-		 */
-		public static String m(String key, Object... v) {
-			String r;
-			try {
-				r = MESSAGES.getString(key);
-			} catch (MissingResourceException x) {
-				r = key;
-			}
-			return v == null || v.length == 0 ? r : MessageFormat.format(r, v);
-		}
-	}
+        /**
+         * Get a message from message resource bundle.
+         *
+         * @param key Message key.
+         * @param v Message parameters.
+         * @return Message.
+         */
+        public static String m(String key, Object... v) {
+            String r;
+            try {
+                r = MESSAGES.getString(key);
+            } catch (MissingResourceException x) {
+                r = key;
+            }
+            return v == null || v.length == 0 ? r : MessageFormat.format(r, v);
+        }
+    }
 }

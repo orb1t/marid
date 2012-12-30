@@ -19,9 +19,10 @@ package org.marid.io;
 
 /**
  * Metered readable object interface.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface MeteredRead {
-	
-	public long getReadCount();
+
+    public long getReadCount();
 }

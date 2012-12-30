@@ -22,18 +22,20 @@ import java.io.OutputStream;
 
 /**
  * Empty output stream.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class EmptyOutputStream extends OutputStream {
-	@Override
-	public void write(byte[] b) throws IOException {
-	}
 
-	@Override
-	public void write(int b) throws IOException {
-	}
+    @Override
+    public void write(byte[] b) throws IOException {
+    }
 
-	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
-	}
+    @Override
+    public void write(int b) throws IOException {
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+    }
 }

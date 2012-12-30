@@ -23,47 +23,48 @@ import java.nio.CharBuffer;
 
 /**
  * Appendable writer.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class AppendableWriter extends Writer {
-	
-	private Appendable appendable;
 
-	public AppendableWriter(Appendable a) {
-		appendable = a;
-	}
+    private Appendable appendable;
 
-	@Override
-	public void write(char[] cbuf, int off, int len) throws IOException {
-		appendable.append(CharBuffer.wrap(cbuf, off, len));
-	}
+    public AppendableWriter(Appendable a) {
+        appendable = a;
+    }
 
-	@Override
-	public void write(String str) throws IOException {
-		appendable.append(str);
-	}
+    @Override
+    public void write(char[] cbuf, int off, int len) throws IOException {
+        appendable.append(CharBuffer.wrap(cbuf, off, len));
+    }
 
-	@Override
-	public void write(char[] cbuf) throws IOException {
-		appendable.append(CharBuffer.wrap(cbuf));
-	}
+    @Override
+    public void write(String str) throws IOException {
+        appendable.append(str);
+    }
 
-	@Override
-	public void write(int c) throws IOException {
-		appendable.append((char)c);
-	}
+    @Override
+    public void write(char[] cbuf) throws IOException {
+        appendable.append(CharBuffer.wrap(cbuf));
+    }
 
-	@Override
-	public void write(String str, int off, int len) throws IOException {
-		appendable.append(str, off, len);
-	}
+    @Override
+    public void write(int c) throws IOException {
+        appendable.append((char) c);
+    }
 
-	@Override
-	public void flush() throws IOException {
-	}
+    @Override
+    public void write(String str, int off, int len) throws IOException {
+        appendable.append(str, off, len);
+    }
 
-	@Override
-	public void close() throws IOException {
-		appendable = null;
-	}	
+    @Override
+    public void flush() throws IOException {
+    }
+
+    @Override
+    public void close() throws IOException {
+        appendable = null;
+    }
 }
