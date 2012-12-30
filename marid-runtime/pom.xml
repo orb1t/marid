@@ -9,12 +9,11 @@
     <parent>
         <groupId>org.marid</groupId>
         <artifactId>marid</artifactId>
-        <version>0.0.1</version>
+        <version>0.1.0</version>
     </parent>
 
     <groupId>org.marid.runtime</groupId>
     <artifactId>marid-runtime</artifactId>
-    <version>0.0.1</version>
     <name>marid-runtime</name>
     <url>http://sf.net/projects/marid</url>
 

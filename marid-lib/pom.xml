@@ -10,11 +10,10 @@
     <parent>
         <groupId>org.marid</groupId>
         <artifactId>marid</artifactId>
-        <version>0.0.1</version>
+        <version>0.1.0</version>
     </parent>
 
     <groupId>org.marid.lib</groupId>
     <artifactId>marid-lib</artifactId>
-    <version>0.0.1</version>
     <name>marid-lib</name>
 </project>
