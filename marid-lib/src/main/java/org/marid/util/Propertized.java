@@ -113,9 +113,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Long value.
          */
-        public static long getLong(Object v, long def) {
+        public static long getLong(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return 0L;
             } else if (v instanceof Number) {
                 return ((Number) v).longValue();
             } else {
@@ -130,9 +133,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Integer value.
          */
-        public static int getInt(Object v, int def) {
+        public static int getInt(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return 0;
             } else if (v instanceof Number) {
                 return ((Number) v).intValue();
             } else {
@@ -147,9 +153,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Float value.
          */
-        public static float getFloat(Object v, float def) {
+        public static float getFloat(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return 0.0f;
             } else if (v instanceof Number) {
                 return ((Number) v).floatValue();
             } else {
@@ -164,9 +173,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Double value.
          */
-        public static double getDouble(Object v, double def) {
+        public static double getDouble(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return 0.0;
             } else if (v instanceof Number) {
                 return ((Number) v).doubleValue();
             } else {
@@ -181,9 +193,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Byte value.
          */
-        public static byte getByte(Object v, byte def) {
+        public static byte getByte(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return 0;
             } else if (v instanceof Number) {
                 return ((Number) v).byteValue();
             } else {
@@ -198,9 +213,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Short value.
          */
-        public static short getShort(Object v, short def) {
+        public static short getShort(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return 0;
             } else if (v instanceof Number) {
                 return ((Number) v).shortValue();
             } else {
@@ -215,9 +233,12 @@ public interface Propertized {
          * @param def Default value.
          * @return BitSet value.
          */
-        public static BitSet getBitSet(Object v, BitSet def) {
+        public static BitSet getBitSet(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof byte[]) {
                 return BitSet.valueOf((byte[]) v);
             } else if (v instanceof long[]) {
@@ -270,9 +291,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Boolean value.
          */
-        public static boolean getBool(Object v, boolean def) {
+        public static boolean getBool(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return false;
             } else if (v instanceof Boolean) {
                 return ((Boolean) v).booleanValue();
             } else if (v instanceof Number) {
@@ -289,9 +313,12 @@ public interface Propertized {
          * @param def Default value.
          * @return TimeUnit value.
          */
-        public static TimeUnit getTimeUnit(Object v, TimeUnit def) {
+        public static TimeUnit getTimeUnit(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof TimeUnit) {
                 return (TimeUnit) v;
             } else {
@@ -306,9 +333,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Currency value.
          */
-        public static Currency getCurrency(Object v, Currency def) {
+        public static Currency getCurrency(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof Currency) {
                 return (Currency) v;
             } else if (v instanceof Locale) {
@@ -325,9 +355,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Locale value.
          */
-        public static Locale getLocale(Object v, Locale def) {
+        public static Locale getLocale(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof Locale) {
                 return (Locale) v;
             } else if (v instanceof Locale.Category) {
@@ -344,9 +377,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Date value.
          */
-        public static Date getDate(Object v, Date def) {
+        public static Date getDate(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof Date) {
                 return (Date) v;
             } else if (v instanceof Calendar) {
@@ -365,63 +401,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Calendar value.
          */
-        public static Calendar getCalendar(Object v, Calendar def) {
+        public static Calendar getCalendar(Object v, Object def) {
             if (v == null) {
-                return def;
-            } else if (v instanceof Calendar) {
-                return (Calendar) v;
-            } else if (v instanceof Date) {
-                Calendar c = Calendar.getInstance();
-                c.setTime((Date) v);
-                return c;
-            } else if (v instanceof Number) {
-                Calendar c = Calendar.getInstance();
-                c.setTimeInMillis(((Number) v).longValue());
-                return c;
-            } else {
-                return DateUtil.isoToCalendar(v.toString());
+                v = def;
             }
-        }
-
-        /**
-         * Get calendar value.
-         *
-         * @param v Object value.
-         * @param def Default value.
-         * @return Calendar value.
-         */
-        public static Calendar getCalendar(Object v, Date def) {
             if (v == null) {
-                Calendar c = Calendar.getInstance();
-                c.setTime(def);
-                return c;
-            } else if (v instanceof Calendar) {
-                return (Calendar) v;
-            } else if (v instanceof Date) {
-                Calendar c = Calendar.getInstance();
-                c.setTime((Date) v);
-                return c;
-            } else if (v instanceof Number) {
-                Calendar c = Calendar.getInstance();
-                c.setTimeInMillis(((Number) v).longValue());
-                return c;
-            } else {
-                return DateUtil.isoToCalendar(v.toString());
-            }
-        }
-
-        /**
-         * Get calendar value.
-         *
-         * @param v Object value.
-         * @param def Default value.
-         * @return Calendar value.
-         */
-        public static Calendar getCalendar(Object v, long def) {
-            if (v == null) {
-                Calendar c = Calendar.getInstance();
-                c.setTimeInMillis(def);
-                return c;
+                return null;
             } else if (v instanceof Calendar) {
                 return (Calendar) v;
             } else if (v instanceof Date) {
@@ -444,9 +429,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Charset value.
          */
-        public static Charset getCharset(Object v, Charset def) {
+        public static Charset getCharset(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof Charset) {
                 return (Charset) def;
             } else {
@@ -462,9 +450,12 @@ public interface Propertized {
          * @return ObjectName value.
          */
         @SuppressWarnings({"UseOfObsoleteCollectionType", "unchecked"})
-        public static ObjectName getObjectName(Object v, ObjectName def) {
+        public static ObjectName getObjectName(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof ObjectName) {
                 return (ObjectName) v;
             } else if (v instanceof Object[] && ((Object[]) v).length == 2) {
@@ -504,9 +495,12 @@ public interface Propertized {
          * @param def Default value.
          * @return UUID value.
          */
-        public static UUID getUuid(Object v, UUID def) {
+        public static UUID getUuid(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof BigInteger
                     && ((BigInteger) v).bitCount() > 128) {
                 ByteBuffer bb = ByteBuffer.allocate(16);
@@ -526,9 +520,12 @@ public interface Propertized {
          * @param def Default value.
          * @return TimeZone value.
          */
-        public static TimeZone getTimeZone(Object v, TimeZone def) {
+        public static TimeZone getTimeZone(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof TimeZone) {
                 return (TimeZone) v;
             } else {
@@ -543,9 +540,12 @@ public interface Propertized {
          * @param def Default value.
          * @return URI value.
          */
-        public static URI getUri(Object v, URI def) {
+        public static URI getUri(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof URI) {
                 return (URI) v;
             } else if (v instanceof URL) {
@@ -580,9 +580,12 @@ public interface Propertized {
          * @param def Default value.
          * @return URL value.
          */
-        public static URL getUrl(Object v, URL def) {
+        public static URL getUrl(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof URL) {
                 return (URL) v;
             } else if (v instanceof URI) {
@@ -621,9 +624,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Set value.
          */
-        public static Set getSet(Object v, Set def) {
+        public static Set getSet(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof Set) {
                 return (Set) v;
             } else if (v.getClass().isArray()) {
@@ -649,9 +655,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Map value.
          */
-        public static Map getMap(Object v, Map def) {
+        public static Map getMap(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof Map) {
                 return (Map) v;
             } else {
@@ -666,9 +675,12 @@ public interface Propertized {
          * @param def Default value.
          * @return List value.
          */
-        public static List getList(Object v, List def) {
+        public static List getList(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof List) {
                 return (List) v;
             } else if (v.getClass().isArray()) {
@@ -692,9 +704,12 @@ public interface Propertized {
          * @param def Default value.
          * @return File value.
          */
-        public static File getFile(Object v, File def) {
+        public static File getFile(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof File) {
                 return (File) v;
             } else if (v instanceof Path) {
@@ -725,9 +740,12 @@ public interface Propertized {
          * @param def Default value.
          * @return Path value.
          */
-        public static Path getPath(Object v, Path def) {
+        public static Path getPath(Object v, Object def) {
             if (v == null) {
-                return def;
+                v = def;
+            }
+            if (v == null) {
+                return null;
             } else if (v instanceof Path) {
                 return (Path) v;
             } else if (v instanceof File) {
@@ -755,6 +773,34 @@ public interface Propertized {
                 }
             } else {
                 return Paths.get(v.toString());
+            }
+        }
+
+        /**
+         * Get the inet address.
+         * @param v Object value.
+         * @param def Default value.
+         * @return Inet address.
+         */
+        public static InetAddress getInetAddress(Object v, Object def) {
+            if (v == null) {
+                v = def;
+            }
+            if (v == null) {
+                return null;
+            } else if (v instanceof byte[]) {
+                try {
+                    return InetAddress.getByAddress((byte[])v);
+                } catch (Exception x) {
+                    String addr = Arrays.toString((byte[])v);
+                    throw new IllegalArgumentException(addr, x);
+                }
+            } else {
+                try {
+                    return InetAddress.getByName(v.toString());
+                } catch (Exception x) {
+                    throw new IllegalArgumentException(v.toString(), x);
+                }
             }
         }
     }
