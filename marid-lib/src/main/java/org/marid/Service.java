@@ -20,6 +20,7 @@ package org.marid;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import org.marid.util.Prp;
 
 /**
@@ -112,4 +113,16 @@ public interface Service extends Runnable, Prp {
      * Shutdowns the service.
      */
     public void shutdown();
+
+    /**
+     * Get the log name.
+     * @return Log name.
+     */
+    public String getLog();
+
+    /**
+     * Get the service logger.
+     * @return Service logger.
+     */
+    public Logger l();
 }

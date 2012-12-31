@@ -17,10 +17,9 @@
  */
 package org.marid;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 import org.marid.util.CMPrp;
 
 /**
@@ -30,10 +29,10 @@ import org.marid.util.CMPrp;
  */
 public abstract class AbstractService extends CMPrp implements Service {
 
+    private static final Map<Integer, Logger> lc = new ConcurrentHashMap<>();
+
     protected Thread thread;
-    protected List<Thread> threads;
     protected ThreadGroup group;
-    protected Thread monitor;
 
     @Override
     public String getName() {
@@ -43,36 +42,7 @@ public abstract class AbstractService extends CMPrp implements Service {
     @Override
     public void init(Map<String, Object> conf) throws Exception {
         put(conf);
-        threads = new LinkedList<>();
         group = new ThreadGroup(SRV_THREAD_GROUP, getName());
-        monitor = new Thread(new Runnable() {
-            @Override
-            @SuppressWarnings("SleepWhileInLoop")
-            public void run() {
-                while (true) try {
-                    long period = $.getLong(get("threadMonitorPeriod"), 1000L);
-                    Thread.sleep(period);
-                    synchronized(AbstractService.this) {
-                        if (threads.isEmpty()) {
-                            continue;
-                        }
-                        Iterator<Thread> i = threads.iterator();
-                        while (i.hasNext()) {
-                            Thread th = i.next();
-                            if (!th.isAlive() || th.isInterrupted()) {
-                                i.remove();
-                            }
-                        }
-                    }
-                } catch (InterruptedException x) {
-                    break;
-                }
-                threads.clear();
-                threads = null;
-            }
-        }, getName() + "-monitor");
-        monitor.setDaemon(true);
-        monitor.start();
     }
 
     @Override
@@ -105,33 +75,42 @@ public abstract class AbstractService extends CMPrp implements Service {
 
     @Override
     public synchronized Thread addThread(Runnable task) {
-        Thread th = new Thread(group, task);
-        threads.add(th);
-        return th;
+        return new Thread(group, task);
     }
 
     @Override
     public synchronized Thread addThread(String name, Runnable task) {
-        Thread th = new Thread(group, task, name);
-        threads.add(th);
-        return th;
+        return new Thread(group, task, name);
     }
 
     @Override
     public synchronized void shutdown() {
+        if (group != null) {
+            Thread[] threads = new Thread[group.activeCount()];
+            group.enumerate(threads);
+            for (Thread th : threads) {
+                if (!th.isInterrupted()) {
+                    th.interrupt();
+                }
+            }
+            group = null;
+        }
         if (thread != null) {
             if (!thread.isInterrupted()) {
                 thread.interrupt();
             }
             thread = null;
         }
-        if (monitor != null) {
-            if (!monitor.isInterrupted()) {
-                monitor.interrupt();
-            }
-            monitor = null;
+    }
+
+    @Override
+    public Logger l() {
+        int key = System.identityHashCode(getLog().intern());
+        Logger l = lc.get(key);
+        if (l == null) {
+            lc.put(key, l = Logger.getLogger(getLog(), "res.messages"));
         }
-        group = null;
+        return l;
     }
 
     @Override

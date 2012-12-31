@@ -54,12 +54,11 @@ public class FastFileHandler extends Handler {
      */
     public FastFileHandler() throws InstantiationException,
             ClassNotFoundException, IllegalAccessException {
-        System.err.println("I'm " + getClass().getName());
         super.setErrorManager(new FastErrorManager());
         LogManager m = LogManager.getLogManager();
         String pfx = getClass().getName();
         String pat = m.getProperty(pfx + ".pattern");
-        pattern = pat == null ? "%h/marid/%l/%g" : pat;
+        pattern = pat == null ? "%h/marid/%l/%g.log" : pat;
         String fmtClass = m.getProperty(pfx + ".formatter");
         if (fmtClass == null) {
             fmtClass = FastFormatter.class.getName();
