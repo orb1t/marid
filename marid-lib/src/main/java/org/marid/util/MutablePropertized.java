@@ -17,6 +17,8 @@
  */
 package org.marid.util;
 
+import java.util.Map;
+
 /**
  * Mutable propertized.
  *
@@ -49,6 +51,12 @@ public interface MutablePropertized extends Propertized {
      * @return Old value.
      */
     public Object put(String key, Object val);
+
+    /**
+     * Put entire map into properties.
+     * @param map Source map.
+     */
+    public void put(Map<String, Object> map);
 
     /**
      * Puts an entry if no entries with given key are present.

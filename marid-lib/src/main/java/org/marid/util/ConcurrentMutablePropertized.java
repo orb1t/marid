@@ -17,6 +17,8 @@
  */
 package org.marid.util;
 
+import java.util.Map;
+
 /**
  * Concurrent mutable propertized object.
  *
@@ -57,5 +59,10 @@ public class ConcurrentMutablePropertized extends ConcurrentPropertized implemen
     @Override
     public void clear() {
         map.clear();
+    }
+
+    @Override
+    public void put(Map<String, Object> m) {
+        map.putAll(m);
     }
 }

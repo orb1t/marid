@@ -17,6 +17,8 @@
  */
 package org.marid.util;
 
+import java.util.Map;
+
 /**
  * TreeMap-based mutable propertized object.
  *
@@ -75,5 +77,10 @@ public class TreeMapMutablePropertized extends TreeMapPropertized implements Mut
     @Override
     public void clear() {
         map.clear();
+    }
+
+    @Override
+    public void put(Map<String, Object> m) {
+        map.putAll(m);
     }
 }

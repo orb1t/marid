@@ -27,7 +27,12 @@ import org.marid.util.Propertized;
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public interface MaridService extends Runnable, Propertized {
+public interface Service extends Runnable, Propertized {
+
+    /**
+     * Marid services thread group.
+     */
+    public static final ThreadGroup SRV_THREAD_GROUP = new ThreadGroup("marid");
 
     /**
      * Initializes the service.
@@ -102,4 +107,9 @@ public interface MaridService extends Runnable, Propertized {
      * @return Service name.
      */
     public String getName();
+
+    /**
+     * Shutdowns the service.
+     */
+    public void shutdown();
 }
