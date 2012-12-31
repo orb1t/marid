@@ -56,7 +56,7 @@ import javax.management.ObjectName;
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public interface Propertized {
+public interface Prp {
 
     /**
      * Get the object by key.

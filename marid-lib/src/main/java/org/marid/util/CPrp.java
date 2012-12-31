@@ -17,16 +17,17 @@
  */
 package org.marid.util;
 
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
- * TreeMap-based propertized object.
+ * Concurrent propertized object.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class TreeMapPropertized extends AbstractPropertized {
+public class CPrp extends AbstractPrp {
 
-    protected final TreeMap<String, Object> map = new TreeMap<>();
+    protected final ConcurrentSkipListMap<String, Object> map =
+            new ConcurrentSkipListMap<>();
 
     @Override
     public Object get(String key) {

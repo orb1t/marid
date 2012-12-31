@@ -24,7 +24,7 @@ import java.util.Map;
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class ConcurrentMutablePropertized extends ConcurrentPropertized implements MutablePropertized {
+public class CMPrp extends CPrp implements MutablePrp {
 
     @Override
     public Object remove(String key) {

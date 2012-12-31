@@ -17,21 +17,19 @@
  */
 package org.marid.util;
 
+import java.util.TreeMap;
+
 /**
- * Abstract propertized object class.
+ * TreeMap-based propertized object.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public abstract class AbstractPropertized implements Propertized {
+public class TPrp extends AbstractPrp {
+
+    protected final TreeMap<String, Object> map = new TreeMap<>();
 
     @Override
-    public Object get(String key, Object def) {
-        Object v = get(key);
-        return v == null ? def : v;
-    }
-
-    @Override
-    public <T> T get(Class<T> c, String key, T def) {
-        return c.cast(get(key, def));
+    public Object get(String key) {
+        return map.get(key);
     }
 }

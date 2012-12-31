@@ -20,14 +20,14 @@ package org.marid;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.marid.util.Propertized;
+import org.marid.util.Prp;
 
 /**
  * Marid service.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public interface Service extends Runnable, Propertized {
+public interface Service extends Runnable, Prp {
 
     /**
      * Marid services thread group.

@@ -21,14 +21,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.marid.util.ConcurrentMutablePropertized;
+import org.marid.util.CMPrp;
 
 /**
  * Abstract service.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public abstract class AbstractService extends ConcurrentMutablePropertized implements Service {
+public abstract class AbstractService extends CMPrp implements Service {
 
     protected Thread thread;
     protected List<Thread> threads;

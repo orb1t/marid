@@ -24,7 +24,7 @@ import java.util.Map;
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class TreeMapMutablePropertized extends TreeMapPropertized implements MutablePropertized {
+public class TMPrp extends TPrp implements MutablePrp {
 
     @Override
     public Object remove(String key) {

@@ -29,14 +29,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import org.marid.util.TreeMapMutablePropertized;
+import org.marid.util.TMPrp;
 
 /**
  * Abstract map importer.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public abstract class AbstractMapImporter extends TreeMapMutablePropertized implements MapImporter {
+public abstract class AbstractMapImporter extends TMPrp implements MapImporter {
 
     @Override
     public Map importMap(File file) throws IOException {

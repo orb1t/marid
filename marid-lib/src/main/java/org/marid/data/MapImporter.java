@@ -24,14 +24,14 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Map;
-import org.marid.util.MutablePropertized;
+import org.marid.util.MutablePrp;
 
 /**
  * Map importer interface.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public interface MapImporter extends MutablePropertized {
+public interface MapImporter extends MutablePrp {
 
     /**
      * Import map from a file.

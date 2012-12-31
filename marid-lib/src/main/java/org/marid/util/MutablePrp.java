@@ -24,7 +24,7 @@ import java.util.Map;
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public interface MutablePropertized extends Propertized {
+public interface MutablePrp extends Prp {
 
     /**
      * Removes the entry by key.

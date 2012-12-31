@@ -17,20 +17,21 @@
  */
 package org.marid.util;
 
-import java.util.concurrent.ConcurrentSkipListMap;
-
 /**
- * Concurrent propertized object.
+ * Abstract propertized object class.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class ConcurrentPropertized extends AbstractPropertized {
-
-    protected final ConcurrentSkipListMap<String, Object> map =
-            new ConcurrentSkipListMap<>();
+public abstract class AbstractPrp implements Prp {
 
     @Override
-    public Object get(String key) {
-        return map.get(key);
+    public Object get(String key, Object def) {
+        Object v = get(key);
+        return v == null ? def : v;
+    }
+
+    @Override
+    public <T> T get(Class<T> c, String key, T def) {
+        return c.cast(get(key, def));
     }
 }
