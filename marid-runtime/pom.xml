@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.marid</groupId>
         <artifactId>marid</artifactId>
-        <version>0.1.9</version>
+        <version>0.1.10-SNAPSHOT</version>
     </parent>
 
     <groupId>org.marid.runtime</groupId>
