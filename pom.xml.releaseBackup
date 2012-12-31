@@ -4,7 +4,7 @@
 
     <groupId>org.marid</groupId>
     <artifactId>marid</artifactId>
-    <version>0.1.9-SNAPSHOT</version>
+    <version>0.1.8-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>marid</name>
@@ -33,6 +33,7 @@
         <developerConnection>
             scm:git:ssh://git.code.sf.net/p/marid/code
         </developerConnection>
+      <tag>marid-0.1.7</tag>
   </scm>
 
     <distributionManagement>
@@ -180,7 +181,7 @@
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <username>eosms</username>
-                        <preparationGoals>wagon:upload</preparationGoals>
+                        <completionGoals>wagon:upload</completionGoals>
                     </configuration>
                 </plugin>
 
