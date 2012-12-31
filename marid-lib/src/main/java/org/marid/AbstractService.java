@@ -17,8 +17,12 @@
  */
 package org.marid;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import org.marid.util.CMPrp;
 
@@ -75,20 +79,65 @@ public abstract class AbstractService extends CMPrp implements Service {
 
     @Override
     public synchronized Thread addThread(Runnable task) {
+        if (!isRunning()) {
+            throw new IllegalStateException("Service is not running");
+        }
+        if (!group.parentOf(Thread.currentThread().getThreadGroup())) {
+            throw new IllegalStateException("Not in service thread group");
+        }
         return new Thread(group, task);
     }
 
     @Override
     public synchronized Thread addThread(String name, Runnable task) {
+        if (!isRunning()) {
+            throw new IllegalStateException("Service is not running");
+        }
+        if (!group.parentOf(Thread.currentThread().getThreadGroup())) {
+            throw new IllegalStateException("Not in service thread group");
+        }
         return new Thread(group, task, name);
+    }
+
+    @Override
+    public void join(long timeout, TimeUnit unit) throws InterruptedException {
+        long to = TimeUnit.MILLISECONDS.convert(timeout, unit);
+        LinkedList<Thread> thl = new LinkedList<>(Arrays.asList(getThreads()));
+        long t = 0L;
+        while (t <= to) {
+            Iterator<Thread> i = thl.iterator();
+            while (i.hasNext()) {
+                if (t > to) {
+                    break;
+                }
+                Thread th = i.next();
+                if (!th.isAlive()) {
+                    i.remove();
+                    continue;
+                }
+                th.join(1L);
+                t++;
+            }
+        }
+    }
+
+    @Override
+    public void join() throws InterruptedException {
+        for (Thread th : getThreads()) {
+            th.join();
+        }
+    }
+
+    @Override
+    public synchronized Thread[] getThreads() {
+        Thread[] threads = new Thread[group.activeCount()];
+        return Arrays.copyOf(threads, group.enumerate(threads));
     }
 
     @Override
     public synchronized void shutdown() {
         if (group != null) {
-            Thread[] threads = new Thread[group.activeCount()];
-            group.enumerate(threads);
-            for (Thread th : threads) {
+            for (Thread th : getThreads()) {
                 if (!th.isInterrupted()) {
                     th.interrupt();
                 }

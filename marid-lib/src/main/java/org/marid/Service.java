@@ -17,7 +17,6 @@
  */
 package org.marid;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -73,7 +72,7 @@ public interface Service extends Runnable, Prp {
      * Get collection of threads.
      * @return Current threads collection.
      */
-    public Collection<Thread> getThreads();
+    public Thread[] getThreads();
 
     /**
      * Get the running flag.
@@ -95,13 +94,15 @@ public interface Service extends Runnable, Prp {
      * Waits until the service will terminated.
      * @param timeout Timeout.
      * @param unit Timeout unit.
+     * @throws InterruptedException An interrupted exception.
      */
-    public void wait(long timeout, TimeUnit unit);
+    public void join(long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
      * Waits until the service will terminated.
+     * @throws InterruptedException An interrupted exception.
      */
-    public void await();
+    public void join() throws InterruptedException;
 
     /**
      * Get the service name.
