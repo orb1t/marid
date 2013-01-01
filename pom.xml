@@ -4,7 +4,7 @@
 
     <groupId>org.marid</groupId>
     <artifactId>marid</artifactId>
-    <version>0.1.10-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>marid</name>
@@ -26,6 +26,7 @@
     <properties>
         <netbeans.hint.license>marid-agpl30</netbeans.hint.license>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <marid.version>0.2-SNAPSHOT</marid.version>
     </properties>
 
     <scm>
@@ -33,8 +34,7 @@
         <developerConnection>
             scm:git:ssh://git.code.sf.net/p/marid/code
         </developerConnection>
-    <tag>HEAD</tag>
-  </scm>
+    </scm>
 
     <distributionManagement>
         <site>
@@ -181,7 +181,6 @@
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <username>eosms</username>
-                        <preparationGoals>wagon:upload</preparationGoals>
                     </configuration>
                 </plugin>
 
@@ -200,9 +199,11 @@
             <plugin>
                 <artifactId>maven-changelog-plugin</artifactId>
             </plugin>
+
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
             </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>wagon-maven-plugin</artifactId>
@@ -214,14 +215,18 @@
                     <url>sftp://frs.sf.net</url>
                     <toDir>/home/frs/project/marid/${project.version}</toDir>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>upload</goal>
-                        </goals>
-                        <phase>deploy</phase>
-                    </execution>
-                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.0</version>
+                <configuration>
+                    <allowMinorUpdates>true</allowMinorUpdates>
+                    <allowMajorUpdates>true</allowMajorUpdates>
+                    <comparisonMethod>maven</comparisonMethod>
+                    <newVersion>${marid.version}</newVersion>
+                </configuration>
             </plugin>
         </plugins>
     </build>

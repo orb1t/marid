@@ -18,12 +18,12 @@
     <dependencySets>
         <dependencySet>
             <includes>
-                <include>org.marid.ide:marid-ide</include>
+                <include>org.marid:marid-ide</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <excludes>
-                <exclude>org.marid.ide:marid-ide</exclude>
+                <exclude>org.marid:marid-ide</exclude>
             </excludes>
             <outputDirectory>lib</outputDirectory>
         </dependencySet>

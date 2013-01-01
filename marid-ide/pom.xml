@@ -4,10 +4,10 @@
     <parent>
         <groupId>org.marid</groupId>
         <artifactId>marid</artifactId>
-        <version>0.1.10-SNAPSHOT</version>
+        <version>0.2-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.marid.ide</groupId>
+    <groupId>org.marid</groupId>
     <artifactId>marid-ide</artifactId>
     <packaging>jar</packaging>
 
@@ -16,7 +16,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.marid.lib</groupId>
+            <groupId>org.marid</groupId>
             <artifactId>marid-lib</artifactId>
             <version>${project.version}</version>
         </dependency>
