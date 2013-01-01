@@ -10,6 +10,7 @@
     <groupId>org.marid</groupId>
     <artifactId>marid-runtime</artifactId>
     <name>marid-runtime</name>
+    <description>Marid runtime system</description>
     <url>http://sf.net/projects/marid</url>
 
     <dependencies>
@@ -23,7 +24,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
@@ -38,9 +38,7 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.3</version>
                 <configuration>
                     <descriptor>src/assemble/marid-assemble.xml</descriptor>
                 </configuration>
