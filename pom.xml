@@ -4,7 +4,7 @@
 
     <groupId>org.marid</groupId>
     <artifactId>marid</artifactId>
-    <version>0.1.13-SNAPSHOT</version>
+    <version>0.1.14-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>marid</name>
@@ -26,7 +26,7 @@
     <properties>
         <netbeans.hint.license>marid-agpl30</netbeans.hint.license>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <marid.version>0.1.13-SNAPSHOT</marid.version>
+        <marid.version>0.1.14-SNAPSHOT</marid.version>
     </properties>
 
     <scm>
