@@ -4,7 +4,7 @@
 
     <groupId>org.marid</groupId>
     <artifactId>marid</artifactId>
-    <version>0.1.11</version>
+    <version>0.1.11-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>marid</name>
@@ -34,7 +34,7 @@
         <developerConnection>
             scm:git:ssh://git.code.sf.net/p/marid/code
         </developerConnection>
-      <tag>marid-0.1.11</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <distributionManagement>
