@@ -184,6 +184,7 @@
                         <developmentVersion>
                             ${marid.version}
                         </developmentVersion>
+                        <preparationGoals>wagon:upload</preparationGoals>
                     </configuration>
                 </plugin>
 
