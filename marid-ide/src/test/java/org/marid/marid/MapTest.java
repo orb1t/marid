@@ -17,24 +17,16 @@
  */
 package org.marid.marid;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import groovy.util.GroovyTestCase;
 
 /**
  * Map tests.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class MapTest extends Assert {
+public class MapTest extends GroovyTestCase {
 
-    @Before
-    public void init() {
-
-    }
-
-    @Test
     public void test1() throws Exception {
-        assertTrue(true);
+        
     }
 }

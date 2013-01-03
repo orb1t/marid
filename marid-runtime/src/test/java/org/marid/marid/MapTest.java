@@ -17,39 +17,17 @@
  */
 package org.marid.marid;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicLong;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import groovy.util.GroovyTestCase;
+
 
 /**
  * Map tests.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class MapTest extends Assert {
+public class MapTest extends GroovyTestCase {
 
-    private static final int SIZE = 100000;
-    private static final int THREADS = 100;
-    private ConcurrentMap<String, Object> map;
-    private AtomicLong time;
-    private List<String> ids;
-
-    @Before
-    public void init() {
-        time = new AtomicLong(0L);
-        ids = new ArrayList<>(SIZE);
-        for (int i = 0; i < SIZE; i++) {
-            ids.add(UUID.randomUUID().toString());
-        }
-    }
-
-    @Test
     public void test1() throws Exception {
-        assertTrue(true);
+
     }
 }
