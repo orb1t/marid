@@ -34,7 +34,36 @@
         <developerConnection>
             scm:git:ssh://git.code.sf.net/p/marid/code
         </developerConnection>
-  </scm>
+    </scm>
+
+    <profiles>
+        <profile>
+            <id>release-profile</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <artifactId>maven-changelog-plugin</artifactId>
+                            <configuration>
+                                <outputEncoding>UTF-8</outputEncoding>
+                                <type>range</type>
+                                <range>-30</range>
+                            </configuration>
+                            <executions>
+                                <execution>
+                                    <id>make-changelog</id>
+                                    <goals>
+                                        <goal>changelog</goal>
+                                    </goals>
+                                    <phase>package</phase>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
 
     <distributionManagement>
         <site>
@@ -127,20 +156,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-changelog-plugin</artifactId>
                     <version>2.2</version>
-                    <configuration>
-                        <outputEncoding>UTF-8</outputEncoding>
-                        <type>range</type>
-                        <range>-30</range>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>make-changelog</id>
-                            <goals>
-                                <goal>changelog</goal>
-                            </goals>
-                            <phase>package</phase>
-                        </execution>
-                    </executions>
                 </plugin>
 
                 <plugin>
