@@ -263,12 +263,32 @@
                 <version>1.5</version>
                 <executions>
                     <execution>
+                        <id>groovy-test-compile</id>
                         <phase>test-compile</phase>
                         <goals>
                             <goal>testCompile</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>groovy-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
                 </executions>
+                <configuration>
+                    <providerSelection>2.0</providerSelection>
+                    <sourceEncoding>UTF-8</sourceEncoding>
+                    <stacktrace>true</stacktrace>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-all</artifactId>
+                        <version>2.0.6</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

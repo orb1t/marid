@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Dmitry Ovchinnikov
+ * Copyright (C) 2013 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,33 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.util;
+package org.marid;
 
-import groovy.lang.GroovySystem;
-import groovy.lang.MetaClass;
+import groovy.util.GroovyTestCase;
+import org.marid.util.CMPrp;
 
 /**
- * Abstract propertized object class.
+ * Type test.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public abstract class AbstractPrp implements Prp {
-
-    @Override
-    public Object get(String key, Object def) {
-        Object v = get(key);
-        return v == null ? def : v;
-    }
-
-    @Override
-    public <T> T get(Class<T> c, String key, T def) {
-        Object v = get(key, def);
-        if (v == null) {
-            return null;
-        } else {
-            Class<?> cl = v.getClass();
-            MetaClass mc = GroovySystem.getMetaClassRegistry().getMetaClass(cl);
-            return c.cast(mc.invokeMethod(v, "asType", c));
-        }
+public class TypeTest extends GroovyTestCase {
+    public void test1() {
+        CMPrp p = new CMPrp();
+        p.put("k", 10L);
+        System.out.println(p.get(Float.class, "k", 1.0f));
     }
 }
