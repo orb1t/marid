@@ -162,6 +162,10 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
                     <version>3.2</version>
+                    <configuration>
+                        <locales>en,es</locales>
+                        <inputEncoding>UTF-8</inputEncoding>
+                    </configuration>
                 </plugin>
 
                 <plugin>

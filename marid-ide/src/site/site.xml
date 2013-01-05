@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/DECORATION/1.3.0 http://maven.apache.org/xsd/decoration-1.3.0.xsd" name="marid-ide" xmlns="http://maven.apache.org/DECORATION/1.3.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <bannerLeft>
+    <name>marid-ide</name>
+  </bannerLeft>
+  <body>
+    <links>
+      <item name="marid-ide" href="./" />
+    </links>
+    <menu name="Parent Project" ref="parent">
+      <item name="marid" href="../index.html" />
+    </menu>
+    <menu ref="reports" />
+  </body>
+</project>
