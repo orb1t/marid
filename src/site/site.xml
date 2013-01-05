@@ -9,11 +9,7 @@
             <item name="marid" href="./" />
         </links>
         <menu ref="parent" />
-        <menu name="Modules" ref="modules">
-            <item name="marid-runtime" href="marid-runtime/index.html" />
-            <item name="marid-lib" href="marid-lib/index.html" />
-            <item name="marid-ide" href="marid-ide/index.html" />
-        </menu>
+        <menu ref="modules"/>
         <menu ref="reports" />
     </body>
     <skin>

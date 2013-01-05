@@ -8,9 +8,7 @@
         <links>
             <item name="marid-lib" href="./" />
         </links>
-        <menu name="Parent Project" ref="parent">
-            <item name="marid" href="../index.html" />
-        </menu>
+        <menu name="Parent Project" ref="parent"/>
         <menu ref="reports" />
     </body>
 </project>

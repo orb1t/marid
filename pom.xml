@@ -165,7 +165,6 @@
                     <configuration>
                         <locales>en,es</locales>
                         <inputEncoding>UTF-8</inputEncoding>
-                        <chmod>false</chmod>
                     </configuration>
                 </plugin>
 
