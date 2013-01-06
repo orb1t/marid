@@ -34,6 +34,7 @@
         <developerConnection>
             scm:git:ssh://git.code.sf.net/p/marid/code
         </developerConnection>
+        <url>http://sf.net/p/marid/code</url>
     </scm>
 
     <profiles>
