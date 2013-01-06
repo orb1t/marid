@@ -4,6 +4,17 @@
     <bannerLeft>
         <name>marid</name>
     </bannerLeft>
+    <poweredBy>
+        <logo
+            img="http://2.gravatar.com/avatar/b13e789b8af2874393b5fddd15f731fe"
+            title="Built by Marid"
+            name="Built by Marid"
+            href="http://sf.net/projects/marid"
+            width="64"
+            height="64"
+            position="center"
+        />
+    </poweredBy>
     <body>
         <links>
             <item name="marid" href="./" />
