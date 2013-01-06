@@ -72,6 +72,23 @@
         </profile>
     </profiles>
 
+    <repositories>
+        <repository>
+            <id>oracle</id>
+            <layout>default</layout>
+            <name>Oracle Released Java Packages</name>
+            <url>http://download.oracle.com/maven</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>fail</checksumPolicy>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+        </repository>
+    </repositories>
+
     <distributionManagement>
         <site>
             <id>marid-web</id>
@@ -327,6 +344,12 @@
             <artifactId>groovy-test</artifactId>
             <version>2.0.6</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sleepycat</groupId>
+            <artifactId>je</artifactId>
+            <version>4.0.92</version>
         </dependency>
     </dependencies>
 </project>
