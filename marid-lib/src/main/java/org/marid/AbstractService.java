@@ -21,9 +21,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 import org.marid.util.CMPrp;
 
 /**
@@ -32,8 +30,6 @@ import org.marid.util.CMPrp;
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public abstract class AbstractService extends CMPrp implements Service {
-
-    private static final Map<Integer, Logger> lc = new ConcurrentHashMap<>();
 
     protected Thread thread;
     protected ThreadGroup group;
@@ -150,16 +146,6 @@ public abstract class AbstractService extends CMPrp implements Service {
             }
             thread = null;
         }
-    }
-
-    @Override
-    public Logger l() {
-        int key = System.identityHashCode(getLog().intern());
-        Logger l = lc.get(key);
-        if (l == null) {
-            lc.put(key, l = Logger.getLogger(getLog(), "res.messages"));
-        }
-        return l;
     }
 
     @Override

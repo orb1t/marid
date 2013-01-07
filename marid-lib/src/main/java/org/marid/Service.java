@@ -114,16 +114,4 @@ public interface Service extends Runnable, Prp {
      * Shutdowns the service.
      */
     public void shutdown();
-
-    /**
-     * Get the log name.
-     * @return Log name.
-     */
-    public String getLog();
-
-    /**
-     * Get the service logger.
-     * @return Service logger.
-     */
-    public Logger l();
 }
