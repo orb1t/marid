@@ -19,7 +19,6 @@ package org.marid;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 import org.marid.util.Prp;
 
 /**
@@ -45,7 +44,7 @@ public interface Service extends Runnable, Prp {
      * Get the service thread group.
      * @return Service thread group.
      */
-    public ThreadGroup getThreadGroup();
+    public ThreadGroup threadGroup();
 
     /**
      * Adds a thread.
@@ -66,19 +65,19 @@ public interface Service extends Runnable, Prp {
      * Get the current service thread.
      * @return Current service thread.
      */
-    public Thread getThread();
+    public Thread thread();
 
     /**
      * Get collection of threads.
      * @return Current threads collection.
      */
-    public Thread[] getThreads();
+    public Thread[] threads();
 
     /**
      * Get the running flag.
      * @return Running flag.
      */
-    public boolean isRunning();
+    public boolean running();
 
     /**
      * Starts the service.
@@ -108,7 +107,7 @@ public interface Service extends Runnable, Prp {
      * Get the service name.
      * @return Service name.
      */
-    public String getName();
+    public String name();
 
     /**
      * Shutdowns the service.

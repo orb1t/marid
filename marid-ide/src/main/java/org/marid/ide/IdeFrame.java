@@ -18,7 +18,7 @@
 package org.marid.ide;
 
 import javax.swing.JFrame;
-import org.marid.ide.l10n.Localized;
+import org.marid.l10n.Localized;
 
 /**
  * IDE frame.

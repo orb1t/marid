@@ -60,9 +60,9 @@ public class Context {
     @SuppressWarnings("UseSpecificCatch")
     private static PrintStream ps(Properties p, List<Exception> xs, String n) {
         PrintStream ps = null;
-        if (p.containsKey("stdoutDir")) {
+        if (p.containsKey("outDir")) {
             try {
-                Path f = Paths.get(p.getProperty("stdoutDir"));
+                Path f = Paths.get(p.getProperty("outDir"));
                 if (!Files.isDirectory(f)) {
                     f = Files.createDirectories(f);
                 }
@@ -81,7 +81,7 @@ public class Context {
                 Path f = Paths.get(url.toURI()).getParent().resolve(n);
                 ps = new PrintStream(Files.newOutputStream(f), true, "UTF-8");
             } catch (Exception x) {
-                xs.add(new IllegalStateException("Setting " + n + " to jarDir", x));
+                xs.add(new IllegalStateException("Set " + n + " to jarDir", x));
             }
         }
         if (ps != null) {

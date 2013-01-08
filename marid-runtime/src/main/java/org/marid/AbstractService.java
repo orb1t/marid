@@ -35,31 +35,31 @@ public abstract class AbstractService extends CMPrp implements Service {
     protected ThreadGroup group;
 
     @Override
-    public String getName() {
+    public String name() {
         return $.getString(get("name"), getClass().getSimpleName());
     }
 
     @Override
     public void init(Map<String, Object> conf) throws Exception {
         put(conf);
-        group = new ThreadGroup(SRV_THREAD_GROUP, getName());
+        group = new ThreadGroup(SRV_THREAD_GROUP, name());
     }
 
     @Override
     public synchronized void start() {
-        if (isRunning()) {
+        if (running()) {
             throw new IllegalStateException("Already running");
         }
-        thread = new Thread(SRV_THREAD_GROUP, this, getName());
+        thread = new Thread(SRV_THREAD_GROUP, this, name());
         thread.start();
     }
 
     @Override
     public synchronized void stop() {
-        if (!isRunning()) {
+        if (!running()) {
             throw new IllegalStateException("Is not running");
         }
-        for (Thread th : getThreads()) {
+        for (Thread th : threads()) {
             if (th.isAlive() && !th.isInterrupted()) {
                 th.interrupt();
             }
@@ -69,13 +69,13 @@ public abstract class AbstractService extends CMPrp implements Service {
     }
 
     @Override
-    public synchronized boolean isRunning() {
+    public synchronized boolean running() {
         return thread != null && thread.isAlive();
     }
 
     @Override
     public synchronized Thread addThread(Runnable task) {
-        if (!isRunning()) {
+        if (!running()) {
             throw new IllegalStateException("Service is not running");
         }
         if (!group.parentOf(Thread.currentThread().getThreadGroup())) {
@@ -86,7 +86,7 @@ public abstract class AbstractService extends CMPrp implements Service {
 
     @Override
     public synchronized Thread addThread(String name, Runnable task) {
-        if (!isRunning()) {
+        if (!running()) {
             throw new IllegalStateException("Service is not running");
         }
         if (!group.parentOf(Thread.currentThread().getThreadGroup())) {
@@ -98,7 +98,7 @@ public abstract class AbstractService extends CMPrp implements Service {
     @Override
     public void join(long timeout, TimeUnit unit) throws InterruptedException {
         long to = TimeUnit.MILLISECONDS.convert(timeout, unit);
-        LinkedList<Thread> thl = new LinkedList<>(Arrays.asList(getThreads()));
+        LinkedList<Thread> thl = new LinkedList<>(Arrays.asList(threads()));
         long t = 0L;
         while (t <= to) {
             Iterator<Thread> i = thl.iterator();
@@ -119,13 +119,13 @@ public abstract class AbstractService extends CMPrp implements Service {
 
     @Override
     public void join() throws InterruptedException {
-        for (Thread th : getThreads()) {
+        for (Thread th : threads()) {
             th.join();
         }
     }
 
     @Override
-    public synchronized Thread[] getThreads() {
+    public synchronized Thread[] threads() {
         Thread[] threads = new Thread[group.activeCount()];
         return Arrays.copyOf(threads, group.enumerate(threads));
     }
@@ -133,7 +133,7 @@ public abstract class AbstractService extends CMPrp implements Service {
     @Override
     public synchronized void shutdown() {
         if (group != null) {
-            for (Thread th : getThreads()) {
+            for (Thread th : threads()) {
                 if (!th.isInterrupted()) {
                     th.interrupt();
                 }

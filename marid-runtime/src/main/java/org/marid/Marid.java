@@ -22,10 +22,11 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import org.marid.logging.Logging;
+import org.marid.context.CmdLine;
 
 /**
  * Launch class.
@@ -34,6 +35,10 @@ import org.marid.logging.Logging;
  */
 public class Marid implements Runnable {
 
+    private static final Properties PROPS = new Properties();
+    private static final Logger log = Logger.getLogger(
+            Marid.class.getName(), "res.messages");
+
     /**
      * Launch entry point.
      *
@@ -41,20 +46,11 @@ public class Marid implements Runnable {
      * @throws Exception An exception.
      */
     public static void main(String... args) throws Exception {
-        String cmd = "start";
-        if (args.length > 0) {
-            cmd = args[args.length - 1];
+        CmdLine cmdLine = new CmdLine(PROPS, args);
+        if (cmdLine.isHelp()) {
+            cmdLine.showHelp();
+            return;
         }
-        switch (cmd) {
-            case "start":
-                Logging.init(Marid.class, "/log.properties");
-                startShutdownThread().join();
-                break;
-            case "stop":
-                sendShutdownCommand();
-                break;
-        }
-
     }
 
     @Override
@@ -66,7 +62,7 @@ public class Marid implements Runnable {
                     Level.WARNING, "Unable to listen shutdown port {0}");
             lr.setThrown(x);
             lr.setParameters(new Object[]{Context.SHUTDOWN_PORT});
-            Log.l.log(lr);
+            log.log(lr);
         }
     }
 
@@ -83,8 +79,8 @@ public class Marid implements Runnable {
                 }
                 String data = new String(buf, 0, p.getLength(),
                         StandardCharsets.ISO_8859_1);
-                if (Log.l.isLoggable(Level.INFO)) {
-                    Log.l.log(Level.INFO, "Datagram packet {0} from {1}",
+                if (log.isLoggable(Level.INFO)) {
+                    log.log(Level.INFO, "Datagram packet {0} from {1}",
                             new Object[]{data, p.getAddress().toString()});
                 }
                 if (data.startsWith(Context.APP_ID)) {
@@ -117,12 +113,7 @@ public class Marid implements Runnable {
                 ds.disconnect();
             }
         } catch (Exception x) {
-            Log.l.log(Level.WARNING, "Unable to send shutdown sequence", x);
+            log.log(Level.WARNING, "Unable to send shutdown sequence", x);
         }
-    }
-
-    private static class Log {
-
-        static final Logger l = Logger.getLogger("sys", "res.messages");
     }
 }

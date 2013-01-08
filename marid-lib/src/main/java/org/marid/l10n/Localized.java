@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.ide.l10n;
+package org.marid.l10n;
 
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
