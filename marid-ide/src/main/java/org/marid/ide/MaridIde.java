@@ -17,6 +17,7 @@
  */
 package org.marid.ide;
 
+import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
@@ -52,6 +53,12 @@ public class MaridIde {
         BufferedImage img = MaridImage.getIcon(512);
         ImageIO.write(img, "PNG", new File("/home/dmitry/marid512.png"));
         JOptionPane.showMessageDialog(null, new JLabel(new ImageIcon(img)));
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new IdeFrame().setVisible(true);
+            }
+        });
     }
 
     private static class Log {

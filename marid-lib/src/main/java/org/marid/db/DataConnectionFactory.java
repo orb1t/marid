@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Dmitry Ovchinnikov
+ * Copyright (C) 2013 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,23 +15,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.ide;
+package org.marid.db;
 
-import javax.swing.JFrame;
-import org.marid.l10n.Localized;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Map;
 
 /**
- * IDE frame.
+ * Data connection factory.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class IdeFrame extends JFrame implements Localized {
+public interface DataConnectionFactory {
 
     /**
-     * Constructs the IDE frame.
+     * Obtain a data connection.
+     * @param uri Remote resource URI.
+     * @param map Parameter map.
+     * @return Data connection.
+     * @throws IOException An I/O exception.
      */
-    public IdeFrame() {
-        super(S.l("Marid IDE"));
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-    }
+    public DataConnection get(URI uri, Map<String, ?> map) throws IOException;
 }

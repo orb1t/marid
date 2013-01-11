@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Dmitry Ovchinnikov
+ * Copyright (C) 2013 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,23 +15,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.ide;
-
-import javax.swing.JFrame;
-import org.marid.l10n.Localized;
+package org.marid.db;
 
 /**
- * IDE frame.
- *
+ * Data archive storage.
+ * 
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class IdeFrame extends JFrame implements Localized {
+public interface DataArchiveStorage {
 
-    /**
-     * Constructs the IDE frame.
-     */
-    public IdeFrame() {
-        super(S.l("Marid IDE"));
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-    }
 }

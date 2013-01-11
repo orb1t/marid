@@ -26,22 +26,10 @@ import java.util.ResourceBundle;
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface Localized {
-
     /**
-     * Messages.
+     * Strings localizations.
      */
-    public static final ResourceBundle MESSAGES =
-            ResourceBundle.getBundle("res.messages");
-    /**
-     * Strings.
-     */
-    public static final ResourceBundle STRINGS =
-            ResourceBundle.getBundle("res.strings");
-
-    /**
-     * Localization utilities class.
-     */
-    public static class L {
+    public class S {
 
         /**
          * Get a string from strings resource bundle.
@@ -50,10 +38,22 @@ public interface Localized {
          * @param ps String parameters.
          * @return String.
          */
-        public static String s(String key, Object... ps) {
-            String r = STRINGS.containsKey(key) ? STRINGS.getString(key) : key;
+        public static String l(String key, Object... ps) {
+            String r = S.containsKey(key) ? S.getString(key) : key;
             return ps == null || ps.length == 0 ? r : String.format(r, ps);
         }
+
+        private static final ResourceBundle S =
+                ResourceBundle.getBundle("res.strings");
+    }
+
+    /**
+     * Messages localizations.
+     */
+    public class M {
+
+        private static final ResourceBundle M =
+            ResourceBundle.getBundle("res.messages");
 
         /**
          * Get a message from message resource bundle.
@@ -62,8 +62,8 @@ public interface Localized {
          * @param v Message parameters.
          * @return Message.
          */
-        public static String m(String k, Object... v) {
-            String r = MESSAGES.containsKey(k) ? MESSAGES.getString(k) : k;
+        public static String l(String k, Object... v) {
+            String r = M.containsKey(k) ? M.getString(k) : k;
             return v == null || v.length == 0 ? r : MessageFormat.format(r, v);
         }
     }

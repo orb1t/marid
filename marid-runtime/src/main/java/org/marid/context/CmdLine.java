@@ -91,17 +91,17 @@ public class CmdLine implements Localized {
      * Shows the help screen.
      */
     public void showHelp() {
-        System.out.println(L.s("Marid, the free data acquisition software"));
+        System.out.println(S.l("Marid, the free data acquisition software"));
         System.out.println();
         HelpFormatter hf = new HelpFormatter();
         String l = System.getProperty("line.separator");
-        String cls = L.s("java -jar marid-runtime.jar <options>");
-        String hdr = l + L.s("Options:");
-        String ftr = l + L.s("(c) 2012-2013 Marid Software Development Group");
+        String cls = S.l("java -jar marid-runtime.jar <options>");
+        String hdr = l + S.l("Options:");
+        String ftr = l + S.l("(c) 2012-2013 Marid Software Development Group");
         hf.printHelp(cls, hdr, options, ftr);
     }
 
     private void add(Options g, String s, String l, boolean p, String d) {
-        g.addOption(new Option(s, l, p, L.s(d)));
+        g.addOption(new Option(s, l, p, S.l(d)));
     }
 }

@@ -21,6 +21,18 @@
             <artifactId>marid-lib</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.codeartisans.thirdparties.swing</groupId>
+            <artifactId>batik-all</artifactId>
+            <version>1.8pre-r1084380</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.14</version>
+        </dependency>
     </dependencies>
 
     <build>
