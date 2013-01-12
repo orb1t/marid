@@ -745,4 +745,244 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @throws IOException An I/O exception.
      */
     public int merge(long[] t, String[] v, String[]... q) throws IOException;
+
+    /**
+     * Updates a value.
+     * @param ts Timestamp.
+     * @param v Value.
+     * @param tag Tag.
+     * @return Insertion result.
+     * @throws IOException An I/O exception.
+     */
+    public boolean update(long ts, double v, String... tag) throws IOException;
+
+    /**
+     * Updates values.
+     * @param t Timestamp array.
+     * @param v Values array.
+     * @param q Tag array.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int update(long[] t, double[] v, String[]... q) throws IOException;
+
+    /**
+     * Updates a value.
+     * @param ts Timestamp.
+     * @param v Value.
+     * @param tag Tag.
+     * @return Insertion result.
+     * @throws IOException An I/O exception.
+     */
+    public boolean update(long ts, float v, String... tag) throws IOException;
+
+    /**
+     * Updates values.
+     * @param t Timestamp array.
+     * @param v Values array.
+     * @param q Tag array.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int update(long[] t, float[] v, String[]... q) throws IOException;
+
+    /**
+     * Updates a value.
+     * @param ts Timestamp.
+     * @param v Value.
+     * @param tag Tag.
+     * @return Insertion result.
+     * @throws IOException An I/O exception.
+     */
+    public boolean update(long ts, int v, String... tag) throws IOException;
+
+    /**
+     * Updates values.
+     * @param t Timestamp array.
+     * @param v Value array.
+     * @param q Tag array.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int update(long[] t, int[] v, String[]... q) throws IOException;
+
+    /**
+     * Updates a value.
+     * @param ts Timestamp.
+     * @param v Value.
+     * @param tag Tag.
+     * @return Insertion result.
+     * @throws IOException An I/O exception.
+     */
+    public boolean update(long ts, long v, String... tag) throws IOException;
+
+    /**
+     * Updates values.
+     * @param t Timestamp array.
+     * @param v Value array.
+     * @param q Tags.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int update(long[] t, long[] v, String[]... q) throws IOException;
+
+    /**
+     * Updates a value.
+     * @param ts Timestamp.
+     * @param v Value.
+     * @param tag Tag.
+     * @return Insertion result.
+     * @throws IOException An I/O exception.
+     */
+    public boolean update(long ts, byte[] v, String... tag) throws IOException;
+
+    /**
+     * Updates values.
+     * @param t Timestamp array.
+     * @param v Value array.
+     * @param q Tags.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int update(long[] t, byte[][] v, String[]... q) throws IOException;
+
+    /**
+     * Updates a value.
+     * @param ts Timestamp.
+     * @param v Value.
+     * @param tag Tag.
+     * @return Insertion result.
+     * @throws IOException An I/O exception.
+     */
+    public boolean update(long ts, boolean v, String... tag) throws IOException;
+
+    /**
+     * Updates values.
+     * @param t Timestamp array.
+     * @param v Value array.
+     * @param q Tags.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int update(long[] t, boolean[] v, String[]... q) throws IOException;
+
+    /**
+     * Updates a value.
+     * @param t Timestamp.
+     * @param v Value.
+     * @param tag Tag.
+     * @return Insertion result.
+     * @throws IOException An I/O exception.
+     */
+    public boolean update(long t, double[] v, String... tag) throws IOException;
+
+    /**
+     * Updates values.
+     * @param t Timestamp array.
+     * @param v Value array.
+     * @param q Tags.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int update(long[] t, double[][] v, String[]... q) throws IOException;
+
+    /**
+     * Updates a value.
+     * @param t Timestamp.
+     * @param v Value.
+     * @param tag Tag.
+     * @return Insertion value.
+     * @throws IOException An I/O exception.
+     */
+    public boolean update(long t, float[] v, String... tag) throws IOException;
+
+    /**
+     * Updates values.
+     * @param t Timestamp array.
+     * @param v Value array.
+     * @param tag Tag array.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int update(long[] t, float[][] v, String[]... q) throws IOException;
+
+    /**
+     * Updates a value.
+     * @param t Timestamp.
+     * @param v Value.
+     * @param tag Tag.
+     * @return Insertion result.
+     * @throws IOException An I/O exception.
+     */
+    public boolean update(long t, int[] v, String... tag) throws IOException;
+
+    /**
+     * Updates values.
+     * @param t Timestamp array.
+     * @param v Value array.
+     * @param tag Tags.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int update(long[] t, int[][] v, String[]... tag) throws IOException;
+
+    /**
+     * Updates a value.
+     * @param t Timestamp.
+     * @param v Value.
+     * @param tag Tag.
+     * @return Insertion result.
+     * @throws IOException An I/O exception.
+     */
+    public boolean update(long t, long[] v, String... tag) throws IOException;
+
+    /**
+     * Updates values.
+     * @param t Timestamp array.
+     * @param v Value array.
+     * @param q Tags.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int update(long[] t, long[][] v, String[]... q) throws IOException;
+
+    /**
+     * Updates a value.
+     * @param t Timestamp.
+     * @param v Value.
+     * @param tag Tag.
+     * @return Insertion result.
+     * @throws IOException An I/O exception.
+     */
+    public boolean update(long t, String[] v, String... tag) throws IOException;
+
+    /**
+     * Updates values.
+     * @param t Timestamp array.
+     * @param v Value array.
+     * @param q Tags.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int update(long[] t, String[][] v, String[]... q) throws IOException;
+
+    /**
+     * Updates a value.
+     * @param t Timestamp.
+     * @param v Value.
+     * @param tag Tag.
+     * @return Insertion result.
+     * @throws IOException An I/O exception.
+     */
+    public boolean update(long t, String v, String... tag) throws IOException;
+
+    /**
+     * Updates values.
+     * @param t Timestamp array.
+     * @param v Value array.
+     * @param q Tags.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int update(long[] t, String[] v, String[]... q) throws IOException;
 }
