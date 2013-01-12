@@ -25,7 +25,6 @@ import java.io.IOException;
  * @auhor Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface CurrentStorage extends Storage {
-
     /**
      * Get a double value by tag.
      * @param tag Value tag.

@@ -25,7 +25,6 @@ import java.io.IOException;
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface HistoricalStorage extends Storage {
-
     /**
      * Checks whether the specific tag exists in the given timestamp.
      * @param ts A timestamp.
