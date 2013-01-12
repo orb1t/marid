@@ -98,7 +98,7 @@
         <repository>
             <id>marid</id>
             <name>frs</name>
-            <url>sftp://frs.sf.net/home/frs/project/marid/deploy</url>
+            <url>sftp://frs.sf.net/home/frs/project/marid/maven</url>
         </repository>
     </distributionManagement>
 
