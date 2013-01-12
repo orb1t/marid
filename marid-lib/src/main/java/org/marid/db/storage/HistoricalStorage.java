@@ -99,4 +99,185 @@ public interface HistoricalStorage extends Storage {
      * @throws IOException An I/O exception.
      */
     public boolean exist(long ts, long tf, String[]... tags) throws IOException;
+
+    /**
+     * Deletes the specific tag at the given timestamp.
+     * @param ts Timestamp.
+     * @param tag A tag.
+     * @return Deletion result.
+     * @throws IOException An I/O exception.
+     */
+    public boolean delete(long ts, String... tag) throws IOException;
+
+    /**
+     * Deletes the specific tag at the given timestamp.
+     * @param ts Timestamp.
+     * @param tags Tags.
+     * @return Deletions count.
+     * @throws IOException An I/O exception.
+     */
+    public long delete(long ts, String[]... tags) throws IOException;
+
+    /**
+     * Deletes the specific tag after the given timestamp.
+     * @param ts Timestamp.
+     * @param tag A tag.
+     * @return Deletions count.
+     * @throws IOException An I/O exception.
+     */
+    public long deleteAfter(long ts, String... tag) throws IOException;
+
+    /**
+     * Deletes the specific tags after the given timestamp.
+     * @param ts Timestamp.
+     * @param tags Tags.
+     * @return Deletetions count.
+     * @throws IOException An I/O exception.
+     */
+    public long deleteAfter(long ts, String[]... tags) throws IOException;
+
+    /**
+     * Deletes the specific tags before the given timestamp.
+     * @param ts Timestamp.
+     * @param tag A tag.
+     * @return Deletions count.
+     * @throws IOException An I/O exception.
+     */
+    public long deleteBefore(long ts, String... tag) throws IOException;
+
+    /**
+     * Deletes the specific tags before the given timestamp.
+     * @param ts Timestamp.
+     * @param tags Tags.
+     * @return Deletions count.
+     * @throws IOException An I/O exception.
+     */
+    public long deleteBefore(long ts, String[]... tags) throws IOException;
+
+    /**
+     * Deletes the specific tag within the given time bounds.
+     * @param ts Start timestamp.
+     * @param tf Final timestamp.
+     * @param tag A tag.
+     * @return Deletions count.
+     * @throws IOException An I/O exception.
+     */
+    public long delete(long ts, long tf, String... tag) throws IOException;
+
+    /**
+     * Deletes the specific tags within the given time bounds.
+     * @param ts Start timestamp.
+     * @param tf Final timestamp.
+     * @param tags Tags.
+     * @return Deletions count.
+     * @throws IOException An I/O exception.
+     */
+    public long delete(long ts, long tf, String[]... tags) throws IOException;
+
+    /**
+     * Counts objects at the given timestamp by tag.
+     * @param ts Timestamp.
+     * @param tag A tag.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long count(long ts, String... tag) throws IOException;
+
+    /**
+     * Counts objects at the given timestamp by tags.
+     * @param ts Timestamp.
+     * @param tags Tags.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long count(long ts, String[]... tags) throws IOException;
+
+    /**
+     * Counts objects after the given timestamp.
+     * @param ts Timestamp.
+     * @param tag Tag.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long countAfter(long ts, String... tag) throws IOException;
+
+    /**
+     * Counts objects after the given timestamp.
+     * @param ts Timestamp.
+     * @param tags Tags.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long countAfter(long ts, String[]... tags) throws IOException;
+
+    /**
+     * Counts objects before the given timestamp.
+     * @param ts Timestamp.
+     * @param tag Tag.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long countBefore(long ts, String... tag) throws IOException;
+
+    /**
+     * Counts objects before the given timestamp.
+     * @param ts Timestamp.
+     * @param tags Tags.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long countBefore(long ts, String[]... tags) throws IOException;
+
+    /**
+     * Counts objects within the given time bounds.
+     * @param ts Start timestamp.
+     * @param tf Final timestamp.
+     * @param tag Tag.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long count(long ts, long tf, String... tag) throws IOException;
+
+    /**
+     * Counts objects within the given time bounds.
+     * @param ts Start timestamp.
+     * @param tf Final timestamp.
+     * @param tags Tags.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long count(long ts, long tf, String[]... tags) throws IOException;
+
+    /**
+     * Counts objects at the given timestamp.
+     * @param ts Timestamp.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long count(long ts) throws IOException;
+
+    /**
+     * Counts objects after the given timestamp.
+     * @param ts Timestamp.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long countAfter(long ts) throws IOException;
+
+    /**
+     * Counts objects before the given timestamp.
+     * @param ts Timestamp.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long countBefore(long ts) throws IOException;
+
+    /**
+     * Counts objects within the given time bounds.
+     * @param ts Start timestamp.
+     * @param tf Final timestamp.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long count(long ts, long tf) throws IOException;
 }

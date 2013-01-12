@@ -55,28 +55,32 @@ public interface Storage {
      * Checks whether the current user has read access to the specific tag.
      * @param tag A tag.
      * @return Access status.
+     * @throws IOException An I/O exception.
      */
-    public boolean hasReadAccess(String... tag);
+    public boolean hasReadAccess(String... tag) throws IOException;
 
     /**
      * Checks whether the current user has write access to a specific tag.
      * @param tag A tag.
      * @return Access status.
+     * @throws IOException An I/O exception.
      */
-    public boolean hasWriteAccess(String... tag);
+    public boolean hasWriteAccess(String... tag) throws IOException;
 
     /**
      * Checks whether the current user has purge access.
      * @return Access status.
+     * @throws IOException An I/O exception.
      */
-    public boolean hasPurgeAccess();
+    public boolean hasPurgeAccess() throws IOException;
 
     /**
      * Get the access code by tag.
      * @param tag A tag.
      * @return Access code.
+     * @throws IOException An I/O exception.
      */
-    public BitSet getAccessCode(String... tag);
+    public BitSet getAccessCode(String... tag) throws IOException;
 
     /**
      * Purge all the data in the current storage.
@@ -95,7 +99,24 @@ public interface Storage {
     /**
      * Deletes all the data by the specific tags.
      * @param tags Tags.
+     * @return Deletions count.
      * @throws IOException An I/O exception.
      */
-    public void delete(String[]... tags) throws IOException;
+    public long delete(String[]... tags) throws IOException;
+
+    /**
+     * Counts the objects associated to the given tag.
+     * @param tag A tag.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long count(String... tag) throws IOException;
+
+    /**
+     * Counts the objects associated to the given tag.
+     * @param tags Tags.
+     * @return Objects count.
+     * @throws IOException An I/O exception.
+     */
+    public long count(String[]... tags) throws IOException;
 }
