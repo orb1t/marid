@@ -18,7 +18,9 @@
 package org.marid.db;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Set;
+import org.marid.db.storage.Storage;
 
 /**
  * Marid data connection.
@@ -30,8 +32,9 @@ public interface DataConnection extends Closeable {
     /**
      * Opens the connection.
      * @return The open flag.
+     * @throws IOException An I/O exception.
      */
-    public boolean open();
+    public boolean open() throws IOException;
 
     /**
      * Checks whether the connection is opened.
@@ -44,13 +47,13 @@ public interface DataConnection extends Closeable {
      * @param type A storage type.
      * @return Check status.
      */
-    public boolean isStorageSupported(Class<? extends DataStorage> type);
+    public boolean isStorageSupported(Class<? extends Storage> type);
 
     /**
      * Get the supported storage type set.
      * @return Supported storage type set.
      */
-    public Set<Class<? extends DataStorage>> getSupportedStorageTypeSet();
+    public Set<Class<? extends Storage>> getSupportedStorageTypeSet();
 
     /**
      * Get a storage by type.

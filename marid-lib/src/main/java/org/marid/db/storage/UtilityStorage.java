@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.db;
+package org.marid.db.storage;
 
 /**
- * Data archive storage.
- * 
+ * Data utility storage.
+ *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public interface DataArchiveStorage {
+public interface UtilityStorage extends Storage {
 
 }
