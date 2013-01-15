@@ -20,6 +20,7 @@ package org.marid.db.storage;
 import java.io.IOException;
 import java.util.BitSet;
 import java.util.List;
+import javax.naming.Name;
 
 /**
  * Data storage interface.
@@ -33,7 +34,7 @@ public interface Storage {
      * @return Tag list.
      * @throws I/O exception.
      */
-    public List<String[]> getTags(String... root) throws IOException;
+    public List<String[]> getTags(Name root) throws IOException;
 
     /**
      * Get tag existence status.
@@ -41,7 +42,7 @@ public interface Storage {
      * @return Status.
      * @throws IOException An I/O exception.
      */
-    public boolean exists(String... tag) throws IOException;
+    public boolean exists(Name tag) throws IOException;
 
     /**
      * Checks whether all the tags exist.
@@ -49,7 +50,7 @@ public interface Storage {
      * @return Check status.
      * @throws IOException An I/O exception.
      */
-    public boolean exist(String[]... tags) throws IOException;
+    public boolean exist(List<Name> tags) throws IOException;
 
     /**
      * Checks whether the current user has read access to the specific tag.
@@ -57,7 +58,7 @@ public interface Storage {
      * @return Access status.
      * @throws IOException An I/O exception.
      */
-    public boolean hasReadAccess(String... tag) throws IOException;
+    public boolean hasReadAccess(Name tag) throws IOException;
 
     /**
      * Checks whether the current user has write access to a specific tag.
@@ -65,7 +66,7 @@ public interface Storage {
      * @return Access status.
      * @throws IOException An I/O exception.
      */
-    public boolean hasWriteAccess(String... tag) throws IOException;
+    public boolean hasWriteAccess(Name tag) throws IOException;
 
     /**
      * Checks whether the current user has purge access.
@@ -80,7 +81,7 @@ public interface Storage {
      * @return Access code.
      * @throws IOException An I/O exception.
      */
-    public BitSet getAccessCode(String... tag) throws IOException;
+    public BitSet getAccessCode(Name tag) throws IOException;
 
     /**
      * Purge all the data in the current storage.
@@ -94,7 +95,7 @@ public interface Storage {
      * @return Deletion result.
      * @throws IOException An I/O exception.
      */
-    public boolean delete(String... tag) throws IOException;
+    public boolean delete(Name tag) throws IOException;
 
     /**
      * Deletes all the data by the specific tags.
@@ -102,7 +103,7 @@ public interface Storage {
      * @return Deletions count.
      * @throws IOException An I/O exception.
      */
-    public long delete(String[]... tags) throws IOException;
+    public long delete(List<Name> tags) throws IOException;
 
     /**
      * Counts the objects associated to the given tag.
@@ -110,7 +111,7 @@ public interface Storage {
      * @return Objects count.
      * @throws IOException An I/O exception.
      */
-    public long count(String... tag) throws IOException;
+    public long count(Name tag) throws IOException;
 
     /**
      * Counts the objects associated to the given tag.
@@ -118,5 +119,5 @@ public interface Storage {
      * @return Objects count.
      * @throws IOException An I/O exception.
      */
-    public long count(String[]... tags) throws IOException;
+    public long count(List<Name> tags) throws IOException;
 }

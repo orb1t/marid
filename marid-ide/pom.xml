@@ -18,7 +18,7 @@
     <dependencies>
         <dependency>
             <groupId>org.marid</groupId>
-            <artifactId>marid-lib</artifactId>
+            <artifactId>marid-runtime</artifactId>
         </dependency>
 
         <dependency>

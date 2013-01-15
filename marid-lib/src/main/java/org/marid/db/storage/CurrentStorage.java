@@ -18,6 +18,8 @@
 package org.marid.db.storage;
 
 import java.io.IOException;
+import java.util.List;
+import javax.naming.Name;
 
 /**
  * Data current storage.
@@ -26,96 +28,28 @@ import java.io.IOException;
  */
 public interface CurrentStorage extends Storage {
     /**
-     * Get a double value by tag.
-     * @param tag Value tag.
-     * @return Double value.
-     */
-    public double getDouble(String... tag) throws IOException;
-
-    /**
-     * Get a float value by tag.
-     * @param tag Value tag.
-     * @return Float value.
-     */
-    public float getFloat(String... tag) throws IOException;
-
-    /**
-     * Get an int by tag.
-     * @param tag Value tag.
-     * @return Integer value.
+     * Get a record by name.
+     *
+     * @param tag Tag.
+     * @return Record.
      * @throws IOException An I/O exception.
      */
-    public int getInt(String... tag) throws IOException;
+    public List get(Name tag) throws IOException;
 
     /**
-     * Get long value by tag.
-     * @param tag Value tag.
-     * @return Long value.
+     * Get records by names.
+     *
+     * @param tags Tags.
+     * @return Records.
      * @throws IOException An I/O exception.
      */
-    public long getLong(String... tag) throws IOException;
+    public List<List> get(List<Name> tags) throws IOException;
 
     /**
-     * Get binary value by tag.
-     * @param tag Value tag.
-     * @return Binary value.
+     * Get all the records.
+     *
+     * @return Records.
      * @throws IOException An I/O exception.
      */
-    public byte[] getBinary(String... tag) throws IOException;
-
-    /**
-     * Get boolean value by tag.
-     * @param tag Value tag.
-     * @return Boolean value.
-     * @throws IOException An I/O exception.
-     */
-    public boolean getBoolean(String... tag) throws IOException;
-
-    /**
-     * Get array of doubles by tag.
-     * @param tag Value tag.
-     * @return Array of doubles.
-     * @throws IOException An I/O exception.
-     */
-    public double[] getDoubles(String... tag) throws IOException;
-
-    /**
-     * Get array of floats by tag.
-     * @param tag Value tag.
-     * @return Array of floats.
-     * @throws IOException An I/O exception.
-     */
-    public float[] getFloats(String... tag) throws IOException;
-
-    /**
-     * Get array of ints by tag.
-     * @param tag Value tag.
-     * @return Array of ints.
-     * @throws IOException An I/O exception.
-     */
-    public int[] getInts(String... tag) throws IOException;
-
-    /**
-     * Get array of longs by tag.
-     * @param tag Value tag.
-     * @return Array of longs.
-     * @throws IOException An I/O exception.
-     */
-    public long[] getLongs(String... tag) throws IOException;
-
-    /**
-     * Get a string by tag.
-     * @param tag Value tag.
-     * @return String.
-     * @throws IOException An I/O exception.
-     */
-    public String getString(String... tag) throws IOException;
-
-    /**
-     * Get array of strings by tag.
-     * @param tag Value tag.
-     * @return Array of string.
-     * @throws IOException An I/O exception.
-     */
-    public String[] getStrings(String... tag) throws IOException;
+    public List<List> get() throws IOException;
 }

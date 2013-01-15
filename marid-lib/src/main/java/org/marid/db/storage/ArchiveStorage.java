@@ -18,6 +18,8 @@
 package org.marid.db.storage;
 
 import java.io.IOException;
+import java.util.List;
+import javax.naming.Name;
 
 /**
  * Data archive storage.
@@ -25,964 +27,119 @@ import java.io.IOException;
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface ArchiveStorage extends HistoricalStorage {
-
     /**
-     * Inserts a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean insert(long ts, double v, String... tag) throws IOException;
-
-    /**
-     * Inserts values.
-     * @param t Timestamp array.
-     * @param v Values array.
-     * @param q Tag array.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int insert(long[] t, double[] v, String[]... q) throws IOException;
-
-    /**
-     * Inserts a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean insert(long ts, float v, String... tag) throws IOException;
-
-    /**
-     * Inserts values.
-     * @param t Timestamp array.
-     * @param v Values array.
-     * @param q Tag array.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int insert(long[] t, float[] v, String[]... q) throws IOException;
-
-    /**
-     * Inserts a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean insert(long ts, int v, String... tag) throws IOException;
-
-    /**
-     * Inserts values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tag array.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int insert(long[] t, int[] v, String[]... q) throws IOException;
-
-    /**
-     * Inserts a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean insert(long ts, long v, String... tag) throws IOException;
-
-    /**
-     * Inserts values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int insert(long[] t, long[] v, String[]... q) throws IOException;
-
-    /**
-     * Inserts a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean insert(long ts, byte[] v, String... tag) throws IOException;
-
-    /**
-     * Inserts values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int insert(long[] t, byte[][] v, String[]... q) throws IOException;
-
-    /**
-     * Inserts a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean insert(long ts, boolean v, String... tag) throws IOException;
-
-    /**
-     * Inserts values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int insert(long[] t, boolean[] v, String[]... q) throws IOException;
-
-    /**
-     * Inserts a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean insert(long t, double[] v, String... tag) throws IOException;
-
-    /**
-     * Inserts values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int insert(long[] t, double[][] v, String[]... q) throws IOException;
-
-    /**
-     * Inserts a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion value.
-     * @throws IOException An I/O exception.
-     */
-    public boolean insert(long t, float[] v, String... tag) throws IOException;
-
-    /**
-     * Inserts values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param tag Tag array.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int insert(long[] t, float[][] v, String[]... q) throws IOException;
-
-    /**
-     * Inserts a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean insert(long t, int[] v, String... tag) throws IOException;
-
-    /**
-     * Inserts values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param tag Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int insert(long[] t, int[][] v, String[]... tag) throws IOException;
-
-    /**
-     * Inserts a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean insert(long t, long[] v, String... tag) throws IOException;
-
-    /**
-     * Inserts values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int insert(long[] t, long[][] v, String[]... q) throws IOException;
-
-    /**
-     * Inserts a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean insert(long t, String[] v, String... tag) throws IOException;
-
-    /**
-     * Inserts values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int insert(long[] t, String[][] v, String[]... q) throws IOException;
-
-    /**
-     * Inserts a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean insert(long t, String v, String... tag) throws IOException;
-
-    /**
-     * Inserts values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int insert(long[] t, String[] v, String[]... q) throws IOException;
-
-    /**
-     * Appends a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean append(long ts, double v, String... tag) throws IOException;
-
-    /**
-     * Appends values.
-     * @param t Timestamp array.
-     * @param v Values array.
-     * @param q Tag array.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int append(long[] t, double[] v, String[]... q) throws IOException;
-
-    /**
-     * Appends a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean append(long ts, float v, String... tag) throws IOException;
-
-    /**
-     * Appends values.
-     * @param t Timestamp array.
-     * @param v Values array.
-     * @param q Tag array.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int append(long[] t, float[] v, String[]... q) throws IOException;
-
-    /**
-     * Appends a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean append(long ts, int v, String... tag) throws IOException;
-
-    /**
-     * Appends values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tag array.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int append(long[] t, int[] v, String[]... q) throws IOException;
-
-    /**
-     * Appends a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean append(long ts, long v, String... tag) throws IOException;
-
-    /**
-     * Appends values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int append(long[] t, long[] v, String[]... q) throws IOException;
-
-    /**
-     * Appends a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean append(long ts, byte[] v, String... tag) throws IOException;
-
-    /**
-     * Appends values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int append(long[] t, byte[][] v, String[]... q) throws IOException;
-
-    /**
-     * Appends a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean append(long ts, boolean v, String... tag) throws IOException;
-
-    /**
-     * Appends values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int append(long[] t, boolean[] v, String[]... q) throws IOException;
-
-    /**
-     * Appends a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean append(long t, double[] v, String... tag) throws IOException;
-
-    /**
-     * Appends values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int append(long[] t, double[][] v, String[]... q) throws IOException;
-
-    /**
-     * Appends a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion value.
-     * @throws IOException An I/O exception.
-     */
-    public boolean append(long t, float[] v, String... tag) throws IOException;
-
-    /**
-     * Appends values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param tag Tag array.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int append(long[] t, float[][] v, String[]... q) throws IOException;
-
-    /**
-     * Appends a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean append(long t, int[] v, String... tag) throws IOException;
-
-    /**
-     * Appends values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param tag Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int append(long[] t, int[][] v, String[]... tag) throws IOException;
-
-    /**
-     * Appends a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean append(long t, long[] v, String... tag) throws IOException;
-
-    /**
-     * Appends values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int append(long[] t, long[][] v, String[]... q) throws IOException;
-
-    /**
-     * Appends a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean append(long t, String[] v, String... tag) throws IOException;
-
-    /**
-     * Appends values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int append(long[] t, String[][] v, String[]... q) throws IOException;
-
-    /**
-     * Appends a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean append(long t, String v, String... tag) throws IOException;
-
-    /**
-     * Appends values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Insertions count.
-     * @throws IOException An I/O exception.
-     */
-    public int append(long[] t, String[] v, String[]... q) throws IOException;
-
-    /**
-     * Merges a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean merge(long ts, double v, String... tag) throws IOException;
-
-    /**
-     * Merges values.
-     * @param t Timestamp array.
-     * @param v Values array.
-     * @param q Tag array.
+     * Inserts rows of data.
+     *
+     * @param rows Rows.
      * @return Updates count.
      * @throws IOException An I/O exception.
      */
-    public int merge(long[] t, double[] v, String[]... q) throws IOException;
+    public int insert(List<List> rows) throws IOException;
 
     /**
-     * Merges a value.
+     * Appends rows of data.
+     *
+     * @param rows Rows.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int append(List<List> rows) throws IOException;
+
+    /**
+     * Updates rows of data.
+     *
+     * @param rows Rows.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int update(List<List> rows) throws IOException;
+
+    /**
+     * Updates rows of data.
+     *
+     * @param rows Rows.
+     * @return Updates count.
+     * @throws IOException An I/O exception.
+     */
+    public int merge(List<List> rows) throws IOException;
+
+    /**
+     * Queries the DB.
+     *
+     * @param tag Tag.
      * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
+     * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public boolean merge(long ts, float v, String... tag) throws IOException;
+    public List<List> query(Name tag, long ts) throws IOException;
 
     /**
-     * Merges values.
-     * @param t Timestamp array.
-     * @param v Values array.
-     * @param q Tag array.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int merge(long[] t, float[] v, String[]... q) throws IOException;
-
-    /**
-     * Merges a value.
+     * Queries the DB.
+     *
+     * @param tags Tag.
      * @param ts Timestamp.
-     * @param v Value.
+     * @return Data rows.
+     * @throws IOException An I/O exception.
+     */
+    public List<List> query(List<Name> tags, long ts) throws IOException;
+
+    /**
+     * Queries the DB after the given timestamp.
+     *
      * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean merge(long ts, int v, String... tag) throws IOException;
-
-    /**
-     * Merges values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tag array.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int merge(long[] t, int[] v, String[]... q) throws IOException;
-
-    /**
-     * Merges a value.
      * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
+     * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public boolean merge(long ts, long v, String... tag) throws IOException;
+    public List<List> queryAfter(Name tag, long ts) throws IOException;
 
     /**
-     * Merges values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int merge(long[] t, long[] v, String[]... q) throws IOException;
-
-    /**
-     * Merges a value.
+     * Queries the DB after the given timestamp.
+     *
+     * @param tags Tag.
      * @param ts Timestamp.
-     * @param v Value.
+     * @return Data rows.
+     * @throws IOException An I/O exception.
+     */
+    public List<List> queryAfter(List<Name> tags, long ts) throws IOException;
+
+    /**
+     * Queries the DB before the given timestamp.
+     *
      * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean merge(long ts, byte[] v, String... tag) throws IOException;
-
-    /**
-     * Merges values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int merge(long[] t, byte[][] v, String[]... q) throws IOException;
-
-    /**
-     * Merges a value.
      * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
+     * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public boolean merge(long ts, boolean v, String... tag) throws IOException;
+    public List<List> queryBefore(Name tag, long ts) throws IOException;
 
     /**
-     * Merges values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int merge(long[] t, boolean[] v, String[]... q) throws IOException;
-
-    /**
-     * Merges a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean merge(long t, double[] v, String... tag) throws IOException;
-
-    /**
-     * Merges values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int merge(long[] t, double[][] v, String[]... q) throws IOException;
-
-    /**
-     * Merges a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion value.
-     * @throws IOException An I/O exception.
-     */
-    public boolean merge(long t, float[] v, String... tag) throws IOException;
-
-    /**
-     * Merges values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param tag Tag array.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int merge(long[] t, float[][] v, String[]... q) throws IOException;
-
-    /**
-     * Merges a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean merge(long t, int[] v, String... tag) throws IOException;
-
-    /**
-     * Merges values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param tag Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int merge(long[] t, int[][] v, String[]... tag) throws IOException;
-
-    /**
-     * Merges a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean merge(long t, long[] v, String... tag) throws IOException;
-
-    /**
-     * Merges values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int merge(long[] t, long[][] v, String[]... q) throws IOException;
-
-    /**
-     * Merges a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean merge(long t, String[] v, String... tag) throws IOException;
-
-    /**
-     * Merges values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int merge(long[] t, String[][] v, String[]... q) throws IOException;
-
-    /**
-     * Merges a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean merge(long t, String v, String... tag) throws IOException;
-
-    /**
-     * Merges values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int merge(long[] t, String[] v, String[]... q) throws IOException;
-
-    /**
-     * Updates a value.
+     * Queries the DB before the given timestamp.
+     *
+     * @param tags Tag.
      * @param ts Timestamp.
-     * @param v Value.
+     * @return Data rows.
+     * @throws IOException An I/O exception.
+     */
+    public List<List> queryBefore(List<Name> tags, long ts) throws IOException;
+
+    /**
+     * Queries the DB between the given timestamps.
      * @param tag Tag.
-     * @return Insertion result.
+     * @param ts Start timestamp.
+     * @param tf Final timestamp.
+     * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public boolean update(long ts, double v, String... tag) throws IOException;
+    public List<List> query(Name tag, long ts, long tf) throws IOException;
 
     /**
-     * Updates values.
-     * @param t Timestamp array.
-     * @param v Values array.
-     * @param q Tag array.
-     * @return Updates count.
+     * Queries the DB between the given timestamps.
+     * @param tl Tags.
+     * @param ts Start timestamp.
+     * @param tf Final timestamp.
+     * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public int update(long[] t, double[] v, String[]... q) throws IOException;
-
-    /**
-     * Updates a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean update(long ts, float v, String... tag) throws IOException;
-
-    /**
-     * Updates values.
-     * @param t Timestamp array.
-     * @param v Values array.
-     * @param q Tag array.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int update(long[] t, float[] v, String[]... q) throws IOException;
-
-    /**
-     * Updates a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean update(long ts, int v, String... tag) throws IOException;
-
-    /**
-     * Updates values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tag array.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int update(long[] t, int[] v, String[]... q) throws IOException;
-
-    /**
-     * Updates a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean update(long ts, long v, String... tag) throws IOException;
-
-    /**
-     * Updates values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int update(long[] t, long[] v, String[]... q) throws IOException;
-
-    /**
-     * Updates a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean update(long ts, byte[] v, String... tag) throws IOException;
-
-    /**
-     * Updates values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int update(long[] t, byte[][] v, String[]... q) throws IOException;
-
-    /**
-     * Updates a value.
-     * @param ts Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean update(long ts, boolean v, String... tag) throws IOException;
-
-    /**
-     * Updates values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int update(long[] t, boolean[] v, String[]... q) throws IOException;
-
-    /**
-     * Updates a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean update(long t, double[] v, String... tag) throws IOException;
-
-    /**
-     * Updates values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int update(long[] t, double[][] v, String[]... q) throws IOException;
-
-    /**
-     * Updates a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion value.
-     * @throws IOException An I/O exception.
-     */
-    public boolean update(long t, float[] v, String... tag) throws IOException;
-
-    /**
-     * Updates values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param tag Tag array.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int update(long[] t, float[][] v, String[]... q) throws IOException;
-
-    /**
-     * Updates a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean update(long t, int[] v, String... tag) throws IOException;
-
-    /**
-     * Updates values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param tag Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int update(long[] t, int[][] v, String[]... tag) throws IOException;
-
-    /**
-     * Updates a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean update(long t, long[] v, String... tag) throws IOException;
-
-    /**
-     * Updates values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int update(long[] t, long[][] v, String[]... q) throws IOException;
-
-    /**
-     * Updates a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean update(long t, String[] v, String... tag) throws IOException;
-
-    /**
-     * Updates values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int update(long[] t, String[][] v, String[]... q) throws IOException;
-
-    /**
-     * Updates a value.
-     * @param t Timestamp.
-     * @param v Value.
-     * @param tag Tag.
-     * @return Insertion result.
-     * @throws IOException An I/O exception.
-     */
-    public boolean update(long t, String v, String... tag) throws IOException;
-
-    /**
-     * Updates values.
-     * @param t Timestamp array.
-     * @param v Value array.
-     * @param q Tags.
-     * @return Updates count.
-     * @throws IOException An I/O exception.
-     */
-    public int update(long[] t, String[] v, String[]... q) throws IOException;
+    public List<List> query(List<Name> tl, long ts, long tf) throws IOException;
 }
