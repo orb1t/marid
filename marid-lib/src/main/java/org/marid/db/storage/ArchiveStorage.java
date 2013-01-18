@@ -19,6 +19,7 @@ package org.marid.db.storage;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import javax.naming.Name;
 
 /**
@@ -84,6 +85,15 @@ public interface ArchiveStorage extends HistoricalStorage {
     public List<List> query(List<Name> tags, long ts) throws IOException;
 
     /**
+     * Queries the DB.
+     *
+     * @param ss Snapshot.
+     * @return Data rows.
+     * @throws IOException An I/O exception.
+     */
+    public List<List> query(Map<Name, Long> ss) throws IOException;
+
+    /**
      * Queries the DB after the given timestamp.
      *
      * @param tag Tag.
@@ -102,6 +112,15 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @throws IOException An I/O exception.
      */
     public List<List> queryAfter(List<Name> tags, long ts) throws IOException;
+
+    /**
+     * Queries the DB after.
+     *
+     * @param ss Snapshot.
+     * @return Data rows.
+     * @throws IOException An I/O exception.
+     */
+    public List<List> queryAfter(Map<Name, Long> ss) throws IOException;
 
     /**
      * Queries the DB before the given timestamp.
@@ -124,22 +143,56 @@ public interface ArchiveStorage extends HistoricalStorage {
     public List<List> queryBefore(List<Name> tags, long ts) throws IOException;
 
     /**
-     * Queries the DB between the given timestamps.
-     * @param tag Tag.
-     * @param ts Start timestamp.
-     * @param tf Final timestamp.
+     * Queries the DB before.
+     *
+     * @param ss Snapshot.
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> query(Name tag, long ts, long tf) throws IOException;
+    public List<List> queryBefore(Map<Name, Long> ss) throws IOException;
+
+    /**
+     * Queries the DB between the given timestamps.
+     * @param tag Tag.
+     * @param ts Timestamps.
+     * @return Data rows.
+     * @throws IOException An I/O exception.
+     */
+    public List<List> query(Name tag, long... ts) throws IOException;
 
     /**
      * Queries the DB between the given timestamps.
      * @param tl Tags.
-     * @param ts Start timestamp.
-     * @param tf Final timestamp.
+     * @param ts Timestamps.
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> query(List<Name> tl, long ts, long tf) throws IOException;
+    public List<List> query(List<Name> tl, long... ts) throws IOException;
+
+    /**
+     * Queries the DB between.
+     *
+     * @param ss Snapshots.
+     * @return Data rows.
+     * @throws IOException An I/O exception.
+     */
+    public List<List> query(Map<Name, Long>... ss) throws IOException;
+
+    /**
+     * Get the last snapshot.
+     *
+     * @param tags Tags.
+     * @return Snapshot.
+     * @throws IOException An I/O exception.
+     */
+    public Map<Name, Long> getLastSnapshot(List<Name> tags) throws IOException;
+
+    /**
+     * Get the first snapshot.
+     *
+     * @param tags Tags.
+     * @return Snapshot.
+     * @throws IOException An I/O exception.
+     */
+    public Map<Name, Long> getFirstSnapshot(List<Name> tags) throws IOException;
 }

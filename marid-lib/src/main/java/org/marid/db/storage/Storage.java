@@ -34,7 +34,7 @@ public interface Storage {
      * @return Tag list.
      * @throws I/O exception.
      */
-    public List<String[]> getTags(Name root) throws IOException;
+    public List<Name> getTags(Name root) throws IOException;
 
     /**
      * Get tag existence status.
