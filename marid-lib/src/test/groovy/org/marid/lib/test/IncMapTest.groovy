@@ -79,6 +79,11 @@ class IncMapTest extends GroovyTestCase {
             def b = testMap.entrySet().toArray()[i];
             assert b.value == a1.value - 1;
         }
+        def k4 = new CompositeName("d");
+        def e4 = new AbstractMap.SimpleEntry(k4, 41L);
+        incMap.entrySet().add(e4);
+        assert incMap[k4] == 41;
+        assert testMap[k4] == 40;
     }
 }
 
