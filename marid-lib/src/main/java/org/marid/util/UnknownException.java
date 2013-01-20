@@ -15,29 +15,40 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid;
-
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Random;
-import junit.framework.TestCase;
+package org.marid.util;
 
 /**
- * Miscellaneous test.
+ * Unknown exception class.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class MiscTest extends TestCase {
+public class UnknownException extends Exception {
 
-    public void test1() {
-        Random r = new Random();
-        BitSet bs = new BitSet(8);
-        for (int i = 0; i < 8; i++) {
-            bs.set(i, true);
-        }
-        System.out.println(bs);
-        System.out.println(Arrays.toString(bs.toByteArray()));
-        byte b = -1;
-        System.out.println(b & 0b10000000);
+    private final String exceptionClassName;
+
+    /**
+     * Default constructor.
+     */
+    public UnknownException() {
+        this(null, null, null);
+    }
+
+    /**
+     * Constructs an unknown exception.
+     * @param message Exception message.
+     * @param cause Cause.
+     * @param className Class name.
+     */
+    public UnknownException(String message, Throwable cause, String className) {
+        super(message, cause, false, false);
+        exceptionClassName = className;
+    }
+
+    /**
+     * Get the exception class name.
+     * @return Exception class name.
+     */
+    public String getExceptionClassName() {
+        return exceptionClassName;
     }
 }

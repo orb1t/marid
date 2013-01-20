@@ -30,9 +30,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+import org.marid.util.UnknownException;
 
 /**
  * Log recordset.
@@ -42,6 +45,13 @@ import java.util.logging.LogRecord;
 public class LogRecordSet implements Externalizable {
 
     private final ArrayList<LogRecord> logRecordList;
+
+    /**
+     * Default constructor.
+     */
+    public LogRecordSet() {
+        this(Collections.<LogRecord>emptyList());
+    }
 
     /**
      * Constructs a new log record set.
@@ -62,20 +72,25 @@ public class LogRecordSet implements Externalizable {
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeInt(logRecordList.size());
-        byte state = 0;
         for (LogRecord r : logRecordList) {
             out.writeLong(r.getMillis());
             out.writeLong(r.getSequenceNumber());
             out.writeInt(r.getThreadID());
-            state |= r.getLevel() != null              ? 0b10000000 : 0;
-            state |= r.getMessage() != null            ? 0b01000000 : 0;
-            state |= r.getSourceClassName() != null    ? 0b00100000 : 0;
-            state |= r.getSourceMethodName() != null   ? 0b00010000 : 0;
-            state |= r.getLoggerName() != null         ? 0b00001000 : 0;
-            state |= r.getResourceBundleName() != null ? 0b00000100 : 0;
-            state |= r.getParameters() != null         ? 0b00000010 : 0;
-            state |= r.getThrown() != null             ? 0b00000001 : 0;
-            out.writeByte(state);
+            BitSet bs = new BitSet(8);
+            bs.set(0, r.getLevel() != null);
+            bs.set(1, r.getMessage() != null);
+            bs.set(2, r.getSourceClassName() != null);
+            bs.set(3, r.getSourceMethodName() != null);
+            bs.set(4, r.getLoggerName() != null);
+            bs.set(5, r.getResourceBundleName() != null);
+            bs.set(6, r.getParameters() != null);
+            bs.set(7, r.getThrown() != null);
+            byte[] buf = bs.toByteArray();
+            if (buf.length == 0) {
+                out.write(0);
+            } else {
+                out.write(buf[0]);
+            }
             if (r.getLevel() != null) {
                 out.writeUTF(r.getLevel().getName());
             }
@@ -144,12 +159,7 @@ public class LogRecordSet implements Externalizable {
                 }
             }
             if (r.getThrown() != null) {
-                Throwable thrown = r.getThrown();
-                boolean hasMessage = thrown.getMessage() != null;
-                out.writeBoolean(hasMessage);
-                if (hasMessage) {
-                    out.writeUTF(thrown.getMessage());
-                }
+                writeThrown(out, r.getThrown());
             }
         }
     }
@@ -161,23 +171,14 @@ public class LogRecordSet implements Externalizable {
             long millis = in.readLong();
             long sequenceNumber = in.readLong();
             int threadId = in.readInt();
-            byte state = in.readByte();
-            boolean hasLevel =                  (state & 0b10000000) > 0;
-            boolean hasMessage =                (state & 0b01000000) > 0;
-            boolean hasSourceClassName =        (state & 0b00100000) > 0;
-            boolean hasSourceMethodName =       (state & 0b00010000) > 0;
-            boolean hasLoggerName =             (state & 0b00001000) > 0;
-            boolean hasResourceBundleName =     (state & 0b00000100) > 0;
-            boolean hasParameters =             (state & 0b00000010) > 0;
-            boolean hasThrown =                 (state & 0b00000001) > 0;
-            Level level = hasLevel ? Level.parse(in.readUTF()) : Level.OFF;
-            String message = hasMessage ? in.readUTF() : null;
-            String sourceClassName = hasSourceClassName ? in.readUTF() : null;
-            String sourceMethodName = hasSourceMethodName ? in.readUTF() : null;
-            String loggerName = hasLoggerName ? in.readUTF() : null;
-            String rbName = hasResourceBundleName ? in.readUTF() : null;
+            BitSet bs = BitSet.valueOf(new byte[] {in.readByte()});
+            Level level = bs.get(0) ? Level.parse(in.readUTF()) : Level.OFF;
+            String message = bs.get(1) ? in.readUTF() : null;
+            String sourceClassName = bs.get(2) ? in.readUTF() : null;
+            String sourceMethodName = bs.get(3) ? in.readUTF() : null;
+            String loggerName = bs.get(4) ? in.readUTF() : null;
+            String rbName = bs.get(5) ? in.readUTF() : null;
             Object[] params = null;
-            Throwable thrown = null;
             LogRecord r = new LogRecord(level, message);
             r.setLoggerName(loggerName);
             r.setResourceBundleName(rbName);
@@ -186,7 +187,7 @@ public class LogRecordSet implements Externalizable {
             r.setThreadID(threadId);
             r.setSequenceNumber(sequenceNumber);
             r.setMillis(millis);
-            if (hasParameters) {
+            if (bs.get(6)) {
                 int len = in.readInt();
                 byte[] nsb = new byte[in.readInt()];
                 in.readFully(nsb);
@@ -220,13 +221,58 @@ public class LogRecordSet implements Externalizable {
                 }
             }
             r.setParameters(params);
-            if (hasThrown) {
-                String msg = in.readBoolean() ? in.readUTF() : null;
+            if (bs.get(7)) {
+                r.setThrown(readThrown(in));
             }
+            logRecordList.add(r);
         }
     }
 
-    private static void wt(ObjectOutput out, Throwable th) throws IOException {
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        for (LogRecord r : logRecordList) {
+            hash = 31 * hash + hashCode(r);
+        }
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ArrayList<LogRecord> l1 = logRecordList;
+        ArrayList<LogRecord> l2 = ((LogRecordSet)obj).logRecordList;
+        if (l1.size() != l2.size()) {
+            return false;
+        }
+        for (int i = 0; i < l1.size(); i++) {
+            if (!equals(l1.get(i), l2.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(getClass().getSimpleName());
+        sb.append('(');
+        sb.append(logRecordList.size());
+        sb.append(')');
+        return sb.toString();
+    }
+
+    void writeThrown(ObjectOutput out, Throwable th) throws IOException {
+        boolean hasCause = th.getCause() != null;
+        out.writeBoolean(hasCause);
+        if (hasCause) {
+            writeThrown(out, th.getCause());
+        }
         String msg = th.getMessage();
         boolean hasMessage = msg != null;
         out.writeBoolean(hasMessage);
@@ -238,11 +284,16 @@ public class LogRecordSet implements Externalizable {
         out.writeInt(stes.length);
         for (StackTraceElement ste : stes) {
             out.writeInt(ste.getLineNumber());
-            byte state = 0;
-            state |= ste.getFileName() != null   ? 0b10000000 : 0;
-            state |= ste.getClassName() != null  ? 0b01000000 : 0;
-            state |= ste.getMethodName() != null ? 0b00100000 : 0;
-            out.writeByte(state);
+            BitSet bs = new BitSet(3);
+            bs.set(0, ste.getFileName() != null);
+            bs.set(1, ste.getClassName() != null);
+            bs.set(2, ste.getMethodName() != null);
+            byte[] buf = bs.toByteArray();
+            if (buf.length == 0) {
+                out.write(0);
+            } else {
+                out.write(buf[0]);
+            }
             if (ste.getFileName() != null) {
                 out.writeUTF(ste.getFileName());
             }
@@ -256,17 +307,17 @@ public class LogRecordSet implements Externalizable {
         Throwable[] suppresseds = th.getSuppressed();
         out.writeInt(suppresseds.length);
         for (Throwable suppressed : suppresseds) {
-            wt(out, suppressed);
-        }
-        boolean hasCause = th.getCause() != null;
-        out.writeBoolean(hasCause);
-        if (hasCause) {
-            wt(out, th.getCause());
+            writeThrown(out, suppressed);
         }
     }
 
     @SuppressWarnings("UseSpecificCatch")
-    private static Throwable rt(ObjectInput in) throws IOException {
+    Throwable readThrown(ObjectInput in) throws IOException {
+        boolean hasCause = in.readBoolean();
+        Throwable cause = null;
+        if (hasCause) {
+            cause = readThrown(in);
+        }
         String msg = null;
         boolean hasMessage = in.readBoolean();
         if (hasMessage) {
@@ -282,79 +333,131 @@ public class LogRecordSet implements Externalizable {
                 c = Class.forName(thc, true,
                         Thread.currentThread().getContextClassLoader());
             }
-            try {
-                th = (Throwable)c.getDeclaredConstructor(
-                        String.class).newInstance(msg);
-            } catch (Exception x) {
-                try {
-                    th = (Throwable)c.getDeclaredConstructor(String.class,
-                                Throwable.class).newInstance(msg, null);
-                } catch (Exception y) {
+            if (hasMessage) {
+                if (hasCause) {
+                    try {
+                        th = (Throwable)c.getDeclaredConstructor(String.class,
+                                Throwable.class).newInstance(msg, cause);
+                    } catch (Exception x) {
+                        th = (Throwable)c.getDeclaredConstructor(
+                                String.class).newInstance(msg);
+                        th.initCause(cause);
+                    }
+                } else {
                     try {
                         th = (Throwable)c.getDeclaredConstructor(
-                                Throwable.class).newInstance((Throwable)null);
-                    } catch (Exception z) {
-                        th = (Throwable)c.newInstance();
+                                String.class).newInstance(msg);
+                    } catch (Exception x) {
+                        th = (Throwable)c.getDeclaredConstructor(String.class,
+                                Throwable.class).newInstance(msg, cause);
                     }
+                }
+            } else {
+                if (hasCause) {
+                    try {
+                        th = (Throwable)c.getDeclaredConstructor(
+                                Throwable.class).newInstance(cause);
+                    } catch (Exception x) {
+                        th = (Throwable)c.newInstance();
+                        th.initCause(cause);
+                    }
+                } else {
+                    th = (Throwable)c.newInstance();
                 }
             }
         } catch (Exception x) {
-            th = new UnknownException(msg, thc);
+            th = new UnknownException(msg, cause, thc);
         }
         StackTraceElement[] stes = new StackTraceElement[in.readInt()];
         for (int i = 0; i < stes.length; i++) {
             int ln = in.readInt();
-            byte state = in.readByte();
-            boolean hasFileName =   (state & 0b10000000) > 0;
-            boolean hasClassName =  (state & 0b01000000) > 0;
-            boolean hasMethodName = (state & 0b00100000) > 0;
-            String fn = hasFileName ? in.readUTF() : null;
-            String cn = hasClassName ? in.readUTF() : null;
-            String mn = hasMethodName ? in.readUTF() : null;
+            BitSet bs = BitSet.valueOf(new byte[] {in.readByte()});
+            String fn = bs.get(0) ? in.readUTF() : null;
+            String cn = bs.get(1) ? in.readUTF() : null;
+            String mn = bs.get(2) ? in.readUTF() : null;
             stes[i] = new StackTraceElement(cn, mn, fn, ln);
         }
         th.setStackTrace(stes);
         int suppressedCount = in.readInt();
         for (int i = 0; i < suppressedCount; i++) {
-            th.addSuppressed(rt(in));
-        }
-        boolean hasCause = in.readBoolean();
-        if (hasCause) {
-            th.initCause(rt(in));
+            th.addSuppressed(readThrown(in));
         }
         return th;
     }
 
-    /**
-     * Unknown exception.
-     */
-    public static final class UnknownException extends Exception {
+    boolean equals(LogRecord r1, LogRecord r2) {
+        return
+                Objects.equals(r1.getLevel(), r2.getLevel()) &&
+                Objects.equals(r1.getLoggerName(), r2.getLoggerName()) &&
+                Objects.equals(r1.getMessage(), r2.getMessage()) &&
+                Objects.equals(r1.getMillis(), r2.getMillis()) &&
+                Objects.deepEquals(r1.getParameters(), r2.getParameters()) &&
+                Objects.equals(r1.getResourceBundleName(),
+                    r2.getResourceBundleName()) &&
+                Objects.equals(r1.getSequenceNumber(),
+                    r2.getSequenceNumber()) &&
+                Objects.equals(r1.getSourceClassName(),
+                    r2.getSourceClassName()) &&
+                Objects.equals(r1.getSourceMethodName(),
+                    r2.getSourceMethodName()) &&
+                Objects.equals(r1.getThreadID(), r2.getThreadID()) &&
+                equals(r1.getThrown(), r2.getThrown());
+    }
 
-        private final String exceptionClassName;
-
-        /**
-         * Default constructor.
-         */
-        public UnknownException() {
-            this(null, null);
+    boolean equals(Throwable t1, Throwable t2) {
+        if (t1 == t2) {
+            return true;
         }
-
-        /**
-         * Constructs an unknown exception.
-         * @param msg Message.
-         * @param cl Exception class.
-         */
-        public UnknownException(String msg, String cl) {
-            super(msg, null, false, false);
-            exceptionClassName = cl;
+        if (t1 == null || t2 == null) {
+            return false;
         }
-
-        /**
-         * Get the exception class name.
-         * @return Exception class name.
-         */
-        public String getExceptionClassName() {
-            return exceptionClassName;
+        if (!Objects.equals(t1.getMessage(), t2.getMessage())) {
+            return false;
         }
+        if (!Objects.deepEquals(t1.getStackTrace(), t2.getStackTrace())) {
+            return false;
+        }
+        Throwable[] sps1 = t1.getSuppressed();
+        Throwable[] sps2 = t2.getSuppressed();
+        if (sps1.length != sps2.length) {
+            return false;
+        }
+        for (int i = 0; i < sps1.length; i++) {
+            if (!equals(sps1[i], sps2[i])) {
+                return false;
+            }
+        }
+        return equals(t1.getCause(), t2.getCause());
+    }
+
+    int hashCode(LogRecord r) {
+        int hash = 1;
+        hash = 31 * hash + Objects.hash(
+                r.getLevel(),
+                r.getLoggerName(),
+                r.getMessage(),
+                r.getMillis(),
+                r.getResourceBundleName(),
+                r.getSequenceNumber(),
+                r.getSourceClassName(),
+                r.getSourceMethodName(),
+                r.getThreadID());
+        hash = 31 * hash + Objects.hash(r.getParameters());
+        hash = 31 * hash + hashCode(r.getThrown());
+        return hash;
+    }
+
+    int hashCode(Throwable t) {
+        if (t == null) {
+            return 0;
+        }
+        int hash = 1;
+        hash = 31 * hash + Objects.hashCode(t.getMessage());
+        hash = 31 * hash + (t.getCause() != null ? hashCode(t.getCause()) : 0);
+        for (Throwable th : t.getSuppressed()) {
+            hash = 31 * hash + hashCode(th);
+        }
+        hash = 31 * hash + Objects.hash((Object[])t.getStackTrace());
+        return hash;
     }
 }

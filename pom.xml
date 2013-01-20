@@ -136,6 +136,11 @@
                         <testSource>1.7</testSource>
                         <testTarget>1.7</testTarget>
                         <showWarnings>true</showWarnings>
+                        <compilerArguments>
+                            <Xlint:unchecked/>
+                        </compilerArguments>
+                        <showDeprecation>true</showDeprecation>
+                        <forceJavacCompilerUse>true</forceJavacCompilerUse>
                     </configuration>
                 </plugin>
 

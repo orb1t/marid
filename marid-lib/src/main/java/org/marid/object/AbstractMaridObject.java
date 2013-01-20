@@ -147,6 +147,7 @@ public abstract class AbstractMaridObject implements MaridObject {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends MaridObject> T getRoot(Class<T> c) {
         for (T o = (T) this;; o = (T) o.getParent()) {
             if (o.getParent() == null || c.isInstance(o)) {

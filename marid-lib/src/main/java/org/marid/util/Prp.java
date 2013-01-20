@@ -624,6 +624,7 @@ public interface Prp {
          * @param def Default value.
          * @return Set value.
          */
+        @SuppressWarnings("unchecked")
         public static Set getSet(Object v, Object def) {
             if (v == null) {
                 v = def;
@@ -675,6 +676,7 @@ public interface Prp {
          * @param def Default value.
          * @return List value.
          */
+        @SuppressWarnings("unchecked")
         public static List getList(Object v, Object def) {
             if (v == null) {
                 v = def;
@@ -740,6 +742,7 @@ public interface Prp {
          * @param def Default value.
          * @return Path value.
          */
+        @SuppressWarnings("unchecked")
         public static Path getPath(Object v, Object def) {
             if (v == null) {
                 v = def;

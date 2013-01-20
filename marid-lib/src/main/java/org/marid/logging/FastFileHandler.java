@@ -52,6 +52,7 @@ public class FastFileHandler extends Handler {
      * @throws IllegalAccessException An exception when it is not possible to
      * acces to a formatter or filter class.
      */
+    @SuppressWarnings("unchecked")
     public FastFileHandler() throws InstantiationException,
             ClassNotFoundException, IllegalAccessException {
         super.setErrorManager(new FastErrorManager());
