@@ -92,14 +92,19 @@ public abstract class DataRecord<T> implements Externalizable {
     }
 
     /**
-     * Get the record code.
-     * @return Record code.
+     * Get the value.
+     * @return Value.
      */
-    public abstract byte getCode();
+    public abstract T getValue();
+
+    /**
+     * Set a new value.
+     * @param val New value.
+     */
+    public abstract void setValue(T val);
 
     @Override
-    public void readExternal(ObjectInput in) throws
-            IOException, ClassNotFoundException {
+    public void readExternal(ObjectInput in) throws IOException {
         tag = in.readUTF();
         time = in.readLong();
     }
