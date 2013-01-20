@@ -19,7 +19,7 @@ package org.marid.db.storage;
 
 import java.io.IOException;
 import java.util.List;
-import javax.naming.Name;
+import org.marid.db.data.DataRecord;
 
 /**
  * Data current storage.
@@ -34,7 +34,7 @@ public interface CurrentStorage extends Storage {
      * @return Record.
      * @throws IOException An I/O exception.
      */
-    public List get(Name tag) throws IOException;
+    DataRecord get(String tag) throws IOException;
 
     /**
      * Get records by names.
@@ -43,7 +43,7 @@ public interface CurrentStorage extends Storage {
      * @return Records.
      * @throws IOException An I/O exception.
      */
-    public List<List> get(List<Name> tags) throws IOException;
+    List<DataRecord> get(List<String> tags) throws IOException;
 
     /**
      * Get all the records.
@@ -51,5 +51,5 @@ public interface CurrentStorage extends Storage {
      * @return Records.
      * @throws IOException An I/O exception.
      */
-    public List<List> get() throws IOException;
+    List<DataRecord> get() throws IOException;
 }

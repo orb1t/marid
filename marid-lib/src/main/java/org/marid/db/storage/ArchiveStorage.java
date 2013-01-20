@@ -20,7 +20,7 @@ package org.marid.db.storage;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import javax.naming.Name;
+import org.marid.db.data.DataRecord;
 
 /**
  * Data archive storage.
@@ -35,7 +35,7 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Updates count.
      * @throws IOException An I/O exception.
      */
-    public int insert(List<List> rows) throws IOException;
+    int insert(List<DataRecord> rows) throws IOException;
 
     /**
      * Appends rows of data.
@@ -44,7 +44,7 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Updates count.
      * @throws IOException An I/O exception.
      */
-    public int append(List<List> rows) throws IOException;
+    int append(List<DataRecord> rows) throws IOException;
 
     /**
      * Updates rows of data.
@@ -53,7 +53,7 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Updates count.
      * @throws IOException An I/O exception.
      */
-    public int update(List<List> rows) throws IOException;
+    int update(List<DataRecord> rows) throws IOException;
 
     /**
      * Updates rows of data.
@@ -62,7 +62,7 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Updates count.
      * @throws IOException An I/O exception.
      */
-    public int merge(List<List> rows) throws IOException;
+    int merge(List<DataRecord> rows) throws IOException;
 
     /**
      * Queries the DB.
@@ -72,7 +72,7 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> query(Name tag, long ts) throws IOException;
+    List<DataRecord> query(String tag, long ts) throws IOException;
 
     /**
      * Queries the DB.
@@ -82,7 +82,7 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> query(List<Name> tags, long ts) throws IOException;
+    List<DataRecord> query(List<String> tags, long ts) throws IOException;
 
     /**
      * Queries the DB.
@@ -91,7 +91,7 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> query(Map<Name, Long> ss) throws IOException;
+    List<DataRecord> query(Map<String, Long> ss) throws IOException;
 
     /**
      * Queries the DB after the given timestamp.
@@ -101,7 +101,7 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> queryAfter(Name tag, long ts) throws IOException;
+    List<DataRecord> queryAfter(String tag, long ts) throws IOException;
 
     /**
      * Queries the DB after the given timestamp.
@@ -111,7 +111,7 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> queryAfter(List<Name> tags, long ts) throws IOException;
+    List<DataRecord> queryAfter(List<String> tags, long ts) throws IOException;
 
     /**
      * Queries the DB after.
@@ -120,7 +120,7 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> queryAfter(Map<Name, Long> ss) throws IOException;
+    List<DataRecord> queryAfter(Map<String, Long> ss) throws IOException;
 
     /**
      * Queries the DB before the given timestamp.
@@ -130,7 +130,7 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> queryBefore(Name tag, long ts) throws IOException;
+    List<DataRecord> queryBefore(String tag, long ts) throws IOException;
 
     /**
      * Queries the DB before the given timestamp.
@@ -140,7 +140,7 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> queryBefore(List<Name> tags, long ts) throws IOException;
+    List<DataRecord> queryBefore(List<String> tags, long ts) throws IOException;
 
     /**
      * Queries the DB before.
@@ -149,34 +149,41 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> queryBefore(Map<Name, Long> ss) throws IOException;
+    List<DataRecord> queryBefore(Map<String, Long> ss) throws IOException;
 
     /**
      * Queries the DB between the given timestamps.
      * @param tag Tag.
-     * @param ts Timestamps.
+     * @param t1 Start timestamp.
+     * @param t2 Final timestamp.
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> query(Name tag, long... ts) throws IOException;
+    List<DataRecord> query(String tag, long t1, long t2) throws IOException;
 
     /**
      * Queries the DB between the given timestamps.
      * @param tl Tags.
-     * @param ts Timestamps.
+     * @param t1 Start timestamp.
+     * @param t2 Final timestamp.
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> query(List<Name> tl, long... ts) throws IOException;
+    List<DataRecord> query(
+            List<String> tl,
+            long t1, long t2) throws IOException;
 
     /**
      * Queries the DB between.
      *
-     * @param ss Snapshots.
+     * @param s1 Start snapshot.
+     * @param s2 Final snapshot.
      * @return Data rows.
      * @throws IOException An I/O exception.
      */
-    public List<List> query(Map<Name, Long>... ss) throws IOException;
+    List<DataRecord> query(
+            Map<String, Long> s1,
+            Map<String, Long> s2) throws IOException;
 
     /**
      * Get the last snapshot.
@@ -185,7 +192,7 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Snapshot.
      * @throws IOException An I/O exception.
      */
-    public Map<Name, Long> getLastSnapshot(List<Name> tags) throws IOException;
+    Map<String, Long> getLastSnapshot(List<String> tags) throws IOException;
 
     /**
      * Get the first snapshot.
@@ -194,5 +201,5 @@ public interface ArchiveStorage extends HistoricalStorage {
      * @return Snapshot.
      * @throws IOException An I/O exception.
      */
-    public Map<Name, Long> getFirstSnapshot(List<Name> tags) throws IOException;
+    Map<String, Long> getFirstSnapshot(List<String> tags) throws IOException;
 }

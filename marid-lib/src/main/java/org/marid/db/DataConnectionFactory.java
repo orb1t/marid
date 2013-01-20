@@ -35,5 +35,5 @@ public interface DataConnectionFactory {
      * @return Data connection.
      * @throws IOException An I/O exception.
      */
-    public DataConnection get(URI uri, Map<String, ?> map) throws IOException;
+    DataConnection get(URI uri, Map<String, ?> map) throws IOException;
 }

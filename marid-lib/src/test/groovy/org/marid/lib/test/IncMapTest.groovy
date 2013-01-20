@@ -18,7 +18,6 @@
 
 package org.marid.lib.test
 
-import javax.naming.CompositeName
 import org.marid.db.util.IncMap
 
 /**
@@ -28,29 +27,25 @@ import org.marid.db.util.IncMap
  */
 class IncMapTest extends GroovyTestCase {
 
-    static def k1 = new CompositeName("a");
-    static def k2 = new CompositeName("b");
-    static def k3 = new CompositeName("c");
-
     def testMap;
     def incMap;
 
     @Override
     void setUp() {
-        testMap = [(k1): 10L, (k2): 20L, (k3): 30L];
+        testMap = [a: 10L, b: 20L, c: 30L];
         incMap = new IncMap(testMap, 1);
     }
 
     void testGet() {
-        assert incMap[k1] == 11;
-        assert incMap[k2] == 21;
-        assert incMap[k3] == 31;
+        assert incMap.a == 11;
+        assert incMap.b == 21;
+        assert incMap.c == 31;
     }
 
     void testRemove() {
-        assert incMap.remove(k1) == 11;
-        assert incMap.remove(k2) == 21;
-        assert incMap.remove(k3) == 31;
+        assert incMap.remove("a") == 11;
+        assert incMap.remove("b") == 21;
+        assert incMap.remove("c") == 31;
     }
 
     void testClear() {
@@ -79,11 +74,10 @@ class IncMapTest extends GroovyTestCase {
             def b = testMap.entrySet().toArray()[i];
             assert b.value == a1.value - 1;
         }
-        def k4 = new CompositeName("d");
-        def e4 = new AbstractMap.SimpleEntry(k4, 41L);
+        def e4 = new AbstractMap.SimpleEntry("d", 41L);
         incMap.entrySet().add(e4);
-        assert incMap[k4] == 41;
-        assert testMap[k4] == 40;
+        assert incMap.d == 41;
+        assert testMap.d == 40;
     }
 }
 

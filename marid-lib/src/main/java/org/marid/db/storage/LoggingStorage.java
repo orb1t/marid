@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import javax.naming.Name;
 
 /**
  * Data logging storage.
@@ -51,7 +50,7 @@ public interface LoggingStorage extends HistoricalStorage {
      * @return Log record list.
      * @throws IOException An I/O exception.
      */
-    List<LogRecord> query(Name name, Level lev) throws IOException;
+    List<LogRecord> query(String name, Level lev) throws IOException;
 
     /**
      * Fetches all the log messages less than given log level.
@@ -60,7 +59,7 @@ public interface LoggingStorage extends HistoricalStorage {
      * @return Log record list.
      * @throws IOException An I/O exception.
      */
-    List<LogRecord> fetch(Name name, Level lev) throws IOException;
+    List<LogRecord> fetch(String name, Level lev) throws IOException;
 
     /**
      * Queries all the log message after the specified timestamp.
@@ -70,7 +69,7 @@ public interface LoggingStorage extends HistoricalStorage {
      * @return Log record list.
      * @throws IOException An I/O exception.
      */
-    List<LogRecord> queryAfter(Name n, Level l, long t) throws IOException;
+    List<LogRecord> queryAfter(String n, Level l, long t) throws IOException;
 
     /**
      * Queries all the log message after the specified timestamp.
@@ -80,5 +79,5 @@ public interface LoggingStorage extends HistoricalStorage {
      * @return Log record list.
      * @throws IOException An I/O exception.
      */
-    List<LogRecord> queryBefore(Name n, Level l, long t) throws IOException;
+    List<LogRecord> queryBefore(String n, Level l, long t) throws IOException;
 }

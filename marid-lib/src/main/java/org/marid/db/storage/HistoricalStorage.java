@@ -19,7 +19,6 @@ package org.marid.db.storage;
 
 import java.io.IOException;
 import java.util.List;
-import javax.naming.Name;
 
 /**
  * Historical storage.
@@ -34,7 +33,7 @@ public interface HistoricalStorage extends Storage {
      * @return Check status.
      * @throws IOException An I/O exception.
      */
-    public boolean exists(Name tag, long ts) throws IOException;
+    public boolean exists(String tag, long ts) throws IOException;
 
     /**
      * Checks whether the specific tags exist in the given timestamp.
@@ -43,7 +42,7 @@ public interface HistoricalStorage extends Storage {
      * @return Check status.
      * @throws IOException An I/O exception.
      */
-    public boolean exist(List<Name> tags, long ts) throws IOException;
+    public boolean exist(List<String> tags, long ts) throws IOException;
 
     /**
      * Checks whether the specific tag exists after the given timestamp.
@@ -52,7 +51,7 @@ public interface HistoricalStorage extends Storage {
      * @return Check status.
      * @throws IOException An I/O exception.
      */
-    public boolean existsAfter(Name tag, long ts) throws IOException;
+    public boolean existsAfter(String tag, long ts) throws IOException;
 
     /**
      * Checks whether the specific tags exist after the given timestamp.
@@ -61,7 +60,7 @@ public interface HistoricalStorage extends Storage {
      * @return Check status.
      * @throws IOException An I/O exception.
      */
-    public boolean existAfter(List<Name> tags, long ts) throws IOException;
+    public boolean existAfter(List<String> tags, long ts) throws IOException;
 
     /**
      * Checks whether the specific tag exists before the given timestamp.
@@ -70,7 +69,7 @@ public interface HistoricalStorage extends Storage {
      * @return Check status.
      * @throws IOException An I/O exception.
      */
-    public boolean existsBefore(Name tag, long ts) throws IOException;
+    public boolean existsBefore(String tag, long ts) throws IOException;
 
     /**
      * Checks whether the specific tags exist before the given timestamp.
@@ -79,7 +78,7 @@ public interface HistoricalStorage extends Storage {
      * @return Check status.
      * @throws IOException An I/O exception.
      */
-    public boolean existBefore(List<Name> tags, long ts) throws IOException;
+    public boolean existBefore(List<String> tags, long ts) throws IOException;
 
     /**
      * Checks whether the specific tag exists between the given timestamps.
@@ -89,7 +88,7 @@ public interface HistoricalStorage extends Storage {
      * @return Check status.
      * @throws IOException An I/O exception.
      */
-    public boolean exists(Name tag, long ts, long tf) throws IOException;
+    public boolean exists(String tag, long ts, long tf) throws IOException;
 
     /**
      * Checks whether the specific tags exist between the given timestamps.
@@ -99,7 +98,7 @@ public interface HistoricalStorage extends Storage {
      * @return Check status.
      * @throws IOException An I/O exception.
      */
-    public boolean exist(List<Name> tags, long ts, long tf) throws IOException;
+    public boolean exist(List<String> tags, long ts, long tf) throws IOException;
 
     /**
      * Deletes the specific tag at the given timestamp.
@@ -108,7 +107,7 @@ public interface HistoricalStorage extends Storage {
      * @return Deletion result.
      * @throws IOException An I/O exception.
      */
-    public boolean delete(Name tag, long ts) throws IOException;
+    public boolean delete(String tag, long ts) throws IOException;
 
     /**
      * Deletes the specific tag at the given timestamp.
@@ -117,7 +116,7 @@ public interface HistoricalStorage extends Storage {
      * @return Deletions count.
      * @throws IOException An I/O exception.
      */
-    public long delete(List<Name> tags, long ts) throws IOException;
+    public long delete(List<String> tags, long ts) throws IOException;
 
     /**
      * Deletes the specific tag after the given timestamp.
@@ -126,7 +125,7 @@ public interface HistoricalStorage extends Storage {
      * @return Deletions count.
      * @throws IOException An I/O exception.
      */
-    public long deleteAfter(Name tag, long ts) throws IOException;
+    public long deleteAfter(String tag, long ts) throws IOException;
 
     /**
      * Deletes the specific tags after the given timestamp.
@@ -135,7 +134,7 @@ public interface HistoricalStorage extends Storage {
      * @return Deletetions count.
      * @throws IOException An I/O exception.
      */
-    public long deleteAfter(List<Name> tags, long ts) throws IOException;
+    public long deleteAfter(List<String> tags, long ts) throws IOException;
 
     /**
      * Deletes the specific tags before the given timestamp.
@@ -144,7 +143,7 @@ public interface HistoricalStorage extends Storage {
      * @return Deletions count.
      * @throws IOException An I/O exception.
      */
-    public long deleteBefore(Name tag, long ts) throws IOException;
+    public long deleteBefore(String tag, long ts) throws IOException;
 
     /**
      * Deletes the specific tags before the given timestamp.
@@ -153,7 +152,7 @@ public interface HistoricalStorage extends Storage {
      * @return Deletions count.
      * @throws IOException An I/O exception.
      */
-    public long deleteBefore(List<Name> tags, long ts) throws IOException;
+    public long deleteBefore(List<String> tags, long ts) throws IOException;
 
     /**
      * Deletes the specific tag within the given time bounds.
@@ -163,7 +162,7 @@ public interface HistoricalStorage extends Storage {
      * @return Deletions count.
      * @throws IOException An I/O exception.
      */
-    public long delete(Name tag, long ts, long tf) throws IOException;
+    public long delete(String tag, long ts, long tf) throws IOException;
 
     /**
      * Deletes the specific tags within the given time bounds.
@@ -173,7 +172,7 @@ public interface HistoricalStorage extends Storage {
      * @return Deletions count.
      * @throws IOException An I/O exception.
      */
-    public long delete(List<Name> tags, long ts, long tf) throws IOException;
+    public long delete(List<String> tags, long ts, long tf) throws IOException;
 
     /**
      * Counts objects at the given timestamp by tag.
@@ -182,7 +181,7 @@ public interface HistoricalStorage extends Storage {
      * @return Objects count.
      * @throws IOException An I/O exception.
      */
-    public long count(Name tag, long ts) throws IOException;
+    public long count(String tag, long ts) throws IOException;
 
     /**
      * Counts objects at the given timestamp by tags.
@@ -191,7 +190,7 @@ public interface HistoricalStorage extends Storage {
      * @return Objects count.
      * @throws IOException An I/O exception.
      */
-    public long count(List<Name> tags, long ts) throws IOException;
+    public long count(List<String> tags, long ts) throws IOException;
 
     /**
      * Counts objects after the given timestamp.
@@ -200,7 +199,7 @@ public interface HistoricalStorage extends Storage {
      * @return Objects count.
      * @throws IOException An I/O exception.
      */
-    public long countAfter(Name tag, long ts) throws IOException;
+    public long countAfter(String tag, long ts) throws IOException;
 
     /**
      * Counts objects after the given timestamp.
@@ -209,7 +208,7 @@ public interface HistoricalStorage extends Storage {
      * @return Objects count.
      * @throws IOException An I/O exception.
      */
-    public long countAfter(List<Name> tags, long ts) throws IOException;
+    public long countAfter(List<String> tags, long ts) throws IOException;
 
     /**
      * Counts objects before the given timestamp.
@@ -218,7 +217,7 @@ public interface HistoricalStorage extends Storage {
      * @return Objects count.
      * @throws IOException An I/O exception.
      */
-    public long countBefore(Name tag, long ts) throws IOException;
+    public long countBefore(String tag, long ts) throws IOException;
 
     /**
      * Counts objects before the given timestamp.
@@ -227,7 +226,7 @@ public interface HistoricalStorage extends Storage {
      * @return Objects count.
      * @throws IOException An I/O exception.
      */
-    public long countBefore(List<Name> tags, long ts) throws IOException;
+    public long countBefore(List<String> tags, long ts) throws IOException;
 
     /**
      * Counts objects within the given time bounds.
@@ -237,7 +236,7 @@ public interface HistoricalStorage extends Storage {
      * @return Objects count.
      * @throws IOException An I/O exception.
      */
-    public long count(Name tag, long ts, long tf) throws IOException;
+    public long count(String tag, long ts, long tf) throws IOException;
 
     /**
      * Counts objects within the given time bounds.
@@ -247,7 +246,7 @@ public interface HistoricalStorage extends Storage {
      * @return Objects count.
      * @throws IOException An I/O exception.
      */
-    public long count(List<Name> tags, long ts, long tf) throws IOException;
+    public long count(List<String> tags, long ts, long tf) throws IOException;
 
     /**
      * Counts objects at the given timestamp.

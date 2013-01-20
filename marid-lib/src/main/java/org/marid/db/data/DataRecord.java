@@ -21,8 +21,6 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import javax.naming.Name;
-import org.marid.io.NameIo;
 
 /**
  * Abstract data record.
@@ -31,7 +29,7 @@ import org.marid.io.NameIo;
  */
 public abstract class DataRecord<T> implements Externalizable {
 
-    private Name tag;
+    private String tag;
     private long time;
 
     /**
@@ -46,7 +44,7 @@ public abstract class DataRecord<T> implements Externalizable {
      * @param tg Record tag.
      * @param ts Timestamp.
      */
-    public DataRecord(Name tg, long ts) {
+    public DataRecord(String tg, long ts) {
         if (tg == null) {
             throw new NullPointerException("Tag is null");
         }
@@ -59,7 +57,7 @@ public abstract class DataRecord<T> implements Externalizable {
      *
      * @return Record tag.
      */
-    public Name getTag() {
+    public String getTag() {
         return tag;
     }
 
@@ -77,7 +75,7 @@ public abstract class DataRecord<T> implements Externalizable {
      *
      * @param tg Record tag.
      */
-    public void setTag(Name tg) {
+    public void setTag(String tg) {
         if (tg == null) {
             throw new NullPointerException("Tag is null");
         }
@@ -102,13 +100,13 @@ public abstract class DataRecord<T> implements Externalizable {
     @Override
     public void readExternal(ObjectInput in) throws
             IOException, ClassNotFoundException {
-        tag = NameIo.readName(in);
+        tag = in.readUTF();
         time = in.readLong();
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-        NameIo.writeName(out, tag);
+        out.writeUTF(tag);
         out.writeLong(time);
     }
 }

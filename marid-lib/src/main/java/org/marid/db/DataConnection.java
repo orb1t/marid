@@ -34,26 +34,26 @@ public interface DataConnection extends Closeable {
      * @return The open flag.
      * @throws IOException An I/O exception.
      */
-    public boolean open() throws IOException;
+    boolean open() throws IOException;
 
     /**
      * Checks whether the connection is opened.
      * @return Opened connection flag.
      */
-    public boolean isOpened();
+    boolean isOpened();
 
     /**
      * Checks whether the given storage type is supported.
      * @param type A storage type.
      * @return Check status.
      */
-    public boolean isStorageSupported(Class<? extends Storage> type);
+    boolean isStorageSupported(Class<? extends Storage> type);
 
     /**
      * Get the supported storage type set.
      * @return Supported storage type set.
      */
-    public Set<Class<? extends Storage>> getSupportedStorageTypeSet();
+    Set<Class<? extends Storage>> getSupportedStorageTypeSet();
 
     /**
      * Get a storage by type.
@@ -61,5 +61,5 @@ public interface DataConnection extends Closeable {
      * @param type Storage type class.
      * @return Storage or null if none was found.
      */
-    public <T> T getStorage(Class<T> type);
+    <T> T getStorage(Class<T> type);
 }

@@ -32,36 +32,36 @@ import javax.naming.Name;
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class IncMap implements Map<Name, Long> {
+public class IncMap implements Map<String, Long> {
 
-    private final Map<Name, Long> del;
+    private final Map<String, Long> d;
     private final long delta;
-    private final Map<Name, Entry<Name, Long>> entryCache = new HashMap<>();
+    private final Map<String, Entry<String, Long>> entryCache = new HashMap<>();
 
-    public IncMap(Map<Name, Long> dg, long dt) {
-        del = dg;
+    public IncMap(Map<String, Long> dg, long dt) {
+        d = dg;
         delta = dt;
     }
 
     @Override
     public int size() {
-        return del.size();
+        return d.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return del.isEmpty();
+        return d.isEmpty();
     }
 
     @Override
     public boolean containsKey(Object key) {
-        return del.containsKey(key);
+        return d.containsKey(key);
     }
 
     @Override
     public boolean containsValue(Object value) {
         if (value instanceof Long) {
-            return del.containsValue(((Long)value) + delta);
+            return d.containsValue(((Long)value) + delta);
         } else {
             return false;
         }
@@ -69,7 +69,7 @@ public class IncMap implements Map<Name, Long> {
 
     @Override
     public Long get(Object key) {
-        Long val = del.get(key);
+        Long val = d.get(key);
         if (val == null) {
             return null;
         } else {
@@ -78,13 +78,13 @@ public class IncMap implements Map<Name, Long> {
     }
 
     @Override
-    public Long put(Name key, Long value) {
-        return del.put(key, value - delta);
+    public Long put(String key, Long value) {
+        return d.put(key, value - delta);
     }
 
     @Override
     public Long remove(Object key) {
-        Long val = del.remove(key);
+        Long val = d.remove(key);
         if (val == null) {
             return null;
         } else {
@@ -93,18 +93,18 @@ public class IncMap implements Map<Name, Long> {
     }
 
     @Override
-    public void putAll(Map<? extends Name, ? extends Long> m) {
-        del.putAll(new IncMap(del, -delta));
+    public void putAll(Map<? extends String, ? extends Long> m) {
+        d.putAll(new IncMap(d, -delta));
     }
 
     @Override
     public void clear() {
-        del.clear();
+        d.clear();
     }
 
     @Override
-    public Set<Name> keySet() {
-        return del.keySet();
+    public Set<String> keySet() {
+        return d.keySet();
     }
 
     @Override
@@ -112,7 +112,7 @@ public class IncMap implements Map<Name, Long> {
         return new AbstractCollection<Long>() {
             @Override
             public Iterator<Long> iterator() {
-                final Iterator<Entry<Name, Long>> i = del.entrySet().iterator();
+                final Iterator<Entry<String, Long>> i = d.entrySet().iterator();
                 return new Iterator<Long>() {
                     @Override
                     public boolean hasNext() {
@@ -133,37 +133,37 @@ public class IncMap implements Map<Name, Long> {
 
             @Override
             public int size() {
-                return del.size();
+                return d.size();
             }
 
             @Override
             public boolean isEmpty() {
-                return del.isEmpty();
+                return d.isEmpty();
             }
 
             @Override
             public void clear() {
-                del.clear();
+                d.clear();
             }
         };
     }
 
     @Override
-    public Set<Entry<Name, Long>> entrySet() {
-       return new AbstractSet<Entry<Name, Long>>() {
+    public Set<Entry<String, Long>> entrySet() {
+       return new AbstractSet<Entry<String, Long>>() {
             @Override
-            public Iterator<Entry<Name, Long>> iterator() {
-                final Iterator<Entry<Name, Long>> i = del.entrySet().iterator();
-                return new Iterator<Entry<Name, Long>>() {
+            public Iterator<Entry<String, Long>> iterator() {
+                final Iterator<Entry<String, Long>> i = d.entrySet().iterator();
+                return new Iterator<Entry<String, Long>>() {
                     @Override
                     public boolean hasNext() {
                         return i.hasNext();
                     }
 
                     @Override
-                    public Entry<Name, Long> next() {
-                        Entry<Name, Long> e = i.next();
-                        Name k = e.getKey();
+                    public Entry<String, Long> next() {
+                        Entry<String, Long> e = i.next();
+                        String k = e.getKey();
                         Long v = e.getValue() + delta;
                         synchronized(entryCache) {
                             if (entryCache.containsKey(k)) {
@@ -186,27 +186,27 @@ public class IncMap implements Map<Name, Long> {
             }
 
             @Override
-            public boolean add(Entry<Name, Long> e) {
-                del.put(e.getKey(), e.getValue() - delta);
+            public boolean add(Entry<String, Long> e) {
+                d.put(e.getKey(), e.getValue() - delta);
                 return true;
             }
 
             @Override
-            public boolean addAll(Collection<? extends Entry<Name, Long>> c) {
-                for (Entry<Name, Long> e : c) {
-                    del.put(e.getKey(), e.getValue() - delta);
+            public boolean addAll(Collection<? extends Entry<String, Long>> c) {
+                for (Entry<String, Long> e : c) {
+                    d.put(e.getKey(), e.getValue() - delta);
                 }
                 return true;
             }
 
             @Override
             public int size() {
-                return del.size();
+                return d.size();
             }
 
             @Override
             public boolean isEmpty() {
-                return del.isEmpty();
+                return d.isEmpty();
             }
         };
     }
@@ -214,10 +214,10 @@ public class IncMap implements Map<Name, Long> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("{");
-        if (del.isEmpty()) {
+        if (d.isEmpty()) {
             return sb.append('}').toString();
         }
-        Iterator<Entry<Name, Long>> i = del.entrySet().iterator();
+        Iterator<Entry<String, Long>> i = d.entrySet().iterator();
         while (true) {
             sb.append(i.next());
             if (i.hasNext()) {

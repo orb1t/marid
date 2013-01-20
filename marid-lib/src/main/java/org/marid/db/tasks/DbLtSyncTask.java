@@ -19,8 +19,6 @@ package org.marid.db.tasks;
 
 import java.util.List;
 import java.util.Map;
-import javax.naming.CompositeName;
-import javax.naming.Name;
 import org.marid.db.storage.ArchiveStorage;
 import org.marid.db.util.IncMap;
 
@@ -47,8 +45,8 @@ public class DbLtSyncTask implements DbTask {
     @Override
     public DbTaskResult call() throws Exception {
         long start = System.currentTimeMillis();
-        List<Name> localTags = lStorage.getTags(new CompositeName());
-        Map<Name, Long> rss = rStorage.getLastSnapshot(localTags);
+        List<String> localTags = lStorage.getTags("");
+        Map<String, Long> rss = rStorage.getLastSnapshot(localTags);
         int uc = rStorage.insert(lStorage.queryAfter(new IncMap(rss, 1L)));
         return new DbTaskResult(uc, System.currentTimeMillis() - start);
     }

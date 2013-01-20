@@ -22,6 +22,6 @@ package org.marid.db.storage;
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public interface UtilityStorage extends Storage {
+public interface DocumentStorage extends Storage {
 
 }
