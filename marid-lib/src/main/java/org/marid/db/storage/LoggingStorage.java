@@ -17,6 +17,12 @@
  */
 package org.marid.db.storage;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import javax.naming.Name;
+
 /**
  * Data logging storage.
  *
@@ -24,4 +30,55 @@ package org.marid.db.storage;
  */
 public interface LoggingStorage extends HistoricalStorage {
 
+    /**
+     * Logs log records.
+     * @param logRecords Log records.
+     * @throws IOException An I/O exception.
+     */
+    void log(LogRecord... logRecords) throws IOException;
+
+    /**
+     * Logs log records.
+     * @param logRecords Log record list.
+     * @throws IOException An I/O exception.
+     */
+    void log(List<LogRecord> logRecords) throws IOException;
+
+    /**
+     * Queries all the log records with the given level and log name.
+     * @param name Log name.
+     * @param lev Log level.
+     * @return Log record list.
+     * @throws IOException An I/O exception.
+     */
+    List<LogRecord> query(Name name, Level lev) throws IOException;
+
+    /**
+     * Fetches all the log messages less than given log level.
+     * @param name Log name.
+     * @param lev Log level.
+     * @return Log record list.
+     * @throws IOException An I/O exception.
+     */
+    List<LogRecord> fetch(Name name, Level lev) throws IOException;
+
+    /**
+     * Queries all the log message after the specified timestamp.
+     * @param n Log name.
+     * @param l Log level.
+     * @param t Timestamp.
+     * @return Log record list.
+     * @throws IOException An I/O exception.
+     */
+    List<LogRecord> queryAfter(Name n, Level l, long t) throws IOException;
+
+    /**
+     * Queries all the log message after the specified timestamp.
+     * @param n Log name.
+     * @param l Log level.
+     * @param t Timestamp.
+     * @return Log record list.
+     * @throws IOException An I/O exception.
+     */
+    List<LogRecord> queryBefore(Name n, Level l, long t) throws IOException;
 }

@@ -22,34 +22,34 @@ import java.util.Map;
 import javax.naming.CompositeName;
 import javax.naming.Name;
 import org.marid.db.storage.ArchiveStorage;
+import org.marid.db.util.IncMap;
 
 /**
- * Database synchronization task.
+ * Database synchronization task (by last timestamps).
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class DbSyncTask implements DbTask {
+public class DbLtSyncTask implements DbTask {
 
-    private final ArchiveStorage localStorage;
-    private final ArchiveStorage remoteStorage;
+    private final ArchiveStorage lStorage;
+    private final ArchiveStorage rStorage;
 
     /**
      * Constructs the database synchronization task.
      * @param ls Local storage.
      * @param rs Remote storage.
      */
-    public DbSyncTask(ArchiveStorage ls, ArchiveStorage rs) {
-        localStorage = ls;
-        remoteStorage = rs;
+    public DbLtSyncTask(ArchiveStorage ls, ArchiveStorage rs) {
+        lStorage = ls;
+        rStorage = rs;
     }
 
     @Override
     public DbTaskResult call() throws Exception {
         long start = System.currentTimeMillis();
-        int updCount;
-        List<Name> localTags = localStorage.getTags(new CompositeName());
-        Map<Name, Long> rss = remoteStorage.getLastSnapshot(localTags);
-        updCount = remoteStorage.insert(localStorage.queryAfter(rss));
-        return new DbTaskResult(updCount, System.currentTimeMillis() - start);
+        List<Name> localTags = lStorage.getTags(new CompositeName());
+        Map<Name, Long> rss = rStorage.getLastSnapshot(localTags);
+        int uc = rStorage.insert(lStorage.queryAfter(new IncMap(rss, 1L)));
+        return new DbTaskResult(uc, System.currentTimeMillis() - start);
     }
 }
