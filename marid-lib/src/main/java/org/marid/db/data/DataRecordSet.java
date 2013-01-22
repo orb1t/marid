@@ -101,16 +101,16 @@ public class DataRecordSet implements Externalizable {
                 }
             }
             Class<? extends DataRecord> drc = (Class<? extends DataRecord>)c;
+            DataRecord r;
+            try {
+                r = drc.newInstance();
+            } catch (IllegalAccessException | InstantiationException x) {
+                throw new IllegalStateException(x);
+            }
             int m = in.readInt();
             for (int k = 0; k < m; k++) {
-                DataRecord r;
-                try {
-                    r = drc.newInstance();
-                } catch (IllegalAccessException | InstantiationException x) {
-                    throw new IllegalStateException(x);
-                }
                 r.readExternal(in);
-                dataRecordList.add(r);
+                dataRecordList.add(r.clone());
             }
         }
     }

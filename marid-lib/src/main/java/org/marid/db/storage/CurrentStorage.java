@@ -34,7 +34,7 @@ public interface CurrentStorage extends Storage {
      * @return Record.
      * @throws IOException An I/O exception.
      */
-    DataRecord get(String tag) throws IOException;
+    public <T extends DataRecord> T get(String tag) throws IOException;
 
     /**
      * Get records by names.
@@ -43,7 +43,8 @@ public interface CurrentStorage extends Storage {
      * @return Records.
      * @throws IOException An I/O exception.
      */
-    List<DataRecord> get(List<String> tags) throws IOException;
+    public <T extends DataRecord> List<T>
+            get(List<String> tags) throws IOException;
 
     /**
      * Get all the records.
@@ -51,5 +52,5 @@ public interface CurrentStorage extends Storage {
      * @return Records.
      * @throws IOException An I/O exception.
      */
-    List<DataRecord> get() throws IOException;
+    public <T extends DataRecord> List<T> get() throws IOException;
 }

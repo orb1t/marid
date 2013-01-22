@@ -17,12 +17,16 @@
  */
 package org.marid.db.data;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 /**
  * Long data record.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class LongDataRecord extends DataRecord<Long> {
+public class LongDataRecord extends NumericDataRecord<Long> {
 
     private long value;
 
@@ -55,5 +59,22 @@ public class LongDataRecord extends DataRecord<Long> {
             throw new NullPointerException("Value is null");
         }
         value = val.longValue();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        super.writeExternal(out);
+        out.writeLong(value);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException {
+        super.readExternal(in);
+        value = in.readLong();
+    }
+
+    @Override
+    public DataRecord<Long> clone() {
+        return new LongDataRecord(getTag(), getTime(), value);
     }
 }

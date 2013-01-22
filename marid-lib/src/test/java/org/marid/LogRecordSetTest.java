@@ -64,6 +64,10 @@ public class LogRecordSetTest extends TestCase {
         recordSet = null;
     }
 
+    /**
+     * Restorability test.
+     * @throws Exception An exception.
+     */
     public void testForRestorability() throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {

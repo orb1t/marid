@@ -17,6 +17,7 @@
  */
 package org.marid.util;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import static java.util.Calendar.*;
@@ -164,6 +165,58 @@ public class DateUtil {
      */
     public static Timestamp isoToTimestamp(String date) {
         return new Timestamp(isoToMillis(date));
+    }
+
+    /**
+     * Formats a timestamp according to ISO rules.
+     * @param ts A timestamp.
+     * @param a An appendable.
+     */
+    public static void iso(long ts, Appendable a,
+            TimeZone tz, boolean ms) throws IOException {
+        Calendar c = Calendar.getInstance(tz, Locale.ITALY);
+        c.setTimeInMillis(ts);
+        a.append(Integer.toString(c.get(YEAR)));
+        a.append('-');
+        int n = c.get(MONTH) + 1;
+        if (n < 10) {
+            a.append('0');
+        }
+        a.append(Integer.toString(n));
+        a.append('-');
+        n = c.get(DATE);
+        if (n < 10) {
+            a.append('0');
+        }
+        a.append(Integer.toString(n));
+        a.append(' ');
+        n = c.get(HOUR);
+        if (n < 10) {
+            a.append('0');
+        }
+        a.append(Integer.toString(n));
+        a.append(':');
+        n = c.get(MINUTE);
+        if (n < 10) {
+            a.append('0');
+        }
+        a.append(Integer.toString(n));
+        a.append(':');
+        n = c.get(SECOND);
+        if (n < 10) {
+            a.append('0');
+        }
+        a.append(Integer.toString(n));
+        if (ms) {
+            a.append('.');
+            n = c.get(MILLISECOND);
+            if (n < 10) {
+                a.append("00");
+            } else if (n < 100) {
+                a.append('0');
+            }
+            a.append(Integer.toString(n));
+        }
     }
 
     private static TimeZone getTimeZone(String s, boolean rfc) {

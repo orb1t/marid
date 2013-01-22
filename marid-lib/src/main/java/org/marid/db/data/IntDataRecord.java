@@ -26,7 +26,7 @@ import java.io.ObjectOutput;
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class IntDataRecord extends DataRecord<Integer> {
+public class IntDataRecord extends NumericDataRecord<Integer> {
 
     private int value;
 
@@ -71,5 +71,10 @@ public class IntDataRecord extends DataRecord<Integer> {
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
         out.writeInt(value);
+    }
+
+    @Override
+    public IntDataRecord clone() {
+        return new IntDataRecord(getTag(), getTime(), value);
     }
 }
