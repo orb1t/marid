@@ -22,59 +22,59 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Long data record.
+ * Adds a double data record.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class LongDataRecord extends NumericDataRecord<Long> {
+public class DoubleDataRecord extends NumericDataRecord<Double> {
 
-    private long value;
+    private double value;
 
     /**
      * Default constructor.
      */
-    public LongDataRecord() {
-        this("", 0L, 0L);
+    public DoubleDataRecord() {
+        this("", 0L, 0.0);
     }
 
     /**
-     * Constructs the long data record.
+     * Constructs the double data record.
      * @param tag Tag.
      * @param ts Timestamp.
      * @param val Value.
      */
-    public LongDataRecord(String tag, long ts, long val) {
+    public DoubleDataRecord(String tag, long ts, double val) {
         super(tag, ts);
         value = val;
     }
 
     @Override
-    public Long getValue() {
+    public Double getValue() {
         return value;
     }
 
     @Override
-    public void setValue(Long val) {
+    public DoubleDataRecord clone() {
+        return new DoubleDataRecord(getTag(), getTime(), value);
+    }
+
+    @Override
+    public void setValue(Double val) {
         if (val == null) {
             throw new NullPointerException("Value is null");
         }
-        value = val.longValue();
+        value = val;
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        out.writeLong(value);
+        out.writeDouble(value);
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException {
         super.readExternal(in);
-        value = in.readLong();
-    }
-
-    @Override
-    public DataRecord<Long> clone() {
-        return new LongDataRecord(getTag(), getTime(), value);
+        value = in.readDouble();
     }
 }

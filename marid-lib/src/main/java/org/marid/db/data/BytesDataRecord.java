@@ -22,59 +22,45 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Long data record.
+ * Bytes data record.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class LongDataRecord extends NumericDataRecord<Long> {
-
-    private long value;
-
+public class BytesDataRecord extends ObjectDataRecord<byte[]> {
     /**
-     * Default constructor.
+     * Constructs the byte record.
      */
-    public LongDataRecord() {
-        this("", 0L, 0L);
+    public BytesDataRecord() {
+        this("", 0L, new byte[0]);
     }
 
     /**
-     * Constructs the long data record.
+     * Constructs the bytes data record.
      * @param tag Tag.
      * @param ts Timestamp.
      * @param val Value.
      */
-    public LongDataRecord(String tag, long ts, long val) {
-        super(tag, ts);
-        value = val;
+    public BytesDataRecord(String tag, long ts, byte[] val) {
+        super(tag, ts, val);
     }
 
     @Override
-    public Long getValue() {
-        return value;
-    }
-
-    @Override
-    public void setValue(Long val) {
-        if (val == null) {
-            throw new NullPointerException("Value is null");
-        }
-        value = val.longValue();
+    public BytesDataRecord clone() {
+        return new BytesDataRecord(getTag(), getTime(), getValue());
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        out.writeLong(value);
+        out.writeInt(getValue().length);
+        out.write(getValue());
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException {
         super.readExternal(in);
-        value = in.readLong();
-    }
-
-    @Override
-    public DataRecord<Long> clone() {
-        return new LongDataRecord(getTag(), getTime(), value);
+        byte[] value = new byte[in.readInt()];
+        in.readFully(value);
+        setValue(value);
     }
 }

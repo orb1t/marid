@@ -34,7 +34,7 @@ public class IntDataRecord extends NumericDataRecord<Integer> {
      * Default constructor.
      */
     public IntDataRecord() {
-        this(null, 0L, 0);
+        this("", 0L, 0);
     }
 
     /**

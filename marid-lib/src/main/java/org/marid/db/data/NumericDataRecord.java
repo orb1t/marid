@@ -26,14 +26,6 @@ import java.math.BigInteger;
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public abstract class NumericDataRecord<T extends Number> extends DataRecord<T>{
-
-    /**
-     * Default constructor.
-     */
-    public NumericDataRecord() {
-        this("", 0L);
-    }
-
     /**
      * Constructs a numeric data record.
      * @param tg Tag.

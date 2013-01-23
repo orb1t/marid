@@ -22,59 +22,59 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Long data record.
+ * Float data record.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class LongDataRecord extends NumericDataRecord<Long> {
+public class FloatDataRecord extends NumericDataRecord<Float> {
 
-    private long value;
+    private float value;
 
     /**
      * Default constructor.
      */
-    public LongDataRecord() {
-        this("", 0L, 0L);
+    public FloatDataRecord() {
+        this("", 0L, 0.0f);
     }
 
     /**
-     * Constructs the long data record.
+     * Constructs a float data record.
      * @param tag Tag.
      * @param ts Timestamp.
      * @param val Value.
      */
-    public LongDataRecord(String tag, long ts, long val) {
+    public FloatDataRecord(String tag, long ts, float val) {
         super(tag, ts);
         value = val;
     }
 
     @Override
-    public Long getValue() {
+    public Float getValue() {
         return value;
     }
 
     @Override
-    public void setValue(Long val) {
+    public DataRecord<Float> clone() {
+        return new FloatDataRecord(getTag(), getTime(), value);
+    }
+
+    @Override
+    public void setValue(Float val) {
         if (val == null) {
             throw new NullPointerException("Value is null");
         }
-        value = val.longValue();
+        value = val;
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        out.writeLong(value);
+        out.writeFloat(value);
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException {
         super.readExternal(in);
-        value = in.readLong();
-    }
-
-    @Override
-    public DataRecord<Long> clone() {
-        return new LongDataRecord(getTag(), getTime(), value);
+        value = in.readFloat();
     }
 }

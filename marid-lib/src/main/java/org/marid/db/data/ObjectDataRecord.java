@@ -17,64 +17,36 @@
  */
 package org.marid.db.data;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-
 /**
- * Long data record.
+ * Float object data record.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class LongDataRecord extends NumericDataRecord<Long> {
+public abstract class ObjectDataRecord<T> extends DataRecord<T> {
 
-    private long value;
-
-    /**
-     * Default constructor.
-     */
-    public LongDataRecord() {
-        this("", 0L, 0L);
-    }
+    private T value;
 
     /**
-     * Constructs the long data record.
+     * Constructs the object data record.
      * @param tag Tag.
      * @param ts Timestamp.
      * @param val Value.
      */
-    public LongDataRecord(String tag, long ts, long val) {
+    public ObjectDataRecord(String tag, long ts, T val) {
         super(tag, ts);
         value = val;
     }
 
     @Override
-    public Long getValue() {
+    public T getValue() {
         return value;
     }
 
     @Override
-    public void setValue(Long val) {
+    public void setValue(T val) {
         if (val == null) {
             throw new NullPointerException("Value is null");
         }
-        value = val.longValue();
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        super.writeExternal(out);
-        out.writeLong(value);
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException {
-        super.readExternal(in);
-        value = in.readLong();
-    }
-
-    @Override
-    public DataRecord<Long> clone() {
-        return new LongDataRecord(getTag(), getTime(), value);
+        value = val;
     }
 }
