@@ -17,9 +17,7 @@
  */
 package org.marid.db;
 
-import java.io.IOException;
 import java.net.URI;
-import java.util.Map;
 
 /**
  * Data connection factory.
@@ -31,9 +29,7 @@ public interface DataConnectionFactory {
     /**
      * Obtain a data connection.
      * @param uri Remote resource URI.
-     * @param map Parameter map.
      * @return Data connection.
-     * @throws IOException An I/O exception.
      */
-    DataConnection get(URI uri, Map<String, ?> map) throws IOException;
+    public DataConnection get(URI uri);
 }

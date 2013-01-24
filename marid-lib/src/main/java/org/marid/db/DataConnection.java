@@ -61,5 +61,5 @@ public interface DataConnection extends Closeable {
      * @param type Storage type class.
      * @return Storage or null if none was found.
      */
-    public <T> T getStorage(Class<T> type);
+    public <T extends Storage> T getStorage(Class<T> type);
 }
