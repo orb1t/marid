@@ -17,68 +17,47 @@
  */
 package org.marid.db.data;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.nio.ByteBuffer;
 
 /**
- * Bytes data record.
+ * String data record.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class BytesDataRecord extends ObjectDataRecord<byte[]> {
+public class StringDataRecord extends ObjectDataRecord<String> {
     /**
-     * Constructs the byte record.
+     * Default constructor.
      */
-    public BytesDataRecord() {
-        this("", 0L, new byte[0]);
+    public StringDataRecord() {
+        this("", 0L, "");
     }
 
     /**
-     * Constructs the bytes data record.
+     * Constructs a data record.
      * @param tag Tag.
      * @param ts Timestamp.
      * @param val Value.
      */
-    public BytesDataRecord(String tag, long ts, byte[] val) {
+    public StringDataRecord(String tag, long ts, String val) {
         super(tag, ts, val);
     }
 
     @Override
-    public BytesDataRecord clone() {
-        return new BytesDataRecord(getTag(), getTime(), getValue());
-    }
-
-    /**
-     * Get the byte buffer.
-     * @return Byte buffer.
-     */
-    public ByteBuffer getByteBuffer() {
-        return ByteBuffer.wrap(getValue());
-    }
-
-    /**
-     * Get the input stream.
-     * @return Input stream.
-     */
-    public ByteArrayInputStream getInputStream() {
-        return new ByteArrayInputStream(getValue());
+    public StringDataRecord clone() {
+        return new StringDataRecord(getTag(), getTime(), getValue());
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        out.writeInt(getValue().length);
-        out.write(getValue());
+        out.writeUTF(getValue());
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException {
         super.readExternal(in);
-        byte[] value = new byte[in.readInt()];
-        in.readFully(value);
-        setValue(value);
+        setValue(in.readUTF());
     }
 }

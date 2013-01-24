@@ -17,68 +17,72 @@
  */
 package org.marid.db.data;
 
-import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.nio.ByteBuffer;
 
 /**
- * Bytes data record.
+ * Characters data record.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class BytesDataRecord extends ObjectDataRecord<byte[]> {
+public class CharsDataRecord extends ObjectDataRecord<char[]> {
     /**
-     * Constructs the byte record.
+     * Default constructor.
      */
-    public BytesDataRecord() {
-        this("", 0L, new byte[0]);
+    public CharsDataRecord() {
+        this("", 0L, new char[0]);
     }
 
     /**
-     * Constructs the bytes data record.
+     * Constructs a data record.
      * @param tag Tag.
      * @param ts Timestamp.
      * @param val Value.
      */
-    public BytesDataRecord(String tag, long ts, byte[] val) {
+    public CharsDataRecord(String tag, long ts, char[] val) {
         super(tag, ts, val);
     }
 
     @Override
-    public BytesDataRecord clone() {
-        return new BytesDataRecord(getTag(), getTime(), getValue());
+    public CharsDataRecord clone() {
+        return new CharsDataRecord(getTag(), getTime(), getValue());
     }
 
     /**
-     * Get the byte buffer.
-     * @return Byte buffer.
+     * Get the string value.
+     * @return String value.
      */
-    public ByteBuffer getByteBuffer() {
-        return ByteBuffer.wrap(getValue());
+    public String getString() {
+        return String.valueOf(getValue());
     }
 
     /**
-     * Get the input stream.
-     * @return Input stream.
+     * Get the reader.
+     * @return Reader.
      */
-    public ByteArrayInputStream getInputStream() {
-        return new ByteArrayInputStream(getValue());
+    public CharArrayReader getReader() {
+        return new CharArrayReader(getValue());
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        out.writeInt(getValue().length);
-        out.write(getValue());
+        char[] value = getValue();
+        out.writeInt(value.length);
+        for (int i = 0; i < value.length; i++) {
+            out.writeChar(value[i]);
+        }
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException {
         super.readExternal(in);
-        byte[] value = new byte[in.readInt()];
-        in.readFully(value);
+        char[] value = new char[in.readInt()];
+        for (int i = 0; i < value.length; i++) {
+            value[i] = in.readChar();
+        }
         setValue(value);
     }
 }

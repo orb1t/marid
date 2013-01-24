@@ -17,68 +17,55 @@
  */
 package org.marid.db.data;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.nio.ByteBuffer;
 
 /**
- * Bytes data record.
+ * Doubles data record.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class BytesDataRecord extends ObjectDataRecord<byte[]> {
+public class DoublesDataRecord extends ObjectDataRecord<double[]> {
     /**
-     * Constructs the byte record.
+     * Default constructor.
      */
-    public BytesDataRecord() {
-        this("", 0L, new byte[0]);
+    public DoublesDataRecord() {
+        this("", 0L, new double[0]);
     }
 
     /**
-     * Constructs the bytes data record.
+     * Constructs a data record.
      * @param tag Tag.
      * @param ts Timestamp.
      * @param val Value.
      */
-    public BytesDataRecord(String tag, long ts, byte[] val) {
+    public DoublesDataRecord(String tag, long ts, double[] val) {
         super(tag, ts, val);
     }
 
     @Override
-    public BytesDataRecord clone() {
-        return new BytesDataRecord(getTag(), getTime(), getValue());
-    }
-
-    /**
-     * Get the byte buffer.
-     * @return Byte buffer.
-     */
-    public ByteBuffer getByteBuffer() {
-        return ByteBuffer.wrap(getValue());
-    }
-
-    /**
-     * Get the input stream.
-     * @return Input stream.
-     */
-    public ByteArrayInputStream getInputStream() {
-        return new ByteArrayInputStream(getValue());
+    public DoublesDataRecord clone() {
+        return new DoublesDataRecord(getTag(), getTime(), getValue());
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        out.writeInt(getValue().length);
-        out.write(getValue());
+        double[] value = getValue();
+        out.writeInt(value.length);
+        for (int i = 0; i < value.length; i++) {
+            out.writeDouble(value[i]);
+        }
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException {
         super.readExternal(in);
-        byte[] value = new byte[in.readInt()];
-        in.readFully(value);
+        double[] value = new double[in.readInt()];
+        for (int i = 0; i < value.length; i++) {
+            value[i] = in.readDouble();
+        }
         setValue(value);
     }
 }
