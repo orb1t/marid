@@ -17,7 +17,8 @@
  */
 package org.marid;
 
-import groovy.util.GroovyTestCase;
+import org.junit.Assert;
+import org.junit.Test;
 import org.marid.util.CMPrp;
 
 /**
@@ -25,10 +26,15 @@ import org.marid.util.CMPrp;
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class TypeTest extends GroovyTestCase {
+public class TypeTest extends Assert {
+
+    /**
+     * Test for float conversion.
+     */
+    @Test
     public void test1() {
         CMPrp p = new CMPrp();
         p.put("k", 10L);
-        System.out.println(p.get(Float.class, "k", 1.0f));
+        assertEquals(10.0f, p.get(Float.class, "k", 1.0f), 0.0f);
     }
 }
