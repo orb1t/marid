@@ -19,6 +19,7 @@ package org.marid.db;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 import org.marid.db.storage.Storage;
 
@@ -31,10 +32,11 @@ public interface DataConnection extends Closeable {
 
     /**
      * Opens the connection.
+     * @param params Connection parameters.
      * @return The open flag.
      * @throws IOException An I/O exception.
      */
-    public boolean open() throws IOException;
+    public boolean open(Map<String, ?> params) throws IOException;
 
     /**
      * Checks whether the connection is opened.
