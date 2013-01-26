@@ -129,6 +129,7 @@ public abstract class DataRecord<T> implements Externalizable, Cloneable {
         int hash = 1;
         hash = 31 * hash + Objects.hashCode(tag);
         hash = 31 * hash + Objects.hashCode(time);
+        hash = 31 * hash + Arrays.deepHashCode(new Object[] {getValue()});
         return hash;
     }
 
@@ -140,7 +141,7 @@ public abstract class DataRecord<T> implements Externalizable, Cloneable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        DataRecord<T> other = (DataRecord<T>) obj;
+        DataRecord other = (DataRecord) obj;
         if (!Objects.equals(tag, other.tag)) {
             return false;
         }

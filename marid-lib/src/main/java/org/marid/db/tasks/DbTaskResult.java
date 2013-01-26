@@ -32,10 +32,18 @@ public final class DbTaskResult {
         duration = dur;
     }
 
+    /**
+     * Get update count.
+     * @return Update count.
+     */
     public int getUpdateCount() {
         return updateCount;
     }
 
+    /**
+     * Get the task duration.
+     * @return Task duration.
+     */
     public long getDuration() {
         return duration;
     }

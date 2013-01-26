@@ -19,6 +19,7 @@ package org.marid.l10n;
 
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
+import static java.util.ResourceBundle.getBundle;
 
 /**
  * Localized resource interface.
@@ -43,8 +44,7 @@ public interface Localized {
             return ps == null || ps.length == 0 ? r : String.format(r, ps);
         }
 
-        private static final ResourceBundle S =
-                ResourceBundle.getBundle("res.strings");
+        private static final ResourceBundle S = getBundle("res.strings");
     }
 
     /**
@@ -52,8 +52,7 @@ public interface Localized {
      */
     public class M {
 
-        private static final ResourceBundle M =
-            ResourceBundle.getBundle("res.messages");
+        private static final ResourceBundle M = getBundle("res.messages");
 
         /**
          * Get a message from message resource bundle.
