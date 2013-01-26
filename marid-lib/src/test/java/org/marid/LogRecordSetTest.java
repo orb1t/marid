@@ -28,7 +28,10 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import javax.naming.CompositeName;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.marid.db.data.LogRecordSet;
 
 /**
@@ -36,12 +39,16 @@ import org.marid.db.data.LogRecordSet;
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class LogRecordSetTest extends TestCase {
+public class LogRecordSetTest extends Assert{
 
     private LogRecordSet recordSet;
 
-    @Override
-    protected void setUp() throws Exception {
+    /**
+     * Sets the test up.
+     * @throws Exception An exception.
+     */
+    @Before
+    public void setUp() throws Exception {
         LogRecord lr1 = new LogRecord(Level.INFO, "msg");
         lr1.setParameters(new Object[] {
             null,
@@ -59,8 +66,12 @@ public class LogRecordSetTest extends TestCase {
         recordSet = new LogRecordSet(lr1, lr2);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    /**
+     * Tears the test down.
+     * @throws Exception An exception.
+     */
+    @After
+    public void tearDown() throws Exception {
         recordSet = null;
     }
 
@@ -68,6 +79,7 @@ public class LogRecordSetTest extends TestCase {
      * Restorability test.
      * @throws Exception An exception.
      */
+    @Test
     public void testForRestorability() throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
