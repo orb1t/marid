@@ -17,9 +17,10 @@
  */
 package org.marid;
 
-import groovy.util.GroovyTestCase;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.junit.Assert;
+import org.junit.Test;
 import org.marid.util.DateUtil;
 
 /**
@@ -27,8 +28,9 @@ import org.marid.util.DateUtil;
  *
  * @author d.ovchinnikow at gmail.com
  */
-public class DateTest extends GroovyTestCase {
+public class DateTest extends Assert {
 
+    @Test
     public void testIsoFullDate() throws Exception {
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         Date std = f.parse("2011-03-02T00:10:59.001+0100");
@@ -37,6 +39,7 @@ public class DateTest extends GroovyTestCase {
         assertEquals(std, DateUtil.isoToDate("2011-03-02T00:10:59.001CET"));
     }
 
+    @Test
     public void testIsoFullDateWithoutTimeZone() throws Exception {
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         Date std = f.parse("2011-03-02T00:10:59.001");
@@ -44,6 +47,7 @@ public class DateTest extends GroovyTestCase {
         assertEquals(std, DateUtil.isoToDate("2011-03-02T00:10:59.001"));
     }
 
+    @Test
     public void testIsoWithoutMS() throws Exception {
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         Date std = f.parse("2011-03-02T00:10:59+0100");
@@ -52,6 +56,7 @@ public class DateTest extends GroovyTestCase {
         assertEquals(std, DateUtil.isoToDate("2011-03-02T00:10:59CET"));
     }
 
+    @Test
     public void testIsoWithoutMSAndTimeZone() throws Exception {
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         Date std = f.parse("2011-03-02T00:10:59");
@@ -59,6 +64,7 @@ public class DateTest extends GroovyTestCase {
         assertEquals(std, DateUtil.isoToDate("2011-03-02T00:10:59"));
     }
 
+    @Test
     public void testIsoHhmm() throws Exception {
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
         Date std = f.parse("2011-03-02T00:10+0100");

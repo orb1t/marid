@@ -18,6 +18,7 @@
 
 package org.marid.lib.test
 
+import org.junit.*;
 import org.marid.db.util.IncMap
 
 /**
@@ -25,47 +26,54 @@ import org.marid.db.util.IncMap
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-class IncMapTest extends GroovyTestCase {
+class IncMapTest {
 
     def testMap;
     def incMap;
 
-    @Override
+    @Before
     void setUp() {
         testMap = [a: 10L, b: 20L, c: 30L];
         incMap = new IncMap(testMap, 1);
     }
 
+    @Test
     void testGet() {
         assert incMap.a == 11;
         assert incMap.b == 21;
         assert incMap.c == 31;
     }
 
+    @Test
     void testRemove() {
         assert incMap.remove("a") == 11;
         assert incMap.remove("b") == 21;
         assert incMap.remove("c") == 31;
     }
 
+    @Test
     void testClear() {
         incMap.clear();
         assert incMap.isEmpty();
         assert testMap.isEmpty();
     }
 
+    @Test
     void testSize() {
         assert testMap.size() == incMap.size();
     }
 
+    @Test
     void testKeySet() {
         assert testMap.keySet() == incMap.keySet();
     }
 
+    @Test
     void testValues() {
         assert testMap.values().collect{it + 1} == incMap.values().asList();
     }
 
+    @Test
     void testEntrySet() {
         for (def i = 0; i < incMap.size(); i++) {
             def a1 = incMap.entrySet().toArray()[i];
