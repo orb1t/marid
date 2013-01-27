@@ -19,7 +19,7 @@ package org.marid;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.marid.util.Prp;
+import org.marid.prp.Prp;
 
 /**
  * Marid service.

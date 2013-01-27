@@ -19,7 +19,7 @@ package org.marid;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.marid.util.CMPrp;
+import org.marid.prp.CMPrp;
 
 /**
  * Type test.

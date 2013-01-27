@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.marid.util.CMPrp;
+import org.marid.prp.CMPrp;
 
 /**
  * Abstract service.
