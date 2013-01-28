@@ -19,6 +19,7 @@ package org.marid.db.storage;
 
 import java.io.IOException;
 import java.util.List;
+import org.marid.db.Storage;
 
 /**
  * Historical storage.

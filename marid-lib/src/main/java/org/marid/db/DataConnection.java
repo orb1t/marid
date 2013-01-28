@@ -19,9 +19,7 @@ package org.marid.db;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Set;
-import org.marid.db.storage.Storage;
 
 /**
  * Marid data connection.
@@ -32,11 +30,10 @@ public interface DataConnection extends Closeable {
 
     /**
      * Opens the connection.
-     * @param params Connection parameters.
      * @return The open flag.
      * @throws IOException An I/O exception.
      */
-    public boolean open(Map<String, ?> params) throws IOException;
+    public boolean open() throws IOException;
 
     /**
      * Checks whether the connection is opened.
@@ -45,23 +42,35 @@ public interface DataConnection extends Closeable {
     public boolean isOpened();
 
     /**
+     * Get the access code for the current user.
+     * @return Acces code.
+     * @throws IOException An I/O exception.
+     */
+    public DbAccessCode getAccessCode() throws IOException;
+
+    /**
      * Checks whether the given storage type is supported.
      * @param type A storage type.
      * @return Check status.
+     * @throws IOException An I/O exception.
      */
-    public boolean isStorageSupported(Class<? extends Storage> type);
+    public boolean isStorageSupported(
+            Class<? extends Storage> type) throws IOException;
 
     /**
      * Get the supported storage type set.
      * @return Supported storage type set.
+     * @throws IOException An I/O exception.
      */
-    public Set<Class<? extends Storage>> getSupportedStorageTypeSet();
+    public Set<Class<? extends Storage>>
+            getSupportedStorageTypeSet() throws IOException;
 
     /**
      * Get a storage by type.
      * @param <T> Storage type.
      * @param type Storage type class.
      * @return Storage or null if none was found.
+     * @throws IOException An I/O exception.
      */
-    public <T extends Storage> T getStorage(Class<T> type);
+    public <T extends Storage> T getStorage(Class<T> type) throws IOException;
 }

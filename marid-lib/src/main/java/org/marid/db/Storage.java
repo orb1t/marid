@@ -15,10 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.db.storage;
+package org.marid.db;
 
 import java.io.IOException;
-import java.util.BitSet;
 import java.util.List;
 
 /**
@@ -27,6 +26,13 @@ import java.util.List;
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface Storage {
+
+    /**
+     * Get the associated data connection.
+     * @return Data connection.
+     */
+    public DataConnection getDataConnection();
+
     /**
      * Get all tags within the given root.
      * @param root Tag root.
@@ -52,35 +58,12 @@ public interface Storage {
     public boolean exist(List<String> tags) throws IOException;
 
     /**
-     * Checks whether the current user has read access to the specific tag.
-     * @param tag A tag.
-     * @return Access status.
-     * @throws IOException An I/O exception.
-     */
-    public boolean hasReadAccess(String tag) throws IOException;
-
-    /**
-     * Checks whether the current user has write access to a specific tag.
-     * @param tag A tag.
-     * @return Access status.
-     * @throws IOException An I/O exception.
-     */
-    public boolean hasWriteAccess(String tag) throws IOException;
-
-    /**
-     * Checks whether the current user has purge access.
-     * @return Access status.
-     * @throws IOException An I/O exception.
-     */
-    public boolean hasPurgeAccess() throws IOException;
-
-    /**
-     * Get the access code by tag.
-     * @param tag A tag.
+     * Get the access code for the given tag.
+     * @param tag Tag.
      * @return Access code.
      * @throws IOException An I/O exception.
      */
-    public BitSet getAccessCode(String tag) throws IOException;
+    public DbAccessCode getAccessCode(String tag) throws IOException;
 
     /**
      * Purge all the data in the current storage.

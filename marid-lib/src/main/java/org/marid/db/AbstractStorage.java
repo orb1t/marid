@@ -15,15 +15,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.db.storage;
+package org.marid.db;
 
-import org.marid.db.Storage;
+import java.io.IOException;
 
 /**
- * Data utility storage.
+ * Abstract storage.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public interface DocumentStorage extends Storage {
+public abstract class AbstractStorage implements Storage {
 
+    /**
+     * Internal data connection.
+     */
+    protected final DataConnection connection;
+
+    /**
+     * Constructs an abstract storage.
+     * @param conn Connection.
+     */
+    public AbstractStorage(DataConnection conn) {
+        connection = conn;
+    }
+
+    @Override
+    public DataConnection getDataConnection() {
+        return connection;
+    }
+
+    @Override
+    public DbAccessCode getAccessCode(String tag) throws IOException {
+        return connection.getAccessCode();
+    }
 }

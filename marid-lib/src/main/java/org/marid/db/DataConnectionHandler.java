@@ -15,43 +15,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.db.storage;
+package org.marid.db;
 
-import org.marid.db.Storage;
 import java.io.IOException;
-import java.util.List;
-import org.marid.db.data.DataRecord;
+import java.net.SocketAddress;
+import java.util.Properties;
 
 /**
- * Data current storage.
+ * Data connection handler.
  *
- * @auhor Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
+ * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public interface CurrentStorage extends Storage {
+public interface DataConnectionHandler {
     /**
-     * Get a record by name.
-     *
-     * @param tag Tag.
-     * @return Record.
+     * Connects to the remote side.
+     * @param protocol Protocol (e.g. http, https, tcp).
+     * @param address Socket address.
+     * @param props Connection properties.
+     * @param user User.
+     * @param password Password.
+     * @return Data connection.
      * @throws IOException An I/O exception.
      */
-    public <T extends DataRecord> T get(String tag) throws IOException;
+    public DataConnection connect(
+            String protocol,
+            SocketAddress address,
+            Properties props,
+            String user,
+            char[] password) throws IOException;
 
     /**
-     * Get records by names.
-     *
-     * @param tags Tags.
-     * @return Records.
-     * @throws IOException An I/O exception.
+     * Get the service protocol name.
+     * @return Service protocol name.
      */
-    public <T extends DataRecord> List<T>
-            get(List<String> tags) throws IOException;
-
-    /**
-     * Get all the records.
-     *
-     * @return Records.
-     * @throws IOException An I/O exception.
-     */
-    public <T extends DataRecord> List<T> get() throws IOException;
+    public String getServiceProtocol();
 }
