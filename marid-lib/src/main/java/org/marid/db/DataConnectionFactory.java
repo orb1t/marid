@@ -18,11 +18,8 @@
 package org.marid.db;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Properties;
 import java.util.ServiceLoader;
 
 /**
@@ -34,22 +31,20 @@ public final class DataConnectionFactory {
     /**
      * Obtain a data connection.
      * @param uri Remote resource URI.
-     * @param user User.
-     * @param password Password.
      * @return Data connection.
      */
-    public static DataConnection connect(
-            URI uri,
-            String user,
-            char[] password) throws IOException, URISyntaxException {
+    public static DataConnection connect(URI uri) throws IOException {
         DataConnectionHandler handler = null;
-        Properties props = new Properties();
         synchronized(DataConnectionFactory.class) {
             String serviceProtocol = uri.getScheme();
             if (serviceProtocol == null) {
                 throw new IllegalArgumentException("Service protocol is null");
             }
-            uri = new URI(uri.getRawSchemeSpecificPart());
+            try {
+                uri = new URI(uri.getRawSchemeSpecificPart());
+            } catch (URISyntaxException x) {
+                throw new IllegalArgumentException(x);
+            }
             if (uri.getHost() == null) {
                 throw new IllegalArgumentException("Host is null");
             }
@@ -61,17 +56,14 @@ public final class DataConnectionFactory {
             }
         }
         if (handler != null) {
-            String prot = uri.getScheme();
-            SocketAddress address = new InetSocketAddress(
-                    uri.getHost(), uri.getPort());
-            return handler.connect(prot, address, props, user, password);
+            return handler.connect(uri.getScheme(), uri);
         } else {
             throw new IllegalStateException("No such service");
         }
     }
 
     private static class Loader {
-        
+
         private static final ServiceLoader<DataConnectionHandler> loader =
                 ServiceLoader.load(DataConnectionHandler.class);
     }

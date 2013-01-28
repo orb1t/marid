@@ -18,8 +18,7 @@
 package org.marid.db;
 
 import java.io.IOException;
-import java.net.SocketAddress;
-import java.util.Properties;
+import java.net.URI;
 
 /**
  * Data connection handler.
@@ -30,19 +29,11 @@ public interface DataConnectionHandler {
     /**
      * Connects to the remote side.
      * @param protocol Protocol (e.g. http, https, tcp).
-     * @param address Socket address.
-     * @param props Connection properties.
-     * @param user User.
-     * @param password Password.
+     * @param uri Remote resource.
      * @return Data connection.
      * @throws IOException An I/O exception.
      */
-    public DataConnection connect(
-            String protocol,
-            SocketAddress address,
-            Properties props,
-            String user,
-            char[] password) throws IOException;
+    public DataConnection connect(String protocol, URI uri) throws IOException;
 
     /**
      * Get the service protocol name.
