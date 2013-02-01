@@ -20,6 +20,7 @@ package org.marid.l10n;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import static java.util.ResourceBundle.getBundle;
+import org.marid.l10n.LocalizationUtils.EmptyResourceBundle;
 
 /**
  * Localized resource interface.
@@ -31,6 +32,19 @@ public interface Localized {
      * Strings localizations.
      */
     public class S {
+        
+        private static final ResourceBundle SB;
+        
+        static {
+            ResourceBundle rb;
+            try {
+                rb = getBundle("res.strings", LocalizationUtils.UTF8_CONTROL);
+            } catch (Exception x) {
+                x.printStackTrace(System.err);
+                rb = new EmptyResourceBundle();
+            }
+            SB = rb;
+        }
 
         /**
          * Get a string from strings resource bundle.
@@ -40,11 +54,9 @@ public interface Localized {
          * @return String.
          */
         public static String l(String key, Object... ps) {
-            String r = S.containsKey(key) ? S.getString(key) : key;
+            String r = SB.containsKey(key) ? SB.getString(key) : key;
             return ps == null || ps.length == 0 ? r : String.format(r, ps);
         }
-
-        private static final ResourceBundle S = getBundle("res.strings");
     }
 
     /**
@@ -52,7 +64,18 @@ public interface Localized {
      */
     public class M {
 
-        private static final ResourceBundle M = getBundle("res.messages");
+        private static final ResourceBundle MB;
+        
+        static {
+            ResourceBundle rb;
+            try {
+                rb = getBundle("res.messages", LocalizationUtils.UTF8_CONTROL);
+            } catch (Exception x) {
+                x.printStackTrace(System.err);
+                rb = new EmptyResourceBundle();
+            }
+            MB = rb;
+        }
 
         /**
          * Get a message from message resource bundle.
@@ -62,7 +85,7 @@ public interface Localized {
          * @return Message.
          */
         public static String l(String k, Object... v) {
-            String r = M.containsKey(k) ? M.getString(k) : k;
+            String r = MB.containsKey(k) ? MB.getString(k) : k;
             return v == null || v.length == 0 ? r : MessageFormat.format(r, v);
         }
     }

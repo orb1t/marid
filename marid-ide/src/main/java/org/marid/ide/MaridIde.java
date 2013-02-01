@@ -20,8 +20,6 @@ package org.marid.ide;
 import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.InputStream;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -36,20 +34,13 @@ import org.marid.logging.Logging;
  */
 public class MaridIde {
 
-    static {
-        Class<?> c = MaridIde.class;
-        try (InputStream is = c.getResourceAsStream("/ide.properties")) {
-        } catch (Exception x) {
-        }
-    }
-
     /**
      * Entry point.
      *
      * @param args Command-line arguments.
      */
     public static void main(String... args) throws Exception {
-        Logging.init(MaridIde.class, "res.messages");
+        Logging.init(MaridIde.class, "log_ide.properties");
         BufferedImage img = MaridImage.getIcon(512);
         ImageIO.write(img, "PNG", new File("/home/dmitry/marid512.png"));
         JOptionPane.showMessageDialog(null, new JLabel(new ImageIcon(img)));
@@ -59,10 +50,5 @@ public class MaridIde {
                 new IdeFrame().setVisible(true);
             }
         });
-    }
-
-    private static class Log {
-
-        private static final Logger l = Logger.getLogger("ide", "res.messages");
     }
 }
