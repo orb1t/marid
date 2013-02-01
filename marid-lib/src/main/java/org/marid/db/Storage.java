@@ -26,7 +26,6 @@ import java.util.List;
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface Storage {
-
     /**
      * Get the associated data connection.
      * @return Data connection.

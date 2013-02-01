@@ -27,7 +27,6 @@ import java.util.Set;
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface DataConnection extends Closeable {
-
     /**
      * Opens the connection.
      * @return The open flag.

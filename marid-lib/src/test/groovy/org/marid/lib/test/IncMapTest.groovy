@@ -19,7 +19,7 @@
 package org.marid.lib.test
 
 import org.junit.*;
-import org.marid.db.util.IncMap
+import org.marid.db.util.IncMap;
 
 /**
  * Inc-map test.
