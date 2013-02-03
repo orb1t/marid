@@ -21,18 +21,49 @@ import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import javax.swing.Action;
 import javax.swing.GroupLayout;
-import javax.swing.JDialog;
-
 import javax.swing.GroupLayout.SequentialGroup;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.KeyStroke;
+
+import org.marid.ide.res.MaridAction;
+import org.marid.l10n.Localized;
 
 /**
  * Abstract dialog.
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public abstract class AbstractDialog extends JDialog {
-
+public abstract class AbstractDialog extends JDialog implements 
+        WindowListener, Localized {
+    /**
+     * Accept action.
+     */
+    protected final Action acceptAction = new MaridAction(
+            getAcceptButtonName(), null, getAcceptButtonIcon()) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            accept();
+        }
+    };
+    
+    /**
+     * Reject action.
+     */
+    protected final Action rejectAction = new MaridAction(
+            getRejectButtonName(), null, getRejectButtonIcon()) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            reject();
+        }
+    };
+    
     /**
      * Constructs a dialog.
      *
@@ -43,7 +74,7 @@ public abstract class AbstractDialog extends JDialog {
      */
     public AbstractDialog(Frame frame, String title, boolean modal,
             GraphicsConfiguration conf) {
-        super(frame, title, modal, conf);
+        super(frame, S.l(title), modal, conf);
         init();
     }
 
@@ -55,7 +86,7 @@ public abstract class AbstractDialog extends JDialog {
      * @param modal Modal flag.
      */
     public AbstractDialog(Frame frame, String title, boolean modal) {
-        super(frame, title, modal);
+        super(frame, S.l(title), modal);
         init();
     }
 
@@ -66,7 +97,7 @@ public abstract class AbstractDialog extends JDialog {
      * @param title Title.
      */
     public AbstractDialog(Frame frame, String title) {
-        super(frame, title);
+        super(frame, S.l(title));
         init();
     }
 
@@ -97,7 +128,7 @@ public abstract class AbstractDialog extends JDialog {
      */
     public AbstractDialog(Window window, String title, ModalityType modality,
             GraphicsConfiguration conf) {
-        super(window, title, modality, conf);
+        super(window, S.l(title), modality, conf);
         init();
     }
 
@@ -109,7 +140,7 @@ public abstract class AbstractDialog extends JDialog {
      * @param modality Modality.
      */
     public AbstractDialog(Window window, String title, ModalityType modality) {
-        super(window, title, modality);
+        super(window, S.l(title), modality);
         init();
     }
 
@@ -120,7 +151,7 @@ public abstract class AbstractDialog extends JDialog {
      * @param title Title.
      */
     public AbstractDialog(Window window, String title) {
-        super(window, title);
+        super(window, S.l(title));
         init();
     }
 
@@ -134,7 +165,7 @@ public abstract class AbstractDialog extends JDialog {
      */
     public AbstractDialog(Dialog dialog, String title, ModalityType modality,
             GraphicsConfiguration conf) {
-        super(dialog, title, modality, conf);
+        super(dialog, S.l(title), modality, conf);
         init();
     }
 
@@ -173,7 +204,45 @@ public abstract class AbstractDialog extends JDialog {
     protected void accept() {
     }
     
+    /**
+     * Get an accept button label.
+     * @return Accept button label.
+     */
+    protected String getAcceptButtonName() {
+        return "OK";
+    }
+    
+    /**
+     * Get a reject button label.
+     * @return Reject button label.
+     */
+    protected String getRejectButtonName() {
+        return "Cancel";
+    }
+    
+    /**
+     * Get an accept button icon.
+     * @return Accept button icon.
+     */
+    protected String getAcceptButtonIcon() {
+        return "s16/ok.png";
+    }
+    
+    /**
+     * Get a reject button icon.
+     * @return Reject button icon.
+     */
+    protected String getRejectButtonIcon() {
+        return "s16/cancel.png";
+    }
+    
     private void init() {
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                reject();
+            }
+        });
         GroupLayout gl = new GroupLayout(getContentPane());
         gl.setAutoCreateContainerGaps(true);
         gl.setAutoCreateGaps(true);
@@ -181,5 +250,8 @@ public abstract class AbstractDialog extends JDialog {
         SequentialGroup hg = gl.createSequentialGroup();
         fill(gl, vg, hg);
         getContentPane().setLayout(gl);
+        getRootPane().registerKeyboardAction(rejectAction,
+                KeyStroke.getKeyStroke("ESCAPE"),
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
     }
 }

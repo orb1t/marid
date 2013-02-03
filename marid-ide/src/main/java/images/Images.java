@@ -110,7 +110,7 @@ public class Images {
      * @return Icon object.
      */
     public static ImageIcon getIcon(String path) {
-        URL url = Images.class.getResource(path);
+        URL url = path == null ? null : Images.class.getResource(path);
         if (url == null) {
             return EMPTY_ICON;
         } else {
@@ -126,7 +126,7 @@ public class Images {
      * @return Icon object.
      */
     public static ImageIcon getIcon(String path, int width, int height) {
-        URL url = Images.class.getResource(path);
+        URL url = path == null ? null : Images.class.getResource(path);
         if (url == null) {
             if (width == height) {
                 switch (width) {
@@ -160,7 +160,7 @@ public class Images {
      * @return Image object.
      */
     public static Image getImage(String path) {
-        URL url = Images.class.getResource(path);
+        URL url = path == null ? null : Images.class.getResource(path);
         if (url == null) {
             return EMPTY_IMAGE;
         } else {
@@ -176,7 +176,7 @@ public class Images {
      * @return Image object.
      */
     public static Image getImage(String path, int width, int height) {
-        URL url = Images.class.getResource(path);
+        URL url = path == null ? null : Images.class.getResource(path);
         if (url == null) {
             if (width == height) {
                 switch (width) {
