@@ -22,11 +22,12 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.util.ListResourceBundle;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Localization utilities.
@@ -80,7 +81,7 @@ public class LocalizationUtils {
                         URLConnection conn = url.openConnection();
                         conn.setUseCaches(false);
                         try (Reader r = new InputStreamReader(
-                                conn.getInputStream(), StandardCharsets.UTF_8)){
+                                conn.getInputStream(), UTF_8)) {
                             return new PropertyResourceBundle(r);
                         }
                     } else {
@@ -88,8 +89,7 @@ public class LocalizationUtils {
                     }
                 } else {
                     try (Reader r = new InputStreamReader(
-                            loader.getResourceAsStream(resourceName),
-                            StandardCharsets.UTF_8)) {
+                            loader.getResourceAsStream(resourceName), UTF_8)) {
                         return new PropertyResourceBundle(r);
                     }
                 }
