@@ -22,12 +22,15 @@ import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.KeyStroke;
@@ -42,6 +45,10 @@ import org.marid.l10n.Localized;
  */
 public abstract class AbstractDialog extends JDialog implements 
         WindowListener, Localized {
+    
+    private static final Logger log = Logger.getLogger(
+            AbstractDialog.class.getName());
+    
     /**
      * Accept action.
      */
@@ -49,7 +56,11 @@ public abstract class AbstractDialog extends JDialog implements
             getAcceptButtonName(), null, getAcceptButtonIcon()) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            accept();
+            try {
+                accept();
+            } catch (Exception x) {
+                log.log(Level.WARNING, "Accepting error", x);
+            }
         }
     };
     
@@ -60,7 +71,11 @@ public abstract class AbstractDialog extends JDialog implements
             getRejectButtonName(), null, getRejectButtonIcon()) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            reject();
+            try {
+                reject();
+            } catch (Exception x) {
+                log.log(Level.WARNING, "Rejecting error", x);
+            }
         }
     };
     
@@ -178,24 +193,12 @@ public abstract class AbstractDialog extends JDialog implements
     protected abstract void fill(
             GroupLayout gl,
             SequentialGroup vg,
-            SequentialGroup hg);
-    
-    /**
-     * Fills the buttons section.
-     * @param gl Group layout.
-     * @param vg Vertical group.
-     * @param hg Horizontal group.
-     */
-    protected abstract void fillButtons(
-            GroupLayout gl,
-            SequentialGroup vg,
-            SequentialGroup hg);
+            ParallelGroup hg);
     
     /**
      * Rejects the dialog.
      */
     protected void reject() {
-        dispose();
     }
     
     /**
@@ -236,22 +239,71 @@ public abstract class AbstractDialog extends JDialog implements
         return "s16/cancel.png";
     }
     
+    /**
+     * Adds default buttons.
+     * @param gl Group layout.
+     * @param vg Vertical group.
+     * @param hg Horizontal group.
+     */
+    protected void addDefaultButtons(
+            GroupLayout gl,
+            SequentialGroup vg,
+            ParallelGroup hg) {
+        vg.addGap(24, 32, Integer.MAX_VALUE);
+        JButton acceptButton = new JButton(acceptAction);
+        JButton rejectButton = new JButton(rejectAction);
+        vg.addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                .addComponent(rejectButton)
+                .addComponent(acceptButton));
+        hg.addGroup(gl.createSequentialGroup()
+                .addComponent(rejectButton)
+                .addGap(0, 0, Integer.MAX_VALUE)
+                .addComponent(acceptButton));
+        getRootPane().setDefaultButton(acceptButton);
+    }
+    
     private void init() {
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                reject();
-            }
-        });
+        addWindowListener(this);
         GroupLayout gl = new GroupLayout(getContentPane());
         gl.setAutoCreateContainerGaps(true);
         gl.setAutoCreateGaps(true);
         SequentialGroup vg = gl.createSequentialGroup();
-        SequentialGroup hg = gl.createSequentialGroup();
+        ParallelGroup hg = gl.createParallelGroup();
         fill(gl, vg, hg);
+        gl.setVerticalGroup(vg);
+        gl.setHorizontalGroup(hg);
         getContentPane().setLayout(gl);
         getRootPane().registerKeyboardAction(rejectAction,
                 KeyStroke.getKeyStroke("ESCAPE"),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
+    }
+
+    @Override
+    public void windowActivated(WindowEvent e) {
+    }
+
+    @Override
+    public void windowClosed(WindowEvent e) {
+    }
+
+    @Override
+    public void windowClosing(WindowEvent e) {
+        reject();
+    }
+
+    @Override
+    public void windowDeactivated(WindowEvent e) {
+    }
+
+    @Override
+    public void windowDeiconified(WindowEvent e) {
+    }
+
+    @Override
+    public void windowIconified(WindowEvent e) {
+    }
+
+    @Override
+    public void windowOpened(WindowEvent e) {
     }
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.marid</groupId>
@@ -24,7 +25,6 @@
     </developers>
 
     <properties>
-        <netbeans.hint.license>marid-agpl30</netbeans.hint.license>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <marid.version>0.1.14-SNAPSHOT</marid.version>
     </properties>
@@ -71,23 +71,6 @@
             </build>
         </profile>
     </profiles>
-
-    <repositories>
-        <repository>
-            <id>oracle</id>
-            <layout>default</layout>
-            <name>Oracle Released Java Packages</name>
-            <url>http://download.oracle.com/maven</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>fail</checksumPolicy>
-                <updatePolicy>always</updatePolicy>
-            </releases>
-        </repository>
-    </repositories>
 
     <distributionManagement>
         <site>
@@ -136,11 +119,8 @@
                         <testSource>1.7</testSource>
                         <testTarget>1.7</testTarget>
                         <showWarnings>true</showWarnings>
-                        <compilerArguments>
-                            <Xlint:unchecked/>
-                        </compilerArguments>
                         <showDeprecation>true</showDeprecation>
-                        <forceJavacCompilerUse>true</forceJavacCompilerUse>
+                        <compilerArgument>-Xlint:unchecked</compilerArgument>
                     </configuration>
                 </plugin>
 
@@ -213,7 +193,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>2.7</version>
-                    <goals>wagon:upload</goals>
                 </plugin>
 
                 <plugin>
@@ -249,6 +228,43 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>2.4</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.gmaven</groupId>
+                    <artifactId>gmaven-plugin</artifactId>
+                    <version>1.5</version>
+                    <configuration>
+                        <source>1.7</source>
+                        <providerSelection>2.0</providerSelection>
+                        <targetBytecode>1.7</targetBytecode>
+                        <stacktrace>true</stacktrace>
+                        <lineLength>120</lineLength>
+                        <indentSize>4</indentSize>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>groovy-compile-source</id>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <phase>compile</phase>
+                        </execution>
+                        <execution>
+                            <id>groovy-compile-test-source</id>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                            <phase>test-compile</phase>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.codehaus.groovy</groupId>
+                            <artifactId>groovy-all</artifactId>
+                            <version>2.1.0</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -289,40 +305,6 @@
                     <newVersion>${marid.version}</newVersion>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <id>groovy-test-compile</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>groovy-compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <providerSelection>2.0</providerSelection>
-                    <sourceEncoding>UTF-8</sourceEncoding>
-                    <stacktrace>true</stacktrace>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-all</artifactId>
-                        <version>2.1.0</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
         </plugins>
     </build>
 
@@ -362,6 +344,19 @@
                 <artifactId>marid-runtime</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>2.1.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-test</artifactId>
+                <version>2.1.0</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -369,14 +364,11 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>2.1.0</version>
         </dependency>
 
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-test</artifactId>
-            <version>2.1.0</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

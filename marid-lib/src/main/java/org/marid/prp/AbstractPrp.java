@@ -17,9 +17,6 @@
  */
 package org.marid.prp;
 
-import groovy.lang.GroovySystem;
-import groovy.lang.MetaClass;
-
 /**
  * Abstract propertized object class.
  *
@@ -36,12 +33,6 @@ public abstract class AbstractPrp implements Prp {
     @Override
     public <T> T get(Class<T> c, String key, T def) {
         Object v = get(key, def);
-        if (v == null) {
-            return null;
-        } else {
-            Class<?> cl = v.getClass();
-            MetaClass mc = GroovySystem.getMetaClassRegistry().getMetaClass(cl);
-            return c.cast(mc.invokeMethod(v, "asType", c));
-        }
+        return c.cast(v);
     }
 }

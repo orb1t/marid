@@ -35,6 +35,6 @@ public class TypeTest extends Assert {
     public void test1() {
         CMPrp p = new CMPrp();
         p.put("k", 10L);
-        assertEquals(10.0f, p.get(Float.class, "k", 1.0f), 0.0f);
+        assertEquals(10L, (long)p.get(Long.class, "k", 10L));
     }
 }

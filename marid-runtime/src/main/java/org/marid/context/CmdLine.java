@@ -17,14 +17,9 @@
  */
 package org.marid.context;
 
-import groovyjarjarcommonscli.CommandLine;
-import groovyjarjarcommonscli.HelpFormatter;
-import groovyjarjarcommonscli.Option;
-import groovyjarjarcommonscli.Options;
-import groovyjarjarcommonscli.ParseException;
-import groovyjarjarcommonscli.Parser;
-import groovyjarjarcommonscli.PosixParser;
 import java.util.Properties;
+
+import groovyjarjarcommonscli.*;
 import org.marid.l10n.Localized;
 
 /**

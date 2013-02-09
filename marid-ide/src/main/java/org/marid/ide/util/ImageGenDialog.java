@@ -17,11 +17,20 @@
  */
 package org.marid.ide.util;
 
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.ParallelGroup;
+import javax.swing.GroupLayout.SequentialGroup;
+import org.marid.ide.gui.AbstractDialog;
+
 /**
  * Image generation dialog.
  * 
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class ImageGenDialog {
-    
+public class ImageGenDialog extends AbstractDialog {
+
+    @Override
+    protected void fill(GroupLayout gl, SequentialGroup vg, ParallelGroup hg) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }    
 }

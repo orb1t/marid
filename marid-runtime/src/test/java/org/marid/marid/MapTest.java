@@ -17,7 +17,8 @@
  */
 package org.marid.marid;
 
-import groovy.util.GroovyTestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
 
 /**
@@ -25,8 +26,9 @@ import groovy.util.GroovyTestCase;
  *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
-public class MapTest extends GroovyTestCase {
+public class MapTest extends Assert {
 
+    @Test
     public void test1() throws Exception {
 
     }

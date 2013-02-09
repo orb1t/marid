@@ -41,8 +41,8 @@ public class MaridIde {
      */
     public static void main(String... args) throws Exception {
         Logging.init(MaridIde.class, "log_ide.properties");
-        BufferedImage img = MaridImage.getIcon(512);
-        ImageIO.write(img, "PNG", new File("/home/dmitry/marid512.png"));
+        BufferedImage img = MaridImage.getIcon(128);
+        ImageIO.write(img, "PNG", new File("/home/dmitry/marid128.png"));
         JOptionPane.showMessageDialog(null, new JLabel(new ImageIcon(img)));
         EventQueue.invokeLater(new Runnable() {
             @Override
