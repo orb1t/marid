@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Dmitry Ovchinnikov
+ * Copyright (C) 2013 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,12 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.ide;
 
-/**
- * IDE graphics.
- *
- * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
- */
-public class IdeGraphics {
-}
+package org.marid.ide
+
+println("hello");

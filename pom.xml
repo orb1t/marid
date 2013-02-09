@@ -239,8 +239,6 @@
                         <providerSelection>2.0</providerSelection>
                         <targetBytecode>1.7</targetBytecode>
                         <stacktrace>true</stacktrace>
-                        <lineLength>120</lineLength>
-                        <indentSize>4</indentSize>
                     </configuration>
                     <executions>
                         <execution>
@@ -266,15 +264,27 @@
                         </dependency>
                     </dependencies>
                 </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.2.1</version>
+                    <configuration>
+                        <includeProjectDependencies>true</includeProjectDependencies>
+                        <executable>java</executable>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-changelog-plugin</artifactId>
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
             </plugin>
 
@@ -294,7 +304,11 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
             </plugin>
 
             <plugin>

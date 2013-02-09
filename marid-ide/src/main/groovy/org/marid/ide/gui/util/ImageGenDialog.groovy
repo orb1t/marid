@@ -15,22 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.ide.util;
 
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.ParallelGroup;
-import javax.swing.GroupLayout.SequentialGroup;
-import org.marid.ide.gui.AbstractDialog;
+package org.marid.ide.gui.util
 
-/**
- * Image generation dialog.
- * 
- * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
- */
-public class ImageGenDialog extends AbstractDialog {
+import groovy.transform.InheritConstructors
+import groovy.util.logging.Log
+import org.codehaus.groovy.runtime.DefaultGroovyMethods
+import org.marid.ide.gui.AbstractDialog
+
+import javax.swing.*
+import javax.swing.GroupLayout.ParallelGroup
+import javax.swing.GroupLayout.SequentialGroup
+
+@Log
+@InheritConstructors
+class ImageGenDialog extends AbstractDialog {
 
     @Override
     protected void fill(GroupLayout gl, SequentialGroup vg, ParallelGroup hg) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }    
+        DefaultGroovyMethods m;
+    }
 }

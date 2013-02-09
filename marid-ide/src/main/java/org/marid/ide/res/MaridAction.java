@@ -34,19 +34,18 @@ public abstract class MaridAction extends AbstractAction implements Localized {
      * @param info Action info (tooltip).
      * @param icon Action icon path.
      * @param key Action key.
-     * @param enabled Enabled state.
+     * @param state Enabled state.
      * @param size Icon size.
      */
-    public MaridAction(String name, String info, String icon,
-            String key, Boolean enabled, int size) {
+    public MaridAction(String name, String info, String icon, String key, Boolean state, int size) {
         if (name != null) {
             putValue(NAME, S.l(name));
         }
         if (icon != null) {
             putValue(SMALL_ICON, Images.getIcon(icon, size, size));
         }
-        if (enabled != null) {
-            setEnabled(enabled);
+        if (state != null) {
+            setEnabled(state);
         }
         if (info != null) {
             putValue(SHORT_DESCRIPTION, S.l(info));

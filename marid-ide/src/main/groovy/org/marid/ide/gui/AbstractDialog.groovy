@@ -15,45 +15,33 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.ide.gui;
 
-import java.awt.Dialog;
-import java.awt.Frame;
-import java.awt.GraphicsConfiguration;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.Action;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.ParallelGroup;
-import javax.swing.GroupLayout.SequentialGroup;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.KeyStroke;
+package org.marid.ide.gui
 
-import org.marid.ide.res.MaridAction;
-import org.marid.l10n.Localized;
+import groovy.util.logging.Log
+import org.marid.ide.res.MaridAction
+import org.marid.l10n.Localized
 
-/**
- * Abstract dialog.
- *
- * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
- */
-public abstract class AbstractDialog extends JDialog implements 
-        WindowListener, Localized {
-    
-    private static final Logger log = Logger.getLogger(
-            AbstractDialog.class.getName());
-    
+import java.awt.Dialog.ModalityType
+import javax.swing.*
+import javax.swing.GroupLayout.ParallelGroup
+import javax.swing.GroupLayout.SequentialGroup
+import java.awt.*
+import java.awt.event.ActionEvent
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
+import java.util.logging.Level
+
+import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW
+import static javax.swing.KeyStroke.getKeyStroke
+
+@Log
+@Mixin(WindowAdapter)
+abstract class AbstractDialog extends JDialog {
     /**
      * Accept action.
      */
-    protected final Action acceptAction = new MaridAction(
-            getAcceptButtonName(), null, getAcceptButtonIcon()) {
+    protected final def acceptAction = new MaridAction(acceptButtonName, null, acceptButtonIcon) {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
@@ -63,12 +51,11 @@ public abstract class AbstractDialog extends JDialog implements
             }
         }
     };
-    
+
     /**
      * Reject action.
      */
-    protected final Action rejectAction = new MaridAction(
-            getRejectButtonName(), null, getRejectButtonIcon()) {
+    protected final def rejectAction = new MaridAction(rejectButtonName, null, rejectButtonIcon) {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
@@ -78,7 +65,7 @@ public abstract class AbstractDialog extends JDialog implements
             }
         }
     };
-    
+
     /**
      * Constructs a dialog.
      *
@@ -87,9 +74,8 @@ public abstract class AbstractDialog extends JDialog implements
      * @param modal Modal flag.
      * @param conf Graphics configuration.
      */
-    public AbstractDialog(Frame frame, String title, boolean modal,
-            GraphicsConfiguration conf) {
-        super(frame, S.l(title), modal, conf);
+    public AbstractDialog(Frame frame, String title, boolean modal, GraphicsConfiguration conf) {
+        super(frame, Localized.S.l(title), modal, conf);
         init();
     }
 
@@ -101,7 +87,7 @@ public abstract class AbstractDialog extends JDialog implements
      * @param modal Modal flag.
      */
     public AbstractDialog(Frame frame, String title, boolean modal) {
-        super(frame, S.l(title), modal);
+        super(frame, Localized.S.l(title), modal);
         init();
     }
 
@@ -112,7 +98,7 @@ public abstract class AbstractDialog extends JDialog implements
      * @param title Title.
      */
     public AbstractDialog(Frame frame, String title) {
-        super(frame, S.l(title));
+        super(frame, Localized.S.l(title));
         init();
     }
 
@@ -141,9 +127,8 @@ public abstract class AbstractDialog extends JDialog implements
      * @param modality Modality.
      * @param conf Graphics configuration.
      */
-    public AbstractDialog(Window window, String title, ModalityType modality,
-            GraphicsConfiguration conf) {
-        super(window, S.l(title), modality, conf);
+    public AbstractDialog(Window w, String title, ModalityType modality, GraphicsConfiguration c) {
+        super(w, Localized.S.l(title), modality, c);
         init();
     }
 
@@ -155,7 +140,7 @@ public abstract class AbstractDialog extends JDialog implements
      * @param modality Modality.
      */
     public AbstractDialog(Window window, String title, ModalityType modality) {
-        super(window, S.l(title), modality);
+        super(window, Localized.S.l(title), modality);
         init();
     }
 
@@ -166,7 +151,7 @@ public abstract class AbstractDialog extends JDialog implements
      * @param title Title.
      */
     public AbstractDialog(Window window, String title) {
-        super(window, S.l(title));
+        super(window, Localized.S.l(title));
         init();
     }
 
@@ -178,9 +163,8 @@ public abstract class AbstractDialog extends JDialog implements
      * @param modality Modality.
      * @param conf Graphics configuration.
      */
-    public AbstractDialog(Dialog dialog, String title, ModalityType modality,
-            GraphicsConfiguration conf) {
-        super(dialog, S.l(title), modality, conf);
+    public AbstractDialog(Dialog dialog, String title, ModalityType modality, GraphicsConfiguration conf) {
+        super(dialog, Localized.S.l(title), modality, conf);
         init();
     }
 
@@ -190,23 +174,20 @@ public abstract class AbstractDialog extends JDialog implements
      * @param vg Vertical group.
      * @param hg Horizontal group.
      */
-    protected abstract void fill(
-            GroupLayout gl,
-            SequentialGroup vg,
-            ParallelGroup hg);
-    
+    protected abstract void fill(GroupLayout gl, SequentialGroup vg, ParallelGroup hg);
+
     /**
      * Rejects the dialog.
      */
     protected void reject() {
     }
-    
+
     /**
      * Accepts the dialog.
      */
     protected void accept() {
     }
-    
+
     /**
      * Get an accept button label.
      * @return Accept button label.
@@ -214,7 +195,7 @@ public abstract class AbstractDialog extends JDialog implements
     protected String getAcceptButtonName() {
         return "OK";
     }
-    
+
     /**
      * Get a reject button label.
      * @return Reject button label.
@@ -222,7 +203,7 @@ public abstract class AbstractDialog extends JDialog implements
     protected String getRejectButtonName() {
         return "Cancel";
     }
-    
+
     /**
      * Get an accept button icon.
      * @return Accept button icon.
@@ -230,7 +211,7 @@ public abstract class AbstractDialog extends JDialog implements
     protected String getAcceptButtonIcon() {
         return "s16/ok.png";
     }
-    
+
     /**
      * Get a reject button icon.
      * @return Reject button icon.
@@ -238,7 +219,7 @@ public abstract class AbstractDialog extends JDialog implements
     protected String getRejectButtonIcon() {
         return "s16/cancel.png";
     }
-    
+
     /**
      * Adds default buttons.
      * @param gl Group layout.
@@ -247,8 +228,8 @@ public abstract class AbstractDialog extends JDialog implements
      */
     protected void addDefaultButtons(
             GroupLayout gl,
-            SequentialGroup vg,
-            ParallelGroup hg) {
+            GroupLayout.SequentialGroup vg,
+            GroupLayout.ParallelGroup hg) {
         vg.addGap(24, 32, Integer.MAX_VALUE);
         JButton acceptButton = new JButton(acceptAction);
         JButton rejectButton = new JButton(rejectAction);
@@ -261,49 +242,24 @@ public abstract class AbstractDialog extends JDialog implements
                 .addComponent(acceptButton));
         getRootPane().setDefaultButton(acceptButton);
     }
-    
+
     private void init() {
         addWindowListener(this);
         GroupLayout gl = new GroupLayout(getContentPane());
-        gl.setAutoCreateContainerGaps(true);
-        gl.setAutoCreateGaps(true);
-        SequentialGroup vg = gl.createSequentialGroup();
-        ParallelGroup hg = gl.createParallelGroup();
+        gl.autoCreateContainerGaps = true;
+        gl.autoCreateGaps = true;
+        GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
+        GroupLayout.ParallelGroup hg = gl.createParallelGroup();
         fill(gl, vg, hg);
         gl.setVerticalGroup(vg);
         gl.setHorizontalGroup(hg);
         getContentPane().setLayout(gl);
-        getRootPane().registerKeyboardAction(rejectAction,
-                KeyStroke.getKeyStroke("ESCAPE"),
-                JComponent.WHEN_IN_FOCUSED_WINDOW);
+        rootPane.registerKeyboardAction(
+                rejectAction, getKeyStroke("ESCAPE"), WHEN_IN_FOCUSED_WINDOW);
     }
 
     @Override
-    public void windowActivated(WindowEvent e) {
-    }
-
-    @Override
-    public void windowClosed(WindowEvent e) {
-    }
-
-    @Override
-    public void windowClosing(WindowEvent e) {
+    void windowClosing(WindowEvent e) {
         reject();
-    }
-
-    @Override
-    public void windowDeactivated(WindowEvent e) {
-    }
-
-    @Override
-    public void windowDeiconified(WindowEvent e) {
-    }
-
-    @Override
-    public void windowIconified(WindowEvent e) {
-    }
-
-    @Override
-    public void windowOpened(WindowEvent e) {
     }
 }
