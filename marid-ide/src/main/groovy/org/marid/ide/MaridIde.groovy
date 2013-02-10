@@ -18,4 +18,15 @@
 
 package org.marid.ide
 
-println("hello");
+import org.marid.ide.gui.util.ImageGenDialog
+import org.marid.logging.LoggingGroovyMethods
+
+import java.awt.*
+import java.util.logging.Logger
+
+Logger.mixin(LoggingGroovyMethods);
+
+EventQueue.invokeLater({
+    def dialog = new ImageGenDialog((Frame)null, "My dialog");
+    dialog.visible = true;
+})

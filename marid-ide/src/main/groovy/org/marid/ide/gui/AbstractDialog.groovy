@@ -20,24 +20,22 @@ package org.marid.ide.gui
 
 import groovy.util.logging.Log
 import org.marid.ide.res.MaridAction
-import org.marid.l10n.Localized
+import org.marid.l10n.Localized.S
 
-import java.awt.Dialog.ModalityType
 import javax.swing.*
 import javax.swing.GroupLayout.ParallelGroup
 import javax.swing.GroupLayout.SequentialGroup
 import java.awt.*
 import java.awt.event.ActionEvent
-import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
+import java.awt.event.WindowListener
 import java.util.logging.Level
 
 import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW
 import static javax.swing.KeyStroke.getKeyStroke
 
 @Log
-@Mixin(WindowAdapter)
-abstract class AbstractDialog extends JDialog {
+abstract class AbstractDialog extends JDialog implements WindowListener {
     /**
      * Accept action.
      */
@@ -48,6 +46,8 @@ abstract class AbstractDialog extends JDialog {
                 accept();
             } catch (Exception x) {
                 log.log(Level.WARNING, "Accepting error", x);
+            } finally {
+                dispose();
             }
         }
     };
@@ -62,6 +62,8 @@ abstract class AbstractDialog extends JDialog {
                 reject();
             } catch (Exception x) {
                 log.log(Level.WARNING, "Rejecting error", x);
+            } finally {
+                dispose();
             }
         }
     };
@@ -74,8 +76,8 @@ abstract class AbstractDialog extends JDialog {
      * @param modal Modal flag.
      * @param conf Graphics configuration.
      */
-    public AbstractDialog(Frame frame, String title, boolean modal, GraphicsConfiguration conf) {
-        super(frame, Localized.S.l(title), modal, conf);
+    AbstractDialog(Frame frame, String title, boolean modal, GraphicsConfiguration conf) {
+        super(frame, S.l(title), modal, conf);
         init();
     }
 
@@ -86,8 +88,8 @@ abstract class AbstractDialog extends JDialog {
      * @param title Title.
      * @param modal Modal flag.
      */
-    public AbstractDialog(Frame frame, String title, boolean modal) {
-        super(frame, Localized.S.l(title), modal);
+    AbstractDialog(Frame frame, String title, boolean modal) {
+        super(frame, S.l(title), modal);
         init();
     }
 
@@ -97,8 +99,8 @@ abstract class AbstractDialog extends JDialog {
      * @param frame Owner frame.
      * @param title Title.
      */
-    public AbstractDialog(Frame frame, String title) {
-        super(frame, Localized.S.l(title));
+    AbstractDialog(Frame frame, String title) {
+        super(frame, S.l(title));
         init();
     }
 
@@ -107,7 +109,7 @@ abstract class AbstractDialog extends JDialog {
      *
      * @param frame Owner frame.
      */
-    public AbstractDialog(Frame frame) {
+    AbstractDialog(Frame frame) {
         super(frame);
         init();
     }
@@ -115,20 +117,20 @@ abstract class AbstractDialog extends JDialog {
     /**
      * Default constructor.
      */
-    public AbstractDialog() {
+    AbstractDialog() {
         init();
     }
 
     /**
      * Constructs a dialog.
      *
-     * @param window Owner window.
+     * @param w Owner window.
      * @param title Dialog title.
      * @param modality Modality.
-     * @param conf Graphics configuration.
+     * @param c Graphics configuration.
      */
-    public AbstractDialog(Window w, String title, ModalityType modality, GraphicsConfiguration c) {
-        super(w, Localized.S.l(title), modality, c);
+    AbstractDialog(Window w, String title, Dialog.ModalityType modality, GraphicsConfiguration c) {
+        super(w, S.l(title), modality, c);
         init();
     }
 
@@ -139,8 +141,8 @@ abstract class AbstractDialog extends JDialog {
      * @param title Title.
      * @param modality Modality.
      */
-    public AbstractDialog(Window window, String title, ModalityType modality) {
-        super(window, Localized.S.l(title), modality);
+    AbstractDialog(Window window, String title, Dialog.ModalityType modality) {
+        super(window, S.l(title), modality);
         init();
     }
 
@@ -150,21 +152,21 @@ abstract class AbstractDialog extends JDialog {
      * @param window Owner window.
      * @param title Title.
      */
-    public AbstractDialog(Window window, String title) {
-        super(window, Localized.S.l(title));
+    AbstractDialog(Window window, String title) {
+        super(window, S.l(title));
         init();
     }
 
     /**
      * Constructs a dialog.
      *
-     * @param dialog Dialog.
+     * @param d Dialog.
      * @param title Title.
      * @param modality Modality.
-     * @param conf Graphics configuration.
+     * @param c Graphics configuration.
      */
-    public AbstractDialog(Dialog dialog, String title, ModalityType modality, GraphicsConfiguration conf) {
-        super(dialog, Localized.S.l(title), modality, conf);
+    AbstractDialog(Dialog d, String title, Dialog.ModalityType modality, GraphicsConfiguration c) {
+        super(d, S.l(title), modality, c);
         init();
     }
 
@@ -226,10 +228,7 @@ abstract class AbstractDialog extends JDialog {
      * @param vg Vertical group.
      * @param hg Horizontal group.
      */
-    protected void addDefaultButtons(
-            GroupLayout gl,
-            GroupLayout.SequentialGroup vg,
-            GroupLayout.ParallelGroup hg) {
+    protected void addDefaultButtons(GroupLayout gl, SequentialGroup vg, ParallelGroup hg) {
         vg.addGap(24, 32, Integer.MAX_VALUE);
         JButton acceptButton = new JButton(acceptAction);
         JButton rejectButton = new JButton(rejectAction);
@@ -256,10 +255,36 @@ abstract class AbstractDialog extends JDialog {
         getContentPane().setLayout(gl);
         rootPane.registerKeyboardAction(
                 rejectAction, getKeyStroke("ESCAPE"), WHEN_IN_FOCUSED_WINDOW);
+        pack();
+        setLocationRelativeTo(owner);
     }
 
     @Override
     void windowClosing(WindowEvent e) {
-        reject();
+        rejectAction.actionPerformed(new ActionEvent(this, 0, "close"));
+    }
+
+    @Override
+    void windowOpened(WindowEvent e) {
+    }
+
+    @Override
+    void windowClosed(WindowEvent e) {
+    }
+
+    @Override
+    void windowIconified(WindowEvent e) {
+    }
+
+    @Override
+    void windowDeiconified(WindowEvent e) {
+    }
+
+    @Override
+    void windowActivated(WindowEvent e) {
+    }
+
+    @Override
+    void windowDeactivated(WindowEvent e) {
     }
 }

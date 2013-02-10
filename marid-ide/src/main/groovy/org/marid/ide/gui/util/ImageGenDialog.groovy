@@ -20,7 +20,6 @@ package org.marid.ide.gui.util
 
 import groovy.transform.InheritConstructors
 import groovy.util.logging.Log
-import org.codehaus.groovy.runtime.DefaultGroovyMethods
 import org.marid.ide.gui.AbstractDialog
 
 import javax.swing.*
@@ -33,6 +32,11 @@ class ImageGenDialog extends AbstractDialog {
 
     @Override
     protected void fill(GroupLayout gl, SequentialGroup vg, ParallelGroup hg) {
-        DefaultGroovyMethods m;
+        addDefaultButtons(gl, vg, hg);
+    }
+
+    @Override
+    protected void accept() {
+        log.info("Hello {0}", "World!");
     }
 }
