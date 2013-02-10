@@ -18,8 +18,9 @@
 package org.marid.ide.res;
 
 import images.Images;
-import javax.swing.AbstractAction;
-import javax.swing.KeyStroke;
+
+import javax.swing.*;
+
 import org.marid.l10n.Localized;
 
 /**
@@ -42,7 +43,10 @@ public abstract class MaridAction extends AbstractAction implements Localized {
             putValue(NAME, S.l(name));
         }
         if (icon != null) {
-            putValue(SMALL_ICON, Images.getIcon(icon, size, size));
+            ImageIcon ic = size < 0 ? Images.getIcon(icon) : Images.getIcon(icon, size, size);
+            if (ic != null) {
+                putValue(SMALL_ICON, ic);
+            }
         }
         if (state != null) {
             setEnabled(state);
@@ -65,7 +69,7 @@ public abstract class MaridAction extends AbstractAction implements Localized {
      */
     public MaridAction(String name, String info, String icon,
             String key, Boolean enabled) {
-        this(name, info, icon, key, enabled, 16);
+        this(name, info, icon, key, enabled, -1);
     }
     
     /**

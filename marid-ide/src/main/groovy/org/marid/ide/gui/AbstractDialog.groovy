@@ -237,7 +237,7 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
                 .addComponent(acceptButton));
         hg.addGroup(gl.createSequentialGroup()
                 .addComponent(rejectButton)
-                .addGap(0, 0, Integer.MAX_VALUE)
+                .addGap(32, 64, Integer.MAX_VALUE)
                 .addComponent(acceptButton));
         getRootPane().setDefaultButton(acceptButton);
     }

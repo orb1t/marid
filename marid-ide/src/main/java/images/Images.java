@@ -17,14 +17,10 @@
  */
 package images;
 
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.image.ImageProducer;
-import java.awt.image.MemoryImageSource;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.ColorModel;
 import java.net.URL;
-import java.util.Arrays;
-import javax.swing.ImageIcon;
 
 /**
  * Images collection.
@@ -32,11 +28,6 @@ import javax.swing.ImageIcon;
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class Images {
-    /**
-     * Empty image.
-     */
-    public static final Image EMPTY_IMAGE = getEmptyImage(0, 0);
-    
     /**
      * Empty 16x16 image.
      */
@@ -56,11 +47,6 @@ public class Images {
      * Empty 48x48 image.
      */
     public static final Image IM48x48 = getEmptyImage(48, 48);
-    
-    /**
-     * Empty icon.
-     */
-    public static final ImageIcon EMPTY_ICON = new ImageIcon(EMPTY_IMAGE);
     
     /**
      * Empty 16x16 icon.
@@ -98,10 +84,9 @@ public class Images {
      * @return Empty image.
      */
     public static Image getEmptyImage(int width, int height) {
-        int[] data = new int[width * height];
-        Arrays.fill(data, 0xFF000000);
-        ImageProducer p = new MemoryImageSource(width, height, data, 0, width);
-        return Toolkit.getDefaultToolkit().createImage(p);
+        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsConfiguration conf = env.getDefaultScreenDevice().getDefaultConfiguration();
+        return conf.createCompatibleImage(width, height, ColorModel.TRANSLUCENT);
     }
         
     /**
@@ -111,11 +96,7 @@ public class Images {
      */
     public static ImageIcon getIcon(String path) {
         URL url = path == null ? null : Images.class.getResource(path);
-        if (url == null) {
-            return EMPTY_ICON;
-        } else {
-            return new ImageIcon(url);
-        }
+        return url == null ? null : new ImageIcon(url);
     }
     
     /**
@@ -161,11 +142,7 @@ public class Images {
      */
     public static Image getImage(String path) {
         URL url = path == null ? null : Images.class.getResource(path);
-        if (url == null) {
-            return EMPTY_IMAGE;
-        } else {
-            return Toolkit.getDefaultToolkit().getImage(url);
-        }
+        return url == null ? null : Toolkit.getDefaultToolkit().getImage(url);
     }
     
     /**
