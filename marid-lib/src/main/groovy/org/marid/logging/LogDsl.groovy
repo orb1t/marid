@@ -16,16 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide
+package org.marid.logging
 
-import org.marid.groovy.DslLoader
-import org.marid.ide.gui.util.ImageGenDialog
+import org.marid.groovy.Dsl
 
-import java.awt.*
+import java.util.logging.Logger
 
-DslLoader.loadDsl();
+class LogDsl implements Dsl {
+    @Override
+    void load() throws Exception {
+        Logger.mixin(LoggingGroovyMethods);
+    }
 
-EventQueue.invokeLater({
-    def dialog = new ImageGenDialog((Frame)null, "My dialog");
-    dialog.visible = true;
-})
+    @Override
+    String toString() {
+        return "JUL DSL";
+    }
+}

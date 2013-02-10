@@ -16,16 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide
+package org.marid.groovy;
 
-import org.marid.groovy.DslLoader
-import org.marid.ide.gui.util.ImageGenDialog
+public interface Dsl {
 
-import java.awt.*
-
-DslLoader.loadDsl();
-
-EventQueue.invokeLater({
-    def dialog = new ImageGenDialog((Frame)null, "My dialog");
-    dialog.visible = true;
-})
+    /**
+     * Loads a DSL.
+     * @throws Exception An exception during DSL loading.
+     */
+    public void load() throws Exception;
+}
