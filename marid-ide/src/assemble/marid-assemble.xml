@@ -14,6 +14,10 @@
             <directory>src/assemble/inc/</directory>
             <outputDirectory>.</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>src/dev</directory>
+            <outputDirectory>.</outputDirectory>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>

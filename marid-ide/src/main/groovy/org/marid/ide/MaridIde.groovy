@@ -22,10 +22,19 @@ import org.marid.groovy.DslLoader
 import org.marid.ide.gui.util.ImageGenDialog
 
 import java.awt.*
+import java.util.logging.LogManager
+
+def classLoader = Thread.currentThread().getContextClassLoader();
+def logConfiguration = classLoader.getResource("logide.properties");
+if (logConfiguration != null) {
+    logConfiguration.withInputStream {stream ->
+        LogManager.logManager.readConfiguration(stream);
+    }
+}
 
 DslLoader.loadDsl();
 
-EventQueue.invokeLater({
+EventQueue.invokeLater {
     def dialog = new ImageGenDialog((Frame)null, "My dialog");
     dialog.visible = true;
-})
+}
