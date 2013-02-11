@@ -33,6 +33,7 @@ import java.util.logging.Level
 
 import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW
 import static javax.swing.KeyStroke.getKeyStroke
+import static java.util.prefs.Preferences.userNodeForPackage
 
 @Log
 abstract class AbstractDialog extends JDialog implements WindowListener {
@@ -67,6 +68,11 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
             }
         }
     };
+
+    /**
+     * Dialog preferences.
+     */
+    protected final def prefs = userNodeForPackage(getClass()).node(getClass().simpleName);
 
     /**
      * Constructs a dialog.
@@ -230,8 +236,8 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
      */
     protected void addDefaultButtons(GroupLayout gl, SequentialGroup vg, ParallelGroup hg) {
         vg.addGap(24, 32, Integer.MAX_VALUE);
-        JButton acceptButton = new JButton(acceptAction);
-        JButton rejectButton = new JButton(rejectAction);
+        def acceptButton = new JButton(acceptAction);
+        def rejectButton = new JButton(rejectAction);
         vg.addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
                 .addComponent(rejectButton)
                 .addComponent(acceptButton));
@@ -239,22 +245,22 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
                 .addComponent(rejectButton)
                 .addGap(32, 64, Integer.MAX_VALUE)
                 .addComponent(acceptButton));
-        getRootPane().setDefaultButton(acceptButton);
+        rootPane.defaultButton = acceptButton;
     }
 
     private void init() {
         addWindowListener(this);
-        GroupLayout gl = new GroupLayout(getContentPane());
+        def gl = new GroupLayout(contentPane);
         gl.autoCreateContainerGaps = true;
         gl.autoCreateGaps = true;
-        GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
-        GroupLayout.ParallelGroup hg = gl.createParallelGroup();
+        def vg = gl.createSequentialGroup();
+        def hg = gl.createParallelGroup();
         fill(gl, vg, hg);
-        gl.setVerticalGroup(vg);
-        gl.setHorizontalGroup(hg);
-        getContentPane().setLayout(gl);
-        rootPane.registerKeyboardAction(
-                rejectAction, getKeyStroke("ESCAPE"), WHEN_IN_FOCUSED_WINDOW);
+        gl.verticalGroup = vg;
+        gl.horizontalGroup = hg;
+        contentPane.layout = gl;
+        def escape = getKeyStroke("ESCAPE");
+        rootPane.registerKeyboardAction(rejectAction, escape, WHEN_IN_FOCUSED_WINDOW);
         pack();
         setLocationRelativeTo(owner);
     }

@@ -24,17 +24,21 @@ import org.marid.ide.gui.util.ImageGenDialog
 import java.awt.*
 import java.util.logging.LogManager
 
-def classLoader = Thread.currentThread().getContextClassLoader();
+def classLoader = Thread.currentThread().contextClassLoader;
 def logConfiguration = classLoader.getResource("logide.properties");
 if (logConfiguration != null) {
-    logConfiguration.withInputStream {stream ->
-        LogManager.logManager.readConfiguration(stream);
+    try {
+        logConfiguration.withInputStream {stream ->
+            LogManager.logManager.readConfiguration(stream);
+        }
+    } catch (x) {
+        x.printStackTrace();
     }
 }
 
 DslLoader.loadDsl();
 
 EventQueue.invokeLater {
-    def dialog = new ImageGenDialog((Frame)null, "My dialog");
+    def dialog = new ImageGenDialog((Frame)null, "Marid Gen Image Dialog");
     dialog.visible = true;
 }
