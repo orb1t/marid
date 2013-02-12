@@ -21,26 +21,66 @@ package org.marid.ide.gui.util
 import groovy.transform.InheritConstructors
 import groovy.util.logging.Log
 import org.marid.ide.gui.AbstractDialog
+import org.marid.ide.res.MaridAction
 import org.marid.image.MaridImage
-import org.marid.l10n.Localized.S
 
+import javax.imageio.ImageIO
 import javax.swing.*
 import javax.swing.GroupLayout.ParallelGroup
 import javax.swing.GroupLayout.SequentialGroup
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
+import javax.swing.filechooser.FileNameExtensionFilter
+import java.awt.event.ActionEvent
+import java.awt.image.RenderedImage
 
 @Log
 @InheritConstructors
 class ImageGenDialog extends AbstractDialog {
 
-    private JSpinner sizeSpinner;
-    private JLabel iconArea;
+    private final def sizeModel = new SpinnerNumberModel(prefs.getInt("size", 32), 16, 512, 2);
+    private final def sizeSpinner = new JSpinner(sizeModel);
+    private final def iconArea = new JLabel(new ImageIcon(MaridImage.getIcon(sizeSpinner.value)));
+    private final def filters = [
+            new FileNameExtensionFilter("PNG files".ls(), "png"),
+            new FileNameExtensionFilter("JPG files".ls(), "jpg")
+    ];
+    private final def formats = [
+            "png", "jpeg"
+    ];
+    private final def saveAction = new MaridAction("Save...", null, null) {
+        @Override
+        void actionPerformed(ActionEvent e) {
+            def fc = new JFileChooser(prefs.get("dir", "."));
+            fc.acceptAllFileFilterUsed = true;
+            fc.multiSelectionEnabled = false;
+            filters.each { fc.addChoosableFileFilter(it) };
+            fc.fileFilter = filters[prefs.getInt("filter", 0)];
+            def result = fc.showSaveDialog(ImageGenDialog.this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                def image = ((ImageIcon) iconArea.icon).image;
+                if (image instanceof RenderedImage) {
+                    image = (RenderedImage) image;
+                    def filterIdx = filters.indexOf(fc.fileFilter);
+                    def format = filterIdx >= 0 ? formats[filterIdx] : "png";
+                    def file = fc.selectedFile;
+                    if (!file.name.endsWith(format.toLowerCase())) {
+                        file = new File(file.parentFile, file.name + "." + format.toLowerCase());
+                    }
+                    try {
+                        ImageIO.write(image, format, file);
+                    } catch (x) {
+                        log.warning("Unable to save the file {0}", x, file);
+                    } finally {
+                        prefs.put("dir", file.parentFile.absolutePath);
+                        if (filterIdx >= 0) prefs.putInt("filter", filterIdx);
+                    }
+                }
+            }
+        }
+    };
 
-    @Override
-    protected void fill(GroupLayout gl, SequentialGroup vg, ParallelGroup hg) {
-        def sizeLabel = new JLabel(S.l("Icon size (in pixels)") + ":");
-        sizeSpinner = new JSpinner(new SpinnerNumberModel(prefs.getInt("size", 32), 16, 512, 2));
+    {
         sizeSpinner.addChangeListener(new ChangeListener() {
             @Override
             void stateChanged(ChangeEvent e) {
@@ -49,15 +89,25 @@ class ImageGenDialog extends AbstractDialog {
                 ImageGenDialog.this.pack();
                 ImageGenDialog.this.locationRelativeTo = ImageGenDialog.this.owner;
             }
-        })
-        iconArea = new JLabel(new ImageIcon(MaridImage.getIcon(sizeSpinner.value)));
+        });
+    }
+
+    @Override
+    protected void fill(GroupLayout gl, SequentialGroup vg, ParallelGroup hg) {
+        def sizeLabel = new JLabel("Icon size (in pixels)".ls() + ":");
+        def saveButton = new JButton(saveAction);
         vg.addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
-            .addComponent(sizeLabel).addComponent(sizeSpinner));
+                .addComponent(sizeLabel).addComponent(sizeSpinner));
         vg.addComponent(iconArea);
+        vg.addComponent(saveButton);
         hg.addGroup(gl.createSequentialGroup().addComponent(sizeLabel).addComponent(sizeSpinner));
         hg.addGroup(gl.createSequentialGroup()
                 .addGap(0, 0, Integer.MAX_VALUE)
                 .addComponent(iconArea)
+                .addGap(0, 0, Integer.MAX_VALUE));
+        hg.addGroup(gl.createSequentialGroup()
+                .addGap(0, 0, Integer.MAX_VALUE)
+                .addComponent(saveButton)
                 .addGap(0, 0, Integer.MAX_VALUE));
         addDefaultButtons(gl, vg, hg);
     }

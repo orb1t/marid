@@ -23,12 +23,13 @@ import org.marid.ide.gui.util.ImageGenDialog
 
 import java.awt.*
 import java.util.logging.LogManager
+import java.util.logging.Logger
 
 def classLoader = Thread.currentThread().contextClassLoader;
 def logConfiguration = classLoader.getResource("logide.properties");
 if (logConfiguration != null) {
     try {
-        logConfiguration.withInputStream {stream ->
+        logConfiguration.withInputStream { stream ->
             LogManager.logManager.readConfiguration(stream);
         }
     } catch (x) {
@@ -36,9 +37,21 @@ if (logConfiguration != null) {
     }
 }
 
+Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
+
 DslLoader.loadDsl();
 
 EventQueue.invokeLater {
-    def dialog = new ImageGenDialog((Frame)null, "Marid Gen Image Dialog");
+    def dialog = new ImageGenDialog((Frame) null, "Marid Gen Image Dialog");
     dialog.visible = true;
+}
+
+class ExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+    private def log = Logger.getLogger(MaridIde.name);
+
+    @Override
+    void uncaughtException(Thread t, Throwable e) {
+        log.warning("Uncaught exception in {0}", e, t);
+    }
 }

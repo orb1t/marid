@@ -67,8 +67,7 @@ public abstract class MaridAction extends AbstractAction implements Localized {
      * @param key Action key.
      * @param enabled Enabled state.
      */
-    public MaridAction(String name, String info, String icon,
-            String key, Boolean enabled) {
+    public MaridAction(String name, String info, String icon, String key, Boolean enabled) {
         this(name, info, icon, key, enabled, -1);
     }
     

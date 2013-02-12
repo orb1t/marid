@@ -37,6 +37,9 @@ import static java.util.prefs.Preferences.userNodeForPackage
 
 @Log
 abstract class AbstractDialog extends JDialog implements WindowListener {
+
+    private def initialized = false;
+
     /**
      * Accept action.
      */
@@ -84,7 +87,6 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
      */
     AbstractDialog(Frame frame, String title, boolean modal, GraphicsConfiguration conf) {
         super(frame, S.l(title), modal, conf);
-        init();
     }
 
     /**
@@ -96,7 +98,6 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
      */
     AbstractDialog(Frame frame, String title, boolean modal) {
         super(frame, S.l(title), modal);
-        init();
     }
 
     /**
@@ -107,7 +108,6 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
      */
     AbstractDialog(Frame frame, String title) {
         super(frame, S.l(title));
-        init();
     }
 
     /**
@@ -117,14 +117,12 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
      */
     AbstractDialog(Frame frame) {
         super(frame);
-        init();
     }
 
     /**
      * Default constructor.
      */
     AbstractDialog() {
-        init();
     }
 
     /**
@@ -137,7 +135,6 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
      */
     AbstractDialog(Window w, String title, Dialog.ModalityType modality, GraphicsConfiguration c) {
         super(w, S.l(title), modality, c);
-        init();
     }
 
     /**
@@ -149,7 +146,6 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
      */
     AbstractDialog(Window window, String title, Dialog.ModalityType modality) {
         super(window, S.l(title), modality);
-        init();
     }
 
     /**
@@ -160,7 +156,6 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
      */
     AbstractDialog(Window window, String title) {
         super(window, S.l(title));
-        init();
     }
 
     /**
@@ -173,7 +168,6 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
      */
     AbstractDialog(Dialog d, String title, Dialog.ModalityType modality, GraphicsConfiguration c) {
         super(d, S.l(title), modality, c);
-        init();
     }
 
     /**
@@ -292,5 +286,14 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
 
     @Override
     void windowDeactivated(WindowEvent e) {
+    }
+
+    @Override
+    void setVisible(boolean b) {
+        if (!initialized) {
+            init();
+            initialized = true;
+        }
+        super.setVisible(b);
     }
 }
