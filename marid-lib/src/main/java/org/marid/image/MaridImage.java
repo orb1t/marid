@@ -17,6 +17,7 @@
  */
 package org.marid.image;
 
+import javax.swing.*;
 import java.awt.BasicStroke;
 import static java.awt.BasicStroke.*;
 import java.awt.Color;
@@ -42,7 +43,7 @@ public class MaridImage {
      * @param size Image size.
      * @return Image.
      */
-    public static BufferedImage getIcon(int size) {
+    public static BufferedImage getImage(int size) {
         BufferedImage img = new BufferedImage(size, size, TYPE_INT_ARGB);
         Graphics2D g = img.createGraphics();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -98,5 +99,14 @@ public class MaridImage {
         g.setPaint(new LinearGradientPaint(0f, 0f, 0f, 1f, fs, cs));
         g.fill(path);
         return img;
+    }
+
+    /**
+     * Get marid icon.
+     * @param size Icon size.
+     * @return Marid icon.
+     */
+    public static ImageIcon getIcon(int size) {
+        return new ImageIcon(getImage(size));
     }
 }

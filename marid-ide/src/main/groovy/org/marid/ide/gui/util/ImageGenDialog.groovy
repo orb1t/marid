@@ -40,7 +40,7 @@ class ImageGenDialog extends AbstractDialog {
 
     private final def sizeModel = new SpinnerNumberModel(prefs.getInt("size", 32), 16, 512, 2);
     private final def sizeSpinner = new JSpinner(sizeModel);
-    private final def iconArea = new JLabel(new ImageIcon(MaridImage.getIcon(sizeSpinner.value)));
+    private final def iconArea = new JLabel(MaridImage.getIcon(sizeSpinner.value as int));
     private final def filters = [
             new FileNameExtensionFilter("PNG files".ls(), "png"),
             new FileNameExtensionFilter("JPG files".ls(), "jpg")
@@ -48,7 +48,7 @@ class ImageGenDialog extends AbstractDialog {
     private final def formats = [
             "png", "jpeg"
     ];
-    private final def saveAction = new MaridAction("Save...", null, null) {
+    private final def saveAction = new MaridAction(name: "Save...") {
         @Override
         void actionPerformed(ActionEvent e) {
             def fc = new JFileChooser(prefs.get("dir", "."));
@@ -84,7 +84,7 @@ class ImageGenDialog extends AbstractDialog {
         sizeSpinner.addChangeListener(new ChangeListener() {
             @Override
             void stateChanged(ChangeEvent e) {
-                iconArea.icon = new ImageIcon(MaridImage.getIcon(sizeSpinner.value));
+                iconArea.icon = MaridImage.getIcon(sizeSpinner.value as int);
                 ImageGenDialog.this.validate();
                 ImageGenDialog.this.pack();
                 ImageGenDialog.this.locationRelativeTo = ImageGenDialog.this.owner;
@@ -114,6 +114,6 @@ class ImageGenDialog extends AbstractDialog {
 
     @Override
     protected void accept() {
-        prefs.putInt("size", sizeSpinner.value);
+        prefs.putInt("size", sizeSpinner.value as int);
     }
 }

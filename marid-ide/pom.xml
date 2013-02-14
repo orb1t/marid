@@ -15,6 +15,10 @@
     <description>Marid Integrated Development Environment</description>
     <url>http://sf.net/projects/marid</url>
 
+    <properties>
+        <splash>${project.basedir}/src/main/resources/images/splash.png</splash>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.marid</groupId>
@@ -44,6 +48,7 @@
                         <manifestEntries>
                             <Class-Path>.</Class-Path>
                             <Built-By>Dmitry Ovchinnikov</Built-By>
+                            <SplashScreen-Image>images/splash.png</SplashScreen-Image>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -53,7 +58,14 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>org.marid.ide.MaridIde</mainClass>
+                    <includeProjectDependencies>true</includeProjectDependencies>
+                    <executable>java</executable>
+                    <arguments>
+                        <argument>-splash:${splash}</argument>
+                        <argument>-classpath</argument>
+                        <classpath/>
+                        <argument>org.marid.ide.MaridIde</argument>
+                    </arguments>
                 </configuration>
             </plugin>
 
@@ -87,10 +99,10 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <outputDirectory>${project.build.directory}/ext</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.basedir}/src/dev</directory>
+                                    <directory>${project.basedir}/src/ext</directory>
                                 </resource>
                             </resources>
                         </configuration>

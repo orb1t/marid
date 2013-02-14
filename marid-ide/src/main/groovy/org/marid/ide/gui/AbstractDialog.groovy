@@ -40,10 +40,7 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
 
     private def initialized = false;
 
-    /**
-     * Accept action.
-     */
-    protected final def acceptAction = new MaridAction(acceptButtonName, null, acceptButtonIcon) {
+    protected final def acceptAction = new MaridAction(name: acceptName, icon: acceptIcon) {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
@@ -56,10 +53,7 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
         }
     };
 
-    /**
-     * Reject action.
-     */
-    protected final def rejectAction = new MaridAction(rejectButtonName, null, rejectButtonIcon) {
+    protected final def rejectAction = new MaridAction(name: rejectName, icon: rejectIcon) {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
@@ -72,162 +66,67 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
         }
     };
 
-    /**
-     * Dialog preferences.
-     */
     protected final def prefs = userNodeForPackage(getClass()).node(getClass().simpleName);
 
-    /**
-     * Constructs a dialog.
-     *
-     * @param frame Owner frame.
-     * @param title Title.
-     * @param modal Modal flag.
-     * @param conf Graphics configuration.
-     */
     AbstractDialog(Frame frame, String title, boolean modal, GraphicsConfiguration conf) {
         super(frame, S.l(title), modal, conf);
     }
 
-    /**
-     * Constructs a dialog.
-     *
-     * @param frame Owner frame.
-     * @param title Title.
-     * @param modal Modal flag.
-     */
     AbstractDialog(Frame frame, String title, boolean modal) {
         super(frame, S.l(title), modal);
     }
 
-    /**
-     * Constructs a dialog.
-     *
-     * @param frame Owner frame.
-     * @param title Title.
-     */
     AbstractDialog(Frame frame, String title) {
         super(frame, S.l(title));
     }
 
-    /**
-     * Constructs a dialog.
-     *
-     * @param frame Owner frame.
-     */
     AbstractDialog(Frame frame) {
         super(frame);
     }
 
-    /**
-     * Default constructor.
-     */
     AbstractDialog() {
     }
 
-    /**
-     * Constructs a dialog.
-     *
-     * @param w Owner window.
-     * @param title Dialog title.
-     * @param modality Modality.
-     * @param c Graphics configuration.
-     */
     AbstractDialog(Window w, String title, Dialog.ModalityType modality, GraphicsConfiguration c) {
         super(w, S.l(title), modality, c);
     }
 
-    /**
-     * Constructs a dialog.
-     *
-     * @param window Owner window.
-     * @param title Title.
-     * @param modality Modality.
-     */
     AbstractDialog(Window window, String title, Dialog.ModalityType modality) {
         super(window, S.l(title), modality);
     }
 
-    /**
-     * Constructs a dialog.
-     *
-     * @param window Owner window.
-     * @param title Title.
-     */
     AbstractDialog(Window window, String title) {
         super(window, S.l(title));
     }
 
-    /**
-     * Constructs a dialog.
-     *
-     * @param d Dialog.
-     * @param title Title.
-     * @param modality Modality.
-     * @param c Graphics configuration.
-     */
     AbstractDialog(Dialog d, String title, Dialog.ModalityType modality, GraphicsConfiguration c) {
         super(d, S.l(title), modality, c);
     }
 
-    /**
-     * Fills the contents.
-     * @param gl Group layout.
-     * @param vg Vertical group.
-     * @param hg Horizontal group.
-     */
     protected abstract void fill(GroupLayout gl, SequentialGroup vg, ParallelGroup hg);
 
-    /**
-     * Rejects the dialog.
-     */
     protected void reject() {
     }
 
-    /**
-     * Accepts the dialog.
-     */
     protected void accept() {
     }
 
-    /**
-     * Get an accept button label.
-     * @return Accept button label.
-     */
-    protected String getAcceptButtonName() {
+    protected String getAcceptName() {
         return "OK";
     }
 
-    /**
-     * Get a reject button label.
-     * @return Reject button label.
-     */
-    protected String getRejectButtonName() {
+    protected String getRejectName() {
         return "Cancel";
     }
 
-    /**
-     * Get an accept button icon.
-     * @return Accept button icon.
-     */
-    protected String getAcceptButtonIcon() {
+    protected String getAcceptIcon() {
         return "s16/ok.png";
     }
 
-    /**
-     * Get a reject button icon.
-     * @return Reject button icon.
-     */
-    protected String getRejectButtonIcon() {
+    protected String getRejectIcon() {
         return "s16/cancel.png";
     }
 
-    /**
-     * Adds default buttons.
-     * @param gl Group layout.
-     * @param vg Vertical group.
-     * @param hg Horizontal group.
-     */
     protected void addDefaultButtons(GroupLayout gl, SequentialGroup vg, ParallelGroup hg) {
         vg.addGap(24, 32, Integer.MAX_VALUE);
         def acceptButton = new JButton(acceptAction);
