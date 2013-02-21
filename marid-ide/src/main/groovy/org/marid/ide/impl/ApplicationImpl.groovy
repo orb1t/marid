@@ -16,18 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide
+package org.marid.ide.impl
 
-import org.marid.groovy.DslLoader
-import org.marid.ide.menu.MaridMenu
-import org.marid.ide.util.IdeUncaughtExceptionHandler
-import org.marid.logging.Logging
+import org.marid.ide.Application
 
-Logging.init(getClass(), "logide.properties");
-Thread.defaultUncaughtExceptionHandler = new IdeUncaughtExceptionHandler();
-DslLoader.loadDsl();
+class ApplicationImpl implements Application {
+    @Override
+    String getVersion() {
+        return null
+    }
 
-def sl = ServiceLoader.load(MaridMenu);
-for (def menu in sl) {
-    println(menu.menuEntries);
+    @Override
+    void exit() {
+
+    }
 }

@@ -16,9 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide;
+package menu
 
-public interface Application {
+import org.marid.ide.menu.AnnotatedMenu
+import org.marid.ide.menu.Menu
 
-    public String getVersion();
+import java.awt.event.ActionEvent
+
+@Menu(info = "System menu")
+class System extends AnnotatedMenu {
+
+    @Menu(info = "Exit to system", shortcut = "control Q")
+    class Exit {
+
+        void call(ActionEvent event) {
+            application.exit();
+        }
+    }
 }

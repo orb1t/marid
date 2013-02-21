@@ -25,4 +25,9 @@ class LocalizationDsl implements Dsl {
     void load() throws Exception {
         String.mixin(LocalizationGroovyMethods);
     }
+
+    @Override
+    String toString() {
+        return "Localization DSL";
+    }
 }

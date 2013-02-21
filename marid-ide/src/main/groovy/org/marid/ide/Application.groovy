@@ -18,16 +18,9 @@
 
 package org.marid.ide
 
-import org.marid.groovy.DslLoader
-import org.marid.ide.menu.MaridMenu
-import org.marid.ide.util.IdeUncaughtExceptionHandler
-import org.marid.logging.Logging
+public interface Application {
 
-Logging.init(getClass(), "logide.properties");
-Thread.defaultUncaughtExceptionHandler = new IdeUncaughtExceptionHandler();
-DslLoader.loadDsl();
+    String getVersion();
 
-def sl = ServiceLoader.load(MaridMenu);
-for (def menu in sl) {
-    println(menu.menuEntries);
+    void exit();
 }

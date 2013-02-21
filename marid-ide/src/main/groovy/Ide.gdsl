@@ -21,3 +21,14 @@ def ideContext = context();
 contributor(ideContext, {
     property(name: "application", type: "org.marid.ide.Application")
 });
+
+def menuContext = context(scope: closureScope());
+
+contributor(menuContext, {
+    if (enclosingClass()?.qualName?.endsWith("Menu")) {
+        method(type: "javax.swing.JMenu", name: "getMenu", params: [:])
+    }
+})
+
+
+

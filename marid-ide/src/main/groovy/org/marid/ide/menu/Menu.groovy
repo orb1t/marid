@@ -16,18 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide
+package org.marid.ide.menu
 
-import org.marid.groovy.DslLoader
-import org.marid.ide.menu.MaridMenu
-import org.marid.ide.util.IdeUncaughtExceptionHandler
-import org.marid.logging.Logging
+public @interface Menu {
 
-Logging.init(getClass(), "logide.properties");
-Thread.defaultUncaughtExceptionHandler = new IdeUncaughtExceptionHandler();
-DslLoader.loadDsl();
+    String[] path() default [];
 
-def sl = ServiceLoader.load(MaridMenu);
-for (def menu in sl) {
-    println(menu.menuEntries);
+    String icon() default "";
+
+    String label() default "";
+
+    String shortcut() default "";
+
+    String description() default "";
+
+    String info() default "";
+
+    String command() default "";
+
+    String group() default "";
+
+    MenuType type() default MenuType.ITEM;
+
+    boolean initialSelected() default false;
+
+    int priority() default -1;
 }

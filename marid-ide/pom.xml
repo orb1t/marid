@@ -37,16 +37,27 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/ext</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
+                    <excludes>
+                        <exclude>src/ext/**/*</exclude>
+                    </excludes>
                     <archive>
                         <manifest>
                             <mainClass>org.marid.ide.MaridIde</mainClass>
                         </manifest>
                         <manifestEntries>
-                            <Class-Path>.</Class-Path>
+                            <Class-Path>ext</Class-Path>
                             <Built-By>Dmitry Ovchinnikov</Built-By>
                             <SplashScreen-Image>images/splash.png</SplashScreen-Image>
                         </manifestEntries>
