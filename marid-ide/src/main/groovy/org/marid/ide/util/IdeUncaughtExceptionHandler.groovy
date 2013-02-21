@@ -24,6 +24,6 @@ import groovy.util.logging.Log
 class IdeUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
     @Override
     void uncaughtException(Thread t, Throwable e) {
-        log.warning("Uncaught exception in {0}, e, t");
+        log.warning("Uncaught exception in {0}", e, t);
     }
 }

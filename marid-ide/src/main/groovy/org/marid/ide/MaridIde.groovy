@@ -27,7 +27,7 @@ Logging.init(getClass(), "logide.properties");
 Thread.defaultUncaughtExceptionHandler = new IdeUncaughtExceptionHandler();
 DslLoader.loadDsl();
 
-def sl = ServiceLoader.load(MaridMenu);
+def sl = ServiceLoader.load(MaridMenu, new GroovyClassLoader());
 for (def menu in sl) {
     println(menu.menuEntries);
 }
