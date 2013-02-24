@@ -1,5 +1,3 @@
-import org.marid.ide.MaridIde
-
 /*
  * Copyright (C) 2013 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
@@ -17,6 +15,8 @@ import org.marid.ide.MaridIde
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import org.marid.ide.MaridIde
 
 def maridIde = new MaridIde();
 maridIde.run();
