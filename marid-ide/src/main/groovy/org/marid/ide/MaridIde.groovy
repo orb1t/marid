@@ -15,19 +15,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.marid.ide
 
-import org.marid.groovy.DslLoader
+import org.codehaus.groovy.control.CompilerConfiguration
 import org.marid.ide.menu.MaridMenu
 import org.marid.ide.util.IdeUncaughtExceptionHandler
 import org.marid.logging.Logging
 
 Logging.init(getClass(), "logide.properties");
 Thread.defaultUncaughtExceptionHandler = new IdeUncaughtExceptionHandler();
-DslLoader.loadDsl();
 
-def sl = ServiceLoader.load(MaridMenu, new GroovyClassLoader());
+def ccl = Thread.currentThread().contextClassLoader;
+def cc = new CompilerConfiguration();
+cc.sourceEncoding = "UTF-8";
+cc.recompileGroovySource = true;
+cc.targetBytecode = "1.7";
+def sl = ServiceLoader.load(MaridMenu, new GroovyClassLoader(ccl, cc, false));
 for (def menu in sl) {
     println(menu.menuEntries);
 }

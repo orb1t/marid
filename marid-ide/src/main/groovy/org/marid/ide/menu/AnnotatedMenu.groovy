@@ -24,6 +24,7 @@ import java.awt.event.ActionEvent
 
 @Log
 class AnnotatedMenu implements MaridMenu {
+
     @Override
     List<MenuEntry> getMenuEntries() {
         def entries = new LinkedList<MenuEntry>();
@@ -221,6 +222,8 @@ class AnnotatedMenu implements MaridMenu {
                         log.warning("{0}.isSelected()", x, cl.canonicalName);
                         return false;
                     }
+                } else {
+                    return true;
                 }
             }
 
@@ -234,6 +237,8 @@ class AnnotatedMenu implements MaridMenu {
                         log.warning("{0}.isEnabled()", x, cl.canonicalName);
                         return false;
                     }
+                } else {
+                    return true;
                 }
             }
 

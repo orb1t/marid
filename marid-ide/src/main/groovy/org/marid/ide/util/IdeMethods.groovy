@@ -16,20 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.logging
+package org.marid.ide.util
 
-import org.marid.groovy.Dsl
+import org.marid.ide.Application
+import org.marid.ide.menu.MaridMenu
 
-import java.util.logging.Logger
+/**
+ * IDE methods.
+ * @author Dmitry Ovchinnikov
+ */
+class IdeMethods {
 
-class LogDsl implements Dsl {
-    @Override
-    void load() throws Exception {
-        Logger.mixin(LoggingGroovyMethods);
+    /**
+     * Get the current application.
+     * @param script A script.
+     * @return Current application.
+     */
+    public static Application getApplication(Script script) {
+        return null;
     }
 
-    @Override
-    String toString() {
-        return "JUL DSL";
+    /**
+     * Get the current application.
+     * @param menu A menu.
+     * @return Current application.
+     */
+    public static Application getApplication(MaridMenu menu) {
+        return null;
     }
 }

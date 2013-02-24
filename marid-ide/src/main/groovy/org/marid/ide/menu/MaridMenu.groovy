@@ -18,6 +18,8 @@
 
 package org.marid.ide.menu
 
+import org.marid.ide.Application
+
 public interface MaridMenu {
 
     List<MenuEntry> getMenuEntries();
