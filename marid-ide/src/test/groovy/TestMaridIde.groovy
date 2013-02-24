@@ -1,5 +1,7 @@
+import org.marid.ide.MaridIde
+
 /*
- * Copyright (C) 2012 Dmitry Ovchinnikov
+ * Copyright (C) 2013 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,20 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.marid;
 
-import org.junit.Assert;
-import org.junit.Test;
-
-/**
- * Map tests.
- *
- * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
- */
-public class MapTest extends Assert {
-
-    @Test
-    public void test1() throws Exception {
-        
-    }
-}
+def maridIde = new MaridIde();
+maridIde.run();
