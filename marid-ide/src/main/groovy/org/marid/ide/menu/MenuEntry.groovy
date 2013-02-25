@@ -58,7 +58,5 @@ public interface MenuEntry {
 
     boolean isEnabled();
 
-    boolean isInitialSelected();
-
     void call(ActionEvent event);
 }

@@ -18,15 +18,12 @@
 
 package menu
 
-import org.marid.ide.menu.AnnotatedMenu
-import org.marid.ide.menu.Menu
+import org.marid.ide.menu.ReflectionMenu
 
 import java.awt.event.ActionEvent
 
-@Menu(info = "System menu")
-class System extends AnnotatedMenu {
+class System extends ReflectionMenu {
 
-    @Menu(info = "Exit to system", shortcut = "control Q")
     class Exit {
 
         void call(ActionEvent event) {
