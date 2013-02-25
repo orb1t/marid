@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -26,7 +27,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <marid.version>0.1.14-SNAPSHOT</marid.version>
+        <java.version>1.7</java.version>
     </properties>
 
     <scm>
@@ -209,9 +210,6 @@
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <username>eosms</username>
-                        <developmentVersion>
-                            ${marid.version}
-                        </developmentVersion>
                         <preparationGoals>wagon:upload</preparationGoals>
                     </configuration>
                 </plugin>
@@ -312,15 +310,6 @@
             <plugin>
                 <groupId>org.codehaus.gmaven</groupId>
                 <artifactId>gmaven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>2.0</version>
-                <configuration>
-                    <newVersion>${marid.version}</newVersion>
-                </configuration>
             </plugin>
         </plugins>
     </build>

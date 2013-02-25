@@ -98,43 +98,43 @@ class ReflectionMenu implements MaridMenu {
             @Override
             boolean isMutableIcon() {
                 return cl.methods
-                        .findAll({it.parameterTypes.length == 0})
-                        .collect({it.name}).contains("getIcon");
+                        .findAll{it.parameterTypes.length == 0}
+                        .collect{it.name}.contains("getIcon");
             }
 
             @Override
             boolean isMutableLabel() {
                 return cl.methods
-                        .findAll({it.parameterTypes.length == 0})
-                        .collect({it.name}).contains("getLabel");
+                        .findAll{it.parameterTypes.length == 0}
+                        .collect{it.name}.contains("getLabel");
             }
 
             @Override
             boolean isMutableInfo() {
                 return cl.methods
-                        .findAll({it.parameterTypes.length == 0})
-                        .collect({it.name}).contains("getInfo");
+                        .findAll{it.parameterTypes.length == 0}
+                        .collect{it.name}.contains("getInfo");
             }
 
             @Override
             boolean isMutableDescription() {
                 return cl.methods
-                        .findAll({it.parameterTypes.length == 0})
-                        .collect({it.name}).contains("getDescription");
+                        .findAll{it.parameterTypes.length == 0}
+                        .collect{it.name}.contains("getDescription");
             }
 
             @Override
             boolean hasSelectedPredicate() {
                 return cl.methods
-                        .findAll({it.parameterTypes.length == 0 && it.returnType == boolean})
-                        .collect({it.name}).contains("isSelected");
+                        .findAll{it.parameterTypes.length == 0 && it.returnType == boolean}
+                        .collect{it.name}.contains("isSelected");
             }
 
             @Override
             boolean hasEnabledPredicate() {
                 return cl.methods
-                        .findAll({it.parameterTypes.length == 0 && it.returnType == boolean})
-                        .collect({it.name}).contains("isEnabled");
+                        .findAll{it.parameterTypes.length == 0 && it.returnType == boolean}
+                        .collect{it.name}.contains("isEnabled");
             }
 
             @Override
@@ -152,8 +152,8 @@ class ReflectionMenu implements MaridMenu {
                 if (item instanceof Closure) {
                     item(event);
                 } else if (cl.methods
-                        .findAll({it.parameterTypes.length == 1})
-                        .collect({it.name}).contains("call")) {
+                        .findAll{it.parameterTypes.length == 1}
+                        .collect{it.name}.contains("call")) {
                     item.call(event);
                 }
             }
