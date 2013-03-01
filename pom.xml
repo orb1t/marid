@@ -32,9 +32,7 @@
 
     <scm>
         <connection>scm:git:git://git.code.sf.net/p/marid/code</connection>
-        <developerConnection>
-            scm:git:ssh://git.code.sf.net/p/marid/code
-        </developerConnection>
+        <developerConnection>scm:git:ssh://git.code.sf.net/p/marid/code</developerConnection>
         <url>http://sf.net/p/marid/code</url>
     </scm>
 
@@ -61,6 +59,7 @@
                                 </execution>
                             </executions>
                         </plugin>
+
                         <plugin>
                             <artifactId>maven-site-plugin</artifactId>
                             <configuration>

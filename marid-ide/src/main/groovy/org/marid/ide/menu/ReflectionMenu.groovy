@@ -32,20 +32,18 @@ class ReflectionMenu implements MaridMenu {
         return entries;
     }
 
-    private void fillEntries(MenuEntry parent, final Class<?> cl, List<MenuEntry> entries) {
+    private void fillEntries(final MenuEntry parent, final Class<?> cl, List<MenuEntry> entries) {
         final def item = cl == getClass() ? this : cl.newInstance();
-        def p = item.hasProperty("path") ? item["path"] as String[] : new String[0];
-        if (p.length == 0) {
-            if (parent != null) {
-                def name = item.hasProperty("name") ? item["name"] : cl.simpleName;
-                p = parent.path + name;
-            }
-        }
-        final def path = p;
         def me =  new MenuEntry() {
             @Override
             String[] getPath() {
-                return path;
+                def p = item.hasProperty("path") ? item["path"] as String[] : new String[0];
+                return p.size() > 0 ? p : parent != null ? parent.path + parent.name : p;
+            }
+
+            @Override
+            String getName() {
+                return item.hasProperty("name") ? item["name"] : cl.simpleName;
             }
 
             @Override
@@ -55,8 +53,7 @@ class ReflectionMenu implements MaridMenu {
 
             @Override
             String getLabel() {
-                return item.hasProperty("label") ? item["label"] as String :
-                    item.hasProperty("name") ? item["name"] as String : cl.simpleName;
+                return item.hasProperty("label") ? item["label"] as String : name;
             }
 
             @Override
@@ -160,7 +157,7 @@ class ReflectionMenu implements MaridMenu {
 
             @Override
             String toString() {
-                return label;
+                return (path + name).toList().join("/");
             }
         };
         entries << me;

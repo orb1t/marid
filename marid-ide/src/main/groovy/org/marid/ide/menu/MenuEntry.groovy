@@ -28,6 +28,8 @@ public interface MenuEntry {
 
     String getLabel();
 
+    String getName();
+
     String getCommand();
 
     String getShortcut();

@@ -19,8 +19,13 @@ package org.marid.ide
 
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.marid.ide.menu.MaridMenu
+import org.marid.ide.menu.MenuBar
+import org.marid.ide.menu.MenuEntry
 import org.marid.ide.util.IdeUncaughtExceptionHandler
 import org.marid.logging.Logging
+
+import javax.swing.JFrame
+import java.awt.Dimension
 
 Logging.init(getClass(), "logide.properties");
 Thread.defaultUncaughtExceptionHandler = new IdeUncaughtExceptionHandler();
@@ -30,7 +35,15 @@ def cc = new CompilerConfiguration();
 cc.sourceEncoding = "UTF-8";
 cc.recompileGroovySource = true;
 cc.targetBytecode = "1.7";
+
 def sl = ServiceLoader.load(MaridMenu, new GroovyClassLoader(ccl, cc, false));
+def entries = new ArrayList<MenuEntry>();
 for (def menu in sl) {
-    println(menu.menuEntries);
+    entries.addAll(menu.menuEntries);
 }
+def frame = new JFrame("Frame");
+frame.JMenuBar = new MenuBar(entries);
+frame.preferredSize = new Dimension(400, 300);
+frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE;
+frame.pack();
+frame.visible = true;
