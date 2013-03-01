@@ -16,9 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.menu
+package org.marid.ide.bind
 
-public interface MaridMenu extends MenuSupport{
+import org.marid.ide.Ide
+import org.marid.ide.itf.Application
+import org.marid.ide.menu.MenuSupport
 
-    List<MenuEntry> getMenuEntries();
+/**
+ * IDE methods.
+ *
+ * @author Dmitry Ovchinnikov
+ */
+class IdeMethods {
+
+    public static Application getApplication(Object script) {
+        return Ide.application;
+    }
+
+    public static Application getApplication(MenuSupport menu) {
+        return Ide.application;
+    }
 }

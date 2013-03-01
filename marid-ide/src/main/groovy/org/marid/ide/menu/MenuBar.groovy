@@ -37,7 +37,7 @@ class MenuBar extends JMenuBar {
     MenuBar(List<MenuEntry> menuEntries) {
         for (def entry in menuEntries
                 .findAll{it.path.length == 0}
-                .sort(false, {e1, e2 -> e1.priority.compareTo(e2.priority)})) {
+                .sort(false, {e1, e2 -> e1.priority <=> e2.priority})) {
             switch (entry.type) {
                 case MenuType.ITEM:
                     add(getItem(entry));
@@ -72,7 +72,7 @@ class MenuBar extends JMenuBar {
         def n = entry.path.length;
         for (def e in menuEntries
                 .findAll{it.path.length == n + 1 && it.path.take(n) == entry.path}
-                .sort(false, {e1, e2 -> e1.priority.compareTo(e2.priority)})) {
+                .sort(false, {e1, e2 -> e1.priority <=> e2.priority})) {
             switch (e.type) {
                 case MenuType.ITEM:
                     menu.add(getItem(e));

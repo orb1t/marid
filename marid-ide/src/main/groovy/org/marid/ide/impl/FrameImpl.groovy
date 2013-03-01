@@ -19,29 +19,40 @@
 package org.marid.ide.impl
 
 import org.marid.ide.Ide
-import org.marid.ide.itf.Application
 import org.marid.ide.itf.Frame
+import org.marid.ide.menu.MaridMenu
+import org.marid.ide.menu.MenuBar
+import org.marid.ide.menu.MenuEntry
 
+import javax.swing.*
+import java.awt.*
 import java.util.prefs.Preferences
 
-class ApplicationImpl implements Application {
+/**
+ * Application frame implementation.
+ *
+ * @author Dmitry Ovchinnikov 
+ */
+class FrameImpl extends JFrame implements Frame {
 
-    private final def frame = new FrameImpl(this);
-    private final def preferences = Preferences.userNodeForPackage(Ide).node("application");
+    private final def application;
+    private final def preferences = Preferences.userNodeForPackage(Ide).node("frame");
 
-    @Override
-    String getVersion() {
-        return getClass().package.implementationVersion;
+    FrameImpl(ApplicationImpl application) {
+        this.application = application;
+        defaultCloseOperation = EXIT_ON_CLOSE;
+        createMenu();
+        preferredSize = new Dimension(400, 300);
+        pack();
     }
 
-    @Override
-    void exit() {
-        System.exit(0);
-    }
-
-    @Override
-    Frame getFrame() {
-        return frame;
+    private def createMenu() {
+        def sl = ServiceLoader.load(MaridMenu, new GroovyClassLoader());
+        def entries = new ArrayList<MenuEntry>();
+        for (def menu in sl) {
+            entries.addAll(menu.menuEntries);
+        }
+        setJMenuBar(new MenuBar(entries));
     }
 
     @Override

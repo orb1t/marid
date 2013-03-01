@@ -16,9 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.menu
+package org.marid.ide.itf
 
-public interface MaridMenu extends MenuSupport{
+/**
+ * Application frame.
+ *
+ * @author Dmitry Ovchinnikov 
+ */
+public interface Frame extends IdeObject {
 
-    List<MenuEntry> getMenuEntries();
+    boolean isVisible();
+
+    void setVisible(boolean state);
 }

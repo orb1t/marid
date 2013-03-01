@@ -18,6 +18,7 @@
 
 package org.marid.ide.menu
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Log
 
 import java.awt.event.ActionEvent

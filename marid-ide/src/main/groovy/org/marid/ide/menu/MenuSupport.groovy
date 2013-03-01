@@ -16,32 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.util
-
-import org.marid.ide.Application
-import org.marid.ide.menu.MaridMenu
+package org.marid.ide.menu
 
 /**
- * IDE methods.
- * @author Dmitry Ovchinnikov
+ * Menu support interface.
+ *
+ * @author Dmitry Ovchinnikov 
  */
-class IdeMethods {
+public interface MenuSupport {
 
-    /**
-     * Get the current application.
-     * @param script A script.
-     * @return Current application.
-     */
-    public static Application getApplication(Script script) {
-        return null;
-    }
-
-    /**
-     * Get the current application.
-     * @param menu A menu.
-     * @return Current application.
-     */
-    public static Application getApplication(MaridMenu menu) {
-        return null;
-    }
 }

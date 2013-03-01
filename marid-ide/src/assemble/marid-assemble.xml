@@ -15,6 +15,10 @@
             <outputDirectory>.</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>src/ext</directory>
+            <outputDirectory>ext</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>src/dev</directory>
             <outputDirectory>.</outputDirectory>
         </fileSet>

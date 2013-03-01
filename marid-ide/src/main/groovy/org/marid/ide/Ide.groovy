@@ -18,9 +18,33 @@
 
 package org.marid.ide
 
-public interface Application {
+import groovy.util.logging.Log
+import org.marid.ide.impl.ApplicationImpl
+import org.marid.ide.itf.Application
 
-    String getVersion();
+/**
+ * IDE class.
+ *
+ * @author Dmitry Ovchinnikov 
+ */
+@Log
+class Ide {
 
-    void exit();
+    private static Application application;
+
+    static {
+        try {
+            application = new ApplicationImpl();
+        } catch (x) {
+            log.severe("Application error", x)
+        }
+    }
+
+    static void init() {
+        application.frame.visible = true;
+    }
+
+    static Application getApplication() {
+        return application;
+    }
 }

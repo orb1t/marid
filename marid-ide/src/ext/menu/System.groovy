@@ -18,13 +18,14 @@
 
 package menu
 
+import org.marid.ide.menu.MenuSupport
 import org.marid.ide.menu.ReflectionMenu
 
 import java.awt.event.ActionEvent
 
 class System extends ReflectionMenu {
 
-    class Exit {
+    class Exit implements MenuSupport {
 
         void call(ActionEvent event) {
             application.exit();

@@ -16,9 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.menu
+package org.marid.ide.itf
 
-public interface MaridMenu extends MenuSupport{
+import java.util.prefs.Preferences
 
-    List<MenuEntry> getMenuEntries();
+/**
+ * Base IDE object interface.
+ *
+ * @author Dmitry Ovchinnikov 
+ */
+public interface IdeObject {
+
+    Preferences getPreferences();
 }
