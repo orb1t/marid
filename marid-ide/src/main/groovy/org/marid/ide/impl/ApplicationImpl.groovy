@@ -21,13 +21,30 @@ package org.marid.ide.impl
 import org.marid.ide.Ide
 import org.marid.ide.itf.Application
 import org.marid.ide.itf.Frame
+import org.marid.ide.menu.MaridMenu
+import org.marid.ide.menu.MenuEntry
 
+import java.awt.EventQueue
+import java.util.concurrent.SynchronousQueue
 import java.util.prefs.Preferences
 
-class ApplicationImpl implements Application {
+class ApplicationImpl implements Application, Runnable {
 
-    private final def frame = new FrameImpl(this);
     private final def preferences = Preferences.userNodeForPackage(Ide).node("application");
+    protected final def menuEntries = new SynchronousQueue<List<MenuEntry>>();
+    private frame;
+
+    ApplicationImpl() {
+        Thread.start {
+            def entries = new ArrayList<MenuEntry>();
+            def sl = ServiceLoader.load(MaridMenu, new GroovyClassLoader());
+            for (def menu in sl) {
+                entries.addAll(menu.menuEntries);
+            }
+            menuEntries.put(entries);
+        }
+        EventQueue.invokeLater(this);
+    }
 
     @Override
     String getVersion() {
@@ -47,5 +64,11 @@ class ApplicationImpl implements Application {
     @Override
     Preferences getPreferences() {
         return preferences;
+    }
+
+    @Override
+    void run() {
+        frame = new FrameImpl(this);
+        frame.visible = true;
     }
 }

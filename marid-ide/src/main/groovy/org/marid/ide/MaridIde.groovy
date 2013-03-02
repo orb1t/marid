@@ -20,13 +20,9 @@ package org.marid.ide
 import org.marid.ide.util.IdeUncaughtExceptionHandler
 import org.marid.logging.Logging
 
-import java.awt.*
-
 Logging.init(getClass(), "logide.properties");
 Thread.defaultUncaughtExceptionHandler = new IdeUncaughtExceptionHandler();
 
 GroovySystem.properties["maridIde"] = this;
 
-EventQueue.invokeLater {
-    Ide.init();
-};
+Ide.init();

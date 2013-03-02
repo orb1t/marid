@@ -41,7 +41,6 @@ class Ide {
     }
 
     static void init() {
-        application.frame.visible = true;
     }
 
     static Application getApplication() {

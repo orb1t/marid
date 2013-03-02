@@ -18,17 +18,17 @@
 
 package menu
 
-import org.marid.ide.menu.MenuSupport
-import org.marid.ide.menu.ReflectionMenu
+import org.marid.ide.menu.GroovyMenu
 
-import java.awt.event.ActionEvent
+class System extends GroovyMenu {
 
-class System extends ReflectionMenu {
-
-    class Exit implements MenuSupport {
-
-        void call(ActionEvent event) {
-            application.exit();
-        }
-    }
+    def items = [
+        system : [
+            items : [
+                exit : [
+                    action : {application.exit()}
+                ]
+            ]
+        ]
+    ];
 }

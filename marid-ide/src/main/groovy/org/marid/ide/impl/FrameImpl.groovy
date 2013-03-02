@@ -20,9 +20,7 @@ package org.marid.ide.impl
 
 import org.marid.ide.Ide
 import org.marid.ide.itf.Frame
-import org.marid.ide.menu.MaridMenu
 import org.marid.ide.menu.MenuBar
-import org.marid.ide.menu.MenuEntry
 
 import javax.swing.*
 import java.awt.*
@@ -41,18 +39,9 @@ class FrameImpl extends JFrame implements Frame {
     FrameImpl(ApplicationImpl application) {
         this.application = application;
         defaultCloseOperation = EXIT_ON_CLOSE;
-        createMenu();
         preferredSize = new Dimension(400, 300);
+        setJMenuBar(new MenuBar(application.menuEntries.take()));
         pack();
-    }
-
-    private def createMenu() {
-        def sl = ServiceLoader.load(MaridMenu, new GroovyClassLoader());
-        def entries = new ArrayList<MenuEntry>();
-        for (def menu in sl) {
-            entries.addAll(menu.menuEntries);
-        }
-        setJMenuBar(new MenuBar(entries));
     }
 
     @Override

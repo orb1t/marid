@@ -56,9 +56,11 @@ public interface MenuEntry {
 
     boolean hasEnabledPredicate();
 
-    boolean isSelected();
+    Boolean isSelected();
 
     boolean isEnabled();
+
+    boolean isLeaf();
 
     void call(ActionEvent event);
 }

@@ -84,7 +84,7 @@ class MenuBar extends JMenuBar {
                     menu.add(getRadioItem(e));
                     break;
                 case MenuType.MENU:
-                    add(getMenu(m, e));
+                    menu.add(getMenu(menuEntries, e));
                     break;
             }
         }
