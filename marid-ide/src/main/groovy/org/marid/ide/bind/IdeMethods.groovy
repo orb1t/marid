@@ -29,7 +29,7 @@ import org.marid.ide.menu.MenuSupport
  */
 class IdeMethods {
 
-    public static Application getApplication(Object script) {
+    public static Application getApplication(Script script) {
         return Ide.application;
     }
 

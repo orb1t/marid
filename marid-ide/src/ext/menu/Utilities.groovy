@@ -16,34 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide
+package menu
 
-import groovy.util.logging.Log
-import org.marid.ide.swing.impl.ApplicationImpl
-import org.marid.ide.itf.Application
+import org.marid.ide.menu.GroovyMenu
 
 /**
- * IDE class.
  *
  * @author Dmitry Ovchinnikov 
  */
-@Log
-class Ide {
+class Utilities extends GroovyMenu {
 
-    private static Application application;
-
-    static {
-        try {
-            application = new ApplicationImpl();
-        } catch (x) {
-            log.severe("Application error", x)
-        }
-    }
-
-    static void init() {
-    }
-
-    static Application getApplication() {
-        return application;
-    }
+    def items = [
+        utilities : [
+            items : [
+                marid_image_generation : [
+                    action : {application.showImageGenDialog()}
+                ],
+                laf_selection : [
+                    action : {application.showLafSelectionDialog()}
+                ]
+            ]
+        ]
+    ];
 }

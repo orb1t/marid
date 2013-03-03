@@ -69,9 +69,10 @@ class MenuBar extends JMenuBar {
 
     private def getMenu(List<MenuEntry> menuEntries, MenuEntry entry) {
         def JMenu menu = new JMenu(new MenuBarAction(entry));
-        def n = entry.path.length;
+        def path = entry.path;
+        def n = path.length;
         for (def e in menuEntries
-                .findAll{it.path.length == n + 1 && it.path.take(n) == entry.path}
+                .findAll{it.path.length == n + 1 && it.path == entry.path + entry.name}
                 .sort(false, {e1, e2 -> e1.priority <=> e2.priority})) {
             switch (e.type) {
                 case MenuType.ITEM:

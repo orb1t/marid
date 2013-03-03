@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.gui
+package org.marid.ide.swing
 
 import groovy.util.logging.Log
 import org.marid.ide.res.MaridAction
@@ -111,18 +111,22 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
     protected void accept() {
     }
 
+    @SuppressWarnings("GrMethodMayBeStatic")
     protected String getAcceptName() {
         return "OK";
     }
 
+    @SuppressWarnings("GrMethodMayBeStatic")
     protected String getRejectName() {
         return "Cancel";
     }
 
+    @SuppressWarnings("GrMethodMayBeStatic")
     protected String getAcceptIcon() {
         return "s16/ok.png";
     }
 
+    @SuppressWarnings("GrMethodMayBeStatic")
     protected String getRejectIcon() {
         return "s16/cancel.png";
     }

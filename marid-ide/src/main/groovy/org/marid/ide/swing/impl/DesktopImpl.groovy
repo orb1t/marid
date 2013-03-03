@@ -16,33 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.impl
+package org.marid.ide.swing.impl
 
 import org.marid.ide.Ide
-import org.marid.ide.itf.Frame
-import org.marid.ide.menu.MenuBar
+import org.marid.ide.itf.Desktop
 
-import javax.swing.*
-import java.awt.*
+import javax.swing.JDesktopPane
 import java.util.prefs.Preferences
 
 /**
- * Application frame implementation.
+ * Desktop implementation.
  *
  * @author Dmitry Ovchinnikov 
  */
-class FrameImpl extends JFrame implements Frame {
+class DesktopImpl extends JDesktopPane implements Desktop {
 
-    private final def application;
-    private final def preferences = Preferences.userNodeForPackage(Ide).node("frame");
-
-    FrameImpl(ApplicationImpl application) {
-        this.application = application;
-        defaultCloseOperation = EXIT_ON_CLOSE;
-        preferredSize = new Dimension(400, 300);
-        setJMenuBar(new MenuBar(application.menuEntries.take()));
-        pack();
-    }
+    private final Preferences preferences = Preferences.userNodeForPackage(Ide).node("desktop");
 
     @Override
     Preferences getPreferences() {

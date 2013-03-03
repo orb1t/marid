@@ -28,4 +28,6 @@ public interface Frame extends IdeObject {
     boolean isVisible();
 
     void setVisible(boolean state);
+
+    Desktop getDesktop();
 }

@@ -16,34 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide
-
-import groovy.util.logging.Log
-import org.marid.ide.swing.impl.ApplicationImpl
-import org.marid.ide.itf.Application
+package org.marid.ide.itf
 
 /**
- * IDE class.
+ * Desktop interface.
  *
  * @author Dmitry Ovchinnikov 
  */
-@Log
-class Ide {
+public interface Desktop extends IdeObject {
 
-    private static Application application;
-
-    static {
-        try {
-            application = new ApplicationImpl();
-        } catch (x) {
-            log.severe("Application error", x)
-        }
-    }
-
-    static void init() {
-    }
-
-    static Application getApplication() {
-        return application;
-    }
 }

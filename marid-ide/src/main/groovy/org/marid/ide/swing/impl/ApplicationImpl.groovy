@@ -16,23 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.impl
+package org.marid.ide.swing.impl
 
+import groovy.util.logging.Log
 import org.marid.ide.Ide
 import org.marid.ide.itf.Application
-import org.marid.ide.itf.Frame
 import org.marid.ide.menu.MaridMenu
 import org.marid.ide.menu.MenuEntry
+import org.marid.ide.swing.util.ImageGenDialog
+import org.marid.ide.swing.util.LafSelectionDialog
 
-import java.awt.EventQueue
+import javax.swing.*
+import java.awt.*
+import java.util.List
 import java.util.concurrent.SynchronousQueue
 import java.util.prefs.Preferences
 
+@Log
 class ApplicationImpl implements Application, Runnable {
 
     private final def preferences = Preferences.userNodeForPackage(Ide).node("application");
     protected final def menuEntries = new SynchronousQueue<List<MenuEntry>>();
-    private frame;
+    private FrameImpl frame;
 
     ApplicationImpl() {
         Thread.start {
@@ -42,6 +47,12 @@ class ApplicationImpl implements Application, Runnable {
                 entries.addAll(menu.menuEntries);
             }
             menuEntries.put(entries);
+        }
+        def laf = preferences.get("laf", UIManager.getCrossPlatformLookAndFeelClassName());
+        try {
+            UIManager.setLookAndFeel(laf as String);
+        } catch (x) {
+            log.warning("{0} error", x, laf)
         }
         EventQueue.invokeLater(this);
     }
@@ -57,8 +68,18 @@ class ApplicationImpl implements Application, Runnable {
     }
 
     @Override
-    Frame getFrame() {
+    FrameImpl getFrame() {
         return frame;
+    }
+
+    @Override
+    void showImageGenDialog() {
+        new ImageGenDialog(frame, "Marid image generation".ls(), false).visible = true;
+    }
+
+    @Override
+    void showLafSelectionDialog() {
+        new LafSelectionDialog(frame, "LAF selection".ls(), true).visible = true;
     }
 
     @Override

@@ -25,4 +25,8 @@ public interface Application extends IdeObject {
     void exit();
 
     Frame getFrame();
+
+    void showImageGenDialog();
+
+    void showLafSelectionDialog();
 }

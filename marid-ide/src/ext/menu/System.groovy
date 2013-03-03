@@ -26,7 +26,8 @@ class System extends GroovyMenu {
         system : [
             items : [
                 exit : [
-                    action : {application.exit()}
+                    action : {application.exit()},
+                    shortcut: "control Q"
                 ]
             ]
         ]

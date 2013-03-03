@@ -63,7 +63,7 @@ class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
             @Override
             String getLabel() {
                 return isMutableLabel() ? map["label"]() as String :
-                    map.get("label", name.capitalize());
+                    map.get("label", name.capitalize().replace('_' as char, ' ' as char));
             }
 
             @Override

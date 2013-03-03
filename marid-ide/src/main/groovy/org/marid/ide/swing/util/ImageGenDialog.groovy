@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.gui.util
+package org.marid.ide.swing.util
 
 import groovy.transform.InheritConstructors
 import groovy.util.logging.Log
-import org.marid.ide.gui.AbstractDialog
+import org.marid.ide.swing.AbstractDialog
 import org.marid.ide.res.MaridAction
 import org.marid.image.MaridImage
 
