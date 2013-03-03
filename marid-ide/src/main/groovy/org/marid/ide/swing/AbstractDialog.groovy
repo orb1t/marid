@@ -18,24 +18,24 @@
 
 package org.marid.ide.swing
 
+import groovy.transform.InheritConstructors
 import groovy.util.logging.Log
 import org.marid.ide.res.MaridAction
-import org.marid.l10n.Localized.S
 
 import javax.swing.*
 import javax.swing.GroupLayout.ParallelGroup
 import javax.swing.GroupLayout.SequentialGroup
-import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.WindowEvent
 import java.awt.event.WindowListener
 import java.util.logging.Level
 
+import static java.util.prefs.Preferences.userNodeForPackage
 import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW
 import static javax.swing.KeyStroke.getKeyStroke
-import static java.util.prefs.Preferences.userNodeForPackage
 
 @Log
+@InheritConstructors
 abstract class AbstractDialog extends JDialog implements WindowListener {
 
     private def initialized = false;
@@ -67,41 +67,6 @@ abstract class AbstractDialog extends JDialog implements WindowListener {
     };
 
     protected final def prefs = userNodeForPackage(getClass()).node(getClass().simpleName);
-
-    AbstractDialog(Frame frame, String title, boolean modal, GraphicsConfiguration conf) {
-        super(frame, S.l(title), modal, conf);
-    }
-
-    AbstractDialog(Frame frame, String title, boolean modal) {
-        super(frame, S.l(title), modal);
-    }
-
-    AbstractDialog(Frame frame, String title) {
-        super(frame, S.l(title));
-    }
-
-    AbstractDialog(Frame frame) {
-        super(frame);
-    }
-
-    AbstractDialog() {
-    }
-
-    AbstractDialog(Window w, String title, Dialog.ModalityType modality, GraphicsConfiguration c) {
-        super(w, S.l(title), modality, c);
-    }
-
-    AbstractDialog(Window window, String title, Dialog.ModalityType modality) {
-        super(window, S.l(title), modality);
-    }
-
-    AbstractDialog(Window window, String title) {
-        super(window, S.l(title));
-    }
-
-    AbstractDialog(Dialog d, String title, Dialog.ModalityType modality, GraphicsConfiguration c) {
-        super(d, S.l(title), modality, c);
-    }
 
     protected abstract void fill(GroupLayout gl, SequentialGroup vg, ParallelGroup hg);
 
