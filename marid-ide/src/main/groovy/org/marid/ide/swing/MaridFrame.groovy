@@ -20,7 +20,7 @@ package org.marid.ide.swing
 
 import groovy.transform.InheritConstructors
 
-import javax.swing.JFrame
+import javax.swing.*
 import java.awt.event.WindowEvent
 import java.awt.event.WindowListener
 import java.util.prefs.Preferences
@@ -32,14 +32,15 @@ import java.util.prefs.Preferences
  */
 @InheritConstructors
 abstract class MaridFrame extends JFrame implements WindowListener {
+
+    private boolean firstTimeVisible = true;
+
     {
         addWindowListener(this);
     }
 
     @Override
     void windowOpened(WindowEvent e) {
-        location = preferences.getPoint("location", location);
-        size = preferences.getDimension("size", preferredSize);
         state = preferences.getInt("state", state);
         extendedState = preferences.getInt("extendedState", extendedState);
     }
@@ -54,7 +55,6 @@ abstract class MaridFrame extends JFrame implements WindowListener {
 
     @Override
     void windowClosed(WindowEvent e) {
-
     }
 
     @Override
@@ -69,12 +69,20 @@ abstract class MaridFrame extends JFrame implements WindowListener {
 
     @Override
     void windowActivated(WindowEvent e) {
-
     }
 
     @Override
     void windowDeactivated(WindowEvent e) {
+    }
 
+    @Override
+    void setVisible(boolean b) {
+        if (firstTimeVisible) {
+            firstTimeVisible = false;
+            location = preferences.getPoint("location", location);
+            size = preferences.getDimension("size", preferredSize);
+        }
+        super.setVisible(b)
     }
 
     abstract Preferences getPreferences();

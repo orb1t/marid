@@ -18,9 +18,9 @@
 package org.marid.ide.swing.impl
 
 import org.marid.ide.Ide
-import org.marid.ide.swing.MaridFrame
 import org.marid.ide.itf.Frame
 import org.marid.ide.menu.MenuBar
+import org.marid.ide.swing.MaridFrame
 
 import java.awt.*
 import java.util.prefs.Preferences
@@ -32,7 +32,7 @@ import java.util.prefs.Preferences
  */
 class FrameImpl extends MaridFrame implements Frame {
 
-    private final def application;
+    private final ApplicationImpl application;
     private final def preferences = Preferences.userNodeForPackage(Ide).node("frame");
     private final def desktop;
 

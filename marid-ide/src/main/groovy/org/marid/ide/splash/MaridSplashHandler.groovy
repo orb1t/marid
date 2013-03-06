@@ -16,19 +16,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.itf
+package org.marid.ide.splash
 
-import org.marid.ide.splash.MaridSplash
+import java.util.logging.Handler
+import java.util.logging.LogRecord
 
-public interface Application extends IdeObject {
+/**
+ * Marid splash handler.
+ *
+ * @author Dmitry Ovchinnikov 
+ */
+class MaridSplashHandler extends Handler {
 
-    String getVersion();
+    private final MaridSplash splash;
 
-    void exit();
+    MaridSplashHandler(MaridSplash splash) {
+        this.splash = splash;
+    }
 
-    Frame getFrame();
+    @Override
+    void publish(LogRecord record) {
 
-    void showImageGenDialog();
+    }
 
-    void showLafSelectionDialog();
+    @Override
+    void flush() {
+
+    }
+
+    @Override
+    void close() throws SecurityException {
+
+    }
 }

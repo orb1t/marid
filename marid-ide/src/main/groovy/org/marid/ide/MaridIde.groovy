@@ -17,12 +17,12 @@
  */
 package org.marid.ide
 
+import org.marid.ide.splash.MaridSplash
 import org.marid.ide.util.IdeUncaughtExceptionHandler
 import org.marid.logging.Logging
 
+def splash = new MaridSplash();
 Logging.init(getClass(), "logide.properties");
 Thread.defaultUncaughtExceptionHandler = new IdeUncaughtExceptionHandler();
 
-GroovySystem.properties["maridIde"] = this;
-
-Ide.init();
+Ide.init(splash);
