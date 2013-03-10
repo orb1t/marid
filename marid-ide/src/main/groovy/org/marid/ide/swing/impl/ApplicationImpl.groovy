@@ -28,15 +28,14 @@ import org.marid.ide.swing.util.LafSelectionDialog
 import org.marid.image.MaridIcon
 
 import javax.swing.*
+import javax.swing.plaf.nimbus.NimbusLookAndFeel
 import java.awt.*
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
 import java.util.List
 import java.util.concurrent.SynchronousQueue
 import java.util.prefs.Preferences
 
 @Log
-class ApplicationImpl implements Application, ActionListener {
+class ApplicationImpl implements Application {
 
     private final def preferences = Preferences.userNodeForPackage(Ide).node("application");
     private FrameImpl frame;
@@ -51,16 +50,17 @@ class ApplicationImpl implements Application, ActionListener {
             }
             menuEntries.put(entries);
         }
-        def laf = preferences.get("laf", UIManager.getCrossPlatformLookAndFeelClassName());
+        def laf = preferences.get("laf", NimbusLookAndFeel.name);
         try {
-            UIManager.setLookAndFeel(laf as String);
+            UIManager.setLookAndFeel(laf);
         } catch (x) {
             log.warning("{0} error", x, laf)
         }
         EventQueue.invokeLater {
-            frame = new FrameImpl(this, menuEntries);
+            def entries = menuEntries.take();
+            frame = new FrameImpl(this, entries);
             frame.visible = true;
-            initTray();
+            initTray(entries);
         };
     }
 
@@ -94,21 +94,17 @@ class ApplicationImpl implements Application, ActionListener {
         return preferences;
     }
 
-    private void initTray() {
+    private void initTray(List<MenuEntry> entries) {
         if (SystemTray.supported) {
             def tray = SystemTray.systemTray;
             def traySize = tray.trayIconSize;
             def trayWidth = (int)traySize.width;
             def trayHeight = (int)traySize.height;
             def image = MaridIcon.getImage(Math.min(trayWidth, trayHeight), Color.GREEN);
-            def icon = new TrayIcon(image, "Marid IDE".ls());
-            icon.addActionListener(this);
+            def popup = new PopupMenuImpl(this, entries);
+            def icon = new TrayIcon(image, "Marid IDE".ls(), popup);
+            icon.addActionListener(popup);
             tray.add(icon);
         }
-    }
-
-    @Override
-    void actionPerformed(ActionEvent e) {
-        frame.visible = !frame.visible;
     }
 }

@@ -16,28 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.menu
+package org.marid.ide.swing.impl
 
 import images.Images
+import org.marid.ide.menu.MenuEntry
+import org.marid.ide.menu.MenuType
 
 import javax.swing.*
+import java.awt.*
 import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import java.util.List
 
 /**
- * Menu bar.
+ * Popup menu implementation.
  *
  * @author Dmitry Ovchinnikov 
  */
-class MenuBar extends JMenuBar {
-    /**
-     * Constructs the menu bar.
-     *
-     * @param maridMenu
-     */
-    MenuBar(List<MenuEntry> menuEntries) {
-        for (def entry in menuEntries
-                .findAll{it.path.length == 0}
-                .sort(false, {e1, e2 -> e1.priority <=> e2.priority})) {
+class PopupMenuImpl extends PopupMenu implements ActionListener {
+
+    private final ApplicationImpl application;
+
+    PopupMenuImpl(ApplicationImpl app, List<MenuEntry> menuEntries) {
+        application = app;
+        def activateItem = new MenuItem("Show/Hide the main window".ls());
+        activateItem.addActionListener(this);
+        add(activateItem);
+        addSeparator();
+        def items = menuEntries.findAll{it.path.length == 0};
+        for (def entry in items.sort(false, {e1, e2 -> e1.priority <=> e2.priority})) {
             switch (entry.type) {
                 case MenuType.ITEM:
                     add(getItem(entry));
@@ -53,27 +60,45 @@ class MenuBar extends JMenuBar {
                     break;
             }
         }
+        addSeparator();
+        def exitItem = new MenuItem("Exit".ls());
+        exitItem.addActionListener({exit()} as ActionListener);
+        add(exitItem);
     }
 
     private def getItem(MenuEntry entry) {
-        return new JMenuItem(new MenuBarAction(entry));
+        def action = new MenuBarAction(entry);
+        def item = new MenuItem(action.getValue(Action.NAME) as String);
+        item.addActionListener(action);
+        item.actionCommand = action.getValue(Action.ACTION_COMMAND_KEY);
+        return item;
     }
 
     private def getRadioItem(MenuEntry entry) {
-        return new JRadioButtonMenuItem(new MenuBarAction(entry));
+        def action = new MenuBarAction(entry);
+        def item = new MenuItem(action.getValue(Action.NAME) as String);
+        item.addActionListener(action);
+        item.actionCommand = action.getValue(Action.ACTION_COMMAND_KEY);
+        return item;
     }
 
     private def getCheckedItem(MenuEntry entry) {
-        return new JCheckBoxMenuItem(new MenuBarAction(entry));
+        def action = new MenuBarAction(entry);
+        def item = new CheckboxMenuItem(action.getValue(Action.NAME) as String);
+        item.addActionListener(action);
+        item.actionCommand = action.getValue(Action.ACTION_COMMAND_KEY);
+        item.state = action.getValue(Action.SELECTED_KEY) as boolean;
+        return item;
     }
 
     private def getMenu(List<MenuEntry> menuEntries, MenuEntry entry) {
-        def JMenu menu = new JMenu(new MenuBarAction(entry));
+        def action = new MenuBarAction(entry);
+        def Menu menu = new Menu(action.getValue(Action.NAME) as String);
+        menu.addActionListener(action);
         def path = entry.path;
         def n = path.length;
-        for (def e in menuEntries
-                .findAll{it.path.length == n + 1 && it.path == entry.path + entry.name}
-                .sort(false, {e1, e2 -> e1.priority <=> e2.priority})) {
+        def v = menuEntries.findAll{it.path.length == n + 1 && it.path == entry.path + entry.name};
+        for (def e in v.sort(false, {e1, e2 -> e1.priority <=> e2.priority})) {
             switch (e.type) {
                 case MenuType.ITEM:
                     menu.add(getItem(e));
@@ -92,7 +117,12 @@ class MenuBar extends JMenuBar {
         return menu;
     }
 
-    private class MenuBarAction extends AbstractAction {
+    @Override
+    void actionPerformed(ActionEvent e) {
+        application.frame.visible = !application.frame.visible;
+    }
+
+    public static class MenuBarAction extends AbstractAction {
 
         final MenuEntry entry;
 
@@ -140,7 +170,7 @@ class MenuBar extends JMenuBar {
                 putValue(SMALL_ICON, Images.getIcon(entry.icon, 16, 16));
             }
             if (entry.hasSelectedPredicate()) {
-                putValue(SELECTED_KEY, entry.selected);
+                putValue(SELECTED_KEY, entry.isSelected());
             }
             if (entry.hasEnabledPredicate()) {
                 enabled = entry.enabled;
