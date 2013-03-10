@@ -25,21 +25,24 @@ import org.marid.ide.menu.MaridMenu
 import org.marid.ide.menu.MenuEntry
 import org.marid.ide.swing.util.ImageGenDialog
 import org.marid.ide.swing.util.LafSelectionDialog
+import org.marid.image.MaridIcon
 
 import javax.swing.*
 import java.awt.*
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
 import java.util.List
 import java.util.concurrent.SynchronousQueue
 import java.util.prefs.Preferences
 
 @Log
-class ApplicationImpl implements Application, Runnable {
+class ApplicationImpl implements Application, ActionListener {
 
     private final def preferences = Preferences.userNodeForPackage(Ide).node("application");
-    protected final def menuEntries = new SynchronousQueue<List<MenuEntry>>();
     private FrameImpl frame;
 
     ApplicationImpl() {
+        def menuEntries = new SynchronousQueue<List<MenuEntry>>();
         Thread.start {
             def entries = new ArrayList<MenuEntry>();
             def sl = ServiceLoader.load(MaridMenu, new GroovyClassLoader());
@@ -54,7 +57,11 @@ class ApplicationImpl implements Application, Runnable {
         } catch (x) {
             log.warning("{0} error", x, laf)
         }
-        EventQueue.invokeLater(this);
+        EventQueue.invokeLater {
+            frame = new FrameImpl(this, menuEntries);
+            frame.visible = true;
+            initTray();
+        };
     }
 
     @Override
@@ -87,9 +94,21 @@ class ApplicationImpl implements Application, Runnable {
         return preferences;
     }
 
+    private void initTray() {
+        if (SystemTray.supported) {
+            def tray = SystemTray.systemTray;
+            def traySize = tray.trayIconSize;
+            def trayWidth = (int)traySize.width;
+            def trayHeight = (int)traySize.height;
+            def image = MaridIcon.getImage(Math.min(trayWidth, trayHeight), Color.GREEN);
+            def icon = new TrayIcon(image, "Marid IDE".ls());
+            icon.addActionListener(this);
+            tray.add(icon);
+        }
+    }
+
     @Override
-    void run() {
-        frame = new FrameImpl(this);
-        frame.visible = true;
+    void actionPerformed(ActionEvent e) {
+        frame.visible = !frame.visible;
     }
 }

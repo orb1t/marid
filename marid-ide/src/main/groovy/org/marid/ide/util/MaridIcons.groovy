@@ -16,17 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.itf
+package org.marid.ide.util
 
-public interface Application extends IdeObject {
+import org.marid.image.MaridIcon
 
-    String getVersion();
+import java.awt.*
+import java.awt.image.BufferedImage
+import java.util.List
 
-    void exit();
+/**
+ * Marid icons.
+ *
+ * @author Dmitry Ovchinnikov 
+ */
+class MaridIcons {
 
-    Frame getFrame();
+    private static final List<BufferedImage> icons = Arrays.asList(
+        MaridIcon.getImage(16, Color.GREEN),
+        MaridIcon.getImage(22, Color.GREEN),
+        MaridIcon.getImage(24, Color.GREEN),
+        MaridIcon.getImage(32, Color.GREEN)
+    );
 
-    void showImageGenDialog();
-
-    void showLafSelectionDialog();
+    static List<BufferedImage> getIcons() {
+        return icons;
+    }
 }

@@ -20,9 +20,12 @@ package org.marid.ide.swing.impl
 import org.marid.ide.Ide
 import org.marid.ide.itf.Frame
 import org.marid.ide.menu.MenuBar
+import org.marid.ide.menu.MenuEntry
 import org.marid.ide.swing.MaridFrame
+import org.marid.ide.util.MaridIcons
 
-import java.awt.*
+import java.awt.Dimension
+import java.util.concurrent.BlockingQueue
 import java.util.prefs.Preferences
 
 /**
@@ -36,12 +39,13 @@ class FrameImpl extends MaridFrame implements Frame {
     private final def preferences = Preferences.userNodeForPackage(Ide).node("frame");
     private final def desktop;
 
-    FrameImpl(ApplicationImpl application) {
+    FrameImpl(ApplicationImpl app, BlockingQueue<List<MenuEntry>> menuEntries) {
         super("Marid IDE".ls());
-        this.application = application;
+        application = app;
+        iconImages = MaridIcons.icons;
         defaultCloseOperation = EXIT_ON_CLOSE;
         add(desktop = new DesktopImpl());
-        setJMenuBar(new MenuBar(application.menuEntries.take()));
+        setJMenuBar(new MenuBar(menuEntries.take()));
         preferredSize = preferences.getDimension("preferredSize", new Dimension(750, 550));
         pack();
     }
