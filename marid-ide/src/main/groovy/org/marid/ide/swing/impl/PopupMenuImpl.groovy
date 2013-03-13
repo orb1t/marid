@@ -18,7 +18,6 @@
 
 package org.marid.ide.swing.impl
 
-import images.Images
 import org.marid.ide.menu.MenuEntry
 import org.marid.ide.menu.MenuType
 
@@ -36,10 +35,12 @@ import java.util.List
 class PopupMenuImpl extends PopupMenu implements ActionListener {
 
     private final ApplicationImpl application;
+    private final font = UIManager.getFont("Label.font").deriveFont(Font.PLAIN);
 
     PopupMenuImpl(ApplicationImpl app, List<MenuEntry> menuEntries) {
         application = app;
         def activateItem = new MenuItem("Show/Hide the main window".ls());
+        activateItem.font = font.deriveFont(Font.BOLD);
         activateItem.addActionListener(this);
         add(activateItem);
         addSeparator();
@@ -53,37 +54,25 @@ class PopupMenuImpl extends PopupMenu implements ActionListener {
                     add(getCheckedItem(entry));
                     break;
                 case MenuType.RADIO:
-                    add(getRadioItem(entry));
+                    add(getItem(entry));
                     break;
                 case MenuType.MENU:
                     add(getMenu(menuEntries, entry));
                     break;
             }
         }
-        addSeparator();
-        def exitItem = new MenuItem("Exit".ls());
-        exitItem.addActionListener({exit()} as ActionListener);
-        add(exitItem);
     }
 
     private def getItem(MenuEntry entry) {
-        def action = new MenuBarAction(entry);
+        def action = new MenuActionImpl(entry);
         def item = new MenuItem(action.getValue(Action.NAME) as String);
         item.addActionListener(action);
         item.actionCommand = action.getValue(Action.ACTION_COMMAND_KEY);
         return item;
     }
 
-    private def getRadioItem(MenuEntry entry) {
-        def action = new MenuBarAction(entry);
-        def item = new MenuItem(action.getValue(Action.NAME) as String);
-        item.addActionListener(action);
-        item.actionCommand = action.getValue(Action.ACTION_COMMAND_KEY);
-        return item;
-    }
-
-    private def getCheckedItem(MenuEntry entry) {
-        def action = new MenuBarAction(entry);
+   private def getCheckedItem(MenuEntry entry) {
+        def action = new MenuActionImpl(entry);
         def item = new CheckboxMenuItem(action.getValue(Action.NAME) as String);
         item.addActionListener(action);
         item.actionCommand = action.getValue(Action.ACTION_COMMAND_KEY);
@@ -92,7 +81,7 @@ class PopupMenuImpl extends PopupMenu implements ActionListener {
     }
 
     private def getMenu(List<MenuEntry> menuEntries, MenuEntry entry) {
-        def action = new MenuBarAction(entry);
+        def action = new MenuActionImpl(entry);
         def Menu menu = new Menu(action.getValue(Action.NAME) as String);
         menu.addActionListener(action);
         def path = entry.path;
@@ -107,7 +96,7 @@ class PopupMenuImpl extends PopupMenu implements ActionListener {
                     menu.add(getCheckedItem(e));
                     break;
                 case MenuType.RADIO:
-                    menu.add(getRadioItem(e));
+                    menu.add(getItem(e));
                     break;
                 case MenuType.MENU:
                     menu.add(getMenu(menuEntries, e));
@@ -118,62 +107,30 @@ class PopupMenuImpl extends PopupMenu implements ActionListener {
     }
 
     @Override
+    void show(Component origin, int x, int y) {
+        update(this);
+        super.show(origin, x, y);
+    }
+
+    @Override
     void actionPerformed(ActionEvent e) {
         application.frame.visible = !application.frame.visible;
     }
 
-    public static class MenuBarAction extends AbstractAction {
-
-        final MenuEntry entry;
-
-        public MenuBarAction(MenuEntry entry) {
-            this.entry = entry;
-            putValue(ACTION_COMMAND_KEY, entry.command);
-            putValue(NAME, entry.label.ls());
-            def shortcut = entry.shortcut;
-            def icon = entry.icon;
-            def description = entry.description?.ls();
-            def info = entry.info?.ls();
-            if (shortcut != null) {
-                putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(shortcut));
-            }
-            if (icon != null) {
-                def smallIcon = Images.getIcon(icon, 16, 16);
-                if (smallIcon != null) {
-                    putValue(SMALL_ICON, smallIcon);
+    private void update(Menu menu) {
+        for (def i = 0; i < menu.itemCount; i++) {
+            def item = menu.getItem(i);
+            def action = (MenuActionImpl)item.actionListeners.find {it instanceof MenuActionImpl};
+            if (action != null) {
+                action.update();
+                item.enabled = action.enabled;
+                if (item instanceof CheckboxMenuItem) {
+                    def cbi = (CheckboxMenuItem)item;
+                    cbi.state = action.getValue(Action.SELECTED_KEY) as boolean;
                 }
             }
-            if (description != null) {
-                putValue(LONG_DESCRIPTION, description);
-            }
-            if (info != null) {
-                putValue(SHORT_DESCRIPTION, info);
-            }
-        }
-
-        @Override
-        void actionPerformed(ActionEvent e) {
-            entry.call(e);
-        }
-
-        void update() {
-            if (entry.mutableDescription) {
-                putValue(LONG_DESCRIPTION, entry.description.ls());
-            }
-            if (entry.mutableInfo) {
-                putValue(SHORT_DESCRIPTION, entry.info.ls());
-            }
-            if (entry.mutableLabel) {
-                putValue(NAME, entry.label.ls());
-            }
-            if (entry.mutableIcon) {
-                putValue(SMALL_ICON, Images.getIcon(entry.icon, 16, 16));
-            }
-            if (entry.hasSelectedPredicate()) {
-                putValue(SELECTED_KEY, entry.isSelected());
-            }
-            if (entry.hasEnabledPredicate()) {
-                enabled = entry.enabled;
+            if (item instanceof Menu) {
+                update((Menu)item);
             }
         }
     }

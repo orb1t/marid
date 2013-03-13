@@ -18,12 +18,10 @@
 
 package org.marid.ide.swing.impl
 
-import images.Images
 import org.marid.ide.menu.MenuEntry
 import org.marid.ide.menu.MenuType
 
 import javax.swing.*
-import java.awt.event.ActionEvent
 
 /**
  * Menu bar.
@@ -53,24 +51,35 @@ class MenuBarImpl extends JMenuBar {
     }
 
     private def getItem(MenuEntry entry) {
-        return new JMenuItem(new MenuBarAction(entry));
+        return new JMenuItem(new MenuActionImpl(entry));
     }
 
     private def getRadioItem(MenuEntry entry) {
-        return new JRadioButtonMenuItem(new MenuBarAction(entry));
+        return new JRadioButtonMenuItem(new MenuActionImpl(entry));
     }
 
     private def getCheckedItem(MenuEntry entry) {
-        return new JCheckBoxMenuItem(new MenuBarAction(entry));
+        return new JCheckBoxMenuItem(new MenuActionImpl(entry));
     }
 
     private def getMenu(List<MenuEntry> menuEntries, MenuEntry entry) {
-        def JMenu menu = new JMenu(new MenuBarAction(entry));
+        def JMenu menu = new JMenu(new MenuActionImpl(entry)) {
+            @Override
+            void setPopupMenuVisible(boolean b) {
+                super.setPopupMenuVisible(b)
+                for (def c in menuComponents) {
+                    if (c instanceof JMenuItem) {
+                        if (c.action instanceof MenuActionImpl) {
+                            ((MenuActionImpl)c.action).update();
+                        }
+                    }
+                }
+            }
+        };
         def path = entry.path;
         def n = path.length;
-        for (def e in menuEntries
-                .findAll{it.path.length == n + 1 && it.path == entry.path + entry.name}
-                .sort(false, {e1, e2 -> e1.priority <=> e2.priority})) {
+        def v = menuEntries.findAll{it.path.length == n + 1 && it.path == entry.path + entry.name};
+        for (def e in v.sort(false, {e1, e2 -> e1.priority <=> e2.priority})) {
             switch (e.type) {
                 case MenuType.ITEM:
                     menu.add(getItem(e));
@@ -87,61 +96,5 @@ class MenuBarImpl extends JMenuBar {
             }
         }
         return menu;
-    }
-
-    private class MenuBarAction extends AbstractAction {
-
-        final MenuEntry entry;
-
-        public MenuBarAction(MenuEntry entry) {
-            this.entry = entry;
-            putValue(ACTION_COMMAND_KEY, entry.command);
-            putValue(NAME, entry.label.ls());
-            def shortcut = entry.shortcut;
-            def icon = entry.icon;
-            def description = entry.description?.ls();
-            def info = entry.info?.ls();
-            if (shortcut != null) {
-                putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(shortcut));
-            }
-            if (icon != null) {
-                def smallIcon = Images.getIcon(icon, 16, 16);
-                if (smallIcon != null) {
-                    putValue(SMALL_ICON, smallIcon);
-                }
-            }
-            if (description != null) {
-                putValue(LONG_DESCRIPTION, description);
-            }
-            if (info != null) {
-                putValue(SHORT_DESCRIPTION, info);
-            }
-        }
-
-        @Override
-        void actionPerformed(ActionEvent e) {
-            entry.call(e);
-        }
-
-        void update() {
-            if (entry.mutableDescription) {
-                putValue(LONG_DESCRIPTION, entry.description.ls());
-            }
-            if (entry.mutableInfo) {
-                putValue(SHORT_DESCRIPTION, entry.info.ls());
-            }
-            if (entry.mutableLabel) {
-                putValue(NAME, entry.label.ls());
-            }
-            if (entry.mutableIcon) {
-                putValue(SMALL_ICON, Images.getIcon(entry.icon, 16, 16));
-            }
-            if (entry.hasSelectedPredicate()) {
-                putValue(SELECTED_KEY, entry.isSelected());
-            }
-            if (entry.hasEnabledPredicate()) {
-                enabled = entry.enabled;
-            }
-        }
     }
 }
