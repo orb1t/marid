@@ -17,15 +17,13 @@
  */
 package org.marid.ide.swing.impl
 
-import org.marid.ide.Ide
 import org.marid.ide.itf.Frame
 import org.marid.ide.menu.MenuEntry
 import org.marid.ide.swing.MaridFrame
-import org.marid.ide.util.MaridIcons
+import org.marid.image.MaridIcons
 
 import java.awt.*
 import java.util.List
-import java.util.prefs.Preferences
 
 /**
  * Application frame implementation.
@@ -35,13 +33,12 @@ import java.util.prefs.Preferences
 class FrameImpl extends MaridFrame implements Frame {
 
     private final ApplicationImpl application;
-    private final def preferences = Preferences.userNodeForPackage(Ide).node("frame");
     private final def desktop;
 
     FrameImpl(ApplicationImpl app, List<MenuEntry> menuEntries) {
         super("Marid IDE".ls());
         application = app;
-        iconImages = MaridIcons.icons;
+        iconImages = MaridIcons.ICONS;
         defaultCloseOperation = EXIT_ON_CLOSE;
         add(desktop = new DesktopImpl());
         setJMenuBar(new MenuBarImpl(menuEntries));
@@ -50,12 +47,12 @@ class FrameImpl extends MaridFrame implements Frame {
     }
 
     @Override
-    Preferences getPreferences() {
-        return preferences;
+    DesktopImpl getDesktop() {
+        return desktop;
     }
 
     @Override
-    DesktopImpl getDesktop() {
-        return desktop;
+    String getIdeObjectType() {
+        return "frame";
     }
 }

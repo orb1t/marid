@@ -16,29 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.util
+package org.marid.image;
 
-import org.marid.image.MaridIcon
-
-import java.awt.*
-import java.awt.image.BufferedImage
-import java.util.List
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * Marid icons.
- *
- * @author Dmitry Ovchinnikov 
+ * @author Dmitry Ovchinnikov
  */
-class MaridIcons {
+public class MaridIcons {
 
-    private static final List<BufferedImage> icons = Arrays.asList(
-        MaridIcon.getImage(16, Color.GREEN),
-        MaridIcon.getImage(22, Color.GREEN),
-        MaridIcon.getImage(24, Color.GREEN),
-        MaridIcon.getImage(32, Color.GREEN)
+    public static final List<BufferedImage> ICONS = Arrays.asList(
+            MaridIcon.getImage(16, Color.GREEN),
+            MaridIcon.getImage(20, Color.GREEN),
+            MaridIcon.getImage(24, Color.GREEN),
+            MaridIcon.getImage(28, Color.GREEN),
+            MaridIcon.getImage(32, Color.GREEN)
     );
-
-    static List<BufferedImage> getIcons() {
-        return icons;
-    }
 }

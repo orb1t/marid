@@ -33,7 +33,7 @@ public interface Localized {
      */
     public class S {
         
-        private static final ResourceBundle SB;
+        public static final ResourceBundle SB;
         
         static {
             ResourceBundle rb;
@@ -64,7 +64,7 @@ public interface Localized {
      */
     public class M {
 
-        private static final ResourceBundle MB;
+        public static final ResourceBundle MB;
         
         static {
             ResourceBundle rb;

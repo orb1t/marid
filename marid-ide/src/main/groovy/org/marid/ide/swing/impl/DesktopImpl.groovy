@@ -18,11 +18,9 @@
 
 package org.marid.ide.swing.impl
 
-import org.marid.ide.Ide
 import org.marid.ide.itf.Desktop
 
-import javax.swing.JDesktopPane
-import java.util.prefs.Preferences
+import javax.swing.*
 
 /**
  * Desktop implementation.
@@ -31,10 +29,8 @@ import java.util.prefs.Preferences
  */
 class DesktopImpl extends JDesktopPane implements Desktop {
 
-    private final Preferences preferences = Preferences.userNodeForPackage(Ide).node("desktop");
-
     @Override
-    Preferences getPreferences() {
-        return preferences;
+    String getIdeObjectType() {
+        return "desktop";
     }
 }

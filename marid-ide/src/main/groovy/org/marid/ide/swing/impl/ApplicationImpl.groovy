@@ -19,7 +19,6 @@
 package org.marid.ide.swing.impl
 
 import groovy.util.logging.Log
-import org.marid.ide.Ide
 import org.marid.ide.itf.Application
 import org.marid.ide.menu.MaridMenu
 import org.marid.ide.menu.MenuEntry
@@ -32,12 +31,10 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel
 import java.awt.*
 import java.util.List
 import java.util.concurrent.SynchronousQueue
-import java.util.prefs.Preferences
 
 @Log
 class ApplicationImpl implements Application {
 
-    private final def preferences = Preferences.userNodeForPackage(Ide).node("application");
     private FrameImpl frame;
 
     ApplicationImpl() {
@@ -89,11 +86,6 @@ class ApplicationImpl implements Application {
         new LafSelectionDialog(frame, "LAF selection".ls(), true).visible = true;
     }
 
-    @Override
-    Preferences getPreferences() {
-        return preferences;
-    }
-
     private void initTray(List<MenuEntry> entries) {
         if (SystemTray.supported) {
             def tray = SystemTray.systemTray;
@@ -106,5 +98,10 @@ class ApplicationImpl implements Application {
             icon.addActionListener(popup);
             tray.add(icon);
         }
+    }
+
+    @Override
+    String getIdeObjectType() {
+        return "application";
     }
 }

@@ -37,11 +37,11 @@ import java.util.logging.Logger
 @Log
 class Ide {
 
-    private static Application application;
+    public static final Application APPLICATION;
 
     static {
         try {
-            application = new ApplicationImpl();
+            APPLICATION = new ApplicationImpl();
         } catch (x) {
             log.severe("Application error", x)
         }
@@ -64,9 +64,5 @@ class Ide {
                 }
             }
         }
-    }
-
-    static Application getApplication() {
-        return application;
     }
 }

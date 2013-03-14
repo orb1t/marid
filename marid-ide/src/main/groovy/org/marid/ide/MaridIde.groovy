@@ -21,8 +21,7 @@ import org.marid.ide.splash.MaridSplash
 import org.marid.ide.util.IdeUncaughtExceptionHandler
 import org.marid.logging.Logging
 
-def splash = new MaridSplash();
 Logging.init(getClass(), "logide.properties");
 Thread.defaultUncaughtExceptionHandler = new IdeUncaughtExceptionHandler();
 
-Ide.init(splash);
+Ide.init(new MaridSplash());

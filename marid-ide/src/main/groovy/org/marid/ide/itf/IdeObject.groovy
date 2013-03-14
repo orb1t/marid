@@ -17,9 +17,6 @@
  */
 
 package org.marid.ide.itf
-
-import java.util.prefs.Preferences
-
 /**
  * Base IDE object interface.
  *
@@ -27,5 +24,5 @@ import java.util.prefs.Preferences
  */
 public interface IdeObject {
 
-    Preferences getPreferences();
+    String getIdeObjectType();
 }

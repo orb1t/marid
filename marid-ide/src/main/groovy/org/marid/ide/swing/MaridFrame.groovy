@@ -19,11 +19,11 @@
 package org.marid.ide.swing
 
 import groovy.transform.InheritConstructors
+import org.marid.ide.itf.IdeObject
 
 import javax.swing.*
 import java.awt.event.WindowEvent
 import java.awt.event.WindowListener
-import java.util.prefs.Preferences
 
 /**
  * Marid frame.
@@ -31,7 +31,7 @@ import java.util.prefs.Preferences
  * @author Dmitry Ovchinnikov 
  */
 @InheritConstructors
-abstract class MaridFrame extends JFrame implements WindowListener {
+abstract class MaridFrame extends JFrame implements WindowListener, IdeObject {
 
     private boolean firstTimeVisible = true;
 
@@ -84,6 +84,4 @@ abstract class MaridFrame extends JFrame implements WindowListener {
         }
         super.setVisible(b)
     }
-
-    abstract Preferences getPreferences();
 }

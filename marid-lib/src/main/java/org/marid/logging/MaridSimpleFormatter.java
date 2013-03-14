@@ -16,31 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.bind
+package org.marid.logging;
 
-import org.marid.ide.Ide
-import org.marid.ide.itf.Application
-import org.marid.ide.itf.IdeObject
-import org.marid.ide.menu.MenuSupport
+import org.marid.l10n.Localized;
 
-import java.util.prefs.Preferences
+import java.util.logging.LogRecord;
+import java.util.logging.SimpleFormatter;
 
 /**
- * IDE methods.
- *
  * @author Dmitry Ovchinnikov
  */
-class IdeMethods {
+public class MaridSimpleFormatter extends SimpleFormatter implements Localized {
 
-    public static Application getApplication(Script script) {
-        return Ide.APPLICATION;
-    }
-
-    public static Application getApplication(MenuSupport menu) {
-        return Ide.APPLICATION;
-    }
-
-    public static Preferences getPreferences(IdeObject object) {
-        return Preferences.userNodeForPackage(object.getClass()).node(object.ideObjectType);
+    @Override
+    public synchronized String formatMessage(LogRecord record) {
+        record.setResourceBundle(M.MB);
+        return super.formatMessage(record);
     }
 }
