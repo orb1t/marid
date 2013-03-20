@@ -25,6 +25,8 @@ import org.marid.l10n.Localized;
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.logging.Level;
@@ -67,7 +69,7 @@ public class SwingHandler extends AbstractHandler {
                 }
                 queue.add(record);
                 for (int i = models.length - 1; i >= 0; i--) {
-                    models[i].recordAdded(record);
+                    models[i].add(record);
                 }
             }
         });
@@ -131,6 +133,17 @@ public class SwingHandler extends AbstractHandler {
             setPreferredSize(new Dimension(width, height));
             pack();
             setLocationByPlatform(true);
+            addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowOpened(WindowEvent e) {
+                    listenerList.add(LogRecordListModel.class, list.getModel());
+                }
+
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    listenerList.remove(LogRecordListModel.class, list.getModel());
+                }
+            });
         }
     }
 
@@ -219,7 +232,7 @@ public class SwingHandler extends AbstractHandler {
             fireContentsChanged(this, 0, getSize() - 1);
         }
 
-        public void recordAdded(LogRecord record) {
+        public void add(LogRecord record) {
             records.add(record);
             if (filter != null) {
                 try {

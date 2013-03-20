@@ -18,5 +18,13 @@
 
 import org.marid.ide.MaridIde
 
+import java.util.logging.Logger
+
 def maridIde = new MaridIde();
+Thread.start {
+    for (def i in 1..100) {
+        Thread.sleep(1000);
+        Logger.getLogger("log").info("{0} Hello", Math.random());
+    }
+}
 maridIde.run();
