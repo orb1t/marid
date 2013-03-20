@@ -21,39 +21,44 @@ package org.marid.logging;
 import java.util.logging.*;
 
 /**
- * Abstract log handler.
- *
  * @author Dmitry Ovchinnikov
  */
 public abstract class AbstractHandler extends Handler {
 
     protected final LogManager manager = LogManager.getLogManager();
 
-    @SuppressWarnings("ConstantConditions")
     public AbstractHandler() throws Exception {
-        String level = manager.getProperty(getClass().getName() + ".level");
-        String encoding = manager.getProperty(getClass().getName() + "encoding");
-        if (level != null) {
-            setLevel(Level.parse(level.trim().toUpperCase()));
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        if (cl == null) {
+            cl = getClass().getClassLoader();
         }
+        String level = manager.getProperty(getClass().getCanonicalName() + ".level");
+        if (level != null) {
+            setLevel(Level.parse(level));
+        }
+        String filter = manager.getProperty(getClass().getCanonicalName() + ".filter");
+        if (filter != null) {
+            setFilter((Filter)cl.loadClass(filter).newInstance());
+        }
+        String formatter = manager.getProperty(getClass().getCanonicalName() + ".formatter");
+        if (formatter != null) {
+            setFormatter((Formatter)cl.loadClass(formatter).newInstance());
+        }
+        String errorManager = manager.getProperty(getClass().getCanonicalName() + ".errorManager");
+        if (errorManager != null) {
+            setErrorManager((ErrorManager)cl.loadClass(errorManager).newInstance());
+        }
+        String encoding = manager.getProperty(getClass().getCanonicalName() + ".encoding");
         if (encoding != null) {
             setEncoding(encoding);
         }
-        String filterClass = manager.getProperty(getClass().getName() + ".filter");
-        if (filterClass != null) {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            if (cl != null) {
-                cl = getClass().getClassLoader();
-            }
-            setFilter((Filter)cl.loadClass(filterClass).newInstance());
-        }
-        String formatterClass = manager.getProperty(getClass().getName() + ".formatter");
-        if (formatterClass != null) {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            if (cl != null) {
-                cl = getClass().getClassLoader();
-            }
-            setFormatter((Formatter)cl.loadClass(formatterClass).newInstance());
-        }
+    }
+
+    @Override
+    public void flush() {
+    }
+
+    @Override
+    public void close() throws SecurityException {
     }
 }

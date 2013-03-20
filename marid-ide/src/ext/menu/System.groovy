@@ -20,6 +20,9 @@ package menu
 
 import org.marid.ide.menu.GroovyMenu
 
+/**
+ * @author Dmitry Ovchinnikov
+ */
 class System extends GroovyMenu {
 
     def items = [

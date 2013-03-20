@@ -42,7 +42,7 @@ public abstract class FastFormatter extends Formatter {
         try {
             format(record, sb);
         } catch (IOException x) {
-            throw new IllegalArgumentException(x);
+           return formatMessage(record);
         }
         return sb.toString();
     }

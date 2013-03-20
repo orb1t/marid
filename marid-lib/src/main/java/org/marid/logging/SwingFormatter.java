@@ -16,19 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.itf
+package org.marid.logging;
 
-public interface Application extends IdeObject {
+import java.sql.Timestamp;
+import java.text.MessageFormat;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
 
-    String getVersion();
-
-    void exit();
-
-    Frame getFrame();
-
-    void showImageGenDialog();
-
-    void showLafSelectionDialog();
-
-    void showLog();
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public class SwingFormatter extends Formatter {
+    @Override
+    public String format(LogRecord record) {
+        StringBuffer sb = new StringBuffer(new Timestamp(record.getMillis()).toString());
+        sb.append(' ');
+        if (record.getParameters() == null || record.getParameters().length == 0) {
+            sb.append(record.getMessage());
+        } else {
+            sb.append(MessageFormat.format(record.getMessage(), record.getParameters()));
+        }
+        return sb.toString();
+    }
 }

@@ -16,19 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.itf
+package menu
 
-public interface Application extends IdeObject {
+import org.marid.ide.menu.GroovyMenu
 
-    String getVersion();
+/**
+ * @author Dmitry Ovchinnikov
+ */
+class Log extends GroovyMenu {
 
-    void exit();
-
-    Frame getFrame();
-
-    void showImageGenDialog();
-
-    void showLafSelectionDialog();
-
-    void showLog();
+    def items = [
+            log : [
+                    items : [
+                            show_log : [
+                                    action : {application.showLog()},
+                                    shortcut: "control L"
+                            ]
+                    ]
+            ]
+    ];
 }

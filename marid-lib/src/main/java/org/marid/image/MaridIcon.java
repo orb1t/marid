@@ -43,7 +43,7 @@ public class MaridIcon {
             cs[i] = new Color(150 - i * 10, 150 - i * 10, 255 - i * 10);
         }
         g.setPaint(new LinearGradientPaint(0.0f, 0.0f, 0.0f, size - 1.0f, fs, cs));
-        g.fillRect(0, 0, size - 1, size - 1);
+        g.fillRect(0, 0, size, size);
         g.scale(size / 2.0, -size / 2.0);
         BasicStroke stroke = new BasicStroke(0.15f);
         g.translate(1.0, -1.0);

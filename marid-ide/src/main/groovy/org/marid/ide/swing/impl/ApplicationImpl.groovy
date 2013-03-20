@@ -25,12 +25,14 @@ import org.marid.ide.menu.MenuEntry
 import org.marid.ide.swing.util.ImageGenDialog
 import org.marid.ide.swing.util.LafSelectionDialog
 import org.marid.image.MaridIcon
+import org.marid.logging.SwingHandler
 
 import javax.swing.*
 import javax.swing.plaf.nimbus.NimbusLookAndFeel
 import java.awt.*
 import java.util.List
 import java.util.concurrent.SynchronousQueue
+import java.util.logging.Logger
 
 @Log
 class ApplicationImpl implements Application {
@@ -84,6 +86,17 @@ class ApplicationImpl implements Application {
     @Override
     void showLafSelectionDialog() {
         new LafSelectionDialog(frame, "LAF selection".ls(), true).visible = true;
+    }
+
+    @Override
+    void showLog() {
+        Logger rootLogger = Logger.global.parent;
+        if (rootLogger != null) {
+            def sh = (SwingHandler)rootLogger.handlers.find {it instanceof SwingHandler};
+            if (sh != null) {
+                sh.show();
+            }
+        }
     }
 
     private void initTray(List<MenuEntry> entries) {
