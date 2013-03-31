@@ -174,6 +174,8 @@ public class SwingHandler extends AbstractHandler {
 
         public LogRecordList() {
             super(new LogRecordListModel());
+            Font labelFont = UIManager.getFont("Label.font");
+            setFont(new Font(Font.MONOSPACED, Font.PLAIN, labelFont.getSize()));
             setCellRenderer(new LogRecordRenderer());
             setFixedCellHeight(20);
         }

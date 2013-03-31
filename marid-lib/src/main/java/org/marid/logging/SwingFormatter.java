@@ -18,24 +18,59 @@
 
 package org.marid.logging;
 
-import java.sql.Timestamp;
 import java.text.MessageFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
+
+import static java.util.Calendar.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class SwingFormatter extends Formatter {
+
+    private final Calendar calendar = new GregorianCalendar();
+    private final StringBuffer buffer = new StringBuffer();
+
     @Override
     public String format(LogRecord record) {
-        StringBuffer sb = new StringBuffer(new Timestamp(record.getMillis()).toString());
-        sb.append(' ');
-        if (record.getParameters() == null || record.getParameters().length == 0) {
-            sb.append(record.getMessage());
-        } else {
-            sb.append(MessageFormat.format(record.getMessage(), record.getParameters()));
+        int len = buffer.length();
+        buffer.setLength(0);
+        if (len > 65536) {
+            buffer.trimToSize();
         }
-        return sb.toString();
+        calendar.setTimeInMillis(record.getMillis());
+        buffer.append(calendar.get(YEAR));
+        buffer.append('-');
+        append(calendar.get(MONTH) + 1, 2);
+        buffer.append('-');
+        append(calendar.get(DATE), 2);
+        buffer.append(' ');
+        append(calendar.get(HOUR_OF_DAY), 2);
+        buffer.append(':');
+        append(calendar.get(MINUTE), 2);
+        buffer.append(':');
+        append(calendar.get(SECOND), 2);
+        buffer.append('.');
+        append(calendar.get(MILLISECOND), 3);
+        buffer.append(' ');
+        if (record.getParameters() == null || record.getParameters().length == 0) {
+            buffer.append(record.getMessage());
+        } else {
+            MessageFormat mf = new MessageFormat(record.getMessage());
+            mf.format(record.getParameters(), buffer, null);
+        }
+        return buffer.toString();
+    }
+
+    private void append(int value, int width) {
+        String textValue = Integer.toString(value);
+        int len = width - textValue.length();
+        for (int i = 0; i < len; i++) {
+            buffer.append('0');
+        }
+        buffer.append(textValue);
     }
 }
