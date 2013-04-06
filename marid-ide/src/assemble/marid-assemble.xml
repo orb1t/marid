@@ -7,7 +7,6 @@
     <id>distr</id>
     <formats>
         <format>tar.gz</format>
-        <format>zip</format>
     </formats>
     <fileSets>
         <fileSet>
@@ -17,10 +16,6 @@
         <fileSet>
             <directory>src/ext</directory>
             <outputDirectory>ext</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>src/dev</directory>
-            <outputDirectory>.</outputDirectory>
         </fileSet>
     </fileSets>
     <dependencySets>

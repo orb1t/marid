@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -7,7 +9,6 @@
         <version>0.1.14-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.marid</groupId>
     <artifactId>marid-ide</artifactId>
     <packaging>jar</packaging>
 
@@ -64,13 +65,12 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <includeProjectDependencies>true</includeProjectDependencies>
-                    <executable>java</executable>
+                    <mainClass>groovy.ui.GroovyMain</mainClass>
+                    <classpathScope>test</classpathScope>
                     <arguments>
-                        <argument>-splash:${splash}</argument>
-                        <argument>-classpath</argument>
-                        <classpath/>
-                        <argument>org.marid.ide.MaridIde</argument>
+                        <argument>--indy</argument>
+                        <argument>-e</argument>
+                        <argument>new TestMaridIde().run()</argument>
                     </arguments>
                 </configuration>
             </plugin>

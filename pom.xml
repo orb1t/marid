@@ -242,6 +242,7 @@
                         <providerSelection>2.0</providerSelection>
                         <targetBytecode>1.7</targetBytecode>
                         <stacktrace>true</stacktrace>
+                        <invokeDynamic>true</invokeDynamic>
                     </configuration>
                     <executions>
                         <execution>

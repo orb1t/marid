@@ -25,6 +25,7 @@ import org.marid.l10n.Localized;
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -121,11 +122,13 @@ public class SwingHandler extends AbstractHandler {
 
         private final Preferences prefs = Preferences.userNodeForPackage(getClass());
         private final LogRecordList list;
+        private final ButtonGroup levelGroup = new ButtonGroup();
 
         public LogFrame() {
             super(S.l("Marid log"));
             setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             setIconImages(MaridIcons.ICONS);
+            setJMenuBar(new LogFrameMenu());
             add(new JScrollPane(list = new LogRecordList()));
             pack();
             int width = prefs.getInt("frameWidth", 400);
@@ -145,21 +148,45 @@ public class SwingHandler extends AbstractHandler {
                 }
             });
         }
+
+        private void updateFilter() {
+        }
+
+        private class SelectLogLevelAction extends AbstractAction {
+
+            private final Level level;
+
+            public SelectLogLevelAction(Level level) {
+                this.level = level;
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateFilter();
+            }
+        }
+
+        private class LogFrameMenu extends JMenuBar {
+
+            public LogFrameMenu() {
+                add(new JRadioButtonMenuItem());
+            }
+        }
     }
 
     private class LogRecordRenderer extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(
                 JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            LogRecord rec = (LogRecord)value;
+            LogRecord rec = (LogRecord) value;
             String val;
             try {
                 val = getFormatter().format(rec);
             } catch (Exception x) {
                 val = x.getMessage();
             }
-            DefaultListCellRenderer r = (DefaultListCellRenderer)super.getListCellRendererComponent(
-                    list, val, index, isSelected, cellHasFocus);
+            DefaultListCellRenderer r = (DefaultListCellRenderer)
+                    super.getListCellRendererComponent(list, val, index, isSelected, cellHasFocus);
             ImageIcon icon = iconMap.get(rec.getLevel().intValue());
             if (icon == null) {
                 int size = list.getFixedCellHeight() - 2;
@@ -174,15 +201,16 @@ public class SwingHandler extends AbstractHandler {
 
         public LogRecordList() {
             super(new LogRecordListModel());
-            Font labelFont = UIManager.getFont("Label.font");
-            setFont(new Font(Font.MONOSPACED, Font.PLAIN, labelFont.getSize()));
+            if (getFont() != null) {
+                setFont(new Font(Font.MONOSPACED, getFont().getStyle(), getFont().getSize()));
+            }
             setCellRenderer(new LogRecordRenderer());
             setFixedCellHeight(20);
         }
 
         @Override
         public LogRecordListModel getModel() {
-            return (LogRecordListModel)super.getModel();
+            return (LogRecordListModel) super.getModel();
         }
     }
 
@@ -215,13 +243,13 @@ public class SwingHandler extends AbstractHandler {
             if (filter != null) {
                 int i = 0;
                 for (LogRecord record : records) {
-                     try {
-                         if (Boolean.TRUE.equals(filter.call(record)) && i++ == index) {
-                             return record;
-                         }
-                     } catch (Exception x) {
-                         // Ignore it to prevent stack overflow
-                     }
+                    try {
+                        if (Boolean.TRUE.equals(filter.call(record)) && i++ == index) {
+                            return record;
+                        }
+                    } catch (Exception x) {
+                        // Ignore it to prevent stack overflow
+                    }
                 }
                 return null;
             } else {

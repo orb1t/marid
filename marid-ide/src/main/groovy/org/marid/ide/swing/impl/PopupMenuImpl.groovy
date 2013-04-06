@@ -137,13 +137,13 @@ class PopupMenuImpl extends PopupMenu implements ActionListener {
     private void update(Menu menu) {
         for (def i = 0; i < menu.itemCount; i++) {
             def item = menu.getItem(i);
-            def action = (MenuActionImpl) item.actionListeners.find { it instanceof MenuActionImpl };
-            if (action != null) {
-                action.update();
-                item.enabled = action.enabled;
+            def a = (MenuActionImpl) item.actionListeners.find { it instanceof MenuActionImpl };
+            if (a != null) {
+                a.update();
+                item.enabled = a.enabled;
                 if (item instanceof CheckboxMenuItem) {
                     def cbi = (CheckboxMenuItem) item;
-                    cbi.state = action.getValue(Action.SELECTED_KEY) as boolean;
+                    cbi.state = a.getValue(Action.SELECTED_KEY) as boolean;
                 }
             }
             if (item instanceof Menu) {
