@@ -17,8 +17,10 @@
  */
 package org.marid.logging;
 
+import org.marid.l10n.Localized;
+
 import java.io.InputStream;
-import java.util.logging.LogManager;
+import java.util.logging.*;
 
 /**
  * Base logging utilities.
@@ -26,6 +28,16 @@ import java.util.logging.LogManager;
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class Logging {
+
+    public static final Level[] LEVELS = {
+            Level.SEVERE,
+            Level.WARNING,
+            Level.CONFIG,
+            Level.INFO,
+            Level.FINE,
+            Level.FINER,
+            Level.FINEST
+    };
 
     /**
      * Initializes the logging system.
@@ -42,6 +54,25 @@ public class Logging {
             LogManager lm = LogManager.getLogManager();
             if (is != null) {
                 lm.readConfiguration(is);
+            }
+            String dynHandlers = lm.getProperty("dynHandlers");
+            Logger root = Logger.getGlobal().getParent();
+            if (dynHandlers != null && root != null) {
+                for (String handler : dynHandlers.split(",")) {
+                    if (handler.isEmpty()) {
+                        continue;
+                    }
+                    handler = handler.trim();
+                    try {
+                        Class<?> handlerClass = Class.forName(handler, true, cl);
+                        root.addHandler((Handler)handlerClass.newInstance());
+                    } catch (Exception x) {
+                        LogRecord lr = new LogRecord(Level.WARNING, "Load handler error");
+                        lr.setResourceBundle(Localized.M.MB);
+                        lr.setThrown(x);
+                        root.log(lr);
+                    }
+                }
             }
         } catch (Exception x) {
             x.printStackTrace(System.err);

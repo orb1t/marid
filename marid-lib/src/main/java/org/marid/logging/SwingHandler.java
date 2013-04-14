@@ -18,7 +18,6 @@
 
 package org.marid.logging;
 
-import groovy.lang.Closure;
 import org.marid.image.MaridIcons;
 import org.marid.l10n.Localized;
 
@@ -29,7 +28,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.net.URL;
 import java.util.*;
+import java.util.logging.Filter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.prefs.Preferences;
@@ -118,16 +121,20 @@ public class SwingHandler extends AbstractHandler {
         return new ImageIcon(image);
     }
 
-    private class LogFrame extends JFrame implements Localized {
+    private class LogFrame extends JFrame implements Localized, Comparator<Level>, Filter {
 
         private final Preferences prefs = Preferences.userNodeForPackage(getClass());
         private final LogRecordList list;
-        private final ButtonGroup levelGroup = new ButtonGroup();
+        private final TreeMap<Level, Action> levelActionMap = new TreeMap<>(this);
+        private Filter filter;
 
         public LogFrame() {
             super(S.l("Marid log"));
             setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             setIconImages(MaridIcons.ICONS);
+            for (Level level : Logging.LEVELS) {
+                levelActionMap.put(level, new LogLevelAction(level));
+            }
             setJMenuBar(new LogFrameMenu());
             add(new JScrollPane(list = new LogRecordList()));
             pack();
@@ -144,32 +151,103 @@ public class SwingHandler extends AbstractHandler {
 
                 @Override
                 public void windowClosed(WindowEvent e) {
+                    prefs.putInt("frameWidth", getWidth());
+                    prefs.putInt("frameHeight", getHeight());
                     listenerList.remove(LogRecordListModel.class, list.getModel());
+                    levelActionMap.clear();
                 }
             });
         }
 
-        private void updateFilter() {
+        private boolean isEmptyLevels() {
+            for (Action action : levelActionMap.values()) {
+                Boolean state = (Boolean) action.getValue(Action.SELECTED_KEY);
+                if (state != null && state) {
+                    return false;
+                }
+            }
+            return true;
         }
 
-        private class SelectLogLevelAction extends AbstractAction {
+        private void updateFilter() {
+            if (!isEmptyLevels()) {
+                list.getModel().setFilter(this);
+            } else if (filter != null) {
+                list.getModel().setFilter(filter);
+            } else {
+                list.getModel().setFilter(null);
+            }
+        }
 
-            private final Level level;
+        @Override
+        public int compare(Level o1, Level o2) {
+            return Integer.compare(o1.intValue(), o2.intValue());
+        }
 
-            public SelectLogLevelAction(Level level) {
-                this.level = level;
+        @Override
+        public boolean isLoggable(LogRecord record) {
+            Action action = levelActionMap.get(record.getLevel());
+            if (action != null) {
+                Boolean state = (Boolean) action.getValue(Action.SELECTED_KEY);
+                return state != null && state;
+            } else {
+                return true;
+            }
+        }
+
+        private class LogLevelAction extends AbstractAction implements PropertyChangeListener {
+
+            public LogLevelAction(Level level) {
+                super(level.getLocalizedName(), getLevelIcon(level, 16));
+                putValue(Action.SELECTED_KEY, false);
+                addPropertyChangeListener(this);
             }
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                updateFilter();
+            }
+
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (Action.SELECTED_KEY.equals(evt.getPropertyName())) {
+                    updateFilter();
+                }
             }
         }
 
-        private class LogFrameMenu extends JMenuBar {
+        private class LogFrameMenu extends JMenuBar implements Comparator<Level> {
+
+            private final URL clearIcon = SwingHandler.class.getResource("clear.png");
 
             public LogFrameMenu() {
-                add(new JRadioButtonMenuItem());
+                JMenu filterMenu = new JMenu(S.l("Filter"));
+                for (Action action : levelActionMap.values()) {
+                    filterMenu.add(new JCheckBoxMenuItem(action));
+                }
+                filterMenu.addSeparator();
+                filterMenu.add(new AbstractAction(S.l("Clear filter"), new ImageIcon(clearIcon)) {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        filter = null;
+                        for (Action action : levelActionMap.values()) {
+                            action.putValue(Action.SELECTED_KEY, false);
+                        }
+                    }
+                });
+                filterMenu.addSeparator();
+                filterMenu.add(new AbstractAction(S.l("Custom filter")) {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        FilterEditor editor = new FilterEditor(LogFrame.this);
+                        editor.setVisible(true);
+                    }
+                });
+                add(filterMenu);
+            }
+
+            @Override
+            public int compare(Level o1, Level o2) {
+                return Integer.compare(o1.intValue(), o2.intValue());
             }
         }
     }
@@ -217,7 +295,7 @@ public class SwingHandler extends AbstractHandler {
     private class LogRecordListModel extends AbstractListModel<LogRecord> implements EventListener {
 
         private final ArrayList<LogRecord> records = new ArrayList<>(queue);
-        private Closure filter;
+        private Filter filter;
 
         @Override
         public int getSize() {
@@ -225,7 +303,7 @@ public class SwingHandler extends AbstractHandler {
                 int count = 0;
                 for (LogRecord record : records) {
                     try {
-                        if (Boolean.TRUE.equals(filter.call(record))) {
+                        if (filter.isLoggable(record)) {
                             count++;
                         }
                     } catch (Exception x) {
@@ -244,7 +322,7 @@ public class SwingHandler extends AbstractHandler {
                 int i = 0;
                 for (LogRecord record : records) {
                     try {
-                        if (Boolean.TRUE.equals(filter.call(record)) && i++ == index) {
+                        if (filter.isLoggable(record) && i++ == index) {
                             return record;
                         }
                     } catch (Exception x) {
@@ -257,7 +335,7 @@ public class SwingHandler extends AbstractHandler {
             }
         }
 
-        public void setFilter(Closure filter) {
+        public void setFilter(Filter filter) {
             this.filter = filter;
             fireContentsChanged(this, 0, getSize() - 1);
         }
@@ -266,7 +344,7 @@ public class SwingHandler extends AbstractHandler {
             records.add(record);
             if (filter != null) {
                 try {
-                    if (Boolean.TRUE.equals(filter.call(record))) {
+                    if (filter.isLoggable(record)) {
                         int size = getSize();
                         fireIntervalAdded(this, size - 1, size - 1);
                     }

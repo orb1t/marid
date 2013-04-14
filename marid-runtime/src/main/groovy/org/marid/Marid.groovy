@@ -16,36 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.splash
+package org.marid
 
-import java.util.logging.Handler
-import java.util.logging.LogRecord
+import org.marid.logging.Logging
 
-/**
- * Marid splash handler.
- *
- * @author Dmitry Ovchinnikov 
- */
-class MaridSplashHandler extends Handler {
+Logging.init(getClass(), "log.properties");
+Thread.defaultUncaughtExceptionHandler = new MaridExceptionHandler();
 
-    private final MaridSplash splash;
 
-    MaridSplashHandler(MaridSplash splash) {
-        this.splash = splash;
-    }
-
-    @Override
-    void publish(LogRecord record) {
-
-    }
-
-    @Override
-    void flush() {
-
-    }
-
-    @Override
-    void close() throws SecurityException {
-
-    }
-}

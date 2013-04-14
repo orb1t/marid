@@ -8,7 +8,6 @@
         <version>0.1.14-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.marid</groupId>
     <artifactId>marid-lib</artifactId>
     <name>marid-lib</name>
     <description>Marid class library</description>

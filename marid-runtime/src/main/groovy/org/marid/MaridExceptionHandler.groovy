@@ -16,6 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.marid.ide.MaridIde
+package org.marid
 
-MaridIde.main(args);
+import groovy.util.logging.Log
+
+/**
+ * @author Dmitry Ovchinnikov
+ */
+@Log
+class MaridExceptionHandler implements Thread.UncaughtExceptionHandler {
+    @Override
+    void uncaughtException(Thread t, Throwable e) {
+        log.warning("Uncaught exception in {0}", e, t);
+    }
+}

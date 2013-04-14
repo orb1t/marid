@@ -17,11 +17,7 @@
  */
 package org.marid.ide
 
-import org.marid.ide.splash.MaridSplash
-import org.marid.ide.util.IdeUncaughtExceptionHandler
-import org.marid.logging.Logging
+import org.marid.Marid
 
-Logging.init(getClass(), "logide.properties");
-Thread.defaultUncaughtExceptionHandler = new IdeUncaughtExceptionHandler();
-
-Ide.init(new MaridSplash());
+Marid.main(args);
+Ide.init();

@@ -16,6 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.marid.ide.MaridIde
+package org.marid.groovy;
 
-MaridIde.main(args);
+import groovy.lang.GroovyShell;
+
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public interface ShellSupplier {
+
+    public GroovyShell getShell();
+}

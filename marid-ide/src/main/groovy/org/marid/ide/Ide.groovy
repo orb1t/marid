@@ -20,15 +20,7 @@ package org.marid.ide
 
 import groovy.util.logging.Log
 import org.marid.ide.itf.Application
-import org.marid.ide.splash.MaridSplash
-import org.marid.ide.splash.MaridSplashHandler
 import org.marid.ide.swing.impl.ApplicationImpl
-import org.marid.logging.SwingHandler
-
-import javax.swing.*
-import java.awt.*
-import java.awt.event.ActionListener
-import java.util.logging.Logger
 
 /**
  * IDE class.
@@ -48,23 +40,6 @@ class Ide {
         }
     }
 
-    static void init(final MaridSplash splash) {
-        final def rootLogger = Logger.global.parent;
-        if (rootLogger != null) {
-            rootLogger.addHandler(new SwingHandler());
-            if (splash.supported) {
-                final def splashHandler = new MaridSplashHandler(splash);
-                rootLogger.addHandler(splashHandler);
-                EventQueue.invokeLater {
-                    new Timer(1000, {
-                        if (!splash.visible) {
-                            rootLogger.removeHandler(splashHandler);
-                            def timer = (Timer) it.source;
-                            timer.stop();
-                        }
-                    } as ActionListener).start();
-                }
-            }
-        }
+    static void init() {
     }
 }
