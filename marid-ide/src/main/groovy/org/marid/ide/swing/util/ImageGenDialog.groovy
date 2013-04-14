@@ -21,7 +21,7 @@ package org.marid.ide.swing.util
 import groovy.transform.InheritConstructors
 import groovy.util.logging.Log
 import org.marid.ide.swing.AbstractDialog
-import org.marid.ide.res.MaridAction
+import org.marid.res.MaridAction
 import org.marid.image.MaridImage
 
 import javax.imageio.ImageIO

@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.res
-
-import images.Images
+package org.marid.res
 
 import javax.swing.AbstractAction
 import javax.swing.KeyStroke

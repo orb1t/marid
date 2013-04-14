@@ -20,7 +20,7 @@ package org.marid.ide.swing
 
 import groovy.transform.InheritConstructors
 import groovy.util.logging.Log
-import org.marid.ide.res.MaridAction
+import org.marid.res.MaridAction
 
 import javax.swing.*
 import javax.swing.GroupLayout.ParallelGroup
