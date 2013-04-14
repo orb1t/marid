@@ -20,7 +20,7 @@ package org.marid.ide.swing.util
 
 import groovy.transform.InheritConstructors
 import org.marid.ide.Ide
-import org.marid.ide.swing.AbstractDialog
+import org.marid.swing.AbstractDialog
 
 import javax.swing.*
 import javax.swing.GroupLayout.ParallelGroup

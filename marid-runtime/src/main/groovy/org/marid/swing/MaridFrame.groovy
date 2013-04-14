@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing
+package org.marid.swing
 
 import groovy.transform.InheritConstructors
-import org.marid.ide.itf.IdeObject
+import org.marid.itf.GuiObject
 
 import javax.swing.*
 import java.awt.event.WindowEvent
@@ -31,7 +31,7 @@ import java.awt.event.WindowListener
  * @author Dmitry Ovchinnikov 
  */
 @InheritConstructors
-abstract class MaridFrame extends JFrame implements WindowListener, IdeObject {
+abstract class MaridFrame extends JFrame implements WindowListener, GuiObject {
 
     private boolean firstTimeVisible = true;
 

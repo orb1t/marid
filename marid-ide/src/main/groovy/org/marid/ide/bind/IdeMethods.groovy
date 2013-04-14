@@ -20,10 +20,7 @@ package org.marid.ide.bind
 
 import org.marid.ide.Ide
 import org.marid.ide.itf.Application
-import org.marid.ide.itf.IdeObject
 import org.marid.ide.menu.MenuSupport
-
-import java.util.prefs.Preferences
 
 /**
  * IDE methods.
@@ -38,9 +35,5 @@ class IdeMethods {
 
     public static Application getApplication(MenuSupport menu) {
         return Ide.APPLICATION;
-    }
-
-    public static Preferences getPreferences(IdeObject object) {
-        return Preferences.userNodeForPackage(object.getClass()).node(object.ideObjectType);
     }
 }

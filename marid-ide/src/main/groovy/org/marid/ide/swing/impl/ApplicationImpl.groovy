@@ -114,7 +114,7 @@ class ApplicationImpl implements Application {
     }
 
     @Override
-    String getIdeObjectType() {
+    String getObjectType() {
         return "application";
     }
 }

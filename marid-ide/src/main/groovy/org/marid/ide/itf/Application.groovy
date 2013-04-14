@@ -18,7 +18,9 @@
 
 package org.marid.ide.itf
 
-public interface Application extends IdeObject {
+import org.marid.itf.GuiObject
+
+public interface Application extends GuiObject {
 
     String getVersion();
 

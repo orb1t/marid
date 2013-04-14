@@ -30,7 +30,7 @@ import javax.swing.*
 class DesktopImpl extends JDesktopPane implements Desktop {
 
     @Override
-    String getIdeObjectType() {
+    String getObjectType() {
         return "desktop";
     }
 }

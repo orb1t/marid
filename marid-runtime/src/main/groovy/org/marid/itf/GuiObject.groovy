@@ -16,13 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.itf
-/**
- * Base IDE object interface.
- *
- * @author Dmitry Ovchinnikov 
- */
-public interface IdeObject {
+package org.marid.itf
 
-    String getIdeObjectType();
+public interface GuiObject {
+
+    String getObjectType();
 }

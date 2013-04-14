@@ -16,20 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.itf
+package org.marid.bind
 
 import org.marid.itf.GuiObject
 
+import java.util.prefs.Preferences
+
 /**
- * Application frame.
- *
- * @author Dmitry Ovchinnikov 
+ * @author Dmitry Ovchinnikov
  */
-public interface Frame extends GuiObject {
+class RuntimeMethods {
 
-    boolean isVisible();
-
-    void setVisible(boolean state);
-
-    Desktop getDesktop();
+    public static Preferences getPreferences(GuiObject object) {
+        return Preferences.userNodeForPackage(object.getClass()).node(object.objectType);
+    }
 }

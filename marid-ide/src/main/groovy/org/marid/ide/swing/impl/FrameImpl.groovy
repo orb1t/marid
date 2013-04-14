@@ -19,7 +19,7 @@ package org.marid.ide.swing.impl
 
 import org.marid.ide.itf.Frame
 import org.marid.ide.menu.MenuEntry
-import org.marid.ide.swing.MaridFrame
+import org.marid.swing.MaridFrame
 import org.marid.image.MaridIcons
 
 import java.awt.*
@@ -52,7 +52,7 @@ class FrameImpl extends MaridFrame implements Frame {
     }
 
     @Override
-    String getIdeObjectType() {
+    String getObjectType() {
         return "frame";
     }
 }

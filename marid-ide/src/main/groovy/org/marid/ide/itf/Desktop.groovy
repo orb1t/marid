@@ -18,11 +18,13 @@
 
 package org.marid.ide.itf
 
+import org.marid.itf.GuiObject
+
 /**
  * Desktop interface.
  *
  * @author Dmitry Ovchinnikov 
  */
-public interface Desktop extends IdeObject {
+public interface Desktop extends GuiObject {
 
 }

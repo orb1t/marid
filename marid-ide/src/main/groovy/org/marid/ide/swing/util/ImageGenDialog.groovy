@@ -20,7 +20,7 @@ package org.marid.ide.swing.util
 
 import groovy.transform.InheritConstructors
 import groovy.util.logging.Log
-import org.marid.ide.swing.AbstractDialog
+import org.marid.swing.AbstractDialog
 import org.marid.res.MaridAction
 import org.marid.image.MaridImage
 
