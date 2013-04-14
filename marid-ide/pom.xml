@@ -77,7 +77,7 @@
                     <arguments>
                         <argument>--indy</argument>
                         <argument>-e</argument>
-                        <argument>new TestMaridIde().run()</argument>
+                        <argument>org.marid.ide.TestMaridIde.main(new String[0])</argument>
                     </arguments>
                 </configuration>
             </plugin>
