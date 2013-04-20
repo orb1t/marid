@@ -16,12 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide
+package org.marid.ide.itf;
 
-def pd = new File(new File(System.getProperty("user.dir"))
-        .parentFile.parentFile.parentFile.parentFile.parentFile, "ext");
-def cl = new GroovyClassLoader();
-cl.addURL(pd.toURI().toURL());
-Thread.currentThread().setContextClassLoader(cl);
-def c = cl.loadClass("org.marid.ide.MaridIde");
-c.getDeclaredMethod("main", String[]).invoke(null, [args] as Object[]);
+import org.marid.l10n.Localized;
+import org.marid.pref.PrefObject;
+
+public interface Application extends PrefObject, Localized {
+
+    public String getVersion();
+
+    public void exit();
+
+    public Frame getFrame();
+
+    public void showImageGenDialog();
+
+    public void showLafSelectionDialog();
+
+    public void showLog();
+}

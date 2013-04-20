@@ -16,12 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide
+package org.marid;
 
-def pd = new File(new File(System.getProperty("user.dir"))
-        .parentFile.parentFile.parentFile.parentFile.parentFile, "ext");
-def cl = new GroovyClassLoader();
-cl.addURL(pd.toURI().toURL());
-Thread.currentThread().setContextClassLoader(cl);
-def c = cl.loadClass("org.marid.ide.MaridIde");
-c.getDeclaredMethod("main", String[]).invoke(null, [args] as Object[]);
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.logging.Logger;
+
+import static org.marid.groovy.MaridGroovyMethods.*;
+
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public class MaridExceptionHandler implements UncaughtExceptionHandler {
+
+    private static final Logger log = Logger.getLogger(MaridExceptionHandler.class.getName());
+
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        warning(log, "Uncaught exception in {0}", e, t);
+    }
+}
