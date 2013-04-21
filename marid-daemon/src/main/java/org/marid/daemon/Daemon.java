@@ -1,4 +1,4 @@
-/*
+package org.marid.daemon;/*
  * Copyright (C) 2013 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
@@ -16,19 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid;
-
-import groovy.lang.GroovyClassLoader;
-import org.marid.logging.Logging;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Marid {
+public class Daemon {
 
-    public static void main(String[] args) {
-        Logging.init(Marid.class, "log.properties");
-        Thread.setDefaultUncaughtExceptionHandler(new MaridExceptionHandler());
-        Thread.currentThread().setContextClassLoader(new GroovyClassLoader());
+    public static void main(String... args) {
+
     }
 }
