@@ -29,6 +29,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.7</java.version>
         <lib>${project.build.directory}/lib</lib>
+        <netbeans.hint.license>marid-agpl30</netbeans.hint.license>
+        <license.file>${basedir}/src/site/LICENSE-marid-agpl30.txt</license.file>
+        <license.dir>${user.home}/.netbeans/7.3/config/Templates/Licenses</license.dir>
     </properties>
 
     <scm>

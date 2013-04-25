@@ -16,14 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.daemon;
+package org.marid.marisc;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Daemon {
+public interface AtomicBlock extends Block {
 
-    public static void main(String... args) {
 
-    }
 }

@@ -18,6 +18,9 @@
 
 package org.marid.ide;
 
+import org.codehaus.groovy.runtime.m12n.ExtensionModuleRegistry;
+import org.codehaus.groovy.runtime.m12n.ExtensionModuleScanner;
+
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -32,5 +35,6 @@ public class TestMaridIde {
         URLClassLoader cl = new URLClassLoader(new URL[] {f.toURI().toURL()});
         Thread.currentThread().setContextClassLoader(cl);
         MaridIde.main(args);
+        ExtensionModuleScanner sc;
     }
 }

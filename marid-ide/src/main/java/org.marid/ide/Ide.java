@@ -29,6 +29,5 @@ public class Ide {
     public static final Application APPLICATION = new ApplicationImpl();
 
     static void init() {
-
     }
 }

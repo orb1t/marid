@@ -16,14 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.daemon;
+package org.marid.marisc;
+
+import java.lang.reflect.Method;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Daemon {
+public interface Input<T> {
 
-    public static void main(String... args) {
+    public Class<?> getRawType();
 
-    }
+    public Class<T> getType();
+
+    public Block getBlock();
+
+    public void setValue(T value);
+
+    public Method getAccessor();
 }
