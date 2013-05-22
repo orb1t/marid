@@ -147,6 +147,7 @@ public class ApplicationImpl implements Application {
             PopupMenuImpl popup = new PopupMenuImpl(this, entries);
             TrayIcon icon = new TrayIcon(image, S.l("Marid IDE"), popup);
             icon.addActionListener(popup);
+            icon.setActionCommand("show_hide");
             tray.add(icon);
         }
     }
