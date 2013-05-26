@@ -17,10 +17,11 @@
  */
 package org.marid.logging;
 
-import org.marid.l10n.Localized;
-
 import java.io.InputStream;
-import java.util.logging.*;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  * Base logging utilities.
@@ -67,10 +68,7 @@ public class Logging {
                         Class<?> handlerClass = Class.forName(handler, true, cl);
                         root.addHandler((Handler)handlerClass.newInstance());
                     } catch (Exception x) {
-                        LogRecord lr = new LogRecord(Level.WARNING, "Load handler error");
-                        lr.setResourceBundle(Localized.M.MB);
-                        lr.setThrown(x);
-                        root.log(lr);
+                        x.printStackTrace(System.err);
                     }
                 }
             }

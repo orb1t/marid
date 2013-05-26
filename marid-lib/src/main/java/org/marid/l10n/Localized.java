@@ -28,9 +28,7 @@ import org.marid.l10n.LocalizationUtils.EmptyResourceBundle;
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public interface Localized {
-    /**
-     * Strings localizations.
-     */
+
     public class S {
         
         public static final ResourceBundle SB;
@@ -46,22 +44,12 @@ public interface Localized {
             SB = rb;
         }
 
-        /**
-         * Get a string from strings resource bundle.
-         *
-         * @param key String key.
-         * @param ps String parameters.
-         * @return String.
-         */
         public static String l(String key, Object... ps) {
             String r = SB.containsKey(key) ? SB.getString(key) : key;
             return ps == null || ps.length == 0 ? r : String.format(r, ps);
         }
     }
 
-    /**
-     * Messages localizations.
-     */
     public class M {
 
         public static final ResourceBundle MB;
@@ -77,16 +65,18 @@ public interface Localized {
             MB = rb;
         }
 
-        /**
-         * Get a message from message resource bundle.
-         *
-         * @param k Message key.
-         * @param v Message parameters.
-         * @return Message.
-         */
         public static String l(String k, Object... v) {
             String r = MB.containsKey(k) ? MB.getString(k) : k;
             return v == null || v.length == 0 ? r : MessageFormat.format(r, v);
+        }
+
+        public static void l(String k, StringBuffer buffer, Object... v) {
+            String r = MB.containsKey(k) ? MB.getString(k) : k;
+            if (v == null || v.length == 0) {
+                buffer.append(r);
+            } else {
+                new MessageFormat(r).format(v, buffer, null);
+            }
         }
     }
 }

@@ -50,7 +50,12 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <descriptor>src/assemble/marid-assemble.xml</descriptor>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <formats>
+                        <format>zip</format>
+                    </formats>
                 </configuration>
                 <executions>
                     <execution>

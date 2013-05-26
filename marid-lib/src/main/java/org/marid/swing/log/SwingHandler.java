@@ -4,7 +4,6 @@ import org.marid.image.MaridIcons;
 import org.marid.l10n.Localized;
 import org.marid.logging.AbstractHandler;
 import org.marid.logging.Logging;
-import org.marid.logging.TextFormatter;
 import org.marid.swing.MaridAction;
 
 import javax.swing.*;
@@ -39,7 +38,7 @@ public class SwingHandler extends AbstractHandler implements Localized {
         String sizeText = manager.getProperty(getClass().getCanonicalName() + ".size");
         size = sizeText == null ? 65536 : Integer.parseInt(sizeText);
         if (getFormatter() == null) {
-            setFormatter(new TextFormatter());
+            setFormatter(new SwingHandlerFormatter());
         }
     }
 
