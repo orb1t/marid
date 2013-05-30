@@ -8,10 +8,6 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>src/assemble/inc/</directory>
-            <outputDirectory>.</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>src/ext</directory>
             <outputDirectory>ext</outputDirectory>
         </fileSet>

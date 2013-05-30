@@ -17,10 +17,13 @@
  */
 package org.marid.l10n;
 
-import java.text.MessageFormat;
-import java.util.ResourceBundle;
-import static java.util.ResourceBundle.getBundle;
 import org.marid.l10n.LocalizationUtils.EmptyResourceBundle;
+
+import java.text.MessageFormat;
+import java.util.Formatter;
+import java.util.ResourceBundle;
+
+import static java.util.ResourceBundle.*;
 
 /**
  * Localized resource interface.
@@ -47,6 +50,17 @@ public interface Localized {
         public static String l(String key, Object... ps) {
             String r = SB.containsKey(key) ? SB.getString(key) : key;
             return ps == null || ps.length == 0 ? r : String.format(r, ps);
+        }
+
+        public static void l(String key, Appendable out, Object... ps) {
+            String r = SB.containsKey(key) ? SB.getString(key) : key;
+            Formatter formatter = new Formatter(out);
+            formatter.format(r, ps);
+        }
+
+        public static void l(String key, Formatter formatter, Object... ps) {
+            String r = SB.containsKey(key) ? SB.getString(key) : key;
+            formatter.format(r, ps);
         }
     }
 

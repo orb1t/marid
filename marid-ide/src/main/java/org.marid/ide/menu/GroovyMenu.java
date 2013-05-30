@@ -22,15 +22,16 @@ import groovy.lang.Closure;
 import groovy.lang.GroovyObjectSupport;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.StringGroovyMethods;
-import org.marid.util.CollectUtils;
 
 import java.awt.event.ActionEvent;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static java.util.Map.*;
-import static org.marid.groovy.MaridGroovyMethods.*;
-import static org.marid.ide.menu.MenuType.*;
+import static java.util.Map.Entry;
+import static org.codehaus.groovy.runtime.DefaultGroovyMethods.asType;
+import static org.codehaus.groovy.runtime.DefaultGroovyMethods.plus;
+import static org.marid.groovy.MaridGroovyMethods.warning;
+import static org.marid.ide.menu.MenuType.MENU;
 
 public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
 
@@ -40,7 +41,7 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
     @SuppressWarnings("unchecked")
     public List<MenuEntry> getMenuEntries() {
         LinkedList<MenuEntry> entries = new LinkedList<>();
-        Map<String, Object> map = (Map<String, Object>)getProperty("items");
+        Map<String, Object> map = (Map<String, Object>) getProperty("items");
         if (map == null) {
             map = Collections.emptyMap();
         }
@@ -55,24 +56,17 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
         final String name = e.getKey();
         final Map<String, Object> map = e.getValue() == null ?
                 Collections.<String, Object>emptyMap() :
-                (Map<String, Object>)e.getValue();
+                (Map<String, Object>) e.getValue();
         Object path = map.get("path");
         final String[] p;
-        if (path instanceof Object[]) {
-            p = new String[((Object[])path).length];
-            for (int i = 0; i < ((Object[])path).length; i++) {
-                p[i] = String.valueOf(((Object[])path)[i]);
-            }
-        } else if (path instanceof Iterable) {
-            ArrayList<String> ap = new ArrayList<>();
-            for (Object o : (Iterable)path) {
-                ap.add(String.valueOf(o));
-            }
-            p = ap.toArray(new String[ap.size()]);
+        if (path instanceof Object[] || path instanceof Iterable) {
+            p = asType(path, String[].class);
+        } else if (pr == null) {
+            p = new String[0];
         } else {
-            p = pr != null ? CollectUtils.concat(pr.getPath(), pr.getName()) : new String[0];
+            p = asType(plus(pr.getPath(), pr.getName()), String[].class);
         }
-        MenuEntry me =  new MenuEntry() {
+        MenuEntry me = new MenuEntry() {
             @Override
             public String[] getPath() {
                 return p;
@@ -109,19 +103,19 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
             @Override
             public String getDescription() {
                 Object d = map.get("description");
-                return isMutableDescription() ? ((Closure<String>)d).call() : String.valueOf(d);
+                return isMutableDescription() ? ((Closure<String>) d).call() : String.valueOf(d);
             }
 
             @Override
             public String getInfo() {
                 Object i = map.get("info");
-                return isMutableInfo() ? ((Closure<String>)i).call() : String.valueOf(i);
+                return isMutableInfo() ? ((Closure<String>) i).call() : String.valueOf(i);
             }
 
             @Override
             public String getIcon() {
                 Object i = map.get("icon");
-                return isMutableIcon() ? ((Closure<String>)i).call() : String.valueOf(i);
+                return isMutableIcon() ? ((Closure<String>) i).call() : String.valueOf(i);
             }
 
             @Override
@@ -168,20 +162,20 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
             @Override
             public Boolean isSelected() {
                 return hasSelectedPredicate() ?
-                        ((Closure<Boolean>)map.get("selected")).call() : null;
+                        ((Closure<Boolean>) map.get("selected")).call() : null;
             }
 
             @Override
             public boolean isEnabled() {
                 return hasEnabledPredicate() ?
-                        ((Closure<Boolean>)map.get("enabled")).call() : true;
+                        ((Closure<Boolean>) map.get("enabled")).call() : true;
             }
 
             @Override
             public boolean isLeaf() {
                 for (MenuEntry e : ens) {
                     if (e.getPath().length == getPath().length + 1 &&
-                            Arrays.equals(e.getPath(), CollectUtils.concat(getPath(), name))) {
+                            Arrays.equals(e.getPath(), plus(getPath(), name))) {
                         return false;
                     }
                 }
@@ -190,7 +184,7 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
 
             @Override
             public void call(ActionEvent event) {
-                Closure v = (Closure)map.get("action");
+                Closure v = (Closure) map.get("action");
                 if (v != null) {
                     try {
                         v.call(event);
@@ -207,9 +201,11 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
             }
         };
         ens.add(me);
-        Map<String, Object> v = (Map<String, Object>)DefaultGroovyMethods.get(
+        Map<String, Object> v = (Map<String, Object>) DefaultGroovyMethods.get(
                 map, "items", Collections.emptyMap());
-        if (v != null) {
+        if (v != null)
+
+        {
             try {
                 for (Entry<String, Object> en : v.entrySet()) {
                     fillEntries(me, en, ens);

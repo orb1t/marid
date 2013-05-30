@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Dmitry Ovchinnikov
+ * Copyright (C) 2013 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,21 +15,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.prp;
 
-import java.util.TreeMap;
+package org.marid.services.server;
 
 /**
- * TreeMap-based propertized object.
- *
- * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
+ * @author Dmitry Ovchinnikov
  */
-public class TPrp extends AbstractPrp {
+public class ServiceServer {
 
-    protected final TreeMap<String, Object> map = new TreeMap<>();
 
-    @Override
-    public Object get(String key) {
-        return map.get(key);
-    }
 }

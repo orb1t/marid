@@ -15,26 +15,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.marid.prp.CMPrp;
+package org.marid.services;
+
+import java.util.Map;
 
 /**
- * Type test.
- *
- * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
+ * @author Dmitry Ovchinnikov
  */
-public class TypeTest extends Assert {
+public interface ServiceSupplier {
 
-    /**
-     * Test for float conversion.
-     */
-    @Test
-    public void test1() {
-        CMPrp p = new CMPrp();
-        p.put("k", 10L);
-        assertEquals(10L, (long)p.get(Long.class, "k", 10L));
-    }
+    public String getVersion();
+
+    public String getName();
+
+    public String getLabel();
+
+    public String getType();
+
+    public Service newService(Map<String, Object> params);
+
+    public Class<? extends Service> getServiceClass();
 }
