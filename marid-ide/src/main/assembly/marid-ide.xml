@@ -8,7 +8,7 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>src/ext</directory>
+            <directory>target/ext</directory>
             <outputDirectory>ext</outputDirectory>
         </fileSet>
     </fileSets>
