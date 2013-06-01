@@ -27,7 +27,7 @@ import javax.swing.UIManager.*;
 import java.awt.*;
 
 import static javax.swing.UIManager.*;
-import static org.marid.groovy.MaridGroovyMethods.*;
+import static org.marid.methods.LogMethods.*;
 
 
 /**

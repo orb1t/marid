@@ -25,7 +25,7 @@ import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
 
-import static org.marid.groovy.MaridGroovyMethods.*;
+import static org.marid.methods.LogMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov

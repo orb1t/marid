@@ -22,6 +22,7 @@ import groovy.lang.Closure;
 import groovy.lang.GroovyObjectSupport;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.StringGroovyMethods;
+import org.marid.util.CollectionUtils;
 
 import java.awt.event.ActionEvent;
 import java.util.*;
@@ -30,7 +31,7 @@ import java.util.logging.Logger;
 import static java.util.Map.Entry;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.asType;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.plus;
-import static org.marid.groovy.MaridGroovyMethods.warning;
+import static org.marid.methods.LogMethods.warning;
 import static org.marid.ide.menu.MenuType.MENU;
 
 public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
@@ -64,7 +65,7 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
         } else if (pr == null) {
             p = new String[0];
         } else {
-            p = asType(plus(pr.getPath(), pr.getName()), String[].class);
+            p = CollectionUtils.concat(pr.getPath(), pr.getName());
         }
         MenuEntry me = new MenuEntry() {
             @Override
@@ -197,7 +198,7 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
             @Override
             public String toString() {
                 return DefaultGroovyMethods.join(
-                        DefaultGroovyMethods.plus(getPath(), getName()), "/");
+                        CollectionUtils.concat(getPath(), getName()), "/");
             }
         };
         ens.add(me);

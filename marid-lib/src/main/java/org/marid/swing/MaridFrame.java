@@ -25,8 +25,8 @@ import javax.swing.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-import static org.marid.groovy.MaridGroovyMethods.*;
-import static org.marid.groovy.GuiGroovyMethods.*;
+import static org.marid.methods.LogMethods.*;
+import static org.marid.methods.GuiMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov

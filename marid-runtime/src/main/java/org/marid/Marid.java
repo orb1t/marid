@@ -24,8 +24,8 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
-import static org.marid.groovy.MaridGroovyMethods.info;
-import static org.marid.groovy.MaridGroovyMethods.warning;
+import static org.marid.methods.LogMethods.info;
+import static org.marid.methods.LogMethods.warning;
 
 /**
  * @author Dmitry Ovchinnikov

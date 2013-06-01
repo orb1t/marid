@@ -21,8 +21,8 @@ import java.util.logging.LogRecord;
 import java.util.prefs.Preferences;
 
 import static java.awt.RenderingHints.*;
-import static org.marid.groovy.GuiGroovyMethods.*;
-import static org.marid.groovy.MaridGroovyMethods.*;
+import static org.marid.methods.GuiMethods.*;
+import static org.marid.methods.LogMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov

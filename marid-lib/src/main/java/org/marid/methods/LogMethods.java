@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.groovy;
+package org.marid.methods;
 
 import org.marid.l10n.Localized;
 import org.marid.pref.PrefObject;
@@ -29,7 +29,7 @@ import java.util.prefs.Preferences;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridGroovyMethods {
+public class LogMethods {
 
     public static void info(Logger logger, String msg, Object... args) {
         LogRecord r = new LogRecord(Level.INFO, msg);

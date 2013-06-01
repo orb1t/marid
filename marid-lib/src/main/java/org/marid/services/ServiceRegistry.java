@@ -21,7 +21,7 @@ package org.marid.services;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static org.marid.groovy.MaridGroovyMethods.severe;
+import static org.marid.methods.LogMethods.severe;
 
 /**
  * @author Dmitry Ovchinnikov

@@ -37,7 +37,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.marid.groovy.MaridGroovyMethods.*;
+import static org.marid.methods.LogMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov

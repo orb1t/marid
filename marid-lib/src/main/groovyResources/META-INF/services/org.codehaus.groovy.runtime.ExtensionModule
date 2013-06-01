@@ -18,5 +18,5 @@
 
 moduleName=marid-lib-ext-module
 moduleVersion=1.0
-extensionClasses=org.marid.groovy.MaridGroovyMethods
+extensionClasses=org.marid.methods.LogMethods
 staticExtensionClasses=

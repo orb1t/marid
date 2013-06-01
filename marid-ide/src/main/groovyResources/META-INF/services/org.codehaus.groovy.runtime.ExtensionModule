@@ -18,5 +18,5 @@
 
 moduleName=runtime-ext-module
 moduleVersion=1.0
-extensionClasses=org.marid.groovy.GuiGroovyMethods,org.marid.ide.groovy.IdeMethods
+extensionClasses=org.marid.methods.GuiMethods,org.marid.ide.groovy.IdeMethods
 staticExtensionClasses=

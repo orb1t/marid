@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.groovy;
+package org.marid.methods;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +25,7 @@ import java.util.prefs.Preferences;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class GuiGroovyMethods {
+public class GuiMethods {
 
     public static String hrf(Dimension dimension) {
         int w = dimension.width;

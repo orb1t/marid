@@ -26,8 +26,8 @@ import java.awt.*;
 import java.util.List;
 import java.util.prefs.Preferences;
 
-import static org.marid.groovy.MaridGroovyMethods.*;
-import static org.marid.groovy.GuiGroovyMethods.*;
+import static org.marid.methods.LogMethods.*;
+import static org.marid.methods.GuiMethods.*;
 
 /**
  * Application frame implementation.

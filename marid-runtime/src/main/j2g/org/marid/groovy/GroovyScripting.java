@@ -30,7 +30,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import static org.marid.groovy.MaridGroovyMethods.warning;
+import static org.marid.methods.LogMethods.warning;
 
 /**
  * @author Dmitry Ovchinnikov

@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
-import static org.marid.groovy.MaridGroovyMethods.*;
+import static org.marid.methods.LogMethods.*;
 
 public class ApplicationImpl implements Application {
 

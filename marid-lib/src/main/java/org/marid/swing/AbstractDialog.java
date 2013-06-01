@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import static javax.swing.JComponent.*;
-import static org.marid.groovy.MaridGroovyMethods.*;
+import static org.marid.methods.LogMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
