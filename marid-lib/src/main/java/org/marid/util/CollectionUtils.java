@@ -16,24 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide;
+package org.marid.util;
 
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.lang.reflect.Array;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TestMaridIde {
+public class CollectionUtils {
 
-    public static void main(String... args) throws Exception {
-        final File u = new File(System.getProperty("user.dir"));
-        final URLClassLoader cl = new URLClassLoader(new URL[] {
-                new File(u, "marid-ide/src/ext").toURI().toURL(),
-                new File(u, "marid-ide/src/groovyExt").toURI().toURL()
-        });
-        Thread.currentThread().setContextClassLoader(cl);
-        MaridIde.main(args);
+    @SuppressWarnings("unchecked")
+    public static <T> T[] concat(T[] array, T elem) {
+        T[] result = (T[]) Array.newInstance(array.getClass().getComponentType(), array.length + 1);
+        result[array.length] = elem;
+        return result;
     }
 }

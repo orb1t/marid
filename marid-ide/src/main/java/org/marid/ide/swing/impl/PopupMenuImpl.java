@@ -18,7 +18,6 @@
 
 package org.marid.ide.swing.impl;
 
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.marid.ide.menu.MenuEntry;
 import org.marid.l10n.Localized;
 
@@ -29,6 +28,8 @@ import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
+
+import static org.marid.util.CollectionUtils.*;
 
 /**
  * Popup menu implementation.
@@ -105,7 +106,7 @@ public class PopupMenuImpl extends PopupMenu implements ActionListener, Localize
         TreeSet<MenuEntry> set = new TreeSet<>(MenuEntry.MENU_ENTRY_COMPARATOR);
         for (MenuEntry e : menuEntries) {
             if (e.getPath().length == n + 1 && Arrays.equals(e.getPath(),
-                    DefaultGroovyMethods.plus(entry.getPath(), entry.getName()))) {
+                    concat(entry.getPath(), entry.getName()))) {
                 set.add(e);
             }
         }

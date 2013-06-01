@@ -16,14 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.groovy;
+package org.marid.ide.groovy;
 
-import groovy.lang.GroovyShell;
+import groovy.lang.Script;
+import org.marid.ide.Ide;
+import org.marid.ide.itf.Application;
+import org.marid.ide.menu.MenuSupport;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ShellSupplier {
+public class IdeMethods {
 
-    public GroovyShell getShell();
+    public static Application getApplication(MenuSupport menu) {
+        return Ide.APPLICATION;
+    }
+
+    public static Application getApplication(Script script) {
+        return Ide.APPLICATION;
+    }
 }

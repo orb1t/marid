@@ -18,31 +18,33 @@
 
 package org.marid;
 
-import groovy.lang.GroovyClassLoader;
 import org.marid.logging.Logging;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
-import static org.marid.groovy.MaridGroovyMethods.*;
+import static org.marid.groovy.MaridGroovyMethods.info;
+import static org.marid.groovy.MaridGroovyMethods.warning;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class Marid implements UncaughtExceptionHandler {
 
-    private static final Logger log = Logger.getLogger(Marid.class.getName());
+    private static final Logger LOG = Logger.getLogger(Marid.class.getName());
 
     public static void main(String[] args) {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
         Logging.init(Marid.class, "log.properties");
         Thread.setDefaultUncaughtExceptionHandler(new Marid());
-        Thread.currentThread().setContextClassLoader(new GroovyClassLoader());
+        info(LOG, "Scripting engine: {0}", Scripting.ENGINE);
+        info(LOG, "Class loader: {0}", Scripting.LOADER);
+        Thread.currentThread().setContextClassLoader(Scripting.LOADER);
     }
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        warning(log, "Uncaught exception in {0}", e, t);
+        warning(LOG, "Uncaught exception in {0}", e, t);
     }
 }

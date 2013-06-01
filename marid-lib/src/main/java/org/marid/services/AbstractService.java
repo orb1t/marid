@@ -18,10 +18,10 @@
 
 package org.marid.services;
 
+import org.marid.typecast.TypeCaster;
+
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Logger;
-
-import static org.codehaus.groovy.runtime.DefaultGroovyMethods.asType;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -34,8 +34,7 @@ public abstract class AbstractService extends ConcurrentSkipListMap<String, Obje
     protected transient final Logger log = Logger.getLogger(getClass().getCanonicalName());
 
     private <T> T get(Class<T> klass, String key) {
-        Object value = get(key);
-        return value == null ? null : asType(value, klass);
+        return TypeCaster.CASTER.cast(klass, get(key));
     }
 
     private <T> T get(Class<T> klass, String key, T def) {

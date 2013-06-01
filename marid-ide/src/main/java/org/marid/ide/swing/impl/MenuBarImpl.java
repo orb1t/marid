@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
 
-import static org.codehaus.groovy.runtime.DefaultGroovyMethods.plus;
+import static org.marid.util.CollectionUtils.concat;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -89,7 +89,7 @@ class MenuBarImpl extends JMenuBar {
         TreeSet<MenuEntry> set = new TreeSet<>(MenuEntry.MENU_ENTRY_COMPARATOR);
         for (MenuEntry e : menuEntries) {
             if (e.getPath().length == n + 1 && Arrays.equals(e.getPath(),
-                    plus(entry.getPath(), entry.getName()))) {
+                    concat(entry.getPath(), entry.getName()))) {
                 set.add(e);
             }
         }

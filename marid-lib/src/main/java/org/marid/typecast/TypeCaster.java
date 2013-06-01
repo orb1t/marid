@@ -16,23 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.groovy;
+package org.marid.typecast;
 
-import groovy.lang.Script;
-import org.marid.ide.Ide;
-import org.marid.ide.itf.Application;
-import org.marid.ide.menu.MenuSupport;
+import java.util.Iterator;
+import java.util.ServiceLoader;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class IdeMethods {
+public abstract class TypeCaster {
 
-    public static Application getApplication(Script script) {
-        return Ide.APPLICATION;
+    public static final TypeCaster CASTER;
+
+    static {
+        Iterator<TypeCaster> it = ServiceLoader.load(TypeCaster.class).iterator();
+        CASTER = it.hasNext() ? it.next() : new DefaultTypeCaster();
     }
 
-    public static Application getApplication(MenuSupport menu) {
-        return Ide.APPLICATION;
-    }
+    public abstract <T> T cast(Class<T> klass, Object value);
 }
