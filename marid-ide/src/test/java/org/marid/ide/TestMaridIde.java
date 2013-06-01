@@ -28,8 +28,8 @@ import java.net.URLClassLoader;
 public class TestMaridIde {
 
     public static void main(String... args) throws Exception {
-        File f = new File(new File(System.getProperty("user.dir")), "marid-ide/src/ext");
-        URLClassLoader cl = new URLClassLoader(new URL[] {f.toURI().toURL()});
+        final File f = new File(new File(System.getProperty("user.dir")), "marid-ide/src/ext");
+        final URLClassLoader cl = new URLClassLoader(new URL[] {f.toURI().toURL()});
         Thread.currentThread().setContextClassLoader(cl);
         MaridIde.main(args);
     }

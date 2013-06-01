@@ -36,4 +36,8 @@ public interface ServiceSupplier {
     public Service newService(Map<String, Object> params);
 
     public Class<? extends Service> getServiceClass();
+
+    public boolean isDefault();
+
+    public void setDefault(boolean state);
 }

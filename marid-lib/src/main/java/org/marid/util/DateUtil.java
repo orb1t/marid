@@ -27,29 +27,10 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
- * Date and calendar utilities.
- *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class DateUtil {
 
-    /**
-     * Parses an ISO-formatted date.
-     *
-     * @param date ISO-formatted date. Possible formats are: <ol>
-     * <li>yyyy-MM-dd'T'HH:mm:ss.SSSZ (28 characters)</li>
-     * <li>yyyy-MM-dd'T'HH:mm:ss.SSSz (26 characters)</li>
-     * <li>yyyy-MM-dd'T'HH:mm:ss.SSS (23 characters)</li>
-     * <li>yyyy-MM-dd'T'HH:mm.ssZ (24 characters)</li>
-     * <li>yyyy-MM-dd'T'HH:mm:ssz (22 characters)</li> <li>yyyy-MM-dd'T'HH:mm:ss
-     * (19 characters)</li> <li>yyyy-MM-dd'T'HH:mmZ (21 characters)</li>
-     * <li>yyyy-MM-dd'T'HH:mm (16 characters)</li> <li>yyyy-MM-dd'T'HHZ (18
-     * characters)</li> <li>yyyy-MM-dd'T'HH (13 characters)</li> <li>yyyy-MM-ddZ
-     * (15 characters)</li> <li>yyyy-MM-dd (10 characters)</li> <li>HH:mm:ss.SSS
-     * (12 characters)</li> <li>HH:mm:ss (8 characters)</li> <li>HH:mm (5
-     * characters)</li> </ol>
-     * @return Calendar.
-     */
     public static Calendar isoToCalendar(String date) {
         TimeZone z;
         int l = date.length();
@@ -69,7 +50,7 @@ public class DateUtil {
                 z = TimeZone.getDefault();
                 break;
         }
-        Calendar c = new GregorianCalendar(z, Locale.ITALY);
+        Calendar c = new GregorianCalendar(z, Locale.ROOT);
         if (l != 12 && l >= 10) {
             switch (l) {
                 case 28:
@@ -137,44 +118,20 @@ public class DateUtil {
         return c;
     }
 
-    /**
-     * Parses an ISO-formatted date.
-     *
-     * @param date ISO-formatted date.
-     * @return Milliseconds since 1970-01-01.
-     */
     public static long isoToMillis(String date) {
         return isoToCalendar(date).getTimeInMillis();
     }
 
-    /**
-     * Parses an ISO-formatted date.
-     *
-     * @param date ISO-formatted date.
-     * @return Date object.
-     */
     public static Date isoToDate(String date) {
         return isoToCalendar(date).getTime();
     }
 
-    /**
-     * Parses an ISO-formatted date.
-     *
-     * @param date ISO-formatted date.
-     * @return SQL timestamp.
-     */
     public static Timestamp isoToTimestamp(String date) {
         return new Timestamp(isoToMillis(date));
     }
 
-    /**
-     * Formats a timestamp according to ISO rules.
-     * @param ts A timestamp.
-     * @param a An appendable.
-     */
-    public static void iso(long ts, Appendable a,
-            TimeZone tz, boolean ms) throws IOException {
-        Calendar c = Calendar.getInstance(tz, Locale.ITALY);
+    public static void iso(long ts, Appendable a, TimeZone tz, boolean ms) throws IOException {
+        Calendar c = Calendar.getInstance(tz, Locale.ROOT);
         c.setTimeInMillis(ts);
         a.append(Integer.toString(c.get(YEAR)));
         a.append('-');

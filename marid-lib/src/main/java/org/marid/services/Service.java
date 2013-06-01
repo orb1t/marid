@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -46,19 +45,7 @@ public interface Service extends ConcurrentMap<String, Object> {
 
     public ThreadGroup getThreadGroup();
 
-    public Future<Map<String, Object>> asyncSend(Map<String, Object> message);
+    public Future<Map<String, Object>> send(Map<String, Object> message);
 
-    public List<Future<Map<String, Object>>> asyncSend(Collection<Map<String, Object>> messages);
-
-    public Map<String, Object> send(Map<String, Object> message) throws InterruptedException;
-
-    public Map<String, Object> send(Map<String, Object> message, long timeout, TimeUnit timeUnit) throws InterruptedException;
-
-    public Map<String, Object> send(Map<String, Object> message, long timeout) throws InterruptedException;
-
-    public List<Map<String, Object>> send(Collection<Map<String, Object>> messages) throws InterruptedException;
-
-    public List<Map<String, Object>> send(Collection<Map<String, Object>> messages, long timeout, TimeUnit timeUnit) throws InterruptedException;
-
-    public List<Map<String, Object>> send(Collection<Map<String, Object>> messages, long timeout) throws InterruptedException;
+    public List<Future<Map<String, Object>>> send(Collection<Map<String, Object>> messages);
 }

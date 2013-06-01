@@ -58,6 +58,26 @@ public abstract class AbstractService extends ConcurrentSkipListMap<String, Obje
         }
     }
 
+    @Override
+    public String getType() {
+        String type = get(String.class, "type");
+        if (type == null) {
+            type = getClass().getSimpleName();
+            if (type.endsWith("Service")) {
+                return type.substring(0, type.length() - 7).toLowerCase();
+            } else {
+                return type.toLowerCase();
+            }
+        } else {
+            return type;
+        }
+    }
+
+    @Override
+    public String getLabel() {
+        return get(String.class, "label", getName());
+    }
+
     protected abstract void doStart() throws Exception;
 
     @Override
@@ -76,5 +96,10 @@ public abstract class AbstractService extends ConcurrentSkipListMap<String, Obje
             doStop();
             running = false;
         }
+    }
+
+    @Override
+    public String toString() {
+        return getLabel();
     }
 }

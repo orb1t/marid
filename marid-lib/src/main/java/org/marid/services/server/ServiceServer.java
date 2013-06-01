@@ -23,5 +23,4 @@ package org.marid.services.server;
  */
 public class ServiceServer {
 
-
 }

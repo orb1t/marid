@@ -34,7 +34,8 @@ public class MaridGroovyMethods {
     public static void info(Logger logger, String msg, Object... args) {
         LogRecord r = new LogRecord(Level.INFO, msg);
         r.setParameters(args);
-        r.setSourceClassName(null);
+        r.setSourceMethodName(null);
+        r.setLoggerName(logger.getName());
         logger.log(r);
     }
 
@@ -42,6 +43,7 @@ public class MaridGroovyMethods {
         LogRecord r = new LogRecord(Level.FINE, msg);
         r.setParameters(args);
         r.setSourceClassName(null);
+        r.setLoggerName(logger.getName());
         logger.log(r);
     }
 
@@ -49,6 +51,7 @@ public class MaridGroovyMethods {
         LogRecord r = new LogRecord(Level.FINER, msg);
         r.setParameters(args);
         r.setSourceClassName(null);
+        r.setLoggerName(logger.getName());
         logger.log(r);
     }
 
@@ -56,6 +59,7 @@ public class MaridGroovyMethods {
         LogRecord r = new LogRecord(Level.FINEST, msg);
         r.setParameters(args);
         r.setSourceClassName(null);
+        r.setLoggerName(logger.getName());
         logger.log(r);
     }
 
@@ -64,6 +68,7 @@ public class MaridGroovyMethods {
         r.setParameters(args);
         r.setThrown(error);
         r.setSourceClassName(null);
+        r.setLoggerName(logger.getName());
         logger.log(r);
     }
 
@@ -71,6 +76,7 @@ public class MaridGroovyMethods {
         LogRecord r = new LogRecord(Level.WARNING, msg);
         r.setParameters(args);
         r.setSourceClassName(null);
+        r.setLoggerName(logger.getName());
         logger.log(r);
     }
 
@@ -79,6 +85,7 @@ public class MaridGroovyMethods {
         r.setParameters(args);
         r.setThrown(error);
         r.setSourceClassName(null);
+        r.setLoggerName(logger.getName());
         logger.log(r);
     }
 
@@ -86,6 +93,7 @@ public class MaridGroovyMethods {
         LogRecord r = new LogRecord(Level.SEVERE, msg);
         r.setParameters(args);
         r.setSourceClassName(null);
+        r.setLoggerName(logger.getName());
         logger.log(r);
     }
 
