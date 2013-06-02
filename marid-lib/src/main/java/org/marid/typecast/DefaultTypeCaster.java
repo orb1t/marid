@@ -69,19 +69,20 @@ public class DefaultTypeCaster extends TypeCaster {
             return null;
         } else {
             Class<?> vc = v.getClass();
-            if (!klass.getComponentType().isArray()) {
+            Class<?> ct = klass.getComponentType();
+            if (!ct.isArray()) {
                 Object array;
                 if (vc.isArray()) {
                     int n = Array.getLength(v);
-                    array = Array.newInstance(klass, n);
+                    array = Array.newInstance(ct, n);
                     for (int i = 0; i < n; i++) {
-                        Array.set(array, i, cast(klass, Array.get(v, i)));
+                        Array.set(array, i, cast(ct, Array.get(v, i)));
                     }
                 } else if (v instanceof Collection) {
-                    array = Array.newInstance(klass, ((Collection) v).size());
+                    array = Array.newInstance(ct, ((Collection) v).size());
                     int i = 0;
                     for (Object o : (Collection) v) {
-                        Array.set(array, i++, cast(klass, o));
+                        Array.set(array, i++, cast(ct, o));
                     }
                 } else {
                     throw new IllegalArgumentException("Unable to cast to array from " + vc);
@@ -90,7 +91,7 @@ public class DefaultTypeCaster extends TypeCaster {
             } else {
                 int ndim;
                 Class<?> cc;
-                for (cc = klass, ndim = 1; cc.isArray(); cc = cc.getComponentType()) {
+                for (cc = klass, ndim = 0; cc.isArray(); cc = cc.getComponentType()) {
                     ndim++;
                 }
                 Object[] array;
@@ -107,7 +108,6 @@ public class DefaultTypeCaster extends TypeCaster {
                 int[] dims = new int[ndim];
                 dims[0] = array.length;
                 Object result = Array.newInstance(cc, dims);
-                Class<?> ct = klass.getComponentType();
                 for (int i = 0; i < array.length; i++) {
                     Array.set(result, i, arrayCast(ct, array[i]));
                 }

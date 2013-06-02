@@ -24,8 +24,6 @@ import org.junit.Test;
 import org.marid.util.DateUtil;
 
 /**
- * Date tests.
- *
  * @author d.ovchinnikow at gmail.com
  */
 public class DateTest extends Assert {
