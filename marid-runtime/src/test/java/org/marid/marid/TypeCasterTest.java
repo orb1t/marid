@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -53,23 +53,29 @@ public class TypeCasterTest {
 
     @Test
     public void testNumbers() {
+        assertEquals(new Integer(11), caster.cast(int.class, "11"));
+        assertEquals(new Long(1L), caster.cast(long.class, "1"));
+        assertEquals(new Long(1L), caster.cast(Long.class, "1"));
+        assertEquals(1.1f, caster.cast(float.class, "1.1"), 0.0001);
+        assertEquals(1.1, caster.cast(double.class, "1.1"), 0.0001);
     }
 
     @Test
     public void testArrays() {
-        assertArrayEquals(
-                new byte[]{1, 2, 3},
+        assertArrayEquals(new byte[]{1, 2, 3},
                 caster.cast(byte[].class, Arrays.asList((byte) 1, 2, (byte) 3)));
-        assertArrayEquals(
-                new int[]{1, 2, 3},
+        assertArrayEquals(new int[]{1, 2, 3},
                 caster.cast(int[].class, Arrays.asList(1, 2, 3)));
-        assertTrue(Arrays.deepEquals(
-                new int[][]{{1, 2}, {3, 4, 5}},
+        assertArrayEquals(new int[][]{{1, 2}, {3, 4, 5}},
                 caster.cast(int[][].class, Arrays.asList(
                         Arrays.asList(1, 2), Arrays.asList(3, 4, 5)
-                ))));
-        assertTrue(Arrays.deepEquals(
-                new double[][][]{{{1.2, 2.3, 3}, {3.3}}, {{0.9}, {0.8}}},
+                )));
+        assertArrayEquals(new String[][]{{"a", "b", "1"}, null},
+                caster.cast(String[][].class, Arrays.asList(
+                        Arrays.asList("a", "b", 1),
+                        null
+                )));
+        assertArrayEquals(new double[][][]{{{1.2, 2.3, 3}, {3.3}}, {{0.9}, {0.8}}},
                 caster.cast(double[][][].class, Arrays.asList(
                         Arrays.asList(
                                 Arrays.asList(1.2, 2.3, 3),
@@ -79,11 +85,6 @@ public class TypeCasterTest {
                                 Arrays.asList(0.9),
                                 Arrays.asList(0.8)
                         )
-                ))));
-        assertArrayEquals(new String[][]{{"a", "b"}, null},
-                caster.cast(String[][].class, Arrays.asList(
-                        Arrays.asList("a", "b"),
-                        null
                 )));
     }
 }

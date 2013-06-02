@@ -18,8 +18,16 @@
 
 package org.marid.groovy;
 
+import groovy.lang.Closure;
+import groovy.lang.GString;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
+import org.codehaus.groovy.runtime.ResourceGroovyMethods;
+import org.codehaus.groovy.runtime.StringGroovyMethods;
 import org.marid.typecast.TypeCaster;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -28,6 +36,26 @@ public class GroovyTypeCaster extends TypeCaster {
 
     @Override
     public <T> T cast(Class<T> klass, Object value) {
-        return DefaultGroovyMethods.asType(value, klass);
+        if (value instanceof Collection) {
+            return DefaultGroovyMethods.asType((Collection) value, klass);
+        } else if (value instanceof Map) {
+            return DefaultGroovyMethods.asType((Map) value, klass);
+        } else if (value instanceof Number) {
+            return DefaultGroovyMethods.asType((Number) value, klass);
+        } else if (value instanceof Object[]) {
+            return DefaultGroovyMethods.asType((Object[]) value, klass);
+        } else if (value instanceof Closure) {
+            return DefaultGroovyMethods.asType((Closure) value, klass);
+        } else if (value instanceof GString) {
+            return StringGroovyMethods.asType((GString) value, klass);
+        } else if (value instanceof String) {
+            return StringGroovyMethods.asType((String) value, klass);
+        } else if (value instanceof CharSequence) {
+            return StringGroovyMethods.asType((CharSequence) value, klass);
+        } else if (value instanceof File) {
+            return ResourceGroovyMethods.asType((File) value, klass);
+        } else {
+            return DefaultGroovyMethods.asType(value, klass);
+        }
     }
 }
