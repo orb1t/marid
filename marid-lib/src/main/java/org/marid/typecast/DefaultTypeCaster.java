@@ -19,7 +19,10 @@
 package org.marid.typecast;
 
 import java.lang.reflect.Array;
-import java.util.Collection;
+import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -59,8 +62,92 @@ public class DefaultTypeCaster extends TypeCaster {
             }
         } else if (klass.isArray()) {
             return (T) arrayCast(klass, v);
+        } else if (Number.class.isAssignableFrom(klass)) {
+            return (T) numberCast(klass, v);
+        } else if (Character.class == klass) {
+            String vs = v.toString();
+            if (!vs.isEmpty()) {
+                return (T) Character.valueOf(vs.charAt(0));
+            } else {
+                throw new IllegalArgumentException("Unable to convert empty string to char");
+            }
+        } else if (Boolean.class == klass) {
+            if (v instanceof Number) {
+                return (T) Boolean.valueOf(((Number) v).intValue() != 0);
+            } else {
+                String vb = v.toString();
+                return (T) Boolean.valueOf("true".equalsIgnoreCase(vb) || "1".equals(vb));
+            }
+        } else if (klass.isEnum()) {
+            return (T) Enum.valueOf((Class<Enum>)klass, v.toString());
+        } else if (Collection.class.isAssignableFrom(klass)) {
+            return (T) collectionCast(klass, v);
         } else {
             throw new UnsupportedOperationException("Cannot convert " + v.getClass() + " to " + klass);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Collection collectionCast(Class<?> klass, Object v) {
+        Collection collection;
+        if (klass.isInterface()) {
+            if (NavigableSet.class == klass || SortedSet.class == klass) {
+                collection = new TreeSet();
+            } else if (Set.class == klass) {
+                collection = new LinkedHashSet();
+            } else if (Queue.class == klass || Deque.class == klass) {
+                collection = new LinkedList();
+            } else if (List.class == klass) {
+                collection = new ArrayList();
+            } else {
+                throw new IllegalArgumentException("Unsupported collection: " + klass);
+            }
+        } else {
+            try {
+                collection = (Collection) klass.newInstance();
+            } catch (InstantiationException | IllegalAccessException x) {
+                throw new IllegalStateException("Unable to create a collection instance", x);
+            }
+        }
+        if (v.getClass().isArray()) {
+            int n = Array.getLength(v);
+            for (int i = 0; i < n; i++) {
+                collection.add(Array.get(v, i));
+            }
+        } else if (v instanceof Iterable) {
+            for (Object e : (Iterable) v) {
+                collection.add(e);
+            }
+        } else {
+            throw new IllegalArgumentException("Unable to convert " + v.getClass() + " to collection");
+        }
+        return collection;
+    }
+
+    private Object numberCast(Class<?> klass, Object v) {
+        if (v instanceof Number) {
+            if (klass == Integer.class) {
+                return ((Number) v).intValue();
+            } else if (klass == Long.class) {
+                return ((Number) v).longValue();
+            } else if (klass == Float.class) {
+                return ((Number) v).floatValue();
+            } else if (klass == Double.class) {
+                return ((Number) v).doubleValue();
+            } else if (klass == Short.class) {
+                return ((Number) v).shortValue();
+            } else if (klass == Byte.class) {
+                return ((Number) v).byteValue();
+            } else if (klass == BigInteger.class) {
+                return new BigInteger(v.toString());
+            } else if (klass == BigDecimal.class) {
+                return new BigDecimal(v.toString());
+            }
+        }
+        try {
+            return klass.getConstructor(String.class).newInstance(v.toString());
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException x) {
+            throw new IllegalStateException("Unable to convert " + v.getClass() + " to " + klass, x);
         }
     }
 
