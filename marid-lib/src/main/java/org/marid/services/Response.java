@@ -18,32 +18,43 @@
 
 package org.marid.services;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Future;
+import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Service extends ConcurrentMap<String, Object> {
+public abstract class Response implements Serializable {
 
-    public String getName();
+    private static final long serialVersionUID = 3362213176969861901L;
+    public final char code;
+    public final String error;
 
-    public String getType();
+    public Response(char code, String error) {
+        this.code = code;
+        this.error = error;
+    }
 
-    public String getVersion();
+    public Response(char code) {
+        this(code, null);
+    }
 
-    public String getLabel();
+    public boolean hasError() {
+        return error != null;
+    }
 
-    public void start() throws Exception;
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Response)) {
+            return false;
+        } else {
+            Response o = (Response) obj;
+            return code == o.code && Objects.equals(error, o.error);
+        }
+    }
 
-    public void stop() throws Exception;
-
-    public boolean isRunning();
-
-    public ThreadGroup getThreadGroup();
-
-    public <T extends Response> Future<T> send(Request<T> message);
-
-    public Transaction startTransaction(Map<String, Object> params);
+    @Override
+    public int hashCode() {
+        return Objects.hash(code, error);
+    }
 }

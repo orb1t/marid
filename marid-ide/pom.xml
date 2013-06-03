@@ -90,6 +90,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.ivy</groupId>
+            <artifactId>ivy</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
         </dependency>
@@ -113,9 +118,6 @@
                             <Class-Path>ext/</Class-Path>
                             <Built-By>Dmitry Ovchinnikov</Built-By>
                             <SplashScreen-Image>images/splash.png</SplashScreen-Image>
-                            <Implementation-Title>${project.description}</Implementation-Title>
-                            <Implementation-Version>${project.version}</Implementation-Version>
-                            <Implementation-Vendor>${project.organization}</Implementation-Vendor>
                         </manifestEntries>
                     </archive>
                 </configuration>

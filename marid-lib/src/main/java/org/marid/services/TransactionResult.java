@@ -18,32 +18,11 @@
 
 package org.marid.services;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Future;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Service extends ConcurrentMap<String, Object> {
-
-    public String getName();
-
-    public String getType();
-
-    public String getVersion();
-
-    public String getLabel();
-
-    public void start() throws Exception;
-
-    public void stop() throws Exception;
-
-    public boolean isRunning();
-
-    public ThreadGroup getThreadGroup();
-
-    public <T extends Response> Future<T> send(Request<T> message);
-
-    public Transaction startTransaction(Map<String, Object> params);
+public enum TransactionResult {
+    DONE,
+    CANCELLED,
+    INTERRUPTED
 }

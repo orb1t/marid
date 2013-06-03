@@ -74,9 +74,6 @@
                         <manifestEntries>
                             <Class-Path>ext/</Class-Path>
                             <Built-By>Dmitry Ovchinnikov</Built-By>
-                            <Implementation-Title>${project.description}</Implementation-Title>
-                            <Implementation-Version>${project.version}</Implementation-Version>
-                            <Implementation-Vendor>${project.organization}</Implementation-Vendor>
                         </manifestEntries>
                     </archive>
                 </configuration>

@@ -25,6 +25,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.marid.typecast.DefaultTypeCaster;
 import org.marid.typecast.TypeCaster;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 
