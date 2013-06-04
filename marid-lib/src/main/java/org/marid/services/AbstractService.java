@@ -18,29 +18,20 @@
 
 package org.marid.services;
 
-import org.marid.typecast.TypeCaster;
+import org.marid.typecast.ParameterizedObject;
 
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Logger;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractService extends ConcurrentSkipListMap<String, Object> implements Service {
+public abstract class AbstractService extends ParameterizedObject implements Service {
 
+    private static final long serialVersionUID = -5619464299660713815L;
     private transient ThreadGroup threadGroup;
     private transient boolean running;
 
     protected transient final Logger log = Logger.getLogger(getClass().getCanonicalName());
-
-    private <T> T get(Class<T> klass, String key) {
-        return TypeCaster.CASTER.cast(klass, get(key));
-    }
-
-    private <T> T get(Class<T> klass, String key, T def) {
-        T value = get(klass, key);
-        return value == null ? def : value;
-    }
 
     @Override
     public String getName() {
@@ -77,6 +68,17 @@ public abstract class AbstractService extends ConcurrentSkipListMap<String, Obje
         return get(String.class, "label", getName());
     }
 
+    @Override
+    public String getVersion() {
+        String version = getClass().getPackage().getImplementationVersion();
+        return version == null ? "dev" : version;
+    }
+
+    @Override
+    public synchronized boolean isRunning() {
+        return running;
+    }
+
     protected abstract void doStart() throws Exception;
 
     @Override
@@ -95,6 +97,17 @@ public abstract class AbstractService extends ConcurrentSkipListMap<String, Obje
             doStop();
             running = false;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
+
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+    @Override
+    public boolean equals(Object o) {
+        return this == o;
     }
 
     @Override

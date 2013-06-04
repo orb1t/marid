@@ -16,40 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.services.server;
-
-import org.marid.services.*;
+package org.marid.typecast;
 
 import java.util.Map;
-import java.util.concurrent.Future;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ServiceServer extends AbstractService {
+public interface Parameterized extends Map<String, Object> {
 
-    private static final long serialVersionUID = -1475217680158305714L;
-    private final Service delegate;
+    public <T> T get(Class<T> klass, String key);
 
-    public ServiceServer(Service delegate) {
-        this.delegate = delegate;
-    }
+    public <T> T get(Class<T> klass, String key, T def);
 
-    @Override
-    protected void doStart() throws Exception {
-    }
+    public int getInt(String key, int def);
 
-    @Override
-    protected void doStop() throws Exception {
-    }
+    public short getShort(String key, short def);
 
-    @Override
-    public <T extends Response> Future<T> send(Request<T> message) {
-        return delegate.send(message);
-    }
+    public boolean getBoolean(String key, boolean def);
 
-    @Override
-    public Transaction transaction(Map<String, Object> params) {
-        return delegate.transaction(params);
-    }
+    public long getLong(String key, long def);
+
+    public float getFloat(String key, float def);
+
+    public double getDouble(String key, double def);
+
+    public char getChar(String key, char def);
+
+    public byte getByte(String key, byte def);
+
+    public String getString(String key, String def);
 }

@@ -37,7 +37,7 @@ public interface ServiceSupplier {
 
     public Class<? extends Service> getServiceClass();
 
-    public boolean isDefault();
+    public boolean isProxy();
 
-    public void setDefault(boolean state);
+    public boolean isServer();
 }

@@ -21,18 +21,28 @@ package org.marid.services;
 import java.io.Serializable;
 import java.util.Objects;
 
+import static java.util.Objects.deepEquals;
+import static java.util.Objects.hash;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public abstract class Response implements Serializable {
 
-    private static final long serialVersionUID = 3362213176969861901L;
-    public final char code;
-    public final String error;
+    public static final int STANDARD_RESPONSE = 0;
+    public static final int UNSUPPORTED_REQUEST_RESPONSE = -1;
+    public static final int BAD_REQUEST_RESPONSE = -2;
+    public static final int UNSUPPORTED_VERSION_RESPONSE = -3;
 
-    public Response(char code, String error) {
+    private static final long serialVersionUID = 3362213176969861901L;
+    public final int code;
+    public final String error;
+    public final Object[] args;
+
+    public Response(int code, String error, Object... args) {
         this.code = code;
         this.error = error;
+        this.args = args;
     }
 
     public Response(char code) {
@@ -49,12 +59,12 @@ public abstract class Response implements Serializable {
             return false;
         } else {
             Response o = (Response) obj;
-            return code == o.code && Objects.equals(error, o.error);
+            return code == o.code && Objects.equals(error, o.error) && deepEquals(args, o.args);
         }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(code, error);
+        return hash(code, error, args);
     }
 }

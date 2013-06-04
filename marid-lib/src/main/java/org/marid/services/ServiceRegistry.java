@@ -18,73 +18,144 @@
 
 package org.marid.services;
 
-import java.util.*;
-import java.util.logging.Logger;
+import org.marid.func.Predicate1;
 
-import static org.marid.methods.LogMethods.severe;
+import java.util.*;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class ServiceRegistry {
 
-    private static final Logger LOG = Logger.getLogger(ServiceRegistry.class.getName());
-    private static final TreeMap<String, ServiceSupplier> SUPPLIERS = new TreeMap<>();
-    private static final TreeMap<String, TreeMap<String, Service>> SERVICES = new TreeMap<>();
+    private static final ConcurrentMap<String, Set<Service>> SERVICE_MAP = new ConcurrentSkipListMap<>();
 
-    static {
-        try {
-            ServiceLoader<ServiceSupplier> loader = ServiceLoader.load(ServiceSupplier.class);
-            synchronized (SUPPLIERS) {
-                for (ServiceSupplier supplier : loader) {
-                    SUPPLIERS.put(supplier.getType(), supplier);
-                }
-            }
-        } catch (Exception x) {
-            severe(LOG, "Unable to load services", x);
+    public static Map<String, Set<Service>> getServiceMap() {
+        TreeMap<String, Set<Service>> map;
+        synchronized (SERVICE_MAP) {
+             map = new TreeMap<>(SERVICE_MAP);
         }
+        for (Map.Entry<String, Set<Service>> e : map.entrySet()) {
+            synchronized (e.getValue()) {
+                e.setValue(new LinkedHashSet<>(e.getValue()));
+            }
+        }
+        return map;
     }
 
-    public static List<ServiceSupplier> getServiceSuppliers() {
-        synchronized (SUPPLIERS) {
-            return new ArrayList<>(SUPPLIERS.values());
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public static void registerService(Service service) {
+        String type = service.getType();
+        Set<Service> set;
+        synchronized (SERVICE_MAP) {
+            set = SERVICE_MAP.get(type);
+            if (set == null) {
+                SERVICE_MAP.put(type, set = new LinkedHashSet<>());
+            }
+        }
+        synchronized (set) {
+            set.add(service);
         }
     }
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public static Service getDefaultService(String type) {
-        TreeMap<String, Service> serviceMap;
-        synchronized (SERVICES) {
-            serviceMap = SERVICES.get(type);
-            if (serviceMap == null) {
-                SERVICES.put(type, serviceMap = new TreeMap<>());
-            }
+    public static void unregisterService(Service service) {
+        String type = service.getType();
+        Set<Service> set;
+        synchronized (SERVICE_MAP) {
+            set = SERVICE_MAP.get(type);
         }
-        synchronized (serviceMap) {
-            if (serviceMap.size() == 1) {
-                return serviceMap.values().iterator().next();
-            } else {
-                Service result = null;
-                for (Service service : serviceMap.values()) {
-                    if (service.containsKey("default")) {
-                        result = service;
-                        break;
-                    } else if (result == null) {
-                        result = service;
-                    }
-                }
-                return result;
+        if (set != null) {
+            synchronized (set) {
+                set.remove(service);
             }
         }
     }
 
-    public static void setDefault(String type, String name) {
-        synchronized (SUPPLIERS) {
-            for (Map.Entry<String, ServiceSupplier> e : SUPPLIERS.entrySet()) {
-                if (type.equals(e.getKey())) {
-                    e.getValue().setDefault(name.equals(e.getValue().getName()));
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public static Service get(String type) {
+        Set<Service> set;
+        synchronized (SERVICE_MAP) {
+            set = SERVICE_MAP.get(type);
+        }
+        if (set != null) {
+            synchronized (set) {
+                if (set.isEmpty()) {
+                    throw new NoSuchElementException(type);
+                } else {
+                    return set.iterator().next();
                 }
             }
+        } else {
+            throw new NoSuchElementException(type);
+        }
+    }
+
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public static Service get(String type, Predicate1<Service> predicate) {
+        Set<Service> set;
+        synchronized (SERVICE_MAP) {
+            set = SERVICE_MAP.get(type);
+        }
+        if (set != null) {
+            synchronized (set) {
+                for (Service service : set) {
+                    if (predicate.check(service)) {
+                        return service;
+                    }
+                }
+            }
+            throw new IllegalStateException("Service not found: " + type);
+        } else {
+            throw new NoSuchElementException(type);
+        }
+    }
+
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public static Service get(String type, String key, Object value) {
+        Set<Service> set;
+        synchronized (SERVICE_MAP) {
+            set = SERVICE_MAP.get(type);
+        }
+        if (set != null) {
+            synchronized (set) {
+                for (Service service : set) {
+                    Object v = service.get(key);
+                    if (v != null && v.equals(value)) {
+                        return service;
+                    }
+                }
+            }
+            throw new IllegalStateException("Service not found: " + type);
+        } else {
+            throw new NoSuchElementException(type);
+        }
+    }
+
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public static Service get(String type, Map<String, Object> params) {
+        Set<Service> set;
+        synchronized (SERVICE_MAP) {
+            set = SERVICE_MAP.get(type);
+        }
+        if (set != null) {
+            synchronized (set) {
+                for (Service service : set) {
+                    if (service.keySet().containsAll(params.keySet())) {
+                        Map<String, Object> map = new HashMap<>();
+                        for (String k : params.keySet()) {
+                            map.put(k, service.get(k));
+                        }
+                        if (map.equals(params)) {
+                            return service;
+                        }
+                    }
+                }
+            }
+            throw new IllegalStateException("Service not found: " + type);
+        } else {
+            throw new NoSuchElementException(type);
         }
     }
 }

@@ -18,14 +18,15 @@
 
 package org.marid.services;
 
+import org.marid.typecast.Parameterized;
+
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Service extends ConcurrentMap<String, Object> {
+public interface Service extends Parameterized {
 
     public String getName();
 
@@ -45,5 +46,5 @@ public interface Service extends ConcurrentMap<String, Object> {
 
     public <T extends Response> Future<T> send(Request<T> message);
 
-    public Transaction startTransaction(Map<String, Object> params);
+    public Transaction transaction(Map<String, Object> params);
 }

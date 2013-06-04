@@ -34,7 +34,11 @@ public abstract class Request<T extends Response> implements Serializable {
         this.command = command;
     }
 
-    public abstract Class<T> getResponseClass();
+    public abstract T getErrorResponse(int code, String error, Object... args);
+
+    public T getUnsupportedRequestResponse() {
+        return getErrorResponse(Response.UNSUPPORTED_REQUEST_RESPONSE, "Unsupported Request");
+    }
 
     @Override
     public boolean equals(Object obj) {

@@ -16,40 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.services.server;
-
-import org.marid.services.*;
-
-import java.util.Map;
-import java.util.concurrent.Future;
+package org.marid.func;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ServiceServer extends AbstractService {
+public interface Predicate1<T> {
 
-    private static final long serialVersionUID = -1475217680158305714L;
-    private final Service delegate;
-
-    public ServiceServer(Service delegate) {
-        this.delegate = delegate;
-    }
-
-    @Override
-    protected void doStart() throws Exception {
-    }
-
-    @Override
-    protected void doStop() throws Exception {
-    }
-
-    @Override
-    public <T extends Response> Future<T> send(Request<T> message) {
-        return delegate.send(message);
-    }
-
-    @Override
-    public Transaction transaction(Map<String, Object> params) {
-        return delegate.transaction(params);
-    }
+    public boolean check(T arg);
 }
