@@ -16,41 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.services;
+package org.marid.service.data;
 
-import java.beans.ConstructorProperties;
 import java.io.Serializable;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class Request<T extends Response> implements Serializable {
+public class DynRequest<T extends Serializable> extends Request<DynResponse> {
 
-    private static final long serialVersionUID = -4223372891746129864L;
-    public final char command;
+    private static final long serialVersionUID = -7813856937656493426L;
+    private final T data;
 
-    @ConstructorProperties({"command"})
-    public Request(char command) {
-        this.command = command;
+    public DynRequest(int command, T data) {
+        super(command);
+        this.data = data;
     }
 
-    public abstract T getErrorResponse(int code, String error, Object... args);
-
-    public T getUnsupportedRequestResponse() {
-        return getErrorResponse(Response.UNSUPPORTED_REQUEST_RESPONSE, "Unsupported Request");
+    public DynRequest(int command) {
+        this(command, null);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null || !getClass().isAssignableFrom(obj.getClass())) {
-            return false;
-        }
-        Request that = (Request) obj;
-        return command == that.command;
+    public T getData() {
+        return data;
     }
 
     @Override
-    public int hashCode() {
-        return 31 + command;
+    public DynResponse getErrorResponse(int code, String error, Object... args) {
+        return new DynResponse(code, error, args);
     }
 }

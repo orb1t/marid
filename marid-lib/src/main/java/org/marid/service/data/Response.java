@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.services;
+package org.marid.service.data;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -45,7 +45,7 @@ public abstract class Response implements Serializable {
         this.args = args;
     }
 
-    public Response(char code) {
+    public Response(int code) {
         this(code, null);
     }
 

@@ -16,20 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.services;
+package org.marid.service.data;
 
-import java.util.concurrent.Future;
+import java.io.Serializable;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Transaction {
+public class DynResponse<T extends Serializable> extends Response {
 
-    public Service getService();
+    private static final long serialVersionUID = -2190258471309407326L;
+    private final T data;
 
-    public <T extends Response> Future<T> submit(Request<T> request);
+    public DynResponse(int code, String error, Object... args) {
+        super(code, error, args);
+        this.data = null;
+    }
 
-    public Future<TransactionResult> send();
+    public DynResponse(int code) {
+        this(code, null);
+    }
 
-    public void cancel();
+    public DynResponse(int code, T data) {
+        super(code);
+        this.data = data;
+    }
+
+    public T getData() {
+        return data;
+    }
 }

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.services;
+package org.marid.concurrent;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;

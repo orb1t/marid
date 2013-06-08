@@ -16,28 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.services;
-
-import java.util.Map;
+package org.marid.service;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ServiceSupplier {
-
-    public String getVersion();
-
-    public String getName();
-
-    public String getLabel();
-
-    public String getType();
-
-    public Service newService(Map<String, Object> params);
-
-    public Class<? extends Service> getServiceClass();
-
-    public boolean isProxy();
-
-    public boolean isServer();
+public enum TransactionResult {
+    DONE,
+    CANCELLED,
+    INTERRUPTED
 }

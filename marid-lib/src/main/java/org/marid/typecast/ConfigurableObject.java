@@ -18,18 +18,30 @@
 
 package org.marid.typecast;
 
+import java.util.Collections;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ParameterizedObject extends TreeMap<String, Object> implements Parameterized {
+public class ConfigurableObject implements Configurable {
 
-    private static final long serialVersionUID = 1319117435693609192L;
+    protected final TreeMap<String, Object> parameters = new TreeMap<>();
+
+    @Override
+    public Object get(String key) {
+        return parameters.get(key);
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return Collections.unmodifiableSet(parameters.keySet());
+    }
 
     @Override
     public <T> T get(Class<T> klass, String key) {
-        return TypeCaster.CASTER.cast(klass, get(key));
+        return TypeCaster.CASTER.cast(klass, parameters.get(key));
     }
 
     @Override

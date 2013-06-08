@@ -16,9 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.services.server;
+package org.marid.service.server;
 
-import org.marid.services.*;
+import org.marid.service.AbstractDelegatedService;
+import org.marid.service.Transaction;
+import org.marid.service.data.Request;
+import org.marid.service.data.Response;
+import org.marid.service.xml.ServiceDescriptor;
 
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -26,13 +30,10 @@ import java.util.concurrent.Future;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ServiceServer extends AbstractService {
+public class ServiceServer extends AbstractDelegatedService {
 
-    private static final long serialVersionUID = -1475217680158305714L;
-    private final Service delegate;
-
-    public ServiceServer(Service delegate) {
-        this.delegate = delegate;
+    public ServiceServer(String id, String type, ServiceDescriptor descriptor) {
+        super(id, type, descriptor);
     }
 
     @Override
@@ -44,12 +45,12 @@ public class ServiceServer extends AbstractService {
     }
 
     @Override
-    public <T extends Response> Future<T> send(Request<T> message) {
-        return delegate.send(message);
+    protected <T extends Response> Future<T> doSend(Request<T> message) {
+        return delegate().send(message);
     }
 
     @Override
-    public Transaction transaction(Map<String, Object> params) {
-        return delegate.transaction(params);
+    protected Transaction doTransaction(Map<String, Object> params) {
+        return delegate().transaction(params);
     }
 }

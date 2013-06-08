@@ -16,13 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.services;
+package org.marid.service;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public enum TransactionResult {
-    DONE,
-    CANCELLED,
-    INTERRUPTED
+public interface DelegatedService extends Service {
+
+    public Service delegate();
 }

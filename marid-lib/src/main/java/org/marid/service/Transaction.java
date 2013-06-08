@@ -16,35 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.services;
+package org.marid.service;
 
-import org.marid.typecast.Parameterized;
+import org.marid.service.data.Request;
+import org.marid.service.data.Response;
 
-import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Service extends Parameterized {
+public interface Transaction {
 
-    public String getName();
+    public Service getService();
 
-    public String getType();
+    public <T extends Response> Future<T> submit(Request<T> request);
 
-    public String getVersion();
-
-    public String getLabel();
-
-    public void start() throws Exception;
-
-    public void stop() throws Exception;
-
-    public boolean isRunning();
-
-    public ThreadGroup getThreadGroup();
-
-    public <T extends Response> Future<T> send(Request<T> message);
-
-    public Transaction transaction(Map<String, Object> params);
+    public Future<TransactionResult> send();
 }

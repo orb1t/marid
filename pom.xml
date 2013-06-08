@@ -55,17 +55,11 @@
             <build>
                 <resources>
                     <resource>
-                        <directory>src/main/resources</directory>
-                    </resource>
-                    <resource>
                         <directory>src/main/groovyResources</directory>
                     </resource>
                 </resources>
 
                 <testResources>
-                    <testResource>
-                        <directory>src/test/resources</directory>
-                    </testResource>
                     <testResource>
                         <directory>src/test/groovyResources</directory>
                     </testResource>
@@ -158,6 +152,30 @@
                 <version>2.3</version>
             </extension>
         </extensions>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>META-INF/services.properties</exclude>
+                </excludes>
+            </resource>
+
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>META-INF/services.properties</include>
+                </includes>
+            </resource>
+        </resources>
+
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+        </testResources>
 
         <pluginManagement>
             <plugins>

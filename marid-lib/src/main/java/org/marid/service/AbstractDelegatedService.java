@@ -16,34 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.typecast;
+package org.marid.service;
 
-import java.util.Map;
+import org.marid.service.xml.ServiceDescriptor;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Parameterized extends Map<String, Object> {
+public abstract class AbstractDelegatedService extends AbstractService implements DelegatedService {
 
-    public <T> T get(Class<T> klass, String key);
+    public AbstractDelegatedService(String id, String type, ServiceDescriptor descriptor) {
+        super(id, type, descriptor);
+    }
 
-    public <T> T get(Class<T> klass, String key, T def);
-
-    public int getInt(String key, int def);
-
-    public short getShort(String key, short def);
-
-    public boolean getBoolean(String key, boolean def);
-
-    public long getLong(String key, long def);
-
-    public float getFloat(String key, float def);
-
-    public double getDouble(String key, double def);
-
-    public char getChar(String key, char def);
-
-    public byte getByte(String key, byte def);
-
-    public String getString(String key, String def);
+    @Override
+    public Service delegate() {
+        Service delegate = REGISTRY.getServiceMap().get(descriptor().getDelegateId());
+        if (delegate == null) {
+            throw new NullPointerException(this + ": No delegate found");
+        } else {
+            return delegate;
+        }
+    }
 }
