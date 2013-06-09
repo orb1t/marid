@@ -93,35 +93,4 @@ public interface Service extends Configurable, ThreadFactory, Localized {
             return reverseMap.get(service);
         }
     }
-
-    public static class Event extends EventObject {
-
-        private static final long serialVersionUID = 4108613835844220191L;
-        private final String id;
-        private final Service service;
-
-        public Event(Registry source, String id, Service service) {
-            super(source);
-            this.id = id;
-            this.service = service;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public Service getService() {
-            return service;
-        }
-
-        @Override
-        public Registry getSource() {
-            return (Registry) super.getSource();
-        }
-
-        @Override
-        public String toString() {
-            return getClass().getSimpleName() + "(" + id + "," + service + ")";
-        }
-    }
 }
