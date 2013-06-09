@@ -144,14 +144,6 @@
     </modules>
 
     <build>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>2.3</version>
-            </extension>
-        </extensions>
-
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -340,19 +332,6 @@
 
             <plugin>
                 <artifactId>maven-release-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>wagon-maven-plugin</artifactId>
-                <version>1.0-beta-4</version>
-                <configuration>
-                    <serverId>marid</serverId>
-                    <fromDir>target</fromDir>
-                    <includes>*.zip,*.tar.gz,*.tar.bz2</includes>
-                    <url>sftp://frs.sf.net</url>
-                    <toDir>/home/frs/project/marid/${project.version}</toDir>
-                </configuration>
             </plugin>
         </plugins>
     </build>
