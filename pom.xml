@@ -31,7 +31,7 @@
 
     <scm>
         <connection>scm:git:git://git.code.sf.net/p/marid/code</connection>
-        <developerConnection>scm:git:https://eosms:git.code.sf.net/p/marid/code</developerConnection>
+        <developerConnection>scm:git:https://git.code.sf.net/p/marid/code</developerConnection>
         <url>http://sf.net/p/marid/code</url>
     </scm>
 
