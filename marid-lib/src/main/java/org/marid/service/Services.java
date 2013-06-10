@@ -19,17 +19,15 @@
 package org.marid.service;
 
 import org.marid.service.xml.ServiceDescriptor;
+import org.marid.service.xml.ServiceEntry;
 import org.marid.service.xml.ServiceList;
-import org.marid.service.xml.ServiceList.ServiceEntry;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.net.URL;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import static org.marid.methods.LogMethods.severe;
@@ -41,16 +39,14 @@ import static org.marid.methods.LogMethods.warning;
 public class Services {
 
     private static final Logger LOG = Logger.getLogger(Services.class.getName());
-    private static final JAXBContext SRV_LIST_CONTEXT = getContext(ServiceList.class);
-    private static final JAXBContext SRV_DESCRIPTOR_CONTEXT = getContext(ServiceDescriptor.class);
     private static final Map<String, Service> SRV_MAP = new LinkedHashMap<>();
     private static final Map<Service, String> RSRV_MAP = new IdentityHashMap<>();
-    private static final Map<String, Map<String, Service>> TISRV_MAP = new TreeMap<>();
 
     public static void load(URL url) {
         ServiceList serviceList;
         try {
-            Unmarshaller unmarshaller = SRV_LIST_CONTEXT.createUnmarshaller();
+            JAXBContext context = JAXBContext.newInstance(ServiceList.class);
+            Unmarshaller unmarshaller = context.createUnmarshaller();
             serviceList = (ServiceList) unmarshaller.unmarshal(url);
         } catch (Exception x) {
             severe(LOG, "Unable to load services", x);
@@ -60,71 +56,28 @@ public class Services {
         if (loader == null) {
             loader = Services.class.getClassLoader();
         }
-        for (ServiceList.ServiceEntry entry : serviceList.services) {
-            loadEntry(loader, entry);
-        }
-    }
-
-    private static void loadEntry(ClassLoader loader, ServiceEntry entry) {
-        if (entry.descriptor == null) {
-            warning(LOG, "Null descriptor for {0}", entry);
-        } else if (entry.serviceClassName != null) {
-            loadDirectEntry(loader, entry);
-        } else if (entry.supplierClassName != null) {
-            loadSupplierEntry(loader, entry);
-        } else {
-            warning(LOG, "{0} class == null && supplier == null", entry);
-        }
-    }
-
-    private static void loadDirectEntry(ClassLoader loader, ServiceEntry entry) {
-        try {
-            Class<?> serviceClass = Class.forName(entry.serviceClassName, true, loader);
-            Service service = (Service) serviceClass.newInstance();
-            String type = getType(service, entry);
-            String id = entry.id != null ? entry.id : type;
-
-        } catch (Exception x) {
-            warning(LOG, "{0} unable to load service class", entry);
-        }
-    }
-
-    private static void loadSupplierEntry(ClassLoader loader, ServiceEntry entry) {
-        try {
-            Class<?> serviceClass = Class.forName(entry.serviceClassName, true, loader);
-            Service service = (Service) serviceClass.newInstance();
-            String type = getType(service, entry);
-            String id = entry.id != null ? entry.id : type;
-
-        } catch (Exception x) {
-            warning(LOG, "{0} unable to load service class", entry);
-        }
-    }
-
-    private static String getType(Service service, ServiceEntry entry) {
-        if (entry.type != null) {
-            return entry.type;
-        } else {
-            Package pkg = service.getClass().getPackage();
-            if (pkg == null) {
-                throw new IllegalArgumentException("Null package for " + service.getClass());
-            }
-            String pkgName = pkg.getName();
-            int pos = pkgName.lastIndexOf('.');
-            if (pos >= 0) {
-                return pkgName.substring(pos + 1, pkgName.length());
-            } else {
-                throw new IllegalArgumentException("Cannot infer type for " + service.getClass());
+        for (ServiceEntry entry : serviceList.services) {
+            try {
+                Service service = entry.service(loader);
+                SRV_MAP.put(service.id(), service);
+                RSRV_MAP.put(service, service.id());
+            } catch (Exception x) {
+                warning(LOG, "Unable to load service {0}", x, entry);
             }
         }
     }
 
-    private static JAXBContext getContext(Class<?> bindClass) {
-        try {
-            return JAXBContext.newInstance(bindClass);
-        } catch (JAXBException x) {
-            severe(LOG, "Unable to get context from {0}", x, bindClass);
-            return null;
+    public static Service getServiceById(String id) {
+        return SRV_MAP.get(id);
+    }
+
+    public static Service getServiceFor(String type, ServiceDescriptor descriptor) {
+        for (String id : descriptor.getServiceIds()) {
+            Service service = SRV_MAP.get(id);
+            if (service != null && type.equals(service.type())) {
+                return service;
+            }
         }
+        return null;
     }
 }

@@ -24,7 +24,7 @@ import org.marid.service.data.Response;
 import org.marid.service.xml.ServiceDescriptor;
 import org.marid.typecast.Configurable;
 
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
@@ -32,8 +32,6 @@ import java.util.concurrent.ThreadFactory;
  * @author Dmitry Ovchinnikov
  */
 public interface Service extends Configurable, ThreadFactory, Localized {
-
-    public static final Registry REGISTRY = new Registry();
 
     public ServiceDescriptor descriptor();
 
@@ -60,37 +58,4 @@ public interface Service extends Configurable, ThreadFactory, Localized {
     public <T extends Response> Future<T> send(Request<T> message);
 
     public Transaction transaction(Map<String, Object> params);
-
-    public static class Registry {
-
-        private final Map<String, Service> serviceMap = new LinkedHashMap<>();
-        private final Map<Service, String> reverseMap = new IdentityHashMap<>();
-        private final Map<String, Map<String, Service>> typeIdMap = new TreeMap<>();
-
-        void register(String id, String type, Service service) {
-            serviceMap.put(id, service);
-            reverseMap.put(service, id);
-            Map<String, Service> idMap = typeIdMap.get(type);
-            if (idMap == null) {
-                typeIdMap.put(type, idMap = new TreeMap<>());
-            }
-            idMap.put(id, service);
-        }
-
-        public Map<String, Service> getServiceMap() {
-            return Collections.unmodifiableMap(serviceMap);
-        }
-
-        public Map<Service, String> getReverseMap() {
-            return Collections.unmodifiableMap(reverseMap);
-        }
-
-        public Map<String, Map<String, Service>> getTypeIdMap() {
-            return Collections.unmodifiableMap(typeIdMap);
-        }
-
-        public String id(Service service) {
-            return reverseMap.get(service);
-        }
-    }
 }

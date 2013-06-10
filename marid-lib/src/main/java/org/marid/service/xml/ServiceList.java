@@ -18,43 +18,18 @@
 
 package org.marid.service.xml;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @XmlRootElement(name = "services")
+@XmlSeeAlso({ServiceEntry.class})
 public class ServiceList {
 
     @XmlElement(name = "service")
     public final ArrayList<ServiceEntry> services = new ArrayList<>();
-
-    @XmlRootElement
-    public static class ServiceEntry {
-
-        @XmlAttribute
-        public String id;
-
-        @XmlAttribute(name = "class")
-        public String serviceClassName;
-
-        @XmlAttribute(name = "supplier")
-        public String supplierClassName;
-
-        @XmlAttribute
-        public String type;
-
-        @XmlAttribute
-        public String descriptor;
-
-        @Override
-        public String toString() {
-            Object[] array = {id, type, descriptor, serviceClassName, supplierClassName};
-            return Arrays.toString(array);
-        }
-    }
 }

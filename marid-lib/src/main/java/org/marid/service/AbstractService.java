@@ -214,14 +214,12 @@ public abstract class AbstractService extends ConfigurableObject implements Serv
 
     @Override
     public Service getService(String type) {
-        Map<String, Service> map = REGISTRY.getTypeIdMap().get(type);
-        for (String id : descriptor.getServiceIds()) {
-            Service service = map.get(id);
-            if (service != null) {
-                return service;
-            }
+        Service service = Services.getServiceFor(type, descriptor);
+        if (service == null) {
+            throw new NoSuchElementException(toString() + ": no services found for type: " + type);
+        } else {
+            return service;
         }
-        throw new NoSuchElementException(toString() + ": no services found for type: " + type);
     }
 
     @Override
