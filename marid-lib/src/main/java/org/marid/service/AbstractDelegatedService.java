@@ -31,7 +31,7 @@ public abstract class AbstractDelegatedService extends AbstractService implement
 
     @Override
     public Service delegate() {
-        Service delegate = REGISTRY.getServiceMap().get(descriptor().getDelegateId());
+        Service delegate = Services.getServiceById(descriptor().getDelegateId());
         if (delegate == null) {
             throw new NullPointerException(this + ": No delegate found");
         } else {

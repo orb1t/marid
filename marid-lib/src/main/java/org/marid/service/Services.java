@@ -25,9 +25,7 @@ import org.marid.service.xml.ServiceList;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.net.URL;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static org.marid.methods.LogMethods.severe;
@@ -40,7 +38,6 @@ public class Services {
 
     private static final Logger LOG = Logger.getLogger(Services.class.getName());
     private static final Map<String, Service> SRV_MAP = new LinkedHashMap<>();
-    private static final Map<Service, String> RSRV_MAP = new IdentityHashMap<>();
 
     public static void load(URL url) {
         ServiceList serviceList;
@@ -60,7 +57,6 @@ public class Services {
             try {
                 Service service = entry.service(loader);
                 SRV_MAP.put(service.id(), service);
-                RSRV_MAP.put(service, service.id());
             } catch (Exception x) {
                 warning(LOG, "Unable to load service {0}", x, entry);
             }
@@ -69,6 +65,10 @@ public class Services {
 
     public static Service getServiceById(String id) {
         return SRV_MAP.get(id);
+    }
+
+    public static Set<String> getServiceIds() {
+        return Collections.unmodifiableSet(SRV_MAP.keySet());
     }
 
     public static Service getServiceFor(String type, ServiceDescriptor descriptor) {

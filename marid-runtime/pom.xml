@@ -81,15 +81,10 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>make-distribution</id>
                         <goals>
-                            <goal>single</goal>
+                            <goal>assembly</goal>
                         </goals>
                         <phase>package</phase>
-                        <configuration>
-                            <finalName>marid-runtime</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
