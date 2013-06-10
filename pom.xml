@@ -124,7 +124,7 @@
         <repository>
             <id>marid</id>
             <name>frs</name>
-            <url>sftp://eosms@frs.sf.net/home/frs/project/marid/maven</url>
+            <url>sftp://frs.sf.net/home/frs/project/marid/maven</url>
         </repository>
     </distributionManagement>
 
