@@ -25,7 +25,7 @@ import java.util.Set;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ServiceSupplier {
+public interface ServiceProducer {
 
     public String getName();
 
@@ -33,7 +33,7 @@ public interface ServiceSupplier {
 
     public String getDescription();
 
-    public Set<String> getServiceTypes();
+    public Set<String> getDependencies();
 
     public Class<? extends Service> getServiceClass();
 

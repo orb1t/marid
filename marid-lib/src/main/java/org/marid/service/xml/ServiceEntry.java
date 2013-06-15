@@ -19,13 +19,12 @@
 package org.marid.service.xml;
 
 import org.marid.service.Service;
-import org.marid.service.ServiceSupplier;
+import org.marid.service.ServiceProducer;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.lang.reflect.Constructor;
 import java.net.URL;
 
 /**
@@ -40,11 +39,8 @@ public class ServiceEntry {
     @XmlAttribute
     private String type;
 
-    @XmlAttribute
+    @XmlAttribute(name = "class")
     private String className;
-
-    @XmlAttribute
-    private boolean supplier;
 
     @XmlAttribute
     private String descriptor;
@@ -73,15 +69,6 @@ public class ServiceEntry {
 
     public ServiceEntry setClassName(String className) {
         this.className = className;
-        return this;
-    }
-
-    public boolean isSupplier() {
-        return supplier;
-    }
-
-    public ServiceEntry setSupplier(boolean supplier) {
-        this.supplier = supplier;
         return this;
     }
 
@@ -129,13 +116,8 @@ public class ServiceEntry {
 
     public Service service(ClassLoader loader) throws Exception {
         Class<?> k = Class.forName(className(), true, loader);
-        if (supplier) {
-            ServiceSupplier serviceSupplier = (ServiceSupplier) k.newInstance();
-            return serviceSupplier.newInstance(id(), type(), serviceDescriptor(loader));
-        } else {
-            Constructor c = k.getConstructor(String.class, String.class, ServiceDescriptor.class);
-            return (Service) c.newInstance(id(), type(), serviceDescriptor(loader));
-        }
+        ServiceProducer serviceProducer = (ServiceProducer) k.newInstance();
+        return serviceProducer.newInstance(id(), type(), serviceDescriptor(loader));
     }
 
     public ServiceDescriptor serviceDescriptor(ClassLoader loader) throws Exception {

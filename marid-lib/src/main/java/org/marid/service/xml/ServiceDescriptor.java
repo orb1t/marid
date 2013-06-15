@@ -18,11 +18,11 @@
 
 package org.marid.service.xml;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Set;
-import java.util.TreeSet;
+import javax.xml.bind.annotation.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -33,40 +33,97 @@ public class ServiceDescriptor {
     @XmlElement
     private String delegateId;
 
-    @XmlElementWrapper(name = "services")
-    @XmlElement(name = "id")
-    private Set<String> serviceIds = new TreeSet<>();
+    @XmlTransient
+    private Map<String, String> serviceMap = new HashMap<>();
+
+    @XmlElementWrapper(name="services")
+    @XmlElement(name="service")
+    private TypeIdEntry[] getEntries() {
+        TypeIdEntry[] entries = new TypeIdEntry[serviceMap.size()];
+        int i = 0;
+        for (Map.Entry<String, String> e : serviceMap.entrySet()) {
+            entries[i++] = new TypeIdEntry(e.getKey(), e.getValue());
+        }
+        return entries;
+    }
+
+    private void setEntries(TypeIdEntry[] entries) {
+        for (TypeIdEntry e : entries) {
+            serviceMap.put(e.type, e.id);
+        }
+    }
 
     public String getDelegateId() {
         return delegateId;
     }
 
+    @XmlTransient
     public ServiceDescriptor setDelegateId(String delegateId) {
         this.delegateId = delegateId;
         return this;
     }
 
-    public ServiceDescriptor addServiceId(String serviceId) {
-        serviceIds.add(serviceId);
+    public ServiceDescriptor addService(String type, String id) {
+        serviceMap.put(type, id);
         return this;
     }
 
-    public ServiceDescriptor removeServiceId(String serviceId) {
-        serviceIds.remove(serviceId);
+    public String getServiceId(String type) {
+        return serviceMap.get(type);
+    }
+
+    public ServiceDescriptor removeService(String serviceId) {
+        serviceMap.remove(serviceId);
         return this;
     }
 
-    public ServiceDescriptor clearServiceIds() {
-        serviceIds.clear();
+    public ServiceDescriptor clearServices() {
+        serviceMap.clear();
         return this;
     }
 
-    public ServiceDescriptor addServiceIds(Set<String> ids) {
-        serviceIds.addAll(ids);
-        return this;
+    public Map<String, String> getServiceMap() {
+        return serviceMap;
     }
 
-    public Set<String> getServiceIds() {
-        return serviceIds;
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ServiceDescriptor)) {
+            return false;
+        } else {
+            ServiceDescriptor that = (ServiceDescriptor) o;
+            Object[] a = {this.delegateId, this.serviceMap};
+            Object[] b = {that.delegateId, that.serviceMap};
+            return Arrays.equals(a, b);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(delegateId, serviceMap);
+    }
+
+    @Override
+    public String toString() {
+        return "ServiceDescriptor{" +
+                "delegateId='" + delegateId + '\'' +
+                ", serviceMap=" + serviceMap + '}';
+    }
+
+    static class TypeIdEntry {
+
+        @XmlAttribute
+        String type;
+
+        @XmlAttribute
+        String id;
+
+        TypeIdEntry(String type, String id) {
+            this.type = type;
+            this.id = id;
+        }
+
+        TypeIdEntry() {
+        }
     }
 }

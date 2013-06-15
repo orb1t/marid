@@ -72,12 +72,6 @@ public class Services {
     }
 
     public static Service getServiceFor(String type, ServiceDescriptor descriptor) {
-        for (String id : descriptor.getServiceIds()) {
-            Service service = SRV_MAP.get(id);
-            if (service != null && type.equals(service.type())) {
-                return service;
-            }
-        }
-        return null;
+        return SRV_MAP.get(descriptor.getServiceId(type));
     }
 }
