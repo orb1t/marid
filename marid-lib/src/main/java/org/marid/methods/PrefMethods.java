@@ -15,22 +15,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.ide.itf;
+
+package org.marid.methods;
+
+import org.marid.Scripting;
 
 import java.util.prefs.Preferences;
 
-import static org.marid.methods.PrefMethods.*;
-
 /**
- * Application frame.
- *
- * @author Dmitry Ovchinnikov 
+ * @author Dmitry Ovchinnikov
  */
-public interface Frame extends Graphical {
+public class PrefMethods {
 
-    public static final Preferences PREF = preferences("frame");
+    public static Preferences preferences(Class<?> klass, String... nodes) {
+        Package pkg = klass.getPackage();
+        String version = pkg.getSpecificationVersion();
+        if (version == null) {
+            version = "DEV";
+        }
+        Preferences prefs = Preferences.userRoot().node("marid").node(version);
+        for (String n : nodes) {
+            prefs = prefs.node(n);
+        }
+        return prefs;
+    }
 
-    public Desktop getDesktop();
-
-    public Application getApplication();
+    public static Preferences preferences(String... nodes) {
+        return preferences(Scripting.class, nodes);
+    }
 }

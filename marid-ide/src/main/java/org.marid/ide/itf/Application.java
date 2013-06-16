@@ -22,7 +22,7 @@ import org.marid.l10n.Localized;
 
 import java.util.prefs.Preferences;
 
-import static org.marid.methods.GuiMethods.*;
+import static org.marid.methods.PrefMethods.*;
 
 public interface Application extends Localized {
 

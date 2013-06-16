@@ -25,6 +25,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import static org.marid.methods.GuiMethods.*;
+import static org.marid.methods.PrefMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov

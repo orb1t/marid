@@ -18,8 +18,6 @@
 
 package org.marid.methods;
 
-import org.marid.l10n.Localized;
-
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -93,13 +91,5 @@ public class LogMethods {
         r.setSourceClassName(null);
         r.setLoggerName(logger.getName());
         logger.log(r);
-    }
-
-    public static String ls(String text, Object... args) {
-        return Localized.S.l(text, args);
-    }
-
-    public static String lm(String text, Object... args) {
-        return Localized.M.l(text, args);
     }
 }

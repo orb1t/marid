@@ -30,7 +30,7 @@ import javax.swing.GroupLayout.SequentialGroup;
 import java.awt.event.ActionEvent;
 import java.util.prefs.Preferences;
 
-import static org.marid.methods.GuiMethods.preferences;
+import static org.marid.methods.PrefMethods.preferences;
 
 /**
  * @author Dmitry Ovchinnikov

@@ -76,21 +76,4 @@ public class GuiMethods {
     public static void putAt(Action action, String key, Object value) {
         action.putValue(key, value);
     }
-
-    public static Preferences preferences(Class<?> klass, String... nodes) {
-        Package pkg = klass.getPackage();
-        String version = pkg.getSpecificationVersion();
-        if (version == null) {
-            version = "DEV";
-        }
-        Preferences prefs = Preferences.userRoot().node("marid").node(version);
-        for (String n : nodes) {
-            prefs = prefs.node(n);
-        }
-        return prefs;
-    }
-
-    public static Preferences preferences(String... nodes) {
-        return preferences(Scripting.class, nodes);
-    }
 }

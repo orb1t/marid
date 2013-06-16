@@ -22,6 +22,8 @@ import java.util.prefs.Preferences;
 
 import static java.awt.RenderingHints.*;
 import static org.marid.methods.GuiMethods.*;
+import static org.marid.methods.PrefMethods.*;
+
 
 /**
  * @author Dmitry Ovchinnikov

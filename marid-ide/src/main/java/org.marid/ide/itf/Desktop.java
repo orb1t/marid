@@ -20,7 +20,7 @@ package org.marid.ide.itf;
 
 import java.util.prefs.Preferences;
 
-import static org.marid.methods.GuiMethods.*;
+import static org.marid.methods.PrefMethods.*;
 
 /**
  * Desktop interface.
