@@ -36,6 +36,7 @@ import static org.marid.methods.GuiMethods.*;
  */
 public class FrameImpl extends MaridFrame implements Frame {
 
+    private static final long serialVersionUID = -5821982526972419542L;
     private final ApplicationImpl application;
     private final DesktopImpl desktop;
     private final Preferences prefs = getPreferences(this);

@@ -1,2 +1,1 @@
-menu.System
-menu.Utilities
+org.marid.ide.menu.GroovyMenu

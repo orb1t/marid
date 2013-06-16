@@ -18,22 +18,12 @@
 
 package org.marid.ide;
 
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
-
 /**
  * @author Dmitry Ovchinnikov
  */
 public class TestMaridIde {
 
-    public static void main(String... args) throws Exception {
-        final File u = new File(System.getProperty("user.dir"));
-        final URLClassLoader cl = new URLClassLoader(new URL[] {
-                new File(u, "marid-ide/src/ext").toURI().toURL(),
-                new File(u, "marid-ide/src/groovyExt").toURI().toURL()
-        });
-        Thread.currentThread().setContextClassLoader(cl);
+    public static void main(String... args) {
         MaridIde.main(args);
     }
 }

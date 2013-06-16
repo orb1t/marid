@@ -18,23 +18,15 @@
 
 package menu
 
-import org.marid.ide.menu.GroovyMenu
-
-/**
- * @author Dmitry Ovchinnikov 
- */
-class Utilities extends GroovyMenu {
-
-    def items = [
-        utilities : [
-            items : [
-                marid_image_generation : [
-                    action : {application.showImageGenDialog()}
-                ],
-                laf_selection : [
-                    action : {application.showLafSelectionDialog()}
-                ]
+[
+    utilities: [
+        items: [
+            marid_image_generation: [
+                action: { application.showImageGenDialog() }
+            ],
+            laf_selection: [
+                action: { application.showLafSelectionDialog() }
             ]
         ]
-    ];
-}
+    ]
+]

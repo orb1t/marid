@@ -22,32 +22,60 @@ import groovy.lang.Closure;
 import groovy.lang.GroovyObjectSupport;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.StringGroovyMethods;
+import org.marid.Scripting;
 import org.marid.util.CollectionUtils;
 
 import java.awt.event.ActionEvent;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
 import java.util.*;
 import java.util.logging.Logger;
 
 import static java.util.Map.Entry;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.asType;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.plus;
-import static org.marid.methods.LogMethods.warning;
 import static org.marid.ide.menu.MenuType.MENU;
+import static org.marid.methods.LogMethods.warning;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
 
     private static final Logger log = Logger.getLogger(GroovyMenu.class.getName());
 
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    private void loadEntries(String script, List<MenuEntry> ens, ClassLoader l) throws Exception {
+        try (Reader r = new InputStreamReader(l.getResource(script).openStream(), UTF_8)) {
+            Map<String, Object> map = (Map<String, Object>) Scripting.ENGINE.eval(r);
+            for (Entry<String, Object> e : map.entrySet()) {
+                fillEntries(null, e, ens);
+            }
+        }
+    }
+
     @Override
-    @SuppressWarnings("unchecked")
     public List<MenuEntry> getMenuEntries() {
         LinkedList<MenuEntry> entries = new LinkedList<>();
-        Map<String, Object> map = (Map<String, Object>) getProperty("items");
-        if (map == null) {
-            map = Collections.emptyMap();
-        }
-        for (Entry<String, Object> e : map.entrySet()) {
-            fillEntries(null, e, entries);
+        ClassLoader l = Thread.currentThread().getContextClassLoader();
+        try {
+            Enumeration<URL> e = l.getResources("menu.groovy");
+            while (e.hasMoreElements()) {
+                URL url = e.nextElement();
+                try (Reader r = new InputStreamReader(url.openStream(), UTF_8)) {
+                    List list = (List) Scripting.ENGINE.eval(r);
+                    for (Object script : list) {
+                        try {
+                            loadEntries(script.toString(), entries, l);
+                        } catch (Exception x) {
+                            warning(log, "Unable to load {0}", x, script);
+                        }
+                    }
+                } catch (Exception x) {
+                    warning(log, "Unable to load {0}", x, url);
+                }
+            }
+        } catch (Exception x) {
+            warning(log, "Unable to load menu items", x);
         }
         return entries;
     }

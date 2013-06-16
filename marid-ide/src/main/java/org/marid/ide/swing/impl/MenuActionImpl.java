@@ -30,6 +30,7 @@ import java.awt.event.ActionEvent;
  */
 class MenuActionImpl extends AbstractAction implements Localized {
 
+    private static final long serialVersionUID = -2037179652848696169L;
     private final MenuEntry entry;
 
     public MenuActionImpl(MenuEntry entry) {

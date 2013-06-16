@@ -19,11 +19,13 @@
 package menu
 
 [
-    system: [
-        items: [
-            exit: [
-                action: { application.exit() },
-                shortcut: "control Q"
+    tools: [
+        items : [
+            preferences : [
+                action : {
+
+                },
+                shortcut: "control shift P"
             ]
         ]
     ]
