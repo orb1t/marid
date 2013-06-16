@@ -24,10 +24,8 @@ import org.marid.swing.MaridFrame;
 
 import java.awt.*;
 import java.util.List;
-import java.util.prefs.Preferences;
 
 import static org.marid.methods.GuiMethods.getDimension;
-import static org.marid.methods.GuiMethods.preferences;
 
 /**
  * Application frame implementation.
@@ -39,7 +37,6 @@ public class FrameImpl extends MaridFrame implements Frame {
     private static final long serialVersionUID = -5821982526972419542L;
     private final ApplicationImpl application;
     private final DesktopImpl desktop;
-    private final Preferences prefs = preferences("frame");
 
     FrameImpl(ApplicationImpl app, List<MenuEntry> menuEntries) {
         super(S.l("Marid IDE"));
@@ -48,13 +45,18 @@ public class FrameImpl extends MaridFrame implements Frame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         add(desktop = new DesktopImpl());
         setJMenuBar(new MenuBarImpl(menuEntries));
-        setPreferredSize(getDimension(prefs, "preferredSize", new Dimension(750, 550)));
+        setPreferredSize(getDimension(PREF, "preferredSize", new Dimension(750, 550)));
         pack();
     }
 
     @Override
     public DesktopImpl getDesktop() {
         return desktop;
+    }
+
+    @Override
+    public ApplicationImpl getApplication() {
+        return application;
     }
 
     @Override

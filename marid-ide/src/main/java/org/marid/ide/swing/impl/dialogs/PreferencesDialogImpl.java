@@ -28,7 +28,6 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
 import java.awt.event.ActionEvent;
-import java.nio.file.Paths;
 import java.util.prefs.Preferences;
 
 import static org.marid.methods.GuiMethods.preferences;
@@ -63,9 +62,9 @@ public class PreferencesDialogImpl extends AbstractDialog implements Dialog {
 
     private class CommonTab extends JPanel {
 
-        private final Preferences pref = PreferencesDialogImpl.this.pref.node("common");
         private final JLabel libDirectoryLabel = new JLabel(S.l("Lib directory") + ":");
-        private final JTextField libDirectoryText = new JTextField(getLibDirectory(), 40);
+        private final JTextField libDirectoryText = new JTextField(
+                getOwner().getApplication().getLibDirectory(), 40);
         private final Action libDirBrowse = new MaridAction("Browse", "browse.png") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -93,14 +92,6 @@ public class PreferencesDialogImpl extends AbstractDialog implements Dialog {
             g.setVerticalGroup(v);
             g.setHorizontalGroup(h);
             setLayout(g);
-        }
-
-        private String getLibDirectory() {
-            String dir = pref.get("libDir", null);
-            if (dir == null) {
-                dir = Paths.get(System.getProperty("user.home"), "marid", "lib").toString();
-            }
-            return dir;
         }
     }
 }

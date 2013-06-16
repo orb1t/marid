@@ -28,6 +28,7 @@ import org.marid.swing.log.SwingHandler;
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -36,15 +37,13 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 
-import static org.marid.methods.LogMethods.*;
-import static org.marid.methods.GuiMethods.*;
+import static org.marid.methods.GuiMethods.preferences;
+import static org.marid.methods.LogMethods.warning;
 
 public class ApplicationImpl implements Application {
 
     private final Logger log = Logger.getLogger(ApplicationImpl.class.getName());
-    private final Preferences pref = preferences("application");
     private final FrameImpl frame;
 
     public ApplicationImpl() {
@@ -117,11 +116,12 @@ public class ApplicationImpl implements Application {
     }
 
     @Override
-    public void showImageGenDialog() {
-    }
-
-    @Override
-    public void showLafSelectionDialog() {
+    public String getLibDirectory() {
+        String dir = SYSPREF.node("common").get("libDir", null);
+        if (dir == null) {
+            dir = Paths.get(System.getProperty("user.home"), "marid", "lib").toString();
+        }
+        return dir;
     }
 
     @Override

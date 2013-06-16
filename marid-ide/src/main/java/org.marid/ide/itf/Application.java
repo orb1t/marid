@@ -20,7 +20,14 @@ package org.marid.ide.itf;
 
 import org.marid.l10n.Localized;
 
+import java.util.prefs.Preferences;
+
+import static org.marid.methods.GuiMethods.*;
+
 public interface Application extends Localized {
+
+    public static final Preferences PREF = preferences("application");
+    public static final Preferences SYSPREF = preferences("preferences");
 
     public String getVersion();
 
@@ -28,11 +35,9 @@ public interface Application extends Localized {
 
     public Frame getFrame();
 
-    public void showImageGenDialog();
-
-    public void showLafSelectionDialog();
-
     public void showLog();
 
     public void showPreferencesDialog();
+
+    public String getLibDirectory();
 }

@@ -18,6 +18,10 @@
 
 package org.marid.ide.itf;
 
+import java.util.prefs.Preferences;
+
+import static org.marid.methods.GuiMethods.*;
+
 /**
  * Desktop interface.
  *
@@ -25,4 +29,5 @@ package org.marid.ide.itf;
  */
 public interface Desktop extends Graphical {
 
+    public static final Preferences PREF = preferences("desktop");
 }

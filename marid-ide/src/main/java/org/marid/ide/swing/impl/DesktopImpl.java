@@ -38,21 +38,5 @@ public class DesktopImpl extends JDesktopPane implements Desktop {
     private class DesktopManagerImpl extends DefaultDesktopManager {
 
         private static final long serialVersionUID = 6164252027191486209L;
-
-        @Override
-        public void openFrame(JInternalFrame f) {
-            super.openFrame(f);
-            if (f.getClass().getSimpleName().contains("Dialog")) {
-                int x = (getWidth() - f.getWidth()) / 2;
-                int y = (getHeight() - f.getHeight()) / 2;
-                if (x < 0) {
-                    x = 0;
-                }
-                if (y < 0) {
-                    y = 0;
-                }
-                f.setLocation(x, y);
-            }
-        }
     }
 }

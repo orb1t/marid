@@ -17,6 +17,10 @@
  */
 package org.marid.ide.itf;
 
+import java.util.prefs.Preferences;
+
+import static org.marid.methods.GuiMethods.*;
+
 /**
  * Application frame.
  *
@@ -24,5 +28,9 @@ package org.marid.ide.itf;
  */
 public interface Frame extends Graphical {
 
+    public static final Preferences PREF = preferences("frame");
+
     public Desktop getDesktop();
+
+    public Application getApplication();
 }

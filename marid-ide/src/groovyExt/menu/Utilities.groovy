@@ -22,10 +22,10 @@ package menu
     utilities: [
         items: [
             marid_image_generation: [
-                action: { application.showImageGenDialog() }
+                action: {  }
             ],
             laf_selection: [
-                action: { application.showLafSelectionDialog() }
+                action: {  }
             ]
         ]
     ]
