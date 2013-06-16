@@ -19,12 +19,10 @@
 package org.marid.methods;
 
 import org.marid.l10n.Localized;
-import org.marid.pref.PrefObject;
 
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -103,13 +101,5 @@ public class LogMethods {
 
     public static String lm(String text, Object... args) {
         return Localized.M.l(text, args);
-    }
-
-    public static Preferences getPreferences(PrefObject prefObject) {
-        return Preferences.userNodeForPackage(prefObject.getClass()).node(prefObject.getPrefNode());
-    }
-
-    public static Preferences getPreferences(Class<?> rootClass) {
-        return Preferences.userNodeForPackage(rootClass).node(rootClass.getSimpleName());
     }
 }

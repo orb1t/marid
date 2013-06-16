@@ -16,12 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.pref;
+package org.marid.ide.itf;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface PrefObject {
+public interface Dialog extends Graphical {
 
-    public String getPrefNode();
+    public Frame getOwner();
 }

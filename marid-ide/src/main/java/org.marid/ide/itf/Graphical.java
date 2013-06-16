@@ -18,21 +18,18 @@
 
 package org.marid.ide.itf;
 
-import org.marid.l10n.Localized;
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public interface Graphical {
 
-public interface Application extends Localized {
+    public int getWidth();
 
-    public String getVersion();
+    public int getHeight();
 
-    public void exit();
+    public String getName();
 
-    public Frame getFrame();
+    public boolean isVisible();
 
-    public void showImageGenDialog();
-
-    public void showLafSelectionDialog();
-
-    public void showLog();
-
-    public void showPreferencesDialog();
+    public void setVisible(boolean state);
 }

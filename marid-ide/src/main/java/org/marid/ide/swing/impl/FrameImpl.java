@@ -19,15 +19,15 @@ package org.marid.ide.swing.impl;
 
 import org.marid.ide.itf.Frame;
 import org.marid.ide.menu.MenuEntry;
-import org.marid.swing.MaridFrame;
 import org.marid.image.MaridIcons;
+import org.marid.swing.MaridFrame;
 
 import java.awt.*;
 import java.util.List;
 import java.util.prefs.Preferences;
 
-import static org.marid.methods.LogMethods.*;
-import static org.marid.methods.GuiMethods.*;
+import static org.marid.methods.GuiMethods.getDimension;
+import static org.marid.methods.GuiMethods.preferences;
 
 /**
  * Application frame implementation.
@@ -39,7 +39,7 @@ public class FrameImpl extends MaridFrame implements Frame {
     private static final long serialVersionUID = -5821982526972419542L;
     private final ApplicationImpl application;
     private final DesktopImpl desktop;
-    private final Preferences prefs = getPreferences(this);
+    private final Preferences prefs = preferences("frame");
 
     FrameImpl(ApplicationImpl app, List<MenuEntry> menuEntries) {
         super(S.l("Marid IDE"));
@@ -58,7 +58,7 @@ public class FrameImpl extends MaridFrame implements Frame {
     }
 
     @Override
-    public String getPrefNode() {
+    protected String prefNode() {
         return "frame";
     }
 }

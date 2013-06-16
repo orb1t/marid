@@ -21,9 +21,8 @@ package org.marid.ide.swing.impl;
 import org.marid.ide.itf.Application;
 import org.marid.ide.menu.MaridMenu;
 import org.marid.ide.menu.MenuEntry;
+import org.marid.ide.swing.impl.dialogs.PreferencesDialogImpl;
 import org.marid.image.MaridIcon;
-import org.marid.swing.dialogs.ImageGenDialog;
-import org.marid.swing.dialogs.LafSelectionDialog;
 import org.marid.swing.log.SwingHandler;
 
 import javax.swing.*;
@@ -37,12 +36,15 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 
 import static org.marid.methods.LogMethods.*;
+import static org.marid.methods.GuiMethods.*;
 
 public class ApplicationImpl implements Application {
 
-    private static final Logger log = Logger.getLogger(ApplicationImpl.class.getName());
+    private final Logger log = Logger.getLogger(ApplicationImpl.class.getName());
+    private final Preferences pref = preferences("application");
     private final FrameImpl frame;
 
     public ApplicationImpl() {
@@ -61,7 +63,7 @@ public class ApplicationImpl implements Application {
                 }
             }
         }).start();
-        String laf = getPreferences(this).get("laf", NimbusLookAndFeel.class.getName());
+        String laf = preferences("laf").get("laf", NimbusLookAndFeel.class.getName());
         try {
             UIManager.setLookAndFeel(laf);
         } catch (Exception x) {
@@ -116,12 +118,15 @@ public class ApplicationImpl implements Application {
 
     @Override
     public void showImageGenDialog() {
-        new ImageGenDialog(frame, false).setVisible(true);
     }
 
     @Override
     public void showLafSelectionDialog() {
-        new LafSelectionDialog(frame, true).setVisible(true);
+    }
+
+    @Override
+    public void showPreferencesDialog() {
+        new PreferencesDialogImpl(frame).setVisible(true);
     }
 
     @Override
@@ -150,10 +155,5 @@ public class ApplicationImpl implements Application {
             icon.setActionCommand("show_hide");
             tray.add(icon);
         }
-    }
-
-    @Override
-    public String getPrefNode() {
-        return "application";
     }
 }

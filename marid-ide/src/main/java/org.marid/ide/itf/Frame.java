@@ -17,18 +17,12 @@
  */
 package org.marid.ide.itf;
 
-import org.marid.pref.PrefObject;
-
 /**
  * Application frame.
  *
  * @author Dmitry Ovchinnikov 
  */
-public interface Frame extends PrefObject {
-
-    public boolean isVisible();
-
-    public void setVisible(boolean state);
+public interface Frame extends Graphical {
 
     public Desktop getDesktop();
 }

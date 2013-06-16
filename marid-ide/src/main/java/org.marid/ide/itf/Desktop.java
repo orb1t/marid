@@ -18,13 +18,11 @@
 
 package org.marid.ide.itf;
 
-import org.marid.pref.PrefObject;
-
 /**
  * Desktop interface.
  *
  * @author Dmitry Ovchinnikov 
  */
-public interface Desktop extends PrefObject {
+public interface Desktop extends Graphical {
 
 }

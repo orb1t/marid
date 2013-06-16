@@ -22,7 +22,6 @@ import java.util.prefs.Preferences;
 
 import static java.awt.RenderingHints.*;
 import static org.marid.methods.GuiMethods.*;
-import static org.marid.methods.LogMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -102,6 +101,7 @@ public class SwingHandler extends AbstractHandler implements Localized {
         return new ImageIcon(image);
     }
 
+    @SuppressWarnings("serial")
     class LogRecordRenderer extends DefaultListCellRenderer {
 
         @Override
@@ -126,9 +126,10 @@ public class SwingHandler extends AbstractHandler implements Localized {
         }
     }
 
+    @SuppressWarnings("serial")
     private class LogFrame extends JFrame implements Comparator<Level>, Filter {
 
-        private final Preferences prefs = getPreferences(getClass());
+        private final Preferences prefs = preferences("logFrame");
         private final TreeMap<Level, Action> levelMap = new TreeMap<>(this);
         private final LogRecordListModel model;
         private Filter filter;
@@ -239,6 +240,7 @@ public class SwingHandler extends AbstractHandler implements Localized {
         }
     }
 
+    @SuppressWarnings("serial")
     private class LogRecordListModel extends AbstractListModel<LogRecord> {
 
         private final ArrayList<LogRecord> records;

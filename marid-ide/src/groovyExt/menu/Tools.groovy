@@ -23,7 +23,7 @@ package menu
         items : [
             preferences : [
                 action : {
-
+                    application.showPreferencesDialog();
                 },
                 shortcut: "control shift P"
             ]

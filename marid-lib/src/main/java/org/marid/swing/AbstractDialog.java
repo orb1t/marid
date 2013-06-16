@@ -28,31 +28,33 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 
-import static javax.swing.JComponent.*;
-import static org.marid.methods.LogMethods.*;
+import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW;
+import static org.marid.methods.LogMethods.warning;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@SuppressWarnings("serial")
 public abstract class AbstractDialog extends JDialog implements WindowListener, Localized {
 
-    private boolean initialized;
+    private static final long serialVersionUID = -8712059723169095179L;
 
     protected final Logger log = Logger.getLogger(getClass().getName());
-    protected final Preferences prefs = getPreferences(getClass());
 
     public AbstractDialog(Window window, String title, ModalityType modalityType) {
         super(window, S.l(title), modalityType);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
     public AbstractDialog(Frame frame, String title, boolean modal) {
         super(frame, S.l(title), modal);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
     public AbstractDialog(Dialog dialog, String title, ModalityType modalityType) {
         super(dialog, S.l(title), modalityType);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
     protected final Action acceptAction = new MaridAction(getAcceptLabel(), getAcceptIcon()) {
@@ -167,9 +169,8 @@ public abstract class AbstractDialog extends JDialog implements WindowListener, 
 
     @Override
     public void setVisible(boolean b) {
-        if (!initialized) {
+        if (!(getLayout() instanceof GroupLayout)) {
             init();
-            initialized = true;
         }
         super.setVisible(b);
     }
