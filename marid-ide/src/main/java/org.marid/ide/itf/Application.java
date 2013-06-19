@@ -40,4 +40,8 @@ public interface Application extends Localized {
     public void showPreferencesDialog();
 
     public String getLibDirectory();
+
+    public String getTempDirectory();
+
+    public String getOutputDirectory();
 }

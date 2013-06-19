@@ -16,26 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.itf;
+package org.marid.swing;
 
-import java.util.prefs.Preferences;
-
-import static org.marid.methods.PrefMethods.*;
+import javax.swing.*;
+import javax.swing.text.JTextComponent;
+import java.awt.event.ActionEvent;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Graphical {
+public class MaridButtons {
 
-    public static final Preferences SYSPREF = preferences("preferences");
-
-    public int getWidth();
-
-    public int getHeight();
-
-    public String getName();
-
-    public boolean isVisible();
-
-    public void setVisible(boolean state);
+    public static JButton browseButton(final JTextComponent textField) {
+        return new JButton(new MaridAction("Browse", "browse.png") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser(textField.getText());
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                int result = fileChooser.showDialog(textField, S.l("Select"));
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    textField.setText(fileChooser.getSelectedFile().toString());
+                }
+            }
+        });
+    }
 }

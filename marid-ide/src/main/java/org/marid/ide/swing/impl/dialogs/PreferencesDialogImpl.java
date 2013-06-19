@@ -21,13 +21,12 @@ package org.marid.ide.swing.impl.dialogs;
 import org.marid.ide.itf.Dialog;
 import org.marid.ide.swing.impl.FrameImpl;
 import org.marid.swing.AbstractDialog;
-import org.marid.swing.MaridAction;
+import org.marid.swing.MaridButtons;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
-import java.awt.event.ActionEvent;
 import java.util.prefs.Preferences;
 
 import static org.marid.methods.PrefMethods.preferences;
@@ -62,16 +61,18 @@ public class PreferencesDialogImpl extends AbstractDialog implements Dialog {
 
     private class CommonTab extends JPanel {
 
-        private final JLabel libDirectoryLabel = new JLabel(S.l("Lib directory") + ":");
-        private final JTextField libDirectoryText = new JTextField(
+        private final JLabel repDirectoryLabel = new JLabel(S.l("Repository location") + ":");
+        private final JTextField repDirectoryText = new JTextField(
                 getOwner().getApplication().getLibDirectory(), 40);
-        private final Action libDirBrowse = new MaridAction("Browse", "browse.png") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
-        };
-        private final JButton libDirBrowseButton = new JButton(libDirBrowse);
+        private final JButton repDirBrowseButton = MaridButtons.browseButton(repDirectoryText);
+        private final JLabel tempDirectoryLabel = new JLabel(S.l("Temporary directory") + ":");
+        private final JTextField tempDirectoryText = new JTextField(
+                getOwner().getApplication().getTempDirectory(), 40);
+        private final JButton tempDirBrowseButton = MaridButtons.browseButton(tempDirectoryText);
+        private final JLabel outDirectoryLabel = new JLabel(S.l("Output directory") + ":");
+        private final JTextField outDirectoryText = new JTextField(
+                getOwner().getApplication().getOutputDirectory(), 40);
+        private final JButton outDirBrowseButton = MaridButtons.browseButton(outDirectoryText);
 
         public CommonTab() {
             GroupLayout g = new GroupLayout(this);
@@ -80,15 +81,31 @@ public class PreferencesDialogImpl extends AbstractDialog implements Dialog {
             GroupLayout.SequentialGroup v = g.createSequentialGroup();
             GroupLayout.SequentialGroup h = g.createSequentialGroup();
             v.addGroup(g.createParallelGroup(Alignment.BASELINE)
-                    .addComponent(libDirectoryLabel)
-                    .addComponent(libDirectoryText)
-                    .addComponent(libDirBrowseButton));
+                    .addComponent(repDirectoryLabel)
+                    .addComponent(repDirectoryText)
+                    .addComponent(repDirBrowseButton));
+            v.addGroup(g.createParallelGroup(Alignment.BASELINE)
+                    .addComponent(tempDirectoryLabel)
+                    .addComponent(tempDirectoryText)
+                    .addComponent(tempDirBrowseButton));
+            v.addGroup(g.createParallelGroup(Alignment.BASELINE)
+                    .addComponent(outDirectoryLabel)
+                    .addComponent(outDirectoryText)
+                    .addComponent(outDirBrowseButton));
             h.addGroup(g.createParallelGroup()
-                    .addComponent(libDirectoryLabel));
+                    .addComponent(repDirectoryLabel)
+                    .addComponent(tempDirectoryLabel)
+                    .addComponent(outDirectoryLabel));
             h.addGroup(g.createParallelGroup()
                     .addGroup(g.createSequentialGroup()
-                            .addComponent(libDirectoryText)
-                            .addComponent(libDirBrowseButton)));
+                            .addComponent(repDirectoryText)
+                            .addComponent(repDirBrowseButton))
+                    .addGroup(g.createSequentialGroup()
+                            .addComponent(tempDirectoryText)
+                            .addComponent(tempDirBrowseButton))
+                    .addGroup(g.createSequentialGroup()
+                            .addComponent(outDirectoryText)
+                            .addComponent(outDirBrowseButton)));
             g.setVerticalGroup(v);
             g.setHorizontalGroup(h);
             setLayout(g);

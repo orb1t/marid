@@ -125,6 +125,24 @@ public class ApplicationImpl implements Application {
     }
 
     @Override
+    public String getTempDirectory() {
+        String dir = SYSPREF.node("common").get("tempDir", null);
+        if (dir == null) {
+            dir = Paths.get(System.getProperty("user.home"), "marid", "temp").toString();
+        }
+        return dir;
+    }
+
+    @Override
+    public String getOutputDirectory() {
+        String dir = SYSPREF.node("common").get("outDir", null);
+        if (dir == null) {
+            dir = Paths.get(System.getProperty("user.home"), "marid", "out").toString();
+        }
+        return dir;
+    }
+
+    @Override
     public void showPreferencesDialog() {
         new PreferencesDialogImpl(frame).setVisible(true);
     }
