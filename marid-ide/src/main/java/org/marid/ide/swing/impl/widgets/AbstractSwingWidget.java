@@ -16,20 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.xml;
+package org.marid.ide.swing.impl.widgets;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import java.util.ArrayList;
+import org.marid.ide.itf.Widget;
+import org.marid.l10n.Localized.S;
+
+import javax.swing.*;
+import java.util.prefs.Preferences;
+
+import static org.marid.methods.PrefMethods.preferences;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "services")
-@XmlSeeAlso({ServiceEntry.class})
-public class ServiceList {
+public class AbstractSwingWidget extends JInternalFrame implements Widget {
 
-    @XmlElement(name = "service")
-    public final ArrayList<ServiceEntry> services = new ArrayList<>();
+    private static final long serialVersionUID = 2475350478673235367L;
+    protected final Preferences pref;
+
+    public AbstractSwingWidget(String title, String name) {
+        super(S.l(title), true, true, true, true);
+        pref = preferences("widgets", name);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setName(name);
+    }
 }

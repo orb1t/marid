@@ -18,22 +18,18 @@
 
 package org.marid.service;
 
+import java.util.Set;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractDelegatedService extends AbstractService implements DelegatedService {
+public interface ServiceMapper {
 
-    public AbstractDelegatedService(String id, String type, ServiceDescriptor descriptor) {
-        super(id, type, descriptor);
-    }
+    public Service getService(String id);
 
-    @Override
-    public Service delegate() {
-        Service d = ServiceMappers.getServiceMapper().getService(descriptor().getDelegateId());
-        if (d == null) {
-            throw new NullPointerException(this + ": No delegate found");
-        } else {
-            return d;
-        }
-    }
+    public Set<String> getServiceIds();
+
+    public Set<String> getServiceIds(String type);
+
+    public Service getService(String type, ServiceDescriptor descriptor);
 }

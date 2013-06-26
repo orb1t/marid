@@ -19,24 +19,112 @@
 package org.marid.ide.swing.impl;
 
 import org.marid.ide.itf.Desktop;
+import org.marid.ide.swing.impl.widgets.ConsoleImpl;
+import org.marid.ide.swing.impl.widgets.ResizableWidget;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 /**
  * Desktop implementation.
  *
- * @author Dmitry Ovchinnikov 
+ * @author Dmitry Ovchinnikov
  */
 public class DesktopImpl extends JDesktopPane implements Desktop {
 
     private static final long serialVersionUID = 6775788688564987554L;
+    private final ConsoleImpl console;
 
     public DesktopImpl() {
         setDesktopManager(new DesktopManagerImpl());
+        add(console = new ConsoleImpl());
+        console.setVisible(true);
+        addContainerListener(new ContainerAdapter() {
+            @Override
+            public void componentAdded(ContainerEvent e) {
+                if (e.getChild() instanceof JInternalFrame) {
+                    e.getChild().addComponentListener(new ComponentAdapter() {
+                        @Override
+                        public void componentShown(ComponentEvent e) {
+                            getDesktopManager().openFrame((JInternalFrame) e.getComponent());
+                            e.getComponent().removeComponentListener(this);
+                        }
+                    });
+                }
+            }
+        });
     }
 
-    private class DesktopManagerImpl extends DefaultDesktopManager {
+    @Override
+    public DesktopManagerImpl getDesktopManager() {
+        return (DesktopManagerImpl) super.getDesktopManager();
+    }
+
+    @Override
+    public ConsoleImpl getConsole() {
+        return console;
+    }
+
+    public class DesktopManagerImpl extends DefaultDesktopManager {
 
         private static final long serialVersionUID = 6164252027191486209L;
+
+        @Override
+        public void openFrame(JInternalFrame f) {
+            super.openFrame(f);
+            checkBounds(f);
+        }
+
+        @Override
+        public void beginResizingFrame(JComponent f, int direction) {
+            super.beginResizingFrame(f, direction);
+            if (f instanceof ResizableWidget) {
+                ((ResizableWidget) f).beginResizing();
+            }
+        }
+
+        @Override
+        public void endResizingFrame(JComponent f) {
+            super.endResizingFrame(f);
+            if (f instanceof ResizableWidget) {
+                ((ResizableWidget) f).endResizing();
+            }
+        }
+
+        @Override
+        public void resizeFrame(JComponent f, int newX, int newY, int newWidth, int newHeight) {
+            super.resizeFrame(f, newX, newY, newWidth, newHeight);
+            if (f instanceof ResizableWidget) {
+                ((ResizableWidget) f).onResize();
+            }
+        }
+
+        private void checkBounds(JInternalFrame f) {
+            int x = f.getX() < 0 ? 0 : f.getX();
+            int y = f.getY() < 0 ? 0 : f.getY();
+            int w = f.getWidth();
+            int h = f.getHeight();
+            if (x + w > getWidth()) {
+                if (w > getWidth()) {
+                    x = 0;
+                    w = getWidth();
+                } else {
+                    x = getWidth() - w;
+                }
+            }
+            if (y + h > getHeight()) {
+                if (h > getHeight()) {
+                    y = 0;
+                    h = getHeight();
+                } else {
+                    y = getHeight() - h;
+                }
+            }
+            Rectangle bounds = new Rectangle(x, y, w, h);
+            if (!bounds.equals(f.getBounds())) {
+                f.setBounds(bounds);
+            }
+        }
     }
 }

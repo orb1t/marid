@@ -18,8 +18,6 @@
 
 package org.marid.service;
 
-import org.marid.service.xml.ServiceDescriptor;
-
 import java.util.Set;
 
 /**

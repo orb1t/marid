@@ -30,4 +30,6 @@ import static org.marid.methods.PrefMethods.*;
 public interface Desktop extends Graphical {
 
     public static final Preferences PREF = preferences("desktop");
+
+    public Widget getConsole();
 }

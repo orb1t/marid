@@ -23,7 +23,6 @@ import org.marid.service.data.DynRequest;
 import org.marid.service.data.DynResponse;
 import org.marid.service.data.Request;
 import org.marid.service.data.Response;
-import org.marid.service.xml.ServiceDescriptor;
 
 import java.util.Map;
 import java.util.concurrent.*;

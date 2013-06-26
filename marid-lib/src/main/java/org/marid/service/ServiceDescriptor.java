@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.xml;
+package org.marid.service;
 
 import javax.xml.bind.annotation.*;
 import java.util.Arrays;

@@ -19,6 +19,7 @@
 package org.marid.service.xml;
 
 import org.junit.Test;
+import org.marid.service.ServiceDescriptor;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;

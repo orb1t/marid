@@ -18,11 +18,15 @@
 
 package menu
 
+import org.marid.ide.swing.impl.windows.ProcessWindowImpl
+
 [
     utilities: [
         items: [
-            marid_image_generation: [
-                action: {  }
+            show_process_window: [
+                action: {
+                    new ProcessWindowImpl().visible = true;
+                }
             ],
             laf_selection: [
                 action: {  }

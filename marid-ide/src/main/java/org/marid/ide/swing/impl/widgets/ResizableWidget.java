@@ -16,24 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.ide.swing.impl.widgets;
+
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractDelegatedService extends AbstractService implements DelegatedService {
+public interface ResizableWidget {
 
-    public AbstractDelegatedService(String id, String type, ServiceDescriptor descriptor) {
-        super(id, type, descriptor);
-    }
+    public void beginResizing();
 
-    @Override
-    public Service delegate() {
-        Service d = ServiceMappers.getServiceMapper().getService(descriptor().getDelegateId());
-        if (d == null) {
-            throw new NullPointerException(this + ": No delegate found");
-        } else {
-            return d;
-        }
-    }
+    public void endResizing();
+
+    public void onResize();
 }

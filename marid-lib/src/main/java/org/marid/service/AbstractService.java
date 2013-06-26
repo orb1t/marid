@@ -20,7 +20,6 @@ package org.marid.service;
 
 import org.marid.service.data.Request;
 import org.marid.service.data.Response;
-import org.marid.service.xml.ServiceDescriptor;
 import org.marid.typecast.ConfigurableObject;
 
 import java.util.IdentityHashMap;
@@ -151,7 +150,7 @@ public abstract class AbstractService extends ConfigurableObject implements Serv
 
     private <T> Future<T> ltFuture(Callable<T> task) {
         BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MILLISECONDS, queue);
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(0, 1, 1, TimeUnit.SECONDS, queue);
         return executor.submit(task);
     }
 
@@ -214,7 +213,7 @@ public abstract class AbstractService extends ConfigurableObject implements Serv
 
     @Override
     public Service getService(String type) {
-        Service service = Services.getServiceFor(type, descriptor);
+        Service service = ServiceMappers.getServiceMapper().getService(type, descriptor);
         if (service == null) {
             throw new NoSuchElementException(toString() + ": no services found for type: " + type);
         } else {

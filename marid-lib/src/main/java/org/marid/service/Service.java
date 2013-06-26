@@ -21,7 +21,6 @@ package org.marid.service;
 import org.marid.l10n.Localized;
 import org.marid.service.data.Request;
 import org.marid.service.data.Response;
-import org.marid.service.xml.ServiceDescriptor;
 import org.marid.typecast.Configurable;
 
 import java.util.Map;

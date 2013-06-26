@@ -27,9 +27,6 @@ import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
-import java.util.prefs.Preferences;
-
-import static org.marid.methods.PrefMethods.preferences;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -39,7 +36,6 @@ public class PreferencesDialogImpl extends AbstractDialog implements Dialog {
 
     private static final long serialVersionUID = -5800791474984622058L;
     private final JTabbedPane tabbedPane;
-    private final Preferences pref = preferences("preferences");
 
     public PreferencesDialogImpl(FrameImpl frame) {
         super(frame, "Preferences", true);

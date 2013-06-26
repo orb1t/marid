@@ -19,7 +19,6 @@
 package org.marid.service;
 
 import org.marid.l10n.Localized.S;
-import org.marid.service.xml.ServiceDescriptor;
 
 import java.lang.reflect.Constructor;
 import java.util.Collections;

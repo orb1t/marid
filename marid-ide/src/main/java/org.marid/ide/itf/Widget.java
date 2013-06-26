@@ -16,24 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.ide.itf;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractDelegatedService extends AbstractService implements DelegatedService {
+public interface Widget extends Graphical {
 
-    public AbstractDelegatedService(String id, String type, ServiceDescriptor descriptor) {
-        super(id, type, descriptor);
-    }
-
-    @Override
-    public Service delegate() {
-        Service d = ServiceMappers.getServiceMapper().getService(descriptor().getDelegateId());
-        if (d == null) {
-            throw new NullPointerException(this + ": No delegate found");
-        } else {
-            return d;
-        }
-    }
 }

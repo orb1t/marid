@@ -28,68 +28,84 @@ import java.util.logging.Logger;
 public class LogMethods {
 
     public static void info(Logger logger, String msg, Object... args) {
-        LogRecord r = new LogRecord(Level.INFO, msg);
-        r.setParameters(args);
-        r.setSourceMethodName(null);
-        r.setLoggerName(logger.getName());
-        logger.log(r);
+        if (logger.isLoggable(Level.INFO)) {
+            LogRecord r = new LogRecord(Level.INFO, msg);
+            r.setParameters(args);
+            r.setSourceMethodName(null);
+            r.setLoggerName(logger.getName());
+            logger.log(r);
+        }
     }
 
     public static void fine(Logger logger, String msg, Object... args) {
-        LogRecord r = new LogRecord(Level.FINE, msg);
-        r.setParameters(args);
-        r.setSourceClassName(null);
-        r.setLoggerName(logger.getName());
-        logger.log(r);
+        if (logger.isLoggable(Level.FINE)) {
+            LogRecord r = new LogRecord(Level.FINE, msg);
+            r.setParameters(args);
+            r.setSourceClassName(null);
+            r.setLoggerName(logger.getName());
+            logger.log(r);
+        }
     }
 
     public static void finer(Logger logger, String msg, Object... args) {
-        LogRecord r = new LogRecord(Level.FINER, msg);
-        r.setParameters(args);
-        r.setSourceClassName(null);
-        r.setLoggerName(logger.getName());
-        logger.log(r);
+        if (logger.isLoggable(Level.FINER)) {
+            LogRecord r = new LogRecord(Level.FINER, msg);
+            r.setParameters(args);
+            r.setSourceClassName(null);
+            r.setLoggerName(logger.getName());
+            logger.log(r);
+        }
     }
 
     public static void finest(Logger logger, String msg, Object... args) {
-        LogRecord r = new LogRecord(Level.FINEST, msg);
-        r.setParameters(args);
-        r.setSourceClassName(null);
-        r.setLoggerName(logger.getName());
-        logger.log(r);
+        if (logger.isLoggable(Level.FINEST)) {
+            LogRecord r = new LogRecord(Level.FINEST, msg);
+            r.setParameters(args);
+            r.setSourceClassName(null);
+            r.setLoggerName(logger.getName());
+            logger.log(r);
+        }
     }
 
     public static void warning(Logger logger, String msg, Throwable error, Object... args) {
-        LogRecord r = new LogRecord(Level.WARNING, msg);
-        r.setParameters(args);
-        r.setThrown(error);
-        r.setSourceClassName(null);
-        r.setLoggerName(logger.getName());
-        logger.log(r);
+        if (logger.isLoggable(Level.WARNING)) {
+            LogRecord r = new LogRecord(Level.WARNING, msg);
+            r.setParameters(args);
+            r.setThrown(error);
+            r.setSourceClassName(null);
+            r.setLoggerName(logger.getName());
+            logger.log(r);
+        }
     }
 
     public static void warning(Logger logger, String msg, Object... args) {
-        LogRecord r = new LogRecord(Level.WARNING, msg);
-        r.setParameters(args);
-        r.setSourceClassName(null);
-        r.setLoggerName(logger.getName());
-        logger.log(r);
+        if (logger.isLoggable(Level.WARNING)) {
+            LogRecord r = new LogRecord(Level.WARNING, msg);
+            r.setParameters(args);
+            r.setSourceClassName(null);
+            r.setLoggerName(logger.getName());
+            logger.log(r);
+        }
     }
 
     public static void severe(Logger logger, String msg, Throwable error, Object... args) {
-        LogRecord r = new LogRecord(Level.SEVERE, msg);
-        r.setParameters(args);
-        r.setThrown(error);
-        r.setSourceClassName(null);
-        r.setLoggerName(logger.getName());
-        logger.log(r);
+        if (logger.isLoggable(Level.SEVERE)) {
+            LogRecord r = new LogRecord(Level.SEVERE, msg);
+            r.setParameters(args);
+            r.setThrown(error);
+            r.setSourceClassName(null);
+            r.setLoggerName(logger.getName());
+            logger.log(r);
+        }
     }
 
     public static void severe(Logger logger, String msg, Object... args) {
-        LogRecord r = new LogRecord(Level.SEVERE, msg);
-        r.setParameters(args);
-        r.setSourceClassName(null);
-        r.setLoggerName(logger.getName());
-        logger.log(r);
+        if (logger.isLoggable(Level.SEVERE)) {
+            LogRecord r = new LogRecord(Level.SEVERE, msg);
+            r.setParameters(args);
+            r.setSourceClassName(null);
+            r.setLoggerName(logger.getName());
+            logger.log(r);
+        }
     }
 }

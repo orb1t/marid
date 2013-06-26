@@ -18,9 +18,6 @@
 
 package org.marid.methods;
 
-import org.marid.Scripting;
-
-import javax.swing.*;
 import java.awt.*;
 import java.util.prefs.Preferences;
 
@@ -69,11 +66,7 @@ public class GuiMethods {
         }
     }
 
-    public static Object getAt(Action action, String key) {
-        return action.getValue(key);
-    }
-
-    public static void putAt(Action action, String key, Object value) {
-        action.putValue(key, value);
+    public static Color withAlpha(Color color, float alpha) {
+        return new Color(color.getColorSpace(), color.getColorComponents(null), alpha);
     }
 }

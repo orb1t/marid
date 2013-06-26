@@ -22,7 +22,7 @@ import org.marid.service.AbstractDelegatedService;
 import org.marid.service.Transaction;
 import org.marid.service.data.Request;
 import org.marid.service.data.Response;
-import org.marid.service.xml.ServiceDescriptor;
+import org.marid.service.ServiceDescriptor;
 
 import java.util.Map;
 import java.util.concurrent.Future;

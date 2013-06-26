@@ -16,24 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid;
+
+import org.marid.service.Service;
+import org.marid.service.ServiceDescriptor;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractDelegatedService extends AbstractService implements DelegatedService {
+public class Services {
 
-    public AbstractDelegatedService(String id, String type, ServiceDescriptor descriptor) {
-        super(id, type, descriptor);
+    static final Map<String, Service> SRV_MAP = new LinkedHashMap<>();
+
+    public static Service getServiceById(String id) {
+        return SRV_MAP.get(id);
     }
 
-    @Override
-    public Service delegate() {
-        Service d = ServiceMappers.getServiceMapper().getService(descriptor().getDelegateId());
-        if (d == null) {
-            throw new NullPointerException(this + ": No delegate found");
-        } else {
-            return d;
-        }
+    public static Set<String> getServiceIds() {
+        return Collections.unmodifiableSet(SRV_MAP.keySet());
+    }
+
+    public static Service getServiceFor(String type, ServiceDescriptor descriptor) {
+        return SRV_MAP.get(descriptor.getServiceId(type));
     }
 }
