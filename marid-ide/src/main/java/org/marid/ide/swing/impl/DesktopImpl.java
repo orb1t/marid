@@ -33,7 +33,6 @@ import java.awt.event.*;
  */
 public class DesktopImpl extends JDesktopPane implements Desktop {
 
-    private static final long serialVersionUID = 6775788688564987554L;
     private final ConsoleImpl console;
 
     public DesktopImpl() {

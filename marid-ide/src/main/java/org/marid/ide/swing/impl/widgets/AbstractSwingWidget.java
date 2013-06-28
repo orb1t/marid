@@ -31,7 +31,6 @@ import static org.marid.methods.PrefMethods.preferences;
  */
 public class AbstractSwingWidget extends JInternalFrame implements Widget {
 
-    private static final long serialVersionUID = 2475350478673235367L;
     protected final Preferences pref;
 
     public AbstractSwingWidget(String title, String name) {

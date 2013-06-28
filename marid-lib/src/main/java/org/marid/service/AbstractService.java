@@ -126,9 +126,8 @@ public abstract class AbstractService extends ConfigurableObject implements Serv
     protected abstract Future<List<?>> doSend(Object... messages);
 
     private <T> Future<T> ltFuture(Callable<T> task) {
-        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(0, 1, 1, TimeUnit.SECONDS, queue);
-        return executor.submit(task);
+        return new ThreadPoolExecutor(0, 1, 1, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(), this).submit(task);
     }
 
     @Override

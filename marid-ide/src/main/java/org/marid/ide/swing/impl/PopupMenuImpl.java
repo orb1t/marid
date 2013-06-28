@@ -36,7 +36,6 @@ import static org.marid.util.CollectionUtils.*;
  */
 public class PopupMenuImpl extends PopupMenu implements ActionListener, Localized {
 
-    private static final long serialVersionUID = 8768534929646166382L;
     private final ApplicationImpl application;
     private final Font font = UIManager.getFont("Label.font").deriveFont(Font.PLAIN);
 

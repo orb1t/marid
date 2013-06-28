@@ -31,10 +31,8 @@ import javax.swing.GroupLayout.SequentialGroup;
 /**
  * @author Dmitry Ovchinnikov
  */
-@SuppressWarnings("serial")
 public class PreferencesDialogImpl extends AbstractDialog implements Dialog {
 
-    private static final long serialVersionUID = -5800791474984622058L;
     private final JTabbedPane tabbedPane;
 
     public PreferencesDialogImpl(FrameImpl frame) {

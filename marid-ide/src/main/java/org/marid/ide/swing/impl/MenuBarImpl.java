@@ -33,8 +33,6 @@ import static org.marid.util.CollectionUtils.concat;
  */
 class MenuBarImpl extends JMenuBar {
 
-    private static final long serialVersionUID = -6830150494902716727L;
-
     public MenuBarImpl(List<MenuEntry> menuEntries) {
         TreeSet<MenuEntry> set = new TreeSet<>(MenuEntry.MENU_ENTRY_COMPARATOR);
         for (MenuEntry e : menuEntries) {

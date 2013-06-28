@@ -42,7 +42,6 @@ import static java.util.Arrays.asList;
  */
 public class ProcessWindowImpl extends JFrame implements Window, ActionListener {
 
-    private static final long serialVersionUID = -2018890141352904632L;
     private final Timer timer = new Timer(30, this);
     private final TimeSeries process = new TimeSeries("process1");
     private final TimeSeriesCollection dataset = new TimeSeriesCollection(process);

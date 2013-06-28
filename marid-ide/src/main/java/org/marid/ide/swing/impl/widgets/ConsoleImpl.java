@@ -37,7 +37,6 @@ import static javax.swing.JSplitPane.VERTICAL_SPLIT;
  */
 public class ConsoleImpl extends AbstractSwingWidget implements ResizableWidget {
 
-    private static final long serialVersionUID = -8384777568633611226L;
     private static final Logger log = Logger.getLogger(ConsoleImpl.class.getName());
     private static final TreeMap<String, String> extMimeMap = new TreeMap<>();
 
