@@ -19,12 +19,9 @@
 package org.marid.service.server;
 
 import org.marid.service.AbstractDelegatedService;
-import org.marid.service.Transaction;
-import org.marid.service.data.Request;
-import org.marid.service.data.Response;
 import org.marid.service.ServiceDescriptor;
 
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.Future;
 
 /**
@@ -45,12 +42,12 @@ public class ServiceServer extends AbstractDelegatedService {
     }
 
     @Override
-    protected <T extends Response> Future<T> doSend(Request<T> message) {
+    protected Future<?> doSend(Object message) {
         return delegate().send(message);
     }
 
     @Override
-    protected Transaction doTransaction(Map<String, Object> params) {
-        return delegate().transaction(params);
+    protected Future<List<?>> doSend(Object... messages) {
+        return delegate().send(messages);
     }
 }

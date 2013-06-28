@@ -33,9 +33,13 @@ public class DeployDescriptor extends Builder {
     @XmlElement(name = "jmx")
     private JmxDescriptor jmxDescriptor = new JmxDescriptor();
 
-    @XmlElementWrapper(name="class-path")
+    @XmlElementWrapper(name = "class-path")
     @XmlElement(name = "item")
     private LinkedList<String> classPath = new LinkedList<>();
+
+    @XmlElementWrapper(name = "services")
+    @XmlElement(name = "service")
+    private LinkedList<ServiceInfo> services = new LinkedList<>();
 
     @XmlTransient
     public JmxDescriptor getJmxDescriptor() {
@@ -88,5 +92,82 @@ public class DeployDescriptor extends Builder {
             this.port = port;
             return this;
         }
+    }
+
+    public static class ServiceInfo extends Builder {
+
+        @XmlAttribute
+        private String id;
+
+        @XmlAttribute
+        private String type;
+
+        @XmlAttribute(name = "class")
+        private String klass;
+
+        @XmlAttribute
+        private String url;
+
+        @XmlTransient
+        public String getId() {
+            return id != null ? id : getType();
+        }
+
+        public ServiceInfo setId(String id) {
+            this.id = id;
+            return this;
+        }
+
+        @XmlTransient
+        public String getType() {
+            if (type == null) {
+                if (getKlass().indexOf('.') < 0) {
+                    return klass;
+                } else {
+                    String[] parts = klass.split("[.]");
+                    return parts[parts.length - 2];
+                }
+            } else {
+                return type;
+            }
+        }
+
+        public ServiceInfo setType(String type) {
+            this.type = type;
+            return this;
+        }
+
+        @XmlTransient
+        public String getKlass() {
+            if (klass == null) {
+                throw new IllegalStateException("Class cannot be null: " + this);
+            } else {
+                return klass;
+            }
+        }
+
+        public ServiceInfo setKlass(String klass) {
+            this.klass = klass;
+            return this;
+        }
+
+        @XmlTransient
+        public String getUrl() {
+            return url;
+        }
+
+        public ServiceInfo setUrl(String url) {
+            this.url = url;
+            return this;
+        }
+    }
+
+    public static class HttpWrapperInfo extends Builder {
+
+        @XmlAttribute
+        private String id;
+
+        @XmlAttribute
+        private String delegateId;
     }
 }

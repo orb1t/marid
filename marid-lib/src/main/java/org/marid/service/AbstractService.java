@@ -18,13 +18,9 @@
 
 package org.marid.service;
 
-import org.marid.service.data.Request;
-import org.marid.service.data.Response;
 import org.marid.typecast.ConfigurableObject;
 
-import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
@@ -125,14 +121,22 @@ public abstract class AbstractService extends ConfigurableObject implements Serv
         }
     }
 
-    protected abstract <T extends Response> Future<T> doSend(Request<T> message);
+    protected abstract Future<?> doSend(Object message);
+
+    protected abstract Future<List<?>> doSend(Object... messages);
+
+    private <T> Future<T> ltFuture(Callable<T> task) {
+        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(0, 1, 1, TimeUnit.SECONDS, queue);
+        return executor.submit(task);
+    }
 
     @Override
-    public synchronized final <T extends Response> Future<T> send(final Request<T> message) {
+    public synchronized final Future<?> send(final Object message) {
         if (!running()) {
-            return ltFuture(new Callable<T>() {
+            return ltFuture(new Callable<Object>() {
                 @Override
-                public T call() throws Exception {
+                public Object call() throws Exception {
                     synchronized (AbstractService.this) {
                         if (!running) {
                             AbstractService.this.wait();
@@ -146,69 +150,22 @@ public abstract class AbstractService extends ConfigurableObject implements Serv
         }
     }
 
-    protected abstract Transaction doTransaction(Map<String, Object> params);
-
-    private <T> Future<T> ltFuture(Callable<T> task) {
-        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(0, 1, 1, TimeUnit.SECONDS, queue);
-        return executor.submit(task);
-    }
-
-    @Override
-    public synchronized final Transaction transaction(final Map<String, Object> params) {
-        class DelayedTransaction implements Transaction {
-
-            private final IdentityHashMap<Request, Future> rfm = new IdentityHashMap<>();
-            private final LinkedList<Request> requests = new LinkedList<>();
-            private Transaction delegate;
-
-            @Override
-            public Service getService() {
-                return AbstractService.this;
-            }
-
-            @Override
-            public <T extends Response> Future<T> submit(final Request<T> request) {
-                requests.add(request);
-                return ltFuture(new Callable<T>() {
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    public T call() throws Exception {
-                        synchronized (AbstractService.this) {
+    public synchronized final Future<List<?>> send(final Object... messages) {
+        if (!running()) {
+            return ltFuture(new Callable<List<?>>() {
+                @Override
+                public List<?> call() throws Exception {
+                    synchronized (AbstractService.this) {
+                        if (!running) {
                             AbstractService.this.wait();
                         }
-                        synchronized (DelayedTransaction.this) {
-                            if (delegate == null) {
-                                DelayedTransaction.this.wait();
-                            }
-                        }
-                        return (T) rfm.get(request).get();
+                        return doSend(messages).get();
                     }
-                });
-            }
-
-            @Override
-            public Future<TransactionResult> send() {
-                return ltFuture(new Callable<TransactionResult>() {
-                    @Override
-                    public TransactionResult call() throws Exception {
-                        synchronized (AbstractService.this) {
-                            AbstractService.this.wait();
-                        }
-                        synchronized (DelayedTransaction.this) {
-                            Transaction d = doTransaction(params);
-                            for (Request<?> request : requests) {
-                                rfm.put(request, delegate.submit(request));
-                            }
-                            delegate = d;
-                            DelayedTransaction.this.notifyAll();
-                        }
-                        return delegate.send().get();
-                    }
-                });
-            }
+                }
+            });
+        } else {
+            return doSend(messages);
         }
-        return new DelayedTransaction();
     }
 
     @Override

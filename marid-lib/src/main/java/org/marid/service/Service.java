@@ -19,11 +19,9 @@
 package org.marid.service;
 
 import org.marid.l10n.Localized;
-import org.marid.service.data.Request;
-import org.marid.service.data.Response;
 import org.marid.typecast.Configurable;
 
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
@@ -54,7 +52,7 @@ public interface Service extends Configurable, ThreadFactory, Localized {
 
     public Service getService(String type);
 
-    public <T extends Response> Future<T> send(Request<T> message);
+    public Future<?> send(Object message);
 
-    public Transaction transaction(Map<String, Object> params);
+    public Future<List<?>> send(Object... messages);
 }

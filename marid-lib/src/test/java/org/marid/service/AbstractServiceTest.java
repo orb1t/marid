@@ -19,12 +19,9 @@
 package org.marid.service;
 
 import org.junit.Test;
-import org.marid.service.data.DynRequest;
-import org.marid.service.data.DynResponse;
-import org.marid.service.data.Request;
-import org.marid.service.data.Response;
 
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.*;
 
 import static org.junit.Assert.assertEquals;
@@ -48,7 +45,7 @@ public class AbstractServiceTest {
                 }
             }
         }).start();
-        service.send(new DynRequest<Integer>('a')).get(300L, TimeUnit.MILLISECONDS);
+        service.send('a').get(300L, TimeUnit.MILLISECONDS);
     }
 
     @Test
@@ -65,10 +62,9 @@ public class AbstractServiceTest {
                 }
             }
         }).start();
-        Future<DynResponse> future = service.send(new DynRequest<Integer>('a'));
-        DynResponse response = future.get(1220L, TimeUnit.MILLISECONDS);
-        assertEquals(1, response.code);
-        assertEquals("test", response.error);
+        Future<?> future = service.send('a');
+        Integer response = (Integer) future.get(1220L, TimeUnit.MILLISECONDS);
+        assertEquals(new Integer(1), response);
     }
 
     @Test(expected = CancellationException.class)
@@ -85,7 +81,7 @@ public class AbstractServiceTest {
                 }
             }
         }).start();
-        final Future<DynResponse> future = service.send(new DynRequest<Integer>('a'));
+        final Future<?> future = service.send('a');
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -97,13 +93,12 @@ public class AbstractServiceTest {
                 }
             }
         }).start();
-        DynResponse response = future.get(1220L, TimeUnit.MILLISECONDS);
-        assertEquals(1, response.code);
-        assertEquals("test", response.error);
+        Integer response = (Integer) future.get(1220L, TimeUnit.MILLISECONDS);
+        assertEquals(new Integer(1), response);
     }
 
     @Test(expected = CancellationException.class)
-    public void testCancellationInterruptedSecond() throws Exception {
+    public void testCancellationInterrupted2() throws Exception {
         final AbstractService service = new TestService(1000L);
         new Thread(new Runnable() {
             @Override
@@ -116,7 +111,7 @@ public class AbstractServiceTest {
                 }
             }
         }).start();
-        final Future<DynResponse> future = service.send(new DynRequest<Integer>('a'));
+        final Future<?> future = service.send('a');
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -128,9 +123,38 @@ public class AbstractServiceTest {
                 }
             }
         }).start();
-        DynResponse response = future.get(1220L, TimeUnit.MILLISECONDS);
-        assertEquals(1, response.code);
-        assertEquals("test", response.error);
+        Integer response = (Integer) future.get(1220L, TimeUnit.MILLISECONDS);
+        assertEquals(new Integer(1), response);
+    }
+
+    @Test(expected = CancellationException.class)
+    public void testCancellationInterrupted3() throws Exception {
+        final AbstractService service = new TestService(1000L);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(200L);
+                    service.start();
+                } catch (Exception x) {
+                    x.printStackTrace();
+                }
+            }
+        }).start();
+        final Future<?> future = service.send('a', 2);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(400L);
+                    future.cancel(true);
+                } catch (Exception x) {
+                    x.printStackTrace();
+                }
+            }
+        }).start();
+        List response = (List) future.get(1220L, TimeUnit.MILLISECONDS);
+        assertEquals(Arrays.asList(1, 2), response);
     }
 
     private class TestService extends AbstractService {
@@ -153,34 +177,25 @@ public class AbstractServiceTest {
         }
 
         @Override
-        protected <T extends Response> Future<T> doSend(final Request<T> message) {
-            return executorService.submit(new Callable<T>() {
+        protected Future<?> doSend(final Object message) {
+            return executorService.submit(new Callable<Object>() {
                 @Override
-                public T call() throws Exception {
+                public Object call() throws Exception {
                     Thread.sleep(delay);
-                    return message.getErrorResponse(1, "test");
+                    return 1;
                 }
             });
         }
 
         @Override
-        protected Transaction doTransaction(Map<String, Object> params) {
-            return new Transaction() {
+        protected Future<List<?>> doSend(Object... messages) {
+            return executorService.submit(new Callable<List<?>>() {
                 @Override
-                public Service getService() {
-                    return null;
+                public List<?> call() throws Exception {
+                    Thread.sleep(delay);
+                    return Arrays.asList(1, 2);
                 }
-
-                @Override
-                public <T extends Response> Future<T> submit(Request<T> request) {
-                    return null;
-                }
-
-                @Override
-                public Future<TransactionResult> send() {
-                    return null;
-                }
-            };
+            });
         }
     }
 }
