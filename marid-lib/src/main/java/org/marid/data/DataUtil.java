@@ -16,44 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.data;
 
-import org.marid.l10n.Localized;
-import org.marid.typecast.Configurable;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Service extends Configurable, ThreadFactory, Localized {
+public class DataUtil {
 
-    public String name();
+    public static int hashCode(Entry<?> entry) {
+        return Objects.hash(entry.getKey(), entry.getValue());
+    }
 
-    public String id();
+    public static boolean equals(Entry<?> o1, Object o2) {
+        return o2 instanceof Entry && Arrays.deepEquals(
+                new Object[]{o1.getKey(), ((Entry) o2).getValue()},
+                new Object[]{((Entry) o2).getKey(), ((Entry) o2).getValue()});
+    }
 
-    public String type();
+    public static int hashCode(Value<?> value) {
+        return Objects.hashCode(value.getValue());
+    }
 
-    public String version();
-
-    public String label();
-
-    public void start() throws Exception;
-
-    public void stop() throws Exception;
-
-    public boolean running();
-
-    public ThreadGroup threadGroup();
-
-    public Service getService(String type);
-
-    public Map<String, String> serviceMap();
-
-    public Future<?> send(Object message);
-
-    public Future<List<?>> send(Object... messages);
+    public static boolean equals(Value<?> o1, Object o2) {
+        return o2 instanceof Value && Objects.deepEquals(o1.getValue(), ((Value) o2).getValue());
+    }
 }

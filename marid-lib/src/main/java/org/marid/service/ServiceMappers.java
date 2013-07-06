@@ -18,10 +18,7 @@
 
 package org.marid.service;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.ServiceLoader;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.ServiceLoader.load;
 
@@ -51,7 +48,7 @@ public class ServiceMappers {
             }
 
             @Override
-            public Service getService(String type, ServiceDescriptor descriptor) {
+            public Service getService(String type, Map<String, String> serviceMap) {
                 return null;
             }
         };

@@ -16,44 +16,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.data;
 
-import org.marid.l10n.Localized;
-import org.marid.typecast.Configurable;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Service extends Configurable, ThreadFactory, Localized {
+@XmlRootElement(name = "int-entry")
+public class IntEntry extends AbstractEntry<Integer> {
 
-    public String name();
+    @XmlTransient
+    private Integer value;
 
-    public String id();
+    public IntEntry() {
+        value = 0;
+    }
 
-    public String type();
+    public IntEntry(String key, Integer value) {
+        super(key);
+        this.value = value;
+    }
 
-    public String version();
+    @Override
+    public Integer getValue() {
+        return value;
+    }
 
-    public String label();
+    @XmlAttribute(name = "value")
+    private String getStringValue() {
+        return Integer.toString(value);
+    }
 
-    public void start() throws Exception;
-
-    public void stop() throws Exception;
-
-    public boolean running();
-
-    public ThreadGroup threadGroup();
-
-    public Service getService(String type);
-
-    public Map<String, String> serviceMap();
-
-    public Future<?> send(Object message);
-
-    public Future<List<?>> send(Object... messages);
+    private void setStringValue(String value) {
+        this.value = Integer.decode(value);
+    }
 }

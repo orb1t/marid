@@ -21,6 +21,7 @@ package org.marid.service;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -163,7 +164,7 @@ public class AbstractServiceTest {
         private final long delay;
 
         public TestService(long delay) {
-            super("testId", "test", new ServiceDescriptor());
+            super(Collections.<String, Object>emptyMap());
             this.delay = delay;
         }
 

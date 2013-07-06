@@ -51,4 +51,9 @@ public class UnknownException extends Exception {
     public String getExceptionClassName() {
         return exceptionClassName;
     }
+
+    @Override
+    public String toString() {
+        return getMessage() != null ? exceptionClassName + ": " + getMessage() : exceptionClassName;
+    }
 }

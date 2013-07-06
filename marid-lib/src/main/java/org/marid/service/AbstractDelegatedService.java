@@ -18,18 +18,27 @@
 
 package org.marid.service;
 
+import java.util.Map;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public abstract class AbstractDelegatedService extends AbstractService implements DelegatedService {
 
-    public AbstractDelegatedService(String id, String type, ServiceDescriptor descriptor) {
-        super(id, type, descriptor);
+    protected final String delegateId;
+
+    public AbstractDelegatedService(Map<String, Object> params) {
+        super(params);
+        if (params.containsKey("delegateId")) {
+            delegateId = String.valueOf(params.get("delegateId"));
+        } else {
+            throw new IllegalArgumentException("No delegateId found in " + params);
+        }
     }
 
     @Override
     public Service delegate() {
-        Service d = ServiceMappers.getServiceMapper().getService(descriptor().getDelegateId());
+        Service d = ServiceMappers.getServiceMapper().getService(delegateId);
         if (d == null) {
             throw new NullPointerException(this + ": No delegate found");
         } else {

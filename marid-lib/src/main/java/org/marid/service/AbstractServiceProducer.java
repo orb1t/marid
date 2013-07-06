@@ -22,6 +22,7 @@ import org.marid.l10n.Localized.S;
 
 import java.lang.reflect.Constructor;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -52,12 +53,12 @@ public abstract class AbstractServiceProducer implements ServiceProducer {
     }
 
     @Override
-    public Service newInstance(String id, String type, ServiceDescriptor descriptor) {
+    public Service newInstance(Map<String, Object> params) {
         Class<? extends Service> cl = getServiceClass();
         Constructor<? extends Service> c;
         try {
-            c = cl.getConstructor(String.class, String.class, ServiceDescriptor.class);
-            return c.newInstance(id, type, descriptor);
+            c = cl.getConstructor(Map.class);
+            return c.newInstance(params);
         } catch (ReflectiveOperationException x) {
             throw new IllegalStateException(x);
         }

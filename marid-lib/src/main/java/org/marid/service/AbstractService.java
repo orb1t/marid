@@ -20,8 +20,7 @@ package org.marid.service;
 
 import org.marid.typecast.ConfigurableObject;
 
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
@@ -30,28 +29,46 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractService extends ConfigurableObject implements Service {
 
-    private final ThreadGroup threadGroup = new ThreadGroup(getClass().getSimpleName());
-    private final ServiceDescriptor descriptor;
+    private final ThreadGroup threadGroup;
     private final String id;
     private final String type;
+    private final Map<String, String> serviceMap = new HashMap<>();
     private boolean running;
 
     protected final Logger log = Logger.getLogger(getClass().getCanonicalName());
 
-    public AbstractService(String id, String type, ServiceDescriptor descriptor) {
-        this.id = id;
-        this.type = type;
-        this.descriptor = descriptor;
-    }
-
-    @Override
-    public ServiceDescriptor descriptor() {
-        return descriptor;
+    @SuppressWarnings("unchecked")
+    public AbstractService(Map<String, Object> params) {
+        if (params.containsKey("type")) {
+            type = String.valueOf(params.get("type"));
+        } else {
+            String[] ps = getClass().getCanonicalName().split("[.]");
+            if (ps.length > 1) {
+                type = ps[ps.length - 2];
+            } else {
+                type = getClass().getSimpleName();
+            }
+        }
+        if (params.containsKey("id")) {
+            id = String.valueOf(params.get("id"));
+        } else {
+            id = type;
+        }
+        threadGroup = new ThreadGroup(id);
+        if (params.get("services") instanceof Map) {
+            Map map = (Map) params.get("services");
+            serviceMap.putAll(Collections.checkedMap(map, String.class, String.class));
+        }
     }
 
     @Override
     public String id() {
         return id;
+    }
+
+    @Override
+    public Map<String, String> serviceMap() {
+        return serviceMap;
     }
 
     private Package getPackage() {
@@ -169,7 +186,7 @@ public abstract class AbstractService extends ConfigurableObject implements Serv
 
     @Override
     public Service getService(String type) {
-        Service service = ServiceMappers.getServiceMapper().getService(type, descriptor);
+        Service service = ServiceMappers.getServiceMapper().getService(type, serviceMap);
         if (service == null) {
             throw new NoSuchElementException(toString() + ": no services found for type: " + type);
         } else {

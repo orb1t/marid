@@ -18,6 +18,7 @@
 
 package org.marid.service;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -31,5 +32,5 @@ public interface ServiceMapper {
 
     public Set<String> getServiceIds(String type);
 
-    public Service getService(String type, ServiceDescriptor descriptor);
+    public Service getService(String type, Map<String, String> serviceMap);
 }

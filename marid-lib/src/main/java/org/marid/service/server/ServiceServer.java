@@ -19,9 +19,9 @@
 package org.marid.service.server;
 
 import org.marid.service.AbstractDelegatedService;
-import org.marid.service.ServiceDescriptor;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
@@ -29,8 +29,8 @@ import java.util.concurrent.Future;
  */
 public class ServiceServer extends AbstractDelegatedService {
 
-    public ServiceServer(String id, String type, ServiceDescriptor descriptor) {
-        super(id, type, descriptor);
+    public ServiceServer(Map<String, Object> params) {
+        super(params);
     }
 
     @Override

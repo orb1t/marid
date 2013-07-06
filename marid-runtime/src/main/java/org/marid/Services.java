@@ -19,7 +19,6 @@
 package org.marid;
 
 import org.marid.service.Service;
-import org.marid.service.ServiceDescriptor;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -39,9 +38,5 @@ public class Services {
 
     public static Set<String> getServiceIds() {
         return Collections.unmodifiableSet(SRV_MAP.keySet());
-    }
-
-    public static Service getServiceFor(String type, ServiceDescriptor descriptor) {
-        return SRV_MAP.get(descriptor.getServiceId(type));
     }
 }

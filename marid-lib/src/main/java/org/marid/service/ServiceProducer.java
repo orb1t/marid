@@ -18,6 +18,7 @@
 
 package org.marid.service;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -35,5 +36,5 @@ public interface ServiceProducer {
 
     public Class<? extends Service> getServiceClass();
 
-    public Service newInstance(String id, String type, ServiceDescriptor descriptor);
+    public Service newInstance(Map<String, Object> params);
 }

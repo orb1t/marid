@@ -21,6 +21,7 @@ package org.marid.deploy;
 import org.marid.util.Builder;
 
 import javax.xml.bind.annotation.*;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -60,8 +61,27 @@ public class DeployDescriptor extends Builder {
         return this;
     }
 
+    public DeployDescriptor addClassPath(String... classPath) {
+        this.classPath.addAll(Arrays.asList(classPath));
+        return this;
+    }
+
     public DeployDescriptor clear() {
         classPath.clear();
+        return this;
+    }
+
+    public List<ServiceInfo> getServices() {
+        return services;
+    }
+
+    public DeployDescriptor addService(ServiceInfo serviceInfo) {
+        services.add(serviceInfo);
+        return this;
+    }
+
+    public DeployDescriptor addService(ServiceInfo... serviceInfos) {
+        services.addAll(Arrays.asList(serviceInfos));
         return this;
     }
 
@@ -97,59 +117,10 @@ public class DeployDescriptor extends Builder {
     public static class ServiceInfo extends Builder {
 
         @XmlAttribute
-        private String id;
-
-        @XmlAttribute
-        private String type;
-
-        @XmlAttribute(name = "class")
-        private String klass;
-
-        @XmlAttribute
         private String url;
 
-        @XmlTransient
-        public String getId() {
-            return id != null ? id : getType();
-        }
-
-        public ServiceInfo setId(String id) {
-            this.id = id;
-            return this;
-        }
-
-        @XmlTransient
-        public String getType() {
-            if (type == null) {
-                if (getKlass().indexOf('.') < 0) {
-                    return klass;
-                } else {
-                    String[] parts = klass.split("[.]");
-                    return parts[parts.length - 2];
-                }
-            } else {
-                return type;
-            }
-        }
-
-        public ServiceInfo setType(String type) {
-            this.type = type;
-            return this;
-        }
-
-        @XmlTransient
-        public String getKlass() {
-            if (klass == null) {
-                throw new IllegalStateException("Class cannot be null: " + this);
-            } else {
-                return klass;
-            }
-        }
-
-        public ServiceInfo setKlass(String klass) {
-            this.klass = klass;
-            return this;
-        }
+        @XmlAttribute(name = "class")
+        private String serviceClass;
 
         @XmlTransient
         public String getUrl() {
@@ -160,14 +131,15 @@ public class DeployDescriptor extends Builder {
             this.url = url;
             return this;
         }
-    }
 
-    public static class HttpWrapperInfo extends Builder {
+        @XmlTransient
+        public String getServiceClass() {
+            return serviceClass;
+        }
 
-        @XmlAttribute
-        private String id;
-
-        @XmlAttribute
-        private String delegateId;
+        public ServiceInfo setServiceClass(String serviceClass) {
+            this.serviceClass = serviceClass;
+            return this;
+        }
     }
 }
