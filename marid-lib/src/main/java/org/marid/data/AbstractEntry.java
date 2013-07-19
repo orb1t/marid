@@ -58,4 +58,9 @@ public abstract class AbstractEntry<T> implements Entry<T> {
     public int hashCode() {
         return DataUtil.hashCode(this);
     }
+
+    @Override
+    public String toString() {
+        return DataUtil.toString(this);
+    }
 }

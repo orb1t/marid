@@ -43,6 +43,7 @@ public class DataTest {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("a", 1);
         map.put("b", 2L);
+        map.put("c", new int[] {0, -1, 100});
         mapValue = new MapValue(map);
     }
 

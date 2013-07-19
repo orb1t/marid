@@ -93,4 +93,9 @@ public class IntArrayEntry implements Entry<int[]> {
     public boolean equals(Object obj) {
         return DataUtil.equals(this, obj);
     }
+
+    @Override
+    public String toString() {
+        return DataUtil.toString(this);
+    }
 }

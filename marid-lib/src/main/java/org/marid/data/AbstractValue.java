@@ -42,4 +42,9 @@ public abstract class AbstractValue<T> implements Value<T> {
     public boolean equals(Object obj) {
         return DataUtil.equals(this, obj);
     }
+
+    @Override
+    public String toString() {
+        return DataUtil.toString(this);
+    }
 }
