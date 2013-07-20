@@ -16,20 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+
 package menu
 
-import org.marid.ide.swing.impl.windows.ProcessWindowImpl
-
 [
-    utilities: [
-        items: [
-            show_process_window: [
-                action: {
-                    new ProcessWindowImpl().visible = true;
-                }
-            ],
-            laf_selection: [
-                action: {  }
+    tools: [
+        items : [
+            preferences : [
+                action : {
+                    application.showPreferencesDialog();
+                },
+                shortcut: "control shift P"
             ]
         ]
     ]

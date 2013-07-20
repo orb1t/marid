@@ -32,12 +32,12 @@ import java.net.URL;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Map.Entry;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.asType;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.plus;
 import static org.marid.ide.menu.MenuType.MENU;
 import static org.marid.methods.LogMethods.warning;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
 

@@ -16,17 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package menu
+package org.marid.data;
 
-[
-    tools: [
-        items : [
-            preferences : [
-                action : {
-                    application.showPreferencesDialog();
-                },
-                shortcut: "control shift P"
-            ]
-        ]
-    ]
-]
+import javax.xml.bind.annotation.XmlRootElement;
+
+/**
+ * @author Dmitry Ovchinnikov
+ */
+@XmlRootElement(name = "void-entry")
+public class VoidEntry extends AbstractEntry<Void> {
+
+    public VoidEntry() {
+    }
+
+    public VoidEntry(String key) {
+        super(key);
+    }
+
+    @Override
+    public Void getValue() {
+        return null;
+    }
+}

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -19,78 +21,6 @@
         <splash>${project.basedir}/src/main/resources/images/splash.png</splash>
     </properties>
 
-    <profiles>
-        <profile>
-            <id>groovy</id>
-
-            <dependencies>
-                <dependency>
-                    <groupId>org.codehaus.groovy</groupId>
-                    <artifactId>groovy-all</artifactId>
-                    <classifier>indy</classifier>
-                </dependency>
-            </dependencies>
-
-            <build>
-                <testResources>
-                    <testResource>
-                        <directory>src/groovyExt</directory>
-                    </testResource>
-                </testResources>
-
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>add-source</id>
-                                <goals><goal>add-source</goal></goals>
-                                <phase>generate-sources</phase>
-                                <configuration>
-                                    <sources>
-                                        <source>src/main/j2g</source>
-                                    </sources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy-groovy-ext</id>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <phase>package</phase>
-                                <configuration>
-                                    <outputDirectory>${project.build.directory}/ext</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>${project.basedir}/src/groovyExt</directory>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <configuration>
-                            <mainClass>org.marid.ide.MaridIde</mainClass>
-                            <classpathScope>test</classpathScope>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
     <dependencies>
         <dependency>
             <groupId>org.marid</groupId>
@@ -103,8 +33,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.ivy</groupId>
-            <artifactId>ivy</artifactId>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <classifier>indy</classifier>
         </dependency>
 
         <dependency>

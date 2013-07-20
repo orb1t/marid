@@ -34,14 +34,6 @@ import java.util.*;
 })
 public class MapValue extends AbstractValue<Map<String, Object>> {
 
-    private static final Map<Class<?>, Class<? extends Entry>> ENTRY_MAP = new IdentityHashMap<>();
-
-    static {
-        ENTRY_MAP.put(Integer.class, IntEntry.class);
-        ENTRY_MAP.put(Long.class, LongEntry.class);
-        ENTRY_MAP.put(Boolean.class, BooleanEntry.class);
-    }
-
     @XmlTransient
     private final Map<String, Object> value;
 
@@ -108,10 +100,13 @@ public class MapValue extends AbstractValue<Map<String, Object>> {
                         entryList.add(new DoubleEntry(e.getKey().toString(), (Double) v));
                         break;
                     case "java.lang.Short":
+                        entryList.add(new ShortEntry(e.getKey().toString(), (Short) v));
                         break;
                     case "java.lang.Byte":
+                        entryList.add(new ByteEntry(e.getKey().toString(), (Byte) v));
                         break;
                     case "java.lang.Void":
+                        entryList.add(new VoidEntry(e.getKey().toString()));
                         break;
                     case "java.lang.Character":
                         break;

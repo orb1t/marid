@@ -16,15 +16,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package menu
+package org.marid.data;
 
-[
-    system: [
-        items: [
-            exit: [
-                action: { application.exit() },
-                shortcut: "control Q"
-            ]
-        ]
-    ]
-]
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
+
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public class ShortEntry extends AbstractEntry<Short> {
+
+    @XmlTransient
+    private Short value;
+
+    public ShortEntry() {
+        value = 0;
+    }
+
+    public ShortEntry(String key, Short value) {
+        super(key);
+        this.value = value;
+    }
+
+    @Override
+    public Short getValue() {
+        return null;
+    }
+
+    @XmlAttribute(name = "value")
+    private String getStringValue() {
+        return value == null ? null : value.toString();
+    }
+
+    private void setStringValue(String value) {
+        this.value = Short.decode(value);
+    }
+}
