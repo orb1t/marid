@@ -22,10 +22,7 @@ import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlTransient;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,6 +33,14 @@ import java.util.Map;
         IntArrayEntry.class
 })
 public class MapValue extends AbstractValue<Map<String, Object>> {
+
+    private static final Map<Class<?>, Class<? extends Entry>> ENTRY_MAP = new IdentityHashMap<>();
+
+    static {
+        ENTRY_MAP.put(Integer.class, IntEntry.class);
+        ENTRY_MAP.put(Long.class, LongEntry.class);
+        ENTRY_MAP.put(Boolean.class, BooleanEntry.class);
+    }
 
     @XmlTransient
     private final Map<String, Object> value;
@@ -73,16 +78,57 @@ public class MapValue extends AbstractValue<Map<String, Object>> {
         List<Entry> entryList = new LinkedList<>();
         for (Object o : map.entrySet()) {
             Map.Entry e = (Map.Entry) o;
-            if (e.getKey() != null) {
-                Object v = e.getValue();
-                if (v instanceof Map) {
-                    entryList.add(new MapEntry(e.getKey().toString(), (Map) v));
-                } else if (v instanceof Integer) {
-                    entryList.add(new IntEntry(e.getKey().toString(), (Integer) v));
-                } else if (v instanceof Long) {
-                    entryList.add(new LongEntry(e.getKey().toString(), (Long) v));
-                } else if (v instanceof int[]) {
-                    entryList.add(new IntArrayEntry(e.getKey().toString(), (int[]) v));
+            if (e.getKey() == null) {
+                continue;
+            }
+            Object v = e.getValue();
+            if (v instanceof Map) {
+                entryList.add(new MapEntry(e.getKey().toString(), (Map) v));
+            } else if (v instanceof Collection) {
+            } else if (v.getClass().isArray()) {
+                if (v.getClass().getComponentType().isPrimitive()) {
+                    if (v instanceof int[]) {
+                        entryList.add(new IntArrayEntry(e.getKey().toString(), (int[]) v));
+                    }
+                }
+            } else {
+                switch (v.getClass().getName()) {
+                    case "java.lang.Boolean":
+                        break;
+                    case "java.lang.Integer":
+                        entryList.add(new IntEntry(e.getKey().toString(), (Integer) v));
+                        break;
+                    case "java.lang.Long":
+                        entryList.add(new LongEntry(e.getKey().toString(), (Long) v));
+                        break;
+                    case "java.lang.Float":
+                        entryList.add(new FloatEntry(e.getKey().toString(), (Float) v));
+                        break;
+                    case "java.lang.Double":
+                        entryList.add(new DoubleEntry(e.getKey().toString(), (Double) v));
+                        break;
+                    case "java.lang.Short":
+                        break;
+                    case "java.lang.Byte":
+                        break;
+                    case "java.lang.Void":
+                        break;
+                    case "java.lang.Character":
+                        break;
+                    case "java.lang.String":
+                        break;
+                    case "java.util.Date":
+                        break;
+                    case "java.sql.Date":
+                        break;
+                    case "java.sql.Time":
+                        break;
+                    case "java.sql.Timestamp":
+                        break;
+                    case "java.util.TimeZone":
+                        break;
+                    case "java.util.Locale":
+                        break;
                 }
             }
         }

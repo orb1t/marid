@@ -44,6 +44,9 @@ public class DataTest {
         map.put("a", 1);
         map.put("b", 2L);
         map.put("c", new int[] {0, -1, 100});
+        Map<String, Object> childMap = new LinkedHashMap<>();
+        childMap.put("1", -33);
+        map.put("cm", childMap);
         mapValue = new MapValue(map);
     }
 
@@ -55,6 +58,7 @@ public class DataTest {
         m.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         StringWriter sw = new StringWriter();
         m.marshal(mapValue, sw);
+        System.out.println(sw);
         Unmarshaller u = ctx.createUnmarshaller();
         MapValue clone = (MapValue) u.unmarshal(new StringReader(sw.toString()));
         assertEquals(mapValue, clone);

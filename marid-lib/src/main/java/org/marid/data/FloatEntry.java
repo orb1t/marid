@@ -19,51 +19,26 @@
 package org.marid.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlSeeAlso;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlSeeAlso({
-        MapEntry.class,
-        IntEntry.class,
-        LongEntry.class,
-        BooleanEntry.class,
-        DoubleEntry.class,
-        FloatEntry.class,
-        IntArrayEntry.class
-})
-public abstract class AbstractEntry<T> implements Entry<T> {
+public class FloatEntry extends AbstractEntry<Float> {
 
     @XmlAttribute
-    private String key;
+    private Float value;
 
-    public AbstractEntry() {
-        key = "";
+    public FloatEntry() {
+        value = 0.0f;
     }
 
-    public AbstractEntry(String key) {
-        this.key = key;
-    }
-
-    @Override
-    public String getKey() {
-        return key;
-    }
-
-    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-    @Override
-    public boolean equals(Object obj) {
-        return DataUtil.equals(this, obj);
+    public FloatEntry(String key, Float value) {
+        super(key);
+        this.value = value;
     }
 
     @Override
-    public int hashCode() {
-        return DataUtil.hashCode(this);
-    }
-
-    @Override
-    public String toString() {
-        return DataUtil.toString(this);
+    public Float getValue() {
+        return value;
     }
 }

@@ -19,51 +19,40 @@
 package org.marid.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlSeeAlso({
-        MapEntry.class,
-        IntEntry.class,
-        LongEntry.class,
-        BooleanEntry.class,
-        DoubleEntry.class,
-        FloatEntry.class,
-        IntArrayEntry.class
-})
-public abstract class AbstractEntry<T> implements Entry<T> {
+@XmlRootElement(name = "bool-entry")
+public class BooleanEntry extends AbstractEntry<Boolean> {
 
-    @XmlAttribute
-    private String key;
+    @XmlTransient
+    private Boolean value;
 
-    public AbstractEntry() {
-        key = "";
+    public BooleanEntry() {
+        value = false;
     }
 
-    public AbstractEntry(String key) {
-        this.key = key;
+    public BooleanEntry(String key, Boolean value) {
+        super(key);
+        this.value = value;
     }
 
     @Override
-    public String getKey() {
-        return key;
+    public Boolean getValue() {
+        return value;
     }
 
-    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-    @Override
-    public boolean equals(Object obj) {
-        return DataUtil.equals(this, obj);
+    @XmlAttribute(name = "value")
+    String getStringValue() {
+        return Boolean.TRUE.equals(value) ? "1" : "0";
     }
 
-    @Override
-    public int hashCode() {
-        return DataUtil.hashCode(this);
-    }
-
-    @Override
-    public String toString() {
-        return DataUtil.toString(this);
+    void setStringValue(String value) {
+        this.value = "1".equals(value)
+                || "true".equalsIgnoreCase(value)
+                || "on".equalsIgnoreCase(value);
     }
 }
