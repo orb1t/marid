@@ -58,7 +58,6 @@ public class DataTest {
         m.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         StringWriter sw = new StringWriter();
         m.marshal(mapValue, sw);
-        System.out.println(sw);
         Unmarshaller u = ctx.createUnmarshaller();
         MapValue clone = (MapValue) u.unmarshal(new StringReader(sw.toString()));
         assertEquals(mapValue, clone);

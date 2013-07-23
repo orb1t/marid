@@ -18,63 +18,87 @@
 
 package org.marid;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
+import java.io.File;
+import java.io.Reader;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.ServiceLoader;
-import java.util.logging.Logger;
-
-import static org.marid.methods.LogMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public abstract class Scripting {
 
-    private static final Logger LOG = Logger.getLogger(Scripting.class.getName());
-    public static final ScriptEngineManager MANAGER = new ScriptEngineManager();
-    public static final ScriptEngine ENGINE;
-    public static final ClassLoader LOADER;
+    public static final Scripting SCRIPTING;
 
     static {
-        ScriptEngine engine = null;
-        ClassLoader classLoader = null;
-        try {
-            Iterator<Scripting> it = ServiceLoader.load(Scripting.class).iterator();
-            if (it.hasNext()) {
-                Bundle bundle = it.next().getBundle();
-                engine = bundle.engine;
-                classLoader = bundle.classLoader;
-            }
-        } catch (Exception x) {
-            severe(LOG, "Unable to load scripting", x);
-            System.exit(1);
-        }
-        if (engine == null) {
-            ScriptEngineManager manager = new ScriptEngineManager();
-            Iterator<ScriptEngineFactory> it = manager.getEngineFactories().iterator();
-            if (it.hasNext()) {
-                engine = it.next().getScriptEngine();
-            } else {
-                severe(LOG, "Cannot find a scripting engine");
-                System.exit(2);
-            }
-        }
-        ENGINE = engine;
-        LOADER = classLoader == null ? Thread.currentThread().getContextClassLoader() : classLoader;
+        Iterator<Scripting> it = ServiceLoader.load(Scripting.class).iterator();
+        SCRIPTING = it.hasNext() ? it.next() : null;
     }
 
-    public abstract Bundle getBundle() throws Exception;
+    public abstract boolean isFunction(Object object);
 
-    protected class Bundle {
+    public abstract boolean isDelegatingSupported();
 
-        protected final ScriptEngine engine;
-        protected final ClassLoader classLoader;
+    public abstract boolean isComposingSupported();
 
-        public Bundle(ScriptEngine engine, ClassLoader classLoader) {
-            this.engine = engine;
-            this.classLoader = classLoader;
-        }
-    }
+    public abstract boolean isCurrySupported();
+
+    public abstract boolean isPropertySupported();
+
+    public abstract Object call(Object function, Object... args);
+
+    public abstract boolean callPredicate(Object predicate, Object... args);
+
+    public abstract Object compose(Object firstFunction, Object secondFunction);
+
+    public abstract Object compose(Object... functions);
+
+    public abstract Object curry(Object function, Object... args);
+
+    public abstract Object curryTail(Object function, Object... args);
+
+    public abstract void setDelegate(Object function, Object delegate);
+
+    public abstract void setProperty(Object function, String property, Object value);
+
+    public abstract Object getProperty(Object function, String property);
+
+    public abstract <T> T cast(Class<T> type, Object object);
+
+    public abstract int hashCode(Object object);
+
+    public abstract String toString(Object object);
+
+    public abstract boolean equals(Object o1, Object o2);
+
+    public abstract Object eval(URL url, Map<String, Object> bindings);
+
+    public abstract Object eval(URL url);
+
+    public abstract Object eval(File file, Map<String, Object> bindings);
+
+    public abstract Object eval(File file);
+
+    public abstract Object eval(Path path, Map<String, Object> bindings);
+
+    public abstract Object eval(Path path);
+
+    public abstract Object eval(String code, String name, Map<String, Object> bindings);
+
+    public abstract Object eval(String code, String name);
+
+    public abstract Object eval(Reader reader, String name, Map<String, Object> bindings);
+
+    public abstract Object eval(Reader reader, String name);
+
+    public abstract String replace(String source, Map<String, Object> bindings);
+
+    public abstract ClassLoader getClassLoader();
+
+    public abstract String getMime();
+
+    public abstract String getExtension();
 }

@@ -20,14 +20,11 @@ package org.marid.ide.swing.impl.widgets;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.marid.Scripting;
 
-import javax.script.ScriptEngine;
 import javax.swing.*;
 import java.awt.*;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import static javax.swing.JSplitPane.VERTICAL_SPLIT;
@@ -38,32 +35,17 @@ import static javax.swing.JSplitPane.VERTICAL_SPLIT;
 public class ConsoleImpl extends AbstractSwingWidget implements ResizableWidget {
 
     private static final Logger log = Logger.getLogger(ConsoleImpl.class.getName());
-    private static final TreeMap<String, String> extMimeMap = new TreeMap<>();
-
-    static {
-        extMimeMap.put("groovy", SyntaxConstants.SYNTAX_STYLE_GROOVY);
-        extMimeMap.put("js", SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
-        extMimeMap.put("java", SyntaxConstants.SYNTAX_STYLE_JAVA);
-        extMimeMap.put("lsp", SyntaxConstants.SYNTAX_STYLE_LISP);
-        extMimeMap.put("clj", SyntaxConstants.SYNTAX_STYLE_CLOJURE);
-        extMimeMap.put("scala", SyntaxConstants.SYNTAX_STYLE_SCALA);
-        extMimeMap.put("py", SyntaxConstants.SYNTAX_STYLE_PYTHON);
-        extMimeMap.put("rb", SyntaxConstants.SYNTAX_STYLE_RUBY);
-    }
-
     private final RSyntaxDocument document;
     private final RSyntaxTextArea commandLine;
     private final RTextScrollPane commandLineScroller;
     private final JSplitPane splitPane;
     private final JPanel results;
     private final JScrollPane resultsScroller;
-    private final ScriptEngine engine;
     private double ratio;
 
     public ConsoleImpl() {
         super("Console", "console");
-        engine = Scripting.ENGINE;
-        document = new RSyntaxDocument(getMime());
+        document = new RSyntaxDocument(Scripting.SCRIPTING.getMime());
         commandLine = new RSyntaxTextArea(document);
         results = new JPanel();
         resultsScroller = new JScrollPane(results);
@@ -73,15 +55,6 @@ public class ConsoleImpl extends AbstractSwingWidget implements ResizableWidget 
         setPreferredSize(new Dimension(500, 500));
         pack();
         splitPane.setDividerLocation((getHeight() * 66) / 100);
-    }
-
-    private String getMime() {
-        for (String ext : engine.getFactory().getExtensions()) {
-            if (extMimeMap.containsKey(ext)) {
-                return extMimeMap.get(ext);
-            }
-        }
-        return SyntaxConstants.SYNTAX_STYLE_NONE;
     }
 
     @Override

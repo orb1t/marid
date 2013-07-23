@@ -25,8 +25,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.7</java.version>
         <lib>${project.build.directory}/lib</lib>
+        <groovy.version>2.1.6</groovy.version>
     </properties>
 
     <scm>
@@ -44,7 +46,7 @@
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-all</artifactId>
-                        <version>2.1.5</version>
+                        <version>${groovy.version}</version>
                         <classifier>indy</classifier>
                     </dependency>
                 </dependencies>
@@ -91,7 +93,7 @@
                                 <dependency>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy-all</artifactId>
-                                    <version>2.1.5</version>
+                                    <version>${groovy.version}</version>
                                     <classifier>indy</classifier>
                                 </dependency>
                             </dependencies>
@@ -143,21 +145,17 @@
     </modules>
 
     <build>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>2.4</version>
+            </extension>
+        </extensions>
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-                <filtering>false</filtering>
-                <excludes>
-                    <exclude>META-INF/services.properties</exclude>
-                </excludes>
-            </resource>
-
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>META-INF/services.properties</include>
-                </includes>
             </resource>
         </resources>
 
@@ -166,14 +164,6 @@
                 <directory>src/test/resources</directory>
             </testResource>
         </testResources>
-
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>2.4</version>
-            </extension>
-        </extensions>
 
         <pluginManagement>
             <plugins>

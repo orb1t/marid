@@ -38,8 +38,8 @@ public class Marid implements UncaughtExceptionHandler {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
         Logging.init(Marid.class, "log.properties");
         Thread.setDefaultUncaughtExceptionHandler(new Marid());
-        Thread.currentThread().setContextClassLoader(Scripting.LOADER);
-        info(LOG, "Scripting engine: {0}", Scripting.ENGINE);
+        Thread.currentThread().setContextClassLoader(Scripting.SCRIPTING.getClassLoader());
+        info(LOG, "Scripting engine: {0}", Scripting.SCRIPTING);
     }
 
     @Override

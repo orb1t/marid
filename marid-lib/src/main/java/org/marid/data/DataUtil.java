@@ -55,7 +55,10 @@ public class DataUtil {
     }
 
     public static String toString(Value<?> value) {
-        Object v = value.getValue();
+        return toString(value.getValue());
+    }
+
+    public static String toString(Object v) {
         if (v instanceof Map) {
             v = prepareToString((Map) v);
         } else if (v instanceof Collection) {

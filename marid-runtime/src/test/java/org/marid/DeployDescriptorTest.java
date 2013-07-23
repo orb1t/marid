@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.marid;
+package org.marid;
 
 import org.junit.Test;
 import org.marid.deploy.DeployDescriptor;

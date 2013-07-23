@@ -16,21 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.util;
+package org.marid.service.descriptor;
 
-import java.lang.reflect.Array;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class CollectionUtils {
+public interface Descriptor {
 
-    public static final Object[] EMPTY_ARRAY = new Object[0];
+    public String getId();
 
-    @SuppressWarnings("unchecked")
-    public static <T> T[] concat(T[] array, T elem) {
-        T[] result = (T[]) Array.newInstance(array.getClass().getComponentType(), array.length + 1);
-        result[array.length] = elem;
-        return result;
-    }
+    public String getType();
+
+    public Map<String, Object> getParameters();
 }

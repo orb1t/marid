@@ -16,67 +16,51 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.marid;
+package org.marid;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.marid.typecast.DefaultTypeCaster;
-import org.marid.typecast.TypeCaster;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.marid.Scripting.SCRIPTING;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@RunWith(Parameterized.class)
 public class TypeCasterTest {
-
-    private final TypeCaster caster;
-
-    public TypeCasterTest(TypeCaster caster) {
-        this.caster = caster;
-    }
-
-    @Parameters
-    public static Collection<Object[]> parameters() {
-        return Arrays.asList(
-                new Object[]{new DefaultTypeCaster()},
-                new Object[]{TypeCaster.CASTER}
-        );
-    }
 
     @Test
     public void testNumbers() {
-        assertEquals(new Integer(11), caster.cast(int.class, "11"));
-        assertEquals(new Long(1L), caster.cast(long.class, "1"));
-        assertEquals(new Long(1L), caster.cast(Long.class, "1"));
-        assertEquals(1.1f, caster.cast(float.class, "1.1"), 0.0001);
-        assertEquals(1.1, caster.cast(double.class, "1.1"), 0.0001);
+        assertEquals(new Integer(11), SCRIPTING.cast(int.class, "11"));
+        assertEquals(new Long(1L), SCRIPTING.cast(long.class, "1"));
+        assertEquals(new Long(1L), SCRIPTING.cast(Long.class, "1"));
+        assertEquals(1.1f, SCRIPTING.cast(float.class, "1.1"), 0.0001);
+        assertEquals(1.1, SCRIPTING.cast(double.class, "1.1"), 0.0001);
     }
 
     @Test
     public void testArrays() {
         assertArrayEquals(new byte[]{1, 2, 3},
-                caster.cast(byte[].class, Arrays.asList((byte) 1, 2, (byte) 3)));
+                SCRIPTING.cast(byte[].class, Arrays.asList((byte) 1, 2, (byte) 3)));
         assertArrayEquals(new int[]{1, 2, 3},
-                caster.cast(int[].class, Arrays.asList(1, 2, 3)));
+                SCRIPTING.cast(int[].class, Arrays.asList(1, 2, 3)));
         assertArrayEquals(new int[][]{{1, 2}, {3, 4, 5}},
-                caster.cast(int[][].class, Arrays.asList(
+                SCRIPTING.cast(int[][].class, Arrays.asList(
                         Arrays.asList(1, 2), Arrays.asList(3, 4, 5)
                 )));
         assertArrayEquals(new String[][]{{"a", "b", "1"}, null},
-                caster.cast(String[][].class, Arrays.asList(
+                SCRIPTING.cast(String[][].class, Arrays.asList(
                         Arrays.asList("a", "b", 1),
                         null
                 )));
         assertArrayEquals(new double[][][]{{{1.2, 2.3, 3}, {3.3}}, {{0.9}, {0.8}}},
-                caster.cast(double[][][].class, Arrays.asList(
+                SCRIPTING.cast(double[][][].class, Arrays.asList(
                         Arrays.asList(
                                 Arrays.asList(1.2, 2.3, 3),
                                 Arrays.asList(3.3)

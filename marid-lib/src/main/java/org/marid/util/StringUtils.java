@@ -16,22 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.typecast;
-
-import java.util.Iterator;
-import java.util.ServiceLoader;
+package org.marid.util;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class TypeCaster {
+public class StringUtils {
 
-    public static final TypeCaster CASTER;
-
-    static {
-        Iterator<TypeCaster> it = ServiceLoader.load(TypeCaster.class).iterator();
-        CASTER = it.hasNext() ? it.next() : new DefaultTypeCaster();
-    }
-
-    public abstract <T> T cast(Class<T> klass, Object value);
 }

@@ -18,6 +18,8 @@
 
 package org.marid.typecast;
 
+import org.marid.Scripting;
+
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeMap;
@@ -41,7 +43,7 @@ public class ConfigurableObject implements Configurable {
 
     @Override
     public <T> T get(Class<T> klass, String key) {
-        return TypeCaster.CASTER.cast(klass, parameters.get(key));
+        return Scripting.SCRIPTING.cast(klass, parameters.get(key));
     }
 
     @Override
