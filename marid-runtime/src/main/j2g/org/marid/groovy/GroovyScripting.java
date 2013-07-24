@@ -287,6 +287,7 @@ public class GroovyScripting extends Scripting {
             try {
                 Template template = templateEngine.createTemplate(source);
                 Writable writable = template.make(new DelegatedMap<String, Object>(bindings) {
+                    @SuppressWarnings("SuspiciousMethodCalls")
                     @Override
                     public Object get(Object key) {
                         return delegate.containsKey(key) ? delegate.get(key) : "#" + key;

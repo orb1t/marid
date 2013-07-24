@@ -32,7 +32,6 @@ public class Descriptors {
     public static <T extends Descriptor> T loadDescriptor(Class<T> cl,
                                                           Map<String, Object> bindings,
                                                           URL url) throws IOException {
-        URLConnection.guessContentTypeFromName("");
         URLConnection connection = url.openConnection();
         String contentType = connection.getContentType();
         if (contentType == null) {

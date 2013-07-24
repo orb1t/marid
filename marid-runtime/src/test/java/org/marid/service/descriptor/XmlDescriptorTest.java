@@ -19,14 +19,12 @@
 package org.marid.service.descriptor;
 
 import org.junit.Test;
-import org.marid.service.descriptor.Descriptors;
-import org.marid.service.descriptor.XmlDescriptor;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dmitry Ovchinnikov

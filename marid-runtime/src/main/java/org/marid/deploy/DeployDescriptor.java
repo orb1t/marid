@@ -119,8 +119,8 @@ public class DeployDescriptor extends Builder {
         @XmlAttribute
         private String url;
 
-        @XmlAttribute(name = "class")
-        private String serviceClass;
+        @XmlAttribute
+        private String producer;
 
         @XmlTransient
         public String getUrl() {
@@ -133,12 +133,12 @@ public class DeployDescriptor extends Builder {
         }
 
         @XmlTransient
-        public String getServiceClass() {
-            return serviceClass;
+        public String getProducer() {
+            return producer;
         }
 
-        public ServiceInfo setServiceClass(String serviceClass) {
-            this.serviceClass = serviceClass;
+        public ServiceInfo setProducer(String producer) {
+            this.producer = producer;
             return this;
         }
     }
