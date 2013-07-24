@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>org.marid</groupId>
-        <artifactId>marid</artifactId>
+        <artifactId>marid-services</artifactId>
         <version>0.5</version>
     </parent>
 
@@ -15,7 +15,6 @@
 
     <name>marid-ide</name>
     <description>Marid Integrated Development Environment</description>
-    <url>http://sf.net/projects/marid</url>
 
     <properties>
         <splash>${project.basedir}/src/main/resources/images/splash.png</splash>
@@ -30,12 +29,6 @@
         <dependency>
             <groupId>org.codeartisans.thirdparties.swing</groupId>
             <artifactId>batik-all</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <classifier>indy</classifier>
         </dependency>
 
         <dependency>
@@ -55,12 +48,6 @@
     </dependencies>
 
     <build>
-        <testResources>
-            <testResource>
-                <directory>src/ext</directory>
-            </testResource>
-        </testResources>
-
         <plugins>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -112,23 +99,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-ext</id>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/ext</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.basedir}/src/ext</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

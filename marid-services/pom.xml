@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.marid</groupId>
+        <artifactId>marid</artifactId>
+        <version>0.5</version>
+    </parent>
+
+    <artifactId>marid-services</artifactId>
+    <packaging>pom</packaging>
+    <name>marid-services</name>
+
+    <profiles>
+        <profile>
+            <id>groovy</id>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy-all</artifactId>
+                    <classifier>indy</classifier>
+                </dependency>
+            </dependencies>
+
+            <build>
+                <testResources>
+                    <testResource>
+                        <directory>src/groovyExt</directory>
+                    </testResource>
+                </testResources>
+
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>add-source</id>
+                                <goals><goal>add-source</goal></goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <sources>
+                                        <source>src/main/j2g</source>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-resources-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <id>copy-groovy-ext-to-build</id>
+                                    <goals>
+                                        <goal>copy-resources</goal>
+                                    </goals>
+                                    <phase>package</phase>
+                                    <configuration>
+                                        <outputDirectory>${project.build.directory}/ext</outputDirectory>
+                                        <resources>
+                                            <resource>
+                                                <directory>${project.basedir}/src/groovyExt</directory>
+                                            </resource>
+                                        </resources>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
+
+    <modules>
+        <module>marid-ide</module>
+        <module>marid-runtime</module>
+    </modules>
+
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+
+            <testResource>
+                <directory>src/ext</directory>
+            </testResource>
+        </testResources>
+    </build>
+</project>
