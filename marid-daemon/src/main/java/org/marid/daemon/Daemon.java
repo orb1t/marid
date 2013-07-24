@@ -24,6 +24,7 @@ import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import java.io.File;
+import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -31,6 +32,7 @@ import java.net.Socket;
 import java.util.concurrent.*;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import static org.marid.daemon.Log.*;
@@ -53,6 +55,11 @@ public class Daemon {
     static final long KEEP_ALIVE = ParseUtils.getLong("MARID.DAEMON.KEEP.ALIVE", 60L);
 
     public static void main(String... args) throws Exception {
+        try (final InputStream logProps = Daemon.class.getResourceAsStream("/log.properties")) {
+            if (logProps != null) {
+                LogManager.getLogManager().readConfiguration(logProps);
+            }
+        }
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {

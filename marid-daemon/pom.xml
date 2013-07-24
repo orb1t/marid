@@ -24,6 +24,7 @@
                         </manifest>
                         <manifestEntries>
                             <Built-By>Dmitry Ovchinnikov</Built-By>
+                            <Class-Path>ext/</Class-Path>
                             <Implementation-Title>${project.description}</Implementation-Title>
                             <Implementation-Version>${project.version}</Implementation-Version>
                             <Implementation-Vendor>${project.organization}</Implementation-Vendor>
