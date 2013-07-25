@@ -40,4 +40,18 @@ public class MaridButtons {
             }
         });
     }
+
+    public static JButton browseUrlButton(final JTextComponent textField) {
+        return new JButton(new MaridAction("Browse", "browse.png") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser(textField.getText());
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                int result = fileChooser.showDialog(textField, S.l("Select"));
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    textField.setText(fileChooser.getSelectedFile().toURI().toString());
+                }
+            }
+        });
+    }
 }

@@ -27,24 +27,29 @@ public interface MenuEntry {
 
         @Override
         public int compare(MenuEntry o1, MenuEntry o2) {
-            int c = Integer.compare(o1.getPath().length, o2.getPath().length);
+            String g1 = String.valueOf(o1.getGroup());
+            String g2 = String.valueOf(o2.getGroup());
+            int c = g1.compareTo(g2);
             if (c != 0) {
                 return c;
-            } else {
-                String[] p1 = o1.getPath();
-                String[] p2 = o2.getPath();
-                for (int i = 0; i < p1.length; i++) {
-                    c = p1[i].compareTo(p2[i]);
-                    if (c != 0) {
-                        return c;
-                    }
-                }
-                c = Integer.compare(o1.getPriority(), o2.getPriority());
+            }
+            c = Integer.compare(o1.getPath().length, o2.getPath().length);
+            if (c != 0) {
+                return c;
+            }
+            String[] p1 = o1.getPath();
+            String[] p2 = o2.getPath();
+            for (int i = 0; i < p1.length; i++) {
+                c = p1[i].compareTo(p2[i]);
                 if (c != 0) {
                     return c;
                 }
-                return o1.getName().compareTo(o2.getName());
             }
+            c = Integer.compare(o1.getPriority(), o2.getPriority());
+            if (c != 0) {
+                return c;
+            }
+            return o1.getName().compareTo(o2.getName());
         }
     };
 

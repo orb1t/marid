@@ -129,6 +129,7 @@ public class Session implements Callable<Session> {
                 switch (properties.getProperty("cmd", "exit")) {
                     case "upload":
                         synchronized (Daemon.class) {
+                            Daemon.stop();
                             upload(clientContext, properties);
                             Daemon.run();
                         }

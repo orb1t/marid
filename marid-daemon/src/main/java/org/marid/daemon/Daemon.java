@@ -130,6 +130,9 @@ public class Daemon {
     }
 
     static synchronized void run() throws Exception {
+        if (maridProcess != null) {
+            return;
+        }
         List<String> args = new LinkedList<>();
         args.add(getJavaBinary());
         if (VMARGS.exists()) {
@@ -162,7 +165,11 @@ public class Daemon {
 
     static synchronized void stop() throws Exception {
         if (maridProcess != null) {
-            maridProcess.destroy();
+            try {
+                maridProcess.destroy();
+            } finally {
+                maridProcess = null;
+            }
         }
     }
 

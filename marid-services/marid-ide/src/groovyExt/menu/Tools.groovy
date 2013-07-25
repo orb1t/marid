@@ -23,11 +23,18 @@ package menu
 [
     tools: [
         items : [
+            show_output_builder: [
+                action: {
+                    application.showOutputBuilder();
+                },
+                group: "distro"
+            ],
             preferences : [
                 action : {
                     application.showPreferencesDialog();
                 },
-                shortcut: "control shift P"
+                shortcut: "control shift P",
+                group: "preferences"
             ]
         ]
     ]

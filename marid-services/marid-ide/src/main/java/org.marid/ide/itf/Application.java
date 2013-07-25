@@ -39,6 +39,8 @@ public interface Application extends Localized {
 
     public void showPreferencesDialog();
 
+    public void showOutputBuilder();
+
     public String getLibDirectory();
 
     public String getTempDirectory();

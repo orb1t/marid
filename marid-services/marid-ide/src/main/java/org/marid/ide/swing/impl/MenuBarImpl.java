@@ -93,7 +93,16 @@ class MenuBarImpl extends JMenuBar {
                 set.add(e);
             }
         }
+        String group = null;
         for (MenuEntry e : set) {
+            if (group == null) {
+                group = String.valueOf(e.getGroup());
+            }
+            String curGroup = String.valueOf(e.getGroup());
+            if (!curGroup.equals(group)) {
+                menu.addSeparator();
+                group = curGroup;
+            }
             switch (e.getType()) {
                 case ITEM:
                     menu.add(getItem(e));

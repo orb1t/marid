@@ -21,6 +21,7 @@ package org.marid.ide.swing.impl;
 import org.marid.ide.itf.Application;
 import org.marid.ide.menu.MaridMenu;
 import org.marid.ide.menu.MenuEntry;
+import org.marid.ide.swing.impl.dialogs.OutputBuilderDialogImpl;
 import org.marid.ide.swing.impl.dialogs.PreferencesDialogImpl;
 import org.marid.image.MaridIcon;
 import org.marid.swing.log.SwingHandler;
@@ -145,6 +146,11 @@ public class ApplicationImpl implements Application {
     @Override
     public void showPreferencesDialog() {
         new PreferencesDialogImpl(frame).setVisible(true);
+    }
+
+    @Override
+    public void showOutputBuilder() {
+        new OutputBuilderDialogImpl(frame).setVisible(true);
     }
 
     @Override

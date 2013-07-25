@@ -19,6 +19,7 @@
 package org.marid.methods;
 
 import org.marid.Scripting;
+import org.marid.Versioning;
 
 import java.util.prefs.Preferences;
 
@@ -28,11 +29,7 @@ import java.util.prefs.Preferences;
 public class PrefMethods {
 
     public static Preferences preferences(Class<?> klass, String... nodes) {
-        Package pkg = klass.getPackage();
-        String version = pkg.getSpecificationVersion();
-        if (version == null) {
-            version = "DEV";
-        }
+        String version = Versioning.getImplementationVersion(klass);
         Preferences prefs = Preferences.userRoot().node("marid").node(version);
         for (String n : nodes) {
             prefs = prefs.node(n);
