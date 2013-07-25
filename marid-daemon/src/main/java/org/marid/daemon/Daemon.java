@@ -29,6 +29,12 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.logging.Level;
@@ -47,12 +53,16 @@ public class Daemon {
     static final int BACKLOG = ParseUtils.getInt("MARID.DAEMON.BACKLOG", 5);
     static final String ADDRESS = ParseUtils.getString("MARID.DAEMON.ADDRESS", "localhost");
     static final File TARGET = ParseUtils.getDir("MARID.DAEMON.TARGET", null, "marid");
+    static final File VMARGS = ParseUtils.getFile("MARID.DAEMON.VM.ARGS", TARGET, "ext", "vm.args");
+    static final File ARGS = ParseUtils.getFile("MARID.DAEMON.ARGS", TARGET, "ext", "marid.args");
     static final File OUT = ParseUtils.getFile("MARID.DAEMON.OUT", TARGET, "marid.log");
+    static final File ERR = ParseUtils.getFile("MARID.DAEMON.ERR", TARGET, "marid.err");
     static final File BACKUPS = ParseUtils.getDir("MARID.DAEMON.BACKUPS", null, "maridbk");
-    static final File TEMP_FILE = ParseUtils.getFile("MARID.DAEMON.TEMP.FILE", BACKUPS, "temp.zip");
     static final File CUR_FILE = ParseUtils.getFile("MARID.DAEMON.CUR.FILE", BACKUPS, "cur.zip");
     static final int THREADS = ParseUtils.getInt("MARID.DAEMON.THREADS", 64);
     static final long KEEP_ALIVE = ParseUtils.getLong("MARID.DAEMON.KEEP.ALIVE", 60L);
+
+    static Process maridProcess;
 
     public static void main(String... args) throws Exception {
         try (final InputStream logProps = Daemon.class.getResourceAsStream("/log.properties")) {
@@ -70,8 +80,10 @@ public class Daemon {
         LOG.log(Level.INFO, "Server socket factory: {0}", serverSocketFactory);
         final ServerSocket serverSocket = serverSocketFactory.createServerSocket(
                 PORT, BACKLOG, InetAddress.getByName(ADDRESS));
+        LOG.log(Level.INFO, "Server socket: {0}", serverSocket);
         final ThreadPoolExecutor executor = new ThreadPoolExecutor(0, THREADS, KEEP_ALIVE,
                 TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), new CallerRunsPolicy());
+        LOG.log(Level.INFO, "Executor: {0}", executor);
         final ExecutorCompletionService<Session> completionService =
                 new ExecutorCompletionService<>(executor);
         final Thread scavengerThread = new Thread(new Runnable() {
@@ -115,5 +127,47 @@ public class Daemon {
                 warning(LOG, "Non-SSL socket {0}", socket);
             }
         }
+    }
+
+    static synchronized void run() throws Exception {
+        List<String> args = new LinkedList<>();
+        args.add(getJavaBinary());
+        if (VMARGS.exists()) {
+            args.addAll(Files.readAllLines(VMARGS.toPath(), StandardCharsets.UTF_8));
+        }
+        args.add("-jar");
+        try (DirectoryStream<Path> ds = Files.newDirectoryStream(TARGET.toPath(), "marid-*.jar")) {
+            args.add(ds.iterator().next().getFileName().toString());
+        }
+        if (ARGS.exists()) {
+            args.addAll(Files.readAllLines(ARGS.toPath(), StandardCharsets.UTF_8));
+        }
+        ProcessBuilder processBuilder = new ProcessBuilder(args);
+        processBuilder.redirectOutput(OUT);
+        processBuilder.redirectError(ERR);
+        processBuilder.directory(TARGET);
+        maridProcess = processBuilder.start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    int resultCode = maridProcess.waitFor();
+                    info(LOG, "Marid was terminated with exit code {0}", resultCode);
+                } catch (Exception x) {
+                    warning(LOG, "Waiting process error", x);
+                }
+            }
+        }).start();
+    }
+
+    static synchronized void stop() throws Exception {
+        if (maridProcess != null) {
+            maridProcess.destroy();
+        }
+    }
+
+    private static String getJavaBinary() {
+        return ParseUtils.getString("MARID.DAEMON.JAVA.BIN",
+                System.getProperty("java.home") + File.separator + "bin" + File.separator + "java");
     }
 }

@@ -19,16 +19,11 @@
 package org.marid.daemon;
 
 import javax.net.ssl.SSLSocket;
-import java.io.File;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -76,7 +71,7 @@ public class Session implements Callable<Session> {
         Files.move(path, Daemon.CUR_FILE.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private void upload(ClientContext clientContext, Properties properties) throws Exception {
+    private void upload(final ClientContext clientContext, Properties properties) throws Exception {
         Path path = null;
         try {
             path = bak();
@@ -85,12 +80,37 @@ public class Session implements Callable<Session> {
                     StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.WRITE)) {
-                fc.transferFrom(Channels.newChannel(clientContext.inputStream), 0L, size);
+                fc.transferFrom(Channels.newChannel(new InputStream() {
+                    @Override
+                    public int read() throws IOException {
+                        int n = clientContext.inputStream.read();
+                        clientContext.outputStream.writeObject(n);
+                        return n;
+                    }
+
+                    @Override
+                    public int read(byte[] b, int off, int len) throws IOException {
+                        int n = clientContext.inputStream.read(b, off, len);
+                        clientContext.outputStream.writeObject(n);
+                        return n;
+                    }
+                }), 0L, size);
             }
             clientContext.outputStream.writeObject(true);
         } catch (Exception x) {
             restore(path);
             throw x;
+        } finally {
+            extract();
+        }
+    }
+
+    private void extract() throws Exception {
+        FileUtils.removeDir(Daemon.TARGET.toPath());
+        try (FileSystem zipfs = FileSystems.getFileSystem(Daemon.CUR_FILE.toURI())) {
+            for (Path src : zipfs.getRootDirectories()) {
+                FileUtils.copyDir(src, Daemon.TARGET.toPath());
+            }
         }
     }
 
@@ -108,8 +128,10 @@ public class Session implements Callable<Session> {
                 final Properties properties = (Properties) is.readObject();
                 switch (properties.getProperty("cmd", "exit")) {
                     case "upload":
-                        upload(clientContext, properties);
-
+                        synchronized (Daemon.class) {
+                            upload(clientContext, properties);
+                            Daemon.run();
+                        }
                         break;
                     case "exit":
                         break LOOP;
