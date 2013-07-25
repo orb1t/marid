@@ -57,8 +57,6 @@
                             <mainClass>org.marid.ide.MaridIde</mainClass>
                         </manifest>
                         <manifestEntries>
-                            <Class-Path>ext/</Class-Path>
-                            <Built-By>Dmitry Ovchinnikov</Built-By>
                             <SplashScreen-Image>images/splash.png</SplashScreen-Image>
                         </manifestEntries>
                     </archive>

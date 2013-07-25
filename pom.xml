@@ -29,6 +29,12 @@
         <java.version>1.7</java.version>
         <lib>${project.build.directory}/lib</lib>
         <groovy.version>2.1.6</groovy.version>
+        <specification.version>${implementation.version}</specification.version>
+        <specification.vendor>${project.organization.name}</specification.vendor>
+        <specification.title>${project.name}</specification.title>
+        <implementation.version>${project.version}</implementation.version>
+        <implementation.vendor>${project.organization.name}</implementation.vendor>
+        <implementation.title>${project.description}</implementation.title>
     </properties>
 
     <scm>
@@ -65,6 +71,10 @@
                 <testResources>
                     <testResource>
                         <directory>src/test/groovyResources</directory>
+                    </testResource>
+
+                    <testResource>
+                        <directory>src/groovyExt</directory>
                     </testResource>
                 </testResources>
 
@@ -158,12 +168,52 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>**/*.properties</exclude>
+                </excludes>
+                <filtering>false</filtering>
+            </resource>
+
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+                <filtering>true</filtering>
             </resource>
         </resources>
 
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>
+                <excludes>
+                    <exclude>**/*.properties</exclude>
+                </excludes>
+                <filtering>false</filtering>
+            </testResource>
+
+            <testResource>
+                <directory>src/test/resources</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+                <filtering>true</filtering>
+            </testResource>
+
+            <testResource>
+                <directory>src/ext</directory>
+                <excludes>
+                    <exclude>**/*.properties</exclude>
+                </excludes>
+                <filtering>false</filtering>
+            </testResource>
+
+            <testResource>
+                <directory>src/ext</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+                <filtering>true</filtering>
             </testResource>
         </testResources>
 
@@ -206,9 +256,17 @@
                             <manifest>
                                 <addClasspath>true</addClasspath>
                                 <classpathPrefix>lib</classpathPrefix>
-                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             </manifest>
+                            <manifestEntries>
+                                <Class-Path>ext/</Class-Path>
+                                <Built-By>${project.organization.name}</Built-By>
+                                <Implementation-Version>${implementation.version}</Implementation-Version>
+                                <Implementation-Title>${implementation.title}</Implementation-Title>
+                                <Implementation-Vendor>${implementation.vendor}</Implementation-Vendor>
+                                <Specification-Version>${specification.version}</Specification-Version>
+                                <Specification-Title>${specification.title}</Specification-Title>
+                                <Specification-Vendor>${specification.vendor}</Specification-Vendor>
+                            </manifestEntries>
                         </archive>
                     </configuration>
                 </plugin>

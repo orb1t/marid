@@ -13,7 +13,6 @@
     <artifactId>marid-runtime</artifactId>
     <name>marid-runtime</name>
     <description>Marid runtime system</description>
-    <url>http://sf.net/projects/marid</url>
 
     <dependencies>
         <dependency>
@@ -36,10 +35,6 @@
                         <manifest>
                             <mainClass>org.marid.Marid</mainClass>
                         </manifest>
-                        <manifestEntries>
-                            <Class-Path>ext/</Class-Path>
-                            <Built-By>Dmitry Ovchinnikov</Built-By>
-                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
@@ -49,12 +44,10 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
             </plugin>
         </plugins>
