@@ -25,6 +25,12 @@
     </formats>
     <baseDirectory>marid-runtime</baseDirectory>
     <includeBaseDirectory>true</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <directory>target/ext</directory>
+            <outputDirectory>ext</outputDirectory>
+        </fileSet>
+    </fileSets>
     <dependencySets>
         <dependencySet>
             <includes>
