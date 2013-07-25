@@ -19,25 +19,29 @@
 package org.marid.swing;
 
 import javax.swing.*;
-import javax.swing.text.JTextComponent;
-import java.awt.event.ActionEvent;
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridButtons {
+public class OutputArea extends JTextArea {
 
-    public static JButton browseButton(final JTextComponent textField) {
-        return new JButton(new MaridAction("Browse", "browse.png") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser(textField.getText());
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                int result = fileChooser.showDialog(textField, S.l("Select"));
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    textField.setText(fileChooser.getSelectedFile().toString());
-                }
-            }
-        });
+    private JScrollPane scrollPane;
+
+    public OutputArea(String text, int rows) {
+        super(text, rows, 0);
+        setBackground(SystemColor.controlDkShadow);
+        setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        setForeground(SystemColor.controlLtHighlight);
+    }
+
+    public OutputArea(int rows) {
+        this(null, rows);
+    }
+
+    public JScrollPane getScrollPane() {
+        return scrollPane != null ? scrollPane : (scrollPane = new JScrollPane(this,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
     }
 }

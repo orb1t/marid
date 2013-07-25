@@ -23,38 +23,86 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.concurrent.Callable;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class FileUtils {
 
-    public static void copyDir(Path source, Path dest) throws IOException {
-        if (!Files.isDirectory(dest)) {
-            Files.createDirectories(dest);
+    public static class RemoveTask implements Callable<Boolean> {
+
+        protected final Path path;
+
+        public RemoveTask(Path path) {
+            this.path = path;
         }
-        try (DirectoryStream<Path> ds = Files.newDirectoryStream(source)) {
-            for (Path entry : ds)  {
-                Path target = dest.resolve(entry.getFileName());
-                if (Files.isDirectory(entry)) {
-                    copyDir(entry, target);
-                } else {
-                    Files.copy(entry, target, StandardCopyOption.REPLACE_EXISTING);
+
+        @Override
+        public Boolean call() throws Exception {
+            if (Files.exists(path)) {
+                remove(path);
+                return Boolean.TRUE;
+            } else {
+                return Boolean.FALSE;
+            }
+        }
+
+        protected void remove(Path path) throws IOException {
+            if (Files.isDirectory(path)) {
+                try (DirectoryStream<Path> ds = Files.newDirectoryStream(path)) {
+                    for (Path entry : ds) {
+                        remove(entry);
+                    }
                 }
             }
+            Files.delete(path);
         }
     }
 
-    public static void removeDir(Path path) throws IOException {
-        try (DirectoryStream<Path> ds = Files.newDirectoryStream(path)) {
-            for (Path entry : ds) {
-                if (Files.isDirectory(entry)) {
-                    removeDir(entry);
-                } else {
-                    Files.delete(entry);
-                }
+    public static class CopyTask implements Callable<Boolean> {
+
+        protected final Path source;
+        protected final Path target;
+
+        public CopyTask(Path source, Path target) {
+            this.source = source;
+            this.target = target;
+        }
+
+        @Override
+        public Boolean call() throws Exception {
+            if (Files.notExists(source)) {
+                return Boolean.FALSE;
+            }
+            if (!Files.isDirectory(target)) {
+                Files.createDirectories(target);
+            }
+            if (Files.isRegularFile(source)) {
+                copy(source, target.resolve(source.getFileName()));
+                return Boolean.TRUE;
+            } else if (Files.isDirectory(source)) {
+                copy(source, target);
+                return Boolean.TRUE;
+            } else {
+                return Boolean.FALSE;
             }
         }
-        Files.delete(path);
+
+        protected void copy(Path src, Path dst) throws IOException {
+            if (Files.isDirectory(src)) {
+                try (DirectoryStream<Path> ds = Files.newDirectoryStream(src)) {
+                    for (Path entry : ds) {
+                        Path t = dst.resolve(entry.getFileName().toString());
+                        if (Files.isDirectory(entry)) {
+                            Files.createDirectories(t);
+                        }
+                        copy(entry, t);
+                    }
+                }
+            } else {
+                Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
     }
 }

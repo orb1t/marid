@@ -358,6 +358,7 @@
                     <configuration>
                         <useJvmChmod>true</useJvmChmod>
                         <descriptor>src/main/assembly/${project.name}.xml</descriptor>
+                        <appendAssemblyId>false</appendAssemblyId>
                     </configuration>
                 </plugin>
 

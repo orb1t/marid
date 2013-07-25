@@ -138,6 +138,9 @@ public abstract class AbstractDialog extends JDialog implements WindowListener, 
 
     protected void addDefaultButtons(GroupLayout gl, SequentialGroup vg, ParallelGroup hg) {
         vg.addGap(24, 32, Integer.MAX_VALUE);
+        JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
+        vg.addComponent(separator);
+        hg.addComponent(separator);
         JButton acceptButton = new JButton(acceptAction);
         JButton rejectButton = new JButton(rejectAction);
         vg.addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)

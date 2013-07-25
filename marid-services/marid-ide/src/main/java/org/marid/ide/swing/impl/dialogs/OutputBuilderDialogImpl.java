@@ -22,16 +22,34 @@ import org.marid.Marid;
 import org.marid.Versioning;
 import org.marid.ide.itf.Dialog;
 import org.marid.ide.swing.impl.FrameImpl;
+import org.marid.nio.FileUtils.CopyTask;
+import org.marid.nio.FileUtils.RemoveTask;
 import org.marid.swing.AbstractDialog;
+import org.marid.swing.MaridAction;
 import org.marid.swing.MaridButtons;
+import org.marid.swing.OutputArea;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
+import static org.marid.methods.LogMethods.warning;
 import static org.marid.methods.PrefMethods.preferences;
 
 /**
@@ -39,12 +57,13 @@ import static org.marid.methods.PrefMethods.preferences;
  */
 public class OutputBuilderDialogImpl extends AbstractDialog implements Dialog {
 
+    private static final Logger LOG = Logger.getLogger(OutputBuilderDialogImpl.class.getName());
     private final JTabbedPane tabbedPane;
 
     public OutputBuilderDialogImpl(FrameImpl frame) {
         super(frame, "Output builder", false);
         tabbedPane = new JTabbedPane();
-        tabbedPane.addTab(S.l("Build"), new BuildTab());
+        tabbedPane.addTab(S.l("Extract"), new ExtractTab());
     }
 
     @Override
@@ -59,37 +78,52 @@ public class OutputBuilderDialogImpl extends AbstractDialog implements Dialog {
         addDefaultButtons(gl, vg, hg);
     }
 
-    private class BuildTab extends JPanel {
+    private class ExtractTab extends JPanel {
 
-        private final Preferences prefs = preferences(BuildTab.class, "output", "builder");
-        private final JLabel zipUrlLabel = new JLabel(S.l("ZIP url") + ":");
-        private final JTextField zipUrlField = new JTextField(getDefaultZipUrl(), 80);
-        private final JButton zipBrowse = MaridButtons.browseUrlButton(zipUrlField);
+        private final Preferences prefs = preferences(ExtractTab.class, "output", "builder");
+        private final JLabel zipLabel = new JLabel(S.l("ZIP URL") + ":");
+        private final JTextField zipField = new JTextField(getDefaultZipPath(), 80);
+        private final JButton zipBrowse = MaridButtons.browseButton(zipField);
+        private final OutputArea outputArea = new OutputArea(20);
+        private final JButton cleanButton = new JButton(getCleanAction());
+        private final JButton extractButton = new JButton(getExtractAction());
+        private final Path outDir = Paths.get(getOwner().getApplication().getOutputDirectory());
 
-        public BuildTab() {
+        public ExtractTab() {
             GroupLayout g = new GroupLayout(this);
             g.setAutoCreateGaps(true);
             g.setAutoCreateContainerGaps(true);
             GroupLayout.SequentialGroup v = g.createSequentialGroup();
-            GroupLayout.SequentialGroup h = g.createSequentialGroup();
+            GroupLayout.ParallelGroup h = g.createParallelGroup();
+            GroupLayout.SequentialGroup h1 = g.createSequentialGroup();
             v.addGroup(g.createParallelGroup(Alignment.BASELINE)
-                    .addComponent(zipUrlLabel)
-                    .addComponent(zipUrlField)
+                    .addComponent(zipLabel)
+                    .addComponent(zipField)
                     .addComponent(zipBrowse));
-            h.addGroup(g.createParallelGroup()
-                    .addComponent(zipUrlLabel));
-            h.addGroup(g.createParallelGroup()
+            v.addComponent(outputArea.getScrollPane());
+            v.addGroup(g.createParallelGroup(Alignment.BASELINE)
+                    .addComponent(cleanButton)
+                    .addComponent(extractButton));
+            h1.addGroup(g.createParallelGroup()
+                    .addComponent(zipLabel));
+            h1.addGroup(g.createParallelGroup()
                     .addGroup(g.createSequentialGroup()
-                            .addComponent(zipUrlField)
+                            .addComponent(zipField)
                             .addComponent(zipBrowse)));
+            h.addGroup(h1);
+            h.addComponent(outputArea.getScrollPane());
+            h.addGroup(g.createSequentialGroup()
+                    .addComponent(cleanButton).addGap(0, 0, Integer.MAX_VALUE)
+                    .addComponent(extractButton));
             g.setVerticalGroup(v);
             g.setHorizontalGroup(h);
             setLayout(g);
+            outputArea.setEditable(false);
         }
 
-        private String getDefaultZipUrl() {
-            String urlText = prefs.get("zipUrl", null);
-            if (urlText == null) {
+        private String getDefaultZipPath() {
+            String text = prefs.get("zip", null);
+            if (text == null) {
                 ClassLoader cl = Thread.currentThread().getContextClassLoader();
                 if (cl == null) {
                     cl = getClass().getClassLoader();
@@ -97,10 +131,125 @@ public class OutputBuilderDialogImpl extends AbstractDialog implements Dialog {
                 String version = Versioning.getImplementationVersion(Marid.class);
                 URL url = cl.getResource("marid-runtime-" + version + ".zip");
                 if (url != null) {
-                    urlText = url.toString();
+                    try {
+                        text = new File(url.toURI()).toString();
+                    } catch (URISyntaxException x) {
+                        warning(LOG, "Invalid ZIP path: {0}", x, url);
+                    }
                 }
             }
-            return urlText != null ? urlText : "";
+            return text != null ? text : "";
+        }
+
+        private void enableButtons(boolean state) {
+            cleanButton.getAction().setEnabled(state);
+            extractButton.getAction().setEnabled(state);
+        }
+
+        private MaridAction getCleanAction() {
+            return new MaridAction("Clean") {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    enableButtons(false);
+                    final AtomicLong counter = new AtomicLong();
+                    Thread worker = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            RemoveTask removeTask = new RemoveTask(outDir) {
+                                @Override
+                                protected void remove(final Path path) throws IOException {
+                                    EventQueue.invokeLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            outputArea.append("\t" + path + "\n");
+                                        }
+                                    });
+                                    counter.incrementAndGet();
+                                    super.remove(path);
+                                }
+                            };
+                            try {
+                                removeTask.call();
+                            } catch (Exception x) {
+                                warning(LOG, "Cleaning output execution exception", x);
+                                outputArea.append(M.l("Error: {0}", x) + "\n");
+                            } finally {
+                                EventQueue.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        enableButtons(true);
+                                        outputArea.append(M.l("Cleaned {0} files", counter.get()) + "\n");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    outputArea.setText("");
+                    outputArea.append(M.l("Cleaning") + "...\n");
+                    worker.start();
+                }
+            };
+        }
+
+        private MaridAction getExtractAction() {
+            return new MaridAction("Extract") {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    enableButtons(false);
+                    final AtomicLong counter = new AtomicLong();
+                    final List<CopyTask> copyTasks = new ArrayList<>();
+                    try {
+                        Path zipPath = Paths.get(zipField.getText());
+                        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                        FileSystem zipfs = FileSystems.newFileSystem(zipPath, cl);
+                        for (Path root : zipfs.getRootDirectories()) {
+                            copyTasks.add(new CopyTask(root, outDir) {
+                                @Override
+                                protected void copy(Path src, final Path dst) throws IOException {
+                                    EventQueue.invokeLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (dst.equals(outDir)) {
+                                                return;
+                                            }
+                                            outputArea.append("\t" + dst + "\n");
+                                        }
+                                    });
+                                    counter.incrementAndGet();
+                                    super.copy(src, dst);
+                                }
+                            });
+                        }
+                    } catch (Exception x) {
+                        warning(LOG, "ZIP error", x);
+                        return;
+                    }
+                    Thread worker = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                for (CopyTask copyTask : copyTasks) {
+                                    copyTask.call();
+                                }
+                            } catch (Exception x) {
+                                warning(LOG, "Extracting to the output execution exception", x);
+                                outputArea.append(M.l("Error: {0}", x) + "\n");
+                            } finally {
+                                EventQueue.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        enableButtons(true);
+                                        outputArea.append(M.l("Extracted {0} files", counter.get()) + "\n");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    outputArea.setText("");
+                    outputArea.append(M.l("Extracting") + "...\n");
+                    worker.start();
+                }
+            };
         }
     }
 }
