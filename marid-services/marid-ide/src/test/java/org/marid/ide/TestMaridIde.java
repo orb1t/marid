@@ -18,15 +18,12 @@
 
 package org.marid.ide;
 
-import org.marid.Versioning;
-
 /**
  * @author Dmitry Ovchinnikov
  */
 public class TestMaridIde {
 
     public static void main(String... args) {
-        System.out.println(Versioning.getImplementationVersion(TestMaridIde.class));
         MaridIde.main(args);
     }
 }

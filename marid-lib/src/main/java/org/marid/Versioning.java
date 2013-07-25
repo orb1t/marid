@@ -18,7 +18,9 @@
 
 package org.marid;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -27,7 +29,7 @@ import java.security.ProtectionDomain;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import static org.marid.methods.LogMethods.*;
+import static org.marid.methods.LogMethods.warning;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,7 +43,32 @@ public class Versioning {
         return version != null ? version : extractField(type, "implementation.version");
     }
 
-    private static String extractField(Class<?> type, String field) {
+    public static String getImplementationTitle(Class<?> type) {
+        String title = type.getPackage().getImplementationTitle();
+        return title != null ? title : extractField(type, "implementation.title");
+    }
+
+    public static String getImplementationVendor(Class<?> type) {
+        String vendor = type.getPackage().getImplementationVendor();
+        return vendor != null ? vendor : extractField(type, "implementation.vendor");
+    }
+
+    public static String getSpecificationVersion(Class<?> type) {
+        String version = type.getPackage().getSpecificationVersion();
+        return version != null ? version : extractField(type, "specification.version");
+    }
+
+    public static String getSpecificationTitle(Class<?> type) {
+        String title = type.getPackage().getSpecificationTitle();
+        return title != null ? title : extractField(type, "specification.title");
+    }
+
+    public static String getSpecificationVendor(Class<?> type) {
+        String vendor = type.getPackage().getSpecificationVendor();
+        return vendor != null ? vendor : extractField(type, "specification.vendor");
+    }
+
+    public static String extractField(Class<?> type, String field) {
         ProtectionDomain protectionDomain = type.getProtectionDomain();
         if (protectionDomain == null) {
             return extractGlobalField(field);
