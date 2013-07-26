@@ -18,9 +18,127 @@
 
 package org.marid.util;
 
+import java.util.Arrays;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public class StringUtils {
 
+    public static String repeated(char symbol, int times) {
+        char[] buf = new char[times];
+        Arrays.fill(buf, symbol);
+        return String.valueOf(buf);
+    }
+
+    public static String repeated(String str, int times) {
+        int n = str.length();
+        char[] buf = new char[n * times];
+        for (int i = 0; i < buf.length; i += n) {
+            str.getChars(0, n, buf, i);
+        }
+        return String.valueOf(buf);
+    }
+
+    public static String repeated(Object obj, int times) {
+        return repeated(String.valueOf(obj), times);
+    }
+
+    public static String delimited(char delimiter, String... array) {
+        int count = 0;
+        for (String s : array) {
+            if (count > 0) {
+                count++;
+            }
+            count += s == null ? 4 : s.length();
+        }
+        char[] buf = new char[count];
+        count = 0;
+        for (String s : array) {
+            if (count > 0) {
+                buf[count++] = delimiter;
+            }
+            if (s == null) {
+                s = "null";
+            }
+            s.getChars(0, s.length(), buf, count);
+            count += s.length();
+        }
+        return String.valueOf(buf);
+    }
+
+    public static String delimited(String delimiter, String... array) {
+        int n = delimiter.length();
+        int count = 0;
+        for (String s : array) {
+            if (count > 0) {
+                count += n;
+            }
+            count += s == null ? 4 : s.length();
+        }
+        char[] buf = new char[count];
+        count = 0;
+        for (String s : array) {
+            if (count > 0) {
+                delimiter.getChars(0, n, buf, count);
+                count += n;
+            }
+            if (s == null) {
+                s = "null";
+            }
+            s.getChars(0, s.length(), buf, count);
+            count += s.length();
+        }
+        return String.valueOf(buf);
+    }
+
+    public static String delimited(char delimiter, Object... array) {
+        String[] a = new String[array.length];
+        for (int i = 0; i < a.length; i++) {
+            a[i] = String.valueOf(array[i]);
+        }
+        int count = 0;
+        for (String s : a) {
+            if (count > 0) {
+                count++;
+            }
+            count += s.length();
+        }
+        char[] buf = new char[count];
+        count = 0;
+        for (String s : a) {
+            if (count > 0) {
+                buf[count++] = delimiter;
+            }
+            s.getChars(0, s.length(), buf, count);
+            count += s.length();
+        }
+        return String.valueOf(buf);
+    }
+
+    public static String delimited(String delimiter, Object... array) {
+        String[] a = new String[array.length];
+        for (int i = 0; i < a.length; i++) {
+            a[i] = String.valueOf(array[i]);
+        }
+        int n = delimiter.length();
+        int count = 0;
+        for (String s : a) {
+            if (count > 0) {
+                count += n;
+            }
+            count += s.length();
+        }
+        char[] buf = new char[count];
+        count = 0;
+        for (String s : a) {
+            if (count > 0) {
+                delimiter.getChars(0, n, buf, count);
+                count += n;
+            }
+            s.getChars(0, s.length(), buf, count);
+            count += s.length();
+        }
+        return String.valueOf(buf);
+    }
 }

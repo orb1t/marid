@@ -18,7 +18,10 @@
 
 package org.marid.util;
 
+import org.marid.Scripting;
+
 import java.lang.reflect.Array;
+import java.util.Objects;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -29,8 +32,95 @@ public class CollectionUtils {
 
     @SuppressWarnings("unchecked")
     public static <T> T[] concat(T[] array, T elem) {
-        T[] result = (T[]) Array.newInstance(array.getClass().getComponentType(), array.length + 1);
-        result[array.length] = elem;
+        int n = array.length;
+        T[] result = (T[]) Array.newInstance(array.getClass().getComponentType(), n + 1);
+        System.arraycopy(array, 0, result, 0, n);
+        result[n] = elem;
         return result;
+    }
+
+    @SuppressWarnings({"unchecked", "SuspiciousSystemArraycopy"})
+    public static <T> T concat(T array, Object elem) {
+        int n = Array.getLength(array);
+        T result = (T) Array.newInstance(array.getClass().getComponentType(), n + 1);
+        System.arraycopy(array, 0, result, 0, n);
+        Array.set(result, n, elem);
+        return result;
+    }
+
+    public static <T> int find(T[] array, T elem, int start) {
+        for (int i = start; i < array.length; i++) {
+            if (Objects.equals(array[i], elem)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int find(Object array, Object elem, int start) {
+        int n = Array.getLength(array);
+        for (int i = start; i < n; i++) {
+            if (Objects.equals(Array.get(array, i), elem)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static <T> int deepFind(T[] array, T elem, int start) {
+        for (int i = start; i < array.length; i++) {
+            if (Scripting.SCRIPTING.equals(array[i], elem)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int deepFind(Object array, Object elem, int start) {
+        int n = Array.getLength(array);
+        for (int i = start; i < n; i++) {
+            if (Scripting.SCRIPTING.equals(Array.get(array, i), elem)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static <T> int findLast(T[] array, T elem, int start) {
+        for (int i = array.length - start - 1; i >=0; i--) {
+            if (Objects.equals(array[i], elem)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int findLast(Object array, Object elem, int start) {
+        int n = Array.getLength(array);
+        for (int i = n - start - 1; i >= 0; i--) {
+            if (Objects.equals(Array.get(array, i), elem)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static <T> int deepFindLast(T[] array, T elem, int start) {
+        for (int i = array.length - start - 1; i >= 0; i--) {
+            if (Scripting.SCRIPTING.equals(array[i], elem)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int deepFindLast(Object array, Object elem, int start) {
+        int n = Array.getLength(array);
+        for (int i = n - start - 1; i >= 0; i--) {
+            if (Scripting.SCRIPTING.equals(Array.get(array, i), elem)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
