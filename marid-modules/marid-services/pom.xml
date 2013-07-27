@@ -51,8 +51,10 @@
                         <artifactId>build-helper-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>add-source</id>
-                                <goals><goal>add-source</goal></goals>
+                                <id>add-groovy-source</id>
+                                <goals>
+                                    <goal>add-source</goal>
+                                </goals>
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <sources>
@@ -75,7 +77,7 @@
                                     <goals>
                                         <goal>copy-resources</goal>
                                     </goals>
-                                    <phase>package</phase>
+                                    <phase>generate-resources</phase>
                                     <configuration>
                                         <outputDirectory>${project.build.directory}/ext</outputDirectory>
                                         <resources>
