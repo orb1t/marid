@@ -4,18 +4,11 @@
 
     <parent>
         <groupId>org.marid</groupId>
-        <artifactId>marid</artifactId>
+        <artifactId>marid-modules</artifactId>
         <version>0.5</version>
     </parent>
 
     <artifactId>marid-lib</artifactId>
     <name>marid-lib</name>
     <description>Marid class library</description>
-
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-    </dependencies>
 </project>
