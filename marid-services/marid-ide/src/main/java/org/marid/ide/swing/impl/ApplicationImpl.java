@@ -160,8 +160,15 @@ public class ApplicationImpl implements Application {
             for (Handler handler : rootLogger.getHandlers()) {
                 if (handler instanceof SwingHandler) {
                     ((SwingHandler)handler).show();
-                    break;
+                    return;
                 }
+            }
+            try {
+                SwingHandler swingHandler = new SwingHandler();
+                rootLogger.addHandler(swingHandler);
+                swingHandler.show();
+            } catch (Exception x) {
+                warning(log, "Unable to create SWING log handler", x);
             }
         }
     }

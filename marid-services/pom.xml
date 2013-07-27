@@ -17,9 +17,6 @@
     <profiles>
         <profile>
             <id>groovy</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
 
             <dependencies>
                 <dependency>

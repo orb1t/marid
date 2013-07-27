@@ -55,8 +55,8 @@
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-all</artifactId>
-                        <version>${groovy.version}</version>
                         <classifier>indy</classifier>
+                        <version>${groovy.version}</version>
                     </dependency>
                 </dependencies>
             </dependencyManagement>
@@ -106,8 +106,8 @@
                                 <dependency>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy-all</artifactId>
-                                    <version>${groovy.version}</version>
                                     <classifier>indy</classifier>
+                                    <version>${groovy.version}</version>
                                 </dependency>
                             </dependencies>
                         </plugin>
@@ -127,6 +127,42 @@
                     <scope>test</scope>
                 </dependency>
             </dependencies>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>add-benchmark-sources</id>
+                                <goals>
+                                    <goal>add-test-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sources>
+                                        <source>src/benchmark/java</source>
+                                    </sources>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>add-benchmark-resources</id>
+                                <goals>
+                                    <goal>add-test-resource</goal>
+                                </goals>
+                                <configuration>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/benchmark/resources</directory>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
