@@ -22,12 +22,15 @@ import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.marid.test.SlowBenchmarks;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@Category(SlowBenchmarks.class)
 public class NpeBenchmark extends AbstractBenchmark {
 
     private static final int MAX_ITEMS = 10000;

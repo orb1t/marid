@@ -19,31 +19,13 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.marid</groupId>
         <artifactId>marid</artifactId>
+        <groupId>org.marid</groupId>
         <version>0.5</version>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>marid-modules</artifactId>
-    <packaging>pom</packaging>
-    <name>marid-modules</name>
-
-    <modules>
-        <module>marid-lib</module>
-        <module>marid-daemon</module>
-        <module>marid-services</module>
-    </modules>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.marid</groupId>
-            <artifactId>marid-test</artifactId>
-            <scope>test</scope>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
+    <artifactId>marid-test</artifactId>
 </project>
