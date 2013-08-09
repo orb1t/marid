@@ -1,0 +1,56 @@
+/* 
+    Document   : marid
+    Created on : 05-ago-2013, 10:30:51
+    Author     : Dmitry Ovchinnikov
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+.ui-widget, .ui-widget .ui-widget {
+    font-size: 12px !important;
+}
+ul.ui-menu-child {
+    white-space: nowrap !important;
+    width: 200px !important; 
+}
+.params {
+    vertical-align: top;
+    padding-right: 5px;
+    min-width: 100px;
+    max-width: 400px;
+}
+.mainPanel {
+    vertical-align: top;
+    min-width: 400px;
+    max-width: 1200px;
+}
+
+.iconColumn {
+    width: 40px;
+}
+.titleColumn {
+    width: auto;
+}
+
+.ui-layout-west {                    
+    overflow-x: hidden !important;
+}
+
+.ui-layout-west .ui-layout-unit-content {
+    overflow-x: hidden !important;
+}
+
+table.noborders {
+    border: none !important;
+}
+
+table.noborders tr td {
+    border: none !important;
+}
+
+captionColumn {
+    text-align: left;
+}
+numericColumn {
+    text-align: right;
+}

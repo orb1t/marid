@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--
+Copyright (C) 2013 Dmitry Ovchinnikov
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License 
+as published by the Free Software Foundation, either version 3
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:cc="http://java.sun.com/jsf/composite">
+    <f:view contentType="text/html" locale="#{localeBean.locale}">
+        <h:head>
+            <f:facet name="first">
+                <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                <title>#{strs.about_author}</title>
+                <link rel="stylesheet" type="text/css" href="marid.css"/>
+            </f:facet>
+        </h:head>
+
+        <h:body>
+            <ui:composition>
+                <p:panelGrid>
+                    <p:row>
+                        <p:column rowspan="5">
+                            <h:graphicImage value="http://farm5.staticflickr.com/4060/4222029315_efd2e22406_o.jpg"/>
+                        </p:column>
+                        <p:column><h:outputText value="#{strs.author_name}:"/></p:column>
+                        <p:column><h:outputText value="Dmitry Ovchinnikov"/></p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column><h:outputText value="#{strs.author_age}:"/></p:column>
+                        <p:column><h:outputText value="33"/></p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column><h:outputText value="#{strs.author_university}:"/></p:column>
+                        <p:column><h:outputText value="#{strs.kstu}"/></p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column><h:outputText value="#{strs.author_speciality}:"/></p:column>
+                        <p:column><h:outputText value="#{strs.ics}"/></p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column><h:outputText value="#{strs.skills}:"/></p:column>
+                        <p:column>
+
+                        </p:column>
+                    </p:row>
+                </p:panelGrid>
+                <p:panel header="Mis aptitudes:" style="margin-top: 10px">
+                    <h:panelGrid columns="2">
+                        <h:column>Java:</h:column>
+                        <h:column>Java SE, Spring, Java EE, Maven, Ant</h:column>
+                        <h:column>Prolog:</h:column>
+                        <h:column>SWI-Prolog: XPCE, sockets, CGI, DCG rules</h:column>
+                        <h:column>Databases:</h:column>
+                        <h:column>HSQLDB, H2, MySQL, Apache Derby, Berkeley DB JE</h:column>
+                        <h:column>Other languages:</h:column>
+                        <h:column>C, C++, Groovy, Scheme, Tcl</h:column>
+                        <h:column>Scripting:</h:column>
+                        <h:column>JavaScript, Groovy, Bash</h:column>
+                        <h:column>Operating Systems:</h:column>
+                        <h:column>Linux, NetBSD, Windows</h:column>
+                    </h:panelGrid>
+                </p:panel>
+                <p:panel header="Mi proyecto anterior:" style="margin-top: 10px">
+                    <p:lightBox iframe="true">
+                        <h:outputLink value="http://sf.net/projects/ipmems" title="IPMEMS">
+                            <h:panelGrid class="noborders" columns="2">
+                                <h:column><p:graphicImage value="http://c.fsdn.com/allura/p/ipmems/icon" alt="IPMEMS"/></h:column>
+                                <h:column>IPMEMS</h:column>
+                            </h:panelGrid>
+                        </h:outputLink>
+                    </p:lightBox>
+                    <br/>
+                    <p:outputLabel value="#{msgs.ipmems_1}"/>
+                    <br/>
+                    <p:outputLabel value="#{msgs.ipmems_2}"/>
+                </p:panel>
+            </ui:composition>
+        </h:body>
+    </f:view>
+</html>

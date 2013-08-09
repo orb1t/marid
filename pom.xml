@@ -26,7 +26,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.7</java.version>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
         <lib>${project.build.directory}/lib</lib>
         <groovy.version>2.1.6</groovy.version>
         <specification.version>${implementation.version}</specification.version>
@@ -37,6 +38,7 @@
         <implementation.title>${project.description}</implementation.title>
         <excluded.benchmarks>org.marid.test.SlowBenchmarks</excluded.benchmarks>
         <excluded.tests>org.marid.test.SlowTests</excluded.tests>
+        <scripting>groovy</scripting>
     </properties>
 
     <scm>
@@ -48,20 +50,6 @@
     <profiles>
         <profile>
             <id>groovy</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-
-            <dependencyManagement>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-all</artifactId>
-                        <classifier>indy</classifier>
-                        <version>${groovy.version}</version>
-                    </dependency>
-                </dependencies>
-            </dependencyManagement>
 
             <build>
                 <resources>
@@ -88,7 +76,7 @@
                             <version>1.5</version>
                             <configuration>
                                 <providerSelection>2.0</providerSelection>
-                                <targetBytecode>1.7</targetBytecode>
+                                <targetBytecode>${maven.compiler.source}</targetBytecode>
                                 <stacktrace>true</stacktrace>
                                 <invokeDynamic>true</invokeDynamic>
                             </configuration>
@@ -125,8 +113,8 @@
                 <dependency>
                     <groupId>com.carrotsearch</groupId>
                     <artifactId>junit-benchmarks</artifactId>
-                    <version>0.7.0</version>
                     <scope>test</scope>
+                    <version>0.7.0</version>
                 </dependency>
             </dependencies>
 
@@ -216,6 +204,7 @@
     <modules>
         <module>marid-modules</module>
         <module>marid-test</module>
+        <module>marid-site</module>
     </modules>
 
     <build>
@@ -286,11 +275,6 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.1</version>
                     <configuration>
-                        <compilerVersion>1.7</compilerVersion>
-                        <source>1.7</source>
-                        <target>1.7</target>
-                        <testSource>1.7</testSource>
-                        <testTarget>1.7</testTarget>
                         <showWarnings>true</showWarnings>
                         <showDeprecation>true</showDeprecation>
                         <compilerArgument>-Xlint:unchecked</compilerArgument>
@@ -523,6 +507,13 @@
                 <groupId>org.apache.ivy</groupId>
                 <artifactId>ivy</artifactId>
                 <version>2.3.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <classifier>indy</classifier>
+                <version>${groovy.version}</version>
             </dependency>
 
             <dependency>

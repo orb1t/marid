@@ -86,8 +86,9 @@ public class MaridIcon {
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
+                File file = new File(System.getProperty("user.home"), "icon.png");
                 try {
-                    ImageIO.write(getImage(64, Color.GREEN), "PNG", new File("icon.png"));
+                    ImageIO.write(getImage(64, Color.GREEN), "PNG", file);
                 } catch (Exception x) {
                     //
                 }

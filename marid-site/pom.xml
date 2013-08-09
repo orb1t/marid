@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2013 Dmitry Ovchinnikov
+  ~ Marid, the free data acquisition and visualization software
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of
+  ~ the License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>marid</artifactId>
+        <groupId>org.marid</groupId>
+        <version>0.5</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>marid-site</artifactId>
+    <packaging>war</packaging>
+
+    <properties>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+        <netbeans.hint.license>agpl30</netbeans.hint.license>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.faces</artifactId>
+            <version>2.1.24</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>taglibs</groupId>
+            <artifactId>standard</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.primefaces</groupId>
+            <artifactId>primefaces</artifactId>
+            <version>3.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.primefaces.themes</groupId>
+            <artifactId>all-themes</artifactId>
+            <version>1.0.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-web-api</artifactId>
+            <version>6.0</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.marid</groupId>
+            <artifactId>marid-lib</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.4</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.0.4.v20130625</version>
+            </plugin>            
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <url>http://repository.primefaces.org/</url>
+            <id>PrimeFaces-maven-lib</id>
+            <layout>default</layout>
+            <name>Repository for library PrimeFaces-maven-lib</name>
+        </repository>
+    </repositories>
+</project>
