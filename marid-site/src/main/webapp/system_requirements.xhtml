@@ -26,14 +26,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <h:head>
             <f:facet name="first">
                 <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
-                <title>Description</title>
+                <title>#{strs.system_requirements}</title>
                 <link rel="stylesheet" type="text/css" href="marid.css"/>
             </f:facet>
         </h:head>
 
         <h:body>
             <ui:composition>
-                <p><b>Marid</b> es una plataforma libre para adquirir y visualizar datos desde un equipo remoto y para crear los sistemas DAQ de bajo costo.</p>
+                <p:panelGrid>
+                    <f:facet name="header">
+                        <p:row>
+                            <p:column>#{strs.parameter}</p:column>
+                            <p:column>#{strs.value}</p:column>
+                        </p:row>
+                    </f:facet>
+                    <p:row>
+                        <p:column>#{strs.operating_system}:</p:column>
+                        <p:column>Linux, Windows, Mac OS, FreeBSD, Solaris</p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>#{strs.java_vm}:</p:column>
+                        <p:column>&gt;= 1.7</p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>#{strs.cpu_frequency}:</p:column>
+                        <p:column>&gt;= 1 GHz</p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>#{strs.disk_space}:</p:column>
+                        <p:column>&gt;= 1 GiB</p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>#{strs.ram}</p:column>
+                        <p:column>&gt;= 1 GiB</p:column>
+                    </p:row>
+                </p:panelGrid>
             </ui:composition>
         </h:body>
     </f:view>

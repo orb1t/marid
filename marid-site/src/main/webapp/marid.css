@@ -40,17 +40,6 @@ ul.ui-menu-child {
     overflow-x: hidden !important;
 }
 
-table.noborders {
+.noborders {
     border: none !important;
-}
-
-table.noborders tr td {
-    border: none !important;
-}
-
-captionColumn {
-    text-align: left;
-}
-numericColumn {
-    text-align: right;
 }

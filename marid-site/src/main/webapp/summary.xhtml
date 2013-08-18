@@ -21,7 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.org/ui" 
-      xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:cc="http://java.sun.com/jsf/composite">
+      xmlns:c="http://java.sun.com/jsp/jstl/core" 
+      xmlns:cc="http://java.sun.com/jsf/composite">
     <f:view contentType="text/html" locale="#{localeBean.locale}">
         <h:head>
             <f:facet name="first">
@@ -34,6 +35,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <h:body>
             <ui:composition>
                 <ui:include src="texts/description_#{localeBean.language}.xhtml"/>
+                <br/>
+                <h:form>
+                    <p:panel header="Overall system cost calculator">
+                        <h:panelGrid columns="2" cellspacing="10">
+                            <h:panelGrid columns="2" cellspacing="10">
+                                <p:outputLabel value="Controller count: "/>
+                                <p:spinner min="1" max="50" value="#{sysStructBean.controllerCount}">
+                                    <p:ajax update="ssi" process="@this"/>
+                                </p:spinner>
+                                <p:outputLabel value="Meter count: "/>
+                                <p:spinner min="1" max="20" value="#{sysStructBean.meterCount}">
+                                    <p:ajax update="ssi" process="@this"/>
+                                </p:spinner>
+                            </h:panelGrid>
+                            <h:outputLink onclick="dlg.show();" value="javascript:void(0)">
+                                <p:graphicImage value="#{sysStructBean.structImage(300)}" width="300" height="300" id="ssi"/>
+                            </h:outputLink>
+                        </h:panelGrid>
+                    </p:panel>
+                    <p:dialog closable="true" closeOnEscape="true" widgetVar="dlg" header="System structure" resizable="false" dynamic="true">
+                        <p:graphicImage value="#{sysStructBean.structImage(600)}" width="600" height="600" cache="false"/>
+                    </p:dialog>
+                </h:form>
             </ui:composition>
         </h:body>
     </f:view>
