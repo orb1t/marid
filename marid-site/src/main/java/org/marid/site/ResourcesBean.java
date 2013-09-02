@@ -37,6 +37,10 @@ public class ResourcesBean {
     
     private final ResourceBundle bundle = ResourceBundle.getBundle(
             FacesContext.getCurrentInstance().getApplication().getMessageBundle());
+
+    public ResourceBundle getBundle() {
+        return bundle;
+    }
         
     public String msg(String key) {
         return m(key);

@@ -21,28 +21,72 @@ import com.mxgraph.canvas.mxImageCanvas;
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
+import com.tunyk.currencyconverter.BankUaCom;
+import com.tunyk.currencyconverter.api.Currency;
+import com.tunyk.currencyconverter.api.CurrencyConverter;
+import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import java.awt.Color;
+import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.io.Serializable;
+import java.text.NumberFormat;
+import java.util.EnumSet;
+import java.util.Set;
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.imageio.ImageIO;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @ManagedBean
 @SessionScoped
-public class SysStructBean {
-    
-    private int controllerCount = 10;
-    private int meterCount = 10;
-    private static final Map<Integer, byte[]> cache = new WeakHashMap<Integer, byte[]>();
+public class SysStructBean implements Serializable {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+    @ManagedProperty("#{localeBean}")
+    private LocaleBean localeBean;
+    private int controllerCount = 5;
+    private int meterCount = 5;
+    private Currency currency = Currency.USD;
+    private MeterLinkType meterLinkType = MeterLinkType.LAN;
+    private ControllerLinkType controllerLinkType = ControllerLinkType.LAN;
+    private CurrencyConverter currencyConverter;
+
+    @PostConstruct
+    public void init() {
+        try {
+            currencyConverter = new BankUaCom(Currency.USD, Currency.EUR);
+        } catch (CurrencyConverterException x) {
+            logger.warn("Currency converter exception", x);
+        }
+    }
+
+    public void setLocaleBean(LocaleBean localeBean) {
+        this.localeBean = localeBean;
+    }
+
+    public Set<MeterLinkType> getMeterLinkTypes() {
+        return EnumSet.allOf(MeterLinkType.class);
+    }
+
+    public Set<ControllerLinkType> getControllerLinkTypes() {
+        return EnumSet.allOf(ControllerLinkType.class);
+    }
+
+    public Set<Currency> getCurrencies() {
+        return EnumSet.allOf(Currency.class);
+    }
 
     public int getMeterCount() {
         return meterCount;
@@ -52,6 +96,18 @@ public class SysStructBean {
         return controllerCount;
     }
 
+    public MeterLinkType getMeterLinkType() {
+        return meterLinkType;
+    }
+
+    public ControllerLinkType getControllerLinkType() {
+        return controllerLinkType;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
     public void setMeterCount(int meterCount) {
         this.meterCount = meterCount;
     }
@@ -59,13 +115,25 @@ public class SysStructBean {
     public void setControllerCount(int controllerCount) {
         this.controllerCount = controllerCount;
     }
-    
+
+    public void setMeterLinkType(MeterLinkType meterLinkType) {
+        this.meterLinkType = meterLinkType;
+    }
+
+    public void setControllerLinkType(ControllerLinkType controllerLinkType) {
+        this.controllerLinkType = controllerLinkType;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
+    }
+
     private mxGraph graph() {
         final mxGraph graph = new mxGraph();
         final Object p = graph.getDefaultParent();
         graph.getModel().beginUpdate();
         try {
-            final Object server = graph.insertVertex(p, null, "Server", 0, 0, 200, 60, "fillColor=#EA5D01");
+            final Object server = graph.insertVertex(p, null, "Server", 0, 0, 200, 60, "fillColor=#EA5D01;fontSize=24");
             for (int c = 0; c < controllerCount; c++) {
                 final Object controller = graph.insertVertex(p, null, "C" + (c + 1), 0, 0, 25, 20, "fillColor=yellow");
                 final Object cEdge = graph.insertEdge(p, null, "", server, controller);
@@ -79,14 +147,47 @@ public class SysStructBean {
         }
         return graph;
     }
-            
-    public StreamedContent structImage(int size) throws IOException {
-        final int key = size * 1024 * 1024 + controllerCount * 1024 + meterCount;
-        synchronized (cache) { 
-            final byte[] data = cache.get(key);
-            if (data != null) {
-                return new DefaultStreamedContent(new ByteArrayInputStream(data), "image/png");
+    
+    private File cachedFile() {
+        return new File(System.getProperty("java.io.tmpdir"), controllerCount + "_" + meterCount  + ".png");
+    }
+    
+    private DefaultStreamedContent getCached() {
+        final File cachedFile = cachedFile();
+        synchronized (SysStructBean.class) {
+            if (cachedFile.exists()) {
+                try {
+                    return new DefaultStreamedContent(new FileInputStream(cachedFile), "image/png");
+                } catch (Exception x) {
+                    logger.warn("Unable to get cached image", x);
+                }
             }
+        }
+        return null;
+    }
+    
+    private boolean writeCached(RenderedImage image) {
+        final File cachedFile = cachedFile();
+        synchronized (SysStructBean.class) {
+            if (!cachedFile.exists()) {
+                try {
+                    ImageIO.write(image, "PNG", cachedFile);
+                    cachedFile.deleteOnExit();
+                    return true;
+                } catch (Exception x) {
+                    logger.warn("Unable to write to the cache", x);
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+
+    public StreamedContent structImage() throws IOException {
+        DefaultStreamedContent c = getCached();
+        if (c != null) {
+            return c;
         }
         final mxGraph graph = graph();
         final mxFastOrganicLayout layout = new mxFastOrganicLayout(graph);
@@ -97,13 +198,81 @@ public class SysStructBean {
         final int w = (int) bounds.getWidth() + 1;
         final int h = (int) bounds.getHeight() + 1;
         final mxImageCanvas canvas = new mxImageCanvas(g2dc, w, h, Color.WHITE, true);
-        graph.drawGraph(canvas);
+        graph.drawGraph(canvas);    
+        final boolean cached = writeCached(canvas.getImage());
+        if (cached) {
+            c = getCached();
+            if (c != null) {
+                return c;
+            }
+        }
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ImageIO.write(canvas.getImage(), "PNG", bos);
         final byte[] data = bos.toByteArray();
-        synchronized (cache) {
-            cache.put(key, data);
-        }
         return new DefaultStreamedContent(new ByteArrayInputStream(data), "image/png");
+    }
+
+    private float getPriceInUsd() {
+        final float controllerSelfPrice = 200.0f;
+        final float controllerCasePrice = 50.0f;
+        final float controllerTransmitterPrice;
+        switch (controllerLinkType) {
+            case LAN:
+                controllerTransmitterPrice = 0.0f;
+                break;
+            case MOBILE:
+                controllerTransmitterPrice = 100.0f;
+                break;
+            case WIFI:
+                controllerTransmitterPrice = 30.0f;
+                break;
+            default:
+                controllerTransmitterPrice = 0.0f;
+                break;
+        }
+        final float controllerReceiverPrice;
+        switch (meterLinkType) {
+            case LAN:
+                controllerReceiverPrice = 0.0f;
+                break;
+            case RS485_CAN:
+                controllerReceiverPrice = (1 + meterCount / 16.0f) * 30.0f;
+                break;
+            case WIFI:
+                controllerReceiverPrice = 30.0f;
+                break;
+            case ZIGBEE:
+                controllerReceiverPrice = 100.0f;
+                break;
+            default:
+                controllerReceiverPrice = 0.0f;
+                break;
+        }
+        final float serverPrice = (1 + (meterCount * controllerCount) / 100.0f) * 300.0f;
+        final float controllerPrice = controllerSelfPrice
+                + controllerReceiverPrice
+                + controllerTransmitterPrice
+                + controllerCasePrice;
+        return serverPrice + controllerPrice * controllerCount;
+    }
+
+    public float getPrice() {
+        if (currencyConverter != null) {
+            try {
+                return currencyConverter.convertCurrency(getPriceInUsd(), currency);
+            } catch (CurrencyConverterException x) {
+                logger.warn("Currency converter exception", x);
+                currency = Currency.USD;
+                return getPriceInUsd();
+            }
+        } else {
+            currency = Currency.USD;
+            return getPriceInUsd();
+        }
+    }
+
+    public String getPriceText() {
+        final NumberFormat numberFormat = NumberFormat.getNumberInstance(localeBean.getLocale());
+        return numberFormat.format(getPrice());
     }
 }

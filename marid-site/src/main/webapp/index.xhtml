@@ -53,29 +53,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                 <p:menuitem value="#{strs.license}" id="license" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                                 <p:menuitem value="#{strs.about_author}" id="about_author" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                                 <p:menuitem value="#{strs.system_requirements}" id="system_requirements" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
-                                <p:menuitem value="#{strs.examples}"/>
+                                <p:menuitem value="#{strs.examples}" id="examples" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                             </p:submenu>
                             <p:submenu label="#{strs.investments}">
-                                <p:menuitem value="#{strs.development_cost}"/>
-                                <p:menuitem value="#{strs.roi}"/>
-                                <p:menuitem value="#{strs.why_libre}"/>
+                                <p:menuitem value="#{strs.development_cost}" id="development_cost" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
+                                <p:menuitem value="#{strs.roi}" id="roi" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
+                                <p:menuitem value="#{strs.why_libre}" id="why_libre" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                             </p:submenu>
                             <p:submenu label="#{strs.building_daq_systems}">
-                                <p:menuitem value="#{strs.creating_structure}"/>
-                                <p:menuitem value="#{strs.configuring_services}"/>
-                                <p:menuitem value="#{strs.deploy}"/>
+                                <p:menuitem value="#{strs.creating_structure}" id="creating_structure" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
+                                <p:menuitem value="#{strs.configuring_services}" id="configuring_services" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
+                                <p:menuitem value="#{strs.deploy}" id="deploy" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                                 <p:menuitem value="#{strs.monitoring}" id="monitoring" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
-                                <p:menuitem value="#{strs.data_cascading}"/>
+                                <p:menuitem value="#{strs.data_cascading}" id="data_cascading" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                             </p:submenu>
                             <p:submenu label="#{strs.data_visualization}">
-                                <p:menuitem value="#{strs.local_pcs}"/>
-                                <p:menuitem value="#{strs.web_clients}"/>
-                                <p:menuitem value="#{strs.javafx_clients}"/>
+                                <p:menuitem value="#{strs.local_pcs}" id="local_pcs" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
+                                <p:menuitem value="#{strs.web_clients}" id="web_clients" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
+                                <p:menuitem value="#{strs.javafx_clients}" id="javafx_clients" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                             </p:submenu>
                             <p:submenu label="#{strs.data_storing}">
-                                <p:menuitem value="#{strs.dbms}"/>
-                                <p:menuitem value="#{strs.file_storage}"/>
-                                <p:menuitem value="#{strs.data_replication}"/>
+                                <p:menuitem value="#{strs.dbms}" id="dbms" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
+                                <p:menuitem value="#{strs.file_storage}" id="file_storage" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
+                                <p:menuitem value="#{strs.data_replication}" id="data_replication" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                             </p:submenu>
                         </p:menu>
                     </p:layoutUnit>

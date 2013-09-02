@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
     <!-- Context parameters -->
     <context-param>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
@@ -11,7 +9,6 @@
         <param-name>primefaces.THEME</param-name>
         <param-value>black-tie</param-value>
     </context-param>
-    
     <!-- Servlets -->
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
@@ -19,40 +16,31 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>
-        <servlet-name>System Structure Servlet</servlet-name>
-        <servlet-class>org.marid.site.servlet.SystemStructureServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>ICO servlet</servlet-name>
         <servlet-class>org.marid.site.servlet.IcoServlet</servlet-class>
     </servlet>
-    
     <!-- Mapping -->
     <servlet-mapping>
         <servlet-name>Faces Servlet</servlet-name>
         <url-pattern>*.xhtml</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>System Structure Servlet</servlet-name>
-        <url-pattern>/ss</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
         <servlet-name>ICO servlet</servlet-name>
         <url-pattern>/favicon.ico</url-pattern>
     </servlet-mapping>
-    
     <!-- Session configuration -->
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
-    
     <!-- Welcome files -->
     <welcome-file-list>
         <welcome-file>index.xhtml</welcome-file>
     </welcome-file-list>
-    
     <!-- Listeners -->
     <listener>
+        <listener-class>org.marid.site.util.LoggingListener</listener-class>
+    </listener>
+    <listener>
         <listener-class>com.sun.faces.config.ConfigureListener</listener-class>
-    </listener> 
+    </listener>
 </web-app>

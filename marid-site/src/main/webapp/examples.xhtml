@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--
+Copyright (C) 2013 Dmitry Ovchinnikov
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License 
+as published by the Free Software Foundation, either version 3
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:c="http://java.sun.com/jsp/jstl/core" 
+      xmlns:cc="http://java.sun.com/jsf/composite">
+    <f:view contentType="text/html" locale="#{localeBean.locale}">
+        <h:head>
+            <f:facet name="first">
+                <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                <title>Summary</title>
+                <link rel="stylesheet" type="text/css" href="marid.css"/>
+            </f:facet>
+        </h:head>
+
+        <h:body>
+            <ui:composition>
+                <h:form>
+                    <p:panel header="Overall system cost calculator">
+                        <h:panelGrid columns="2" cellspacing="10">
+                            <h:panelGrid columns="1">
+                                <h:panelGrid columns="2" cellspacing="10">
+                                    <p:outputLabel value="#{strs.controller_count}: "/>
+                                    <p:spinner min="1" max="50" value="#{sysStructBean.controllerCount}">
+                                        <p:ajax update="ssi,ssid,price" process="@this"/>
+                                    </p:spinner>
+                                    <p:outputLabel value="#{strs.meter_count}: "/>
+                                    <p:spinner min="1" max="20" value="#{sysStructBean.meterCount}">
+                                        <p:ajax update="ssi,ssid,price" process="@this"/>
+                                    </p:spinner>
+                                    <p:outputLabel value="Meter link type: "/>
+                                    <p:selectOneMenu value="#{sysStructBean.meterLinkType}">
+                                        <f:selectItems value="#{sysStructBean.meterLinkTypes}"/>
+                                        <p:ajax update="price" process="@this"/>
+                                    </p:selectOneMenu>
+                                    <p:outputLabel value="Controller link type:"/>
+                                    <p:selectOneMenu value="#{sysStructBean.controllerLinkType}">
+                                        <f:selectItems value="#{sysStructBean.controllerLinkTypes}"/>
+                                        <p:ajax update="price" process="@this"/>
+                                    </p:selectOneMenu>
+                                    <p:outputLabel value="Currency: "/>
+                                    <p:selectOneMenu value="#{sysStructBean.currency}">
+                                        <f:selectItems value="#{sysStructBean.currencies}"/>
+                                        <p:ajax update="price" process="@this"/>
+                                    </p:selectOneMenu>
+                                </h:panelGrid>
+                                <hr/>
+                                <h:panelGrid columns="2" cellspacing="10">
+                                    <p:outputLabel value="Overall cost: "/>
+                                    <h:outputText value="#{sysStructBean.priceText} #{sysStructBean.currency}" id="price"/>
+                                </h:panelGrid>
+                            </h:panelGrid>
+                            <h:outputLink onclick="dlg.show();" value="javascript:void(0)">
+                                <p:graphicImage value="#{sysStructBean.structImage()}" width="300" height="300" id="ssi"/>
+                            </h:outputLink>
+                        </h:panelGrid>
+                    </p:panel>
+                    <p:dialog closable="true" closeOnEscape="true" widgetVar="dlg" header="System structure" resizable="false">
+                        <p:graphicImage value="#{sysStructBean.structImage()}" width="600" height="600" id="ssid"/>
+                    </p:dialog>
+                </h:form>
+            </ui:composition>
+        </h:body>
+    </f:view>
+</html>

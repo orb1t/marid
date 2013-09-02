@@ -34,30 +34,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
         <h:body>
             <ui:composition>
-                <ui:include src="texts/description_#{localeBean.language}.xhtml"/>
-                <br/>
-                <h:form>
-                    <p:panel header="Overall system cost calculator">
-                        <h:panelGrid columns="2" cellspacing="10">
-                            <h:panelGrid columns="2" cellspacing="10">
-                                <p:outputLabel value="Controller count: "/>
-                                <p:spinner min="1" max="50" value="#{sysStructBean.controllerCount}">
-                                    <p:ajax update="ssi" process="@this"/>
-                                </p:spinner>
-                                <p:outputLabel value="Meter count: "/>
-                                <p:spinner min="1" max="20" value="#{sysStructBean.meterCount}">
-                                    <p:ajax update="ssi" process="@this"/>
-                                </p:spinner>
-                            </h:panelGrid>
-                            <h:outputLink onclick="dlg.show();" value="javascript:void(0)">
-                                <p:graphicImage value="#{sysStructBean.structImage(300)}" width="300" height="300" id="ssi"/>
-                            </h:outputLink>
-                        </h:panelGrid>
-                    </p:panel>
-                    <p:dialog closable="true" closeOnEscape="true" widgetVar="dlg" header="System structure" resizable="false" dynamic="true">
-                        <p:graphicImage value="#{sysStructBean.structImage(600)}" width="600" height="600" cache="false"/>
+                <c:choose>
+                    <c:when test="#{localeBean.language == 'es'}">
+                        <p><b>Marid</b> es una plataforma libre para adquirir y visualizar datos desde un equipo remoto y para crear los sistemas DAQ de bajo costo.</p>
+                    </c:when>
+                    <c:otherwise>
+                        <p><b>Marid</b> is a free data acquisition and data visualization platform to build low-cost and high-scalable DAQ systems.</p>
+                    </c:otherwise>
+                </c:choose>
+                <p:dataList value="#{advantagesBean.advantages}" var="adv" itemType="square" styleClass="noborders">
+                    #{advantagesBean.label(adv)}
+                </p:dataList>
+                <p:panel header="#{strs.typical_usage}">
+                    <h:outputLink value="javascript:void(0)" onclick="dlg.show();">
+                        <h:graphicImage value="images/marid.png" width="100%" style="margin-top: 10px"/>
+                    </h:outputLink>
+                    <p:dialog widgetVar="dlg" closable="true" width="100%" height="600px">
+                        <p:graphicImage value="images/marid.png" width="100%"/>
                     </p:dialog>
-                </h:form>
+                </p:panel>
             </ui:composition>
         </h:body>
     </f:view>

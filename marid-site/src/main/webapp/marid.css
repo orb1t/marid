@@ -43,3 +43,7 @@ ul.ui-menu-child {
 .noborders {
     border: none !important;
 }
+
+.noborders .ui-widget-content {
+    border: none;
+}
