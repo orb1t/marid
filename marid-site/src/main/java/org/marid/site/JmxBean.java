@@ -33,11 +33,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
 import javax.faces.context.FacesContext;
 import org.marid.site.time.ChartTime;
-import org.primefaces.model.chart.CartesianChartModel;
-import org.primefaces.model.chart.ChartSeries;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -45,9 +42,7 @@ import org.primefaces.model.chart.ChartSeries;
 @ManagedBean(eager = true)
 @ApplicationScoped
 public class JmxBean extends TimerTask implements Serializable {
-    
-    @ManagedProperty("#{rb}")
-    private ResourcesBean rb;
+
     private Timer timer;
     private final MemoryMXBean memory = ManagementFactory.getMemoryMXBean();
     private final OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
@@ -57,44 +52,19 @@ public class JmxBean extends TimerTask implements Serializable {
     private final SortedMap<Object, Number> usedMemMap = new ConcurrentSkipListMap<Object, Number>();
     private final SortedMap<Object, Number> freeMemMap = new ConcurrentSkipListMap<Object, Number>();
     private final SortedMap<Object, Number> cpuMap = new ConcurrentSkipListMap<Object, Number>();
-    private CartesianChartModel memModel;
-    private ChartSeries usedMemSeries;
-    private ChartSeries freeMemSeries;
-    private CartesianChartModel cpuModel;
-    private ChartSeries cpuSeries;
-    
+
     @PostConstruct
     public void init() {
-        memModel = new CartesianChartModel();
-        cpuModel = new CartesianChartModel();
-        memModel.addSeries(usedMemSeries = new ChartSeries(rb.msg("Used memory")));
-        usedMemSeries.setData(usedMemMap);
-        memModel.addSeries(freeMemSeries = new ChartSeries(rb.msg("Free memory")));
-        freeMemSeries.setData(freeMemMap);
-        cpuModel.addSeries(cpuSeries = new ChartSeries(rb.msg("CPU load")));
-        cpuSeries.setData(cpuMap);
         timer = new Timer();
         timer.schedule(this, 0L, 1000L);
     }
-    
+
     @PreDestroy
     public void destroy() {
         timer.cancel();
         timer = null;
     }
-    
-    public void setRb(ResourcesBean rb) {
-        this.rb = rb;
-    }
-    
-    public CartesianChartModel getMemModel() {
-        return memModel;
-    }
 
-    public CartesianChartModel getCpuModel() {
-        return cpuModel;
-    }
-    
     private String formatNumber(Number number) {
         final Locale locale = FacesContext.getCurrentInstance().getViewRoot().getLocale();
         final NumberFormat format = NumberFormat.getNumberInstance(locale);
@@ -104,45 +74,57 @@ public class JmxBean extends TimerTask implements Serializable {
     public String getCommitedMemory() {
         return formatNumber(memory.getHeapMemoryUsage().getCommitted());
     }
-    
+
     public String getMaxMemory() {
         return formatNumber(memory.getHeapMemoryUsage().getMax());
     }
-    
+
     public String getUsedMemory() {
         return formatNumber(memory.getHeapMemoryUsage().getUsed());
     }
-    
+
     public String getInitMemory() {
         return formatNumber(memory.getHeapMemoryUsage().getInit());
     }
-    
+
     public double getCpuLoad() {
         return os.getSystemLoadAverage();
     }
-    
+
     public int getThreadCount() {
         return threads.getThreadCount();
     }
-    
+
     public int getPeakThreadCount() {
         return threads.getPeakThreadCount();
     }
-    
+
     public int getDaemonThreadCount() {
         return threads.getDaemonThreadCount();
     }
-    
+
     public int getLoadedClassCount() {
         return clb.getLoadedClassCount();
     }
-    
+
     public long getTotalLoadedClassCount() {
         return clb.getTotalLoadedClassCount();
     }
-    
+
     public long getUnloadedClassCount() {
         return clb.getUnloadedClassCount();
+    }
+
+    public SortedMap<Object, Number> getUsedMemMap() {
+        return usedMemMap;
+    }
+
+    public SortedMap<Object, Number> getFreeMemMap() {
+        return freeMemMap;
+    }
+
+    public SortedMap<Object, Number> getCpuMap() {
+        return cpuMap;
     }
 
     @Override

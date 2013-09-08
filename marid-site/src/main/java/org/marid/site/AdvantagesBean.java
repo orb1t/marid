@@ -29,11 +29,11 @@ import org.marid.site.model.Advantage;
 @SessionScoped
 public class AdvantagesBean implements Serializable {
     
-    @ManagedProperty("#{rb}")
-    private ResourcesBean rb;
+    @ManagedProperty("#{localeBean}")
+    private LocaleBean localeBean;
 
-    public void setRb(ResourcesBean rb) {
-        this.rb = rb;
+    public void setLocaleBean(LocaleBean localeBean) {
+        this.localeBean = localeBean;
     }
     
     public Advantage[] getAdvantages() {
@@ -41,7 +41,11 @@ public class AdvantagesBean implements Serializable {
     }
     
     public String label(Advantage advantage) {
-        return rb.getBundle().containsKey(advantage.name()) ?
-                rb.getBundle().getString(advantage.name()) : advantage.getText();
+        final String label = localeBean.msg(advantage.name());
+        if (advantage.name().equals(label)) {
+            return advantage.getText();
+        } else {
+            return label;
+        }
     }
 }

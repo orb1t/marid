@@ -54,9 +54,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                 <p:menuitem value="#{strs.about_author}" id="about_author" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                                 <p:menuitem value="#{strs.system_requirements}" id="system_requirements" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                                 <p:menuitem value="#{strs.examples}" id="examples" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
+                                <p:menuitem value="#{strs.download}" id="download" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                             </p:submenu>
                             <p:submenu label="#{strs.investments}">
-                                <p:menuitem value="#{strs.development_cost}" id="development_cost" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                                 <p:menuitem value="#{strs.roi}" id="roi" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                                 <p:menuitem value="#{strs.why_libre}" id="why_libre" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                             </p:submenu>
@@ -65,7 +65,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                 <p:menuitem value="#{strs.configuring_services}" id="configuring_services" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                                 <p:menuitem value="#{strs.deploy}" id="deploy" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                                 <p:menuitem value="#{strs.monitoring}" id="monitoring" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
-                                <p:menuitem value="#{strs.data_cascading}" id="data_cascading" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
                             </p:submenu>
                             <p:submenu label="#{strs.data_visualization}">
                                 <p:menuitem value="#{strs.local_pcs}" id="local_pcs" actionListener="#{pageSwitcherBean.pageSwitch}" update="mainPanel"/>
@@ -85,12 +84,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         </p:panel>
                     </p:layoutUnit>
                     <p:layoutUnit position="south">
-                        <table width="100%">
-                            <tr>
-                                <td>#{strs.copyright}</td>
-                                <td align="right">#{strs.web_design}: Dmitry Ovchinnikov</td>
-                            </tr>
-                        </table>
+                        <h:panelGrid columns="2" columnClasses="toLeft,toRight">
+                            <h:outputText value="#{strs.copyright}"/>
+                            <h:outputText value="#{strs.web_design}: Dmitry Ovchinnikov"/>
+                        </h:panelGrid>
                     </p:layoutUnit>               
                 </p:layout>
             </h:form>

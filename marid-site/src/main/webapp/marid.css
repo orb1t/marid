@@ -1,11 +1,3 @@
-/* 
-    Document   : marid
-    Created on : 05-ago-2013, 10:30:51
-    Author     : Dmitry Ovchinnikov
-    Description:
-        Purpose of the stylesheet follows.
-*/
-
 .ui-widget, .ui-widget .ui-widget {
     font-size: 12px !important;
 }
@@ -46,4 +38,13 @@ ul.ui-menu-child {
 
 .noborders .ui-widget-content {
     border: none;
+}
+
+.toLeft {
+    text-align: left;
+}
+
+.toRight {
+    text-align: right;
+    width: auto;
 }

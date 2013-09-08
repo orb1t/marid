@@ -26,26 +26,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <h:head>
             <f:facet name="first">
                 <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
-                <title>Memory monitoring</title>
+                <title>Summary</title>
                 <link rel="stylesheet" type="text/css" href="marid.css"/>
             </f:facet>
         </h:head>
 
         <h:body>
             <ui:composition>
-                <h:form>
-                    <p:poll interval="3" update="cpuChart"/>
-                    <p:lineChart 
-                        id="cpuChart" 
-                        stacked="true" 
-                        legendPosition="e"
-                        fill="true"
-                        style="height: 300px"
-                        title="#{strs.memory_consumption}"
-                        xaxisLabel="#{strs.time}"
-                        yaxisLabel="#{strs.cpu_load}, %"
-                        value="#{jmxChartBean.cpuModel}"/>
-                </h:form>
+                <h:graphicImage value="images/file-storage.png" style="max-width: 800px; width: 100%"/>
             </ui:composition>
         </h:body>
     </f:view>
