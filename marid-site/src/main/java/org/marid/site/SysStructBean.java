@@ -21,9 +21,7 @@ import com.mxgraph.canvas.mxImageCanvas;
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
-import com.tunyk.currencyconverter.BankUaCom;
 import com.tunyk.currencyconverter.api.Currency;
-import com.tunyk.currencyconverter.api.CurrencyConverter;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import java.awt.Color;
 import java.awt.image.RenderedImage;
@@ -36,7 +34,6 @@ import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.EnumSet;
 import java.util.Set;
-import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
@@ -56,24 +53,20 @@ public class SysStructBean implements Serializable {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     @ManagedProperty("#{localeBean}")
     private LocaleBean localeBean;
+    @ManagedProperty("#{currencyConverterBean}")
+    private CurrencyConverterBean currencyConverterBean;
     private int controllerCount = 5;
     private int meterCount = 5;
     private Currency currency = Currency.USD;
     private MeterLinkType meterLinkType = MeterLinkType.LAN;
     private ControllerLinkType controllerLinkType = ControllerLinkType.LAN;
-    private CurrencyConverter currencyConverter;
-
-    @PostConstruct
-    public void init() {
-        try {
-            currencyConverter = new BankUaCom(Currency.USD, Currency.EUR);
-        } catch (CurrencyConverterException x) {
-            logger.warn("Currency converter exception", x);
-        }
-    }
 
     public void setLocaleBean(LocaleBean localeBean) {
         this.localeBean = localeBean;
+    }
+
+    public void setCurrencyConverterBean(CurrencyConverterBean currencyConverterBean) {
+        this.currencyConverterBean = currencyConverterBean;
     }
 
     public Set<MeterLinkType> getMeterLinkTypes() {
@@ -257,18 +250,7 @@ public class SysStructBean implements Serializable {
     }
 
     public float getPrice() {
-        if (currencyConverter != null) {
-            try {
-                return currencyConverter.convertCurrency(getPriceInUsd(), currency);
-            } catch (CurrencyConverterException x) {
-                logger.warn("Currency converter exception", x);
-                currency = Currency.USD;
-                return getPriceInUsd();
-            }
-        } else {
-            currency = Currency.USD;
-            return getPriceInUsd();
-        }
+        return currencyConverterBean.convertTo(getPriceInUsd(), currency);
     }
 
     public String getPriceText() {

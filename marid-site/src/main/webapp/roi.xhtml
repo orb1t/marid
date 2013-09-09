@@ -34,6 +34,69 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <h:body>
             <ui:composition>
                 <p:graphicImage value="#{roiBean.image}"/>
+                <hr/>
+                <h:form>
+                    <p:panelGrid style="width: 100%">
+                        <p:row>
+                            <p:column rowspan="4">
+                                <h:outputText value="#{strs.currency}:"/>
+                            </p:column>
+                            <p:column rowspan="4">
+                                <p:selectOneMenu value="#{roiBean.currency}">
+                                    <f:selectItems value="#{roiBean.currencies}"/>
+                                    <p:ajax process="@this" update="asc,cpm"/>
+                                </p:selectOneMenu>
+                            </p:column>
+                            <p:column rowspan="5" width="20px"/>
+                            <p:column><h:outputText value="#{strs.average_system_cost}:"/></p:column>
+                            <p:column>
+                                <h:outputFormat id="asc" value="{0}">
+                                    <f:param value="#{currencyConverterBean.convertTo(roiBean.averagePrice, roiBean.currency)}"/>
+                                </h:outputFormat>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column><h:outputText value="#{strs.systems_per_year}:"/></p:column>
+                            <p:column>
+                                <h:outputFormat value="{0}">
+                                    <f:param value="#{10}"/>
+                                </h:outputFormat>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column><h:outputText value="#{strs.revenue}:"/></p:column>
+                            <p:column>
+                                <h:outputFormat value="{0,number,percent}">
+                                    <f:param value="#{0.1}"/>
+                                </h:outputFormat>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column><h:outputText value="#{strs.development_time}:"/></p:column>
+                            <p:column>
+                                <h:outputFormat value="{0} #{strs.months}">
+                                    <f:param value="#{12}"/>
+                                </h:outputFormat>
+                            </p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column>
+                                <h:outputText value="ROI:"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputFormat value="{0}">
+                                    <f:param value="#{roiBean.roi}"/>
+                                </h:outputFormat>
+                            </p:column>
+                            <p:column><h:outputText value="#{strs.average_costs_per_month}:"/></p:column>
+                            <p:column>
+                                <h:outputFormat id="cpm" value="{0}">
+                                    <f:param value="#{currencyConverterBean.convertTo(roiBean.costsPerMonth, roiBean.currency)}"/>
+                                </h:outputFormat>
+                            </p:column>
+                        </p:row>
+                    </p:panelGrid>
+                </h:form>
             </ui:composition>
         </h:body>
     </f:view>
