@@ -31,8 +31,6 @@
     <packaging>war</packaging>
 
     <properties>
-        <maven.compiler.source>1.6</maven.compiler.source>
-        <maven.compiler.target>1.6</maven.compiler.target>
         <netbeans.hint.license>agpl30</netbeans.hint.license>
         <jgraphx.version>2_1_0_9</jgraphx.version>
         <jgraphx.path>downloads/jgraphx/archive/jgraphx-${jgraphx.version}.zip</jgraphx.path>
@@ -91,19 +89,16 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.5</version>
         </dependency>
         
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.5</version>
         </dependency>
         
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
-            <version>1.7.5</version>
         </dependency>
                 
         <dependency>

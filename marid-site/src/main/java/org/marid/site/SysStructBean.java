@@ -22,7 +22,6 @@ import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 import com.tunyk.currencyconverter.api.Currency;
-import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import java.awt.Color;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;

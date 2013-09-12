@@ -30,6 +30,7 @@
         <maven.compiler.target>1.7</maven.compiler.target>
         <lib>${project.build.directory}/lib</lib>
         <groovy.version>2.1.6</groovy.version>
+        <slf.version>1.7.5</slf.version>
         <specification.version>${implementation.version}</specification.version>
         <specification.vendor>${project.organization.name}</specification.vendor>
         <specification.title>${project.name}</specification.title>
@@ -83,12 +84,16 @@
                             <executions>
                                 <execution>
                                     <id>groovy-compile-source</id>
-                                    <goals><goal>compile</goal></goals>
+                                    <goals>
+                                        <goal>compile</goal>
+                                    </goals>
                                     <phase>compile</phase>
                                 </execution>
                                 <execution>
                                     <id>groovy-compile-test-source</id>
-                                    <goals><goal>testCompile</goal></goals>
+                                    <goals>
+                                        <goal>testCompile</goal>
+                                    </goals>
                                     <phase>test-compile</phase>
                                 </execution>
                             </executions>
@@ -205,6 +210,7 @@
         <module>marid-modules</module>
         <module>marid-test</module>
         <module>marid-site</module>
+        <module>marid-site-standalone</module>
     </modules>
 
     <build>
@@ -515,6 +521,42 @@
                 <classifier>indy</classifier>
                 <version>${groovy.version}</version>
             </dependency>
+            
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-nop</artifactId>
+                <version>${slf.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-jdk14</artifactId>
+                <version>${slf.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jul-to-slf4j</artifactId>
+                <version>${slf.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.marid</groupId>
@@ -525,6 +567,20 @@
             <dependency>
                 <groupId>org.marid</groupId>
                 <artifactId>marid-runtime</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.marid</groupId>
+                <artifactId>marid-site</artifactId>
+                <type>war</type>
+                <version>${project.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.marid</groupId>
+                <artifactId>marid-test</artifactId>
+                <scope>test</scope>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
