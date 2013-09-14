@@ -49,9 +49,9 @@ public class JmxBean extends TimerTask implements Serializable {
     private final ThreadMXBean threads = ManagementFactory.getThreadMXBean();
     private final ClassLoadingMXBean clb = ManagementFactory.getClassLoadingMXBean();
     private final Runtime runtime = Runtime.getRuntime();
-    private final SortedMap<Object, Number> usedMemMap = new ConcurrentSkipListMap<Object, Number>();
-    private final SortedMap<Object, Number> freeMemMap = new ConcurrentSkipListMap<Object, Number>();
-    private final SortedMap<Object, Number> cpuMap = new ConcurrentSkipListMap<Object, Number>();
+    private final SortedMap<Object, Number> usedMemMap = new ConcurrentSkipListMap<>();
+    private final SortedMap<Object, Number> freeMemMap = new ConcurrentSkipListMap<>();
+    private final SortedMap<Object, Number> cpuMap = new ConcurrentSkipListMap<>();
 
     @PostConstruct
     public void init() {

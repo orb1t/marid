@@ -20,22 +20,18 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
- * Marid SHOP.
- *
  * @author Dmitry Ovchinnikov
  */
 public class Site {
 
     public static void main(String... args) throws Exception {
-        {
-            int port = Integer.parseInt(get("MARID.SITE.PORT", "8080"));
-            String webApp = Site.class.getResource("/marid-site.war").toString();
-            Server server = new Server(port);
-            WebAppContext webAppContext = new WebAppContext(webApp, "/");
-            server.setHandler(webAppContext);
-            server.start();
-            server.join();
-        }
+        int port = Integer.parseInt(get("MARID.SITE.PORT", "8080"));
+        String webApp = Site.class.getResource("/marid-site.war").toString();
+        Server server = new Server(port);
+        WebAppContext webAppContext = new WebAppContext(webApp, "/");
+        server.setHandler(webAppContext);
+        server.start();
+        server.join();
     }
 
     private static String get(String key, String def) {

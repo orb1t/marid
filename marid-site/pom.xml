@@ -93,14 +93,9 @@
         
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
+            <artifactId>slf4j-jdk14</artifactId>
         </dependency>
-        
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jul-to-slf4j</artifactId>
-        </dependency>
-                
+                        
         <dependency>
             <groupId>com.tunyk.currencyconverter</groupId>
             <artifactId>currency-converter-api</artifactId>

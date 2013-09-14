@@ -38,9 +38,6 @@
     </welcome-file-list>
     <!-- Listeners -->
     <listener>
-        <listener-class>org.marid.site.util.LoggingListener</listener-class>
-    </listener>
-    <listener>
         <listener-class>com.sun.faces.config.ConfigureListener</listener-class>
     </listener>
 </web-app>
