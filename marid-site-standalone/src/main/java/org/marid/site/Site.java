@@ -17,6 +17,7 @@
 package org.marid.site;
 
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.util.log.JavaUtilLog;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
@@ -25,6 +26,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 public class Site {
 
     public static void main(String... args) throws Exception {
+        System.setProperty(JavaUtilLog.class.getPackage().getName() + ".class", JavaUtilLog.class.getName());
         int port = Integer.parseInt(get("MARID.SITE.PORT", "8080"));
         String webApp = Site.class.getResource("/marid-site.war").toString();
         Server server = new Server(port);
