@@ -15,7 +15,6 @@
 
     <properties>
         <appassdir>${project.build.directory}/appassembler</appassdir>
-        <jetty.version>9.0.5.v20130815</jetty.version>
     </properties>
 
     <dependencies>
