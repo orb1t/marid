@@ -27,10 +27,10 @@ public class Site {
 
     public static void main(String... args) throws Exception {
         System.setProperty(JavaUtilLog.class.getPackage().getName() + ".class", JavaUtilLog.class.getName());
-        int port = Integer.parseInt(get("MARID.SITE.PORT", "8080"));
-        String webApp = Site.class.getResource("/marid-site.war").toString();
-        Server server = new Server(port);
-        WebAppContext webAppContext = new WebAppContext(webApp, "/");
+        final int port = Integer.parseInt(get("MARID.SITE.PORT", "8080"));
+        final String webApp = Site.class.getResource("/marid-site.war").toString();
+        final Server server = new Server(port);
+        final WebAppContext webAppContext = new WebAppContext(webApp, "/");
         server.setHandler(webAppContext);
         server.start();
         server.join();
