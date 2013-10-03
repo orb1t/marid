@@ -22,13 +22,11 @@ import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
-import com.tunyk.currencyconverter.api.Currency;
 import java.awt.Color;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.Currency;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
@@ -45,18 +43,18 @@ public class RoiBean implements Serializable {
     
     @ManagedProperty("#{localeBean}")
     private LocaleBean localeBean;
-    private Currency currency = Currency.USD;
+    private String currency = "USD";
     private float averagePrice = 50000.0f;
     private int systemsPerYear = 10;
     private float revenue = 0.1f;
     private int developmentTime = 12;
     private float costsPerMonth = 4000.0f;
 
-    public Currency getCurrency() {
+    public String getCurrency() {
         return currency;
     }
 
-    public void setCurrency(Currency currency) {
+    public void setCurrency(String currency) {
         this.currency = currency;
     }
 
@@ -86,10 +84,6 @@ public class RoiBean implements Serializable {
         return rev / exp;
     }
     
-    public Set<Currency> getCurrencies() {
-        return EnumSet.allOf(Currency.class);
-    }
-
     public void setLocaleBean(LocaleBean localeBean) {
         this.localeBean = localeBean;
     }

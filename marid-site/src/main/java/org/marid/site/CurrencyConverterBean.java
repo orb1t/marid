@@ -16,45 +16,67 @@
  */
 package org.marid.site;
 
-import com.tunyk.currencyconverter.BankUaCom;
-import com.tunyk.currencyconverter.api.Currency;
-import com.tunyk.currencyconverter.api.CurrencyConverter;
-import com.tunyk.currencyconverter.api.CurrencyConverterException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serializable;
-import javax.annotation.PostConstruct;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Currency;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.primefaces.json.JSONException;
+import org.primefaces.json.JSONObject;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @ManagedBean
 @ApplicationScoped
-public class CurrencyConverterBean implements Serializable {
+public class CurrencyConverterBean implements Serializable, Comparator<Currency> {
     
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-    private CurrencyConverter currencyConverter;
+    private static final Logger LOG = Logger.getLogger(CurrencyConverterBean.class.getName());
     
-    @PostConstruct
-    public void init() {
-        try {
-            currencyConverter = new BankUaCom(Currency.USD, Currency.EUR);
-        } catch (CurrencyConverterException x) {
-            logger.warn("Currency converter exception", x);
-        }
+    private final Set<String> currencies = new LinkedHashSet<>(Arrays.asList("USD", "EUR", "GBP", "CHF", "RUR"));
+
+    @Override
+    public int compare(Currency o1, Currency o2) {
+        return o1.getCurrencyCode().compareTo(o2.getCurrencyCode());
+    }
+
+    public Set<String> getCurrencies() {
+        return currencies;
     }
     
-    public float convertTo(float amount, Currency currency) {
-        if (currencyConverter != null) {
-            try {
-                return currencyConverter.convertCurrency(amount, currency);
-            } catch (CurrencyConverterException x) {
-                logger.warn("Currency converter exception", x);
-                return amount;
+    public float convertTo(float amount, String currency) {
+        try {
+            final URL url = new URL(new StringBuilder("http://www.google.com/ig/calculator?hl=en&q=")
+                    .append(amount)
+                    .append("USD")
+                    .append("%3D%3F")
+                    .append(currency)
+                    .toString());
+            final StringBuilder responseBuilder = new StringBuilder();
+            try (final InputStreamReader r = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)) {
+                final char[] buf = new char[128];
+                while (true) {
+                    final int n = r.read(buf);
+                    if (n < 0) {
+                        break;
+                    }
+                    responseBuilder.append(buf, 0, n);
+                }
             }
-        } else {
+            final JSONObject json = new JSONObject(responseBuilder.toString());
+            final String value = json.getString("rhs").split("\\s+")[0];
+            return Float.parseFloat(value.replaceAll("[^\\d.]", ""));
+        } catch (IOException | JSONException x) {
+            LOG.log(Level.WARNING, "Unable to convert the currency", x);
             return amount;
         }
     }

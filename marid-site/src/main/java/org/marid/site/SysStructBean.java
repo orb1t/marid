@@ -21,7 +21,6 @@ import com.mxgraph.canvas.mxImageCanvas;
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
-import com.tunyk.currencyconverter.api.Currency;
 import java.awt.Color;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
@@ -31,16 +30,17 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.text.NumberFormat;
+import java.util.Currency;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.imageio.ImageIO;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -49,14 +49,14 @@ import org.slf4j.LoggerFactory;
 @SessionScoped
 public class SysStructBean implements Serializable {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger LOG = Logger.getLogger(SysStructBean.class.getName());
     @ManagedProperty("#{localeBean}")
     private LocaleBean localeBean;
     @ManagedProperty("#{currencyConverterBean}")
     private CurrencyConverterBean currencyConverterBean;
     private int controllerCount = 5;
     private int meterCount = 5;
-    private Currency currency = Currency.USD;
+    private String currency = "USD";
     private MeterLinkType meterLinkType = MeterLinkType.LAN;
     private ControllerLinkType controllerLinkType = ControllerLinkType.LAN;
 
@@ -76,10 +76,6 @@ public class SysStructBean implements Serializable {
         return EnumSet.allOf(ControllerLinkType.class);
     }
 
-    public Set<Currency> getCurrencies() {
-        return EnumSet.allOf(Currency.class);
-    }
-
     public int getMeterCount() {
         return meterCount;
     }
@@ -96,7 +92,7 @@ public class SysStructBean implements Serializable {
         return controllerLinkType;
     }
 
-    public Currency getCurrency() {
+    public String getCurrency() {
         return currency;
     }
 
@@ -116,7 +112,7 @@ public class SysStructBean implements Serializable {
         this.controllerLinkType = controllerLinkType;
     }
 
-    public void setCurrency(Currency currency) {
+    public void setCurrency(String currency) {
         this.currency = currency;
     }
 
@@ -151,7 +147,7 @@ public class SysStructBean implements Serializable {
                 try {
                     return new DefaultStreamedContent(new FileInputStream(cachedFile), "image/png");
                 } catch (Exception x) {
-                    logger.warn("Unable to get cached image", x);
+                    LOG.log(Level.WARNING, "Unable to get cached image", x);
                 }
             }
         }
@@ -167,7 +163,7 @@ public class SysStructBean implements Serializable {
                     cachedFile.deleteOnExit();
                     return true;
                 } catch (Exception x) {
-                    logger.warn("Unable to write to the cache", x);
+                    LOG.log(Level.WARNING, "Unable to write to the cache", x);
                     return false;
                 }
             } else {

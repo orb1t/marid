@@ -43,7 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                             </p:column>
                             <p:column rowspan="4">
                                 <p:selectOneMenu value="#{roiBean.currency}">
-                                    <f:selectItems value="#{roiBean.currencies}"/>
+                                    <f:selectItems value="#{currencyConverterBean.currencies}"/>
                                     <p:ajax process="@this" update="asc,cpm"/>
                                 </p:selectOneMenu>
                             </p:column>

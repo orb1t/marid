@@ -59,7 +59,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                     </p:selectOneMenu>
                                     <p:outputLabel value="Currency: "/>
                                     <p:selectOneMenu value="#{sysStructBean.currency}">
-                                        <f:selectItems value="#{sysStructBean.currencies}"/>
+                                        <f:selectItems value="#{currencyConverterBean.currencies}"/>
                                         <p:ajax update="price" process="@this"/>
                                     </p:selectOneMenu>
                                 </h:panelGrid>
