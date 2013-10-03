@@ -16,6 +16,9 @@
  */
 package org.marid.site;
 
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.log.JavaUtilLog;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -24,8 +27,19 @@ import org.eclipse.jetty.webapp.WebAppContext;
  * @author Dmitry Ovchinnikov
  */
 public class Site {
+    
+    private static final Logger LOG = Logger.getLogger(Site.class.getName());
 
     public static void main(String... args) throws Exception {
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                final LogRecord r = new LogRecord(Level.WARNING, "Unhandled error in {0}");
+                r.setParameters(new Object[] {t});
+                r.setThrown(e);
+                LOG.log(r);
+            }
+        });
         System.setProperty(JavaUtilLog.class.getPackage().getName() + ".class", JavaUtilLog.class.getName());
         final int port = Integer.parseInt(get("MARID.SITE.PORT", "8080"));
         final String webApp = Site.class.getResource("/marid-site.war").toString();
