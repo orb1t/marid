@@ -10,7 +10,7 @@
         <action>
             <actionName>run</actionName>
             <goals>
-                <goal>jetty:run</goal>
+                <goal>tomcat7:run-war</goal>
             </goals>
         </action>
         <action>
@@ -29,7 +29,7 @@
         <action>
             <actionName>debug</actionName>
             <goals>
-                <goal>jetty:run</goal>
+                <goal>tomcat7:run-war</goal>
             </goals>
             <properties>
                 <jpda.listen>maven</jpda.listen>

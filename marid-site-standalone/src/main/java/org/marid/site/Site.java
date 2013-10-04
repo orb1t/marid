@@ -16,12 +16,15 @@
  */
 package org.marid.site;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.util.log.JavaUtilLog;
-import org.eclipse.jetty.webapp.WebAppContext;
+import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -40,14 +43,22 @@ public class Site {
                 LOG.log(r);
             }
         });
-        System.setProperty(JavaUtilLog.class.getPackage().getName() + ".class", JavaUtilLog.class.getName());
         final int port = Integer.parseInt(get("MARID.SITE.PORT", "8080"));
-        final String webApp = Site.class.getResource("/marid-site.war").toString();
-        final Server server = new Server(port);
-        final WebAppContext webAppContext = new WebAppContext(webApp, "/");
-        server.setHandler(webAppContext);
-        server.start();
-        server.join();
+        final Path basePath = Paths.get("base");
+        if (Files.exists(basePath)) {
+            FileUtils.deleteDirectory(basePath.toFile());
+        }
+        final Path webApps = basePath.resolve("webapps");
+        Files.createDirectories(webApps);
+        try (final InputStream is = Site.class.getResourceAsStream("/marid-site.war")) {
+            Files.copy(is, webApps.resolve("marid-site.war"));
+        }
+        final Tomcat tomcat = new Tomcat();
+        tomcat.setPort(port);
+        tomcat.setBaseDir(basePath.toString());
+        tomcat.addWebapp("/", "marid-site.war");
+        tomcat.start();
+        tomcat.getServer().await();
     }
 
     private static String get(String key, String def) {
