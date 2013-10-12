@@ -16,42 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.xml;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.events.Attribute;
+package org.marid.groovy;
 
 import java.util.Map;
-
-import static org.marid.Scripting.SCRIPTING;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SubstitutedXmlAttribute extends SubstitutedXmlEvent<Attribute> implements Attribute {
+public interface BindingProvider {
 
-    public SubstitutedXmlAttribute(Attribute delegate, Map<String, Object> bindings) {
-        super(delegate, bindings);
-    }
-
-    @Override
-    public QName getName() {
-        return delegate.getName();
-    }
-
-    @Override
-    public String getValue() {
-        String v = delegate.getValue();
-        return v == null ? null : SCRIPTING.replace(v, bindings);
-    }
-
-    @Override
-    public String getDTDType() {
-        return delegate.getDTDType();
-    }
-
-    @Override
-    public boolean isSpecified() {
-        return delegate.isSpecified();
-    }
+    Map<String, Object> getBinding();
 }

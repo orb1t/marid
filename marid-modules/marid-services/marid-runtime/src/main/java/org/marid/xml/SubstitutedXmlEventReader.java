@@ -18,13 +18,13 @@
 
 package org.marid.xml;
 
+import org.marid.groovy.GroovyRuntime;
+
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.XMLEvent;
 import java.util.Map;
-
-import static org.marid.Scripting.SCRIPTING;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -71,7 +71,7 @@ public class SubstitutedXmlEventReader implements XMLEventReader {
     @Override
     public String getElementText() throws XMLStreamException {
         String v = delegate.getElementText();
-        return v == null ? null : SCRIPTING.replace(v, bindings);
+        return v == null ? null : GroovyRuntime.replace(v, bindings);
     }
 
     @Override

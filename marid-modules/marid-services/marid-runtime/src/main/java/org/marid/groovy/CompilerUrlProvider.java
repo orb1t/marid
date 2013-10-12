@@ -16,27 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.methods;
+package org.marid.groovy;
 
-import org.marid.Versioning;
-
-import java.util.prefs.Preferences;
+import java.net.URL;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PrefMethods {
+public interface CompilerUrlProvider {
 
-    public static Preferences preferences(Class<?> klass, String... nodes) {
-        String version = Versioning.getImplementationVersion(klass);
-        Preferences prefs = Preferences.userRoot().node("marid").node(version);
-        for (String n : nodes) {
-            prefs = prefs.node(n);
-        }
-        return prefs;
-    }
-
-    public static Preferences preferences(String... nodes) {
-        return preferences(Versioning.class, nodes);
-    }
+    List<URL> getUrls();
 }

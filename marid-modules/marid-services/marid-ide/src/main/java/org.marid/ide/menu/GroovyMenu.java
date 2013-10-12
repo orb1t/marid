@@ -19,9 +19,11 @@
 package org.marid.ide.menu;
 
 import groovy.lang.Closure;
+import groovy.lang.GroovyCodeSource;
 import groovy.lang.GroovyObjectSupport;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.StringGroovyMethods;
+import org.marid.groovy.GroovyRuntime;
 import org.marid.util.CollectionUtils;
 
 import java.awt.event.ActionEvent;
@@ -32,7 +34,6 @@ import java.util.logging.Logger;
 import static java.util.Map.Entry;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.asType;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.plus;
-import static org.marid.Scripting.SCRIPTING;
 import static org.marid.ide.menu.MenuType.MENU;
 import static org.marid.methods.LogMethods.warning;
 
@@ -42,7 +43,8 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     private void loadEntries(String script, List<MenuEntry> ens, ClassLoader l) throws Exception {
-        Map<String, Object> map = (Map<String, Object>) SCRIPTING.eval(l.getResource(script));
+        GroovyCodeSource gcs = new GroovyCodeSource(l.getResource(script));
+        Map<String, Object> map = (Map<String, Object>) GroovyRuntime.SHELL.evaluate(gcs);
         for (Entry<String, Object> e : map.entrySet()) {
             fillEntries(null, e, ens);
         }
@@ -57,7 +59,7 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
             while (e.hasMoreElements()) {
                 URL url = e.nextElement();
                 try {
-                    List list = (List) SCRIPTING.eval(url);
+                    List list = (List) GroovyRuntime.SHELL.evaluate(new GroovyCodeSource(url));
                     for (Object script : list) {
                         try {
                             loadEntries(script.toString(), entries, l);

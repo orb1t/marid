@@ -20,8 +20,8 @@ package org.marid.ide.swing.impl.widgets;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
-import org.marid.Scripting;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,7 +34,7 @@ import static javax.swing.JSplitPane.VERTICAL_SPLIT;
  */
 public class ConsoleImpl extends AbstractSwingWidget implements ResizableWidget {
 
-    private static final Logger log = Logger.getLogger(ConsoleImpl.class.getName());
+    private static final Logger LOG = Logger.getLogger(ConsoleImpl.class.getName());
     private final RSyntaxDocument document;
     private final RSyntaxTextArea commandLine;
     private final RTextScrollPane commandLineScroller;
@@ -45,7 +45,7 @@ public class ConsoleImpl extends AbstractSwingWidget implements ResizableWidget 
 
     public ConsoleImpl() {
         super("Console", "console");
-        document = new RSyntaxDocument(Scripting.SCRIPTING.getMime());
+        document = new RSyntaxDocument(SyntaxConstants.SYNTAX_STYLE_GROOVY);
         commandLine = new RSyntaxTextArea(document);
         results = new JPanel();
         resultsScroller = new JScrollPane(results);

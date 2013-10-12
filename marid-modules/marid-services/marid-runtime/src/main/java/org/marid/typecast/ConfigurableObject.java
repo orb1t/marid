@@ -18,11 +18,12 @@
 
 package org.marid.typecast;
 
-import org.marid.Scripting;
+import groovy.lang.Closure;
+import groovy.lang.GString;
+import org.codehaus.groovy.runtime.DefaultGroovyMethods;
+import org.codehaus.groovy.runtime.StringGroovyMethods;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -43,7 +44,26 @@ public class ConfigurableObject implements Configurable {
 
     @Override
     public <T> T get(Class<T> klass, String key) {
-        return Scripting.SCRIPTING.cast(klass, parameters.get(key));
+        Object v = parameters.get(key);
+        if (v instanceof Number) {
+            return DefaultGroovyMethods.asType((Number) v, klass);
+        } else if (v instanceof Collection) {
+            return DefaultGroovyMethods.asType((Collection) v, klass);
+        } else if (v instanceof Map) {
+            return DefaultGroovyMethods.asType((Map) v, klass);
+        } else if (v instanceof Object[]) {
+            return DefaultGroovyMethods.asType((Object[]) v, klass);
+        } else if (v instanceof String) {
+            return StringGroovyMethods.asType((String) v, klass);
+        } else if (v instanceof CharSequence) {
+            return StringGroovyMethods.asType((CharSequence) v, klass);
+        } else if (v instanceof Closure) {
+            return DefaultGroovyMethods.asType((Closure) v, klass);
+        } else if (v instanceof GString) {
+            return StringGroovyMethods.asType((GString) v, klass);
+        } else {
+            return DefaultGroovyMethods.asType(v, klass);
+        }
     }
 
     @Override

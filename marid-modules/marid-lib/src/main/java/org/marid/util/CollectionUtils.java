@@ -18,8 +18,6 @@
 
 package org.marid.util;
 
-import org.marid.Scripting;
-
 import java.lang.reflect.Array;
 import java.util.Objects;
 
@@ -67,25 +65,6 @@ public class CollectionUtils {
         return -1;
     }
 
-    public static <T> int deepFind(T[] array, T elem, int start) {
-        for (int i = start; i < array.length; i++) {
-            if (Scripting.SCRIPTING.equals(array[i], elem)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public static int deepFind(Object array, Object elem, int start) {
-        int n = Array.getLength(array);
-        for (int i = start; i < n; i++) {
-            if (Scripting.SCRIPTING.equals(Array.get(array, i), elem)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     public static <T> int findLast(T[] array, T elem, int start) {
         for (int i = array.length - start - 1; i >=0; i--) {
             if (Objects.equals(array[i], elem)) {
@@ -99,25 +78,6 @@ public class CollectionUtils {
         int n = Array.getLength(array);
         for (int i = n - start - 1; i >= 0; i--) {
             if (Objects.equals(Array.get(array, i), elem)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public static <T> int deepFindLast(T[] array, T elem, int start) {
-        for (int i = array.length - start - 1; i >= 0; i--) {
-            if (Scripting.SCRIPTING.equals(array[i], elem)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public static int deepFindLast(Object array, Object elem, int start) {
-        int n = Array.getLength(array);
-        for (int i = n - start - 1; i >= 0; i--) {
-            if (Scripting.SCRIPTING.equals(Array.get(array, i), elem)) {
                 return i;
             }
         }
