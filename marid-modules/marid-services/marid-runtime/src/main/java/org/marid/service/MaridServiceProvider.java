@@ -18,42 +18,12 @@
 
 package org.marid.service;
 
-import org.marid.l10n.Localized;
-import org.marid.typecast.Configurable;
-
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Service extends Configurable, ThreadFactory, Localized {
+public interface MaridServiceProvider {
 
-    public String name();
-
-    public String id();
-
-    public String type();
-
-    public String version();
-
-    public String label();
-
-    public void start() throws Exception;
-
-    public void stop() throws Exception;
-
-    public boolean running();
-
-    public ThreadGroup threadGroup();
-
-    public Service getService(String type);
-
-    public Map<String, String> serviceMap();
-
-    public Future<?> send(Object message);
-
-    public Future<List<?>> send(Object... messages);
+    List<MaridService> getServices();
 }

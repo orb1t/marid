@@ -18,10 +18,23 @@
 
 package org.marid.service;
 
+import com.google.common.util.concurrent.Service;
+
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface DelegatedService extends Service {
+public interface MaridService extends Service, ThreadFactory {
 
-    public Service delegate();
+    ThreadGroup threadGroup();
+
+    String id();
+
+    String type();
+
+    String name();
+
+    <T> Future<T> send(Object message);
 }

@@ -18,13 +18,12 @@
 
 package org.marid.groovy;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyClassLoader;
-import groovy.lang.GroovyShell;
-import groovy.lang.Writable;
+import groovy.lang.*;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
 import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.runtime.DefaultGroovyMethods;
+import org.codehaus.groovy.runtime.StringGroovyMethods;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -32,6 +31,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -142,6 +142,41 @@ public class GroovyRuntime {
 
     public static GroovyShell newShell(Binding binding) {
         return new GroovyShell(CLASS_LOADER, binding, COMPILER_CONFIGURATION);
+    }
+
+    public static <T> T cast(Class<T> klass, Object v) {
+        if (v == null) {
+            return null;
+        } else if (klass.isInstance(v)) {
+            return klass.cast(v);
+        } else if (v instanceof Number) {
+            return DefaultGroovyMethods.asType((Number) v, klass);
+        } else if (v instanceof Collection) {
+            return DefaultGroovyMethods.asType((Collection) v, klass);
+        } else if (v instanceof Map) {
+            return DefaultGroovyMethods.asType((Map) v, klass);
+        } else if (v instanceof Object[]) {
+            return DefaultGroovyMethods.asType((Object[]) v, klass);
+        } else if (v instanceof String) {
+            return StringGroovyMethods.asType((String) v, klass);
+        } else if (v instanceof CharSequence) {
+            return StringGroovyMethods.asType((CharSequence) v, klass);
+        } else if (v instanceof Closure) {
+            return DefaultGroovyMethods.asType((Closure) v, klass);
+        } else {
+            return DefaultGroovyMethods.asType(v, klass);
+        }
+    }
+
+    public static <T> T get(Class<T> klass, Map<String, Object> params, String key, T def) {
+        Object v = params.get(key);
+        if (v == null) {
+            return def;
+        } else if (v instanceof Closure) {
+            return cast(klass, ((Closure) v).call(params));
+        } else {
+            return cast(klass, v);
+        }
     }
 
     public static String replace(String text, Map<String, Object> bindings) {

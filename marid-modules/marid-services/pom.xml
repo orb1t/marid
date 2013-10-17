@@ -43,6 +43,11 @@
             <artifactId>groovy-all</artifactId>
             <classifier>indy</classifier>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
