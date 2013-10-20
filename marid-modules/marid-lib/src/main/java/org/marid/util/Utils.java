@@ -16,40 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.xml;
-
-import org.marid.groovy.GroovyRuntime;
-
-import javax.xml.stream.events.Characters;
-import java.util.Map;
+package org.marid.util;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SubstitutedXmlCharacters extends SubstitutedXmlEvent<Characters> implements Characters {
+public class Utils {
 
-    public SubstitutedXmlCharacters(Characters delegate, Map<String, Object> bindings) {
-        super(delegate, bindings);
-    }
-
-    @Override
-    public String getData() {
-        String v = delegate.getData();
-        return v == null ? v : GroovyRuntime.replace(v, bindings);
-    }
-
-    @Override
-    public boolean isWhiteSpace() {
-        return delegate.isWhiteSpace();
-    }
-
-    @Override
-    public boolean isCData() {
-        return delegate.isCData();
-    }
-
-    @Override
-    public boolean isIgnorableWhiteSpace() {
-        return delegate.isIgnorableWhiteSpace();
+    public static ClassLoader getClassLoader(Class<?> c) {
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        return classLoader == null ? c.getClassLoader() : classLoader;
     }
 }

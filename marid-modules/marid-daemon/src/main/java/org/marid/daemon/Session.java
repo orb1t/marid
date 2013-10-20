@@ -18,35 +18,33 @@
 
 package org.marid.daemon;
 
-import javax.net.ssl.SSLSocket;
 import java.io.*;
-import java.math.BigInteger;
+import java.net.Socket;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.file.FileSystem;
 import java.nio.file.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
-import static org.marid.daemon.Log.warning;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.marid.daemon.Log.info;
+import static org.marid.daemon.Log.warning;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class Session implements Callable<Session> {
 
-    private final SSLSocket socket;
+    private final Socket socket;
     private final String sessionId;
     private final Logger log;
 
-    public Session(SSLSocket socket) {
+    public Session(Socket socket) {
         this.socket = socket;
-        this.sessionId = new BigInteger(socket.getSession().getId()).toString(Character.MAX_RADIX);
+        this.sessionId = UUID.nameUUIDFromBytes(socket.toString().getBytes(ISO_8859_1)).toString();
         this.log = Logger.getLogger(toString());
     }
 
@@ -117,9 +115,8 @@ public class Session implements Callable<Session> {
     @SuppressWarnings("unchecked")
     @Override
     public Session call() throws Exception {
-        try (final SSLSocket s = socket;
-             final ObjectInputStream is = new ObjectInputStream(s.getInputStream());
-             final ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream())) {
+        try (final ObjectInputStream is = new ObjectInputStream(socket.getInputStream());
+             final ObjectOutputStream os = new ObjectOutputStream(socket.getOutputStream())) {
             final ClientContext clientContext = new ClientContext(
                     (Map<String, String>) is.readObject(), (Properties) is.readObject(), is, os);
             os.writeObject(new TreeMap<>(System.getenv()));

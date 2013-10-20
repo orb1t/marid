@@ -213,10 +213,6 @@
                 </includes>
                 <filtering>true</filtering>
             </testResource>
-
-            <testResource>
-                <directory>src/test/groovyResources</directory>
-            </testResource>
         </testResources>
 
         <pluginManagement>
@@ -390,42 +386,6 @@
                     <artifactId>build-helper-maven-plugin</artifactId>
                     <version>1.8</version>
                 </plugin>
-
-                <plugin>
-                    <groupId>org.codehaus.gmaven</groupId>
-                    <artifactId>gmaven-plugin</artifactId>
-                    <version>1.5</version>
-                    <configuration>
-                        <providerSelection>2.0</providerSelection>
-                        <targetBytecode>${maven.compiler.source}</targetBytecode>
-                        <stacktrace>true</stacktrace>
-                        <invokeDynamic>true</invokeDynamic>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>groovy-compile-source</id>
-                            <goals>
-                                <goal>compile</goal>
-                            </goals>
-                            <phase>compile</phase>
-                        </execution>
-                        <execution>
-                            <id>groovy-compile-test-source</id>
-                            <goals>
-                                <goal>testCompile</goal>
-                            </goals>
-                            <phase>test-compile</phase>
-                        </execution>
-                    </executions>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.codehaus.groovy</groupId>
-                            <artifactId>groovy-all</artifactId>
-                            <classifier>indy</classifier>
-                            <version>${groovy.version}</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -515,6 +475,12 @@
             <dependency>
                 <groupId>org.marid</groupId>
                 <artifactId>marid-lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.marid</groupId>
+                <artifactId>marid-daemon</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

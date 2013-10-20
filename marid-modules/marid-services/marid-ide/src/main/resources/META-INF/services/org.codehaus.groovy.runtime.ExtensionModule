@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-moduleName=runtime-ext-module
+moduleName=ide-ext-module
 moduleVersion=1.0
 extensionClasses=org.marid.methods.GuiMethods,org.marid.ide.groovy.IdeMethods
 staticExtensionClasses=

@@ -16,41 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.xml;
+package org.marid.service.silly;
 
-import org.marid.groovy.GroovyRuntime;
+import org.marid.service.MaridService;
+import org.marid.service.MaridServiceProvider;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.events.Attribute;
-import java.util.Map;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SubstitutedXmlAttribute extends SubstitutedXmlEvent<Attribute> implements Attribute {
-
-    public SubstitutedXmlAttribute(Attribute delegate, Map<String, Object> bindings) {
-        super(delegate, bindings);
-    }
+public class SillyTestServiceProvider implements MaridServiceProvider {
 
     @Override
-    public QName getName() {
-        return delegate.getName();
-    }
-
-    @Override
-    public String getValue() {
-        String v = delegate.getValue();
-        return v == null ? null : GroovyRuntime.replace(v, bindings);
-    }
-
-    @Override
-    public String getDTDType() {
-        return delegate.getDTDType();
-    }
-
-    @Override
-    public boolean isSpecified() {
-        return delegate.isSpecified();
+    public List<? extends MaridService> getServices() {
+        return Collections.singletonList(new SillyTestService(Collections.<String, Object>emptyMap()));
     }
 }

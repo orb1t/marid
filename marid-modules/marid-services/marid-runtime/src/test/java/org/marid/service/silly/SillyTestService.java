@@ -16,14 +16,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.service.silly;
 
-import java.util.List;
+import org.marid.service.AbstractMaridService;
+
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface MaridServiceProvider {
+public class SillyTestService extends AbstractMaridService {
 
-    List<? extends MaridService> getServices();
+    public SillyTestService(Map<String, Object> params) {
+        super(params);
+    }
+
+    @Override
+    public String id() {
+        return "id0";
+    }
+
+    @Override
+    protected Object processMessage(Object message) throws Exception {
+        return message;
+    }
+
+    @Override
+    protected void doStart() {
+        notifyStarted();
+    }
+
+    @Override
+    protected void doStop() {
+        notifyStopped();
+    }
 }

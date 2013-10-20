@@ -23,10 +23,11 @@ import com.google.common.util.concurrent.ServiceManager;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.logging.Logger;
 
 import static java.util.ServiceLoader.load;
+import static org.marid.methods.LogMethods.info;
 import static org.marid.methods.LogMethods.severe;
 import static org.marid.methods.LogMethods.warning;
 
@@ -37,13 +38,16 @@ public class MaridServices {
 
     private static final Logger LOG = Logger.getLogger(MaridServices.class.getName());
     private static final Set<MaridService> SERVICES = new LinkedHashSet<>();
-    public static final ServiceManager SERVICE_MANAGER;
+    private static final ServiceManager SERVICE_MANAGER;
 
     static {
         try {
             for (final MaridServiceProvider provider : load(MaridServiceProvider.class)) {
                 try {
-                    SERVICES.addAll(provider.getServices());
+                    for (final MaridService service : provider.getServices()) {
+                        SERVICES.add(service);
+                        info(LOG, "{0} Added", service);
+                    }
                 } catch (Exception x) {
                     warning(LOG, "Unable to get services from {0}", x, provider);
                 }
@@ -93,5 +97,13 @@ public class MaridServices {
             }
         }
         throw new IllegalArgumentException("Service not exists: " + type);
+    }
+
+    public static void start() {
+        SERVICE_MANAGER.startAsync();
+    }
+
+    public static void stop() {
+        SERVICE_MANAGER.stopAsync();
     }
 }

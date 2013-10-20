@@ -20,6 +20,7 @@ package org.marid;
 
 import org.marid.groovy.GroovyRuntime;
 import org.marid.logging.Logging;
+import org.marid.service.MaridServices;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.TimeZone;
@@ -33,12 +34,14 @@ import static org.marid.methods.LogMethods.warning;
 public class Marid implements UncaughtExceptionHandler {
 
     private static final Logger LOG = Logger.getLogger(Marid.class.getName());
+    public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
-    public static void main(String[] args) {
-        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+    public static void main(String... args) {
+        TimeZone.setDefault(UTC);
         Logging.init(Marid.class, "log.properties");
         Thread.setDefaultUncaughtExceptionHandler(new Marid());
         Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
+        MaridServices.start();
     }
 
     @Override

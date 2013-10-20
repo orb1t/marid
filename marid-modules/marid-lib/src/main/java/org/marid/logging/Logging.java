@@ -17,6 +17,8 @@
  */
 package org.marid.logging;
 
+import org.marid.util.Utils;
+
 import java.io.InputStream;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -47,25 +49,21 @@ public class Logging {
      * @param res Log properties resource.
      */
     public static void init(Class<?> c, String res) {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        if (cl == null) {
-            cl = c.getClassLoader();
-        }
+        final ClassLoader cl = Utils.getClassLoader(c);
         try (InputStream is = cl.getResourceAsStream(res)) {
-            LogManager lm = LogManager.getLogManager();
+            final LogManager lm = LogManager.getLogManager();
             if (is != null) {
                 lm.readConfiguration(is);
             }
-            String dynHandlers = lm.getProperty("dynHandlers");
-            Logger root = Logger.getGlobal().getParent();
+            final String dynHandlers = lm.getProperty("dynHandlers");
+            final Logger root = Logger.getGlobal().getParent();
             if (dynHandlers != null && root != null) {
-                for (String handler : dynHandlers.split(",")) {
+                for (final String handler : dynHandlers.split(",")) {
                     if (handler.isEmpty()) {
                         continue;
                     }
-                    handler = handler.trim();
                     try {
-                        Class<?> handlerClass = Class.forName(handler, true, cl);
+                        final Class<?> handlerClass = Class.forName(handler.trim(), true, cl);
                         root.addHandler((Handler)handlerClass.newInstance());
                     } catch (Exception x) {
                         x.printStackTrace(System.err);

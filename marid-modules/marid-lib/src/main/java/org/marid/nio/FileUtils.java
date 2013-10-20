@@ -30,6 +30,14 @@ import java.util.concurrent.Callable;
  */
 public class FileUtils {
 
+    public static void copy(Path source, Path target) throws IOException {
+        new CopyTask(source, target).call();
+    }
+
+    public static void remove(Path path) throws IOException {
+        new RemoveTask(path).call();
+    }
+
     public static class RemoveTask implements Callable<Boolean> {
 
         protected final Path path;
@@ -39,7 +47,7 @@ public class FileUtils {
         }
 
         @Override
-        public Boolean call() throws Exception {
+        public Boolean call() throws IOException {
             if (Files.exists(path)) {
                 remove(path);
                 return Boolean.TRUE;
@@ -71,7 +79,7 @@ public class FileUtils {
         }
 
         @Override
-        public Boolean call() throws Exception {
+        public Boolean call() throws IOException {
             if (Files.notExists(source)) {
                 return Boolean.FALSE;
             }

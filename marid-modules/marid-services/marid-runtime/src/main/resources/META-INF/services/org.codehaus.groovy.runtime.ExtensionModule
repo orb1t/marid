@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-moduleName=marid-lib-ext-module
+moduleName=runtime-ext-module
 moduleVersion=1.0
-extensionClasses=org.marid.methods.LogMethods
+extensionClasses=org.marid.methods.LogMethods,org.marid.methods.PrefMethods
 staticExtensionClasses=

@@ -16,14 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.daemon;
 
-import java.util.List;
+import javax.net.ServerSocketFactory;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface MaridServiceProvider {
+public class MaridServerSocketFactory extends ServerSocketFactory {
 
-    List<? extends MaridService> getServices();
+    private final ServerSocketFactory delegate = ServerSocketFactory.getDefault();
+
+    @Override
+    public ServerSocket createServerSocket(int port) throws IOException {
+        return delegate.createServerSocket(port);
+    }
+
+    @Override
+    public ServerSocket createServerSocket(int port, int backlog) throws IOException {
+        return delegate.createServerSocket(port, backlog);
+    }
+
+    @Override
+    public ServerSocket createServerSocket(int port, int backlog, InetAddress ifAddress) throws IOException {
+        return delegate.createServerSocket(port, backlog, ifAddress);
+    }
 }

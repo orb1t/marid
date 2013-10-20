@@ -32,8 +32,6 @@
 
     <properties>
         <netbeans.hint.license>agpl30</netbeans.hint.license>
-        <jgraphx.version>2_1_0_9</jgraphx.version>
-        <jgraphx.path>downloads/jgraphx/archive/jgraphx-${jgraphx.version}.zip</jgraphx.path>
     </properties>
 
     <dependencies>
@@ -104,7 +102,7 @@
                 <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat7-maven-plugin</artifactId>
                 <version>2.1</version>
-            </plugin>            
+            </plugin>
         </plugins>
     </build>
 

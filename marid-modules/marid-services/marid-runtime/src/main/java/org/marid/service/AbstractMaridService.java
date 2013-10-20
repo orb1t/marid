@@ -23,6 +23,7 @@ import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.MoreExecutors;
 import groovy.lang.Closure;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
@@ -49,6 +50,7 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
     protected final boolean poolDaemons;
     protected final boolean daemons;
     protected final long timeGranularity;
+    protected final long shutdownTimeout;
     protected final Logger log = Logger.getLogger(getClass().getName());
 
     public AbstractMaridService(Map<String, Object> params) {
@@ -58,6 +60,7 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
         daemons = get(boolean.class, params, "daemons", false);
         poolDaemons = get(boolean.class, params, "poolDaemons", false);
         timeGranularity = get(long.class, params, "timeGranularity", 1000L);
+        shutdownTimeout = get(long.class, params, "shutdownTimeout", 60_000L);
         threadGroup = new ThreadGroup(id);
         threadPoolGroup = new ThreadGroup(threadGroup, id + ".pool");
         executor = new ThreadPoolExecutor(
@@ -79,6 +82,7 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
                     }
                 },
                 getRejectedExecutionHandler(params));
+        fine(log, "{0} Params {1}", id + ":" + type, params);
         addListener(new Listener() {
             @Override
             public void failed(State from, Throwable failure) {
@@ -104,6 +108,15 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
             public void terminated(State from) {
                 info(log, "{0} Terminated", AbstractMaridService.this);
                 executor.shutdown();
+                try {
+                    if (executor.awaitTermination(shutdownTimeout, TimeUnit.MILLISECONDS)) {
+                        return;
+                    }
+                } catch (InterruptedException x) {
+                    warning(log, "{0} Interrupted", x, AbstractMaridService.this);
+                }
+                final List<Runnable> rest = executor.shutdownNow();
+                severe(log, "{0} Shutdown error. Skipped {1} tasks", AbstractMaridService.this, rest.size());
             }
         }, MoreExecutors.sameThreadExecutor());
     }
@@ -181,7 +194,7 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
     @SuppressWarnings("NullableProblems")
     @Override
     public Thread newThread(Runnable r) {
-        final Thread thread =  new Thread(threadGroup, r, String.valueOf(r), threadStackSize);
+        final Thread thread = new Thread(threadGroup, r, String.valueOf(r), threadStackSize);
         thread.setDaemon(daemons);
         return thread;
     }

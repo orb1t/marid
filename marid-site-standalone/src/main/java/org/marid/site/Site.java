@@ -16,6 +16,9 @@
  */
 package org.marid.site;
 
+import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,14 +26,12 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import org.apache.catalina.startup.Tomcat;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class Site {
-    
+
     private static final Logger LOG = Logger.getLogger(Site.class.getName());
 
     public static void main(String... args) throws Exception {
