@@ -16,38 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.silly;
+package org.marid.web;
 
-import org.marid.service.AbstractMaridService;
+import org.marid.Marid;
+import org.marid.service.MaridServiceProvider;
+import org.marid.test.TestUtils;
 
-import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SillyTestService extends AbstractMaridService {
+public class TestWebServer implements Callable<Void> {
 
-    public SillyTestService(Map params) {
-        super(params);
+    private final String[] args;
+
+    public TestWebServer(String... args) {
+        this.args = args;
+    }
+
+    public static void main(String... args) throws Exception {
+        TestUtils.callWithClassLoader(new TestWebServer(args),
+                MaridServiceProvider.class, TestWebServiceProvider.class);
     }
 
     @Override
-    public String id() {
-        return "id0";
-    }
-
-    @Override
-    protected Object processMessage(Object message) throws Exception {
-        return message;
-    }
-
-    @Override
-    protected void doStart() {
-        notifyStarted();
-    }
-
-    @Override
-    protected void doStop() {
-        notifyStopped();
+    public Void call() throws Exception {
+        Marid.main(args);
+        return null;
     }
 }

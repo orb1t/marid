@@ -16,38 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.silly;
+package org.marid.web;
 
-import org.marid.service.AbstractMaridService;
+import com.google.common.collect.ImmutableMap;
+import org.marid.service.MaridService;
+import org.marid.service.MaridServiceProvider;
 
-import java.util.Map;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SillyTestService extends AbstractMaridService {
-
-    public SillyTestService(Map params) {
-        super(params);
-    }
+public class TestWebServiceProvider implements MaridServiceProvider {
 
     @Override
-    public String id() {
-        return "id0";
+    public List<? extends MaridService> getServices() {
+        try {
+            return Collections.singletonList(buildWebServer());
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
     }
 
-    @Override
-    protected Object processMessage(Object message) throws Exception {
-        return message;
-    }
-
-    @Override
-    protected void doStart() {
-        notifyStarted();
-    }
-
-    @Override
-    protected void doStop() {
-        notifyStopped();
+    private WebServer buildWebServer() throws Exception {
+        return new WebServer(ImmutableMap.builder()
+                .put("dir", Paths.get(getClass().getResource("site/index.html").toURI()).getParent())
+                .build());
     }
 }

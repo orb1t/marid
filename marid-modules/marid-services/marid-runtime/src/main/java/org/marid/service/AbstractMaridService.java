@@ -18,23 +18,18 @@
 
 package org.marid.service;
 
-import com.google.common.base.Supplier;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.MoreExecutors;
-import groovy.lang.Closure;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
-import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
-import java.util.concurrent.ThreadPoolExecutor.DiscardOldestPolicy;
-import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import java.util.logging.Logger;
 
 import static org.marid.groovy.GroovyRuntime.get;
 import static org.marid.l10n.Localized.S;
 import static org.marid.methods.LogMethods.*;
+import static org.marid.proputil.PropUtil.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -51,9 +46,10 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
     protected final boolean daemons;
     protected final long timeGranularity;
     protected final long shutdownTimeout;
+    protected final Executor sameThreadExecutor = MoreExecutors.sameThreadExecutor();
     protected final Logger log = Logger.getLogger(getClass().getName());
 
-    public AbstractMaridService(Map<String, Object> params) {
+    public AbstractMaridService(Map params) {
         threadStackSize = get(int.class, params, "threadStackSize", 0);
         type = get(String.class, params, "type", defaultType());
         id = get(String.class, params, "id", type);
@@ -68,20 +64,9 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
                 get(int.class, params, "threadPoolMaxSize", 1),
                 get(long.class, params, "threadPoolKeepAliveTime", 60_000L),
                 TimeUnit.MILLISECONDS,
-                getBlockingQueue(params),
-                new ThreadFactory() {
-                    private short num;
-
-                    @SuppressWarnings("NullableProblems")
-                    @Override
-                    public Thread newThread(Runnable r) {
-                        final String name = "thread-" + num++;
-                        final Thread thread = new Thread(threadPoolGroup, r, name, threadStackSize);
-                        thread.setDaemon(poolDaemons);
-                        return thread;
-                    }
-                },
-                getRejectedExecutionHandler(params));
+                getBlockingQueue(params, "blockingQueue", 0),
+                getThreadFactory(params, "threadPoolThreadFactory", threadPoolGroup, poolDaemons, threadStackSize),
+                getRejectedExecutionHandler(params, "rejectedExecutionHandler"));
         fine(log, "{0} Params {1}", id + ":" + type, params);
         addListener(new Listener() {
             @Override
@@ -92,6 +77,7 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
             @Override
             public void running() {
                 info(log, "{0} Running", AbstractMaridService.this);
+                onRunning();
             }
 
             @Override
@@ -107,6 +93,7 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
             @Override
             public void terminated(State from) {
                 info(log, "{0} Terminated", AbstractMaridService.this);
+                onTerminated();
                 executor.shutdown();
                 try {
                     if (executor.awaitTermination(shutdownTimeout, TimeUnit.MILLISECONDS)) {
@@ -118,72 +105,18 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
                 final List<Runnable> rest = executor.shutdownNow();
                 severe(log, "{0} Shutdown error. Skipped {1} tasks", AbstractMaridService.this, rest.size());
             }
-        }, MoreExecutors.sameThreadExecutor());
+        }, sameThreadExecutor);
+    }
+
+    protected void onRunning() {
+    }
+
+    protected void onTerminated() {
     }
 
     private String defaultType() {
         final String[] cps = getClass().getCanonicalName().split("[.]");
         return cps.length > 1 ? cps[cps.length - 2] : cps[0];
-    }
-
-    @SuppressWarnings("unchecked")
-    private BlockingQueue<Runnable> getBlockingQueue(Map<String, Object> params) {
-        final Object value = params.get("blockingQueue");
-        if (value == null) {
-            return new SynchronousQueue<>();
-        } else if (value instanceof String) {
-            switch ((String) value) {
-                case "linked":
-                    return new LinkedBlockingQueue<>();
-                case "array":
-                    return new ArrayBlockingQueue<>(Runtime.getRuntime().availableProcessors() * 2);
-                case "synchronous":
-                    return new SynchronousQueue<>();
-                default:
-                    throw new IllegalArgumentException("Invalid blocking queue type: " + value);
-            }
-        } else if (value instanceof Supplier) {
-            return ((Supplier<BlockingQueue<Runnable>>) value).get();
-        } else if (value instanceof BlockingQueue) {
-            return (BlockingQueue<Runnable>) value;
-        } else if (value instanceof Number) {
-            return new ArrayBlockingQueue<>(((Number) value).intValue());
-        } else if (value instanceof Boolean) {
-            return new SynchronousQueue<>((Boolean) value);
-        } else if (value instanceof Closure) {
-            return ((Closure<BlockingQueue<Runnable>>) value).call(params);
-        } else {
-            throw new IllegalArgumentException("Illegal value for blockingQueue: " + value);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private RejectedExecutionHandler getRejectedExecutionHandler(Map<String, Object> params) {
-        final Object value = params.get("rejectedExecutionHandler");
-        if (value == null) {
-            return new CallerRunsPolicy();
-        } else if (value instanceof String) {
-            switch ((String) value) {
-                case "callerRunsPolicy":
-                    return new CallerRunsPolicy();
-                case "discardPolicy":
-                    return new DiscardPolicy();
-                case "discardOldestPolicy":
-                    return new DiscardOldestPolicy();
-                case "abortPolicy":
-                    return new AbortPolicy();
-                default:
-                    throw new IllegalArgumentException("Invalid rejection handler: " + value);
-            }
-        } else if (value instanceof Supplier) {
-            return ((Supplier<RejectedExecutionHandler>) value).get();
-        } else if (value instanceof RejectedExecutionException) {
-            return (RejectedExecutionHandler) value;
-        } else if (value instanceof Closure) {
-            return ((Closure<RejectedExecutionHandler>) value).call(params);
-        } else {
-            throw new IllegalArgumentException("Illegal value for rejectionExecutionHandler: " + value);
-        }
     }
 
     @Override
