@@ -16,33 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.web;
 
-import org.marid.Marid;
-import org.marid.service.MaridServiceProvider;
-import org.marid.test.TestUtils;
 
-import java.util.concurrent.Callable;
+package menu
 
-/**
- * @author Dmitry Ovchinnikov
- */
-public class TestWebServer implements Callable<Void> {
+import org.marid.ide.swing.impl.windows.ProcessWindowImpl
 
-    private final String[] args;
-
-    public TestWebServer(String... args) {
-        this.args = args;
-    }
-
-    public static void main(String... args) throws Exception {
-        TestUtils.callWithClassLoader(new TestWebServer(args),
-                MaridServiceProvider.class, TestWebServiceProvider.class);
-    }
-
-    @Override
-    public Void call() throws Exception {
-        Marid.main(args);
-        return null;
-    }
-}
+[
+    utilities: [
+        items: [
+            show_process_window: [
+                action: {
+                    new ProcessWindowImpl().visible = true;
+                }
+            ],
+            laf_selection: [
+                action: {  }
+            ]
+        ]
+    ]
+]

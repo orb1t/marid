@@ -16,8 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package services
+
+import org.marid.web.SimpleWebServer
+
 [
-    "menu/System.groovy",
-    "menu/Tools.groovy",
-    "menu/Utilities.groovy"
+    new SimpleWebServer([:])
 ]

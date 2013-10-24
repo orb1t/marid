@@ -21,8 +21,11 @@ package org.marid.web;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableBiMap;
+import org.codehaus.groovy.runtime.DefaultGroovyMethods;
+import org.marid.groovy.GroovyRuntime;
 import org.marid.service.AbstractMaridService;
 
+import javax.activation.FileTypeMap;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -30,20 +33,18 @@ import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import static java.nio.file.StandardWatchEventKinds.*;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.marid.groovy.GroovyRuntime.cast;
 import static org.marid.groovy.GroovyRuntime.get;
-import static org.marid.methods.LogMethods.severe;
-import static org.marid.methods.LogMethods.warning;
+import static org.marid.methods.LogMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -55,12 +56,15 @@ public abstract class AbstractWebServer extends AbstractMaridService {
     protected final Map<String, Path> dirMap;
     protected final Map<String, Pattern> vhostPatternMap;
     protected final BiMap<String, String> vhostMap;
+    protected final List<String> defaultPages;
+    protected final FileTypeMap fileTypeMap = FileTypeMap.getDefaultFileTypeMap();
 
     public AbstractWebServer(Map params) {
         super(params);
         dirMap = dirMap(get(Map.class, params, "dirMap", defaultDirMap()));
         vhostPatternMap = vhostPatternMap(get(Map.class, params, "vhostPatternMap", emptyMap()));
         vhostMap = vhostMap(get(Map.class, params, "vhostMap", emptyMap()));
+        defaultPages = defaultPages(get(Collection.class, params, "defaultPages", emptyList()));
     }
 
     protected Map<String, Path> defaultDirMap() {
@@ -92,7 +96,7 @@ public abstract class AbstractWebServer extends AbstractMaridService {
 
     protected Map<String, Pattern> vhostPatternMap(Map map) {
         if (map.isEmpty()) {
-            return Collections.emptyMap();
+            return emptyMap();
         } else {
             final Map<String, Pattern> vpm = new HashMap<>();
             for (final Object oe : map.entrySet()) {
@@ -127,6 +131,18 @@ public abstract class AbstractWebServer extends AbstractMaridService {
             return bimap;
         }
     }
+    
+    protected List<String> defaultPages(Collection collection) {
+        if (collection.isEmpty()) {
+            return emptyList();
+        } else {
+            final List<String> list = new ArrayList<>(collection.size());
+            for (final Object o : collection) {
+                list.add(GroovyRuntime.cast(String.class, o));
+            }
+            return list;
+        }
+    }
 
     @Override
     protected Object processMessage(Object message) throws Exception {
@@ -154,6 +170,11 @@ public abstract class AbstractWebServer extends AbstractMaridService {
         return f.startsWith(".") || f.endsWith(".bak") || f.endsWith(".new");
     }
 
+    @SuppressWarnings("unchecked")
+    protected String toContextPath(Path path) {
+        return "/" + DefaultGroovyMethods.join((Iterator)path.iterator(), "/");
+    }
+
     protected abstract void onAdd(Path dir, Path context);
 
     protected abstract void onModify(Path dir, Path context);
@@ -175,28 +196,29 @@ public abstract class AbstractWebServer extends AbstractMaridService {
         public void run() {
             try {
                 while (isRunning()) {
-                    final WatchKey watchKey = watchService.poll(timeGranularity, MILLISECONDS);
-                    if (watchKey == null) {
+                    final WatchKey key = watchService.poll(timeGranularity, MILLISECONDS);
+                    if (key == null) {
                         continue;
                     }
                     try {
-                        for (final WatchEvent<?> watchEvent : watchKey.pollEvents()) {
-                            final Path path = (Path) watchEvent.context();
+                        for (final WatchEvent<?> event : key.pollEvents()) {
+                            final Path path = (Path) event.context();
                             if (watchFilter(path)) {
                                 continue;
                             }
-                            if (watchEvent.kind() == ENTRY_CREATE) {
+                            if (event.kind() == ENTRY_CREATE) {
                                 onAdd(dir, path);
-                            } else if (watchEvent.kind() == ENTRY_DELETE) {
+                            } else if (event.kind() == ENTRY_DELETE) {
                                 onDelete(dir, path);
-                            } else if (watchEvent.kind() == ENTRY_MODIFY) {
+                            } else if (event.kind() == ENTRY_MODIFY) {
                                 onModify(dir, path);
                             } else {
-                                throw new IllegalStateException("Kind: " + watchEvent.kind());
+                                throw new IllegalStateException("Kind: " + event.kind());
                             }
+                            info(log, "{0} {1} {2}", AbstractWebServer.this, event.kind(), dir);
                         }
                     } finally {
-                        watchKey.reset();
+                        key.reset();
                     }
                 }
             } catch (InterruptedException x) {
@@ -209,17 +231,26 @@ public abstract class AbstractWebServer extends AbstractMaridService {
         @Override
         public FileVisitResult preVisitDirectory(Path d, BasicFileAttributes a) throws IOException {
             if (filterPath(d)) {
+                finest(log, "{0} Skipped {1}", AbstractWebServer.this, d);
                 return FileVisitResult.SKIP_SUBTREE;
             } else {
-                dir.register(watchService, ALL_KINDS);
+                d.register(watchService, ALL_KINDS);
+                fine(log, "{0} Registered {1}", AbstractWebServer.this, d);
                 return FileVisitResult.CONTINUE;
             }
         }
 
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes a) throws IOException {
-            if (!filterPath(file)) {
-                onAdd(dir, dir.relativize(file));
+            if (filterPath(file)) {
+                finest(log, "{0} Filtered {1}", AbstractWebServer.this, file);
+            } else {
+                try {
+                    onAdd(dir, dir.relativize(file));
+                    info(log, "{0} Added {1}", AbstractWebServer.this, file);
+                } catch (Exception x) {
+                    warning(log, "{0} Unable to add {1}", AbstractWebServer.this, file);
+                }
             }
             return FileVisitResult.CONTINUE;
         }

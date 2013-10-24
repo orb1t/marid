@@ -16,8 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+
+package menu
+
 [
-    "menu/System.groovy",
-    "menu/Tools.groovy",
-    "menu/Utilities.groovy"
+    tools: [
+        items : [
+            show_output_builder: [
+                action: {
+                    application.showOutputBuilder();
+                },
+                group: "distro"
+            ],
+            preferences : [
+                action : {
+                    application.showPreferencesDialog();
+                },
+                shortcut: "control shift P",
+                group: "preferences"
+            ]
+        ]
+    ]
 ]

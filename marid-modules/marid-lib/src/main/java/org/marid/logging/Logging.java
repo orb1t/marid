@@ -54,6 +54,8 @@ public class Logging {
             final LogManager lm = LogManager.getLogManager();
             if (is != null) {
                 lm.readConfiguration(is);
+            } else {
+                lm.readConfiguration();
             }
             final String dynHandlers = lm.getProperty("dynHandlers");
             final Logger root = Logger.getGlobal().getParent();

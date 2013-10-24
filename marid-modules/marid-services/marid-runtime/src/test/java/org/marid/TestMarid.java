@@ -16,35 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.web;
+package org.marid;
 
-import com.google.common.collect.ImmutableMap;
-import org.marid.service.MaridService;
 import org.marid.service.MaridServiceProvider;
+import org.marid.test.TestUtils;
+import org.marid.web.TestWebServiceProvider;
 
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TestWebServiceProvider implements MaridServiceProvider {
+public class TestMarid implements Callable<Void> {
 
-    @Override
-    public List<? extends MaridService> getServices() {
-        try {
-            return Collections.singletonList(buildWebServer());
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
+    private final String[] args;
+
+    public TestMarid(String... args) {
+        this.args = args;
     }
 
-    private SimpleWebServer buildWebServer() throws Exception {
-        return new SimpleWebServer(ImmutableMap.builder()
-                .put("dirMap", Collections.singletonMap(
-                        "default",
-                        Paths.get(getClass().getResource("site/index.html").toURI()).getParent()))
-                .build());
+    @Override
+    public Void call() throws Exception {
+        Marid.main(args);
+        return null;
+    }
+
+    public static void main(String... args) throws Exception {
+        TestUtils.callWithClassLoader(new TestMarid(args),
+                MaridServiceProvider.class, TestWebServiceProvider.class);
     }
 }
