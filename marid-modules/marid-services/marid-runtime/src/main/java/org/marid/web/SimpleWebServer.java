@@ -27,6 +27,7 @@ import groovy.lang.GroovyCodeSource;
 import org.marid.groovy.GroovyRuntime;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,8 +39,7 @@ import java.util.concurrent.*;
 
 import static com.google.common.io.Files.getFileExtension;
 import static com.google.common.io.Files.getNameWithoutExtension;
-import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
-import static java.net.HttpURLConnection.HTTP_OK;
+import static java.net.HttpURLConnection.*;
 import static org.marid.groovy.GroovyRuntime.get;
 import static org.marid.methods.LogMethods.info;
 import static org.marid.methods.LogMethods.warning;
@@ -48,10 +48,12 @@ import static org.marid.proputil.PropUtil.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SimpleWebServer extends AbstractWebServer {
+public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
 
     protected final int stopTimeout;
     protected final HttpServer server;
+    protected final Path webDir;
+    protected final Map<Path, HttpHandler> handlerMap = new ConcurrentHashMap<>();
 
     public SimpleWebServer(Map params) throws IOException {
         super(params);
@@ -71,6 +73,43 @@ public class SimpleWebServer extends AbstractWebServer {
                         get(boolean.class, params, "webPoolDaemons", false), threadStackSize),
                 getRejectedExecutionHandler(params, "webPoolRejectedExecutionHandler"))
         );
+        webDir = dirMap.get("default");
+        server.createContext("/", this);
+    }
+
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        try {
+            final String[] parts = exchange.getRequestURI().getRawPath().substring(1).split("/");
+            Path path = webDir;
+            for (final String part : parts) {
+                path = path.resolve(URLDecoder.decode(part, "UTF-8"));
+            }
+            if (Files.isDirectory(path)) {
+                for (final String page : defaultPages) {
+                    final Path pagePath = path.resolve(page);
+                    final HttpHandler handler = handlerMap.get(webDir.relativize(pagePath));
+                    if (handler != null) {
+                        handler.handle(exchange);
+                        return;
+                    }
+                }
+            }
+            exchange.sendResponseHeaders(HTTP_NOT_FOUND, 0);
+        } catch (Exception x) {
+            warning(log, "{0} Unable to handle {1}", this, exchange.getRequestURI());
+        } finally {
+            exchange.close();
+        }
+    }
+
+    @Override
+    protected List<String> defaultPages(Collection collection) {
+        if (collection.isEmpty()) {
+            return Arrays.asList("index.groovy", "index.html", "index.svg");
+        } else {
+            return super.defaultPages(collection);
+        }
     }
 
     @Override
@@ -98,6 +137,7 @@ public class SimpleWebServer extends AbstractWebServer {
             if ("text/groovy".equals(fileTypeMap.getContentType(fname))) {
                 try {
                     server.removeContext(toContextPath(context));
+                    handlerMap.remove(context);
                     info(log, "{0} Removed context {1} {2}", this, dir, context);
                 } catch (Exception x) {
                     warning(log, "{0} Unable to remove context {1} {2}", x, this, dir, context);
@@ -115,6 +155,7 @@ public class SimpleWebServer extends AbstractWebServer {
         } else {
             try {
                 server.removeContext(toContextPath(context));
+                handlerMap.remove(context);
                 info(log, "{0} Removed context {1} {2}", this, dir, context);
             } catch (Exception x) {
                 warning(log, "{0} Unable to remove context {1} {2}", x, this, dir, context);
@@ -148,16 +189,14 @@ public class SimpleWebServer extends AbstractWebServer {
                 }
             }
         }
-        final List<String> contentType = mime.startsWith("text/")
-                ? new LinkedList<>(Arrays.asList(mime, "charset=UTF-8"))
-                : new LinkedList<>(Collections.singleton(mime));
+        final String contentType = mime.startsWith("text/") ? mime + ";charset=UTF-8" : mime;
         try {
             final String contextPath = toContextPath(context);
-            server.createContext(contextPath, new HttpHandler() {
+            final HttpHandler handler = new HttpHandler() {
                 @Override
                 public void handle(HttpExchange exchange) throws IOException {
                     if (!script) {
-                        exchange.getResponseHeaders().put("Content-Type", contentType);
+                        exchange.getResponseHeaders().set("Content-Type", contentType);
                     }
                     boolean filtered = false;
                     for (final Entry<Closure, Path> e : scripts.entrySet()) {
@@ -182,12 +221,13 @@ public class SimpleWebServer extends AbstractWebServer {
                             Files.copy(file, exchange.getResponseBody());
                         } catch (Exception x) {
                             warning(log, "{0} I/O error {1}", SimpleWebServer.this, file);
-                        } finally {
-                            exchange.close();
                         }
                     }
+                    exchange.close();
                 }
-            });
+            };
+            server.createContext(contextPath, handler);
+            handlerMap.put(context, handler);
             info(log, "{0} Bound {1} to {2}", this, contextPath, file);
         } catch (Exception x) {
             warning(log, "{0} Unable to register context {1} {2}", this, dir, context);
@@ -237,11 +277,11 @@ public class SimpleWebServer extends AbstractWebServer {
             executor.submit(new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
-                    final Path dir = dirMap.get("default");
-                    if (dir == null) {
+                    if (webDir == null) {
                         warning(log, "{0} No default directory found", SimpleWebServer.this);
+                        return null;
                     } else {
-                        Files.createDirectories(dir);
+                        Files.createDirectories(webDir);
                     }
                     server.start();
                     return null;
