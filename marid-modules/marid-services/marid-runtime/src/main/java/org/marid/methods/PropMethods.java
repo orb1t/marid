@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.proputil;
+package org.marid.methods;
 
 import com.google.common.base.Supplier;
 import groovy.lang.Closure;
@@ -31,12 +31,30 @@ import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.ThreadPoolExecutor.DiscardOldestPolicy;
 import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 
-import static org.marid.groovy.GroovyRuntime.get;
+import static org.marid.groovy.GroovyRuntime.cast;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PropUtil {
+public class PropMethods {
+
+    public static <T> T get(Map params, Class<T> type, String key) {
+        final Object value = params.get(key);
+        if (value == null) {
+            return type.cast(value);
+        } else if (type == Object.class) {
+            return type.cast(value);
+        } else if (value instanceof Closure) {
+            return cast(type, ((Closure) value).call(params));
+        } else {
+            return cast(type, value);
+        }
+    }
+
+    public static <T> T get(Map params, Class<T> type, String key, T def) {
+        final T value = get(params, type, key);
+        return value == null ? def : value;
+    }
 
     @SuppressWarnings("unchecked")
     public static BlockingQueue<Runnable> getBlockingQueue(Map params, String key, int def) {
@@ -65,7 +83,7 @@ public class PropUtil {
         } else if (value instanceof Closure) {
             return ((Closure<BlockingQueue<Runnable>>) value).call(params);
         } else {
-            return get(BlockingQueue.class, params, key, new SynchronousQueue());
+            return get(params, BlockingQueue.class, key, new SynchronousQueue());
         }
     }
 
@@ -93,7 +111,7 @@ public class PropUtil {
         } else if (value instanceof Closure) {
             return (RejectedExecutionHandler) ((Closure) value).call(params);
         } else {
-            return get(RejectedExecutionHandler.class, params, key, new CallerRunsPolicy());
+            return get(params, RejectedExecutionHandler.class, key, new CallerRunsPolicy());
         }
     }
 
@@ -160,7 +178,7 @@ public class PropUtil {
         } else if (value instanceof Closure) {
             return (InetSocketAddress) ((Closure) value).call(params);
         } else {
-            return get(InetSocketAddress.class, params, key, new InetSocketAddress(def));
+            return get(params, InetSocketAddress.class, key, new InetSocketAddress(def));
         }
     }
 }

@@ -18,11 +18,13 @@
 
 package org.marid.tree;
 
-import org.marid.groovy.GroovyRuntime;
+import org.codehaus.groovy.runtime.DefaultGroovyMethods;
+import org.marid.methods.PropMethods;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Logger;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableCollection;
@@ -38,13 +40,17 @@ public class StaticTreeObject implements TreeObject {
     protected final ConcurrentMap<String, Object> vars = new ConcurrentHashMap<>();
     protected final String[] path;
     protected final Map<String, StaticTreeObject> children = new LinkedHashMap<>();
+    protected final String label;
+    protected final Logger logger;
 
     public StaticTreeObject(StaticTreeObject parent, String name, Map params) {
         this.parent = parent;
         this.path = parent == null ? new String[] {name} : concat(parent.path, name);
-        for (final Object e : GroovyRuntime.get(Map.class, params, "vars", emptyMap()).entrySet()) {
+        for (final Object e : PropMethods.get(params, Map.class, "vars", emptyMap()).entrySet()) {
             vars.put(String.valueOf(((Entry) e).getKey()), ((Entry) e).getValue());
         }
+        this.label = DefaultGroovyMethods.join(path, "/");
+        this.logger = Logger.getLogger(label);
     }
 
     @Override
@@ -55,11 +61,6 @@ public class StaticTreeObject implements TreeObject {
     @Override
     public Collection<? extends StaticTreeObject> children() {
         return unmodifiableCollection(children.values());
-    }
-
-    @Override
-    public <T> T get(Class<T> klass, String name, T def) {
-        return GroovyRuntime.get(klass, vars, name, def);
     }
 
     @Override
@@ -132,5 +133,20 @@ public class StaticTreeObject implements TreeObject {
     @Override
     public ConcurrentMap<String, Object> vars() {
         return vars;
+    }
+
+    @Override
+    public StaticTreeObject getRoot() {
+        for (StaticTreeObject o = this; o != null; o = o.parent) {
+            if (o.parent == null) {
+                return o;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return label;
     }
 }

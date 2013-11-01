@@ -40,10 +40,9 @@ import java.util.concurrent.*;
 import static com.google.common.io.Files.getFileExtension;
 import static com.google.common.io.Files.getNameWithoutExtension;
 import static java.net.HttpURLConnection.*;
-import static org.marid.groovy.GroovyRuntime.get;
 import static org.marid.methods.LogMethods.info;
 import static org.marid.methods.LogMethods.warning;
-import static org.marid.proputil.PropUtil.*;
+import static org.marid.methods.PropMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -57,20 +56,20 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
 
     public SimpleWebServer(Map params) throws IOException {
         super(params);
-        stopTimeout = get(int.class, params, "stopTimeout", 60);
+        stopTimeout = get(params, int.class, "stopTimeout", 60);
         final HttpServerProvider dsp = HttpServerProvider.provider();
-        final int defBacklog = get(int.class, params, "webBacklog", 0);
-        final HttpServerProvider sp = get(HttpServerProvider.class, params, "serverProvider", dsp);
+        final int defBacklog = get(params, int.class, "webBacklog", 0);
+        final HttpServerProvider sp = get(params, HttpServerProvider.class, "serverProvider", dsp);
         server = sp.createHttpServer(getInetSocketAddress(params, "webAddress", 8080), defBacklog);
         final ThreadGroup webThreadPoolGroup = new ThreadGroup(threadGroup, id() + ".pool");
         server.setExecutor(new ThreadPoolExecutor(
-                get(int.class, params, "webPoolInitSize", 0),
-                get(int.class, params, "webPoolMaxSize", 64),
-                get(long.class, params, "webPoolKeepAliveTime", 60_000L),
+                get(params, int.class, "webPoolInitSize", 0),
+                get(params, int.class, "webPoolMaxSize", 64),
+                get(params, long.class, "webPoolKeepAliveTime", 60_000L),
                 TimeUnit.MILLISECONDS,
                 getBlockingQueue(params, "webPoolBlockingQueue", 64),
                 getThreadFactory(params, "webPoolThreadFactory", webThreadPoolGroup,
-                        get(boolean.class, params, "webPoolDaemons", false), threadStackSize),
+                        get(params, boolean.class, "webPoolDaemons", false), threadStackSize),
                 getRejectedExecutionHandler(params, "webPoolRejectedExecutionHandler"))
         );
         webDir = dirMap.get("default");

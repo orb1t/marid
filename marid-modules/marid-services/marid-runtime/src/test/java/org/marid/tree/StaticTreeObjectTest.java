@@ -54,4 +54,13 @@ public class StaticTreeObjectTest {
         assertEquals("e11", root.object("e1").object("e11").name());
         assertEquals("e21", root.object("e2").object("e21").name());
     }
+
+    @Test
+    public void testTreeNavigation() {
+        for (final StaticTreeObject child : root.children.values()) {
+            assertEquals(child, root.object(child.name()));
+            assertEquals(child, root.object(".", child.name()));
+            assertEquals(child, root.object(".", child.name(), "..", child.name()));
+        }
+    }
 }

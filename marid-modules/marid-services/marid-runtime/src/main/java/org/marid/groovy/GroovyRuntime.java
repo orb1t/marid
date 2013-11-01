@@ -31,7 +31,6 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -170,17 +169,6 @@ public class GroovyRuntime {
             return DefaultGroovyMethods.asType((Closure) v, klass);
         } else {
             return DefaultGroovyMethods.asType(v, klass);
-        }
-    }
-
-    public static <T> T get(Class<T> klass, Map params, String key, T def) {
-        Object v = params.get(key);
-        if (v == null) {
-            return def;
-        } else if (v instanceof Closure) {
-            return cast(klass, ((Closure) v).call(params));
-        } else {
-            return cast(klass, v);
         }
     }
 

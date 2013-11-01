@@ -16,45 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.tree;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
+package org.marid;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface TreeObject {
+public class ParameterizedException extends RuntimeException {
 
-    TreeObject parent();
+    private final Object[] args;
 
-    Collection<? extends TreeObject> children();
+    public ParameterizedException(String message, Throwable cause, Object... args) {
+        super(message, cause);
+        this.args = args;
+    }
 
-    String path();
+    public ParameterizedException(String message, Object... args) {
+        super(message);
+        this.args = args;
+    }
 
-    String name();
-
-    List<String> listPath();
-
-    String[] arrayPath();
-
-    Object get(String name);
-
-    Object getAt(String name);
-
-    Object put(String name, Object value);
-
-    void putAt(String name, Object value);
-
-    Set<String> keySet();
-
-    TreeObject object(String... path);
-
-    TreeObject object(List<String> path);
-
-    ConcurrentMap<String, Object> vars();
-
-    TreeObject getRoot();
+    public Object[] getArgs() {
+        return args;
+    }
 }

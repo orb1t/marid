@@ -16,45 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.tree;
+package org.marid.dpp;
+
+import groovy.lang.Closure;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
+import java.util.LinkedList;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface TreeObject {
+public class DppFuncs {
 
-    TreeObject parent();
+    public static LinkedList<Closure> func(Iterable iterable) {
+        final LinkedList<Closure> fs = new LinkedList<>();
+        for (final Object o : iterable) {
+            func(o, fs);
+        }
+        return fs;
+    }
 
-    Collection<? extends TreeObject> children();
-
-    String path();
-
-    String name();
-
-    List<String> listPath();
-
-    String[] arrayPath();
-
-    Object get(String name);
-
-    Object getAt(String name);
-
-    Object put(String name, Object value);
-
-    void putAt(String name, Object value);
-
-    Set<String> keySet();
-
-    TreeObject object(String... path);
-
-    TreeObject object(List<String> path);
-
-    ConcurrentMap<String, Object> vars();
-
-    TreeObject getRoot();
+    public static void func(Object o, LinkedList<Closure> cs) {
+        if (o instanceof Collection) {
+            for (final Object co : (Collection) o) {
+                func(co, cs);
+            }
+        } else if (o instanceof Closure) {
+            cs.add((Closure) o);
+        }
+    }
 }

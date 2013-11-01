@@ -18,9 +18,16 @@
 
 package org.marid.dpp;
 
+import org.marid.tree.StaticTreeObject;
+
+import java.util.Map;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DppBus {
+public class DppBus extends StaticTreeObject {
 
+    public DppBus(StaticTreeObject parent, String name, Map params) {
+        super(parent, name, params);
+    }
 }

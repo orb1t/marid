@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Map;
 
-import static org.marid.groovy.GroovyRuntime.get;
-import static org.marid.proputil.PropUtil.getInetSocketAddress;
+import static org.marid.methods.PropMethods.getInetSocketAddress;
+import static org.marid.methods.PropMethods.get;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -31,15 +31,15 @@ import static org.marid.proputil.PropUtil.getInetSocketAddress;
 public class SocketStreams extends Socket implements IOStreams {
 
     public SocketStreams(Map params) throws IOException {
-        connect(getInetSocketAddress(params, "host", 502), get(int.class, params, "ctimeout", 0));
-        setSoTimeout(get(int.class, params, "timeout", 60_000));
-        setKeepAlive(get(boolean.class, params, "keepAlive", getKeepAlive()));
-        setReceiveBufferSize(get(int.class, params, "rcvBufSize", getReceiveBufferSize()));
-        setSendBufferSize(get(int.class, params, "sendBufSize", getSendBufferSize()));
-        setOOBInline(get(boolean.class, params, "oobInline", getOOBInline()));
-        setReuseAddress(get(boolean.class, params, "reuseAddress", getReuseAddress()));
-        setTrafficClass(get(int.class, params, "trafficClass", getTrafficClass()));
-        setTcpNoDelay(get(boolean.class, params, "tcpNoDelay", getTcpNoDelay()));
+        connect(getInetSocketAddress(params, "host", 502), get(params, int.class, "ctimeout", 0));
+        setSoTimeout(get(params, int.class, "timeout", 60_000));
+        setKeepAlive(get(params, boolean.class, "keepAlive", getKeepAlive()));
+        setReceiveBufferSize(get(params, int.class, "rcvBufSize", getReceiveBufferSize()));
+        setSendBufferSize(get(params, int.class, "sendBufSize", getSendBufferSize()));
+        setOOBInline(get(params, boolean.class, "oobInline", getOOBInline()));
+        setReuseAddress(get(params, boolean.class, "reuseAddress", getReuseAddress()));
+        setTrafficClass(get(params, int.class, "trafficClass", getTrafficClass()));
+        setTcpNoDelay(get(params, boolean.class, "tcpNoDelay", getTcpNoDelay()));
     }
 
     @Override

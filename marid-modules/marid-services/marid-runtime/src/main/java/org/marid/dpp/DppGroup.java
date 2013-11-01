@@ -16,45 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.tree;
+package org.marid.dpp;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
+import org.marid.tree.StaticTreeObject;
+
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface TreeObject {
+public class DppGroup extends DppTask {
 
-    TreeObject parent();
+    protected final Object prefixFunc;
+    protected final Object postfixFunc;
 
-    Collection<? extends TreeObject> children();
-
-    String path();
-
-    String name();
-
-    List<String> listPath();
-
-    String[] arrayPath();
-
-    Object get(String name);
-
-    Object getAt(String name);
-
-    Object put(String name, Object value);
-
-    void putAt(String name, Object value);
-
-    Set<String> keySet();
-
-    TreeObject object(String... path);
-
-    TreeObject object(List<String> path);
-
-    ConcurrentMap<String, Object> vars();
-
-    TreeObject getRoot();
+    protected DppGroup(StaticTreeObject parent, String name, Map params) {
+        super(parent, name, params);
+        prefixFunc = params.get("prefixFunc");
+        postfixFunc = params.get("postfixFunc");
+    }
 }

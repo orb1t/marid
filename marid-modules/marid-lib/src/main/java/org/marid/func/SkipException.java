@@ -16,45 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.tree;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
+package org.marid.func;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface TreeObject {
+public class SkipException extends RuntimeException {
 
-    TreeObject parent();
+    private final Object[] args;
 
-    Collection<? extends TreeObject> children();
+    public SkipException() {
+        this(null, (Throwable) null);
+    }
 
-    String path();
+    public SkipException(String message, Object... args) {
+        this(message, null, args);
+    }
 
-    String name();
+    public SkipException(Throwable cause) {
+        this(null, cause);
+    }
 
-    List<String> listPath();
+    public SkipException(String message, Throwable cause, Object... args) {
+        super(message, cause, false, false);
+        this.args = args;
+    }
 
-    String[] arrayPath();
-
-    Object get(String name);
-
-    Object getAt(String name);
-
-    Object put(String name, Object value);
-
-    void putAt(String name, Object value);
-
-    Set<String> keySet();
-
-    TreeObject object(String... path);
-
-    TreeObject object(List<String> path);
-
-    ConcurrentMap<String, Object> vars();
-
-    TreeObject getRoot();
+    public Object[] getArgs() {
+        return args;
+    }
 }

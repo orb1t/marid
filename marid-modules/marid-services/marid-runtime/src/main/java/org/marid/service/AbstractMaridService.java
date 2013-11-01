@@ -26,10 +26,9 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
-import static org.marid.groovy.GroovyRuntime.get;
 import static org.marid.l10n.Localized.S;
 import static org.marid.methods.LogMethods.*;
-import static org.marid.proputil.PropUtil.*;
+import static org.marid.methods.PropMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,19 +49,19 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
     protected final Logger log = Logger.getLogger(getClass().getName());
 
     public AbstractMaridService(Map params) {
-        threadStackSize = get(int.class, params, "threadStackSize", 0);
-        type = get(String.class, params, "type", defaultType());
-        id = get(String.class, params, "id", type);
-        daemons = get(boolean.class, params, "daemons", false);
-        poolDaemons = get(boolean.class, params, "poolDaemons", false);
-        timeGranularity = get(long.class, params, "timeGranularity", 1000L);
-        shutdownTimeout = get(long.class, params, "shutdownTimeout", 60_000L);
+        threadStackSize = get(params, int.class, "threadStackSize", 0);
+        type = get(params, String.class, "type", defaultType());
+        id = get(params, String.class, "id", type);
+        daemons = get(params, boolean.class, "daemons", false);
+        poolDaemons = get(params, boolean.class, "poolDaemons", false);
+        timeGranularity = get(params, long.class, "timeGranularity", 1000L);
+        shutdownTimeout = get(params, long.class, "shutdownTimeout", 60_000L);
         threadGroup = new ThreadGroup(id);
         threadPoolGroup = new ThreadGroup(threadGroup, id + ".pool");
         executor = new ThreadPoolExecutor(
-                get(int.class, params, "threadPoolInitSize", 0),
-                get(int.class, params, "threadPoolMaxSize", 1),
-                get(long.class, params, "threadPoolKeepAliveTime", 60_000L),
+                get(params, int.class, "threadPoolInitSize", 0),
+                get(params, int.class, "threadPoolMaxSize", 1),
+                get(params, long.class, "threadPoolKeepAliveTime", 60_000L),
                 TimeUnit.MILLISECONDS,
                 getBlockingQueue(params, "blockingQueue", 0),
                 getThreadFactory(params, "threadPoolThreadFactory", threadPoolGroup, poolDaemons, threadStackSize),

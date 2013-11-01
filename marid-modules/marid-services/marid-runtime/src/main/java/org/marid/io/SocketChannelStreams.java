@@ -26,7 +26,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.Channels;
 import java.util.Map;
 
-import static org.marid.groovy.GroovyRuntime.*;
+import static org.marid.methods.PropMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,7 +41,7 @@ public class SocketChannelStreams implements IOStreams {
         channel = AsynchronousSocketChannel.open();
         for (final SocketOption option : channel.supportedOptions()) {
             if (params.containsKey(option.name())) {
-                channel.setOption(option, get(option.type(), params, option.name(), null));
+                channel.setOption(option, get(params, option.type(), option.name(), null));
             }
         }
         input = Channels.newInputStream(channel);

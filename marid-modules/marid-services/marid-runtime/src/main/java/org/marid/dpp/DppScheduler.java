@@ -16,45 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.tree;
+package org.marid.dpp;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
+import org.marid.methods.PropMethods;
+import org.marid.tree.StaticTreeObject;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface TreeObject {
+public class DppScheduler extends StaticTreeObject {
 
-    TreeObject parent();
+    public DppScheduler(Map params) {
+        super(null,
+                PropMethods.get(params, String.class, "name", "scheduler"),
+                PropMethods.get(params, Map.class, "vars", Collections.emptyMap()));
 
-    Collection<? extends TreeObject> children();
-
-    String path();
-
-    String name();
-
-    List<String> listPath();
-
-    String[] arrayPath();
-
-    Object get(String name);
-
-    Object getAt(String name);
-
-    Object put(String name, Object value);
-
-    void putAt(String name, Object value);
-
-    Set<String> keySet();
-
-    TreeObject object(String... path);
-
-    TreeObject object(List<String> path);
-
-    ConcurrentMap<String, Object> vars();
-
-    TreeObject getRoot();
+    }
 }

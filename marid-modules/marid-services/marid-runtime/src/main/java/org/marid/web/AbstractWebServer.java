@@ -43,8 +43,8 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.marid.groovy.GroovyRuntime.cast;
-import static org.marid.groovy.GroovyRuntime.get;
 import static org.marid.methods.LogMethods.*;
+import static org.marid.methods.PropMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -61,10 +61,10 @@ public abstract class AbstractWebServer extends AbstractMaridService {
 
     public AbstractWebServer(Map params) {
         super(params);
-        dirMap = dirMap(get(Map.class, params, "dirMap", defaultDirMap()));
-        vhostPatternMap = vhostPatternMap(get(Map.class, params, "vhostPatternMap", emptyMap()));
-        vhostMap = vhostMap(get(Map.class, params, "vhostMap", emptyMap()));
-        defaultPages = defaultPages(get(Collection.class, params, "defaultPages", emptyList()));
+        dirMap = dirMap(get(params, Map.class, "dirMap", defaultDirMap()));
+        vhostPatternMap = vhostPatternMap(get(params, Map.class, "vhostPatternMap", emptyMap()));
+        vhostMap = vhostMap(get(params, Map.class, "vhostMap", emptyMap()));
+        defaultPages = defaultPages(get(params, Collection.class, "defaultPages", emptyList()));
     }
 
     protected Map<String, Path> defaultDirMap() {
