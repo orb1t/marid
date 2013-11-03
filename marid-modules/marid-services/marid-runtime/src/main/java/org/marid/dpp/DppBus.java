@@ -36,7 +36,6 @@ import static org.marid.methods.PropMethods.getThreadFactory;
 public class DppBus extends StaticTreeObject {
 
     protected final ThreadGroup timerThreadGroup;
-    protected final ThreadGroup executorThreadGroup;
     protected final ScheduledThreadPoolExecutor timer;
     protected final Map<String, ScheduledFuture<?>> taskMap = new HashMap<>();
     protected final boolean logDurations;
@@ -44,8 +43,7 @@ public class DppBus extends StaticTreeObject {
     public DppBus(DppScheduler parent, String name, Map params) {
         super(parent, name, params);
         logDurations = PropMethods.get(params, boolean.class, "logDurations", parent.logDurations);
-        timerThreadGroup = new ThreadGroup("timer:" + label);
-        executorThreadGroup = new ThreadGroup("executor:" + label);
+        timerThreadGroup = new ThreadGroup(label);
         timer = new ScheduledThreadPoolExecutor(
                 PropMethods.get(params, int.class, "timerThreadCount", 1),
                 getThreadFactory(params, "timerThreadFactory", timerThreadGroup,
