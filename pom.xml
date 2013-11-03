@@ -34,12 +34,12 @@
         <groovy.version>2.1.9</groovy.version>
         <jetty.version>9.0.5.v20130815</jetty.version>
         <catalina.version>7.0.42</catalina.version>
-        <specification.version>${implementation.version}</specification.version>
-        <specification.vendor>${project.organization.name}</specification.vendor>
-        <specification.title>${project.name}</specification.title>
-        <implementation.version>${project.version}</implementation.version>
-        <implementation.vendor>${project.organization.name}</implementation.vendor>
-        <implementation.title>${project.description}</implementation.title>
+        <s.version>${i.version}</s.version>
+        <s.vendor>${project.organization.name}</s.vendor>
+        <s.title>${project.name}</s.title>
+        <i.version>${project.version}</i.version>
+        <i.vendor>${project.organization.name}</i.vendor>
+        <i.title>${project.description}</i.title>
         <excluded.benchmarks>org.marid.test.SlowBenchmarks</excluded.benchmarks>
         <excluded.tests>org.marid.test.SlowTests</excluded.tests>
         <scripting>groovy</scripting>
@@ -201,15 +201,12 @@
                             <manifestEntries>
                                 <Class-Path>ext/</Class-Path>
                                 <Built-By>${project.organization.name}</Built-By>
-                                <Implementation-Version>${implementation.version}
-                                </Implementation-Version>
-                                <Implementation-Title>${implementation.title}</Implementation-Title>
-                                <Implementation-Vendor>${implementation.vendor}
-                                </Implementation-Vendor>
-                                <Specification-Version>${specification.version}
-                                </Specification-Version>
-                                <Specification-Title>${specification.title}</Specification-Title>
-                                <Specification-Vendor>${specification.vendor}</Specification-Vendor>
+                                <Implementation-Version>${i.version}</Implementation-Version>
+                                <Implementation-Title>${i.title}</Implementation-Title>
+                                <Implementation-Vendor>${i.vendor}</Implementation-Vendor>
+                                <Specification-Version>${s.version}</Specification-Version>
+                                <Specification-Title>${s.title}</Specification-Title>
+                                <Specification-Vendor>${s.vendor}</Specification-Vendor>
                             </manifestEntries>
                         </archive>
                     </configuration>
