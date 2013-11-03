@@ -280,6 +280,7 @@
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <username>eosms</username>
+                        <goals>deploy</goals>
                     </configuration>
                 </plugin>
 
