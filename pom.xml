@@ -6,7 +6,7 @@
 
     <groupId>org.marid</groupId>
     <artifactId>marid</artifactId>
-    <version>0.5</version>
+    <version>0.6-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>marid</name>
