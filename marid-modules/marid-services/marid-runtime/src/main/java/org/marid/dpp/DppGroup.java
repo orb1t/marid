@@ -34,5 +34,24 @@ public class DppGroup extends DppTask {
         super(parent, name, params);
         prefixFunc = params.get("prefixFunc");
         postfixFunc = params.get("postfixFunc");
+        DppUtil.addTasks(logger, this, children, params);
+    }
+
+    @Override
+    public void start() {
+        for (final StaticTreeObject child : children.values()) {
+            if (child instanceof DppTask) {
+                ((DppTask) child).start();
+            }
+        }
+    }
+
+    @Override
+    public void stop() {
+        for (final StaticTreeObject child : children.values()) {
+            if (child instanceof DppTask) {
+                ((DppTask) child).stop();
+            }
+        }
     }
 }

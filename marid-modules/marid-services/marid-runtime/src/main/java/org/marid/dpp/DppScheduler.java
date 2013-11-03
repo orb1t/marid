@@ -21,18 +21,46 @@ package org.marid.dpp;
 import org.marid.methods.PropMethods;
 import org.marid.tree.StaticTreeObject;
 
-import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import static java.util.Collections.emptyMap;
+import static org.marid.methods.LogMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class DppScheduler extends StaticTreeObject {
 
-    public DppScheduler(Map params) {
-        super(null,
-                PropMethods.get(params, String.class, "name", "scheduler"),
-                PropMethods.get(params, Map.class, "vars", Collections.emptyMap()));
+    protected final boolean logDurations;
 
+    public DppScheduler(String name, Map params) {
+        super(null, name, PropMethods.get(params, Map.class, "vars", emptyMap()));
+        logDurations = PropMethods.get(params, boolean.class, "logDurations", true);
+        final Map buses = PropMethods.get(params, Map.class, "buses", emptyMap());
+        for (final Object e : buses.entrySet()) {
+            final Entry entry = (Entry) e;
+            final String busName = String.valueOf(entry.getKey());
+            final Map busParams = PropMethods.get(buses, Map.class, entry.getKey(), emptyMap());
+            children.put(busName, new DppBus(this, busName, busParams));
+            info(logger, "Added bus {0}", busName);
+        }
+    }
+
+    public void start() {
+        for (final StaticTreeObject child : children.values()) {
+            if (child instanceof DppBus) {
+                ((DppBus) child).start();
+            }
+        }
+    }
+
+    public void stop() {
+        for (final StaticTreeObject child : children.values()) {
+            if (child instanceof DppBus) {
+                ((DppBus) child).stop();
+            }
+        }
+        children.clear();
     }
 }

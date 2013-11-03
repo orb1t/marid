@@ -18,16 +18,69 @@
 
 package org.marid.dpp;
 
+import org.marid.methods.PropMethods;
 import org.marid.tree.StaticTreeObject;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
+import static org.marid.methods.PropMethods.getRejectedExecutionHandler;
+import static org.marid.methods.PropMethods.getThreadFactory;
+
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class DppBus extends StaticTreeObject {
 
-    public DppBus(StaticTreeObject parent, String name, Map params) {
+    protected final ThreadGroup timerThreadGroup;
+    protected final ThreadGroup executorThreadGroup;
+    protected final ScheduledThreadPoolExecutor timer;
+    protected final Map<String, ScheduledFuture<?>> taskMap = new HashMap<>();
+    protected final boolean logDurations;
+
+    public DppBus(DppScheduler parent, String name, Map params) {
         super(parent, name, params);
+        logDurations = PropMethods.get(params, boolean.class, "logDurations", parent.logDurations);
+        timerThreadGroup = new ThreadGroup("timer:" + label);
+        executorThreadGroup = new ThreadGroup("executor:" + label);
+        timer = new ScheduledThreadPoolExecutor(
+                PropMethods.get(params, int.class, "timerThreadCount", 1),
+                getThreadFactory(params, "timerThreadFactory", timerThreadGroup,
+                        PropMethods.get(params, boolean.class, "timerDaemon", false),
+                        PropMethods.get(params, int.class, "timerStackSize", 0)),
+                getRejectedExecutionHandler(params, "timerRejectedExecutionHandler"));
+        timer.setRemoveOnCancelPolicy(
+                PropMethods.get(params, boolean.class, "timerRemoveOnCancel", true));
+        DppUtil.addTasks(logger, this, children, params);
+    }
+
+    @Override
+    public DppScheduler parent() {
+        return (DppScheduler) super.parent();
+    }
+
+    public void start() {
+        if (!timer.isShutdown()) {
+            for (final StaticTreeObject child : children.values()) {
+                if (child instanceof DppTask) {
+                    ((DppTask) child).start();
+                }
+            }
+        }
+    }
+
+    public void stop() {
+        if (!timer.isShutdown()) {
+            for (final StaticTreeObject child : children.values()) {
+                if (child instanceof DppTask) {
+                    ((DppTask) child).stop();
+                }
+            }
+            timer.shutdown();
+            children.clear();
+        }
     }
 }

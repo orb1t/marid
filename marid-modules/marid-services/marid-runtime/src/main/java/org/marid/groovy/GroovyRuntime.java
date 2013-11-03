@@ -19,14 +19,11 @@
 package org.marid.groovy;
 
 import groovy.lang.*;
-import groovy.text.SimpleTemplateEngine;
-import groovy.text.Template;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.StringGroovyMethods;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
@@ -170,23 +167,5 @@ public class GroovyRuntime {
         } else {
             return DefaultGroovyMethods.asType(v, klass);
         }
-    }
-
-    public static String replace(String text, Map<String, Object> bindings) {
-        SimpleTemplateEngine engine = new SimpleTemplateEngine(SHELL);
-        Template template;
-        try {
-            template = engine.createTemplate(text);
-        } catch (ClassNotFoundException | IOException x) {
-            throw new IllegalStateException(x);
-        }
-        Writable writable = template.make(bindings);
-        StringWriter sw = new StringWriter();
-        try {
-            writable.writeTo(sw);
-        } catch (IOException x) {
-            throw new IllegalStateException(x);
-        }
-        return sw.toString();
     }
 }

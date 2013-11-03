@@ -18,17 +18,23 @@
 
 package org.marid.dpp;
 
+import org.marid.methods.PropMethods;
 import org.marid.service.AbstractMaridService;
 
 import java.util.Map;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class DppService extends AbstractMaridService {
 
+    protected final DppScheduler scheduler;
+
     public DppService(Map params) {
         super(params);
+        scheduler = new DppScheduler(id, PropMethods.get(params, Map.class, "vars", emptyMap()));
     }
 
     @Override
@@ -38,11 +44,21 @@ public class DppService extends AbstractMaridService {
 
     @Override
     protected void doStart() {
-        notifyStarted();
+        try {
+            scheduler.start();
+            notifyStarted();
+        } catch (Exception x) {
+            notifyFailed(x);
+        }
     }
 
     @Override
     protected void doStop() {
-        notifyStopped();
+        try {
+            scheduler.stop();
+            notifyStopped();
+        } catch (Exception x) {
+            notifyFailed(x);
+        }
     }
 }

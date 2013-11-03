@@ -69,6 +69,17 @@ public class StaticTreeObject implements TreeObject {
     }
 
     @Override
+    public <T> T get(Class<T> type, String key, T def) {
+        final T value = get(type, key);
+        return value == null ? def : value;
+    }
+
+    @Override
+    public <T> T get(Class<T> type, String key) {
+        return PropMethods.get(vars, type, key);
+    }
+
+    @Override
     public Object getAt(String name) {
         return get(name);
     }
@@ -117,7 +128,7 @@ public class StaticTreeObject implements TreeObject {
 
     @Override
     public String path() {
-        return null;
+        return label;
     }
 
     @Override

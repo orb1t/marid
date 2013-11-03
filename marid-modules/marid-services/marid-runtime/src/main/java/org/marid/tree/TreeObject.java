@@ -42,6 +42,10 @@ public interface TreeObject {
 
     Object get(String name);
 
+    <T> T get(Class<T> type, String key);
+
+    <T> T get(Class<T> type, String key, T def);
+
     Object getAt(String name);
 
     Object put(String name, Object value);

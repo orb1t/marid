@@ -38,7 +38,7 @@ import static org.marid.groovy.GroovyRuntime.cast;
  */
 public class PropMethods {
 
-    public static <T> T get(Map params, Class<T> type, String key) {
+    public static <T> T get(Map params, Class<T> type, Object key) {
         final Object value = params.get(key);
         if (value == null) {
             return type.cast(value);
@@ -51,16 +51,16 @@ public class PropMethods {
         }
     }
 
-    public static <T> T get(Map params, Class<T> type, String key, T def) {
+    public static <T> T get(Map params, Class<T> type, Object key, T def) {
         final T value = get(params, type, key);
         return value == null ? def : value;
     }
 
     @SuppressWarnings("unchecked")
-    public static BlockingQueue<Runnable> getBlockingQueue(Map params, String key, int def) {
+    public static BlockingQueue<Runnable> getBlockingQueue(Map params, Object key, int def, Supplier<BlockingQueue<Runnable>> supplier) {
         final Object value = params.get(key);
         if (value == null) {
-            return new SynchronousQueue<>();
+            return supplier.get();
         } else if (value instanceof BlockingQueue) {
             return (BlockingQueue<Runnable>) value;
         } else if (value instanceof String) {
@@ -68,7 +68,8 @@ public class PropMethods {
                 case "linked":
                     return new LinkedBlockingQueue<>();
                 case "array":
-                    return new ArrayBlockingQueue<>(def == 0 ? Runtime.getRuntime().availableProcessors() * 2 : def);
+                    final int processors = Runtime.getRuntime().availableProcessors();
+                    return new ArrayBlockingQueue<>(def == 0 ? processors * 2 : def);
                 case "synchronous":
                     return new SynchronousQueue<>();
                 default:
@@ -83,11 +84,20 @@ public class PropMethods {
         } else if (value instanceof Closure) {
             return ((Closure<BlockingQueue<Runnable>>) value).call(params);
         } else {
-            return get(params, BlockingQueue.class, key, new SynchronousQueue());
+            return get(params, BlockingQueue.class, key, supplier.get());
         }
     }
 
-    public static RejectedExecutionHandler getRejectedExecutionHandler(Map params, String key) {
+    public static BlockingQueue<Runnable> getBlockingQueue(Map params, Object key, int def) {
+        return getBlockingQueue(params, key, def, new Supplier<BlockingQueue<Runnable>>() {
+            @Override
+            public BlockingQueue<Runnable> get() {
+                return new SynchronousQueue<>();
+            }
+        });
+    }
+
+    public static RejectedExecutionHandler getRejectedExecutionHandler(Map params, Object key) {
         final Object value = params.get(key);
         if (value == null) {
             return new CallerRunsPolicy();
@@ -115,7 +125,7 @@ public class PropMethods {
         }
     }
 
-    public static ThreadFactory getThreadFactory(Map params, String key, final ThreadGroup threadGroup, final boolean daemon, final int stackSize) {
+    public static ThreadFactory getThreadFactory(Map params, Object key, final ThreadGroup threadGroup, final boolean daemon, final int stackSize) {
         final Object value = params.get(key);
         if (value == null) {
             return new ThreadFactory() {
@@ -155,7 +165,7 @@ public class PropMethods {
         }
     }
 
-    public static InetSocketAddress getInetSocketAddress(Map params, String key, int def) {
+    public static InetSocketAddress getInetSocketAddress(Map params, Object key, int def) {
         final Object value = params.get(key);
         if (value == null) {
             return new InetSocketAddress(def);
