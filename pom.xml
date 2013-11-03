@@ -41,6 +41,7 @@
         <excluded.benchmarks>org.marid.test.SlowBenchmarks</excluded.benchmarks>
         <excluded.tests>org.marid.test.SlowTests</excluded.tests>
         <scripting>groovy</scripting>
+        <sf.frs>frs.sf.net/home/frs/project/marid</sf.frs>
     </properties>
 
     <scm>
@@ -101,7 +102,7 @@
         <repository>
             <id>sourceforge</id>
             <name>sourceforge</name>
-            <url>sftp://frs.sf.net/home/frs/project/marid/repo</url>
+            <url>sftp://${sf.frs}/repo</url>
         </repository>
     </distributionManagement>
 

@@ -43,6 +43,11 @@
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>wagon-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 </project>
