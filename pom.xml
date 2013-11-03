@@ -99,9 +99,9 @@
             <url>scp://shell.sf.net/home/project-web/marid/htdocs</url>
         </site>
         <repository>
-            <id>marid</id>
-            <name>frs</name>
-            <url>sftp://frs.sf.net/home/frs/project/marid/repo</url>
+            <id>sourceforge</id>
+            <name>sourceforge</name>
+            <url>scpexe://frs.sf.net:/home/frs/project/marid/repo</url>
         </repository>
     </distributionManagement>
 
