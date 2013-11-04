@@ -34,7 +34,7 @@ public class DppService extends AbstractMaridService {
 
     public DppService(Map params) {
         super(params);
-        scheduler = new DppScheduler(id, PropMethods.get(params, Map.class, "vars", emptyMap()));
+        scheduler = new DppScheduler(id, PropMethods.get(params, Map.class, "params", emptyMap()));
     }
 
     @Override
