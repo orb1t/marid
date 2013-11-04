@@ -37,6 +37,7 @@ public class SocketChannelStreams implements IOStreams {
     protected final InputStream input;
     protected final OutputStream output;
 
+    @SuppressWarnings("unchecked")
     public SocketChannelStreams(Map params) throws IOException {
         channel = AsynchronousSocketChannel.open();
         for (final SocketOption option : channel.supportedOptions()) {

@@ -19,6 +19,8 @@
 package org.marid.util;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.marid.test.NormalTests;
 
 import static org.junit.Assert.*;
 import static org.marid.util.StringUtils.*;
@@ -26,6 +28,7 @@ import static org.marid.util.StringUtils.*;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Category(NormalTests.class)
 public class StringUtilsTest {
 
     @Test

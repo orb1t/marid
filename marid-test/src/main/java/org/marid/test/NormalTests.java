@@ -21,6 +21,6 @@ package org.marid.test;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface NormalTests {
+public interface NormalTests extends SlowTests {
 
 }

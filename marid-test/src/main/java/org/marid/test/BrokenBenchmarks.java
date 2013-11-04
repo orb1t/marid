@@ -21,6 +21,6 @@ package org.marid.test;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface NormalBenchmarks extends SlowBenchmarks {
+public interface BrokenBenchmarks {
 
 }

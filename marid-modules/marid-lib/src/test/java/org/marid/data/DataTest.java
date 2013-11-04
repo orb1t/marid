@@ -20,6 +20,8 @@ package org.marid.data;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.marid.test.NormalTests;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -34,6 +36,7 @@ import static org.junit.Assert.*;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Category(NormalTests.class)
 public class DataTest {
 
     private MapValue mapValue;

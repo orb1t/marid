@@ -19,10 +19,13 @@
 package org.marid.dpp
 
 import org.junit.Test
+import org.junit.experimental.categories.Category
+import org.marid.test.SlowTests
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@Category([SlowTests])
 class DppTest {
 
     @Test

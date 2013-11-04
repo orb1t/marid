@@ -19,6 +19,8 @@
 package org.marid.tree;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.marid.test.NormalTests;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -27,6 +29,7 @@ import static org.junit.Assert.*;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Category(NormalTests.class)
 public class StaticTreeObjectTest {
 
     private final StaticTreeObject root = new StaticTreeObject(null, "root", emptyMap());

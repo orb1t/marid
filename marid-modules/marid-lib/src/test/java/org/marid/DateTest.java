@@ -21,11 +21,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.marid.test.NormalTests;
 import org.marid.util.DateUtil;
 
 /**
  * @author d.ovchinnikow at gmail.com
  */
+@Category(NormalTests.class)
 public class DateTest extends Assert {
 
     @Test

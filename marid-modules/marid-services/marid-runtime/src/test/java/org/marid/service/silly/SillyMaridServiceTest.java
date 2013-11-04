@@ -19,10 +19,12 @@
 package org.marid.service.silly;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.marid.Marid;
 import org.marid.service.MaridService;
 import org.marid.service.MaridServiceProvider;
 import org.marid.service.MaridServices;
+import org.marid.test.NormalTests;
 
 import java.util.concurrent.Callable;
 
@@ -33,6 +35,7 @@ import static org.marid.test.TestUtils.callWithClassLoader;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Category(NormalTests.class)
 public class SillyMaridServiceTest {
 
     @Test

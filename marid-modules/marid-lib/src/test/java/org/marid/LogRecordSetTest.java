@@ -20,7 +20,9 @@ package org.marid;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.marid.db.data.LogRecordSet;
+import org.marid.test.NormalTests;
 
 import javax.naming.CompositeName;
 import java.io.ByteArrayInputStream;
@@ -36,6 +38,7 @@ import java.util.logging.LogRecord;
 
 import static org.junit.Assert.assertEquals;
 
+@Category(NormalTests.class)
 public class LogRecordSetTest {
 
     private LogRecordSet recordSet;
