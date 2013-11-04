@@ -18,18 +18,50 @@
 
 package org.marid.dpp
 
+import groovy.util.logging.Log
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.marid.test.SlowTests
+
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Category([SlowTests])
+@Log
 class DppTest {
 
     @Test
-    void test1() {
-        println("TEST");
+    void testCount() {
+        def locker = new CountDownLatch(3);
+        def scheduler = new DppScheduler("scheduler", [
+            buses : [
+                bus0 : [
+                    groups : [
+                        group0 : [
+                            period : 1L,
+                            tasks : [
+                                task0 : [
+                                    vars : [
+                                        count : 0
+                                    ],
+                                    func : {t, r ->
+                                        log.info("#{0}", t["count"]);
+                                        locker.countDown();
+                                        if (t["count"]++ > 3) {
+                                            t.stop();
+                                        }
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+        scheduler.start();
+        locker.await(4L, TimeUnit.SECONDS);
     }
 }

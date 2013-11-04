@@ -155,6 +155,9 @@ public class DppTask extends StaticTreeObject implements Runnable {
     }
 
     public void start() {
+        if (func.isEmpty()) {
+            return;
+        }
         final DppBus bus = bus();
         synchronized (bus.taskMap) {
             if (!bus.taskMap.containsKey(label)) {
@@ -177,6 +180,9 @@ public class DppTask extends StaticTreeObject implements Runnable {
     }
 
     public void stop() {
+        if (func.isEmpty()) {
+            return;
+        }
         final DppBus bus = bus();
         synchronized (bus.taskMap) {
             final ScheduledFuture<?> f = bus.taskMap.remove(label);

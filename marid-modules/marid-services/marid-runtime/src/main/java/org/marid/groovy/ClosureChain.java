@@ -23,6 +23,7 @@ import org.marid.func.BreakException;
 import org.marid.func.SkipException;
 import org.marid.tree.TreeObject;
 
+import java.util.Collection;
 import java.util.logging.Logger;
 
 import static org.marid.methods.LogMethods.fine;
@@ -33,10 +34,14 @@ import static org.marid.methods.LogMethods.warning;
  */
 public class ClosureChain {
 
-    private final Iterable<? extends Closure> closures;
+    private final Collection<? extends Closure> closures;
 
-    public ClosureChain(Iterable<? extends Closure> closures) {
+    public ClosureChain(Collection<? extends Closure> closures) {
         this.closures = closures;
+    }
+
+    public boolean isEmpty() {
+        return closures.isEmpty();
     }
 
     public Object call(Logger logger, TreeObject object, Object result) {

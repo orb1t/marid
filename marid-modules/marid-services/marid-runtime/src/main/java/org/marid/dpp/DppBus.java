@@ -18,30 +18,38 @@
 
 package org.marid.dpp;
 
+import org.marid.groovy.ClosureChain;
 import org.marid.methods.PropMethods;
 import org.marid.tree.StaticTreeObject;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static org.marid.methods.PropMethods.getRejectedExecutionHandler;
 import static org.marid.methods.PropMethods.getThreadFactory;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DppBus extends StaticTreeObject {
+public class DppBus extends StaticTreeObject implements Runnable {
 
     protected final ThreadGroup timerThreadGroup;
     protected final ScheduledThreadPoolExecutor timer;
     protected final Map<String, ScheduledFuture<?>> taskMap = new HashMap<>();
     protected final boolean logDurations;
+    protected final ClosureChain func;
+    protected final ScheduledFuture<?> checkFuture;
+    protected final boolean interruptThread;
 
     public DppBus(DppScheduler parent, String name, Map params) {
         super(parent, name, params);
+        func = new ClosureChain(DppUtil.func(funcs(PropMethods.get(params, Object.class, "func"))));
         logDurations = PropMethods.get(params, boolean.class, "logDurations", parent.logDurations);
         timerThreadGroup = new ThreadGroup(label);
         timer = new ScheduledThreadPoolExecutor(
@@ -53,6 +61,16 @@ public class DppBus extends StaticTreeObject {
         timer.setRemoveOnCancelPolicy(
                 PropMethods.get(params, boolean.class, "timerRemoveOnCancel", true));
         DppUtil.addTasks(logger, this, children, params);
+        final long checkPeriod = PropMethods.get(params, long.class, "period", -1L);
+        final TimeUnit checkTimeUnit = PropMethods.get(params, TimeUnit.class, "timeUnit", SECONDS);
+        checkFuture = func.isEmpty() ? null : checkPeriod < 0L
+                ? timer.schedule(this, 0L, checkTimeUnit)
+                : timer.scheduleWithFixedDelay(this, 0L, checkPeriod, checkTimeUnit);
+        interruptThread = PropMethods.get(params, boolean.class, "interruptThread", true);
+    }
+
+    private Iterable funcs(Object f) {
+        return f == null ? Collections.emptyList() : Collections.singletonList(f);
     }
 
     @Override
@@ -72,6 +90,9 @@ public class DppBus extends StaticTreeObject {
 
     public void stop() {
         if (!timer.isShutdown()) {
+            if (checkFuture != null) {
+                checkFuture.cancel(interruptThread);
+            }
             for (final StaticTreeObject child : children.values()) {
                 if (child instanceof DppTask) {
                     ((DppTask) child).stop();
@@ -80,5 +101,10 @@ public class DppBus extends StaticTreeObject {
             timer.shutdown();
             children.clear();
         }
+    }
+
+    @Override
+    public void run() {
+        func.call(logger, this, new HashMap<>());
     }
 }
