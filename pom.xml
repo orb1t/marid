@@ -202,6 +202,8 @@
                         <trimStackTrace>false</trimStackTrace>
                         <groups>${test.groups}</groups>
                         <excludedGroups>${excluded.tests}</excludedGroups>
+                        <reuseForks>false</reuseForks>
+                        <forkCount>1</forkCount>
                     </configuration>
                 </plugin>
 
@@ -479,6 +481,13 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
             <version>4.11</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <scope>test</scope>
+            <version>2.0.2</version>
         </dependency>
     </dependencies>
 </project>

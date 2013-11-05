@@ -18,18 +18,16 @@
 
 package org.marid.service;
 
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.ServiceManager;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.concurrent.*;
+import java.util.*;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 import static java.util.ServiceLoader.load;
-import static org.marid.methods.LogMethods.info;
-import static org.marid.methods.LogMethods.severe;
-import static org.marid.methods.LogMethods.warning;
+import static org.marid.methods.LogMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -37,7 +35,8 @@ import static org.marid.methods.LogMethods.warning;
 public class MaridServices {
 
     private static final Logger LOG = Logger.getLogger(MaridServices.class.getName());
-    private static final Set<MaridService> SERVICES = new LinkedHashSet<>();
+    private static final Multimap<String, MaridService> TS_MAP = LinkedListMultimap.create();
+    private static final Map<String, MaridService> IS_MAP = new HashMap<>();
     private static final ServiceManager SERVICE_MANAGER;
 
     static {
@@ -45,7 +44,11 @@ public class MaridServices {
             for (final MaridServiceProvider provider : load(MaridServiceProvider.class)) {
                 try {
                     for (final MaridService service : provider.getServices()) {
-                        SERVICES.add(service);
+                        TS_MAP.put(service.type(), service);
+                        final MaridService oldService = IS_MAP.put(service.id(), service);
+                        if (oldService != null) {
+                            warning(LOG, "Duplicate service for id = {0}", service.id());
+                        }
                         info(LOG, "{0} Added", service);
                     }
                 } catch (Exception x) {
@@ -55,48 +58,38 @@ public class MaridServices {
         } catch (Exception x) {
             severe(LOG, "Unable to load services", x);
         }
-        SERVICE_MANAGER = new ServiceManager(SERVICES);
+        SERVICE_MANAGER = new ServiceManager(IS_MAP.values());
     }
 
-    public static Set<MaridService> getServices() {
-        return Collections.unmodifiableSet(SERVICES);
+    public static Collection<MaridService> getServices() {
+        return Collections.unmodifiableCollection(IS_MAP.values());
     }
 
     public static MaridService getServiceById(String id) {
-        for (final MaridService service : SERVICES) {
-            if (id.equals(service.id())) {
-                return service;
-            }
-        }
-        return null;
+        return IS_MAP.get(id);
     }
 
     public static MaridService getServiceByType(String type) {
-        for (final MaridService service : SERVICES) {
-            if (type.equals(service.type())) {
-                return service;
-            }
+        final Collection<MaridService> services = TS_MAP.get(type);
+        if (services == null) {
+            return null;
+        } else {
+            final Iterator<MaridService> it = services.iterator();
+            return it.hasNext() ? it.next() : null;
         }
-        return null;
     }
 
-    public static Set<MaridService> getServicesByType(String type) {
-        final Set<MaridService> set = new LinkedHashSet<>();
-        for (final MaridService service : SERVICES) {
-            if (type.equals(service.type())) {
-                set.add(service);
-            }
-        }
-        return set;
+    public static Collection<MaridService> getServicesByType(String type) {
+        return TS_MAP.get(type);
     }
 
     public static <T> Future<T> send(String type, Object message) {
-        for (final MaridService service : SERVICES) {
-            if (type.equals(service.type())) {
-                return service.send(message);
-            }
+        final MaridService service = getServiceByType(type);
+        if (service != null) {
+            return service.send(message);
+        } else {
+            throw new IllegalArgumentException("Service not exists: " + type);
         }
-        throw new IllegalArgumentException("Service not exists: " + type);
     }
 
     public static void start() {
