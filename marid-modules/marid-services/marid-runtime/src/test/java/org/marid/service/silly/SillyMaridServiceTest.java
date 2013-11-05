@@ -46,7 +46,7 @@ public class SillyMaridServiceTest {
                 Marid.main();
                 final MaridService sillyService = MaridServices.getServiceByType("silly");
                 assertNotNull(sillyService);
-                assertEquals(1, sillyService.send(1).get());
+                assertEquals(1, sillyService.send("get", 1).get());
                 MaridServices.stop();
                 return null;
             }

@@ -16,39 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.silly;
+package org.marid.service;
 
-import org.marid.service.AbstractMaridService;
-import org.marid.service.ServiceMethod;
-
-import java.util.Map;
+import java.lang.annotation.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SillyTestService extends AbstractMaridService {
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Target(ElementType.METHOD)
+public @interface ServiceMethod {
 
-    public SillyTestService(Map params) {
-        super(params);
-    }
-
-    @Override
-    public String id() {
-        return "id0";
-    }
-
-    @ServiceMethod
-    public int get(int value) {
-        return value;
-    }
-
-    @Override
-    protected void doStart() {
-        notifyStarted();
-    }
-
-    @Override
-    protected void doStop() {
-        notifyStopped();
-    }
+    String group() default "all";
 }

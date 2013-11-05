@@ -18,6 +18,8 @@
 
 package org.marid.ttv;
 
+import org.marid.service.ServiceMethod;
+
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -29,45 +31,66 @@ public interface TagTimeValueDbms extends AutoCloseable {
 
     public void start();
 
+    @ServiceMethod
     Set<String> tagSet();
 
+    @ServiceMethod
     Date getMinTimestamp(String tag);
 
+    @ServiceMethod
     Date getMaxTimestamp(String tag);
 
+    @ServiceMethod
     void setMaximumFetchSize(int size);
 
+    @ServiceMethod
     int getMaximumFetchSize();
 
+    @ServiceMethod
     void setQueryTimeout(int timeout);
 
+    @ServiceMethod
     int getQueryTimeout();
 
+    @ServiceMethod
     <T> Map<String, Map<Date, T>> after(Class<T> type, Set<String> tags, Date from, boolean inc);
 
+    @ServiceMethod
     <T> Map<String, Map<Date, T>> before(Class<T> type, Set<String> tags, Date to, boolean inc);
 
+    @ServiceMethod
     <T> Map<String, Map<Date, T>> between(Class<T> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc);
 
+    @ServiceMethod
     long usedSize();
 
+    @ServiceMethod
     <T> int insert(Class<T> type, Map<String, Map<Date, T>> data);
 
+    @ServiceMethod
     <T> int insertOrUpdate(Class<T> type, Map<String, Map<Date, T>> data);
 
+    @ServiceMethod
     <T> int update(Class<T> type, Map<String, Map<Date, T>> data);
 
+    @ServiceMethod
     int remove(Class<?> type, Set<String> tags);
 
+    @ServiceMethod
     int removeAfter(Class<?> type, Set<String> tags, Date from, boolean inc);
 
+    @ServiceMethod
     int removeBefore(Class<?> type, Set<String> tags, Date to, boolean inc);
 
+    @ServiceMethod
     int remove(Class<?> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc);
 
+    @ServiceMethod
     int remove(Class<?> type, Map<String, Date> keys);
 
+    @ServiceMethod
     void clear();
 
+    @ServiceMethod
     Set<Class<?>> supportedTypes();
 }

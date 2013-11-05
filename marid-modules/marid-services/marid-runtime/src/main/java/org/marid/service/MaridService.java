@@ -20,6 +20,7 @@ package org.marid.service;
 
 import com.google.common.util.concurrent.Service;
 
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
@@ -36,5 +37,7 @@ public interface MaridService extends Service, ThreadFactory {
 
     String name();
 
-    <T> Future<T> send(Object message);
+    <T> Future<T> send(String method, Object... args);
+
+    Map<String, ServiceMethodInfo> methodMap();
 }

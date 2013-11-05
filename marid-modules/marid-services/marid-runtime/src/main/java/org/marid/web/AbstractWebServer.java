@@ -145,11 +145,6 @@ public abstract class AbstractWebServer extends AbstractMaridService {
     }
 
     @Override
-    protected Object processMessage(Object message) throws Exception {
-        return null;
-    }
-
-    @Override
     protected void onRunning() {
         super.onRunning();
         for (final Path dir : dirMap.values()) {

@@ -16,44 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dpp;
-
-import org.marid.methods.PropMethods;
-import org.marid.service.AbstractMaridService;
-
-import java.util.Map;
-
-import static java.util.Collections.emptyMap;
+package org.marid.service;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DppService extends AbstractMaridService {
+public class ServiceMethodInfo {
 
-    protected final DppScheduler scheduler;
+    public final String group;
 
-    public DppService(Map params) {
-        super(params);
-        scheduler = new DppScheduler(id, PropMethods.get(params, Map.class, "params", emptyMap()));
-    }
-
-    @Override
-    protected void doStart() {
-        try {
-            scheduler.start();
-            notifyStarted();
-        } catch (Exception x) {
-            notifyFailed(x);
-        }
-    }
-
-    @Override
-    protected void doStop() {
-        try {
-            scheduler.stop();
-            notifyStopped();
-        } catch (Exception x) {
-            notifyFailed(x);
-        }
+    public ServiceMethodInfo(String group) {
+        this.group = group;
     }
 }

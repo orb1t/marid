@@ -83,10 +83,10 @@ public class MaridServices {
         return TS_MAP.get(type);
     }
 
-    public static <T> Future<T> send(String type, Object message) {
+    public static <T> Future<T> send(String type, String method, Object... args) {
         final MaridService service = getServiceByType(type);
         if (service != null) {
-            return service.send(message);
+            return service.send(method, args);
         } else {
             throw new IllegalArgumentException("Service not exists: " + type);
         }

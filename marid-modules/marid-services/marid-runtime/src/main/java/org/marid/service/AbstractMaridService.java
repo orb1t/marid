@@ -20,7 +20,11 @@ package org.marid.service;
 
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.MoreExecutors;
+import groovy.lang.MetaClass;
+import org.codehaus.groovy.runtime.InvokerHelper;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -29,6 +33,7 @@ import java.util.logging.Logger;
 import static org.marid.l10n.Localized.S;
 import static org.marid.methods.LogMethods.*;
 import static org.marid.methods.PropMethods.*;
+import static java.util.Collections.unmodifiableMap;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -46,7 +51,9 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
     protected final long timeGranularity;
     protected final long shutdownTimeout;
     protected final Executor sameThreadExecutor = MoreExecutors.sameThreadExecutor();
+    protected final MetaClass metaClass = InvokerHelper.getMetaClass(getClass());
     protected final Logger log = Logger.getLogger(getClass().getName());
+    protected final Map<String, ServiceMethodInfo> methodMap = new HashMap<>();
 
     public AbstractMaridService(Map params) {
         threadStackSize = get(params, int.class, "threadStackSize", 0);
@@ -105,6 +112,12 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
                 severe(log, "{0} Shutdown error. Skipped {1} tasks", AbstractMaridService.this, rest.size());
             }
         }, sameThreadExecutor);
+        for (final Method method : getClass().getMethods()) {
+            if (method.isAnnotationPresent(ServiceMethod.class)) {
+                final ServiceMethod serviceMethod = method.getAnnotation(ServiceMethod.class);
+                methodMap.put(method.getName(), new ServiceMethodInfo(serviceMethod.group()));
+            }
+        }
     }
 
     protected void onRunning() {
@@ -147,14 +160,20 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
     }
 
     @Override
+    public Map<String, ServiceMethodInfo> methodMap() {
+        return unmodifiableMap(methodMap);
+    }
+
+    @Override
     public String toString() {
         return id() + ":" + type();
     }
 
-    protected abstract Object processMessage(Object message) throws Exception;
-
     @Override
-    public <T> Future<T> send(final Object message) {
+    public <T> Future<T> send(final String method, final Object... args) {
+        if (!methodMap.containsKey(method)) {
+            throw new SecurityException("Invalid method '" + method + "'");
+        }
         return executor.submit(new Callable<T>() {
             @SuppressWarnings("unchecked")
             @Override
@@ -169,7 +188,7 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
                         }
                     }
                 }
-                return (T) processMessage(message);
+                return (T) metaClass.invokeMethod(AbstractMaridService.this, method, args);
             }
         });
     }
