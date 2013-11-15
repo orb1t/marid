@@ -16,17 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
-
-import java.lang.annotation.*;
+package org.marid.datastore.fs;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-@Target(ElementType.METHOD)
-public @interface ServiceMethod {
+abstract class TypeHandler<T> {
 
-    String group() default "all";
+    abstract String getExtension();
+
+    abstract T parse(String text);
+
+    abstract String toString(T value);
 }

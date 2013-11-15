@@ -23,12 +23,23 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class FileUtils {
+
+    public static TreeSet<Path> listSorted(Path dir, String glob) throws IOException {
+        final TreeSet<Path> set = new TreeSet<>();
+        try (final DirectoryStream<Path> ds = Files.newDirectoryStream(dir, glob)) {
+            for (final Path path : ds) {
+                set.add(path);
+            }
+        }
+        return set;
+    }
 
     public static void copy(Path source, Path target) throws IOException {
         new CopyTask(source, target).call();

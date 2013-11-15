@@ -16,37 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.silly;
-
-import org.marid.service.AbstractMaridService;
-
-import java.util.Map;
+package org.marid.util;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SillyTestService extends AbstractMaridService {
+public class DateUtil {
 
-    public SillyTestService(Map params) {
-        super(params);
-    }
-
-    @Override
-    public String id() {
-        return "id0";
-    }
-
-    public int get(int value) {
-        return value;
-    }
-
-    @Override
-    protected void doStart() {
-        notifyStarted();
-    }
-
-    @Override
-    protected void doStop() {
-        notifyStopped();
-    }
 }

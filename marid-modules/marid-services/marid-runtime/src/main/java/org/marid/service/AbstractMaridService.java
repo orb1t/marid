@@ -23,8 +23,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import groovy.lang.MetaClass;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -33,7 +31,6 @@ import java.util.logging.Logger;
 import static org.marid.l10n.Localized.S;
 import static org.marid.methods.LogMethods.*;
 import static org.marid.methods.PropMethods.*;
-import static java.util.Collections.unmodifiableMap;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -53,7 +50,6 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
     protected final Executor sameThreadExecutor = MoreExecutors.sameThreadExecutor();
     protected final MetaClass metaClass = InvokerHelper.getMetaClass(getClass());
     protected final Logger log = Logger.getLogger(getClass().getName());
-    protected final Map<String, ServiceMethodInfo> methodMap = new HashMap<>();
 
     public AbstractMaridService(Map params) {
         threadStackSize = get(params, int.class, "threadStackSize", 0);
@@ -112,12 +108,6 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
                 severe(log, "{0} Shutdown error. Skipped {1} tasks", AbstractMaridService.this, rest.size());
             }
         }, sameThreadExecutor);
-        for (final Method method : getClass().getMethods()) {
-            if (method.isAnnotationPresent(ServiceMethod.class)) {
-                final ServiceMethod serviceMethod = method.getAnnotation(ServiceMethod.class);
-                methodMap.put(method.getName(), new ServiceMethodInfo(serviceMethod.group()));
-            }
-        }
     }
 
     protected void onRunning() {
@@ -160,35 +150,40 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
     }
 
     @Override
-    public Map<String, ServiceMethodInfo> methodMap() {
-        return unmodifiableMap(methodMap);
-    }
-
-    @Override
     public String toString() {
         return id() + ":" + type();
     }
 
     @Override
     public <T> Future<T> send(final String method, final Object... args) {
-        if (!methodMap.containsKey(method)) {
-            throw new SecurityException("Invalid method '" + method + "'");
-        }
         return executor.submit(new Callable<T>() {
             @SuppressWarnings("unchecked")
             @Override
             public T call() throws Exception {
-                while (!isRunning()) {
-                    try {
-                        awaitRunning(timeGranularity, TimeUnit.MILLISECONDS);
-                    } catch (TimeoutException x) {
-                        if (Thread.interrupted()) {
-                            warning(log, "{0} Interrupted {1}", AbstractMaridService.this, this);
-                            throw new InterruptedException();
+                final State state = state();
+                switch (state) {
+                    case FAILED:
+                        throw new IllegalStateException(failureCause());
+                    case STOPPING:
+                    case TERMINATED:
+                        throw new IllegalStateException("Terminated");
+                    case NEW:
+                    case STARTING:
+                        while (!isRunning()) {
+                            try {
+                                awaitRunning(timeGranularity, TimeUnit.MILLISECONDS);
+                            } catch (TimeoutException x) {
+                                if (Thread.interrupted()) {
+                                    warning(log, "Interrupted {0}", this);
+                                    throw new InterruptedException();
+                                }
+                            }
                         }
-                    }
+                    case RUNNING:
+                        return (T) metaClass.invokeMethod(AbstractMaridService.this, method, args);
+                    default:
+                        throw new IllegalStateException("Illegal state: " + state);
                 }
-                return (T) metaClass.invokeMethod(AbstractMaridService.this, method, args);
             }
         });
     }

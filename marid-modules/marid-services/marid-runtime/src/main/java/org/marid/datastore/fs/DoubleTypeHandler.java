@@ -16,16 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.datastore.fs;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ServiceMethodInfo {
+public class DoubleTypeHandler extends TypeHandler<Double> {
 
-    public final String group;
+    @Override
+    String getExtension() {
+        return "dbl";
+    }
 
-    public ServiceMethodInfo(String group) {
-        this.group = group;
+    @Override
+    Double parse(String text) {
+        return Double.valueOf(text);
+    }
+
+    @Override
+    String toString(Double value) {
+        return value.toString();
     }
 }
