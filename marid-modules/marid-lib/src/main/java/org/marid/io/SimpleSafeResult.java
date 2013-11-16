@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Dmitry Ovchinnikov
+ * Copyright (C) 2013 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,14 +15,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.marid.io;
 
-/**
- * Metered writable object interface.
- *
- * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
- */
-public interface MeteredWrite {
+import java.util.List;
 
-    public long getWrittenCount();
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public class SimpleSafeResult<T> implements SafeResult<T> {
+
+    private final T result;
+    private final List<Throwable> errors;
+
+    public SimpleSafeResult(T result, List<Throwable> errors) {
+        this.result = result;
+        this.errors = errors;
+    }
+
+    @Override
+    public T getResult() {
+        return result;
+    }
+
+    @Override
+    public List<Throwable> getErrors() {
+        return errors;
+    }
+
+    @Override
+    public String toString() {
+        return result + " (" + errors.size() + " errors)";
+    }
 }

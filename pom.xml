@@ -488,7 +488,7 @@
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <scope>test</scope>
+            <scope>provided</scope>
             <version>2.0.2</version>
         </dependency>
     </dependencies>

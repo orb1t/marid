@@ -18,6 +18,8 @@
 
 package org.marid.datastore;
 
+import org.marid.io.SafeResult;
+
 import java.util.Date;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -28,11 +30,11 @@ import java.util.Set;
  */
 public interface TtvStore extends AutoCloseable {
 
-    Set<String> tagSet(String pattern);
+    SafeResult<Set<String>> tagSet(String pattern);
 
-    Map<String, Date> getMinTimestamp(Class<?> type, Set<String> tags);
+    SafeResult<Map<String, Date>> getMinTimestamp(Class<?> type, Set<String> tags);
 
-    Map<String, Date> getMaxTimestamp(Class<?> type, Set<String> tags);
+    SafeResult<Map<String, Date>> getMaxTimestamp(Class<?> type, Set<String> tags);
 
     void setMaximumFetchSize(int size);
 
@@ -42,31 +44,31 @@ public interface TtvStore extends AutoCloseable {
 
     int getQueryTimeout();
 
-    <T> Map<String, NavigableMap<Date, T>> after(Class<T> type, Set<String> tags, Date from, boolean inc);
+    <T> SafeResult<Map<String, NavigableMap<Date, T>>> after(Class<T> type, Set<String> tags, Date from, boolean inc);
 
-    <T> Map<String, NavigableMap<Date, T>> before(Class<T> type, Set<String> tags, Date to, boolean inc);
+    <T> SafeResult<Map<String, NavigableMap<Date, T>>> before(Class<T> type, Set<String> tags, Date to, boolean inc);
 
-    <T> Map<String, NavigableMap<Date, T>> between(Class<T> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc);
+    <T> SafeResult<Map<String, NavigableMap<Date, T>>> between(Class<T> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc);
 
     long usedSize();
 
-    <T> long insert(Class<T> type, Map<String, Map<Date, T>> data);
+    <T> SafeResult<Long> insert(Class<T> type, Map<String, Map<Date, T>> data);
 
-    <T> long insertOrUpdate(Class<T> type, Map<String, Map<Date, T>> data);
+    <T> SafeResult<Long> insertOrUpdate(Class<T> type, Map<String, Map<Date, T>> data);
 
-    <T> long update(Class<T> type, Map<String, Map<Date, T>> data);
+    <T> SafeResult<Long> update(Class<T> type, Map<String, Map<Date, T>> data);
 
-    long remove(Class<?> type, Set<String> tags);
+    SafeResult<Long> remove(Class<?> type, Set<String> tags);
 
-    long removeAfter(Class<?> type, Set<String> tags, Date from, boolean inc);
+    SafeResult<Long> removeAfter(Class<?> type, Set<String> tags, Date from, boolean inc);
 
-    long removeBefore(Class<?> type, Set<String> tags, Date to, boolean inc);
+    SafeResult<Long> removeBefore(Class<?> type, Set<String> tags, Date to, boolean inc);
 
-    long removeBetween(Class<?> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc);
+    SafeResult<Long> removeBetween(Class<?> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc);
 
-    long removeKeys(Class<?> type, Map<String, Date> keys);
+    SafeResult<Long> removeKeys(Class<?> type, Map<String, Date> keys);
 
-    long clear();
+    SafeResult<Long> clear();
 
-    Set<Class<?>> supportedTypes();
+    SafeResult<Set<Class<?>>> supportedTypes();
 }

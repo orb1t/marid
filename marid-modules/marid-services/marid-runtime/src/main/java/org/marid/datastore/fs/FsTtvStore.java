@@ -18,6 +18,7 @@
 
 package org.marid.datastore.fs;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -25,9 +26,11 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.Sets;
 import org.marid.datastore.TtvStore;
+import org.marid.io.SafeResult;
+import org.marid.io.SimpleSafeResult;
+import org.marid.nio.FileUtils;
 import org.marid.service.AbstractMaridService;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.file.*;
@@ -42,13 +45,16 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 import static com.google.common.base.StandardSystemProperty.USER_HOME;
+import static com.google.common.io.Files.getFileExtension;
+import static java.lang.Integer.parseInt;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.newDirectoryStream;
 import static java.nio.file.StandardOpenOption.*;
 import static java.nio.file.StandardWatchEventKinds.*;
+import static java.util.Calendar.*;
 import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableSet;
-import static org.marid.methods.LogMethods.fine;
-import static org.marid.methods.LogMethods.warning;
+import static org.marid.methods.LogMethods.*;
 import static org.marid.methods.PropMethods.get;
 import static org.marid.nio.FileUtils.listSorted;
 
@@ -66,7 +72,7 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
     private final Map<String, TypeHandler<?>> typeExtBinding = new HashMap<>();
     private final Set<Class<?>> supportedTypes = unmodifiableSet(typeBinding.keySet());
     private final WatchService watchService;
-    private final String fileSystemScheme;
+    private final String extension;
     private final FileSystemProvider fileSystemProvider;
     private final Cache<Path, FileSystem> fileSystemCache;
     private final String dateGlob;
@@ -77,17 +83,18 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
     public FsTtvStore(Map params) throws IOException {
         super(params);
         final Path defaultPath = Paths.get(USER_HOME.value(), "marid", "data");
-        fileSystemScheme = get(params, String.class, "fileSystemScheme", "zip");
-        dateGlob = "????-??-??." + fileSystemScheme;
+        final String scheme = get(params, String.class, "scheme", "jar");
+        extension = get(params, String.class, "extension", scheme);
+        dateGlob = "????-??-??." + extension;
         FileSystemProvider fsProvider = null;
         for (final FileSystemProvider provider : FileSystemProvider.installedProviders()) {
-            if (Objects.equals(provider.getScheme(), fileSystemScheme)) {
+            if (Objects.equals(provider.getScheme(), scheme)) {
                 fsProvider = provider;
                 break;
             }
         }
         if (fsProvider == null) {
-            throw new NoSuchElementException("No such file system provider: " + fileSystemScheme);
+            throw new NoSuchElementException("No such file system provider: " + scheme);
         }
         fileSystemProvider = fsProvider;
         dir = get(params, Path.class, "dir", defaultPath).toAbsolutePath();
@@ -103,15 +110,34 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                         get(params, TimeUnit.class, "cacheTimeUnit", TimeUnit.HOURS))
                 .removalListener(new RemovalListener<Path, FileSystem>() {
                     @Override
-                    public void onRemoval(RemovalNotification<Path, FileSystem> notification) {
+                    public void onRemoval(RemovalNotification<Path, FileSystem> e) {
                         try {
-                            final FileSystem fs = notification.getValue();
+                            final FileSystem fs = e.getValue();
                             if (fs != null) {
-                                fs.close();
-                                fine(LOG, "Remove {0} from cache", notification.getKey());
+                                boolean empty = false;
+                                synchronized (fs) {
+                                    try {
+                                        final Path d = fs.getRootDirectories().iterator().next();
+                                        try (final DirectoryStream<Path> s = newDirectoryStream(d)) {
+                                            empty = !s.iterator().hasNext();
+                                        }
+                                    } catch (Exception x) {
+                                        warning(LOG, "File system error", x);
+                                    }
+                                    fs.close();
+                                }
+                                if (empty) {
+                                    try {
+                                        Files.deleteIfExists(e.getKey());
+                                        info(LOG, "Deleted {0}", e.getKey());
+                                    } catch (Exception x) {
+                                        warning(LOG, "Unable to delete {0}", x, e.getKey());
+                                    }
+                                }
+                                fine(LOG, "Remove {0} from cache", e.getKey());
                             }
                         } catch (Exception x) {
-                            warning(LOG, "Unable to close {0}", x, notification.getKey());
+                            warning(LOG, "Unable to close {0}", x, e.getKey());
                         }
                     }
                 })
@@ -121,6 +147,16 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
         for (final Entry<Class<?>, TypeHandler<?>> e : typeBinding.entrySet()) {
             typeExtBinding.put(e.getValue().getExtension(), e.getValue());
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> TypeHandler<T> getTypeHandler(Class<T> type) {
+        return (TypeHandler<T>) typeBinding.get(type);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> TypeHandler<T> getTypeHandler(String ext, Class<T> type) {
+        return (TypeHandler<T>) typeExtBinding.get(ext);
     }
 
     @Override
@@ -135,21 +171,21 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
     }
 
     @Override
-    public Set<String> tagSet(final String pattern) {
+    public SafeResult<Set<String>> tagSet(final String pattern) {
         if (pattern == null || pattern.isEmpty()) {
-            return tagSet;
+            return new SimpleSafeResult<>(tagSet, Collections.<Throwable>emptyList());
         } else {
-            return Sets.filter(tagSet, new Predicate<String>() {
+            return new SimpleSafeResult<>(Sets.<String>filter(tagSet, new Predicate<String>() {
                 @Override
                 public boolean apply(String input) {
                     return input.matches(pattern);
                 }
-            });
+            }), Collections.<Throwable>emptyList());
         }
     }
 
     private Map<String, Date> getMaxMinTimestamp(Class<?> type, Set<String> tags, boolean min) {
-        final Map<String, Date> map = new HashMap<>();
+        final Map<String, Date> map = new TreeMap<>();
         final String timeGlob;
         try {
             timeGlob = "??-??-??." + typeBinding.get(type).getExtension();
@@ -187,13 +223,17 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
     }
 
     @Override
-    public Map<String, Date> getMinTimestamp(Class<?> type, Set<String> tags) {
-        return getMaxMinTimestamp(type, tags, true);
+    public SafeResult<Map<String, Date>> getMinTimestamp(Class<?> type, Set<String> tags) {
+        return new SimpleSafeResult<>(
+                getMaxMinTimestamp(type, tags, true),
+                Collections.<Throwable>emptyList());
     }
 
     @Override
-    public Map<String, Date> getMaxTimestamp(Class<?> type, Set<String> tags) {
-        return getMaxMinTimestamp(type, tags, false);
+    public SafeResult<Map<String, Date>> getMaxTimestamp(Class<?> type, Set<String> tags) {
+        return new SimpleSafeResult<>(
+                getMaxMinTimestamp(type, tags, false),
+                Collections.<Throwable>emptyList());
     }
 
     @Override
@@ -217,18 +257,82 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
     }
 
     @Override
-    public <T> Map<String, NavigableMap<Date, T>> after(Class<T> type, Set<String> tags, Date from, boolean inc) {
-        return null;
+    public <T> SafeResult<Map<String, NavigableMap<Date, T>>> after(Class<T> type, Set<String> tags, Date from, boolean inc) {
+        return between(type, tags, from, inc, new Date(Long.MAX_VALUE), false);
     }
 
     @Override
-    public <T> Map<String, NavigableMap<Date, T>> before(Class<T> type, Set<String> tags, Date to, boolean inc) {
-        return null;
+    public <T> SafeResult<Map<String, NavigableMap<Date, T>>> before(Class<T> type, Set<String> tags, Date to, boolean inc) {
+        return between(type, tags, new Date(Long.MIN_VALUE), false, to, inc);
     }
 
     @Override
-    public <T> Map<String, NavigableMap<Date, T>> between(Class<T> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc) {
-        return null;
+    public <T> SafeResult<Map<String, NavigableMap<Date, T>>> between(Class<T> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc) {
+        final List<Throwable> errors = new LinkedList<>();
+        final Map<String, NavigableMap<Date, T>> map = new TreeMap<>();
+        final Calendar f = new GregorianCalendar();
+        final Calendar t = new GregorianCalendar();
+        f.setTime(from);
+        t.setTime(to);
+        for (final String tag : tags) {
+            final Path tagPath = dir.resolve(tag);
+            if (!Files.isDirectory(tagPath)) {
+                continue;
+            }
+            final NavigableMap<Date, T> values = new TreeMap<>();
+            final TreeMap<Calendar, Path> dateMap = new TreeMap<>();
+            try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, dateGlob)) {
+                for (final Path dp : ds) {
+                    final String name = dp.getFileName().toString();
+                    final Calendar c = new GregorianCalendar(
+                            parseInt(name.substring(0, 4)),
+                            parseInt(name.substring(5, 7)),
+                            parseInt(name.substring(8, 10)));
+                    dateMap.put(c, dp);
+                }
+            } catch (IOException x) {
+                errors.add(x);
+                warning(LOG, "Unable to enumerate the directory {0}", x, tagPath);
+            }
+            for (final Entry<Calendar, Path> e : dateMap.subMap(f, true, t, true).entrySet()) {
+                try {
+                    final FileSystem fs = fileSystem(e.getValue());
+                    final TreeMap<Calendar, Path> timeMap = new TreeMap<>();
+                    synchronized (fs) {
+                        final Path d = fs.getRootDirectories().iterator().next();
+                        try (final DirectoryStream<Path> s = newDirectoryStream(d)) {
+                            for (final Path tp : s) {
+                                final String tpn = tp.getFileName().toString();
+                                final Calendar c = new GregorianCalendar();
+                                c.setTime(e.getKey().getTime());
+                                c.set(HOUR_OF_DAY, parseInt(tpn.substring(0, 2)));
+                                c.set(MINUTE, parseInt(tpn.substring(3, 5)));
+                                c.set(SECOND, parseInt(tpn.substring(6, 8)));
+                                timeMap.put(c, tp);
+                            }
+                        }
+                        for (final Entry<Calendar, Path> te : timeMap.subMap(f, fromInc, t, toInc).entrySet()) {
+                            try {
+                                final String name = te.getValue().getFileName().toString();
+                                final String ext = getFileExtension(name);
+                                final TypeHandler<T> th = getTypeHandler(ext, type);
+                                final byte[] data = Files.readAllBytes(te.getValue());
+                                final String stringData = new String(data, UTF_8);
+                                values.put(te.getKey().getTime(), th.parse(stringData));
+                            } catch (Exception x) {
+                                errors.add(x);
+                                warning(LOG, "Unable to process {0}", x, te.getValue());
+                            }
+                        }
+                    }
+                } catch (Exception x) {
+                    errors.add(x);
+                    warning(LOG, "Unable to process {0}", x, e.getValue());
+                }
+            }
+            map.put(tag, values);
+        }
+        return new SimpleSafeResult<>(map, errors);
     }
 
     @Override
@@ -240,7 +344,7 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
         return fileSystemCache.get(path, new Callable<FileSystem>() {
             @Override
             public FileSystem call() throws Exception {
-                return fileSystemProvider.newFileSystem(path, singletonMap("create", true));
+                return fileSystemProvider.newFileSystem(path, singletonMap("create", "true"));
             }
         });
     }
@@ -250,7 +354,7 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH) + 1,
                 calendar.get(Calendar.DATE),
-                fileSystemScheme);
+                extension);
     }
 
     private String timeFile(Calendar calendar, String ext) {
@@ -261,128 +365,253 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                 ext);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> long insert(Class<T> t, Map<String, Map<Date, T>> data, Set<? extends OpenOption> o) {
-        final TypeHandler<T> th = (TypeHandler<T>) typeBinding.get(t);
-        final String ext;
-        try {
-            ext = th.getExtension();
-        } catch (NullPointerException x) {
-            throw new IllegalArgumentException("Unsupported type: " + t, x);
-        }
+    public <T> SafeResult<Long> insert(Class<T> t, Map<String, Map<Date, T>> data, Set<? extends OpenOption> o) {
+        final List<Throwable> errors = new LinkedList<>();
+        final TypeHandler<T> th = getTypeHandler(t);
+        Preconditions.checkNotNull(th, "Unsupported type: " + t);
         final GregorianCalendar calendar = new GregorianCalendar();
-        long n = 0;
+        long n = 0L;
         for (final Entry<String, Map<Date, T>> te : data.entrySet()) {
-            final Path tagPath = dir.resolve(te.getKey());
+            final String tag = te.getKey();
+            final Path tagPath = dir.resolve(tag);
             try {
                 Files.createDirectories(tagPath);
             } catch (IOException x) {
-                throw new IllegalStateException(x);
+                errors.add(x);
+                continue;
             }
             for (final Entry<Date, T> e : te.getValue().entrySet()) {
+                final Date ts = e.getKey();
+                final T v = e.getValue();
+                final FileSystem fs;
+                final Path timePath;
                 try {
-                    calendar.setTime(e.getKey());
+                    calendar.setTime(ts);
                     final Path datePath = tagPath.resolve(dateFile(calendar));
-                    final FileSystem fs = fileSystem(datePath);
-                    final Path timePath = fs.getPath(timeFile(calendar, ext));
-                    try (final FileChannel ch = fileSystemProvider.newFileChannel(timePath, o)) {
-                        ch.write(UTF_8.encode(th.toString(e.getValue())));
+                    fs = fileSystem(datePath);
+                    timePath = fs.getPath(timeFile(calendar, th.getExtension()));
+                } catch (Exception x) {
+                    errors.add(x);
+                    continue;
+                }
+                try {
+                    synchronized (fs) {
+                        try (final FileChannel ch = fs.provider().newFileChannel(timePath, o)) {
+                            ch.write(UTF_8.encode(th.toString(v)));
+                        }
                     }
                     n++;
-                } catch (FileAlreadyExistsException x) {
-                    warning(LOG, "{0} already exists", x.getFile());
-                } catch (FileNotFoundException x) {
-                    warning(LOG, x.getMessage());
+                } catch (NoSuchFileException x) {
+                    if (!o.contains(CREATE)) {
+                        errors.add(x);
+                        continue;
+                    }
+                    final Set<? extends OpenOption> s = EnumSet.of(CREATE_NEW, WRITE);
+                    try { // JDK Bug
+                        synchronized (fs) {
+                            try (final FileChannel ch = fs.provider().newFileChannel(timePath, s)) {
+                                ch.write(UTF_8.encode(th.toString(v)));
+                            }
+                        }
+                        n++;
+                    } catch (Exception y) {
+                        errors.add(x);
+                    }
                 } catch (Exception x) {
-                    throw new IllegalStateException(x);
+                    errors.add(x);
                 }
             }
         }
-        return n;
+        return new SimpleSafeResult<>(n, errors);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> long insert(Class<T> type, Map<String, Map<Date, T>> data) {
+    public <T> SafeResult<Long> insert(Class<T> type, Map<String, Map<Date, T>> data) {
         return insert(type, data, EnumSet.of(CREATE_NEW, WRITE));
     }
 
     @Override
-    public <T> long insertOrUpdate(Class<T> type, Map<String, Map<Date, T>> data) {
+    public <T> SafeResult<Long> insertOrUpdate(Class<T> type, Map<String, Map<Date, T>> data) {
         return insert(type, data, EnumSet.of(CREATE, WRITE, TRUNCATE_EXISTING));
     }
 
     @Override
-    public <T> long update(Class<T> type, Map<String, Map<Date, T>> data) {
+    public <T> SafeResult<Long> update(Class<T> type, Map<String, Map<Date, T>> data) {
         return insert(type, data, EnumSet.of(WRITE, TRUNCATE_EXISTING));
     }
 
     @Override
-    public long remove(Class<?> type, Set<String> tags) {
-        final AtomicLong counter = new AtomicLong();
+    public SafeResult<Long> remove(Class<?> type, Set<String> tags) {
+        final List<Throwable> errors = new LinkedList<>();
+        long n = 0L;
         for (final String tag : tags) {
             final Path tagPath = dir.resolve(tag);
+            if (!Files.isDirectory(tagPath)) {
+                continue;
+            }
+            try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, dateGlob)) {
+                for (final Path dp : ds) {
+                    try {
+                        final FileSystem fs = fileSystem(dp);
+                        synchronized (fs) {
+                            for (final Path d : fs.getRootDirectories()) {
+                                Files.walkFileTree(d, FileUtils.FILE_CLEANER);
+                            }
+                        }
+                        fileSystemCache.invalidate(dp);
+                    } catch (Exception x) {
+                        errors.add(x);
+                    }
+                }
+            } catch (IOException x) {
+                errors.add(x);
+            }
             try {
-                try (final DirectoryStream<Path> ds = Files.newDirectoryStream(tagPath, dateGlob)) {
+                Files.deleteIfExists(tagPath);
+            } catch (DirectoryNotEmptyException x) {
+                warning(LOG, "Directory {0} is not empty", x.getFile());
+            } catch (IOException x) {
+                errors.add(x);
+            }
+        }
+        return new SimpleSafeResult<>(n, errors);
+    }
+
+    @Override
+    public SafeResult<Long> removeAfter(Class<?> type, Set<String> tags, Date from, boolean inc) {
+        return removeBetween(type, tags, from, inc, new Date(Long.MAX_VALUE), false);
+    }
+
+    @Override
+    public SafeResult<Long> removeBefore(Class<?> type, Set<String> tags, Date to, boolean inc) {
+        return removeBetween(type, tags, new Date(Long.MIN_VALUE), false, to, inc);
+    }
+
+    @Override
+    public SafeResult<Long> removeBetween(Class<?> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc) {
+        final List<Throwable> errors = new LinkedList<>();
+        long n = 0L;
+        final Calendar f = new GregorianCalendar();
+        final Calendar t = new GregorianCalendar();
+        f.setTime(from);
+        t.setTime(to);
+        for (final String tag : tags) {
+            final Path tagPath = dir.resolve(tag);
+            if (!Files.isDirectory(tagPath)) {
+                continue;
+            }
+            final TreeMap<Calendar, Path> dateMap = new TreeMap<>();
+            try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, dateGlob)) {
+                for (final Path p : ds) {
+                    final String name = p.getFileName().toString();
+                    final Calendar calendar = new GregorianCalendar(
+                            Integer.parseInt(name.substring(0, 4)),
+                            Integer.parseInt(name.substring(5, 7)) - 1,
+                            Integer.parseInt(name.substring(8, 10)));
+                    dateMap.put(calendar, p);
+                }
+            } catch (IOException x) {
+                errors.add(x);
+            }
+            for (final Entry<Calendar, Path> de : dateMap.subMap(f, true, t, true).entrySet()) {
+                final Path dp = de.getValue();
+                try {
+                    final FileSystem fs = fileSystem(dp);
+                    final TreeMap<Calendar, Path> timeMap = new TreeMap<>();
+                    synchronized (fs) {
+                        final Path d = fs.getRootDirectories().iterator().next();
+                        try (final DirectoryStream<Path> s = newDirectoryStream(d)) {
+                            for (final Path tp : s) {
+                                final String name = tp.getFileName().toString();
+                                final Calendar calendar = new GregorianCalendar();
+                                calendar.setTime(de.getKey().getTime());
+                                calendar.set(HOUR_OF_DAY, parseInt(name.substring(0, 2)));
+                                calendar.set(MINUTE, parseInt(name.substring(3, 5)));
+                                calendar.set(SECOND, parseInt(name.substring(6, 8)));
+                                timeMap.put(calendar, tp);
+                            }
+                        } catch (IOException x) {
+                            errors.add(x);
+                        }
+                        for (final Path tp : timeMap.subMap(f, fromInc, t, toInc).values()) {
+                            try {
+                                fs.provider().delete(tp);
+                                n++;
+                            } catch (IOException x) {
+                                errors.add(x);
+                            }
+                        }
+                    }
+                } catch (Exception x) {
+                    errors.add(x);
+                }
+            }
+        }
+        return new SimpleSafeResult<>(n, errors);
+    }
+
+    @Override
+    public SafeResult<Long> removeKeys(Class<?> type, Map<String, Date> keys) {
+        final List<Throwable> errors = new LinkedList<>();
+        long n = 0L;
+        for (final Entry<String, Date> e : keys.entrySet()) {
+            try {
+                final Calendar c = new GregorianCalendar();
+                c.setTime(e.getValue());
+                final Path tagPath = dir.resolve(e.getKey());
+                if (!Files.isDirectory(tagPath)) {
+                    continue;
+                }
+                try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, dateGlob)) {
                     for (final Path dp : ds) {
-                        try (final DirectoryStream<Path> ts = Files.newDirectoryStream(dp, "??-??-??.*")) {
-                            for (final Path tp : ts) {
-                                try {
-                                    if (Files.deleteIfExists(tp)) {
-                                        counter.incrementAndGet();
+                        final String name = dp.getFileName().toString();
+                        if (parseInt(name.substring(0, 4)) != c.get(YEAR)) {
+                            continue;
+                        }
+                        if (parseInt(name.substring(5, 7)) != c.get(MONTH) + 1) {
+                            continue;
+                        }
+                        if (parseInt(name.substring(8, 10)) != c.get(DATE)) {
+                            continue;
+                        }
+                        final FileSystem fs = fileSystem(dp);
+                        synchronized (fs) {
+                            final Path d = fs.getRootDirectories().iterator().next();
+                            try (final DirectoryStream<Path> s = newDirectoryStream(d)) {
+                                for (final Path tp : s) {
+                                    final String tpn = tp.getFileName().toString();
+                                    if (parseInt(tpn.substring(0, 2)) != c.get(HOUR_OF_DAY)) {
+                                        continue;
                                     }
-                                } catch (IOException x) {
-                                    warning(LOG, "Unable to delete {0}", x, tp);
+                                    if (parseInt(tpn.substring(3, 5)) != c.get(MINUTE)) {
+                                        continue;
+                                    }
+                                    if (parseInt(tpn.substring(6, 8)) != c.get(SECOND)) {
+                                        continue;
+                                    }
+                                    Files.delete(tp);
+                                    n++;
                                 }
                             }
                         }
-                        try {
-                            Files.deleteIfExists(dp);
-                        } catch (DirectoryNotEmptyException x) {
-                            fine(LOG, "Directory {0} is not empty", x.getFile());
-                        }
+                        break;
                     }
                 }
-                try {
-                    Files.deleteIfExists(tagPath);
-                } catch (DirectoryNotEmptyException x) {
-                    fine(LOG, "Directory {0} is not empty", x.getFile());
-                }
-            } catch (IOException x) {
-                throw new IllegalStateException(x);
+            } catch (Exception x) {
+                errors.add(x);
             }
         }
-        return counter.get();
+        return new SimpleSafeResult<>(n, errors);
     }
 
     @Override
-    public long removeAfter(Class<?> type, Set<String> tags, Date from, boolean inc) {
-        return 0;
-    }
-
-    @Override
-    public long removeBefore(Class<?> type, Set<String> tags, Date to, boolean inc) {
-        return 0;
-    }
-
-    @Override
-    public long removeBetween(Class<?> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc) {
-        return 0;
-    }
-
-    @Override
-    public long removeKeys(Class<?> type, Map<String, Date> keys) {
-        return 0;
-    }
-
-    @Override
-    public long clear() {
+    public SafeResult<Long> clear() {
         return remove(Object.class, tagSet);
     }
 
     @Override
-    public Set<Class<?>> supportedTypes() {
-        return supportedTypes;
+    public SafeResult<Set<Class<?>>> supportedTypes() {
+        return new SimpleSafeResult<>(supportedTypes, Collections.<Throwable>emptyList());
     }
 
     @Override

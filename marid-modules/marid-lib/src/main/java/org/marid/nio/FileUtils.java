@@ -19,10 +19,8 @@
 package org.marid.nio;
 
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
@@ -30,6 +28,14 @@ import java.util.concurrent.Callable;
  * @author Dmitry Ovchinnikov
  */
 public class FileUtils {
+
+    public static final FileVisitor<Path> FILE_CLEANER = new SimpleFileVisitor<Path>() {
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            Files.delete(file);
+            return FileVisitResult.CONTINUE;
+        }
+    };
 
     public static TreeSet<Path> listSorted(Path dir, String glob) throws IOException {
         final TreeSet<Path> set = new TreeSet<>();
