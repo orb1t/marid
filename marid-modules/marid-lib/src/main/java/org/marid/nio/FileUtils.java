@@ -29,10 +29,24 @@ import java.util.concurrent.Callable;
  */
 public class FileUtils {
 
-    public static final FileVisitor<Path> FILE_CLEANER = new SimpleFileVisitor<Path>() {
+    public static final FileVisitor<Path> CLEANER = new SimpleFileVisitor<Path>() {
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
             Files.delete(file);
+            return FileVisitResult.CONTINUE;
+        }
+    };
+
+    public static final FileVisitor<Path> RECURSIVE_CLEANER = new SimpleFileVisitor<Path>() {
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            Files.delete(file);
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            Files.delete(dir);
             return FileVisitResult.CONTINUE;
         }
     };

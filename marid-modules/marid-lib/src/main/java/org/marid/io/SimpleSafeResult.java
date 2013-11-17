@@ -18,7 +18,10 @@
 
 package org.marid.io;
 
+import java.lang.reflect.Array;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -45,6 +48,19 @@ public class SimpleSafeResult<T> implements SafeResult<T> {
 
     @Override
     public String toString() {
-        return result + " (" + errors.size() + " errors)";
+        final StringBuilder sb = new StringBuilder();
+        if (result instanceof Map) {
+            sb.append("map(").append(((Map) result).size()).append(") ");
+        } else if (result instanceof Collection) {
+            sb.append("collection(").append(((Collection) result).size()).append(") ");
+        } else if (result == null) {
+            sb.append("null ");
+        } else if (result.getClass().isArray()) {
+            sb.append("array(").append(Array.getLength(result)).append(") ");
+        } else {
+            sb.append(result).append(' ');
+        }
+        sb.append('(').append(errors.size()).append(" errors)");
+        return sb.toString();
     }
 }

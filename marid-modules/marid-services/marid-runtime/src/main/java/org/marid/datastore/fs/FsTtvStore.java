@@ -18,24 +18,34 @@
 
 package org.marid.datastore.fs;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.Sets;
+import groovy.json.JsonOutput;
+import groovy.json.JsonSlurper;
 import org.marid.datastore.TtvStore;
 import org.marid.io.SafeResult;
 import org.marid.io.SimpleSafeResult;
-import org.marid.nio.FileUtils;
 import org.marid.service.AbstractMaridService;
 
+import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CoderResult;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.spi.FileSystemProvider;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -45,15 +55,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 import static com.google.common.base.StandardSystemProperty.USER_HOME;
-import static com.google.common.io.Files.getFileExtension;
 import static java.lang.Integer.parseInt;
+import static java.nio.channels.Channels.newReader;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.newDirectoryStream;
 import static java.nio.file.StandardOpenOption.*;
-import static java.nio.file.StandardWatchEventKinds.*;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.util.Calendar.*;
-import static java.util.Collections.singletonMap;
-import static java.util.Collections.unmodifiableSet;
+import static org.marid.groovy.GroovyRuntime.cast;
 import static org.marid.methods.LogMethods.*;
 import static org.marid.methods.PropMethods.get;
 import static org.marid.nio.FileUtils.listSorted;
@@ -64,72 +74,53 @@ import static org.marid.nio.FileUtils.listSorted;
 public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVisitor<Path> {
 
     private static final Logger LOG = Logger.getLogger(FsTtvStore.class.getName());
+    private static final Set<? extends OpenOption> FOPTS = EnumSet.of(CREATE, WRITE, READ);
 
     private final Path dir;
     private final Set<String> tagSet = new ConcurrentSkipListSet<>();
     private final AtomicLong usedSize = new AtomicLong();
-    private final Map<Class<?>, TypeHandler<?>> typeBinding = new IdentityHashMap<>();
-    private final Map<String, TypeHandler<?>> typeExtBinding = new HashMap<>();
-    private final Set<Class<?>> supportedTypes = unmodifiableSet(typeBinding.keySet());
     private final WatchService watchService;
-    private final String extension;
-    private final FileSystemProvider fileSystemProvider;
-    private final Cache<Path, FileSystem> fileSystemCache;
-    private final String dateGlob;
+    private final Cache<Path, DateEntry> entryCache;
+    private final int bufferSize;
     private volatile int maximumFetchSize;
     private volatile int queryTimeout;
 
     @SuppressWarnings("unchecked")
     public FsTtvStore(Map params) throws IOException {
         super(params);
+        bufferSize = get(params, int.class, "bufferSize", 1024);
         final Path defaultPath = Paths.get(USER_HOME.value(), "marid", "data");
-        final String scheme = get(params, String.class, "scheme", "jar");
-        extension = get(params, String.class, "extension", scheme);
-        dateGlob = "????-??-??." + extension;
-        FileSystemProvider fsProvider = null;
-        for (final FileSystemProvider provider : FileSystemProvider.installedProviders()) {
-            if (Objects.equals(provider.getScheme(), scheme)) {
-                fsProvider = provider;
-                break;
-            }
-        }
-        if (fsProvider == null) {
-            throw new NoSuchElementException("No such file system provider: " + scheme);
-        }
-        fileSystemProvider = fsProvider;
         dir = get(params, Path.class, "dir", defaultPath).toAbsolutePath();
         watchService = FileSystems.getDefault().newWatchService();
         if (Files.notExists(dir)) {
             Files.createDirectories(dir);
         }
-        fileSystemCache = CacheBuilder.newBuilder()
+        entryCache = CacheBuilder.newBuilder()
                 .maximumSize(get(params, long.class, "cacheSize", 1024L))
                 .concurrencyLevel(get(params, int.class, "cacheConcurrency",
                         Runtime.getRuntime().availableProcessors()))
                 .expireAfterAccess(get(params, long.class, "cacheExpirationTime", 1L),
                         get(params, TimeUnit.class, "cacheTimeUnit", TimeUnit.HOURS))
-                .removalListener(new RemovalListener<Path, FileSystem>() {
+                .removalListener(new RemovalListener<Path, DateEntry>() {
                     @Override
-                    public void onRemoval(RemovalNotification<Path, FileSystem> e) {
+                    public void onRemoval(RemovalNotification<Path, DateEntry> e) {
                         try {
-                            final FileSystem fs = e.getValue();
-                            if (fs != null) {
-                                boolean empty = false;
-                                synchronized (fs) {
+                            final DateEntry de = e.getValue();
+                            if (de != null) {
+                                synchronized (de) {
+                                    long size;
                                     try {
-                                        final Path d = fs.getRootDirectories().iterator().next();
-                                        try (final DirectoryStream<Path> s = newDirectoryStream(d)) {
-                                            empty = !s.iterator().hasNext();
-                                        }
+                                        size = de.ch.size();
                                     } catch (Exception x) {
-                                        warning(LOG, "File system error", x);
+                                        size = 0L;
+                                        warning(LOG, "Unable to get size: {0}", x, e.getKey());
                                     }
-                                    fs.close();
-                                }
-                                if (empty) {
+                                    de.close();
                                     try {
-                                        Files.deleteIfExists(e.getKey());
-                                        info(LOG, "Deleted {0}", e.getKey());
+                                        if (size == 0L) {
+                                            Files.delete(e.getKey());
+                                            finest(LOG, "Deleted {0}", e.getKey());
+                                        }
                                     } catch (Exception x) {
                                         warning(LOG, "Unable to delete {0}", x, e.getKey());
                                     }
@@ -143,30 +134,54 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                 })
                 .build();
         Files.walkFileTree(dir, this);
-        typeBinding.put(Double.class, new DoubleTypeHandler());
-        for (final Entry<Class<?>, TypeHandler<?>> e : typeBinding.entrySet()) {
-            typeExtBinding.put(e.getValue().getExtension(), e.getValue());
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> TypeHandler<T> getTypeHandler(Class<T> type) {
-        return (TypeHandler<T>) typeBinding.get(type);
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> TypeHandler<T> getTypeHandler(String ext, Class<T> type) {
-        return (TypeHandler<T>) typeExtBinding.get(ext);
     }
 
     @Override
     protected void doStart() {
         notifyStarted();
+        newThread(new Runnable() {
+            @Override
+            public void run() {
+                try (final WatchService s = watchService) {
+                    while (isRunning()) {
+                        final WatchKey k = s.poll(1L, TimeUnit.SECONDS);
+                        if (k == null) {
+                            continue;
+                        }
+                        final Path parent = (Path) k.watchable();
+                        for (final WatchEvent<?> ev : k.pollEvents()) {
+                            try {
+                                final Path path = parent.resolve((Path) ev.context());
+                                final String name = path.getFileName().toString();
+                                if (path.getParent().equals(dir)) {
+                                    if (ev.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
+                                        tagSet.add(name);
+                                        fine(LOG, "Added tag {0}", name);
+                                    } else if (ev.kind() == StandardWatchEventKinds.ENTRY_DELETE) {
+                                        tagSet.remove(name);
+                                        fine(LOG, "Removed tag {0}", name);
+                                    }
+                                }
+                            } catch (Exception x) {
+                                warning(LOG, "Unable to process {0}", x, ev.context());
+                            }
+                        }
+                        if (!k.reset()) {
+                            k.cancel();
+                            fine(LOG, "Cancelled {0}", parent);
+                        }
+                    }
+                } catch (Exception x) {
+                    warning(LOG, "Watch service error", x);
+                }
+            }
+        }).start();
+
     }
 
     @Override
     protected void doStop() {
-        fileSystemCache.invalidateAll();
+        entryCache.invalidateAll();
         notifyStopped();
     }
 
@@ -184,56 +199,44 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
         }
     }
 
-    private Map<String, Date> getMaxMinTimestamp(Class<?> type, Set<String> tags, boolean min) {
+    private SafeResult<Map<String, Date>> getMaxMinTimestamp(Class<?> type, Set<String> tags, boolean min) {
+        final List<Throwable> errors = new LinkedList<>();
         final Map<String, Date> map = new TreeMap<>();
-        final String timeGlob;
-        try {
-            timeGlob = "??-??-??." + typeBinding.get(type).getExtension();
-        } catch (NullPointerException x) {
-            throw new IllegalArgumentException("Unsupported type: " + type, x);
-        }
-        try {
-            TAG_LOOP:
-            for (final String tag : tags) {
-                final Path tagPath = dir.resolve(tag);
-                if (Files.isDirectory(tagPath)) {
-                    final TreeSet<Path> datePaths = listSorted(tagPath, dateGlob);
+        TAG_LOOP:
+        for (final String tag : tags) {
+            final Path tagPath = dir.resolve(tag);
+            if (Files.isDirectory(tagPath)) {
+                try {
+                    final TreeSet<Path> datePaths = listSorted(tagPath, "????-??-??.data");
                     for (final Path datePath : min ? datePaths : datePaths.descendingSet()) {
-                        final TreeSet<Path> timePaths = listSorted(datePath, timeGlob);
-                        for (final Path timePath : min ? timePaths : timePaths.descendingSet()) {
-                            final String time = timePath.getFileName().toString();
-                            final String date = datePath.getFileName().toString();
-                            final GregorianCalendar calendar = new GregorianCalendar(
-                                    Integer.parseInt(date.substring(0, 4)),
-                                    Integer.parseInt(date.substring(5, 7)) - 1,
-                                    Integer.parseInt(date.substring(8, 10)),
-                                    Integer.parseInt(time.substring(0, 2)),
-                                    Integer.parseInt(time.substring(3, 5)),
-                                    Integer.parseInt(time.substring(6, 8)));
-                            map.put(tag, calendar.getTime());
-                            continue TAG_LOOP;
+                        try {
+                            final DateEntry de = dateEntry(datePath);
+                            synchronized (de) {
+                                if (!de.records.isEmpty()) {
+                                    map.put(tag, min ? de.records.firstKey() : de.records.lastKey());
+                                    continue TAG_LOOP;
+                                }
+                            }
+                        } catch (Exception x) {
+                            errors.add(x);
                         }
                     }
+                } catch (Exception x) {
+                    errors.add(x);
                 }
             }
-            return map;
-        } catch (IOException x) {
-            throw new IllegalStateException(x);
         }
+        return new SimpleSafeResult<>(map, errors);
     }
 
     @Override
     public SafeResult<Map<String, Date>> getMinTimestamp(Class<?> type, Set<String> tags) {
-        return new SimpleSafeResult<>(
-                getMaxMinTimestamp(type, tags, true),
-                Collections.<Throwable>emptyList());
+        return getMaxMinTimestamp(type, tags, true);
     }
 
     @Override
     public SafeResult<Map<String, Date>> getMaxTimestamp(Class<?> type, Set<String> tags) {
-        return new SimpleSafeResult<>(
-                getMaxMinTimestamp(type, tags, false),
-                Collections.<Throwable>emptyList());
+        return getMaxMinTimestamp(type, tags, false);
     }
 
     @Override
@@ -257,77 +260,82 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
     }
 
     @Override
-    public <T> SafeResult<Map<String, NavigableMap<Date, T>>> after(Class<T> type, Set<String> tags, Date from, boolean inc) {
+    public <T> SafeResult<Map<String, NavigableMap<Date, T>>> after
+            (Class<T> type, Set<String> tags, Date from, boolean inc) {
         return between(type, tags, from, inc, new Date(Long.MAX_VALUE), false);
     }
 
     @Override
-    public <T> SafeResult<Map<String, NavigableMap<Date, T>>> before(Class<T> type, Set<String> tags, Date to, boolean inc) {
+    public <T> SafeResult<Map<String, NavigableMap<Date, T>>> before
+            (Class<T> type, Set<String> tags, Date to, boolean inc) {
         return between(type, tags, new Date(Long.MIN_VALUE), false, to, inc);
     }
 
     @Override
-    public <T> SafeResult<Map<String, NavigableMap<Date, T>>> between(Class<T> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc) {
+    public <T> SafeResult<Map<String, NavigableMap<Date, T>>> between(
+            Class<T> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc) {
         final List<Throwable> errors = new LinkedList<>();
         final Map<String, NavigableMap<Date, T>> map = new TreeMap<>();
-        final Calendar f = new GregorianCalendar();
-        final Calendar t = new GregorianCalendar();
-        f.setTime(from);
-        t.setTime(to);
         for (final String tag : tags) {
             final Path tagPath = dir.resolve(tag);
             if (!Files.isDirectory(tagPath)) {
                 continue;
             }
-            final NavigableMap<Date, T> values = new TreeMap<>();
-            final TreeMap<Calendar, Path> dateMap = new TreeMap<>();
-            try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, dateGlob)) {
+            final TreeMap<Date, Path> dateMap = new TreeMap<>();
+            try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, "????-??-??.data")) {
                 for (final Path dp : ds) {
                     final String name = dp.getFileName().toString();
                     final Calendar c = new GregorianCalendar(
                             parseInt(name.substring(0, 4)),
-                            parseInt(name.substring(5, 7)),
+                            parseInt(name.substring(5, 7)) - 1,
                             parseInt(name.substring(8, 10)));
-                    dateMap.put(c, dp);
+                    dateMap.put(c.getTime(), dp);
                 }
             } catch (IOException x) {
                 errors.add(x);
                 warning(LOG, "Unable to enumerate the directory {0}", x, tagPath);
             }
-            for (final Entry<Calendar, Path> e : dateMap.subMap(f, true, t, true).entrySet()) {
+            final NavigableMap<Date, T> values = new TreeMap<>();
+            for (final Path dp : dateMap.subMap(from, true, to, true).values()) {
                 try {
-                    final FileSystem fs = fileSystem(e.getValue());
-                    final TreeMap<Calendar, Path> timeMap = new TreeMap<>();
-                    synchronized (fs) {
-                        final Path d = fs.getRootDirectories().iterator().next();
-                        try (final DirectoryStream<Path> s = newDirectoryStream(d)) {
-                            for (final Path tp : s) {
-                                final String tpn = tp.getFileName().toString();
-                                final Calendar c = new GregorianCalendar();
-                                c.setTime(e.getKey().getTime());
-                                c.set(HOUR_OF_DAY, parseInt(tpn.substring(0, 2)));
-                                c.set(MINUTE, parseInt(tpn.substring(3, 5)));
-                                c.set(SECOND, parseInt(tpn.substring(6, 8)));
-                                timeMap.put(c, tp);
-                            }
-                        }
-                        for (final Entry<Calendar, Path> te : timeMap.subMap(f, fromInc, t, toInc).entrySet()) {
+                    final DateEntry de = dateEntry(dp);
+                    synchronized (de) {
+                        for (final Entry<Date, Record> re : de.records.subMap(from, fromInc, to, toInc).entrySet()) {
+                            final String text = re.getValue().text;
                             try {
-                                final String name = te.getValue().getFileName().toString();
-                                final String ext = getFileExtension(name);
-                                final TypeHandler<T> th = getTypeHandler(ext, type);
-                                final byte[] data = Files.readAllBytes(te.getValue());
-                                final String stringData = new String(data, UTF_8);
-                                values.put(te.getKey().getTime(), th.parse(stringData));
+                                final Object v;
+                                if ("null".equals(text)) {
+                                    v = null;
+                                } else if (type == Double.class || type == double.class) {
+                                    v = Double.valueOf(text);
+                                } else if (type == Float.class || type == float.class) {
+                                    v = Float.valueOf(text);
+                                } else if (type == Long.class || type == long.class) {
+                                    v = Long.valueOf(text);
+                                } else if (type == Integer.class || type == int.class) {
+                                    v = Integer.valueOf(text);
+                                } else if (type == Boolean.class || type == boolean.class) {
+                                    v = Boolean.valueOf(text);
+                                } else if (type == Short.class || type == short.class) {
+                                    v = Short.valueOf(text);
+                                } else if (type == Byte.class || type == byte.class) {
+                                    v = Byte.valueOf(text);
+                                } else if (type == BigDecimal.class) {
+                                    v = new BigDecimal(text);
+                                } else if (type == BigInteger.class) {
+                                    v = new BigInteger(text);
+                                } else {
+                                    v = ((List) de.slurper.parseText("[" + text + "]")).get(0);
+                                }
+                                values.put(re.getKey(), cast(type, v));
                             } catch (Exception x) {
                                 errors.add(x);
-                                warning(LOG, "Unable to process {0}", x, te.getValue());
                             }
                         }
                     }
                 } catch (Exception x) {
                     errors.add(x);
-                    warning(LOG, "Unable to process {0}", x, e.getValue());
+                    warning(LOG, "Unable to process {0}", x, dp);
                 }
             }
             map.put(tag, values);
@@ -340,35 +348,21 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
         return usedSize.get();
     }
 
-    private FileSystem fileSystem(final Path path) throws Exception {
-        return fileSystemCache.get(path, new Callable<FileSystem>() {
+    private DateEntry dateEntry(final Path path) throws Exception {
+        return entryCache.get(path, new Callable<DateEntry>() {
             @Override
-            public FileSystem call() throws Exception {
-                return fileSystemProvider.newFileSystem(path, singletonMap("create", "true"));
+            public DateEntry call() throws Exception {
+                return new DateEntry(path);
             }
         });
     }
 
-    private String dateFile(Calendar calendar) {
-        return String.format("%04d-%02d-%02d.%s",
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH) + 1,
-                calendar.get(Calendar.DATE),
-                extension);
+    private String dateFile(Calendar c) {
+        return String.format("%04d-%02d-%02d.data", c.get(YEAR), c.get(MONTH) + 1, c.get(DATE));
     }
 
-    private String timeFile(Calendar calendar, String ext) {
-        return String.format("%02d-%02d-%02d.%s",
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE),
-                calendar.get(Calendar.SECOND),
-                ext);
-    }
-
-    public <T> SafeResult<Long> insert(Class<T> t, Map<String, Map<Date, T>> data, Set<? extends OpenOption> o) {
+    public <T> SafeResult<Long> insert(Class<T> t, Map<String, Map<Date, T>> data, boolean insert, boolean update) {
         final List<Throwable> errors = new LinkedList<>();
-        final TypeHandler<T> th = getTypeHandler(t);
-        Preconditions.checkNotNull(th, "Unsupported type: " + t);
         final GregorianCalendar calendar = new GregorianCalendar();
         long n = 0L;
         for (final Entry<String, Map<Date, T>> te : data.entrySet()) {
@@ -381,41 +375,36 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                 continue;
             }
             for (final Entry<Date, T> e : te.getValue().entrySet()) {
-                final Date ts = e.getKey();
-                final T v = e.getValue();
-                final FileSystem fs;
-                final Path timePath;
                 try {
-                    calendar.setTime(ts);
-                    final Path datePath = tagPath.resolve(dateFile(calendar));
-                    fs = fileSystem(datePath);
-                    timePath = fs.getPath(timeFile(calendar, th.getExtension()));
-                } catch (Exception x) {
-                    errors.add(x);
-                    continue;
-                }
-                try {
-                    synchronized (fs) {
-                        try (final FileChannel ch = fs.provider().newFileChannel(timePath, o)) {
-                            ch.write(UTF_8.encode(th.toString(v)));
-                        }
+                    calendar.setTime(e.getKey());
+                    final Path dp = tagPath.resolve(dateFile(calendar));
+                    final DateEntry de = dateEntry(dp);
+                    final T value = cast(t, e.getValue());
+                    final String v;
+                    if (value instanceof Number) {
+                        v = JsonOutput.toJson((Number) value);
+                    } else if (value instanceof String) {
+                        v = JsonOutput.toJson((String) value);
+                    } else if (value instanceof Boolean) {
+                        v = JsonOutput.toJson((Boolean) value);
+                    } else if (value instanceof Map) {
+                        v = JsonOutput.toJson((Map) value);
+                    } else if (value instanceof URL) {
+                        v = JsonOutput.toJson((URL) value);
+                    } else if (value instanceof UUID) {
+                        v = JsonOutput.toJson((UUID) value);
+                    } else if (value instanceof Character) {
+                        v = JsonOutput.toJson((Character) value);
+                    } else if (value instanceof Date) {
+                        v = JsonOutput.toJson((Date) value);
+                    } else if (value instanceof Calendar) {
+                        v = JsonOutput.toJson((Calendar) value);
+                    } else {
+                        v = JsonOutput.toJson(value);
                     }
-                    n++;
-                } catch (NoSuchFileException x) {
-                    if (!o.contains(CREATE)) {
-                        errors.add(x);
-                        continue;
-                    }
-                    final Set<? extends OpenOption> s = EnumSet.of(CREATE_NEW, WRITE);
-                    try { // JDK Bug
-                        synchronized (fs) {
-                            try (final FileChannel ch = fs.provider().newFileChannel(timePath, s)) {
-                                ch.write(UTF_8.encode(th.toString(v)));
-                            }
-                        }
+                    synchronized (de) {
+                        de.put(e.getKey(), v, insert, update);
                         n++;
-                    } catch (Exception y) {
-                        errors.add(x);
                     }
                 } catch (Exception x) {
                     errors.add(x);
@@ -427,17 +416,17 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
 
     @Override
     public <T> SafeResult<Long> insert(Class<T> type, Map<String, Map<Date, T>> data) {
-        return insert(type, data, EnumSet.of(CREATE_NEW, WRITE));
+        return insert(type, data, true, false);
     }
 
     @Override
     public <T> SafeResult<Long> insertOrUpdate(Class<T> type, Map<String, Map<Date, T>> data) {
-        return insert(type, data, EnumSet.of(CREATE, WRITE, TRUNCATE_EXISTING));
+        return insert(type, data, true, true);
     }
 
     @Override
     public <T> SafeResult<Long> update(Class<T> type, Map<String, Map<Date, T>> data) {
-        return insert(type, data, EnumSet.of(WRITE, TRUNCATE_EXISTING));
+        return insert(type, data, false, true);
     }
 
     @Override
@@ -449,16 +438,14 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
             if (!Files.isDirectory(tagPath)) {
                 continue;
             }
-            try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, dateGlob)) {
+            try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, "????-??-??.data")) {
                 for (final Path dp : ds) {
                     try {
-                        final FileSystem fs = fileSystem(dp);
-                        synchronized (fs) {
-                            for (final Path d : fs.getRootDirectories()) {
-                                Files.walkFileTree(d, FileUtils.FILE_CLEANER);
-                            }
+                        final DateEntry de = dateEntry(dp);
+                        synchronized (de) {
+                            de.ch.truncate(0L);
                         }
-                        fileSystemCache.invalidate(dp);
+                        entryCache.invalidate(dp);
                     } catch (Exception x) {
                         errors.add(x);
                     }
@@ -491,56 +478,30 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
     public SafeResult<Long> removeBetween(Class<?> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc) {
         final List<Throwable> errors = new LinkedList<>();
         long n = 0L;
-        final Calendar f = new GregorianCalendar();
-        final Calendar t = new GregorianCalendar();
-        f.setTime(from);
-        t.setTime(to);
         for (final String tag : tags) {
             final Path tagPath = dir.resolve(tag);
             if (!Files.isDirectory(tagPath)) {
                 continue;
             }
-            final TreeMap<Calendar, Path> dateMap = new TreeMap<>();
-            try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, dateGlob)) {
+            final TreeMap<Date, Path> dateMap = new TreeMap<>();
+            try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, "????-??-??.data")) {
                 for (final Path p : ds) {
                     final String name = p.getFileName().toString();
                     final Calendar calendar = new GregorianCalendar(
                             Integer.parseInt(name.substring(0, 4)),
                             Integer.parseInt(name.substring(5, 7)) - 1,
                             Integer.parseInt(name.substring(8, 10)));
-                    dateMap.put(calendar, p);
+                    dateMap.put(calendar.getTime(), p);
                 }
             } catch (IOException x) {
                 errors.add(x);
             }
-            for (final Entry<Calendar, Path> de : dateMap.subMap(f, true, t, true).entrySet()) {
-                final Path dp = de.getValue();
+            for (final Entry<Date, Path> e : dateMap.subMap(from, true, to, true).entrySet()) {
+                final Path dp = e.getValue();
                 try {
-                    final FileSystem fs = fileSystem(dp);
-                    final TreeMap<Calendar, Path> timeMap = new TreeMap<>();
-                    synchronized (fs) {
-                        final Path d = fs.getRootDirectories().iterator().next();
-                        try (final DirectoryStream<Path> s = newDirectoryStream(d)) {
-                            for (final Path tp : s) {
-                                final String name = tp.getFileName().toString();
-                                final Calendar calendar = new GregorianCalendar();
-                                calendar.setTime(de.getKey().getTime());
-                                calendar.set(HOUR_OF_DAY, parseInt(name.substring(0, 2)));
-                                calendar.set(MINUTE, parseInt(name.substring(3, 5)));
-                                calendar.set(SECOND, parseInt(name.substring(6, 8)));
-                                timeMap.put(calendar, tp);
-                            }
-                        } catch (IOException x) {
-                            errors.add(x);
-                        }
-                        for (final Path tp : timeMap.subMap(f, fromInc, t, toInc).values()) {
-                            try {
-                                fs.provider().delete(tp);
-                                n++;
-                            } catch (IOException x) {
-                                errors.add(x);
-                            }
-                        }
+                    final DateEntry de = dateEntry(dp);
+                    synchronized (de) {
+                        de.remove(from, fromInc, to, toInc);
                     }
                 } catch (Exception x) {
                     errors.add(x);
@@ -562,7 +523,7 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                 if (!Files.isDirectory(tagPath)) {
                     continue;
                 }
-                try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, dateGlob)) {
+                try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, "????-??-??.data")) {
                     for (final Path dp : ds) {
                         final String name = dp.getFileName().toString();
                         if (parseInt(name.substring(0, 4)) != c.get(YEAR)) {
@@ -574,25 +535,13 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                         if (parseInt(name.substring(8, 10)) != c.get(DATE)) {
                             continue;
                         }
-                        final FileSystem fs = fileSystem(dp);
-                        synchronized (fs) {
-                            final Path d = fs.getRootDirectories().iterator().next();
-                            try (final DirectoryStream<Path> s = newDirectoryStream(d)) {
-                                for (final Path tp : s) {
-                                    final String tpn = tp.getFileName().toString();
-                                    if (parseInt(tpn.substring(0, 2)) != c.get(HOUR_OF_DAY)) {
-                                        continue;
-                                    }
-                                    if (parseInt(tpn.substring(3, 5)) != c.get(MINUTE)) {
-                                        continue;
-                                    }
-                                    if (parseInt(tpn.substring(6, 8)) != c.get(SECOND)) {
-                                        continue;
-                                    }
-                                    Files.delete(tp);
-                                    n++;
-                                }
+                        try {
+                            final DateEntry de = dateEntry(dp);
+                            synchronized (de) {
+                                de.remove(e.getValue());
                             }
+                        } catch (Exception x) {
+                            errors.add(x);
                         }
                         break;
                     }
@@ -610,8 +559,8 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
     }
 
     @Override
-    public SafeResult<Set<Class<?>>> supportedTypes() {
-        return new SimpleSafeResult<>(supportedTypes, Collections.<Throwable>emptyList());
+    public boolean isTypeSupported(Class<?> type) {
+        return true;
     }
 
     @Override
@@ -645,12 +594,175 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
 
     @Override
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-        dir.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+        dir.register(watchService, ENTRY_CREATE, ENTRY_DELETE);
+        fine(LOG, "Registered {0}", dir);
         return FileVisitResult.CONTINUE;
     }
 
     @Override
     public void close() throws Exception {
         watchService.close();
+    }
+
+    class DateEntry implements Closeable {
+
+        final Path file;
+        final FileChannel ch;
+        final TreeMap<Date, Record> records = new TreeMap<>();
+        final Calendar calendar;
+        final ByteBuffer buffer = ByteBuffer.allocateDirect(bufferSize);
+        final CharsetDecoder decoder = UTF_8.newDecoder();
+        final CharsetEncoder encoder = UTF_8.newEncoder();
+        final JsonSlurper slurper = new JsonSlurper();
+
+        DateEntry(Path path) throws IOException {
+            file = path;
+            ch = FileChannel.open(file, FOPTS);
+            final String f = file.getFileName().toString();
+            calendar = new GregorianCalendar(
+                    parseInt(f.substring(0, 4)),
+                    parseInt(f.substring(5, 7)) - 1,
+                    parseInt(f.substring(8, 10)));
+            final BufferedReader r = new BufferedReader(newReader(ch, decoder, bufferSize));
+            long pos = 0L;
+            while (true) {
+                final String line = r.readLine();
+                if (line == null) {
+                    break;
+                }
+                final int maxCount = (int) (line.length() * encoder.maxBytesPerChar() * 2);
+                final int len;
+                if (maxCount <= bufferSize) {
+                    buffer.clear();
+                    final CoderResult cr = encoder.encode(CharBuffer.wrap(line), buffer, true);
+                    if (cr.isError()) {
+                        cr.throwException();
+                    }
+                    len = buffer.position();
+                } else {
+                    final ByteBuffer buf = encoder.encode(CharBuffer.wrap(line));
+                    len = buf.limit();
+                }
+                calendar.set(HOUR_OF_DAY, parseInt(line.substring(0, 2)));
+                calendar.set(MINUTE, parseInt(line.substring(3, 5)));
+                calendar.set(SECOND, parseInt(line.substring(6, 8)));
+                records.put(calendar.getTime(), new Record(pos, len, line.substring(9)));
+                pos += len + 1;
+            }
+            assert ch.size() == ch.position();
+        }
+
+        void remove(Date from, boolean fromInc, Date to, boolean toInc) throws IOException {
+            for (final Date date : records.subMap(from, fromInc, to, toInc).keySet()) {
+                remove(date);
+            }
+        }
+
+        boolean remove(Date date) throws IOException {
+            final Record r = records.remove(date);
+            if (r == null) {
+                return false;
+            }
+            ch.position(r.position);
+            long pos = r.position + r.length + 1;
+            final long size = ch.size();
+            while (pos < size) {
+                pos += ch.transferTo(pos, size - pos, ch);
+            }
+            ch.truncate(size - r.length - 1);
+            ch.position(ch.size());
+            return true;
+        }
+
+        void put(Date date, String value, boolean insert, boolean update) throws IOException {
+            if (insert) {
+                if (update) {
+                    remove(date);
+                }
+            } else {
+                if (!remove(date)) {
+                    throw new IllegalStateException(toString(date) + " does not exist");
+                }
+            }
+            calendar.setTime(date);
+            final StringBuilder builder = new StringBuilder(10 + value.length());
+            {
+                final int hour = calendar.get(HOUR_OF_DAY);
+                if (hour < 10) {
+                    builder.append('0');
+                }
+                builder.append(hour);
+            }
+            builder.append('-');
+            {
+                final int minute = calendar.get(MINUTE);
+                if (minute < 10) {
+                    builder.append('0');
+                }
+                builder.append(minute);
+            }
+            builder.append('-');
+            {
+                final int second = calendar.get(SECOND);
+                if (second < 10) {
+                    builder.append('0');
+                }
+                builder.append(second);
+            }
+            builder.append('\t').append(value).append('\n');
+            final long position = ch.position();
+            final CharBuffer charBuffer = CharBuffer.wrap(builder);
+            int length = 0;
+            while (true) {
+                buffer.clear();
+                final CoderResult cr = encoder.encode(charBuffer, buffer, true);
+                if (cr.isOverflow()) {
+                    length += buffer.position();
+                    buffer.flip();
+                    ch.write(buffer);
+                    continue;
+                }
+                if (cr.isUnderflow()) {
+                    length += buffer.position();
+                    buffer.flip();
+                    ch.write(buffer);
+                    break;
+                }
+                if (cr.isError()) {
+                    cr.throwException();
+                }
+            }
+            final Record old = records.put(date, new Record(position, length - 1, value));
+            if (old != null) {
+                throw new IllegalStateException(toString(date) + " already exists");
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            ch.close();
+        }
+
+        @Override
+        public String toString() {
+            return "Entry " + file;
+        }
+
+        String toString(Date date) {
+            return toString() + " " + new Timestamp(date.getTime());
+        }
+    }
+
+    static class Record {
+
+        final long position;
+        final int length;
+        final String text;
+
+        Record(long position, int length, String text) {
+            this.position = position;
+            this.length = length;
+            this.text = text;
+        }
     }
 }

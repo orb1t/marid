@@ -16,25 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.datastore.fs;
+package org.marid.test;
+
+import java.util.logging.Level;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DoubleTypeHandler extends TypeHandler<Double> {
+public class AllLogs extends AbstractLoggingConfigurer {
 
-    @Override
-    String getExtension() {
-        return "dbl";
-    }
-
-    @Override
-    Double parse(String text) {
-        return Double.valueOf(text);
-    }
-
-    @Override
-    String toString(Double value) {
-        return value.toString();
+    public AllLogs() {
+        super(Level.ALL);
     }
 }

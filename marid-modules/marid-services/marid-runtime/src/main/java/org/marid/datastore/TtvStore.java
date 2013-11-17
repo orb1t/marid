@@ -70,5 +70,5 @@ public interface TtvStore extends AutoCloseable {
 
     SafeResult<Long> clear();
 
-    SafeResult<Set<Class<?>>> supportedTypes();
+    boolean isTypeSupported(Class<?> type);
 }
