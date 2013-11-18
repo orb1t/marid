@@ -45,7 +45,7 @@ public class Logging {
     /**
      * Initializes the logging system.
      *
-     * @param c Calling class.
+     * @param c   Calling class.
      * @param res Log properties resource.
      */
     public static void init(Class<?> c, String res) {
@@ -54,8 +54,6 @@ public class Logging {
             final LogManager lm = LogManager.getLogManager();
             if (is != null) {
                 lm.readConfiguration(is);
-            } else {
-                lm.readConfiguration();
             }
             final String dynHandlers = lm.getProperty("dynHandlers");
             final Logger root = Logger.getGlobal().getParent();
@@ -66,7 +64,7 @@ public class Logging {
                     }
                     try {
                         final Class<?> handlerClass = Class.forName(handler.trim(), true, cl);
-                        root.addHandler((Handler)handlerClass.newInstance());
+                        root.addHandler((Handler) handlerClass.newInstance());
                     } catch (Exception x) {
                         x.printStackTrace(System.err);
                     }

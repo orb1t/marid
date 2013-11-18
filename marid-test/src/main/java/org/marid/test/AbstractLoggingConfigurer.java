@@ -18,6 +18,8 @@
 
 package org.marid.test;
 
+import org.marid.logging.CompactFormatter;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +42,9 @@ public class AbstractLoggingConfigurer {
         formatter.format(".level=%s\n", level);
         formatter.format("handlers=%s\n", ConsoleHandler.class.getCanonicalName());
         formatter.format("%s.level=%s\n", ConsoleHandler.class.getCanonicalName(), level);
+        formatter.format("%s.formatter=%s\n",
+                ConsoleHandler.class.getCanonicalName(),
+                CompactFormatter.class.getCanonicalName());
         final InputStream is = new ByteArrayInputStream(builder.toString().getBytes(ISO_8859_1));
         try {
             logManager.readConfiguration(is);
