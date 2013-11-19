@@ -18,7 +18,6 @@
 
 package org.marid.datastore.fs
 
-import com.google.common.base.Stopwatch
 import groovy.util.logging.Log
 import org.junit.After
 import org.junit.Before
@@ -31,7 +30,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom
-import java.util.concurrent.TimeUnit
 
 /**
  * @author Dmitry Ovchinnikov
@@ -90,14 +88,14 @@ class FsTtvStoreTest {
         for (def th : selectResult.errors) {
             th.printStackTrace();
         }
-        assert selectResult.result == data;
+        assert selectResult.value == data;
         ttvStore.entryCache.invalidateAll();
         selectResult = ttvStore.between(Double, tags, start.time, true, end.time, true);
         log.info("Selection result after cleaning cache: {0}; time = {1} s", selectResult, sw());
         for (def th : selectResult.errors) {
             th.printStackTrace();
         }
-        assert selectResult.result == data;
+        assert selectResult.value == data;
         ttvStore.clear();
     }
 

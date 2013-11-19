@@ -16,17 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
-
-import java.io.Serializable;
-import java.util.List;
+package org.marid.service;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface SafeResult<T> extends Serializable {
+public interface Parameterized {
 
-    T getValue();
+    public void setParameter(String parameter, Object value);
 
-    List<Throwable> getErrors();
+    public <T> T getParameter(Class<T> type, String parameter, T defaultValue);
+
+    public <T> T getParameter(Class<T> type, String parameter);
 }

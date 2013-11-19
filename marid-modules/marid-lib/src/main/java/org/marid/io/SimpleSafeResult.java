@@ -28,17 +28,17 @@ import java.util.Map;
  */
 public class SimpleSafeResult<T> implements SafeResult<T> {
 
-    private final T result;
+    private final T value;
     private final List<Throwable> errors;
 
-    public SimpleSafeResult(T result, List<Throwable> errors) {
-        this.result = result;
+    public SimpleSafeResult(T value, List<Throwable> errors) {
+        this.value = value;
         this.errors = errors;
     }
 
     @Override
-    public T getResult() {
-        return result;
+    public T getValue() {
+        return value;
     }
 
     @Override
@@ -49,16 +49,16 @@ public class SimpleSafeResult<T> implements SafeResult<T> {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        if (result instanceof Map) {
-            sb.append("map(").append(((Map) result).size()).append(") ");
-        } else if (result instanceof Collection) {
-            sb.append("collection(").append(((Collection) result).size()).append(") ");
-        } else if (result == null) {
+        if (value instanceof Map) {
+            sb.append("map(").append(((Map) value).size()).append(") ");
+        } else if (value instanceof Collection) {
+            sb.append("collection(").append(((Collection) value).size()).append(") ");
+        } else if (value == null) {
             sb.append("null ");
-        } else if (result.getClass().isArray()) {
-            sb.append("array(").append(Array.getLength(result)).append(") ");
+        } else if (value.getClass().isArray()) {
+            sb.append("array(").append(Array.getLength(value)).append(") ");
         } else {
-            sb.append(result).append(' ');
+            sb.append(value).append(' ');
         }
         sb.append('(').append(errors.size()).append(" errors)");
         return sb.toString();

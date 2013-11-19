@@ -19,6 +19,7 @@
 package org.marid.datastore;
 
 import org.marid.io.SafeResult;
+import org.marid.service.Parameterized;
 
 import java.util.Date;
 import java.util.Map;
@@ -28,21 +29,13 @@ import java.util.Set;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface TtvStore extends AutoCloseable {
+public interface TtvStore extends Parameterized {
 
     SafeResult<Set<String>> tagSet(String pattern);
 
     SafeResult<Map<String, Date>> getMinTimestamp(Class<?> type, Set<String> tags);
 
     SafeResult<Map<String, Date>> getMaxTimestamp(Class<?> type, Set<String> tags);
-
-    void setMaximumFetchSize(int size);
-
-    int getMaximumFetchSize();
-
-    void setQueryTimeout(int timeout);
-
-    int getQueryTimeout();
 
     <T> SafeResult<Map<String, NavigableMap<Date, T>>> after(Class<T> type, Set<String> tags, Date from, boolean inc);
 

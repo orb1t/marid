@@ -30,9 +30,12 @@ import org.marid.datastore.TtvStore;
 import org.marid.io.FastArrayOutputStream;
 import org.marid.io.SafeResult;
 import org.marid.io.SimpleSafeResult;
-import org.marid.service.AbstractMaridService;
+import org.marid.service.ParameterizedMaridService;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.EOFException;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
@@ -40,6 +43,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
@@ -72,7 +76,7 @@ import static org.marid.nio.FileUtils.listSorted;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVisitor<Path> {
+public class FsTtvStore extends ParameterizedMaridService implements TtvStore, FileVisitor<Path> {
 
     private static final Logger LOG = Logger.getLogger(FsTtvStore.class.getName());
     private static final Set<? extends OpenOption> FOPTS = EnumSet.of(CREATE, WRITE, READ);
@@ -83,8 +87,6 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
     private final WatchService watchService;
     private final Cache<Path, DateEntry> entryCache;
     private final int bufferSize;
-    private volatile int maximumFetchSize;
-    private volatile int queryTimeout;
 
     @SuppressWarnings("unchecked")
     public FsTtvStore(Map params) throws IOException {
@@ -172,6 +174,8 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                             fine(LOG, "Cancelled {0}", parent);
                         }
                     }
+                } catch (ClosedWatchServiceException x) {
+                    fine(LOG, "Watch service has terminated");
                 } catch (Exception x) {
                     warning(LOG, "Watch service error", x);
                 }
@@ -183,7 +187,12 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
     @Override
     protected void doStop() {
         entryCache.invalidateAll();
-        notifyStopped();
+        try {
+            watchService.close();
+            notifyStopped();
+        } catch (IOException x) {
+            notifyFailed(x);
+        }
     }
 
     @Override
@@ -200,7 +209,7 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
         }
     }
 
-    private SafeResult<Map<String, Date>> getMaxMinTimestamp(Class<?> type, Set<String> tags, boolean min) {
+    private SafeResult<Map<String, Date>> getMaxMinTimestamp(Class<?> type, Set<String> tags, final boolean min) {
         final List<Throwable> errors = new LinkedList<>();
         final Map<String, Date> map = new TreeMap<>();
         TAG_LOOP:
@@ -210,16 +219,18 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                 try {
                     final TreeSet<Path> datePaths = listSorted(tagPath, "????-??-??.data");
                     for (final Path datePath : min ? datePaths : datePaths.descendingSet()) {
-                        try {
-                            final DateEntry de = dateEntry(datePath);
-                            synchronized (de) {
+                        if (access(datePath, new Accessor<Boolean>() {
+                            @Override
+                            public Boolean access(DateEntry de) throws Exception {
                                 if (!de.records.isEmpty()) {
                                     map.put(tag, min ? de.records.firstKey() : de.records.lastKey());
-                                    continue TAG_LOOP;
+                                    return Boolean.TRUE;
+                                } else {
+                                    return Boolean.FALSE;
                                 }
                             }
-                        } catch (Exception x) {
-                            errors.add(x);
+                        }, errors) == Boolean.TRUE) {
+                            continue TAG_LOOP;
                         }
                     }
                 } catch (Exception x) {
@@ -241,26 +252,6 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
     }
 
     @Override
-    public void setMaximumFetchSize(int size) {
-        maximumFetchSize = size;
-    }
-
-    @Override
-    public int getMaximumFetchSize() {
-        return maximumFetchSize;
-    }
-
-    @Override
-    public int getQueryTimeout() {
-        return queryTimeout;
-    }
-
-    @Override
-    public void setQueryTimeout(int timeout) {
-        queryTimeout = timeout;
-    }
-
-    @Override
     public <T> SafeResult<Map<String, NavigableMap<Date, T>>> after
             (Class<T> type, Set<String> tags, Date from, boolean inc) {
         return between(type, tags, from, inc, new Date(Long.MAX_VALUE), false);
@@ -274,7 +265,8 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
 
     @Override
     public <T> SafeResult<Map<String, NavigableMap<Date, T>>> between(
-            Class<T> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc) {
+            final Class<T> type, Set<String> tags,
+            final Date from, final boolean fromInc, final Date to, final boolean toInc) {
         final List<Throwable> errors = new LinkedList<>();
         final Map<String, NavigableMap<Date, T>> map = new TreeMap<>();
         for (final String tag : tags) {
@@ -298,28 +290,28 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
             }
             final NavigableMap<Date, T> values = new TreeMap<>();
             for (final Path dp : dateMap.subMap(from, true, to, true).values()) {
-                try {
-                    final DateEntry de = dateEntry(dp);
-                    synchronized (de) {
+                access(dp, new Accessor<Void>() {
+                    @Override
+                    public Void access(DateEntry de) throws Exception {
                         for (final Entry<Date, Record> re : de.records.subMap(from, fromInc, to, toInc).entrySet()) {
                             final String text = de.text(re.getValue());
                             try {
                                 final Object v;
                                 if ("null".equals(text)) {
                                     v = null;
-                                } else if (type == Double.class || type == double.class) {
+                                } else if (type == Double.class) {
                                     v = Double.valueOf(text);
-                                } else if (type == Float.class || type == float.class) {
+                                } else if (type == Float.class) {
                                     v = Float.valueOf(text);
-                                } else if (type == Long.class || type == long.class) {
+                                } else if (type == Long.class) {
                                     v = Long.valueOf(text);
-                                } else if (type == Integer.class || type == int.class) {
+                                } else if (type == Integer.class) {
                                     v = Integer.valueOf(text);
-                                } else if (type == Boolean.class || type == boolean.class) {
+                                } else if (type == Boolean.class) {
                                     v = Boolean.valueOf(text);
-                                } else if (type == Short.class || type == short.class) {
+                                } else if (type == Short.class) {
                                     v = Short.valueOf(text);
-                                } else if (type == Byte.class || type == byte.class) {
+                                } else if (type == Byte.class) {
                                     v = Byte.valueOf(text);
                                 } else if (type == BigDecimal.class) {
                                     v = new BigDecimal(text);
@@ -333,11 +325,9 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                                 errors.add(x);
                             }
                         }
+                        return null;
                     }
-                } catch (Exception x) {
-                    errors.add(x);
-                    warning(LOG, "Unable to process {0}", x, dp);
-                }
+                }, errors);
             }
             map.put(tag, values);
         }
@@ -362,7 +352,8 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
         return String.format("%04d-%02d-%02d.data", c.get(YEAR), c.get(MONTH) + 1, c.get(DATE));
     }
 
-    public <T> SafeResult<Long> insert(Class<T> t, Map<String, Map<Date, T>> data, boolean insert, boolean update) {
+    public <T> SafeResult<Long> insert(
+            Class<T> t, Map<String, Map<Date, T>> data, final boolean insert, final boolean update) {
         final List<Throwable> errors = new LinkedList<>();
         final GregorianCalendar calendar = new GregorianCalendar();
         long n = 0L;
@@ -379,15 +370,14 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                 try {
                     calendar.setTime(e.getKey());
                     final Path dp = tagPath.resolve(dateFile(calendar));
-                    final DateEntry de = dateEntry(dp);
                     final T value = cast(t, e.getValue());
                     final String v;
                     if (value instanceof Number) {
-                        v = JsonOutput.toJson((Number) value);
+                        v = value.toString();
                     } else if (value instanceof String) {
                         v = JsonOutput.toJson((String) value);
                     } else if (value instanceof Boolean) {
-                        v = JsonOutput.toJson((Boolean) value);
+                        v = value.toString();
                     } else if (value instanceof Map) {
                         v = JsonOutput.toJson((Map) value);
                     } else if (value instanceof URL) {
@@ -403,10 +393,14 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                     } else {
                         v = JsonOutput.toJson(value);
                     }
-                    synchronized (de) {
-                        de.put(e.getKey(), v, insert, update);
-                        n++;
-                    }
+                    access(dp, new Accessor<Void>() {
+                        @Override
+                        public Void access(DateEntry de) throws Exception {
+                            de.put(e.getKey(), v, insert, update);
+                            return null;
+                        }
+                    }, errors);
+                    n++;
                 } catch (Exception x) {
                     errors.add(x);
                 }
@@ -441,15 +435,15 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
             }
             try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, "????-??-??.data")) {
                 for (final Path dp : ds) {
-                    try {
-                        final DateEntry de = dateEntry(dp);
-                        synchronized (de) {
+                    access(dp, new Accessor<Void>() {
+                        @Override
+                        public Void access(DateEntry de) throws Exception {
                             de.ch.truncate(0L);
+                            return null;
                         }
-                        entryCache.invalidate(dp);
-                    } catch (Exception x) {
-                        errors.add(x);
-                    }
+                    }, errors);
+                    n++;
+                    entryCache.invalidate(dp);
                 }
             } catch (IOException x) {
                 errors.add(x);
@@ -476,7 +470,9 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
     }
 
     @Override
-    public SafeResult<Long> removeBetween(Class<?> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc) {
+    public SafeResult<Long> removeBetween(
+            Class<?> type, Set<String> tags,
+            final Date from, final boolean fromInc, final Date to, final boolean toInc) {
         final List<Throwable> errors = new LinkedList<>();
         long n = 0L;
         for (final String tag : tags) {
@@ -498,15 +494,13 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                 errors.add(x);
             }
             for (final Entry<Date, Path> e : dateMap.subMap(from, true, to, true).entrySet()) {
-                final Path dp = e.getValue();
-                try {
-                    final DateEntry de = dateEntry(dp);
-                    synchronized (de) {
+                access(e.getValue(), new Accessor<Void>() {
+                    @Override
+                    public Void access(DateEntry de) throws Exception {
                         de.remove(from, fromInc, to, toInc);
+                        return null;
                     }
-                } catch (Exception x) {
-                    errors.add(x);
-                }
+                }, errors);
             }
         }
         return new SimpleSafeResult<>(n, errors);
@@ -536,14 +530,13 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                         if (parseInt(name.substring(8, 10)) != c.get(DATE)) {
                             continue;
                         }
-                        try {
-                            final DateEntry de = dateEntry(dp);
-                            synchronized (de) {
+                        access(dp, new Accessor<Void>() {
+                            @Override
+                            public Void access(DateEntry de) throws Exception {
                                 de.remove(e.getValue());
+                                return null;
                             }
-                        } catch (Exception x) {
-                            errors.add(x);
-                        }
+                        }, errors);
                         break;
                     }
                 }
@@ -600,9 +593,32 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
         return FileVisitResult.CONTINUE;
     }
 
-    @Override
-    public void close() throws Exception {
-        watchService.close();
+    <T> T access(final Path dp, Accessor<T> acc, Collection<Throwable> errors) {
+        try {
+            final DateEntry dateEntry = entryCache.get(dp, new Callable<DateEntry>() {
+                @Override
+                public DateEntry call() throws Exception {
+                    return new DateEntry(dp);
+                }
+            });
+            synchronized (dateEntry) {
+                final FileLock lock = dateEntry.ch.lock();
+                try {
+                    return acc.access(dateEntry);
+                } finally {
+                    lock.release();
+                }
+            }
+        } catch (Exception x) {
+            errors.add(x);
+            warning(LOG, "Unable to process {0}", x, dp);
+            return null;
+        }
+    }
+
+    interface Accessor<T> {
+
+        T access(DateEntry de) throws Exception;
     }
 
     class DateEntry implements Closeable {
