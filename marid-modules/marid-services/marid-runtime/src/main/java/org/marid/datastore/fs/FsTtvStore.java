@@ -27,19 +27,20 @@ import com.google.common.collect.Sets;
 import groovy.json.JsonOutput;
 import groovy.json.JsonSlurper;
 import org.marid.datastore.TtvStore;
+import org.marid.io.FastArrayOutputStream;
 import org.marid.io.SafeResult;
 import org.marid.io.SimpleSafeResult;
 import org.marid.service.AbstractMaridService;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
@@ -301,7 +302,7 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                     final DateEntry de = dateEntry(dp);
                     synchronized (de) {
                         for (final Entry<Date, Record> re : de.records.subMap(from, fromInc, to, toInc).entrySet()) {
-                            final String text = re.getValue().text;
+                            final String text = de.text(re.getValue());
                             try {
                                 final Object v;
                                 if ("null".equals(text)) {
@@ -646,7 +647,7 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                 calendar.set(HOUR_OF_DAY, parseInt(line.substring(0, 2)));
                 calendar.set(MINUTE, parseInt(line.substring(3, 5)));
                 calendar.set(SECOND, parseInt(line.substring(6, 8)));
-                records.put(calendar.getTime(), new Record(pos, len, line.substring(9)));
+                records.put(calendar.getTime(), new Record(pos, len));
                 pos += len + 1;
             }
             assert ch.size() == ch.position();
@@ -672,6 +673,32 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
             ch.truncate(size - r.length - 1);
             ch.position(ch.size());
             return true;
+        }
+
+        String text(Record record) throws IOException {
+            final int len = record.length - 9;
+            if (len <= bufferSize) {
+                buffer.limit(len);
+                buffer.position(0);
+                ch.position(record.position + 9);
+                while (buffer.position() < len) {
+                    final int n = ch.read(buffer);
+                    if (n < 0) {
+                        throw new EOFException();
+                    }
+                }
+                buffer.flip();
+                ch.position(ch.size());
+                return decoder.decode(buffer).toString();
+            } else {
+                final FastArrayOutputStream faos = new FastArrayOutputStream(len);
+                final WritableByteChannel wbch = Channels.newChannel(faos);
+                final long pos = record.position + 9;
+                while (faos.size() < len) {
+                    ch.transferTo(pos + faos.size(), len - faos.size(), wbch);
+                }
+                return decoder.decode(faos.getSharedByteBuffer()).toString();
+            }
         }
 
         void put(Date date, String value, boolean insert, boolean update) throws IOException {
@@ -732,7 +759,7 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
                     cr.throwException();
                 }
             }
-            final Record old = records.put(date, new Record(position, length - 1, value));
+            final Record old = records.put(date, new Record(position, length - 1));
             if (old != null) {
                 throw new IllegalStateException(toString(date) + " already exists");
             }
@@ -757,12 +784,10 @@ public class FsTtvStore extends AbstractMaridService implements TtvStore, FileVi
 
         final long position;
         final int length;
-        final String text;
 
-        Record(long position, int length, String text) {
+        Record(long position, int length) {
             this.position = position;
             this.length = length;
-            this.text = text;
         }
     }
 }
