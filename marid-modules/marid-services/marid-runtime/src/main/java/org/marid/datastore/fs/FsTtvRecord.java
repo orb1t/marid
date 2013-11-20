@@ -16,17 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
-
-import java.io.Serializable;
-import java.util.Collection;
+package org.marid.datastore.fs;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface SafeResult<T> extends Serializable {
+public class FsTtvRecord {
 
-    T getValue();
+    final long position;
+    final int length;
 
-    Collection<Throwable> getErrors();
+    FsTtvRecord(long position, int length) {
+        this.position = position;
+        this.length = length;
+    }
 }

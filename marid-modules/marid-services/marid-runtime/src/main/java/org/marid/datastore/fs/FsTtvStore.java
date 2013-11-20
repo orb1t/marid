@@ -25,46 +25,30 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.Sets;
 import groovy.json.JsonOutput;
-import groovy.json.JsonSlurper;
 import org.marid.datastore.TtvStore;
-import org.marid.io.FastArrayOutputStream;
 import org.marid.io.SafeResult;
 import org.marid.io.SimpleSafeResult;
 import org.marid.service.ParameterizedMaridService;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.EOFException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.channels.WritableByteChannel;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.CoderResult;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 import static com.google.common.base.StandardSystemProperty.USER_HOME;
 import static java.lang.Integer.parseInt;
-import static java.nio.channels.Channels.newReader;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.newDirectoryStream;
-import static java.nio.file.StandardOpenOption.*;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.util.Calendar.*;
@@ -79,16 +63,14 @@ import static org.marid.nio.FileUtils.listSorted;
 public class FsTtvStore extends ParameterizedMaridService implements TtvStore, FileVisitor<Path> {
 
     private static final Logger LOG = Logger.getLogger(FsTtvStore.class.getName());
-    private static final Set<? extends OpenOption> FOPTS = EnumSet.of(CREATE, WRITE, READ);
 
     private final Path dir;
     private final Set<String> tagSet = new ConcurrentSkipListSet<>();
     private final AtomicLong usedSize = new AtomicLong();
     private final WatchService watchService;
-    private final Cache<Path, DateEntry> entryCache;
+    private final Cache<Path, FsTtvEntry> entryCache;
     private final int bufferSize;
 
-    @SuppressWarnings("unchecked")
     public FsTtvStore(Map params) throws IOException {
         super(params);
         bufferSize = get(params, int.class, "bufferSize", 1024);
@@ -104,11 +86,11 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
                         Runtime.getRuntime().availableProcessors()))
                 .expireAfterAccess(get(params, long.class, "cacheExpirationTime", 1L),
                         get(params, TimeUnit.class, "cacheTimeUnit", TimeUnit.HOURS))
-                .removalListener(new RemovalListener<Path, DateEntry>() {
+                .removalListener(new RemovalListener<Path, FsTtvEntry>() {
                     @Override
-                    public void onRemoval(RemovalNotification<Path, DateEntry> e) {
+                    public void onRemoval(RemovalNotification<Path, FsTtvEntry> e) {
                         try {
-                            final DateEntry de = e.getValue();
+                            final FsTtvEntry de = e.getValue();
                             if (de != null) {
                                 synchronized (de) {
                                     long size;
@@ -187,6 +169,7 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
     @Override
     protected void doStop() {
         entryCache.invalidateAll();
+        entryCache.cleanUp();
         try {
             watchService.close();
             notifyStopped();
@@ -219,17 +202,17 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
                 try {
                     final TreeSet<Path> datePaths = listSorted(tagPath, "????-??-??.data");
                     for (final Path datePath : min ? datePaths : datePaths.descendingSet()) {
-                        if (access(datePath, new Accessor<Boolean>() {
+                        final AtomicBoolean flag = new AtomicBoolean();
+                        access(datePath, new Accessor() {
                             @Override
-                            public Boolean access(DateEntry de) throws Exception {
+                            public void access(FsTtvEntry de) throws Exception {
                                 if (!de.records.isEmpty()) {
                                     map.put(tag, min ? de.records.firstKey() : de.records.lastKey());
-                                    return Boolean.TRUE;
-                                } else {
-                                    return Boolean.FALSE;
+                                    flag.set(true);
                                 }
                             }
-                        }, errors) == Boolean.TRUE) {
+                        }, errors);
+                        if (flag.get()) {
                             continue TAG_LOOP;
                         }
                     }
@@ -290,10 +273,10 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
             }
             final NavigableMap<Date, T> values = new TreeMap<>();
             for (final Path dp : dateMap.subMap(from, true, to, true).values()) {
-                access(dp, new Accessor<Void>() {
+                access(dp, new Accessor() {
                     @Override
-                    public Void access(DateEntry de) throws Exception {
-                        for (final Entry<Date, Record> re : de.records.subMap(from, fromInc, to, toInc).entrySet()) {
+                    public void access(FsTtvEntry de) throws Exception {
+                        for (final Entry<Date, FsTtvRecord> re : de.records.subMap(from, fromInc, to, toInc).entrySet()) {
                             final String text = de.text(re.getValue());
                             try {
                                 final Object v;
@@ -325,7 +308,6 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
                                 errors.add(x);
                             }
                         }
-                        return null;
                     }
                 }, errors);
             }
@@ -337,15 +319,6 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
     @Override
     public long usedSize() {
         return usedSize.get();
-    }
-
-    private DateEntry dateEntry(final Path path) throws Exception {
-        return entryCache.get(path, new Callable<DateEntry>() {
-            @Override
-            public DateEntry call() throws Exception {
-                return new DateEntry(path);
-            }
-        });
     }
 
     private String dateFile(Calendar c) {
@@ -393,11 +366,10 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
                     } else {
                         v = JsonOutput.toJson(value);
                     }
-                    access(dp, new Accessor<Void>() {
+                    access(dp, new Accessor() {
                         @Override
-                        public Void access(DateEntry de) throws Exception {
+                        public void access(FsTtvEntry de) throws Exception {
                             de.put(e.getKey(), v, insert, update);
-                            return null;
                         }
                     }, errors);
                     n++;
@@ -435,11 +407,10 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
             }
             try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, "????-??-??.data")) {
                 for (final Path dp : ds) {
-                    access(dp, new Accessor<Void>() {
+                    access(dp, new Accessor() {
                         @Override
-                        public Void access(DateEntry de) throws Exception {
+                        public void access(FsTtvEntry de) throws Exception {
                             de.ch.truncate(0L);
-                            return null;
                         }
                     }, errors);
                     n++;
@@ -494,11 +465,10 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
                 errors.add(x);
             }
             for (final Entry<Date, Path> e : dateMap.subMap(from, true, to, true).entrySet()) {
-                access(e.getValue(), new Accessor<Void>() {
+                access(e.getValue(), new Accessor() {
                     @Override
-                    public Void access(DateEntry de) throws Exception {
+                    public void access(FsTtvEntry de) throws Exception {
                         de.remove(from, fromInc, to, toInc);
-                        return null;
                     }
                 }, errors);
             }
@@ -530,11 +500,10 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
                         if (parseInt(name.substring(8, 10)) != c.get(DATE)) {
                             continue;
                         }
-                        access(dp, new Accessor<Void>() {
+                        access(dp, new Accessor() {
                             @Override
-                            public Void access(DateEntry de) throws Exception {
+                            public void access(FsTtvEntry de) throws Exception {
                                 de.remove(e.getValue());
-                                return null;
                             }
                         }, errors);
                         break;
@@ -593,18 +562,18 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
         return FileVisitResult.CONTINUE;
     }
 
-    <T> T access(final Path dp, Accessor<T> acc, Collection<Throwable> errors) {
+    void access(final Path dp, Accessor acc, Collection<Throwable> errors) {
         try {
-            final DateEntry dateEntry = entryCache.get(dp, new Callable<DateEntry>() {
+            final FsTtvEntry dateEntry = entryCache.get(dp, new Callable<FsTtvEntry>() {
                 @Override
-                public DateEntry call() throws Exception {
-                    return new DateEntry(dp);
+                public FsTtvEntry call() throws Exception {
+                    return new FsTtvEntry(dp, bufferSize);
                 }
             });
             synchronized (dateEntry) {
                 final FileLock lock = dateEntry.ch.lock();
                 try {
-                    return acc.access(dateEntry);
+                    acc.access(dateEntry);
                 } finally {
                     lock.release();
                 }
@@ -612,198 +581,11 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
         } catch (Exception x) {
             errors.add(x);
             warning(LOG, "Unable to process {0}", x, dp);
-            return null;
         }
     }
 
-    interface Accessor<T> {
+    interface Accessor {
 
-        T access(DateEntry de) throws Exception;
-    }
-
-    class DateEntry implements Closeable {
-
-        final Path file;
-        final FileChannel ch;
-        final TreeMap<Date, Record> records = new TreeMap<>();
-        final Calendar calendar;
-        final ByteBuffer buffer = ByteBuffer.allocateDirect(bufferSize);
-        final CharsetDecoder decoder = UTF_8.newDecoder();
-        final CharsetEncoder encoder = UTF_8.newEncoder();
-        final JsonSlurper slurper = new JsonSlurper();
-
-        DateEntry(Path path) throws IOException {
-            file = path;
-            ch = FileChannel.open(file, FOPTS);
-            final String f = file.getFileName().toString();
-            calendar = new GregorianCalendar(
-                    parseInt(f.substring(0, 4)),
-                    parseInt(f.substring(5, 7)) - 1,
-                    parseInt(f.substring(8, 10)));
-            final BufferedReader r = new BufferedReader(newReader(ch, decoder, bufferSize));
-            long pos = 0L;
-            while (true) {
-                final String line = r.readLine();
-                if (line == null) {
-                    break;
-                }
-                final int maxCount = (int) (line.length() * encoder.maxBytesPerChar() * 2);
-                final int len;
-                if (maxCount <= bufferSize) {
-                    buffer.clear();
-                    final CoderResult cr = encoder.encode(CharBuffer.wrap(line), buffer, true);
-                    if (cr.isError()) {
-                        cr.throwException();
-                    }
-                    len = buffer.position();
-                } else {
-                    final ByteBuffer buf = encoder.encode(CharBuffer.wrap(line));
-                    len = buf.limit();
-                }
-                calendar.set(HOUR_OF_DAY, parseInt(line.substring(0, 2)));
-                calendar.set(MINUTE, parseInt(line.substring(3, 5)));
-                calendar.set(SECOND, parseInt(line.substring(6, 8)));
-                records.put(calendar.getTime(), new Record(pos, len));
-                pos += len + 1;
-            }
-            assert ch.size() == ch.position();
-        }
-
-        void remove(Date from, boolean fromInc, Date to, boolean toInc) throws IOException {
-            for (final Date date : records.subMap(from, fromInc, to, toInc).keySet()) {
-                remove(date);
-            }
-        }
-
-        boolean remove(Date date) throws IOException {
-            final Record r = records.remove(date);
-            if (r == null) {
-                return false;
-            }
-            ch.position(r.position);
-            long pos = r.position + r.length + 1;
-            final long size = ch.size();
-            while (pos < size) {
-                pos += ch.transferTo(pos, size - pos, ch);
-            }
-            ch.truncate(size - r.length - 1);
-            ch.position(ch.size());
-            return true;
-        }
-
-        String text(Record record) throws IOException {
-            final int len = record.length - 9;
-            if (len <= bufferSize) {
-                buffer.limit(len);
-                buffer.position(0);
-                ch.position(record.position + 9);
-                while (buffer.position() < len) {
-                    final int n = ch.read(buffer);
-                    if (n < 0) {
-                        throw new EOFException();
-                    }
-                }
-                buffer.flip();
-                ch.position(ch.size());
-                return decoder.decode(buffer).toString();
-            } else {
-                final FastArrayOutputStream faos = new FastArrayOutputStream(len);
-                final WritableByteChannel wbch = Channels.newChannel(faos);
-                final long pos = record.position + 9;
-                while (faos.size() < len) {
-                    ch.transferTo(pos + faos.size(), len - faos.size(), wbch);
-                }
-                return decoder.decode(faos.getSharedByteBuffer()).toString();
-            }
-        }
-
-        void put(Date date, String value, boolean insert, boolean update) throws IOException {
-            if (insert) {
-                if (update) {
-                    remove(date);
-                }
-            } else {
-                if (!remove(date)) {
-                    throw new IllegalStateException(toString(date) + " does not exist");
-                }
-            }
-            calendar.setTime(date);
-            final StringBuilder builder = new StringBuilder(10 + value.length());
-            {
-                final int hour = calendar.get(HOUR_OF_DAY);
-                if (hour < 10) {
-                    builder.append('0');
-                }
-                builder.append(hour);
-            }
-            builder.append('-');
-            {
-                final int minute = calendar.get(MINUTE);
-                if (minute < 10) {
-                    builder.append('0');
-                }
-                builder.append(minute);
-            }
-            builder.append('-');
-            {
-                final int second = calendar.get(SECOND);
-                if (second < 10) {
-                    builder.append('0');
-                }
-                builder.append(second);
-            }
-            builder.append('\t').append(value).append('\n');
-            final long position = ch.position();
-            final CharBuffer charBuffer = CharBuffer.wrap(builder);
-            int length = 0;
-            while (true) {
-                buffer.clear();
-                final CoderResult cr = encoder.encode(charBuffer, buffer, true);
-                if (cr.isOverflow()) {
-                    length += buffer.position();
-                    buffer.flip();
-                    ch.write(buffer);
-                    continue;
-                }
-                if (cr.isUnderflow()) {
-                    length += buffer.position();
-                    buffer.flip();
-                    ch.write(buffer);
-                    break;
-                }
-                if (cr.isError()) {
-                    cr.throwException();
-                }
-            }
-            final Record old = records.put(date, new Record(position, length - 1));
-            if (old != null) {
-                throw new IllegalStateException(toString(date) + " already exists");
-            }
-        }
-
-        @Override
-        public void close() throws IOException {
-            ch.close();
-        }
-
-        @Override
-        public String toString() {
-            return "Entry " + file;
-        }
-
-        String toString(Date date) {
-            return toString() + " " + new Timestamp(date.getTime());
-        }
-    }
-
-    static class Record {
-
-        final long position;
-        final int length;
-
-        Record(long position, int length) {
-            this.position = position;
-            this.length = length;
-        }
+        void access(FsTtvEntry de) throws Exception;
     }
 }

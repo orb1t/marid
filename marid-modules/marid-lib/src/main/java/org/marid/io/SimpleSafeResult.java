@@ -29,9 +29,9 @@ import java.util.Map;
 public class SimpleSafeResult<T> implements SafeResult<T> {
 
     private final T value;
-    private final List<Throwable> errors;
+    private final Collection<Throwable> errors;
 
-    public SimpleSafeResult(T value, List<Throwable> errors) {
+    public SimpleSafeResult(T value, Collection<Throwable> errors) {
         this.value = value;
         this.errors = errors;
     }
@@ -42,7 +42,7 @@ public class SimpleSafeResult<T> implements SafeResult<T> {
     }
 
     @Override
-    public List<Throwable> getErrors() {
+    public Collection<Throwable> getErrors() {
         return errors;
     }
 
