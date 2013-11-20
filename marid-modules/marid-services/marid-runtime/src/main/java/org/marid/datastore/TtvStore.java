@@ -45,11 +45,11 @@ public interface TtvStore extends Parameterized {
 
     long usedSize();
 
-    <T> SafeResult<Long> insert(Class<T> type, Map<String, Map<Date, T>> data);
+    <T> SafeResult<Long> insert(Class<T> type, Map<String, ? extends Map<? extends Date, T>> data);
 
-    <T> SafeResult<Long> insertOrUpdate(Class<T> type, Map<String, Map<Date, T>> data);
+    <T> SafeResult<Long> insertOrUpdate(Class<T> type, Map<String, ? extends Map<? extends Date, T>> data);
 
-    <T> SafeResult<Long> update(Class<T> type, Map<String, Map<Date, T>> data);
+    <T> SafeResult<Long> update(Class<T> type, Map<String, ? extends Map<? extends Date, T>> data);
 
     SafeResult<Long> remove(Class<?> type, Set<String> tags);
 
@@ -59,7 +59,7 @@ public interface TtvStore extends Parameterized {
 
     SafeResult<Long> removeBetween(Class<?> type, Set<String> tags, Date from, boolean fromInc, Date to, boolean toInc);
 
-    SafeResult<Long> removeKeys(Class<?> type, Map<String, Date> keys);
+    SafeResult<Long> removeKeys(Class<?> type, Map<String, ? extends Date> keys);
 
     SafeResult<Long> clear();
 

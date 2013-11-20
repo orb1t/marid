@@ -18,17 +18,20 @@
 
 package org.marid.datastore.fs
 
+import com.carrotsearch.junitbenchmarks.AbstractBenchmark
+import com.carrotsearch.junitbenchmarks.BenchmarkOptions
 import groovy.util.logging.Log
-import org.junit.After
-import org.junit.Before
+import org.junit.AfterClass
+import org.junit.BeforeClass
+import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.experimental.categories.Category
+import org.junit.runners.MethodSorters
 import org.marid.nio.FileUtils
 import org.marid.test.SlowTests
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom
 
 /**
@@ -37,21 +40,38 @@ import java.util.concurrent.ThreadLocalRandom
 @SuppressWarnings("GroovyAccessibility")
 @Category([SlowTests])
 @Log
-class FsTtvStoreTest {
+@BenchmarkOptions(benchmarkRounds = 1, warmupRounds = 0)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+class FsTtvStoreTest extends AbstractBenchmark {
 
-    private Path storePath;
-    private FsTtvStore ttvStore;
+    private static final def tags = ["tag1", "tag2", "tag3"].toSet();
+    private static final def data = new HashMap<String, TreeMap<Date, Double>>();
+    private static final def duration = 48 * 3600;
+    private static final def start = new GregorianCalendar(2000, 0, 1, 0, 0, 0);
+    private static final def end = (GregorianCalendar) start.clone();
+    private static Path storePath;
+    private static FsTtvStore ttvStore;
 
-    @Before
-    void init() {
+    @BeforeClass
+    static void init() {
+        end.add(Calendar.SECOND, duration);
         storePath = Files.createTempDirectory("test");
         ttvStore = new FsTtvStore([dir: storePath]);
         ttvStore.startAsync().awaitRunning();
         log.info("Test started on {0}", storePath);
+        for (def tag in tags) {
+            def random = ThreadLocalRandom.current();
+            def values = new TreeMap<Date, Double>();
+            for (def seconds in 0..duration) {
+                values[new Date(start.timeInMillis + seconds * 1000L)] = random.nextDouble();
+            }
+            data[tag] = values;
+        }
     }
 
-    @After
-    void destroy() {
+    @AfterClass
+    static void destroy() {
+        ttvStore.clear();
         ttvStore.stopAsync().awaitTerminated();
         Files.walkFileTree(storePath, FileUtils.RECURSIVE_CLEANER);
         if (Files.exists(storePath)) {
@@ -62,45 +82,43 @@ class FsTtvStoreTest {
 
     @Test
     void testInsert() {
-        sw();
-        def data = new ConcurrentHashMap<String, Map<Date, Double>>();
-        def duration = 48 * 3600;
-        def start = new GregorianCalendar(2000, 0, 1, 0, 0, 0);
-        def end = (GregorianCalendar) start.clone();
-        end.add(Calendar.SECOND, duration);
-        def tags = ["tag1", "tag2", "tag3"].toSet();
-        for (def tag in tags) {
-            def random = ThreadLocalRandom.current();
-            def values = new TreeMap<Date, Double>();
-            for (def seconds in 0..duration) {
-                values[new Date(start.timeInMillis + seconds * 1000L)] = random.nextDouble();
-            }
-            data[tag] = values;
-        }
-        log.info("Fill time {0} s", sw());
         def insertResult = ttvStore.insert(Double, data);
-        log.info("Insert result: {0}; time = {1} s", insertResult, sw());
+        log.info("Insert result: {0}; time = {1} s", insertResult);
         for (def th : insertResult.errors) {
             th.printStackTrace();
         }
+    }
+
+    @Test
+    void testSelect() {
         def selectResult = ttvStore.between(Double, tags, start.time, true, end.time, true);
         log.info("Selection result: {0}; time = {1} s", selectResult, sw());
         for (def th : selectResult.errors) {
             th.printStackTrace();
         }
         assert selectResult.value == data;
+    }
+
+    @Test
+    void testSelectAfterInvalidateCache() {
         ttvStore.entryCache.invalidateAll();
-        selectResult = ttvStore.between(Double, tags, start.time, true, end.time, true);
+        def selectResult = ttvStore.between(Double, tags, start.time, true, end.time, true);
         log.info("Selection result after cleaning cache: {0}; time = {1} s", selectResult, sw());
         for (def th : selectResult.errors) {
             th.printStackTrace();
         }
         assert selectResult.value == data;
-        ttvStore.clear();
     }
 
     @Test
-    void testRemove() {
-        ttvStore.clear();
+    void testRemoveKeys() {
+        def slicePoint = new Date(start.timeInMillis + (int) (duration / 2));
+        ttvStore.removeKeys(Double, [tag1: slicePoint]);
+        data["tag1"].remove(slicePoint);
+        def selectResult = ttvStore.between(Double, tags, start.time, true, end.time, true);
+        for (def th : selectResult.errors) {
+            th.printStackTrace();
+        }
+        assert selectResult.value == data;
     }
 }

@@ -326,11 +326,12 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
     }
 
     public <T> SafeResult<Long> insert(
-            Class<T> t, Map<String, Map<Date, T>> data, final boolean insert, final boolean update) {
+            Class<T> t, Map<String, ? extends Map<? extends Date, T>> data,
+            final boolean insert, final boolean update) {
         final List<Throwable> errors = new LinkedList<>();
         final GregorianCalendar calendar = new GregorianCalendar();
         long n = 0L;
-        for (final Entry<String, Map<Date, T>> te : data.entrySet()) {
+        for (final Entry<String, ? extends Map<? extends Date, T>> te : data.entrySet()) {
             final String tag = te.getKey();
             final Path tagPath = dir.resolve(tag);
             try {
@@ -339,7 +340,7 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
                 errors.add(x);
                 continue;
             }
-            for (final Entry<Date, T> e : te.getValue().entrySet()) {
+            for (final Entry<? extends Date, T> e : te.getValue().entrySet()) {
                 try {
                     calendar.setTime(e.getKey());
                     final Path dp = tagPath.resolve(dateFile(calendar));
@@ -382,17 +383,17 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
     }
 
     @Override
-    public <T> SafeResult<Long> insert(Class<T> type, Map<String, Map<Date, T>> data) {
+    public <T> SafeResult<Long> insert(Class<T> type, Map<String, ? extends Map<? extends Date, T>> data) {
         return insert(type, data, true, false);
     }
 
     @Override
-    public <T> SafeResult<Long> insertOrUpdate(Class<T> type, Map<String, Map<Date, T>> data) {
+    public <T> SafeResult<Long> insertOrUpdate(Class<T> type, Map<String, ? extends Map<? extends Date, T>> data) {
         return insert(type, data, true, true);
     }
 
     @Override
-    public <T> SafeResult<Long> update(Class<T> type, Map<String, Map<Date, T>> data) {
+    public <T> SafeResult<Long> update(Class<T> type, Map<String, ? extends Map<? extends Date, T>> data) {
         return insert(type, data, false, true);
     }
 
@@ -477,10 +478,10 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore, F
     }
 
     @Override
-    public SafeResult<Long> removeKeys(Class<?> type, Map<String, Date> keys) {
+    public SafeResult<Long> removeKeys(Class<?> type, Map<String, ? extends Date> keys) {
         final List<Throwable> errors = new LinkedList<>();
         long n = 0L;
-        for (final Entry<String, Date> e : keys.entrySet()) {
+        for (final Entry<String, ? extends Date> e : keys.entrySet()) {
             try {
                 final Calendar c = new GregorianCalendar();
                 c.setTime(e.getValue());
