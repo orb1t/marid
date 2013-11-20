@@ -22,6 +22,8 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.test.NormalTests;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.Assert.*;
 import static org.marid.util.StringUtils.*;
 
@@ -47,5 +49,12 @@ public class StringUtilsTest {
         assertEquals("", delimited(','));
         assertEquals("1,2.3,4.5,q", delimited(',', 1, 2.3, 4.5f, 'q'));
         assertEquals("1++2.3++4.5++q", delimited("++", 1, 2.3, 4.5f, 'q'));
+    }
+
+    @Test
+    public void testPatoi() {
+        for (int i = 0; i < 1000; i++) {
+            assertEquals(i, patoi(Integer.toString(i).getBytes(StandardCharsets.ISO_8859_1)));
+        }
     }
 }

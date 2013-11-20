@@ -18,7 +18,10 @@
 
 package org.marid.util;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -140,5 +143,24 @@ public class StringUtils {
             count += s.length();
         }
         return String.valueOf(buf);
+    }
+
+    public static int patoi(byte[] value, int off, int len) {
+        int sum = 0;
+        int base = 1;
+        for (int i = off + len - 1; i >= off; i--) {
+            final byte b = value[i];
+            if (b >= 0x30 && b <= 0x39) {
+                sum += (b - 0x30) * base;
+                base *= 10;
+            } else {
+                throw new IllegalArgumentException("Invalid number: " + new String(value, ISO_8859_1));
+            }
+        }
+        return sum;
+    }
+
+    public static int patoi(byte[] value) {
+        return patoi(value, 0, value.length);
     }
 }

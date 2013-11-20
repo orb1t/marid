@@ -21,7 +21,7 @@ package org.marid.datastore.fs;
 import groovy.json.JsonSlurper;
 import org.marid.io.FastArrayOutputStream;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
@@ -39,10 +39,11 @@ import java.sql.Timestamp;
 import java.util.*;
 
 import static java.lang.Integer.parseInt;
-import static java.nio.channels.Channels.newReader;
+import static java.nio.channels.Channels.newInputStream;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.*;
 import static java.util.Calendar.*;
+import static org.marid.util.StringUtils.patoi;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -71,31 +72,24 @@ class FsTtvEntry implements Closeable {
                 parseInt(f.substring(0, 4)),
                 parseInt(f.substring(5, 7)) - 1,
                 parseInt(f.substring(8, 10)));
-        final BufferedReader r = new BufferedReader(newReader(ch, decoder, bufferSize));
+        final BufferedInputStream bis = new BufferedInputStream(newInputStream(ch), bufferSize);
+        final FastArrayOutputStream faos = new FastArrayOutputStream(bufferSize);
         long pos = 0L;
         while (true) {
-            final String line = r.readLine();
-            if (line == null) {
+            final int b = bis.read();
+            if (b < 0) {
                 break;
             }
-            final int maxCount = (int) (line.length() * encoder.maxBytesPerChar() * 2);
-            final int len;
-            if (maxCount <= bufferSize) {
-                buffer.clear();
-                final CoderResult cr = encoder.encode(CharBuffer.wrap(line), buffer, true);
-                if (cr.isError()) {
-                    cr.throwException();
-                }
-                len = buffer.position();
-            } else {
-                final ByteBuffer buf = encoder.encode(CharBuffer.wrap(line));
-                len = buf.limit();
+            faos.write(b);
+            if (b == '\n') {
+                final byte[] buf = faos.getSharedBuffer();
+                calendar.set(HOUR_OF_DAY, patoi(buf, 0, 2));
+                calendar.set(MINUTE, patoi(buf, 3, 2));
+                calendar.set(SECOND, patoi(buf, 6, 2));
+                records.put(calendar.getTime(), new FsTtvRecord(pos, faos.size() - 1));
+                pos += faos.size();
+                faos.reset();
             }
-            calendar.set(HOUR_OF_DAY, parseInt(line.substring(0, 2)));
-            calendar.set(MINUTE, parseInt(line.substring(3, 5)));
-            calendar.set(SECOND, parseInt(line.substring(6, 8)));
-            records.put(calendar.getTime(), new FsTtvRecord(pos, len));
-            pos += len + 1;
         }
         assert ch.size() == ch.position();
     }
@@ -159,33 +153,32 @@ class FsTtvEntry implements Closeable {
             }
         }
         calendar.setTime(date);
-        final StringBuilder builder = new StringBuilder(10 + value.length());
+        final CharBuffer charBuffer = CharBuffer.allocate(10 + value.length());
         {
             final int hour = calendar.get(HOUR_OF_DAY);
             if (hour < 10) {
-                builder.append('0');
+                charBuffer.put('0');
             }
-            builder.append(hour);
+            charBuffer.append(Integer.toString(hour));
         }
-        builder.append('-');
+        charBuffer.put('-');
         {
             final int minute = calendar.get(MINUTE);
             if (minute < 10) {
-                builder.append('0');
+                charBuffer.put('0');
             }
-            builder.append(minute);
+            charBuffer.append(Integer.toString(minute));
         }
-        builder.append('-');
+        charBuffer.put('-');
         {
             final int second = calendar.get(SECOND);
             if (second < 10) {
-                builder.append('0');
+                charBuffer.put('0');
             }
-            builder.append(second);
+            charBuffer.append(Integer.toString(second));
         }
-        builder.append('\t').append(value).append('\n');
+        charBuffer.put('\t').append(value).put('\n').position(0);
         final long position = ch.position();
-        final CharBuffer charBuffer = CharBuffer.wrap(builder);
         int length = 0;
         while (true) {
             buffer.clear();
