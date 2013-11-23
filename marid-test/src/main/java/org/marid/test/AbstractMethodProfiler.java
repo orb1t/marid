@@ -16,17 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.test;
 
-import java.io.Serializable;
-import java.util.Collection;
+import org.junit.Rule;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface SafeResult<T> extends Serializable {
+public class AbstractMethodProfiler {
 
-    T getValue();
-
-    Collection<? extends Throwable> getErrors();
+    @Rule
+    public final TestRule rule = new TestRule() {
+        @Override
+        public Statement apply(final Statement base, final Description description) {
+            return new Statement() {
+                @Override
+                public void evaluate() throws Throwable {
+                    final long start = System.nanoTime();
+                    base.evaluate();
+                    final float time = (System.nanoTime() - start) / 1.0e9f;
+                    System.out.format("%s in %s s%s", description, time, System.lineSeparator());
+                }
+            };
+        }
+    };
 }

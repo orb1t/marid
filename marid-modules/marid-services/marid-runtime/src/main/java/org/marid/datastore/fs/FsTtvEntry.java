@@ -21,25 +21,23 @@ package org.marid.datastore.fs;
 import groovy.json.JsonSlurper;
 import org.marid.io.FastArrayOutputStream;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.Closeable;
-import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
+import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.sql.Timestamp;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 import static java.lang.Integer.parseInt;
-import static java.nio.channels.Channels.newInputStream;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.*;
 import static java.util.Calendar.*;
@@ -50,172 +48,163 @@ import static org.marid.util.StringUtils.patoi;
  */
 class FsTtvEntry implements Closeable {
 
-    private static final Set<? extends OpenOption> FOPTS = EnumSet.of(CREATE, WRITE, READ);
+    private static final Set<? extends OpenOption> OPTS = EnumSet.of(CREATE, WRITE, READ);
 
     final int bufferSize;
+    final ByteBuffer buffer;
     final Path file;
     final FileChannel ch;
-    final TreeMap<Date, FsTtvRecord> records = new TreeMap<>();
-    final Calendar calendar;
-    final ByteBuffer buffer;
-    final CharsetDecoder decoder = UTF_8.newDecoder();
-    final CharsetEncoder encoder = UTF_8.newEncoder();
+    final TreeMap<Date, FsTtvRecord> index = new TreeMap<>();
+    final Calendar cal;
     final JsonSlurper slurper = new JsonSlurper();
+    final CharsetEncoder encoder = UTF_8.newEncoder();
 
     FsTtvEntry(Path path, int bufSize) throws IOException {
         bufferSize = bufSize;
         buffer = ByteBuffer.allocateDirect(bufferSize);
         file = path;
-        ch = FileChannel.open(file, FOPTS);
+        ch = FileChannel.open(file, OPTS);
         final String f = file.getFileName().toString();
-        calendar = new GregorianCalendar(
+        cal = new GregorianCalendar(
                 parseInt(f.substring(0, 4)),
                 parseInt(f.substring(5, 7)) - 1,
                 parseInt(f.substring(8, 10)));
-        final BufferedInputStream bis = new BufferedInputStream(newInputStream(ch), bufferSize);
-        final FastArrayOutputStream faos = new FastArrayOutputStream(bufferSize);
+        final FastArrayOutputStream faos = new FastArrayOutputStream();
         long pos = 0L;
-        while (true) {
-            final int b = bis.read();
-            if (b < 0) {
-                break;
+        int r = ch.read(buffer);
+        buffer.flip();
+        while (r >= 0) {
+            while (buffer.hasRemaining()) {
+                final byte b = buffer.get();
+                faos.write(b & 0xFF);
+                if (b == '\n') {
+                    final byte[] buf = faos.getSharedBuffer();
+                    cal.set(HOUR_OF_DAY, patoi(buf, 0, 2));
+                    cal.set(MINUTE, patoi(buf, 3, 2));
+                    cal.set(SECOND, patoi(buf, 6, 2));
+                    index.put(cal.getTime(), new FsTtvRecord(pos, faos.size()));
+                    pos += faos.size();
+                    faos.reset();
+                }
             }
-            faos.write(b);
-            if (b == '\n') {
-                final byte[] buf = faos.getSharedBuffer();
-                calendar.set(HOUR_OF_DAY, patoi(buf, 0, 2));
-                calendar.set(MINUTE, patoi(buf, 3, 2));
-                calendar.set(SECOND, patoi(buf, 6, 2));
-                records.put(calendar.getTime(), new FsTtvRecord(pos, faos.size() - 1));
-                pos += faos.size();
-                faos.reset();
-            }
+            buffer.clear();
+            r = ch.read(buffer);
+            buffer.flip();
         }
-        assert ch.size() == ch.position();
     }
 
     void remove(Date from, boolean fromInc, Date to, boolean toInc) throws IOException {
-        for (final Date date : records.subMap(from, fromInc, to, toInc).keySet()) {
-            remove(date);
-        }
+        index.subMap(from, fromInc, to, toInc).clear();
     }
 
     boolean remove(Date date) throws IOException {
-        final FsTtvRecord r = records.remove(date);
-        if (r == null) {
-            return false;
-        }
-        ch.position(r.position);
-        long pos = r.position + r.length + 1;
-        final long size = ch.size();
-        while (pos < size) {
-            pos += ch.transferTo(pos, size - pos, ch);
-        }
-        ch.truncate(size - r.length - 1);
-        ch.position(ch.size());
-        return true;
+        return index.remove(date) != null;
     }
 
     String text(FsTtvRecord record) throws IOException {
-        final int len = record.length - 9;
-        if (len <= bufferSize) {
-            buffer.limit(len);
-            buffer.position(0);
-            ch.position(record.position + 9);
-            while (buffer.position() < len) {
-                final int n = ch.read(buffer);
-                if (n < 0) {
-                    throw new EOFException();
-                }
-            }
-            buffer.flip();
-            ch.position(ch.size());
-            return decoder.decode(buffer).toString();
-        } else {
-            final FastArrayOutputStream faos = new FastArrayOutputStream(len);
-            final WritableByteChannel wbch = Channels.newChannel(faos);
-            final long pos = record.position + 9;
-            while (faos.size() < len) {
-                ch.transferTo(pos + faos.size(), len - faos.size(), wbch);
-            }
-            return decoder.decode(faos.getSharedByteBuffer()).toString();
+        final String s = recordText(record);
+        return s.substring(9, s.length() - 1);
+    }
+
+    String recordText(FsTtvRecord record) throws IOException {
+        final FastArrayOutputStream faos = new FastArrayOutputStream(record.length);
+        final WritableByteChannel wch = Channels.newChannel(faos);
+        while (faos.size() < record.length) {
+            ch.transferTo(record.position + faos.size(), record.length - faos.size(), wch);
         }
+        return UTF_8.decode(faos.getSharedByteBuffer()).toString();
     }
 
     void put(Date date, String value, boolean insert, boolean update) throws IOException {
-        if (insert) {
-            if (update) {
-                remove(date);
+        cal.setTime(date);
+        final CharBuffer cb = CharBuffer.allocate(10 + value.length());
+        {
+            int field = cal.get(HOUR_OF_DAY);
+            if (field < 10) cb.append('0');
+            cb.append(Integer.toString(field)).append('-');
+            field = cal.get(MINUTE);
+            if (field < 10) cb.append('0');
+            cb.append(Integer.toString(field)).append('-');
+            field = cal.get(SECOND);
+            if (field < 10) cb.append('0');
+            cb.append(Integer.toString(field)).append(' ').append(value).append('\n').position(0);
+        }
+        final long pos = ch.position();
+        int len = 0;
+        for (buffer.clear(); ; ) {
+            final CoderResult r = encoder.encode(cb, buffer, true);
+            buffer.flip();
+            len += buffer.remaining();
+            do {
+                ch.write(buffer);
+            } while (buffer.hasRemaining());
+            if (r.isOverflow()) {
+                buffer.clear();
+            } else if (r.isUnderflow()) {
+                break;
+            } else if (r.isError()) {
+                r.throwException();
+            } else {
+                throw new IllegalStateException(r.toString());
+            }
+        }
+        final FsTtvRecord old = index.put(date, new FsTtvRecord(pos, len));
+        if (old != null) {
+            if (insert && !update) {
+                throw new IllegalStateException("Already exists");
             }
         } else {
-            if (!remove(date)) {
-                throw new IllegalStateException(toString(date) + " does not exist");
+            if (update) {
+                throw new IllegalStateException("Not exists");
             }
-        }
-        calendar.setTime(date);
-        final CharBuffer charBuffer = CharBuffer.allocate(10 + value.length());
-        {
-            final int hour = calendar.get(HOUR_OF_DAY);
-            if (hour < 10) {
-                charBuffer.put('0');
-            }
-            charBuffer.append(Integer.toString(hour));
-        }
-        charBuffer.put('-');
-        {
-            final int minute = calendar.get(MINUTE);
-            if (minute < 10) {
-                charBuffer.put('0');
-            }
-            charBuffer.append(Integer.toString(minute));
-        }
-        charBuffer.put('-');
-        {
-            final int second = calendar.get(SECOND);
-            if (second < 10) {
-                charBuffer.put('0');
-            }
-            charBuffer.append(Integer.toString(second));
-        }
-        charBuffer.put('\t').append(value).put('\n').position(0);
-        final long position = ch.position();
-        int length = 0;
-        while (true) {
-            buffer.clear();
-            final CoderResult cr = encoder.encode(charBuffer, buffer, true);
-            if (cr.isOverflow()) {
-                length += buffer.position();
-                buffer.flip();
-                ch.write(buffer);
-                continue;
-            }
-            if (cr.isUnderflow()) {
-                length += buffer.position();
-                buffer.flip();
-                ch.write(buffer);
-                break;
-            }
-            if (cr.isError()) {
-                cr.throwException();
-            }
-        }
-        final FsTtvRecord old = records.put(date, new FsTtvRecord(position, length - 1));
-        if (old != null) {
-            throw new IllegalStateException(toString(date) + " already exists");
         }
     }
 
     @Override
     public void close() throws IOException {
-        ch.close();
+        final IOException e = new IOException();
+        if (index.isEmpty()) {
+            try {
+                ch.close();
+            } catch (Exception x) {
+                e.addSuppressed(x);
+            }
+            try {
+                Files.delete(file);
+            } catch (Exception x) {
+                e.addSuppressed(x);
+            }
+        } else {
+            final String bakName = file.getFileName().toString() + ".bak";
+            final Path bak = file.getParent().resolve(bakName);
+            try (final BufferedWriter w = Files.newBufferedWriter(bak, UTF_8)) {
+                for (final FsTtvRecord r : index.values()) {
+                    w.append(recordText(r));
+                }
+            } catch (Exception x) {
+                e.addSuppressed(x);
+            } finally {
+                try {
+                    ch.close();
+                } catch (Exception x) {
+                    e.addSuppressed(x);
+                }
+                try {
+                    if (Files.exists(bak)) {
+                        Files.move(bak, file, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                } catch (Exception x) {
+                    e.addSuppressed(x);
+                }
+            }
+        }
+        if (e.getSuppressed().length > 0) {
+            throw e;
+        }
     }
 
     @Override
     public String toString() {
         return "Entry " + file;
-    }
-
-    String toString(Date date) {
-        return toString() + " " + new Timestamp(date.getTime());
     }
 }

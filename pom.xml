@@ -203,6 +203,7 @@
                             <java.util.logging.config.class>${logs}</java.util.logging.config.class>
                             <user.timezone>UTC</user.timezone>
                         </systemPropertyVariables>
+                        <argLine>-Xmx1g</argLine>
                     </configuration>
                 </plugin>
 
@@ -404,6 +405,12 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.11</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.codeartisans.thirdparties.swing</groupId>
                 <artifactId>batik-all</artifactId>
                 <version>1.8pre-r1084380</version>
@@ -485,14 +492,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-            <version>4.11</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.carrotsearch</groupId>
-            <artifactId>junit-benchmarks</artifactId>
-            <scope>test</scope>
-            <version>0.7.2</version>
         </dependency>
 
         <dependency>

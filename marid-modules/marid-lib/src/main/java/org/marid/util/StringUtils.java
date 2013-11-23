@@ -154,7 +154,7 @@ public class StringUtils {
                 sum += (b - 0x30) * base;
                 base *= 10;
             } else {
-                throw new IllegalArgumentException("Invalid number: " + new String(value, ISO_8859_1));
+                throw new IllegalArgumentException("Invalid number: " + new String(value, off, len, ISO_8859_1));
             }
         }
         return sum;

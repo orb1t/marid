@@ -18,8 +18,6 @@
 
 package org.marid.datastore.fs
 
-import com.carrotsearch.junitbenchmarks.AbstractBenchmark
-import com.carrotsearch.junitbenchmarks.BenchmarkOptions
 import groovy.util.logging.Log
 import org.junit.AfterClass
 import org.junit.BeforeClass
@@ -28,6 +26,7 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runners.MethodSorters
 import org.marid.nio.FileUtils
+import org.marid.test.AbstractMethodProfiler
 import org.marid.test.SlowTests
 
 import java.nio.file.Files
@@ -40,13 +39,12 @@ import java.util.concurrent.ThreadLocalRandom
 @SuppressWarnings("GroovyAccessibility")
 @Category([SlowTests])
 @Log
-@BenchmarkOptions(benchmarkRounds = 1, warmupRounds = 0)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class FsTtvStoreTest extends AbstractBenchmark {
+class FsTtvStoreTest extends AbstractMethodProfiler {
 
     private static final def tags = ["tag1", "tag2", "tag3"].toSet();
     private static final def data = new HashMap<String, TreeMap<Date, Double>>();
-    private static final def duration = 48 * 3600;
+    private static final def duration = 3;
     private static final def start = new GregorianCalendar(2000, 0, 1, 0, 0, 0);
     private static final def end = (GregorianCalendar) start.clone();
     private static Path storePath;
@@ -81,18 +79,16 @@ class FsTtvStoreTest extends AbstractBenchmark {
     }
 
     @Test
-    void testInsert() {
+    void test1Insert() {
         def insertResult = ttvStore.insert(Double, data);
-        log.info("Insert result: {0}; time = {1} s", insertResult);
         for (def th : insertResult.errors) {
             th.printStackTrace();
         }
     }
 
     @Test
-    void testSelect() {
+    void test2Select() {
         def selectResult = ttvStore.between(Double, tags, start.time, true, end.time, true);
-        log.info("Selection result: {0}; time = {1} s", selectResult, sw());
         for (def th : selectResult.errors) {
             th.printStackTrace();
         }
@@ -100,10 +96,9 @@ class FsTtvStoreTest extends AbstractBenchmark {
     }
 
     @Test
-    void testSelectAfterInvalidateCache() {
+    void test3SelectAfterInvalidateCache() {
         ttvStore.entryCache.invalidateAll();
         def selectResult = ttvStore.between(Double, tags, start.time, true, end.time, true);
-        log.info("Selection result after cleaning cache: {0}; time = {1} s", selectResult, sw());
         for (def th : selectResult.errors) {
             th.printStackTrace();
         }
@@ -111,10 +106,29 @@ class FsTtvStoreTest extends AbstractBenchmark {
     }
 
     @Test
-    void testRemoveKeys() {
+    void test4RemoveKeys() {
         def slicePoint = new Date(start.timeInMillis + (int) (duration / 2));
-        ttvStore.removeKeys(Double, [tag1: slicePoint]);
+        def removeResult = ttvStore.removeKeys(Double, [tag1: slicePoint]);
+        log.info("Remove result: {0}", removeResult.value);
         data["tag1"].remove(slicePoint);
+        def selectResult = ttvStore.between(Double, tags, start.time, true, end.time, true);
+        for (def th : selectResult.errors) {
+            th.printStackTrace();
+        }
+        assert selectResult.value == data;
+    }
+
+    @Test
+    void test5RemoveRange() {
+        def slicePoint = new Date(start.timeInMillis + ((int) (duration / 2)) * 1000L);
+        def removeResult = ttvStore.removeAfter(Double, ["tag2"].toSet(), slicePoint, false);
+        for (def th : removeResult.errors) {
+            th.printStackTrace();
+        }
+        log.info("Remove result: {0}", removeResult.value);
+        for (def k in data["tag2"].tailMap(slicePoint, false).keySet().toList()) {
+            data["tag2"].remove(k);
+        }
         def selectResult = ttvStore.between(Double, tags, start.time, true, end.time, true);
         for (def th : selectResult.errors) {
             th.printStackTrace();

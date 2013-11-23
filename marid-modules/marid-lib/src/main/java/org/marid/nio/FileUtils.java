@@ -20,9 +20,11 @@ package org.marid.nio;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -67,6 +69,20 @@ public class FileUtils {
 
     public static void remove(Path path) throws IOException {
         new RemoveTask(path).call();
+    }
+
+    public static class PatternFileFilter implements Filter<Path> {
+
+        private final Pattern pattern;
+
+        public PatternFileFilter(String pattern) {
+            this.pattern = pattern == null ? null : Pattern.compile(pattern);
+        }
+
+        @Override
+        public boolean accept(Path entry) throws IOException {
+            return pattern == null || pattern.matcher(entry.getFileName().toString()).matches();
+        }
     }
 
     public static class RemoveTask implements Callable<Boolean> {
