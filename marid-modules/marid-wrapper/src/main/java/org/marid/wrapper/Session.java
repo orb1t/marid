@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.daemon;
+package org.marid.wrapper;
 
 import java.io.*;
 import java.net.Socket;
@@ -30,8 +30,8 @@ import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.marid.daemon.Log.info;
-import static org.marid.daemon.Log.warning;
+import static org.marid.wrapper.Log.info;
+import static org.marid.wrapper.Log.warning;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -49,10 +49,10 @@ public class Session implements Callable<Session> {
     }
 
     private Path bak() throws Exception {
-        if (Daemon.CUR_FILE.isFile()) {
+        if (Wrapper.CUR_FILE.isFile()) {
             final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss'.zip'");
-            final File file = new File(Daemon.BACKUPS, dateFormat.format(new Date()));
-            final Path source = Daemon.CUR_FILE.toPath();
+            final File file = new File(Wrapper.BACKUPS, dateFormat.format(new Date()));
+            final Path source = Wrapper.CUR_FILE.toPath();
             final Path target = file.toPath();
             Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
             return target;
@@ -66,7 +66,7 @@ public class Session implements Callable<Session> {
             return;
         }
         info(log, "Restoring {0}", path);
-        Files.move(path, Daemon.CUR_FILE.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        Files.move(path, Wrapper.CUR_FILE.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     private void upload(final ClientContext clientContext, Properties properties) throws Exception {
@@ -74,7 +74,7 @@ public class Session implements Callable<Session> {
         try {
             path = bak();
             final long size = Long.parseLong(properties.getProperty("size"));
-            try (final FileChannel fc = FileChannel.open(Daemon.CUR_FILE.toPath(),
+            try (final FileChannel fc = FileChannel.open(Wrapper.CUR_FILE.toPath(),
                     StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.WRITE)) {
@@ -104,10 +104,10 @@ public class Session implements Callable<Session> {
     }
 
     private void extract() throws Exception {
-        FileUtils.removeDir(Daemon.TARGET.toPath());
-        try (FileSystem zipfs = FileSystems.getFileSystem(Daemon.CUR_FILE.toURI())) {
+        FileUtils.removeDir(Wrapper.TARGET.toPath());
+        try (FileSystem zipfs = FileSystems.getFileSystem(Wrapper.CUR_FILE.toURI())) {
             for (Path src : zipfs.getRootDirectories()) {
-                FileUtils.copyDir(src, Daemon.TARGET.toPath());
+                FileUtils.copyDir(src, Wrapper.TARGET.toPath());
             }
         }
     }
@@ -125,10 +125,10 @@ public class Session implements Callable<Session> {
                 final Properties properties = (Properties) is.readObject();
                 switch (properties.getProperty("cmd", "exit")) {
                     case "upload":
-                        synchronized (Daemon.class) {
-                            Daemon.stop();
+                        synchronized (Wrapper.class) {
+                            Wrapper.stop();
                             upload(clientContext, properties);
-                            Daemon.run();
+                            Wrapper.run();
                         }
                         break;
                     case "exit":

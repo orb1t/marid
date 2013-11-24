@@ -196,6 +196,43 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
                 continue;
             }
             final NavigableMap<Date, T> values = new TreeMap<>();
+            class SelectAccessor implements Accessor {
+                @Override
+                public void access(FsTtvEntry de) throws Exception {
+                    for (final Entry<Date, FsTtvRecord> e : de.index.subMap(from, fromInc, to, toInc).entrySet()) {
+                        final String text = de.text(e.getValue());
+                        try {
+                            final Object v;
+                            if ("null".equals(text)) {
+                                v = null;
+                            } else if (type == Double.class) {
+                                v = Double.valueOf(text);
+                            } else if (type == Float.class) {
+                                v = Float.valueOf(text);
+                            } else if (type == Long.class) {
+                                v = Long.valueOf(text);
+                            } else if (type == Integer.class) {
+                                v = Integer.valueOf(text);
+                            } else if (type == Boolean.class) {
+                                v = Boolean.valueOf(text);
+                            } else if (type == Short.class) {
+                                v = Short.valueOf(text);
+                            } else if (type == Byte.class) {
+                                v = Byte.valueOf(text);
+                            } else if (type == BigDecimal.class) {
+                                v = new BigDecimal(text);
+                            } else if (type == BigInteger.class) {
+                                v = new BigInteger(text);
+                            } else {
+                                v = ((List) de.slurper.parseText("[" + text + "]")).get(0);
+                            }
+                            values.put(e.getKey(), cast(type, v));
+                        } catch (Exception x) {
+                            errors.add(x);
+                        }
+                    }
+                }
+            }
             try (final DirectoryStream<Path> ds = newDirectoryStream(tagPath, "????-??-??.data")) {
                 for (final Path dp : ds) {
                     final String name = dp.getFileName().toString();
@@ -204,46 +241,10 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
                             parseInt(name.substring(5, 7)) - 1,
                             parseInt(name.substring(8, 10)));
                     if (c.compareTo(fc) >= 0 && c.compareTo(tc) <= 0) {
-                        access(dp, new Accessor() {
-                            @Override
-                            public void access(FsTtvEntry de) throws Exception {
-                                for (final Entry<Date, FsTtvRecord> re : de.index.subMap(from, fromInc, to, toInc).entrySet()) {
-                                    final String text = de.text(re.getValue());
-                                    try {
-                                        final Object v;
-                                        if ("null".equals(text)) {
-                                            v = null;
-                                        } else if (type == Double.class) {
-                                            v = Double.valueOf(text);
-                                        } else if (type == Float.class) {
-                                            v = Float.valueOf(text);
-                                        } else if (type == Long.class) {
-                                            v = Long.valueOf(text);
-                                        } else if (type == Integer.class) {
-                                            v = Integer.valueOf(text);
-                                        } else if (type == Boolean.class) {
-                                            v = Boolean.valueOf(text);
-                                        } else if (type == Short.class) {
-                                            v = Short.valueOf(text);
-                                        } else if (type == Byte.class) {
-                                            v = Byte.valueOf(text);
-                                        } else if (type == BigDecimal.class) {
-                                            v = new BigDecimal(text);
-                                        } else if (type == BigInteger.class) {
-                                            v = new BigInteger(text);
-                                        } else {
-                                            v = ((List) de.slurper.parseText("[" + text + "]")).get(0);
-                                        }
-                                        values.put(re.getKey(), cast(type, v));
-                                    } catch (Exception x) {
-                                        errors.add(x);
-                                    }
-                                }
-                            }
-                        }, errors);
+                        access(dp, new SelectAccessor(), errors);
                     }
                 }
-            } catch (IOException x) {
+            } catch (Exception x) {
                 errors.add(x);
                 warning(LOG, "Unable to enumerate the directory {0}", x, tagPath);
             }
@@ -392,7 +393,7 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
             Class<?> type, Set<String> tags,
             final Date from, final boolean fromInc, final Date to, final boolean toInc) {
         final List<Throwable> errors = new LinkedList<>();
-        long n = 0L;
+        final AtomicLong counter = new AtomicLong();
         final Calendar fc = trimmed(from);
         final Calendar tc = trimmed(to);
         for (final String tag : tags) {
@@ -411,7 +412,7 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
                         access(p, new Accessor() {
                             @Override
                             public void access(FsTtvEntry de) throws Exception {
-                                de.remove(from, fromInc, to, toInc);
+                                counter.addAndGet(de.remove(from, fromInc, to, toInc));
                             }
                         }, errors);
                     }
@@ -420,13 +421,13 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
                 errors.add(x);
             }
         }
-        return new SimpleSafeResult<>(n, errors);
+        return new SimpleSafeResult<>(counter.get(), errors);
     }
 
     @Override
     public SafeResult<Long> removeKeys(Class<?> type, Map<String, ? extends Date> keys) {
         final List<Throwable> errors = new LinkedList<>();
-        long n = 0L;
+        final AtomicLong counter = new AtomicLong();
         for (final Entry<String, ? extends Date> e : keys.entrySet()) {
             try {
                 final Calendar c = new GregorianCalendar();
@@ -450,7 +451,9 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
                         access(dp, new Accessor() {
                             @Override
                             public void access(FsTtvEntry de) throws Exception {
-                                de.remove(e.getValue());
+                                if (de.remove(e.getValue())) {
+                                    counter.incrementAndGet();
+                                }
                             }
                         }, errors);
                         break;
@@ -460,7 +463,7 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
                 errors.add(x);
             }
         }
-        return new SimpleSafeResult<>(n, errors);
+        return new SimpleSafeResult<>(counter.get(), errors);
     }
 
     @Override

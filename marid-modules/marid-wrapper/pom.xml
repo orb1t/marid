@@ -5,8 +5,9 @@
         <groupId>org.marid</groupId>
         <version>0.7-SNAPSHOT</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>marid-daemon</artifactId>
+    <artifactId>marid-wrapper</artifactId>
 
     <build>
         <plugins>
@@ -20,7 +21,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.marid.daemon.Daemon</mainClass>
+                            <mainClass>org.marid.wrapper.Wrapper</mainClass>
                         </manifest>
                         <manifestEntries>
                             <Built-By>Dmitry Ovchinnikov</Built-By>

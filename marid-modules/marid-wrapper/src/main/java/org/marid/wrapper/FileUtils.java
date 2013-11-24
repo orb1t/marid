@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.daemon;
+package org.marid.wrapper;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;

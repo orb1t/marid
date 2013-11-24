@@ -20,15 +20,15 @@ package org.marid.datastore.fs;
 
 import groovy.json.JsonSlurper;
 import org.marid.io.FastArrayOutputStream;
+import org.marid.nio.ByteArrayWriteChannel;
 
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
-import java.nio.channels.WritableByteChannel;
+import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.nio.file.Files;
@@ -58,6 +58,7 @@ class FsTtvEntry implements Closeable {
     final Calendar cal;
     final JsonSlurper slurper = new JsonSlurper();
     final CharsetEncoder encoder = UTF_8.newEncoder();
+    final CharsetDecoder decoder = UTF_8.newDecoder();
 
     FsTtvEntry(Path path, int bufSize) throws IOException {
         bufferSize = bufSize;
@@ -93,8 +94,11 @@ class FsTtvEntry implements Closeable {
         }
     }
 
-    void remove(Date from, boolean fromInc, Date to, boolean toInc) throws IOException {
-        index.subMap(from, fromInc, to, toInc).clear();
+    int remove(Date from, boolean fromInc, Date to, boolean toInc) throws IOException {
+        final NavigableMap<Date, FsTtvRecord> subMap = index.subMap(from, fromInc, to, toInc);
+        final int count = subMap.size();
+        subMap.clear();
+        return count;
     }
 
     boolean remove(Date date) throws IOException {
@@ -102,17 +106,17 @@ class FsTtvEntry implements Closeable {
     }
 
     String text(FsTtvRecord record) throws IOException {
-        final String s = recordText(record);
-        return s.substring(9, s.length() - 1);
+        return extract(record.position + 9, record.length - 10);
     }
 
     String recordText(FsTtvRecord record) throws IOException {
-        final FastArrayOutputStream faos = new FastArrayOutputStream(record.length);
-        final WritableByteChannel wch = Channels.newChannel(faos);
-        while (faos.size() < record.length) {
-            ch.transferTo(record.position + faos.size(), record.length - faos.size(), wch);
-        }
-        return UTF_8.decode(faos.getSharedByteBuffer()).toString();
+        return extract(record.position, record.length);
+    }
+
+    String extract(long pos, int len) throws IOException {
+        final ByteArrayWriteChannel wch = new ByteArrayWriteChannel(len);
+        wch.transferFrom(ch, pos);
+        return wch.toString(decoder);
     }
 
     void put(Date date, String value, boolean insert, boolean update) throws IOException {

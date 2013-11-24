@@ -16,32 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.daemon;
+package org.marid.wrapper.notifications;
 
-import javax.net.ServerSocketFactory;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
+import javax.management.Notification;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridServerSocketFactory extends ServerSocketFactory {
+public class LogRecordNotification extends Notification {
 
-    private final ServerSocketFactory delegate = ServerSocketFactory.getDefault();
-
-    @Override
-    public ServerSocket createServerSocket(int port) throws IOException {
-        return delegate.createServerSocket(port);
-    }
-
-    @Override
-    public ServerSocket createServerSocket(int port, int backlog) throws IOException {
-        return delegate.createServerSocket(port, backlog);
-    }
-
-    @Override
-    public ServerSocket createServerSocket(int port, int backlog, InetAddress ifAddress) throws IOException {
-        return delegate.createServerSocket(port, backlog, ifAddress);
+    public LogRecordNotification(String type, Object source, long sequenceNumber) {
+        super(type, source, sequenceNumber);
     }
 }

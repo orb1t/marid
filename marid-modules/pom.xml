@@ -32,7 +32,7 @@
 
     <modules>
         <module>marid-lib</module>
-        <module>marid-daemon</module>
+        <module>marid-wrapper</module>
         <module>marid-services</module>
     </modules>
 

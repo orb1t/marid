@@ -26,8 +26,8 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runners.MethodSorters
 import org.marid.nio.FileUtils
-import org.marid.test.AbstractMethodProfiler
 import org.marid.test.SlowTests
+import org.marid.test.rules.ManagedInterceptedMethodProfiler
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -40,15 +40,19 @@ import java.util.concurrent.ThreadLocalRandom
 @Category([SlowTests])
 @Log
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class FsTtvStoreTest extends AbstractMethodProfiler {
+class FsTtvStoreTest extends ManagedInterceptedMethodProfiler {
 
     private static final def tags = ["tag1", "tag2", "tag3"].toSet();
     private static final def data = new HashMap<String, TreeMap<Date, Double>>();
-    private static final def duration = 3;
+    private static final def duration = 48 * 3600;
     private static final def start = new GregorianCalendar(2000, 0, 1, 0, 0, 0);
     private static final def end = (GregorianCalendar) start.clone();
     private static Path storePath;
     private static FsTtvStore ttvStore;
+
+    FsTtvStoreTest() {
+        super(FsTtvStore);
+    }
 
     @BeforeClass
     static void init() {
@@ -107,7 +111,7 @@ class FsTtvStoreTest extends AbstractMethodProfiler {
 
     @Test
     void test4RemoveKeys() {
-        def slicePoint = new Date(start.timeInMillis + (int) (duration / 2));
+        def slicePoint = new Date(start.timeInMillis + ((int) (duration / 2)) * 1000L);
         def removeResult = ttvStore.removeKeys(Double, [tag1: slicePoint]);
         log.info("Remove result: {0}", removeResult.value);
         data["tag1"].remove(slicePoint);

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.daemon;
+package org.marid.wrapper;
 
 import java.util.logging.Level;
 import java.util.logging.LogRecord;

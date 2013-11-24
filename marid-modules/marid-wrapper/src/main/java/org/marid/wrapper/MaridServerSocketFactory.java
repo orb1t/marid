@@ -16,31 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.test;
+package org.marid.wrapper;
 
-import org.junit.Rule;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
+import javax.net.ServerSocketFactory;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class AbstractMethodProfiler {
+public class MaridServerSocketFactory extends ServerSocketFactory {
 
-    @Rule
-    public final TestRule rule = new TestRule() {
-        @Override
-        public Statement apply(final Statement base, final Description description) {
-            return new Statement() {
-                @Override
-                public void evaluate() throws Throwable {
-                    final long start = System.nanoTime();
-                    base.evaluate();
-                    final float time = (System.nanoTime() - start) / 1.0e9f;
-                    System.out.format("%s in %s s%s", description, time, System.lineSeparator());
-                }
-            };
-        }
-    };
+    private final ServerSocketFactory delegate = ServerSocketFactory.getDefault();
+
+    @Override
+    public ServerSocket createServerSocket(int port) throws IOException {
+        return delegate.createServerSocket(port);
+    }
+
+    @Override
+    public ServerSocket createServerSocket(int port, int backlog) throws IOException {
+        return delegate.createServerSocket(port, backlog);
+    }
+
+    @Override
+    public ServerSocket createServerSocket(int port, int backlog, InetAddress ifAddress) throws IOException {
+        return delegate.createServerSocket(port, backlog, ifAddress);
+    }
 }
