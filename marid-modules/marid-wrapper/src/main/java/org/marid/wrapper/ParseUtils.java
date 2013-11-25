@@ -34,6 +34,15 @@ public class ParseUtils {
         }
     }
 
+    public static boolean getBoolean(String property, boolean def) {
+        final String val = System.getProperty(property, System.getenv(property));
+        try {
+            return val == null ? def : Boolean.parseBoolean(val);
+        } catch (Exception x) {
+            throw new IllegalStateException(property + "=" + val, x);
+        }
+    }
+
     public static long getLong(String property, long def) {
         final String val = System.getProperty(property, System.getenv(property));
         try {

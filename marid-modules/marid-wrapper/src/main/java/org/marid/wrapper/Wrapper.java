@@ -18,28 +18,23 @@
 
 package org.marid.wrapper;
 
-import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import java.io.File;
-import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
-import static org.marid.wrapper.Log.info;
-import static org.marid.wrapper.Log.warning;
+import static org.marid.wrapper.Log.*;
+import static org.marid.wrapper.SecureContext.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -47,100 +42,47 @@ import static org.marid.wrapper.Log.warning;
 public class Wrapper implements UncaughtExceptionHandler {
 
     private static final Logger LOG = Logger.getLogger(Wrapper.class.getName());
-    private static final String DEFAULT_SSF = MaridServerSocketFactory.class.getCanonicalName();
-    static final int PORT = ParseUtils.getInt("MARID_DAEMON_PORT", 11200);
-    static final int BACKLOG = ParseUtils.getInt("MARID_DAEMON_BACKLOG", 5);
-    static final String ADDRESS = ParseUtils.getString("MARID_DAEMON_ADDRESS", "localhost");
-    static final File TARGET = ParseUtils.getDir("MARID_DAEMON_TARGET", null, "marid");
-    static final File VMARGS = ParseUtils.getFile("MARID_DAEMON_VM_ARGS", TARGET, "ext", "vm.args");
-    static final File ARGS = ParseUtils.getFile("MARID_DAEMON_ARGS", TARGET, "ext", "marid.args");
-    static final File OUT = ParseUtils.getFile("MARID_DAEMON_OUT", TARGET, "marid.log");
-    static final File ERR = ParseUtils.getFile("MARID_DAEMON_ERR", TARGET, "marid.err");
-    static final File BACKUPS = ParseUtils.getDir("MARID_DAEMON_BACKUPS", null, "maridbk");
-    static final File CUR_FILE = ParseUtils.getFile("MARID_DAEMON_CUR_FILE", BACKUPS, "cur.zip");
-    static final String SSF = ParseUtils.getString("MARID_DAEMON_SSF", DEFAULT_SSF);
+    static final int PORT = ParseUtils.getInt("MW_PORT", 11200);
+    static final int BACKLOG = ParseUtils.getInt("MW_BACKLOG", 5);
+    static final String ADDRESS = ParseUtils.getString("MW_ADDRESS", null);
+    static final File TARGET = ParseUtils.getDir("MW_TARGET", null, "marid");
+    static final File BACKUPS = ParseUtils.getDir("MW_BACKUPS", null, "maridbk");
+    static final int THREADS = ParseUtils.getInt("MW_THREADS", 8);
+    static final int MAX_THREADS = ParseUtils.getInt("MW_MAX_THREADS", THREADS);
 
+    static final Lock processLock = new ReentrantLock();
     static Process maridProcess;
 
-    @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String... args) throws Exception {
-        try (final InputStream logProps = Wrapper.class.getResourceAsStream("/log.properties")) {
-            if (logProps != null) {
-                LogManager.getLogManager().readConfiguration(logProps);
-            }
-        }
         Thread.setDefaultUncaughtExceptionHandler(new Wrapper());
-        final ClassLoader classLoader = getClassLoader();
-        final ServerSocketFactory ssf = (ServerSocketFactory) classLoader.loadClass(SSF).newInstance();
-        LOG.log(Level.INFO, "Server socket factory: {0}", ssf);
-        final ServerSocket serverSocket = ssf.createServerSocket(PORT, BACKLOG, InetAddress.getByName(ADDRESS));
-        LOG.log(Level.INFO, "Server socket: {0}", serverSocket);
-        while (true) {
-            try (final Socket socket = serverSocket.accept()) {
-                final SSLSocket sslSocket = (SSLSocket) socket;
-                final SSLSession session = sslSocket.getSession();
-                info(LOG, "{0} New client", sslSocket);
+        info(LOG, "Server socket factory: {0}", SecureContext.SERVER_SOCKET_FACTORY);
+        final SSLServerSocket serverSocket = (SSLServerSocket) (ADDRESS == null
+                ? SERVER_SOCKET_FACTORY.createServerSocket(PORT, BACKLOG)
+                : SERVER_SOCKET_FACTORY.createServerSocket(PORT, BACKLOG, InetAddress.getByName(ADDRESS)));
+        info(LOG, "Server socket: {0}", serverSocket);
+        serverSocket.setNeedClientAuth(true);
+        final ThreadPoolExecutor executor = new ThreadPoolExecutor(THREADS, MAX_THREADS,
+                1L, TimeUnit.MINUTES, new SynchronousQueue<Runnable>(), new CallerRunsPolicy());
+        try {
+            while (true) {
                 try {
-                    new Session(sslSocket).call();
+                    final Socket socket = serverSocket.accept();
+                    try {
+                        final SSLSocket sslSocket = (SSLSocket) socket;
+                        final SSLSession sslSession = sslSocket.getSession();
+                        info(LOG, "{0} New client", sslSocket);
+                        executor.execute(new Session(sslSocket, sslSession));
+                    } catch (Exception x) {
+                        warning(LOG, "{0} Client error", x, socket);
+                    }
                 } catch (Exception x) {
-                    warning(LOG, "{0} Session error", x);
+                    severe(LOG, "Accept clients failed", x);
+                    break;
                 }
             }
+        } finally {
+            executor.shutdown();
         }
-    }
-
-    static ClassLoader getClassLoader() {
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        return classLoader != null ? classLoader : Wrapper.class.getClassLoader();
-    }
-
-    static synchronized void run() throws Exception {
-        if (maridProcess != null) {
-            return;
-        }
-        List<String> args = new LinkedList<>();
-        args.add(getJavaBinary());
-        if (VMARGS.exists()) {
-            args.addAll(Files.readAllLines(VMARGS.toPath(), StandardCharsets.UTF_8));
-        }
-        args.add("-jar");
-        try (DirectoryStream<Path> ds = Files.newDirectoryStream(TARGET.toPath(), "marid-*.jar")) {
-            args.add(ds.iterator().next().getFileName().toString());
-        }
-        if (ARGS.exists()) {
-            args.addAll(Files.readAllLines(ARGS.toPath(), StandardCharsets.UTF_8));
-        }
-        ProcessBuilder processBuilder = new ProcessBuilder(args);
-        processBuilder.redirectOutput(OUT);
-        processBuilder.redirectError(ERR);
-        processBuilder.directory(TARGET);
-        maridProcess = processBuilder.start();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    int resultCode = maridProcess.waitFor();
-                    info(LOG, "Marid was terminated with exit code {0}", resultCode);
-                } catch (Exception x) {
-                    warning(LOG, "Waiting process error", x);
-                }
-            }
-        }).start();
-    }
-
-    static synchronized void stop() throws Exception {
-        if (maridProcess != null) {
-            try {
-                maridProcess.destroy();
-            } finally {
-                maridProcess = null;
-            }
-        }
-    }
-
-    private static String getJavaBinary() {
-        return ParseUtils.getString("MARID.DAEMON.JAVA.BIN",
-                System.getProperty("java.home") + File.separator + "bin" + File.separator + "java");
     }
 
     @Override

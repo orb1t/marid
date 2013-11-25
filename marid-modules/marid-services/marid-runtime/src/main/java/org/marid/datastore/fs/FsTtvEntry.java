@@ -155,11 +155,11 @@ class FsTtvEntry implements Closeable {
         final FsTtvRecord old = index.put(date, new FsTtvRecord(pos, len));
         if (old != null) {
             if (insert && !update) {
-                throw new IllegalStateException("Already exists");
+                throw new IllegalStateException("Already exists: " + file + "@" + date);
             }
         } else {
             if (update) {
-                throw new IllegalStateException("Not exists");
+                throw new IllegalStateException("Not exists: " + file + "@" + date);
             }
         }
     }
