@@ -18,16 +18,33 @@
 
 package org.marid.wrapper;
 
-import org.marid.wrapper.deploy.ClientInfo;
+import org.marid.io.JaxbStreams;
+import org.marid.io.LimitedInputStream;
+import org.marid.nio.FileUtils;
 
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.rmi.server.UID;
+import java.security.KeyStore;
+import java.security.UnrecoverableKeyException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Handler;
 import java.util.logging.Logger;
 
-import static org.marid.wrapper.Log.info;
-import static org.marid.wrapper.Log.warning;
+import static org.marid.wrapper.Log.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,28 +52,149 @@ import static org.marid.wrapper.Log.warning;
 public class Session implements Runnable {
 
     private static final Logger LOG = Logger.getLogger(Session.class.getName());
+    static final JAXBContext JAXB_CONTEXT = ParseUtils.getJaxbContext(ClientData.class, AuthResponse.class);
 
     final SSLSocket socket;
     final SSLSession session;
+    private final Map<UID, Handler> logHandlerMap = new HashMap<>();
+    static final SimpleDateFormat backupFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss'.zip'");
 
     public Session(SSLSocket socket, SSLSession session) {
         this.socket = socket;
         this.session = session;
     }
 
-    private void doRun(ClientInfo ci, DataInputStream is, DataOutputStream os) throws Exception {
-        is.readFully(new byte[3]);
+    private Set<String> checkClientData(DataInputStream is, DataOutputStream os) throws Exception {
+        final byte[] data = new byte[is.readInt()];
+        is.readFully(data);
+        final Unmarshaller unmarshaller = JAXB_CONTEXT.createUnmarshaller();
+        final ClientData clientData = (ClientData) unmarshaller.unmarshal(new ByteArrayInputStream(data));
+        info(LOG, "{0} {1}", socket, clientData.toString());
+        final KeyStore keyStore = SecureContext.getKeyStore();
+        final String user = clientData.getUser();
+        try {
+            keyStore.getKey(user, clientData.getPassword().toCharArray());
+        } catch (UnrecoverableKeyException x) {
+            JaxbStreams.write(JAXB_CONTEXT, os, new AuthResponse("accessDenied"));
+            throw new IllegalAccessException("Access denied for " + user);
+        }
+        final String[] roles = ParseUtils.getString("MW_ROLES_" + user, "admin").split(",");
+        final AuthResponse response = new AuthResponse("ok", roles);
+        JaxbStreams.write(JAXB_CONTEXT, os, response);
+        info(LOG, "{0} User {1} was authorized as {2}", socket, user, response.getRoles());
+        return response.getRoles();
+    }
+
+    void upload(Set<String> roles, UID uid, DataInputStream is, DataOutputStream os) throws Exception {
+        if (!roles.contains("admin") && !roles.contains("uploader")) {
+            synchronized (this) {
+                uid.write(os);
+                os.writeUTF("accessDenied");
+            }
+        }
+        try {
+            while (true) {
+                synchronized (this) {
+                    uid.write(os);
+                    os.writeUTF("waitLock");
+                }
+                if (Wrapper.processLock.tryLock(1L, TimeUnit.MINUTES)) {
+                    try {
+                        final Path curZip = Wrapper.BACKUPS.resolve("cur.zip");
+                        if (Files.isRegularFile(curZip)) {
+                            final Path backupZip = Wrapper.BACKUPS.resolve(backupFormat.format(new Date()));
+                            Files.move(curZip, backupZip, StandardCopyOption.REPLACE_EXISTING);
+                        }
+                        Files.copy(new LimitedInputStream(is, is.readLong()), curZip);
+                        if (Wrapper.maridProcess != null) {
+                            Wrapper.maridProcess.destroy();
+                            Wrapper.maridProcess = null;
+                        }
+                        if (Files.isDirectory(Wrapper.TARGET)) {
+                            Files.walkFileTree(Wrapper.TARGET, FileUtils.RECURSIVE_CLEANER);
+                        }
+                        FileUtils.copyFromZip(curZip, Wrapper.TARGET);
+                        break;
+                    } finally {
+                        Wrapper.processLock.unlock();
+                    }
+                } else {
+                    synchronized (this) {
+                        uid.write(os);
+                        os.writeUTF("waitLockFailed");
+                    }
+                    switch (is.readUTF()) {
+                        case "continue":
+                            continue;
+                        case "exit":
+                            synchronized (this) {
+                                uid.write(os);
+                                os.writeUTF("break");
+                            }
+                            return;
+                    }
+                }
+            }
+            synchronized (this) {
+                uid.write(os);
+                os.writeUTF("ok");
+            }
+        } catch (Exception x) {
+            synchronized (this) {
+                uid.write(os);
+                os.writeUTF("error");
+                os.writeUTF(x.toString());
+            }
+        }
+    }
+
+    void listenLogs(Set<String> roles, UID uid, DataInputStream is, DataOutputStream os) throws Exception {
+
+    }
+
+    private void doRun(DataInputStream is, DataOutputStream os) throws Exception {
+        final Set<String> roles = checkClientData(is, os);
+        while (true) {
+            final String command = is.readUTF();
+            final UID uid = UID.read(is);
+            fine(LOG, "{0} Command {1} received", socket, command);
+            switch (command) {
+                case "upload":
+                    upload(roles, uid, is, os);
+                    break;
+                case "listenLogs":
+                    listenLogs(roles, uid, is, os);
+                    break;
+                case "close":
+                case "exit":
+                    synchronized (this) {
+                        uid.write(os);
+                        os.writeBoolean(true);
+                    }
+                    return;
+                default:
+                    synchronized (this) {
+                        uid.write(os);
+                        os.writeUTF("unknown");
+                    }
+                    break;
+            }
+        }
     }
 
     @Override
     public void run() {
-        final ClientInfo clientInfo = new ClientInfo(socket.getInetAddress());
         try (final DataInputStream i = new DataInputStream(socket.getInputStream());
              final DataOutputStream o = new DataOutputStream(socket.getOutputStream())) {
-            doRun(clientInfo, i, o);
+            doRun(i, o);
         } catch (Exception x) {
             warning(LOG, "{0} session error", x, this);
         } finally {
+            final Logger rootLogger = Logger.getLogger("");
+            for (final Handler handler : logHandlerMap.values()) {
+                rootLogger.removeHandler(handler);
+            }
+            logHandlerMap.clear();
             try {
                 socket.close();
                 info(LOG, "{0} Closed", socket);

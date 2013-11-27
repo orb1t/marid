@@ -9,6 +9,13 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>marid-wrapper</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.marid</groupId>
+            <artifactId>marid-lib</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>

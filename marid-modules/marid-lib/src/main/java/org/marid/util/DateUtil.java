@@ -19,12 +19,9 @@ package org.marid.util;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Calendar;
+import java.util.*;
+
 import static java.util.Calendar.*;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
@@ -32,7 +29,7 @@ import java.util.TimeZone;
 public class DateUtil {
 
     public static Calendar isoToCalendar(String date) {
-        TimeZone z;
+        final TimeZone z;
         int l = date.length();
         switch (l) {
             case 28:
@@ -50,7 +47,7 @@ public class DateUtil {
                 z = TimeZone.getDefault();
                 break;
         }
-        Calendar c = new GregorianCalendar(z, Locale.ROOT);
+        final Calendar c = new GregorianCalendar(z, Locale.ROOT);
         if (l != 12 && l >= 10) {
             switch (l) {
                 case 28:
@@ -131,7 +128,7 @@ public class DateUtil {
     }
 
     public static void iso(long ts, Appendable a, TimeZone tz, boolean ms) throws IOException {
-        Calendar c = Calendar.getInstance(tz, Locale.ROOT);
+        final Calendar c = Calendar.getInstance(tz, Locale.ROOT);
         c.setTimeInMillis(ts);
         a.append(Integer.toString(c.get(YEAR)));
         a.append('-');
@@ -177,7 +174,7 @@ public class DateUtil {
     }
 
     private static TimeZone getTimeZone(String s, boolean rfc) {
-        int l = s.length();
+        final int l = s.length();
         if (rfc) {
             String h = s.substring(l - 5, l - 2);
             String m = s.substring(l - 2, l);

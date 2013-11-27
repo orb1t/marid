@@ -18,7 +18,10 @@
 
 package org.marid.wrapper;
 
-import java.io.File;
+import javax.xml.bind.JAXBContext;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -52,46 +55,36 @@ public class ParseUtils {
         }
     }
 
-    public static File getFile(String property, File baseDir, String... def) {
+    public static Path getPath(String property, Path baseDir, String... def) {
         final String val = System.getProperty(property, System.getenv(property));
         try {
-            File file;
+            final Path file;
             if (val != null) {
-                file = new File(val);
+                file = Paths.get(val);
             } else {
-                file = baseDir == null ? new File(System.getProperty("user.home")) : baseDir;
-                for (String name : def) {
-                    file = new File(file, name);
-                }
+                file = baseDir == null
+                        ? Paths.get(System.getProperty("user.home"), def)
+                        : Paths.get(baseDir.toString(), def);
             }
-            if (!file.getParentFile().isDirectory()) {
-                if (!file.getParentFile().mkdirs()) {
-                    throw new IllegalStateException("Unable to create " + file.getParent());
-                }
-            }
+            Files.createDirectories(file.getParent());
             return file;
         } catch (Exception x) {
             throw new IllegalStateException(property + "=" + val, x);
         }
     }
 
-    public static File getDir(String property, File baseDir, String... def) {
+    public static Path getDir(String property, Path baseDir, String... def) {
         final String val = System.getProperty(property, System.getenv(property));
         try {
-            File file;
+            final Path file;
             if (val != null) {
-                file =  new File(val);
+                file =  Paths.get(val);
             } else {
-                file = baseDir == null ? new File(System.getProperty("user.home")) : baseDir;
-                for (String name : def) {
-                    file = new File(file, name);
-                }
+                file = baseDir == null
+                        ? Paths.get(System.getProperty("user.home"), def)
+                        : Paths.get(baseDir.toString(), def);
             }
-            if (!file.isDirectory()) {
-                if (!file.mkdirs()) {
-                    throw new IllegalStateException("Unable to create " + file);
-                }
-            }
+            Files.createDirectories(file);
             return file;
         } catch (Exception x) {
             throw new IllegalStateException(property + "=" + val, x);
@@ -101,5 +94,13 @@ public class ParseUtils {
     public static String getString(String property, String def) {
         final String val = System.getProperty(property, System.getenv(property));
         return val == null ? def : val;
+    }
+
+    public static JAXBContext getJaxbContext(Class<?>... classes) {
+        try {
+            return JAXBContext.newInstance(classes);
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
     }
 }

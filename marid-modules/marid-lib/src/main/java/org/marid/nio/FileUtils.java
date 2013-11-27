@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
@@ -63,12 +65,39 @@ public class FileUtils {
         return set;
     }
 
-    public static void copy(Path source, Path target) throws IOException {
-        new CopyTask(source, target).call();
+    public static boolean copy(Path source, Path target) throws IOException {
+        return Boolean.TRUE == new CopyTask(source, target).call();
     }
 
-    public static void remove(Path path) throws IOException {
-        new RemoveTask(path).call();
+    public static boolean remove(Path path) throws IOException {
+        return Boolean.TRUE == new RemoveTask(path).call();
+    }
+
+    public static void copyFromZip(Path zip, Path dest) throws IOException {
+        final Map<String, ?> env = Collections.emptyMap();
+        try (final FileSystem fs = FileSystems.newFileSystem(zip.toUri(), env)) {
+            for (final Path dir : fs.getRootDirectories()) {
+                copy(dir, dest);
+            }
+        }
+    }
+
+    public static void moveFromZip(Path zip, Path dest) throws IOException {
+        copyFromZip(zip, dest);
+        Files.delete(zip);
+    }
+
+    public static void copyToZip(Path source, Path zip) throws IOException {
+        final Map<String, ?> env = Collections.singletonMap("create", "true");
+        try (final FileSystem fs = FileSystems.newFileSystem(zip.toUri(), env)) {
+            final Path dest = fs.getRootDirectories().iterator().next();
+            copy(source, dest);
+        }
+    }
+
+    public static void moveToZip(Path source, Path zip) throws IOException {
+        copyToZip(source, zip);
+        remove(source);
     }
 
     public static class PatternFileFilter implements Filter<Path> {
@@ -119,10 +148,12 @@ public class FileUtils {
 
         protected final Path source;
         protected final Path target;
+        protected final CopyOption[] copyOptions;
 
-        public CopyTask(Path source, Path target) {
+        public CopyTask(Path source, Path target, CopyOption... copyOptions) {
             this.source = source;
             this.target = target;
+            this.copyOptions = copyOptions;
         }
 
         @Override
@@ -146,9 +177,9 @@ public class FileUtils {
 
         protected void copy(Path src, Path dst) throws IOException {
             if (Files.isDirectory(src)) {
-                try (DirectoryStream<Path> ds = Files.newDirectoryStream(src)) {
-                    for (Path entry : ds) {
-                        Path t = dst.resolve(entry.getFileName().toString());
+                try (final DirectoryStream<Path> ds = Files.newDirectoryStream(src)) {
+                    for (final Path entry : ds) {
+                        final Path t = dst.resolve(entry.getFileName().toString());
                         if (Files.isDirectory(entry)) {
                             Files.createDirectories(t);
                         }
@@ -156,7 +187,7 @@ public class FileUtils {
                     }
                 }
             } else {
-                Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(src, dst, copyOptions);
             }
         }
     }

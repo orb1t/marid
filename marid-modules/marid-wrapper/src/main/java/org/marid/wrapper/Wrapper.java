@@ -19,13 +19,14 @@
 package org.marid.wrapper;
 
 import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
-import java.io.File;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.concurrent.SynchronousQueue;
+import java.nio.file.Path;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +35,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import static org.marid.wrapper.Log.*;
-import static org.marid.wrapper.SecureContext.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -45,28 +45,30 @@ public class Wrapper implements UncaughtExceptionHandler {
     static final int PORT = ParseUtils.getInt("MW_PORT", 11200);
     static final int BACKLOG = ParseUtils.getInt("MW_BACKLOG", 5);
     static final String ADDRESS = ParseUtils.getString("MW_ADDRESS", null);
-    static final File TARGET = ParseUtils.getDir("MW_TARGET", null, "marid");
-    static final File BACKUPS = ParseUtils.getDir("MW_BACKUPS", null, "maridbk");
+    static final Path TARGET = ParseUtils.getDir("MW_TARGET", null, "marid");
+    static final Path BACKUPS = ParseUtils.getDir("MW_BACKUPS", null, "maridbk");
     static final int THREADS = ParseUtils.getInt("MW_THREADS", 8);
-    static final int MAX_THREADS = ParseUtils.getInt("MW_MAX_THREADS", THREADS);
+    static final int QUEUE_SIZE = ParseUtils.getInt("MW_QUEUE_SIZE", 16);
 
     static final Lock processLock = new ReentrantLock();
     static Process maridProcess;
 
     public static void main(String... args) throws Exception {
         Thread.setDefaultUncaughtExceptionHandler(new Wrapper());
-        info(LOG, "Server socket factory: {0}", SecureContext.SERVER_SOCKET_FACTORY);
+        final SSLServerSocketFactory ssf = SecureContext.getServerSocketFactory();
+        info(LOG, "Server socket factory: {0}", ssf);
         final SSLServerSocket serverSocket = (SSLServerSocket) (ADDRESS == null
-                ? SERVER_SOCKET_FACTORY.createServerSocket(PORT, BACKLOG)
-                : SERVER_SOCKET_FACTORY.createServerSocket(PORT, BACKLOG, InetAddress.getByName(ADDRESS)));
+                ? ssf.createServerSocket(PORT, BACKLOG)
+                : ssf.createServerSocket(PORT, BACKLOG, InetAddress.getByName(ADDRESS)));
         info(LOG, "Server socket: {0}", serverSocket);
         serverSocket.setNeedClientAuth(true);
-        final ThreadPoolExecutor executor = new ThreadPoolExecutor(THREADS, MAX_THREADS,
-                1L, TimeUnit.MINUTES, new SynchronousQueue<Runnable>(), new CallerRunsPolicy());
+        final ThreadPoolExecutor executor = new ThreadPoolExecutor(0, THREADS,
+                1L, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(QUEUE_SIZE), new CallerRunsPolicy());
         try {
             while (true) {
                 try {
                     final Socket socket = serverSocket.accept();
+                    socket.setSoTimeout(3_600_000);
                     try {
                         final SSLSocket sslSocket = (SSLSocket) socket;
                         final SSLSession sslSession = sslSocket.getSession();

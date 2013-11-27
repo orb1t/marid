@@ -16,44 +16,66 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.wrapper.deploy;
+package org.marid.wrapper;
 
-import java.net.InetAddress;
+import org.marid.util.JaxbObject;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ClientInfo {
+@XmlRootElement(name = "client")
+public class ClientData extends JaxbObject {
 
-    private final InetAddress address;
-    private ClientData clientData;
+    @XmlElement
+    private String user = "guest";
 
-    public ClientInfo(InetAddress address) {
-        this.address = address;
+    @XmlElement
+    private String password;
+
+    @XmlElement
+    private String javaVersion;
+
+    @XmlTransient
+    public String getUser() {
+        return user;
     }
 
-    public InetAddress getAddress() {
-        return address;
+    public ClientData setUser(String user) {
+        this.user = user;
+        return this;
     }
 
-    public void setClientData(ClientData clientData) {
-        this.clientData = clientData;
+    @XmlTransient
+    public String getPassword() {
+        return password;
     }
 
-    public ClientData getClientData() {
-        return clientData;
+    public ClientData setPassword(String password) {
+        this.password = password;
+        return this;
+    }
+
+    @XmlTransient
+    public String getJavaVersion() {
+        return javaVersion;
+    }
+
+    public ClientData setJavaVersion(String javaVersion) {
+        this.javaVersion = javaVersion;
+        return this;
     }
 
     @Override
     public String toString() {
         final Map<String, Object> map = new LinkedHashMap<>();
-        map.put("address", address);
-        if (clientData != null) {
-            map.put("javaVersion", clientData.getJvmProperties().get("java.version"));
-            map.put("javaVendor", clientData.getJvmProperties().get("java.vendor"));
-        }
+        map.put("user", user);
+        map.put("javaVersion", javaVersion);
         return getClass().getSimpleName() + map;
     }
 }

@@ -23,20 +23,24 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyStore;
-import java.util.logging.Logger;
-
-import static org.marid.wrapper.Log.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class SecureContext {
 
-    private static final Logger LOG = Logger.getLogger(SecureContext.class.getName());
     private static final SSLContext SSL_CONTEXT;
+    private static final SSLServerSocketFactory SERVER_SOCKET_FACTORY;
+    private static final SSLSocketFactory SOCKET_FACTORY;
+    private static final Exception SSL_CONTEXT_EXCEPTION;
+    private static final KeyStore KEY_STORE;
 
     static {
+        Exception exception;
         SSLContext ctx;
+        SSLServerSocketFactory ssf;
+        SSLSocketFactory sf;
+        KeyStore ks;
         try {
             final String sslContextProtocol = ParseUtils.getString("MW_SSL_CONTEXT_PROTOCOL", "TLS");
             final String sslContextProvider = ParseUtils.getString("MW_SSL_CONTEXT_PROVIDER", null);
@@ -45,7 +49,7 @@ public class SecureContext {
                     : SSLContext.getInstance(sslContextProtocol, sslContextProvider);
             final String keyStoreProvider = ParseUtils.getString("MW_KS_PROVIDER", null);
             final String keyStoreType = ParseUtils.getString("MW_KS_TYPE", KeyStore.getDefaultType());
-            final KeyStore ks = keyStoreProvider == null
+            ks = keyStoreProvider == null
                     ? KeyStore.getInstance(keyStoreType)
                     : KeyStore.getInstance(keyStoreType, keyStoreProvider);
             final String keyStoreFile = ParseUtils.getString("MW_KS_FILE", null);
@@ -74,18 +78,52 @@ public class SecureContext {
                     : TrustManagerFactory.getInstance(tmfAlg, tmfProvider);
             tmf.init(ks);
             ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+            exception = null;
+            ssf = ctx.getServerSocketFactory();
+            sf = ctx.getSocketFactory();
         } catch (Exception x) {
-            severe(LOG, "Unable to get SSL context", x);
+            ks = null;
             ctx = null;
+            ssf = null;
+            sf = null;
+            exception = x;
         }
+        KEY_STORE = ks;
         SSL_CONTEXT = ctx;
+        SOCKET_FACTORY = sf;
+        SERVER_SOCKET_FACTORY = ssf;
+        SSL_CONTEXT_EXCEPTION = exception;
     }
 
-    public static final SSLServerSocketFactory SERVER_SOCKET_FACTORY = SSL_CONTEXT == null
-            ? null
-            : SSL_CONTEXT.getServerSocketFactory();
+    public static SSLServerSocketFactory getServerSocketFactory() {
+        if (SERVER_SOCKET_FACTORY != null) {
+            return SERVER_SOCKET_FACTORY;
+        } else {
+            throw new IllegalStateException("Server socket factory error", SSL_CONTEXT_EXCEPTION);
+        }
+    }
 
-    public static final SSLSocketFactory SOCKET_FACTORY = SSL_CONTEXT == null
-            ? null
-            : SSL_CONTEXT.getSocketFactory();
+    public static SSLSocketFactory getSocketFactory() {
+        if (SOCKET_FACTORY != null) {
+            return SOCKET_FACTORY;
+        } else {
+            throw new IllegalStateException("Socket factory error", SSL_CONTEXT_EXCEPTION);
+        }
+    }
+
+    public static SSLContext getSslContext() {
+        if (SSL_CONTEXT != null) {
+            return SSL_CONTEXT;
+        } else {
+            throw new IllegalStateException("SSL context error", SSL_CONTEXT_EXCEPTION);
+        }
+    }
+
+    public static KeyStore getKeyStore() {
+        if (KEY_STORE != null) {
+            return KEY_STORE;
+        } else {
+            throw new IllegalStateException("Key store error", SSL_CONTEXT_EXCEPTION);
+        }
+    }
 }
