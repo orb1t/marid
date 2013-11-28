@@ -78,7 +78,7 @@ public class Session implements Runnable {
             JaxbStreams.write(JAXB_CONTEXT, os, new AuthResponse("accessDenied"));
             throw new IllegalAccessException("Access denied for " + user);
         }
-        final String[] roles = ParseUtils.getString("MW_ROLES_" + user, "admin").split(",");
+        final String[] roles = Wrapper.USERS.getProperty("MW_ROLES_" + user, "admin").split(",");
         final AuthResponse response = new AuthResponse("ok", roles);
         JaxbStreams.write(JAXB_CONTEXT, os, response);
         info(LOG, "{0} User {1} was authorized as {2}", socket, user, response.getRoles());
@@ -89,14 +89,14 @@ public class Session implements Runnable {
         if (!roles.contains("admin") && !roles.contains("uploader")) {
             synchronized (this) {
                 uid.write(os);
-                os.writeUTF("accessDenied");
+                os.writeByte(Response.ACCESS_DENIED);
             }
         }
         try {
             while (true) {
                 synchronized (this) {
                     uid.write(os);
-                    os.writeUTF("waitLock");
+                    os.writeByte(Response.WAIT_LOCK);
                 }
                 if (Wrapper.processLock.tryLock(1L, TimeUnit.MINUTES)) {
                     try {
@@ -106,10 +106,7 @@ public class Session implements Runnable {
                             Files.move(curZip, backupZip, StandardCopyOption.REPLACE_EXISTING);
                         }
                         Files.copy(new LimitedInputStream(is, is.readLong()), curZip);
-                        if (Wrapper.maridProcess != null) {
-                            Wrapper.maridProcess.destroy();
-                            Wrapper.maridProcess = null;
-                        }
+                        Wrapper.destroyProcess();
                         if (Files.isDirectory(Wrapper.TARGET)) {
                             Files.walkFileTree(Wrapper.TARGET, FileUtils.RECURSIVE_CLEANER);
                         }
@@ -121,15 +118,15 @@ public class Session implements Runnable {
                 } else {
                     synchronized (this) {
                         uid.write(os);
-                        os.writeUTF("waitLockFailed");
+                        os.writeByte(Response.WAIT_LOCK_FAILED);
                     }
-                    switch (is.readUTF()) {
-                        case "continue":
+                    switch (is.readByte()) {
+                        case Request.CONTINUE:
                             continue;
-                        case "exit":
+                        case Request.CLOSE:
                             synchronized (this) {
                                 uid.write(os);
-                                os.writeUTF("break");
+                                os.writeByte(Response.BREAK);
                             }
                             return;
                     }
@@ -137,12 +134,12 @@ public class Session implements Runnable {
             }
             synchronized (this) {
                 uid.write(os);
-                os.writeUTF("ok");
+                os.writeByte(Response.OK);
             }
         } catch (Exception x) {
             synchronized (this) {
                 uid.write(os);
-                os.writeUTF("error");
+                os.writeByte(Response.EXCEPTION);
                 os.writeUTF(x.toString());
             }
         }
@@ -155,18 +152,17 @@ public class Session implements Runnable {
     private void doRun(DataInputStream is, DataOutputStream os) throws Exception {
         final Set<String> roles = checkClientData(is, os);
         while (true) {
-            final String command = is.readUTF();
+            final byte request = is.readByte();
             final UID uid = UID.read(is);
-            fine(LOG, "{0} Command {1} received", socket, command);
-            switch (command) {
-                case "upload":
+            fine(LOG, "{0} Command {1} received", socket, request);
+            switch (request) {
+                case Request.UPLOAD:
                     upload(roles, uid, is, os);
                     break;
-                case "listenLogs":
+                case Request.LISTEN_LOGS:
                     listenLogs(roles, uid, is, os);
                     break;
-                case "close":
-                case "exit":
+                case Request.CLOSE:
                     synchronized (this) {
                         uid.write(os);
                         os.writeBoolean(true);

@@ -18,14 +18,23 @@
 
 package org.marid.wrapper;
 
+import org.marid.MaridConstants;
+import org.marid.io.ProcessUtils;
+
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.file.Path;
+import java.rmi.server.UID;
+import java.util.Properties;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
@@ -47,14 +56,29 @@ public class Wrapper implements UncaughtExceptionHandler {
     static final String ADDRESS = ParseUtils.getString("MW_ADDRESS", null);
     static final Path TARGET = ParseUtils.getDir("MW_TARGET", null, "marid");
     static final Path BACKUPS = ParseUtils.getDir("MW_BACKUPS", null, "maridbk");
+    static final Path LOGS = ParseUtils.getDir("MW_LOGS", null, "maridlogs");
     static final int THREADS = ParseUtils.getInt("MW_THREADS", 8);
     static final int QUEUE_SIZE = ParseUtils.getInt("MW_QUEUE_SIZE", 16);
+    static final String MARID_HOST = ParseUtils.getString("MW_MARID_HOST", null);
+    static final int MARID_PORT = ParseUtils.getInt("MW_MARID_PORT", MaridConstants.DEFAULT_MARID_PORT);
+    static final Properties USERS = new Properties();
 
     static final Lock processLock = new ReentrantLock();
-    static Process maridProcess;
+    private static Process maridProcess;
 
     public static void main(String... args) throws Exception {
         Thread.setDefaultUncaughtExceptionHandler(new Wrapper());
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                System.out.println("Good bye!");
+            }
+        });
+        try (final InputStream is = Wrapper.class.getResourceAsStream("users.properties")) {
+            if (is != null) {
+                USERS.load(is);
+            }
+        }
         final SSLServerSocketFactory ssf = SecureContext.getServerSocketFactory();
         info(LOG, "Server socket factory: {0}", ssf);
         final SSLServerSocket serverSocket = (SSLServerSocket) (ADDRESS == null
@@ -90,5 +114,49 @@ public class Wrapper implements UncaughtExceptionHandler {
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         warning(LOG, "Unhandled exception in {0}", e, t);
+    }
+
+    static Socket getMaridSocket() throws IOException {
+        if (MARID_HOST != null) {
+            return new Socket(MARID_HOST, MARID_PORT);
+        } else {
+            return new Socket(InetAddress.getLoopbackAddress(), MARID_PORT);
+        }
+    }
+
+    static void destroyProcess() {
+        if (maridProcess != null) {
+            try {
+                try (final Socket s = getMaridSocket();
+                     final DataInputStream dis = new DataInputStream(s.getInputStream());
+                     final DataOutputStream dos = new DataOutputStream(s.getOutputStream())) {
+                    s.setSoTimeout(360_000);
+                    final UID uid = new UID();
+                    uid.write(dos);
+                    dos.writeUTF("exit");
+                    while (true) {
+                        final UID responseUid = UID.read(dis);
+                        if (!uid.equals(responseUid)) {
+                            throw new IllegalStateException("Invalid protocol: UID mismatch");
+                        }
+                        final String response = dis.readUTF();
+                        if ("ok".equals(response)) {
+                            break;
+                        } else {
+                            info(LOG, "{0} sends {1}", maridProcess, response);
+                        }
+                    }
+                }
+                final int r = ProcessUtils.joinProcess(maridProcess, 360_000L);
+                if (r != 0) {
+                    warning(LOG, "{0} was terminated with exit status {1}", maridProcess, r);
+                }
+            } catch (Exception x) {
+                warning(LOG, "Unable to send exit command to {0}", x, maridProcess);
+                maridProcess.destroy();
+            } finally {
+                maridProcess = null;
+            }
+        }
     }
 }
