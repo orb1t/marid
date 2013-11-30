@@ -23,7 +23,7 @@ package org.marid.ide;
  */
 public class TestMaridIde {
 
-    public static void main(String... args) {
+    public static void main(String... args) throws Exception {
         MaridIde.main(args);
     }
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -60,13 +61,8 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>groovy.ui.GroovyMain</mainClass>
+                    <mainClass>org.marid.ide.TestMaridIde</mainClass>
                     <classpathScope>test</classpathScope>
-                    <arguments>
-                        <argument>--indy</argument>
-                        <argument>-e</argument>
-                        <argument>org.marid.ide.TestMaridIde.main(new String[0])</argument>
-                    </arguments>
                 </configuration>
             </plugin>
 
@@ -109,7 +105,9 @@
                 <executions>
                     <execution>
                         <id>add-marid-runtime</id>
-                        <goals><goal>add-test-resource</goal></goals>
+                        <goals>
+                            <goal>add-test-resource</goal>
+                        </goals>
                         <configuration>
                             <resources>
                                 <resource>
@@ -117,6 +115,10 @@
                                     <includes>
                                         <include>*.zip</include>
                                     </includes>
+                                </resource>
+
+                                <resource>
+                                    <directory>src/ext</directory>
                                 </resource>
                             </resources>
                         </configuration>

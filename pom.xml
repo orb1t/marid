@@ -47,6 +47,7 @@
         <scripting>groovy</scripting>
         <sf.frs>frs.sf.net/home/frs/project/marid</sf.frs>
         <logs>org.marid.test.AllLogs</logs>
+        <groovy.classifier>indy</groovy.classifier>
     </properties>
 
     <scm>
@@ -347,7 +348,6 @@
                         <dependency>
                             <groupId>org.codehaus.groovy</groupId>
                             <artifactId>groovy-all</artifactId>
-                            <classifier>indy</classifier>
                             <version>${groovy.version}</version>
                         </dependency>
                     </dependencies>
@@ -437,7 +437,7 @@
             <dependency>
                 <groupId>org.codehaus.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
-                <classifier>indy</classifier>
+                <classifier>${groovy.classifier}</classifier>
                 <version>${groovy.version}</version>
             </dependency>
 

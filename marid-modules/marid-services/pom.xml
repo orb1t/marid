@@ -39,7 +39,7 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <classifier>indy</classifier>
+            <classifier>${groovy.classifier}</classifier>
         </dependency>
 
         <dependency>
@@ -121,8 +121,7 @@
                                     <groovyc srcdir="${project.basedir}/src/test/groovy"
                                              destdir="${project.build.directory}/test-classes"
                                              classpathref="maven.test.classpath"
-                                             encoding="${project.build.sourceEncoding}"
-                                             indy="true"/>
+                                             encoding="${project.build.sourceEncoding}"/>
                                 </target>
                             </configuration>
                         </execution>
