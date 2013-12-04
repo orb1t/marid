@@ -25,8 +25,10 @@ public class Response {
 
     public static final byte ACCESS_DENIED = -128;
     public static final byte WAIT_LOCK_FAILED = -127;
+    public static final byte UNKNOWN_REQUEST = -126;
     public static final byte OK = 0;
     public static final byte WAIT_LOCK = 1;
     public static final byte BREAK = 2;
     public static final byte EXCEPTION = 3;
+    public static final byte LOG_RECORD = 4;
 }

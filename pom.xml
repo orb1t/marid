@@ -28,8 +28,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <java.version>1.7</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
         <lib>${project.build.directory}/lib</lib>
         <groovy.version>2.1.9</groovy.version>
         <jetty.version>9.0.5.v20130815</jetty.version>
@@ -187,6 +188,8 @@
                         <showWarnings>true</showWarnings>
                         <showDeprecation>true</showDeprecation>
                         <compilerArgument>-Xlint:unchecked</compilerArgument>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
                     </configuration>
                 </plugin>
 

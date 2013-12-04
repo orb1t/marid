@@ -143,7 +143,7 @@ public class Wrapper implements UncaughtExceptionHandler {
                         if ("ok".equals(response)) {
                             break;
                         } else {
-                            info(LOG, "{0} sends {1}", maridProcess, response);
+                            info(LOG, "{0} {1}", maridProcess, response);
                         }
                     }
                 }
@@ -152,7 +152,7 @@ public class Wrapper implements UncaughtExceptionHandler {
                     warning(LOG, "{0} was terminated with exit status {1}", maridProcess, r);
                 }
             } catch (Exception x) {
-                warning(LOG, "Unable to send exit command to {0}", x, maridProcess);
+                warning(LOG, "{0} Unable to send exit command", x, maridProcess);
                 maridProcess.destroy();
             } finally {
                 maridProcess = null;

@@ -22,9 +22,7 @@ import org.marid.util.JaxbObject;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,9 +36,17 @@ public class AuthResponse extends JaxbObject {
     @XmlElement
     private final TreeSet<String> roles;
 
-    public AuthResponse(String result, String... roles) {
+    public AuthResponse(String result, Set<String> roles) {
         this.result = result;
-        this.roles = new TreeSet<>(Arrays.asList(roles));
+        this.roles = new TreeSet<>(roles);
+    }
+
+    public AuthResponse(String result, String... roles) {
+        this(result, new HashSet<>(Arrays.asList(roles)));
+    }
+
+    public AuthResponse(String result) {
+        this(result, Collections.<String>emptySet());
     }
 
     public AuthResponse() {
