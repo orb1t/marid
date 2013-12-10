@@ -52,7 +52,7 @@ public class ApplicationImpl implements Application {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                List<MenuEntry> entries = new ArrayList<>();
+                final List<MenuEntry> entries = new ArrayList<>();
                 for (MaridMenu menu : ServiceLoader.load(MaridMenu.class)) {
                     entries.addAll(menu.getMenuEntries());
                 }
@@ -63,7 +63,7 @@ public class ApplicationImpl implements Application {
                 }
             }
         }).start();
-        String laf = preferences("laf").get("laf", NimbusLookAndFeel.class.getName());
+        final String laf = preferences("laf").get("laf", NimbusLookAndFeel.class.getName());
         try {
             UIManager.setLookAndFeel(laf);
         } catch (Exception x) {
@@ -76,7 +76,7 @@ public class ApplicationImpl implements Application {
                 List<MenuEntry> entries = null;
                 try {
                     entries = menuEntries.take();
-                    FrameImpl frame = new FrameImpl(ApplicationImpl.this, entries);
+                    final FrameImpl frame = new FrameImpl(ApplicationImpl.this, entries);
                     frame.setVisible(true);
                     frameQ.put(frame);
                 } catch (Exception x) {
@@ -155,7 +155,7 @@ public class ApplicationImpl implements Application {
 
     @Override
     public void showLog() {
-        Logger rootLogger = Logger.getGlobal().getParent();
+        final Logger rootLogger = Logger.getGlobal().getParent();
         if (rootLogger != null) {
             for (Handler handler : rootLogger.getHandlers()) {
                 if (handler instanceof SwingHandler) {
@@ -164,7 +164,7 @@ public class ApplicationImpl implements Application {
                 }
             }
             try {
-                SwingHandler swingHandler = new SwingHandler();
+                final SwingHandler swingHandler = new SwingHandler();
                 rootLogger.addHandler(swingHandler);
                 swingHandler.show();
             } catch (Exception x) {
@@ -175,13 +175,13 @@ public class ApplicationImpl implements Application {
 
     private void initTray(List<MenuEntry> entries) throws Exception {
         if (SystemTray.isSupported()) {
-            SystemTray tray = SystemTray.getSystemTray();
-            Dimension traySize = tray.getTrayIconSize();
-            int trayWidth = traySize.width;
-            int trayHeight = traySize.height;
-            Image image = MaridIcon.getImage(Math.min(trayWidth, trayHeight), Color.GREEN);
-            PopupMenuImpl popup = new PopupMenuImpl(this, entries);
-            TrayIcon icon = new TrayIcon(image, S.l("Marid IDE"), popup);
+            final SystemTray tray = SystemTray.getSystemTray();
+            final Dimension traySize = tray.getTrayIconSize();
+            final int trayWidth = traySize.width;
+            final int trayHeight = traySize.height;
+            final Image image = MaridIcon.getImage(Math.min(trayWidth, trayHeight), Color.GREEN);
+            final PopupMenuImpl popup = new PopupMenuImpl(this, entries);
+            final TrayIcon icon = new TrayIcon(image, S.l("Marid IDE"), popup);
             icon.addActionListener(popup);
             icon.setActionCommand("show_hide");
             tray.add(icon);

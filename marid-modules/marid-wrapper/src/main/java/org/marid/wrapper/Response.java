@@ -30,5 +30,6 @@ public class Response {
     public static final byte WAIT_LOCK = 1;
     public static final byte BREAK = 2;
     public static final byte EXCEPTION = 3;
-    public static final byte LOG_RECORD = 4;
+    public static final byte LOG_RECORDS = 4;
+    public static final byte WAIT_DATA = 5;
 }

@@ -16,32 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.wrapper;
+package org.marid.wrapper.data;
 
-import org.marid.util.JaxbObject;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.marid.util.SerializableObject;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "client")
-public class ClientData extends JaxbObject {
+public class ClientData extends SerializableObject {
 
-    @XmlElement
     private String user = "guest";
 
-    @XmlElement
-    private String password;
+    private char[] password;
 
-    @XmlElement
     private String javaVersion;
 
-    @XmlTransient
     public String getUser() {
         return user;
     }
@@ -51,17 +40,15 @@ public class ClientData extends JaxbObject {
         return this;
     }
 
-    @XmlTransient
-    public String getPassword() {
+    public char[] password() {
         return password;
     }
 
-    public ClientData setPassword(String password) {
+    public ClientData password(char[] password) {
         this.password = password;
         return this;
     }
 
-    @XmlTransient
     public String getJavaVersion() {
         return javaVersion;
     }
@@ -69,13 +56,5 @@ public class ClientData extends JaxbObject {
     public ClientData setJavaVersion(String javaVersion) {
         this.javaVersion = javaVersion;
         return this;
-    }
-
-    @Override
-    public String toString() {
-        final Map<String, Object> map = new LinkedHashMap<>();
-        map.put("user", user);
-        map.put("javaVersion", javaVersion);
-        return getClass().getSimpleName() + map;
     }
 }

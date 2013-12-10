@@ -74,8 +74,7 @@ public class FileUtils {
     }
 
     public static void copyFromZip(Path zip, Path dest) throws IOException {
-        final Map<String, ?> env = Collections.emptyMap();
-        try (final FileSystem fs = FileSystems.newFileSystem(zip.toUri(), env)) {
+        try (final FileSystem fs = FileSystems.newFileSystem(zip.toUri(), Collections.<String, Object>emptyMap())) {
             for (final Path dir : fs.getRootDirectories()) {
                 copy(dir, dest);
             }
@@ -88,10 +87,31 @@ public class FileUtils {
     }
 
     public static void copyToZip(Path source, Path zip) throws IOException {
-        final Map<String, ?> env = Collections.singletonMap("create", "true");
-        try (final FileSystem fs = FileSystems.newFileSystem(zip.toUri(), env)) {
+        try (final FileSystem fs = FileSystems.newFileSystem(zip.toUri(), Collections.singletonMap("create", "true"))) {
             final Path dest = fs.getRootDirectories().iterator().next();
             copy(source, dest);
+        }
+    }
+
+    public static void toZipCopy(Path zip, Path... sources) throws IOException {
+        try (final FileSystem fs = FileSystems.newFileSystem(zip.toUri(), Collections.singletonMap("create", "true"))) {
+            final Path dest = fs.getRootDirectories().iterator().next();
+            for (final Path source : sources) {
+                if (Files.isDirectory(source)) {
+                    final Path dir = dest.resolve(source.getFileName());
+                    Files.createDirectory(dir);
+                    copy(source, dir);
+                } else {
+                    copy(source, dest);
+                }
+            }
+        }
+    }
+
+    public static void toZipMove(Path zip, Path... sources) throws IOException {
+        toZipCopy(zip, sources);
+        for (final Path source : sources) {
+            remove(source);
         }
     }
 

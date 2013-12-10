@@ -16,27 +16,44 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.methods;
+package org.marid.util;
 
-import org.marid.Versioning;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.marid.test.NormalTests;
 
-import java.util.prefs.Preferences;
+import static org.junit.Assert.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PrefMethods {
+@Category(NormalTests.class)
+public class SerializableObjectTest {
 
-    public static Preferences preferences(Class<?> klass, String... nodes) {
-        final String version = Versioning.getImplementationVersion(klass);
-        Preferences prefs = Preferences.userRoot().node("marid").node(version);
-        for (String n : nodes) {
-            prefs = prefs.node(n);
-        }
-        return prefs;
+    @Test
+    public void testEqualityAndHashCode() {
+        final X x1 = new X(1, "y");
+        final X x2 = new X(1, "y");
+        assertEquals(x1, x2);
+        assertEquals(x1.hashCode(), x2.hashCode());
     }
 
-    public static Preferences preferences(String... nodes) {
-        return preferences(Versioning.class, nodes);
+    private static class X extends SerializableObject {
+
+        private final int x;
+        private final String y;
+
+        private X(int x, String y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public String getY() {
+            return y;
+        }
     }
 }

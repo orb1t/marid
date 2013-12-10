@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.wrapper.deploy;
+package org.marid.wrapper.data;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -28,7 +28,7 @@ import java.util.*;
  * @author Dmitry Ovchinnikov
  */
 @XmlRootElement(name = "configuration")
-public class Configuration {
+public class DeployConf {
 
     @XmlElementWrapper(name = "vm-arguments")
     @XmlElement(name = "vm-argument")
@@ -48,17 +48,17 @@ public class Configuration {
         return Collections.unmodifiableList(vmArguments);
     }
 
-    public Configuration addVmArgument(String arg) {
+    public DeployConf addVmArgument(String arg) {
         vmArguments.add(arg);
         return this;
     }
 
-    public Configuration addVmArguments(Collection<String> args) {
+    public DeployConf addVmArguments(Collection<String> args) {
         vmArguments.addAll(args);
         return this;
     }
 
-    public Configuration addVmArguments(String... args) {
+    public DeployConf addVmArguments(String... args) {
         return addVmArguments(Arrays.asList(args));
     }
 
@@ -66,17 +66,17 @@ public class Configuration {
         return Collections.unmodifiableList(maridArguments);
     }
 
-    public Configuration addMaridArgument(String arg) {
+    public DeployConf addMaridArgument(String arg) {
         maridArguments.add(arg);
         return this;
     }
 
-    public Configuration addMaridArguments(Collection<String> args) {
+    public DeployConf addMaridArguments(Collection<String> args) {
         maridArguments.addAll(args);
         return this;
     }
 
-    public Configuration addMaridArguments(String... args) {
+    public DeployConf addMaridArguments(String... args) {
         return addMaridArguments(Arrays.asList(args));
     }
 
@@ -85,7 +85,7 @@ public class Configuration {
         return version;
     }
 
-    public Configuration setVersion(String version) {
+    public DeployConf setVersion(String version) {
         this.version = version;
         return this;
     }
@@ -95,7 +95,7 @@ public class Configuration {
         return timestamp;
     }
 
-    public Configuration setTimestamp(Date timestamp) {
+    public DeployConf setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
         return this;
     }

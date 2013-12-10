@@ -18,15 +18,21 @@
 
 package org.marid.util;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class JaxbObject implements Serializable {
+public abstract class SerializableObject implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
@@ -60,5 +66,21 @@ public abstract class JaxbObject implements Serializable {
         } catch (Exception x) {
             throw new IllegalStateException(x);
         }
+    }
+
+    @Override
+    public String toString() {
+        final Map<String, Object> map = new TreeMap<>();
+        try {
+            for (final PropertyDescriptor pd : Introspector.getBeanInfo(getClass()).getPropertyDescriptors()) {
+                final Method readMethod = pd.getReadMethod();
+                if (readMethod != null) {
+                    map.put(pd.getName(), readMethod.invoke(null));
+                }
+            }
+        } catch (IntrospectionException | ReflectiveOperationException x) {
+            throw new IllegalStateException(x);
+        }
+        return getClass().getSimpleName() + map;
     }
 }

@@ -16,24 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.wrapper;
+package org.marid.wrapper.data;
 
-import org.marid.util.JaxbObject;
+import org.marid.util.SerializableObject;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "auth-response")
-public class AuthResponse extends JaxbObject {
+public class AuthResponse extends SerializableObject {
 
-    @XmlElement
     private final String result;
 
-    @XmlElement
     private final TreeSet<String> roles;
 
     public AuthResponse(String result, Set<String> roles) {
@@ -47,10 +42,6 @@ public class AuthResponse extends JaxbObject {
 
     public AuthResponse(String result) {
         this(result, Collections.<String>emptySet());
-    }
-
-    public AuthResponse() {
-        this(null);
     }
 
     public String getResult() {

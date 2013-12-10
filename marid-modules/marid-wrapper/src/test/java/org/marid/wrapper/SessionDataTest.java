@@ -22,13 +22,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.marid.io.JaxbStreams;
+import org.marid.wrapper.data.AuthResponse;
+import org.marid.wrapper.data.ClientData;
 
-import javax.xml.bind.JAXBContext;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -38,34 +38,32 @@ import static org.junit.Assert.assertEquals;
  * @author Dmitry Ovchinnikov
  */
 @RunWith(Parameterized.class)
-public class JaxbDataTest {
+public class SessionDataTest {
 
-    private final JAXBContext context;
     private final Object object;
 
-    public JaxbDataTest(JAXBContext context, Object object) {
-        this.context = context;
+    public SessionDataTest(Object object) {
         this.object = object;
     }
 
     @Parameters
     public static Collection<Object[]> parameters() {
         return Arrays.asList(
-                new Object[] {Session.JAXB_CONTEXT, new AuthResponse("ok", "guest", "uploader")},
-                new Object[] {Session.JAXB_CONTEXT, new ClientData()
+                new Object[] {new AuthResponse("ok", "guest", "uploader")},
+                new Object[] {new ClientData()
                         .setJavaVersion("1.8")
-                        .setPassword("abc")
+                        .password("abc".toCharArray())
                         .setUser("user")});
     }
 
     @Test
     public void test() throws Exception {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final DataOutputStream dos = new DataOutputStream(bos);
-        JaxbStreams.write(context, dos, object);
+        final ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(object);
         final ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        final DataInputStream dis = new DataInputStream(bis);
-        final Object restored = JaxbStreams.read(context, object.getClass(), dis);
+        final ObjectInputStream ois = new ObjectInputStream(bis);
+        final Object restored = ois.readObject();
         assertEquals(object, restored);
     }
 

@@ -26,6 +26,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.marid</groupId>
+            <artifactId>marid-wrapper</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.codeartisans.thirdparties.swing</groupId>
             <artifactId>batik-all</artifactId>
         </dependency>
@@ -71,11 +76,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>
-
-            <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
@@ -89,6 +89,12 @@
                             <resources>
                                 <resource>
                                     <directory>../marid-runtime/target</directory>
+                                    <includes>
+                                        <include>*.zip</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>../../marid-wrapper/target</directory>
                                     <includes>
                                         <include>*.zip</include>
                                     </includes>
@@ -116,7 +122,12 @@
                                         <include>*.zip</include>
                                     </includes>
                                 </resource>
-
+                                <resource>
+                                    <directory>../../marid-wrapper/target</directory>
+                                    <includes>
+                                        <include>*.zip</include>
+                                    </includes>
+                                </resource>
                                 <resource>
                                     <directory>src/ext</directory>
                                 </resource>

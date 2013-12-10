@@ -41,25 +41,25 @@ public class PopupMenuImpl extends PopupMenu implements ActionListener, Localize
 
     public PopupMenuImpl(ApplicationImpl app, List<MenuEntry> menuEntries) {
         application = app;
-        MenuItem activateItem = new MenuItem(S.l("Show/Hide the main window"));
+        final MenuItem activateItem = new MenuItem(S.l("Show/Hide the main window"));
         activateItem.setFont(font.deriveFont(Font.BOLD));
         activateItem.setActionCommand("show_hide");
         activateItem.addActionListener(this);
         add(activateItem);
         addSeparator();
-        MenuItem showLogItem = new MenuItem(S.l("Show log"));
+        final MenuItem showLogItem = new MenuItem(S.l("Show log"));
         showLogItem.setFont(font);
         showLogItem.setActionCommand("show_log");
         showLogItem.addActionListener(this);
         add(showLogItem);
         addSeparator();
-        TreeSet<MenuEntry> set = new TreeSet<>(MenuEntry.MENU_ENTRY_COMPARATOR);
-        for (MenuEntry e : menuEntries) {
+        final TreeSet<MenuEntry> set = new TreeSet<>(MenuEntry.MENU_ENTRY_COMPARATOR);
+        for (final MenuEntry e : menuEntries) {
             if (e.getPath().length == 0) {
                 set.add(e);
             }
         }
-        for (MenuEntry e : set) {
+        for (final MenuEntry e : set) {
             switch (e.getType()) {
                 case ITEM:
                 case RADIO:
@@ -76,8 +76,8 @@ public class PopupMenuImpl extends PopupMenu implements ActionListener, Localize
     }
 
     private MenuItem getItem(MenuEntry entry) {
-        MenuActionImpl action = new MenuActionImpl(entry);
-        MenuItem item = new MenuItem(String.valueOf(action.getValue(Action.NAME)));
+        final MenuActionImpl action = new MenuActionImpl(entry);
+        final MenuItem item = new MenuItem(String.valueOf(action.getValue(Action.NAME)));
         item.setFont(font);
         item.addActionListener(action);
         item.setActionCommand(String.valueOf(action.getValue(Action.ACTION_COMMAND_KEY)));
@@ -85,8 +85,8 @@ public class PopupMenuImpl extends PopupMenu implements ActionListener, Localize
     }
 
     private CheckboxMenuItem getCheckedItem(MenuEntry entry) {
-        MenuActionImpl action = new MenuActionImpl(entry);
-        CheckboxMenuItem item = new CheckboxMenuItem(String.valueOf(action.getValue(Action.NAME)));
+        final MenuActionImpl action = new MenuActionImpl(entry);
+        final CheckboxMenuItem item = new CheckboxMenuItem(String.valueOf(action.getValue(Action.NAME)));
         item.setFont(font);
         item.addActionListener(action);
         item.setActionCommand(String.valueOf(action.getValue(Action.ACTION_COMMAND_KEY)));
@@ -95,20 +95,20 @@ public class PopupMenuImpl extends PopupMenu implements ActionListener, Localize
     }
 
     private Menu getMenu(List<MenuEntry> menuEntries, MenuEntry entry) {
-        MenuActionImpl action = new MenuActionImpl(entry);
-        Menu menu = new Menu(String.valueOf(action.getValue(Action.NAME)));
+        final MenuActionImpl action = new MenuActionImpl(entry);
+        final Menu menu = new Menu(String.valueOf(action.getValue(Action.NAME)));
         menu.setFont(font);
         menu.addActionListener(action);
-        String[] path = entry.getPath();
-        int n = path.length;
-        TreeSet<MenuEntry> set = new TreeSet<>(MenuEntry.MENU_ENTRY_COMPARATOR);
-        for (MenuEntry e : menuEntries) {
+        final String[] path = entry.getPath();
+        final int n = path.length;
+        final TreeSet<MenuEntry> set = new TreeSet<>(MenuEntry.MENU_ENTRY_COMPARATOR);
+        for (final MenuEntry e : menuEntries) {
             if (e.getPath().length == n + 1 && Arrays.equals(e.getPath(),
                     concat(entry.getPath(), entry.getName()))) {
                 set.add(e);
             }
         }
-        for (MenuEntry e : set) {
+        for (final MenuEntry e : set) {
             switch (e.getType()) {
                 case ITEM:
                 case RADIO:
@@ -145,14 +145,14 @@ public class PopupMenuImpl extends PopupMenu implements ActionListener, Localize
 
     private void update(Menu menu) {
         for (int i = 0; i < menu.getItemCount(); i++) {
-            MenuItem item = menu.getItem(i);
-            for (ActionListener al : item.getActionListeners()) {
+            final MenuItem item = menu.getItem(i);
+            for (final ActionListener al : item.getActionListeners()) {
                 if (al instanceof MenuActionImpl) {
                     ((MenuActionImpl)al).update();
                     item.setEnabled(((MenuActionImpl)al).isEnabled());
                     if (item instanceof CheckboxMenuItem) {
-                        Action a = (Action)al;
-                        boolean s = Boolean.TRUE.equals(a.getValue(Action.SELECTED_KEY));
+                        final Action a = (Action)al;
+                        final boolean s = Boolean.TRUE.equals(a.getValue(Action.SELECTED_KEY));
                         ((CheckboxMenuItem)item).setState(s);
                     }
                 }

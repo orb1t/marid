@@ -18,23 +18,28 @@
 
 package org.marid.wrapper;
 
-import org.marid.MaridConstants;
+import org.marid.io.JaxbStreams;
 import org.marid.io.ProcessUtils;
+import org.marid.secure.SecureProfile;
+import org.marid.wrapper.data.DeployConf;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.rmi.server.UID;
+import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
+import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
@@ -48,38 +53,32 @@ import static org.marid.wrapper.Log.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Wrapper implements UncaughtExceptionHandler {
+public class Wrapper extends TimerTask implements UncaughtExceptionHandler {
 
-    private static final Logger LOG = Logger.getLogger(Wrapper.class.getName());
+    private static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
+
     static final int PORT = ParseUtils.getInt("MW_PORT", 11200);
     static final int BACKLOG = ParseUtils.getInt("MW_BACKLOG", 5);
     static final String ADDRESS = ParseUtils.getString("MW_ADDRESS", null);
     static final Path TARGET = ParseUtils.getDir("MW_TARGET", null, "marid");
-    static final Path BACKUPS = ParseUtils.getDir("MW_BACKUPS", null, "maridbk");
-    static final Path LOGS = ParseUtils.getDir("MW_LOGS", null, "maridlogs");
+    static final Path BACKUPS = ParseUtils.getDir("MW_BACKUPS", null, "maridBackups");
+    static final Path LOGS = ParseUtils.getDir("MW_LOGS", TARGET, "logs");
     static final int THREADS = ParseUtils.getInt("MW_THREADS", 8);
     static final int QUEUE_SIZE = ParseUtils.getInt("MW_QUEUE_SIZE", 16);
-    static final String MARID_HOST = ParseUtils.getString("MW_MARID_HOST", null);
-    static final int MARID_PORT = ParseUtils.getInt("MW_MARID_PORT", MaridConstants.DEFAULT_MARID_PORT);
     static final Properties USERS = new Properties();
+    static final SecureProfile SECURE_PROFILE = new SecureProfile(Wrapper.class, secureProperties());
 
     static final Lock processLock = new ReentrantLock();
     private static Process maridProcess;
 
     public static void main(String... args) throws Exception {
         Thread.setDefaultUncaughtExceptionHandler(new Wrapper());
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                System.out.println("Good bye!");
-            }
-        });
         try (final InputStream is = Wrapper.class.getResourceAsStream("users.properties")) {
             if (is != null) {
                 USERS.load(is);
             }
         }
-        final SSLServerSocketFactory ssf = SecureContext.getServerSocketFactory();
+        final SSLServerSocketFactory ssf = SECURE_PROFILE.getServerSocketFactory();
         info(LOG, "Server socket factory: {0}", ssf);
         final SSLServerSocket serverSocket = (SSLServerSocket) (ADDRESS == null
                 ? ssf.createServerSocket(PORT, BACKLOG)
@@ -116,36 +115,75 @@ public class Wrapper implements UncaughtExceptionHandler {
         warning(LOG, "Unhandled exception in {0}", e, t);
     }
 
-    static Socket getMaridSocket() throws IOException {
-        if (MARID_HOST != null) {
-            return new Socket(MARID_HOST, MARID_PORT);
-        } else {
-            return new Socket(InetAddress.getLoopbackAddress(), MARID_PORT);
+    @Override
+    public void run() {
+        try {
+            processLock.tryLock(1L, TimeUnit.MINUTES);
+        } catch (InterruptedException x) {
+            warning(LOG, "Interrupted timer", x);
+            return;
         }
+        try {
+            if (maridProcess != null) {
+                return;
+            }
+            final Path confFile = TARGET.resolve("configuration.xml");
+            final DeployConf deployConf;
+            if (Files.isReadable(confFile)) {
+                try {
+                    deployConf = JaxbStreams.readXml(DeployConf.class, confFile);
+                } catch (Exception x) {
+                    warning(LOG, "Unable to read deploy configuration from {0}", x, confFile);
+                    try {
+                        Thread.sleep(60_000L);
+                    } catch (InterruptedException ix) {
+                        warning(LOG, "Interrupted timer", ix);
+                    }
+                    return;
+                }
+            } else {
+                deployConf = new DeployConf();
+            }
+            final List<String> cmdLine = new LinkedList<>();
+            cmdLine.add(Paths.get(System.getProperty("java.home"), "bin", "java").toString());
+            cmdLine.addAll(deployConf.getVmArguments());
+            cmdLine.add("-jar");
+            for (final String file : TARGET.toFile().list()) {
+                if (file.startsWith("marid-runtime") && file.endsWith(".jar")) {
+                    cmdLine.add(file);
+                    break;
+                }
+            }
+            cmdLine.addAll(deployConf.getMaridArguments());
+            maridProcess = new ProcessBuilder(cmdLine)
+                    .redirectError(LOGS.resolve("error.log").toFile())
+                    .redirectOutput(LOGS.resolve("output.log").toFile())
+                    .directory(TARGET.toFile())
+                    .start();
+        } catch (Exception x) {
+            warning(LOG, "Error while starting process", x);
+        } finally {
+            processLock.unlock();
+        }
+    }
+
+    private static Properties secureProperties() {
+        final Properties properties = new Properties();
+        try (final InputStream inputStream = Wrapper.class.getResourceAsStream("/maridWrapperSecuryty.properties")) {
+            if (inputStream != null) {
+                properties.load(inputStream);
+            }
+        } catch (Exception x) {
+            warning(LOG, "Unable to process security properties");
+        }
+        return properties;
     }
 
     static void destroyProcess() {
         if (maridProcess != null) {
             try {
-                try (final Socket s = getMaridSocket();
-                     final DataInputStream dis = new DataInputStream(s.getInputStream());
-                     final DataOutputStream dos = new DataOutputStream(s.getOutputStream())) {
-                    s.setSoTimeout(360_000);
-                    final UID uid = new UID();
-                    uid.write(dos);
-                    dos.writeUTF("exit");
-                    while (true) {
-                        final UID responseUid = UID.read(dis);
-                        if (!uid.equals(responseUid)) {
-                            throw new IllegalStateException("Invalid protocol: UID mismatch");
-                        }
-                        final String response = dis.readUTF();
-                        if ("ok".equals(response)) {
-                            break;
-                        } else {
-                            info(LOG, "{0} {1}", maridProcess, response);
-                        }
-                    }
+                try (final OutputStream os = maridProcess.getOutputStream()) {
+                    os.write('x');
                 }
                 final int r = ProcessUtils.joinProcess(maridProcess, 360_000L);
                 if (r != 0) {

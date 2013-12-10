@@ -67,8 +67,6 @@ public class DesktopImpl extends JDesktopPane implements Desktop {
 
     public class DesktopManagerImpl extends DefaultDesktopManager {
 
-        private static final long serialVersionUID = 6164252027191486209L;
-
         @Override
         public void openFrame(JInternalFrame f) {
             super.openFrame(f);
@@ -97,6 +95,11 @@ public class DesktopImpl extends JDesktopPane implements Desktop {
             if (f instanceof ResizableWidget) {
                 ((ResizableWidget) f).onResize();
             }
+        }
+
+        @Override
+        public void dragFrame(JComponent f, int newX, int newY) {
+            super.dragFrame(f, newX, newY);
         }
 
         private void checkBounds(JInternalFrame f) {

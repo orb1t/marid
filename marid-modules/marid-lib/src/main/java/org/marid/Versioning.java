@@ -37,86 +37,85 @@ import static org.marid.methods.LogMethods.warning;
 public class Versioning {
 
     private static final Logger LOG = Logger.getLogger(Versioning.class.getName());
+    private static final Properties GLOBALS = new Properties();
 
-    public static String getImplementationVersion(Class<?> type) {
-        String version = type.getPackage().getImplementationVersion();
-        return version != null ? version : extractField(type, "implementation.version");
-    }
-
-    public static String getImplementationTitle(Class<?> type) {
-        String title = type.getPackage().getImplementationTitle();
-        return title != null ? title : extractField(type, "implementation.title");
-    }
-
-    public static String getImplementationVendor(Class<?> type) {
-        String vendor = type.getPackage().getImplementationVendor();
-        return vendor != null ? vendor : extractField(type, "implementation.vendor");
-    }
-
-    public static String getSpecificationVersion(Class<?> type) {
-        String version = type.getPackage().getSpecificationVersion();
-        return version != null ? version : extractField(type, "specification.version");
-    }
-
-    public static String getSpecificationTitle(Class<?> type) {
-        String title = type.getPackage().getSpecificationTitle();
-        return title != null ? title : extractField(type, "specification.title");
-    }
-
-    public static String getSpecificationVendor(Class<?> type) {
-        String vendor = type.getPackage().getSpecificationVendor();
-        return vendor != null ? vendor : extractField(type, "specification.vendor");
-    }
-
-    public static String extractField(Class<?> type, String field) {
-        ProtectionDomain protectionDomain = type.getProtectionDomain();
-        if (protectionDomain == null) {
-            return extractGlobalField(field);
-        } else {
-            CodeSource codeSource = protectionDomain.getCodeSource();
-            if (codeSource == null) {
-                return extractGlobalField(field);
-            } else {
-                try (URLClassLoader cl = new URLClassLoader(new URL[] {codeSource.getLocation()})) {
-                    InputStream is = cl.getResourceAsStream("meta.properties");
-                    if (is != null) {
-                        try (Reader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-                            Properties properties = new Properties();
-                            properties.load(r);
-                            if (properties.containsKey(field)) {
-                                return properties.getProperty(field);
-                            } else {
-                                return extractGlobalField(field);
-                            }
-                        }
-                    } else {
-                        return extractGlobalField(field);
-                    }
-                } catch (Exception x) {
-                    warning(LOG, "Unable to read meta.properties", x);
-                    return extractGlobalField(field);
-                }
-            }
-        }
-    }
-
-    private static String extractGlobalField(String field) {
+    static {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
             classLoader = Versioning.class.getClassLoader();
         }
-        InputStream is = classLoader.getResourceAsStream("meta.properties");
+        final InputStream is = classLoader.getResourceAsStream("meta.properties");
         if (is != null) {
-            try (Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-                Properties properties = new Properties();
-                properties.load(reader);
-                return properties.getProperty(field, "-");
+            try (final Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+                GLOBALS.load(reader);
             } catch (Exception x) {
-                warning(LOG, "Unable to read any meta.properties", x);
-                return "-";
+                warning(LOG, "Unable to read global meta.properties", x);
             }
-        } else {
-            return "-";
         }
+    }
+
+    private static final ClassValue<Properties> LOCALS = new ClassValue<Properties>() {
+        @Override
+        protected Properties computeValue(Class<?> type) {
+            final ProtectionDomain protectionDomain = type.getProtectionDomain();
+            if (protectionDomain == null) {
+                return GLOBALS;
+            } else {
+                final CodeSource codeSource = protectionDomain.getCodeSource();
+                if (codeSource == null) {
+                    return GLOBALS;
+                } else {
+                    try (final URLClassLoader cl = new URLClassLoader(new URL[] {})) {
+                        final InputStream is = cl.getResourceAsStream("meta.properties");
+                        if (is != null) {
+                            final Properties properties = new Properties();
+                            try (final Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+                                properties.load(reader);
+                            }
+                            return properties;
+                        } else {
+                            return GLOBALS;
+                        }
+                    } catch (Exception x) {
+                        warning(LOG, "Unable to read meta.properties");
+                        return GLOBALS;
+                    }
+                }
+            }
+        }
+    };
+
+    public static String getImplementationVersion(Class<?> type) {
+        final String version = type.getPackage().getImplementationVersion();
+        return version != null ? version : extractField(type, "implementation.version");
+    }
+
+    public static String getImplementationTitle(Class<?> type) {
+        final String title = type.getPackage().getImplementationTitle();
+        return title != null ? title : extractField(type, "implementation.title");
+    }
+
+    public static String getImplementationVendor(Class<?> type) {
+        final String vendor = type.getPackage().getImplementationVendor();
+        return vendor != null ? vendor : extractField(type, "implementation.vendor");
+    }
+
+    public static String getSpecificationVersion(Class<?> type) {
+        final String version = type.getPackage().getSpecificationVersion();
+        return version != null ? version : extractField(type, "specification.version");
+    }
+
+    public static String getSpecificationTitle(Class<?> type) {
+        final String title = type.getPackage().getSpecificationTitle();
+        return title != null ? title : extractField(type, "specification.title");
+    }
+
+    public static String getSpecificationVendor(Class<?> type) {
+        final String vendor = type.getPackage().getSpecificationVendor();
+        return vendor != null ? vendor : extractField(type, "specification.vendor");
+    }
+
+    public static String extractField(Class<?> type, String field) {
+        return LOCALS.get(type).getProperty(field, "-");
     }
 }

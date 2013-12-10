@@ -18,7 +18,6 @@
 
 package org.marid.wrapper;
 
-import javax.xml.bind.JAXBContext;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -94,13 +93,5 @@ public class ParseUtils {
     public static String getString(String property, String def) {
         final String val = System.getProperty(property, System.getenv(property));
         return val == null ? def : val;
-    }
-
-    public static JAXBContext getJaxbContext(Class<?>... classes) {
-        try {
-            return JAXBContext.newInstance(classes);
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
     }
 }

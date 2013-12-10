@@ -18,8 +18,6 @@
 
 package org.marid.ide.swing.impl.widgets;
 
-import java.awt.*;
-
 /**
  * @author Dmitry Ovchinnikov
  */

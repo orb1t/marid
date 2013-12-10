@@ -464,7 +464,7 @@
 
             <dependency>
                 <groupId>org.marid</groupId>
-                <artifactId>marid-daemon</artifactId>
+                <artifactId>marid-wrapper</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
