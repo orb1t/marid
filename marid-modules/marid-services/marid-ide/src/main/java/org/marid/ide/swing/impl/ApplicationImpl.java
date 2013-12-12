@@ -29,75 +29,77 @@ import org.marid.swing.log.SwingHandler;
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
-import static org.marid.methods.PrefMethods.preferences;
+import static org.marid.ide.swing.impl.MaridSwingPrefs.SYS_PREFS;
 import static org.marid.methods.LogMethods.warning;
 
 public class ApplicationImpl implements Application {
 
-    private final Logger log = Logger.getLogger(ApplicationImpl.class.getName());
+    private static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
     private final FrameImpl frame;
 
     public ApplicationImpl() {
-        final BlockingQueue<List<MenuEntry>> menuEntries = new SynchronousQueue<>();
-        new Thread(new Runnable() {
+        final List<MenuEntry> menuEntries = getMenuEntries();
+        installLaf();
+        final FutureTask<FrameImpl> frameFuture = new FutureTask<>(new Callable<FrameImpl>() {
             @Override
-            public void run() {
-                final List<MenuEntry> entries = new ArrayList<>();
-                for (MaridMenu menu : ServiceLoader.load(MaridMenu.class)) {
-                    entries.addAll(menu.getMenuEntries());
-                }
-                try {
-                    menuEntries.put(entries);
-                } catch (Exception x) {
-                    warning(log, "Menu entries error", x);
-                }
+            public FrameImpl call() throws Exception {
+                return new FrameImpl(ApplicationImpl.this, menuEntries);
             }
-        }).start();
-        final String laf = preferences("laf").get("laf", NimbusLookAndFeel.class.getName());
+        });
+        EventQueue.invokeLater(frameFuture);
+        try {
+            frame = frameFuture.get();
+        } catch (ExecutionException x) {
+            throw new IllegalStateException(x.getCause());
+        } catch (InterruptedException x) {
+            throw new IllegalStateException(x);
+        }
+        final FutureTask<Void> trayFuture = new FutureTask<>(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                initTray(menuEntries);
+                return null;
+            }
+        });
+        EventQueue.invokeLater(trayFuture);
+        try {
+            trayFuture.get();
+        } catch (ExecutionException x) {
+            warning(LOG, "Unable to initialize system tray", x.getCause());
+        } catch (InterruptedException x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
+    private List<MenuEntry> getMenuEntries() {
+        final List<MenuEntry> entries = new LinkedList<>();
+        try {
+            for (final MaridMenu menu : ServiceLoader.load(MaridMenu.class)) {
+                entries.addAll(menu.getMenuEntries());
+            }
+        } catch (Exception x) {
+            warning(LOG, "Unable to load menu entries", x);
+        }
+        return entries;
+    }
+
+    private void installLaf() {
+        final String laf = SYS_PREFS.get("laf", NimbusLookAndFeel.class.getName());
         try {
             UIManager.setLookAndFeel(laf);
         } catch (Exception x) {
-            warning(log, "{0} error", x, laf);
-        }
-        final BlockingQueue<FrameImpl> frameQ = new SynchronousQueue<>();
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                List<MenuEntry> entries = null;
-                try {
-                    entries = menuEntries.take();
-                    final FrameImpl frame = new FrameImpl(ApplicationImpl.this, entries);
-                    frame.setVisible(true);
-                    frameQ.put(frame);
-                } catch (Exception x) {
-                    warning(log, "Init frame error", x);
-                }
-                if (entries != null) {
-                    try {
-                        initTray(entries);
-                    } catch (Exception x) {
-                        warning(log, "Tray initialization error", x);
-                    }
-                }
-            }
-        });
-        try {
-            frame = frameQ.poll(3, TimeUnit.MINUTES);
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
-        if (frame == null) {
-            warning(log, "Frame is null");
+            warning(LOG, "{0} error", x, laf);
         }
     }
 
@@ -118,7 +120,7 @@ public class ApplicationImpl implements Application {
 
     @Override
     public String getLibDirectory() {
-        String dir = SYSPREF.node("common").get("libDir", null);
+        String dir = SYS_PREFS.node("common").get("libDir", null);
         if (dir == null) {
             dir = Paths.get(System.getProperty("user.home"), "marid", "lib").toString();
         }
@@ -127,7 +129,7 @@ public class ApplicationImpl implements Application {
 
     @Override
     public String getTempDirectory() {
-        String dir = SYSPREF.node("common").get("tempDir", null);
+        String dir = SYS_PREFS.node("common").get("tempDir", null);
         if (dir == null) {
             dir = Paths.get(System.getProperty("user.home"), "marid", "temp").toString();
         }
@@ -136,7 +138,7 @@ public class ApplicationImpl implements Application {
 
     @Override
     public String getOutputDirectory() {
-        String dir = SYSPREF.node("common").get("outDir", null);
+        String dir = SYS_PREFS.node("common").get("outDir", null);
         if (dir == null) {
             dir = Paths.get(System.getProperty("user.home"), "marid", "out").toString();
         }
@@ -168,7 +170,7 @@ public class ApplicationImpl implements Application {
                 rootLogger.addHandler(swingHandler);
                 swingHandler.show();
             } catch (Exception x) {
-                warning(log, "Unable to create SWING log handler", x);
+                warning(LOG, "Unable to create SWING log handler", x);
             }
         }
     }

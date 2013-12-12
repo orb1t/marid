@@ -20,14 +20,7 @@ package org.marid.ide.itf;
 
 import org.marid.l10n.Localized;
 
-import java.util.prefs.Preferences;
-
-import static org.marid.methods.PrefMethods.*;
-
 public interface Application extends Localized {
-
-    public static final Preferences PREF = preferences("application");
-    public static final Preferences SYSPREF = preferences("preferences");
 
     public String getVersion();
 

@@ -23,16 +23,14 @@ import org.marid.l10n.Localized;
 import javax.swing.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.prefs.Preferences;
 
 import static org.marid.methods.GuiMethods.*;
-import static org.marid.methods.PrefMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public abstract class MaridFrame extends JFrame implements WindowListener,Localized {
-
-    private static final long serialVersionUID = 8281239938628777661L;
 
     public MaridFrame(String title) {
         super(S.l(title));
@@ -41,16 +39,16 @@ public abstract class MaridFrame extends JFrame implements WindowListener,Locali
 
     @Override
     public void windowOpened(WindowEvent e) {
-        setState(preferences(prefNode()).getInt("state", getState()));
-        setExtendedState(preferences(prefNode()).getInt("extendedState", getExtendedState()));
+        setState(prefNode().getInt("state", getState()));
+        setExtendedState(prefNode().getInt("extendedState", getExtendedState()));
     }
 
     @Override
     public void windowClosing(WindowEvent e) {
-        putPoint(preferences(prefNode()), "location", getLocation());
-        putDimension(preferences(prefNode()), "size", getSize());
-        preferences(prefNode()).putInt("state", getState());
-        preferences(prefNode()).putInt("extendedState", getExtendedState());
+        putPoint(prefNode(), "location", getLocation());
+        putDimension(prefNode(), "size", getSize());
+        prefNode().putInt("state", getState());
+        prefNode().putInt("extendedState", getExtendedState());
     }
 
     @Override
@@ -59,12 +57,12 @@ public abstract class MaridFrame extends JFrame implements WindowListener,Locali
 
     @Override
     public void windowIconified(WindowEvent e) {
-        preferences(prefNode()).putInt("state", getState());
+        prefNode().putInt("state", getState());
     }
 
     @Override
     public void windowDeiconified(WindowEvent e) {
-        preferences(prefNode()).putInt("state", getState());
+        prefNode().putInt("state", getState());
     }
 
     @Override
@@ -77,13 +75,13 @@ public abstract class MaridFrame extends JFrame implements WindowListener,Locali
 
     @Override
     public void setVisible(boolean b) {
-        if (!prefNode().equals(getName())) {
-            setName(prefNode());
-            setLocation(getPoint(preferences(prefNode()), "location", getLocation()));
-            setSize(getDimension(preferences(prefNode()), "size", getPreferredSize()));
+        if (!prefNode().name().equals(getName())) {
+            setName(prefNode().name());
+            setLocation(getPoint(prefNode(), "location", getLocation()));
+            setSize(getDimension(prefNode(), "size", getPreferredSize()));
         }
         super.setVisible(b);
     }
 
-    protected abstract String prefNode();
+    protected abstract Preferences prefNode();
 }

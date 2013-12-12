@@ -18,18 +18,12 @@
 
 package org.marid.ide.itf;
 
-import java.util.prefs.Preferences;
-
-import static org.marid.methods.PrefMethods.*;
-
 /**
  * Desktop interface.
  *
  * @author Dmitry Ovchinnikov 
  */
 public interface Desktop extends Graphical {
-
-    public static final Preferences PREF = preferences("desktop");
 
     public Widget getConsole();
 }

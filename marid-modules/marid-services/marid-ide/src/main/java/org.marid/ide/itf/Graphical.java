@@ -18,16 +18,10 @@
 
 package org.marid.ide.itf;
 
-import java.util.prefs.Preferences;
-
-import static org.marid.methods.PrefMethods.*;
-
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface Graphical {
-
-    public static final Preferences SYSPREF = preferences("preferences");
 
     public int getWidth();
 

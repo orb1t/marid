@@ -15,20 +15,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.marid.ide.itf;
+
+package org.marid.ide.swing.impl;
+
+import java.util.prefs.Preferences;
+
+import static org.marid.methods.PrefMethods.*;
 
 /**
- * Application frame.
- *
- * @author Dmitry Ovchinnikov 
+ * @author Dmitry Ovchinnikov
  */
-public interface Frame extends Graphical {
+public class MaridSwingPrefs {
 
-    public Desktop getDesktop();
-
-    public Application getApplication();
-
-    boolean isVisible();
-
-    void setVisible(boolean state);
+    public static final Preferences SYS_PREFS = preferences("system");
+    public static final Preferences APP_PREFS = preferences("application");
+    public static final Preferences FRAME_PREFS = preferences("frame");
+    public static final Preferences DESKTOP_PREFS = preferences("desktop");
+    public static final Preferences CMD_PREFS = preferences("cmd");
 }

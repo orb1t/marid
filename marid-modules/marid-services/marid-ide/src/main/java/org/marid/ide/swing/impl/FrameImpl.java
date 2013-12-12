@@ -21,11 +21,14 @@ import org.marid.ide.itf.Frame;
 import org.marid.ide.menu.MenuEntry;
 import org.marid.image.MaridIcons;
 import org.marid.swing.MaridFrame;
+import org.marid.swing.SwingUtil;
 
 import java.awt.*;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 import static org.marid.methods.GuiMethods.getDimension;
+import static org.marid.ide.swing.impl.MaridSwingPrefs.*;
 
 /**
  * Application frame implementation.
@@ -44,7 +47,7 @@ public class FrameImpl extends MaridFrame implements Frame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         add(desktop = new DesktopImpl());
         setJMenuBar(new MenuBarImpl(menuEntries));
-        setPreferredSize(getDimension(PREF, "preferredSize", new Dimension(750, 550)));
+        setPreferredSize(getDimension(FRAME_PREFS, "preferredSize", new Dimension(750, 550)));
         pack();
     }
 
@@ -59,7 +62,17 @@ public class FrameImpl extends MaridFrame implements Frame {
     }
 
     @Override
-    protected String prefNode() {
-        return "frame";
+    public void setVisible(final boolean b) {
+        SwingUtil.execute(new Runnable() {
+            @Override
+            public void run() {
+                FrameImpl.super.setVisible(b);
+            }
+        });
+    }
+
+    @Override
+    protected Preferences prefNode() {
+        return FRAME_PREFS;
     }
 }

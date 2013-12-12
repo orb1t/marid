@@ -20,14 +20,32 @@ package org.marid.ide;
 
 import org.marid.ide.itf.Application;
 import org.marid.ide.swing.impl.ApplicationImpl;
+import org.marid.util.Utils;
+
+import java.lang.invoke.MethodHandles;
+import java.util.logging.Logger;
+import java.util.prefs.Preferences;
+
+import static org.marid.methods.LogMethods.warning;
+import static org.marid.methods.PrefMethods.preferences;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class Ide {
 
-    public static final Application APPLICATION = new ApplicationImpl();
+    private static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
+    public static final Application APPLICATION;
 
-    static void init() {
+    static {
+        final Preferences prefs = preferences("system");
+        Application app;
+        try {
+            app = Utils.newInstance(Application.class, prefs.get("applicationClass", ApplicationImpl.class.getName()));
+        } catch (Exception x) {
+            warning(LOG, "Unable to create an application instance", x);
+            app = new ApplicationImpl();
+        }
+        APPLICATION = app;
     }
 }

@@ -18,15 +18,30 @@
 
 package org.marid.ide;
 
-import org.marid.Marid;
+import org.marid.groovy.GroovyRuntime;
+import org.marid.logging.Logging;
+
+import java.lang.invoke.MethodHandles;
+import java.util.logging.Logger;
+
+import static org.marid.methods.LogMethods.warning;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridIde {
+public class MaridIde implements Thread.UncaughtExceptionHandler {
+
+    private static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
 
     public static void main(String[] args) {
-        Marid.main(args);
-        Ide.init();
+        Logging.init(MaridIde.class, "log.properties");
+        Thread.setDefaultUncaughtExceptionHandler(new MaridIde());
+        Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
+        Ide.APPLICATION.getFrame().setVisible(true);
+    }
+
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        warning(LOG, "Uncaught exception in {0}", e, t);
     }
 }

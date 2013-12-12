@@ -27,4 +27,8 @@ public class Utils {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         return classLoader == null ? c.getClassLoader() : classLoader;
     }
+
+    public static <T> T newInstance(Class<T> type, String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        return type.cast(getClassLoader(type).loadClass(className).newInstance());
+    }
 }

@@ -109,6 +109,24 @@
                     <artifactId>maven-antrun-plugin</artifactId>
                     <executions>
                         <execution>
+                            <id>compile-groovy</id>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                            <configuration>
+                                <target>
+                                    <taskdef name="groovyc"
+                                             classname="org.codehaus.groovy.ant.Groovyc"
+                                             classpathref="maven.compile.classpath"/>
+                                    <groovyc srcdir="${project.basedir}/src/main/groovy"
+                                             destdir="${project.build.directory}/classes"
+                                             classpathref="maven.compile.classpath"
+                                             encoding="${project.build.sourceEncoding}"/>
+                                </target>
+                            </configuration>
+                        </execution>
+
+                        <execution>
                             <id>test-compile-groovy</id>
                             <goals>
                                 <goal>run</goal>
