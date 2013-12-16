@@ -34,9 +34,6 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
@@ -51,35 +48,8 @@ public class ApplicationImpl implements Application {
     public ApplicationImpl() {
         final List<MenuEntry> menuEntries = getMenuEntries();
         installLaf();
-        final FutureTask<FrameImpl> frameFuture = new FutureTask<>(new Callable<FrameImpl>() {
-            @Override
-            public FrameImpl call() throws Exception {
-                return new FrameImpl(ApplicationImpl.this, menuEntries);
-            }
-        });
-        EventQueue.invokeLater(frameFuture);
-        try {
-            frame = frameFuture.get();
-        } catch (ExecutionException x) {
-            throw new IllegalStateException(x.getCause());
-        } catch (InterruptedException x) {
-            throw new IllegalStateException(x);
-        }
-        final FutureTask<Void> trayFuture = new FutureTask<>(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                initTray(menuEntries);
-                return null;
-            }
-        });
-        EventQueue.invokeLater(trayFuture);
-        try {
-            trayFuture.get();
-        } catch (ExecutionException x) {
-            warning(LOG, "Unable to initialize system tray", x.getCause());
-        } catch (InterruptedException x) {
-            throw new IllegalStateException(x);
-        }
+        frame = new FrameImpl(ApplicationImpl.this, menuEntries);
+        initTray(menuEntries);
     }
 
     private List<MenuEntry> getMenuEntries() {
@@ -175,18 +145,22 @@ public class ApplicationImpl implements Application {
         }
     }
 
-    private void initTray(List<MenuEntry> entries) throws Exception {
+    private void initTray(List<MenuEntry> entries) {
         if (SystemTray.isSupported()) {
-            final SystemTray tray = SystemTray.getSystemTray();
-            final Dimension traySize = tray.getTrayIconSize();
-            final int trayWidth = traySize.width;
-            final int trayHeight = traySize.height;
-            final Image image = MaridIcon.getImage(Math.min(trayWidth, trayHeight), Color.GREEN);
-            final PopupMenuImpl popup = new PopupMenuImpl(this, entries);
-            final TrayIcon icon = new TrayIcon(image, S.l("Marid IDE"), popup);
-            icon.addActionListener(popup);
-            icon.setActionCommand("show_hide");
-            tray.add(icon);
+            try {
+                final SystemTray tray = SystemTray.getSystemTray();
+                final Dimension traySize = tray.getTrayIconSize();
+                final int trayWidth = traySize.width;
+                final int trayHeight = traySize.height;
+                final Image image = MaridIcon.getImage(Math.min(trayWidth, trayHeight), Color.GREEN);
+                final PopupMenuImpl popup = new PopupMenuImpl(this, entries);
+                final TrayIcon icon = new TrayIcon(image, S.l("Marid IDE"), popup);
+                icon.addActionListener(popup);
+                icon.setActionCommand("show_hide");
+                tray.add(icon);
+            } catch (Exception x) {
+                warning(LOG, "Unable to create the tray icon", x);
+            }
         }
     }
 }

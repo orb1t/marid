@@ -32,6 +32,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static java.util.Map.Entry;
+import static java.util.Collections.emptyMap;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.asType;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.plus;
 import static org.marid.ide.menu.MenuType.MENU;
@@ -39,40 +40,40 @@ import static org.marid.methods.LogMethods.warning;
 
 public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
 
-    private static final Logger log = Logger.getLogger(GroovyMenu.class.getName());
+    private static final Logger LOG = Logger.getLogger(GroovyMenu.class.getName());
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     private void loadEntries(String script, List<MenuEntry> ens, ClassLoader l) throws Exception {
-        GroovyCodeSource gcs = new GroovyCodeSource(l.getResource(script));
-        Map<String, Object> map = (Map<String, Object>) GroovyRuntime.SHELL.evaluate(gcs);
-        for (Entry<String, Object> e : map.entrySet()) {
+        final GroovyCodeSource gcs = new GroovyCodeSource(l.getResource(script));
+        final Map<String, Object> map = (Map<String, Object>) GroovyRuntime.SHELL.evaluate(gcs);
+        for (final Entry<String, Object> e : map.entrySet()) {
             fillEntries(null, e, ens);
         }
     }
 
     @Override
     public List<MenuEntry> getMenuEntries() {
-        LinkedList<MenuEntry> entries = new LinkedList<>();
-        ClassLoader l = Thread.currentThread().getContextClassLoader();
+        final LinkedList<MenuEntry> entries = new LinkedList<>();
+        final ClassLoader l = Thread.currentThread().getContextClassLoader();
         try {
-            Enumeration<URL> e = l.getResources("menu.groovy");
+            final Enumeration<URL> e = l.getResources("menu.groovy");
             while (e.hasMoreElements()) {
-                URL url = e.nextElement();
+                final URL url = e.nextElement();
                 try {
-                    List list = (List) GroovyRuntime.SHELL.evaluate(new GroovyCodeSource(url));
-                    for (Object script : list) {
+                    final List list = (List) GroovyRuntime.SHELL.evaluate(new GroovyCodeSource(url));
+                    for (final Object script : list) {
                         try {
                             loadEntries(script.toString(), entries, l);
                         } catch (Exception x) {
-                            warning(log, "Unable to load {0}", x, script);
+                            warning(LOG, "Unable to load {0}", x, script);
                         }
                     }
                 } catch (Exception x) {
-                    warning(log, "Unable to load {0}", x, url);
+                    warning(LOG, "Unable to load {0}", x, url);
                 }
             }
         } catch (Exception x) {
-            warning(log, "Unable to load menu items", x);
+            warning(LOG, "Unable to load menu items", x);
         }
         return entries;
     }
@@ -83,7 +84,7 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
         final Map<String, Object> map = e.getValue() == null ?
                 Collections.<String, Object>emptyMap() :
                 (Map<String, Object>) e.getValue();
-        Object path = map.get("path");
+        final Object path = map.get("path");
         final String[] p;
         if (path instanceof Object[] || path instanceof Iterable) {
             p = asType(path, String[].class);
@@ -92,7 +93,7 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
         } else {
             p = CollectionUtils.concat(pr.getPath(), pr.getName());
         }
-        MenuEntry me = new MenuEntry() {
+        final MenuEntry me = new MenuEntry() {
             @Override
             public String[] getPath() {
                 return p;
@@ -128,26 +129,26 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
 
             @Override
             public String getDescription() {
-                Object d = map.get("description");
+                final Object d = map.get("description");
                 return isMutableDescription() ? ((Closure<String>) d).call() : String.valueOf(d);
             }
 
             @Override
             public String getInfo() {
-                Object i = map.get("info");
+                final Object i = map.get("info");
                 return isMutableInfo() ? ((Closure<String>) i).call() : String.valueOf(i);
             }
 
             @Override
             public String getIcon() {
-                Object i = map.get("icon");
+                final Object i = map.get("icon");
                 return isMutableIcon() ? ((Closure<String>) i).call() : String.valueOf(i);
             }
 
             @Override
             public MenuType getType() {
-                return !isLeaf() ? MENU : MenuType.valueOf(DefaultGroovyMethods.get(
-                        map, "type", MenuType.ITEM.name()).toString().toUpperCase());
+                return !isLeaf() ? MENU : MenuType.valueOf(
+                        DefaultGroovyMethods.get(map, "type", MenuType.ITEM.name()).toString().toUpperCase());
             }
 
             @Override
@@ -187,21 +188,18 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
 
             @Override
             public Boolean isSelected() {
-                return hasSelectedPredicate() ?
-                        ((Closure<Boolean>) map.get("selected")).call() : null;
+                return hasSelectedPredicate() ? ((Closure<Boolean>) map.get("selected")).call() : null;
             }
 
             @Override
             public boolean isEnabled() {
-                return hasEnabledPredicate() ?
-                        ((Closure<Boolean>) map.get("enabled")).call() : true;
+                return hasEnabledPredicate() ? ((Closure<Boolean>) map.get("enabled")).call() : true;
             }
 
             @Override
             public boolean isLeaf() {
-                for (MenuEntry e : ens) {
-                    if (e.getPath().length == getPath().length + 1 &&
-                            Arrays.equals(e.getPath(), plus(getPath(), name))) {
+                for (final MenuEntry e : ens) {
+                    if (e.getPath().length == getPath().length + 1 && Arrays.equals(e.getPath(), plus(getPath(), name))) {
                         return false;
                     }
                 }
@@ -210,34 +208,30 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
 
             @Override
             public void call(ActionEvent event) {
-                Closure v = (Closure) map.get("action");
+                final Closure v = (Closure) map.get("action");
                 if (v != null) {
                     try {
                         v.call(event);
                     } catch (Exception x) {
-                        warning(log, "{0} calling error", x, this);
+                        warning(LOG, "{0} calling error", x, this);
                     }
                 }
             }
 
             @Override
             public String toString() {
-                return DefaultGroovyMethods.join(
-                        CollectionUtils.concat(getPath(), getName()), "/");
+                return DefaultGroovyMethods.join(CollectionUtils.concat(getPath(), getName()), "/");
             }
         };
         ens.add(me);
-        Map<String, Object> v = (Map<String, Object>) DefaultGroovyMethods.get(
-                map, "items", Collections.emptyMap());
-        if (v != null)
-
-        {
+        final Map<String, Object> v = (Map<String, Object>) DefaultGroovyMethods.get(map, "items", emptyMap());
+        if (v != null) {
             try {
-                for (Entry<String, Object> en : v.entrySet()) {
+                for (final Entry<String, Object> en : v.entrySet()) {
                     fillEntries(me, en, ens);
                 }
             } catch (Exception x) {
-                warning(log, "Adding elements error to {0}", x, me);
+                warning(LOG, "Adding elements error to {0}", x, me);
             }
         }
     }

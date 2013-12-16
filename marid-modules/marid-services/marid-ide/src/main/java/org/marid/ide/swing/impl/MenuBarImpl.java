@@ -34,13 +34,13 @@ import static org.marid.util.CollectionUtils.concat;
 class MenuBarImpl extends JMenuBar {
 
     public MenuBarImpl(List<MenuEntry> menuEntries) {
-        TreeSet<MenuEntry> set = new TreeSet<>(MenuEntry.MENU_ENTRY_COMPARATOR);
+        final TreeSet<MenuEntry> set = new TreeSet<>(MenuEntry.MENU_ENTRY_COMPARATOR);
         for (MenuEntry e : menuEntries) {
             if (e.getPath().length == 0) {
                 set.add(e);
             }
         }
-        for (MenuEntry e : set) {
+        for (final MenuEntry e : set) {
             switch (e.getType()) {
                 case ITEM:
                     add(getItem(e));
@@ -71,11 +71,11 @@ class MenuBarImpl extends JMenuBar {
     }
 
     private JMenu getMenu(List<MenuEntry> menuEntries, MenuEntry entry) {
-        JMenu menu = new JMenu(new MenuActionImpl(entry)) {
+        final JMenu menu = new JMenu(new MenuActionImpl(entry)) {
             @Override
             public void setPopupMenuVisible(boolean b) {
                 super.setPopupMenuVisible(b);
-                for (Component c : getMenuComponents()) {
+                for (final Component c : getMenuComponents()) {
                     if (c instanceof JMenuItem) {
                         if (((JMenuItem) c).getAction() instanceof MenuActionImpl) {
                             ((MenuActionImpl)((JMenuItem) c).getAction()).update();
@@ -84,21 +84,20 @@ class MenuBarImpl extends JMenuBar {
                 }
             }
         };
-        String[] path = entry.getPath();
-        int n = path.length;
-        TreeSet<MenuEntry> set = new TreeSet<>(MenuEntry.MENU_ENTRY_COMPARATOR);
-        for (MenuEntry e : menuEntries) {
-            if (e.getPath().length == n + 1 && Arrays.equals(e.getPath(),
-                    concat(entry.getPath(), entry.getName()))) {
+        final String[] path = entry.getPath();
+        final int n = path.length;
+        final TreeSet<MenuEntry> set = new TreeSet<>(MenuEntry.MENU_ENTRY_COMPARATOR);
+        for (final MenuEntry e : menuEntries) {
+            if (e.getPath().length == n + 1 && Arrays.equals(e.getPath(), concat(entry.getPath(), entry.getName()))) {
                 set.add(e);
             }
         }
         String group = null;
-        for (MenuEntry e : set) {
+        for (final MenuEntry e : set) {
             if (group == null) {
                 group = String.valueOf(e.getGroup());
             }
-            String curGroup = String.valueOf(e.getGroup());
+            final String curGroup = String.valueOf(e.getGroup());
             if (!curGroup.equals(group)) {
                 menu.addSeparator();
                 group = curGroup;

@@ -32,7 +32,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <lib>${project.build.directory}/lib</lib>
-        <groovy.version>2.1.9</groovy.version>
+        <groovy.version>2.2.1</groovy.version>
         <jetty.version>9.0.5.v20130815</jetty.version>
         <catalina.version>7.0.42</catalina.version>
         <s.version>${i.version}</s.version>
@@ -190,6 +190,8 @@
                         <compilerArgument>-Xlint:unchecked</compilerArgument>
                         <source>${maven.compiler.source}</source>
                         <target>${maven.compiler.target}</target>
+                        <testSource>${maven.compiler.source}</testSource>
+                        <testTarget>${maven.compiler.target}</testTarget>
                     </configuration>
                 </plugin>
 

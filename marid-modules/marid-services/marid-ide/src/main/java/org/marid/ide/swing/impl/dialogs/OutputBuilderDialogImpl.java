@@ -90,12 +90,12 @@ public class OutputBuilderDialogImpl extends AbstractDialog implements Dialog {
         private final Path outDir = Paths.get(getOwner().getApplication().getOutputDirectory());
 
         public ExtractTab() {
-            GroupLayout g = new GroupLayout(this);
+            final GroupLayout g = new GroupLayout(this);
             g.setAutoCreateGaps(true);
             g.setAutoCreateContainerGaps(true);
-            GroupLayout.SequentialGroup v = g.createSequentialGroup();
-            GroupLayout.ParallelGroup h = g.createParallelGroup();
-            GroupLayout.SequentialGroup h1 = g.createSequentialGroup();
+            final GroupLayout.SequentialGroup v = g.createSequentialGroup();
+            final GroupLayout.ParallelGroup h = g.createParallelGroup();
+            final GroupLayout.SequentialGroup h1 = g.createSequentialGroup();
             v.addGroup(g.createParallelGroup(Alignment.BASELINE)
                     .addComponent(zipLabel)
                     .addComponent(zipField)
@@ -128,8 +128,8 @@ public class OutputBuilderDialogImpl extends AbstractDialog implements Dialog {
                 if (cl == null) {
                     cl = getClass().getClassLoader();
                 }
-                String version = Versioning.getImplementationVersion(Marid.class);
-                URL url = cl.getResource("marid-runtime-" + version + ".zip");
+                final String version = Versioning.getImplementationVersion(Marid.class);
+                final URL url = cl.getResource("marid-runtime-" + version + ".zip");
                 if (url != null) {
                     try {
                         text = new File(url.toURI()).toString();
@@ -152,10 +152,10 @@ public class OutputBuilderDialogImpl extends AbstractDialog implements Dialog {
                 public void actionPerformed(ActionEvent e) {
                     enableButtons(false);
                     final AtomicLong counter = new AtomicLong();
-                    Thread worker = new Thread(new Runnable() {
+                    final Thread worker = new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            RemoveTask removeTask = new RemoveTask(outDir) {
+                            final RemoveTask removeTask = new RemoveTask(outDir) {
                                 @Override
                                 protected void remove(final Path path) throws IOException {
                                     EventQueue.invokeLater(new Runnable() {
@@ -199,10 +199,10 @@ public class OutputBuilderDialogImpl extends AbstractDialog implements Dialog {
                     final AtomicLong counter = new AtomicLong();
                     final List<CopyTask> copyTasks = new ArrayList<>();
                     try {
-                        Path zipPath = Paths.get(zipField.getText());
-                        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                        FileSystem zipfs = FileSystems.newFileSystem(zipPath, cl);
-                        for (Path root : zipfs.getRootDirectories()) {
+                        final Path zipPath = Paths.get(zipField.getText());
+                        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                        final FileSystem zipfs = FileSystems.newFileSystem(zipPath, cl);
+                        for (final Path root : zipfs.getRootDirectories()) {
                             copyTasks.add(new CopyTask(root, outDir) {
                                 @Override
                                 protected void copy(Path src, final Path dst) throws IOException {
@@ -224,11 +224,11 @@ public class OutputBuilderDialogImpl extends AbstractDialog implements Dialog {
                         warning(LOG, "ZIP error", x);
                         return;
                     }
-                    Thread worker = new Thread(new Runnable() {
+                    final Thread worker = new Thread(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                for (CopyTask copyTask : copyTasks) {
+                                for (final CopyTask copyTask : copyTasks) {
                                     copyTask.call();
                                 }
                             } catch (Exception x) {

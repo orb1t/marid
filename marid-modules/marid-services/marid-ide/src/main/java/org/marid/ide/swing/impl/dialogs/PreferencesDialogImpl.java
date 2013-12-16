@@ -69,11 +69,11 @@ public class PreferencesDialogImpl extends AbstractDialog implements Dialog {
         private final JButton outDirBrowseButton = MaridButtons.browseButton(outDirectoryText);
 
         public CommonTab() {
-            GroupLayout g = new GroupLayout(this);
+            final GroupLayout g = new GroupLayout(this);
             g.setAutoCreateContainerGaps(true);
             g.setAutoCreateGaps(true);
-            GroupLayout.SequentialGroup v = g.createSequentialGroup();
-            GroupLayout.SequentialGroup h = g.createSequentialGroup();
+            final GroupLayout.SequentialGroup v = g.createSequentialGroup();
+            final GroupLayout.SequentialGroup h = g.createSequentialGroup();
             v.addGroup(g.createParallelGroup(Alignment.BASELINE)
                     .addComponent(repDirectoryLabel)
                     .addComponent(repDirectoryText)

@@ -21,14 +21,13 @@ import org.marid.ide.itf.Frame;
 import org.marid.ide.menu.MenuEntry;
 import org.marid.image.MaridIcons;
 import org.marid.swing.MaridFrame;
-import org.marid.swing.SwingUtil;
 
 import java.awt.*;
 import java.util.List;
 import java.util.prefs.Preferences;
 
+import static org.marid.ide.swing.impl.MaridSwingPrefs.FRAME_PREFS;
 import static org.marid.methods.GuiMethods.getDimension;
-import static org.marid.ide.swing.impl.MaridSwingPrefs.*;
 
 /**
  * Application frame implementation.
@@ -59,16 +58,6 @@ public class FrameImpl extends MaridFrame implements Frame {
     @Override
     public ApplicationImpl getApplication() {
         return application;
-    }
-
-    @Override
-    public void setVisible(final boolean b) {
-        SwingUtil.execute(new Runnable() {
-            @Override
-            public void run() {
-                FrameImpl.super.setVisible(b);
-            }
-        });
     }
 
     @Override

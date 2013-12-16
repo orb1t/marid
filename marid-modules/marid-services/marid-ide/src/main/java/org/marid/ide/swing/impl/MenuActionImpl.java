@@ -36,15 +36,15 @@ class MenuActionImpl extends AbstractAction implements Localized {
         this.entry = entry;
         putValue(ACTION_COMMAND_KEY, entry.getCommand());
         putValue(NAME, S.l(entry.getLabel()));
-        String shortcut = entry.getShortcut();
-        String icon = entry.getIcon();
-        String description = S.l(entry.getDescription());
-        String info = S.l(entry.getInfo());
+        final String shortcut = entry.getShortcut();
+        final String icon = entry.getIcon();
+        final String description = S.l(entry.getDescription());
+        final String info = S.l(entry.getInfo());
         if (shortcut != null) {
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(shortcut));
         }
         if (icon != null) {
-            ImageIcon smallIcon = Images.getIcon(icon, 16, 16);
+            final ImageIcon smallIcon = Images.getIcon(icon, 16, 16);
             if (smallIcon != null) {
                 putValue(SMALL_ICON, smallIcon);
             }

@@ -19,15 +19,14 @@
 package org.marid.ide;
 
 import org.marid.ide.itf.Application;
-import org.marid.ide.swing.impl.ApplicationImpl;
-import org.marid.util.Utils;
+import org.marid.ide.itf.ApplicationFactory;
+import org.marid.ide.swing.impl.ApplicationFactoryImpl;
 
 import java.lang.invoke.MethodHandles;
+import java.util.ServiceLoader;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 
 import static org.marid.methods.LogMethods.warning;
-import static org.marid.methods.PrefMethods.preferences;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,14 +37,18 @@ public class Ide {
     public static final Application APPLICATION;
 
     static {
-        final Preferences prefs = preferences("system");
-        Application app;
+        ApplicationFactory factory = null;
         try {
-            app = Utils.newInstance(Application.class, prefs.get("applicationClass", ApplicationImpl.class.getName()));
+            for (final ApplicationFactory applicationFactory : ServiceLoader.load(ApplicationFactory.class)) {
+                factory = applicationFactory;
+            }
         } catch (Exception x) {
             warning(LOG, "Unable to create an application instance", x);
-            app = new ApplicationImpl();
+        } finally {
+            if (factory == null) {
+                factory = new ApplicationFactoryImpl();
+            }
         }
-        APPLICATION = app;
+        APPLICATION = factory.createApplication();
     }
 }

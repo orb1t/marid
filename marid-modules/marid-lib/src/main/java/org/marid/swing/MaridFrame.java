@@ -22,7 +22,6 @@ import org.marid.l10n.Localized;
 
 import javax.swing.*;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.prefs.Preferences;
 
 import static org.marid.methods.GuiMethods.*;
@@ -30,57 +29,35 @@ import static org.marid.methods.GuiMethods.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class MaridFrame extends JFrame implements WindowListener,Localized {
+public abstract class MaridFrame extends JFrame implements Localized {
 
     public MaridFrame(String title) {
         super(S.l(title));
-        addWindowListener(this);
     }
 
     @Override
-    public void windowOpened(WindowEvent e) {
-        setState(prefNode().getInt("state", getState()));
-        setExtendedState(prefNode().getInt("extendedState", getExtendedState()));
-    }
-
-    @Override
-    public void windowClosing(WindowEvent e) {
-        putPoint(prefNode(), "location", getLocation());
-        putDimension(prefNode(), "size", getSize());
-        prefNode().putInt("state", getState());
-        prefNode().putInt("extendedState", getExtendedState());
-    }
-
-    @Override
-    public void windowClosed(WindowEvent e) {
-    }
-
-    @Override
-    public void windowIconified(WindowEvent e) {
-        prefNode().putInt("state", getState());
-    }
-
-    @Override
-    public void windowDeiconified(WindowEvent e) {
-        prefNode().putInt("state", getState());
-    }
-
-    @Override
-    public void windowActivated(WindowEvent e) {
-    }
-
-    @Override
-    public void windowDeactivated(WindowEvent e) {
-    }
-
-    @Override
-    public void setVisible(boolean b) {
-        if (!prefNode().name().equals(getName())) {
-            setName(prefNode().name());
-            setLocation(getPoint(prefNode(), "location", getLocation()));
-            setSize(getDimension(prefNode(), "size", getPreferredSize()));
+    protected void processWindowEvent(WindowEvent e) {
+        switch (e.getID()) {
+            case WindowEvent.WINDOW_OPENED:
+                setState(prefNode().getInt("state", getState()));
+                setExtendedState(prefNode().getInt("extendedState", getExtendedState()));
+                setLocation(getPoint(prefNode(), "location", getLocation()));
+                setSize(getDimension(prefNode(), "size", getPreferredSize()));
+                break;
+            case WindowEvent.WINDOW_CLOSED:
+                putPoint(prefNode(), "location", getLocation());
+                putDimension(prefNode(), "size", getSize());
+                prefNode().putInt("state", getState());
+                prefNode().putInt("extendedState", getExtendedState());
+                break;
+            case WindowEvent.WINDOW_ICONIFIED:
+                prefNode().putInt("state", getState());
+                break;
+            case WindowEvent.WINDOW_DEICONIFIED:
+                prefNode().putInt("state", getState());
+                break;
         }
-        super.setVisible(b);
+        super.processWindowEvent(e);
     }
 
     protected abstract Preferences prefNode();
