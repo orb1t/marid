@@ -22,21 +22,21 @@ import org.marid.l10n.Localized;
 
 public interface Application extends Localized {
 
-    public String getVersion();
+    String getVersion();
 
-    public void exit();
+    void exit();
 
-    public Frame getFrame();
+    Frame getFrame();
 
-    public void showLog();
+    void showLog();
 
-    public void showPreferencesDialog();
+    void showPreferencesDialog();
 
-    public void showOutputBuilder();
+    void showOutputBuilder();
 
-    public String getLibDirectory();
+    String getLibDirectory();
 
-    public String getTempDirectory();
+    String getTempDirectory();
 
-    public String getOutputDirectory();
+    String getOutputDirectory();
 }

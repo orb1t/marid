@@ -19,7 +19,9 @@
 package org.marid.ide.swing.impl;
 
 import org.marid.ide.itf.Desktop;
+import org.marid.ide.itf.Widget;
 import org.marid.ide.swing.impl.widgets.ConsoleImpl;
+import org.marid.ide.swing.impl.widgets.DeployWidgetImpl;
 import org.marid.ide.swing.impl.widgets.ResizableWidget;
 
 import javax.swing.*;
@@ -63,6 +65,12 @@ public class DesktopImpl extends JDesktopPane implements Desktop {
     @Override
     public ConsoleImpl getConsole() {
         return console;
+    }
+
+    @Override
+    public Widget getDeployWidget() {
+        final DeployWidgetImpl deployWidget = new DeployWidgetImpl();
+        return deployWidget;
     }
 
     public class DesktopManagerImpl extends DefaultDesktopManager {

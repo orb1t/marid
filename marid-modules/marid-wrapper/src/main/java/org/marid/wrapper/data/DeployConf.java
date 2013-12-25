@@ -18,6 +18,8 @@
 
 package org.marid.wrapper.data;
 
+import org.marid.io.ser.SerializableObject;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -28,7 +30,7 @@ import java.util.*;
  * @author Dmitry Ovchinnikov
  */
 @XmlRootElement(name = "configuration")
-public class DeployConf {
+public class DeployConf extends SerializableObject {
 
     @XmlElementWrapper(name = "vm-arguments")
     @XmlElement(name = "vm-argument")

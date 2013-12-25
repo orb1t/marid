@@ -24,6 +24,7 @@ import groovy.lang.GroovyObjectSupport;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.StringGroovyMethods;
 import org.marid.groovy.GroovyRuntime;
+import org.marid.methods.PropMethods;
 import org.marid.util.CollectionUtils;
 
 import java.awt.event.ActionEvent;
@@ -35,6 +36,7 @@ import static java.util.Map.Entry;
 import static java.util.Collections.emptyMap;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.asType;
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.plus;
+import static org.marid.ide.menu.MenuType.ITEM;
 import static org.marid.ide.menu.MenuType.MENU;
 import static org.marid.methods.LogMethods.warning;
 
@@ -119,7 +121,7 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
 
             @Override
             public String getCommand() {
-                return String.valueOf(DefaultGroovyMethods.get(map, "command", name));
+                return PropMethods.get(map, String.class, "command", name);
             }
 
             @Override
@@ -147,13 +149,12 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
 
             @Override
             public MenuType getType() {
-                return !isLeaf() ? MENU : MenuType.valueOf(
-                        DefaultGroovyMethods.get(map, "type", MenuType.ITEM.name()).toString().toUpperCase());
+                return !isLeaf() ? MENU : PropMethods.get(map, MenuType.class, "type", ITEM);
             }
 
             @Override
             public int getPriority() {
-                return Integer.parseInt(DefaultGroovyMethods.get(map, "priority", "-1").toString());
+                return PropMethods.get(map, int.class, "priority", -1);
             }
 
             @Override

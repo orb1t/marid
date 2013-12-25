@@ -25,5 +25,7 @@ package org.marid.ide.itf;
  */
 public interface Desktop extends Graphical {
 
-    public Widget getConsole();
+    Widget getConsole();
+
+    Widget getDeployWidget();
 }

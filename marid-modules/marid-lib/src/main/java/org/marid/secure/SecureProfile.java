@@ -18,6 +18,8 @@
 
 package org.marid.secure;
 
+import org.marid.util.Utils;
+
 import javax.net.ssl.*;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -29,6 +31,8 @@ import java.util.Properties;
  * @author Dmitry Ovchinnikov
  */
 public class SecureProfile {
+
+    public static final SecureProfile DEFAULT = new SecureProfile(getProperties());
 
     private final KeyStore keyStore;
     private final SSLContext sslContext;
@@ -96,6 +100,23 @@ public class SecureProfile {
         serverSocketFactory = ssf;
         socketFactory = sf;
         exception = ex;
+    }
+
+    public SecureProfile(Properties properties) {
+        this(SecureProfile.class, properties);
+    }
+
+    private static Properties getProperties() {
+        final ClassLoader classLoader = Utils.getClassLoader(SecureProfile.class);
+        try (final InputStream is = classLoader.getResourceAsStream("maridSecurity.properties")) {
+            final Properties properties = new Properties();
+            if (is != null) {
+                properties.load(is);
+            }
+            return properties;
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
     }
 
     private void checkException() {

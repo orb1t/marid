@@ -20,35 +20,20 @@ package org.marid.wrapper.data;
 
 import org.marid.io.ser.SerializableObject;
 
-import java.util.*;
+import java.util.logging.Level;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class AuthResponse extends SerializableObject {
+public class ListenLogsRequest extends SerializableObject {
 
-    private final String result;
+    private final String levelName;
 
-    private final TreeSet<String> roles;
-
-    public AuthResponse(String result, Set<String> roles) {
-        this.result = result;
-        this.roles = new TreeSet<>(roles);
+    public ListenLogsRequest(Level level) {
+        levelName = level.getName();
     }
 
-    public AuthResponse(String result, String... roles) {
-        this(result, new HashSet<>(Arrays.asList(roles)));
-    }
-
-    public AuthResponse(String result) {
-        this(result, Collections.<String>emptySet());
-    }
-
-    public String getResult() {
-        return result;
-    }
-
-    public Set<String> getRoles() {
-        return roles;
+    public Level getLevel() {
+        return Level.parse(levelName);
     }
 }

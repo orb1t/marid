@@ -48,7 +48,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
-import static org.marid.wrapper.Log.*;
+import static org.marid.methods.LogMethods.*;
+import static org.marid.wrapper.WrapperConstants.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -57,7 +58,7 @@ public class Wrapper extends TimerTask implements UncaughtExceptionHandler {
 
     private static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
 
-    static final int PORT = ParseUtils.getInt("MW_PORT", 11200);
+    static final int PORT = ParseUtils.getInt("MW_PORT", DEFAULT_PORT);
     static final int BACKLOG = ParseUtils.getInt("MW_BACKLOG", 5);
     static final String ADDRESS = ParseUtils.getString("MW_ADDRESS", null);
     static final Path TARGET = ParseUtils.getDir("MW_TARGET", null, "marid");
@@ -66,7 +67,6 @@ public class Wrapper extends TimerTask implements UncaughtExceptionHandler {
     static final int THREADS = ParseUtils.getInt("MW_THREADS", 8);
     static final int QUEUE_SIZE = ParseUtils.getInt("MW_QUEUE_SIZE", 16);
     static final Properties USERS = new Properties();
-    static final SecureProfile SECURE_PROFILE = new SecureProfile(Wrapper.class, secureProperties());
 
     static final Lock processLock = new ReentrantLock();
     private static Process maridProcess;
@@ -78,7 +78,7 @@ public class Wrapper extends TimerTask implements UncaughtExceptionHandler {
                 USERS.load(is);
             }
         }
-        final SSLServerSocketFactory ssf = SECURE_PROFILE.getServerSocketFactory();
+        final SSLServerSocketFactory ssf = SecureProfile.DEFAULT.getServerSocketFactory();
         info(LOG, "Server socket factory: {0}", ssf);
         final SSLServerSocket serverSocket = (SSLServerSocket) (ADDRESS == null
                 ? ssf.createServerSocket(PORT, BACKLOG)
@@ -169,7 +169,7 @@ public class Wrapper extends TimerTask implements UncaughtExceptionHandler {
 
     private static Properties secureProperties() {
         final Properties properties = new Properties();
-        try (final InputStream inputStream = Wrapper.class.getResourceAsStream("/maridWrapperSecuryty.properties")) {
+        try (final InputStream inputStream = Wrapper.class.getResourceAsStream("/maridWrapperSecurity.properties")) {
             if (inputStream != null) {
                 properties.load(inputStream);
             }

@@ -18,7 +18,7 @@
 
 package org.marid.wrapper.data;
 
-import org.marid.util.SerializableObject;
+import org.marid.io.ser.SerializableObject;
 
 /**
  * @author Dmitry Ovchinnikov

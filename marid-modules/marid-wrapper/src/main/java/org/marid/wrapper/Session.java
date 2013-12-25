@@ -18,17 +18,19 @@
 
 package org.marid.wrapper;
 
+import org.marid.io.GzipInputStream;
 import org.marid.io.GzipOutputStream;
 import org.marid.io.JaxbStreams;
 import org.marid.io.LimitedInputStream;
 import org.marid.nio.FileUtils;
-import org.marid.wrapper.data.AuthResponse;
-import org.marid.wrapper.data.ClientData;
-import org.marid.wrapper.data.DeployConf;
+import org.marid.secure.SecureProfile;
+import org.marid.wrapper.data.*;
 
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,7 +48,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.marid.wrapper.Log.*;
+import static org.marid.methods.LogMethods.*;
 import static org.marid.wrapper.Wrapper.*;
 
 /**
@@ -71,7 +73,7 @@ public class Session implements Runnable {
     private void checkClientData(ObjectInputStream is, ObjectOutputStream os) throws Exception {
         final ClientData clientData = (ClientData) is.readObject();
         info(LOG, "{0} {1}", socket, clientData.toString());
-        final KeyStore keyStore = SECURE_PROFILE.getKeyStore();
+        final KeyStore keyStore = SecureProfile.DEFAULT.getKeyStore();
         final String user = clientData.getUser();
         try {
             keyStore.getKey(user, clientData.password());
@@ -85,31 +87,19 @@ public class Session implements Runnable {
         info(LOG, "{0} User {1} was authorized as {2}", socket, user, response.getRoles());
     }
 
-    void process(RequestContext context, String method, String... roles) throws Exception {
-        final Set<String> roleSet = new HashSet<>(Arrays.asList(roles));
-        roleSet.retainAll(this.roles);
-        if (roleSet.isEmpty()) {
-            context.sendResponse(Response.ACCESS_DENIED);
-        } else {
-            try {
-                getClass().getDeclaredMethod(method, RequestContext.class).invoke(this, context);
-                context.sendResponse(Response.OK);
-            } catch (Exception x) {
-                context.sendResponse(Response.EXCEPTION, x.toString());
-            }
-        }
-    }
-
-    void upload(RequestContext ctx) throws Exception {
-        final DeployConf deployConf = JaxbStreams.read(DeployConf.class, ctx.in);
-        ctx.sendResponse(Response.WAIT_DATA);
+    @Roles({"admin", "upload"})
+    void process(RequestContext ctx, UploadRequest uploadRequest) throws Exception {
         while (true) {
-            ctx.sendResponse(Response.WAIT_LOCK);
+            ctx.write("WAIT_LOCK");
             if (Wrapper.processLock.tryLock(1L, TimeUnit.MINUTES)) {
+                ctx.write("WAIT_DATA");
                 try {
                     final Path curZip = BACKUPS.resolve("cur.zip");
+                    info(LOG, "{0} Receiving data", socket);
                     Files.copy(new LimitedInputStream(ctx.in, ctx.in.readLong()), curZip, REPLACE_EXISTING);
+                    ctx.write("DESTROY_PROCESS");
                     Wrapper.destroyProcess();
+                    ctx.write("COPY_DATA");
                     if (Files.isDirectory(TARGET)) {
                         final Path res = BACKUPS.resolve(RES_BACKUP_FORMAT.format(new Date()));
                         info(LOG, "{0} Copying resources", socket);
@@ -117,28 +107,34 @@ public class Session implements Runnable {
                         info(LOG, "{0} Copying application files", socket);
                         FileUtils.moveToZip(TARGET, BACKUPS.resolve(APP_BACKUP_FORMAT.format(new Date())));
                     }
+                    ctx.write("EXTRACT_DATA");
                     info(LOG, "{0} Extracting data", socket);
                     FileUtils.copyFromZip(curZip, TARGET);
+                    ctx.write("WRITE_CONF");
                     info(LOG, "{0} Writing configuration", socket);
-                    JaxbStreams.writeXml(TARGET.resolve("configuration.xml"), deployConf);
+                    JaxbStreams.writeXml(TARGET.resolve("configuration.xml"), uploadRequest.getDeployConf());
                     break;
                 } finally {
                     Wrapper.processLock.unlock();
                 }
             } else {
-                ctx.sendResponse(Response.WAIT_LOCK_FAILED);
-                switch (ctx.in.readByte()) {
-                    case Request.CONTINUE:
+                ctx.write("WAIT_LOCK_FAILED");
+                final Object request = ctx.in.readObject();
+                switch (request.toString()) {
+                    case "CONTINUE":
                         continue;
-                    case Request.CLOSE:
-                        ctx.sendResponse(Response.BREAK);
+                    case "CLOSE":
                         return;
+                    default:
+                        throw new IllegalStateException("Illegal request: " + request);
                 }
             }
         }
     }
 
-    void listenLogs(final RequestContext ctx) throws Exception {
+    @Roles({"admin", "listenLogs"})
+    void process(RequestContext ctx, ListenLogsRequest listenLogsRequest) throws Exception {
+        ctx.setLevel(listenLogsRequest.getLevel());
         try (final RequestContext context = logHandler) {
             Logger.getLogger("").removeHandler(context);
         }
@@ -149,32 +145,54 @@ public class Session implements Runnable {
     private void doRun(ObjectInputStream is, ObjectOutputStream os) throws Exception {
         checkClientData(is, os);
         while (true) {
-            final byte request = is.readByte();
             final UID uid = UID.read(is);
             final RequestContext context = new RequestContext(uid, is, os);
+            final Object request = context.in.readObject();
             fine(LOG, "{0} Command {1} received", socket, request);
-            switch (request) {
-                case Request.UPLOAD:
-                    process(context, "upload", "admin", "uploader");
-                    break;
-                case Request.LISTEN_LOGS:
-                    process(context, "listenLogs", "admin", "listenLogs");
-                    break;
-                case Request.CLOSE:
-                    context.sendResponse(Response.OK);
-                    return;
-                default:
-                    context.sendResponse(Response.UNKNOWN_REQUEST);
-                    break;
+            try {
+                final Method method = getClass().getDeclaredMethod("process", RequestContext.class, request.getClass());
+                final Set<String> roles = new HashSet<>(Arrays.asList(method.getAnnotation(Roles.class).value()));
+                roles.retainAll(this.roles);
+                if (!roles.isEmpty()) {
+                    method.invoke(this, context, request);
+                    context.write("OK");
+                } else {
+                    context.write("ACCESS_DENIED");
+                }
+            } catch (NoSuchMethodException x) {
+                context.write("UNKNOWN_REQUEST");
+            } catch (SecurityException | IllegalAccessException x) {
+                context.write("SECURITY_ERROR");
+            } catch (ClosedSessionException x) {
+                break;
+            } catch (InvocationTargetException x) {
+                context.write("ERROR");
+                context.write(x.getCause());
             }
         }
     }
 
     @Override
     public void run() {
-        try (final ObjectInputStream i = new ObjectInputStream(socket.getInputStream());
-             final ObjectOutputStream o = new ObjectOutputStream(socket.getOutputStream())) {
-            doRun(i, o);
+        try (final InputStream inp = socket.getInputStream();
+             final OutputStream out = socket.getOutputStream()) {
+            final int code = inp.read();
+            switch (code) {
+                case 0:
+                    try (final ObjectInputStream i = new ObjectInputStream(inp);
+                         final ObjectOutputStream o = new ObjectOutputStream(out)) {
+                        doRun(i, o);
+                    }
+                    break;
+                case 1:
+                    try (final ObjectInputStream i = new ObjectInputStream(new GzipInputStream(inp, 8192));
+                         final ObjectOutputStream o = new ObjectOutputStream(new GzipOutputStream(out, 8192, true))) {
+                        doRun(i, o);
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid code: " + code);
+            }
         } catch (Exception x) {
             warning(LOG, "{0} session error", x, this);
         } finally {
@@ -205,38 +223,6 @@ public class Session implements Runnable {
             this.out = out;
         }
 
-        private void sendResponse(byte response, Object... parameters) throws IOException {
-            synchronized (Session.this) {
-                id.write(out);
-                out.writeByte(response);
-                for (final Object p : parameters) {
-                    if (p instanceof String) {
-                        out.writeUTF((String) p);
-                    } else if (p instanceof Integer) {
-                        out.writeInt((int) p);
-                    } else if (p instanceof Long) {
-                        out.writeLong((long) p);
-                    } else if (p instanceof Byte) {
-                        out.writeByte((byte) p);
-                    } else if (p instanceof Boolean) {
-                        out.writeBoolean((boolean) p);
-                    } else if (p instanceof Short) {
-                        out.writeShort((short) p);
-                    } else if (p instanceof Double) {
-                        out.writeDouble((double) p);
-                    } else if (p instanceof Float) {
-                        out.writeFloat((float) p);
-                    } else if (p instanceof Serializable) {
-                        out.writeObject(p);
-                    } else if (p instanceof ByteArrayOutputStream) {
-                        ((ByteArrayOutputStream) p).writeTo(out);
-                    } else {
-                        throw new IllegalArgumentException("Invalid parameter: " + p);
-                    }
-                }
-            }
-        }
-
         @Override
         public void publish(LogRecord record) {
             try {
@@ -251,14 +237,8 @@ public class Session implements Runnable {
             final int size = records.size();
             final List<LogRecord> recordList = new ArrayList<>(size);
             records.drainTo(recordList, size);
-            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            try (final ObjectOutputStream os = new ObjectOutputStream(new GzipOutputStream(bos, 16384, false))) {
-                os.writeObject(recordList);
-            } catch (Exception x) {
-                return;
-            }
             try {
-                sendResponse(Response.LOG_RECORDS, bos.size(), bos);
+                write(recordList.toArray(new LogRecord[recordList.size()]));
             } catch (Exception x) {
                 // We cannot log here
             }
@@ -283,6 +263,14 @@ public class Session implements Runnable {
         public void close() throws SecurityException {
             setLevel(Level.OFF);
             flush();
+        }
+
+        public void write(Object object) throws IOException {
+            synchronized (Session.this) {
+                id.write(out);
+                out.writeObject(object);
+                out.flush();
+            }
         }
     }
 }

@@ -16,11 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.util;
+package org.marid.io.ser;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.beans.Transient;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -74,6 +75,9 @@ public abstract class SerializableObject implements Serializable {
         try {
             for (final PropertyDescriptor pd : Introspector.getBeanInfo(getClass()).getPropertyDescriptors()) {
                 final Method readMethod = pd.getReadMethod();
+                if (readMethod.isAnnotationPresent(Transient.class)) {
+                    continue;
+                }
                 if (readMethod != null) {
                     map.put(pd.getName(), readMethod.invoke(null));
                 }

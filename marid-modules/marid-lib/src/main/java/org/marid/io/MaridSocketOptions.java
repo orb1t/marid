@@ -16,39 +16,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.wrapper.data;
+package org.marid.io;
 
-import org.marid.io.ser.SerializableObject;
-
-import java.util.*;
+import java.net.SocketOption;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class AuthResponse extends SerializableObject {
+public class MaridSocketOptions {
 
-    private final String result;
+    public static final SocketOption<Integer> SO_TIMEOUT = new MaridSocketOption<>("SO_TIMEOUT", Integer.class);
+    public static final SocketOption<Integer> CONN_TIMEOUT = new MaridSocketOption<>("CONN_TIMEOUT", Integer.class);
 
-    private final TreeSet<String> roles;
+    private static class MaridSocketOption<T> implements SocketOption<T> {
 
-    public AuthResponse(String result, Set<String> roles) {
-        this.result = result;
-        this.roles = new TreeSet<>(roles);
-    }
+        private final String name;
+        private final Class<T> type;
 
-    public AuthResponse(String result, String... roles) {
-        this(result, new HashSet<>(Arrays.asList(roles)));
-    }
+        private MaridSocketOption(String name, Class<T> type) {
+            this.name = name;
+            this.type = type;
+        }
 
-    public AuthResponse(String result) {
-        this(result, Collections.<String>emptySet());
-    }
+        @Override
+        public String name() {
+            return name;
+        }
 
-    public String getResult() {
-        return result;
-    }
-
-    public Set<String> getRoles() {
-        return roles;
+        @Override
+        public Class<T> type() {
+            return type;
+        }
     }
 }

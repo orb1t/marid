@@ -16,45 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.util;
+package org.marid.net;
 
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.marid.io.ser.SerializableObject;
-import org.marid.test.NormalTests;
+import org.marid.io.MaridSocketOptions;
 
-import static org.junit.Assert.*;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketOption;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Category(NormalTests.class)
-public class SerializableObjectTest {
+public class StandardSocketConfigurer<S extends Socket> extends DefaultSocketConfigurer<S> {
 
-    @Test
-    public void testEqualityAndHashCode() {
-        final X x1 = new X(1, "y");
-        final X x2 = new X(1, "y");
-        assertEquals(x1, x2);
-        assertEquals(x1.hashCode(), x2.hashCode());
+    protected final InetSocketAddress address;
+
+    public StandardSocketConfigurer(InetSocketAddress address, Map<? extends SocketOption<?>, ?> socketOptions) {
+        super(socketOptions);
+        this.address = address;
     }
 
-    private static class X extends SerializableObject {
-
-        private final int x;
-        private final String y;
-
-        private X(int x, String y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        public int getX() {
-            return x;
-        }
-
-        public String getY() {
-            return y;
+    @Override
+    public void configure(S socket) throws Exception {
+        super.configure(socket);
+        final Integer connTimeout = (Integer) socketOptions.get(MaridSocketOptions.CONN_TIMEOUT);
+        if (connTimeout == null) {
+            socket.connect(address);
+        } else {
+            socket.connect(address, connTimeout);
         }
     }
 }

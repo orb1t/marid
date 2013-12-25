@@ -16,39 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.wrapper.data;
-
-import org.marid.io.ser.SerializableObject;
-
-import java.util.*;
+package org.marid.wrapper;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class AuthResponse extends SerializableObject {
+public interface WrapperConstants {
 
-    private final String result;
-
-    private final TreeSet<String> roles;
-
-    public AuthResponse(String result, Set<String> roles) {
-        this.result = result;
-        this.roles = new TreeSet<>(roles);
-    }
-
-    public AuthResponse(String result, String... roles) {
-        this(result, new HashSet<>(Arrays.asList(roles)));
-    }
-
-    public AuthResponse(String result) {
-        this(result, Collections.<String>emptySet());
-    }
-
-    public String getResult() {
-        return result;
-    }
-
-    public Set<String> getRoles() {
-        return roles;
-    }
+    int DEFAULT_PORT = 11200;
+    int MODE_DEFAULT = 0;
+    int MODE_GZIP = 1;
 }

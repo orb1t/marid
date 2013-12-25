@@ -16,39 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.wrapper.data;
+package org.marid.ide.swing.impl.widgets;
 
-import org.marid.io.ser.SerializableObject;
-
-import java.util.*;
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class AuthResponse extends SerializableObject {
+public class DeployWidgetImpl extends AbstractSwingWidget {
 
-    private final String result;
-
-    private final TreeSet<String> roles;
-
-    public AuthResponse(String result, Set<String> roles) {
-        this.result = result;
-        this.roles = new TreeSet<>(roles);
-    }
-
-    public AuthResponse(String result, String... roles) {
-        this(result, new HashSet<>(Arrays.asList(roles)));
-    }
-
-    public AuthResponse(String result) {
-        this(result, Collections.<String>emptySet());
-    }
-
-    public String getResult() {
-        return result;
-    }
-
-    public Set<String> getRoles() {
-        return roles;
+    public DeployWidgetImpl() {
+        super("Deploy", "deployWidget");
+        setPreferredSize(new Dimension(600, 400));
+        pack();
     }
 }
