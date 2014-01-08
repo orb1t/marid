@@ -136,6 +136,7 @@
                         <goals>
                             <goal>add-test-resource</goal>
                         </goals>
+                        <phase>generate-test-resources</phase>
                         <configuration>
                             <resources>
                                 <resource>
@@ -149,9 +150,6 @@
                                     <includes>
                                         <include>*.zip</include>
                                     </includes>
-                                </resource>
-                                <resource>
-                                    <directory>src/ext</directory>
                                 </resource>
                             </resources>
                         </configuration>

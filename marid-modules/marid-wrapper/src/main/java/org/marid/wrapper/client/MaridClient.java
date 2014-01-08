@@ -86,8 +86,9 @@ public class MaridClient extends SocketWrapper<SSLSocket, ObjectInputStream, Obj
     }
 
     private UID write(Object object) throws IOException {
-        if (error.get() != null) {
-
+        final Throwable throwable = error.get();
+        if (throwable != null) {
+            throw throwable instanceof IOException ? (IOException) throwable : new IOException(throwable);
         }
         lock.writeLock().lock();
         try {
@@ -192,7 +193,7 @@ public class MaridClient extends SocketWrapper<SSLSocket, ObjectInputStream, Obj
                     } catch (Exception y) {
                         x.addSuppressed(y);
                     }
-                    throw new IllegalStateException(x);
+                    error.set(x);
                 }
             } finally {
                 lock.readLock().unlock();

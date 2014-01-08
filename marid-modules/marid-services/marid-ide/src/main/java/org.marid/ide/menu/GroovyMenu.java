@@ -40,36 +40,28 @@ import static org.marid.ide.menu.MenuType.ITEM;
 import static org.marid.ide.menu.MenuType.MENU;
 import static org.marid.methods.LogMethods.warning;
 
-public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
+public class GroovyMenu extends GroovyObjectSupport {
 
     private static final Logger LOG = Logger.getLogger(GroovyMenu.class.getName());
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
-    private void loadEntries(String script, List<MenuEntry> ens, ClassLoader l) throws Exception {
-        final GroovyCodeSource gcs = new GroovyCodeSource(l.getResource(script));
+    private static void loadEntries(URL script, List<MenuEntry> ens, ClassLoader l) throws Exception {
+        final GroovyCodeSource gcs = new GroovyCodeSource(script);
         final Map<String, Object> map = (Map<String, Object>) GroovyRuntime.SHELL.evaluate(gcs);
         for (final Entry<String, Object> e : map.entrySet()) {
             fillEntries(null, e, ens);
         }
     }
 
-    @Override
-    public List<MenuEntry> getMenuEntries() {
+    public static List<MenuEntry> getMenuEntries() {
         final LinkedList<MenuEntry> entries = new LinkedList<>();
         final ClassLoader l = Thread.currentThread().getContextClassLoader();
         try {
-            final Enumeration<URL> e = l.getResources("menu.groovy");
+            final Enumeration<URL> e = l.getResources("Menu.groovy");
             while (e.hasMoreElements()) {
                 final URL url = e.nextElement();
                 try {
-                    final List list = (List) GroovyRuntime.SHELL.evaluate(new GroovyCodeSource(url));
-                    for (final Object script : list) {
-                        try {
-                            loadEntries(script.toString(), entries, l);
-                        } catch (Exception x) {
-                            warning(LOG, "Unable to load {0}", x, script);
-                        }
-                    }
+                    loadEntries(url, entries, l);
                 } catch (Exception x) {
                     warning(LOG, "Unable to load {0}", x, url);
                 }
@@ -81,7 +73,7 @@ public class GroovyMenu extends GroovyObjectSupport implements MaridMenu {
     }
 
     @SuppressWarnings("unchecked")
-    void fillEntries(final MenuEntry pr, final Entry<String, Object> e, final List<MenuEntry> ens) {
+    static void fillEntries(final MenuEntry pr, final Entry<String, Object> e, final List<MenuEntry> ens) {
         final String name = e.getKey();
         final Map<String, Object> map = e.getValue() == null ?
                 Collections.<String, Object>emptyMap() :

@@ -69,4 +69,8 @@ public class GuiMethods {
     public static Color withAlpha(Color color, float alpha) {
         return new Color(color.getColorSpace(), color.getColorComponents(null), alpha);
     }
+
+    public static void show(Class<? extends Window> klass) throws Exception {
+        klass.newInstance().setVisible(true);
+    }
 }

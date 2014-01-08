@@ -311,7 +311,7 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
                     return null;
                 }
             }).get();
-            notifyStarted();
+            notifyStopped();
         } catch (InterruptedException x) {
             warning(log, "{0} Interrupted", this);
             notifyFailed(x);

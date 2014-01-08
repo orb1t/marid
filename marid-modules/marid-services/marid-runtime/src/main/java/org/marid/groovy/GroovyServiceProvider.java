@@ -43,7 +43,7 @@ public class GroovyServiceProvider implements MaridServiceProvider {
         final List<MaridService> services = new LinkedList<>();
         try {
             final ClassLoader cl = Utils.getClassLoader(getClass());
-            final Enumeration<URL> e = cl.getResources("services/services.groovy");
+            final Enumeration<URL> e = cl.getResources("services.groovy");
             while (e.hasMoreElements()) {
                 final URL url = e.nextElement();
                 try {

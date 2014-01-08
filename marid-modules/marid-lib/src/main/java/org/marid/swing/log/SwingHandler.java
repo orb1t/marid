@@ -105,10 +105,8 @@ public class SwingHandler extends AbstractHandler implements Localized {
 
     @SuppressWarnings("serial")
     class LogRecordRenderer extends DefaultListCellRenderer {
-
         @Override
-        public Component getListCellRendererComponent(
-                JList list, Object v, int i, boolean s, boolean f) {
+        public Component getListCellRendererComponent(JList list, Object v, int i, boolean s, boolean f) {
             LogRecord rec = (LogRecord) v;
             String val;
             try {
@@ -138,6 +136,7 @@ public class SwingHandler extends AbstractHandler implements Localized {
 
         public LogFrame() {
             super(S.l("Marid log"));
+            setAlwaysOnTop(prefs.getBoolean("alwaysOnTop", true));
             this.model = new LogRecordListModel();
             for (Level level : Logging.LEVELS) {
                 levelMap.put(level, new LevelAction(level));
@@ -242,7 +241,6 @@ public class SwingHandler extends AbstractHandler implements Localized {
         }
     }
 
-    @SuppressWarnings("serial")
     private class LogRecordListModel extends AbstractListModel<LogRecord> {
 
         private final ArrayList<LogRecord> records;

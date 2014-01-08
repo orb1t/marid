@@ -22,9 +22,12 @@ import com.google.common.collect.ImmutableMap;
 import org.marid.service.MaridService;
 import org.marid.service.MaridServiceProvider;
 
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+
+import static java.util.Collections.singletonMap;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,10 +44,9 @@ public class TestWebServiceProvider implements MaridServiceProvider {
     }
 
     private SimpleWebServer buildWebServer() throws Exception {
+        final URL indexURL = getClass().getResource("site/index.html");
         return new SimpleWebServer(ImmutableMap.builder()
-                .put("dirMap", Collections.singletonMap(
-                        "default",
-                        Paths.get(getClass().getResource("site/index.html").toURI()).getParent()))
+                .put("dirMap", singletonMap("default", Paths.get(indexURL.toURI()).getParent()))
                 .build());
     }
 }

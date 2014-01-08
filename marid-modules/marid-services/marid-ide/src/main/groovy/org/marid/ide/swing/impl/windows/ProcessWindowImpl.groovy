@@ -23,7 +23,6 @@ import org.jfree.chart.ChartPanel
 import org.jfree.data.time.Millisecond
 import org.jfree.data.time.TimeSeries
 import org.jfree.data.time.TimeSeriesCollection
-import org.marid.ide.itf.Window
 
 import javax.swing.*
 import java.awt.*
@@ -36,7 +35,7 @@ import static images.Images.getImage
 /**
  * @author Dmitry Ovchinnikov
  */
-class ProcessWindowImpl extends JFrame implements Window, ActionListener {
+class ProcessWindowImpl extends JFrame implements ActionListener {
 
     private def timer = new Timer(30, this);
     private def process = new TimeSeries("process1");

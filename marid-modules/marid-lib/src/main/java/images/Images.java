@@ -49,12 +49,16 @@ public class Images {
     }
 
     public static ImageIcon getIcon(String path, int w, int h) {
-        URL url = path == null ? null : Images.class.getResource(path);
+        final URL url = path == null ? null : Images.class.getResource(path);
         if (url == null) {
             return null;
         } else {
-            Image img = new ImageIcon(url).getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH);
-            return new ImageIcon(img);
+            final ImageIcon imageIcon = new ImageIcon(url);
+            if (imageIcon.getIconHeight() != w || imageIcon.getIconHeight() != h) {
+                return new ImageIcon(imageIcon.getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH));
+            } else {
+                return imageIcon;
+            }
         }
     }
 

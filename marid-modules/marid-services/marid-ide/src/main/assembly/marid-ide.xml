@@ -6,6 +6,8 @@
     <formats>
         <format>zip</format>
     </formats>
+    <baseDirectory>marid-ide</baseDirectory>
+    <includeBaseDirectory>true</includeBaseDirectory>
     <fileSets>
         <fileSet>
             <directory>target/ext</directory>

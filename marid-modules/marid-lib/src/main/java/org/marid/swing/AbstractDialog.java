@@ -35,10 +35,7 @@ import static org.marid.methods.LogMethods.warning;
 /**
  * @author Dmitry Ovchinnikov
  */
-@SuppressWarnings("serial")
 public abstract class AbstractDialog extends JDialog implements WindowListener, Localized {
-
-    private static final long serialVersionUID = -8712059723169095179L;
 
     protected final Logger log = Logger.getLogger(getClass().getName());
 

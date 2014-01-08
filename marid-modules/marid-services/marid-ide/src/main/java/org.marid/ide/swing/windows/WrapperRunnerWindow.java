@@ -1,0 +1,53 @@
+/*
+ * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Marid, the free data acquisition and visualization software
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.marid.ide.swing.windows;
+
+import org.marid.swing.AbstractMultiFrame;
+import org.marid.swing.forms.InputForm;
+import org.marid.swing.input.FileInput;
+import org.marid.util.Utils;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.event.ActionEvent;
+import java.net.URL;
+
+import static org.marid.methods.LogMethods.info;
+
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public class WrapperRunnerWindow extends AbstractMultiFrame {
+
+    private final URL wrapperUrl = Utils.getClassLoader(getClass()).getResource("marid-wrapper-" + version + ".zip");
+    private final FileInput fileInput = new FileInput("zipLocation", "File location",
+            wrapperUrl, new FileNameExtensionFilter("ZIP", "zip"));
+
+    public WrapperRunnerWindow() {
+        super("Wrapper Runner");
+        addAction("start", "Start", "Starts the Wrapper", "F5", "Wrapper");
+        addFrame(new InputForm("Wrapper preferences", fileInput));
+        pack();
+    }
+
+    public void start(ActionEvent actionEvent, Action action) {
+        info(logger, "Start");
+        action.setEnabled(false);
+    }
+}

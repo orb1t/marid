@@ -18,10 +18,14 @@
 
 package org.marid.ide;
 
+import groovy.lang.GroovyCodeSource;
 import org.marid.groovy.GroovyRuntime;
 import org.marid.logging.Logging;
+import org.marid.util.Utils;
 
+import javax.swing.*;
 import java.lang.invoke.MethodHandles;
+import java.net.URL;
 import java.util.logging.Logger;
 
 import static org.marid.methods.LogMethods.warning;
@@ -37,7 +41,14 @@ public class MaridIde implements Thread.UncaughtExceptionHandler {
         Logging.init(MaridIde.class, "log.properties");
         Thread.setDefaultUncaughtExceptionHandler(new MaridIde());
         Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
-        Ide.APPLICATION.getFrame().setVisible(true);
+        final URL url = Utils.getClassLoader(MaridIde.class).getResource("Init.groovy");
+        if (url != null) {
+            try {
+                GroovyRuntime.SHELL.evaluate(new GroovyCodeSource(url));
+            } catch (Exception x) {
+                JOptionPane.showMessageDialog(null, x, "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     @Override
