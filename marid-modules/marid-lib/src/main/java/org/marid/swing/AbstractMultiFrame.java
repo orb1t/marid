@@ -22,14 +22,20 @@ import images.Images;
 import org.marid.methods.LogMethods;
 
 import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyVetoException;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 
+import static java.awt.BorderLayout.NORTH;
+import static javax.swing.SwingConstants.HORIZONTAL;
 import static org.marid.l10n.Localized.S;
-import static org.marid.methods.GuiMethods.getDimension;
-import static org.marid.methods.GuiMethods.putDimension;
+import static org.marid.methods.GuiMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -37,21 +43,133 @@ import static org.marid.methods.GuiMethods.putDimension;
 public class AbstractMultiFrame extends AbstractFrame {
 
     protected final Logger logger = Logger.getLogger(getClass().getName());
-    protected final MultiFrameToolBar toolBar;
+    protected final JToolBar toolBar;
     protected final MultiFrameDesktop desktop;
     protected final JMenuBar menuBar;
 
     public AbstractMultiFrame(String title) {
         super(title);
         setJMenuBar(menuBar = new JMenuBar());
-        add(toolBar = new MultiFrameToolBar(), pref.get("toolbarPosition", BorderLayout.NORTH));
+        menuBar.add(new JSeparator());
+        add(toolBar = new JToolBar(pref.getInt("toolbarOrientation", HORIZONTAL)), pref.get("toolbarPosition", NORTH));
         add(desktop = new MultiFrameDesktop());
         toolBar.setBorderPainted(true);
         setPreferredSize(getDimension(pref, "size", new Dimension(700, 500)));
         addAction("-cascade", "Cascade", "Cascades the widgets", "control J", "Widgets");
+        addAction("-tileHorizontal", "Tile horizontal", "Tiles the widgets horizontally", "control H", "Widgets");
+        addAction("-tileVertical|", "Tile vertical", "Tiles the widgets vertically", "control K", "Widgets");
+        addWidgetListMenu();
+        addAction("-profiles", "Profiles...", "Shows the profiles dialog", null, "Widgets");
     }
 
-    public void cascade(ActionEvent actionEvent, Action action) {
+    public void cascade(ActionEvent actionEvent, Action action) throws PropertyVetoException {
+        final JInternalFrame[] frames = desktop.getAllFrames();
+        for (int i = 0; i < frames.length; i++) {
+            frames[i].setIcon(false);
+            frames[i].setLocation(i * 20, i * 20);
+            frames[i].setSize(frames[i].getPreferredSize());
+        }
+    }
+
+    public void tileVertical(ActionEvent actionEvent, Action action) throws PropertyVetoException {
+        final JInternalFrame[] frames = desktop.getAllFrames();
+        for (int i = 0; i < frames.length; i++) {
+            frames[i].setIcon(false);
+            frames[i].setLocation(0, (desktop.getHeight() / frames.length) * i);
+            frames[i].setSize(desktop.getWidth(), desktop.getHeight() / frames.length);
+        }
+    }
+
+    public void tileHorizontal(ActionEvent actionEvent, Action action) throws PropertyVetoException {
+        final JInternalFrame[] frames = desktop.getAllFrames();
+        for (int i = 0; i < frames.length; i++) {
+            frames[i].setIcon(false);
+            frames[i].setLocation((desktop.getWidth() / frames.length) * i, 0);
+            frames[i].setSize(desktop.getWidth() / frames.length, desktop.getHeight());
+        }
+    }
+
+    public void profiles(ActionEvent actionEvent, Action action) {
+
+    }
+
+    private void addWidgetListMenu() {
+        final JMenu widgetsMenu = menuBar.getMenu(0);
+        final JMenu widgetListMenu = new JMenu(S.l("Widget list"));
+        widgetListMenu.setIcon(Images.getIcon("widgetList16.png", 16));
+        widgetListMenu.setActionCommand("widgetList");
+        widgetListMenu.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                for (final JInternalFrame frame : desktop.getAllFrames()) {
+                    final ActionListener frameActionListener = new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            try {
+                                switch (e.getActionCommand()) {
+                                    case "maximize":
+                                        frame.setMaximum(true);
+                                        break;
+                                    case "minimize":
+                                        frame.setIcon(true);
+                                        break;
+                                    case "normalize":
+                                        frame.setIcon(false);
+                                        frame.setMaximum(false);
+                                        frame.setLocation(0, 0);
+                                        frame.setSize(frame.getPreferredSize());
+                                        break;
+                                }
+                            } catch (PropertyVetoException x) {
+                                // skip
+                            }
+                        }
+                    };
+                    final JMenu item = new JMenu(frame.getTitle());
+                    item.setIcon(frame.getFrameIcon());
+                    item.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            try {
+                                frame.setIcon(false);
+                                frame.setSelected(true);
+                            } catch (PropertyVetoException x) {
+                                // skip
+                            }
+                        }
+                    });
+                    final JMenuItem minimizeItem = new JMenuItem(S.l("Minimize"), Images.getIcon("minimize16.png"));
+                    minimizeItem.setActionCommand("minimize");
+                    minimizeItem.addActionListener(frameActionListener);
+                    item.add(minimizeItem);
+                    final JMenuItem maximizeItem = new JMenuItem(S.l("Maximize"), Images.getIcon("maximize16.png"));
+                    maximizeItem.setActionCommand("maximize");
+                    maximizeItem.addActionListener(frameActionListener);
+                    item.add(maximizeItem);
+                    item.addSeparator();
+                    final JMenuItem normalizeItem = new JMenuItem(S.l("Normalize"), Images.getIcon("normalize16.png"));
+                    normalizeItem.setActionCommand("normalize");
+                    normalizeItem.addActionListener(frameActionListener);
+                    item.add(normalizeItem);
+                    widgetListMenu.add(item);
+                }
+            }
+
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                widgetListMenu.removeAll();
+            }
+
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                widgetListMenu.removeAll();
+            }
+        });
+        widgetsMenu.add(widgetListMenu);
+        widgetsMenu.addSeparator();
+    }
+
+    public void widgetList(ActionEvent actionEvent, Action action) throws PropertyVetoException {
 
     }
 
@@ -98,7 +216,7 @@ public class AbstractMultiFrame extends AbstractFrame {
             action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(key));
         }
         if (addToToolbar) {
-            toolBar.add(action);
+            toolBar.add(action).setFocusable(false);
             if (addSeparator) {
                 final Component lastButton = toolBar.getComponent(toolBar.getComponentCount() - 1);
                 if (!(lastButton instanceof JSeparator)) {
@@ -154,6 +272,10 @@ public class AbstractMultiFrame extends AbstractFrame {
                 pref.putInt("extState", getExtendedState());
                 pref.put("toolbarPosition", (String) borderLayout.getConstraints(toolBar));
                 pref.putInt("toolbarOrientation", toolBar.getOrientation());
+                for (final JInternalFrame frame : desktop.getAllFrames()) {
+                    final Preferences framePref = pref.node(frame.getName());
+                    putPoint(framePref, "location", frame.getLocation());
+                }
                 break;
             case WindowEvent.WINDOW_OPENED:
                 setState(pref.getInt("state", getState()));
@@ -163,21 +285,9 @@ public class AbstractMultiFrame extends AbstractFrame {
     }
 
     public void addFrame(JInternalFrame frame) {
+        final Preferences framePref = pref.node(frame.getName());
+        frame.setLocation(getPoint(framePref, "location", new Point(0, 0)));
         desktop.getDesktopManager().openFrame(frame);
-    }
-
-    protected class MultiFrameToolBar extends JToolBar {
-
-        protected MultiFrameToolBar() {
-            super(pref.getInt("toolbarOrientation", JToolBar.HORIZONTAL));
-        }
-
-        @Override
-        public JButton add(Action a) {
-            final JButton button = super.add(a);
-            button.setFocusable(false);
-            return button;
-        }
     }
 
     protected class MultiFrameDesktop extends JDesktopPane {

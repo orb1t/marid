@@ -37,8 +37,9 @@ public class InputForm extends JInternalFrame {
     protected final Input<?>[] inputs;
 
     @SafeVarargs
-    public <T extends Component & Input<?>> InputForm(String title, T... inputs) {
+    public <T extends Component & Input<?>> InputForm(String name, String title, T... inputs) {
         super(S.l(title), true, false, true, true);
+        setName(name);
         setFrameIcon(new ImageIcon(MaridIcons.ICONS.get(1)));
         this.inputs = inputs;
         final JPanel panel = new ListPanel();

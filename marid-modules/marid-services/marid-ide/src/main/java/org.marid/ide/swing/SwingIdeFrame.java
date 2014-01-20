@@ -72,12 +72,7 @@ public class SwingIdeFrame extends JFrame {
                 if (closeable) {
                     setVisible(false);
                 } else {
-                    final String message = M.l("Do you want to exit?");
-                    switch (showConfirmDialog(this, message, S.l("Exit"), YES_NO_OPTION, QUESTION_MESSAGE)) {
-                        case YES_OPTION:
-                            exit();
-                            break;
-                    }
+                    exitWithConfirm();
                 }
                 break;
         }
@@ -99,6 +94,14 @@ public class SwingIdeFrame extends JFrame {
             } catch (Exception x) {
                 warning(LOG, "Unable to show log window", x);
             }
+        }
+    }
+
+    public void exitWithConfirm() {
+        switch (showConfirmDialog(this, M.l("Do you want to exit?"), S.l("Exit"), YES_NO_OPTION, QUESTION_MESSAGE)) {
+            case YES_OPTION:
+                exit();
+                break;
         }
     }
 

@@ -29,6 +29,7 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
@@ -61,7 +62,7 @@ public class SwingIde {
                 frame = new SwingIdeFrame(true, entries);
                 frame.setVisible(true);
                 tray.add(icon);
-                TrayIconHandler.addSystemHandler(icon);
+                TrayIconHandler.addSystemHandler(icon, Level.parse(SYSPREFS.get("trayLevel", Level.OFF.getName())));
             } catch (Exception x) {
                 warning(LOG, "Unable to create the tray icon", x);
                 frame = new SwingIdeFrame(false, entries);

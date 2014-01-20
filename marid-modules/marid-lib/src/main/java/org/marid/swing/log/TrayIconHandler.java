@@ -24,10 +24,7 @@ import java.awt.*;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,8 +33,9 @@ public class TrayIconHandler extends Handler {
 
     private final TrayIcon trayIcon;
 
-    public TrayIconHandler(TrayIcon trayIcon) {
+    private TrayIconHandler(TrayIcon trayIcon, Level level) {
         this.trayIcon = trayIcon;
+        setLevel(level);
     }
 
     @Override
@@ -66,7 +64,11 @@ public class TrayIconHandler extends Handler {
             messageType = TrayIcon.MessageType.NONE;
         }
         if (messageType != TrayIcon.MessageType.NONE) {
-            trayIcon.displayMessage(caption, text, messageType);
+            try {
+                trayIcon.displayMessage(caption, text, messageType);
+            } catch (Exception x) {
+                reportError("Display message error", x, ErrorManager.WRITE_FAILURE);
+            }
         }
     }
 
@@ -94,7 +96,7 @@ public class TrayIconHandler extends Handler {
         }
     }
 
-    public static void addSystemHandler(TrayIcon trayIcon) {
+    public static void addSystemHandler(TrayIcon trayIcon, Level level) {
         final Logger logger = Logger.getLogger("");
         if (logger != null) {
             for (final Handler h : logger.getHandlers()) {
@@ -102,7 +104,7 @@ public class TrayIconHandler extends Handler {
                     return;
                 }
             }
-            logger.addHandler(new TrayIconHandler(trayIcon));
+            logger.addHandler(new TrayIconHandler(trayIcon, level));
         }
     }
 }

@@ -25,6 +25,7 @@ import org.marid.util.Utils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.net.URL;
 
@@ -42,12 +43,19 @@ public class WrapperRunnerWindow extends AbstractMultiFrame {
     public WrapperRunnerWindow() {
         super("Wrapper Runner");
         addAction("start", "Start", "Starts the Wrapper", "F5", "Wrapper");
-        addFrame(new InputForm("Wrapper preferences", fileInput));
+        addFrame(new InputForm("wrapperPreferences", "Wrapper preferences", fileInput));
         pack();
     }
 
     public void start(ActionEvent actionEvent, Action action) {
-        info(logger, "Start");
+        addFrame(new JInternalFrame("Console", true, true, true, true) {
+            {
+                setPreferredSize(new Dimension(800, 600));
+                setBackground(Color.BLACK);
+                setName("console");
+                pack();
+            }
+        });
         action.setEnabled(false);
     }
 }

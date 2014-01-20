@@ -17,8 +17,6 @@
  */
 package org.marid.l10n;
 
-import org.marid.l10n.LocalizationUtils.EmptyResourceBundle;
-
 import java.text.MessageFormat;
 import java.util.Formatter;
 import java.util.ResourceBundle;
@@ -42,24 +40,24 @@ public interface Localized {
                 rb = getBundle("res.strings", LocalizationUtils.UTF8_CONTROL);
             } catch (Exception x) {
                 x.printStackTrace(System.err);
-                rb = new EmptyResourceBundle();
+                rb = ResourceBundle.getBundle(Localized.class.getPackage().getName() + ".strings");
             }
             SB = rb;
         }
 
         public static String l(String key, Object... ps) {
-            String r = SB.containsKey(key) ? SB.getString(key) : key;
+            final String r = SB.containsKey(key) ? SB.getString(key) : key;
             return ps == null || ps.length == 0 ? r : String.format(r, ps);
         }
 
         public static void l(String key, Appendable out, Object... ps) {
-            String r = SB.containsKey(key) ? SB.getString(key) : key;
-            Formatter formatter = new Formatter(out);
+            final String r = SB.containsKey(key) ? SB.getString(key) : key;
+            final Formatter formatter = new Formatter(out);
             formatter.format(r, ps);
         }
 
         public static void l(String key, Formatter formatter, Object... ps) {
-            String r = SB.containsKey(key) ? SB.getString(key) : key;
+            final String r = SB.containsKey(key) ? SB.getString(key) : key;
             formatter.format(r, ps);
         }
     }
@@ -74,18 +72,18 @@ public interface Localized {
                 rb = getBundle("res.messages", LocalizationUtils.UTF8_CONTROL);
             } catch (Exception x) {
                 x.printStackTrace(System.err);
-                rb = new EmptyResourceBundle();
+                rb = ResourceBundle.getBundle(Localized.class.getPackage().getName() + ".messages");
             }
             MB = rb;
         }
 
         public static String l(String k, Object... v) {
-            String r = MB.containsKey(k) ? MB.getString(k) : k;
+            final String r = MB.containsKey(k) ? MB.getString(k) : k;
             return v == null || v.length == 0 ? r : MessageFormat.format(r, v);
         }
 
         public static void l(String k, StringBuffer buffer, Object... v) {
-            String r = MB.containsKey(k) ? MB.getString(k) : k;
+            final String r = MB.containsKey(k) ? MB.getString(k) : k;
             if (v == null || v.length == 0) {
                 buffer.append(r);
             } else {

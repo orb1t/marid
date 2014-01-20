@@ -145,7 +145,7 @@ public class PopupMenuImpl extends PopupMenu implements ActionListener, Localize
                 SwingIde.frame.showLog();
                 break;
             case "exit":
-                SwingIde.frame.exit();
+                SwingIde.frame.exitWithConfirm();
                 break;
         }
 
