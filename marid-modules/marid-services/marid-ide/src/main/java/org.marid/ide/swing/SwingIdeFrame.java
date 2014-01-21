@@ -98,7 +98,7 @@ public class SwingIdeFrame extends JFrame {
     }
 
     public void exitWithConfirm() {
-        switch (showConfirmDialog(this, M.l("Do you want to exit?"), S.l("Exit"), YES_NO_OPTION, QUESTION_MESSAGE)) {
+        switch (showConfirmDialog(null, M.l("Do you want to exit?"), S.l("Exit"), YES_NO_OPTION, QUESTION_MESSAGE)) {
             case YES_OPTION:
                 exit();
                 break;

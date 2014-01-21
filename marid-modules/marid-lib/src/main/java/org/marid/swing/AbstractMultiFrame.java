@@ -50,7 +50,6 @@ public class AbstractMultiFrame extends AbstractFrame {
     public AbstractMultiFrame(String title) {
         super(title);
         setJMenuBar(menuBar = new JMenuBar());
-        menuBar.add(new JSeparator());
         add(toolBar = new JToolBar(pref.getInt("toolbarOrientation", HORIZONTAL)), pref.get("toolbarPosition", NORTH));
         add(desktop = new MultiFrameDesktop());
         toolBar.setBorderPainted(true);
@@ -195,8 +194,10 @@ public class AbstractMultiFrame extends AbstractFrame {
                 final Object caller = AbstractMultiFrame.this;
                 try {
                     caller.getClass().getMethod(method, ActionEvent.class, Action.class).invoke(caller, e, this);
+                } catch (NoSuchMethodException x) {
+                    LogMethods.warning(logger, "{0} No command registered", x, method);
                 } catch (Exception x) {
-                    LogMethods.warning(logger, "{0} error", x, method);
+                    LogMethods.severe(logger, "{0} error", x, method);
                 }
             }
         };
@@ -230,7 +231,7 @@ public class AbstractMultiFrame extends AbstractFrame {
         JMenu menu = null;
         for (int i = 0; i < menuBar.getMenuCount(); i++) {
             final JMenu m = menuBar.getMenu(i);
-            if (path[0].equals(m.getActionCommand())) {
+            if (m != null && path[0].equals(m.getActionCommand())) {
                 menu = m;
                 break;
             }
