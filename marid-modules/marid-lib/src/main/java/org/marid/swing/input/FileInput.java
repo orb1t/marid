@@ -36,12 +36,9 @@ public class FileInput extends JPanel implements Input<String> {
 
     private static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
 
-    private final String label;
     private final JTextField textField;
 
-    public FileInput(String key, String label, String path, final FileFilter... fileFilters) {
-        this.label = label;
-        setName(key);
+    public FileInput(String path, final FileFilter... fileFilters) {
         final GroupLayout g = new GroupLayout(this);
         g.setAutoCreateGaps(true);
         textField = new JTextField(get(path));
@@ -79,8 +76,8 @@ public class FileInput extends JPanel implements Input<String> {
         setLayout(g);
     }
 
-    public FileInput(String key, String label, URL url, FileFilter... fileFilters) {
-        this(key, label, url == null ? "" : new File(get(url)).getAbsolutePath(), fileFilters);
+    public FileInput(URL url, FileFilter... fileFilters) {
+        this(url == null ? "" : new File(get(url)).getAbsolutePath(), fileFilters);
     }
 
     @Override
@@ -101,11 +98,6 @@ public class FileInput extends JPanel implements Input<String> {
     @Override
     public void loadValue(Preferences preferences, String key, String def) {
         textField.setText(preferences.get(key, def));
-    }
-
-    @Override
-    public String getLabel() {
-        return label;
     }
 
     @Override

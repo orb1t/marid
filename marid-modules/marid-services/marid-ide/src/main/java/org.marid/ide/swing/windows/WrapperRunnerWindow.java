@@ -19,17 +19,13 @@
 package org.marid.ide.swing.windows;
 
 import org.marid.swing.AbstractMultiFrame;
-import org.marid.swing.forms.InputForm;
-import org.marid.swing.input.FileInput;
+import org.marid.swing.FrameAction;
 import org.marid.util.Utils;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.net.URL;
-
-import static org.marid.methods.LogMethods.info;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -37,16 +33,13 @@ import static org.marid.methods.LogMethods.info;
 public class WrapperRunnerWindow extends AbstractMultiFrame {
 
     private final URL wrapperUrl = Utils.getClassLoader(getClass()).getResource("marid-wrapper-" + version + ".zip");
-    private final FileInput fileInput = new FileInput("zipLocation", "File location",
-            wrapperUrl, new FileNameExtensionFilter("ZIP", "zip"));
 
     public WrapperRunnerWindow() {
         super("Wrapper Runner");
-        addAction("start", "Start", "Starts the Wrapper", "F5", "Wrapper");
-        addFrame(new InputForm("wrapperPreferences", "Wrapper preferences", fileInput));
         pack();
     }
 
+    @FrameAction(key = "F5", info = "Starts the wrapper", group = "control", tool = true, path = "Wrapper")
     public void start(ActionEvent actionEvent, Action action) {
         addFrame(new JInternalFrame("Console", true, true, true, true) {
             {

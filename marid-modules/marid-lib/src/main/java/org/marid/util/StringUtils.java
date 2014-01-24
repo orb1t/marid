@@ -18,7 +18,6 @@
 
 package org.marid.util;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -27,6 +26,10 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * @author Dmitry Ovchinnikov
  */
 public class StringUtils {
+
+    public static String capitalize(String text) {
+        return text.isEmpty() ? text : text.substring(0, 1).toUpperCase() + text.substring(1);
+    }
 
     public static String repeated(char symbol, int times) {
         char[] buf = new char[times];

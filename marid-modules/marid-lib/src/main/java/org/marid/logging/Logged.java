@@ -16,20 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.input;
+package org.marid.logging;
 
-import java.util.prefs.Preferences;
+import java.util.logging.Logger;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Input<V> {
+public interface Logged {
 
-    V getValue();
-
-    void setValue(V value);
-
-    void putValue(Preferences preferences, String key);
-
-    void loadValue(Preferences preferences, String key, V def);
+    Logger getLogger();
 }

@@ -16,20 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.input;
-
-import java.util.prefs.Preferences;
+package org.marid.swing.forms;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Input<V> {
+public @interface Input {
 
-    V getValue();
+    String label() default "#";
 
-    void setValue(V value);
+    String name() default "#";
 
-    void putValue(Preferences preferences, String key);
+    boolean horizontal() default true;
 
-    void loadValue(Preferences preferences, String key, V def);
+    String group() default "#";
 }
