@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
-import static org.marid.l10n.Localized.S;
+import static org.marid.l10n.L10n.*;
 import static org.marid.methods.LogMethods.*;
 import static org.marid.methods.PropMethods.*;
 
@@ -146,7 +146,7 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
 
     @Override
     public String name() {
-        return S.l(getClass().getSimpleName());
+        return s(getClass().getSimpleName());
     }
 
     @Override

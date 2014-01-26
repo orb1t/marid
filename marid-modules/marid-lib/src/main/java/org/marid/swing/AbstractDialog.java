@@ -18,8 +18,6 @@
 
 package org.marid.swing;
 
-import org.marid.l10n.Localized;
-
 import javax.swing.*;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
@@ -30,27 +28,28 @@ import java.awt.event.WindowListener;
 import java.util.logging.Logger;
 
 import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW;
+import static org.marid.l10n.L10n.s;
 import static org.marid.methods.LogMethods.warning;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractDialog extends JDialog implements WindowListener, Localized {
+public abstract class AbstractDialog extends JDialog implements WindowListener {
 
     protected final Logger log = Logger.getLogger(getClass().getName());
 
     public AbstractDialog(Window window, String title, ModalityType modalityType) {
-        super(window, S.l(title), modalityType);
+        super(window, s(title), modalityType);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
     public AbstractDialog(Frame frame, String title, boolean modal) {
-        super(frame, S.l(title), modal);
+        super(frame, s(title), modal);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
     public AbstractDialog(Dialog dialog, String title, ModalityType modalityType) {
-        super(dialog, S.l(title), modalityType);
+        super(dialog, s(title), modalityType);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 

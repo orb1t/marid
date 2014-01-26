@@ -1,25 +1,26 @@
 package org.marid.swing;
 
 import images.Images;
-import org.marid.l10n.Localized;
 
 import javax.swing.*;
+
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class MaridAction extends AbstractAction implements Localized {
+public abstract class MaridAction extends AbstractAction {
 
     public MaridAction() {
         super();
     }
 
     public MaridAction(String title) {
-        super(S.l(title));
+        super(s(title));
     }
 
     public MaridAction(String title, String icon) {
-        super(S.l(title));
+        super(s(title));
         ImageIcon ic = Images.getIcon(icon);
         if (ic != null) {
             putValue(SMALL_ICON, ic);
@@ -27,6 +28,6 @@ public abstract class MaridAction extends AbstractAction implements Localized {
     }
 
     public MaridAction(String title, Icon icon) {
-        super(S.l(title), icon);
+        super(s(title), icon);
     }
 }

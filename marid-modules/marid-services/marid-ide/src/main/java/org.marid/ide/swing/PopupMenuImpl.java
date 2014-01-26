@@ -19,7 +19,6 @@
 package org.marid.ide.swing;
 
 import org.marid.ide.menu.MenuEntry;
-import org.marid.l10n.Localized;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,29 +28,30 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
 
+import static org.marid.l10n.L10n.s;
 import static org.marid.util.CollectionUtils.concat;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PopupMenuImpl extends PopupMenu implements ActionListener, Localized {
+public class PopupMenuImpl extends PopupMenu implements ActionListener {
 
     private final Font font = UIManager.getFont("Label.font").deriveFont(Font.PLAIN);
 
     public PopupMenuImpl(List<MenuEntry> menuEntries) {
-        final MenuItem activateItem = new MenuItem(S.l("Show/Hide the main window"));
+        final MenuItem activateItem = new MenuItem(s("Show/Hide the main window"));
         activateItem.setFont(font.deriveFont(Font.BOLD));
         activateItem.setActionCommand("show_hide");
         activateItem.addActionListener(this);
         add(activateItem);
         addSeparator();
-        final MenuItem showLogItem = new MenuItem(S.l("Show log"));
+        final MenuItem showLogItem = new MenuItem(s("Show log"));
         showLogItem.setFont(font);
         showLogItem.setActionCommand("show_log");
         showLogItem.addActionListener(this);
         add(showLogItem);
         addSeparator();
-        final MenuItem exitItem = new MenuItem(S.l("Exit"));
+        final MenuItem exitItem = new MenuItem(s("Exit"));
         exitItem.setFont(font);
         exitItem.setActionCommand("exit");
         exitItem.addActionListener(this);

@@ -21,7 +21,6 @@ package org.marid.ide.swing;
 import org.marid.ide.menu.GroovyMenu;
 import org.marid.ide.menu.MenuEntry;
 import org.marid.image.MaridIcon;
-import org.marid.l10n.Localized;
 import org.marid.swing.log.TrayIconHandler;
 
 import javax.swing.*;
@@ -33,6 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
+import static org.marid.l10n.L10n.s;
 import static org.marid.methods.LogMethods.warning;
 import static org.marid.methods.PrefMethods.preferences;
 
@@ -56,7 +56,7 @@ public class SwingIde {
                 final int trayHeight = traySize.height;
                 final Image image = MaridIcon.getImage(Math.min(trayWidth, trayHeight), Color.GREEN);
                 final PopupMenuImpl popup = new PopupMenuImpl(entries);
-                final TrayIcon icon = new TrayIcon(image, Localized.S.l("Marid IDE"), popup);
+                final TrayIcon icon = new TrayIcon(image, s("Marid IDE"), popup);
                 icon.addActionListener(popup);
                 icon.setActionCommand("show_hide");
                 frame = new SwingIdeFrame(true, entries);

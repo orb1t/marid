@@ -18,21 +18,20 @@
 
 package org.marid.swing;
 
-import org.marid.l10n.Localized;
-
 import javax.swing.*;
 import java.awt.event.WindowEvent;
 import java.util.prefs.Preferences;
 
+import static org.marid.l10n.L10n.s;
 import static org.marid.methods.GuiMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class MaridFrame extends JFrame implements Localized {
+public abstract class MaridFrame extends JFrame {
 
     public MaridFrame(String title) {
-        super(S.l(title));
+        super(s(title));
     }
 
     @Override

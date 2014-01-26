@@ -18,8 +18,10 @@
 
 package org.marid.ide.swing.windows;
 
+import org.marid.l10n.L10n;
 import org.marid.swing.AbstractMultiFrame;
 import org.marid.swing.FrameAction;
+import org.marid.swing.FrameWidget;
 import org.marid.util.Utils;
 
 import javax.swing.*;
@@ -41,14 +43,18 @@ public class WrapperRunnerWindow extends AbstractMultiFrame {
 
     @FrameAction(key = "F5", info = "Starts the wrapper", group = "control", tool = true, path = "Wrapper")
     public void start(ActionEvent actionEvent, Action action) {
-        addFrame(new JInternalFrame("Console", true, true, true, true) {
-            {
-                setPreferredSize(new Dimension(800, 600));
-                setBackground(Color.BLACK);
-                setName("console");
-                pack();
-            }
-        });
+        showFrame("runner");
         action.setEnabled(false);
+    }
+
+    @FrameWidget(name = "runner", user = false)
+    public class Runner extends JInternalFrame {
+
+        public Runner() {
+            super(L10n.s("Runner"), true, false, true, false);
+            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            setPreferredSize(new Dimension(800, 600));
+            pack();
+        }
     }
 }

@@ -19,10 +19,9 @@
 package org.marid.swing.profiles;
 
 import javax.swing.*;
-
 import java.util.prefs.Preferences;
 
-import static org.marid.l10n.Localized.S;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -32,7 +31,7 @@ public class ProfileDialog extends JDialog {
     private final Preferences preferences;
 
     public ProfileDialog(JFrame frame, Preferences preferences) {
-        super(frame, S.l("Profiles") + ": " + frame.getTitle(), true);
+        super(frame, s("Profiles") + ": " + frame.getTitle(), true);
         this.preferences = preferences;
     }
 }

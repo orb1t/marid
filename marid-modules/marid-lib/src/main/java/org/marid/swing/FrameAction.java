@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import static org.marid.l10n.Localized.S;
+import static org.marid.l10n.L10n.s;
 import static org.marid.methods.LogMethods.warning;
 import static org.marid.util.StringUtils.capitalize;
 
@@ -98,7 +98,7 @@ public @interface FrameAction {
             if (actionMap.containsKey(caller)) {
                 return actionMap.get(caller);
             }
-            final Action action = new AbstractAction(S.l(label)) {
+            final Action action = new AbstractAction(s(label)) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
@@ -119,7 +119,7 @@ public @interface FrameAction {
                 action.putValue(Action.LARGE_ICON_KEY, largeIcon);
             }
             if (!frameAction.info().isEmpty()) {
-                action.putValue(Action.SHORT_DESCRIPTION, S.l(frameAction.info()));
+                action.putValue(Action.SHORT_DESCRIPTION, s(frameAction.info()));
             }
             if (!frameAction.key().isEmpty()) {
                 action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(frameAction.key()));

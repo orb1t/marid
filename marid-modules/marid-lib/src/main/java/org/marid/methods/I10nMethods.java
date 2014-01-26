@@ -18,7 +18,8 @@
 
 package org.marid.methods;
 
-import org.marid.l10n.Localized;
+import static org.marid.l10n.L10n.m;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -26,10 +27,10 @@ import org.marid.l10n.Localized;
 public class I10nMethods {
 
     public static String ls(String s, Object... args) {
-        return Localized.S.l(s, args);
+        return s(s, args);
     }
 
     public static String lm(String m, Object... args) {
-        return Localized.M.l(m, args);
+        return m(m, args);
     }
 }

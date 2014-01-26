@@ -20,26 +20,27 @@ package org.marid.ide.swing;
 
 import images.Images;
 import org.marid.ide.menu.MenuEntry;
-import org.marid.l10n.Localized;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+import static org.marid.l10n.L10n.*;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-class MenuActionImpl extends AbstractAction implements Localized {
+class MenuActionImpl extends AbstractAction {
 
     private final MenuEntry entry;
 
     public MenuActionImpl(MenuEntry entry) {
         this.entry = entry;
         putValue(ACTION_COMMAND_KEY, entry.getCommand());
-        putValue(NAME, S.l(entry.getLabel()));
+        putValue(NAME, s(entry.getLabel()));
         final String shortcut = entry.getShortcut();
         final String icon = entry.getIcon();
-        final String description = S.l(entry.getDescription());
-        final String info = S.l(entry.getInfo());
+        final String description = s(entry.getDescription());
+        final String info = s(entry.getInfo());
         if (shortcut != null) {
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(shortcut));
         }
@@ -64,13 +65,13 @@ class MenuActionImpl extends AbstractAction implements Localized {
 
     public void update() {
         if (entry.isMutableDescription()) {
-            putValue(LONG_DESCRIPTION, S.l(entry.getDescription()));
+            putValue(LONG_DESCRIPTION, s(entry.getDescription()));
         }
         if (entry.isMutableInfo()) {
-            putValue(SHORT_DESCRIPTION, S.l(entry.getInfo()));
+            putValue(SHORT_DESCRIPTION, s(entry.getInfo()));
         }
         if (entry.isMutableLabel()) {
-            putValue(NAME, S.l(entry.getLabel()));
+            putValue(NAME, s(entry.getLabel()));
         }
         if (entry.isMutableIcon()) {
             putValue(SMALL_ICON, Images.getIcon(entry.getIcon(), 16, 16));

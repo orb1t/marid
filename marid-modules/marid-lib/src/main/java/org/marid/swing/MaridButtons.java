@@ -18,6 +18,8 @@
 
 package org.marid.swing;
 
+import org.marid.l10n.L10n;
+
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.event.ActionEvent;
@@ -33,7 +35,7 @@ public class MaridButtons {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser(textField.getText());
                 fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                int result = fileChooser.showDialog(textField, S.l("Select"));
+                int result = fileChooser.showDialog(textField, L10n.s("Select"));
                 if (result == JFileChooser.APPROVE_OPTION) {
                     textField.setText(fileChooser.getSelectedFile().toString());
                 }

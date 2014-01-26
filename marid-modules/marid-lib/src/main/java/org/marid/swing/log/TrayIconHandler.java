@@ -18,13 +18,13 @@
 
 package org.marid.swing.log;
 
-import org.marid.l10n.Localized;
-
 import java.awt.*;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.logging.*;
+
+import static org.marid.l10n.L10n.m;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -44,7 +44,7 @@ public class TrayIconHandler extends Handler {
             return;
         }
         final String caption = new Timestamp(record.getMillis()).toString();
-        final String message = Localized.M.l(String.valueOf(record.getMessage()));
+        final String message = m(String.valueOf(record.getMessage()));
         String text = message;
         if (record.getParameters() != null && record.getParameters().length > 0) {
             try {

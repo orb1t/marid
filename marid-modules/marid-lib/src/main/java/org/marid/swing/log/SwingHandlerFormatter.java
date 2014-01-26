@@ -18,7 +18,7 @@
 
 package org.marid.swing.log;
 
-import org.marid.l10n.Localized;
+import static org.marid.l10n.L10n.*;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -32,7 +32,7 @@ import static java.util.Calendar.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SwingHandlerFormatter extends Formatter implements Localized {
+public class SwingHandlerFormatter extends Formatter {
 
     private final Calendar calendar = new GregorianCalendar(Locale.ROOT);
 
@@ -80,7 +80,7 @@ public class SwingHandlerFormatter extends Formatter implements Localized {
         buffer.append(field);
         buffer.append(' ');
         try {
-            M.l(record.getMessage(), buffer, record.getParameters());
+            m(record.getMessage(), buffer, record.getParameters());
         } catch (Exception x) {
             x.printStackTrace();
             buffer.append(record.getMessage());

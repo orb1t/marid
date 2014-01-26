@@ -36,11 +36,12 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import static javax.swing.JOptionPane.*;
-import static org.marid.l10n.Localized.M;
-import static org.marid.l10n.Localized.S;
+import static org.marid.l10n.L10n.m;
+import static org.marid.l10n.L10n.s;
+import static org.marid.methods.GuiMethods.getDimension;
+import static org.marid.methods.GuiMethods.putDimension;
 import static org.marid.methods.LogMethods.warning;
-import static org.marid.methods.GuiMethods.*;
-import static org.marid.methods.PrefMethods.*;
+import static org.marid.methods.PrefMethods.preferences;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -52,7 +53,7 @@ public class SwingIdeFrame extends JFrame {
     private final boolean closeable;
 
     public SwingIdeFrame(boolean closeable, List<MenuEntry> menuEntries) {
-        super(S.l("Marid IDE"));
+        super(s("Marid IDE"));
         this.closeable = closeable;
         setIconImages(MaridIcons.ICONS);
         setJMenuBar(new MenuBarImpl(menuEntries));
@@ -98,7 +99,7 @@ public class SwingIdeFrame extends JFrame {
     }
 
     public void exitWithConfirm() {
-        switch (showConfirmDialog(null, M.l("Do you want to exit?"), S.l("Exit"), YES_NO_OPTION, QUESTION_MESSAGE)) {
+        switch (showConfirmDialog(null, m("Do you want to exit?"), s("Exit"), YES_NO_OPTION, QUESTION_MESSAGE)) {
             case YES_OPTION:
                 exit();
                 break;

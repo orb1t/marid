@@ -29,6 +29,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.Logger;
@@ -37,7 +38,7 @@ import java.util.prefs.Preferences;
 import static java.awt.BorderLayout.NORTH;
 import static java.util.Arrays.copyOfRange;
 import static javax.swing.SwingConstants.HORIZONTAL;
-import static org.marid.l10n.Localized.S;
+import static org.marid.l10n.L10n.*;
 import static org.marid.methods.GuiMethods.*;
 import static org.marid.methods.LogMethods.warning;
 
@@ -63,7 +64,7 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements Logged
         setPreferredSize(getDimension(pref, "size", new Dimension(700, 500)));
         doActions();
         menuBar.add(new JSeparator(JSeparator.VERTICAL));
-        final JMenu widgetsMenu = new JMenu(S.l("Widgets"));
+        final JMenu widgetsMenu = new JMenu(s("Widgets"));
         final ActionListener widgetsListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -99,9 +100,9 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements Logged
                 }
             }
         };
-        final JMenuItem cascadeItem = new JMenuItem(S.l("Cascade"), Images.getIcon("cascade16.png", 16));
-        final JMenuItem tileVItem = new JMenuItem(S.l("Tile vertical"), Images.getIcon("tileVertical16.png", 16));
-        final JMenuItem tileHItem = new JMenuItem(S.l("Tile horizontal"), Images.getIcon("tileHorizontal16.png", 16));
+        final JMenuItem cascadeItem = new JMenuItem(s("Cascade"), Images.getIcon("cascade16.png", 16));
+        final JMenuItem tileVItem = new JMenuItem(s("Tile vertical"), Images.getIcon("tileVertical16.png", 16));
+        final JMenuItem tileHItem = new JMenuItem(s("Tile horizontal"), Images.getIcon("tileHorizontal16.png", 16));
         cascadeItem.setActionCommand("cascade");
         cascadeItem.addActionListener(widgetsListener);
         tileVItem.setActionCommand("tileVertical");
@@ -113,7 +114,7 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements Logged
         widgetsMenu.add(tileHItem);
         widgetsMenu.addSeparator();
         addWidgetListMenu(widgetsMenu);
-        final JMenuItem profilesItem = new JMenuItem(S.l("Profiles..."), Images.getIcon("profiles16.png", 16));
+        final JMenuItem profilesItem = new JMenuItem(s("Profiles..."), Images.getIcon("profiles16.png", 16));
         profilesItem.setActionCommand("profiles");
         profilesItem.addActionListener(widgetsListener);
         widgetsMenu.add(profilesItem);
@@ -121,7 +122,7 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements Logged
     }
 
     private void addWidgetListMenu(JMenu widgetsMenu) {
-        final JMenu widgetListMenu = new JMenu(S.l("Widget list"));
+        final JMenu widgetListMenu = new JMenu(s("Widget list"));
         widgetListMenu.setIcon(Images.getIcon("widgetList16.png", 16));
         widgetListMenu.setActionCommand("widgetList");
         widgetListMenu.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
@@ -164,16 +165,16 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements Logged
                             }
                         }
                     });
-                    final JMenuItem minimizeItem = new JMenuItem(S.l("Minimize"), Images.getIcon("minimize16.png"));
+                    final JMenuItem minimizeItem = new JMenuItem(s("Minimize"), Images.getIcon("minimize16.png"));
                     minimizeItem.setActionCommand("minimize");
                     minimizeItem.addActionListener(frameActionListener);
                     item.add(minimizeItem);
-                    final JMenuItem maximizeItem = new JMenuItem(S.l("Maximize"), Images.getIcon("maximize16.png"));
+                    final JMenuItem maximizeItem = new JMenuItem(s("Maximize"), Images.getIcon("maximize16.png"));
                     maximizeItem.setActionCommand("maximize");
                     maximizeItem.addActionListener(frameActionListener);
                     item.add(maximizeItem);
                     item.addSeparator();
-                    final JMenuItem normalizeItem = new JMenuItem(S.l("Normalize"), Images.getIcon("normalize16.png"));
+                    final JMenuItem normalizeItem = new JMenuItem(s("Normalize"), Images.getIcon("normalize16.png"));
                     normalizeItem.setActionCommand("normalize");
                     normalizeItem.addActionListener(frameActionListener);
                     item.add(normalizeItem);
@@ -229,7 +230,7 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements Logged
                     }
                 }
                 if (menu == null) {
-                    menuBar.add(menu = new JMenu(S.l(path[0])));
+                    menuBar.add(menu = new JMenu(s(path[0])));
                     menu.setActionCommand(path[0]);
                 }
                 for (String[] p = copyOfRange(path, 1, path.length); p.length > 0; p = copyOfRange(p, 1, p.length)) {
@@ -245,7 +246,7 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements Logged
                         if (menu.getMenuComponentCount() == 0) {
                             menu.addSeparator();
                         }
-                        menu.add(subMenu = new JMenu(S.l(p[0])));
+                        menu.add(subMenu = new JMenu(s(p[0])));
                         subMenu.setActionCommand(p[0]);
                     }
                     menu = subMenu;
@@ -303,10 +304,39 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements Logged
         }
     }
 
-    public void addFrame(JInternalFrame frame) {
-        final Preferences framePref = pref.node(frame.getName());
-        frame.setLocation(getPoint(framePref, "location", new Point(0, 0)));
-        desktop.getDesktopManager().openFrame(frame);
+    public void showFrame(String name) {
+        for (final JInternalFrame frame : desktop.getAllFrames()) {
+            if (name.equals(frame.getName())) {
+                try {
+                    if (frame.isIcon()) {
+                        frame.setIcon(false);
+                    }
+                    frame.setVisible(true);
+                    frame.setSelected(true);
+                } catch (Exception x) {
+                    warning(logger, "{0} show error", x, frame.getName());
+                }
+                return;
+            }
+        }
+        for (final Class<?> frameClass : getClass().getClasses()) {
+            if (frameClass.isAnnotationPresent(FrameWidget.class)) {
+                final FrameWidget widget = frameClass.getAnnotation(FrameWidget.class);
+                if (widget.name().equals(name)) {
+                    try {
+                        final JInternalFrame frame = frameClass.isMemberClass()
+                                ? (JInternalFrame) frameClass.getConstructor(getClass()).newInstance(this)
+                                : (JInternalFrame) frameClass.newInstance();
+                        frame.setName(widget.name());
+                        desktop.getDesktopManager().openFrame(frame);
+                    } catch (Exception x) {
+                        warning(logger, "{0} creating error", x, widget.name());
+                    }
+                    return;
+                }
+            }
+        }
+        warning(logger, "No such frame: {0}", name);
     }
 
     protected class MultiFrameDesktop extends JDesktopPane {

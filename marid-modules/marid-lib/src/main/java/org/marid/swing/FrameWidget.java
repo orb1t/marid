@@ -18,28 +18,20 @@
 
 package org.marid.swing;
 
-import org.marid.Versioning;
-import org.marid.image.MaridIcons;
-
-import javax.swing.*;
-
-import java.util.prefs.Preferences;
-
-import static org.marid.l10n.L10n.*;
-import static org.marid.methods.PrefMethods.*;
+import java.lang.annotation.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class AbstractFrame extends JFrame {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface FrameWidget {
 
-    protected final String version = Versioning.getImplementationVersion(getClass());
-    protected final Preferences pref = preferences(getClass());
+    String name() default "";
 
-    public AbstractFrame(String title) {
-        super(s(title));
-        setIconImages(MaridIcons.ICONS);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLocationByPlatform(true);
-    }
+    boolean user() default true;
+
+    String icon() default "";
+
+    String key() default "";
 }

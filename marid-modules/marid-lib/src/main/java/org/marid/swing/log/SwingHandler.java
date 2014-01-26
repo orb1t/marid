@@ -1,7 +1,6 @@
 package org.marid.swing.log;
 
 import org.marid.image.MaridIcons;
-import org.marid.l10n.Localized;
 import org.marid.logging.AbstractHandler;
 import org.marid.logging.Logging;
 import org.marid.swing.MaridAction;
@@ -21,14 +20,16 @@ import java.util.logging.LogRecord;
 import java.util.prefs.Preferences;
 
 import static java.awt.RenderingHints.*;
-import static org.marid.methods.GuiMethods.*;
-import static org.marid.methods.PrefMethods.*;
+import static org.marid.l10n.L10n.s;
+import static org.marid.methods.GuiMethods.getDimension;
+import static org.marid.methods.GuiMethods.putDimension;
+import static org.marid.methods.PrefMethods.preferences;
 
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SwingHandler extends AbstractHandler implements Localized {
+public class SwingHandler extends AbstractHandler {
 
     private final int size;
     private final LinkedList<LogRecord> queue = new LinkedList<>();
@@ -135,7 +136,7 @@ public class SwingHandler extends AbstractHandler implements Localized {
         private Filter filter;
 
         public LogFrame() {
-            super(S.l("Marid log"));
+            super(s("Marid log"));
             setAlwaysOnTop(prefs.getBoolean("alwaysOnTop", true));
             this.model = new LogRecordListModel();
             for (Level level : Logging.LEVELS) {
@@ -202,7 +203,7 @@ public class SwingHandler extends AbstractHandler implements Localized {
         private class LogFrameMenu extends JMenuBar {
 
             public LogFrameMenu() {
-                JMenu filterMenu = new JMenu(S.l("Filter"));
+                JMenu filterMenu = new JMenu(s("Filter"));
                 for (Action a : levelMap.values()) {
                     filterMenu.add(new JCheckBoxMenuItem(a));
                 }
