@@ -29,16 +29,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import static java.awt.BorderLayout.NORTH;
 import static java.util.Arrays.copyOfRange;
 import static javax.swing.SwingConstants.HORIZONTAL;
-import static org.marid.l10n.L10n.*;
+import static org.marid.l10n.L10n.s;
 import static org.marid.methods.GuiMethods.*;
 import static org.marid.methods.LogMethods.warning;
 
@@ -64,6 +66,10 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements Logged
         setPreferredSize(getDimension(pref, "size", new Dimension(700, 500)));
         doActions();
         menuBar.add(new JSeparator(JSeparator.VERTICAL));
+        menuBar.add(widgetsMenu());
+    }
+
+    private JMenu widgetsMenu() {
         final JMenu widgetsMenu = new JMenu(s("Widgets"));
         final ActionListener widgetsListener = new ActionListener() {
             @Override
@@ -118,7 +124,7 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements Logged
         profilesItem.setActionCommand("profiles");
         profilesItem.addActionListener(widgetsListener);
         widgetsMenu.add(profilesItem);
-        menuBar.add(widgetsMenu);
+        return widgetsMenu;
     }
 
     private void addWidgetListMenu(JMenu widgetsMenu) {
@@ -286,7 +292,9 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements Logged
         super.processWindowEvent(e);
         switch (e.getID()) {
             case WindowEvent.WINDOW_CLOSED:
-                final BorderLayout borderLayout = (BorderLayout) centerPanel.getLayout();
+                for (final JInternalFrame frame : desktop.getAllFrames()) {
+                    frame.doDefaultCloseAction();
+                }
                 putDimension(pref, "size", getSize());
                 pref.putInt("state", getState());
                 pref.putInt("extState", getExtendedState());
@@ -304,39 +312,30 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements Logged
         }
     }
 
-    public void showFrame(String name) {
+    public void showFrame(Class<?> type) {
         for (final JInternalFrame frame : desktop.getAllFrames()) {
-            if (name.equals(frame.getName())) {
-                try {
-                    if (frame.isIcon()) {
-                        frame.setIcon(false);
-                    }
-                    frame.setVisible(true);
-                    frame.setSelected(true);
-                } catch (Exception x) {
-                    warning(logger, "{0} show error", x, frame.getName());
-                }
+            if (type == frame.getClass()) {
+                frame.show();
                 return;
             }
         }
         for (final Class<?> frameClass : getClass().getClasses()) {
             if (frameClass.isAnnotationPresent(FrameWidget.class)) {
-                final FrameWidget widget = frameClass.getAnnotation(FrameWidget.class);
-                if (widget.name().equals(name)) {
+                if (type == frameClass) {
                     try {
-                        final JInternalFrame frame = frameClass.isMemberClass()
-                                ? (JInternalFrame) frameClass.getConstructor(getClass()).newInstance(this)
-                                : (JInternalFrame) frameClass.newInstance();
-                        frame.setName(widget.name());
-                        desktop.getDesktopManager().openFrame(frame);
+                        final InternalFrame frame = frameClass.isMemberClass()
+                                ? (InternalFrame) frameClass.getConstructor(getClass()).newInstance(this)
+                                : (InternalFrame) frameClass.newInstance();
+                        desktop.add(frame);
+                        frame.show();
                     } catch (Exception x) {
-                        warning(logger, "{0} creating error", x, widget.name());
+                        warning(logger, "{0} creating error", x, frameClass.getSimpleName());
                     }
                     return;
                 }
             }
         }
-        warning(logger, "No such frame: {0}", name);
+        warning(logger, "No such frame: {0}", type.getSimpleName());
     }
 
     protected class MultiFrameDesktop extends JDesktopPane {
@@ -352,17 +351,57 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements Logged
 
         protected class MultiFrameDesktopManager extends DefaultDesktopManager {
 
-            @Override
-            public void openFrame(JInternalFrame f) {
-                super.openFrame(f);
-                for (final JInternalFrame frame : getAllFrames()) {
-                    if (frame == f) {
-                        return;
-                    }
-                }
-                MultiFrameDesktop.this.add(f);
-                f.setVisible(true);
+        }
+    }
+
+    protected class InternalFrame extends JInternalFrame {
+
+        private final Preferences framePref;
+
+        protected InternalFrame() {
+            final FrameWidget meta = getClass().getAnnotation(FrameWidget.class);
+            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            setTitle(meta.title().isEmpty() ? s(getClass().getSimpleName()) : s(meta.title()));
+            setResizable(meta.resizable());
+            setIconifiable(meta.iconifiable());
+            setClosable(meta.closable());
+            setMaximizable(meta.maximizable());
+            framePref = pref.node(getClass().getSimpleName());
+        }
+
+        @Override
+        public void show() {
+            final int x, y;
+            switch (framePref.get("position", getClass().getAnnotation(FrameWidget.class).position())) {
+                case "ne":
+                    x = desktop.getWidth() - getWidth();
+                    y = 0;
+                    break;
+                case "sw":
+                    x = 0;
+                    y = desktop.getHeight() - getHeight();
+                    break;
+                case "se":
+                    x = desktop.getWidth() - getWidth();
+                    y = desktop.getHeight() - getHeight();
+                    break;
+                case "c":
+                    x = (desktop.getWidth() - getWidth()) / 2;
+                    y = (desktop.getHeight() - getHeight()) / 2;
+                    break;
+                case "nw":
+                default:
+                    x = 0;
+                    y = 0;
+                    break;
             }
+            setLocation(x, y);
+            super.show();
+        }
+
+        @Override
+        public void dispose() {
+            super.dispose();
         }
     }
 }

@@ -68,8 +68,7 @@ public class L10n {
         }
     };
 
-    public static final ResourceBundle SB;
-    public static final ResourceBundle MB;
+    public static final ResourceBundle SB, MB;
 
     static {
         final ClassLoader cl = Utils.getClassLoader(L10n.class);

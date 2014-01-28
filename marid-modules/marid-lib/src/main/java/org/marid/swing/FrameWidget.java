@@ -27,11 +27,21 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FrameWidget {
 
-    String name() default "";
+    String title() default "";
 
     boolean user() default true;
 
     String icon() default "";
 
     String key() default "";
+
+    String position() default "nw";
+
+    boolean closable() default false;
+
+    boolean iconifiable() default true;
+
+    boolean maximizable() default true;
+
+    boolean resizable() default true;
 }
