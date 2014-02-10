@@ -20,22 +20,18 @@ package org.marid.groovy;
 
 import groovy.lang.*;
 import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
-import org.codehaus.groovy.runtime.StringGroovyMethods;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.net.URL;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
 
-import static org.marid.methods.LogMethods.severe;
-import static org.marid.methods.LogMethods.warning;
+import static org.marid.methods.LogMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -47,9 +43,10 @@ public class GroovyRuntime {
 
     static {
         try {
-            for (CompilerCustomizer customizer : ServiceLoader.load(CompilerCustomizer.class)) {
+            for (final CompilerCustomizer customizer : ServiceLoader.load(CompilerCustomizer.class)) {
                 try {
                     customizer.customize(COMPILER_CONFIGURATION);
+                    fine(LOG, "Compiler customizer {0} loaded", customizer);
                 } catch (Exception x) {
                     warning(LOG, "Compiler customizer {0} error", x, customizer);
                 }
@@ -68,9 +65,9 @@ public class GroovyRuntime {
         }
         CLASS_LOADER = new GroovyClassLoader(classLoader, COMPILER_CONFIGURATION);
         try {
-            for (CompilerUrlProvider provider : ServiceLoader.load(CompilerUrlProvider.class)) {
+            for (final CompilerUrlProvider provider : ServiceLoader.load(CompilerUrlProvider.class)) {
                 try {
-                    for (URL url : provider.getUrls()) {
+                    for (final URL url : provider.getUrls()) {
                         CLASS_LOADER.addURL(url);
                     }
                 } catch (Exception x) {
@@ -85,9 +82,9 @@ public class GroovyRuntime {
     public static final GroovyShell SHELL;
 
     static {
-        Map<String, Object> bindings = new HashMap<>();
+        final Map<String, Object> bindings = new HashMap<>();
         try {
-            for (BindingProvider provider : ServiceLoader.load(BindingProvider.class)) {
+            for (final BindingProvider provider : ServiceLoader.load(BindingProvider.class)) {
                 try {
                     bindings.putAll(provider.getBinding());
                 } catch (Exception x) {
@@ -100,7 +97,7 @@ public class GroovyRuntime {
         }
         SHELL = new GroovyShell(CLASS_LOADER, new Binding(bindings), COMPILER_CONFIGURATION);
         try {
-            Field loaderField = GroovyShell.class.getDeclaredField("loader");
+            final Field loaderField = GroovyShell.class.getDeclaredField("loader");
             loaderField.setAccessible(true);
             loaderField.set(SHELL, CLASS_LOADER);
         } catch (Exception x) {
@@ -113,7 +110,7 @@ public class GroovyRuntime {
     static {
         MethodHandle handle = null;
         try {
-            Field field = GroovyShell.class.getDeclaredField("context");
+            final Field field = GroovyShell.class.getDeclaredField("context");
             field.setAccessible(true);
             handle = MethodHandles.lookup().unreflectSetter(field);
         } catch (Exception x) {
@@ -125,7 +122,7 @@ public class GroovyRuntime {
     public static GroovyShell forkShell(Binding binding) {
         if (CONTEXT_MH != null) {
             try {
-                GroovyShell shell = new GroovyShell(SHELL);
+                final GroovyShell shell = new GroovyShell(SHELL);
                 CONTEXT_MH.invokeExact(shell, binding);
                 return shell;
             } catch (Throwable x) {
@@ -143,29 +140,5 @@ public class GroovyRuntime {
 
     public static Closure getClosure(GroovyCodeSource source) throws IOException {
         return (Closure) SHELL.parse(source).run();
-    }
-
-    public static <T> T cast(Class<T> klass, Object v) {
-        if (v == null) {
-            return null;
-        } else if (klass.isInstance(v)) {
-            return klass.cast(v);
-        } else if (v instanceof Number) {
-            return DefaultGroovyMethods.asType((Number) v, klass);
-        } else if (v instanceof Collection) {
-            return DefaultGroovyMethods.asType((Collection) v, klass);
-        } else if (v instanceof Map) {
-            return DefaultGroovyMethods.asType((Map) v, klass);
-        } else if (v instanceof Object[]) {
-            return DefaultGroovyMethods.asType((Object[]) v, klass);
-        } else if (v instanceof String) {
-            return StringGroovyMethods.asType((String) v, klass);
-        } else if (v instanceof CharSequence) {
-            return StringGroovyMethods.asType((CharSequence) v, klass);
-        } else if (v instanceof Closure) {
-            return DefaultGroovyMethods.asType((Closure) v, klass);
-        } else {
-            return DefaultGroovyMethods.asType(v, klass);
-        }
     }
 }

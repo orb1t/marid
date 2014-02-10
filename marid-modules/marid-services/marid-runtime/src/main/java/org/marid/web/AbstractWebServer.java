@@ -22,6 +22,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableBiMap;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
+import org.marid.dyn.TypeCaster;
 import org.marid.groovy.GroovyRuntime;
 import org.marid.service.AbstractMaridService;
 
@@ -42,7 +43,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.marid.groovy.GroovyRuntime.cast;
+import static org.marid.dyn.TypeCaster.TYPE_CASTER;
 import static org.marid.methods.LogMethods.*;
 import static org.marid.methods.PropMethods.*;
 
@@ -85,7 +86,7 @@ public abstract class AbstractWebServer extends AbstractMaridService {
                 } else if (e.getValue() instanceof URI) {
                     dmap.put(e.getKey().toString(), Paths.get((URI) e.getValue()));
                 } else {
-                    dmap.put(e.getKey().toString(), cast(Path.class, e.getValue()));
+                    dmap.put(e.getKey().toString(), TYPE_CASTER.cast(Path.class, e.getValue()));
                 }
             } catch (Exception x) {
                 warning(log, "{0} Unable to add {1}", x, this, oe);
@@ -105,7 +106,7 @@ public abstract class AbstractWebServer extends AbstractMaridService {
                     if (e.getValue() instanceof String) {
                         vpm.put(e.getKey().toString(), Pattern.compile((String) e.getValue()));
                     } else {
-                        vpm.put(e.getKey().toString(), cast(Pattern.class, e.getValue()));
+                        vpm.put(e.getKey().toString(), TYPE_CASTER.cast(Pattern.class, e.getValue()));
                     }
                 } catch (Exception x) {
                     warning(log, "{0} Unable to add vhost pattern {1}", x, this, oe);
@@ -123,7 +124,7 @@ public abstract class AbstractWebServer extends AbstractMaridService {
             for (final Object oe : map.entrySet()) {
                 final Entry e = (Entry) oe;
                 try {
-                    bimap.put(e.getKey().toString(), cast(String.class, e.getValue()));
+                    bimap.put(e.getKey().toString(), TYPE_CASTER.cast(String.class, e.getValue()));
                 } catch (Exception x) {
                     warning(log, "{0} Unable to add vhost entry {1}", x, this, oe);
                 }
@@ -138,7 +139,7 @@ public abstract class AbstractWebServer extends AbstractMaridService {
         } else {
             final List<String> list = new ArrayList<>(collection.size());
             for (final Object o : collection) {
-                list.add(GroovyRuntime.cast(String.class, o));
+                list.add(TYPE_CASTER.cast(String.class, o));
             }
             return list;
         }

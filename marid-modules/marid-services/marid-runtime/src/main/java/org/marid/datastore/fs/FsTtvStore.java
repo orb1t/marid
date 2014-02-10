@@ -20,10 +20,10 @@ package org.marid.datastore.fs;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import groovy.json.JsonOutput;
 import org.marid.datastore.TtvStore;
+import org.marid.dyn.TypeCaster;
 import org.marid.io.SafeResult;
 import org.marid.io.SimpleSafeResult;
 import org.marid.nio.FileUtils.PatternFileFilter;
@@ -36,7 +36,6 @@ import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -46,7 +45,7 @@ import static com.google.common.base.StandardSystemProperty.USER_HOME;
 import static java.lang.Integer.parseInt;
 import static java.nio.file.Files.newDirectoryStream;
 import static java.util.Calendar.*;
-import static org.marid.groovy.GroovyRuntime.cast;
+import static org.marid.dyn.TypeCaster.TYPE_CASTER;
 import static org.marid.methods.LogMethods.fine;
 import static org.marid.methods.LogMethods.warning;
 import static org.marid.methods.PropMethods.get;
@@ -78,20 +77,17 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
                         Runtime.getRuntime().availableProcessors()))
                 .expireAfterAccess(get(params, long.class, "cacheExpirationTime", 1L),
                         get(params, TimeUnit.class, "cacheTimeUnit", TimeUnit.HOURS))
-                .removalListener(new RemovalListener<Path, FsTtvEntry>() {
-                    @Override
-                    public void onRemoval(RemovalNotification<Path, FsTtvEntry> e) {
-                        try {
-                            final FsTtvEntry de = e.getValue();
-                            if (de != null) {
-                                synchronized (de) {
-                                    de.close();
-                                }
-                                fine(LOG, "Remove {0} from cache", e.getKey());
+                .removalListener((RemovalNotification<Path, FsTtvEntry> e) -> {
+                    try {
+                        final FsTtvEntry de = e.getValue();
+                        if (de != null) {
+                            synchronized (de) {
+                                de.close();
                             }
-                        } catch (Exception x) {
-                            warning(LOG, "Unable to close {0}", x, e.getKey());
+                            fine(LOG, "Remove {0} from cache", e.getKey());
                         }
+                    } catch (Exception x) {
+                        warning(LOG, "Unable to close {0}", x, e.getKey());
                     }
                 })
                 .build();
@@ -139,13 +135,10 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
                     final TreeSet<Path> datePaths = listSorted(tagPath, "????-??-??.data");
                     for (final Path datePath : min ? datePaths : datePaths.descendingSet()) {
                         final AtomicBoolean flag = new AtomicBoolean();
-                        access(datePath, new Accessor() {
-                            @Override
-                            public void access(FsTtvEntry de) throws Exception {
-                                if (!de.index.isEmpty()) {
-                                    map.put(tag, min ? de.index.firstKey() : de.index.lastKey());
-                                    flag.set(true);
-                                }
+                        access(datePath, de -> {
+                            if (!de.index.isEmpty()) {
+                                map.put(tag, min ? de.index.firstKey() : de.index.lastKey());
+                                flag.set(true);
                             }
                         }, errors);
                         if (flag.get()) {
@@ -226,7 +219,7 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
                             } else {
                                 v = ((List) de.slurper.parseText("[" + text + "]")).get(0);
                             }
-                            values.put(e.getKey(), cast(type, v));
+                            values.put(e.getKey(), TYPE_CASTER.cast(type, v));
                         } catch (Exception x) {
                             errors.add(x);
                         }
@@ -281,7 +274,7 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
                 try {
                     calendar.setTime(e.getKey());
                     final Path dp = tagPath.resolve(dateFile(calendar));
-                    final T value = cast(t, e.getValue());
+                    final T value = TYPE_CASTER.cast(t, e.getValue());
                     final String v;
                     if (value instanceof Number) {
                         v = value.toString();
@@ -304,12 +297,7 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
                     } else {
                         v = JsonOutput.toJson(value);
                     }
-                    access(dp, new Accessor() {
-                        @Override
-                        public void access(FsTtvEntry de) throws Exception {
-                            de.put(e.getKey(), v, insert, update);
-                        }
-                    }, errors);
+                    access(dp, de -> de.put(e.getKey(), v, insert, update), errors);
                     n++;
                 } catch (Exception x) {
                     errors.add(x);
@@ -409,12 +397,7 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
                             Integer.parseInt(name.substring(5, 7)) - 1,
                             Integer.parseInt(name.substring(8, 10)));
                     if (calendar.compareTo(fc) >= 0 && calendar.compareTo(tc) <= 0) {
-                        access(p, new Accessor() {
-                            @Override
-                            public void access(FsTtvEntry de) throws Exception {
-                                counter.addAndGet(de.remove(from, fromInc, to, toInc));
-                            }
-                        }, errors);
+                        access(p, de -> counter.addAndGet(de.remove(from, fromInc, to, toInc)), errors);
                     }
                 }
             } catch (IOException x) {
@@ -448,12 +431,9 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
                         if (parseInt(name.substring(8, 10)) != c.get(DATE)) {
                             continue;
                         }
-                        access(dp, new Accessor() {
-                            @Override
-                            public void access(FsTtvEntry de) throws Exception {
-                                if (de.remove(e.getValue())) {
-                                    counter.incrementAndGet();
-                                }
+                        access(dp, de -> {
+                            if (de.remove(e.getValue())) {
+                                counter.incrementAndGet();
                             }
                         }, errors);
                         break;
@@ -483,12 +463,7 @@ public class FsTtvStore extends ParameterizedMaridService implements TtvStore {
 
     void access(final Path dp, Accessor acc, Collection<Throwable> errors) {
         try {
-            final FsTtvEntry dateEntry = entryCache.get(dp, new Callable<FsTtvEntry>() {
-                @Override
-                public FsTtvEntry call() throws Exception {
-                    return new FsTtvEntry(dp, bufferSize);
-                }
-            });
+            final FsTtvEntry dateEntry = entryCache.get(dp, () -> new FsTtvEntry(dp, bufferSize));
             synchronized (dateEntry) {
                 acc.access(dateEntry);
             }

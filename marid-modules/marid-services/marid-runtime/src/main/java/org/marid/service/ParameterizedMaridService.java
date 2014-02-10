@@ -18,11 +18,11 @@
 
 package org.marid.service;
 
-import org.marid.groovy.GroovyRuntime;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import static org.marid.dyn.TypeCaster.TYPE_CASTER;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -44,7 +44,7 @@ public abstract class ParameterizedMaridService extends AbstractMaridService imp
     @Override
     public <T> T getParameter(Class<T> type, String parameter) {
         final Object value = paramMap.get(parameter);
-        return value == null ? null : GroovyRuntime.cast(type, value);
+        return value == null ? null : TYPE_CASTER.cast(type, value);
     }
 
     @Override

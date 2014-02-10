@@ -18,36 +18,21 @@
 package org.marid.util;
 
 /**
- * Unknown exception class.
- *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class UnknownException extends Exception {
 
     private final String exceptionClassName;
 
-    /**
-     * Default constructor.
-     */
     public UnknownException() {
         this(null, null, null);
     }
 
-    /**
-     * Constructs an unknown exception.
-     * @param message Exception message.
-     * @param cause Cause.
-     * @param className Class name.
-     */
     public UnknownException(String message, Throwable cause, String className) {
         super(message, cause, false, false);
         exceptionClassName = className;
     }
 
-    /**
-     * Get the exception class name.
-     * @return Exception class name.
-     */
     public String getExceptionClassName() {
         return exceptionClassName;
     }

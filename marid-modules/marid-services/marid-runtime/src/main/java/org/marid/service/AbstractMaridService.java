@@ -154,36 +154,33 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
         return id() + ":" + type();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public <T> Future<T> send(final String method, final Object... args) {
-        return executor.submit(new Callable<T>() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public T call() throws Exception {
-                final State state = state();
-                switch (state) {
-                    case FAILED:
-                        throw new IllegalStateException(failureCause());
-                    case STOPPING:
-                    case TERMINATED:
-                        throw new IllegalStateException("Terminated");
-                    case NEW:
-                    case STARTING:
-                        while (!isRunning()) {
-                            try {
-                                awaitRunning(timeGranularity, TimeUnit.MILLISECONDS);
-                            } catch (TimeoutException x) {
-                                if (Thread.interrupted()) {
-                                    warning(log, "Interrupted {0}", this);
-                                    throw new InterruptedException();
-                                }
+    public <T> Future<T> send(String method, Object... args) {
+        return executor.submit(() -> {
+            final State state = state();
+            switch (state) {
+                case FAILED:
+                    throw new IllegalStateException(failureCause());
+                case STOPPING:
+                case TERMINATED:
+                    throw new IllegalStateException("Terminated");
+                case NEW:
+                case STARTING:
+                    while (!isRunning()) {
+                        try {
+                            awaitRunning(timeGranularity, TimeUnit.MILLISECONDS);
+                        } catch (TimeoutException x) {
+                            if (Thread.interrupted()) {
+                                warning(log, "Interrupted {0}", this);
+                                throw new InterruptedException();
                             }
                         }
-                    case RUNNING:
-                        return (T) metaClass.invokeMethod(AbstractMaridService.this, method, args);
-                    default:
-                        throw new IllegalStateException("Illegal state: " + state);
-                }
+                    }
+                case RUNNING:
+                    return (T) metaClass.invokeMethod(AbstractMaridService.this, method, args);
+                default:
+                    throw new IllegalStateException("Illegal state: " + state);
             }
         });
     }

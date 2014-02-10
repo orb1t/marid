@@ -21,6 +21,7 @@ package org.marid.ide.swing;
 import org.marid.ide.menu.GroovyMenu;
 import org.marid.ide.menu.MenuEntry;
 import org.marid.image.MaridIcon;
+import org.marid.pref.PrefUtils;
 import org.marid.swing.log.TrayIconHandler;
 
 import javax.swing.*;
@@ -34,15 +35,14 @@ import java.util.prefs.Preferences;
 
 import static org.marid.l10n.L10n.s;
 import static org.marid.methods.LogMethods.warning;
-import static org.marid.methods.PrefMethods.preferences;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class SwingIde {
 
+    static final Preferences SYSPREFS = PrefUtils.preferences("system");
     static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
-    static final Preferences SYSPREFS = preferences("system");
     public static SwingIdeFrame frame;
 
     public static void run() {

@@ -18,9 +18,10 @@
 
 package org.marid.util;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.lang.Character.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -43,7 +44,7 @@ public class StringUtils {
         for (int i = 0; i < buf.length; i += n) {
             str.getChars(0, n, buf, i);
         }
-        return String.valueOf(buf);
+        return new String(buf);
     }
 
     public static String repeated(Object obj, int times) {
@@ -148,22 +149,22 @@ public class StringUtils {
         return String.valueOf(buf);
     }
 
-    public static int patoi(byte[] value, int off, int len) {
-        int sum = 0;
-        int base = 1;
-        for (int i = off + len - 1; i >= off; i--) {
-            final byte b = value[i];
-            if (b >= 0x30 && b <= 0x39) {
-                sum += (b - 0x30) * base;
-                base *= 10;
-            } else {
-                throw new IllegalArgumentException("Invalid number: " + new String(value, off, len, ISO_8859_1));
-            }
-        }
-        return sum;
+    public static int atoi(byte[] buf, int off, int len) {
+        return Integer.parseInt(new String(buf, off, len, StandardCharsets.ISO_8859_1));
     }
 
-    public static int patoi(byte[] value) {
-        return patoi(value, 0, value.length);
+    public static String camelToText(String camel) {
+        final StringBuilder builder = new StringBuilder(camel.length());
+        final int[] cps = camel.trim().codePoints().toArray();
+        for (int i = 0; i < cps.length; i++) {
+            final int cp = i == 0 ? toUpperCase(cps[i]) : cps[i];
+            builder.appendCodePoint(cp);
+            if (isUpperCase(cp) && i < cps.length - 2 && isUpperCase(cps[i + 1]) && isLowerCase(cps[i + 2])) {
+                builder.append(' ');
+            } else if (isLowerCase(cp) && i < cps.length - 1 && isUpperCase(cps[i + 1])) {
+                builder.append(' ');
+            }
+        }
+        return builder.toString();
     }
 }

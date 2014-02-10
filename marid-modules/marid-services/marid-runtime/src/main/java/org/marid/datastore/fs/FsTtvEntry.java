@@ -41,7 +41,7 @@ import static java.lang.Integer.parseInt;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.*;
 import static java.util.Calendar.*;
-import static org.marid.util.StringUtils.patoi;
+import static org.marid.util.StringUtils.atoi;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -80,9 +80,9 @@ class FsTtvEntry implements Closeable {
                 faos.write(b & 0xFF);
                 if (b == '\n') {
                     final byte[] buf = faos.getSharedBuffer();
-                    cal.set(HOUR_OF_DAY, patoi(buf, 0, 2));
-                    cal.set(MINUTE, patoi(buf, 3, 2));
-                    cal.set(SECOND, patoi(buf, 6, 2));
+                    cal.set(HOUR_OF_DAY, atoi(buf, 0, 2));
+                    cal.set(MINUTE, atoi(buf, 3, 2));
+                    cal.set(SECOND, atoi(buf, 6, 2));
                     index.put(cal.getTime(), new FsTtvRecord(pos, faos.size()));
                     pos += faos.size();
                     faos.reset();

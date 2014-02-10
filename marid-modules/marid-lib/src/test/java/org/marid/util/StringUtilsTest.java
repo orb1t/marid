@@ -22,9 +22,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.test.NormalTests;
 
-import java.nio.charset.StandardCharsets;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.marid.util.StringUtils.*;
 
 /**
@@ -52,9 +50,12 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void testPatoi() {
-        for (int i = 0; i < 1000; i++) {
-            assertEquals(i, patoi(Integer.toString(i).getBytes(StandardCharsets.ISO_8859_1)));
-        }
+    public void testCamelToText() {
+        assertEquals("Camel Test", camelToText("camelTest"));
+        assertEquals("Camel Test", camelToText(" camelTest"));
+        assertEquals("Camel COOL Test", camelToText(" camelCOOLTest"));
+        assertEquals("Верблюжий Тест", camelToText("верблюжийТест"));
+        assertEquals("Верблюжий Т", camelToText("верблюжийТ"));
+        assertEquals("Camel TEST", camelToText("camelTEST"));
     }
 }

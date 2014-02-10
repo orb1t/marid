@@ -18,38 +18,28 @@
 
 package org.marid.ide.swing;
 
-import groovy.lang.GroovyCodeSource;
-import org.marid.groovy.GroovyRuntime;
 import org.marid.ide.menu.MenuEntry;
 import org.marid.image.MaridIcons;
+import org.marid.logging.LogSupport;
+import org.marid.pref.PrefSupport;
 import org.marid.swing.log.SwingHandler;
-import org.marid.util.Utils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
-import java.lang.invoke.MethodHandles;
-import java.net.URL;
 import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 
 import static javax.swing.JOptionPane.*;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
-import static org.marid.methods.GuiMethods.getDimension;
-import static org.marid.methods.GuiMethods.putDimension;
-import static org.marid.methods.LogMethods.warning;
-import static org.marid.methods.PrefMethods.preferences;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SwingIdeFrame extends JFrame {
+public class SwingIdeFrame extends JFrame implements PrefSupport, LogSupport {
 
-    private static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
-    private static final Preferences PREFS = preferences("maridFrame");
     private final boolean closeable;
 
     public SwingIdeFrame(boolean closeable, List<MenuEntry> menuEntries) {
@@ -57,7 +47,7 @@ public class SwingIdeFrame extends JFrame {
         this.closeable = closeable;
         setIconImages(MaridIcons.ICONS);
         setJMenuBar(new MenuBarImpl(menuEntries));
-        setPreferredSize(getDimension(PREFS, "size", new Dimension(700, 500)));
+        setPreferredSize(getPref("size", new Dimension(700, 500)));
         pack();
     }
 
@@ -66,8 +56,8 @@ public class SwingIdeFrame extends JFrame {
         super.processWindowEvent(e);
         switch (e.getID()) {
             case WindowEvent.WINDOW_OPENED:
-                setState(PREFS.getInt("state", getState()));
-                setExtendedState(PREFS.getInt("extendedState", getExtendedState()));
+                setState(getPref("state", getState()));
+                setExtendedState(getPref("extendedState", getExtendedState()));
                 break;
             case WindowEvent.WINDOW_CLOSING:
                 if (closeable) {
@@ -82,7 +72,7 @@ public class SwingIdeFrame extends JFrame {
     public void showLog() {
         final Logger rootLogger = Logger.getGlobal().getParent();
         if (rootLogger != null) {
-            for (Handler handler : rootLogger.getHandlers()) {
+            for (final Handler handler : rootLogger.getHandlers()) {
                 if (handler instanceof SwingHandler) {
                     ((SwingHandler) handler).show();
                     return;
@@ -93,7 +83,7 @@ public class SwingIdeFrame extends JFrame {
                 rootLogger.addHandler(swingHandler);
                 swingHandler.show();
             } catch (Exception x) {
-                warning(LOG, "Unable to show log window", x);
+                warning("Unable to show log window", x);
             }
         }
     }
@@ -107,18 +97,9 @@ public class SwingIdeFrame extends JFrame {
     }
 
     public void exit() {
-        PREFS.putInt("state", getState());
-        PREFS.putInt("extendedState", getExtendedState());
-        putDimension(PREFS, "size", getSize());
-        try {
-            final URL url = Utils.getClassLoader(getClass()).getResource("exitTrigger.groovy");
-            if (url != null) {
-                GroovyRuntime.SHELL.evaluate(new GroovyCodeSource(url));
-            }
-            System.exit(0);
-        } catch (Exception x) {
-            warning(LOG, "Unable to call exit trigger", x);
-            System.exit(1);
-        }
+        putPref("state", getState());
+        putPref("extendedState", getExtendedState());
+        putPref("size", getSize());
+        System.exit(0);
     }
 }

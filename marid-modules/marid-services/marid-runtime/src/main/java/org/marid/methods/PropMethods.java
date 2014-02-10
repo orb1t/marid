@@ -31,7 +31,7 @@ import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.ThreadPoolExecutor.DiscardOldestPolicy;
 import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 
-import static org.marid.groovy.GroovyRuntime.cast;
+import static org.marid.dyn.TypeCaster.TYPE_CASTER;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -45,9 +45,9 @@ public class PropMethods {
         } else if (type == Object.class) {
             return type.cast(value);
         } else if (value instanceof Closure) {
-            return cast(type, ((Closure) value).call(params));
+            return TYPE_CASTER.cast(type, ((Closure) value).call(params));
         } else {
-            return cast(type, value);
+            return TYPE_CASTER.cast(type, value);
         }
     }
 

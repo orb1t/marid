@@ -31,23 +31,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.codeartisans.thirdparties.swing</groupId>
-            <artifactId>batik-all</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fifesoft</groupId>
-            <artifactId>rsyntaxtextarea</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.swinglabs.swingx</groupId>
-            <artifactId>swingx-all</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>marid-swing</artifactId>
         </dependency>
     </dependencies>
 
