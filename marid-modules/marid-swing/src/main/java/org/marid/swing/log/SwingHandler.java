@@ -7,6 +7,7 @@ import org.marid.pref.PrefSupport;
 import org.marid.swing.MaridAction;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
@@ -15,6 +16,8 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.*;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Filter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -27,13 +30,13 @@ import static org.marid.l10n.L10n.s;
  */
 public class SwingHandler extends AbstractHandler implements PrefSupport {
 
+    private static final Map<Level, ImageIcon> iconMap = new HashMap<>();
     private final int size;
     private final LinkedList<LogRecord> queue = new LinkedList<>();
-    private final LinkedList<LogRecordListModel> models = new LinkedList<>();
-    private static final Map<Level, ImageIcon> iconMap = new HashMap<>();
+    private final ConcurrentLinkedQueue<LogRecordListModel> models = new ConcurrentLinkedQueue<>();
 
     public SwingHandler() throws Exception {
-        String sizeText = manager.getProperty(getClass().getCanonicalName() + ".size");
+        final String sizeText = manager.getProperty(getClass().getCanonicalName() + ".size");
         size = sizeText == null ? 65536 : Integer.parseInt(sizeText);
         if (getFormatter() == null) {
             setFormatter(new SwingHandlerFormatter());
@@ -42,15 +45,18 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
 
     @Override
     public void publish(final LogRecord record) {
-        EventQueue.invokeLater(() -> {
-            while (queue.size() >= size) {
-                queue.remove();
-            }
+        if (record.getSourceMethodName() != null) {
+            return;
+        }
+        synchronized (queue) {
             queue.add(record);
-            for (LogRecordListModel model : models) {
-                model.add(record);
+            if (queue.size() > size) {
+                queue.removeFirst();
             }
-        });
+        }
+        for (final LogRecordListModel model : models) {
+            model.buffer.add(record);
+        }
     }
 
     public void show() {
@@ -98,15 +104,14 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
     class LogRecordRenderer extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(JList list, Object v, int i, boolean s, boolean f) {
-            LogRecord rec = (LogRecord) v;
+            final LogRecord rec = (LogRecord) v;
             String val;
             try {
                 val = getFormatter().format(rec);
             } catch (Exception x) {
                 val = x.getMessage();
             }
-            DefaultListCellRenderer r = (DefaultListCellRenderer)
-                    super.getListCellRendererComponent(list, val, i, s, f);
+            final JLabel r = (DefaultListCellRenderer) super.getListCellRendererComponent(list, val, i, s, f);
             ImageIcon icon = iconMap.get(rec.getLevel());
             if (icon == null) {
                 int size = list.getFixedCellHeight() - 2;
@@ -121,13 +126,21 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
     private class LogFrame extends JFrame implements Comparator<Level>, Filter {
 
         private final TreeMap<Level, Action> levelMap = new TreeMap<>(this);
-        private final LogRecordListModel model;
+        private final LogRecordListModel model = new LogRecordListModel();
+        private final Timer timer = new Timer(100, e -> {
+            final List<LogRecord> records = new LinkedList<>();
+            for (final Iterator<LogRecord> it = model.buffer.iterator(); it.hasNext(); ) {
+                final LogRecord r = it.next();
+                it.remove();
+                records.add(r);
+            }
+            model.add(records);
+        });
         private Filter filter;
 
         public LogFrame() {
             super(s("Marid log"));
             setAlwaysOnTop(getPref("alwaysOnTop", true));
-            this.model = new LogRecordListModel();
             for (Level level : Logging.LEVELS) {
                 levelMap.put(level, new LevelAction(level));
             }
@@ -143,11 +156,12 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
             addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowOpened(WindowEvent e) {
-                    models.add(model);
+                    timer.start();
                 }
 
                 @Override
                 public void windowClosed(WindowEvent e) {
+                    timer.stop();
                     models.remove(model);
                     if ((getExtendedState() & MAXIMIZED_BOTH) == 0) {
                         putPref("size", getSize());
@@ -230,11 +244,15 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
 
     private class LogRecordListModel extends AbstractListModel<LogRecord> {
 
+        private final ConcurrentLinkedQueue<LogRecord> buffer = new ConcurrentLinkedQueue<>();
         private final ArrayList<LogRecord> records;
         private Filter filter;
 
         LogRecordListModel() {
-            records = new ArrayList<>(queue);
+            synchronized (queue) {
+                records = new ArrayList<>(queue);
+                models.add(this);
+            }
         }
 
         @Override
@@ -280,19 +298,14 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
             fireContentsChanged(this, 0, getSize() - 1);
         }
 
-        void add(LogRecord record) {
-            records.add(record);
+        void add(List<LogRecord> records) {
+            final int initCount = this.records.size();
+            this.records.addAll(records);
             if (filter != null) {
-                try {
-                    if (filter.isLoggable(record)) {
-                        int size = getSize();
-                        fireIntervalAdded(this, size - 1, size - 1);
-                    }
-                } catch (Exception x) {
-                    // Simple ignoring
-                }
+                final int count = (int) records.stream().filter(filter::isLoggable).count();
+                fireIntervalAdded(this, initCount, initCount + count);
             } else {
-                fireIntervalAdded(this, records.size() - 1, records.size() - 1);
+                fireIntervalAdded(this, initCount, this.records.size());
             }
         }
     }

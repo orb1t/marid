@@ -26,7 +26,6 @@ import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
 import static java.util.Calendar.*;
-import static org.marid.l10n.L10n.*;
 import static org.marid.l10n.L10n.m;
 
 /**
@@ -39,7 +38,8 @@ public class SwingHandlerFormatter extends Formatter {
     @Override
     public String format(LogRecord record) {
         calendar.setTimeInMillis(record.getMillis());
-        StringBuffer buffer = new StringBuffer(Integer.toString(calendar.get(YEAR)));
+        StringBuffer buffer = new StringBuffer(64);
+        buffer.append(Integer.toString(calendar.get(YEAR)));
         buffer.append('-');
         int field = calendar.get(MONTH) + 1;
         if (field < 10) {

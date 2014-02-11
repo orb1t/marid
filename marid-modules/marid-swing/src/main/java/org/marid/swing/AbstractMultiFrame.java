@@ -60,6 +60,7 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
         menuBar.add(widgetsMenu());
         menuBar.add(new JSeparator(JSeparator.VERTICAL));
         doActions();
+        info("{0} created", this);
     }
 
     private JMenuItem menuItem(String title, String icon, String cmd, ActionListener actionListener) {
