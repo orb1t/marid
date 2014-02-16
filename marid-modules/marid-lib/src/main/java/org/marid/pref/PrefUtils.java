@@ -19,13 +19,17 @@
 package org.marid.pref;
 
 import org.marid.Versioning;
+import org.marid.methods.LogMethods;
 
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class PrefUtils {
+
+    private static final Logger LOG = Logger.getLogger(PrefUtils.class.getName());
 
     public static Preferences preferences(Class<?> klass, String... nodes) {
         final String version = Versioning.getImplementationVersion(klass);
@@ -41,20 +45,38 @@ public class PrefUtils {
     }
 
     public static <T> T getPref(Preferences preferences, Class<T> type, String key, T def) {
-        return PrefCodecs.getReader(type).load(preferences, key, def);
+        try {
+            return PrefCodecs.getReader(type).load(preferences, key, def);
+        } catch (Exception x) {
+            LogMethods.warning(LOG, "Unable to load {0}.{1} of {2}", x, preferences, key, type);
+            return def;
+        }
     }
 
     @SuppressWarnings("unchecked")
     public static  <T> T getPref(Preferences preferences, String key, T def) {
-        return PrefCodecs.getReader((Class<T>)def.getClass()).load(preferences, key, def);
+        try {
+            return PrefCodecs.getReader((Class<T>)def.getClass()).load(preferences, key, def);
+        } catch (Exception x) {
+            LogMethods.warning(LOG, "Unable to load {0}.{1} of {2}", x, preferences, key, def == null ? null : def.getClass());
+            return def;
+        }
     }
 
     public static <T> void putPref(Preferences preferences, Class<T> type, String key, T value) {
-        PrefCodecs.getWriter(type).save(preferences, key, value);
+        try {
+            PrefCodecs.getWriter(type).save(preferences, key, value);
+        } catch (Exception x) {
+            LogMethods.warning(LOG, "Unable to save {0}.{1} value {2}", preferences, key, value);
+        }
     }
 
     @SuppressWarnings("unchecked")
     public static void putPref(Preferences preferences, String key, Object value) {
-        PrefCodecs.getWriter((Class) value.getClass()).save(preferences, key, value);
+        try {
+            PrefCodecs.getWriter((Class) value.getClass()).save(preferences, key, value);
+        } catch (Exception x) {
+            LogMethods.warning(LOG, "Unable to save {0}.{1} value {2}", preferences, key, value);
+        }
     }
 }

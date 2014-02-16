@@ -23,24 +23,24 @@ import org.marid.swing.FrameAction;
 import org.marid.swing.FrameWidget;
 import org.marid.swing.forms.Input;
 import org.marid.swing.forms.Tab;
-import org.marid.swing.input.FileInputControl;
+import org.marid.swing.input.*;
 import org.marid.util.Utils;
+import org.marid.wrapper.WrapperConstants;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.net.URL;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Tab(node = "network")
-@Tab(node = "interface")
+@Tab(node = "data")
 @Tab(node = "source")
+@Tab(node = "performance")
 public class WrapperRunnerWindow extends AbstractMultiFrame {
-
-    private final URL wrapperUrl = Utils.getClassLoader(getClass()).getResource("marid-wrapper-" + version + ".zip");
 
     public WrapperRunnerWindow() {
         super("Wrapper Runner");
@@ -48,8 +48,43 @@ public class WrapperRunnerWindow extends AbstractMultiFrame {
     }
 
     @Input(tab = "source")
-    public FileInputControl zipFile() {
-        return new FileInputControl(wrapperUrl, new FileNameExtensionFilter("ZIP files", "zip"));
+    public ControlContainer<URL, UrlInputControl> zipFile() {
+        return ccs(new UrlInputControl("ZIP files", "zip"), () -> Utils.getResource("marid-wrapper-%s.zip", version));
+    }
+
+    @Input(tab = "network")
+    public ControlContainer<Integer, FormattedIntInputControl> networkTimeoutInSeconds() {
+        return ccv(new FormattedIntInputControl(), 3_600);
+    }
+
+    @Input(tab = "network")
+    public ControlContainer<Integer, FormattedIntInputControl> port() {
+        return ccv(new FormattedIntInputControl(), WrapperConstants.DEFAULT_PORT);
+    }
+
+    @Input(tab = "network")
+    public ControlContainer<Integer, FormattedIntInputControl> backlog() {
+        return ccv(new FormattedIntInputControl(), 5);
+    }
+
+    @Input(tab = "network")
+    public ControlContainer<String, StringInputControl> host() {
+        return ccv(new StringInputControl(), "");
+    }
+
+    @Input(tab = "performance")
+    public ControlContainer<Integer, SpinIntInputControl> queueSize() {
+        return ccv(new SpinIntInputControl(2, 128, 2), 8);
+    }
+
+    @Input(tab = "performance")
+    public ControlContainer<Integer, SpinIntInputControl> threads() {
+        return ccv(new SpinIntInputControl(1, 32, 1), 16);
+    }
+
+    @Input(tab = "data")
+    public ControlContainer<File, FileInputControl> targetDirectory() {
+        return ccv(new FileInputControl(), new File(System.getProperty("user.home"), "marid/wrapper"));
     }
 
     @FrameWidget(position = "c")

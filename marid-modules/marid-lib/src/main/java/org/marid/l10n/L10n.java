@@ -25,17 +25,12 @@ import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.MessageFormat;
-import java.util.Formatter;
-import java.util.Locale;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.ResourceBundle.getBundle;
 
 /**
- * Localization utilities.
- *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class L10n {
@@ -43,28 +38,26 @@ public class L10n {
     public static final ResourceBundle.Control UTF8_CONTROL = new ResourceBundle.Control() {
         @Override
         public ResourceBundle newBundle(String b, Locale l, String f, ClassLoader ld, boolean r) throws IllegalAccessException, InstantiationException, IOException {
-            if (!FORMAT_PROPERTIES.contains(f)) {
-                return super.newBundle(b, l, f, ld, r);
-            } else {
+            if (FORMAT_PROPERTIES.contains(f)) {
                 final String bundleName = toBundleName(b, l);
                 final String resourceName = toResourceName(bundleName, "properties");
-                if (r) {
-                    final URL url = ld.getResource(resourceName);
-                    if (url != null) {
-                        final URLConnection conn = url.openConnection();
-                        conn.setUseCaches(false);
-                        try (final Reader rd = new InputStreamReader(conn.getInputStream(), UTF_8)) {
-                            return new PropertyResourceBundle(rd);
-                        }
-                    } else {
-                        return null;
-                    }
-                } else {
-                    try (final Reader rd = new InputStreamReader(ld.getResourceAsStream(resourceName), UTF_8)) {
-                        return new PropertyResourceBundle(rd);
-                    }
+                return getResourceBundle(ld, resourceName, r);
+            } else {
+                return super.newBundle(b, l, f, ld, r);
+            }
+        }
+
+        private ResourceBundle getResourceBundle(ClassLoader ld, String resourceName, boolean reload) throws IOException {
+            ResourceBundle resourceBundle = null;
+            for (final Enumeration<URL> e = ld.getResources(resourceName); e.hasMoreElements(); ) {
+                final URL url = e.nextElement();
+                final URLConnection urlConnection = url.openConnection();
+                urlConnection.setUseCaches(!reload);
+                try (final Reader rd = new InputStreamReader(urlConnection.getInputStream(), UTF_8)) {
+                    resourceBundle = new ChainedPropertyResourceBundle(resourceBundle, rd);
                 }
             }
+            return resourceBundle;
         }
     };
 

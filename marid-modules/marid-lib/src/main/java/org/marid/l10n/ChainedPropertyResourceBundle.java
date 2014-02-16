@@ -16,18 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.forms;
+package org.marid.l10n;
 
-import org.marid.swing.input.InputControl;
-
-import javax.swing.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface InputConfiguration<V, T extends JComponent & InputControl<V, T>> {
+public class ChainedPropertyResourceBundle extends PropertyResourceBundle {
 
-    T newInputControl();
-
-    V getDefaultValue();
+    public ChainedPropertyResourceBundle(ResourceBundle parent, Reader reader) throws IOException {
+        super(reader);
+        this.parent = parent;
+    }
 }

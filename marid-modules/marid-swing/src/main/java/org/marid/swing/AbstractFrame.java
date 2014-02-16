@@ -25,6 +25,8 @@ import org.marid.swing.input.InputControl;
 
 import javax.swing.*;
 
+import java.util.function.Supplier;
+
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -41,8 +43,26 @@ public class AbstractFrame extends JFrame implements PrefSupport {
         setLocationByPlatform(true);
     }
 
-    public abstract class InputConfiguration<V, T extends JComponent & InputControl<V, T>> {
+    public static <V, C extends InputControl<V>> ControlContainer<V, C> ccs(C ctrl, Supplier<V> dvs) {
+        return new ControlContainer<>(ctrl, dvs);
+    }
 
+    public static <V, C extends InputControl<V>> ControlContainer<V, C> ccv(C ctrl, V defaultValue) {
+        return new ControlContainer<>(ctrl, () -> defaultValue);
+    }
 
+    public static class ControlContainer<V, C extends InputControl<V>> {
+
+        public final C control;
+        private final Supplier<V> defaultValueSupplier;
+
+        private ControlContainer(C control, Supplier<V> defaultValueSupplier) {
+            this.control = control;
+            this.defaultValueSupplier = defaultValueSupplier;
+        }
+
+        public V getDefaultValue() {
+            return defaultValueSupplier.get();
+        }
     }
 }

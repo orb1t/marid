@@ -37,6 +37,4 @@ public @interface Input {
     boolean vertical() default false;
 
     int order() default 0;
-
-    String init() default "";
 }

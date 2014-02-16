@@ -26,5 +26,5 @@ import java.util.prefs.Preferences;
 @FunctionalInterface
 public interface PrefWriter<T> {
 
-    void save(Preferences preferences, String key, T value);
+    void save(Preferences preferences, String key, T value) throws Exception;
 }

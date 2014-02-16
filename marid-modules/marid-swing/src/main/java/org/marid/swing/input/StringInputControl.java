@@ -23,19 +23,20 @@ import javax.swing.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class StringInputControl extends JTextField implements InputControl<String, StringInputControl> {
+public class StringInputControl extends JTextField implements InputControl<String> {
 
-    public StringInputControl(String text) {
-
+    public StringInputControl() {
     }
 
     @Override
     public String getValue() {
-        return null;
+        return getText();
     }
 
     @Override
     public void setValue(String value) {
-
+        if (value != null) {
+            setText(value);
+        }
     }
 }

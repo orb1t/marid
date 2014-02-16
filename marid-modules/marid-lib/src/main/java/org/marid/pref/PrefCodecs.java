@@ -21,8 +21,11 @@ package org.marid.pref;
 import org.marid.methods.LogMethods;
 import org.marid.util.Utils;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URL;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -62,6 +65,9 @@ public abstract class PrefCodecs {
         putReader(BitSet.class, (prefs, key, def) -> BitSet.valueOf(prefs.getByteArray(key, def.toByteArray())));
         putReader(TimeZone.class, (prefs, key, def) -> TimeZone.getTimeZone(prefs.get(key, def.getID())));
         putReader(Currency.class, (prefs, key, def) -> Currency.getInstance(prefs.get(key, def.getCurrencyCode())));
+        putReader(URL.class, (prefs, key, def) -> new URL(prefs.get(key, def.toString())));
+        putReader(URI.class, (prefs, key, def) -> new URI(prefs.get(key, def.toString())));
+        putReader(File.class, (prefs, key, def) -> new File(prefs.get(key, def.toString())));
 
         // Primitive writers
         putWriter(Integer.class, Preferences::putInt);
@@ -84,6 +90,9 @@ public abstract class PrefCodecs {
         putWriter(BitSet.class, (prefs, key, val) -> prefs.putByteArray(key, val.toByteArray()));
         putWriter(TimeZone.class, (prefs, key, val) -> prefs.put(key, val.getID()));
         putWriter(Currency.class, (prefs, key, val) -> prefs.put(key, val.getCurrencyCode()));
+        putWriter(URL.class, (prefs, key, val) -> prefs.put(key, val.toString()));
+        putWriter(URI.class, (prefs, key, val) -> prefs.put(key, val.toString()));
+        putWriter(File.class, (prefs, key, val) -> prefs.put(key, val.toString()));
 
         // Custom readers and writers
         try {
@@ -114,7 +123,7 @@ public abstract class PrefCodecs {
         if (reader != null) {
             return reader;
         } else if (type.isEnum()) {
-            return (PrefReader<T>) (PrefReader<Enum>) (pref, key, def) -> Enum.valueOf((Class<Enum>)type, def.toString());
+            return (pref, key, def) -> (T) Enum.valueOf((Class<Enum>)type, def.toString());
         } else {
             return (pref, key, def) -> {
                 final String val = pref.get(key, null);

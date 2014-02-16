@@ -18,6 +18,8 @@
 
 package org.marid.util;
 
+import java.net.URL;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -30,5 +32,9 @@ public class Utils {
 
     public static <T> T newInstance(Class<T> type, String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         return type.cast(getClassLoader(type).loadClass(className).newInstance());
+    }
+
+    public static URL getResource(String format, Object... args) {
+        return getClassLoader(Utils.class).getResource(String.format(format, args));
     }
 }

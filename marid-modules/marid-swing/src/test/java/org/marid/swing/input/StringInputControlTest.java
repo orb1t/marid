@@ -18,29 +18,23 @@
 
 package org.marid.swing.input;
 
-import javax.swing.*;
+import org.junit.Test;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface InputControl<V> {
+public class StringInputControlTest {
 
-    V getValue();
-
-    void setValue(V value);
-
-    default JComponent getComponent() {
-        return (JComponent) this;
-    }
-
-    default Class<?> getType() {
-        for (final Type type : getClass().getGenericInterfaces()) {
-            if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == InputControl.class) {
-                return (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
-            }
+    @Test
+    public void test() {
+        final Class<?> type = StringInputControl.class;
+        for (final Type t : type.getGenericInterfaces()) {
+            final ParameterizedType pt = (ParameterizedType) t;
+            System.out.println(((Class<?>)pt.getRawType()).isInterface());
+            System.out.println(pt.getActualTypeArguments()[0]);
         }
-        throw new IllegalStateException();
     }
 }

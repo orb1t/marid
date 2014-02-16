@@ -66,6 +66,7 @@ public class Wrapper extends TimerTask implements UncaughtExceptionHandler {
     static final Path LOGS = ParseUtils.getDir("MW_LOGS", TARGET, "logs");
     static final int THREADS = ParseUtils.getInt("MW_THREADS", 8);
     static final int QUEUE_SIZE = ParseUtils.getInt("MW_QUEUE_SIZE", 16);
+    static final int TIMEOUT = ParseUtils.getInt("MW_TIMEOUT", 3_600_000);
     static final Properties USERS = new Properties();
 
     static final Lock processLock = new ReentrantLock();
@@ -86,12 +87,12 @@ public class Wrapper extends TimerTask implements UncaughtExceptionHandler {
         info(LOG, "Server socket: {0}", serverSocket);
         serverSocket.setNeedClientAuth(true);
         final ThreadPoolExecutor executor = new ThreadPoolExecutor(0, THREADS,
-                1L, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(QUEUE_SIZE), new CallerRunsPolicy());
+                1L, TimeUnit.MINUTES, new LinkedBlockingQueue<>(QUEUE_SIZE), new CallerRunsPolicy());
         try {
             while (true) {
                 try {
                     final Socket socket = serverSocket.accept();
-                    socket.setSoTimeout(3_600_000);
+                    socket.setSoTimeout(TIMEOUT);
                     try {
                         final SSLSocket sslSocket = (SSLSocket) socket;
                         final SSLSession sslSession = sslSocket.getSession();

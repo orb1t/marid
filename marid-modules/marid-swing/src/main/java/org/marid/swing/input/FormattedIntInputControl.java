@@ -19,28 +19,29 @@
 package org.marid.swing.input;
 
 import javax.swing.*;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.text.NumberFormat;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface InputControl<V> {
+public class FormattedIntInputControl implements InputControl<Integer> {
 
-    V getValue();
+    private final JFormattedTextField field = new JFormattedTextField(NumberFormat.getIntegerInstance());
 
-    void setValue(V value);
-
-    default JComponent getComponent() {
-        return (JComponent) this;
+    @Override
+    public Integer getValue() {
+        return field.getText().isEmpty() ? null : ((Number) field.getValue()).intValue();
     }
 
-    default Class<?> getType() {
-        for (final Type type : getClass().getGenericInterfaces()) {
-            if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == InputControl.class) {
-                return (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
-            }
+    @Override
+    public void setValue(Integer value) {
+        if (value != null) {
+            field.setValue(value);
         }
-        throw new IllegalStateException();
+    }
+
+    @Override
+    public JComponent getComponent() {
+        return field;
     }
 }

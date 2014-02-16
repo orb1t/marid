@@ -19,28 +19,37 @@
 package org.marid.swing.input;
 
 import javax.swing.*;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface InputControl<V> {
+public class SpinIntInputControl implements InputControl<Integer> {
 
-    V getValue();
+    private final JSpinner spinner;
 
-    void setValue(V value);
-
-    default JComponent getComponent() {
-        return (JComponent) this;
+    public SpinIntInputControl(boolean editable, int min, int max, int step) {
+        spinner = new JSpinner(new SpinnerNumberModel(min, min, max, step));
+        ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField().setEditable(editable);
     }
 
-    default Class<?> getType() {
-        for (final Type type : getClass().getGenericInterfaces()) {
-            if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == InputControl.class) {
-                return (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
-            }
+    public SpinIntInputControl(int min, int max, int step) {
+        this(false, min, max, step);
+    }
+
+    @Override
+    public void setValue(Integer value) {
+        if (value != null) {
+            spinner.setValue(value);
         }
-        throw new IllegalStateException();
+    }
+
+    @Override
+    public Integer getValue() {
+        return (Integer) spinner.getValue();
+    }
+
+    @Override
+    public JComponent getComponent() {
+        return spinner;
     }
 }

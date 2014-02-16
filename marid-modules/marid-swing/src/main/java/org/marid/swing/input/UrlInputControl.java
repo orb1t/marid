@@ -25,6 +25,8 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import static javax.swing.Action.SHORT_DESCRIPTION;
 import static org.marid.l10n.L10n.s;
@@ -32,19 +34,24 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class FileInputControl extends JPanel implements InputControl<File>, LogSupport {
+public class UrlInputControl extends JPanel implements InputControl<URL>, LogSupport {
 
     private final JTextField textField = new JTextField();
 
-    public FileInputControl(int type, FileFilter... fileFilters) {
+    public UrlInputControl(FileFilter... fileFilters) {
         final GroupLayout g = new GroupLayout(this);
         g.setAutoCreateGaps(true);
         final JButton browseButton = new JButton(new MaridAction("", "browse", (a, e) -> {
-            final File file = getValue();
+            File file;
+            try {
+                file = new File(getValue().toURI());
+            } catch (Exception x) {
+                file = null;
+            }
             try {
                 final File parent = file != null ? file.getParentFile() : null;
                 final JFileChooser ch = new JFileChooser(parent == null ? new File(".") : parent);
-                ch.setFileSelectionMode(type);
+                ch.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 ch.setAcceptAllFileFilterUsed(true);
                 for (final FileFilter fileFilter : fileFilters) {
                     ch.addChoosableFileFilter(fileFilter);
@@ -56,9 +63,9 @@ public class FileInputControl extends JPanel implements InputControl<File>, LogS
                 if (file != null) {
                     ch.setSelectedFile(file);
                 }
-                switch (ch.showOpenDialog(this)) {
+                switch (ch.showOpenDialog(UrlInputControl.this)) {
                     case JFileChooser.APPROVE_OPTION:
-                        textField.setText(ch.getSelectedFile().toString());
+                        textField.setText(ch.getSelectedFile().toURI().toString());
                         break;
                 }
             } catch (Exception x) {
@@ -70,24 +77,27 @@ public class FileInputControl extends JPanel implements InputControl<File>, LogS
         setLayout(g);
     }
 
-    public FileInputControl(String description, String... extensions) {
-        this(JFileChooser.FILES_ONLY, new FileNameExtensionFilter(description, extensions));
-    }
-
-    public FileInputControl() {
-        this(JFileChooser.DIRECTORIES_ONLY);
+    public UrlInputControl(String description, String... extensions) {
+        this(new FileNameExtensionFilter(description, extensions));
     }
 
     @Override
-    public File getValue() {
-        return textField.getText().trim().isEmpty() ? null : new File(textField.getText().trim());
-    }
-
-    @Override
-    public void setValue(File value) {
-        if (value != null) {
-            textField.setText(value.toString());
+    public URL getValue() {
+        final String text = textField.getText().trim();
+        if (text.isEmpty()) {
+            return null;
+        } else {
+            try {
+                return new URL(textField.getText());
+            } catch (MalformedURLException x) {
+                throw new IllegalArgumentException(x.getMessage(), x);
+            }
         }
+    }
+
+    @Override
+    public void setValue(URL value) {
+        textField.setText(value == null ? "" : value.toString());
     }
 
     @Override

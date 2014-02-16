@@ -86,8 +86,8 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
     }
 
     static ImageIcon getLevelIcon(Level level, int size) {
-        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = image.createGraphics();
+        final BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        final Graphics2D g = image.createGraphics();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_ON);
         g.setBackground(new Color(0, 0, 0, 0));
@@ -100,7 +100,6 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
         return new ImageIcon(image);
     }
 
-    @SuppressWarnings("serial")
     class LogRecordRenderer extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(JList list, Object v, int i, boolean s, boolean f) {
@@ -122,7 +121,6 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
         }
     }
 
-    @SuppressWarnings("serial")
     private class LogFrame extends JFrame implements Comparator<Level>, Filter {
 
         private final TreeMap<Level, Action> levelMap = new TreeMap<>(this);
@@ -147,7 +145,7 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
             setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             setIconImages(MaridIcons.ICONS);
             setPreferredSize(getPref("size", new Dimension(300, 400)));
-            JList<LogRecord> list = new JList<>(model);
+            final JList<LogRecord> list = new JList<>(model);
             list.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
             list.setFixedCellHeight(20);
             list.setCellRenderer(new LogRecordRenderer());
@@ -180,12 +178,12 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
 
         @Override
         public boolean isLoggable(LogRecord record) {
-            Action action = levelMap.get(record.getLevel());
+            final Action action = levelMap.get(record.getLevel());
             return action == null || Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY));
         }
 
         private boolean selected() {
-            for (Action a : levelMap.values()) {
+            for (final Action a : levelMap.values()) {
                 if (Boolean.TRUE.equals(a.getValue(Action.SELECTED_KEY))) {
                     return true;
                 }
@@ -206,13 +204,13 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
         private class LogFrameMenu extends JMenuBar {
 
             public LogFrameMenu() {
-                JMenu filterMenu = new JMenu(s("Filter"));
-                for (Action a : levelMap.values()) {
+                final JMenu filterMenu = new JMenu(s("Filter"));
+                for (final Action a : levelMap.values()) {
                     filterMenu.add(new JCheckBoxMenuItem(a));
                 }
                 filterMenu.addSeparator();
                 filterMenu.add(new MaridAction("Clear filter", "clear.png", (a, e) -> {
-                    for (Action action : levelMap.values()) {
+                    for (final Action action : levelMap.values()) {
                         action.putValue(Action.SELECTED_KEY, false);
                     }
                 }));
@@ -246,6 +244,7 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
 
         private final ConcurrentLinkedQueue<LogRecord> buffer = new ConcurrentLinkedQueue<>();
         private final ArrayList<LogRecord> records;
+        private int limit = Integer.MAX_VALUE;
         private Filter filter;
 
         LogRecordListModel() {
@@ -259,7 +258,7 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
         public int getSize() {
             if (filter != null) {
                 int count = 0;
-                for (LogRecord record : records) {
+                for (final LogRecord record : records) {
                     try {
                         if (filter.isLoggable(record)) {
                             count++;
@@ -278,7 +277,7 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
         public LogRecord getElementAt(int index) {
             if (filter != null) {
                 int i = 0;
-                for (LogRecord record : records) {
+                for (final LogRecord record : records) {
                     try {
                         if (filter.isLoggable(record) && i++ == index) {
                             return record;
@@ -296,6 +295,11 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
         void setFilter(Filter filter) {
             this.filter = filter;
             fireContentsChanged(this, 0, getSize() - 1);
+        }
+
+        // TODO: implement limit support
+        void setLimit(int limit) {
+            this.limit = limit;
         }
 
         void add(List<LogRecord> records) {

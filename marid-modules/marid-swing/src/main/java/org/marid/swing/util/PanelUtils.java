@@ -16,31 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.input;
+package org.marid.swing.util;
 
 import javax.swing.*;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.util.function.Function;
+
+import javax.swing.GroupLayout.Group;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface InputControl<V> {
+public class PanelUtils {
 
-    V getValue();
-
-    void setValue(V value);
-
-    default JComponent getComponent() {
-        return (JComponent) this;
+    public static JPanel groupedPanel(Function<GroupLayout, Group> h, Function<GroupLayout, Group> v, GroupedAction a) {
+        final JPanel panel = new JPanel();
+        final GroupLayout g = new GroupLayout(panel);
+        g.setAutoCreateGaps(true);
+        g.setAutoCreateContainerGaps(true);
+        final Group hGroup = h.apply(g);
+        final Group vGroup = v.apply(g);
+        a.doWithGroups(g, hGroup, vGroup);
+        g.setHorizontalGroup(hGroup);
+        g.setVerticalGroup(vGroup);
+        panel.setLayout(g);
+        return panel;
     }
 
-    default Class<?> getType() {
-        for (final Type type : getClass().getGenericInterfaces()) {
-            if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == InputControl.class) {
-                return (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
-            }
-        }
-        throw new IllegalStateException();
+    public static interface GroupedAction {
+
+        void doWithGroups(GroupLayout g, Group h, Group v);
     }
 }

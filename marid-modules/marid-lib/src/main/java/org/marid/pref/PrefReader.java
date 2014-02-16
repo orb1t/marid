@@ -26,5 +26,5 @@ import java.util.prefs.Preferences;
 @FunctionalInterface
 public interface PrefReader<T> {
 
-    T load(Preferences preferences, String key, T def);
+    T load(Preferences preferences, String key, T def) throws Exception;
 }
