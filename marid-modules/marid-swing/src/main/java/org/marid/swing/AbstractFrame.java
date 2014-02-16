@@ -19,12 +19,17 @@
 package org.marid.swing;
 
 import org.marid.Versioning;
+import org.marid.dyn.TypeCaster;
+import org.marid.functions.CachedSupplier;
 import org.marid.image.MaridIcons;
 import org.marid.pref.PrefSupport;
+import org.marid.pref.PrefUtils;
+import org.marid.swing.forms.Input;
 import org.marid.swing.input.InputControl;
 
 import javax.swing.*;
-
+import java.lang.reflect.Method;
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
 import static org.marid.l10n.L10n.s;
@@ -43,26 +48,74 @@ public class AbstractFrame extends JFrame implements PrefSupport {
         setLocationByPlatform(true);
     }
 
-    public static <V, C extends InputControl<V>> ControlContainer<V, C> ccs(C ctrl, Supplier<V> dvs) {
-        return new ControlContainer<>(ctrl, dvs);
+    public <T> T getPref(Class<T> type, String node, String key) {
+        for (final Method method : getClass().getMethods()) {
+            final Input input = method.getAnnotation(Input.class);
+            if (input != null) {
+                final ComponentMetaHolder meta = new ComponentMetaHolder(input, method);
+                if (meta.node.equals(node) && meta.key.equals(key)) {
+                    try {
+                        final ControlContainer cc = (ControlContainer) method.invoke(this);
+                        final Object value = PrefUtils.getPref(preferences().node("prefs").node(input.tab()), meta.key, cc.getDefaultValue());
+                        return TypeCaster.TYPE_CASTER.cast(type, value);
+                    } catch (ReflectiveOperationException x) {
+                        throw new IllegalStateException("Unable to load value for " + node + "." + key);
+                    }
+                }
+            }
+        }
+        throw new NoSuchElementException(node + "." + key);
     }
 
-    public static <V, C extends InputControl<V>> ControlContainer<V, C> ccv(C ctrl, V defaultValue) {
-        return new ControlContainer<>(ctrl, () -> defaultValue);
+    public static <V, C extends InputControl<V>> ControlContainer<V, C> cc(Supplier<C> cs, Supplier<V> dvs) {
+        return new ControlContainer<>(cs, dvs);
     }
 
     public static class ControlContainer<V, C extends InputControl<V>> {
 
-        public final C control;
+        private final Supplier<C> controlSupplier;
         private final Supplier<V> defaultValueSupplier;
 
-        private ControlContainer(C control, Supplier<V> defaultValueSupplier) {
-            this.control = control;
+        private ControlContainer(Supplier<C> controlSupplier, Supplier<V> defaultValueSupplier) {
+            this.controlSupplier = controlSupplier;
             this.defaultValueSupplier = defaultValueSupplier;
         }
 
         public V getDefaultValue() {
             return defaultValueSupplier.get();
+        }
+
+        public C getControl() {
+            return controlSupplier.get();
+        }
+    }
+
+    public static class ComponentMetaHolder {
+
+        public final String key;
+        public final String node;
+
+        public ComponentMetaHolder(Input input, Method method) {
+            key = input.name().isEmpty() ? method.getName() : input.name();
+            node = input.tab();
+        }
+    }
+
+    public static class ComponentHolder<V, C extends InputControl<V>> extends ComponentMetaHolder {
+
+        public final C control;
+        public final V defaultValue;
+
+        @SuppressWarnings("unchecked")
+        public ComponentHolder(AbstractFrame owner, Input input, Method method) {
+            super(input, method);
+            try {
+                final ControlContainer<V, C> cc = (ControlContainer<V, C>) method.invoke(owner);
+                control = cc.getControl();
+                defaultValue = cc.getDefaultValue();
+            } catch (ReflectiveOperationException x) {
+                throw new IllegalStateException(x);
+            }
         }
     }
 }

@@ -25,7 +25,10 @@ import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Formatter;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.ResourceBundle.getBundle;
@@ -38,20 +41,15 @@ public class L10n {
     public static final ResourceBundle.Control UTF8_CONTROL = new ResourceBundle.Control() {
         @Override
         public ResourceBundle newBundle(String b, Locale l, String f, ClassLoader ld, boolean r) throws IllegalAccessException, InstantiationException, IOException {
-            if (FORMAT_PROPERTIES.contains(f)) {
-                final String bundleName = toBundleName(b, l);
-                final String resourceName = toResourceName(bundleName, "properties");
-                return getResourceBundle(ld, resourceName, r);
-            } else {
-                return super.newBundle(b, l, f, ld, r);
-            }
+            return FORMAT_PROPERTIES.contains(f)
+                    ? getResourceBundle(ld, toResourceName(toBundleName(b, l), "properties"), r)
+                    : super.newBundle(b, l, f, ld, r);
         }
 
         private ResourceBundle getResourceBundle(ClassLoader ld, String resourceName, boolean reload) throws IOException {
             ResourceBundle resourceBundle = null;
             for (final Enumeration<URL> e = ld.getResources(resourceName); e.hasMoreElements(); ) {
-                final URL url = e.nextElement();
-                final URLConnection urlConnection = url.openConnection();
+                final URLConnection urlConnection = e.nextElement().openConnection();
                 urlConnection.setUseCaches(!reload);
                 try (final Reader rd = new InputStreamReader(urlConnection.getInputStream(), UTF_8)) {
                     resourceBundle = new ChainedPropertyResourceBundle(resourceBundle, rd);
@@ -70,13 +68,13 @@ public class L10n {
             sb = getBundle("res.strings", Locale.getDefault(), cl, UTF8_CONTROL);
         } catch (Exception x) {
             x.printStackTrace(System.err);
-            sb = ResourceBundle.getBundle(L10n.class.getPackage().getName() + ".strings");
+            sb = ConstantListResourceBundle.EMPTY_BUNDLE;
         }
         try {
             mb = getBundle("res.messages", Locale.getDefault(), cl, UTF8_CONTROL);
         } catch (Exception x) {
             x.printStackTrace(System.err);
-            mb = ResourceBundle.getBundle(L10n.class.getPackage().getName() + ".messages");
+            mb = ConstantListResourceBundle.EMPTY_BUNDLE;
         }
         SB = sb;
         MB = mb;

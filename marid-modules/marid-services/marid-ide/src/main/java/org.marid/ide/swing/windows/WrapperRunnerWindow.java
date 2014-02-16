@@ -49,42 +49,47 @@ public class WrapperRunnerWindow extends AbstractMultiFrame {
 
     @Input(tab = "source")
     public ControlContainer<URL, UrlInputControl> zipFile() {
-        return ccs(new UrlInputControl("ZIP files", "zip"), () -> Utils.getResource("marid-wrapper-%s.zip", version));
+        return cc(() -> new UrlInputControl("ZIP files", "zip"), () -> Utils.getResource("marid-wrapper-%s.zip", version));
     }
 
     @Input(tab = "network")
     public ControlContainer<Integer, FormattedIntInputControl> networkTimeoutInSeconds() {
-        return ccv(new FormattedIntInputControl(), 3_600);
+        return cc(FormattedIntInputControl::new, () -> 3_600);
     }
 
     @Input(tab = "network")
     public ControlContainer<Integer, FormattedIntInputControl> port() {
-        return ccv(new FormattedIntInputControl(), WrapperConstants.DEFAULT_PORT);
+        return cc(FormattedIntInputControl::new, () -> WrapperConstants.DEFAULT_PORT);
     }
 
     @Input(tab = "network")
     public ControlContainer<Integer, FormattedIntInputControl> backlog() {
-        return ccv(new FormattedIntInputControl(), 5);
+        return cc(FormattedIntInputControl::new, () -> 5);
     }
 
     @Input(tab = "network")
     public ControlContainer<String, StringInputControl> host() {
-        return ccv(new StringInputControl(), "");
+        return cc(StringInputControl::new, () -> "");
     }
 
     @Input(tab = "performance")
     public ControlContainer<Integer, SpinIntInputControl> queueSize() {
-        return ccv(new SpinIntInputControl(2, 128, 2), 8);
+        return cc(() -> new SpinIntInputControl(2, 128, 2), () -> 8);
     }
 
     @Input(tab = "performance")
     public ControlContainer<Integer, SpinIntInputControl> threads() {
-        return ccv(new SpinIntInputControl(1, 32, 1), 16);
+        return cc(() -> new SpinIntInputControl(1, 32, 1), () -> 16);
     }
 
     @Input(tab = "data")
     public ControlContainer<File, FileInputControl> targetDirectory() {
-        return ccv(new FileInputControl(), new File(System.getProperty("user.home"), "marid/wrapper"));
+        return cc(FileInputControl::new, () -> new File(System.getProperty("user.home"), "marid/wrapper"));
+    }
+
+    @Input(tab = "data")
+    public ControlContainer<File, FileInputControl> logsDirectory() {
+        return cc(FileInputControl::new, () -> new File(getPref(File.class, "data", "targetDirectory"), "lib"));
     }
 
     @FrameWidget(position = "c")

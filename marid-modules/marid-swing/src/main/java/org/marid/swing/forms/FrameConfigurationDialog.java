@@ -29,6 +29,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
@@ -48,7 +49,7 @@ import static javax.swing.SwingConstants.HORIZONTAL;
 import static javax.swing.SwingConstants.VERTICAL;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
-import static org.marid.swing.AbstractFrame.ControlContainer;
+import static org.marid.swing.AbstractFrame.ComponentHolder;
 import static org.marid.swing.util.PanelUtils.groupedPanel;
 import static org.marid.util.StringUtils.camelToText;
 import static org.marid.util.StringUtils.capitalize;
@@ -58,7 +59,9 @@ import static org.marid.util.StringUtils.capitalize;
  */
 public class FrameConfigurationDialog extends JDialog implements LogSupport, PrefSupport {
 
-    private final Map<Component, ControlContainer<Object, ?>> containerMap = new IdentityHashMap<>();
+    private final Map<Component, ComponentHolder<Object, ?>> containerMap = new IdentityHashMap<>();
+    private final Map<String, String> tabLabelMap = new HashMap<>();
+    private final Map<String, Map<String, String>> keyLabelMap = new HashMap<>();
     private final JTabbedPane tabbedPane;
 
     public FrameConfigurationDialog(AbstractFrame owner) {
@@ -117,25 +120,23 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
     }
 
     protected boolean savePreferences() {
-        final Map<Component, Exception> exceptionMap = new IdentityHashMap<>();
-        for (final Map.Entry<Component, ControlContainer<Object, ?>> e : containerMap.entrySet()) {
+        final Map<ComponentHolder, Exception> exceptionMap = new IdentityHashMap<>();
+        for (final Map.Entry<Component, ComponentHolder<Object, ?>> e : containerMap.entrySet()) {
             try {
-                final ControlContainer<Object, ?> cc = e.getValue();
-                final JComponent component = cc.control.getComponent();
-                final String node = component.getParent().getName();
-                final Preferences preferences = getOwner().preferences().node("prefs").node(node);
-                final Object defaultValue = cc.getDefaultValue();
-                final Object currentValue = cc.control.getValue();
+                final ComponentHolder<Object, ?> ch = e.getValue();
+                final Preferences preferences = getOwner().preferences().node("prefs").node(ch.node);
+                final Object defaultValue = ch.defaultValue;
+                final Object currentValue = ch.control.getValue();
                 if (currentValue == null || currentValue.equals(defaultValue)) {
-                    preferences.remove(component.getName());
-                    fine("Restored {0}.{1} default value", component.getParent().getName(), component.getName());
+                    preferences.remove(ch.key);
+                    fine("Restored {0}.{1} default value", ch.node, ch.key);
                 } else {
-                    PrefUtils.putPref(preferences, component.getName(), currentValue);
-                    fine("Saved {0}.{1} value {2}", component.getParent().getName(), component.getName(), currentValue);
+                    PrefUtils.putPref(preferences, ch.key, currentValue);
+                    fine("Saved {0}.{1} value {2}", ch.node, ch.key, currentValue);
                 }
             } catch (Exception x) {
-                exceptionMap.put(e.getKey(), x);
-                warning("Unable to save {0}.{1}", x, e.getKey().getParent().getName(), e.getKey().getName());
+                exceptionMap.put(e.getValue(), x);
+                warning("Unable to save {0}.{1}", x, e.getValue().node, e.getValue().key);
             }
         }
         if (exceptionMap.isEmpty()) {
@@ -145,27 +146,31 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
             outerPanel.add(new JLabel(s("List of validation errors") + ":"), NORTH);
             final JPanel panel = new JPanel(new GridBagLayout());
             final GridBagConstraints c = new GridBagConstraints();
-            c.fill = BOTH; c.anchor = BASELINE; c.insets = new Insets(5, 10, 5, 10);
-            for (final Map.Entry<Component, Exception> e : exceptionMap.entrySet()) {
-                final JLabel label = (JLabel) Arrays.stream(e.getKey().getParent().getComponents()).filter(q ->
-                        q instanceof JLabel && ((JLabel) q).getLabelFor() == e.getKey()
-                ).findFirst().orElse(null);
-                if (label != null) {
-                    c.weightx = 0.0; c.gridwidth = RELATIVE;
-                    panel.add(new JLabel(format("<html><b>%s</b></html>", s("Tab") + ":")), c);
-                    c.weightx = 1.0; c.gridwidth = REMAINDER;
-                    panel.add(new JLabel(e.getKey().getParent().getName()), c);
-                    c.weightx = 0.0; c.gridwidth = RELATIVE;
-                    panel.add(new JLabel(format("<html><b>%s</b></html>", s("Label") + ":")), c);
-                    c.weightx = 1.0; c.gridwidth = REMAINDER;
-                    panel.add(new JLabel(label.getText().substring(0, label.getText().length() - 1)), c);
-                    c.weightx = 0.0; c.gridwidth = RELATIVE;
-                    panel.add(new JLabel(format("<html><b>%s</b></html>", s("Message") + ": ")), c);
-                    c.weightx = 1.0; c.gridwidth = REMAINDER;
-                    panel.add(new JLabel(format("<html>%s</html>", e.getValue().getLocalizedMessage())), c);
-                    c.weightx = 1.0; c.gridwidth = REMAINDER;
-                    panel.add(new JSeparator(HORIZONTAL), c);
-                }
+            c.fill = BOTH;
+            c.anchor = BASELINE;
+            c.insets = new Insets(5, 10, 5, 10);
+            for (final Map.Entry<ComponentHolder, Exception> e : exceptionMap.entrySet()) {
+                c.weightx = 0.0;
+                c.gridwidth = RELATIVE;
+                panel.add(new JLabel(format("<html><b>%s</b></html>", s("Tab") + ":")), c);
+                c.weightx = 1.0;
+                c.gridwidth = REMAINDER;
+                panel.add(new JLabel(tabLabelMap.get(e.getKey().node)), c);
+                c.weightx = 0.0;
+                c.gridwidth = RELATIVE;
+                panel.add(new JLabel(format("<html><b>%s</b></html>", s("Label") + ":")), c);
+                c.weightx = 1.0;
+                c.gridwidth = REMAINDER;
+                panel.add(new JLabel(keyLabelMap.get(e.getKey().node).get(e.getKey().key)), c);
+                c.weightx = 0.0;
+                c.gridwidth = RELATIVE;
+                panel.add(new JLabel(format("<html><b>%s</b></html>", s("Message") + ": ")), c);
+                c.weightx = 1.0;
+                c.gridwidth = REMAINDER;
+                panel.add(new JLabel(format("<html>%s</html>", e.getValue().getLocalizedMessage())), c);
+                c.weightx = 1.0;
+                c.gridwidth = REMAINDER;
+                panel.add(new JSeparator(HORIZONTAL), c);
             }
             outerPanel.add(new JScrollPane(panel));
             outerPanel.add(new JLabel(m("Do you want to solve these errors?")), SOUTH);
@@ -179,11 +184,7 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
     }
 
     protected void loadDefaults() {
-        for (final Map.Entry<Component, ControlContainer<Object, ?>> e : containerMap.entrySet()) {
-            final ControlContainer<Object, ?> cc = e.getValue();
-            final Object defaultValue = cc.getDefaultValue();
-            cc.control.setValue(defaultValue);
-        }
+        containerMap.forEach((c, ch) -> ch.control.setValue(ch.defaultValue));
     }
 
     protected void exportPrefs() {
@@ -196,10 +197,11 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
     @SuppressWarnings("unchecked")
     private void addTab(Tab tab) throws Exception {
         final String tabTitle = tab.label().isEmpty() ? s(capitalize(tab.node())) : s(tab.label());
+        tabLabelMap.put(tab.node(), tabTitle);
+        keyLabelMap.put(tab.node(), new HashMap<>());
         final Icon tabIcon = tab.icon().isEmpty() ? null : Images.getIcon(tab.icon(), 16);
         final String tabTip = tab.tip().isEmpty() ? null : s(tab.tip());
         final JPanel panel = new JPanel(new GridBagLayout());
-        panel.setName(tab.node());
         final Preferences preferences = getOwner().preferences().node("prefs").node(tab.node());
         final GridBagConstraints c = new GridBagConstraints();
         c.fill = BOTH; c.anchor = BASELINE; c.insets = new Insets(5, 5, 5, 5);
@@ -216,17 +218,16 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
                 .forEachOrdered(method -> {
                     final Input input = method.getAnnotation(Input.class);
                     try {
-                        final ControlContainer cc = (ControlContainer) method.invoke(getOwner());
-                        cc.control.getComponent().setName(input.name().isEmpty() ? method.getName() : input.name());
+                        final ComponentHolder ch = new ComponentHolder(getOwner(), input, method);
                         try {
                             final String name = input.name().isEmpty() ? method.getName() : input.name();
-                            final Object value = PrefUtils.getPref(preferences, cc.control.getType(), name, cc.getDefaultValue());
-                            cc.control.setValue(value);
+                            final Object value = PrefUtils.getPref(preferences, ch.control.getType(), name, ch.defaultValue);
+                            ch.control.setValue(value);
                         } catch (Exception x) {
                             warning("Unable to load init value {0}.{1}", x, tab.node(), input.name());
                         }
-                        addTabCc(panel, c, input, cc);
-                        containerMap.put(cc.control.getComponent(), cc);
+                        addTabCc(panel, c, input, ch);
+                        containerMap.put(ch.control.getComponent(), ch);
                     } catch (Exception x) {
                         warning("Unable to create input {0}.{1}", x, tab.node(), input.name());
                     }
@@ -236,18 +237,23 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
         tabbedPane.addTab(tabTitle, tabIcon, new JScrollPane(panel), tabTip);
     }
 
-    private void addTabCc(JPanel p, GridBagConstraints c, Input in, ControlContainer<Object, ?> cc) throws Exception {
-        c.gridwidth = 1; c.weightx = 0.0;
-        p.add(new JButton(new MaridAction("", "defaultValue", (a, e) -> cc.control.setValue(cc.getDefaultValue()),
+    private void addTabCc(JPanel p, GridBagConstraints c, Input in, ComponentHolder<Object, ?> ch) throws Exception {
+        c.gridwidth = 1;
+        c.weightx = 0.0;
+        p.add(new JButton(new MaridAction("", "defaultValue", (a, e) -> ch.control.setValue(ch.defaultValue),
                 Action.SHORT_DESCRIPTION, s("Set default value"))), c);
         p.add(new JSeparator(VERTICAL), c);
-        c.gridwidth = in.vertical() ? REMAINDER : 1; c.weightx = in.vertical() ? 1.0 : 0.0;
-        final String txt = in.label().isEmpty() ? camelToText(cc.control.getComponent().getName()) : in.label();
-        final JLabel label = new JLabel(s(txt) + ":");
-        label.setLabelFor(cc.control.getComponent());
+        c.gridwidth = in.vertical() ? REMAINDER : 1;
+        c.weightx = in.vertical() ? 1.0 : 0.0;
+        final String txt = in.label().isEmpty() ? camelToText(ch.key) : in.label();
+        final String labelText = s(txt);
+        final JLabel label = new JLabel(labelText + ":");
+        label.setLabelFor(ch.control.getComponent());
         p.add(label, c);
-        c.gridwidth = REMAINDER; c.weightx = 1.0;
-        p.add(cc.control.getComponent(), c);
+        c.gridwidth = REMAINDER;
+        c.weightx = 1.0;
+        p.add(ch.control.getComponent(), c);
+        keyLabelMap.get(in.tab()).put(ch.key, labelText);
     }
 
     @Override
