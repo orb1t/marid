@@ -47,8 +47,12 @@ public class SwingIdeFrame extends JFrame implements PrefSupport, LogSupport {
         this.closeable = closeable;
         setIconImages(MaridIcons.ICONS);
         setJMenuBar(new MenuBarImpl(menuEntries));
-        setPreferredSize(getPref("size", new Dimension(700, 500)));
+        setLocationByPlatform(true);
         pack();
+        setSize(getPref("size", new Dimension(700, 500)));
+        setLocation(getPref("location", getLocation()));
+        setState(getPref("state", getState()));
+        setExtendedState(getPref("extendedState", getExtendedState()));
     }
 
     @Override
@@ -98,8 +102,12 @@ public class SwingIdeFrame extends JFrame implements PrefSupport, LogSupport {
 
     public void exit() {
         putPref("state", getState());
+        if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
+            putPref("size", getSize());
+            putPref("location", getLocation());
+        }
         putPref("extendedState", getExtendedState());
-        putPref("size", getSize());
+        dispose();
         System.exit(0);
     }
 }

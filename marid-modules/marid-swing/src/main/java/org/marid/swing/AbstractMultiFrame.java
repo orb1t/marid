@@ -56,7 +56,6 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
         centerPanel.add(desktop = new MultiFrameDesktop());
         add(centerPanel);
         toolBar.setBorderPainted(true);
-        setPreferredSize(getPref("size", new Dimension(700, 500)));
         menuBar.add(widgetsMenu());
         menuBar.add(new JSeparator(JSeparator.VERTICAL));
         doActions();
@@ -288,9 +287,6 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
                 for (final JInternalFrame frame : desktop.getAllFrames()) {
                     frame.doDefaultCloseAction();
                 }
-                putPref("size", getSize());
-                putPref("state", getState());
-                putPref("extState", getExtendedState());
                 putPref("tPosition", getToolbarPosition());
                 putPref("tOrientation", toolBar.getOrientation());
                 for (final InternalFrame frame : desktop.getAllFrames()) {
@@ -298,8 +294,6 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
                 }
                 break;
             case WindowEvent.WINDOW_OPENED:
-                setState(getPref("state", getState()));
-                setExtendedState(getPref("extState", getExtendedState()));
                 break;
         }
     }

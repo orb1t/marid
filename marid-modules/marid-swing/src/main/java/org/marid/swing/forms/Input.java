@@ -25,7 +25,7 @@ import java.lang.annotation.*;
  */
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
+@Target({ElementType.FIELD, ElementType.TYPE_PARAMETER})
 public @interface Input {
 
     String label() default "";

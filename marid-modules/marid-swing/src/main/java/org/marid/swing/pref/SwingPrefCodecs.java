@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing;
+package org.marid.swing.pref;
 
 import org.marid.pref.PrefCodecs;
 import org.marid.pref.PrefReader;

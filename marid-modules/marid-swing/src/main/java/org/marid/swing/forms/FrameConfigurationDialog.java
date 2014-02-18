@@ -21,17 +21,15 @@ package org.marid.swing.forms;
 import images.Images;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
-import org.marid.pref.PrefUtils;
 import org.marid.swing.AbstractFrame;
 import org.marid.swing.MaridAction;
+import org.marid.swing.input.InputControl;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Map;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.prefs.Preferences;
 
 import static java.awt.BorderLayout.NORTH;
@@ -49,7 +47,6 @@ import static javax.swing.SwingConstants.HORIZONTAL;
 import static javax.swing.SwingConstants.VERTICAL;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
-import static org.marid.swing.AbstractFrame.ComponentHolder;
 import static org.marid.swing.util.PanelUtils.groupedPanel;
 import static org.marid.util.StringUtils.camelToText;
 import static org.marid.util.StringUtils.capitalize;
@@ -59,7 +56,7 @@ import static org.marid.util.StringUtils.capitalize;
  */
 public class FrameConfigurationDialog extends JDialog implements LogSupport, PrefSupport {
 
-    private final Map<Component, ComponentHolder<Object, ?>> containerMap = new IdentityHashMap<>();
+    private final Map<Component, ComponentHolder<Object, InputControl<Object>>> containerMap = new IdentityHashMap<>();
     private final Map<String, String> tabLabelMap = new HashMap<>();
     private final Map<String, Map<String, String>> keyLabelMap = new HashMap<>();
     private final JTabbedPane tabbedPane;
@@ -121,18 +118,17 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
 
     protected boolean savePreferences() {
         final Map<ComponentHolder, Exception> exceptionMap = new IdentityHashMap<>();
-        for (final Map.Entry<Component, ComponentHolder<Object, ?>> e : containerMap.entrySet()) {
+        for (final Map.Entry<Component, ComponentHolder<Object, InputControl<Object>>> e : containerMap.entrySet()) {
+            final ComponentHolder<Object, InputControl<Object>> ch = e.getValue();
             try {
-                final ComponentHolder<Object, ?> ch = e.getValue();
-                final Preferences preferences = getOwner().preferences().node("prefs").node(ch.node);
-                final Object defaultValue = ch.defaultValue;
-                final Object currentValue = ch.control.getValue();
-                if (currentValue == null || currentValue.equals(defaultValue)) {
-                    preferences.remove(ch.key);
-                    fine("Restored {0}.{1} default value", ch.node, ch.key);
-                } else {
-                    PrefUtils.putPref(preferences, ch.key, currentValue);
-                    fine("Saved {0}.{1} value {2}", ch.node, ch.key, currentValue);
+                if (!Objects.equals(ch.initialValue, ch.control.getValue())) {
+                    if (Objects.equals(ch.getDefaultValue(), ch.control.getValue()) && ch.cc.contains()) {
+                        ch.cc.remove();
+                        fine("Restored {0}.{1}", ch.node, ch.key);
+                    } else {
+                        ch.cc.save(ch.control);
+                        fine("Saved {0}.{1}: {2}", ch.node, ch.key, ch.control.getValue());
+                    }
                 }
             } catch (Exception x) {
                 exceptionMap.put(e.getValue(), x);
@@ -150,26 +146,19 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
             c.anchor = BASELINE;
             c.insets = new Insets(5, 10, 5, 10);
             for (final Map.Entry<ComponentHolder, Exception> e : exceptionMap.entrySet()) {
-                c.weightx = 0.0;
-                c.gridwidth = RELATIVE;
+                c.weightx = 0.0; c.gridwidth = RELATIVE;
                 panel.add(new JLabel(format("<html><b>%s</b></html>", s("Tab") + ":")), c);
-                c.weightx = 1.0;
-                c.gridwidth = REMAINDER;
+                c.weightx = 1.0; c.gridwidth = REMAINDER;
                 panel.add(new JLabel(tabLabelMap.get(e.getKey().node)), c);
-                c.weightx = 0.0;
-                c.gridwidth = RELATIVE;
+                c.weightx = 0.0; c.gridwidth = RELATIVE;
                 panel.add(new JLabel(format("<html><b>%s</b></html>", s("Label") + ":")), c);
-                c.weightx = 1.0;
-                c.gridwidth = REMAINDER;
+                c.weightx = 1.0; c.gridwidth = REMAINDER;
                 panel.add(new JLabel(keyLabelMap.get(e.getKey().node).get(e.getKey().key)), c);
-                c.weightx = 0.0;
-                c.gridwidth = RELATIVE;
+                c.weightx = 0.0; c.gridwidth = RELATIVE;
                 panel.add(new JLabel(format("<html><b>%s</b></html>", s("Message") + ": ")), c);
-                c.weightx = 1.0;
-                c.gridwidth = REMAINDER;
+                c.weightx = 1.0; c.gridwidth = REMAINDER;
                 panel.add(new JLabel(format("<html>%s</html>", e.getValue().getLocalizedMessage())), c);
-                c.weightx = 1.0;
-                c.gridwidth = REMAINDER;
+                c.weightx = 1.0; c.gridwidth = REMAINDER;
                 panel.add(new JSeparator(HORIZONTAL), c);
             }
             outerPanel.add(new JScrollPane(panel));
@@ -184,7 +173,8 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
     }
 
     protected void loadDefaults() {
-        containerMap.forEach((c, ch) -> ch.control.setValue(ch.defaultValue));
+        containerMap.forEach((c, ch) -> getOwner().preferences().node("prefs").node(ch.node).remove(ch.key));
+        containerMap.forEach((c, ch) -> ch.control.setValue(ch.getDefaultValue()));
     }
 
     protected void exportPrefs() {
@@ -202,30 +192,23 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
         final Icon tabIcon = tab.icon().isEmpty() ? null : Images.getIcon(tab.icon(), 16);
         final String tabTip = tab.tip().isEmpty() ? null : s(tab.tip());
         final JPanel panel = new JPanel(new GridBagLayout());
-        final Preferences preferences = getOwner().preferences().node("prefs").node(tab.node());
         final GridBagConstraints c = new GridBagConstraints();
         c.fill = BOTH; c.anchor = BASELINE; c.insets = new Insets(5, 5, 5, 5);
-        asList(getOwner().getClass().getMethods())
+        asList(getOwner().getClass().getFields())
                 .stream()
-                .filter(m -> m.isAnnotationPresent(Input.class) && m.getAnnotation(Input.class).tab().equals(tab.node()))
-                .sorted((m1, m2) -> {
-                    final Input a1 = m1.getAnnotation(Input.class);
-                    final Input a2 = m2.getAnnotation(Input.class);
+                .filter(f -> f.isAnnotationPresent(Input.class) && f.getAnnotation(Input.class).tab().equals(tab.node()))
+                .sorted((f1, f2) -> {
+                    final Input a1 = f1.getAnnotation(Input.class);
+                    final Input a2 = f2.getAnnotation(Input.class);
                     return a1.order() != a2.order()
                             ? a1.order() - a2.order()
                             : a1.name().compareTo(a2.name());
                 })
-                .forEachOrdered(method -> {
-                    final Input input = method.getAnnotation(Input.class);
+                .forEachOrdered(field -> {
+                    final Input input = field.getAnnotation(Input.class);
                     try {
-                        final ComponentHolder ch = new ComponentHolder(getOwner(), input, method);
-                        try {
-                            final String name = input.name().isEmpty() ? method.getName() : input.name();
-                            final Object value = PrefUtils.getPref(preferences, ch.control.getType(), name, ch.defaultValue);
-                            ch.control.setValue(value);
-                        } catch (Exception x) {
-                            warning("Unable to load init value {0}.{1}", x, tab.node(), input.name());
-                        }
+                        final ComponentHolder ch = new ComponentHolder(getOwner(), input, field);
+                        ch.control.setValue(ch.initialValue);
                         addTabCc(panel, c, input, ch);
                         containerMap.put(ch.control.getComponent(), ch);
                     } catch (Exception x) {
@@ -240,7 +223,7 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
     private void addTabCc(JPanel p, GridBagConstraints c, Input in, ComponentHolder<Object, ?> ch) throws Exception {
         c.gridwidth = 1;
         c.weightx = 0.0;
-        p.add(new JButton(new MaridAction("", "defaultValue", (a, e) -> ch.control.setValue(ch.defaultValue),
+        p.add(new JButton(new MaridAction("", "defaultValue", (a, e) -> ch.control.setValue(ch.getDefaultValue()),
                 Action.SHORT_DESCRIPTION, s("Set default value"))), c);
         p.add(new JSeparator(VERTICAL), c);
         c.gridwidth = in.vertical() ? REMAINDER : 1;
@@ -259,5 +242,31 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
     @Override
     public AbstractFrame getOwner() {
         return (AbstractFrame) super.getOwner();
+    }
+
+    private static class ComponentHolder<V, C extends InputControl<V>> {
+
+        private final String node;
+        private final String key;
+        private final C control;
+        private final AbstractFrame.Pv<V, C> cc;
+        private final V initialValue;
+
+        @SuppressWarnings("unchecked")
+        public ComponentHolder(AbstractFrame owner, Input input, Field field) {
+            key = input.name().isEmpty() ? field.getName() : input.name();
+            node = input.tab();
+            try {
+                cc = (AbstractFrame.Pv<V, C>) field.get(owner);
+                control = cc.getControl();
+                initialValue = cc.get();
+            } catch (ReflectiveOperationException x) {
+                throw new IllegalStateException(x);
+            }
+        }
+
+        public V getDefaultValue() {
+            return cc.getDefaultValue();
+        }
     }
 }

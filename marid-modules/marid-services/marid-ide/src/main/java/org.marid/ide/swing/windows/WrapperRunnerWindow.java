@@ -42,54 +42,44 @@ import java.net.URL;
 @Tab(node = "performance")
 public class WrapperRunnerWindow extends AbstractMultiFrame {
 
+    @Input(tab = "source", order = 0)
+    public final Pv<URL, UrlInputControl> zipFile = new Pv<>(
+            () -> new UrlInputControl("ZIP files", "zip"),
+            () -> Utils.getResource("marid-wrapper-%s.zip", version));
+
+    @Input(tab = "network", order = 0)
+    public final Pv<String, StringInputControl> host = new Pv<>(StringInputControl::new, () -> "localhost");
+
+    @Input(tab = "network", order = 1)
+    public final Pv<Integer, FormattedIntInputControl> port = new Pv<>(
+            FormattedIntInputControl::new,
+            () -> WrapperConstants.DEFAULT_PORT);
+
+    @Input(tab = "network", order = 2)
+    public final Pv<Integer, FormattedIntInputControl> backlog = new Pv<>(FormattedIntInputControl::new, () -> 5);
+
+    @Input(tab = "network", order = 3, label = "Socket Timeout In Seconds")
+    public final Pv<Integer, FormattedIntInputControl> soTimeout = new Pv<>(FormattedIntInputControl::new, () -> 3_600);
+
+    @Input(tab = "performance", order = 0)
+    public final Pv<Integer, SpinIntInputControl> queueSize = new Pv<>(() -> new SpinIntInputControl(2, 128, 2), () -> 8);
+
+    @Input(tab = "performance", order = 1)
+    public final Pv<Integer, SpinIntInputControl> threads = new Pv<>(() -> new SpinIntInputControl(1, 32, 1), () -> 16);
+
+    @Input(tab = "data", order = 0)
+    public final Pv<File, FileInputControl> targetDirectory = new Pv<>(
+            FileInputControl::new,
+            () -> new File(System.getProperty("user.home"), "marid/wrapper"));
+
+    @Input(tab = "data", order = 1)
+    public final Pv<File, FileInputControl> logsDirectory = new Pv<>(
+            FileInputControl::new,
+            () -> new File(targetDirectory.get(), "logs"));
+
     public WrapperRunnerWindow() {
         super("Wrapper Runner");
         pack();
-    }
-
-    @Input(tab = "source")
-    public ControlContainer<URL, UrlInputControl> zipFile() {
-        return cc(() -> new UrlInputControl("ZIP files", "zip"), () -> Utils.getResource("marid-wrapper-%s.zip", version));
-    }
-
-    @Input(tab = "network")
-    public ControlContainer<Integer, FormattedIntInputControl> networkTimeoutInSeconds() {
-        return cc(FormattedIntInputControl::new, () -> 3_600);
-    }
-
-    @Input(tab = "network")
-    public ControlContainer<Integer, FormattedIntInputControl> port() {
-        return cc(FormattedIntInputControl::new, () -> WrapperConstants.DEFAULT_PORT);
-    }
-
-    @Input(tab = "network")
-    public ControlContainer<Integer, FormattedIntInputControl> backlog() {
-        return cc(FormattedIntInputControl::new, () -> 5);
-    }
-
-    @Input(tab = "network")
-    public ControlContainer<String, StringInputControl> host() {
-        return cc(StringInputControl::new, () -> "");
-    }
-
-    @Input(tab = "performance")
-    public ControlContainer<Integer, SpinIntInputControl> queueSize() {
-        return cc(() -> new SpinIntInputControl(2, 128, 2), () -> 8);
-    }
-
-    @Input(tab = "performance")
-    public ControlContainer<Integer, SpinIntInputControl> threads() {
-        return cc(() -> new SpinIntInputControl(1, 32, 1), () -> 16);
-    }
-
-    @Input(tab = "data")
-    public ControlContainer<File, FileInputControl> targetDirectory() {
-        return cc(FileInputControl::new, () -> new File(System.getProperty("user.home"), "marid/wrapper"));
-    }
-
-    @Input(tab = "data")
-    public ControlContainer<File, FileInputControl> logsDirectory() {
-        return cc(FileInputControl::new, () -> new File(getPref(File.class, "data", "targetDirectory"), "lib"));
     }
 
     @FrameWidget(position = "c")

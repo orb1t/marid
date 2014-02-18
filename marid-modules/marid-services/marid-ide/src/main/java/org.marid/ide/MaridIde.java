@@ -29,7 +29,8 @@ import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.util.logging.Logger;
 
-import static org.marid.methods.LogMethods.*;
+import static org.marid.methods.LogMethods.info;
+import static org.marid.methods.LogMethods.warning;
 
 /**
  * @author Dmitry Ovchinnikov

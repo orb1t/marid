@@ -20,7 +20,6 @@ package org.marid.swing;
 
 import org.marid.Versioning;
 import org.marid.dyn.TypeCaster;
-import org.marid.functions.CachedSupplier;
 import org.marid.image.MaridIcons;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.PrefUtils;
@@ -28,10 +27,14 @@ import org.marid.swing.forms.Input;
 import org.marid.swing.input.InputControl;
 
 import javax.swing.*;
-import java.lang.reflect.Method;
-import java.util.NoSuchElementException;
+import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.lang.reflect.Field;
 import java.util.function.Supplier;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
+import static java.util.Arrays.asList;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -45,38 +48,38 @@ public class AbstractFrame extends JFrame implements PrefSupport {
         super(s(title));
         setIconImages(MaridIcons.ICONS);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLocationByPlatform(true);
+        setLocation(getPref("location", new Point(0, 0)));
+        setPreferredSize(getPref("size", new Dimension(700, 500)));
+        setState(getPref("state", getState()));
+        setExtendedState(getPref("extendedState", getExtendedState()));
     }
 
-    public <T> T getPref(Class<T> type, String node, String key) {
-        for (final Method method : getClass().getMethods()) {
-            final Input input = method.getAnnotation(Input.class);
-            if (input != null) {
-                final ComponentMetaHolder meta = new ComponentMetaHolder(input, method);
-                if (meta.node.equals(node) && meta.key.equals(key)) {
-                    try {
-                        final ControlContainer cc = (ControlContainer) method.invoke(this);
-                        final Object value = PrefUtils.getPref(preferences().node("prefs").node(input.tab()), meta.key, cc.getDefaultValue());
-                        return TypeCaster.TYPE_CASTER.cast(type, value);
-                    } catch (ReflectiveOperationException x) {
-                        throw new IllegalStateException("Unable to load value for " + node + "." + key);
-                    }
+    @Override
+    protected void processWindowEvent(WindowEvent e) {
+        super.processWindowEvent(e);
+        switch (e.getID()) {
+            case WindowEvent.WINDOW_OPENED:
+                setState(getPref("state", getState()));
+                setExtendedState(getPref("extendedState", getExtendedState()));
+                break;
+            case WindowEvent.WINDOW_CLOSED:
+                if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
+                    putPref("size", getSize());
+                    putPref("location", getLocation());
                 }
-            }
+                putPref("state", getState());
+                putPref("extendedState", getExtendedState());
+                break;
         }
-        throw new NoSuchElementException(node + "." + key);
     }
 
-    public static <V, C extends InputControl<V>> ControlContainer<V, C> cc(Supplier<C> cs, Supplier<V> dvs) {
-        return new ControlContainer<>(cs, dvs);
-    }
+    public class Pv<V, C extends InputControl<V>> {
 
-    public static class ControlContainer<V, C extends InputControl<V>> {
-
+        private Field field;
         private final Supplier<C> controlSupplier;
         private final Supplier<V> defaultValueSupplier;
 
-        private ControlContainer(Supplier<C> controlSupplier, Supplier<V> defaultValueSupplier) {
+        public Pv(Supplier<C> controlSupplier, Supplier<V> defaultValueSupplier) {
             this.controlSupplier = controlSupplier;
             this.defaultValueSupplier = defaultValueSupplier;
         }
@@ -88,34 +91,79 @@ public class AbstractFrame extends JFrame implements PrefSupport {
         public C getControl() {
             return controlSupplier.get();
         }
-    }
 
-    public static class ComponentMetaHolder {
-
-        public final String key;
-        public final String node;
-
-        public ComponentMetaHolder(Input input, Method method) {
-            key = input.name().isEmpty() ? method.getName() : input.name();
-            node = input.tab();
+        public Input getInput() {
+            return getField().getAnnotation(Input.class);
         }
-    }
 
-    public static class ComponentHolder<V, C extends InputControl<V>> extends ComponentMetaHolder {
+        public Supplier<V> getDefaultValueSupplier() {
+            return defaultValueSupplier;
+        }
 
-        public final C control;
-        public final V defaultValue;
+        private Field getField() {
+            if (field == null) {
+                for (final Field field : AbstractFrame.this.getClass().getFields()) {
+                    final Input input = field.getAnnotation(Input.class);
+                    if (input != null) {
+                        try {
+                            if (this == field.get(AbstractFrame.this)) {
+                                return this.field = field;
+                            }
+                        } catch (ReflectiveOperationException x) {
+                            throw new IllegalStateException(x);
+                        }
+                    }
+                }
+                throw new IllegalStateException("No such field");
+            } else {
+                return field;
+            }
+        }
 
-        @SuppressWarnings("unchecked")
-        public ComponentHolder(AbstractFrame owner, Input input, Method method) {
-            super(input, method);
+        public V get() {
+            final Field field = getField();
+            final Input input = field.getAnnotation(Input.class);
+            final String key = input.name().isEmpty() ? field.getName() : input.name();
+            return PrefUtils.getPref(preferences().node("prefs").node(input.tab()), key, getDefaultValue());
+        }
+
+        public void save(C control) {
+            final Field field = getField();
+            final Input input = field.getAnnotation(Input.class);
+            final String key = input.name().isEmpty() ? field.getName() : input.name();
+            PrefUtils.putPref(preferences().node("prefs").node(input.tab()), key, control.getValue());
+        }
+
+        public boolean contains() {
+            final Field field = getField();
+            final Input input = field.getAnnotation(Input.class);
+            final String key = input.name().isEmpty() ? field.getName() : input.name();
+            final Preferences preferences = preferences().node("prefs").node(input.tab());
             try {
-                final ControlContainer<V, C> cc = (ControlContainer<V, C>) method.invoke(owner);
-                control = cc.getControl();
-                defaultValue = cc.getDefaultValue();
-            } catch (ReflectiveOperationException x) {
+                return asList(preferences.keys()).contains(key) || asList(preferences.childrenNames()).contains(key);
+            } catch (BackingStoreException x) {
                 throw new IllegalStateException(x);
             }
+        }
+
+        public void remove() {
+            final Field field = getField();
+            final Input input = field.getAnnotation(Input.class);
+            final String key = input.name().isEmpty() ? field.getName() : input.name();
+            final Preferences preferences = preferences().node("prefs").node(input.tab());
+            try {
+                if (asList(preferences.keys()).contains(key)) {
+                    preferences.remove(key);
+                } else if (asList(preferences.childrenNames()).contains(key)) {
+                    preferences.node(key).removeNode();
+                }
+            } catch (BackingStoreException x) {
+                throw new IllegalStateException(x);
+            }
+        }
+
+        public <T> T get(Class<T> type) {
+            return TypeCaster.TYPE_CASTER.cast(type, get());
         }
     }
 }
