@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,22 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.wrapper.data;
+package org.marid.io;
 
-import org.marid.io.ser.SerializableObject;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class UploadRequest extends SerializableObject {
+public class BinStreams {
 
-    private final DeployConf deployConf;
-
-    public UploadRequest(DeployConf deployConf) {
-        this.deployConf = deployConf;
-    }
-
-    public DeployConf getDeployConf() {
-        return deployConf;
+    public static String read(URL url) throws IOException {
+        try (final InputStreamReader reader = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)) {
+            final char[] buf = new char[1024];
+            final StringBuilder builder = new StringBuilder();
+            while (true) {
+                final int n = reader.read(buf);
+                if (n < 0) {
+                    break;
+                }
+                builder.append(buf, 0, n);
+            }
+            return builder.toString();
+        }
     }
 }

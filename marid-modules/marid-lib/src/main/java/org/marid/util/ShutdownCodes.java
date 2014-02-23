@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,12 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.func;
+package org.marid.util;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Predicate1<T> {
+public interface ShutdownCodes {
 
-    public boolean check(T arg);
+    public static final int DB_SERVER_FAILURE = 8;
+    public static final int UDP_ERROR_SHUTDOWN = 31;
 }

@@ -18,183 +18,224 @@
 
 package org.marid.wrapper;
 
-import org.marid.io.JaxbStreams;
-import org.marid.io.ProcessUtils;
-import org.marid.secure.SecureProfile;
-import org.marid.wrapper.data.DeployConf;
+import org.hsqldb.Database;
+import org.hsqldb.DatabaseManager;
+import org.hsqldb.server.Server;
+import org.marid.io.PrintStreamWriter;
+import org.marid.logging.Logging;
+import org.marid.net.UdpShutdownThread;
+import org.marid.util.ShutdownCodes;
+import org.marid.util.Utils;
+import org.marid.wrapper.hsqldb.HsqldbConfiguration;
+import org.marid.wrapper.hsqldb.HsqldbServerProvider;
+import org.marid.wrapper.hsqldb.HsqldbWrapperServerDao;
 
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.invoke.MethodHandles;
-import java.net.InetAddress;
-import java.net.Socket;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-import java.util.TimerTask;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import static java.nio.file.StandardOpenOption.*;
+import static org.hsqldb.server.ServerConstants.SERVER_STATE_ONLINE;
+import static org.hsqldb.server.ServerConstants.SERVER_STATE_SHUTDOWN;
 import static org.marid.methods.LogMethods.*;
-import static org.marid.wrapper.WrapperConstants.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Wrapper extends TimerTask implements UncaughtExceptionHandler {
+public class Wrapper {
 
-    private static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
+    static {
+        System.setProperty("hsqldb.reconfig_logging", Boolean.toString(false));
+    }
 
-    static final int PORT = ParseUtils.getInt("MW_PORT", DEFAULT_PORT);
-    static final int BACKLOG = ParseUtils.getInt("MW_BACKLOG", 5);
-    static final String ADDRESS = ParseUtils.getString("MW_ADDRESS", null);
-    static final Path TARGET = ParseUtils.getDir("MW_TARGET", null, "marid");
-    static final Path BACKUPS = ParseUtils.getDir("MW_BACKUPS", null, "maridBackups");
-    static final Path LOGS = ParseUtils.getDir("MW_LOGS", TARGET, "logs");
-    static final int THREADS = ParseUtils.getInt("MW_THREADS", 8);
-    static final int QUEUE_SIZE = ParseUtils.getInt("MW_QUEUE_SIZE", 16);
-    static final int TIMEOUT = ParseUtils.getInt("MW_TIMEOUT", 3_600_000);
-    static final Properties USERS = new Properties();
-
-    static final Lock processLock = new ReentrantLock();
-    private static Process maridProcess;
+    private static final Logger LOG = Logger.getLogger(Wrapper.class.getName());
+    private static final PrintWriter ERR_WRITER = new PrintStreamWriter(System.err, true);
 
     public static void main(String... args) throws Exception {
-        Thread.setDefaultUncaughtExceptionHandler(new Wrapper());
-        try (final InputStream is = Wrapper.class.getResourceAsStream("users.properties")) {
-            if (is != null) {
-                USERS.load(is);
-            }
-        }
-        final SSLServerSocketFactory ssf = SecureProfile.DEFAULT.getServerSocketFactory();
-        info(LOG, "Server socket factory: {0}", ssf);
-        final SSLServerSocket serverSocket = (SSLServerSocket) (ADDRESS == null
-                ? ssf.createServerSocket(PORT, BACKLOG)
-                : ssf.createServerSocket(PORT, BACKLOG, InetAddress.getByName(ADDRESS)));
-        info(LOG, "Server socket: {0}", serverSocket);
-        serverSocket.setNeedClientAuth(true);
-        final ThreadPoolExecutor executor = new ThreadPoolExecutor(0, THREADS,
-                1L, TimeUnit.MINUTES, new LinkedBlockingQueue<>(QUEUE_SIZE), new CallerRunsPolicy());
-        try {
-            while (true) {
-                try {
-                    final Socket socket = serverSocket.accept();
-                    socket.setSoTimeout(TIMEOUT);
-                    try {
-                        final SSLSocket sslSocket = (SSLSocket) socket;
-                        final SSLSession sslSession = sslSocket.getSession();
-                        info(LOG, "{0} New client", sslSocket);
-                        executor.execute(new Session(sslSocket, sslSession));
-                    } catch (Exception x) {
-                        warning(LOG, "{0} Client error", x, socket);
-                    }
-                } catch (Exception x) {
-                    severe(LOG, "Accept clients failed", x);
-                    break;
-                }
-            }
-        } finally {
-            executor.shutdown();
-        }
-    }
-
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
-        warning(LOG, "Unhandled exception in {0}", e, t);
-    }
-
-    @Override
-    public void run() {
-        try {
-            processLock.tryLock(1L, TimeUnit.MINUTES);
-        } catch (InterruptedException x) {
-            warning(LOG, "Interrupted timer", x);
+        Logging.init(Wrapper.class, "marid-logging.properties");
+        final WrapperCli cli = new WrapperCli(Utils.loadProperties(Wrapper.class, "marid-wrapper.properties"), args);
+        if (cli.isHelp()) {
+            cli.showHelp();
             return;
         }
+        switch (cli.getCommand()) {
+            case "start":
+                start(cli);
+                break;
+            case "stop":
+                stop(cli.getInstanceName(), cli.getBindAddress());
+                break;
+            default:
+                throw new IllegalArgumentException(cli.getCommand());
+        }
+    }
+
+    private static void start(WrapperCli cli) throws Exception {
+        final UdpShutdownThread shutdownThread = new UdpShutdownThread(
+                cli.getInstanceName(), () -> startDbServer(cli), cli.getBindAddress());
         try {
-            if (maridProcess != null) {
+            shutdownThread.start();
+            shutdownThread.join();
+        } catch (Exception x) {
+            warning(LOG, "Starting {0} error", x, cli.getInstanceName());
+        }
+        System.exit(shutdownThread.getExitCode());
+    }
+
+    private static void stop(String name, InetSocketAddress bindAddress) throws Exception {
+        UdpShutdownThread.sendShutdownSequence(bindAddress, name);
+    }
+
+    private static HsqldbConfiguration newConfiguration(WrapperCli cli) {
+        try {
+            final HsqldbConfiguration configuration = cli.configuration()
+                    .setNoSystemExit(true)
+                    .setRestartOnShutdown(false);
+            if (configuration.getDatabaseMap().isEmpty()) {
+                final Path path = Paths.get(System.getProperty("user.home"), "marid-wrapper/marid-wrapper");
+                configuration.putDatabase("wrapper", path.toString());
+            }
+            return configuration;
+        } catch (IOException x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
+    private static void startDbServer(WrapperCli cli) {
+        final Server server = HsqldbServerProvider.getServer(newConfiguration(cli), ERR_WRITER, ERR_WRITER);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            server.stop();
+            do {
+                info(LOG, "Waiting for DB server stop");
+                try {
+                    TimeUnit.SECONDS.sleep(1L);
+                } catch (InterruptedException x) {
+                    warning(LOG, "{0} was interrupted", x, Thread.currentThread());
+                }
+            } while (server.getState() != SERVER_STATE_SHUTDOWN);
+        }));
+        server.start();
+        final long startTime = System.currentTimeMillis();
+        do {
+            info(LOG, "Waiting for DB server start");
+            try {
+                TimeUnit.SECONDS.sleep(1L);
+            } catch (InterruptedException x) {
+                warning(LOG, "{0} was interrupted", x, Thread.currentThread());
+            }
+            if (System.currentTimeMillis() - startTime > TimeUnit.HOURS.toMillis(1L)) {
+                severe(LOG, "DB server start timeout error");
+                System.exit(ShutdownCodes.DB_SERVER_FAILURE);
                 return;
             }
-            final Path confFile = TARGET.resolve("configuration.xml");
-            final DeployConf deployConf;
-            if (Files.isReadable(confFile)) {
-                try {
-                    deployConf = JaxbStreams.readXml(DeployConf.class, confFile);
-                } catch (Exception x) {
-                    warning(LOG, "Unable to read deploy configuration from {0}", x, confFile);
-                    try {
-                        Thread.sleep(60_000L);
-                    } catch (InterruptedException ix) {
-                        warning(LOG, "Interrupted timer", ix);
-                    }
-                    return;
-                }
-            } else {
-                deployConf = new DeployConf();
-            }
-            final List<String> cmdLine = new LinkedList<>();
-            cmdLine.add(Paths.get(System.getProperty("java.home"), "bin", "java").toString());
-            cmdLine.addAll(deployConf.getVmArguments());
-            cmdLine.add("-jar");
-            for (final String file : TARGET.toFile().list()) {
-                if (file.startsWith("marid-runtime") && file.endsWith(".jar")) {
-                    cmdLine.add(file);
-                    break;
-                }
-            }
-            cmdLine.addAll(deployConf.getMaridArguments());
-            maridProcess = new ProcessBuilder(cmdLine)
-                    .redirectError(LOGS.resolve("error.log").toFile())
-                    .redirectOutput(LOGS.resolve("output.log").toFile())
-                    .directory(TARGET.toFile())
-                    .start();
-        } catch (Exception x) {
-            warning(LOG, "Error while starting process", x);
-        } finally {
-            processLock.unlock();
-        }
-    }
-
-    private static Properties secureProperties() {
-        final Properties properties = new Properties();
-        try (final InputStream inputStream = Wrapper.class.getResourceAsStream("/maridWrapperSecurity.properties")) {
-            if (inputStream != null) {
-                properties.load(inputStream);
-            }
-        } catch (Exception x) {
-            warning(LOG, "Unable to process security properties");
-        }
-        return properties;
-    }
-
-    static void destroyProcess() {
-        if (maridProcess != null) {
+        } while (server.getState() != SERVER_STATE_ONLINE);
+        final Database database = DatabaseManager.getDatabase(0);
+        final Path umapPath = Paths.get(database.getPath()).getParent().resolve("marid-wrapper-update.map");
+        final HsqldbWrapperServerDao dao = new HsqldbWrapperServerDao(database.getSessionManager().getSysSession());
+        if (!Files.exists(umapPath)) {
             try {
-                try (final OutputStream os = maridProcess.getOutputStream()) {
-                    os.write('x');
-                }
-                final int r = ProcessUtils.joinProcess(maridProcess, 360_000L);
-                if (r != 0) {
-                    warning(LOG, "{0} was terminated with exit status {1}", maridProcess, r);
-                }
+                applySettings(cli.getSettings(), dao);
+                dao.initDefaultSchema();
             } catch (Exception x) {
-                warning(LOG, "{0} Unable to send exit command", x, maridProcess);
-                maridProcess.destroy();
-            } finally {
-                maridProcess = null;
+                warning(LOG, "Unable to apply settings", x);
+                System.exit(ShutdownCodes.DB_SERVER_FAILURE);
+                return;
+            }
+        }
+        try {
+            applySqlIndex(dao, umapPath);
+        } catch (Exception x) {
+            severe(LOG, "System halt due to serious error", x);
+            System.exit(ShutdownCodes.DB_SERVER_FAILURE);
+        }
+    }
+
+    private static void applySettings(URL settings, HsqldbWrapperServerDao dao) throws Exception {
+        try (final Scanner scanner = new Scanner(settings.openStream(), "UTF-8")) {
+            while (scanner.hasNextLine()) {
+                final String line = scanner.nextLine().trim();
+                if (line.isEmpty() || line.startsWith("--")) {
+                    continue;
+                }
+                dao.update(line);
+                info(LOG, "Executing {0}", line);
+            }
+        }
+    }
+
+    private static void applySqlIndex(HsqldbWrapperServerDao dao, Path umapPath) throws Exception {
+        final Map<String, Set<String>> umap = new LinkedHashMap<>();
+        if (Files.exists(umapPath)) {
+            try (final Scanner scanner = new Scanner(umapPath, "UTF-8")) {
+                while (scanner.hasNextLine()) {
+                    final String line = scanner.nextLine().trim();
+                    if (line.isEmpty() || line.startsWith("#")) {
+                        continue;
+                    }
+                    final String[] parts = line.split(":");
+                    if (parts.length != 2) {
+                        throw new IllegalStateException("Invalid line: " + line);
+                    }
+                    final Set<String> set = umap.computeIfAbsent(parts[0].trim(), k -> new LinkedHashSet<>());
+                    set.add(parts[1].trim());
+                }
+            }
+        }
+        try (final Scanner scanner = new Scanner(Wrapper.class.getResourceAsStream("sql/sqlUpdate.txt"), "UTF-8")) {
+            final Pattern updateItemPattern = Pattern.compile("---\\s+(.+)\\s+---");
+            while (scanner.hasNextLine()) {
+                final String l = scanner.nextLine().trim();
+                if (l.isEmpty() || l.startsWith("#")) {
+                    continue;
+                }
+                try (final Scanner s = new Scanner(Wrapper.class.getResourceAsStream("sql/" + l + ".sql"), "UTF-8")) {
+                    final StringBuilder currentUpdate = new StringBuilder();
+                    String updateItem = null;
+                    final Consumer<String> consumer = item -> {
+                        final Set<String> set = umap.computeIfAbsent(l, k -> new LinkedHashSet<>());
+                        final String updateLine = l + " : " + item;
+                        if (!set.contains(item)) {
+                            info(LOG, "Executing {0}", updateLine);
+                            dao.update(currentUpdate.toString());
+                            try {
+                                Files.write(umapPath, Collections.singleton(updateLine), APPEND, WRITE, CREATE);
+                            } catch (IOException x) {
+                                throw new IllegalStateException(x);
+                            }
+                        }
+                    };
+                    while (s.hasNextLine()) {
+                        final String line = s.nextLine().trim();
+                        if (line.isEmpty()) {
+                            continue;
+                        }
+                        final Matcher matcher = updateItemPattern.matcher(line);
+                        if (matcher.matches()) {
+                            if (updateItem != null) {
+                                consumer.accept(updateItem);
+                            }
+                            updateItem = matcher.group(1);
+                            currentUpdate.setLength(0);
+                        } else if (!line.startsWith("--")) {
+                            Objects.requireNonNull(updateItem, "Invalid line without updateItem: " + line);
+                            currentUpdate.append(line);
+                            currentUpdate.append('\n');
+                        }
+                    }
+                    if (currentUpdate.length() > 0 && updateItem != null) {
+                        consumer.accept(updateItem);
+                    }
+                }
             }
         }
     }

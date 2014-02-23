@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,12 +18,17 @@
 
 package org.marid.wrapper;
 
+import java.net.InetSocketAddress;
+
+import static org.marid.net.UdpShutdownThread.sendShutdownSequence;
+import static org.marid.wrapper.WrapperConstants.DEFAULT_WRAPPER_SHUTDOWN_PORT;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ClosedSessionException extends RuntimeException {
+public class WrapperShutdown {
 
-    public ClosedSessionException() {
-        super(null, null, false, false);
+    public static void main(String[] args) throws Exception {
+        sendShutdownSequence(new InetSocketAddress("localhost", DEFAULT_WRAPPER_SHUTDOWN_PORT), "marid-wrapper");
     }
 }

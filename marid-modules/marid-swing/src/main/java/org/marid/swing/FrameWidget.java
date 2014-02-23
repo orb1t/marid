@@ -38,8 +38,6 @@ public @interface FrameWidget {
 
     String key() default "";
 
-    String position() default "nw";
-
     boolean closable() default false;
 
     boolean iconifiable() default true;

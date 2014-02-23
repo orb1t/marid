@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,39 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.wrapper.data;
-
-import org.marid.io.ser.SerializableObject;
-
-import java.util.*;
+package org.marid.wrapper;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class AuthResponse extends SerializableObject {
+public interface PasswordInput {
 
-    private final String result;
-
-    private final TreeSet<String> roles;
-
-    public AuthResponse(String result, Set<String> roles) {
-        this.result = result;
-        this.roles = new TreeSet<>(roles);
-    }
-
-    public AuthResponse(String result, String... roles) {
-        this(result, new HashSet<>(Arrays.asList(roles)));
-    }
-
-    public AuthResponse(String result) {
-        this(result, Collections.<String>emptySet());
-    }
-
-    public String getResult() {
-        return result;
-    }
-
-    public Set<String> getRoles() {
-        return roles;
-    }
+    char[] getPassword(String value);
 }

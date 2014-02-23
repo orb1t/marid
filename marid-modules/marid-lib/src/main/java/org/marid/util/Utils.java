@@ -18,7 +18,12 @@
 
 package org.marid.util;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,5 +41,19 @@ public class Utils {
 
     public static URL getResource(String format, Object... args) {
         return getClassLoader(Utils.class).getResource(String.format(format, args));
+    }
+
+    public static Properties loadProperties(Class<?> c, String path) throws IOException {
+        return loadProperties(getClassLoader(c).getResource(path));
+    }
+
+    public static Properties loadProperties(URL url) throws IOException {
+        final Properties properties = new Properties();
+        if (url != null) {
+            try (final Reader reader = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)) {
+                properties.load(reader);
+            }
+        }
+        return properties;
     }
 }

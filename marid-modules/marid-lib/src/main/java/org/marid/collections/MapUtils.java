@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,24 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.wrapper.data;
+package org.marid.collections;
 
-import org.marid.io.ser.SerializableObject;
-
-import java.util.logging.Level;
+import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ListenLogsRequest extends SerializableObject {
+public class MapUtils {
 
-    private final String levelName;
-
-    public ListenLogsRequest(Level level) {
-        levelName = level.getName();
-    }
-
-    public Level getLevel() {
-        return Level.parse(levelName);
+    public static <K, V> void forEach(Map<K, V> map, BiConsumer<Integer, Map.Entry<K, V>> consumer) {
+        int i = 0;
+        for (final Map.Entry<K, V> entry : map.entrySet()) {
+            consumer.accept(i++, entry);
+        }
     }
 }

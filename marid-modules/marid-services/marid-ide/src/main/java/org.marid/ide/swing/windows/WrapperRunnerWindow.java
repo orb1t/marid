@@ -28,10 +28,10 @@ import org.marid.util.Utils;
 import org.marid.wrapper.WrapperConstants;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Paths;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -40,6 +40,7 @@ import java.net.URL;
 @Tab(node = "data")
 @Tab(node = "source")
 @Tab(node = "performance")
+@Tab(node = "jvm", label = "JVM")
 public class WrapperRunnerWindow extends AbstractMultiFrame {
 
     @Input(tab = "source", order = 0)
@@ -53,7 +54,7 @@ public class WrapperRunnerWindow extends AbstractMultiFrame {
     @Input(tab = "network", order = 1)
     public final Pv<Integer, FormattedIntInputControl> port = new Pv<>(
             FormattedIntInputControl::new,
-            () -> WrapperConstants.DEFAULT_PORT);
+            () -> WrapperConstants.DEFAULT_WRAPPER_PORT);
 
     @Input(tab = "network", order = 2)
     public final Pv<Integer, FormattedIntInputControl> backlog = new Pv<>(FormattedIntInputControl::new, () -> 5);
@@ -77,17 +78,25 @@ public class WrapperRunnerWindow extends AbstractMultiFrame {
             FileInputControl::new,
             () -> new File(targetDirectory.get(), "logs"));
 
+    @Input(tab = "jvm", order = 0, label = "JVM Path")
+    public final Pv<String, StringInputControl> jvmPath = new Pv<>(
+            StringInputControl::new,
+            () -> Paths.get(System.getProperty("java.home"), "bin", "java").toString()
+    );
+
+    @Input(tab = "jvm", order = 1, label = "JVM arguments")
+    public final Pv<String, StringInputControl> jvmArgs = new Pv<>(StringInputControl::new, () -> "");
+
     public WrapperRunnerWindow() {
         super("Wrapper Runner");
         pack();
     }
 
-    @FrameWidget(position = "c")
+    @FrameWidget
     @FrameAction(key = "F5", info = "Starts the wrapper", group = "control", tool = true, path = "Wrapper", icon = "start")
     public class Runner extends InternalFrame {
 
         public Runner(ActionEvent actionEvent, Action action) {
-            setPreferredSize(new Dimension(800, 600));
             pack();
             action.setEnabled(false);
         }

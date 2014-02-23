@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,9 +21,9 @@ package org.marid.wrapper;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface WrapperConstants {
+public class WrapperConstants {
 
-    int DEFAULT_PORT = 11200;
-    int MODE_DEFAULT = 0;
-    int MODE_GZIP = 1;
+    public static final int DEFAULT_WRAPPER_PORT = 10001;
+    public static final int DEFAULT_WRAPPER_SHUTDOWN_PORT = 10002;
+    public static final String DEFAULT_WRAPPER_PASSWORD = "marido";
 }

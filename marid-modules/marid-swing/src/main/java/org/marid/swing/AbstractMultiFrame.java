@@ -24,6 +24,8 @@ import org.marid.pref.PrefSupport;
 import org.marid.swing.forms.FrameConfigurationDialog;
 
 import javax.swing.*;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.*;
@@ -32,6 +34,7 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.prefs.Preferences;
 
 import static java.awt.BorderLayout.NORTH;
 import static java.util.Arrays.copyOfRange;
@@ -59,7 +62,6 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
         menuBar.add(widgetsMenu());
         menuBar.add(new JSeparator(JSeparator.VERTICAL));
         doActions();
-        info("{0} created", this);
     }
 
     private JMenuItem menuItem(String title, String icon, String cmd, ActionListener actionListener) {
@@ -357,41 +359,43 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
         protected InternalFrame() {
             final FrameWidget meta = getClass().getAnnotation(FrameWidget.class);
             setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            setName(meta.key().isEmpty() ? getClass().getSimpleName() : meta.key());
             setTitle(meta.title().isEmpty() ? s(getClass().getSimpleName()) : s(meta.title()));
             setResizable(meta.resizable());
             setIconifiable(meta.iconifiable());
             setClosable(meta.closable());
             setMaximizable(meta.maximizable());
+            setPreferredSize(getPref("size", getInitialSize()));
+            addInternalFrameListener(new InternalFrameAdapter() {
+                @Override
+                public void internalFrameClosed(InternalFrameEvent e) {
+                    try {
+                        putPref("size", getSize());
+                        putPref("location", getLocation());
+                    } finally {
+                        removeInternalFrameListener(this);
+                    }
+                }
+            });
         }
 
         @Override
         public void show() {
-            final int x, y;
-            switch (getPref("position", getClass().getAnnotation(FrameWidget.class).position())) {
-                case "ne":
-                    x = desktop.getWidth() - getWidth();
-                    y = 0;
-                    break;
-                case "sw":
-                    x = 0;
-                    y = desktop.getHeight() - getHeight();
-                    break;
-                case "se":
-                    x = desktop.getWidth() - getWidth();
-                    y = desktop.getHeight() - getHeight();
-                    break;
-                case "c":
-                    x = (desktop.getWidth() - getWidth()) / 2;
-                    y = (desktop.getHeight() - getHeight()) / 2;
-                    break;
-                case "nw":
-                default:
-                    x = 0;
-                    y = 0;
-                    break;
-            }
-            setLocation(x, y);
+            setLocation(getPref("location", getInitialLocation()));
             super.show();
+        }
+
+        @Override
+        public Preferences preferences() {
+            return AbstractMultiFrame.this.preferences().node("frames").node(getName());
+        }
+
+        protected Dimension getInitialSize() {
+            return new Dimension(500, 400);
+        }
+
+        protected Point getInitialLocation() {
+            return new Point(0, 0);
         }
     }
 }

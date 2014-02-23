@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.wrapper;
+package org.marid.wrapper.logging;
 
 /**
  * @author Dmitry Ovchinnikov
- * Please, do not remove names or change order of the enum constants.
  */
-public class Request {
-
-    public static final byte UPLOAD = 0;
-    public static final byte LISTEN_LOGS = 1;
-    public static final byte CLOSE = 2;
-    public static final byte CONTINUE = 3;
+public class WrapperLogHandler {
 }
