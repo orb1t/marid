@@ -79,4 +79,47 @@ public class PrefUtils {
             LogMethods.warning(LOG, "Unable to save {0}.{1} value {2}", preferences, key, value);
         }
     }
+
+    public static String[] parseStrings(String value) {
+        final String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return new String[0];
+        } else {
+            final String[] parts = trimmed.split("\\s");
+            for (int i = 0; i < parts.length; i++) {
+                final String part = parts[i];
+                if (part.indexOf(0xA0) >= 0) {
+                    final StringBuilder builder = new StringBuilder(part);
+                    for (int p = 0; p < builder.length(); p++) {
+                        if (builder.charAt(p) == 0xA0) {
+                            if (p + 1 < builder.length() && builder.charAt(p + 1) == 0xA0) {
+                                builder.replace(p, p + 2, "\u00A0");
+                            } else {
+                                builder.setCharAt(p, ' ');
+                            }
+                        }
+                    }
+                    parts[i] = builder.toString();
+                }
+            }
+            return parts;
+        }
+    }
+
+    public static String makeStrings(String[] value) {
+        if (value.length == 0) {
+            return "";
+        } else {
+            final String[] parts = new String[value.length];
+            for (int i = 0; i < parts.length; i++) {
+                final String part = value[i].trim();
+                if (part.indexOf(' ') >= 0) {
+                    parts[i] = part.replace("\u00A0", "\u00A0\u00A0").replace(' ', '\u00A0');
+                } else {
+                    parts[i] = part;
+                }
+            }
+            return String.join(" ", parts);
+        }
+    }
 }

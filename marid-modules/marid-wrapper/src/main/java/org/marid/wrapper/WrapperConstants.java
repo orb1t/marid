@@ -18,12 +18,16 @@
 
 package org.marid.wrapper;
 
+import org.marid.management.JmxUtils;
+
+import javax.management.ObjectName;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public class WrapperConstants {
 
-    public static final int DEFAULT_WRAPPER_PORT = 10001;
-    public static final int DEFAULT_WRAPPER_SHUTDOWN_PORT = 10002;
-    public static final String DEFAULT_WRAPPER_PASSWORD = "marido";
+    public static final int DEFAULT_WRAPPER_SHUTDOWN_PORT = 7556;
+    public static final String DEFAULT_JMX_ADDRESS = "service:jmx:rmi:///jndi/rmi://localhost:7555/jmxrmi";
+    public static final ObjectName WRAPPER_OBJECT_NAME = JmxUtils.getObjectName(Wrapper.class);
 }

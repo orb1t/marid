@@ -370,8 +370,11 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
                 @Override
                 public void internalFrameClosed(InternalFrameEvent e) {
                     try {
-                        putPref("size", getSize());
-                        putPref("location", getLocation());
+                        putPref("maximized", isMaximum());
+                        if (!isMaximum()) {
+                            putPref("location", getLocation());
+                            putPref("size", getSize());
+                        }
                     } finally {
                         removeInternalFrameListener(this);
                     }
@@ -381,7 +384,14 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
 
         @Override
         public void show() {
-            setLocation(getPref("location", getInitialLocation()));
+            try {
+                setMaximum(getPref("maximized", isMaximum()));
+            } catch (PropertyVetoException x) {
+                throw new IllegalStateException(x);
+            }
+            if (!isMaximum()) {
+                setLocation(getPref("location", getInitialLocation()));
+            }
             super.show();
         }
 

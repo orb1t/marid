@@ -16,23 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.forms;
+package org.marid.concurrent;
 
-import java.lang.annotation.*;
+import java.util.Objects;
+import java.util.TimerTask;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE_PARAMETER})
-public @interface Input {
+public class MaridTimerTask extends TimerTask {
 
-    String label() default "";
+    private final Runnable runnable;
 
-    String name() default "";
+    public MaridTimerTask(Runnable runnable) {
+        this.runnable = Objects.requireNonNull(runnable);
+    }
 
-    String tab();
-
-    int order() default 0;
+    @Override
+    public void run() {
+        runnable.run();
+    }
 }

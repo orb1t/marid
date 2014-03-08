@@ -22,51 +22,48 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 
 /**
- * Fast array output stream.
- *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class FastArrayOutputStream extends ByteArrayOutputStream {
 
-    /**
-     * Default constructor.
-     */
     public FastArrayOutputStream() {
     }
 
-    /**
-     * Constructs the fast array output stream.
-     *
-     * @param size Initial buffer size.
-     */
     public FastArrayOutputStream(int size) {
         super(size);
     }
 
-    /**
-     * Get the shared input stream.
-     *
-     * @return Shared input stream.
-     */
     public ByteArrayInputStream getSharedInputStream() {
         return new ByteArrayInputStream(buf, 0, count);
     }
 
-    /**
-     * Get the shared byte buffer.
-     *
-     * @return Shared byte buffer.
-     */
     public ByteBuffer getSharedByteBuffer() {
         return ByteBuffer.wrap(buf, 0, count);
     }
 
-    /**
-     * Get the shared buffer.
-     *
-     * @return Shared buffer.
-     */
     public byte[] getSharedBuffer() {
         return buf;
+    }
+
+    public ByteBuffer getTrimmedByteBuffer() {
+        final ByteBuffer buffer = ByteBuffer.wrap(buf);
+        int offset = 0, limit = count;
+        for (final byte b : buf) {
+            if (Character.isWhitespace((char) b)) {
+                offset++;
+            } else {
+                break;
+            }
+        }
+        for (int i = count - 1; i >= 0; i--) {
+            if (Character.isWhitespace((char) buf[i])) {
+                limit--;
+            } else {
+                break;
+            }
+        }
+        buffer.position(offset);
+        buffer.limit(limit);
+        return buffer;
     }
 }

@@ -25,9 +25,8 @@ import java.util.logging.*;
  */
 public abstract class AbstractHandler extends Handler {
 
-    protected final LogManager manager = LogManager.getLogManager();
-
     public AbstractHandler() throws Exception {
+        final LogManager manager = LogManager.getLogManager();
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl == null) {
             cl = getClass().getClassLoader();

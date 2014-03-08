@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Filter;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 
 import static java.awt.RenderingHints.*;
@@ -36,7 +37,7 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
     private final ConcurrentLinkedQueue<LogRecordListModel> models = new ConcurrentLinkedQueue<>();
 
     public SwingHandler() throws Exception {
-        final String sizeText = manager.getProperty(getClass().getCanonicalName() + ".size");
+        final String sizeText = LogManager.getLogManager().getProperty(getClass().getCanonicalName() + ".size");
         size = sizeText == null ? 65536 : Integer.parseInt(sizeText);
         if (getFormatter() == null) {
             setFormatter(new SwingHandlerFormatter());

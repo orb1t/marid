@@ -32,4 +32,8 @@ public class GzipOutputStream extends GZIPOutputStream {
         super(out, size, syncFlush);
         def.setLevel(Deflater.BEST_COMPRESSION);
     }
+
+    public OutputStream getOut() {
+        return out;
+    }
 }

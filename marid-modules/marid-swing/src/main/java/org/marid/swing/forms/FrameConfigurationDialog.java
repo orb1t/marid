@@ -24,6 +24,7 @@ import org.marid.pref.PrefSupport;
 import org.marid.swing.AbstractFrame;
 import org.marid.swing.MaridAction;
 import org.marid.swing.input.InputControl;
+import org.marid.swing.input.TitledInputControl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,6 +38,7 @@ import static java.awt.BorderLayout.SOUTH;
 import static java.awt.GridBagConstraints.*;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static javax.swing.Action.SHORT_DESCRIPTION;
 import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_OPTION;
@@ -47,6 +49,7 @@ import static javax.swing.SwingConstants.HORIZONTAL;
 import static javax.swing.SwingConstants.VERTICAL;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
+import static org.marid.swing.MaridAction.MaridActionListener;
 import static org.marid.swing.util.PanelUtils.groupedPanel;
 import static org.marid.util.StringUtils.camelToText;
 import static org.marid.util.StringUtils.capitalize;
@@ -223,16 +226,18 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
     private void addTabCc(JPanel p, GridBagConstraints c, Input in, ComponentHolder<Object, ?> ch) throws Exception {
         c.gridwidth = 1;
         c.weightx = 0.0;
-        p.add(new JButton(new MaridAction("", "defaultValue", (a, e) -> ch.control.setValue(ch.getDefaultValue()),
-                Action.SHORT_DESCRIPTION, s("Set default value"))), c);
+        c.fill = NONE;
+        p.add(new JButton(ch.getAction()), c);
+        c.fill = BOTH;
         p.add(new JSeparator(VERTICAL), c);
-        c.gridwidth = in.vertical() ? REMAINDER : 1;
-        c.weightx = in.vertical() ? 1.0 : 0.0;
-        final String txt = in.label().isEmpty() ? camelToText(ch.key) : in.label();
-        final String labelText = s(txt);
-        final JLabel label = new JLabel(labelText + ":");
-        label.setLabelFor(ch.control.getComponent());
-        p.add(label, c);
+        final String labelText = s(in.label().isEmpty() ? camelToText(ch.key) : in.label());
+        if (ch.control instanceof TitledInputControl) {
+            ((TitledInputControl) ch.control).setTitle(labelText + ":");
+        } else {
+            final JLabel label = new JLabel(labelText + ":");
+            label.setLabelFor(ch.control.getComponent());
+            p.add(label, c);
+        }
         c.gridwidth = REMAINDER;
         c.weightx = 1.0;
         p.add(ch.control.getComponent(), c);
@@ -267,6 +272,14 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
 
         public V getDefaultValue() {
             return cc.getDefaultValue();
+        }
+
+        public MaridActionListener getActionListener() {
+            return (a, e) -> control.setValue(getDefaultValue());
+        }
+
+        public MaridAction getAction() {
+            return new MaridAction("", "defaultValue", getActionListener(), SHORT_DESCRIPTION, s("Set default value"));
         }
     }
 }

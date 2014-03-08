@@ -17,17 +17,19 @@
  */
 package org.marid.logging;
 
+import org.marid.logging.monitoring.LogMXBean;
+import org.marid.management.JmxUtils;
 import org.marid.util.Utils;
 
+import javax.management.MBeanServer;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
- * Base logging utilities.
- *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class Logging {
@@ -42,36 +44,34 @@ public class Logging {
             Level.FINEST
     };
 
-    /**
-     * Initializes the logging system.
-     *
-     * @param c   Calling class.
-     * @param res Log properties resource.
-     */
     public static void init(Class<?> c, String res) {
         final ClassLoader cl = Utils.getClassLoader(c);
-        try (InputStream is = cl.getResourceAsStream(res)) {
+        try (final InputStream is = cl.getResourceAsStream(res)) {
             final LogManager lm = LogManager.getLogManager();
             if (is != null) {
                 lm.readConfiguration(is);
-            }
-            final String dynHandlers = lm.getProperty("dynHandlers");
-            final Logger root = Logger.getGlobal().getParent();
-            if (dynHandlers != null && root != null) {
-                for (final String handler : dynHandlers.split(",")) {
-                    if (handler.isEmpty()) {
-                        continue;
-                    }
-                    try {
-                        final Class<?> handlerClass = Class.forName(handler.trim(), true, cl);
-                        root.addHandler((Handler) handlerClass.newInstance());
-                    } catch (Exception x) {
-                        x.printStackTrace(System.err);
+            } else {
+                try (final InputStream dis = cl.getResourceAsStream("marid-logging-default.properties")) {
+                    if (dis != null) {
+                        lm.readConfiguration(dis);
                     }
                 }
             }
         } catch (Exception x) {
             x.printStackTrace(System.err);
+        }
+        final Logger root = Logger.getLogger("");
+        if (root != null) {
+            final MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+            for (final Handler handler : root.getHandlers()) {
+                if (handler instanceof LogMXBean) {
+                    try {
+                        mBeanServer.registerMBean(handler, JmxUtils.getObjectName(handler.getClass()));
+                    } catch (Exception x) {
+                        x.printStackTrace(System.err);
+                    }
+                }
+            }
         }
     }
 }

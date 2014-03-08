@@ -16,23 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.forms;
-
-import java.lang.annotation.*;
+package org.marid.wrapper;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE_PARAMETER})
-public @interface Input {
+public interface WrapperServiceMXBean {
 
-    String label() default "";
-
-    String name() default "";
-
-    String tab();
-
-    int order() default 0;
+    default int getX() {
+        return 1;
+    }
 }

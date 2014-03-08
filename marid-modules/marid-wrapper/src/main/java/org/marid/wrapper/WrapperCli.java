@@ -18,16 +18,27 @@
 
 package org.marid.wrapper;
 
+import com.sun.jmx.remote.security.MBeanServerFileAccessController;
 import org.apache.commons.cli.*;
-import org.marid.bind.JaxbUtil;
-import org.marid.wrapper.hsqldb.HsqldbConfiguration;
 
-import java.io.File;
+import javax.management.remote.JMXConnectorServer;
+import javax.management.remote.JMXServiceURL;
+import javax.management.remote.MBeanServerForwarder;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.NoSuchFileException;
+import java.util.Map;
 import java.util.Properties;
 
 import static org.marid.l10n.L10n.s;
+import static org.marid.util.Utils.getUrl;
+import static org.marid.util.Utils.loadProperties;
+import static org.marid.wrapper.WrapperConstants.DEFAULT_JMX_ADDRESS;
 import static org.marid.wrapper.WrapperConstants.DEFAULT_WRAPPER_SHUTDOWN_PORT;
 
 /**
@@ -43,17 +54,12 @@ public class WrapperCli {
 
     private static Options getOptions() {
         return new Options()
-                .addOption("c", "configuration", true, s("Set database configuration file"))
-                .addOption("s", "settings", true, s("Set settings.sql alternative URL"))
                 .addOption("h", "help", true, s("Shows this help screen"))
-                .addOption("b", "bind", true, s("Bind address (default: localhost:%d)", DEFAULT_WRAPPER_SHUTDOWN_PORT))
-                .addOption("n", "instance-name", true, s("Set instance name"));
-    }
-
-    public HsqldbConfiguration configuration() throws IOException {
-        return commandLine.hasOption('c')
-                ? JaxbUtil.load(HsqldbConfiguration.class, new File(commandLine.getOptionValue('c')))
-                : new HsqldbConfiguration();
+                .addOption("b", "bind", true, s("Bind address [localhost:%d]", DEFAULT_WRAPPER_SHUTDOWN_PORT))
+                .addOption("j", "jmx", true, s("Service URL [%s]", DEFAULT_JMX_ADDRESS))
+                .addOption("e", "env", true, s("JMX environment"))
+                .addOption("f", "forward", true, s("Connector server forwarder"))
+                .addOption("n", "instance", true, s("Set instance name"));
     }
 
     public boolean isHelp() {
@@ -61,8 +67,7 @@ public class WrapperCli {
     }
 
     public void showHelp() {
-        new HelpFormatter().printHelp(
-                "java -jar <jar-file> [<options>] start | stop",
+        new HelpFormatter().printHelp(80, "java -jar <jar-file> [<options>] start | stop",
                 System.lineSeparator() + s("options") + ":",
                 getOptions(),
                 System.lineSeparator() + "(c) 2014 Marid software development group",
@@ -83,10 +88,50 @@ public class WrapperCli {
         }
     }
 
-    public URL getSettings() throws MalformedURLException {
-        return commandLine.hasOption('s')
-                ? new URL(commandLine.getOptionValue('s'))
-                : getClass().getResource("settings.sql");
+    public JMXServiceURL getJmxUrl() throws MalformedURLException {
+        return new JMXServiceURL(commandLine.getOptionValue('j', DEFAULT_JMX_ADDRESS));
+    }
+
+    public void applyForwarder(JMXConnectorServer server) throws IOException, ReflectiveOperationException {
+        final String f = commandLine.getOptionValue('f');
+        if (f == null) {
+            return;
+        }
+        if (f.startsWith("@")) {
+            server.setMBeanServerForwarder(new MBeanServerFileAccessController(loadProperties(getUrl(f.substring(1)))));
+        } else {
+            final Class<?> c = Class.forName(f, true, Thread.currentThread().getContextClassLoader());
+            server.setMBeanServerForwarder((MBeanServerForwarder) c.newInstance());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, ?> getJmxEnv() throws Exception {
+        final String file = commandLine.getOptionValue('e');
+        if (file == null) {
+            return null;
+        } else {
+            final URL url = getUrl(file);
+            if (url.getFile().endsWith(".properties")) {
+                final Properties properties = new Properties();
+                try (final Reader r = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)) {
+                    properties.load(r);
+                }
+                return (Map) properties;
+            } else {
+                final ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
+                for (final ScriptEngineFactory scriptEngineFactory : scriptEngineManager.getEngineFactories()) {
+                    for (final String ext : scriptEngineFactory.getExtensions()) {
+                        if (url.getFile().endsWith("." + ext)) {
+                            try (final Reader r = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)) {
+                                return (Map) scriptEngineFactory.getScriptEngine().eval(r);
+                            }
+                        }
+                    }
+                }
+                throw new NoSuchFileException(file);
+            }
+        }
     }
 
     public String getCommand() {

@@ -16,23 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.forms;
+package org.marid.wrapper;
 
-import java.lang.annotation.*;
+import org.marid.logging.LogSupport;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE_PARAMETER})
-public @interface Input {
+public class WrapperService implements LogSupport, WrapperServiceMXBean {
 
-    String label() default "";
+    public WrapperService(WrapperCli cli) {
 
-    String name() default "";
+    }
 
-    String tab();
+    private void run() throws Exception {
 
-    int order() default 0;
+    }
+
+    public void start() {
+        final Thread thread = new Thread(() -> {
+            try {
+                run();
+            } catch (Exception x) {
+                severe("Error in wrapper thread", x);
+            }
+        }, "Wrapper");
+    }
 }

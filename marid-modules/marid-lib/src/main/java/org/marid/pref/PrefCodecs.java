@@ -32,6 +32,8 @@ import java.util.prefs.Preferences;
 
 import static java.util.ServiceLoader.load;
 import static org.marid.dyn.TypeCaster.TYPE_CASTER;
+import static org.marid.pref.PrefUtils.makeStrings;
+import static org.marid.pref.PrefUtils.parseStrings;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -68,6 +70,7 @@ public abstract class PrefCodecs {
         putReader(URL.class, (prefs, key, def) -> new URL(prefs.get(key, def.toString())));
         putReader(URI.class, (prefs, key, def) -> new URI(prefs.get(key, def.toString())));
         putReader(File.class, (prefs, key, def) -> new File(prefs.get(key, def.toString())));
+        putReader(String[].class, (prefs, key, def) -> parseStrings(prefs.get(key, makeStrings(def))));
 
         // Primitive writers
         putWriter(Integer.class, Preferences::putInt);
@@ -93,6 +96,7 @@ public abstract class PrefCodecs {
         putWriter(URL.class, (prefs, key, val) -> prefs.put(key, val.toString()));
         putWriter(URI.class, (prefs, key, val) -> prefs.put(key, val.toString()));
         putWriter(File.class, (prefs, key, val) -> prefs.put(key, val.toString()));
+        putWriter(String[].class, (prefs, key, val) -> prefs.put(key, makeStrings(val)));
 
         // Custom readers and writers
         try {

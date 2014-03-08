@@ -16,23 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.forms;
+package org.marid.logging.monitoring;
 
-import java.lang.annotation.*;
+import java.io.Serializable;
+import java.util.logging.LogRecord;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE_PARAMETER})
-public @interface Input {
+public interface LogRecords extends Serializable {
 
-    String label() default "";
-
-    String name() default "";
-
-    String tab();
-
-    int order() default 0;
+    Iterable<LogRecord> logRecords();
 }

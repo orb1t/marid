@@ -18,21 +18,11 @@
 
 package org.marid.swing.forms;
 
-import java.lang.annotation.*;
+import org.marid.pref.PrefSupport;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE_PARAMETER})
-public @interface Input {
+public interface Configuration extends PrefSupport {
 
-    String label() default "";
-
-    String name() default "";
-
-    String tab();
-
-    int order() default 0;
 }

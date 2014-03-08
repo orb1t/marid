@@ -16,23 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.forms;
+package org.marid.swing.control;
 
-import java.lang.annotation.*;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE_PARAMETER})
-public @interface Input {
+public class ConsoleArea extends JTextArea {
 
-    String label() default "";
+    public ConsoleArea() {
+        setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
+        setLineWrap(true);
+        setEditable(false);
+    }
 
-    String name() default "";
+    public JScrollPane wrap() {
+        return new JScrollPane(this, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    }
 
-    String tab();
-
-    int order() default 0;
+    public void println(String line) {
+        append(line);
+        append(System.lineSeparator());
+    }
 }

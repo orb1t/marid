@@ -16,23 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.forms;
+package org.marid.logging.monitoring;
 
-import java.lang.annotation.*;
+import javax.management.MBeanNotificationInfo;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE_PARAMETER})
-public @interface Input {
+public class Notifications {
 
-    String label() default "";
-
-    String name() default "";
-
-    String tab();
-
-    int order() default 0;
+    public static MBeanNotificationInfo buildInfo(Class<?> type, String description, String... types) {
+        return new MBeanNotificationInfo(types, type.getName(), description);
+    }
 }

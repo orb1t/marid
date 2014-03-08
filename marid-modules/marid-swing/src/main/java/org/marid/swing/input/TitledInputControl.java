@@ -16,23 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.forms;
-
-import java.lang.annotation.*;
+package org.marid.swing.input;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE_PARAMETER})
-public @interface Input {
+public interface TitledInputControl<V> extends InputControl<V> {
 
-    String label() default "";
+    String getTitle();
 
-    String name() default "";
-
-    String tab();
-
-    int order() default 0;
+    void setTitle(String title);
 }

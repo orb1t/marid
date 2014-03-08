@@ -16,23 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.forms;
+package org.marid.logging.monitoring;
 
-import java.lang.annotation.*;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.logging.LogRecord;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE_PARAMETER})
-public @interface Input {
+public class LogRecordsArray implements LogRecords, Serializable {
 
-    String label() default "";
+    private final LogRecord[] logRecords;
 
-    String name() default "";
+    public LogRecordsArray(Collection<LogRecord> logRecords) {
+        this.logRecords = logRecords.toArray(new LogRecord[logRecords.size()]);
+    }
 
-    String tab();
+    public LogRecordsArray(LogRecord... logRecords) {
+        this.logRecords = logRecords;
+    }
 
-    int order() default 0;
+    @Override
+    public Iterable<LogRecord> logRecords() {
+        return Arrays.asList(logRecords);
+    }
 }

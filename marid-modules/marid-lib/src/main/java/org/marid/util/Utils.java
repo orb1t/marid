@@ -21,14 +21,21 @@ package org.marid.util;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.time.ZoneId;
 import java.util.Properties;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class Utils {
+
+    public static final ZoneId ZONE_ID = ZoneId.systemDefault();
 
     public static ClassLoader getClassLoader(Class<?> c) {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -55,5 +62,21 @@ public class Utils {
             }
         }
         return properties;
+    }
+
+    public static URL getUrl(String file) throws MalformedURLException {
+        try {
+            return new URL(file);
+        } catch (MalformedURLException x) {
+            return Paths.get(file).toUri().toURL();
+        }
+    }
+
+    public static URI getUri(String file) {
+        try {
+            return new URI(file);
+        } catch (URISyntaxException x) {
+            return Paths.get(file).toUri();
+        }
     }
 }

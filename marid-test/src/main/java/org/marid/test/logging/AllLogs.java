@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2013 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,23 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.forms;
+package org.marid.test.logging;
 
-import java.lang.annotation.*;
+import java.util.logging.Level;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE_PARAMETER})
-public @interface Input {
+public class AllLogs extends AbstractLoggingConfigurer {
 
-    String label() default "";
-
-    String name() default "";
-
-    String tab();
-
-    int order() default 0;
+    public AllLogs() {
+        super(Level.ALL);
+    }
 }

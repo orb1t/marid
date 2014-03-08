@@ -18,6 +18,8 @@
 
 package org.marid;
 
+import org.marid.util.Utils;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -40,11 +42,7 @@ public class Versioning {
     private static final Properties GLOBALS = new Properties();
 
     static {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        if (classLoader == null) {
-            classLoader = Versioning.class.getClassLoader();
-        }
-        final InputStream is = classLoader.getResourceAsStream("meta.properties");
+        final InputStream is = Utils.getClassLoader(Versioning.class).getResourceAsStream("meta.properties");
         if (is != null) {
             try (final Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
                 GLOBALS.load(reader);
@@ -65,7 +63,7 @@ public class Versioning {
                 if (codeSource == null) {
                     return GLOBALS;
                 } else {
-                    try (final URLClassLoader cl = new URLClassLoader(new URL[] {})) {
+                    try (final URLClassLoader cl = new URLClassLoader(new URL[] {codeSource.getLocation()})) {
                         final InputStream is = cl.getResourceAsStream("meta.properties");
                         if (is != null) {
                             final Properties properties = new Properties();

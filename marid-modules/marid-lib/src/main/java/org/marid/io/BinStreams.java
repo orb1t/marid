@@ -18,10 +18,14 @@
 
 package org.marid.io;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,5 +45,28 @@ public class BinStreams {
             }
             return builder.toString();
         }
+    }
+
+    public static Runnable consumeLinesTask(InputStream inputStream, Charset charset, Consumer<String> consumer) {
+        return () -> {
+            try {
+                final BufferedReader r = new BufferedReader(new InputStreamReader(inputStream, charset));
+                while (true) {
+                    final String line = r.readLine();
+                    if (line == null) {
+                        break;
+                    }
+                    consumer.accept(line);
+                }
+            } catch (Exception x) {
+                throw new IllegalStateException(x);
+            } finally {
+                consumer.accept(null);
+            }
+        };
+    }
+
+    public static Runnable consumeLinesTask(InputStream inputStream, Consumer<String> consumer) {
+        return consumeLinesTask(inputStream, Charset.defaultCharset(), consumer);
     }
 }

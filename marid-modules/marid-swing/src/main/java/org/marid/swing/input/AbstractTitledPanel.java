@@ -16,23 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.forms;
+package org.marid.swing.input;
 
-import java.lang.annotation.*;
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE_PARAMETER})
-public @interface Input {
+public abstract class AbstractTitledPanel<V> extends JPanel implements TitledInputControl<V> {
 
-    String label() default "";
+    private final TitledBorder titledBorder = new TitledBorder(BorderFactory.createEtchedBorder());
 
-    String name() default "";
+    public AbstractTitledPanel() {
+        titledBorder.setTitlePosition(TitledBorder.CENTER);
+        setBorder(BorderFactory.createCompoundBorder(titledBorder, BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+    }
 
-    String tab();
+    @Override
+    public String getTitle() {
+        return titledBorder.getTitle();
+    }
 
-    int order() default 0;
+    @Override
+    public void setTitle(String title) {
+        titledBorder.setTitle(title);
+    }
 }
