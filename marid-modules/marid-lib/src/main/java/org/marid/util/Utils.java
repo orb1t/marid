@@ -79,4 +79,19 @@ public class Utils {
             return Paths.get(file).toUri();
         }
     }
+
+    public static Class<?> wrapperType(Class<?> primitiveType) {
+        switch (primitiveType.getName()) {
+            case "int":     return Integer.class;
+            case "boolean": return Boolean.class;
+            case "long":    return Long.class;
+            case "double":  return Double.class;
+            case "float":   return Float.class;
+            case "char":    return Character.class;
+            case "short":   return Short.class;
+            case "byte":    return Byte.class;
+            case "void":    return Void.class;
+            default:        throw new IllegalArgumentException(primitiveType.getName());
+        }
+    }
 }

@@ -18,10 +18,12 @@
 
 package org.marid.pref;
 
+import org.marid.functions.UnsafeFunction;
 import org.marid.methods.LogMethods;
 import org.marid.util.Utils;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -38,6 +40,7 @@ import static org.marid.dyn.TypeCaster.TYPE_CASTER;
 /**
  * @author Dmitry Ovchinnikov
  */
+@SuppressWarnings("unchecked")
 public abstract class PrefCodecs {
 
     private static final Logger LOG = Logger.getLogger(PrefCodecs.class.getName());
@@ -46,33 +49,32 @@ public abstract class PrefCodecs {
 
     static {
         // Primitive readers
-        putReader(Integer.class, Preferences::getInt);
-        putReader(int.class, Preferences::getInt);
-        putReader(Long.class, Preferences::getLong);
-        putReader(long.class, Preferences::getLong);
-        putReader(Short.class, (prefs, key, def) -> (short) prefs.getInt(key, def));
-        putReader(short.class, (prefs, key, def) -> (short) prefs.getInt(key, def));
-        putReader(Byte.class, (prefs, key, def) -> (byte) prefs.getInt(key, def));
-        putReader(byte.class, (prefs, key, def) -> (byte) prefs.getInt(key, def));
-        putReader(Double.class, Preferences::getDouble);
-        putReader(double.class, Preferences::getDouble);
-        putReader(Float.class, Preferences::getFloat);
-        putReader(float.class, Preferences::getFloat);
-        putReader(String.class, Preferences::get);
-        putReader(Boolean.class, Preferences::getBoolean);
-        putReader(boolean.class, Preferences::getBoolean);
-        putReader(byte[].class, Preferences::getByteArray);
-        putReader(BigInteger.class, (prefs, key, def) -> new BigInteger(prefs.get(key, def.toString())));
-        putReader(BigDecimal.class, (prefs, key, def) -> new BigDecimal(prefs.get(key, def.toString())));
-        putReader(BitSet.class, (prefs, key, def) -> BitSet.valueOf(prefs.getByteArray(key, def.toByteArray())));
-        putReader(TimeZone.class, (prefs, key, def) -> TimeZone.getTimeZone(prefs.get(key, def.getID())));
-        putReader(Currency.class, (prefs, key, def) -> Currency.getInstance(prefs.get(key, def.getCurrencyCode())));
-        putReader(URL.class, (prefs, key, def) -> new URL(prefs.get(key, def.toString())));
-        putReader(URI.class, (prefs, key, def) -> new URI(prefs.get(key, def.toString())));
-        putReader(File.class, (prefs, key, def) -> new File(prefs.get(key, def.toString())));
-        putReader(String[].class, (prefs, key, def) -> parseStrings(prefs.get(key, makeStrings(def))));
-        putReader(InetSocketAddress.class, (prefs, key, def) -> parseInetSocketAddress(prefs.get(key, def.toString())));
-        putReader(InetAddress.class, (prefs, key, def) -> InetAddress.getByName(prefs.get(key, def.toString())));
+        putReader(Integer.class, stringReader(Integer::decode));
+        putReader(int.class, (prefs, key) -> prefs.getInt(key, 0));
+        putReader(Long.class, stringReader(Long::decode));
+        putReader(long.class, (prefs, key) -> prefs.getLong(key, 0L));
+        putReader(Short.class, stringReader(Short::decode));
+        putReader(short.class, (prefs, key) -> (short) prefs.getInt(key, 0));
+        putReader(Byte.class, stringReader(Byte::decode));
+        putReader(byte.class, (prefs, key) -> (byte) prefs.getInt(key, 0));
+        putReader(Double.class, stringReader(Double::valueOf));
+        putReader(double.class, (prefs, key) -> prefs.getDouble(key, 0.0));
+        putReader(Float.class, stringReader(Float::valueOf));
+        putReader(float.class, (prefs, key) -> prefs.getFloat(key, 0.0f));
+        putReader(String.class, (prefs, key) -> prefs.get(key, null));
+        putReader(Boolean.class, stringReader(Boolean::valueOf));
+        putReader(boolean.class, (prefs, key) -> prefs.getBoolean(key, false));
+        putReader(byte[].class, (prefs, key) -> prefs.getByteArray(key, null));
+        putReader(BigInteger.class, stringReader(BigInteger::new));
+        putReader(BigDecimal.class, stringReader(BigDecimal::new));
+        putReader(BitSet.class, byteArrayReader(BitSet::valueOf));
+        putReader(TimeZone.class, stringReader(TimeZone::getTimeZone));
+        putReader(Currency.class, stringReader(Currency::getInstance));
+        putReader(URL.class, stringReader(URL::new));
+        putReader(URI.class, stringReader(URI::new));
+        putReader(File.class, stringReader(File::new));
+        putReader(InetSocketAddress.class, stringReader(PrefCodecs::parseInetSocketAddress));
+        putReader(InetAddress.class, stringReader(InetAddress::getByName));
 
         // Primitive writers
         putWriter(Integer.class, Preferences::putInt);
@@ -86,6 +88,7 @@ public abstract class PrefCodecs {
         putWriter(Byte.class, Preferences::putInt);
         putWriter(byte.class, Preferences::putInt);
         putWriter(Float.class, Preferences::putFloat);
+        putWriter(String.class, Preferences::put);
         putWriter(float.class, Preferences::putFloat);
         putWriter(Boolean.class, Preferences::putBoolean);
         putWriter(boolean.class, Preferences::putBoolean);
@@ -98,7 +101,6 @@ public abstract class PrefCodecs {
         putWriter(URL.class, (prefs, key, val) -> prefs.put(key, val.toString()));
         putWriter(URI.class, (prefs, key, val) -> prefs.put(key, val.toString()));
         putWriter(File.class, (prefs, key, val) -> prefs.put(key, val.toString()));
-        putWriter(String[].class, (prefs, key, val) -> prefs.put(key, makeStrings(val)));
         putWriter(InetSocketAddress.class, (prefs, key, val) -> prefs.put(key, val.toString()));
         putWriter(InetAddress.class, (prefs, key, val) -> prefs.put(key, val.toString()));
 
@@ -111,6 +113,40 @@ public abstract class PrefCodecs {
         } catch (Exception x) {
             LogMethods.warning(LOG, "Unable to enumerate pref codecs", x);
         }
+        final Map<Class<?>, PrefReader<Object>> arrayReaders = new IdentityHashMap<>();
+        final Map<Class<?>, PrefWriter<Object>> arrayWriters = new IdentityHashMap<>();
+        for (final Map.Entry<Class<?>, PrefReader<?>> e : READERS.entrySet()) {
+            final Class<?> arrayType = Array.newInstance(e.getKey(), 0).getClass();
+            arrayReaders.put(arrayType, (prefs, key) -> {
+                if (prefs.nodeExists(key)) {
+                    final Preferences node = prefs.node(key);
+                    final String[] keys = node.keys();
+                    final int n = keys.length;
+                    final Object array = Array.newInstance(e.getKey(), n);
+                    for (int i = 0; i < n; i++) {
+                        Array.set(array, i, e.getValue().load(node, keys[i]));
+                    }
+                    return array;
+                } else {
+                    return null;
+                }
+            });
+        }
+        for (final Map.Entry<Class<?>, PrefWriter<?>> e : WRITERS.entrySet()) {
+            final Class<?> arrayType = Array.newInstance(e.getKey(), 0).getClass();
+            arrayWriters.put(arrayType, (prefs, key, val) -> {
+                final Preferences node = prefs.node(key);
+                for (final String k : node.keys()) {
+                    node.remove(k);
+                }
+                final int n = Array.getLength(val);
+                for (int i = 0; i < n; i++) {
+                    ((PrefWriter<Object>) e.getValue()).save(node, Integer.toString(i), Array.get(val, i));
+                }
+            });
+        }
+        READERS.putAll(arrayReaders);
+        WRITERS.putAll(arrayWriters);
     }
 
     public abstract Map<Class<?>, PrefReader<?>> readers();
@@ -125,22 +161,31 @@ public abstract class PrefCodecs {
         WRITERS.put(type, writer);
     }
 
-    @SuppressWarnings("unchecked")
+    protected static <T> PrefReader<T> stringReader(UnsafeFunction<String, T> function) {
+        return (prefs, key) -> {
+            final String v = prefs.get(key, null);
+            return v == null ? null : function.applyUnsafe(v);
+        };
+    }
+
+    protected static <T> PrefReader<T> byteArrayReader(UnsafeFunction<byte[], T> function) {
+        return (prefs, key) -> {
+            final byte[] v = prefs.getByteArray(key, null);
+            return v == null ? null : function.applyUnsafe(v);
+        };
+    }
+
     public static <T> PrefReader<T> getReader(Class<T> type) {
         final PrefReader<T> reader = (PrefReader<T>) READERS.get(type);
         if (reader != null) {
             return reader;
         } else if (type.isEnum()) {
-            return (pref, key, def) -> (T) Enum.valueOf((Class<Enum>)type, def.toString());
+            return stringReader(s -> (T) Enum.valueOf((Class<Enum>) type, s));
         } else {
-            return (pref, key, def) -> {
-                final String val = pref.get(key, null);
-                return val != null ? TYPE_CASTER.cast(type, val) : def;
-            };
+            return stringReader(s -> TYPE_CASTER.cast(type, s));
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> PrefWriter<T> getWriter(Class<T> type) {
         final PrefWriter<T> writer = (PrefWriter<T>) WRITERS.get(type);
         if (writer != null) {
@@ -149,49 +194,6 @@ public abstract class PrefCodecs {
             return (pref, key, val) -> pref.put(key, val.toString());
         } else {
             return (pref, key, val) -> pref.put(key, TYPE_CASTER.cast(String.class, val));
-        }
-    }
-
-    public static String[] parseStrings(String value) {
-        final String trimmed = value.trim();
-        if (trimmed.isEmpty()) {
-            return new String[0];
-        } else {
-            final String[] parts = trimmed.split("\\s");
-            for (int i = 0; i < parts.length; i++) {
-                final String part = parts[i];
-                if (part.indexOf(0xA0) >= 0) {
-                    final StringBuilder builder = new StringBuilder(part);
-                    for (int p = 0; p < builder.length(); p++) {
-                        if (builder.charAt(p) == 0xA0) {
-                            if (p + 1 < builder.length() && builder.charAt(p + 1) == 0xA0) {
-                                builder.replace(p, p + 2, "\u00A0");
-                            } else {
-                                builder.setCharAt(p, ' ');
-                            }
-                        }
-                    }
-                    parts[i] = builder.toString();
-                }
-            }
-            return parts;
-        }
-    }
-
-    public static String makeStrings(String[] value) {
-        if (value.length == 0) {
-            return "";
-        } else {
-            final String[] parts = new String[value.length];
-            for (int i = 0; i < parts.length; i++) {
-                final String part = value[i].trim();
-                if (part.indexOf(' ') >= 0) {
-                    parts[i] = part.replace("\u00A0", "\u00A0\u00A0").replace(' ', '\u00A0');
-                } else {
-                    parts[i] = part;
-                }
-            }
-            return String.join(" ", parts);
         }
     }
 

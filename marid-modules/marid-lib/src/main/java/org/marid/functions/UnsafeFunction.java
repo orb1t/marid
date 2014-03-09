@@ -16,20 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.pref;
+package org.marid.functions;
 
-import java.util.prefs.Preferences;
+import java.util.function.Function;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @FunctionalInterface
-public interface PrefReader<T> {
+public interface UnsafeFunction<T, R> extends Function<T, R> {
 
-    T load(Preferences preferences, String key) throws Exception;
-
-    default T load(Preferences preferences, String key, T def) throws Exception {
-        final T v = load(preferences, key);
-        return v == null ? def : v;
+    @Override
+    default R apply(T t) {
+        try {
+            return applyUnsafe(t);
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
     }
+
+    R applyUnsafe(T arg) throws Exception;
 }

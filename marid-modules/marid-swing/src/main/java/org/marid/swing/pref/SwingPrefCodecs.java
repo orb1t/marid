@@ -33,14 +33,14 @@ public class SwingPrefCodecs extends PrefCodecs {
     @Override
     public Map<Class<?>, PrefReader<?>> readers() {
         final Map<Class<?>, PrefReader<?>> m = new IdentityHashMap<>();
-        m.put(Dimension.class, (PrefReader<Dimension>) (p, k, d) -> {
-            final String[] parts = p.get(k, d.width + "x" + d.height).split("x");
+        m.put(Dimension.class, stringReader(s -> {
+            final String[] parts = s.split("x");
             return new Dimension(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
-        });
-        m.put(Point.class, (PrefReader<Point>) (p, k, d) -> {
-            final String[] parts = p.get(k, d.x + "," + d.y).split(",");
+        }));
+        m.put(Point.class, stringReader(s -> {
+            final String[] parts = s.split(",");
             return new Point(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
-        });
+        }));
         return m;
     }
 
