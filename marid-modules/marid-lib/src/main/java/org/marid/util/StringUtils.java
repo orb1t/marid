@@ -32,6 +32,10 @@ public class StringUtils {
         return text.isEmpty() ? text : text.substring(0, 1).toUpperCase() + text.substring(1);
     }
 
+    public static String decapitalize(String text) {
+        return text.isEmpty() ? text : text.substring(0, 1).toLowerCase() + text.substring(1);
+    }
+
     public static String repeated(char symbol, int times) {
         char[] buf = new char[times];
         Arrays.fill(buf, symbol);

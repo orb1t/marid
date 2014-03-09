@@ -18,11 +18,138 @@
 
 package org.marid.swing.forms;
 
-import org.marid.pref.PrefSupport;
+import org.marid.dyn.TypeCaster;
+import org.marid.pref.PrefUtils;
+import org.marid.swing.input.InputControl;
+import org.marid.util.StringUtils;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.function.Supplier;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
+
+import static java.util.Arrays.asList;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Configuration extends PrefSupport {
+public interface Configuration {
 
+    class Pv<V, C extends InputControl<V>> {
+
+        public final Class<?> caller = ClassResolver.CLASS_RESOLVER.getClassContext()[2];
+        private Field field;
+        private final Supplier<C> controlSupplier;
+        private final Supplier<V> defaultValueSupplier;
+        private final Preferences preferences;
+
+        public Pv(Supplier<C> controlSupplier, Supplier<V> defaultValueSupplier) {
+            this.controlSupplier = controlSupplier;
+            this.defaultValueSupplier = defaultValueSupplier;
+            this.preferences = PrefUtils.preferences(caller, nodes());
+        }
+
+        private String[] nodes() {
+            if (caller.isAnnotationPresent(Pref.class)) {
+                return caller.getAnnotation(Pref.class).value();
+            } else {
+                return new String[] {StringUtils.decapitalize(caller.getSimpleName())};
+            }
+        }
+
+        public V getDefaultValue() {
+            return defaultValueSupplier.get();
+        }
+
+        public C getControl() {
+            return controlSupplier.get();
+        }
+
+        public Input getInput() {
+            return getField().getAnnotation(Input.class);
+        }
+
+        public Supplier<V> getDefaultValueSupplier() {
+            return defaultValueSupplier;
+        }
+
+        private Field getField() {
+            if (field == null) {
+                for (final Field field : caller.getFields()) {
+                    if (Modifier.isStatic(field.getModifiers())) {
+                        final Input input = field.getAnnotation(Input.class);
+                        if (input != null) {
+                            try {
+                                if (this == field.get(null)) {
+                                    return this.field = field;
+                                }
+                            } catch (ReflectiveOperationException x) {
+                                throw new IllegalStateException(x);
+                            }
+                        }
+                    }
+                }
+                throw new IllegalStateException("No such field");
+            } else {
+                return field;
+            }
+        }
+
+        public V get() {
+            final Field field = getField();
+            final Input input = field.getAnnotation(Input.class);
+            final String key = input.name().isEmpty() ? field.getName() : input.name();
+            return PrefUtils.getPref(preferences.node(input.tab()), key, getDefaultValue());
+        }
+
+        public void save(C control) {
+            final Field field = getField();
+            final Input input = field.getAnnotation(Input.class);
+            final String key = input.name().isEmpty() ? field.getName() : input.name();
+            PrefUtils.putPref(preferences.node(input.tab()), key, control.getValue());
+        }
+
+        public boolean contains() {
+            final Field field = getField();
+            final Input input = field.getAnnotation(Input.class);
+            final String key = input.name().isEmpty() ? field.getName() : input.name();
+            final Preferences p = preferences.node(input.tab());
+            try {
+                return asList(p.keys()).contains(key) || asList(p.childrenNames()).contains(key);
+            } catch (BackingStoreException x) {
+                throw new IllegalStateException(x);
+            }
+        }
+
+        public void remove() {
+            final Field field = getField();
+            final Input input = field.getAnnotation(Input.class);
+            final String key = input.name().isEmpty() ? field.getName() : input.name();
+            final Preferences p = preferences.node(input.tab());
+            try {
+                if (asList(p.keys()).contains(key)) {
+                    p.remove(key);
+                } else if (asList(p.childrenNames()).contains(key)) {
+                    p.node(key).removeNode();
+                }
+            } catch (BackingStoreException x) {
+                throw new IllegalStateException(x);
+            }
+        }
+
+        public <T> T get(Class<T> type) {
+            return TypeCaster.TYPE_CASTER.cast(type, get());
+        }
+
+        private static final class ClassResolver extends SecurityManager {
+
+            @Override
+            protected Class[] getClassContext() {
+                return super.getClassContext();
+            }
+
+            private static final ClassResolver CLASS_RESOLVER = new ClassResolver();
+        }
+    }
 }

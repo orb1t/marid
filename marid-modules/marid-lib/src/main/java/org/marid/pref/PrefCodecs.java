@@ -24,6 +24,8 @@ import org.marid.util.Utils;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
@@ -32,8 +34,6 @@ import java.util.prefs.Preferences;
 
 import static java.util.ServiceLoader.load;
 import static org.marid.dyn.TypeCaster.TYPE_CASTER;
-import static org.marid.pref.PrefUtils.makeStrings;
-import static org.marid.pref.PrefUtils.parseStrings;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -71,6 +71,8 @@ public abstract class PrefCodecs {
         putReader(URI.class, (prefs, key, def) -> new URI(prefs.get(key, def.toString())));
         putReader(File.class, (prefs, key, def) -> new File(prefs.get(key, def.toString())));
         putReader(String[].class, (prefs, key, def) -> parseStrings(prefs.get(key, makeStrings(def))));
+        putReader(InetSocketAddress.class, (prefs, key, def) -> parseInetSocketAddress(prefs.get(key, def.toString())));
+        putReader(InetAddress.class, (prefs, key, def) -> InetAddress.getByName(prefs.get(key, def.toString())));
 
         // Primitive writers
         putWriter(Integer.class, Preferences::putInt);
@@ -97,6 +99,8 @@ public abstract class PrefCodecs {
         putWriter(URI.class, (prefs, key, val) -> prefs.put(key, val.toString()));
         putWriter(File.class, (prefs, key, val) -> prefs.put(key, val.toString()));
         putWriter(String[].class, (prefs, key, val) -> prefs.put(key, makeStrings(val)));
+        putWriter(InetSocketAddress.class, (prefs, key, val) -> prefs.put(key, val.toString()));
+        putWriter(InetAddress.class, (prefs, key, val) -> prefs.put(key, val.toString()));
 
         // Custom readers and writers
         try {
@@ -146,5 +150,53 @@ public abstract class PrefCodecs {
         } else {
             return (pref, key, val) -> pref.put(key, TYPE_CASTER.cast(String.class, val));
         }
+    }
+
+    public static String[] parseStrings(String value) {
+        final String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return new String[0];
+        } else {
+            final String[] parts = trimmed.split("\\s");
+            for (int i = 0; i < parts.length; i++) {
+                final String part = parts[i];
+                if (part.indexOf(0xA0) >= 0) {
+                    final StringBuilder builder = new StringBuilder(part);
+                    for (int p = 0; p < builder.length(); p++) {
+                        if (builder.charAt(p) == 0xA0) {
+                            if (p + 1 < builder.length() && builder.charAt(p + 1) == 0xA0) {
+                                builder.replace(p, p + 2, "\u00A0");
+                            } else {
+                                builder.setCharAt(p, ' ');
+                            }
+                        }
+                    }
+                    parts[i] = builder.toString();
+                }
+            }
+            return parts;
+        }
+    }
+
+    public static String makeStrings(String[] value) {
+        if (value.length == 0) {
+            return "";
+        } else {
+            final String[] parts = new String[value.length];
+            for (int i = 0; i < parts.length; i++) {
+                final String part = value[i].trim();
+                if (part.indexOf(' ') >= 0) {
+                    parts[i] = part.replace("\u00A0", "\u00A0\u00A0").replace(' ', '\u00A0');
+                } else {
+                    parts[i] = part;
+                }
+            }
+            return String.join(" ", parts);
+        }
+    }
+
+    public static InetSocketAddress parseInetSocketAddress(String value) throws Exception {
+        final URI uri = new URI("proto://" + value);
+        return InetSocketAddress.createUnresolved(uri.getHost(), uri.getPort());
     }
 }

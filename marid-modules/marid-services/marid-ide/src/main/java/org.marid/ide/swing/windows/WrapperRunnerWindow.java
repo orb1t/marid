@@ -23,12 +23,7 @@ import org.marid.swing.AbstractMultiFrame;
 import org.marid.swing.FrameAction;
 import org.marid.swing.FrameWidget;
 import org.marid.swing.control.ConsoleArea;
-import org.marid.swing.forms.Input;
-import org.marid.swing.forms.Tab;
-import org.marid.swing.input.*;
 import org.marid.swing.process.ProcessWorker;
-import org.marid.util.Utils;
-import org.marid.wrapper.WrapperConstants;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
@@ -36,7 +31,6 @@ import javax.swing.event.InternalFrameEvent;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,42 +48,7 @@ import static org.marid.nio.FileUtils.CopyTask;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Tab(node = "network")
-@Tab(node = "data")
-@Tab(node = "source")
-@Tab(node = "performance")
-@Tab(node = "jvm", label = "JVM")
-public class WrapperRunnerWindow extends AbstractMultiFrame {
-
-    @Input(tab = "source", order = 0)
-    public final Pv<URL, UrlInputControl> zipFile = new Pv<>(
-            () -> new UrlInputControl("ZIP files", "zip"),
-            () -> Utils.getResource("marid-wrapper-%s.zip", version));
-
-    @Input(tab = "network", order = 1)
-    public final Pv<String, StringInputControl> jmxAddress = new Pv<>(
-            StringInputControl::new, () -> WrapperConstants.DEFAULT_JMX_ADDRESS);
-
-    @Input(tab = "network", order = 2)
-    public final Pv<String, StringInputControl> bindAddress = new Pv<>(
-            StringInputControl::new, () -> "localhost:" + WrapperConstants.DEFAULT_WRAPPER_SHUTDOWN_PORT);
-
-    @Input(tab = "performance", order = 0)
-    public final Pv<Integer, SpinIntInputControl> queueSize = new Pv<>(() -> new SpinIntInputControl(2, 128, 2), () -> 8);
-
-    @Input(tab = "performance", order = 1)
-    public final Pv<Integer, SpinIntInputControl> threads = new Pv<>(() -> new SpinIntInputControl(1, 32, 1), () -> 16);
-
-    @Input(tab = "data", order = 0)
-    public final Pv<File, FileInputControl> targetDirectory = new Pv<>(
-            FileInputControl::new, () -> new File(System.getProperty("user.home"), "marid"));
-
-    @Input(tab = "jvm", order = 0, label = "JVM Path")
-    public final Pv<String, StringInputControl> jvmPath = new Pv<>(
-            StringInputControl::new, () -> Paths.get(System.getProperty("java.home"), "bin", "java").toString());
-
-    @Input(tab = "jvm", order = 1, label = "JVM arguments")
-    public final Pv<String[], StringArrayInputControl> jvmArgs = new Pv<>(StringArrayInputControl::new, () -> new String[0]);
+public class WrapperRunnerWindow extends AbstractMultiFrame implements WrapperRunnerConfiguration {
 
     public WrapperRunnerWindow() {
         super("Wrapper Runner");
@@ -165,7 +124,7 @@ public class WrapperRunnerWindow extends AbstractMultiFrame {
                 args.add("-jar");
                 args.addAll(Arrays.asList(wd.list((f, n) -> n.endsWith(".jar"))));
                 args.add("-b");
-                args.add(bindAddress.get());
+                args.add(bindAddress.get().toString());
                 args.add("start");
                 info("ProcessBuilder will run with: {0}", String.join(" ", args));
                 return new ProcessBuilder(args).directory(wd);

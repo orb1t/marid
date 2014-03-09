@@ -29,7 +29,9 @@ public class SpinIntInputControl implements InputControl<Integer> {
 
     public SpinIntInputControl(boolean editable, int min, int max, int step) {
         spinner = new JSpinner(new SpinnerNumberModel(min, min, max, step));
-        ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField().setEditable(editable);
+        if (editable) {
+            ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField().setEditable(editable);
+        }
     }
 
     public SpinIntInputControl(int min, int max, int step) {

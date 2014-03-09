@@ -42,7 +42,7 @@ public class StringArrayInputControl extends AbstractTitledPanel<String[]> {
         add(new JScrollPane(list));
         final Action removeAction = new MaridAction("Remove", "remove", (a, e) -> {
             if (list.getSelectedIndex() >= 0) {
-                list.removeSelectionInterval(list.getSelectedIndex(), list.getSelectedIndex());
+                model.remove(list.getSelectedIndex());
             }
         });
         toolBar.add(new MaridAction("Add", "add", (a, e) -> {

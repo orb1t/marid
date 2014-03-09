@@ -23,7 +23,6 @@ import java.lang.annotation.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Repeatable(Tabs.class)

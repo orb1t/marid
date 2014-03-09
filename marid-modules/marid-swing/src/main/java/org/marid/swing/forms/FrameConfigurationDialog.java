@@ -30,8 +30,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.prefs.Preferences;
 
 import static java.awt.BorderLayout.NORTH;
 import static java.awt.BorderLayout.SOUTH;
@@ -50,6 +50,7 @@ import static javax.swing.SwingConstants.VERTICAL;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
 import static org.marid.swing.MaridAction.MaridActionListener;
+import static org.marid.swing.forms.Configuration.Pv;
 import static org.marid.swing.util.PanelUtils.groupedPanel;
 import static org.marid.util.StringUtils.camelToText;
 import static org.marid.util.StringUtils.capitalize;
@@ -68,16 +69,13 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
         super(owner, s("Configuration") + ": " + owner.getTitle(), true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         add(tabbedPane = new JTabbedPane(getPref("tabPlacement", TOP), getPref("tabLayoutPolicy", WRAP_TAB_LAYOUT)));
-        Arrays.<Tab>asList(owner.getClass().getAnnotationsByType(Tab.class))
-                .stream()
-                .sorted((t1, t2) -> t1.order() != t2.order() ? t1.order() - t2.order() : t1.node().compareTo(t2.node()))
-                .forEachOrdered(tab -> {
-                    try {
-                        addTab(tab);
-                    } catch (Exception x) {
-                        warning("Unable to add {0}", tab.node());
-                    }
-                });
+        for (final Tab tab : tabs()) {
+            try {
+                addTab(tab);
+            } catch (Exception x) {
+                warning("Unable to add {0}", tab.node());
+            }
+        }
         final JButton impBtn = new JButton(new MaridAction("Import preferences", "importPrefs", (a, e) -> importPrefs()));
         final JButton expBtn = new JButton(new MaridAction("Export preferences", "exportPrefs", (a, e) -> exportPrefs()));
         final JButton defBtn = new JButton(new MaridAction("Load defaults", "loadDefaults", (a, e) -> loadDefaults()));
@@ -101,16 +99,23 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
         getRootPane().registerKeyboardAction(cclBtn.getAction(), getKeyStroke("ESCAPE"), WHEN_IN_FOCUSED_WINDOW);
     }
 
+    private Set<Tab> tabs() {
+        final Set<Tab> tabs = new TreeSet<>(
+                (a, b) -> a.order() != b.order() ? a.order() - b.order() : a.node().compareTo(b.node()));
+        for (final Class<?> i : getOwner().getClass().getInterfaces()) {
+            tabs.addAll(Arrays.<Tab>asList(i.getAnnotationsByType(Tab.class)));
+        }
+        for (Class<?> c = getOwner().getClass(); c != null; c = c.getSuperclass()) {
+            tabs.addAll(Arrays.<Tab>asList(c.getAnnotationsByType(Tab.class)));
+        }
+        return tabs;
+    }
+
     private Dimension computePreferredSize() {
         final Rectangle rectangle = new Rectangle(getPref("size", getPreferredSize()));
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         final Rectangle screenRectangle = new Rectangle(screenSize.width * 3 / 4, screenSize.height * 3 / 4);
         return screenRectangle.intersection(rectangle).getSize();
-    }
-
-    @Override
-    public Preferences preferences() {
-        return getOwner().preferences().node("configuration");
     }
 
     @Override
@@ -125,11 +130,11 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
             final ComponentHolder<Object, InputControl<Object>> ch = e.getValue();
             try {
                 if (!Objects.equals(ch.initialValue, ch.control.getValue())) {
-                    if (Objects.equals(ch.getDefaultValue(), ch.control.getValue()) && ch.cc.contains()) {
-                        ch.cc.remove();
+                    if (Objects.equals(ch.getDefaultValue(), ch.control.getValue()) && ch.pv.contains()) {
+                        ch.pv.remove();
                         fine("Restored {0}.{1}", ch.node, ch.key);
                     } else {
-                        ch.cc.save(ch.control);
+                        ch.pv.save(ch.control);
                         fine("Saved {0}.{1}: {2}", ch.node, ch.key, ch.control.getValue());
                     }
                 }
@@ -149,19 +154,26 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
             c.anchor = BASELINE;
             c.insets = new Insets(5, 10, 5, 10);
             for (final Map.Entry<ComponentHolder, Exception> e : exceptionMap.entrySet()) {
-                c.weightx = 0.0; c.gridwidth = RELATIVE;
+                c.weightx = 0.0;
+                c.gridwidth = RELATIVE;
                 panel.add(new JLabel(format("<html><b>%s</b></html>", s("Tab") + ":")), c);
-                c.weightx = 1.0; c.gridwidth = REMAINDER;
+                c.weightx = 1.0;
+                c.gridwidth = REMAINDER;
                 panel.add(new JLabel(tabLabelMap.get(e.getKey().node)), c);
-                c.weightx = 0.0; c.gridwidth = RELATIVE;
+                c.weightx = 0.0;
+                c.gridwidth = RELATIVE;
                 panel.add(new JLabel(format("<html><b>%s</b></html>", s("Label") + ":")), c);
-                c.weightx = 1.0; c.gridwidth = REMAINDER;
+                c.weightx = 1.0;
+                c.gridwidth = REMAINDER;
                 panel.add(new JLabel(keyLabelMap.get(e.getKey().node).get(e.getKey().key)), c);
-                c.weightx = 0.0; c.gridwidth = RELATIVE;
+                c.weightx = 0.0;
+                c.gridwidth = RELATIVE;
                 panel.add(new JLabel(format("<html><b>%s</b></html>", s("Message") + ": ")), c);
-                c.weightx = 1.0; c.gridwidth = REMAINDER;
+                c.weightx = 1.0;
+                c.gridwidth = REMAINDER;
                 panel.add(new JLabel(format("<html>%s</html>", e.getValue().getLocalizedMessage())), c);
-                c.weightx = 1.0; c.gridwidth = REMAINDER;
+                c.weightx = 1.0;
+                c.gridwidth = REMAINDER;
                 panel.add(new JSeparator(HORIZONTAL), c);
             }
             outerPanel.add(new JScrollPane(panel));
@@ -176,7 +188,7 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
     }
 
     protected void loadDefaults() {
-        containerMap.forEach((c, ch) -> getOwner().preferences().node("prefs").node(ch.node).remove(ch.key));
+        containerMap.forEach((c, ch) -> ch.pv.remove());
         containerMap.forEach((c, ch) -> ch.control.setValue(ch.getDefaultValue()));
     }
 
@@ -187,7 +199,6 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
 
     }
 
-    @SuppressWarnings("unchecked")
     private void addTab(Tab tab) throws Exception {
         final String tabTitle = tab.label().isEmpty() ? s(capitalize(tab.node())) : s(tab.label());
         tabLabelMap.put(tab.node(), tabTitle);
@@ -196,10 +207,14 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
         final String tabTip = tab.tip().isEmpty() ? null : s(tab.tip());
         final JPanel panel = new JPanel(new GridBagLayout());
         final GridBagConstraints c = new GridBagConstraints();
-        c.fill = BOTH; c.anchor = BASELINE; c.insets = new Insets(5, 5, 5, 5);
+        c.fill = BOTH;
+        c.anchor = BASELINE;
+        c.insets = new Insets(5, 5, 5, 5);
         asList(getOwner().getClass().getFields())
                 .stream()
-                .filter(f -> f.isAnnotationPresent(Input.class) && f.getAnnotation(Input.class).tab().equals(tab.node()))
+                .filter(f -> Modifier.isStatic(f.getModifiers()) &&
+                        f.isAnnotationPresent(Input.class) &&
+                        f.getAnnotation(Input.class).tab().equals(tab.node()))
                 .sorted((f1, f2) -> {
                     final Input a1 = f1.getAnnotation(Input.class);
                     final Input a2 = f2.getAnnotation(Input.class);
@@ -210,7 +225,7 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
                 .forEachOrdered(field -> {
                     final Input input = field.getAnnotation(Input.class);
                     try {
-                        final ComponentHolder ch = new ComponentHolder(getOwner(), input, field);
+                        final ComponentHolder<Object, InputControl<Object>> ch = new ComponentHolder<>(input, field);
                         ch.control.setValue(ch.initialValue);
                         addTabCc(panel, c, input, ch);
                         containerMap.put(ch.control.getComponent(), ch);
@@ -254,24 +269,24 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
         private final String node;
         private final String key;
         private final C control;
-        private final AbstractFrame.Pv<V, C> cc;
+        private final Pv<V, C> pv;
         private final V initialValue;
 
         @SuppressWarnings("unchecked")
-        public ComponentHolder(AbstractFrame owner, Input input, Field field) {
+        public ComponentHolder(Input input, Field field) {
             key = input.name().isEmpty() ? field.getName() : input.name();
             node = input.tab();
             try {
-                cc = (AbstractFrame.Pv<V, C>) field.get(owner);
-                control = cc.getControl();
-                initialValue = cc.get();
+                pv = (Pv<V, C>) field.get(null);
+                control = pv.getControl();
+                initialValue = pv.get();
             } catch (ReflectiveOperationException x) {
                 throw new IllegalStateException(x);
             }
         }
 
         public V getDefaultValue() {
-            return cc.getDefaultValue();
+            return pv.getDefaultValue();
         }
 
         public MaridActionListener getActionListener() {

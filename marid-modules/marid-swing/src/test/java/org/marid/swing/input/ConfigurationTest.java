@@ -18,23 +18,23 @@
 
 package org.marid.swing.input;
 
+import org.junit.Assert;
 import org.junit.Test;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import org.marid.swing.forms.Configuration;
+import org.marid.swing.forms.Input;
+import org.marid.swing.forms.Tab;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class StringInputControlTest {
+@Tab(node = "tab1")
+public class ConfigurationTest implements Configuration {
+
+    @Input(tab = "tab1")
+    private static final Pv<Integer, FormattedIntInputControl> p = new Pv<>(FormattedIntInputControl::new, () -> 1);
 
     @Test
     public void test() {
-        final Class<?> type = StringInputControl.class;
-        for (final Type t : type.getGenericInterfaces()) {
-            final ParameterizedType pt = (ParameterizedType) t;
-            System.out.println(((Class<?>)pt.getRawType()).isInterface());
-            System.out.println(pt.getActualTypeArguments()[0]);
-        }
+        Assert.assertSame(ConfigurationTest.class, p.caller);
     }
 }
