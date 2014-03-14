@@ -20,15 +20,13 @@ package org.marid.ide.swing.windows;
 
 import org.marid.nio.FileUtils;
 import org.marid.swing.AbstractMultiFrame;
-import org.marid.swing.FrameAction;
-import org.marid.swing.FrameWidget;
 import org.marid.swing.control.ConsoleArea;
+import org.marid.swing.menu.MenuActionList;
 import org.marid.swing.process.ProcessWorker;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -43,6 +41,7 @@ import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static javax.swing.JOptionPane.*;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
+import static org.marid.net.UdpShutdownThread.sendShutdownSequence;
 import static org.marid.nio.FileUtils.CopyTask;
 
 /**
@@ -50,27 +49,43 @@ import static org.marid.nio.FileUtils.CopyTask;
  */
 public class WrapperRunnerWindow extends AbstractMultiFrame implements WrapperRunnerConfiguration {
 
+    private Action stopAction;
+
     public WrapperRunnerWindow() {
         super("Wrapper Runner");
         pack();
     }
 
-    @FrameWidget
-    @FrameAction(key = "F5", info = "Starts the wrapper", group = "control", tool = true, path = "Wrapper", icon = "start")
+    @Override
+    protected void fillActions(MenuActionList actionList) {
+        action("mainMenu", "Wrapper").put(actionList);
+        stopAction = action("control", "Stop", "stop", true, "Wrapper")
+                .setListener((a, ev) -> sendShutdownSequence(bindAddress.get(), "marid-wrapper"))
+                .setInitializer(a -> a.setEnabled(false))
+                .put(actionList);
+        action("control", "Start", "start", true, "Wrapper")
+                .setListener((a, ev) -> {
+                    showFrame(Output.class);
+                    a.setEnabled(false);
+                    stopAction.setEnabled(true);
+                })
+                .put(actionList);
+    }
+
     public class Output extends InternalFrame {
 
         private final ConsoleArea outArea = new ConsoleArea();
         private final ConsoleArea errArea = new ConsoleArea();
         private ProcessWorker worker;
 
-        public Output(ActionEvent actionEvent, Action action) {
+        public Output() {
+            super("wrapper", "Wrapper", false);
             final JTabbedPane pane = new JTabbedPane();
             add(pane);
             pane.addTab(s("Output"), outArea.wrap());
             pane.addTab(s("Errors"), errArea.wrap());
             pane.setSelectedIndex(1);
             pack();
-            action.setEnabled(false);
             addInternalFrameListener(new InternalFrameAdapter() {
                 @Override
                 public void internalFrameClosed(InternalFrameEvent e) {
@@ -124,7 +139,7 @@ public class WrapperRunnerWindow extends AbstractMultiFrame implements WrapperRu
                 args.add("-jar");
                 args.addAll(Arrays.asList(wd.list((f, n) -> n.endsWith(".jar"))));
                 args.add("-b");
-                args.add(bindAddress.get().toString());
+                args.add(bindAddress.get().getHostString() + ":" + bindAddress.get().getPort());
                 args.add("start");
                 info("ProcessBuilder will run with: {0}", String.join(" ", args));
                 return new ProcessBuilder(args).directory(wd);
@@ -158,6 +173,7 @@ public class WrapperRunnerWindow extends AbstractMultiFrame implements WrapperRu
                     }
                 } else if (worker.isDone()) {
                     ((Timer) e.getSource()).stop();
+                    stopAction.setEnabled(false);
                     try {
                         showMessageDialog(this, m("Process was terminated with exit code {0}", worker.get()), s("Process result"), INFORMATION_MESSAGE);
                     } catch (Exception x) {

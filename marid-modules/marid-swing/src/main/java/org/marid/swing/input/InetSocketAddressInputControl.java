@@ -46,7 +46,7 @@ public class InetSocketAddressInputControl extends JPanel implements InputContro
 
     @Override
     public InetSocketAddress getValue() {
-        return InetSocketAddress.createUnresolved(addressField.getText(), (int) spinner.getValue());
+        return new InetSocketAddress(addressField.getText(), (int) spinner.getValue());
     }
 
     @Override

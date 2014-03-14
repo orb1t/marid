@@ -69,8 +69,7 @@ public class FsHandler extends AbstractHandler implements LogMXBean, MaridNotifi
     public FsHandler() throws Exception {
         final LogManager logManager = LogManager.getLogManager();
         final String prefix = getClass().getCanonicalName();
-        final String dir = logManager.getProperty(prefix + ".directory");
-        directory = dir != null ? new File(dir) : new File(System.getProperty("user.home"), "marid-logs");
+        directory = new File("logs");
         final String depthStr = logManager.getProperty(prefix + ".depth");
         depth = depthStr != null ? Integer.parseInt(depthStr) : 7;
         formatted = "true".equalsIgnoreCase(logManager.getProperty(prefix + ".formatted"));
@@ -167,11 +166,6 @@ public class FsHandler extends AbstractHandler implements LogMXBean, MaridNotifi
         }
     }
 
-    protected void flushDirect() throws IOException {
-        outputStream.flush();
-        ((FileOutputStream) outputStream).getFD().sync();
-    }
-
     protected InputStream newInputStream(File file) throws IOException {
         return new FileInputStream(file);
     }
@@ -186,7 +180,9 @@ public class FsHandler extends AbstractHandler implements LogMXBean, MaridNotifi
             lock.writeLock().lock();
             try {
                 if (file != null & dirty) {
-                    flushDirect();
+                    outputStream.flush();
+                    ((FileOutputStream) outputStream).getFD().sync();
+                    dirty = false;
                 }
             } catch (Exception x) {
                 getErrorManager().error("Unable to flush " + file, x, FLUSH_FAILURE);

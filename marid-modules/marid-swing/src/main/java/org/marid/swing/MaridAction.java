@@ -45,7 +45,9 @@ public class MaridAction extends AbstractAction {
             }
         }
         for (int i = 0; i < args.length; i += 2) {
-            putValue(args[i].toString(), args[i + 1]);
+            if (args[i + 1] != null) {
+                putValue(args[i].toString(), args[i + 1]);
+            }
         }
     }
 
@@ -67,6 +69,6 @@ public class MaridAction extends AbstractAction {
 
     public interface MaridActionListener {
 
-        void actionPerformed(MaridAction action, ActionEvent actionEvent) throws Exception;
+        void actionPerformed(Action action, ActionEvent actionEvent) throws Exception;
     }
 }

@@ -22,6 +22,9 @@ import images.Images;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.forms.FrameConfigurationDialog;
+import org.marid.swing.menu.MenuAction;
+import org.marid.swing.menu.MenuActionList;
+import org.marid.swing.menu.MenuActionTreeElement;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
@@ -32,14 +35,14 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
 import static java.awt.BorderLayout.NORTH;
-import static java.util.Arrays.copyOfRange;
 import static javax.swing.SwingConstants.HORIZONTAL;
 import static org.marid.l10n.L10n.s;
+import static org.marid.swing.MaridAction.MaridActionListener;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -49,19 +52,17 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
     protected final JPanel centerPanel = new JPanel(new BorderLayout());
     protected final JToolBar toolBar;
     protected final MultiFrameDesktop desktop;
-    protected final JMenuBar menuBar;
 
     public AbstractMultiFrame(String title) {
         super(title);
-        setJMenuBar(menuBar = new JMenuBar());
+        setJMenuBar(new JMenuBar());
         centerPanel.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
         centerPanel.add(toolBar = new JToolBar(getPref("tOrientation", HORIZONTAL)), getPref("tPosition", NORTH));
         centerPanel.add(desktop = new MultiFrameDesktop());
         add(centerPanel);
         toolBar.setBorderPainted(true);
-        menuBar.add(widgetsMenu());
-        menuBar.add(new JSeparator(JSeparator.VERTICAL));
-        doActions();
+        getJMenuBar().add(widgetsMenu());
+        getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
     }
 
     private JMenuItem menuItem(String title, String icon, String cmd, ActionListener actionListener) {
@@ -182,98 +183,29 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
         return widgetListMenu;
     }
 
+    protected abstract void fillActions(MenuActionList actionList);
+
+    protected ActionPutter action(String group, String name, String... path) {
+        return new ActionPutter(group, name, path);
+    }
+
+    protected ActionPutter action(String group, String name, String icon, boolean toolbar, String... path) {
+        return new ActionPutter(group, name, path).setIcon(icon).setToolbar(toolbar);
+    }
+
+    @Override
+    public void pack() {
+        final MenuActionList actions = new MenuActionList();
+        fillActions(actions);
+        final MenuActionTreeElement element = actions.createTreeElement();
+        element.fillJMenuBar(getJMenuBar());
+        actions.fillToolbar(toolBar);
+        super.pack();
+    }
+
     public void add(JInternalFrame frame) {
         desktop.add(frame);
         frame.show();
-    }
-
-    private void doActions() {
-        final TreeSet<FrameAction.FrameActionElement> actions = new TreeSet<>();
-        final TreeSet<FrameAction.FrameActionElement> toolbarActions = new TreeSet<>();
-        for (final Method method : getClass().getMethods()) {
-            if (method.isAnnotationPresent(FrameAction.class)) {
-                final FrameAction fa = method.getAnnotation(FrameAction.class);
-                if (fa.path().isEmpty()) {
-                    continue;
-                }
-                final FrameAction.FrameActionElement e = new FrameAction.MethodActionElement(method, fa);
-                actions.add(e);
-                if (fa.tool()) {
-                    toolbarActions.add(e);
-                }
-            }
-        }
-        for (final Class<?> klass : getClass().getClasses()) {
-            if (klass.isAnnotationPresent(FrameAction.class)) {
-                final FrameAction fa = klass.getAnnotation(FrameAction.class);
-                if (fa.path().isEmpty()) {
-                    continue;
-                }
-                final FrameAction.FrameActionElement e = new FrameAction.InternalFrameActionElement(klass, fa);
-                actions.add(e);
-                if (fa.tool()) {
-                    toolbarActions.add(e);
-                }
-            }
-        }
-        final int start = menuBar.getMenuCount();
-        final Map<String, JMenu> menus = new LinkedHashMap<>();
-        for (final FrameAction.FrameActionElement action : actions) {
-            if (!menus.containsKey(action.getPath())) {
-                final String[] path = action.getPath().split("/");
-                JMenu menu = null;
-                for (int i = start; i < menuBar.getMenuCount(); i++) {
-                    final JMenu m = menuBar.getMenu(i);
-                    if (m.getActionCommand().equals(path[0])) {
-                        menu = m;
-                        break;
-                    }
-                }
-                if (menu == null) {
-                    menuBar.add(menu = new JMenu(s(path[0])));
-                    menu.setActionCommand(path[0]);
-                }
-                for (String[] p = copyOfRange(path, 1, path.length); p.length > 0; p = copyOfRange(p, 1, p.length)) {
-                    JMenu subMenu = null;
-                    for (int i = start; i < menu.getMenuComponentCount(); i++) {
-                        final JMenu m = (JMenu) menu.getMenuComponent(i);
-                        if (m.getActionCommand().equals(p[0])) {
-                            subMenu = m;
-                            break;
-                        }
-                    }
-                    if (subMenu == null) {
-                        if (menu.getMenuComponentCount() == 0) {
-                            menu.addSeparator();
-                        }
-                        menu.add(subMenu = new JMenu(s(p[0])));
-                        subMenu.setActionCommand(p[0]);
-                    }
-                    menu = subMenu;
-                }
-                menus.put(action.getPath(), menu);
-            }
-        }
-        final NavigableSet<FrameAction.FrameActionElement> descendingActions = actions.descendingSet();
-        for (final FrameAction.FrameActionElement e : descendingActions) {
-            final JMenu menu = menus.get(e.getPath());
-            menu.insert(e.getAction(this), 0);
-            final NavigableSet<FrameAction.FrameActionElement> next = descendingActions.tailSet(e, false);
-            if (!next.isEmpty()) {
-                if (next.first().getPath().equals(e.getPath()) && !next.first().getGroup().equals(e.getGroup())) {
-                    menu.insertSeparator(0);
-                }
-            }
-        }
-        for (final FrameAction.FrameActionElement e : toolbarActions) {
-            toolBar.add(e.getAction(this)).setFocusable(false);
-            final NavigableSet<FrameAction.FrameActionElement> next = toolbarActions.tailSet(e, false);
-            if (!next.isEmpty()) {
-                if (!next.first().getPath().equals(e.getPath()) || !next.first().getGroup().equals(e.getGroup())) {
-                    toolBar.addSeparator();
-                }
-            }
-        }
     }
 
     private String getToolbarPosition() {
@@ -300,7 +232,7 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
         }
     }
 
-    public void showFrame(Class<?> type) {
+    public void showFrame(Class<? extends InternalFrame> type) {
         for (final JInternalFrame frame : desktop.getAllFrames()) {
             if (type == frame.getClass()) {
                 frame.show();
@@ -308,19 +240,17 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
             }
         }
         for (final Class<?> frameClass : getClass().getClasses()) {
-            if (frameClass.isAnnotationPresent(FrameWidget.class)) {
-                if (type == frameClass) {
-                    try {
-                        final InternalFrame frame = frameClass.isMemberClass()
-                                ? (InternalFrame) frameClass.getConstructor(getClass()).newInstance(this)
-                                : (InternalFrame) frameClass.newInstance();
-                        desktop.add(frame);
-                        frame.show();
-                    } catch (Exception x) {
-                        warning("{0} creating error", x, frameClass.getSimpleName());
-                    }
-                    return;
+            if (type == frameClass) {
+                try {
+                    final InternalFrame frame = frameClass.isMemberClass()
+                            ? type.getConstructor(getClass()).newInstance(this)
+                            : type.newInstance();
+                    desktop.add(frame);
+                    frame.show();
+                } catch (Exception x) {
+                    warning("{0} creating error", x, frameClass.getSimpleName());
                 }
+                return;
             }
         }
         warning("No such frame: {0}", type.getSimpleName());
@@ -356,15 +286,10 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
 
     protected class InternalFrame extends JInternalFrame implements PrefSupport {
 
-        protected InternalFrame() {
-            final FrameWidget meta = getClass().getAnnotation(FrameWidget.class);
+        protected InternalFrame(String name, String title, boolean closable) {
+            super(s(title), true, closable, true, true);
+            setName(name);
             setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            setName(meta.key().isEmpty() ? getClass().getSimpleName() : meta.key());
-            setTitle(meta.title().isEmpty() ? s(getClass().getSimpleName()) : s(meta.title()));
-            setResizable(meta.resizable());
-            setIconifiable(meta.iconifiable());
-            setClosable(meta.closable());
-            setMaximizable(meta.maximizable());
             setPreferredSize(getPref("size", getInitialSize()));
             addInternalFrameListener(new InternalFrameAdapter() {
                 @Override
@@ -406,6 +331,83 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
 
         protected Point getInitialLocation() {
             return new Point(0, 0);
+        }
+    }
+
+    protected class ActionPutter {
+
+        private final String name;
+        private final String[] path;
+        private final String group;
+        private MaridActionListener actionListener;
+        private String icon;
+        private String shortDescription;
+        private String longDescription;
+        private String key;
+        private Consumer<Action> actionInitializer;
+        private Boolean toolbar;
+
+        private ActionPutter(String group, String name, String... path) {
+            this.group = group;
+            this.name = name;
+            this.path = path;
+        }
+
+        public ActionPutter setIcon(String icon) {
+            this.icon = icon;
+            return this;
+        }
+
+        public ActionPutter setListener(MaridActionListener listener) {
+            this.actionListener = listener;
+            return this;
+        }
+
+        public ActionPutter setShortDescription(String shortDescription) {
+            this.shortDescription = shortDescription;
+            return this;
+        }
+
+        public ActionPutter setLongDescription(String longDescription) {
+            this.longDescription = longDescription;
+            return this;
+        }
+
+        public ActionPutter setKey(String key) {
+            this.key = key;
+            return this;
+        }
+
+        public ActionPutter setInitializer(Consumer<Action> actionInitializer) {
+            this.actionInitializer = actionInitializer;
+            return this;
+        }
+
+        public ActionPutter setToolbar(boolean toolbar) {
+            this.toolbar = toolbar;
+            return this;
+        }
+
+        public Action put(MenuActionList actionList) {
+            final Action action;
+            if (actionListener == null) {
+                action = null;
+            } else {
+                action = new MaridAction(name, icon, actionListener,
+                        Action.SHORT_DESCRIPTION, shortDescription,
+                        Action.LONG_DESCRIPTION, longDescription,
+                        Action.ACCELERATOR_KEY, key == null ? null : KeyStroke.getKeyStroke(key));
+            }
+            if (action != null && action.getValue(Action.SHORT_DESCRIPTION) == null) {
+                action.putValue(Action.SHORT_DESCRIPTION, action.getValue(Action.NAME));
+            }
+            final MenuAction menuAction = new MenuAction(name, group, path, action);
+            menuAction.properties.put("toolbar", toolbar);
+            actionList.add(menuAction);
+            if (actionInitializer != null) {
+                actionInitializer.accept(action);
+            }
+            return action;
         }
     }
 }

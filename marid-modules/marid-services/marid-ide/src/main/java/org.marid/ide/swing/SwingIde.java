@@ -18,23 +18,31 @@
 
 package org.marid.ide.swing;
 
-import org.marid.ide.menu.GroovyMenu;
-import org.marid.ide.menu.MenuEntry;
+import groovy.lang.GroovyCodeSource;
+import org.marid.groovy.GroovyRuntime;
 import org.marid.image.MaridIcon;
 import org.marid.pref.PrefUtils;
+import org.marid.swing.MaridAction;
 import org.marid.swing.log.TrayIconHandler;
+import org.marid.swing.menu.MenuAction;
+import org.marid.swing.menu.MenuActionList;
+import org.marid.swing.menu.MenuActionTreeElement;
 
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
 import java.lang.invoke.MethodHandles;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
+import static org.marid.dyn.TypeCaster.TYPE_CASTER;
 import static org.marid.l10n.L10n.s;
 import static org.marid.methods.LogMethods.warning;
+import static org.marid.swing.MaridAction.MaridActionListener;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -47,7 +55,64 @@ public class SwingIde {
 
     public static void run() {
         installLaf();
-        final List<MenuEntry> entries = GroovyMenu.getMenuEntries();
+        final MenuActionList menuActions = new MenuActionList();
+        try {
+            final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            for (final Enumeration<URL> e = cl.getResources("Menu.groovy"); e.hasMoreElements();) {
+                final URL url = e.nextElement();
+                try {
+                    final List list = (List) GroovyRuntime.SHELL.evaluate(new GroovyCodeSource(url));
+                    for (final Object le : list) {
+                        if (!(le instanceof List)) {
+                            continue;
+                        }
+                        final List l = (List) le;
+                        final String[] path;
+                        final String group;
+                        final String name;
+                        final String icon;
+                        final MaridActionListener mal;
+                        final Object[] args;
+                        switch (l.size()) {
+                            case 6:
+                                path = TYPE_CASTER.cast(String[].class, l.get(0));
+                                group = TYPE_CASTER.cast(String.class, l.get(1));
+                                name = TYPE_CASTER.cast(String.class, l.get(2));
+                                icon = TYPE_CASTER.cast(String.class, l.get(3));
+                                mal = TYPE_CASTER.cast(MaridActionListener.class, l.get(4));
+                                args = TYPE_CASTER.cast(Object[].class, l.get(5));
+                                break;
+                            case 5:
+                                path = TYPE_CASTER.cast(String[].class, l.get(0));
+                                group = TYPE_CASTER.cast(String.class, l.get(1));
+                                name = TYPE_CASTER.cast(String.class, l.get(2));
+                                icon = TYPE_CASTER.cast(String.class, l.get(3));
+                                mal = TYPE_CASTER.cast(MaridActionListener.class, l.get(4));
+                                args = new String[0];
+                                break;
+                            case 3:
+                                path = TYPE_CASTER.cast(String[].class, l.get(0));
+                                group = TYPE_CASTER.cast(String.class, l.get(1));
+                                name = TYPE_CASTER.cast(String.class, l.get(2));
+                                icon = null;
+                                mal = null;
+                                args = null;
+                                break;
+                            default:
+                                warning(LOG, "Invalid menu line: {0}", l);
+                                continue;
+                        }
+                        final MaridAction action = mal == null ? null : new MaridAction(s(name), icon, mal, args);
+                        menuActions.add(new MenuAction(name, group, path, action));
+                    }
+                } catch (Exception x) {
+                    warning(LOG, "Unable to load menu entries from {0}", x, url);
+                }
+            }
+        } catch (Exception x) {
+            warning(LOG, "Unable to load menu entries", x);
+        }
+        final MenuActionTreeElement menuRoot = menuActions.createTreeElement();
         if (SystemTray.isSupported()) {
             try {
                 final SystemTray tray = SystemTray.getSystemTray();
@@ -55,17 +120,25 @@ public class SwingIde {
                 final int trayWidth = traySize.width;
                 final int trayHeight = traySize.height;
                 final Image image = MaridIcon.getImage(Math.min(trayWidth, trayHeight), Color.GREEN);
-                final PopupMenuImpl popup = new PopupMenuImpl(entries);
-                final TrayIcon icon = new TrayIcon(image, s("Marid IDE"), popup);
-                icon.addActionListener(popup);
-                icon.setActionCommand("show_hide");
-                frame = new SwingIdeFrame(true, entries);
+                final PopupMenu popupMenu = new PopupMenu();
+                final MenuItem showLogMenuItem = new MenuItem(s("Show log..."));
+                showLogMenuItem.addActionListener(e -> frame.showLog());
+                popupMenu.add(showLogMenuItem);
+                popupMenu.addSeparator();
+                final MenuItem exitMenuItem = new MenuItem(s("Exit"));
+                exitMenuItem.addActionListener(e -> frame.exitWithConfirm());
+                popupMenu.add(exitMenuItem);
+                popupMenu.addSeparator();
+                menuRoot.fillPopupMenu(popupMenu);
+                final TrayIcon icon = new TrayIcon(image, s("Marid IDE"), popupMenu);
+                icon.addActionListener(ev -> frame.setVisible(!frame.isVisible()));
+                frame = new SwingIdeFrame(true, menuRoot);
                 frame.setVisible(true);
                 tray.add(icon);
                 TrayIconHandler.addSystemHandler(icon, Level.parse(SYSPREFS.get("trayLevel", Level.OFF.getName())));
             } catch (Exception x) {
                 warning(LOG, "Unable to create the tray icon", x);
-                frame = new SwingIdeFrame(false, entries);
+                frame = new SwingIdeFrame(false, menuRoot);
                 frame.setVisible(true);
             }
         }

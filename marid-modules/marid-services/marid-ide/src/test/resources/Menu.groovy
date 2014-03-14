@@ -1,3 +1,5 @@
+import org.marid.ide.swing.windows.WrapperRunnerWindow
+
 /*
  * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
@@ -16,15 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.marid.ide.swing.windows.WrapperRunnerWindow
-
 [
-    deploy: [
-        items: [
-            run_wrapper: [
-                action: { WrapperRunnerWindow.show() },
-                shortcut: "control shift W"
-            ]
-        ]
-    ]
+        [[], "mainMenu", "Deploy"],
+        [["Deploy"], "main", "Wrapper", null, {a, e -> WrapperRunnerWindow.show()}]
 ]

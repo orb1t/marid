@@ -18,16 +18,15 @@
 
 package org.marid.ide.swing;
 
-import org.marid.ide.menu.MenuEntry;
 import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.log.SwingHandler;
+import org.marid.swing.menu.MenuActionTreeElement;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
-import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
@@ -42,12 +41,13 @@ public class SwingIdeFrame extends JFrame implements PrefSupport, LogSupport {
 
     private final boolean closeable;
 
-    public SwingIdeFrame(boolean closeable, List<MenuEntry> menuEntries) {
+    public SwingIdeFrame(boolean closeable, MenuActionTreeElement menuRoot) {
         super(s("Marid IDE"));
         this.closeable = closeable;
         setIconImages(MaridIcons.ICONS);
-        setJMenuBar(new MenuBarImpl(menuEntries));
+        setJMenuBar(new JMenuBar());
         setLocationByPlatform(true);
+        menuRoot.fillJMenuBar(getJMenuBar());
         pack();
         setSize(getPref("size", new Dimension(700, 500)));
         setLocation(getPref("location", getLocation()));

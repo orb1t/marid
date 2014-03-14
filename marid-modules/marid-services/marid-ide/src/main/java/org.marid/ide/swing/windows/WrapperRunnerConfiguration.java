@@ -56,7 +56,7 @@ public interface WrapperRunnerConfiguration extends Configuration {
     @Input(tab = "network", order = 2)
     Pv<InetSocketAddress, InetSocketAddressInputControl> bindAddress = new Pv<>(
             InetSocketAddressInputControl::new,
-            () -> InetSocketAddress.createUnresolved("localhost", DEFAULT_WRAPPER_SHUTDOWN_PORT));
+            () -> new InetSocketAddress("localhost", DEFAULT_WRAPPER_SHUTDOWN_PORT));
 
     @Input(tab = "performance", order = 0)
     Pv<Integer, SpinIntInputControl> queueSize = new Pv<>(() -> new SpinIntInputControl(2, 128, 2), () -> 8);

@@ -16,14 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package org.marid.swing.input;
 
-
-import org.marid.ide.swing.SwingIde
-
-import java.awt.EventQueue
+import javax.swing.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+public class BooleanInputControl extends JCheckBox implements InputControl<Boolean> {
+    @Override
+    public Boolean getValue() {
+        return isSelected();
+    }
 
-EventQueue.invokeLater {SwingIde.run()}
+    @Override
+    public void setValue(Boolean value) {
+        setSelected(value);
+    }
+}
