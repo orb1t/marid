@@ -23,8 +23,9 @@ import org.marid.pref.PrefReader;
 import org.marid.pref.PrefWriter;
 
 import java.awt.*;
-import java.util.IdentityHashMap;
 import java.util.Map;
+
+import static java.lang.Integer.parseInt;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -32,23 +33,19 @@ import java.util.Map;
 public class SwingPrefCodecs extends PrefCodecs {
     @Override
     public Map<Class<?>, PrefReader<?>> readers() {
-        final Map<Class<?>, PrefReader<?>> m = new IdentityHashMap<>();
-        m.put(Dimension.class, stringReader(s -> {
-            final String[] parts = s.split("x");
-            return new Dimension(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
-        }));
-        m.put(Point.class, stringReader(s -> {
-            final String[] parts = s.split(",");
-            return new Point(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
-        }));
-        return m;
+        return new ReaderMapBuilder()
+                .add(Dimension.class, splitReader("x", s -> new Dimension(parseInt(s[0]), parseInt(s[1]))))
+                .add(Point.class, splitReader(",", s -> new Point(parseInt(s[0]), parseInt(s[1]))))
+                .add(Rectangle.class, splitReader(",", s -> new Rectangle(parseInt(s[0]), parseInt(s[1]), parseInt(s[2]), parseInt(s[3]))))
+                .build();
     }
 
     @Override
     public Map<Class<?>, PrefWriter<?>> writers() {
-        final Map<Class<?>, PrefWriter<?>> m = new IdentityHashMap<>();
-        m.put(Dimension.class, (PrefWriter<Dimension>) (p, k, v) -> p.put(k, v.width + "x" + v.height));
-        m.put(Point.class, (PrefWriter<Point>) (p, k, v) -> p.put(k, v.x + "," + v.y));
-        return m;
+        return new WriterMapBuilder()
+                .add(Dimension.class, (p, k, v) -> p.put(k, v.width + "x" + v.height))
+                .add(Point.class, (p, k, v) -> p.put(k, v.x + "," + v.y))
+                .add(Rectangle.class, (p, k, v) -> p.put(k, v.x + "," + v.y + "," + v.width + "," + v.height))
+                .build();
     }
 }

@@ -168,6 +168,13 @@ public abstract class PrefCodecs {
         };
     }
 
+    protected static <T> PrefReader<T> splitReader(String separator, UnsafeFunction<String[], T> function) {
+        return (pref, key) -> {
+            final String v = pref.get(key, null);
+            return v == null ? null : function.applyUnsafe(v.split(separator));
+        };
+    }
+
     protected static <T> PrefReader<T> byteArrayReader(UnsafeFunction<byte[], T> function) {
         return (prefs, key) -> {
             final byte[] v = prefs.getByteArray(key, null);
@@ -200,5 +207,33 @@ public abstract class PrefCodecs {
     public static InetSocketAddress parseInetSocketAddress(String value) throws Exception {
         final URI uri = new URI("proto://" + value);
         return InetSocketAddress.createUnresolved(uri.getHost(), uri.getPort());
+    }
+
+    public static class ReaderMapBuilder {
+
+        private final Map<Class<?>, PrefReader<?>> readerMap = new IdentityHashMap<>();
+
+        public <T> ReaderMapBuilder add(Class<T> type, PrefReader<T> reader) {
+            readerMap.put(type, reader);
+            return this;
+        }
+
+        public Map<Class<?>, PrefReader<?>> build() {
+            return readerMap;
+        }
+    }
+
+    public static class WriterMapBuilder {
+
+        private final Map<Class<?>, PrefWriter<?>> writerMap = new IdentityHashMap<>();
+
+        public <T> WriterMapBuilder add(Class<T> type, PrefWriter<T> writer) {
+            writerMap.put(type, writer);
+            return this;
+        }
+
+        public Map<Class<?>, PrefWriter<?>> build() {
+            return writerMap;
+        }
     }
 }

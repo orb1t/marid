@@ -49,6 +49,9 @@ public class MaridAction extends AbstractAction {
                 putValue(args[i].toString(), args[i + 1]);
             }
         }
+        if (getValue(Action.SHORT_DESCRIPTION) == null) {
+            putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));
+        }
     }
 
     @Override

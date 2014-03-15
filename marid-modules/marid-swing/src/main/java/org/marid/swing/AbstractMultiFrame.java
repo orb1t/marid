@@ -398,9 +398,6 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
                         Action.LONG_DESCRIPTION, longDescription,
                         Action.ACCELERATOR_KEY, key == null ? null : KeyStroke.getKeyStroke(key));
             }
-            if (action != null && action.getValue(Action.SHORT_DESCRIPTION) == null) {
-                action.putValue(Action.SHORT_DESCRIPTION, action.getValue(Action.NAME));
-            }
             final MenuAction menuAction = new MenuAction(name, group, path, action);
             menuAction.properties.put("toolbar", toolbar);
             actionList.add(menuAction);

@@ -36,10 +36,14 @@ public class AbstractFrame extends JFrame implements PrefSupport {
         super(s(title));
         setIconImages(MaridIcons.ICONS);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLocation(getPref("location", new Point(0, 0)));
-        setPreferredSize(getPref("size", new Dimension(700, 500)));
         setState(getPref("state", getState()));
         setExtendedState(getPref("extendedState", getExtendedState()));
+    }
+
+    @Override
+    public void pack() {
+        super.pack();
+        setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
     }
 
     @Override
@@ -52,8 +56,7 @@ public class AbstractFrame extends JFrame implements PrefSupport {
                 break;
             case WindowEvent.WINDOW_CLOSED:
                 if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
-                    putPref("size", getSize());
-                    putPref("location", getLocation());
+                    putPref("bounds", getBounds());
                 }
                 putPref("state", getState());
                 putPref("extendedState", getExtendedState());

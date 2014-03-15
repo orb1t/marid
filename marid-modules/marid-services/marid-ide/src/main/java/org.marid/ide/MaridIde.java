@@ -23,6 +23,7 @@ import org.marid.Versioning;
 import org.marid.groovy.GroovyRuntime;
 import org.marid.ide.swing.SwingIde;
 import org.marid.logging.Logging;
+import org.marid.swing.log.SwingHandler;
 import org.marid.util.Utils;
 
 import javax.swing.*;
@@ -41,8 +42,9 @@ public class MaridIde implements Thread.UncaughtExceptionHandler {
 
     private static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Logging.init(MaridIde.class, "marid-ide-logging.properties");
+        Logger.getLogger("").addHandler(new SwingHandler());
         Thread.setDefaultUncaughtExceptionHandler(new MaridIde());
         Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
         info(LOG, "Starting Marid {0} on {1} {2}",

@@ -49,8 +49,7 @@ public class SwingIdeFrame extends JFrame implements PrefSupport, LogSupport {
         setLocationByPlatform(true);
         menuRoot.fillJMenuBar(getJMenuBar());
         pack();
-        setSize(getPref("size", new Dimension(700, 500)));
-        setLocation(getPref("location", getLocation()));
+        setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
         setState(getPref("state", getState()));
         setExtendedState(getPref("extendedState", getExtendedState()));
     }
@@ -102,11 +101,10 @@ public class SwingIdeFrame extends JFrame implements PrefSupport, LogSupport {
 
     public void exit() {
         putPref("state", getState());
-        if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
-            putPref("size", getSize());
-            putPref("location", getLocation());
-        }
         putPref("extendedState", getExtendedState());
+        if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
+            putPref("bounds", getBounds());
+        }
         dispose();
         System.exit(0);
     }

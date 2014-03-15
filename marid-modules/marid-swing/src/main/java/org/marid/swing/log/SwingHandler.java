@@ -122,9 +122,9 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
         }
     }
 
-    private class LogFrame extends JFrame implements Comparator<Level>, Filter {
+    private class LogFrame extends JFrame implements Filter {
 
-        private final TreeMap<Level, Action> levelMap = new TreeMap<>(this);
+        private final TreeMap<Level, Action> levelMap = new TreeMap<>((l1, l2) -> l1.intValue() - l2.intValue());
         private final LogRecordListModel model = new LogRecordListModel();
         private final Timer timer = new Timer(100, e -> {
             final List<LogRecord> records = new LinkedList<>();
@@ -173,27 +173,13 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
         }
 
         @Override
-        public int compare(Level o1, Level o2) {
-            return Integer.compare(o1.intValue(), o2.intValue());
-        }
-
-        @Override
         public boolean isLoggable(LogRecord record) {
             final Action action = levelMap.get(record.getLevel());
             return action == null || Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY));
         }
 
-        private boolean selected() {
-            for (final Action a : levelMap.values()) {
-                if (Boolean.TRUE.equals(a.getValue(Action.SELECTED_KEY))) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         void updateFilter() {
-            if (selected()) {
+            if (levelMap.values().stream().anyMatch(a -> Boolean.TRUE.equals(a.getValue(Action.SELECTED_KEY)))) {
                 model.setFilter(this);
             } else if (filter != null) {
                 model.setFilter(filter);
@@ -206,15 +192,10 @@ public class SwingHandler extends AbstractHandler implements PrefSupport {
 
             public LogFrameMenu() {
                 final JMenu filterMenu = new JMenu(s("Filter"));
-                for (final Action a : levelMap.values()) {
-                    filterMenu.add(new JCheckBoxMenuItem(a));
-                }
+                levelMap.values().forEach(a -> filterMenu.add(new JCheckBoxMenuItem(a)));
                 filterMenu.addSeparator();
-                filterMenu.add(new MaridAction("Clear filter", "clear.png", (a, e) -> {
-                    for (final Action action : levelMap.values()) {
-                        action.putValue(Action.SELECTED_KEY, false);
-                    }
-                }));
+                filterMenu.add(new MaridAction("Clear filter", "clear.png", (a, e) ->
+                        levelMap.values().forEach(ac -> ac.putValue(Action.SELECTED_KEY, false))));
                 filterMenu.addSeparator();
                 add(filterMenu);
             }

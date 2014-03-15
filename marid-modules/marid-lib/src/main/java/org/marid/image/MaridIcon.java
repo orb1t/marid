@@ -18,12 +18,10 @@
 
 package org.marid.image;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
@@ -80,19 +78,5 @@ public class MaridIcon {
 
     public static ImageIcon getIcon(int size, Color color) {
         return new ImageIcon(getImage(size, color));
-    }
-
-    public static void main(String... args) {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                File file = new File(System.getProperty("user.home"), "icon.png");
-                try {
-                    ImageIO.write(getImage(64, Color.GREEN), "PNG", file);
-                } catch (Exception x) {
-                    //
-                }
-            }
-        });
     }
 }

@@ -18,6 +18,8 @@
 
 package org.marid.ide.swing.windows;
 
+import org.marid.l10n.L10n;
+import org.marid.swing.MaridAction;
 import org.marid.swing.forms.Configuration;
 import org.marid.swing.forms.Input;
 import org.marid.swing.forms.Tab;
@@ -25,6 +27,7 @@ import org.marid.swing.input.*;
 import org.marid.util.Utils;
 import org.marid.wrapper.Wrapper;
 
+import javax.swing.*;
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.URL;
@@ -73,5 +76,12 @@ public interface WrapperRunnerConfiguration extends Configuration {
             StringInputControl::new, () -> Paths.get(getProperty("java.home"), "bin", "java").toString());
 
     @Input(tab = "jvm", order = 1, label = "JVM arguments")
-    Pv<String[], StringArrayInputControl> jvmArgs = new Pv<>(StringArrayInputControl::new, () -> new String[0]);
+    Pv<String[], StringArrayInputControl> jvmArgs = new Pv<>(() -> new StringArrayInputControl().withToolbar((m, t) -> {
+        t.add(new MaridAction("Add debug parameters", "bug", (a, e) -> {
+            final String port = JOptionPane.showInputDialog(L10n.m("Input debug port") + ": ", "5005");
+            if (port != null) {
+                m.addElement(String.format("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=%s", port));
+            }
+        })).setFocusable(false);
+    }), () -> new String[0]);
 }
