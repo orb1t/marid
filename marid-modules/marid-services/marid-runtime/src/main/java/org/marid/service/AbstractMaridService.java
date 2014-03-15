@@ -18,107 +18,37 @@
 
 package org.marid.service;
 
-import com.google.common.util.concurrent.AbstractService;
-import com.google.common.util.concurrent.MoreExecutors;
-import groovy.lang.MetaClass;
-import org.codehaus.groovy.runtime.InvokerHelper;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.*;
-import java.util.logging.Logger;
-
-import static org.marid.l10n.L10n.*;
-import static org.marid.methods.LogMethods.*;
-import static org.marid.methods.PropMethods.*;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractMaridService extends AbstractService implements MaridService {
+public abstract class AbstractMaridService implements MaridService {
 
     protected final int threadStackSize;
-    protected final String type;
-    protected final String id;
-    protected final ThreadGroup threadGroup;
-    protected final ThreadGroup threadPoolGroup;
+    protected final ThreadGroup threadGroup = new ThreadGroup(getName());
+    public final ThreadGroup threadPoolGroup = new ThreadGroup(threadGroup, "pool");
     protected final ThreadPoolExecutor executor;
     protected final boolean poolDaemons;
     protected final boolean daemons;
     protected final long timeGranularity;
     protected final long shutdownTimeout;
-    protected final Executor sameThreadExecutor = MoreExecutors.sameThreadExecutor();
-    protected final MetaClass metaClass = InvokerHelper.getMetaClass(getClass());
-    protected final Logger log = Logger.getLogger(getClass().getName());
 
-    public AbstractMaridService(Map params) {
-        threadStackSize = get(params, int.class, "threadStackSize", 0);
-        type = get(params, String.class, "type", defaultType());
-        id = get(params, String.class, "id", type);
-        daemons = get(params, boolean.class, "daemons", false);
-        poolDaemons = get(params, boolean.class, "poolDaemons", false);
-        timeGranularity = get(params, long.class, "timeGranularity", 1000L);
-        shutdownTimeout = get(params, long.class, "shutdownTimeout", 60_000L);
-        threadGroup = new ThreadGroup(id);
-        threadPoolGroup = new ThreadGroup(threadGroup, id + ".pool");
+    public AbstractMaridService(AbstractMaridServiceParameters params) {
+        threadStackSize = params.threadStackSize;
+        daemons = params.daemons;
+        poolDaemons = params.poolDaemons;
+        timeGranularity = params.timeGranularity;
+        shutdownTimeout = params.shutdownTimeout;
         executor = new ThreadPoolExecutor(
-                get(params, int.class, "threadPoolInitSize", 0),
-                get(params, int.class, "threadPoolMaxSize", 1),
-                get(params, long.class, "threadPoolKeepAliveTime", 60_000L),
+                params.threadPoolInitSize,
+                params.threadPoolMaxSize,
+                params.threadPoolKeepAliveTime,
                 TimeUnit.MILLISECONDS,
-                getBlockingQueue(params, "blockingQueue", 0),
-                getThreadFactory(params, "threadPoolThreadFactory", threadPoolGroup, poolDaemons, threadStackSize),
-                getRejectedExecutionHandler(params, "rejectedExecutionHandler"));
-        fine(log, "{0} Params {1}", id + ":" + type, params);
-        addListener(new Listener() {
-            @Override
-            public void failed(State from, Throwable failure) {
-                warning(log, "{0} Failed from {1}", failure, AbstractMaridService.this, from);
-            }
-
-            @Override
-            public void running() {
-                info(log, "{0} Running", AbstractMaridService.this);
-                onRunning();
-            }
-
-            @Override
-            public void starting() {
-                info(log, "{0} Starting", AbstractMaridService.this);
-            }
-
-            @Override
-            public void stopping(State from) {
-                fine(log, "{0} Stopping", AbstractMaridService.this);
-            }
-
-            @Override
-            public void terminated(State from) {
-                info(log, "{0} Terminated", AbstractMaridService.this);
-                onTerminated();
-                executor.shutdown();
-                try {
-                    if (executor.awaitTermination(shutdownTimeout, TimeUnit.MILLISECONDS)) {
-                        return;
-                    }
-                } catch (InterruptedException x) {
-                    warning(log, "{0} Interrupted", x, AbstractMaridService.this);
-                }
-                final List<Runnable> rest = executor.shutdownNow();
-                severe(log, "{0} Shutdown error. Skipped {1} tasks", AbstractMaridService.this, rest.size());
-            }
-        }, sameThreadExecutor);
-    }
-
-    protected void onRunning() {
-    }
-
-    protected void onTerminated() {
-    }
-
-    private String defaultType() {
-        final String[] cps = getClass().getCanonicalName().split("[.]");
-        return cps.length > 1 ? cps[cps.length - 2] : cps[0];
+                params.blockingQueueSupplier.get(),
+                params.poolThreadFactory.apply(this),
+                params.rejectedExecutionHandler.apply(this));
     }
 
     @Override
@@ -126,62 +56,8 @@ public abstract class AbstractMaridService extends AbstractService implements Ma
         return threadGroup;
     }
 
-    @SuppressWarnings("NullableProblems")
-    @Override
-    public Thread newThread(Runnable r) {
-        final Thread thread = new Thread(threadGroup, r, String.valueOf(r), threadStackSize);
-        thread.setDaemon(daemons);
-        return thread;
-    }
-
-    @Override
-    public String id() {
-        return id;
-    }
-
-    @Override
-    public String type() {
-        return type;
-    }
-
-    @Override
-    public String name() {
-        return s(getClass().getSimpleName());
-    }
-
     @Override
     public String toString() {
-        return id() + ":" + type();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> Future<T> send(String method, Object... args) {
-        return executor.submit(() -> {
-            final State state = state();
-            switch (state) {
-                case FAILED:
-                    throw new IllegalStateException(failureCause());
-                case STOPPING:
-                case TERMINATED:
-                    throw new IllegalStateException("Terminated");
-                case NEW:
-                case STARTING:
-                    while (!isRunning()) {
-                        try {
-                            awaitRunning(timeGranularity, TimeUnit.MILLISECONDS);
-                        } catch (TimeoutException x) {
-                            if (Thread.interrupted()) {
-                                warning(log, "Interrupted {0}", this);
-                                throw new InterruptedException();
-                            }
-                        }
-                    }
-                case RUNNING:
-                    return (T) metaClass.invokeMethod(AbstractMaridService.this, method, args);
-                default:
-                    throw new IllegalStateException("Illegal state: " + state);
-            }
-        });
+        return getName();
     }
 }

@@ -18,9 +18,6 @@
 
 package org.marid.methods;
 
-import com.google.common.base.Supplier;
-import groovy.lang.Closure;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -30,6 +27,8 @@ import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.ThreadPoolExecutor.DiscardOldestPolicy;
 import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.marid.dyn.TypeCaster.TYPE_CASTER;
 
@@ -38,14 +37,15 @@ import static org.marid.dyn.TypeCaster.TYPE_CASTER;
  */
 public class PropMethods {
 
+    @SuppressWarnings("unchecked")
     public static <T> T get(Map params, Class<T> type, Object key) {
         final Object value = params.get(key);
         if (value == null) {
-            return type.cast(value);
+            return type.cast(null);
         } else if (type == Object.class) {
             return type.cast(value);
-        } else if (value instanceof Closure) {
-            return TYPE_CASTER.cast(type, ((Closure) value).call(params));
+        } else if (value instanceof Function || value instanceof Callable) {
+            return TYPE_CASTER.cast(type, TYPE_CASTER.cast(Function.class, value).apply(params));
         } else {
             return TYPE_CASTER.cast(type, value);
         }
@@ -81,22 +81,18 @@ public class PropMethods {
             return new ArrayBlockingQueue<>(((Number) value).intValue());
         } else if (value instanceof Boolean) {
             return new SynchronousQueue<>((Boolean) value);
-        } else if (value instanceof Closure) {
-            return ((Closure<BlockingQueue<Runnable>>) value).call(params);
+        } else if (value instanceof Function || value instanceof Callable) {
+            return (BlockingQueue<Runnable>) TYPE_CASTER.cast(Function.class, value).apply(params);
         } else {
             return get(params, BlockingQueue.class, key, supplier.get());
         }
     }
 
     public static BlockingQueue<Runnable> getBlockingQueue(Map params, Object key, int def) {
-        return getBlockingQueue(params, key, def, new Supplier<BlockingQueue<Runnable>>() {
-            @Override
-            public BlockingQueue<Runnable> get() {
-                return new SynchronousQueue<>();
-            }
-        });
+        return getBlockingQueue(params, key, def, SynchronousQueue::new);
     }
 
+    @SuppressWarnings("unchecked")
     public static RejectedExecutionHandler getRejectedExecutionHandler(Map params, Object key) {
         final Object value = params.get(key);
         if (value == null) {
@@ -118,13 +114,14 @@ public class PropMethods {
             }
         } else if (value instanceof Supplier) {
             return (RejectedExecutionHandler) ((Supplier) value).get();
-        } else if (value instanceof Closure) {
-            return (RejectedExecutionHandler) ((Closure) value).call(params);
+        } else if (value instanceof Function || value instanceof Callable) {
+            return (RejectedExecutionHandler) TYPE_CASTER.cast(Function.class, value).apply(params);
         } else {
             return get(params, RejectedExecutionHandler.class, key, new CallerRunsPolicy());
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static ThreadFactory getThreadFactory(Map params, Object key, final ThreadGroup threadGroup, final boolean daemon, final int stackSize) {
         final Object value = params.get(key);
         if (value == null) {
@@ -158,13 +155,14 @@ public class PropMethods {
             return (ThreadFactory) value;
         } else if (value instanceof Supplier) {
             return (ThreadFactory) ((Supplier) value).get();
-        } else if (value instanceof Closure) {
-            return (ThreadFactory) ((Closure) value).call(params);
+        } else if (value instanceof Function || value instanceof Callable) {
+            return (ThreadFactory) TYPE_CASTER.cast(Function.class, value).apply(params);
         } else {
             throw new IllegalArgumentException("Illegal value for thread factory: " + value);
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static InetSocketAddress getInetSocketAddress(Map params, Object key, int def) {
         final Object value = params.get(key);
         if (value == null) {
@@ -185,8 +183,8 @@ public class PropMethods {
             return (InetSocketAddress) value;
         } else if (value instanceof Supplier) {
             return (InetSocketAddress) ((Supplier) value).get();
-        } else if (value instanceof Closure) {
-            return (InetSocketAddress) ((Closure) value).call(params);
+        } else if (value instanceof Function || value instanceof Callable) {
+            return (InetSocketAddress) TYPE_CASTER.cast(Function.class, value).apply(params);
         } else {
             return get(params, InetSocketAddress.class, key, new InetSocketAddress(def));
         }

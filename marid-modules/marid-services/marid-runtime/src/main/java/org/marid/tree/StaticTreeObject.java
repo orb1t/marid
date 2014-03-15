@@ -69,19 +69,8 @@ public class StaticTreeObject implements TreeObject {
     }
 
     @Override
-    public <T> T get(Class<T> type, String key, T def) {
-        final T value = get(type, key);
-        return value == null ? def : value;
-    }
-
-    @Override
     public <T> T get(Class<T> type, String key) {
         return PropMethods.get(vars, type, key);
-    }
-
-    @Override
-    public Object getAt(String name) {
-        return get(name);
     }
 
     @Override
@@ -90,18 +79,8 @@ public class StaticTreeObject implements TreeObject {
     }
 
     @Override
-    public void putAt(String name, Object value) {
-        put(name, value);
-    }
-
-    @Override
     public Set<String> keySet() {
         return vars.keySet();
-    }
-
-    @Override
-    public StaticTreeObject object(String... path) {
-        return object(Arrays.asList(path));
     }
 
     @Override
@@ -134,11 +113,6 @@ public class StaticTreeObject implements TreeObject {
     @Override
     public String[] arrayPath() {
         return path;
-    }
-
-    @Override
-    public List<String> listPath() {
-        return Arrays.asList(path);
     }
 
     @Override

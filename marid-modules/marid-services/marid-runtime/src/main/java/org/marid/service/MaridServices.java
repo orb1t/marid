@@ -18,16 +18,15 @@
 
 package org.marid.service;
 
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.util.concurrent.ServiceManager;
+import org.marid.methods.LogMethods;
 
 import java.util.*;
-import java.util.concurrent.Future;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-import static java.util.ServiceLoader.load;
-import static org.marid.methods.LogMethods.*;
+import static java.lang.Runtime.getRuntime;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,68 +34,65 @@ import static org.marid.methods.LogMethods.*;
 public class MaridServices {
 
     private static final Logger LOG = Logger.getLogger(MaridServices.class.getName());
-    private static final Multimap<String, MaridService> TS_MAP = LinkedListMultimap.create();
-    private static final Map<String, MaridService> IS_MAP = new HashMap<>();
-    private static final ServiceManager SERVICE_MANAGER;
-
-    static {
-        try {
-            for (final MaridServiceProvider provider : load(MaridServiceProvider.class)) {
-                try {
-                    for (final MaridService service : provider.getServices()) {
-                        TS_MAP.put(service.type(), service);
-                        final MaridService oldService = IS_MAP.put(service.id(), service);
-                        if (oldService != null) {
-                            warning(LOG, "Duplicate service for id = {0}", service.id());
-                        }
-                        info(LOG, "{0} Added", service);
-                    }
-                } catch (Exception x) {
-                    warning(LOG, "Unable to get services from {0}", x, provider);
-                }
-            }
-        } catch (Exception x) {
-            severe(LOG, "Unable to load services", x);
+    static final NavigableMap<Class<?>, Collection<MaridService>> SERVICES = new ConcurrentSkipListMap<>((a, b) -> {
+        if (a == b) {
+            return 0;
+        } else if (a.isAssignableFrom(b)) {
+            return -1;
+        } else if (b.isAssignableFrom(a)) {
+            return 1;
+        } else {
+            return a.getName().compareTo(b.getName());
         }
-        SERVICE_MANAGER = new ServiceManager(IS_MAP.values());
-    }
+    });
 
     public static Collection<MaridService> getServices() {
-        return Collections.unmodifiableCollection(IS_MAP.values());
+        final List<MaridService> services = new LinkedList<>();
+        SERVICES.values().forEach(services::addAll);
+        return services;
     }
 
-    public static MaridService getServiceById(String id) {
-        return IS_MAP.get(id);
-    }
-
-    public static MaridService getServiceByType(String type) {
-        final Collection<MaridService> services = TS_MAP.get(type);
-        if (services == null) {
-            return null;
-        } else {
-            final Iterator<MaridService> it = services.iterator();
-            return it.hasNext() ? it.next() : null;
+    public static <T extends MaridService> List<T> getServices(Class<T> type) {
+        final List<T> services = new LinkedList<>();
+        for (final Map.Entry<Class<?>, Collection<MaridService>> e : SERVICES.tailMap(type).entrySet()) {
+            if (type.isAssignableFrom(e.getKey())) {
+                e.getValue().forEach(s -> services.add(type.cast(s)));
+            } else {
+                break;
+            }
         }
-    }
-
-    public static Collection<MaridService> getServicesByType(String type) {
-        return TS_MAP.get(type);
-    }
-
-    public static <T> Future<T> send(String type, String method, Object... args) {
-        final MaridService service = getServiceByType(type);
-        if (service != null) {
-            return service.send(method, args);
-        } else {
-            throw new IllegalArgumentException("Service not exists: " + type);
-        }
+        return services;
     }
 
     public static void start() {
-        SERVICE_MANAGER.startAsync();
+        final int threads = getRuntime().availableProcessors() > 1 ? getRuntime().availableProcessors() : 8;
+        final ExecutorService executorService = Executors.newFixedThreadPool(threads);
+        try {
+            SERVICES.values().forEach(l -> l.forEach(s -> executorService.execute(() -> {
+                try {
+                    s.start();
+                } catch (Exception x) {
+                    LogMethods.severe(LOG, "Unable to start {0}", x, s);
+                }
+            })));
+        } finally {
+            executorService.shutdown();
+        }
     }
 
     public static void stop() {
-        SERVICE_MANAGER.stopAsync();
+        final int threads = getRuntime().availableProcessors() > 1 ? getRuntime().availableProcessors() : 8;
+        final ExecutorService executorService = Executors.newFixedThreadPool(threads);
+        try {
+            SERVICES.values().forEach(l -> l.forEach(s -> executorService.execute(() -> {
+                try {
+                    s.close();
+                } catch (Exception x) {
+                    LogMethods.severe(LOG, "Unable to close {0}", x, s);
+                }
+            })));
+        } finally {
+            executorService.shutdown();
+        }
     }
 }

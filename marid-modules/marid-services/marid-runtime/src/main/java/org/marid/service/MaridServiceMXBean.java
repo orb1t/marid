@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,21 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.silly;
-
-import org.marid.service.MaridService;
-import org.marid.service.MaridServiceProvider;
-
-import java.util.Collections;
-import java.util.List;
+package org.marid.service;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SillyTestServiceProvider implements MaridServiceProvider {
+public interface MaridServiceMXBean {
 
-    @Override
-    public List<? extends MaridService> getServices() {
-        return Collections.singletonList(new SillyTestService(Collections.<String, Object>emptyMap()));
-    }
+    int getThreadCount();
+
+    boolean isRunning();
+
+    int getStackSize();
+
+    boolean isDaemons();
+
+    String getName();
 }

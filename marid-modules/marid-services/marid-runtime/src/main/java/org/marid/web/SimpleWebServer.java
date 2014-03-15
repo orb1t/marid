@@ -21,7 +21,6 @@ package org.marid.web;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.spi.HttpServerProvider;
 import groovy.lang.Closure;
 import groovy.lang.GroovyCodeSource;
 import org.marid.groovy.GroovyRuntime;
@@ -35,42 +34,35 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.io.Files.getFileExtension;
 import static com.google.common.io.Files.getNameWithoutExtension;
 import static java.net.HttpURLConnection.*;
-import static org.marid.methods.LogMethods.info;
-import static org.marid.methods.LogMethods.warning;
-import static org.marid.methods.PropMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
 
-    protected final int stopTimeout;
+    public final ThreadGroup webPoolThreadGroup = new ThreadGroup(threadPoolGroup, "webPool");
     protected final HttpServer server;
     protected final Path webDir;
     protected final Map<Path, HttpHandler> handlerMap = new ConcurrentHashMap<>();
 
-    public SimpleWebServer(Map params) throws IOException {
+    public SimpleWebServer(SimpleWebServerParameters params) throws IOException {
         super(params);
-        stopTimeout = get(params, int.class, "stopTimeout", 60);
-        final HttpServerProvider dsp = HttpServerProvider.provider();
-        final int defBacklog = get(params, int.class, "webBacklog", 0);
-        final HttpServerProvider sp = get(params, HttpServerProvider.class, "serverProvider", dsp);
-        server = sp.createHttpServer(getInetSocketAddress(params, "webAddress", 8080), defBacklog);
-        final ThreadGroup webThreadPoolGroup = new ThreadGroup(threadGroup, id() + ".pool");
+        server = params.httpServerProvider.createHttpServer(params.address, params.backlog);
         server.setExecutor(new ThreadPoolExecutor(
-                get(params, int.class, "webPoolInitSize", 0),
-                get(params, int.class, "webPoolMaxSize", 64),
-                get(params, long.class, "webPoolKeepAliveTime", 60_000L),
+                params.webThreadPoolInitSize,
+                params.webThreadPoolMaxSize,
+                params.webThreadPoolKeepAliveTime,
                 TimeUnit.MILLISECONDS,
-                getBlockingQueue(params, "webPoolBlockingQueue", 64),
-                getThreadFactory(params, "webPoolThreadFactory", webThreadPoolGroup,
-                        get(params, boolean.class, "webPoolDaemons", false), threadStackSize),
-                getRejectedExecutionHandler(params, "webPoolRejectedExecutionHandler"))
+                params.webBlockingQueueSupplier.get(),
+                params.webPoolThreadFactory.apply(this),
+                params.webRejectedExecutionHandler.apply(this))
         );
         webDir = dirMap.get("default");
         server.createContext("/", this);
@@ -96,18 +88,9 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
             }
             exchange.sendResponseHeaders(HTTP_NOT_FOUND, 0);
         } catch (Exception x) {
-            warning(log, "{0} Unable to handle {1}", this, exchange.getRequestURI());
+            warning("{0} Unable to handle {1}", this, exchange.getRequestURI());
         } finally {
             exchange.close();
-        }
-    }
-
-    @Override
-    protected List<String> defaultPages(Collection collection) {
-        if (collection.isEmpty()) {
-            return Arrays.asList("index.groovy", "index.html", "index.svg");
-        } else {
-            return super.defaultPages(collection);
         }
     }
 
@@ -137,9 +120,9 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
                 try {
                     server.removeContext(toContextPath(context));
                     handlerMap.remove(context);
-                    info(log, "{0} Removed context {1} {2}", this, dir, context);
+                    info("{0} Removed context {1} {2}", this, dir, context);
                 } catch (Exception x) {
-                    warning(log, "{0} Unable to remove context {1} {2}", x, this, dir, context);
+                    warning("{0} Unable to remove context {1} {2}", x, this, dir, context);
                 }
                 modify(dir, context);
             }
@@ -155,9 +138,9 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
             try {
                 server.removeContext(toContextPath(context));
                 handlerMap.remove(context);
-                info(log, "{0} Removed context {1} {2}", this, dir, context);
+                info("{0} Removed context {1} {2}", this, dir, context);
             } catch (Exception x) {
-                warning(log, "{0} Unable to remove context {1} {2}", x, this, dir, context);
+                warning("{0} Unable to remove context {1} {2}", x, this, dir, context);
             }
         }
     }
@@ -184,52 +167,49 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
                     final GroovyCodeSource source = new GroovyCodeSource(path.toFile());
                     scripts.put(GroovyRuntime.getClosure(source), path);
                 } catch (Exception x) {
-                    warning(log, "{0} Unable to compile {1}", this, path);
+                    warning("{0} Unable to compile {1}", this, path);
                 }
             }
         }
         final String contentType = mime.startsWith("text/") ? mime + ";charset=UTF-8" : mime;
         try {
             final String contextPath = toContextPath(context);
-            final HttpHandler handler = new HttpHandler() {
-                @Override
-                public void handle(HttpExchange exchange) throws IOException {
-                    if (!script) {
-                        exchange.getResponseHeaders().set("Content-Type", contentType);
-                    }
-                    boolean filtered = false;
-                    for (final Entry<Closure, Path> e : scripts.entrySet()) {
-                        try {
-                            final Object v = e.getKey().call(file, exchange);
-                            if (!filtered && Boolean.TRUE.equals(v)) {
-                                filtered = true;
-                            }
-                        } catch (Exception x) {
-                            warning(log, "{0} Script {1}", SimpleWebServer.this, e.getValue());
-                            if (exchange.getResponseCode() < 0) {
-                                exchange.sendResponseHeaders(HTTP_INTERNAL_ERROR, -1);
-                                return;
-                            }
-                        }
-                    }
-                    if (!script) {
-                        if (exchange.getResponseCode() < 0) {
-                            exchange.sendResponseHeaders(HTTP_OK, filtered ? 0L : Files.size(file));
-                        }
-                        try {
-                            Files.copy(file, exchange.getResponseBody());
-                        } catch (Exception x) {
-                            warning(log, "{0} I/O error {1}", SimpleWebServer.this, file);
-                        }
-                    }
-                    exchange.close();
+            final HttpHandler handler = exchange -> {
+                if (!script) {
+                    exchange.getResponseHeaders().set("Content-Type", contentType);
                 }
+                boolean filtered = false;
+                for (final Entry<Closure, Path> e : scripts.entrySet()) {
+                    try {
+                        final Object v = e.getKey().call(file, exchange);
+                        if (!filtered && Boolean.TRUE.equals(v)) {
+                            filtered = true;
+                        }
+                    } catch (Exception x) {
+                        warning("{0} Script {1}", SimpleWebServer.this, e.getValue());
+                        if (exchange.getResponseCode() < 0) {
+                            exchange.sendResponseHeaders(HTTP_INTERNAL_ERROR, -1);
+                            return;
+                        }
+                    }
+                }
+                if (!script) {
+                    if (exchange.getResponseCode() < 0) {
+                        exchange.sendResponseHeaders(HTTP_OK, filtered ? 0L : Files.size(file));
+                    }
+                    try {
+                        Files.copy(file, exchange.getResponseBody());
+                    } catch (Exception x) {
+                        warning("{0} I/O error {1}", SimpleWebServer.this, file);
+                    }
+                }
+                exchange.close();
             };
             server.createContext(contextPath, handler);
             handlerMap.put(context, handler);
-            info(log, "{0} Bound {1} to {2}", this, contextPath, file);
+            info("{0} Bound {1} to {2}", this, contextPath, file);
         } catch (Exception x) {
-            warning(log, "{0} Unable to register context {1} {2}", this, dir, context);
+            warning("{0} Unable to register context {1} {2}", this, dir, context);
         }
     }
 
@@ -266,63 +246,34 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
                 }
             });
         } catch (Exception x) {
-            warning(log, "{0} Unable to apply scripts {1} {2}", x, this, dir, context);
+            warning("{0} Unable to apply scripts {1} {2}", x, this, dir, context);
         }
     }
 
     @Override
-    protected void doStart() {
-        try {
-            executor.submit(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    if (webDir == null) {
-                        warning(log, "{0} No default directory found", SimpleWebServer.this);
-                        return null;
-                    } else {
-                        Files.createDirectories(webDir);
-                    }
-                    server.start();
-                    return null;
-                }
-            }).get();
-            notifyStarted();
-        } catch (InterruptedException x) {
-            warning(log, "{0} Interrupted", this);
-            notifyFailed(x);
-        } catch (CancellationException x) {
-            warning(log, "{0} Cancelled", this);
-            notifyFailed(x);
-        } catch (ExecutionException x) {
-            warning(log, "{0} Start error", x.getCause(), this);
-            notifyFailed(x.getCause());
-        } catch (Exception x) {
-            notifyFailed(x);
-        }
+    public void start() throws Exception {
+        super.start();
+        executor.submit(() -> {
+            if (webDir == null) {
+                warning("{0} No default directory found", SimpleWebServer.this);
+                return null;
+            } else {
+                Files.createDirectories(webDir);
+            }
+            server.start();
+            return null;
+        }).get();
     }
 
     @Override
-    protected void doStop() {
+    public void close() throws Exception {
         try {
-            executor.submit(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    server.stop(stopTimeout);
-                    return null;
-                }
+            executor.submit(() -> {
+                server.stop((int) shutdownTimeout);
+                return null;
             }).get();
-            notifyStopped();
-        } catch (InterruptedException x) {
-            warning(log, "{0} Interrupted", this);
-            notifyFailed(x);
-        } catch (CancellationException x) {
-            warning(log, "{0} Cancelled", this);
-            notifyFailed(x);
-        } catch (ExecutionException x) {
-            warning(log, "{0} Stop error", x.getCause(), this);
-            notifyFailed(x.getCause());
-        } catch (Exception x) {
-            notifyFailed(x);
+        } finally {
+            super.close();
         }
     }
 }

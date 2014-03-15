@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,37 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.silly;
+package org.marid.web;
 
-import org.marid.service.AbstractMaridService;
+import org.marid.service.AbstractMaridServiceParameters;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+
+import static java.util.Collections.singletonMap;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SillyTestService extends AbstractMaridService {
+public class AbstractWebServerParameters extends AbstractMaridServiceParameters {
 
-    public SillyTestService(Map params) {
-        super(params);
-    }
-
-    @Override
-    public String id() {
-        return "id0";
-    }
-
-    public int get(int value) {
-        return value;
-    }
-
-    @Override
-    protected void doStart() {
-        notifyStarted();
-    }
-
-    @Override
-    protected void doStop() {
-        notifyStopped();
-    }
+    public Map<String, Path> dirMap = singletonMap("default", Paths.get(System.getProperty("user.home"), "marid", "web"));
+    public Map<String, Pattern> vHostPatternMap = Collections.emptyMap();
+    public Map<String, String> vHostMap = Collections.emptyMap();
+    public List<String> defaultPages = Collections.emptyList();
 }

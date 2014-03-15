@@ -18,23 +18,57 @@
 
 package org.marid.service;
 
-import com.google.common.util.concurrent.Service;
+import org.marid.logging.LogSupport;
 
-import java.util.concurrent.Future;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadFactory;
+
+import static org.marid.service.MaridServices.SERVICES;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface MaridService extends Service, ThreadFactory {
+public interface MaridService extends LogSupport, ThreadFactory, AutoCloseable, MaridServiceMXBean {
 
     ThreadGroup threadGroup();
 
-    String id();
+    default void start() throws Exception {
+        SERVICES.computeIfAbsent(getClass(), c -> new ConcurrentLinkedQueue<>()).add(this);
+    }
 
-    String type();
+    @Override
+    default void close() throws Exception {
+    }
 
-    String name();
+    @Override
+    default boolean isRunning() {
+        return threadGroup().activeCount() > 0;
+    }
 
-    <T> Future<T> send(String method, Object... args);
+    @Override
+    default int getThreadCount() {
+        return threadGroup().activeCount();
+    }
+
+    @Override
+    default boolean isDaemons() {
+        return false;
+    }
+
+    @Override
+    default Thread newThread(Runnable r) {
+        final Thread thread = new Thread(threadGroup(), r, String.valueOf(r), getStackSize());
+        thread.setDaemon(isDaemons());
+        return thread;
+    }
+
+    @Override
+    default int getStackSize() {
+        return 0;
+    }
+
+    @Override
+    default String getName() {
+        return getClass().getSimpleName();
+    }
 }

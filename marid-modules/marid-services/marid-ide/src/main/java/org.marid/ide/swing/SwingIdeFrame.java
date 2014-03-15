@@ -73,20 +73,9 @@ public class SwingIdeFrame extends JFrame implements PrefSupport, LogSupport {
     }
 
     public void showLog() {
-        final Logger rootLogger = Logger.getGlobal().getParent();
-        if (rootLogger != null) {
-            for (final Handler handler : rootLogger.getHandlers()) {
-                if (handler instanceof SwingHandler) {
-                    ((SwingHandler) handler).show();
-                    return;
-                }
-            }
-            try {
-                final SwingHandler swingHandler = new SwingHandler();
-                rootLogger.addHandler(swingHandler);
-                swingHandler.show();
-            } catch (Exception x) {
-                warning("Unable to show log window", x);
+        for (final Handler handler : Logger.getGlobal().getParent().getHandlers()) {
+            if (handler instanceof SwingHandler) {
+                ((SwingHandler) handler).show();
             }
         }
     }

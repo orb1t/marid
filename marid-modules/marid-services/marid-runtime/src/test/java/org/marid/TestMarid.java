@@ -18,31 +18,22 @@
 
 package org.marid;
 
-import org.marid.service.MaridServiceProvider;
-import org.marid.test.TestUtils;
-import org.marid.web.TestWebServiceProvider;
+import org.marid.web.SimpleWebServer;
+import org.marid.web.SimpleWebServerParameters;
 
-import java.util.concurrent.Callable;
+import java.nio.file.Paths;
+import java.util.Collections;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TestMarid implements Callable<Void> {
-
-    private final String[] args;
-
-    public TestMarid(String... args) {
-        this.args = args;
-    }
-
-    @Override
-    public Void call() throws Exception {
-        Marid.main(args);
-        return null;
-    }
+public class TestMarid {
 
     public static void main(String... args) throws Exception {
-        TestUtils.callWithClassLoader(new TestMarid(args),
-                MaridServiceProvider.class, TestWebServiceProvider.class);
+        final SimpleWebServerParameters parameters = new SimpleWebServerParameters();
+        parameters.dirMap = Collections.singletonMap("default",
+                Paths.get(SimpleWebServer.class.getResource("site/index.html").toURI()).getParent());
+        final SimpleWebServer webServer = new SimpleWebServer(parameters);
+        webServer.start();
     }
 }

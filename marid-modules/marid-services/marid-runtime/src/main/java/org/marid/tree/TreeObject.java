@@ -18,9 +18,7 @@
 
 package org.marid.tree;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -36,7 +34,9 @@ public interface TreeObject {
 
     String name();
 
-    List<String> listPath();
+    default List<String> listPath() {
+        return Arrays.asList(arrayPath());
+    }
 
     String[] arrayPath();
 
@@ -44,17 +44,26 @@ public interface TreeObject {
 
     <T> T get(Class<T> type, String key);
 
-    <T> T get(Class<T> type, String key, T def);
+    default <T> T get(Class<T> type, String key, T def) {
+        final T value = get(type, key);
+        return value == null ? def : value;
+    }
 
-    Object getAt(String name);
+    default Object getAt(String name) {
+        return get(name);
+    }
 
     Object put(String name, Object value);
 
-    void putAt(String name, Object value);
+    default void putAt(String name, Object value) {
+        put(name, value);
+    }
 
     Set<String> keySet();
 
-    TreeObject object(String... path);
+    default TreeObject object(String... path) {
+        return object(Arrays.asList(path));
+    }
 
     TreeObject object(List<String> path);
 

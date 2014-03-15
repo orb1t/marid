@@ -49,7 +49,7 @@ import static org.marid.swing.MaridAction.MaridActionListener;
  */
 public class SwingIde {
 
-    static final Preferences SYSPREFS = PrefUtils.preferences("system");
+    public static final Preferences SYSPREFS = PrefUtils.preferences("system");
     static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
     public static SwingIdeFrame frame;
 
