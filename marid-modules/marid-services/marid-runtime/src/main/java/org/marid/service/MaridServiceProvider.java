@@ -18,12 +18,12 @@
 
 package org.marid.service;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface MaridServiceProvider {
 
-    List<? extends MaridService> getServices();
+    Set<Class<? extends MaridService>> getServices();
 }

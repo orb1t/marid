@@ -31,8 +31,8 @@ public class TestMarid {
 
     public static void main(String... args) throws Exception {
         final SimpleWebServerParameters parameters = new SimpleWebServerParameters();
-        parameters.dirMap = Collections.singletonMap("default",
-                Paths.get(SimpleWebServer.class.getResource("site/index.html").toURI()).getParent());
+        parameters.setDirMap(Collections.singletonMap("default",
+                Paths.get(SimpleWebServer.class.getResource("site/index.html").toURI()).getParent()));
         final SimpleWebServer webServer = new SimpleWebServer(parameters);
         webServer.start();
     }

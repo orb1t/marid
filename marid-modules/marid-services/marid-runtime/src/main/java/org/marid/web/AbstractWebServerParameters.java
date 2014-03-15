@@ -34,8 +34,40 @@ import static java.util.Collections.singletonMap;
  */
 public class AbstractWebServerParameters extends AbstractMaridServiceParameters {
 
-    public Map<String, Path> dirMap = singletonMap("default", Paths.get(System.getProperty("user.home"), "marid", "web"));
-    public Map<String, Pattern> vHostPatternMap = Collections.emptyMap();
-    public Map<String, String> vHostMap = Collections.emptyMap();
-    public List<String> defaultPages = Collections.emptyList();
+    Map<String, Path> dirMap = singletonMap("default", Paths.get(System.getProperty("user.home"), "marid", "web"));
+    Map<String, Pattern> vHostPatternMap = Collections.emptyMap();
+    Map<String, String> vHostMap = Collections.emptyMap();
+    List<String> defaultPages = Collections.emptyList();
+
+    public Map<String, Path> getDirMap() {
+        return dirMap;
+    }
+
+    public void setDirMap(Map<String, Path> dirMap) {
+        this.dirMap = dirMap;
+    }
+
+    public Map<String, Pattern> getvHostPatternMap() {
+        return vHostPatternMap;
+    }
+
+    public void setvHostPatternMap(Map<String, Pattern> vHostPatternMap) {
+        this.vHostPatternMap = vHostPatternMap;
+    }
+
+    public Map<String, String> getvHostMap() {
+        return vHostMap;
+    }
+
+    public void setvHostMap(Map<String, String> vHostMap) {
+        this.vHostMap = vHostMap;
+    }
+
+    public List<String> getDefaultPages() {
+        return defaultPages;
+    }
+
+    public void setDefaultPages(List<String> defaultPages) {
+        this.defaultPages = defaultPages;
+    }
 }

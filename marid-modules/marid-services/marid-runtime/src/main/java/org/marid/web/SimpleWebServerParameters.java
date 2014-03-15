@@ -31,17 +31,89 @@ import java.util.function.Supplier;
  */
 public class SimpleWebServerParameters extends AbstractWebServerParameters {
 
-    public int backlog = 0;
-    public HttpServerProvider httpServerProvider = HttpServerProvider.provider();
-    public InetSocketAddress address = new InetSocketAddress(8080);
-    public int webThreadPoolInitSize = 0;
-    public int webThreadPoolMaxSize = 16;
-    public long webThreadPoolKeepAliveTime = TimeUnit.MINUTES.toMillis(1L);
-    public Supplier<BlockingQueue<Runnable>> webBlockingQueueSupplier = SynchronousQueue::new;
-    public Function<SimpleWebServer, ThreadFactory> webPoolThreadFactory = s -> r -> new Thread(s.webPoolThreadGroup, r, r.toString(), threadStackSize);
-    public Function<SimpleWebServer, RejectedExecutionHandler> webRejectedExecutionHandler = s -> new ThreadPoolExecutor.CallerRunsPolicy();
+    int backlog = 0;
+    HttpServerProvider httpServerProvider = HttpServerProvider.provider();
+    InetSocketAddress address = new InetSocketAddress(8080);
+    int webThreadPoolInitSize = 0;
+    int webThreadPoolMaxSize = 16;
+    long webThreadPoolKeepAliveTime = TimeUnit.MINUTES.toMillis(1L);
+    Supplier<BlockingQueue<Runnable>> webBlockingQueueSupplier = SynchronousQueue::new;
+    Function<SimpleWebServer, ThreadFactory> webPoolThreadFactory = s -> r -> new Thread(s.webPoolThreadGroup, r, r.toString(), getThreadStackSize());
+    Function<SimpleWebServer, RejectedExecutionHandler> webRejectedExecutionHandler = s -> new ThreadPoolExecutor.CallerRunsPolicy();
 
     public SimpleWebServerParameters() {
         defaultPages = Arrays.asList("index.groovy", "index.html", "index.svg");
+    }
+
+    public int getBacklog() {
+        return backlog;
+    }
+
+    public void setBacklog(int backlog) {
+        this.backlog = backlog;
+    }
+
+    public HttpServerProvider getHttpServerProvider() {
+        return httpServerProvider;
+    }
+
+    public void setHttpServerProvider(HttpServerProvider httpServerProvider) {
+        this.httpServerProvider = httpServerProvider;
+    }
+
+    public InetSocketAddress getAddress() {
+        return address;
+    }
+
+    public void setAddress(InetSocketAddress address) {
+        this.address = address;
+    }
+
+    public int getWebThreadPoolInitSize() {
+        return webThreadPoolInitSize;
+    }
+
+    public void setWebThreadPoolInitSize(int webThreadPoolInitSize) {
+        this.webThreadPoolInitSize = webThreadPoolInitSize;
+    }
+
+    public int getWebThreadPoolMaxSize() {
+        return webThreadPoolMaxSize;
+    }
+
+    public void setWebThreadPoolMaxSize(int webThreadPoolMaxSize) {
+        this.webThreadPoolMaxSize = webThreadPoolMaxSize;
+    }
+
+    public long getWebThreadPoolKeepAliveTime() {
+        return webThreadPoolKeepAliveTime;
+    }
+
+    public void setWebThreadPoolKeepAliveTime(long webThreadPoolKeepAliveTime) {
+        this.webThreadPoolKeepAliveTime = webThreadPoolKeepAliveTime;
+    }
+
+    public Supplier<BlockingQueue<Runnable>> getWebBlockingQueueSupplier() {
+        return webBlockingQueueSupplier;
+    }
+
+    public void setWebBlockingQueueSupplier(Supplier<BlockingQueue<Runnable>> webBlockingQueueSupplier) {
+        this.webBlockingQueueSupplier = webBlockingQueueSupplier;
+    }
+
+    public Function<SimpleWebServer, ThreadFactory> getWebPoolThreadFactory() {
+        return webPoolThreadFactory;
+    }
+
+    public void setWebPoolThreadFactory(Function<SimpleWebServer, ThreadFactory> webPoolThreadFactory) {
+        this.webPoolThreadFactory = webPoolThreadFactory;
+    }
+
+    public Function<SimpleWebServer, RejectedExecutionHandler> getWebRejectedExecutionHandler() {
+        return webRejectedExecutionHandler;
+    }
+
+    public void setWebRejectedExecutionHandler(Function<SimpleWebServer, RejectedExecutionHandler> webRejectedExecutionHandler) {
+        this.webRejectedExecutionHandler = webRejectedExecutionHandler;
     }
 }
