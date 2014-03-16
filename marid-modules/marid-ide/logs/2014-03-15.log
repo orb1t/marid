@@ -1,0 +1,49 @@
+<record ln="org.marid.ide.MaridIde" l="INFO" timestamp="2014-03-15T07:16:59.085Z" th="1" msg="Starting Marid {0} on {1} {2}">
+    <ps>
+        <string>0.7-SNAPSHOT</string>
+        <string>Java HotSpot(TM) 64-Bit Server VM</string>
+        <string>25.0-b70</string>
+    </ps>
+</record>
+<record ln="org.marid.ide.swing.windows.WrapperRunnerWindow" l="INFO" timestamp="2014-03-15T07:17:03.908Z" th="24" msg="Copied {0} to {1}">
+    <ps>
+        <string>/marid-wrapper/lib/commons-cli-1.2.jar</string>
+        <string>/home/dm/marid/marid-wrapper/lib/commons-cli-1.2.jar</string>
+    </ps>
+</record>
+<record ln="org.marid.ide.swing.windows.WrapperRunnerWindow" l="INFO" timestamp="2014-03-15T07:17:03.909Z" th="24" msg="Copied {0} to {1}">
+    <ps>
+        <string>/marid-wrapper/lib/marid-lib-0.7-SNAPSHOT.jar</string>
+        <string>/home/dm/marid/marid-wrapper/lib/marid-lib-0.7-SNAPSHOT.jar</string>
+    </ps>
+</record>
+<record ln="org.marid.ide.swing.windows.WrapperRunnerWindow" l="INFO" timestamp="2014-03-15T07:17:03.910Z" th="24" msg="Copied {0} to {1}">
+    <ps>
+        <string>/marid-wrapper/lib/</string>
+        <string>/home/dm/marid/marid-wrapper/lib</string>
+    </ps>
+</record>
+<record ln="org.marid.ide.swing.windows.WrapperRunnerWindow" l="INFO" timestamp="2014-03-15T07:17:03.911Z" th="24" msg="Copied {0} to {1}">
+    <ps>
+        <string>/marid-wrapper/marid-wrapper-0.7-SNAPSHOT.jar</string>
+        <string>/home/dm/marid/marid-wrapper/marid-wrapper-0.7-SNAPSHOT.jar</string>
+    </ps>
+</record>
+<record ln="org.marid.ide.swing.windows.WrapperRunnerWindow" l="INFO" timestamp="2014-03-15T07:17:03.911Z" th="24" msg="Copied {0} to {1}">
+    <ps>
+        <string>/marid-wrapper/</string>
+        <string>/home/dm/marid/marid-wrapper</string>
+    </ps>
+</record>
+<record ln="org.marid.ide.swing.windows.WrapperRunnerWindow" l="INFO" timestamp="2014-03-15T07:17:03.912Z" th="24" msg="Copied {0} to {1}">
+    <ps>
+        <string>/</string>
+        <string>/home/dm/marid</string>
+    </ps>
+</record>
+<record ln="org.marid.ide.swing.windows.WrapperRunnerWindow" l="INFO" timestamp="2014-03-15T07:17:03.920Z" th="24" msg="ProcessBuilder will run with: {0}">
+    <ps>
+        <string>/home/dm/bin/jdk/jre/bin/java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -jar marid-wrapper-0.7-SNAPSHOT.jar -b localhost:7556 start</string>
+    </ps>
+</record>
+

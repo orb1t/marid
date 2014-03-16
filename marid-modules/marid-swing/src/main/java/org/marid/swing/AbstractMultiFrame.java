@@ -20,24 +20,19 @@ package org.marid.swing;
 
 import images.Images;
 import org.marid.logging.LogSupport;
-import org.marid.pref.PrefSupport;
 import org.marid.swing.forms.FrameConfigurationDialog;
 import org.marid.swing.menu.MenuAction;
 import org.marid.swing.menu.MenuActionList;
 import org.marid.swing.menu.MenuActionTreeElement;
 
 import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
-import java.util.Arrays;
 import java.util.function.Consumer;
-import java.util.prefs.Preferences;
 
 import static java.awt.BorderLayout.NORTH;
 import static javax.swing.SwingConstants.HORIZONTAL;
@@ -76,7 +71,7 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
         final JMenu widgetsMenu = new JMenu(s("Widgets"));
         final ActionListener widgetsListener = e -> {
             try {
-                final InternalFrame[] frames = desktop.getAllFrames();
+                final JInternalFrame[] frames = desktop.getAllFrames();
                 switch (e.getActionCommand()) {
                     case "cascade":
                         for (int i = 0; i < frames.length; i++) {
@@ -139,7 +134,7 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
         widgetListMenu.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-                for (final InternalFrame frame : desktop.getAllFrames()) {
+                for (final JInternalFrame frame : desktop.getAllFrames()) {
                     final ActionListener frameActionListener = event -> {
                         try {
                             switch (event.getActionCommand()) {
@@ -223,9 +218,6 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
                 }
                 putPref("tPosition", getToolbarPosition());
                 putPref("tOrientation", toolBar.getOrientation());
-                for (final InternalFrame frame : desktop.getAllFrames()) {
-                    frame.putPref("location", frame.getLocation());
-                }
                 break;
             case WindowEvent.WINDOW_OPENED:
                 break;
@@ -256,81 +248,10 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
         warning("No such frame: {0}", type.getSimpleName());
     }
 
-    protected class MultiFrameDesktop extends JDesktopPane {
-
-        protected MultiFrameDesktop() {
-            setDesktopManager(new MultiFrameDesktopManager());
-        }
-
-        @Override
-        public MultiFrameDesktopManager getDesktopManager() {
-            return (MultiFrameDesktopManager) super.getDesktopManager();
-        }
-
-        @Override
-        public InternalFrame[] getAllFrames() {
-            final JInternalFrame[] frames = super.getAllFrames();
-            return Arrays.copyOf(frames, frames.length, InternalFrame[].class);
-        }
-
-        @Override
-        public InternalFrame[] getAllFramesInLayer(int layer) {
-            final JInternalFrame[] frames = super.getAllFramesInLayer(layer);
-            return Arrays.copyOf(frames, frames.length, InternalFrame[].class);
-        }
-
-        protected class MultiFrameDesktopManager extends DefaultDesktopManager {
-
-        }
-    }
-
-    protected class InternalFrame extends JInternalFrame implements PrefSupport {
+    protected class InternalFrame extends AbstractInternalFrame<AbstractMultiFrame> {
 
         protected InternalFrame(String name, String title, boolean closable) {
-            super(s(title), true, closable, true, true);
-            setName(name);
-            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            setPreferredSize(getPref("size", getInitialSize()));
-            addInternalFrameListener(new InternalFrameAdapter() {
-                @Override
-                public void internalFrameClosed(InternalFrameEvent e) {
-                    try {
-                        putPref("maximized", isMaximum());
-                        if (!isMaximum()) {
-                            putPref("location", getLocation());
-                            putPref("size", getSize());
-                        }
-                    } finally {
-                        removeInternalFrameListener(this);
-                    }
-                }
-            });
-        }
-
-        @Override
-        public void show() {
-            try {
-                setMaximum(getPref("maximized", isMaximum()));
-            } catch (PropertyVetoException x) {
-                throw new IllegalStateException(x);
-            }
-            if (!isMaximum()) {
-                setLocation(getPref("location", getInitialLocation()));
-            }
-            super.show();
-        }
-
-        @Override
-        public Preferences preferences() {
-            return AbstractMultiFrame.this.preferences().node("frames").node(getName());
-        }
-
-        protected Dimension getInitialSize() {
-            return new Dimension(500, 400);
-        }
-
-        protected Point getInitialLocation() {
-            return new Point(0, 0);
+            super(AbstractMultiFrame.this, name, title, closable);
         }
     }
 

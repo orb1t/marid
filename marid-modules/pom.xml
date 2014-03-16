@@ -28,13 +28,13 @@
 
     <artifactId>marid-modules</artifactId>
     <packaging>pom</packaging>
-    <name>marid-modules</name>
 
     <modules>
         <module>marid-lib</module>
         <module>marid-wrapper</module>
-        <module>marid-services</module>
         <module>marid-swing</module>
+        <module>marid-runtime</module>
+        <module>marid-ide</module>
     </modules>
 
     <dependencies>

@@ -1,0 +1,21 @@
+<record ln="org.marid.service.MaridServices" l="INFO" timestamp="2014-03-15T11:28:35.756Z" th="1" msg="{0} Added">
+    <ps>
+        <string>id0:silly</string>
+    </ps>
+</record>
+<record ln="org.marid.service.silly.SillyTestService" l="INFO" timestamp="2014-03-15T11:28:35.858Z" th="1" msg="{0} Starting">
+    <ps>
+        <string>id0:silly</string>
+    </ps>
+</record>
+<record ln="org.marid.service.silly.SillyTestService" l="INFO" timestamp="2014-03-15T11:28:35.859Z" th="1" msg="{0} Running">
+    <ps>
+        <string>id0:silly</string>
+    </ps>
+</record>
+<record ln="org.marid.service.silly.SillyTestService" l="INFO" timestamp="2014-03-15T11:28:35.864Z" th="1" msg="{0} Terminated">
+    <ps>
+        <string>id0:silly</string>
+    </ps>
+</record>
+
