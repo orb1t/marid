@@ -32,14 +32,10 @@ public class SingletonInternalFrame<F extends AbstractMultiFrame> extends Intern
         addInternalFrameListener(new InternalFrameAdapter() {
             @Override
             public void internalFrameClosed(InternalFrameEvent e) {
-                try {
-                    putPref("maximized", isMaximum());
-                    if (!isMaximum()) {
-                        putPref("location", getLocation());
-                        putPref("size", getSize());
-                    }
-                } finally {
-                    removeInternalFrameListener(this);
+                putPref("maximized", isMaximum());
+                if (!isMaximum()) {
+                    putPref("location", getLocation());
+                    putPref("size", getSize());
                 }
             }
         });

@@ -31,11 +31,7 @@ public class AbstractInternalFrame<F extends AbstractMultiFrame> extends Interna
         addInternalFrameListener(new InternalFrameAdapter() {
             @Override
             public void internalFrameClosed(InternalFrameEvent e) {
-                try {
-                    putPref("size", getSize());
-                } finally {
-                    removeInternalFrameListener(this);
-                }
+                putPref("size", getSize());
             }
         });
     }
@@ -43,6 +39,6 @@ public class AbstractInternalFrame<F extends AbstractMultiFrame> extends Interna
     @Override
     public void pack() {
         super.pack();
-        setSize(getPref("size", getPreferredSize()));
+        setSize(getPref("size", getInitialSize()));
     }
 }

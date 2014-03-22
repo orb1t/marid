@@ -45,10 +45,10 @@ public class ServconWindow extends AbstractMultiFrame {
     public ServconWindow() {
         super("Service configurer");
         services.setCellRenderer(new ServiceCellRenderer());
-        remove(getDesktop());
+        centerPanel.remove(getDesktop());
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(services), getDesktop());
         splitPane.setDividerLocation(getPref("divider", 200));
-        add(splitPane);
+        centerPanel.add(splitPane);
         pack();
     }
 
