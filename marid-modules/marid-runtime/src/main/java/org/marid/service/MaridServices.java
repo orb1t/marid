@@ -99,7 +99,7 @@ public class MaridServices {
     }
 
     public static Set<Class<? extends MaridService>> serviceClasses() {
-        final Set<Class<? extends MaridService>> classes = new LinkedHashSet<>();
+        final Set<Class<? extends MaridService>> classes = new HashSet<>();
         try {
             for (final MaridServiceProvider provider : SERVICE_PROVIDERS) {
                 try {

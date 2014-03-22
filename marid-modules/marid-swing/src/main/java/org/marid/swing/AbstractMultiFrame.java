@@ -21,7 +21,6 @@ package org.marid.swing;
 import images.Images;
 import org.marid.logging.LogSupport;
 import org.marid.swing.forms.FrameConfigurationDialog;
-import org.marid.swing.menu.MenuAction;
 import org.marid.swing.menu.MenuActionList;
 import org.marid.swing.menu.MenuActionTreeElement;
 
@@ -32,12 +31,12 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
-import java.util.function.Consumer;
+import java.lang.reflect.ParameterizedType;
+import java.util.function.Supplier;
 
 import static java.awt.BorderLayout.NORTH;
 import static javax.swing.SwingConstants.HORIZONTAL;
 import static org.marid.l10n.L10n.s;
-import static org.marid.swing.MaridAction.MaridActionListener;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -46,7 +45,7 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
 
     protected final JPanel centerPanel = new JPanel(new BorderLayout());
     protected final JToolBar toolBar;
-    protected final MultiFrameDesktop desktop;
+    private final MultiFrameDesktop desktop;
 
     public AbstractMultiFrame(String title) {
         super(title);
@@ -58,6 +57,10 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
         toolBar.setBorderPainted(true);
         getJMenuBar().add(widgetsMenu());
         getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
+    }
+
+    public MultiFrameDesktop getDesktop() {
+        return desktop;
     }
 
     private JMenuItem menuItem(String title, String icon, String cmd, ActionListener actionListener) {
@@ -180,14 +183,6 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
 
     protected abstract void fillActions(MenuActionList actionList);
 
-    protected ActionPutter action(String group, String name, String... path) {
-        return new ActionPutter(group, name, path);
-    }
-
-    protected ActionPutter action(String group, String name, String icon, boolean toolbar, String... path) {
-        return new ActionPutter(group, name, path).setIcon(icon).setToolbar(toolbar);
-    }
-
     @Override
     public void pack() {
         final MenuActionList actions = new MenuActionList();
@@ -224,108 +219,50 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
         }
     }
 
-    public void showFrame(Class<? extends InternalFrame> type) {
+    protected <F extends SingletonInternalFrame> void showSingletonFrame(Supplier<F> frameSupplier) {
+        Class<?> type = null;
+        for (final java.lang.reflect.Type t : frameSupplier.getClass().getGenericInterfaces()) {
+            if (t instanceof ParameterizedType && t.getTypeName().equals(Supplier.class.getName())) {
+                final ParameterizedType pt = (ParameterizedType) t;
+                if (pt.getActualTypeArguments().length == 1 && pt.getActualTypeArguments()[0] instanceof Class<?>) {
+                    type = (Class<?>) pt.getActualTypeArguments()[0];
+                    break;
+                }
+            }
+        }
+        if (type == null) {
+            type = frameSupplier.get().getClass();
+        }
         for (final JInternalFrame frame : desktop.getAllFrames()) {
-            if (type == frame.getClass()) {
+            if (frame.getClass() == type) {
                 frame.show();
                 return;
             }
         }
-        for (final Class<?> frameClass : getClass().getClasses()) {
-            if (type == frameClass) {
-                try {
-                    final InternalFrame frame = frameClass.isMemberClass()
-                            ? type.getConstructor(getClass()).newInstance(this)
-                            : type.newInstance();
-                    desktop.add(frame);
-                    frame.show();
-                } catch (Exception x) {
-                    warning("{0} creating error", x, frameClass.getSimpleName());
-                }
-                return;
-            }
-        }
-        warning("No such frame: {0}", type.getSimpleName());
+        createAndShowFrame(frameSupplier);
     }
 
-    protected class InternalFrame extends AbstractInternalFrame<AbstractMultiFrame> {
+    protected <F extends AbstractInternalFrame> void showFrame(Supplier<F> frameSupplier) {
+        createAndShowFrame(frameSupplier);
+    }
 
-        protected InternalFrame(String name, String title, boolean closable) {
-            super(AbstractMultiFrame.this, name, title, closable);
+    protected void createAndShowFrame(Supplier<? extends JInternalFrame> frameSupplier) {
+        final JInternalFrame frame = frameSupplier.get();
+        desktop.add(frame);
+        frame.show();
+    }
+
+    protected class IntFrame extends AbstractInternalFrame<AbstractMultiFrame> {
+
+        protected IntFrame(String title) {
+            super(AbstractMultiFrame.this, title);
         }
     }
 
-    protected class ActionPutter {
+    protected class SingletonIntFrame extends SingletonInternalFrame<AbstractMultiFrame> {
 
-        private final String name;
-        private final String[] path;
-        private final String group;
-        private MaridActionListener actionListener;
-        private String icon;
-        private String shortDescription;
-        private String longDescription;
-        private String key;
-        private Consumer<Action> actionInitializer;
-        private Boolean toolbar;
-
-        private ActionPutter(String group, String name, String... path) {
-            this.group = group;
-            this.name = name;
-            this.path = path;
-        }
-
-        public ActionPutter setIcon(String icon) {
-            this.icon = icon;
-            return this;
-        }
-
-        public ActionPutter setListener(MaridActionListener listener) {
-            this.actionListener = listener;
-            return this;
-        }
-
-        public ActionPutter setShortDescription(String shortDescription) {
-            this.shortDescription = shortDescription;
-            return this;
-        }
-
-        public ActionPutter setLongDescription(String longDescription) {
-            this.longDescription = longDescription;
-            return this;
-        }
-
-        public ActionPutter setKey(String key) {
-            this.key = key;
-            return this;
-        }
-
-        public ActionPutter setInitializer(Consumer<Action> actionInitializer) {
-            this.actionInitializer = actionInitializer;
-            return this;
-        }
-
-        public ActionPutter setToolbar(boolean toolbar) {
-            this.toolbar = toolbar;
-            return this;
-        }
-
-        public Action put(MenuActionList actionList) {
-            final Action action;
-            if (actionListener == null) {
-                action = null;
-            } else {
-                action = new MaridAction(name, icon, actionListener,
-                        Action.SHORT_DESCRIPTION, shortDescription,
-                        Action.LONG_DESCRIPTION, longDescription,
-                        Action.ACCELERATOR_KEY, key == null ? null : KeyStroke.getKeyStroke(key));
-            }
-            final MenuAction menuAction = new MenuAction(name, group, path, action);
-            menuAction.properties.put("toolbar", toolbar);
-            actionList.add(menuAction);
-            if (actionInitializer != null) {
-                actionInitializer.accept(action);
-            }
-            return action;
+        protected SingletonIntFrame(String title) {
+            super(AbstractMultiFrame.this, title);
         }
     }
 }

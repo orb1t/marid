@@ -57,28 +57,28 @@ public class WrapperRunnerWindow extends AbstractMultiFrame implements WrapperRu
 
     @Override
     protected void fillActions(MenuActionList actionList) {
-        action("mainMenu", "Wrapper").put(actionList);
-        stopAction = action("control", "Stop", "stop", true, "Wrapper")
+        actionList.add("mainMenu", "Wrapper");
+        stopAction = actionList.add(true, "control", "Stop", "Wrapper")
+                .setIcon("stop")
                 .setListener((a, ev) -> sendShutdownSequence(bindAddress.get(), "marid-wrapper"))
-                .setInitializer(a -> a.setEnabled(false))
-                .put(actionList);
-        action("control", "Start", "start", true, "Wrapper")
+                .setInitializer(a -> a.setEnabled(false));
+        actionList.add(true, "control", "Start", "Wrapper")
+                .setIcon("start")
                 .setListener((a, ev) -> {
-                    showFrame(Output.class);
+                    showSingletonFrame(Output::new);
                     a.setEnabled(false);
                     stopAction.setEnabled(true);
-                })
-                .put(actionList);
+                });
     }
 
-    public class Output extends InternalFrame {
+    public class Output extends SingletonIntFrame {
 
         private final ConsoleArea outArea = new ConsoleArea();
         private final ConsoleArea errArea = new ConsoleArea();
         private ProcessWorker worker;
 
         public Output() {
-            super("wrapper", "Wrapper", false);
+            super("Wrapper");
             final JTabbedPane pane = new JTabbedPane();
             add(pane);
             pane.addTab(s("Output"), outArea.wrap());

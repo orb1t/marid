@@ -74,6 +74,20 @@ public class MenuActionList extends ArrayList<MenuAction> {
         });
     }
 
+    public ActionBuilder add(boolean toolbar, String group, String name, String... path) {
+        final ActionBuilder actionBuilder = new ActionBuilder(name);
+        final MenuAction menuAction = new MenuAction(name, group, path, actionBuilder);
+        if (toolbar) {
+            menuAction.properties.put("toolbar", true);
+        }
+        add(menuAction);
+        return actionBuilder;
+    }
+
+    public ActionBuilder add(String group, String name, String... path) {
+        return add(false, group, name, path);
+    }
+
     private void fillMenuActionTreeElement(MenuActionTreeElement element) {
         final String[] path = element.getChildPath();
         for (final MenuAction action : this) {

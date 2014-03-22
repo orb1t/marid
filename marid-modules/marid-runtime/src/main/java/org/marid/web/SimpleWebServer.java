@@ -24,6 +24,7 @@ import com.sun.net.httpserver.HttpServer;
 import groovy.lang.Closure;
 import groovy.lang.GroovyCodeSource;
 import org.marid.groovy.GroovyRuntime;
+import org.marid.service.ServiceDescriptor;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -45,6 +46,7 @@ import static java.net.HttpURLConnection.*;
 /**
  * @author Dmitry Ovchinnikov
  */
+@ServiceDescriptor(icon = "services/web.png", name = "Simple web server", description = "Simple threaded web server")
 public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
 
     public final ThreadGroup webPoolThreadGroup = new ThreadGroup(threadPoolGroup, "webPool");

@@ -20,19 +20,24 @@ package org.marid.swing;
 
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+import java.beans.PropertyVetoException;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class AbstractInternalFrame<F extends AbstractMultiFrame> extends InternalFrame<F> {
+public class SingletonInternalFrame<F extends AbstractMultiFrame> extends InternalFrame<F> {
 
-    protected AbstractInternalFrame(F owner, String title) {
-        super(owner, title, true);
+    protected SingletonInternalFrame(F owner, String title) {
+        super(owner, title, false);
         addInternalFrameListener(new InternalFrameAdapter() {
             @Override
             public void internalFrameClosed(InternalFrameEvent e) {
                 try {
-                    putPref("size", getSize());
+                    putPref("maximized", isMaximum());
+                    if (!isMaximum()) {
+                        putPref("location", getLocation());
+                        putPref("size", getSize());
+                    }
                 } finally {
                     removeInternalFrameListener(this);
                 }
@@ -43,6 +48,13 @@ public class AbstractInternalFrame<F extends AbstractMultiFrame> extends Interna
     @Override
     public void pack() {
         super.pack();
-        setSize(getPref("size", getPreferredSize()));
+        try {
+            setMaximum(getPref("maximized", isMaximum()));
+        } catch (PropertyVetoException x) {
+            throw new IllegalStateException(x);
+        }
+        if (!isMaximum()) {
+            setLocation(getPref("location", getInitialLocation()));
+        }
     }
 }

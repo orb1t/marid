@@ -1,5 +1,3 @@
-import org.marid.ide.swing.wrapper.WrapperRunnerWindow
-
 /*
  * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
@@ -18,7 +16,25 @@ import org.marid.ide.swing.wrapper.WrapperRunnerWindow
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-[
-        [[], "mainMenu", "Deploy"],
-        [["Deploy"], "main", "Wrapper", null, {a, e -> WrapperRunnerWindow.show()}]
-]
+package org.marid.service;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * @author Dmitry Ovchinnikov.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+public @interface ServiceDescriptor {
+
+    String name() default "";
+
+    String description() default "";
+
+    String descriptionResource() default "";
+
+    String icon() default "";
+}

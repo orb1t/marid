@@ -58,7 +58,7 @@ public class SwingIde {
         final MenuActionList menuActions = new MenuActionList();
         try {
             final ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            for (final Enumeration<URL> e = cl.getResources("Menu.groovy"); e.hasMoreElements();) {
+            for (final Enumeration<URL> e = cl.getResources("menu/Menu.groovy"); e.hasMoreElements();) {
                 final URL url = e.nextElement();
                 try {
                     final List list = (List) GroovyRuntime.SHELL.evaluate(new GroovyCodeSource(url));

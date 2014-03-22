@@ -16,33 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing;
+package org.marid.ide.swing.servcon;
 
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
+import org.marid.swing.AbstractInternalFrame;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class AbstractInternalFrame<F extends AbstractMultiFrame> extends InternalFrame<F> {
+public class ServconFrame extends AbstractInternalFrame<ServconWindow> {
 
-    protected AbstractInternalFrame(F owner, String title) {
-        super(owner, title, true);
-        addInternalFrameListener(new InternalFrameAdapter() {
-            @Override
-            public void internalFrameClosed(InternalFrameEvent e) {
-                try {
-                    putPref("size", getSize());
-                } finally {
-                    removeInternalFrameListener(this);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void pack() {
-        super.pack();
-        setSize(getPref("size", getPreferredSize()));
+    public ServconFrame(ServconWindow owner) {
+        super(owner, "Service configuration");
+        pack();
     }
 }
