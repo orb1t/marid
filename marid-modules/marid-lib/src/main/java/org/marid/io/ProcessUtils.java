@@ -18,12 +18,37 @@
 
 package org.marid.io;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.TimeoutException;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class ProcessUtils {
+
+    private static final ClassValue<Field> PID_FIELDS = new ClassValue<Field>() {
+        @Override
+        protected Field computeValue(Class<?> type) {
+            try {
+                for (Class<?> c = type; c != null; c = c.getSuperclass()) {
+                    final Field field;
+                    try {
+                        field = c.getDeclaredField("pid");
+                        if (field.getType() != int.class) {
+                            continue;
+                        }
+                    } catch (NoSuchFieldException x) {
+                        continue;
+                    }
+                    field.setAccessible(true);
+                    return field;
+                }
+            } catch (Exception x) {
+                return null;
+            }
+            return null;
+        }
+    };
 
     public static int joinProcess(Process process, long timeout) throws InterruptedException, TimeoutException {
         final long startTime = System.currentTimeMillis();
@@ -35,5 +60,17 @@ public class ProcessUtils {
             }
         } while (System.currentTimeMillis() - startTime <= timeout);
         throw new TimeoutException();
+    }
+
+    public static int getPid(Process process) {
+        final Field field = PID_FIELDS.get(process.getClass());
+        if (field != null) {
+            try {
+                return (int) field.get(process);
+            } catch (ReflectiveOperationException x) {
+                throw new IllegalStateException(x);
+            }
+        }
+        return -1;
     }
 }

@@ -20,20 +20,30 @@ package org.marid.swing;
 
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 public class AbstractInternalFrame<F extends AbstractMultiFrame> extends InternalFrame<F> {
 
+    private static final Map<AbstractMultiFrame, Integer> COUNTER_MAP = new WeakHashMap<>();
+
     protected AbstractInternalFrame(F owner, String title) {
-        super(owner, title, true);
+        super(owner, title(owner, title), true);
         addInternalFrameListener(new InternalFrameAdapter() {
             @Override
             public void internalFrameClosed(InternalFrameEvent e) {
                 putPref("size", getSize());
             }
         });
+    }
+
+    private static String title(AbstractMultiFrame owner, String title) {
+        final int n = COUNTER_MAP.computeIfAbsent(owner, f -> 0) + 1;
+        COUNTER_MAP.put(owner, n);
+        return title + " " + n;
     }
 
     @Override

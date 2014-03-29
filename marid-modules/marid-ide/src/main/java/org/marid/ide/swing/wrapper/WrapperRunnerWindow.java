@@ -18,6 +18,7 @@
 
 package org.marid.ide.swing.wrapper;
 
+import org.marid.io.ProcessUtils;
 import org.marid.nio.FileUtils;
 import org.marid.swing.AbstractMultiFrame;
 import org.marid.swing.control.ConsoleArea;
@@ -28,20 +29,20 @@ import org.marid.wrapper.Wrapper;
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
-import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static javax.swing.JOptionPane.*;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
 import static org.marid.net.UdpShutdownThread.sendShutdownSequence;
+import static org.marid.swing.util.MessageType.INFO;
+import static org.marid.swing.util.MessageType.WARNING;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -106,17 +107,15 @@ public class WrapperRunnerWindow extends AbstractMultiFrame implements WrapperRu
             }
         }
 
-        @Override
-        public void show() {
-            super.show();
-            final Future<ProcessBuilder> zipResult = newSingleThreadExecutor().submit(() -> {
+        private ProcessBuilder createProcessBuilder() {
+            try {
                 final File dir = targetDirectory.get();
                 if (!checkTargetDirectory(dir)) {
-                    return null;
+                    throw new IllegalStateException("Target directory will not be created");
                 }
                 if (!dir.mkdirs()) {
                     warning("Unable to create directory: {0}", dir);
-                    return null;
+                    throw new IllegalStateException("Unable to create directory");
                 }
                 final ArrayList<String> args = new ArrayList<>();
                 args.add(jvmPath.get());
@@ -129,43 +128,46 @@ public class WrapperRunnerWindow extends AbstractMultiFrame implements WrapperRu
                 args.add("start");
                 info("ProcessBuilder will run with: {0}", String.join(" ", args));
                 return new ProcessBuilder(args).directory(dir);
-            });
-            new Timer(100, e -> {
-                if (worker == null) {
-                    if (zipResult.isDone()) {
-                        try {
-                            final ProcessBuilder processBuilder = zipResult.get();
-                            worker = new ProcessWorker(processBuilder, 10_000L) {
-                                @Override
-                                protected void process(List<ProcessLine> chunks) {
-                                    for (final ProcessLine processLine : chunks) {
-                                        (processLine.error ? errArea : outArea).println(processLine.line);
-                                    }
-                                    if (!errorQueue.isEmpty()) {
-                                        for (final Iterator<Exception> i = errorQueue.iterator(); i.hasNext(); ) {
-                                            warning("Process error", i.next());
-                                            i.remove();
-                                        }
-                                    }
-                                }
-                            };
-                            worker.execute();
-                        } catch (Exception x) {
-                            ((Timer) e.getSource()).stop();
-                            final Throwable ex = x instanceof ExecutionException ? x.getCause() : x;
-                            warning("Unable to extract ZIP archive", ex);
-                            showMessageDialog(this, m("Unable to extract ZIP archive: {0}", ex), s("Extract result"), WARNING_MESSAGE);
-                        }
+            } catch (IllegalStateException x) {
+                throw x;
+            } catch (Exception x) {
+                warning("Unable to get process builder", x);
+                throw new IllegalStateException(x);
+            }
+        }
+
+        @Override
+        public void show() {
+            super.show();
+            final ProcessBuilder processBuilder = createProcessBuilder();
+            worker = new ProcessWorker(processBuilder, 10_000L) {
+                @Override
+                protected Process newProcess() throws IOException {
+                    final Process process = super.newProcess();
+                    final int pid = ProcessUtils.getPid(process);
+                    if (pid >= 0) {
+                        EventQueue.invokeLater(() -> setTitle(getTitle() + ": " + ProcessUtils.getPid(process)));
                     }
-                } else if (worker.isDone()) {
+                    return process;
+                }
+
+                @Override
+                protected void process(List<ProcessLine> chunks) {
+                    for (final ProcessLine processLine : chunks) {
+                        (processLine.error ? errArea : outArea).println(processLine.line);
+                    }
+                }
+            };
+            worker.execute();
+            new Timer(100, e -> {
+                if (worker.isDone()) {
                     ((Timer) e.getSource()).stop();
                     stopAction.setEnabled(false);
                     try {
-                        showMessageDialog(this, m("Process was terminated with exit code {0}", worker.get()), s("Process result"), INFORMATION_MESSAGE);
+                        showMessage(INFO, "Process result", "Process was terminated with exit code {0}", worker.get());
                     } catch (Exception x) {
-                        final Throwable ex = x instanceof ExecutionException ? x.getCause() : x;
-                        warning("Process consume error", ex);
-                        showMessageDialog(this, m("Process was terminated with error {0}", ex), s("Process result"), WARNING_MESSAGE);
+                        warning("Process consume error", x);
+                        showMessage(WARNING, "Process result", "Process was terminated with error", x);
                     }
                 }
             }).start();

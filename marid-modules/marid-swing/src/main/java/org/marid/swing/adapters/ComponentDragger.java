@@ -16,25 +16,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.swing.adapters;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface ServiceDescriptor {
+public class ComponentDragger implements MouseMotionListener {
 
-    String name() default "";
+    private final Component target;
+    private int cx, cy;
+    private int x, y;
 
-    String description() default "";
+    public ComponentDragger(Component target) {
+        this.target = target;
+    }
 
-    String descriptionResource() default "";
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        target.setLocation(cx + e.getXOnScreen() - x, cy + e.getYOnScreen() - y);
+        target.getParent().revalidate();
+    }
 
-    String icon() default "services/service.png";
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        x = e.getXOnScreen();
+        y = e.getYOnScreen();
+        cx = target.getX();
+        cy = target.getY();
+    }
 }

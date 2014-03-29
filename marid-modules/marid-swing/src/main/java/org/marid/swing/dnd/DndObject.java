@@ -16,25 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.swing.dnd;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.swing.*;
+import java.io.Serializable;
+
+import static java.awt.Image.SCALE_SMOOTH;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface ServiceDescriptor {
+public interface DndObject extends Serializable {
 
-    String name() default "";
+    Object getObject();
 
-    String description() default "";
+    default ImageIcon getVisualRepresentation() {
+        return null;
+    }
 
-    String descriptionResource() default "";
-
-    String icon() default "services/service.png";
+    default ImageIcon getVisualRepresentation(int width, int height) {
+        final ImageIcon icon = getVisualRepresentation();
+        if (icon == null) {
+            return null;
+        } else {
+            return icon.getIconWidth() == width && icon.getIconHeight() == height
+                    ? icon
+                    : new ImageIcon(icon.getImage().getScaledInstance(width, height, SCALE_SMOOTH));
+        }
+    }
 }

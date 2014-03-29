@@ -16,25 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.swing.dnd;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.marid.test.NormalTests;
+
+import java.awt.datatransfer.DataFlavor;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface ServiceDescriptor {
+@Category({NormalTests.class})
+public class DndSourceTest {
 
-    String name() default "";
+    @Test
+    public void testGenerics() {
+        final DndSource<?> dndSource = new DndSource<TestDndObject>() {
+        };
+        final DataFlavor[] dataFlavors = dndSource.getSourceDataFlavors();
+        Assert.assertEquals(1, dataFlavors.length);
+        Assert.assertEquals(new DataFlavor(TestDndObject.class, null), dataFlavors[0]);
+    }
 
-    String description() default "";
+    class TestDndObject implements DndObject {
 
-    String descriptionResource() default "";
-
-    String icon() default "services/service.png";
+        @Override
+        public Object getObject() {
+            return null;
+        }
+    }
 }

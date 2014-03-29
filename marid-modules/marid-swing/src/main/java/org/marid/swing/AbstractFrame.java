@@ -20,11 +20,15 @@ package org.marid.swing;
 
 import org.marid.image.MaridIcons;
 import org.marid.pref.PrefSupport;
+import org.marid.swing.util.MessageType;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
+import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -62,5 +66,22 @@ public class AbstractFrame extends JFrame implements PrefSupport {
                 putPref("extendedState", getExtendedState());
                 break;
         }
+    }
+
+    protected void showMessage(MessageType messageType, String title, Object message) {
+        JOptionPane.showMessageDialog(this, message, s(title), messageType.messageType);
+    }
+
+    protected void showMessage(MessageType messageType, String title, String message, Object... args) {
+        JOptionPane.showMessageDialog(this, m(message, args), s(title), messageType.messageType);
+    }
+
+    protected void showMessage(MessageType messageType, String title, String message, Throwable error, Object... args) {
+        final StringWriter sw = new StringWriter();
+        try (final PrintWriter pw = new PrintWriter(sw)) {
+            pw.println(m(message, args));
+            error.printStackTrace(pw);
+        }
+        JOptionPane.showMessageDialog(this, sw.toString(), s(title), messageType.messageType);
     }
 }

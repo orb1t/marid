@@ -16,25 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.swing.dnd;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.awt.dnd.DnDConstants;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface ServiceDescriptor {
+public interface DndConstants {
 
-    String name() default "";
+    int DND_COPY = DnDConstants.ACTION_COPY;
 
-    String description() default "";
+    int DND_MOVE = DnDConstants.ACTION_MOVE;
 
-    String descriptionResource() default "";
+    int DND_LINK = DnDConstants.ACTION_LINK;
 
-    String icon() default "services/service.png";
+    int DND_NONE = DnDConstants.ACTION_NONE;
 }

@@ -16,25 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.swing.util;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.swing.*;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface ServiceDescriptor {
+public enum MessageType {
 
-    String name() default "";
+    INFO(JOptionPane.INFORMATION_MESSAGE),
+    WARNING(JOptionPane.WARNING_MESSAGE),
+    ERROR(JOptionPane.ERROR_MESSAGE),
+    QUESTION(JOptionPane.QUESTION_MESSAGE),
+    PLAIN(JOptionPane.PLAIN_MESSAGE);
 
-    String description() default "";
+    public final int messageType;
 
-    String descriptionResource() default "";
-
-    String icon() default "services/service.png";
+    private MessageType(int messageType) {
+        this.messageType = messageType;
+    }
 }

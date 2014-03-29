@@ -20,13 +20,18 @@ package org.marid.ide.swing.servcon;
 
 import org.marid.swing.AbstractInternalFrame;
 
+import javax.swing.*;
+
 /**
  * @author Dmitry Ovchinnikov.
  */
 public class ServconFrame extends AbstractInternalFrame<ServconWindow> {
 
+    private final ServconEditor editor;
+
     public ServconFrame(ServconWindow owner) {
         super(owner, "Service configuration");
+        add(new JScrollPane(editor = new ServconEditor()));
         pack();
     }
 }
