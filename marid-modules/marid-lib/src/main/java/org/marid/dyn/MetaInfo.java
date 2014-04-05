@@ -16,23 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.dyn;
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.io.Serializable;
+import java.lang.annotation.*;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public interface MaridServiceParameters extends Serializable {
+@Inherited
+@Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MetaInfo {
 
-    default PropertyDescriptor[] propertyDescriptors() {
-        try {
-            return Introspector.getBeanInfo(getClass()).getPropertyDescriptors();
-        } catch (IntrospectionException x) {
-            throw new IllegalStateException(x);
-        }
-    }
+    String name() default "";
+
+    String description() default "";
+
+    String descriptionResource() default "";
+
+    String icon() default "block/block.png";
 }

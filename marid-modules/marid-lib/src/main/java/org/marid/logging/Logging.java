@@ -45,7 +45,7 @@ public class Logging {
     };
 
     public static void init(Class<?> c, String res) {
-        final ClassLoader cl = Utils.getClassLoader(c);
+        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try (final InputStream is = cl.getResourceAsStream(res)) {
             final LogManager lm = LogManager.getLogManager();
             if (is != null) {

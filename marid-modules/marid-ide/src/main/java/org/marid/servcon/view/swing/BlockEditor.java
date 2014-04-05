@@ -16,23 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.servcon;
+package org.marid.servcon.view.swing;
 
-import org.marid.servcon.view.swing.BlockEditor;
-import org.marid.swing.AbstractInternalFrame;
+import org.marid.servcon.model.ClassBlock;
+import org.marid.swing.dnd.DndTarget;
+import org.marid.swing.dnd.MaridTransferHandler;
+import org.marid.swing.layout.AbsoluteLayout;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class ServconFrame extends AbstractInternalFrame<ServconWindow> {
+public class BlockEditor extends JLayeredPane implements DndTarget<ClassBlock> {
 
-    private final BlockEditor editor;
+    public BlockEditor() {
+        setLayout(new AbsoluteLayout());
+        setOpaque(true);
+        setBackground(SystemColor.controlLtHighlight);
+        setTransferHandler(new MaridTransferHandler());
+    }
 
-    public ServconFrame(ServconWindow owner) {
-        super(owner, "Service configuration");
-        add(new JScrollPane(editor = new BlockEditor()));
-        pack();
+    @Override
+    public boolean dropDndObject(ClassBlock object, TransferHandler.TransferSupport support) {
+        final SwingBlock swingBlock = new SwingBlock(this, object);
+        add(swingBlock);
+        swingBlock.setLocation(support.getDropLocation().getDropPoint());
+        return true;
     }
 }

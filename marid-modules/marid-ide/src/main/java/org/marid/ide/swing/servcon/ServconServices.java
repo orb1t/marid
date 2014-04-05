@@ -18,27 +18,28 @@
 
 package org.marid.ide.swing.servcon;
 
+import org.marid.servcon.model.ClassBlock;
 import org.marid.service.MaridServices;
 import org.marid.swing.dnd.DndSource;
 import org.marid.swing.dnd.MaridTransferHandler;
+import org.marid.swing.model.StdListCellRenderer;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class ServconServices extends JList<ServconService> implements DndSource<ServconService> {
+public class ServconServices extends JList<ClassBlock> implements DndSource<ClassBlock> {
 
     public ServconServices() {
-        super(MaridServices.serviceClasses().stream().map(ServconService::new).sorted().toArray(ServconService[]::new));
+        super(MaridServices.serviceClasses().stream().map(ClassBlock::new).sorted().toArray(ClassBlock[]::new));
         setCellRenderer(new ServiceCellRenderer());
         setTransferHandler(new MaridTransferHandler());
         setDragEnabled(true);
     }
 
     @Override
-    public ServconService getDndObject() {
+    public ClassBlock getDndObject() {
         return getSelectedValue();
     }
 
@@ -47,14 +48,12 @@ public class ServconServices extends JList<ServconService> implements DndSource<
         return DND_COPY;
     }
 
-    private static class ServiceCellRenderer extends DefaultListCellRenderer {
+    private static class ServiceCellRenderer extends StdListCellRenderer<ClassBlock> {
         @Override
-        public Component getListCellRendererComponent(JList<?> l, Object v, int index, boolean sel, boolean focus) {
-            final Component c = super.getListCellRendererComponent(l, v, index, sel, focus);
-            final DefaultListCellRenderer renderer = (DefaultListCellRenderer) c;
-            final ServconService ss = (ServconService) v;
-            renderer.setIcon(ss.getVisualRepresentation(32, 32));
-            return renderer;
+        public JLabel getRenderer(JList<ClassBlock> lst, ClassBlock val, int idx, boolean sel, boolean focus) {
+            final JLabel r =  super.getRenderer(lst, val, idx, sel, focus);
+            r.setIcon(val.getVisualRepresentation(32, 32));
+            return r;
         }
     }
 }

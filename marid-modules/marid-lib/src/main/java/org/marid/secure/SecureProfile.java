@@ -18,8 +18,6 @@
 
 package org.marid.secure;
 
-import org.marid.util.Utils;
-
 import javax.net.ssl.*;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -107,7 +105,7 @@ public class SecureProfile {
     }
 
     private static Properties getProperties() {
-        final ClassLoader classLoader = Utils.getClassLoader(SecureProfile.class);
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         try (final InputStream is = classLoader.getResourceAsStream("maridSecurity.properties")) {
             final Properties properties = new Properties();
             if (is != null) {

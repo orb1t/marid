@@ -37,21 +37,19 @@ public class Utils {
 
     public static final ZoneId ZONE_ID = ZoneId.systemDefault();
 
-    public static ClassLoader getClassLoader(Class<?> c) {
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        return classLoader == null ? c.getClassLoader() : classLoader;
-    }
-
     public static <T> T newInstance(Class<T> type, String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        return type.cast(getClassLoader(type).loadClass(className).newInstance());
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        return type.cast(classLoader.loadClass(className).newInstance());
     }
 
     public static URL getResource(String format, Object... args) {
-        return getClassLoader(Utils.class).getResource(String.format(format, args));
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        return classLoader.getResource(String.format(format, args));
     }
 
-    public static Properties loadProperties(Class<?> c, String path) throws IOException {
-        return loadProperties(getClassLoader(c).getResource(path));
+    public static Properties loadProperties(String path) throws IOException {
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        return loadProperties(classLoader.getResource(path));
     }
 
     public static Properties loadProperties(URL url) throws IOException {

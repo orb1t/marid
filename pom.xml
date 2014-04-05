@@ -67,7 +67,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.16</version>
+                        <version>2.17</version>
                         <executions>
                             <execution>
                                 <id>run-benchmarks</id>
@@ -186,7 +186,10 @@
                     <configuration>
                         <showWarnings>true</showWarnings>
                         <showDeprecation>true</showDeprecation>
-                        <compilerArgument>-Xlint:unchecked</compilerArgument>
+                        <compilerArgs>
+                            <arg>-Xlint:unchecked</arg>
+                            <arg>-parameters</arg>
+                        </compilerArgs>
                         <source>${maven.compiler.source}</source>
                         <target>${maven.compiler.target}</target>
                         <testSource>${maven.compiler.source}</testSource>
@@ -197,7 +200,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.16</version>
+                    <version>2.17</version>
                     <configuration>
                         <trimStackTrace>false</trimStackTrace>
                         <groups>${test.groups}</groups>

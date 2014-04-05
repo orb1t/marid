@@ -17,8 +17,6 @@
  */
 package org.marid.l10n;
 
-import org.marid.util.Utils;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -62,7 +60,7 @@ public class L10n {
     public static final ResourceBundle SB, MB;
 
     static {
-        final ClassLoader cl = Utils.getClassLoader(L10n.class);
+        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
         ResourceBundle sb, mb;
         try {
             sb = getBundle("res.strings", Locale.getDefault(), cl, UTF8_CONTROL);

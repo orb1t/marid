@@ -20,6 +20,7 @@ package org.marid.service;
 
 import org.marid.logging.LogSupport;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadFactory;
 
@@ -56,7 +57,7 @@ public interface MaridService extends LogSupport, ThreadFactory, AutoCloseable, 
     }
 
     @Override
-    default Thread newThread(Runnable r) {
+    default Thread newThread(@Nonnull Runnable r) {
         final Thread thread = new Thread(threadGroup(), r, String.valueOf(r), getStackSize());
         thread.setDaemon(isDaemons());
         return thread;
@@ -71,4 +72,5 @@ public interface MaridService extends LogSupport, ThreadFactory, AutoCloseable, 
     default String getName() {
         return getClass().getSimpleName();
     }
+
 }

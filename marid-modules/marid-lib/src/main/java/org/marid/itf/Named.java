@@ -16,25 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.itf;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.annotation.Nonnull;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface ServiceDescriptor {
+public interface Named extends Comparable<Named> {
 
-    String name() default "";
+    String getName();
 
-    String description() default "";
-
-    String descriptionResource() default "";
-
-    String icon() default "services/service.png";
+    default int compareTo(@Nonnull Named named) {
+        return getName().compareTo(named.getName());
+    }
 }

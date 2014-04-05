@@ -16,23 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.swing.model;
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.io.Serializable;
+import javax.swing.*;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public interface MaridServiceParameters extends Serializable {
+public class StdListCellRenderer<E> extends DefaultListCellRenderer {
 
-    default PropertyDescriptor[] propertyDescriptors() {
-        try {
-            return Introspector.getBeanInfo(getClass()).getPropertyDescriptors();
-        } catch (IntrospectionException x) {
-            throw new IllegalStateException(x);
-        }
+    @SuppressWarnings("unchecked")
+    @Override
+    public final JLabel getListCellRendererComponent(JList<?> l, Object v, int i, boolean s, boolean f) {
+        return getRenderer((JList<E>) l, (E) v, i, s, f);
+    }
+
+    public JLabel getRenderer(JList<E> l, E val, int idx, boolean selected, boolean focus) {
+        return (DefaultListCellRenderer) super.getListCellRendererComponent(l, val, idx, selected, focus);
     }
 }

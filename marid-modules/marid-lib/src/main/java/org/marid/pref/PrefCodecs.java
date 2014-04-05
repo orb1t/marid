@@ -20,7 +20,6 @@ package org.marid.pref;
 
 import org.marid.functions.UnsafeFunction;
 import org.marid.methods.LogMethods;
-import org.marid.util.Utils;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -106,7 +105,7 @@ public abstract class PrefCodecs {
 
         // Custom readers and writers
         try {
-            for (final PrefCodecs prefCodecs : load(PrefCodecs.class, Utils.getClassLoader(PrefCodecs.class))) {
+            for (final PrefCodecs prefCodecs : load(PrefCodecs.class, Thread.currentThread().getContextClassLoader())) {
                 READERS.putAll(prefCodecs.readers());
                 WRITERS.putAll(prefCodecs.writers());
             }

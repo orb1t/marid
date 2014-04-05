@@ -43,7 +43,7 @@ public class Wrapper {
 
     public static void main(String... args) throws Exception {
         Logging.init(Wrapper.class, "marid-wrapper-logging.properties");
-        final WrapperCli cli = new WrapperCli(Utils.loadProperties(Wrapper.class, "marid-wrapper.properties"), args);
+        final WrapperCli cli = new WrapperCli(Utils.loadProperties("marid-wrapper.properties"), args);
         if (cli.isHelp()) {
             cli.showHelp();
             return;

@@ -16,23 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.servcon.view.swing;
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.io.Serializable;
+import javax.swing.*;
+import javax.swing.border.Border;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public interface MaridServiceParameters extends Serializable {
+public interface SwingServconConstants {
 
-    default PropertyDescriptor[] propertyDescriptors() {
-        try {
-            return Introspector.getBeanInfo(getClass()).getPropertyDescriptors();
-        } catch (IntrospectionException x) {
-            throw new IllegalStateException(x);
-        }
-    }
+    Border EMPTY3 = BorderFactory.createEmptyBorder(3, 3, 3, 3);
+    Border EMPTY5 = BorderFactory.createEmptyBorder(5, 5, 5, 5);
+    Border BLOCK_BORDER = BorderFactory.createCompoundBorder(BorderFactory.createRaisedSoftBevelBorder(), EMPTY3);
+    Border TITLE_BORDER = BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), EMPTY5);
 }

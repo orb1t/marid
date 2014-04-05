@@ -16,21 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.reflect;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.Serializable;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public interface MaridServiceParameters extends Serializable {
+public class IntrospectionUtils {
 
-    default PropertyDescriptor[] propertyDescriptors() {
+    public static PropertyDescriptor[] getPropertyDescriptors(Class<?> type) {
         try {
-            return Introspector.getBeanInfo(getClass()).getPropertyDescriptors();
+            return Introspector.getBeanInfo(type).getPropertyDescriptors();
         } catch (IntrospectionException x) {
             throw new IllegalStateException(x);
         }

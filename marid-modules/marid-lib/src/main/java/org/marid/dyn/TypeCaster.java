@@ -19,11 +19,11 @@
 package org.marid.dyn;
 
 import org.marid.methods.LogMethods;
-import org.marid.util.Utils;
 
 import java.util.Iterator;
 import java.util.logging.Logger;
 
+import static java.lang.Thread.currentThread;
 import static java.util.ServiceLoader.load;
 
 /**
@@ -37,7 +37,7 @@ public abstract class TypeCaster {
     static {
         TypeCaster typeCaster = null;
         try {
-            final Iterator<TypeCaster> it = load(TypeCaster.class, Utils.getClassLoader(TypeCaster.class)).iterator();
+            final Iterator<TypeCaster> it = load(TypeCaster.class, currentThread().getContextClassLoader()).iterator();
             if (it.hasNext()) {
                 typeCaster = it.next();
                 LogMethods.fine(LOG, "Type caster {0} selected", typeCaster);

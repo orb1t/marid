@@ -24,7 +24,6 @@ import org.marid.groovy.GroovyRuntime;
 import org.marid.ide.swing.SwingIde;
 import org.marid.logging.Logging;
 import org.marid.swing.log.SwingHandler;
-import org.marid.util.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,7 +50,7 @@ public class MaridIde implements Thread.UncaughtExceptionHandler {
                 Versioning.getImplementationVersion(MaridIde.class),
                 System.getProperty("java.vm.name"),
                 System.getProperty("java.vm.version"));
-        final URL url = Utils.getClassLoader(MaridIde.class).getResource("Init.groovy");
+        final URL url = Thread.currentThread().getContextClassLoader().getResource("Init.groovy");
         if (url != null) {
             try {
                 GroovyRuntime.SHELL.evaluate(new GroovyCodeSource(url));

@@ -23,8 +23,8 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import groovy.lang.Closure;
 import groovy.lang.GroovyCodeSource;
+import org.marid.dyn.MetaInfo;
 import org.marid.groovy.GroovyRuntime;
-import org.marid.service.ServiceDescriptor;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -33,7 +33,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -46,7 +49,7 @@ import static java.net.HttpURLConnection.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-@ServiceDescriptor(icon = "services/web.png", name = "Simple web server", description = "Simple threaded web server")
+@MetaInfo(icon = "services/web.png", name = "Simple web server", description = "Simple threaded web server")
 public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
 
     public final ThreadGroup webPoolThreadGroup = new ThreadGroup(threadPoolGroup, "webPool");
