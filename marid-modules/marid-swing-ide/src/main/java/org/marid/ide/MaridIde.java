@@ -21,7 +21,6 @@ package org.marid.ide;
 import groovy.lang.GroovyCodeSource;
 import org.marid.Versioning;
 import org.marid.groovy.GroovyRuntime;
-import org.marid.ide.swing.SwingIde;
 import org.marid.logging.Logging;
 import org.marid.swing.log.SwingHandler;
 

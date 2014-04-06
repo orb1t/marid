@@ -18,8 +18,8 @@
 
 package menu
 
-import org.marid.ide.swing.servcon.ServconWindow
-import org.marid.ide.swing.wrapper.WrapperRunnerWindow
+import org.marid.ide.servcon.ServconWindow
+import org.marid.ide.wrapper.WrapperRunnerWindow
 
 [
         [[], "mainMenu", "Deploy"],

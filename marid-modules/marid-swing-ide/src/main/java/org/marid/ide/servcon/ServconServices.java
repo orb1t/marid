@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.servcon;
+package org.marid.ide.servcon;
 
 import org.marid.servcon.model.ClassBlock;
 import org.marid.service.MaridServices;

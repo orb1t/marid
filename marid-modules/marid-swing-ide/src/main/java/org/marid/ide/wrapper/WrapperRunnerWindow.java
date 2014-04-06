@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.wrapper;
+package org.marid.ide.wrapper;
 
 import org.marid.io.ProcessUtils;
 import org.marid.nio.FileUtils;

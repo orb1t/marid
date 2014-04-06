@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.marid.ide.swing.wrapper.WrapperRunnerWindow
+import org.marid.ide.wrapper.WrapperRunnerWindow
 
 [
         [[], "mainMenu", "Deploy"],

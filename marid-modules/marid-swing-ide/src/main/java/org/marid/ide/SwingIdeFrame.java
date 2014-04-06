@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing;
+package org.marid.ide;
 
 import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;

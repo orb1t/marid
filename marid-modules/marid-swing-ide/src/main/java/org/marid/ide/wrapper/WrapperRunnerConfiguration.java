@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.wrapper;
+package org.marid.ide.wrapper;
 
 import org.marid.l10n.L10n;
 import org.marid.swing.MaridAction;
