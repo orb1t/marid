@@ -26,11 +26,5 @@ import javax.swing.*;
 public class MultiFrameDesktop extends JDesktopPane {
 
     public MultiFrameDesktop() {
-        setDesktopManager(new MultiFrameDesktopManager());
-    }
-
-    @Override
-    public MultiFrameDesktopManager getDesktopManager() {
-        return (MultiFrameDesktopManager) super.getDesktopManager();
     }
 }

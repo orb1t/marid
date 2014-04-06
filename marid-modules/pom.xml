@@ -34,7 +34,7 @@
         <module>marid-wrapper</module>
         <module>marid-swing</module>
         <module>marid-runtime</module>
-        <module>marid-ide</module>
+        <module>marid-swing-ide</module>
     </modules>
 
     <dependencies>

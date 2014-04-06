@@ -69,6 +69,8 @@ public class SwingBlock extends JPanel implements SwingServconConstants {
         }
         final JPanel rightPanel = new JPanel(new GridLayout(0, 1, 2, 2));
         rightPanel.add(new Title("Outputs"));
+        rightPanel.add(new Out(block.getSelfOutput()));
+        rightPanel.add(new JSeparator());
         add(leftPanel, BorderLayout.WEST);
         add(rightPanel, BorderLayout.EAST);
     }
@@ -86,8 +88,18 @@ public class SwingBlock extends JPanel implements SwingServconConstants {
         private final Block.Param param;
 
         private Param(Block.Param param) {
-            super(param.toString(), Images.getIcon(param.getMetaInfo().icon()), SwingConstants.LEFT);
+            super(param.toString(), Images.getIcon(param.getMetaInfo().icon(), 24), SwingConstants.LEFT);
             this.param = param;
+        }
+    }
+
+    private class Out extends JLabel {
+
+        private final Block.Out out;
+
+        private Out(Block.Out out) {
+            super(out.toString(), Images.getIcon(out.getMetaInfo().icon(), 24), SwingConstants.RIGHT);
+            this.out = out;
         }
     }
 }
