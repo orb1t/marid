@@ -454,6 +454,12 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>marid-gui</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>marid-logging</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -467,6 +473,12 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>marid-runtime</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>marid-gres</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

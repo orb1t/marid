@@ -48,7 +48,7 @@ public interface DndSource<T extends DndObject> extends DndConstants {
     }
 
     default Object encodeDndSource(DataFlavor dataFlavor, T dndObject) {
-        return dataFlavor.getRepresentationClass() == dndObject.getClass() ? dndObject : null;
+        return dataFlavor.getRepresentationClass().isInstance(dndObject) ? dndObject : null;
     }
 
     default void fireDndObjectExportDone(T dndObject, int action) {

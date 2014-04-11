@@ -64,7 +64,8 @@ public class ClassBlock extends Block {
     }
 
     private Out[] out() {
-        return stream(pds()).filter(p -> p.getReadMethod() != null).map(ClassOut::new).toArray(Out[]::new);
+        return stream(pds()).filter(p -> !p.getName().equals("class") && p.getReadMethod() != null)
+                .map(ClassOut::new).toArray(Out[]::new);
     }
 
     @Override
@@ -94,7 +95,7 @@ public class ClassBlock extends Block {
 
     @Override
     public String getName() {
-        return getMetaInfo().name().isEmpty() ? object.getCanonicalName() : getMetaInfo().name();
+        return getMetaInfo().name().isEmpty() ? object.getSimpleName() : getMetaInfo().name();
     }
 
     private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {

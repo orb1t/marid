@@ -174,6 +174,14 @@ public abstract class PrefCodecs {
         };
     }
 
+    protected static <T> PrefWriter<T> stringWriter(UnsafeFunction<T, String> function) {
+        return (pref, key, value) -> pref.put(key, function.apply(value));
+    }
+
+    protected static <T> PrefWriter<T> formattedWriter(String format, UnsafeFunction<T, Object[]> function) {
+        return (pref, key, value) -> pref.put(key, String.format(format, function.apply(value)));
+    }
+
     protected static <T> PrefReader<T> byteArrayReader(UnsafeFunction<byte[], T> function) {
         return (prefs, key) -> {
             final byte[] v = prefs.getByteArray(key, null);

@@ -18,6 +18,7 @@
 
 package org.marid.ide.servcon;
 
+import org.marid.servcon.model.Block;
 import org.marid.servcon.model.ClassBlock;
 import org.marid.service.MaridServices;
 import org.marid.swing.dnd.DndSource;
@@ -29,7 +30,7 @@ import javax.swing.*;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class ServconServices extends JList<ClassBlock> implements DndSource<ClassBlock> {
+public class ServconServices extends JList<Block> implements DndSource<Block> {
 
     public ServconServices() {
         super(MaridServices.serviceClasses().stream().map(ClassBlock::new).sorted().toArray(ClassBlock[]::new));
@@ -39,7 +40,7 @@ public class ServconServices extends JList<ClassBlock> implements DndSource<Clas
     }
 
     @Override
-    public ClassBlock getDndObject() {
+    public Block getDndObject() {
         return getSelectedValue();
     }
 
@@ -48,9 +49,9 @@ public class ServconServices extends JList<ClassBlock> implements DndSource<Clas
         return DND_COPY;
     }
 
-    private static class ServiceCellRenderer extends StdListCellRenderer<ClassBlock> {
+    private static class ServiceCellRenderer extends StdListCellRenderer<Block> {
         @Override
-        public JLabel getRenderer(JList<ClassBlock> lst, ClassBlock val, int idx, boolean sel, boolean focus) {
+        public JLabel getRenderer(JList<Block> lst, Block val, int idx, boolean sel, boolean focus) {
             final JLabel r =  super.getRenderer(lst, val, idx, sel, focus);
             r.setIcon(val.getVisualRepresentation(32, 32));
             return r;

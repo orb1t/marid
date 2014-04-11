@@ -21,53 +21,30 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>marid-modules</artifactId>
         <groupId>org.marid</groupId>
+        <artifactId>marid-modules</artifactId>
         <version>0.7-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>marid-swing</artifactId>
+    <artifactId>marid-gui</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.marid</groupId>
             <artifactId>marid-lib</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>marid-gres</artifactId>
+            <groupId>org.controlsfx</groupId>
+            <artifactId>controlsfx</artifactId>
+            <version>8.0.5</version>
         </dependency>
 
         <dependency>
-            <groupId>org.swinglabs.swingx</groupId>
-            <artifactId>swingx-all</artifactId>
-            <version>1.6.5-1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.codeartisans.thirdparties.swing</groupId>
-            <artifactId>batik-all</artifactId>
-            <version>1.8pre-r1084380</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-            <version>1.0.17</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fifesoft</groupId>
-            <artifactId>rsyntaxtextarea</artifactId>
-            <version>2.5.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.jgoodies</groupId>
-            <artifactId>jgoodies-looks</artifactId>
-            <version>2.5.3</version>
+            <groupId>com.dooapp.fxform2</groupId>
+            <artifactId>core</artifactId>
+            <version>8.0.6</version>
         </dependency>
     </dependencies>
 </project>

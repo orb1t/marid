@@ -120,8 +120,8 @@ public class MaridTransferHandler extends TransferHandler implements LogSupport 
         if (support.getComponent() instanceof DndTarget) {
             final DndTarget dndTarget = (DndTarget) support.getComponent();
             final DataFlavor[] supported = dndTarget.getTargetDataFlavors();
-            return stream(support.getDataFlavors()).anyMatch(df -> stream(supported).anyMatch(sdf -> sdf.match(df))) &&
-                    dndTarget.canImport(support);
+            return stream(support.getDataFlavors())
+                    .anyMatch(df -> stream(supported).anyMatch(sdf -> sdf.match(df))) && dndTarget.canImport(support);
         } else {
             return false;
         }

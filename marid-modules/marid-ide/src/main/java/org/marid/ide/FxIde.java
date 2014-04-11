@@ -16,33 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view.swing;
+package org.marid.ide;
 
-import org.marid.servcon.model.ClassBlock;
-import org.marid.swing.dnd.DndTarget;
-import org.marid.swing.dnd.MaridTransferHandler;
-import org.marid.swing.layout.AbsoluteLayout;
-
-import javax.swing.*;
-import java.awt.*;
+import javafx.application.Application;
+import javafx.scene.control.Button;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+import org.marid.l10n.L10n;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class BlockEditor extends JLayeredPane implements DndTarget<ClassBlock> {
-
-    public BlockEditor() {
-        setLayout(new AbsoluteLayout());
-        setOpaque(true);
-        setBackground(SystemColor.controlLtHighlight);
-        setTransferHandler(new MaridTransferHandler());
-    }
+public class FxIde extends Application {
 
     @Override
-    public boolean dropDndObject(ClassBlock object, TransferHandler.TransferSupport support) {
-        final SwingBlock swingBlock = new SwingBlock(this, object);
-        add(swingBlock);
-        swingBlock.setLocation(support.getDropLocation().getDropPoint());
-        return true;
+    public void start(Stage stage) throws Exception {
+        stage.setTitle(L10n.s("Marid IDE"));
+        final StackPane stackPane = new StackPane(
+                new Button("a")
+        );
+        stage.setScene(new FxIdeScene(stackPane, 600, 400));
+        stage.show();
+    }
+
+    public static void launch(String... args) {
+        Application.launch(args);
     }
 }

@@ -16,21 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.servcon;
+package org.marid.ide;
 
-import org.marid.servcon.view.BlockEditor;
-import org.marid.swing.AbstractInternalFrame;
+import javafx.beans.NamedArg;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class ServconFrame extends AbstractInternalFrame<ServconWindow> {
+public class FxIdeScene extends Scene {
 
-    private final BlockEditor editor = new BlockEditor();
-
-    public ServconFrame(ServconWindow owner) {
-        super(owner, "Service configuration");
-        add(editor);
-        pack();
+    public FxIdeScene(@NamedArg("root") Parent root,
+                      @NamedArg("width") double width,
+                      @NamedArg("height") double height) {
+        super(root, width, height);
     }
 }

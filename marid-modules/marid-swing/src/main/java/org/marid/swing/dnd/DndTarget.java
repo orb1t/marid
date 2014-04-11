@@ -20,7 +20,6 @@ package org.marid.swing.dnd;
 
 import org.marid.logging.LogSupport;
 
-import javax.swing.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.lang.reflect.ParameterizedType;
@@ -58,7 +57,7 @@ public interface DndTarget<T extends DndObject> extends DndConstants, LogSupport
     @SuppressWarnings("unchecked")
     default T getImported(Transferable transferable) {
         for (final DataFlavor dataFlavor : transferable.getTransferDataFlavors()) {
-            if (dataFlavor.getRepresentationClass() == getTargetDndType()) {
+            if (getTargetDndType() == dataFlavor.getRepresentationClass()) {
                 try {
                     return (T) transferable.getTransferData(dataFlavor);
                 } catch (Exception x) {

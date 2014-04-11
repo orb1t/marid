@@ -16,18 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view.swing;
-
-import javax.swing.*;
-import javax.swing.border.Border;
+package org.marid.ide;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public interface SwingServconConstants {
+public class TestMaridIde {
 
-    Border EMPTY3 = BorderFactory.createEmptyBorder(3, 3, 3, 3);
-    Border EMPTY5 = BorderFactory.createEmptyBorder(5, 5, 5, 5);
-    Border BLOCK_BORDER = BorderFactory.createCompoundBorder(BorderFactory.createRaisedSoftBevelBorder(), EMPTY3);
-    Border TITLE_BORDER = BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), EMPTY5);
+    public static void main(String... args) throws Exception {
+        MaridIde.main(args);
+    }
 }

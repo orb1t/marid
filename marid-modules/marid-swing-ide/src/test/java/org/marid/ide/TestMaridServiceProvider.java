@@ -51,6 +51,10 @@ public class TestMaridServiceProvider implements MaridServiceProvider {
         public ServiceB(ServiceA serviceA, AbstractMaridServiceParameters params) {
             super(params);
         }
+
+        public void setParam1(int param) {
+
+        }
     }
 
     public static class ServiceC extends AbstractMaridService {

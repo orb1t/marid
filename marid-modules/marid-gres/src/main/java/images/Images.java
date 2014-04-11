@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -38,13 +38,13 @@ public class Images {
     }
 
     public static BufferedImage getEmptyImage(int width, int height) {
-        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsConfiguration conf = env.getDefaultScreenDevice().getDefaultConfiguration();
+        final GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        final GraphicsConfiguration conf = env.getDefaultScreenDevice().getDefaultConfiguration();
         return conf.createCompatibleImage(width, height, ColorModel.TRANSLUCENT);
     }
 
     public static ImageIcon getIcon(String path) {
-        URL url = path == null ? null : Images.class.getResource(path);
+        final URL url = path == null ? null : Images.class.getResource(path);
         return url == null ? null : new ImageIcon(url);
     }
 
@@ -71,11 +71,11 @@ public class Images {
     }
 
     public static Image getImage(String path, int w, int h) {
-        URL url = path == null ? null : Images.class.getResource(path);
+        final URL url = path == null ? null : Images.class.getResource(path);
         if (url == null) {
             return null;
         } else {
-            Toolkit tk = Toolkit.getDefaultToolkit();
+            final Toolkit tk = Toolkit.getDefaultToolkit();
             return tk.getImage(url).getScaledInstance(w, h, Image.SCALE_SMOOTH);
         }
     }
@@ -89,7 +89,7 @@ public class Images {
     }
 
     public static Image getImage(String path) {
-        URL url = path == null ? null : Images.class.getResource(path);
+        final URL url = path == null ? null : Images.class.getResource(path);
         return url == null ? null : Toolkit.getDefaultToolkit().getImage(url);
     }
 }

@@ -21,7 +21,6 @@ package org.marid.servcon.model;
 import images.Images;
 import org.marid.dyn.MetaInfo;
 import org.marid.itf.Named;
-import org.marid.l10n.L10n;
 import org.marid.swing.dnd.DndObject;
 
 import javax.swing.*;
@@ -42,6 +41,18 @@ public abstract class Block implements Named, DndObject {
     public abstract In[] getInputs();
 
     public abstract Out[] getOutputs();
+
+    public boolean hasParameters() {
+        return getParameters().length > 0;
+    }
+
+    public boolean hasOutputs() {
+        return getOutputs().length > 0;
+    }
+
+    public boolean hasInputs() {
+        return getInputs().length > 0;
+    }
 
     @Override
     public ImageIcon getVisualRepresentation() {
@@ -87,7 +98,10 @@ public abstract class Block implements Named, DndObject {
 
         public abstract Class<?> getType();
 
-        public abstract MetaInfo getMetaInfo();
+        public MetaInfo getMetaInfo() {
+            final MetaInfo metaInfo = getType().getAnnotation(MetaInfo.class);
+            return metaInfo == null ? getClass().getAnnotation(MetaInfo.class) : metaInfo;
+        }
 
         @Override
         public String toString() {
@@ -106,12 +120,6 @@ public abstract class Block implements Named, DndObject {
 
         public Out getOut() {
             return out;
-        }
-
-        @Override
-        public MetaInfo getMetaInfo() {
-            final MetaInfo metaInfo = getType().getAnnotation(MetaInfo.class);
-            return metaInfo == null ? In.class.getAnnotation(MetaInfo.class) : metaInfo;
         }
     }
 
@@ -135,12 +143,6 @@ public abstract class Block implements Named, DndObject {
 
         public In getIn() {
             return in;
-        }
-
-        @Override
-        public MetaInfo getMetaInfo() {
-            final MetaInfo metaInfo = getType().getAnnotation(MetaInfo.class);
-            return metaInfo == null ? Out.class.getAnnotation(MetaInfo.class) : metaInfo;
         }
     }
 }
