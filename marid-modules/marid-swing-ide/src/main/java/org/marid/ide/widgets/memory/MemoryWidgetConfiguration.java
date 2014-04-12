@@ -47,4 +47,7 @@ public interface MemoryWidgetConfiguration extends Configuration {
 
     @Input(tab = "chart")
     Pv<Integer, SpinIntInputControl> updateInterval = new Pv<>(() -> new SpinIntInputControl(1, 10, 1), () -> 1);
+
+    @Input(tab = "chart")
+    Pv<Integer, SpinIntInputControl> historySize = new Pv<>(() -> new SpinIntInputControl(1, 60, 1), () -> 3);
 }

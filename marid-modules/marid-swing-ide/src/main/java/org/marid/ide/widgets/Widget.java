@@ -41,10 +41,12 @@ public abstract class Widget extends JInternalFrame implements PrefSupport {
 
     protected final JToolBar toolBar = new JToolBar(getPref("orientation", HORIZONTAL, "toolbar"));
     protected final IdeFrame owner;
+    protected final BorderLayout layout = new BorderLayout();
 
     public Widget(IdeFrame owner, String title) {
-        super(s(title));
+        super(s(title), true, true, true, true);
         this.owner = owner;
+        setLayout(layout);
         setName(title);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         add(toolBar, getPref("pos", BorderLayout.NORTH, "toolbar"));
@@ -73,7 +75,7 @@ public abstract class Widget extends JInternalFrame implements PrefSupport {
     }
 
     private String getToolbarPosition() {
-        final String position = (String) ((BorderLayout) getLayout()).getConstraints(toolBar);
+        final String position = (String) layout.getConstraints(toolBar);
         return position == null ? BorderLayout.NORTH : position;
     }
 }

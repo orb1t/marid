@@ -109,8 +109,7 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
     }
 
     private Set<Tab> tabs() {
-        final Set<Tab> tabs = new TreeSet<>(
-                (a, b) -> a.order() != b.order() ? a.order() - b.order() : a.node().compareTo(b.node()));
+        final Set<Tab> tabs = new TreeSet<>((a, b) -> a.order() != b.order() ? a.order() - b.order() : a.node().compareTo(b.node()));
         for (final Class<?> i : component.getClass().getInterfaces()) {
             tabs.addAll(Arrays.asList(i.getAnnotationsByType(Tab.class)));
         }
@@ -138,14 +137,17 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
         for (final Map.Entry<Component, ComponentHolder<Object, InputControl<Object>>> e : containerMap.entrySet()) {
             final ComponentHolder<Object, InputControl<Object>> ch = e.getValue();
             try {
-                if (!Objects.equals(ch.initialValue, ch.control.getValue())) {
-                    if (Objects.equals(ch.getDefaultValue(), ch.control.getValue()) && ch.pv.contains()) {
+                final Object oldValue = ch.initialValue;
+                final Object newValue = ch.control.getValue();
+                if (!Objects.equals(oldValue, newValue)) {
+                    if (Objects.equals(ch.getDefaultValue(), newValue) && ch.pv.contains()) {
                         ch.pv.remove();
                         fine("Restored {0}.{1}", ch.node, ch.key);
                     } else {
                         ch.pv.save(ch.control);
-                        fine("Saved {0}.{1}: {2}", ch.node, ch.key, ch.control.getValue());
+                        fine("Saved {0}.{1}: {2}", ch.node, ch.key, newValue);
                     }
+                    ch.pv.fireConsumers(oldValue, newValue);
                 }
             } catch (Exception x) {
                 exceptionMap.put(e.getValue(), x);

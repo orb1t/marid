@@ -30,14 +30,29 @@ import java.util.List;
  */
 public class VBlock extends VPaintable {
 
+    private static final int ICON_SIZE = 32;
+    private static final int GAP = 2;
+
     protected VBlock(BlockEditor blockEditor, Block block, Point location) {
         super(blockEditor, block, location);
     }
 
+    private int labelWidth() {
+        final FontMetrics fm = blockEditor.getFontMetrics();
+        return fm.stringWidth(block.toString());
+    }
+
+    private int labelHeight() {
+        final FontMetrics fm = blockEditor.getFontMetrics();
+        return fm.getHeight();
+    }
+
     @Override
     public Dimension getSize() {
+        final FontMetrics fm = blockEditor.getFontMetrics();
+        final int width = GAP + ICON_SIZE + GAP + labelWidth() + GAP;
         //System.out.println(blockEditor.getFontMetrics().getStringBounds("hello", blockEditor.getGraphics()));
-        return new Dimension(50, 50);
+        return new Dimension(width, 50);
     }
 
     @Override
@@ -52,10 +67,11 @@ public class VBlock extends VPaintable {
         g.fillRect(0, 0, size.width, size.height);
         g.setColor(SystemColor.controlShadow);
         g.draw3DRect(0, 0, size.width, size.height, true);
-        final ImageIcon icon = block.getVisualRepresentation();
+        final ImageIcon icon = block.getVisualRepresentation(ICON_SIZE, ICON_SIZE);
         if (icon != null) {
-            icon.paintIcon(blockEditor, g, 2, 2);
+            icon.paintIcon(blockEditor, g, GAP, GAP);
         }
+        g.drawString(block.toString(), 2 * GAP + ICON_SIZE, GAP + labelHeight());
         super.paint(g);
     }
 }

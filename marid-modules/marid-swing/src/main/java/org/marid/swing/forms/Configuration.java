@@ -26,6 +26,11 @@ import org.marid.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -44,6 +49,7 @@ public interface Configuration {
         private final Supplier<C> controlSupplier;
         private final Supplier<V> defaultValueSupplier;
         private final Preferences preferences;
+        private final Map<Object, List<BiConsumer<V, V>>> consumerMap = new WeakHashMap<>();
 
         public Pv(Supplier<C> controlSupplier, Supplier<V> defaultValueSupplier) {
             this.controlSupplier = controlSupplier;
@@ -140,6 +146,31 @@ public interface Configuration {
 
         public <T> T get(Class<T> type) {
             return TypeCaster.TYPE_CASTER.cast(type, get());
+        }
+
+        public void addConsumer(Object gcBase, BiConsumer<V, V> consumer) {
+            consumerMap.computeIfAbsent(gcBase, o -> new LinkedList<>()).add(consumer);
+        }
+
+        public void removeConsumer(Object gcBase, BiConsumer<V, V> consumer) {
+            final List<BiConsumer<V, V>> consumers = consumerMap.get(gcBase);
+            if (consumers != null) {
+                consumers.remove(consumer);
+            }
+        }
+
+        public void clearConsumers(Object gcBase) {
+            consumerMap.remove(gcBase);
+        }
+
+        public void fireConsumers(V oldValue, V newValue) {
+            for (final List<BiConsumer<V, V>> consumers : consumerMap.values()) {
+                if (consumers != null) {
+                    for (final BiConsumer<V, V> consumer : consumers) {
+                        consumer.accept(oldValue, newValue);
+                    }
+                }
+            }
         }
 
         private static final class ClassResolver extends SecurityManager {
