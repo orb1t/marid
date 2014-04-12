@@ -5,9 +5,9 @@ import org.marid.logging.LogSupport;
 import org.marid.methods.LogMethods;
 
 import javax.swing.*;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.logging.Logger;
 
 import static org.marid.l10n.L10n.s;
@@ -52,6 +52,25 @@ public class MaridAction extends AbstractAction {
         if (getValue(Action.SHORT_DESCRIPTION) == null) {
             putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));
         }
+    }
+
+    public MaridAction(String title, String icon, ActionListener actionListener, Object... args) {
+        this(title, icon, (a, e) -> actionListener.actionPerformed(e), args);
+    }
+
+    public MaridAction setKey(String key) {
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(key));
+        return this;
+    }
+
+    public MaridAction setShortDescription(String description, Object... args) {
+        putValue(SHORT_DESCRIPTION, s(description, args));
+        return this;
+    }
+
+    public MaridAction setLongDescription(String description, Object... args) {
+        putValue(LONG_DESCRIPTION, s(description, args));
+        return this;
     }
 
     @Override

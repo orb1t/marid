@@ -26,20 +26,14 @@ import java.util.prefs.Preferences;
 import static org.marid.methods.LogMethods.warning;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public interface PrefSupport {
+public interface SysPrefSupport {
 
-    default String[] prefNodes() {
-        return new String[] {getClass().getSimpleName()};
-    }
+    Preferences SYSPREFS = PrefUtils.preferences("system");
 
-    default Preferences preferences() {
-        return PrefUtils.preferences(getClass(), prefNodes());
-    }
-
-    default void logPrefError(boolean load, Class<?> type, String key, String[] nodes, Throwable error) {
-        final String fmt = load ? "Unable to load {0} of {1}" : "Unable to save {0} of {1}";
+    default void logSysPrefError(boolean load, Class<?> type, String key, String[] nodes, Throwable error) {
+        final String fmt = load ? "Unable to load system {0} of {1}" : "Unable to save system {0} of {1}";
         final String k = nodes == null || nodes.length == 0 ? key : String.join(".", nodes) + "." + key;
         if (this instanceof LogSupport) {
             ((LogSupport) this).warning(fmt, error.getCause(), k, type);
@@ -48,39 +42,39 @@ public interface PrefSupport {
         }
     }
 
-    default <T> T getPref(Class<T> type, String key, T def, String... nodes) {
+    default <T> T getSysPref(Class<T> type, String key, T def, String... nodes) {
         try {
-            return PrefUtils.getPref(preferences(), type, key, def, nodes);
+            return PrefUtils.getPref(SYSPREFS, type, key, def, nodes);
         } catch (Exception x) {
-            logPrefError(true, type, key, nodes, x);
+            logSysPrefError(true, type, key, nodes, x);
             return def;
         }
     }
 
     @SuppressWarnings("unchecked")
-    default <T> T getPref(String key, T def, String... nodes) {
+    default <T> T getSysPref(String key, T def, String... nodes) {
         try {
-            return PrefUtils.getPref(preferences(), key, def, nodes);
+            return PrefUtils.getPref(SYSPREFS, key, def, nodes);
         } catch (Exception x) {
-            logPrefError(true, def == null ? null : def.getClass(), key, nodes, x);
+            logSysPrefError(true, def == null ? null : def.getClass(), key, nodes, x);
             return def;
         }
     }
 
-    default <T> void putPref(Class<T> type, String key, T value, String... nodes) {
+    default <T> void putSysPref(Class<T> type, String key, T value, String... nodes) {
         try {
-            PrefUtils.putPref(preferences(), type, key, value, nodes);
+            PrefUtils.putPref(SYSPREFS, type, key, value, nodes);
         } catch (Exception x) {
-            logPrefError(false, type, key, nodes, x);
+            logSysPrefError(false, type, key, nodes, x);
         }
     }
 
     @SuppressWarnings("unchecked")
-    default void putPref(String key, Object value, String... nodes) {
+    default void putSysPref(String key, Object value, String... nodes) {
         try {
-            PrefUtils.putPref(preferences(), key, value, nodes);
+            PrefUtils.putPref(SYSPREFS, key, value, nodes);
         } catch (Exception x) {
-            logPrefError(false, value == null ? null : value.getClass(), key, nodes, x);
+            logSysPrefError(false, value == null ? null : value.getClass(), key, nodes, x);
         }
     }
 }

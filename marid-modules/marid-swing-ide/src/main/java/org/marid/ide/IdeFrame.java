@@ -37,17 +37,19 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SwingIdeFrame extends JFrame implements PrefSupport, LogSupport {
+public class IdeFrame extends JFrame implements PrefSupport, LogSupport {
 
     private final boolean closeable;
+    private final IdeDesktop desktop;
 
-    public SwingIdeFrame(boolean closeable, MenuActionTreeElement menuRoot) {
+    public IdeFrame(boolean closeable, MenuActionTreeElement menuRoot) {
         super(s("Marid IDE"));
         this.closeable = closeable;
         setIconImages(MaridIcons.ICONS);
         setJMenuBar(new JMenuBar());
         setLocationByPlatform(true);
         menuRoot.fillJMenuBar(getJMenuBar());
+        add(desktop = new IdeDesktop());
         pack();
         setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
         setState(getPref("state", getState()));

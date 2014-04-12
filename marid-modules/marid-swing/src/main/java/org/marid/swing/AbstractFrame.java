@@ -19,33 +19,87 @@
 package org.marid.swing;
 
 import org.marid.image.MaridIcons;
+import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
+import org.marid.pref.SysPrefSupport;
+import org.marid.swing.menu.MenuActionList;
+import org.marid.swing.menu.MenuActionTreeElement;
 import org.marid.swing.util.MessageType;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import static java.awt.BorderLayout.NORTH;
+import static javax.swing.SwingConstants.HORIZONTAL;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
+import static org.marid.swing.util.MessageType.WARNING;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class AbstractFrame extends JFrame implements PrefSupport {
+public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPrefSupport, LogSupport {
+
+    public static final Border CENTER_PANEL_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+
+    protected final JPanel centerPanel = new JPanel(new BorderLayout());
+    protected final JToolBar toolBar;
 
     public AbstractFrame(String title) {
         super(s(title));
+        setJMenuBar(new JMenuBar());
+        centerPanel.setBorder(CENTER_PANEL_BORDER);
+        centerPanel.add(toolBar = new JToolBar(getPref("tOrientation", HORIZONTAL)), getPref("tPosition", NORTH));
+        toolBar.setBorderPainted(true);
+        add(centerPanel);
         setIconImages(MaridIcons.ICONS);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setState(getPref("state", getState()));
         setExtendedState(getPref("extendedState", getExtendedState()));
+        getJMenuBar().add(windowMenu());
+    }
+
+    private JMenu windowMenu() {
+        final JMenu menu = new JMenu(s("Window"));
+        menu.add(new MaridAction("Switch always-on-top mode", null, this::switchAlwaysOnTop)
+                .setKey(getSysPref("alwaysOnTopKey", "control alt O")));
+        menu.addSeparator();
+        menu.add(new MaridAction("Switch full screen mode", null, this::switchFullScreen)
+                .setKey(getSysPref("fullScreenKey", "control alt F")));
+        return menu;
+    }
+
+    protected void switchAlwaysOnTop(ActionEvent event) {
+        if (isAlwaysOnTopSupported()) {
+            setAlwaysOnTop(!isAlwaysOnTop());
+        } else {
+            showMessage(WARNING, "Warning", "Always on top windows are not supported");
+        }
+    }
+
+    protected void switchFullScreen(ActionEvent event) {
+        final GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        final GraphicsDevice device = environment.getDefaultScreenDevice();
+        if (device.isFullScreenSupported()) {
+            device.setFullScreenWindow(device.getFullScreenWindow() == this ? null : this);
+        } else {
+            showMessage(WARNING, "Warning", "Full-screen mode is not supported");
+        }
     }
 
     @Override
     public void pack() {
+        getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
+        final MenuActionList actions = new MenuActionList();
+        fillActions(actions);
+        final MenuActionTreeElement element = actions.createTreeElement();
+        element.fillJMenuBar(getJMenuBar());
+        actions.fillToolbar(toolBar);
         super.pack();
         setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
     }
@@ -67,6 +121,8 @@ public class AbstractFrame extends JFrame implements PrefSupport {
                 break;
         }
     }
+
+    protected abstract void fillActions(MenuActionList actionList);
 
     protected void showMessage(MessageType messageType, String title, Object message) {
         JOptionPane.showMessageDialog(this, message, s(title), messageType.messageType);

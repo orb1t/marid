@@ -57,7 +57,7 @@ public class MaridIde implements Thread.UncaughtExceptionHandler {
                 JOptionPane.showMessageDialog(null, x, "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
-            EventQueue.invokeLater(SwingIde::run);
+            EventQueue.invokeLater(Ide::run);
         }
     }
 

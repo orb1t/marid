@@ -21,7 +21,7 @@ package org.marid.ide;
 import groovy.lang.GroovyCodeSource;
 import org.marid.groovy.GroovyRuntime;
 import org.marid.image.MaridIcon;
-import org.marid.pref.PrefUtils;
+import org.marid.pref.SysPrefSupport;
 import org.marid.swing.MaridAction;
 import org.marid.swing.log.TrayIconHandler;
 import org.marid.swing.menu.MenuAction;
@@ -37,7 +37,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 
 import static org.marid.dyn.TypeCaster.TYPE_CASTER;
 import static org.marid.l10n.L10n.s;
@@ -47,11 +46,10 @@ import static org.marid.swing.MaridAction.MaridActionListener;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SwingIde {
+public class Ide implements SysPrefSupport {
 
-    public static final Preferences SYSPREFS = PrefUtils.preferences("system");
     static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
-    public static SwingIdeFrame frame;
+    public static IdeFrame frame;
 
     public static void run() {
         installLaf();
@@ -132,13 +130,13 @@ public class SwingIde {
                 menuRoot.fillPopupMenu(popupMenu);
                 final TrayIcon icon = new TrayIcon(image, s("Marid IDE"), popupMenu);
                 icon.addActionListener(ev -> frame.setVisible(!frame.isVisible()));
-                frame = new SwingIdeFrame(true, menuRoot);
+                frame = new IdeFrame(true, menuRoot);
                 frame.setVisible(true);
                 tray.add(icon);
                 TrayIconHandler.addSystemHandler(icon, Level.parse(SYSPREFS.get("trayLevel", Level.OFF.getName())));
             } catch (Exception x) {
                 warning(LOG, "Unable to create the tray icon", x);
-                frame = new SwingIdeFrame(false, menuRoot);
+                frame = new IdeFrame(false, menuRoot);
                 frame.setVisible(true);
             }
         }

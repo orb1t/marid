@@ -19,10 +19,7 @@
 package org.marid.swing;
 
 import images.Images;
-import org.marid.logging.LogSupport;
 import org.marid.swing.forms.FrameConfigurationDialog;
-import org.marid.swing.menu.MenuActionList;
-import org.marid.swing.menu.MenuActionTreeElement;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
@@ -34,29 +31,19 @@ import java.beans.PropertyVetoException;
 import java.lang.reflect.ParameterizedType;
 import java.util.function.Supplier;
 
-import static java.awt.BorderLayout.NORTH;
-import static javax.swing.SwingConstants.HORIZONTAL;
 import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractMultiFrame extends AbstractFrame implements LogSupport {
+public abstract class AbstractMultiFrame extends AbstractFrame {
 
-    protected final JPanel centerPanel = new JPanel(new BorderLayout());
-    protected final JToolBar toolBar;
     private final MultiFrameDesktop desktop;
 
     public AbstractMultiFrame(String title) {
         super(title);
-        setJMenuBar(new JMenuBar());
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
-        centerPanel.add(toolBar = new JToolBar(getPref("tOrientation", HORIZONTAL)), getPref("tPosition", NORTH));
         centerPanel.add(desktop = new MultiFrameDesktop());
-        add(centerPanel);
-        toolBar.setBorderPainted(true);
         getJMenuBar().add(widgetsMenu());
-        getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
     }
 
     public MultiFrameDesktop getDesktop() {
@@ -179,18 +166,6 @@ public abstract class AbstractMultiFrame extends AbstractFrame implements LogSup
             }
         });
         return widgetListMenu;
-    }
-
-    protected abstract void fillActions(MenuActionList actionList);
-
-    @Override
-    public void pack() {
-        final MenuActionList actions = new MenuActionList();
-        fillActions(actions);
-        final MenuActionTreeElement element = actions.createTreeElement();
-        element.fillJMenuBar(getJMenuBar());
-        actions.fillToolbar(toolBar);
-        super.pack();
     }
 
     public void add(JInternalFrame frame) {

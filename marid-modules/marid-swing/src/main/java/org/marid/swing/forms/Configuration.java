@@ -19,6 +19,7 @@
 package org.marid.swing.forms;
 
 import org.marid.dyn.TypeCaster;
+import org.marid.pref.PrefSupport;
 import org.marid.pref.PrefUtils;
 import org.marid.swing.input.InputControl;
 import org.marid.util.StringUtils;
@@ -36,7 +37,7 @@ import static java.util.Arrays.asList;
  */
 public interface Configuration {
 
-    class Pv<V, C extends InputControl<V>> {
+    class Pv<V, C extends InputControl<V>> implements PrefSupport {
 
         public final Class<?> caller = ClassResolver.CLASS_RESOLVER.getClassContext()[2];
         private Field field;
@@ -47,15 +48,14 @@ public interface Configuration {
         public Pv(Supplier<C> controlSupplier, Supplier<V> defaultValueSupplier) {
             this.controlSupplier = controlSupplier;
             this.defaultValueSupplier = defaultValueSupplier;
-            this.preferences = PrefUtils.preferences(caller, nodes());
+            this.preferences = PrefUtils.preferences(caller, caller.isAnnotationPresent(Pref.class)
+                    ? caller.getAnnotation(Pref.class).value()
+                    : new String[]{StringUtils.decapitalize(caller.getSimpleName())});
         }
 
-        private String[] nodes() {
-            if (caller.isAnnotationPresent(Pref.class)) {
-                return caller.getAnnotation(Pref.class).value();
-            } else {
-                return new String[] {StringUtils.decapitalize(caller.getSimpleName())};
-            }
+        @Override
+        public Preferences preferences() {
+            return preferences;
         }
 
         public V getDefaultValue() {
@@ -100,14 +100,14 @@ public interface Configuration {
             final Field field = getField();
             final Input input = field.getAnnotation(Input.class);
             final String key = input.name().isEmpty() ? field.getName() : input.name();
-            return PrefUtils.getPref(preferences.node(input.tab()), key, getDefaultValue());
+            return getPref(key, getDefaultValue(), input.tab());
         }
 
         public void save(C control) {
             final Field field = getField();
             final Input input = field.getAnnotation(Input.class);
             final String key = input.name().isEmpty() ? field.getName() : input.name();
-            PrefUtils.putPref(preferences.node(input.tab()), key, control.getValue());
+            putPref(key, control.getValue(), input.tab());
         }
 
         public boolean contains() {
