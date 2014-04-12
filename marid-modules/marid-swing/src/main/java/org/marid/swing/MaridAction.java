@@ -39,9 +39,10 @@ public class MaridAction extends AbstractAction {
                 }
             }
         } else {
-            final ImageIcon ic = Images.getIcon(icon);
+            final ImageIcon ic = Images.getIcon(icon, 16);
             if (ic != null) {
                 putValue(SMALL_ICON, ic);
+                putValue(LARGE_ICON_KEY, Images.getIcon(icon, 24));
             }
         }
         for (int i = 0; i < args.length; i += 2) {

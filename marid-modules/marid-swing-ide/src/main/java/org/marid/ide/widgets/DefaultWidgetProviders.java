@@ -16,23 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dyn;
+package org.marid.ide.widgets;
 
-import java.lang.annotation.*;
+import org.marid.ide.widgets.memory.MemoryWidget;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Inherited
-@Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.METHOD, ElementType.TYPE_USE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface MetaInfo {
-
-    String name() default "";
-
-    String description() default "";
-
-    String descriptionResource() default "";
-
-    String icon() default "block/block.png";
+public class DefaultWidgetProviders implements WidgetProviders {
+    @Override
+    public Collection<Class<? extends Widget>> getProviders() {
+        return Arrays.asList(MemoryWidget.class);
+    }
 }

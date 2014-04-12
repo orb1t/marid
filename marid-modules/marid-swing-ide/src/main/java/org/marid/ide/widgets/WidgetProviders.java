@@ -16,23 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dyn;
+package org.marid.ide.widgets;
 
-import java.lang.annotation.*;
+import java.util.*;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Inherited
-@Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.METHOD, ElementType.TYPE_USE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface MetaInfo {
+@FunctionalInterface
+public interface WidgetProviders {
 
-    String name() default "";
+    Comparator<Class<? extends Widget>> COMPARATOR = (a, b) -> a.getClass().getName().compareTo(b.getClass().getName());
 
-    String description() default "";
+    Collection<Class<? extends Widget>> getProviders();
 
-    String descriptionResource() default "";
-
-    String icon() default "block/block.png";
+    static NavigableSet<Class<? extends Widget>> widgetProviders() {
+        final TreeSet<Class<? extends Widget>> widgetProviders = new TreeSet<>(COMPARATOR);
+        for (final WidgetProviders wps : ServiceLoader.load(WidgetProviders.class)) {
+            widgetProviders.addAll(wps.getProviders());
+        }
+        return widgetProviders;
+    }
 }

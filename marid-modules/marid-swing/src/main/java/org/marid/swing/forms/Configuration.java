@@ -37,7 +37,7 @@ import static java.util.Arrays.asList;
  */
 public interface Configuration {
 
-    class Pv<V, C extends InputControl<V>> implements PrefSupport {
+    public class Pv<V, C extends InputControl<V>> implements PrefSupport {
 
         public final Class<?> caller = ClassResolver.CLASS_RESOLVER.getClassContext()[2];
         private Field field;

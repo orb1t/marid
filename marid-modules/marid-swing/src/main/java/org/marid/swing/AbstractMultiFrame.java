@@ -19,7 +19,6 @@
 package org.marid.swing;
 
 import images.Images;
-import org.marid.swing.forms.FrameConfigurationDialog;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
@@ -84,9 +83,6 @@ public abstract class AbstractMultiFrame extends AbstractFrame {
                             frames[i].setSize(desktop.getWidth() / frames.length, desktop.getHeight());
                         }
                         break;
-                    case "configuration":
-                        new FrameConfigurationDialog(this).setVisible(true);
-                        break;
                     case "fullscreen":
                         final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
                         final GraphicsDevice gd = ge.getDefaultScreenDevice();
@@ -112,8 +108,6 @@ public abstract class AbstractMultiFrame extends AbstractFrame {
         widgetsMenu.add(menuItem("Tile horizontal", "tileHorizontal16.png", "tileHorizontal", widgetsListener));
         widgetsMenu.addSeparator();
         widgetsMenu.add(widgetListMenu());
-        widgetsMenu.addSeparator();
-        widgetsMenu.add(menuItem("Configuration...", "configuration16.png", "configuration", widgetsListener));
         return widgetsMenu;
     }
 
@@ -173,11 +167,6 @@ public abstract class AbstractMultiFrame extends AbstractFrame {
         frame.show();
     }
 
-    private String getToolbarPosition() {
-        final String position = (String) ((BorderLayout) centerPanel.getLayout()).getConstraints(toolBar);
-        return position == null ? BorderLayout.NORTH : position;
-    }
-
     @Override
     protected void processWindowEvent(WindowEvent e) {
         super.processWindowEvent(e);
@@ -186,8 +175,6 @@ public abstract class AbstractMultiFrame extends AbstractFrame {
                 for (final JInternalFrame frame : desktop.getAllFrames()) {
                     frame.doDefaultCloseAction();
                 }
-                putPref("tPosition", getToolbarPosition());
-                putPref("tOrientation", toolBar.getOrientation());
                 break;
             case WindowEvent.WINDOW_OPENED:
                 break;

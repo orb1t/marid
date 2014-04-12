@@ -18,15 +18,20 @@
 
 package org.marid.ide;
 
+import org.marid.dyn.MetaInfo;
+import org.marid.ide.widgets.Widget;
+import org.marid.ide.widgets.WidgetProviders;
 import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
+import org.marid.swing.MaridAction;
 import org.marid.swing.log.SwingHandler;
 import org.marid.swing.menu.MenuActionTreeElement;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.Constructor;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
@@ -48,12 +53,38 @@ public class IdeFrame extends JFrame implements PrefSupport, LogSupport {
         setIconImages(MaridIcons.ICONS);
         setJMenuBar(new JMenuBar());
         setLocationByPlatform(true);
+        getJMenuBar().add(widgetsMenu());
+        getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
         menuRoot.fillJMenuBar(getJMenuBar());
         add(desktop = new IdeDesktop());
         pack();
         setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
         setState(getPref("state", getState()));
         setExtendedState(getPref("extendedState", getExtendedState()));
+    }
+
+    private JMenu widgetsMenu() {
+        final JMenu menu = new JMenu(s("Widgets"));
+        for (final Class<? extends Widget> widgetType : WidgetProviders.widgetProviders()) {
+            final MetaInfo metaInfo = widgetType.getAnnotation(MetaInfo.class);
+            menu.add(new MaridAction(metaInfo.name(), metaInfo.icon(), e -> {
+                for (final JInternalFrame frame : desktop.getAllFrames()) {
+                    if (widgetType == frame.getClass()) {
+                        frame.show();
+                        return;
+                    }
+                }
+                try {
+                    final Constructor<? extends Widget> c = widgetType.getConstructor(IdeFrame.class);
+                    final Widget widget = c.newInstance(this);
+                    desktop.add(widget);
+                    widget.show();
+                } catch (Exception x) {
+                    warning("Unable to create widget: {0}", x, widgetType);
+                }
+            }));
+        }
+        return menu;
     }
 
     @Override

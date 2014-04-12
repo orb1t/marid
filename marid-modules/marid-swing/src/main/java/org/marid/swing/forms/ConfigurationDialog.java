@@ -21,7 +21,6 @@ package org.marid.swing.forms;
 import images.Images;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
-import org.marid.swing.AbstractFrame;
 import org.marid.swing.MaridAction;
 import org.marid.swing.input.InputControl;
 import org.marid.swing.input.TitledInputControl;
@@ -32,9 +31,11 @@ import java.awt.event.WindowEvent;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.prefs.Preferences;
 
 import static java.awt.BorderLayout.NORTH;
 import static java.awt.BorderLayout.SOUTH;
+import static java.awt.Dialog.ModalityType.APPLICATION_MODAL;
 import static java.awt.GridBagConstraints.*;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -47,6 +48,7 @@ import static javax.swing.JTabbedPane.WRAP_TAB_LAYOUT;
 import static javax.swing.KeyStroke.getKeyStroke;
 import static javax.swing.SwingConstants.HORIZONTAL;
 import static javax.swing.SwingConstants.VERTICAL;
+import static javax.swing.SwingUtilities.windowForComponent;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
 import static org.marid.swing.MaridAction.MaridActionListener;
@@ -58,15 +60,18 @@ import static org.marid.util.StringUtils.capitalize;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class FrameConfigurationDialog extends JDialog implements LogSupport, PrefSupport {
+public class ConfigurationDialog<C extends Component & Configuration & PrefSupport> extends JDialog implements LogSupport, PrefSupport {
 
+    private final C component;
     private final Map<Component, ComponentHolder<Object, InputControl<Object>>> containerMap = new IdentityHashMap<>();
     private final Map<String, String> tabLabelMap = new HashMap<>();
     private final Map<String, Map<String, String>> keyLabelMap = new HashMap<>();
     private final JTabbedPane tabbedPane;
 
-    public FrameConfigurationDialog(AbstractFrame owner) {
-        super(owner, s("Configuration") + ": " + owner.getTitle(), true);
+    @SuppressWarnings("MagicConstant")
+    public ConfigurationDialog(C component) {
+        super(windowForComponent(component), s("Configuration") + ": " + s(component.getName()), APPLICATION_MODAL);
+        this.component = component;
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         add(tabbedPane = new JTabbedPane(getPref("tabPlacement", TOP), getPref("tabLayoutPolicy", WRAP_TAB_LAYOUT)));
         for (final Tab tab : tabs()) {
@@ -91,37 +96,41 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
             h.addComponent(cclBtn).addComponent(okBtn);
             v.addComponent(impBtn).addComponent(expBtn).addComponent(defBtn).addComponent(cclBtn).addComponent(okBtn);
         }), SOUTH);
-        setMinimumSize(new Dimension(700, 500));
-        setPreferredSize(computePreferredSize());
-        pack();
-        setLocationRelativeTo(owner);
+        setPreferredSize(getPref("size", getPreferredSize()));
         getRootPane().setDefaultButton(okBtn);
         getRootPane().registerKeyboardAction(cclBtn.getAction(), getKeyStroke("ESCAPE"), WHEN_IN_FOCUSED_WINDOW);
+        pack();
+        setLocationRelativeTo(getOwner());
+    }
+
+    @Override
+    public Preferences preferences() {
+        return component.preferences().node("configurationDialogPreferences");
     }
 
     private Set<Tab> tabs() {
         final Set<Tab> tabs = new TreeSet<>(
                 (a, b) -> a.order() != b.order() ? a.order() - b.order() : a.node().compareTo(b.node()));
-        for (final Class<?> i : getOwner().getClass().getInterfaces()) {
-            tabs.addAll(Arrays.<Tab>asList(i.getAnnotationsByType(Tab.class)));
+        for (final Class<?> i : component.getClass().getInterfaces()) {
+            tabs.addAll(Arrays.asList(i.getAnnotationsByType(Tab.class)));
         }
-        for (Class<?> c = getOwner().getClass(); c != null; c = c.getSuperclass()) {
-            tabs.addAll(Arrays.<Tab>asList(c.getAnnotationsByType(Tab.class)));
+        for (Class<?> c = component.getClass(); c != null; c = c.getSuperclass()) {
+            tabs.addAll(Arrays.asList(c.getAnnotationsByType(Tab.class)));
         }
         return tabs;
-    }
-
-    private Dimension computePreferredSize() {
-        final Rectangle rectangle = new Rectangle(getPref("size", getPreferredSize()));
-        final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        final Rectangle screenRectangle = new Rectangle(screenSize.width * 3 / 4, screenSize.height * 3 / 4);
-        return screenRectangle.intersection(rectangle).getSize();
     }
 
     @Override
     protected void processWindowEvent(WindowEvent e) {
         super.processWindowEvent(e);
-        putPref("size", getSize());
+        switch (e.getID()) {
+            case WindowEvent.WINDOW_CLOSED:
+                putPref("size", getSize());
+                break;
+            case WindowEvent.WINDOW_OPENED:
+                setSize(getPref("size", getSize()));
+                break;
+        }
     }
 
     protected boolean savePreferences() {
@@ -208,9 +217,9 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
         final JPanel panel = new JPanel(new GridBagLayout());
         final GridBagConstraints c = new GridBagConstraints();
         c.fill = BOTH;
-        c.anchor = BASELINE;
+        c.anchor = GridBagConstraints.CENTER;
         c.insets = new Insets(5, 5, 5, 5);
-        asList(getOwner().getClass().getFields())
+        asList(component.getClass().getFields())
                 .stream()
                 .filter(f -> Modifier.isStatic(f.getModifiers()) &&
                         f.isAnnotationPresent(Input.class) &&
@@ -257,11 +266,6 @@ public class FrameConfigurationDialog extends JDialog implements LogSupport, Pre
         c.weightx = 1.0;
         p.add(ch.control.getComponent(), c);
         keyLabelMap.get(in.tab()).put(ch.key, labelText);
-    }
-
-    @Override
-    public AbstractFrame getOwner() {
-        return (AbstractFrame) super.getOwner();
     }
 
     private static class ComponentHolder<V, C extends InputControl<V>> {

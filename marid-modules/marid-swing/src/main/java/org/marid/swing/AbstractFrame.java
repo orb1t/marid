@@ -22,6 +22,8 @@ import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.SysPrefSupport;
+import org.marid.swing.forms.Configuration;
+import org.marid.swing.forms.ConfigurationDialog;
 import org.marid.swing.menu.MenuActionList;
 import org.marid.swing.menu.MenuActionTreeElement;
 import org.marid.swing.util.MessageType;
@@ -52,6 +54,7 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
 
     public AbstractFrame(String title) {
         super(s(title));
+        setName(title);
         setJMenuBar(new JMenuBar());
         setUndecorated(getPref("undecorated", getSysPref("undecorated", false, "windows")));
         centerPanel.setBorder(CENTER_PANEL_BORDER);
@@ -73,10 +76,19 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         menu.addSeparator();
         menu.add(new MaridAction("Switch full screen mode", null, this::switchFullScreen)
                 .setKey(getSysPref("fullScreenKey", "control alt F")));
+        if (this instanceof Configuration) {
+            menu.addSeparator();
+            menu.add(new MaridAction("Configuration...", null, this::showConfiguration)
+                    .setKey(getSysPref("showConfigurationKey", "control alt C")));
+        }
         menu.addSeparator();
         menu.add(new MaridAction("Close", null, e -> dispose())
                 .setKey(getSysPref("closeWindowKey", "control alt Q")));
         return menu;
+    }
+
+    private void showConfiguration(ActionEvent event) {
+        new ConfigurationDialog<>((Component & Configuration & PrefSupport) this).setVisible(true);
     }
 
     protected void switchAlwaysOnTop(ActionEvent event) {
@@ -118,6 +130,9 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
                 setExtendedState(getPref("extendedState", getExtendedState()));
                 break;
             case WindowEvent.WINDOW_CLOSED:
+                putPref("pos", getToolbarPosition(), "toolbar");
+                putPref("orientation", toolBar.getOrientation(), "toolbar");
+                putPref("visible", toolBar.isVisible());
                 if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
                     putPref("bounds", getBounds());
                 }
@@ -125,6 +140,11 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
                 putPref("extendedState", getExtendedState());
                 break;
         }
+    }
+
+    private String getToolbarPosition() {
+        final String position = (String) ((BorderLayout) centerPanel.getLayout()).getConstraints(toolBar);
+        return position == null ? BorderLayout.NORTH : position;
     }
 
     protected abstract void fillActions(MenuActionList actionList);
