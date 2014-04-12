@@ -48,14 +48,16 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
     public static final Border CENTER_PANEL_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 
     protected final JPanel centerPanel = new JPanel(new BorderLayout());
-    protected final JToolBar toolBar;
+    protected final JToolBar toolBar = new JToolBar(getPref("orientation", HORIZONTAL, "toolbar"));
 
     public AbstractFrame(String title) {
         super(s(title));
         setJMenuBar(new JMenuBar());
+        setUndecorated(getPref("undecorated", getSysPref("undecorated", false, "windows")));
         centerPanel.setBorder(CENTER_PANEL_BORDER);
-        centerPanel.add(toolBar = new JToolBar(getPref("tOrientation", HORIZONTAL)), getPref("tPosition", NORTH));
+        centerPanel.add(toolBar, getPref("pos", NORTH, "toolbar"));
         toolBar.setBorderPainted(true);
+        toolBar.setVisible(getPref("visible", true, "toolbar"));
         add(centerPanel);
         setIconImages(MaridIcons.ICONS);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -71,6 +73,9 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         menu.addSeparator();
         menu.add(new MaridAction("Switch full screen mode", null, this::switchFullScreen)
                 .setKey(getSysPref("fullScreenKey", "control alt F")));
+        menu.addSeparator();
+        menu.add(new MaridAction("Close", null, e -> dispose())
+                .setKey(getSysPref("closeWindowKey", "control alt Q")));
         return menu;
     }
 

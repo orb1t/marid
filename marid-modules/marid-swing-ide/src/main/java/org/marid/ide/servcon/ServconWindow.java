@@ -18,7 +18,8 @@
 
 package org.marid.ide.servcon;
 
-import org.marid.swing.AbstractMultiFrame;
+import org.marid.servcon.view.BlockEditor;
+import org.marid.swing.AbstractFrame;
 import org.marid.swing.menu.MenuActionList;
 
 import javax.swing.*;
@@ -27,15 +28,15 @@ import java.awt.event.WindowEvent;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ServconWindow extends AbstractMultiFrame {
+public class ServconWindow extends AbstractFrame {
 
     private final ServconServices services = new ServconServices();
+    private final BlockEditor editor = new BlockEditor();
     private final JSplitPane splitPane;
 
     public ServconWindow() {
         super("Service configurer");
-        centerPanel.remove(getDesktop());
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(services), getDesktop());
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(services), editor);
         splitPane.setDividerLocation(getPref("divider", 200));
         centerPanel.add(splitPane);
         pack();
@@ -53,10 +54,5 @@ public class ServconWindow extends AbstractMultiFrame {
 
     @Override
     protected void fillActions(MenuActionList actionList) {
-        actionList.add("mainMenu", "Configurator");
-        actionList.add(true, "control", "New", "Configurator")
-                .setIcon("new")
-                .setKey("control N")
-                .setListener((a, e) -> showFrame(() -> new ServconFrame(this)));
     }
 }
