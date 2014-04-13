@@ -49,7 +49,6 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
         setOpaque(true);
         setBackground(SystemColor.controlLtHighlight);
         setTransferHandler(new MaridTransferHandler());
-        registerKeyboardAction(a -> repaint(), KeyStroke.getKeyStroke("ESCAPE"), WHEN_FOCUSED);
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
     }
 
@@ -98,9 +97,6 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
                         Point p = new Point(mp.x - b.x, mp.y - b.y);
                         Component sub = component;
                         while (true) {
-                            if (sub instanceof AbstractButton) {
-                                break;
-                            }
                             final Component c = sub.getComponentAt(p);
                             if (c == null || c == sub) {
                                 break;
@@ -109,25 +105,10 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
                             final Rectangle bounds = sub.getBounds();
                             p = new Point(p.x - bounds.x, p.y - bounds.y);
                         }
-                        if (sub instanceof AbstractButton) {
-                            final AbstractButton button = (AbstractButton) sub;
-                            switch (e.getID()) {
-                                case MouseEvent.MOUSE_MOVED:
-                                    int x = component.getX(), y = component.getY();
-                                    for (Component c = sub; c != component; c = c.getParent()) {
-                                        x += c.getX();
-                                        y += c.getY();
-                                    }
-                                    final Rectangle r = new Rectangle(x, y, sub.getWidth(), sub.getHeight());
-                                    final Rectangle tr = SwingUtil.transform(transform::transform, r);
-                                    repaint(tr);
-                                    break;
-                                case MouseEvent.MOUSE_CLICKED:
-                                    button.doClick();
-                                    repaint();
-                                    break;
-                            }
-                        }
+                        sub.dispatchEvent(new MouseEvent(sub, e.getID(), me.getWhen(), me.getModifiers(),
+                                p.x, p.y, me.getXOnScreen(), me.getYOnScreen(), me.getClickCount(),
+                                me.isPopupTrigger(), me.getButton()));
+                        repaint();
                     }
                 }
                 break;

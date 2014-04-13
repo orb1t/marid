@@ -31,12 +31,11 @@ import java.awt.event.WindowEvent;
 public class ServconWindow extends AbstractFrame {
 
     private final ServconServices services = new ServconServices();
-    private final BlockEditor editor = new BlockEditor();
     private final JSplitPane splitPane;
 
     public ServconWindow() {
         super("Service configurer");
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(services), editor);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(services), new BlockEditor());
         splitPane.setDividerLocation(getPref("divider", 200));
         centerPanel.add(splitPane);
         pack();
