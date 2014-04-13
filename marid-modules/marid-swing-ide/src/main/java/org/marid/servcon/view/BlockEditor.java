@@ -27,9 +27,10 @@ import org.marid.swing.dnd.MaridTransferHandler;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 
+import static java.awt.AWTEvent.*;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.util.Objects.requireNonNull;
@@ -40,26 +41,97 @@ import static java.util.Objects.requireNonNull;
 public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSupport {
 
     private final AffineTransform transform = new AffineTransform();
+    private Point mousePoint = new Point();
+    private AffineTransform mouseTransform = (AffineTransform) transform.clone();
 
     public BlockEditor() {
         setFont(requireNonNull(UIManager.getFont(getPref("font", "Label.font")), "Font is null"));
         setOpaque(true);
         setBackground(SystemColor.controlLtHighlight);
         setTransferHandler(new MaridTransferHandler());
-        addMouseWheelListener(ev -> {
-            final double s = 1.0 + ev.getPreciseWheelRotation() / 10.0;
-            final Point mousePoint = SwingUtil.transform(transform::inverseTransform, ev.getPoint());
-            transform.translate(mousePoint.getX(), mousePoint.getY());
-            transform.scale(s, s);
-            transform.translate(-mousePoint.getX(), -mousePoint.getY());
-            repaint();
-        });
-        addMouseMotionListener(new EditorMouseMotionListener());
         registerKeyboardAction(a -> repaint(), KeyStroke.getKeyStroke("ESCAPE"), WHEN_FOCUSED);
+        enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
     }
 
     public FontMetrics getFontMetrics() {
         return getFontMetrics(getFont());
+    }
+
+    @Override
+    protected void processEvent(AWTEvent e) {
+        super.processEvent(e);
+        switch (e.getID()) {
+            case MouseEvent.MOUSE_WHEEL: {
+                final MouseWheelEvent me = (MouseWheelEvent) e;
+                final double s = 1.0 + me.getPreciseWheelRotation() / 10.0;
+                final Point mp = SwingUtil.transform(transform::inverseTransform, me.getPoint());
+                transform.translate(mp.getX(), mp.getY());
+                transform.scale(s, s);
+                transform.translate(-mp.getX(), -mp.getY());
+                repaint();
+                break;
+            }
+            case MouseEvent.MOUSE_CLICKED:
+            case MouseEvent.MOUSE_DRAGGED:
+            case MouseEvent.MOUSE_MOVED:
+            case MouseEvent.MOUSE_PRESSED:
+            case MouseEvent.MOUSE_RELEASED:
+                final MouseEvent me = (MouseEvent) e;
+                final Point mp = SwingUtil.transform(transform::inverseTransform, me.getPoint());
+                switch (e.getID()) {
+                    case MouseEvent.MOUSE_DRAGGED:
+                        if (me.isShiftDown()) {
+                            final Point p = SwingUtil.transform(mouseTransform::inverseTransform, me.getPoint());
+                            transform.setTransform(mouseTransform);
+                            transform.translate(p.getX() - mousePoint.getX(), p.getY() - mousePoint.getY());
+                            repaint();
+                        }
+                        break;
+                    default:
+                        mousePoint = mp;
+                        mouseTransform = (AffineTransform) transform.clone();
+                        break;
+                }
+                for (final Component component : getComponents()) {
+                    final Rectangle b = component.getBounds();
+                    if (b.contains(mp)) {
+                        Point p = new Point(mp.x - b.x, mp.y - b.y);
+                        Component sub = component;
+                        while (true) {
+                            if (sub instanceof AbstractButton) {
+                                break;
+                            }
+                            final Component c = sub.getComponentAt(p);
+                            if (c == null || c == sub) {
+                                break;
+                            }
+                            sub = c;
+                            final Rectangle bounds = sub.getBounds();
+                            p = new Point(p.x - bounds.x, p.y - bounds.y);
+                        }
+                        if (sub instanceof AbstractButton) {
+                            final AbstractButton button = (AbstractButton) sub;
+                            switch (e.getID()) {
+                                case MouseEvent.MOUSE_MOVED:
+                                    Rectangle r = SwingUtilities.convertRectangle(sub, sub.getBounds(), component);
+                                    System.out.println(r);
+                                    r = new Rectangle(r.x + component.getX(), r.y + component.getY(), r.width, r.height);
+                                    r = SwingUtil.transform(transform::transform, r);
+                                    repaint(r);
+                                    final Graphics2D g = (Graphics2D) getGraphics();
+                                    g.setColor(new Color(100, 100, 100, 100));
+                                    g.fill(r);
+                                    break;
+                                case MouseEvent.MOUSE_CLICKED:
+                                    button.doClick();
+                                    repaint();
+                                    break;
+                            }
+                        }
+                    }
+                }
+                break;
+        }
     }
 
     @Override
@@ -102,28 +174,6 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
         } catch (Exception x) {
             warning("Unable to transform coordinates", x);
             return false;
-        }
-    }
-
-    private class EditorMouseMotionListener implements MouseMotionListener {
-
-        private Point point = new Point();
-        private AffineTransform t = (AffineTransform) transform.clone();
-
-        @Override
-        public void mouseDragged(MouseEvent e) {
-            if (e.isShiftDown()) {
-                final Point p = SwingUtil.transform(t::inverseTransform, e.getPoint());
-                transform.setTransform(t);
-                transform.translate(p.getX() - point.getX(), p.getY() - point.getY());
-                repaint();
-            }
-        }
-
-        @Override
-        public void mouseMoved(MouseEvent e) {
-            point = SwingUtil.transform(transform::inverseTransform, e.getPoint());
-            t = (AffineTransform) transform.clone();
         }
     }
 }

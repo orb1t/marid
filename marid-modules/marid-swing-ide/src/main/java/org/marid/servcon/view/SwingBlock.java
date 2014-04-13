@@ -19,8 +19,11 @@
 package org.marid.servcon.view;
 
 import org.marid.servcon.model.Block;
+import org.marid.swing.MaridAction;
 
 import javax.swing.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -43,6 +46,22 @@ public class SwingBlock extends JPanel {
         toolBar.setBorder(BorderFactory.createEtchedBorder());
         toolBar.setBorderPainted(true);
         toolBar.add(new JLabel(block.toString(), block.getVisualRepresentation(), SwingConstants.LEFT));
+        toolBar.add(Box.createGlue());
+        toolBar.addSeparator();
+        toolBar.add(new MaridAction("Remove block", "removeWidget", e -> {
+            blockEditor.remove(this);
+        }));
+        toolBar.addMouseMotionListener(new MouseMotionListener() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                System.out.println(e);
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+
+            }
+        });
         g.setVerticalGroup(g.createSequentialGroup()
                 .addComponent(toolBar));
         g.setHorizontalGroup(g.createParallelGroup()
