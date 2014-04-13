@@ -105,9 +105,9 @@
         </dependency>
 
         <dependency>
-            <groupId>fr.inria.zvtm</groupId>
-            <artifactId>zvtm-core</artifactId>
-            <version>0.11.1</version>
+            <groupId>org.swinglabs</groupId>
+            <artifactId>jxlayer</artifactId>
+            <version>3.0.4</version>
         </dependency>
     </dependencies>
 
@@ -116,11 +116,6 @@
             <id>org.arakhne-maven</id>
             <name>Arakhne.org Snapshots</name>
             <url>http://download.tuxfamily.org/arakhne/maven</url>
-        </repository>
-
-        <repository>
-            <id>zvtm repository</id>
-            <url>http://zvtm.sourceforge.net/maven</url>
         </repository>
     </repositories>
 </project>

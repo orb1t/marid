@@ -113,14 +113,14 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
                             final AbstractButton button = (AbstractButton) sub;
                             switch (e.getID()) {
                                 case MouseEvent.MOUSE_MOVED:
-                                    Rectangle r = SwingUtilities.convertRectangle(sub, sub.getBounds(), component);
-                                    System.out.println(r);
-                                    r = new Rectangle(r.x + component.getX(), r.y + component.getY(), r.width, r.height);
-                                    r = SwingUtil.transform(transform::transform, r);
-                                    repaint(r);
-                                    final Graphics2D g = (Graphics2D) getGraphics();
-                                    g.setColor(new Color(100, 100, 100, 100));
-                                    g.fill(r);
+                                    int x = component.getX(), y = component.getY();
+                                    for (Component c = sub; c != component; c = c.getParent()) {
+                                        x += c.getX();
+                                        y += c.getY();
+                                    }
+                                    final Rectangle r = new Rectangle(x, y, sub.getWidth(), sub.getHeight());
+                                    final Rectangle tr = SwingUtil.transform(transform::transform, r);
+                                    repaint(tr);
                                     break;
                                 case MouseEvent.MOUSE_CLICKED:
                                     button.doClick();
@@ -151,7 +151,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
                     final SwingBlock block = (SwingBlock) component;
                     final Rectangle bb = block.getBounds();
                     g.translate(bb.x, bb.y);
-                    block.printAll(g);
+                    block.print(g);
                     g.translate(-bb.x, -bb.y);
                 }
             }
