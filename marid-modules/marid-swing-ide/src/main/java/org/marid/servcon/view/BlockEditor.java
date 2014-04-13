@@ -33,6 +33,8 @@ import java.awt.geom.AffineTransform;
 import static java.awt.AWTEvent.*;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.event.MouseEvent.MOUSE_ENTERED;
+import static java.awt.event.MouseEvent.MOUSE_EXITED;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -43,6 +45,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
     private final AffineTransform transform = new AffineTransform();
     private Point mousePoint = new Point();
     private AffineTransform mouseTransform = (AffineTransform) transform.clone();
+    private Component currentComponent;
 
     public BlockEditor() {
         setFont(requireNonNull(UIManager.getFont(getPref("font", "Label.font")), "Font is null"));
@@ -105,10 +108,25 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
                             final Rectangle bounds = sub.getBounds();
                             p = new Point(p.x - bounds.x, p.y - bounds.y);
                         }
-                        sub.dispatchEvent(new MouseEvent(sub, e.getID(), me.getWhen(), me.getModifiers(),
-                                p.x, p.y, me.getXOnScreen(), me.getYOnScreen(), me.getClickCount(),
-                                me.isPopupTrigger(), me.getButton()));
-                        repaint();
+                        final int id = e.getID(), cc = me.getClickCount(), bt = me.getButton(), x = p.x, y = p.y;
+                        final long t = me.getWhen();
+                        final int m = me.getModifiers(), xs = me.getXOnScreen(), ys = me.getYOnScreen();
+                        final boolean pt = me.isPopupTrigger();
+                        final MouseEvent mev = new MouseEvent(sub, id, t, m, x, y, xs, ys, cc, pt, bt);
+                        try {
+                            sub.dispatchEvent(mev);
+                        } catch (IllegalComponentStateException ex) {
+                            warning("Unable to call dispatch event", ex);
+                        }
+                        if (sub != currentComponent) {
+                            if (currentComponent != null) {
+                                final MouseEvent ev = new MouseEvent(currentComponent, MOUSE_EXITED, t, m, x, y, xs, ys, cc, pt, bt);
+                                currentComponent.dispatchEvent(ev);
+                            }
+                            sub.dispatchEvent(new MouseEvent(sub, MOUSE_ENTERED, t, m, x, y, xs, ys, cc, pt, bt));
+                            currentComponent = sub;
+                        }
+                        repaint(); // TODO: repaint within bounds
                     }
                 }
                 break;
@@ -138,6 +156,14 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
             }
         } finally {
             g.setTransform(oldTransform);
+        }
+    }
+
+    @Override
+    public void remove(Component comp) {
+        super.remove(comp);
+        if (currentComponent == comp) {
+            currentComponent = null;
         }
     }
 
