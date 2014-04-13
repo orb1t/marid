@@ -29,8 +29,6 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
-import java.util.ArrayList;
-import java.util.List;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -42,7 +40,6 @@ import static java.util.Objects.requireNonNull;
 public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSupport {
 
     private final AffineTransform transform = new AffineTransform();
-    private final List<VPaintable> blocks = new ArrayList<>();
 
     public BlockEditor() {
         setFont(requireNonNull(UIManager.getFont(getPref("font", "Label.font")), "Font is null"));
@@ -77,11 +74,14 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
             final AffineTransform t = new AffineTransform(oldTransform);
             t.concatenate(transform);
             g.setTransform(t);
-            for (final VPaintable block : blocks) {
-                final Rectangle bb = block.getBounds();
-                g.translate(bb.x, bb.y);
-                block.paint(g);
-                g.translate(-bb.x, -bb.y);
+            for (final Component component : getComponents()) {
+                if (component instanceof SwingBlock) {
+                    final SwingBlock block = (SwingBlock) component;
+                    final Rectangle bb = block.getBounds();
+                    g.translate(bb.x, bb.y);
+                    block.printAll(g);
+                    g.translate(-bb.x, -bb.y);
+                }
             }
         } finally {
             g.setTransform(oldTransform);
@@ -93,8 +93,10 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
         try {
             final Point dropPoint = new Point();
             transform.inverseTransform(support.getDropLocation().getDropPoint(), dropPoint);
-            final VBlock block = new VBlock(this, object, dropPoint);
-            blocks.add(block);
+            final SwingBlock block = new SwingBlock(this, object);
+            block.setBounds(new Rectangle(dropPoint, block.getPreferredSize()));
+            add(block);
+            block.setVisible(false);
             repaint();
             return true;
         } catch (Exception x) {
