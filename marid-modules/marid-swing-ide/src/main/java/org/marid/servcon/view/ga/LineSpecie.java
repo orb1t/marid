@@ -32,14 +32,19 @@ import java.util.concurrent.ThreadLocalRandom;
 */
 public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
 
+    private static final int BORDER = 20;
     private final int n = 3;
     private final Point[] points;
 
     public LineSpecie(BlockLink<LineSpecie> blockLink) {
         super(blockLink);
         points = new Point[n];
+        final Random random = new Random();
+        final Point p1 = blockLink.out.connectionPoint();
+        final Point p2 = blockLink.in.connectionPoint();
+        final Point cp = new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
         for (int i = 0; i < n; i++) {
-            points[i] = blockLink.in.connectionPoint();
+            points[i] = new Point(cp.x + random.nextInt(10), cp.y + random.nextInt(10));
         }
     }
 
@@ -75,16 +80,29 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
                 distance += points[i].distance(points[i + 1]);
             }
             final double distFactor = lineDistance == 0.0 ? (distance == 0.0 ? 0.0 : 1.0) : distance / lineDistance;
+            final Rectangle[] rectangles;
+            synchronized (blockLink.in.getEditor().getTreeLock()) {
+                rectangles = new Rectangle[blockLink.in.getEditor().getComponentCount()];
+                for (int i = 0; i < rectangles.length; i++) {
+                    rectangles[i] = blockLink.in.getEditor().getComponent(i).getBounds();
+                }
+            }
             double isectFactor = 0.0;
-            /*
-            for (final Component component : blockLink.in.getEditor().getComponents()) {
-                final Rectangle bounds = component.getBounds();
+            for (final Rectangle r : rectangles) {
+                final int x = r.x - BORDER;
+                final int y = r.y - BORDER;
+                final int w = r.width + BORDER * 2;
+                final int h = r.height + BORDER * 2;
+                final Rectangle b = new Rectangle(x, y, w, h);
                 for (int i = 0; i < points.length - 1; i++) {
-                    if (bounds.intersectsLine(new Line2D.Double(points[i], points[i + 1]))) {
-                        isectFactor++;
+                    final Rectangle rect = i ==0 || i == points.length - 2 ? r : b;
+                    final Line2D line = new Line2D.Double(points[i], points[i + 1]);
+                    if (rect.intersectsLine(line)) {
+                        final Dimension d = rect.intersection(line.getBounds()).getSize();
+                        isectFactor += Math.sqrt(d.width * d.width + d.height * d.height) + 1.0;
                     }
                 }
-            }*/
+            }
             return distFactor + isectFactor;
         } catch (Exception x) {
             warning("GA fitness error on {0}", x, Arrays.toString(points));
@@ -98,7 +116,9 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
         for (int i = 0; i < n; i++) {
             if (random.nextFloat() < MUTATION_PROBABILITY) {
                 final Point p = points[i];
-                points[i] = new Point(p.x + random.nextInt(5) - 2, p.y + random.nextInt(5) - 2);
+                final int rx = random.nextInt(30);
+                final int ry = random.nextInt(30);
+                points[i] = new Point(p.x + random.nextInt(rx * 2 + 1) - rx, p.y + random.nextInt(ry * 2 + 1) - ry);
             }
         }
     }

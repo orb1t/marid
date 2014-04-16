@@ -29,9 +29,12 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 
 import static java.awt.AWTEvent.MOUSE_EVENT_MASK;
 import static java.awt.AWTEvent.MOUSE_MOTION_EVENT_MASK;
@@ -49,6 +52,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
     private final AffineTransform transform = new AffineTransform();
     protected final List<BlockLink<?>> blockLinks = new CopyOnWriteArrayList<>();
     private final LinkWorker linkWorker = new LinkWorker();
+    private final ForkJoinPool pool = new ForkJoinPool();
     private Point mousePoint = new Point();
     private AffineTransform mouseTransform = (AffineTransform) transform.clone();
     private Component currentComponent;
@@ -229,11 +233,15 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
         @Override
         protected Void doInBackground() throws Exception {
             while (!isCancelled()) {
+                final List<ForkJoinTask<?>> tasks = new ArrayList<>(blockLinks.size());
                 for (final BlockLink<?> blockLink : blockLinks) {
-                    for (int i = 0; i < 1000; i++) {
-                        blockLink.doGA();
-                    }
+                    tasks.add(pool.submit(() -> {
+                        for (int i = 0; i < 1000; i++) {
+                            blockLink.doGA();
+                        }
+                    }));
                 }
+                tasks.forEach(ForkJoinTask::join);
                 process(Collections.singletonList(null));
                 Thread.sleep(100L);
             }
