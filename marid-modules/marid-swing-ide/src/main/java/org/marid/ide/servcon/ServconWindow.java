@@ -23,6 +23,7 @@ import org.marid.swing.AbstractFrame;
 import org.marid.swing.menu.MenuActionList;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 /**
@@ -31,13 +32,25 @@ import java.awt.event.WindowEvent;
 public class ServconWindow extends AbstractFrame {
 
     private final ServconServices services = new ServconServices();
+    private final BlockEditor blockEditor = new BlockEditor();
     private final JSplitPane splitPane;
 
     public ServconWindow() {
         super("Service configurer");
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(services), new BlockEditor());
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(services), blockEditor);
         splitPane.setDividerLocation(getPref("divider", 200));
         centerPanel.add(splitPane);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                blockEditor.start();
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                blockEditor.stop();
+            }
+        });
         pack();
     }
 

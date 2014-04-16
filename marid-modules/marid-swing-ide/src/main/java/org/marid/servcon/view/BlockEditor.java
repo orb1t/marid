@@ -29,12 +29,16 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import static java.awt.AWTEvent.*;
+import static java.awt.AWTEvent.MOUSE_EVENT_MASK;
+import static java.awt.AWTEvent.MOUSE_MOTION_EVENT_MASK;
+import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.event.MouseEvent.MOUSE_ENTERED;
-import static java.awt.event.MouseEvent.MOUSE_EXITED;
+import static java.awt.event.MouseEvent.*;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -43,9 +47,14 @@ import static java.util.Objects.requireNonNull;
 public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSupport {
 
     private final AffineTransform transform = new AffineTransform();
+    protected final List<BlockLink<?>> blockLinks = new CopyOnWriteArrayList<>();
+    private final LinkWorker linkWorker = new LinkWorker();
     private Point mousePoint = new Point();
     private AffineTransform mouseTransform = (AffineTransform) transform.clone();
     private Component currentComponent;
+    private Component movingComponent;
+    private Point movingComponentPoint;
+    private Point movingComponentLocation;
 
     public BlockEditor() {
         setFont(requireNonNull(UIManager.getFont(getPref("font", "Label.font")), "Font is null"));
@@ -59,10 +68,19 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
         return getFontMetrics(getFont());
     }
 
+    public void start() {
+        linkWorker.execute();
+    }
+
+    public void stop() {
+        linkWorker.cancel(false);
+    }
+
+    @SuppressWarnings("StringEquality")
     @Override
     protected void processEvent(AWTEvent e) {
         super.processEvent(e);
-        switch (e.getID()) {
+        MainSwitch: switch (e.getID()) {
             case MouseEvent.MOUSE_WHEEL: {
                 final MouseWheelEvent me = (MouseWheelEvent) e;
                 final double s = 1.0 + me.getPreciseWheelRotation() / 10.0;
@@ -87,8 +105,21 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
                             transform.setTransform(mouseTransform);
                             transform.translate(p.getX() - mousePoint.getX(), p.getY() - mousePoint.getY());
                             repaint();
+                        } else if (movingComponent != null) {
+                            final int locx = movingComponentLocation.x + mp.x - movingComponentPoint.x;
+                            final int locy = movingComponentLocation.y + mp.y - movingComponentPoint.y;
+                            movingComponent.setLocation(locx, locy);
+                            repaint();
+                            break MainSwitch;
                         }
                         break;
+                    case MOUSE_RELEASED:
+                        if (movingComponent != null) {
+                            movingComponent = null;
+                            movingComponentPoint = null;
+                            movingComponentLocation = null;
+                            break MainSwitch;
+                        }
                     default:
                         mousePoint = mp;
                         mouseTransform = (AffineTransform) transform.clone();
@@ -113,10 +144,16 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
                         final int m = me.getModifiers(), xs = me.getXOnScreen(), ys = me.getYOnScreen();
                         final boolean pt = me.isPopupTrigger();
                         final MouseEvent mev = new MouseEvent(sub, id, t, m, x, y, xs, ys, cc, pt, bt);
+                        if (sub.getName() == BlockView.MOVEABLE && id == MOUSE_PRESSED) {
+                            movingComponent = component;
+                            movingComponentPoint = mp;
+                            movingComponentLocation = component.getLocation();
+                            break;
+                        }
                         try {
                             sub.dispatchEvent(mev);
                         } catch (IllegalComponentStateException ex) {
-                            warning("Unable to call dispatch event", ex);
+                            // ignore it
                         }
                         if (sub != currentComponent) {
                             if (currentComponent != null) {
@@ -127,6 +164,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
                             currentComponent = sub;
                         }
                         repaint(); // TODO: repaint within bounds
+                        break;
                     }
                 }
                 break;
@@ -145,9 +183,12 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
             final AffineTransform t = new AffineTransform(oldTransform);
             t.concatenate(transform);
             g.setTransform(t);
+            for (final BlockLink blockLink : blockLinks) {
+                blockLink.paint(g);
+            }
             for (final Component component : getComponents()) {
-                if (component instanceof SwingBlock) {
-                    final SwingBlock block = (SwingBlock) component;
+                if (component instanceof BlockView) {
+                    final BlockView block = (BlockView) component;
                     final Rectangle bb = block.getBounds();
                     g.translate(bb.x, bb.y);
                     block.print(g);
@@ -172,7 +213,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
         try {
             final Point dropPoint = new Point();
             transform.inverseTransform(support.getDropLocation().getDropPoint(), dropPoint);
-            final SwingBlock block = new SwingBlock(this, object);
+            final BlockView block = new BlockView(this, object);
             block.setBounds(new Rectangle(dropPoint, block.getPreferredSize()));
             add(block);
             block.setVisible(false);
@@ -181,6 +222,27 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
         } catch (Exception x) {
             warning("Unable to transform coordinates", x);
             return false;
+        }
+    }
+
+    private class LinkWorker extends SwingWorker<Void, Void> {
+        @Override
+        protected Void doInBackground() throws Exception {
+            while (!isCancelled()) {
+                for (final BlockLink<?> blockLink : blockLinks) {
+                    for (int i = 0; i < 1000; i++) {
+                        blockLink.doGA();
+                    }
+                }
+                process(Collections.singletonList(null));
+                Thread.sleep(100L);
+            }
+            return null;
+        }
+
+        @Override
+        protected void process(List<Void> chunks) {
+            repaint();
         }
     }
 }
