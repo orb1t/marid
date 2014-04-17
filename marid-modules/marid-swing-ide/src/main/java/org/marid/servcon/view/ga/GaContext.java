@@ -29,10 +29,10 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class GaContext {
 
-    final Rectangle[] rectangles;
-    final Point p1;
-    final Point p2;
-    final Random random = ThreadLocalRandom.current();
+    public final Rectangle[] rectangles;
+    public final Point p1;
+    public final Point p2;
+    public final Random random = ThreadLocalRandom.current();
 
     public GaContext(Rectangle[] rectangles, Point p1, Point p2) {
         this.rectangles = rectangles;

@@ -23,10 +23,12 @@ import org.marid.logging.LogSupport;
 import org.marid.servcon.view.ga.GaContext;
 import org.marid.servcon.view.ga.Specie;
 
+import javax.annotation.Nonnull;
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.TreeSet;
 import java.util.function.Function;
 
 /**
@@ -34,7 +36,7 @@ import java.util.function.Function;
  */
 public class BlockLink<S extends Specie<S>> implements LogSupport {
 
-    private static final int SPECIES_COUNT = 20;
+    private static final int SPECIES_COUNT = 40;
 
     private volatile S specie;
     private final List<S> species = new ArrayList<>();
@@ -56,23 +58,18 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
 
     public void doGA(GaContext gaContext) {
         try {
-            final TreeMap<Double, S> specieMap = new TreeMap<>();
-            final Random random = ThreadLocalRandom.current();
-            while (specieMap.size() < SPECIES_COUNT * 2) {
-                final S male = species.get(random.nextInt(species.size()));
-                final S female = species.get(random.nextInt(species.size()));
+            final TreeSet<SpecieEntry<S>> set = new TreeSet<>();
+            while (set.size() < SPECIES_COUNT * 2) {
+                final S male = species.get(gaContext.random.nextInt(species.size()));
+                final S female = species.get(gaContext.random.nextInt(species.size()));
                 final S child = male.crossover(gaContext, female);
                 child.mutate(gaContext);
-                specieMap.put(child.fitness(gaContext), child);
+                set.add(new SpecieEntry<>(child.fitness(gaContext), child));
             }
-            final Map.Entry<Double, S> bestEntry = specieMap.firstEntry();
-            specie = bestEntry.getValue();
-            species.clear();
-            for (final S specie : specieMap.values()) {
-                if (species.size() > SPECIES_COUNT) {
-                    break;
-                }
-                species.add(specie);
+            specie = set.first().specie;
+            final Iterator<SpecieEntry<S>> it = set.iterator();
+            for (int i = 0; i < SPECIES_COUNT; i++) {
+                species.set(i, it.next().specie);
             }
         } catch (Exception x) {
             warning("GA error", x);
@@ -82,5 +79,21 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
     @Override
     public String toString() {
         return getClass().getSimpleName() + ImmutableMap.of("in", in, "out", out, "specie", specie);
+    }
+
+    private static class SpecieEntry<S extends Specie<S>> implements Comparable<SpecieEntry<S>> {
+
+        private final double fitness;
+        private final S specie;
+
+        private SpecieEntry(double fitness, S specie) {
+            this.fitness = fitness;
+            this.specie = specie;
+        }
+
+        @Override
+        public int compareTo(@Nonnull SpecieEntry<S> o) {
+            return Double.compare(fitness, o.fitness);
+        }
     }
 }

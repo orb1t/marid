@@ -238,7 +238,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
                 final List<ForkJoinTask<?>> tasks = new ArrayList<>(blockLinks.size());
                 for (final BlockLink<?> blockLink : blockLinks) {
                     tasks.add(pool.submit(() -> {
-                        for (int i = 0; i < 1000; i++) {
+                        for (int i = 0; i < 400; i++) {
                             blockLink.doGA(new GaContext(blockLink));
                         }
                     }));

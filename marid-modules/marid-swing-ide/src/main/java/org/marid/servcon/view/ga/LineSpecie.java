@@ -34,7 +34,7 @@ import java.util.Random;
 public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
 
     private static final int BORDER = 20;
-    private static final int COUNT = 4;
+    private static final int COUNT = 5;
 
     private final int[] xs;
     private final int[] ys;
@@ -86,10 +86,11 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
             for (final Rectangle r : fc.rectangles) {
                 final double cx = r.getCenterX();
                 final double cy = r.getCenterY();
-                final double rr = Point.distance(cx, cy, r.getMinY(), r.getMinY());
+                final double rr = Point.distance(cx, cy, r.getMinY(), r.getMinY()) * 2;
                 visitLines(fc, (x1, y1, x2, y2) -> {
                     if (r.intersectsLine(x1, y1, x2, y2)) {
-                        isectFactor.addAndGet(rr - Line2D.ptLineDist(x1, y1, x2, y2, cx, cy));
+                        final double v = rr - Line2D.ptLineDist(x1, y1, x2, y2, cx, cy);
+                        isectFactor.addAndGet(v >= 0.0 ? v : 1.0);
                     }
                 });
             }
