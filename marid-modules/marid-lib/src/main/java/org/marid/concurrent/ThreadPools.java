@@ -16,30 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view.ga;
+package org.marid.concurrent;
 
-import org.marid.servcon.view.BlockLink;
-
-import java.awt.*;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
-* @author Dmitry Ovchinnikov.
-*/
-public abstract class Specie<S extends Specie<S>> {
+ * @author Dmitry Ovchinnikov.
+ */
+public class ThreadPools {
 
-    public static final float MUTATION_PROBABILITY = 0.005f;
-
-    protected final BlockLink<S> blockLink;
-
-    public Specie(BlockLink<S> blockLink) {
-        this.blockLink = blockLink;
+    public static ThreadPoolExecutor newThreadPool(int threads, long keepAliveTime) {
+        return new ThreadPoolExecutor(
+                0,
+                threads,
+                keepAliveTime,
+                TimeUnit.MILLISECONDS,
+                new SynchronousQueue<>(),
+                new ThreadPoolExecutor.CallerRunsPolicy());
     }
-
-    public abstract void paint(Graphics2D g);
-
-    public abstract double fitness(GaContext gaContext);
-
-    public abstract void mutate(GaContext gaContext);
-
-    public abstract S crossover(GaContext gaContext, S that);
 }

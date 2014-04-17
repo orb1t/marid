@@ -29,10 +29,6 @@
 
     <artifactId>marid-swing</artifactId>
 
-    <properties>
-        <neteditor.version>17.0</neteditor.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -75,47 +71,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.arakhne.neteditor</groupId>
-            <artifactId>neteditor-fig</artifactId>
-            <version>${neteditor.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.arakhne.neteditor</groupId>
-            <artifactId>neteditor-figlayout</artifactId>
-            <version>${neteditor.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.arakhne.neteditor</groupId>
-            <artifactId>neteditor-formalism</artifactId>
-            <version>${neteditor.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.arakhne.neteditor</groupId>
-            <artifactId>neteditor-io</artifactId>
-            <version>${neteditor.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.arakhne.neteditor</groupId>
-            <artifactId>neteditor-swingpanel</artifactId>
-            <version>${neteditor.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.swinglabs</groupId>
-            <artifactId>jxlayer</artifactId>
-            <version>3.0.4</version>
+            <groupId>com.vividsolutions</groupId>
+            <artifactId>jts</artifactId>
+            <version>1.13</version>
         </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>org.arakhne-maven</id>
-            <name>Arakhne.org Snapshots</name>
-            <url>http://download.tuxfamily.org/arakhne/maven</url>
-        </repository>
-    </repositories>
 </project>

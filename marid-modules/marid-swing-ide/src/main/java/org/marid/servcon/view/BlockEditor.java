@@ -20,6 +20,7 @@ package org.marid.servcon.view;
 
 import org.marid.pref.PrefSupport;
 import org.marid.servcon.model.Block;
+import org.marid.servcon.view.ga.GaContext;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.dnd.DndTarget;
 import org.marid.swing.dnd.MaridTransferHandler;
@@ -52,7 +53,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
     private final AffineTransform transform = new AffineTransform();
     protected final List<BlockLink<?>> blockLinks = new CopyOnWriteArrayList<>();
     private final LinkWorker linkWorker = new LinkWorker();
-    private final ForkJoinPool pool = new ForkJoinPool();
+    private final ForkJoinPool pool = new ForkJoinPool(8);
     private Point mousePoint = new Point();
     private AffineTransform mouseTransform = (AffineTransform) transform.clone();
     private Component currentComponent;
@@ -78,6 +79,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
 
     public void stop() {
         linkWorker.cancel(false);
+        pool.shutdown();
     }
 
     @SuppressWarnings("StringEquality")
@@ -237,7 +239,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
                 for (final BlockLink<?> blockLink : blockLinks) {
                     tasks.add(pool.submit(() -> {
                         for (int i = 0; i < 1000; i++) {
-                            blockLink.doGA();
+                            blockLink.doGA(new GaContext(blockLink));
                         }
                     }));
                 }

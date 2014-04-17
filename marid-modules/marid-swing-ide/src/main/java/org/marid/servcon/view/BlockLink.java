@@ -20,6 +20,7 @@ package org.marid.servcon.view;
 
 import com.google.common.collect.ImmutableMap;
 import org.marid.logging.LogSupport;
+import org.marid.servcon.view.ga.GaContext;
 import org.marid.servcon.view.ga.Specie;
 
 import java.awt.*;
@@ -53,16 +54,16 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
         specie.paint(g);
     }
 
-    public void doGA() {
+    public void doGA(GaContext gaContext) {
         try {
             final TreeMap<Double, S> specieMap = new TreeMap<>();
             final Random random = ThreadLocalRandom.current();
             while (specieMap.size() < SPECIES_COUNT * 2) {
                 final S male = species.get(random.nextInt(species.size()));
                 final S female = species.get(random.nextInt(species.size()));
-                final S child = male.crossover(female);
-                child.mutate();
-                specieMap.put(child.fitness(), child);
+                final S child = male.crossover(gaContext, female);
+                child.mutate(gaContext);
+                specieMap.put(child.fitness(gaContext), child);
             }
             final Map.Entry<Double, S> bestEntry = specieMap.firstEntry();
             specie = bestEntry.getValue();
