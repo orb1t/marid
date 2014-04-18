@@ -23,33 +23,33 @@ import org.marid.logging.LogSupport;
 import org.marid.servcon.view.ga.GaContext;
 import org.marid.servcon.view.ga.Specie;
 
-import javax.annotation.Nonnull;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.Arrays;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 public class BlockLink<S extends Specie<S>> implements LogSupport {
 
-    private static final int SPECIES_COUNT = 40;
+    private static final int SPECIES_COUNT = 30;
 
     private volatile S specie;
-    private final List<S> species = new ArrayList<>();
+    private final S[] species;
+    private final Species<S> incubator;
     public final BlockView.In in;
     public final BlockView.Out out;
 
-    public BlockLink(Function<BlockLink<S>, S> specieFunc, BlockView.In in, BlockView.Out out) {
+    public BlockLink(Function<BlockLink<S>, S> specieFunc, IntFunction<S[]> saf, BlockView.In in, BlockView.Out out) {
         this.in = in;
         this.out = out;
         this.specie = specieFunc.apply(this);
+        this.species = saf.apply(SPECIES_COUNT);
         for (int i = 0; i < SPECIES_COUNT; i++) {
-            species.add(specieFunc.apply(this));
+            this.species[i] = specieFunc.apply(this);
         }
+        this.incubator = new Species<>(saf, SPECIES_COUNT * 4);
     }
 
     public void paint(Graphics2D g) {
@@ -57,20 +57,17 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
     }
 
     public void doGA(GaContext gaContext) {
+        incubator.count = 0;
         try {
-            final TreeSet<SpecieEntry<S>> set = new TreeSet<>();
-            while (set.size() < SPECIES_COUNT * 2) {
-                final S male = species.get(gaContext.random.nextInt(species.size()));
-                final S female = species.get(gaContext.random.nextInt(species.size()));
+            while (incubator.count < incubator.fitnesses.length) {
+                final S male = species[gaContext.random.nextInt(species.length)];
+                final S female = species[gaContext.random.nextInt(species.length)];
                 final S child = male.crossover(gaContext, female);
                 child.mutate(gaContext);
-                set.add(new SpecieEntry<>(child.fitness(gaContext), child));
+                incubator.put(child.fitness(gaContext), child);
             }
-            specie = set.first().specie;
-            final Iterator<SpecieEntry<S>> it = set.iterator();
-            for (int i = 0; i < SPECIES_COUNT; i++) {
-                species.set(i, it.next().specie);
-            }
+            specie = incubator.species[0];
+            incubator.copy(SPECIES_COUNT, species);
         } catch (Exception x) {
             warning("GA error", x);
         }
@@ -81,19 +78,31 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
         return getClass().getSimpleName() + ImmutableMap.of("in", in, "out", out, "specie", specie);
     }
 
-    private static class SpecieEntry<S extends Specie<S>> implements Comparable<SpecieEntry<S>> {
+    static class Species<S extends Specie<S>> {
 
-        private final double fitness;
-        private final S specie;
+        final double[] fitnesses;
+        final S[] species;
+        int count;
 
-        private SpecieEntry(double fitness, S specie) {
-            this.fitness = fitness;
-            this.specie = specie;
+        Species(IntFunction<S[]> func, int count) {
+            fitnesses = new double[count];
+            species = func.apply(count);
         }
 
-        @Override
-        public int compareTo(@Nonnull SpecieEntry<S> o) {
-            return Double.compare(fitness, o.fitness);
+        void put(double fitness, S specie) {
+            final int index = -(Arrays.binarySearch(fitnesses, 0, count, fitness) + 1);
+            if (index < 0) {
+                return;
+            }
+            System.arraycopy(fitnesses, index, fitnesses, index + 1, count - index);
+            System.arraycopy(species, index, species, index + 1, count - index);
+            fitnesses[index] = fitness;
+            species[index] = specie;
+            count++;
+        }
+
+        void copy(int count, S[] species) {
+            System.arraycopy(this.species, 0, species, 0, count);
         }
     }
 }

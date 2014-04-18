@@ -169,12 +169,10 @@ public class BlockView extends JPanel {
             for (final Component component : blockEditor.getComponents()) {
                 if (component instanceof BlockView) {
                     final BlockView bv = (BlockView) component;
-                    for (final Out out : bv.outputs) {
-                        if (out.isSelected()) {
-                            out.setSelected(false);
-                            blockEditor.blockLinks.add(new BlockLink<LineSpecie>(LineSpecie::new, this, out));
-                        }
-                    }
+                    bv.outputs.stream().filter(Out::isSelected).forEach(out -> {
+                        out.setSelected(false);
+                        blockEditor.blockLinks.add(new BlockLink<LineSpecie>(LineSpecie::new, LineSpecie[]::new, this, out));
+                    });
                 }
             }
             setSelected(false);

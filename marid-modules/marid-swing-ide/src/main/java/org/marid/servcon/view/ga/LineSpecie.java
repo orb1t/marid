@@ -18,13 +18,12 @@
 
 package org.marid.servcon.view.ga;
 
-import com.google.common.util.concurrent.AtomicDouble;
 import org.marid.logging.LogSupport;
 import org.marid.servcon.view.BlockLink;
-import org.marid.swing.geom.LineCoordinateVisitor;
 
 import java.awt.*;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -69,34 +68,45 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
     public void paint(Graphics2D g) {
         final Point p1 = blockLink.out.connectionPoint();
         final Point p2 = blockLink.in.connectionPoint();
-        g.drawLine(p1.x, p1.y, p1.x + BORDER, p1.y);
-        g.drawLine(p1.x + BORDER, p1.y, xs[0], ys[0]);
-        g.drawPolyline(xs, ys, COUNT);
-        g.drawLine(xs[COUNT - 1], ys[COUNT - 1], p2.x - BORDER, p2.y);
-        g.drawLine(p2.x - BORDER, p2.y, p2.x, p2.y);
+        final Path2D.Float path = new Path2D.Float();
+        path.moveTo(p1.x, p1.y);
+        path.lineTo(p1.x + BORDER, p1.y);
+        for (int i = 0; i < COUNT - 1; i += 2) {
+            path.quadTo(xs[i], ys[i], xs[i + 1], ys[i + 1]);
+        }
+        path.quadTo(xs[COUNT - 1], ys[COUNT - 1], p2.x - BORDER, p2.y);
+        path.lineTo(p2.x, p2.y);
+        g.draw(path);
     }
 
     @Override
     public double fitness(GaContext fc) {
         try {
-            final double lineDistance = Point.distance(fc.p1.x + BORDER, fc.p1.y, fc.p2.x - BORDER, fc.p2.y);
-            final double distance = length(fc);
-            final double distFactor = lineDistance == 0.0 ? (distance == 0.0 ? 0.0 : 1.0) : distance / lineDistance;
-            final AtomicDouble isectFactor = new AtomicDouble();
+            final double lineDistance = Point.distance(fc.p1.x + BORDER, fc.p1.y, fc.p2.x - BORDER, fc.p2.y) + 1.0;
+            final double distFactor = length(fc) / lineDistance;
+            double isectFactor = 0.0;
             for (final Rectangle r : fc.rectangles) {
                 final double cx = r.getCenterX();
                 final double cy = r.getCenterY();
                 final double rr = Point.distance(cx, cy, r.getMinY(), r.getMinY()) * 2;
-                visitLines(fc, (x1, y1, x2, y2) -> {
-                    if (r.intersectsLine(x1, y1, x2, y2)) {
-                        final double v = rr - Line2D.ptLineDist(x1, y1, x2, y2, cx, cy);
-                        isectFactor.addAndGet(v >= 0.0 ? v : 1.0);
-                    }
-                });
+                isectFactor += isectF(r, cx, cy, rr, fc.p1.x + BORDER, fc.p1.y, xs[0], ys[0]);
+                for (int i = 0; i < COUNT - 1; i++) {
+                    isectFactor += isectF(r, cx, cy, rr, xs[i], ys[i], xs[i + 1], ys[i + 1]);
+                }
+                isectFactor += isectF(r, cx, cy, rr, xs[COUNT - 1], ys[COUNT - 1], fc.p2.x - BORDER, fc.p2.y);
             }
-            return distFactor + isectFactor.get() / (lineDistance * 0.25);
+            return distFactor + isectFactor / (lineDistance * 0.25);
         } catch (Exception x) {
             warning("GA fitness error on {0}", x, this);
+            return 0.0;
+        }
+    }
+
+    private double isectF(Rectangle r, double cx, double cy, double rr, double x1, double y1, double x2, double y2) {
+        if (r.intersectsLine(x1, y1, x2, y2)) {
+            final double v = rr - Line2D.ptLineDist(x1, y1, x2, y2, cx, cy);
+            return v >= 0.0 ? v : 1.0;
+        } else {
             return 0.0;
         }
     }
@@ -126,14 +136,6 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
             }
         }
         return new LineSpecie(blockLink, xs, ys);
-    }
-
-    private void visitLines(GaContext fc, LineCoordinateVisitor visitor) {
-        visitor.visit(fc.p1.x + BORDER, fc.p1.y, xs[0], ys[0]);
-        for (int i = 0; i < COUNT - 1; i++) {
-            visitor.visit(xs[i], ys[i], xs[i + 1], ys[i + 1]);
-        }
-        visitor.visit(xs[COUNT - 1], ys[COUNT - 1], fc.p2.x - BORDER, fc.p2.y);
     }
 
     @Override
