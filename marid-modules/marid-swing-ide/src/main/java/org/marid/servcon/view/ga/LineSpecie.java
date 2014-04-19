@@ -108,7 +108,7 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
 
     @Override
     public void mutate(GaContext gc) {
-        if (gc.random.nextFloat() < gc.mutationProbability) {
+        if (gc.random.nextFloat() < gc.getMutationProbability()) {
             final int r = gc.random.nextInt(1000);
             for (int i = 0; i < COUNT; i++) {
                 xs[i] += gc.random.nextInt(r * 2 + 1) - r;

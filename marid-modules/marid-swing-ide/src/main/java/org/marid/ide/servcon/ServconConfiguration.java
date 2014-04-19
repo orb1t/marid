@@ -24,6 +24,7 @@ import org.marid.swing.forms.Input;
 import org.marid.swing.forms.Tab;
 import org.marid.swing.input.EnumInputControl;
 import org.marid.swing.input.FloatInputControl;
+import org.marid.swing.input.SpinIntInputControl;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -41,4 +42,14 @@ public interface ServconConfiguration extends Configuration {
     Pv<Float, FloatInputControl> mutationProbability = new Pv<>(
             FloatInputControl::new,
             () -> 0.005f);
+
+    @Input(tab = "GA")
+    Pv<Integer, SpinIntInputControl> incubatorSize = new Pv<>(
+            () -> new SpinIntInputControl(2, 10, 1),
+            () -> 4);
+
+    @Input(tab = "GA")
+    Pv<Integer, SpinIntInputControl> species = new Pv<>(
+            () -> new SpinIntInputControl(10, 100, 5),
+            () -> 30);
 }

@@ -28,16 +28,16 @@ import org.marid.servcon.view.ga.Specie;
 public enum BlockLinkType {
     LINE_LINK {
         @Override
-        public BlockLink<? extends Specie> createBlockLink(BlockView.In in, BlockView.Out out) {
-            return new BlockLink<>(LineSpecie::new, LineSpecie[]::new, in, out);
+        public BlockLink<? extends Specie> createBlockLink(int sCount, BlockView.In in, BlockView.Out out) {
+            return new BlockLink<>(sCount, LineSpecie::new, LineSpecie[]::new, in, out);
         }
     },
     ORTH_LINK {
         @Override
-        public BlockLink<? extends Specie> createBlockLink(BlockView.In in, BlockView.Out out) {
-            return new BlockLink<>(OrthoSpecie::new, OrthoSpecie[]::new, in, out);
+        public BlockLink<? extends Specie> createBlockLink(int sCount, BlockView.In in, BlockView.Out out) {
+            return new BlockLink<>(sCount, OrthoSpecie::new, OrthoSpecie[]::new, in, out);
         }
     };
 
-    public abstract BlockLink<? extends Specie> createBlockLink(BlockView.In in, BlockView.Out out);
+    public abstract BlockLink<? extends Specie> createBlockLink(int sCount, BlockView.In in, BlockView.Out out);
 }

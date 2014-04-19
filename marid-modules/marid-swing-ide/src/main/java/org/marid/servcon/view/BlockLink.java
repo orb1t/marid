@@ -20,6 +20,8 @@ package org.marid.servcon.view;
 
 import com.google.common.collect.ImmutableMap;
 import org.marid.logging.LogSupport;
+import org.marid.servcon.view.BlockView.In;
+import org.marid.servcon.view.BlockView.Out;
 import org.marid.servcon.view.ga.GaContext;
 import org.marid.servcon.view.ga.Specie;
 
@@ -33,30 +35,33 @@ import java.util.function.IntFunction;
  */
 public class BlockLink<S extends Specie<S>> implements LogSupport {
 
-    private static final int SPECIES_COUNT = 30;
-
     private volatile S specie;
     private final S[] species;
-    private final Species<S> incubator;
     public final BlockView.In in;
     public final BlockView.Out out;
+    private final IntFunction<S[]> iFunc;
 
-    public BlockLink(Function<BlockLink<S>, S> specieFunc, IntFunction<S[]> saf, BlockView.In in, BlockView.Out out) {
+    public BlockLink(int sCount, Function<BlockLink<S>, S> sFunc, IntFunction<S[]> iFunc, In in, Out out) {
         this.in = in;
         this.out = out;
-        this.specie = specieFunc.apply(this);
-        this.species = saf.apply(SPECIES_COUNT);
-        for (int i = 0; i < SPECIES_COUNT; i++) {
-            this.species[i] = specieFunc.apply(this);
+        this.iFunc = iFunc;
+        this.specie = sFunc.apply(this);
+        this.species = iFunc.apply(sCount);
+        for (int i = 0; i < sCount; i++) {
+            this.species[i] = sFunc.apply(this);
         }
-        this.incubator = new Species<>(saf, SPECIES_COUNT * 4);
     }
 
     public void paint(Graphics2D g) {
         specie.paint(g);
     }
 
-    public void doGA(GaContext gaContext) {
+    public Incubator createIncubator(int size) {
+        return new Incubator(size * species.length);
+    }
+
+    @SuppressWarnings("unchecked")
+    public void doGA(GaContext gaContext, Incubator incubator) {
         incubator.count = 0;
         try {
             while (incubator.count < incubator.length) {
@@ -67,7 +72,7 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
                 incubator.put(child.fitness(gaContext), child);
             }
             specie = incubator.species[0];
-            incubator.copy(SPECIES_COUNT, species);
+            incubator.copy();
         } catch (Exception x) {
             warning("GA error", x);
         }
@@ -78,16 +83,16 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
         return getClass().getSimpleName() + ImmutableMap.of("in", in, "out", out, "specie", specie);
     }
 
-    static class Species<S extends Specie<S>> {
+    public class Incubator {
 
         final double[] fitnesses;
         final S[] species;
         int count;
         int length;
 
-        Species(IntFunction<S[]> func, int count) {
+        Incubator(int count) {
             fitnesses = new double[count];
-            species = func.apply(count);
+            species = iFunc.apply(count);
             length = count;
         }
 
@@ -103,8 +108,8 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
             count++;
         }
 
-        void copy(int count, S[] species) {
-            System.arraycopy(this.species, 0, species, 0, count);
+        void copy() {
+            System.arraycopy(species, 0, BlockLink.this.species, 0, BlockLink.this.species.length);
         }
     }
 }

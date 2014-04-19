@@ -33,10 +33,8 @@ public class GaContext {
     public final Point p1;
     public final Point p2;
     public final Random random = ThreadLocalRandom.current();
-    public final float mutationProbability;
 
-    public GaContext(BlockLink<?> blockLink, float mutationProbability) {
-        this.mutationProbability = mutationProbability;
+    public GaContext(BlockLink<?> blockLink) {
         synchronized (blockLink.in.getEditor().getTreeLock()) {
             final Rectangle[] rectangles = new Rectangle[blockLink.in.getEditor().getComponentCount()];
             for (int i = 0; i < rectangles.length; i++) {
@@ -46,5 +44,9 @@ public class GaContext {
             this.p1 = blockLink.out.connectionPoint();
             this.p2 = blockLink.in.connectionPoint();
         }
+    }
+
+    public float getMutationProbability() {
+        return 0.01f;
     }
 }

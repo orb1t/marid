@@ -146,7 +146,7 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
 
     @Override
     public void mutate(GaContext gc) {
-        if (gc.random.nextFloat() < gc.mutationProbability) {
+        if (gc.random.nextFloat() < gc.getMutationProbability()) {
             for (int i = 0; i < COUNT; i++) {
                 final int r = gc.random.nextInt(300);
                 lengths[i] += gc.random.nextInt(r * 2 + 1) - r;

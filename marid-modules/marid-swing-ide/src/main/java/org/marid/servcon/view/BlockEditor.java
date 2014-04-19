@@ -18,9 +18,7 @@
 
 package org.marid.servcon.view;
 
-import com.google.common.util.concurrent.Uninterruptibles;
 import org.marid.ide.servcon.ServconConfiguration;
-import org.marid.ide.servcon.ServconWindow;
 import org.marid.servcon.model.Block;
 import org.marid.servcon.view.ga.GaContext;
 import org.marid.swing.SwingUtil;
@@ -36,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
+import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static java.awt.AWTEvent.MOUSE_EVENT_MASK;
 import static java.awt.AWTEvent.MOUSE_MOTION_EVENT_MASK;
 import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
@@ -50,7 +49,7 @@ import static java.util.Objects.requireNonNull;
 public class BlockEditor extends JComponent implements DndTarget<Block> {
 
     private final AffineTransform transform = new AffineTransform();
-    protected final List<BlockLink<?>> blockLinks = new CopyOnWriteArrayList<>();
+    protected final List<BlockLink> blockLinks = new CopyOnWriteArrayList<>();
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final ForkJoinPool pool = new ForkJoinPool(8);
     private Point mousePoint = new Point();
@@ -59,6 +58,8 @@ public class BlockEditor extends JComponent implements DndTarget<Block> {
     private Component movingComponent;
     private Point movingComponentPoint;
     private Point movingComponentLocation;
+    private volatile float mutationProbability = ServconConfiguration.mutationProbability.get();
+    private volatile int incubatorSize = ServconConfiguration.incubatorSize.get();
 
     public BlockEditor() {
         setFont(requireNonNull(UIManager.getFont("Label.font")));
@@ -66,6 +67,8 @@ public class BlockEditor extends JComponent implements DndTarget<Block> {
         setBackground(SystemColor.controlLtHighlight);
         setTransferHandler(new MaridTransferHandler());
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
+        ServconConfiguration.mutationProbability.addConsumer(this, (o, n) -> mutationProbability = n);
+        ServconConfiguration.incubatorSize.addConsumer(this, (o, n) -> incubatorSize = n);
     }
 
     public FontMetrics getFontMetrics() {
@@ -75,18 +78,23 @@ public class BlockEditor extends JComponent implements DndTarget<Block> {
     public void start() {
         executorService.execute(() -> {
             while (!executorService.isShutdown()) {
-                final float mutationProbability = ServconConfiguration.mutationProbability.get();
                 final List<ForkJoinTask<?>> tasks = new ArrayList<>(blockLinks.size());
-                for (final BlockLink<?> blockLink : blockLinks) {
+                for (final BlockLink blockLink : blockLinks) {
                     tasks.add(pool.submit(() -> {
+                        final BlockLink.Incubator incubator = blockLink.createIncubator(incubatorSize);
                         for (int i = 0; i < 400; i++) {
-                            blockLink.doGA(new GaContext(blockLink, mutationProbability));
+                            blockLink.doGA(new GaContext(blockLink) {
+                                @Override
+                                public final float getMutationProbability() {
+                                    return mutationProbability;
+                                }
+                            }, incubator);
                         }
                     }));
                 }
                 tasks.forEach(ForkJoinTask::join);
                 EventQueue.invokeLater(this::repaint);
-                Uninterruptibles.sleepUninterruptibly(100L, TimeUnit.MILLISECONDS);
+                sleepUninterruptibly(100L, TimeUnit.MILLISECONDS);
             }
         });
     }

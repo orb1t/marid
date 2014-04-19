@@ -38,19 +38,20 @@ public class BlockLinkTest {
 
     @Test
     public void testAddElements() {
-        final BlockLink.Species<LineSpecie> species = new BlockLink.Species<>(LineSpecie[]::new, 100);
+        final BlockLink<LineSpecie> link = new BlockLink<>(30, LineSpecie::new, LineSpecie[]::new, null, null);
+        final BlockLink<LineSpecie>.Incubator incubator = link.createIncubator(4);
         for (int iter = 0; iter < 10; iter++) {
-            species.count = 0;
+            incubator.count = 0;
             final TreeMap<Double, LineSpecie> lineSpecieTreeMap = new TreeMap<>();
             final Random random = new Random();
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 120; i++) {
                 lineSpecieTreeMap.put(random.nextDouble(), EasyMock.createMock(LineSpecie.class));
             }
             for (final Map.Entry<Double, LineSpecie> e : lineSpecieTreeMap.entrySet()) {
-                species.put(e.getKey(), e.getValue());
+                incubator.put(e.getKey(), e.getValue());
             }
-            Assert.assertArrayEquals(lineSpecieTreeMap.keySet().toArray(), Arrays.stream(species.fitnesses).mapToObj(Double::valueOf).toArray());
-            Assert.assertArrayEquals(lineSpecieTreeMap.values().toArray(), species.species);
+            Assert.assertArrayEquals(lineSpecieTreeMap.keySet().toArray(), Arrays.stream(incubator.fitnesses).mapToObj(Double::valueOf).toArray());
+            Assert.assertArrayEquals(lineSpecieTreeMap.values().toArray(), incubator.species);
         }
     }
 }

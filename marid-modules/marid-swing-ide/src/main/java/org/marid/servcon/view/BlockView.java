@@ -34,6 +34,7 @@ import static javax.swing.BorderFactory.createTitledBorder;
 import static javax.swing.border.TitledBorder.CENTER;
 import static javax.swing.border.TitledBorder.LEADING;
 import static org.marid.ide.servcon.ServconConfiguration.linkType;
+import static org.marid.ide.servcon.ServconConfiguration.species;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -171,7 +172,7 @@ public class BlockView extends JPanel {
                     final BlockView bv = (BlockView) component;
                     bv.outputs.stream().filter(Out::isSelected).forEach(out -> {
                         out.setSelected(false);
-                        blockEditor.blockLinks.add(linkType.get().createBlockLink(this, out));
+                        blockEditor.blockLinks.add(linkType.get().createBlockLink(species.get(), this, out));
                     });
                 }
             }
