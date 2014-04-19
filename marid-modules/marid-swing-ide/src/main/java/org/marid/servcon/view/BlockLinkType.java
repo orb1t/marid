@@ -16,28 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.collections;
+package org.marid.servcon.view;
+
+import org.marid.servcon.view.ga.LineSpecie;
+import org.marid.servcon.view.ga.OrthoSpecie;
+import org.marid.servcon.view.ga.Specie;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class Stats {
-
-    public static int intSum(int[] array, int offset, int length) {
-        int sum = 0;
-        final int n = offset + length;
-        for (int i = offset; i < n; i++) {
-            sum += array[i];
+public enum BlockLinkType {
+    LINE_LINK {
+        @Override
+        public BlockLink<? extends Specie> createBlockLink(BlockView.In in, BlockView.Out out) {
+            return new BlockLink<>(LineSpecie::new, LineSpecie[]::new, in, out);
         }
-        return sum;
-    }
-
-    public static int intAbsSum(int[] array, int offset, int length) {
-        int sum = 0;
-        final int n = offset + length;
-        for (int i = offset; i < n; i++) {
-            sum += Math.abs(array[i]);
+    },
+    ORTH_LINK {
+        @Override
+        public BlockLink<? extends Specie> createBlockLink(BlockView.In in, BlockView.Out out) {
+            return new BlockLink<>(OrthoSpecie::new, OrthoSpecie[]::new, in, out);
         }
-        return sum;
-    }
+    };
+
+    public abstract BlockLink<? extends Specie> createBlockLink(BlockView.In in, BlockView.Out out);
 }

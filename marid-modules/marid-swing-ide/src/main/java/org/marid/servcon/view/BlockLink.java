@@ -59,7 +59,7 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
     public void doGA(GaContext gaContext) {
         incubator.count = 0;
         try {
-            while (incubator.count < incubator.fitnesses.length) {
+            while (incubator.count < incubator.length) {
                 final S male = species[gaContext.random.nextInt(species.length)];
                 final S female = species[gaContext.random.nextInt(species.length)];
                 final S child = male.crossover(gaContext, female);
@@ -83,10 +83,12 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
         final double[] fitnesses;
         final S[] species;
         int count;
+        int length;
 
         Species(IntFunction<S[]> func, int count) {
             fitnesses = new double[count];
             species = func.apply(count);
+            length = count;
         }
 
         void put(double fitness, S specie) {

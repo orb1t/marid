@@ -20,7 +20,6 @@ package org.marid.servcon.view;
 
 import images.Images;
 import org.marid.servcon.model.Block;
-import org.marid.servcon.view.ga.LineSpecie;
 import org.marid.swing.MaridAction;
 
 import javax.swing.*;
@@ -171,7 +170,7 @@ public class BlockView extends JPanel {
                     final BlockView bv = (BlockView) component;
                     bv.outputs.stream().filter(Out::isSelected).forEach(out -> {
                         out.setSelected(false);
-                        blockEditor.blockLinks.add(new BlockLink<LineSpecie>(LineSpecie::new, LineSpecie[]::new, this, out));
+                        blockEditor.blockLinks.add(BlockLinkType.ORTH_LINK.createBlockLink(this, out));
                     });
                 }
             }

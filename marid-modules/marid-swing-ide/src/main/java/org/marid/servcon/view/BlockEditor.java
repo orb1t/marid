@@ -18,6 +18,7 @@
 
 package org.marid.servcon.view;
 
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.marid.pref.PrefSupport;
 import org.marid.servcon.model.Block;
 import org.marid.servcon.view.ga.GaContext;
@@ -31,11 +32,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.*;
 
 import static java.awt.AWTEvent.MOUSE_EVENT_MASK;
 import static java.awt.AWTEvent.MOUSE_MOTION_EVENT_MASK;
@@ -52,7 +50,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
 
     private final AffineTransform transform = new AffineTransform();
     protected final List<BlockLink<?>> blockLinks = new CopyOnWriteArrayList<>();
-    private final LinkWorker linkWorker = new LinkWorker();
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final ForkJoinPool pool = new ForkJoinPool(8);
     private Point mousePoint = new Point();
     private AffineTransform mouseTransform = (AffineTransform) transform.clone();
@@ -74,11 +72,25 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
     }
 
     public void start() {
-        linkWorker.execute();
+        executorService.execute(() -> {
+            while (!executorService.isShutdown()) {
+                final List<ForkJoinTask<?>> tasks = new ArrayList<>(blockLinks.size());
+                for (final BlockLink<?> blockLink : blockLinks) {
+                    tasks.add(pool.submit(() -> {
+                        for (int i = 0; i < 400; i++) {
+                            blockLink.doGA(new GaContext(blockLink));
+                        }
+                    }));
+                }
+                tasks.forEach(ForkJoinTask::join);
+                EventQueue.invokeLater(this::repaint);
+                Uninterruptibles.sleepUninterruptibly(100L, TimeUnit.MILLISECONDS);
+            }
+        });
     }
 
     public void stop() {
-        linkWorker.cancel(false);
+        executorService.shutdown();
         pool.shutdown();
     }
 
@@ -228,31 +240,6 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
         } catch (Exception x) {
             warning("Unable to transform coordinates", x);
             return false;
-        }
-    }
-
-    private class LinkWorker extends SwingWorker<Void, Void> {
-        @Override
-        protected Void doInBackground() throws Exception {
-            while (!isCancelled()) {
-                final List<ForkJoinTask<?>> tasks = new ArrayList<>(blockLinks.size());
-                for (final BlockLink<?> blockLink : blockLinks) {
-                    tasks.add(pool.submit(() -> {
-                        for (int i = 0; i < 400; i++) {
-                            blockLink.doGA(new GaContext(blockLink));
-                        }
-                    }));
-                }
-                tasks.forEach(ForkJoinTask::join);
-                process(Collections.singletonList(null));
-                Thread.sleep(100L);
-            }
-            return null;
-        }
-
-        @Override
-        protected void process(List<Void> chunks) {
-            repaint();
         }
     }
 }

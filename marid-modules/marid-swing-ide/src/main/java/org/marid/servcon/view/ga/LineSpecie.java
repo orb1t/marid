@@ -23,7 +23,6 @@ import org.marid.servcon.view.BlockLink;
 
 import java.awt.*;
 import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -68,21 +67,17 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
     public void paint(Graphics2D g) {
         final Point p1 = blockLink.out.connectionPoint();
         final Point p2 = blockLink.in.connectionPoint();
-        final Path2D.Float path = new Path2D.Float();
-        path.moveTo(p1.x, p1.y);
-        path.lineTo(p1.x + BORDER, p1.y);
-        for (int i = 0; i < COUNT - 1; i += 2) {
-            path.quadTo(xs[i], ys[i], xs[i + 1], ys[i + 1]);
-        }
-        path.quadTo(xs[COUNT - 1], ys[COUNT - 1], p2.x - BORDER, p2.y);
-        path.lineTo(p2.x, p2.y);
-        g.draw(path);
+        g.drawLine(p1.x, p1.y, p1.x + BORDER, p1.y);
+        g.drawLine(p1.x + BORDER, p1.y, xs[0], ys[0]);
+        g.drawPolyline(xs, ys, COUNT);
+        g.drawLine(xs[COUNT - 1], ys[COUNT - 1], p2.x - BORDER, p2.y);
+        g.drawLine(p2.x - BORDER, p2.y, p2.x, p2.y);
     }
 
     @Override
     public double fitness(GaContext fc) {
         try {
-            final double lineDistance = Point.distance(fc.p1.x + BORDER, fc.p1.y, fc.p2.x - BORDER, fc.p2.y) + 1.0;
+            final double lineDistance = Point.distance(fc.p1.x + BORDER, fc.p1.y, fc.p2.x - BORDER, fc.p2.y) + 0.1;
             final double distFactor = length(fc) / lineDistance;
             double isectFactor = 0.0;
             for (final Rectangle r : fc.rectangles) {
@@ -114,11 +109,10 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
     @Override
     public void mutate(GaContext gc) {
         if (gc.random.nextFloat() < MUTATION_PROBABILITY) {
+            final int r = gc.random.nextInt(1000);
             for (int i = 0; i < COUNT; i++) {
-                final int rx = gc.random.nextInt(300);
-                final int ry = gc.random.nextInt(300);
-                xs[i] += gc.random.nextInt(rx * 2 + 1) - rx;
-                ys[i] += gc.random.nextInt(ry * 2 + 1) - ry;
+                xs[i] += gc.random.nextInt(r * 2 + 1) - r;
+                ys[i] += gc.random.nextInt(r * 2 + 1) - r;
             }
         }
     }
