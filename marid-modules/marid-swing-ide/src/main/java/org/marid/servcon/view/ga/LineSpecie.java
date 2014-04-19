@@ -24,7 +24,6 @@ import org.marid.servcon.view.BlockLink;
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.util.Arrays;
-import java.util.Random;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -39,12 +38,15 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
 
     public LineSpecie(BlockLink<LineSpecie> blockLink) {
         super(blockLink);
-        final Random random = new Random();
         this.xs = new int[COUNT];
         this.ys = new int[COUNT];
+        final Point p1 = blockLink.out.connectionPoint();
+        final Point p2 = blockLink.in.connectionPoint();
+        final int dx = (p2.x - p1.x) / COUNT;
+        final int dy = (p2.y - p1.y) / COUNT;
         for (int i = 0; i < COUNT; i++) {
-            xs[i] = random.nextInt(100);
-            ys[i] = random.nextInt(100);
+            xs[i] = p1.x + dx * (i + 1);
+            ys[i] = p1.y + dy * (i + 1);
         }
     }
 
