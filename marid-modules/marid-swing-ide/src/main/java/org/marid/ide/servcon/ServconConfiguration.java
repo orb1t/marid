@@ -16,31 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.input;
+package org.marid.ide.servcon;
 
-import javax.swing.*;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import org.marid.servcon.view.BlockLinkType;
+import org.marid.swing.forms.Configuration;
+import org.marid.swing.forms.Input;
+import org.marid.swing.forms.Tab;
+import org.marid.swing.input.EnumInputControl;
+import org.marid.swing.input.FloatInputControl;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public interface InputControl<V> {
+@Tab(node = "appearance")
+@Tab(node = "GA")
+public interface ServconConfiguration extends Configuration {
 
-    V getInputValue();
+    @Input(tab = "appearance")
+    Pv<BlockLinkType, EnumInputControl<BlockLinkType>> linkType = new Pv<>(
+            () -> new EnumInputControl<>(BlockLinkType::values),
+            () -> BlockLinkType.LINE_LINK);
 
-    void setInputValue(V value);
-
-    default JComponent getComponent() {
-        return (JComponent) this;
-    }
-
-    default Class<?> getType() {
-        for (final Type type : getClass().getGenericInterfaces()) {
-            if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == InputControl.class) {
-                return (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
-            }
-        }
-        throw new IllegalStateException();
-    }
+    @Input(tab = "GA")
+    Pv<Float, FloatInputControl> mutationProbability = new Pv<>(
+            FloatInputControl::new,
+            () -> 0.005f);
 }

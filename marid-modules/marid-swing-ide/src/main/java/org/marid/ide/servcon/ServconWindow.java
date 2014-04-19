@@ -29,7 +29,7 @@ import java.awt.event.WindowEvent;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ServconWindow extends AbstractFrame {
+public class ServconWindow extends AbstractFrame implements ServconConfiguration {
 
     private final ServconServices services = new ServconServices();
     private final BlockEditor blockEditor = new BlockEditor();

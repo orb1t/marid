@@ -16,28 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view.ga;
+package org.marid.swing.input;
 
-import org.marid.servcon.view.BlockLink;
-
-import java.awt.*;
+import javax.swing.*;
+import java.util.function.Supplier;
 
 /**
-* @author Dmitry Ovchinnikov.
-*/
-public abstract class Specie<S extends Specie<S>> {
+ * @author Dmitry Ovchinnikov.
+ */
+public class EnumInputControl<E extends Enum<E>> extends JComboBox<E> implements InputControl<E> {
 
-    protected final BlockLink<S> blockLink;
-
-    public Specie(BlockLink<S> blockLink) {
-        this.blockLink = blockLink;
+    public EnumInputControl(Supplier<E[]> enumSupplier) {
+        super(enumSupplier.get());
     }
 
-    public abstract void paint(Graphics2D g);
+    @Override
+    public E getInputValue() {
+        return getModel().getElementAt(getSelectedIndex());
+    }
 
-    public abstract double fitness(GaContext gaContext);
-
-    public abstract void mutate(GaContext gaContext);
-
-    public abstract S crossover(GaContext gaContext, S that);
+    @Override
+    public void setInputValue(E value) {
+        getModel().setSelectedItem(value);
+    }
 }

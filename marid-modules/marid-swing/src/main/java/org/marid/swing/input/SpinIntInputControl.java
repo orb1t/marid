@@ -39,14 +39,14 @@ public class SpinIntInputControl implements InputControl<Integer> {
     }
 
     @Override
-    public void setValue(Integer value) {
+    public void setInputValue(Integer value) {
         if (value != null) {
             spinner.setValue(value);
         }
     }
 
     @Override
-    public Integer getValue() {
+    public Integer getInputValue() {
         return (Integer) spinner.getValue();
     }
 

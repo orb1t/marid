@@ -16,28 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view.ga;
+package org.marid.swing.input;
 
-import org.marid.servcon.view.BlockLink;
-
-import java.awt.*;
+import javax.swing.*;
+import java.text.NumberFormat;
 
 /**
-* @author Dmitry Ovchinnikov.
-*/
-public abstract class Specie<S extends Specie<S>> {
+ * @author Dmitry Ovchinnikov
+ */
+public class LongInputControl implements InputControl<Long> {
 
-    protected final BlockLink<S> blockLink;
+    private final JFormattedTextField field = new JFormattedTextField(NumberFormat.getIntegerInstance());
 
-    public Specie(BlockLink<S> blockLink) {
-        this.blockLink = blockLink;
+    @Override
+    public Long getInputValue() {
+        return field.getText().isEmpty() ? null : ((Number) field.getValue()).longValue();
     }
 
-    public abstract void paint(Graphics2D g);
+    @Override
+    public void setInputValue(Long value) {
+        if (value != null) {
+            field.setValue(value);
+        }
+    }
 
-    public abstract double fitness(GaContext gaContext);
-
-    public abstract void mutate(GaContext gaContext);
-
-    public abstract S crossover(GaContext gaContext, S that);
+    @Override
+    public JComponent getComponent() {
+        return field;
+    }
 }

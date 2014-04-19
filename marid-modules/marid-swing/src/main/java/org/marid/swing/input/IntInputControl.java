@@ -24,17 +24,17 @@ import java.text.NumberFormat;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class FormattedIntInputControl implements InputControl<Integer> {
+public class IntInputControl implements InputControl<Integer> {
 
     private final JFormattedTextField field = new JFormattedTextField(NumberFormat.getIntegerInstance());
 
     @Override
-    public Integer getValue() {
+    public Integer getInputValue() {
         return field.getText().isEmpty() ? null : ((Number) field.getValue()).intValue();
     }
 
     @Override
-    public void setValue(Integer value) {
+    public void setInputValue(Integer value) {
         if (value != null) {
             field.setValue(value);
         }

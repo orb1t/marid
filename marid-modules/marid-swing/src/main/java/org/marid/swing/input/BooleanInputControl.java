@@ -25,12 +25,12 @@ import javax.swing.*;
  */
 public class BooleanInputControl extends JCheckBox implements InputControl<Boolean> {
     @Override
-    public Boolean getValue() {
+    public Boolean getInputValue() {
         return isSelected();
     }
 
     @Override
-    public void setValue(Boolean value) {
+    public void setInputValue(Boolean value) {
         setSelected(value);
     }
 }

@@ -40,7 +40,7 @@ public class FileInputControl extends JPanel implements InputControl<File>, LogS
         final GroupLayout g = new GroupLayout(this);
         g.setAutoCreateGaps(true);
         final JButton browseButton = new JButton(new MaridAction("", "browse", (a, e) -> {
-            final File file = getValue();
+            final File file = getInputValue();
             try {
                 final File parent = file != null ? file.getParentFile() : null;
                 final JFileChooser ch = new JFileChooser(parent == null ? new File(".") : parent);
@@ -79,12 +79,12 @@ public class FileInputControl extends JPanel implements InputControl<File>, LogS
     }
 
     @Override
-    public File getValue() {
+    public File getInputValue() {
         return textField.getText().trim().isEmpty() ? null : new File(textField.getText().trim());
     }
 
     @Override
-    public void setValue(File value) {
+    public void setInputValue(File value) {
         if (value != null) {
             textField.setText(value.toString());
         }

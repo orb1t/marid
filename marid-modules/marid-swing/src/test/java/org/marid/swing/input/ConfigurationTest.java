@@ -31,7 +31,7 @@ import org.marid.swing.forms.Tab;
 public class ConfigurationTest implements Configuration {
 
     @Input(tab = "tab1")
-    private static final Pv<Integer, FormattedIntInputControl> p = new Pv<>(FormattedIntInputControl::new, () -> 1);
+    private static final Pv<Integer, IntInputControl> p = new Pv<>(IntInputControl::new, () -> 1);
 
     @Test
     public void test() {

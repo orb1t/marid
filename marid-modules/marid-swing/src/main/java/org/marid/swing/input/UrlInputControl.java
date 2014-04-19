@@ -44,7 +44,7 @@ public class UrlInputControl extends JPanel implements InputControl<URL>, LogSup
         final JButton browseButton = new JButton(new MaridAction("", "browse", (a, e) -> {
             File file;
             try {
-                file = new File(getValue().toURI());
+                file = new File(getInputValue().toURI());
             } catch (Exception x) {
                 file = null;
             }
@@ -82,7 +82,7 @@ public class UrlInputControl extends JPanel implements InputControl<URL>, LogSup
     }
 
     @Override
-    public URL getValue() {
+    public URL getInputValue() {
         final String text = textField.getText().trim();
         if (text.isEmpty()) {
             return null;
@@ -96,7 +96,7 @@ public class UrlInputControl extends JPanel implements InputControl<URL>, LogSup
     }
 
     @Override
-    public void setValue(URL value) {
+    public void setInputValue(URL value) {
         textField.setText(value == null ? "" : value.toString());
     }
 

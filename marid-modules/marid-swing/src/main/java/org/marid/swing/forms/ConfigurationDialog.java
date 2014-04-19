@@ -138,7 +138,7 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
             final ComponentHolder<Object, InputControl<Object>> ch = e.getValue();
             try {
                 final Object oldValue = ch.initialValue;
-                final Object newValue = ch.control.getValue();
+                final Object newValue = ch.control.getInputValue();
                 if (!Objects.equals(oldValue, newValue)) {
                     if (Objects.equals(ch.getDefaultValue(), newValue) && ch.pv.contains()) {
                         ch.pv.remove();
@@ -200,7 +200,7 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
 
     protected void loadDefaults() {
         containerMap.forEach((c, ch) -> ch.pv.remove());
-        containerMap.forEach((c, ch) -> ch.control.setValue(ch.getDefaultValue()));
+        containerMap.forEach((c, ch) -> ch.control.setInputValue(ch.getDefaultValue()));
     }
 
     protected void exportPrefs() {
@@ -237,7 +237,7 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
                     final Input input = field.getAnnotation(Input.class);
                     try {
                         final ComponentHolder<Object, InputControl<Object>> ch = new ComponentHolder<>(input, field);
-                        ch.control.setValue(ch.initialValue);
+                        ch.control.setInputValue(ch.initialValue);
                         addTabCc(panel, c, input, ch);
                         containerMap.put(ch.control.getComponent(), ch);
                     } catch (Exception x) {
@@ -296,7 +296,7 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
         }
 
         public MaridActionListener getActionListener() {
-            return (a, e) -> control.setValue(getDefaultValue());
+            return (a, e) -> control.setInputValue(getDefaultValue());
         }
 
         public MaridAction getAction() {

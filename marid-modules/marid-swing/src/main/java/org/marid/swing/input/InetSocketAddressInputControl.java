@@ -45,12 +45,12 @@ public class InetSocketAddressInputControl extends JPanel implements InputContro
     }
 
     @Override
-    public InetSocketAddress getValue() {
+    public InetSocketAddress getInputValue() {
         return new InetSocketAddress(addressField.getText(), (int) spinner.getValue());
     }
 
     @Override
-    public void setValue(InetSocketAddress value) {
+    public void setInputValue(InetSocketAddress value) {
         addressField.setText(value.getHostString());
         spinner.setValue(value.getPort());
     }

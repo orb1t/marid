@@ -22,26 +22,23 @@ import javax.swing.*;
 import java.text.NumberFormat;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public class FormattedLongInputControl implements InputControl<Long> {
+public class FloatInputControl extends JFormattedTextField implements InputControl<Float> {
 
-    private final JFormattedTextField field = new JFormattedTextField(NumberFormat.getIntegerInstance());
-
-    @Override
-    public Long getValue() {
-        return field.getText().isEmpty() ? null : ((Number) field.getValue()).longValue();
+    public FloatInputControl() {
+        super(NumberFormat.getNumberInstance());
     }
 
     @Override
-    public void setValue(Long value) {
+    public Float getInputValue() {
+        return getText().trim().isEmpty() ? null : ((Number) getValue()).floatValue();
+    }
+
+    @Override
+    public void setInputValue(Float value) {
         if (value != null) {
-            field.setValue(value);
+            setValue(value);
         }
-    }
-
-    @Override
-    public JComponent getComponent() {
-        return field;
     }
 }

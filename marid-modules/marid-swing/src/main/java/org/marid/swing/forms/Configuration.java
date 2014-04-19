@@ -72,10 +72,6 @@ public interface Configuration {
             return controlSupplier.get();
         }
 
-        public Input getInput() {
-            return getField().getAnnotation(Input.class);
-        }
-
         public Supplier<V> getDefaultValueSupplier() {
             return defaultValueSupplier;
         }
@@ -113,7 +109,7 @@ public interface Configuration {
             final Field field = getField();
             final Input input = field.getAnnotation(Input.class);
             final String key = input.name().isEmpty() ? field.getName() : input.name();
-            putPref(key, control.getValue(), input.tab());
+            putPref(key, control.getInputValue(), input.tab());
         }
 
         public boolean contains() {

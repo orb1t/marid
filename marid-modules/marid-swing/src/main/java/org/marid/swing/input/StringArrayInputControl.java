@@ -94,7 +94,7 @@ public class StringArrayInputControl extends AbstractTitledPanel<String[]> {
     }
 
     @Override
-    public String[] getValue() {
+    public String[] getInputValue() {
         final String[] array = new String[model.getSize()];
         for (int i = 0; i < array.length; i++) {
             array[i] = model.get(i);
@@ -103,7 +103,7 @@ public class StringArrayInputControl extends AbstractTitledPanel<String[]> {
     }
 
     @Override
-    public void setValue(String[] value) {
+    public void setInputValue(String[] value) {
         model.clear();
         for (final String s : value) {
             model.addElement(s);

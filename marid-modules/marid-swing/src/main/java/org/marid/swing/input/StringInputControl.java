@@ -29,12 +29,12 @@ public class StringInputControl extends JTextField implements InputControl<Strin
     }
 
     @Override
-    public String getValue() {
+    public String getInputValue() {
         return getText();
     }
 
     @Override
-    public void setValue(String value) {
+    public void setInputValue(String value) {
         if (value != null) {
             setText(value);
         }

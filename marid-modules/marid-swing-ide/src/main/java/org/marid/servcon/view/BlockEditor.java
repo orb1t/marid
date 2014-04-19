@@ -19,7 +19,8 @@
 package org.marid.servcon.view;
 
 import com.google.common.util.concurrent.Uninterruptibles;
-import org.marid.pref.PrefSupport;
+import org.marid.ide.servcon.ServconConfiguration;
+import org.marid.ide.servcon.ServconWindow;
 import org.marid.servcon.model.Block;
 import org.marid.servcon.view.ga.GaContext;
 import org.marid.swing.SwingUtil;
@@ -46,7 +47,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSupport {
+public class BlockEditor extends JComponent implements DndTarget<Block> {
 
     private final AffineTransform transform = new AffineTransform();
     protected final List<BlockLink<?>> blockLinks = new CopyOnWriteArrayList<>();
@@ -58,11 +59,9 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
     private Component movingComponent;
     private Point movingComponentPoint;
     private Point movingComponentLocation;
-    public final BlockLinkType blockLinkType;
 
     public BlockEditor() {
-        blockLinkType = getPref("blockLinkType", BlockLinkType.LINE_LINK);
-        setFont(requireNonNull(UIManager.getFont(getPref("font", "Label.font")), "Font is null"));
+        setFont(requireNonNull(UIManager.getFont("Label.font")));
         setOpaque(true);
         setBackground(SystemColor.controlLtHighlight);
         setTransferHandler(new MaridTransferHandler());
@@ -76,11 +75,12 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
     public void start() {
         executorService.execute(() -> {
             while (!executorService.isShutdown()) {
+                final float mutationProbability = ServconConfiguration.mutationProbability.get();
                 final List<ForkJoinTask<?>> tasks = new ArrayList<>(blockLinks.size());
                 for (final BlockLink<?> blockLink : blockLinks) {
                     tasks.add(pool.submit(() -> {
                         for (int i = 0; i < 400; i++) {
-                            blockLink.doGA(new GaContext(blockLink));
+                            blockLink.doGA(new GaContext(blockLink, mutationProbability));
                         }
                     }));
                 }
