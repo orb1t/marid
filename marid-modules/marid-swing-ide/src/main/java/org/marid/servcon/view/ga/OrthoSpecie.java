@@ -74,7 +74,8 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
                 ym2 = y;
             }
         }
-        g.drawLine(xm1, ym1, xm2, ym2);
+        g.drawLine(xm1, ym1, xm1, ym2);
+        g.drawLine(xm1, ym2, xm2, ym2);
     }
 
     private int intersectionH(Rectangle r, int x1, int x2) {
@@ -112,6 +113,7 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
         int x = gaContext.p1.x + BORDER, y = gaContext.p1.y;
         final int m = COUNT / 2;
         int xm1 = 0, ym1 = 0, xm2 = 0, ym2 = 0;
+        double lenFactor = 0.0;
         for (int i = 0; i < COUNT; i++) {
             if (i == m) {
                 xm1 = x;
@@ -120,6 +122,10 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
                 y = gaContext.p2.y;
             }
             final int len = lengths[i];
+            final int alen = Math.abs(len);
+            if (alen < 20) {
+                lenFactor += alen;
+            }
             if (dirs.get(i)) {
                 for (final Rectangle r : gaContext.rectangles) {
                     if (y >= r.y && y <= r.y + r.height) {
@@ -141,7 +147,7 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
             }
         }
         final double endDist = Point.distance(xm1, ym1, xm2, ym2);
-        return distFactor + (isectFactor + endDist) * 2;
+        return distFactor + (isectFactor + endDist) * 2.0 + lenFactor * 2.0;
     }
 
     @Override
