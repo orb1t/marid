@@ -141,6 +141,12 @@ public class BlockView extends JPanel {
         return outPort;
     }
 
+    public Rectangle getSafeBounds() {
+        final Rectangle bounds = getBounds();
+        bounds.grow(10, 10);
+        return bounds;
+    }
+
     public class In extends JToggleButton implements ActionListener {
 
         public final Block.In in;

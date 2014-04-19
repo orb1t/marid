@@ -18,13 +18,14 @@
 
 package org.marid.servcon.view;
 
-import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.marid.servcon.view.ga.LineSpecie;
+import org.marid.servcon.view.ga.GaContext;
+import org.marid.servcon.view.ga.Specie;
 import org.marid.test.NormalTests;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
@@ -38,20 +39,47 @@ public class BlockLinkTest {
 
     @Test
     public void testAddElements() {
-        final BlockLink<LineSpecie> link = new BlockLink<>(30, LineSpecie::new, LineSpecie[]::new, null, null);
-        final BlockLink<LineSpecie>.Incubator incubator = link.createIncubator(4);
+        final BlockLink<TestSpecie> link = new BlockLink<>(30, l -> new TestSpecie(), TestSpecie[]::new, null, null);
+        final BlockLink<TestSpecie>.Incubator incubator = link.createIncubator(4);
         for (int iter = 0; iter < 10; iter++) {
             incubator.count = 0;
-            final TreeMap<Double, LineSpecie> lineSpecieTreeMap = new TreeMap<>();
+            final TreeMap<Double, TestSpecie> map = new TreeMap<>();
             final Random random = new Random();
             for (int i = 0; i < 120; i++) {
-                lineSpecieTreeMap.put(random.nextDouble(), EasyMock.createMock(LineSpecie.class));
+                map.put(random.nextDouble(), new TestSpecie());
             }
-            for (final Map.Entry<Double, LineSpecie> e : lineSpecieTreeMap.entrySet()) {
+            for (final Map.Entry<Double, TestSpecie> e : map.entrySet()) {
                 incubator.put(e.getKey(), e.getValue());
             }
-            Assert.assertArrayEquals(lineSpecieTreeMap.keySet().toArray(), Arrays.stream(incubator.fitnesses).mapToObj(Double::valueOf).toArray());
-            Assert.assertArrayEquals(lineSpecieTreeMap.values().toArray(), incubator.species);
+            Assert.assertArrayEquals(map.keySet().toArray(), Arrays.stream(incubator.fitnesses).mapToObj(Double::valueOf).toArray());
+            Assert.assertArrayEquals(map.values().toArray(), incubator.species);
+        }
+    }
+
+    private static class TestSpecie extends Specie<TestSpecie> {
+
+        public TestSpecie() {
+            super(null);
+        }
+
+        @Override
+        public void paint(Graphics2D g) {
+
+        }
+
+        @Override
+        public double fitness(GaContext gaContext) {
+            return 0;
+        }
+
+        @Override
+        public void mutate(GaContext gaContext) {
+
+        }
+
+        @Override
+        public TestSpecie crossover(GaContext gaContext, TestSpecie that) {
+            return null;
         }
     }
 }

@@ -50,6 +50,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block> {
 
     private final AffineTransform transform = new AffineTransform();
     protected final List<BlockLink> blockLinks = new CopyOnWriteArrayList<>();
+    public final List<BlockView> blockViews = new ArrayList<>();
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final ForkJoinPool pool = new ForkJoinPool(8);
     private Point mousePoint = new Point();
@@ -82,7 +83,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block> {
                 for (final BlockLink blockLink : blockLinks) {
                     tasks.add(pool.submit(() -> {
                         final BlockLink.Incubator incubator = blockLink.createIncubator(incubatorSize);
-                        for (int i = 0; i < 400; i++) {
+                        for (int i = 0; i < 100; i++) {
                             blockLink.doGA(new GaContext(blockLink) {
                                 @Override
                                 public final float getMutationProbability() {
@@ -229,8 +230,20 @@ public class BlockEditor extends JComponent implements DndTarget<Block> {
     }
 
     @Override
+    public Component add(Component comp) {
+        final Component component = super.add(comp);
+        if (comp instanceof BlockView) {
+            blockViews.add((BlockView) comp);
+        }
+        return component;
+    }
+
+    @Override
     public void remove(Component comp) {
         super.remove(comp);
+        if (comp instanceof BlockView) {
+            blockViews.remove(comp);
+        }
         if (currentComponent == comp) {
             currentComponent = null;
         }

@@ -18,6 +18,7 @@
 
 package org.marid.servcon.view.ga;
 
+import org.marid.servcon.view.BlockEditor;
 import org.marid.servcon.view.BlockLink;
 
 import java.awt.*;
@@ -36,9 +37,10 @@ public class GaContext {
 
     public GaContext(BlockLink<?> blockLink) {
         synchronized (blockLink.in.getEditor().getTreeLock()) {
-            final Rectangle[] rectangles = new Rectangle[blockLink.in.getEditor().getComponentCount()];
+            final BlockEditor blockEditor = blockLink.in.getEditor();
+            final Rectangle[] rectangles = new Rectangle[blockEditor.blockViews.size()];
             for (int i = 0; i < rectangles.length; i++) {
-                rectangles[i] = blockLink.in.getEditor().getComponent(i).getBounds();
+                rectangles[i] = blockEditor.blockViews.get(i).getSafeBounds();
             }
             this.rectangles = rectangles;
             this.p1 = blockLink.out.connectionPoint();
