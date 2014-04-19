@@ -55,7 +55,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     protected final List<BlockLink> blockLinks = new CopyOnWriteArrayList<>();
     public final List<BlockView> blockViews = new ArrayList<>();
     private final Thread gaThread = new Thread(this);
-    private final ForkJoinPool pool = new ForkJoinPool(8);
+    private final ForkJoinPool pool = new ForkJoinPool(Math.max(Runtime.getRuntime().availableProcessors(), 8));
     private Point mousePoint = new Point();
     private AffineTransform mouseTransform = (AffineTransform) transform.clone();
     private Component currentComponent;
