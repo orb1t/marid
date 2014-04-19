@@ -170,7 +170,7 @@ public class BlockView extends JPanel {
                     final BlockView bv = (BlockView) component;
                     bv.outputs.stream().filter(Out::isSelected).forEach(out -> {
                         out.setSelected(false);
-                        blockEditor.blockLinks.add(BlockLinkType.ORTH_LINK.createBlockLink(this, out));
+                        blockEditor.blockLinks.add(getEditor().blockLinkType.createBlockLink(this, out));
                     });
                 }
             }

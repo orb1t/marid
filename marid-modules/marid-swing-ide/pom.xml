@@ -178,6 +178,9 @@
                                 <resource>
                                     <directory>${project.build.directory}/ext</directory>
                                 </resource>
+                                <resource>
+                                    <directory>${project.basedir}/src/ext</directory>
+                                </resource>
                             </resources>
                         </configuration>
                     </execution>

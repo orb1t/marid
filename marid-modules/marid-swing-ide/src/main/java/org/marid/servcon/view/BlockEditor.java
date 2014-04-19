@@ -58,8 +58,10 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, PrefSup
     private Component movingComponent;
     private Point movingComponentPoint;
     private Point movingComponentLocation;
+    public final BlockLinkType blockLinkType;
 
     public BlockEditor() {
+        blockLinkType = getPref("blockLinkType", BlockLinkType.LINE_LINK);
         setFont(requireNonNull(UIManager.getFont(getPref("font", "Label.font")), "Font is null"));
         setOpaque(true);
         setBackground(SystemColor.controlLtHighlight);
