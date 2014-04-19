@@ -122,8 +122,9 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
     @Override
     public LineSpecie crossover(GaContext gc, LineSpecie that) {
         final int[] xs = new int[COUNT], ys = new int[COUNT];
+        final int rand = gc.random.nextInt();
         for (int i = 0; i < COUNT; i++) {
-            if (gc.random.nextBoolean()) {
+            if ((rand & (1 << i)) == 0) {
                 xs[i] = that.xs[i];
                 ys[i] = that.ys[i];
             } else {

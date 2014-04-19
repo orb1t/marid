@@ -32,7 +32,10 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static java.awt.AWTEvent.MOUSE_EVENT_MASK;
@@ -46,12 +49,12 @@ import static java.util.Objects.requireNonNull;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class BlockEditor extends JComponent implements DndTarget<Block> {
+public class BlockEditor extends JComponent implements DndTarget<Block>, Runnable {
 
     private final AffineTransform transform = new AffineTransform();
     protected final List<BlockLink> blockLinks = new CopyOnWriteArrayList<>();
     public final List<BlockView> blockViews = new ArrayList<>();
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final Thread gaThread = new Thread(this);
     private final ForkJoinPool pool = new ForkJoinPool(8);
     private Point mousePoint = new Point();
     private AffineTransform mouseTransform = (AffineTransform) transform.clone();
@@ -76,33 +79,35 @@ public class BlockEditor extends JComponent implements DndTarget<Block> {
         return getFontMetrics(getFont());
     }
 
-    public void start() {
-        executorService.execute(() -> {
-            while (!executorService.isShutdown()) {
-                final List<ForkJoinTask<?>> tasks = new ArrayList<>(blockLinks.size());
-                for (final BlockLink blockLink : blockLinks) {
-                    tasks.add(pool.submit(() -> {
-                        final BlockLink.Incubator incubator = blockLink.createIncubator(incubatorSize);
-                        final GaContext gaContext = new GaContext(blockLink) {
-                            @Override
-                            public final float getMutationProbability() {
-                                return mutationProbability;
-                            }
-                        };
-                        for (int i = 0; i < 100; i++) {
-                            blockLink.doGA(gaContext, incubator);
+    @Override
+    public void run() {
+        while (!pool.isShutdown()) {
+            final List<ForkJoinTask<?>> tasks = new ArrayList<>(blockLinks.size());
+            for (final BlockLink blockLink : blockLinks) {
+                tasks.add(pool.submit(() -> {
+                    final BlockLink.Incubator incubator = blockLink.createIncubator(incubatorSize);
+                    final GaContext gaContext = new GaContext(blockLink) {
+                        @Override
+                        public final float getMutationProbability() {
+                            return mutationProbability;
                         }
-                    }));
-                }
-                tasks.forEach(ForkJoinTask::join);
-                EventQueue.invokeLater(this::repaint);
-                sleepUninterruptibly(100L, TimeUnit.MILLISECONDS);
+                    };
+                    for (int i = 0; i < 100; i++) {
+                        blockLink.doGA(gaContext, incubator);
+                    }
+                }));
             }
-        });
+            tasks.forEach(ForkJoinTask::join);
+            EventQueue.invokeLater(this::repaint);
+            sleepUninterruptibly(100L, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public void start() {
+        gaThread.start();
     }
 
     public void stop() {
-        executorService.shutdown();
         pool.shutdown();
     }
 
