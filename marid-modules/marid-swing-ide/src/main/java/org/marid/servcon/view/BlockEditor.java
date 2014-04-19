@@ -83,13 +83,14 @@ public class BlockEditor extends JComponent implements DndTarget<Block> {
                 for (final BlockLink blockLink : blockLinks) {
                     tasks.add(pool.submit(() -> {
                         final BlockLink.Incubator incubator = blockLink.createIncubator(incubatorSize);
+                        final GaContext gaContext = new GaContext(blockLink) {
+                            @Override
+                            public final float getMutationProbability() {
+                                return mutationProbability;
+                            }
+                        };
                         for (int i = 0; i < 100; i++) {
-                            blockLink.doGA(new GaContext(blockLink) {
-                                @Override
-                                public final float getMutationProbability() {
-                                    return mutationProbability;
-                                }
-                            }, incubator);
+                            blockLink.doGA(gaContext, incubator);
                         }
                     }));
                 }

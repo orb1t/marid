@@ -35,7 +35,7 @@ import java.util.function.IntFunction;
  */
 public class BlockLink<S extends Specie<S>> implements LogSupport {
 
-    private volatile S specie;
+    public volatile S specie;
     private final S[] species;
     public final BlockView.In in;
     public final BlockView.Out out;

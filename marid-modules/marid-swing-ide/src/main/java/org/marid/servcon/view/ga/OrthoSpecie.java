@@ -31,15 +31,15 @@ import java.util.BitSet;
 public class OrthoSpecie extends Specie<OrthoSpecie> {
 
     private static final int BORDER = 20;
-    private static final int COUNT = 8;
+    private static final int MAX = 8;
 
     private final int[] lengths;
     private final BitSet dirs;
 
     public OrthoSpecie(BlockLink<OrthoSpecie> blockLink) {
         super(blockLink);
-        this.lengths = new int[COUNT];
-        this.dirs = new BitSet(COUNT);
+        this.lengths = new int[MAX];
+        this.dirs = new BitSet(MAX);
     }
 
     private OrthoSpecie(BlockLink<OrthoSpecie> blockLink, int[] lengths, BitSet dirs) {
@@ -54,9 +54,9 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
         final Point p2 = blockLink.in.connectionPoint();
         int x = p1.x + BORDER, y = p1.y;
         g.drawLine(p1.x, p1.y, x, y);
-        final int m = COUNT / 2;
+        final int m = MAX / 2;
         int xm1 = 0, ym1 = 0, xm2 = 0, ym2 = 0;
-        for (int i = 0; i < COUNT; i++) {
+        for (int i = 0; i < MAX; i++) {
             if (i == m) {
                 xm1 = x;
                 ym1 = y;
@@ -108,13 +108,13 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
 
     @Override
     public double fitness(GaContext gaContext) {
-        final int distFactor = Stats.intAbsSum(lengths, 0, COUNT);
+        final int distFactor = Stats.intAbsSum(lengths, 0, MAX);
         int isectFactor = 0;
         int x = gaContext.p1.x + BORDER, y = gaContext.p1.y;
-        final int m = COUNT / 2;
-        int xm1 = 0, ym1 = 0, xm2 = 0, ym2 = 0;
-        double lenFactor = 0.0;
-        for (int i = 0; i < COUNT; i++) {
+        final int m = MAX / 2;
+        int xm1 = 0, ym1 = 0;
+        double endDist = 0.0;
+        for (int i = 0; i < MAX; i++) {
             if (i == m) {
                 xm1 = x;
                 ym1 = y;
@@ -122,10 +122,6 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
                 y = gaContext.p2.y;
             }
             final int len = lengths[i];
-            final int alen = Math.abs(len);
-            if (alen < 20) {
-                lenFactor += alen;
-            }
             if (dirs.get(i)) {
                 for (final Rectangle r : gaContext.rectangles) {
                     if (y >= r.y && y <= r.y + r.height) {
@@ -142,18 +138,21 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
                 y += len;
             }
             if (i == m) {
-                xm2 = x;
-                ym2 = y;
+                endDist = Point.distance(xm1, ym1, x, y);
+                for (final Rectangle r : gaContext.rectangles) {
+                    if (r.intersectsLine(xm1, ym1, x, y)) {
+                        isectFactor += endDist;
+                    }
+                }
             }
         }
-        final double endDist = Point.distance(xm1, ym1, xm2, ym2);
-        return distFactor + (isectFactor + endDist) * 2.0 + lenFactor * 2.0;
+        return distFactor + isectFactor * 5.0 + endDist;
     }
 
     @Override
     public void mutate(GaContext gc) {
         if (gc.random.nextFloat() < gc.getMutationProbability()) {
-            for (int i = 0; i < COUNT; i++) {
+            for (int i = 0; i < MAX; i++) {
                 final int r = gc.random.nextInt(300);
                 lengths[i] += gc.random.nextInt(r * 2 + 1) - r;
                 dirs.set(i, gc.random.nextBoolean());
@@ -163,9 +162,9 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
 
     @Override
     public OrthoSpecie crossover(GaContext gaContext, OrthoSpecie that) {
-        final int[] lengths = new int[COUNT];
-        final BitSet dirs = new BitSet(COUNT);
-        for (int i = 0; i < COUNT; i++) {
+        final int[] lengths = new int[MAX];
+        final BitSet dirs = new BitSet(MAX);
+        for (int i = 0; i < MAX; i++) {
             if (gaContext.random.nextBoolean()) {
                 lengths[i] = that.lengths[i];
                 dirs.set(i, that.dirs.get(i));

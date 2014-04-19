@@ -22,7 +22,6 @@ import org.marid.servcon.view.BlockEditor;
 import org.marid.servcon.view.BlockLink;
 
 import java.awt.*;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -33,7 +32,7 @@ public class GaContext {
     public final Rectangle[] rectangles;
     public final Point p1;
     public final Point p2;
-    public final Random random = ThreadLocalRandom.current();
+    public final ThreadLocalRandom random = ThreadLocalRandom.current();
 
     public GaContext(BlockLink<?> blockLink) {
         synchronized (blockLink.in.getEditor().getTreeLock()) {
