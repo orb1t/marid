@@ -59,7 +59,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     private Point mousePoint = new Point();
     private final Rectangle clip = new Rectangle();
     private AffineTransform mouseTransform = (AffineTransform) transform.clone();
-    private Component currentComponent;
+    private Component curComponent;
     private Component movingComponent;
     private Point movingComponentPoint;
     private Point movingComponentLocation;
@@ -117,94 +117,83 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     @SuppressWarnings("StringEquality")
     @Override
     protected void processEvent(AWTEvent e) {
-        super.processEvent(e);
-        MainSwitch:
-        switch (e.getID()) {
-            case MouseEvent.MOUSE_WHEEL: {
-                final MouseWheelEvent me = (MouseWheelEvent) e;
-                final double s = 1.0 + me.getPreciseWheelRotation() / 10.0;
-                final Point mp = SwingUtil.transform(transform::inverseTransform, me.getPoint());
-                transform.translate(mp.getX(), mp.getY());
-                transform.scale(s, s);
-                transform.translate(-mp.getX(), -mp.getY());
-                repaint();
-                break;
+        if (e.getID() == MOUSE_WHEEL) {
+            final MouseWheelEvent me = (MouseWheelEvent) e;
+            final double s = 1.0 + me.getPreciseWheelRotation() / 10.0;
+            final Point mp = SwingUtil.transform(transform::inverseTransform, me.getPoint());
+            transform.translate(mp.getX(), mp.getY());
+            transform.scale(s, s);
+            transform.translate(-mp.getX(), -mp.getY());
+            repaint();
+        } else {
+            final MouseEvent me = (MouseEvent) e;
+            final Point mp = SwingUtil.transform(transform::inverseTransform, me.getPoint());
+            switch (e.getID()) {
+                case MouseEvent.MOUSE_DRAGGED:
+                    if (me.isShiftDown()) {
+                        final Point p = SwingUtil.transform(mouseTransform::inverseTransform, me.getPoint());
+                        transform.setTransform(mouseTransform);
+                        transform.translate(p.getX() - mousePoint.getX(), p.getY() - mousePoint.getY());
+                        repaint();
+                    } else if (movingComponent != null) {
+                        final int locx = movingComponentLocation.x + mp.x - movingComponentPoint.x;
+                        final int locy = movingComponentLocation.y + mp.y - movingComponentPoint.y;
+                        movingComponent.setLocation(locx, locy);
+                        repaint();
+                        return;
+                    }
+                    break;
+                case MOUSE_RELEASED:
+                    if (movingComponent != null) {
+                        movingComponent = null;
+                        movingComponentPoint = null;
+                        movingComponentLocation = null;
+                        return;
+                    }
+                default:
+                    mousePoint = mp;
+                    mouseTransform = (AffineTransform) transform.clone();
+                    break;
             }
-            case MouseEvent.MOUSE_CLICKED:
-            case MouseEvent.MOUSE_DRAGGED:
-            case MouseEvent.MOUSE_MOVED:
-            case MouseEvent.MOUSE_PRESSED:
-            case MouseEvent.MOUSE_RELEASED:
-                final MouseEvent me = (MouseEvent) e;
-                final Point mp = SwingUtil.transform(transform::inverseTransform, me.getPoint());
-                switch (e.getID()) {
-                    case MouseEvent.MOUSE_DRAGGED:
-                        if (me.isShiftDown()) {
-                            final Point p = SwingUtil.transform(mouseTransform::inverseTransform, me.getPoint());
-                            transform.setTransform(mouseTransform);
-                            transform.translate(p.getX() - mousePoint.getX(), p.getY() - mousePoint.getY());
-                            repaint();
-                        } else if (movingComponent != null) {
-                            final int locx = movingComponentLocation.x + mp.x - movingComponentPoint.x;
-                            final int locy = movingComponentLocation.y + mp.y - movingComponentPoint.y;
-                            movingComponent.setLocation(locx, locy);
-                            repaint();
-                            break MainSwitch;
-                        }
-                        break;
-                    case MOUSE_RELEASED:
-                        if (movingComponent != null) {
-                            movingComponent = null;
-                            movingComponentPoint = null;
-                            movingComponentLocation = null;
-                            break MainSwitch;
-                        }
-                    default:
-                        mousePoint = mp;
-                        mouseTransform = (AffineTransform) transform.clone();
-                        break;
-                }
-                for (final Component component : getComponents()) {
-                    final Rectangle b = component.getBounds();
-                    if (b.contains(mp)) {
-                        Point p = new Point(mp.x - b.x, mp.y - b.y);
-                        Component sub = component;
-                        while (true) {
-                            final Component c = sub.getComponentAt(p);
-                            if (c == null || c == sub) {
-                                break;
-                            }
-                            sub = c;
-                            final Rectangle bounds = sub.getBounds();
-                            p = new Point(p.x - bounds.x, p.y - bounds.y);
-                        }
-                        final int x = p.x, y = p.y;
-                        if (sub.getName() == BlockView.MOVEABLE && e.getID() == MOUSE_PRESSED) {
-                            movingComponent = component;
-                            movingComponentPoint = mp;
-                            movingComponentLocation = component.getLocation();
+            for (final Component component : getComponents()) {
+                final Rectangle b = component.getBounds();
+                if (b.contains(mp)) {
+                    Point p = new Point(mp.x - b.x, mp.y - b.y);
+                    Component sub = component;
+                    while (true) {
+                        final Component c = sub.getComponentAt(p);
+                        if (c == null || c == sub) {
                             break;
                         }
-                        try {
-                            sub.dispatchEvent(mouseEvent(sub, me, me.getID(), x, y));
-                        } catch (IllegalComponentStateException ex) {
-                            // ignore it
-                        }
-                        if (sub != currentComponent) {
-                            if (currentComponent != null) {
-                                currentComponent.dispatchEvent(mouseEvent(currentComponent, me, MOUSE_EXITED, x, y));
-                            }
-                            sub.dispatchEvent(mouseEvent(sub, me, MOUSE_ENTERED, x, y));
-                            currentComponent = sub;
-                        }
-                        repaint(); // TODO: repaint within bounds
-                        break MainSwitch;
+                        sub = c;
+                        final Rectangle bounds = sub.getBounds();
+                        p = new Point(p.x - bounds.x, p.y - bounds.y);
                     }
+                    if (sub.getName() == BlockView.MOVEABLE && e.getID() == MOUSE_PRESSED) {
+                        movingComponent = component;
+                        movingComponentPoint = mp;
+                        movingComponentLocation = component.getLocation();
+                        break;
+                    }
+                    try {
+                        sub.dispatchEvent(mouseEvent(sub, me, me.getID(), p.x, p.y));
+                    } catch (IllegalComponentStateException ex) {
+                        // ignore it
+                    }
+                    if (sub != curComponent) {
+                        if (curComponent != null) {
+                            curComponent.dispatchEvent(mouseEvent(curComponent, me, MOUSE_EXITED, p.x, p.y));
+                        }
+                        sub.dispatchEvent(mouseEvent(sub, me, MOUSE_ENTERED, p.x, p.y));
+                        curComponent = sub;
+                    }
+                    repaint(); // TODO: repaint within bounds
+                    return;
                 }
-                if (currentComponent != null) {
-                    currentComponent.dispatchEvent(mouseEvent(currentComponent, me, MOUSE_EXITED, mp.x, mp.y));
-                }
-                break;
+            }
+            if (curComponent != null) {
+                curComponent.dispatchEvent(mouseEvent(curComponent, me, MOUSE_EXITED, mp.x, mp.y));
+            }
         }
     }
 
@@ -219,8 +208,8 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
         g.getClipBounds(clip);
         g.setBackground(getBackground());
         g.clearRect(clip.x, clip.y, clip.width, clip.height);
-        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.transform(transform);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         for (final BlockLink blockLink : blockLinks) {
             blockLink.paint(g);
         }
@@ -246,8 +235,8 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
         if (comp instanceof BlockView) {
             blockViews.remove(comp);
         }
-        if (currentComponent == comp) {
-            currentComponent = null;
+        if (curComponent == comp) {
+            curComponent = null;
         }
     }
 
