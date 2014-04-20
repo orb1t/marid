@@ -57,6 +57,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     private final Thread gaThread = new Thread(this);
     private final ForkJoinPool pool = new ForkJoinPool(Math.max(Runtime.getRuntime().availableProcessors(), 8));
     private Point mousePoint = new Point();
+    private final Rectangle clip = new Rectangle();
     private AffineTransform mouseTransform = (AffineTransform) transform.clone();
     private Component currentComponent;
     private Component movingComponent;
@@ -80,6 +81,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void run() {
         while (!pool.isShutdown()) {
             final List<ForkJoinTask<?>> tasks = new ArrayList<>(blockLinks.size());
@@ -115,7 +117,8 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     @Override
     protected void processEvent(AWTEvent e) {
         super.processEvent(e);
-        MainSwitch: switch (e.getID()) {
+        MainSwitch:
+        switch (e.getID()) {
             case MouseEvent.MOUSE_WHEEL: {
                 final MouseWheelEvent me = (MouseWheelEvent) e;
                 final double s = 1.0 + me.getPreciseWheelRotation() / 10.0;
@@ -209,29 +212,18 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     @Override
     protected void paintComponent(Graphics graphics) {
         final Graphics2D g = (Graphics2D) graphics;
-        final Rectangle cb = g.getClipBounds();
+        g.getClipBounds(clip);
         g.setBackground(getBackground());
-        g.clearRect(cb.x, cb.y, cb.width, cb.height);
+        g.clearRect(clip.x, clip.y, clip.width, clip.height);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        final AffineTransform oldTransform = g.getTransform();
-        try {
-            final AffineTransform t = new AffineTransform(oldTransform);
-            t.concatenate(transform);
-            g.setTransform(t);
-            for (final BlockLink blockLink : blockLinks) {
-                blockLink.paint(g);
-            }
-            for (final Component component : getComponents()) {
-                if (component instanceof BlockView) {
-                    final BlockView block = (BlockView) component;
-                    final Rectangle bb = block.getBounds();
-                    g.translate(bb.x, bb.y);
-                    block.print(g);
-                    g.translate(-bb.x, -bb.y);
-                }
-            }
-        } finally {
-            g.setTransform(oldTransform);
+        g.transform(transform);
+        for (final BlockLink blockLink : blockLinks) {
+            blockLink.paint(g);
+        }
+        for (final BlockView block : blockViews) {
+            g.translate(block.getX(), block.getY());
+            block.print(g);
+            g.translate(-block.getX(), -block.getY());
         }
     }
 

@@ -60,7 +60,6 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
         return new Incubator(size * species.length);
     }
 
-    @SuppressWarnings("unchecked")
     public void doGA(GaContext gc, Incubator incubator) {
         incubator.count = 0;
         try {
