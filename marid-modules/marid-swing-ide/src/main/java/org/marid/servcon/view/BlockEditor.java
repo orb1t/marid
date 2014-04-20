@@ -58,6 +58,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     private final ForkJoinPool pool = new ForkJoinPool(Math.max(Runtime.getRuntime().availableProcessors(), 8));
     private Point mousePoint = new Point();
     private final Rectangle clip = new Rectangle();
+    private final Stroke lineStroke = new BasicStroke(2.0f);
     private AffineTransform mouseTransform = (AffineTransform) transform.clone();
     private Component curComponent;
     private Component movingComponent;
@@ -72,6 +73,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
         setBackground(SystemColor.controlLtHighlight);
         setDoubleBuffered(true);
         setTransferHandler(new MaridTransferHandler());
+        setForeground(SystemColor.controlDkShadow);
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
         ServconConfiguration.mutationProbability.addConsumer(this, (o, n) -> mutationProbability = n);
         ServconConfiguration.incubatorSize.addConsumer(this, (o, n) -> incubatorSize = n);
@@ -209,10 +211,13 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
         g.setBackground(getBackground());
         g.clearRect(clip.x, clip.y, clip.width, clip.height);
         g.transform(transform);
+        final Stroke oldStroke = g.getStroke();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g.setStroke(lineStroke);
         for (final BlockLink blockLink : blockLinks) {
             blockLink.paint(g);
         }
+        g.setStroke(oldStroke);
         for (final BlockView block : blockViews) {
             g.translate(block.getX(), block.getY());
             block.print(g);

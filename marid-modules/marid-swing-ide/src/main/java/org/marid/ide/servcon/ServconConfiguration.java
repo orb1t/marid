@@ -41,7 +41,7 @@ public interface ServconConfiguration extends Configuration {
     @Input(tab = "GA")
     Pv<Float, FloatInputControl> mutationProbability = new Pv<>(
             FloatInputControl::new,
-            () -> 0.005f);
+            () -> 0.3f);
 
     @Input(tab = "GA")
     Pv<Integer, SpinIntInputControl> incubatorSize = new Pv<>(

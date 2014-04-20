@@ -71,6 +71,7 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
                 incubator.put(child.fitness(gc), child);
             }
             specie = incubator.species[0];
+            specie.fitness(gc);
             incubator.copy();
         } catch (Exception x) {
             warning("GA error", x);

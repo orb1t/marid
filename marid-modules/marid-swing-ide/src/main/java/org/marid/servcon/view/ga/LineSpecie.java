@@ -56,12 +56,12 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
         this.ys = ys;
     }
 
-    private double length(GaContext fc) {
-        double length = Point.distance(fc.p1.x + BORDER, fc.p1.y, xs[0], ys[0]);
+    private double lengthSq(GaContext fc) {
+        double length = Point.distanceSq(fc.p1.x + BORDER, fc.p1.y, xs[0], ys[0]);
         for (int i = 0; i < COUNT - 1; i++) {
-            length += Point.distance(xs[i], ys[i], xs[i + 1], ys[i + 1]);
+            length += Point.distanceSq(xs[i], ys[i], xs[i + 1], ys[i + 1]);
         }
-        length += Point.distance(xs[COUNT - 1], ys[COUNT - 1], fc.p2.x - BORDER, fc.p2.y);
+        length += Point.distanceSq(xs[COUNT - 1], ys[COUNT - 1], fc.p2.x - BORDER, fc.p2.y);
         return length;
     }
 
@@ -79,20 +79,20 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
     @Override
     public double fitness(GaContext fc) {
         try {
-            final double lineDistance = Point.distance(fc.p1.x + BORDER, fc.p1.y, fc.p2.x - BORDER, fc.p2.y) + 0.1;
-            final double distFactor = length(fc) / lineDistance;
+            final double lineDistance = Point.distanceSq(fc.p1.x + BORDER, fc.p1.y, fc.p2.x - BORDER, fc.p2.y) + 0.1;
+            final double distFactor = lengthSq(fc) / lineDistance;
             double isectFactor = 0.0;
             for (final Rectangle r : fc.rectangles) {
                 final double cx = r.getCenterX();
                 final double cy = r.getCenterY();
-                final double rr = Point.distance(cx, cy, r.getMinY(), r.getMinY()) * 2;
+                final double rr = 4.0 * (r.width * r.width + r.height * r.height);
                 isectFactor += isectF(r, cx, cy, rr, fc.p1.x + BORDER, fc.p1.y, xs[0], ys[0]);
                 for (int i = 0; i < COUNT - 1; i++) {
                     isectFactor += isectF(r, cx, cy, rr, xs[i], ys[i], xs[i + 1], ys[i + 1]);
                 }
                 isectFactor += isectF(r, cx, cy, rr, xs[COUNT - 1], ys[COUNT - 1], fc.p2.x - BORDER, fc.p2.y);
             }
-            return distFactor + isectFactor / (lineDistance * 0.25);
+            return distFactor + isectFactor / lineDistance;
         } catch (Exception x) {
             warning("GA fitness error on {0}", x, this);
             return 0.0;
@@ -101,7 +101,7 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
 
     private double isectF(Rectangle r, double cx, double cy, double rr, double x1, double y1, double x2, double y2) {
         if (r.intersectsLine(x1, y1, x2, y2)) {
-            final double v = rr - Line2D.ptLineDist(x1, y1, x2, y2, cx, cy);
+            final double v = rr - Line2D.ptLineDistSq(x1, y1, x2, y2, cx, cy);
             return v >= 0.0 ? v : 1.0;
         } else {
             return 0.0;

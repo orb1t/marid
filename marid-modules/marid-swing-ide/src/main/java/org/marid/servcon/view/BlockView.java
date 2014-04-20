@@ -143,7 +143,7 @@ public class BlockView extends JPanel {
 
     public Rectangle getSafeBounds() {
         final Rectangle bounds = getBounds();
-        bounds.grow(10, 10);
+        bounds.grow(9, 9);
         return bounds;
     }
 
