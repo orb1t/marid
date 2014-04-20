@@ -84,13 +84,12 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void run() {
         while (!pool.isShutdown()) {
             final List<ForkJoinTask<?>> tasks = new ArrayList<>(blockLinks.size());
             for (final BlockLink blockLink : blockLinks) {
                 tasks.add(pool.submit(() -> {
-                    final BlockLink.Incubator incubator = blockLink.createIncubator(incubatorSize);
+                    blockLink.initIncubator(incubatorSize);
                     final GaContext gaContext = new GaContext(blockLink) {
                         @Override
                         public final float getMutationProbability() {
@@ -98,7 +97,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
                         }
                     };
                     for (int i = 0; i < 100; i++) {
-                        blockLink.doGA(gaContext, incubator);
+                        blockLink.doGA(gaContext);
                     }
                 }));
             }
@@ -116,7 +115,6 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
         pool.shutdown();
     }
 
-    @SuppressWarnings("StringEquality")
     @Override
     protected void processEvent(AWTEvent e) {
         if (e.getID() == MOUSE_WHEEL) {
@@ -171,7 +169,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
                         final Rectangle bounds = sub.getBounds();
                         p = new Point(p.x - bounds.x, p.y - bounds.y);
                     }
-                    if (sub.getName() == BlockView.MOVEABLE && e.getID() == MOUSE_PRESSED) {
+                    if (BlockView.MOVEABLE.equals(sub.getName()) && e.getID() == MOUSE_PRESSED) {
                         movingComponent = component;
                         movingComponentPoint = mp;
                         movingComponentLocation = component.getLocation();

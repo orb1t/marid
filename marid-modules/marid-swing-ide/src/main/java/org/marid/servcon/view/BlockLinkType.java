@@ -32,7 +32,7 @@ public enum BlockLinkType {
             return new BlockLink<>(sCount, LineSpecie::new, LineSpecie[]::new, in, out);
         }
     },
-    ORTH_LINK {
+    ORTHO_LINK {
         @Override
         public BlockLink<? extends Specie> createBlockLink(int sCount, BlockView.In in, BlockView.Out out) {
             return new BlockLink<>(sCount, OrthoSpecie::new, OrthoSpecie[]::new, in, out);

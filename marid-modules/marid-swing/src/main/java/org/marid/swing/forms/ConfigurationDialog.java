@@ -35,7 +35,7 @@ import java.util.prefs.Preferences;
 
 import static java.awt.BorderLayout.NORTH;
 import static java.awt.BorderLayout.SOUTH;
-import static java.awt.Dialog.ModalityType.APPLICATION_MODAL;
+import static java.awt.Dialog.ModalityType.DOCUMENT_MODAL;
 import static java.awt.GridBagConstraints.*;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -70,7 +70,7 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
 
     @SuppressWarnings("MagicConstant")
     public ConfigurationDialog(C component) {
-        super(windowForComponent(component), s("Configuration") + ": " + s(component.getName()), APPLICATION_MODAL);
+        super(windowForComponent(component), s("Configuration") + ": " + s(component.getName()), DOCUMENT_MODAL);
         this.component = component;
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         add(tabbedPane = new JTabbedPane(getPref("tabPlacement", TOP), getPref("tabLayoutPolicy", WRAP_TAB_LAYOUT)));
@@ -121,7 +121,6 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
 
     @Override
     protected void processWindowEvent(WindowEvent e) {
-        super.processWindowEvent(e);
         switch (e.getID()) {
             case WindowEvent.WINDOW_CLOSED:
                 putPref("size", getSize());
@@ -130,6 +129,7 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
                 setSize(getPref("size", getSize()));
                 break;
         }
+        super.processWindowEvent(e);
     }
 
     protected boolean savePreferences() {

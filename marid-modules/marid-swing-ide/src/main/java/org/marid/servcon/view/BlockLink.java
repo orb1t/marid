@@ -40,6 +40,7 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
     public final BlockView.In in;
     public final BlockView.Out out;
     private final IntFunction<S[]> iFunc;
+    Incubator incubator;
 
     public BlockLink(int sCount, Function<BlockLink<S>, S> sFunc, IntFunction<S[]> iFunc, In in, Out out) {
         this.in = in;
@@ -56,11 +57,11 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
         specie.paint(g);
     }
 
-    public Incubator createIncubator(int size) {
-        return new Incubator(size * species.length);
+    public void initIncubator(int size) {
+        incubator = new Incubator(size * species.length);
     }
 
-    public void doGA(GaContext gc, Incubator incubator) {
+    public void doGA(GaContext gc) {
         incubator.count = 0;
         try {
             while (incubator.count < incubator.length) {
@@ -83,7 +84,7 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
         return getClass().getSimpleName() + ImmutableMap.of("in", in, "out", out, "specie", specie);
     }
 
-    public class Incubator {
+    class Incubator {
 
         final double[] fitnesses;
         final S[] species;

@@ -64,7 +64,9 @@ public class BlockView extends JPanel {
         toolBar.setBorder(createEtchedBorder());
         toolBar.setBorderPainted(true);
         toolBar.add(titleLabel());
-        toolBar.add(Box.createGlue());
+        final Component glue = Box.createGlue();
+        glue.setName(MOVEABLE);
+        toolBar.add(glue);
         toolBar.addSeparator();
         toolBar.add(new MaridAction("Remove block", "removeWidget", e -> {
             blockEditor.remove(this);
