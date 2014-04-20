@@ -70,6 +70,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
         setFont(requireNonNull(UIManager.getFont("Label.font")));
         setOpaque(true);
         setBackground(SystemColor.controlLtHighlight);
+        setDoubleBuffered(true);
         setTransferHandler(new MaridTransferHandler());
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
         ServconConfiguration.mutationProbability.addConsumer(this, (o, n) -> mutationProbability = n);
@@ -177,36 +178,39 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
                             final Rectangle bounds = sub.getBounds();
                             p = new Point(p.x - bounds.x, p.y - bounds.y);
                         }
-                        final int id = e.getID(), cc = me.getClickCount(), bt = me.getButton(), x = p.x, y = p.y;
-                        final long t = me.getWhen();
-                        final int m = me.getModifiers(), xs = me.getXOnScreen(), ys = me.getYOnScreen();
-                        final boolean pt = me.isPopupTrigger();
-                        final MouseEvent mev = new MouseEvent(sub, id, t, m, x, y, xs, ys, cc, pt, bt);
-                        if (sub.getName() == BlockView.MOVEABLE && id == MOUSE_PRESSED) {
+                        final int x = p.x, y = p.y;
+                        if (sub.getName() == BlockView.MOVEABLE && e.getID() == MOUSE_PRESSED) {
                             movingComponent = component;
                             movingComponentPoint = mp;
                             movingComponentLocation = component.getLocation();
                             break;
                         }
                         try {
-                            sub.dispatchEvent(mev);
+                            sub.dispatchEvent(mouseEvent(sub, me, me.getID(), x, y));
                         } catch (IllegalComponentStateException ex) {
                             // ignore it
                         }
                         if (sub != currentComponent) {
                             if (currentComponent != null) {
-                                final MouseEvent ev = new MouseEvent(currentComponent, MOUSE_EXITED, t, m, x, y, xs, ys, cc, pt, bt);
-                                currentComponent.dispatchEvent(ev);
+                                currentComponent.dispatchEvent(mouseEvent(currentComponent, me, MOUSE_EXITED, x, y));
                             }
-                            sub.dispatchEvent(new MouseEvent(sub, MOUSE_ENTERED, t, m, x, y, xs, ys, cc, pt, bt));
+                            sub.dispatchEvent(mouseEvent(sub, me, MOUSE_ENTERED, x, y));
                             currentComponent = sub;
                         }
                         repaint(); // TODO: repaint within bounds
-                        break;
+                        break MainSwitch;
                     }
+                }
+                if (currentComponent != null) {
+                    currentComponent.dispatchEvent(mouseEvent(currentComponent, me, MOUSE_EXITED, mp.x, mp.y));
                 }
                 break;
         }
+    }
+
+    private MouseEvent mouseEvent(Component component, MouseEvent e, int id, int x, int y) {
+        return new MouseEvent(component, id, e.getWhen(), e.getModifiers(), x, y,
+                e.getXOnScreen(), e.getYOnScreen(), e.getClickCount(), e.isPopupTrigger(), e.getButton());
     }
 
     @Override

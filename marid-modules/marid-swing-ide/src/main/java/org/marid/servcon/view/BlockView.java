@@ -68,7 +68,7 @@ public class BlockView extends JPanel {
         toolBar.addSeparator();
         toolBar.add(new MaridAction("Remove block", "removeWidget", e -> {
             blockEditor.remove(this);
-        }));
+        })).setFocusable(false);
         final GroupLayout.SequentialGroup vl = g.createSequentialGroup();
         final GroupLayout.SequentialGroup vr = g.createSequentialGroup();
         final GroupLayout.ParallelGroup hl = g.createParallelGroup();
