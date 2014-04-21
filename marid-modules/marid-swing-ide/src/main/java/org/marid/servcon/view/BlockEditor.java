@@ -53,7 +53,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
 
     private final AffineTransform transform = new AffineTransform();
     protected final List<BlockLink> blockLinks = new CopyOnWriteArrayList<>();
-    public final List<BlockView> blockViews = new ArrayList<>();
+    public final List<BlockView> blockViews = new CopyOnWriteArrayList<>();
     private final Thread gaThread = new Thread(this);
     private final ForkJoinPool pool = new ForkJoinPool(Math.max(Runtime.getRuntime().availableProcessors(), 8));
     private Point mousePoint = new Point();
@@ -61,7 +61,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     private final Stroke lineStroke = new BasicStroke(2.0f);
     private AffineTransform mouseTransform = (AffineTransform) transform.clone();
     private Component curComponent;
-    private Component movingComponent;
+    private BlockView movingComponent;
     private Point movingComponentPoint;
     private Point movingComponentLocation;
     private volatile float mutationProbability = ServconConfiguration.mutationProbability.get();
@@ -155,7 +155,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
                     mouseTransform = (AffineTransform) transform.clone();
                     break;
             }
-            for (final Component component : getComponents()) {
+            for (final BlockView component : blockViews) {
                 final Rectangle b = component.getBounds();
                 if (b.contains(mp)) {
                     int x = mp.x - b.x, y = mp.y - b.y;
@@ -222,22 +222,15 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
         }
     }
 
-    @Override
-    public Component add(Component comp) {
-        final Component component = super.add(comp);
-        if (comp instanceof BlockView) {
-            blockViews.add((BlockView) comp);
-        }
-        return component;
+    public void add(BlockView blockView) {
+        blockViews.add(blockView);
+        add((Component) blockView);
     }
 
-    @Override
-    public void remove(Component comp) {
-        super.remove(comp);
-        if (comp instanceof BlockView) {
-            blockViews.remove(comp);
-        }
-        if (curComponent == comp) {
+    public void remove(BlockView blockView) {
+        blockViews.remove(blockView);
+        remove((Component) blockView);
+        if (curComponent == blockView) {
             curComponent = null;
         }
     }

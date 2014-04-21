@@ -175,14 +175,11 @@ public class BlockView extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            for (final Component component : blockEditor.getComponents()) {
-                if (component instanceof BlockView) {
-                    final BlockView bv = (BlockView) component;
-                    bv.outputs.stream().filter(Out::isSelected).forEach(out -> {
-                        out.setSelected(false);
-                        blockEditor.blockLinks.add(linkType.get().createBlockLink(species.get(), this, out));
-                    });
-                }
+            for (final BlockView blockView : blockEditor.blockViews) {
+                blockView.outputs.stream().filter(Out::isSelected).forEach(out -> {
+                    out.setSelected(false);
+                    blockEditor.blockLinks.add(linkType.get().createBlockLink(species.get(), this, out));
+                });
             }
             setSelected(false);
             blockEditor.repaint();
@@ -201,11 +198,9 @@ public class BlockView extends JPanel {
         }
 
         public Point connectionPoint() {
-            synchronized (BlockView.this.getTreeLock()) {
-                return new Point(
-                        BlockView.this.getX() + BlockView.this.getWidth() + 1,
-                        BlockView.this.getY() + getParent().getY() + getY() + getHeight() / 2);
-            }
+            return new Point(
+                    BlockView.this.getX() + BlockView.this.getWidth() + 1,
+                    BlockView.this.getY() + getParent().getY() + getY() + getHeight() / 2);
         }
 
         public BlockEditor getEditor() {
