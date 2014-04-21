@@ -158,16 +158,15 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
             for (final Component component : getComponents()) {
                 final Rectangle b = component.getBounds();
                 if (b.contains(mp)) {
-                    Point p = new Point(mp.x - b.x, mp.y - b.y);
+                    int x = mp.x - b.x, y = mp.y - b.y;
                     Component sub = component;
                     while (true) {
-                        final Component c = sub.getComponentAt(p);
+                        final Component c = sub.getComponentAt(x, y);
                         if (c == null || c == sub) {
                             break;
                         }
                         sub = c;
-                        final Rectangle bounds = sub.getBounds();
-                        p = new Point(p.x - bounds.x, p.y - bounds.y);
+                        x -= sub.getX(); y -= sub.getY();
                     }
                     if (BlockView.MOVEABLE.equals(sub.getName()) && e.getID() == MOUSE_PRESSED) {
                         movingComponent = component;
@@ -176,15 +175,15 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
                         break;
                     }
                     try {
-                        sub.dispatchEvent(mouseEvent(sub, me, me.getID(), p.x, p.y));
+                        sub.dispatchEvent(mouseEvent(sub, me, me.getID(), x, y));
                     } catch (IllegalComponentStateException ex) {
                         // ignore it
                     }
                     if (sub != curComponent) {
                         if (curComponent != null) {
-                            curComponent.dispatchEvent(mouseEvent(curComponent, me, MOUSE_EXITED, p.x, p.y));
+                            curComponent.dispatchEvent(mouseEvent(curComponent, me, MOUSE_EXITED, x, y));
                         }
-                        sub.dispatchEvent(mouseEvent(sub, me, MOUSE_ENTERED, p.x, p.y));
+                        sub.dispatchEvent(mouseEvent(sub, me, MOUSE_ENTERED, x, y));
                         curComponent = sub;
                     }
                     repaint(); // TODO: repaint within bounds
