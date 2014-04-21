@@ -101,19 +101,22 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
                     if (r.intersectsLine(x, y, x, y + len)) {
                         isectFactor += r.width * 2 - Math.abs(cx - x);
                     }
-                    distFactor += Math.sqrt(Math.abs((gc.p1.x + gc.p2.x) / 2.0 - x) * Math.abs(len));
+                    distFactor += Math.abs((gc.p1.x + gc.p2.x) / 2.0 - x) + Math.abs(len);
                     y += len;
                 }
             }
             if (r.intersectsLine(x, y, x, gc.p2.y)) {
                 isectFactor += r.width * 2 - Math.abs(cx - x);
             }
-            distFactor += Math.sqrt(Math.abs((gc.p1.x + gc.p2.x) / 2.0 - x) * Math.abs(gc.p2.y - y));
+            distFactor += Math.abs((gc.p1.x + gc.p2.x) / 2.0 - x) + Math.abs(gc.p2.y - y);
             if (r.intersectsLine(x, gc.p2.y, gc.p2.x - BORDER, gc.p2.y)) {
                 isectFactor += r.height * 2 - Math.abs(cy - gc.p2.y);
             }
         }
-        return length(gc) + isectFactor * 100.0 + distFactor / 10.0;
+        if (blockLink.specie == this) {
+            System.out.println(isectFactor + " " + distFactor);
+        }
+        return length(gc) + Math.pow(isectFactor, 4.0) * 10.0 + Math.sqrt(distFactor);
     }
 
     @Override

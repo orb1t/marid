@@ -92,7 +92,7 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
                 }
                 isectFactor += isectF(r, cx, cy, rr, xs[COUNT - 1], ys[COUNT - 1], fc.p2.x - BORDER, fc.p2.y);
             }
-            return distFactor + isectFactor / lineDistance;
+            return distFactor + isectFactor;
         } catch (Exception x) {
             warning("GA fitness error on {0}", x, this);
             return 0.0;
