@@ -160,13 +160,11 @@ public interface Configuration {
         }
 
         public void fireConsumers(V oldValue, V newValue) {
-            for (final List<BiConsumer<V, V>> consumers : consumerMap.values()) {
-                if (consumers != null) {
-                    for (final BiConsumer<V, V> consumer : consumers) {
-                        consumer.accept(oldValue, newValue);
-                    }
+            consumerMap.forEach((k, v) -> {
+                for (final BiConsumer<V, V> consumer : v) {
+                    consumer.accept(oldValue, newValue);
                 }
-            }
+            });
         }
 
         private static final class ClassResolver extends SecurityManager {

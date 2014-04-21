@@ -112,6 +112,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
                     for (int i = 0; i < 100; i++) {
                         blockLink.doGA(gaContext);
                     }
+                    blockLink.specie.fitness(gaContext);
                 }));
             }
             tasks.forEach(ForkJoinTask::join);
