@@ -77,6 +77,19 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
         ServconConfiguration.mutationProbability.addConsumer(this, (o, n) -> mutationProbability = n);
         ServconConfiguration.incubatorSize.addConsumer(this, (o, n) -> incubatorSize = n);
+        ServconConfiguration.linkType.addConsumer(this, (o, n) -> updateLinks());
+        ServconConfiguration.species.addConsumer(this, (o, n) -> updateLinks());
+    }
+
+    private void updateLinks() {
+        final BlockView.In[] ins = blockLinks.stream().map(l -> l.in).toArray(BlockView.In[]::new);
+        final BlockView.Out[] outs = blockLinks.stream().map(l -> l.out).toArray(BlockView.Out[]::new);
+        blockLinks.clear();
+        final BlockLinkType linkType = ServconConfiguration.linkType.get();
+        final int speciesCount = ServconConfiguration.species.get();
+        for (int i = 0; i < ins.length; i++) {
+            blockLinks.add(linkType.createBlockLink(speciesCount, ins[i], outs[i]));
+        }
     }
 
     public FontMetrics getFontMetrics() {
@@ -156,9 +169,8 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
                     break;
             }
             for (final BlockView component : blockViews) {
-                final Rectangle b = component.getBounds();
-                if (b.contains(mp)) {
-                    int x = mp.x - b.x, y = mp.y - b.y;
+                int x = mp.x - component.getX(), y = mp.y - component.getY();
+                if (component.contains(x, y)) {
                     Component sub = component;
                     while (true) {
                         final Component c = sub.getComponentAt(x, y);
@@ -186,7 +198,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
                         sub.dispatchEvent(mouseEvent(sub, me, MOUSE_ENTERED, x, y));
                         curComponent = sub;
                     }
-                    repaint(); // TODO: repaint within bounds
+                    repaint();
                     return;
                 }
             }
@@ -228,6 +240,11 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     }
 
     public void remove(BlockView blockView) {
+        for (final BlockLink blockLink : blockLinks) {
+            if (blockLink.in.getBlockView() == blockView || blockLink.out.getBlockView() == blockView) {
+                blockLinks.remove(blockLink);
+            }
+        }
         blockViews.remove(blockView);
         remove((Component) blockView);
         if (curComponent == blockView) {

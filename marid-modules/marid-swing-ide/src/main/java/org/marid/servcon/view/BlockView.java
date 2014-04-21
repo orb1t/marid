@@ -173,6 +173,10 @@ public class BlockView extends JPanel {
             return blockEditor;
         }
 
+        public BlockView getBlockView() {
+            return BlockView.this;
+        }
+
         @Override
         public void actionPerformed(ActionEvent e) {
             for (final BlockView blockView : blockEditor.blockViews) {
@@ -205,6 +209,10 @@ public class BlockView extends JPanel {
 
         public BlockEditor getEditor() {
             return blockEditor;
+        }
+
+        public BlockView getBlockView() {
+            return BlockView.this;
         }
 
         @Override
