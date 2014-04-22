@@ -69,6 +69,11 @@ public class BlockLinkTest {
         }
 
         @Override
+        public Shape getShape() {
+            return null;
+        }
+
+        @Override
         public double fitness(GaContext gaContext) {
             return 0;
         }

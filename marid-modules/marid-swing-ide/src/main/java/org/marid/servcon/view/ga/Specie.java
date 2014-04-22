@@ -40,4 +40,6 @@ public abstract class Specie<S extends Specie<S>> {
     public abstract void mutate(GaContext gaContext);
 
     public abstract S crossover(GaContext gaContext, S that);
+
+    public abstract Shape getShape();
 }

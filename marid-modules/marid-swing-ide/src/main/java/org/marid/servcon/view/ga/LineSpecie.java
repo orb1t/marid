@@ -23,6 +23,7 @@ import org.marid.servcon.view.BlockLink;
 
 import java.awt.*;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.util.Arrays;
 
 /**
@@ -35,6 +36,7 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
 
     private final int[] xs;
     private final int[] ys;
+    private Path2D.Double shape;
 
     public LineSpecie(BlockLink<LineSpecie> blockLink) {
         super(blockLink);
@@ -67,13 +69,26 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
 
     @Override
     public void paint(Graphics2D g) {
+        g.draw(shape = createShape());
+    }
+
+    private Path2D.Double createShape() {
         final Point p1 = blockLink.out.connectionPoint();
         final Point p2 = blockLink.in.connectionPoint();
-        g.drawLine(p1.x, p1.y, p1.x + BORDER, p1.y);
-        g.drawLine(p1.x + BORDER, p1.y, xs[0], ys[0]);
-        g.drawPolyline(xs, ys, COUNT);
-        g.drawLine(xs[COUNT - 1], ys[COUNT - 1], p2.x - BORDER, p2.y);
-        g.drawLine(p2.x - BORDER, p2.y, p2.x, p2.y);
+        final Path2D.Double shape = new Path2D.Double();
+        shape.moveTo(p1.x, p1.y);
+        shape.lineTo(p1.x + BORDER, p1.y);
+        for (int i = 0; i < COUNT; i++) {
+            shape.lineTo(xs[i], ys[i]);
+        }
+        shape.lineTo(p2.x - BORDER, p2.y);
+        shape.lineTo(p2.x, p2.y);
+        return shape;
+    }
+
+    @Override
+    public Path2D.Double getShape() {
+        return shape == null ? shape = createShape() : shape;
     }
 
     @Override

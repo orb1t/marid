@@ -22,7 +22,8 @@ import com.google.common.collect.ImmutableMap;
 import org.marid.servcon.view.BlockLink;
 
 import java.awt.*;
-import java.util.BitSet;
+import java.awt.geom.Path2D;
+import java.util.Arrays;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -30,85 +31,82 @@ import java.util.BitSet;
 public class OrthoSpecie extends Specie<OrthoSpecie> {
 
     private static final int BORDER = 20;
-    private static final int MAX = 6;
+    private static final int MAX = 3;
 
-    private final int[] lengths;
-    private final BitSet dirs;
+    private final int[] xs;
+    private final int[] ys;
+    private Path2D.Double shape;
 
     public OrthoSpecie(BlockLink<OrthoSpecie> blockLink) {
         super(blockLink);
-        this.lengths = new int[MAX];
-        this.dirs = new BitSet(MAX);
+        this.xs = new int[MAX];
+        this.ys = new int[MAX];
     }
 
-    private OrthoSpecie(BlockLink<OrthoSpecie> blockLink, int[] lengths, BitSet dirs) {
+    private OrthoSpecie(BlockLink<OrthoSpecie> blockLink, int[] xs, int[] ys) {
         super(blockLink);
-        this.lengths = lengths;
-        this.dirs = dirs;
+        this.xs = xs;
+        this.ys = ys;
+    }
+
+    private Path2D.Double createShape() {
+        final Path2D.Double shape = new Path2D.Double();
+        final Point p1 = blockLink.out.connectionPoint();
+        final Point p2 = blockLink.in.connectionPoint();
+        shape.moveTo(p1.x, p1.y);
+        int x = p1.x + BORDER, y = p1.y;
+        shape.lineTo(x, y);
+        for (int i = 0; i < MAX; i++) {
+            shape.lineTo(x = xs[i], y);
+            shape.lineTo(x, y = ys[i]);
+        }
+        shape.lineTo(x, p2.y);
+        shape.lineTo(p2.x - BORDER, p2.y);
+        shape.lineTo(p2.x, p2.y);
+        return shape;
     }
 
     @Override
     public void paint(Graphics2D g) {
-        final Point p1 = blockLink.out.connectionPoint();
-        final Point p2 = blockLink.in.connectionPoint();
-        int x = p1.x + BORDER, y = p1.y;
-        g.drawLine(p1.x, p1.y, x, y);
-        for (int i = 0; i < MAX; i++) {
-            if (dirs.get(i)) {
-                g.drawLine(x, y, x += lengths[i], y);
-            } else {
-                g.drawLine(x, y, x, y += lengths[i]);
-            }
-        }
-        g.drawLine(x, y, x, p2.y);
-        g.drawLine(x, p2.y, p2.x - BORDER, p2.y);
-        g.drawLine(p2.x - BORDER, p2.y, p2.x, p2.y);
+        g.draw(shape = createShape());
+    }
+
+    @Override
+    public Shape getShape() {
+        return shape == null ? shape = createShape() : shape;
     }
 
     private int length(GaContext gc) {
         int len = 0;
-        for (final int l : lengths) {
-            len += Math.abs(l);
-        }
         int x = gc.p1.x + BORDER, y = gc.p1.y;
         for (int i = 0; i < MAX; i++) {
-            final int l = lengths[i];
-            if (dirs.get(i)) {
-                x += l;
-            } else {
-                y += l;
-            }
+            len += Math.abs(xs[i] - x) + Math.abs(ys[i] - y);
+            x = xs[i]; y = ys[i];
         }
         return len + Math.abs(gc.p2.y - y) + Math.abs(gc.p2.x - BORDER - x);
     }
 
     @Override
     public double fitness(GaContext gc) {
-        int isectFactor = 0;
-        double distFactor = 0.0;
+        int isectFactor = 0, distFactor = 0;
         for (final Rectangle r : gc.rectangles) {
             final int cx = r.x + r.width / 2;
             final int cy = r.y + r.height / 2;
             int x = gc.p1.x + BORDER, y = gc.p1.y;
             for (int i = 0; i < MAX; i++) {
-                final int len = lengths[i];
-                if (dirs.get(i)) {
-                    if (r.intersectsLine(x, y, x + len, y)) {
-                        isectFactor += r.height * 2 - Math.abs(cy - y);
-                    }
-                    x += len;
-                } else {
-                    if (r.intersectsLine(x, y, x, y + len)) {
-                        isectFactor += r.width * 2 - Math.abs(cx - x);
-                    }
-                    distFactor += Math.abs((gc.p1.x + gc.p2.x) / 2.0 - x) + Math.abs(len);
-                    y += len;
+                if (r.intersectsLine(x, y, x = xs[i], y)) {
+                    isectFactor += r.height * 2 - Math.abs(cy - y);
                 }
+                final int ly = Math.abs(ys[i] - y);
+                if (r.intersectsLine(x, y, x, y = ys[i])) {
+                    isectFactor += r.width * 2 - Math.abs(cx - x);
+                }
+                distFactor += Math.abs((gc.p1.x + gc.p2.x) / 2 - x) + ly;
             }
             if (r.intersectsLine(x, y, x, gc.p2.y)) {
                 isectFactor += r.width * 2 - Math.abs(cx - x);
             }
-            distFactor += Math.abs((gc.p1.x + gc.p2.x) / 2.0 - x) + Math.abs(gc.p2.y - y);
+            distFactor += Math.abs((gc.p1.x + gc.p2.x) / 2 - x) + Math.abs(gc.p2.y - y);
             if (r.intersectsLine(x, gc.p2.y, gc.p2.x - BORDER, gc.p2.y)) {
                 isectFactor += r.height * 2 - Math.abs(cy - gc.p2.y);
             }
@@ -121,31 +119,31 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
         if (gc.random.nextFloat() < gc.getMutationProbability()) {
             for (int i = 0; i < MAX; i++) {
                 final int r = gc.random.nextInt(3000);
-                lengths[i] += gc.random.nextInt(-r, r + 1);
-                dirs.set(i, gc.random.nextBoolean());
+                xs[i] += gc.random.nextInt(-r, r + 1);
+                ys[i] += gc.random.nextInt(-r, r + 1);
             }
         }
     }
 
     @Override
     public OrthoSpecie crossover(GaContext gaContext, OrthoSpecie that) {
-        final int[] lengths = new int[MAX];
-        final BitSet dirs = new BitSet(MAX);
+        final int[] xs = new int[MAX];
+        final int[] ys = new int[MAX];
         final int rand = gaContext.random.nextInt();
         for (int i = 0; i < MAX; i++) {
             if ((rand & (1 << i)) == 0) {
-                lengths[i] = that.lengths[i];
-                dirs.set(i, that.dirs.get(i));
+                xs[i] = that.xs[i];
+                ys[i] = that.ys[i];
             } else {
-                lengths[i] = this.lengths[i];
-                dirs.set(i, this.dirs.get(i));
+                xs[i] = this.xs[i];
+                ys[i] = this.ys[i];
             }
         }
-        return new OrthoSpecie(blockLink, lengths, dirs);
+        return new OrthoSpecie(blockLink, xs, ys);
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + ImmutableMap.of("lengths", lengths, "dirs", dirs.toString());
+        return getClass().getSimpleName() + ImmutableMap.of("xs", Arrays.toString(xs), "ys", Arrays.toString(ys));
     }
 }
