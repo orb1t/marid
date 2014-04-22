@@ -34,7 +34,10 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static java.awt.AWTEvent.MOUSE_EVENT_MASK;
@@ -50,6 +53,9 @@ import static java.util.Objects.requireNonNull;
  */
 public class BlockEditor extends JComponent implements DndTarget<Block>, Runnable {
 
+    private static final Stroke STROKE = new BasicStroke(2.0f);
+    private static final Stroke SELECTED_STROKE = new BasicStroke(3.0f);
+
     private final AffineTransform transform = new AffineTransform();
     protected final Deque<BlockLink> blockLinks = new ConcurrentLinkedDeque<>();
     public final Deque<BlockView> blockViews = new ConcurrentLinkedDeque<>();
@@ -57,10 +63,10 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     private final ForkJoinPool pool = new ForkJoinPool(Math.max(Runtime.getRuntime().availableProcessors(), 8));
     private Point mousePoint = new Point();
     private final Rectangle clip = new Rectangle();
-    private final Stroke lineStroke = new BasicStroke(2.0f);
     private AffineTransform mouseTransform = (AffineTransform) transform.clone();
     private Component curComponent;
     private BlockView movingComponent;
+    private BlockLink currentLink;
     private Point movingComponentPoint;
     private Point movingComponentLocation;
     private volatile float mutationProbability = ServconConfiguration.mutationProbability.get();
@@ -199,12 +205,27 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
                         sub.dispatchEvent(mouseEvent(sub, me, MOUSE_ENTERED, x, y));
                         curComponent = sub;
                     }
+                    currentLink = null;
                     repaint();
                     return;
                 }
             }
             if (curComponent != null) {
                 curComponent.dispatchEvent(mouseEvent(curComponent, me, MOUSE_EXITED, mp.x, mp.y));
+            }
+            for (final BlockLink blockLink : blockLinks) {
+                final Shape shape = blockLink.getSpecie().getShape();
+                if (shape.intersects(mp.x - 2, mp.y - 2, 4, 4)) {
+                    if (currentLink != blockLink) {
+                        currentLink = blockLink;
+                        repaint();
+                    }
+                    return;
+                }
+            }
+            if (currentLink != null) {
+                currentLink = null;
+                repaint();
             }
         }
     }
@@ -223,9 +244,15 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
         g.transform(transform);
         final Stroke oldStroke = g.getStroke();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g.setStroke(lineStroke);
-        for (final BlockLink blockLink : blockLinks) {
-            blockLink.paint(g);
+        for (final BlockLink link : blockLinks) {
+            if (currentLink == link) {
+                g.setColor(SystemColor.activeCaption);
+                g.setStroke(SELECTED_STROKE);
+            } else {
+                g.setColor(getForeground());
+                g.setStroke(STROKE);
+            }
+            link.paint(g);
         }
         g.setStroke(oldStroke);
         for (final BlockView block : blockViews) {
@@ -241,9 +268,10 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     }
 
     public void remove(BlockView blockView) {
-        for (final BlockLink blockLink : blockLinks) {
+        for (final Iterator<BlockLink> it = blockLinks.iterator(); it.hasNext(); ) {
+            final BlockLink blockLink = it.next();
             if (blockLink.in.getBlockView() == blockView || blockLink.out.getBlockView() == blockView) {
-                blockLinks.remove(blockLink);
+                it.remove();
             }
         }
         blockViews.remove(blockView);
