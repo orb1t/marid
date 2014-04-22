@@ -113,9 +113,6 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
                 isectFactor += r.height * 2 - Math.abs(cy - gc.p2.y);
             }
         }
-        if (blockLink.specie == this) {
-            System.out.println(isectFactor + " " + distFactor);
-        }
         return length(gc) + Math.pow(isectFactor, 4.0) * 10.0 + Math.sqrt(distFactor);
     }
 
