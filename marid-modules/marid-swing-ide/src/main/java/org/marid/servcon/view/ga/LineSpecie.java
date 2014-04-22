@@ -85,7 +85,7 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
             for (final Rectangle r : fc.rectangles) {
                 final double cx = r.getCenterX();
                 final double cy = r.getCenterY();
-                final double rr = 2.0 * (r.width * r.width + r.height * r.height);
+                final double rr = r.width * r.width + r.height * r.height;
                 isectFactor += isectF(r, cx, cy, rr, fc.p1.x + BORDER, fc.p1.y, xs[0], ys[0]);
                 for (int i = 0; i < COUNT - 1; i++) {
                     isectFactor += isectF(r, cx, cy, rr, xs[i], ys[i], xs[i + 1], ys[i + 1]);
