@@ -35,7 +35,6 @@ import java.util.function.IntFunction;
  */
 public class BlockLink<S extends Specie<S>> implements LogSupport {
 
-    public volatile S specie;
     private final S[] species;
     public final BlockView.In in;
     public final BlockView.Out out;
@@ -46,7 +45,6 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
         this.in = in;
         this.out = out;
         this.iFunc = iFunc;
-        this.specie = sFunc.apply(this);
         this.species = iFunc.apply(sCount);
         for (int i = 0; i < sCount; i++) {
             this.species[i] = sFunc.apply(this);
@@ -54,25 +52,30 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
     }
 
     public void paint(Graphics2D g) {
-        specie.paint(g);
+        species[0].paint(g);
     }
 
     public void initIncubator(int size) {
         incubator = new Incubator(size * species.length);
     }
 
+    public S getSpecie() {
+        return species[0];
+    }
+
     public void doGA(GaContext gc) {
         incubator.count = 0;
         try {
             while (incubator.count < incubator.length) {
-                final S male = species[gc.random.nextInt(species.length)];
-                final S female = species[gc.random.nextInt(species.length)];
+                final int n = gc.random.nextInt(1, species.length);
+                final int mi = gc.random.nextInt(n);
+                final int fi = gc.random.nextInt(n);
+                final S male = species[mi];
+                final S female = species[mi == fi ? fi + 1 : fi];
                 final S child = male.crossover(gc, female);
                 child.mutate(gc);
                 incubator.put(child.fitness(gc), child);
             }
-            specie = incubator.species[0];
-            specie.fitness(gc);
             incubator.copy();
         } catch (Exception x) {
             warning("GA error", x);
@@ -81,7 +84,7 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + ImmutableMap.of("in", in, "out", out, "specie", specie);
+        return getClass().getSimpleName() + ImmutableMap.of("in", in, "out", out, "specie", species[0]);
     }
 
     class Incubator {

@@ -31,11 +31,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static java.awt.AWTEvent.MOUSE_EVENT_MASK;
@@ -52,8 +51,8 @@ import static java.util.Objects.requireNonNull;
 public class BlockEditor extends JComponent implements DndTarget<Block>, Runnable {
 
     private final AffineTransform transform = new AffineTransform();
-    protected final List<BlockLink> blockLinks = new CopyOnWriteArrayList<>();
-    public final List<BlockView> blockViews = new CopyOnWriteArrayList<>();
+    protected final Deque<BlockLink> blockLinks = new ConcurrentLinkedDeque<>();
+    public final Deque<BlockView> blockViews = new ConcurrentLinkedDeque<>();
     private final Thread gaThread = new Thread(this);
     private final ForkJoinPool pool = new ForkJoinPool(Math.max(Runtime.getRuntime().availableProcessors(), 8));
     private Point mousePoint = new Point();
@@ -112,7 +111,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
                     for (int i = 0; i < 100; i++) {
                         blockLink.doGA(gaContext);
                     }
-                    blockLink.specie.fitness(gaContext);
+                    blockLink.getSpecie().fitness(gaContext);
                 }));
             }
             tasks.forEach(ForkJoinTask::join);
@@ -169,7 +168,8 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
                     mouseTransform = (AffineTransform) transform.clone();
                     break;
             }
-            for (final BlockView component : blockViews) {
+            for (final Iterator<BlockView> i = blockViews.descendingIterator(); i.hasNext(); ) {
+                final BlockView component = i.next();
                 int x = mp.x - component.getX(), y = mp.y - component.getY();
                 if (component.contains(x, y)) {
                     Component sub = component;

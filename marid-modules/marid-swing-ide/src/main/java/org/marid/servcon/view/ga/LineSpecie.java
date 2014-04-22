@@ -101,8 +101,7 @@ public class LineSpecie extends Specie<LineSpecie> implements LogSupport {
 
     private double isectF(Rectangle r, double cx, double cy, double rr, double x1, double y1, double x2, double y2) {
         if (r.intersectsLine(x1, y1, x2, y2)) {
-            final double v = rr - Line2D.ptLineDistSq(x1, y1, x2, y2, cx, cy);
-            return v >= 0.0 ? v : 1.0;
+            return rr - Line2D.ptLineDistSq(x1, y1, x2, y2, cx, cy);
         } else {
             return 0.0;
         }
