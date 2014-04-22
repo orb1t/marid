@@ -30,7 +30,7 @@ import java.util.BitSet;
 public class OrthoSpecie extends Specie<OrthoSpecie> {
 
     private static final int BORDER = 20;
-    private static final int MAX = 4;
+    private static final int MAX = 6;
 
     private final int[] lengths;
     private final BitSet dirs;
