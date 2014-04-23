@@ -262,6 +262,10 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
         }
     }
 
+    @Override
+    protected void paintChildren(Graphics g) {
+    }
+
     public void add(BlockView blockView) {
         blockViews.add(blockView);
         add((Component) blockView);
