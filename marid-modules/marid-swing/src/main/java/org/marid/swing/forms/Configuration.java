@@ -19,11 +19,20 @@
 package org.marid.swing.forms;
 
 import org.marid.dyn.TypeCaster;
+import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.PrefUtils;
 import org.marid.swing.input.InputControl;
 import org.marid.util.StringUtils;
 
+import javax.swing.*;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
+import java.awt.*;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.LinkedList;
@@ -32,6 +41,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -42,7 +52,7 @@ import static java.util.Arrays.asList;
  */
 public interface Configuration {
 
-    public class Pv<V, C extends InputControl<V>> implements PrefSupport {
+    public class Pv<V, C extends InputControl<V>> implements PrefSupport, LogSupport {
 
         public final Class<?> caller = ClassResolver.CLASS_RESOLVER.getClassContext()[2];
         private Field field;
@@ -57,6 +67,11 @@ public interface Configuration {
             this.preferences = PrefUtils.preferences(caller, caller.isAnnotationPresent(Pref.class)
                     ? caller.getAnnotation(Pref.class).value()
                     : new String[]{StringUtils.decapitalize(caller.getSimpleName())});
+        }
+
+        @Override
+        public Logger logger() {
+            return LOGGERS.get(caller);
         }
 
         @Override
@@ -96,6 +111,11 @@ public interface Configuration {
             } else {
                 return field;
             }
+        }
+
+        private String getFieldName() {
+            final Field field = getField();
+            return field == null ? null : field.getName();
         }
 
         public V get() {
@@ -144,11 +164,60 @@ public interface Configuration {
             return TypeCaster.TYPE_CASTER.cast(type, get());
         }
 
-        public void addConsumer(Object gcBase, BiConsumer<V, V> consumer) {
+        public void addConsumer(JInternalFrame frame, BiConsumer<V, V> consumer) {
+            frame.addInternalFrameListener(new InternalFrameAdapter() {
+                @Override
+                public void internalFrameOpened(InternalFrameEvent e) {
+                    info("Adding configuration listener to {0}", getFieldName());
+                    appendConsumer(frame, consumer);
+                }
+
+                @Override
+                public void internalFrameClosed(InternalFrameEvent e) {
+                    info("Removing configuration listener from {0}", getFieldName());
+                    removeConsumer(frame, consumer);
+                    frame.removeInternalFrameListener(this);
+                }
+            });
+        }
+
+        public void addConsumer(Window window, BiConsumer<V, V> consumer) {
+            window.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowOpened(WindowEvent e) {
+                    info("Adding configuration listener to {0}", getFieldName());
+                    appendConsumer(window, consumer);
+                }
+
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    info("Removing configuration listener from {0}", getFieldName());
+                    appendConsumer(window, consumer);
+                    window.removeWindowListener(this);
+                }
+            });
+        }
+
+        public void addConsumer(Component component, BiConsumer<V, V> consumer) {
+            component.addHierarchyListener(new HierarchyListener() {
+                @Override
+                public void hierarchyChanged(HierarchyEvent e) {
+                    if (e.getChanged() instanceof Window) {
+                        addConsumer((Window) e.getChanged(), consumer);
+                        component.removeHierarchyListener(this);
+                    } else if (e.getChanged() instanceof JInternalFrame) {
+                        addConsumer((JInternalFrame) e.getChanged(), consumer);
+                        component.removeHierarchyListener(this);
+                    }
+                }
+            });
+        }
+
+        private void appendConsumer(Object gcBase, BiConsumer<V, V> consumer) {
             consumerMap.computeIfAbsent(gcBase, o -> new LinkedList<>()).add(consumer);
         }
 
-        public void removeConsumer(Object gcBase, BiConsumer<V, V> consumer) {
+        private void removeConsumer(Object gcBase, BiConsumer<V, V> consumer) {
             final List<BiConsumer<V, V>> consumers = consumerMap.get(gcBase);
             if (consumers != null) {
                 consumers.remove(consumer);

@@ -24,6 +24,7 @@ import org.marid.servcon.view.ga.GaContext;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.dnd.DndTarget;
 import org.marid.swing.dnd.MaridTransferHandler;
+import org.marid.swing.geom.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -135,16 +136,18 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     }
 
     @Override
+    protected void processMouseWheelEvent(MouseWheelEvent me) {
+        final double s = 1.0 + me.getPreciseWheelRotation() / 10.0;
+        final Point mp = SwingUtil.transform(transform::inverseTransform, me.getPoint());
+        transform.translate(mp.getX(), mp.getY());
+        transform.scale(s, s);
+        transform.translate(-mp.getX(), -mp.getY());
+        repaint();
+    }
+
+    @Override
     protected void processEvent(AWTEvent e) {
-        if (e.getID() == MOUSE_WHEEL) {
-            final MouseWheelEvent me = (MouseWheelEvent) e;
-            final double s = 1.0 + me.getPreciseWheelRotation() / 10.0;
-            final Point mp = SwingUtil.transform(transform::inverseTransform, me.getPoint());
-            transform.translate(mp.getX(), mp.getY());
-            transform.scale(s, s);
-            transform.translate(-mp.getX(), -mp.getY());
-            repaint();
-        } else {
+        if (e instanceof MouseEvent && !(e instanceof MouseWheelEvent)) {
             final MouseEvent me = (MouseEvent) e;
             final Point mp = SwingUtil.transform(transform::inverseTransform, me.getPoint());
             switch (e.getID()) {
@@ -154,11 +157,13 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
                         transform.setTransform(mouseTransform);
                         transform.translate(p.getX() - mousePoint.getX(), p.getY() - mousePoint.getY());
                         repaint();
+                        return;
                     } else if (movingComponent != null) {
                         final int locx = movingComponentLocation.x + mp.x - movingComponentPoint.x;
                         final int locy = movingComponentLocation.y + mp.y - movingComponentPoint.y;
                         movingComponent.setLocation(locx, locy);
                         repaint();
+                        currentLink = null;
                         return;
                     }
                     break;
@@ -215,7 +220,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
             }
             for (final BlockLink blockLink : blockLinks) {
                 final Shape shape = blockLink.getSpecie().getShape();
-                if (shape.intersects(mp.x - 2, mp.y - 2, 4, 4)) {
+                if (ShapeUtils.contains(shape, mp, 3.0)) {
                     if (currentLink != blockLink) {
                         currentLink = blockLink;
                         repaint();
@@ -227,6 +232,8 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
                 currentLink = null;
                 repaint();
             }
+        } else {
+            super.processEvent(e);
         }
     }
 
