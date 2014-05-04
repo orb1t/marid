@@ -43,30 +43,30 @@ import static org.marid.wrapper.WrapperConstants.DEFAULT_WRAPPER_SHUTDOWN_PORT;
 @Tab(node = "jvm", label = "JVM")
 public interface WrapperRunnerConfiguration extends Configuration {
 
-    @Input(tab = "network", order = 1)
-    Pv<String, StringInputControl> jmxAddress = new Pv<>(StringInputControl::new, () -> DEFAULT_JMX_ADDRESS);
+    @Input(tab = "network", order = 1, name = "JMX address")
+    Pv<String> JMX_ADDRESS = new Pv<>(StringInputControl::new, () -> DEFAULT_JMX_ADDRESS);
 
     @Input(tab = "network", order = 2)
-    Pv<InetSocketAddress, InetSocketAddressInputControl> bindAddress = new Pv<>(
+    Pv<InetSocketAddress> BIND_ADDRESS = new Pv<>(
             InetSocketAddressInputControl::new,
             () -> new InetSocketAddress("localhost", DEFAULT_WRAPPER_SHUTDOWN_PORT));
 
     @Input(tab = "performance", order = 0)
-    Pv<Integer, SpinIntInputControl> queueSize = new Pv<>(() -> new SpinIntInputControl(2, 128, 2), () -> 8);
+    Pv<Integer> QUEUE_SIZE = new Pv<>(() -> new SpinIntInputControl(2, 128, 2), () -> 8);
 
     @Input(tab = "performance", order = 1)
-    Pv<Integer, SpinIntInputControl> threads = new Pv<>(() -> new SpinIntInputControl(1, 32, 1), () -> 16);
+    Pv<Integer> THREADS = new Pv<>(() -> new SpinIntInputControl(1, 32, 1), () -> 16);
 
     @Input(tab = "data", order = 0)
-    Pv<File, FileInputControl> targetDirectory = new Pv<>(
+    Pv<File> TARGET_DIRECTORY = new Pv<>(
             FileInputControl::new, () -> new File(new File(getProperty("user.home"), "marid"), "marid-wrapper"));
 
     @Input(tab = "jvm", order = 0, label = "JVM Path")
-    Pv<String, StringInputControl> jvmPath = new Pv<>(
+    Pv<String> JVM_PATH = new Pv<>(
             StringInputControl::new, () -> Paths.get(getProperty("java.home"), "bin", "java").toString());
 
     @Input(tab = "jvm", order = 1, label = "JVM arguments")
-    Pv<String[], StringArrayInputControl> jvmArgs = new Pv<>(() -> new StringArrayInputControl().withToolbar((m, t) -> {
+    Pv<String[]> JVM_ARGS = new Pv<>(() -> new StringArrayInputControl().withToolbar((m, t) -> {
         t.add(new MaridAction("Add debug parameters", "bug", (a, e) -> {
             final String port = JOptionPane.showInputDialog(L10n.m("Input debug port") + ": ", "5005");
             if (port != null) {

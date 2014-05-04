@@ -54,8 +54,8 @@ import static org.marid.l10n.L10n.s;
 import static org.marid.swing.MaridAction.MaridActionListener;
 import static org.marid.swing.forms.Configuration.Pv;
 import static org.marid.swing.util.PanelUtils.groupedPanel;
-import static org.marid.util.StringUtils.camelToText;
 import static org.marid.util.StringUtils.capitalize;
+import static org.marid.util.StringUtils.constantToText;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -63,7 +63,7 @@ import static org.marid.util.StringUtils.capitalize;
 public class ConfigurationDialog<C extends Component & Configuration & PrefSupport> extends JDialog implements LogSupport, PrefSupport {
 
     private final C component;
-    private final Map<Component, ComponentHolder<Object, InputControl<Object>>> containerMap = new IdentityHashMap<>();
+    private final Map<Component, ComponentHolder> containerMap = new IdentityHashMap<>();
     private final Map<String, String> tabLabelMap = new HashMap<>();
     private final Map<String, Map<String, String>> keyLabelMap = new HashMap<>();
     private final JTabbedPane tabbedPane;
@@ -134,8 +134,8 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
 
     protected boolean savePreferences() {
         final Map<ComponentHolder, Exception> exceptionMap = new IdentityHashMap<>();
-        for (final Map.Entry<Component, ComponentHolder<Object, InputControl<Object>>> e : containerMap.entrySet()) {
-            final ComponentHolder<Object, InputControl<Object>> ch = e.getValue();
+        for (final Map.Entry<Component, ComponentHolder> e : containerMap.entrySet()) {
+            final ComponentHolder ch = e.getValue();
             try {
                 final Object oldValue = ch.initialValue;
                 final Object newValue = ch.control.getInputValue();
@@ -236,7 +236,7 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
                 .forEachOrdered(field -> {
                     final Input input = field.getAnnotation(Input.class);
                     try {
-                        final ComponentHolder<Object, InputControl<Object>> ch = new ComponentHolder<>(input, field);
+                        final ComponentHolder ch = new ComponentHolder(input, field);
                         ch.control.setInputValue(ch.initialValue);
                         addTabCc(panel, c, input, ch);
                         containerMap.put(ch.control.getComponent(), ch);
@@ -249,14 +249,14 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
         tabbedPane.addTab(tabTitle, tabIcon, new JScrollPane(panel), tabTip);
     }
 
-    private void addTabCc(JPanel p, GridBagConstraints c, Input in, ComponentHolder<Object, ?> ch) throws Exception {
+    private void addTabCc(JPanel p, GridBagConstraints c, Input in, ComponentHolder ch) throws Exception {
         c.gridwidth = 1;
         c.weightx = 0.0;
         c.fill = NONE;
         p.add(new JButton(ch.getAction()), c);
         c.fill = BOTH;
         p.add(new JSeparator(VERTICAL), c);
-        final String labelText = s(in.label().isEmpty() ? camelToText(ch.key) : in.label());
+        final String labelText = s(in.label().isEmpty() ? s(constantToText(ch.key)) : in.label());
         if (ch.control instanceof TitledInputControl) {
             ((TitledInputControl) ch.control).setTitle(labelText + ":");
         } else {
@@ -270,20 +270,20 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
         keyLabelMap.get(in.tab()).put(ch.key, labelText);
     }
 
-    private static class ComponentHolder<V, C extends InputControl<V>> {
+    private static class ComponentHolder {
 
         private final String node;
         private final String key;
-        private final C control;
-        private final Pv<V, C> pv;
-        private final V initialValue;
+        private final InputControl<Object> control;
+        private final Pv<Object> pv;
+        private final Object initialValue;
 
         @SuppressWarnings("unchecked")
         public ComponentHolder(Input input, Field field) {
             key = input.name().isEmpty() ? field.getName() : input.name();
             node = input.tab();
             try {
-                pv = (Pv<V, C>) field.get(null);
+                pv = (Pv<Object>) field.get(null);
                 control = pv.getControl();
                 initialValue = pv.get();
             } catch (ReflectiveOperationException x) {
@@ -291,7 +291,7 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
             }
         }
 
-        public V getDefaultValue() {
+        public Object getDefaultValue() {
             return pv.getDefaultValue();
         }
 

@@ -16,14 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view;
+package org.marid.bde.view;
 
 import com.google.common.collect.ImmutableMap;
 import org.marid.logging.LogSupport;
-import org.marid.servcon.view.BlockView.In;
-import org.marid.servcon.view.BlockView.Out;
-import org.marid.servcon.view.ga.GaContext;
-import org.marid.servcon.view.ga.Specie;
+import org.marid.bde.view.BlockView.In;
+import org.marid.bde.view.BlockView.Out;
+import org.marid.bde.view.ga.GaContext;
+import org.marid.bde.view.ga.Specie;
 
 import java.awt.*;
 import java.util.Arrays;

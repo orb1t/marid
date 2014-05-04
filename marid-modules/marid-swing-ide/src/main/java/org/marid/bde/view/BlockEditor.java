@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view;
+package org.marid.bde.view;
 
-import org.marid.ide.servcon.ServconConfiguration;
-import org.marid.servcon.model.Block;
-import org.marid.servcon.view.ga.GaContext;
+import org.marid.ide.bde.BdeConfiguration;
+import org.marid.bde.model.Block;
+import org.marid.bde.view.ga.GaContext;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.dnd.DndTarget;
 import org.marid.swing.dnd.MaridTransferHandler;
@@ -52,7 +52,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class BlockEditor extends JComponent implements DndTarget<Block>, Runnable {
+public class BlockEditor extends JComponent implements DndTarget<Block>, Runnable, BdeConfiguration {
 
     private static final Stroke STROKE = new BasicStroke(2.0f);
     private static final Stroke SELECTED_STROKE = new BasicStroke(3.0f);
@@ -70,8 +70,8 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
     private BlockLink currentLink;
     private Point movingComponentPoint;
     private Point movingComponentLocation;
-    private volatile float mutationProbability = ServconConfiguration.mutationProbability.get();
-    private volatile int incubatorSize = ServconConfiguration.incubatorSize.get();
+    private volatile float mutationProbability = MUTATION_PROBABILITY.get();
+    private volatile int incubatorSize = INCUBATOR_SIZE.get();
 
     public BlockEditor() {
         setFont(requireNonNull(UIManager.getFont("Label.font")));
@@ -81,18 +81,18 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
         setTransferHandler(new MaridTransferHandler());
         setForeground(SystemColor.controlDkShadow);
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
-        ServconConfiguration.mutationProbability.addConsumer(this, (o, n) -> mutationProbability = n);
-        ServconConfiguration.incubatorSize.addConsumer(this, (o, n) -> incubatorSize = n);
-        ServconConfiguration.linkType.addConsumer(this, (o, n) -> updateLinks());
-        ServconConfiguration.species.addConsumer(this, (o, n) -> updateLinks());
+        MUTATION_PROBABILITY.addConsumer(this, (o, n) -> mutationProbability = n);
+        INCUBATOR_SIZE.addConsumer(this, (o, n) -> incubatorSize = n);
+        LINK_TYPE.addConsumer(this, (o, n) -> updateLinks());
+        SPECIES.addConsumer(this, (o, n) -> updateLinks());
     }
 
     private void updateLinks() {
         final BlockView.In[] ins = blockLinks.stream().map(l -> l.in).toArray(BlockView.In[]::new);
         final BlockView.Out[] outs = blockLinks.stream().map(l -> l.out).toArray(BlockView.Out[]::new);
         blockLinks.clear();
-        final BlockLinkType linkType = ServconConfiguration.linkType.get();
-        final int speciesCount = ServconConfiguration.species.get();
+        final BlockLinkType linkType = LINK_TYPE.get();
+        final int speciesCount = SPECIES.get();
         for (int i = 0; i < ins.length; i++) {
             blockLinks.add(linkType.createBlockLink(speciesCount, ins[i], outs[i]));
         }

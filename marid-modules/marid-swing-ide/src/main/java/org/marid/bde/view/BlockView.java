@@ -16,10 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view;
+package org.marid.bde.view;
 
 import images.Images;
-import org.marid.servcon.model.Block;
+import org.marid.bde.model.Block;
+import org.marid.ide.bde.BdeConfiguration;
 import org.marid.swing.MaridAction;
 
 import javax.swing.*;
@@ -33,14 +34,12 @@ import static javax.swing.BorderFactory.createEtchedBorder;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static javax.swing.border.TitledBorder.CENTER;
 import static javax.swing.border.TitledBorder.LEADING;
-import static org.marid.ide.servcon.ServconConfiguration.linkType;
-import static org.marid.ide.servcon.ServconConfiguration.species;
 import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class BlockView extends JPanel {
+public class BlockView extends JPanel implements BdeConfiguration {
 
     public static final String MOVEABLE = "$moveable";
 
@@ -182,7 +181,7 @@ public class BlockView extends JPanel {
             for (final BlockView blockView : blockEditor.blockViews) {
                 blockView.outputs.stream().filter(Out::isSelected).forEach(out -> {
                     out.setSelected(false);
-                    blockEditor.blockLinks.add(linkType.get().createBlockLink(species.get(), this, out));
+                    blockEditor.blockLinks.add(LINK_TYPE.get().createBlockLink(SPECIES.get(), this, out));
                 });
             }
             setSelected(false);

@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.servcon;
+package org.marid.ide.bde;
 
-import org.marid.servcon.model.Block;
-import org.marid.servcon.model.ClassBlock;
+import org.marid.bde.model.Block;
+import org.marid.bde.model.ClassBlock;
 import org.marid.service.MaridServices;
 import org.marid.swing.dnd.DndSource;
 import org.marid.swing.dnd.MaridTransferHandler;

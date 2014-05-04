@@ -16,28 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view;
+package org.marid.bd;
 
-import org.marid.servcon.view.ga.LineSpecie;
-import org.marid.servcon.view.ga.OrthoSpecie;
-import org.marid.servcon.view.ga.Specie;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public enum BlockLinkType {
-    LINE_LINK {
-        @Override
-        public BlockLink<? extends Specie> createBlockLink(int sCount, BlockView.In in, BlockView.Out out) {
-            return new BlockLink<>(sCount, LineSpecie::new, LineSpecie[]::new, in, out);
-        }
-    },
-    ORTHO_LINK {
-        @Override
-        public BlockLink<? extends Specie> createBlockLink(int sCount, BlockView.In in, BlockView.Out out) {
-            return new BlockLink<>(sCount, OrthoSpecie::new, OrthoSpecie[]::new, in, out);
-        }
-    };
+@XmlRootElement(name = "block")
+public class Block implements Serializable {
 
-    public abstract BlockLink<? extends Specie> createBlockLink(int sCount, BlockView.In in, BlockView.Out out);
+    @XmlRootElement(name = "port")
+    public class Port {
+
+    }
 }

@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view;
+package org.marid.bde.view;
 
-import org.marid.servcon.model.Block;
+import org.marid.bde.model.Block;
 
 import javax.swing.*;
 import java.awt.*;

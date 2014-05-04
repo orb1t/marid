@@ -16,30 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view.ga;
-
-import org.marid.servcon.view.BlockLink;
-
-import java.awt.*;
+package org.marid.bd;
 
 /**
-* @author Dmitry Ovchinnikov.
-*/
-public abstract class Specie<S extends Specie<S>> {
-
-    protected final BlockLink<S> blockLink;
-
-    public Specie(BlockLink<S> blockLink) {
-        this.blockLink = blockLink;
-    }
-
-    public abstract void paint(Graphics2D g);
-
-    public abstract double fitness(GaContext gaContext);
-
-    public abstract void mutate(GaContext gaContext);
-
-    public abstract S crossover(GaContext gaContext, S that);
-
-    public abstract Shape getShape();
+ * @author Dmitry Ovchinnikov.
+ */
+public enum PortType {
+    INPUT, OUTPUT, PARAMETER
 }

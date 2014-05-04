@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view.ga;
+package org.marid.bde.view.ga;
 
 import org.marid.logging.LogSupport;
-import org.marid.servcon.view.BlockLink;
+import org.marid.bde.view.BlockLink;
 
 import java.awt.*;
 import java.awt.geom.Line2D;

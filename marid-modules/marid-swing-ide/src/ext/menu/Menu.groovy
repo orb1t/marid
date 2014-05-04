@@ -18,12 +18,12 @@
 
 package menu
 
-import org.marid.ide.servcon.ServconWindow
+import org.marid.ide.bde.BdeWindow
 import org.marid.ide.wrapper.WrapperRunnerWindow
 
 [
         [[], "mainMenu", "Deploy"],
         [["Deploy"], "main", "Wrapper", null, {a, e -> WrapperRunnerWindow.show()}],
         [[], "mainMenu", "Services"],
-        [["Services"], "main", "Service configurer", null, {a, e -> ServconWindow.show()}]
+        [["Services"], "main", "Service configurer", null, {a, e -> BdeWindow.show()}]
 ]

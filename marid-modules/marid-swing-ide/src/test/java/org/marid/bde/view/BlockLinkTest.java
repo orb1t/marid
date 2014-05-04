@@ -16,12 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view;
+package org.marid.bde.view;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.marid.servcon.view.ga.GaContext;
-import org.marid.servcon.view.ga.Specie;
+import org.marid.bde.view.ga.GaContext;
+import org.marid.bde.view.ga.Specie;
 import org.marid.test.NormalTests;
 
 import java.awt.*;

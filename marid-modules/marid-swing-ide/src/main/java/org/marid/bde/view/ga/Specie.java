@@ -16,25 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.input;
+package org.marid.bde.view.ga;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.marid.swing.forms.Configuration;
-import org.marid.swing.forms.Input;
-import org.marid.swing.forms.Tab;
+import org.marid.bde.view.BlockLink;
+
+import java.awt.*;
 
 /**
- * @author Dmitry Ovchinnikov
- */
-@Tab(node = "tab1")
-public class ConfigurationTest implements Configuration {
+* @author Dmitry Ovchinnikov.
+*/
+public abstract class Specie<S extends Specie<S>> {
 
-    @Input(tab = "tab1")
-    private static final Pv<Integer> p = new Pv<>(IntInputControl::new, () -> 1);
+    protected final BlockLink<S> blockLink;
 
-    @Test
-    public void test() {
-        Assert.assertSame(ConfigurationTest.class, p.caller);
+    public Specie(BlockLink<S> blockLink) {
+        this.blockLink = blockLink;
     }
+
+    public abstract void paint(Graphics2D g);
+
+    public abstract double fitness(GaContext gaContext);
+
+    public abstract void mutate(GaContext gaContext);
+
+    public abstract S crossover(GaContext gaContext, S that);
+
+    public abstract Shape getShape();
 }

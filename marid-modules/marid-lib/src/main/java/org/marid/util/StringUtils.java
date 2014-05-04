@@ -171,4 +171,15 @@ public class StringUtils {
         }
         return builder.toString();
     }
+
+    public static String constantToText(String constant) {
+        final String[] parts = constant.split("_");
+        for (int i = 0; i < parts.length; i++) {
+            parts[i] = parts[i].toLowerCase();
+            if (i == 0) {
+                parts[i] = capitalize(parts[i]);
+            }
+        }
+        return String.join(" ", parts);
+    }
 }

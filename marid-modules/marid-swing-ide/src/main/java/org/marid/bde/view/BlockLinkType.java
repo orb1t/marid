@@ -16,36 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide;
+package org.marid.bde.view;
 
-import javafx.application.Application;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
-import org.marid.l10n.L10n;
+import org.marid.bde.view.ga.LineSpecie;
+import org.marid.bde.view.ga.OrthoSpecie;
+import org.marid.bde.view.ga.Specie;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class FxIde extends Application {
+public enum BlockLinkType {
+    LINE_LINK {
+        @Override
+        public BlockLink<? extends Specie> createBlockLink(int sCount, BlockView.In in, BlockView.Out out) {
+            return new BlockLink<>(sCount, LineSpecie::new, LineSpecie[]::new, in, out);
+        }
+    },
+    ORTHO_LINK {
+        @Override
+        public BlockLink<? extends Specie> createBlockLink(int sCount, BlockView.In in, BlockView.Out out) {
+            return new BlockLink<>(sCount, OrthoSpecie::new, OrthoSpecie[]::new, in, out);
+        }
+    };
 
-    public FxIde() {
-        setUserAgentStylesheet(Application.STYLESHEET_MODENA);
-    }
-
-    @Override
-    public void start(Stage stage) throws Exception {
-        final StackPane stackPane = new StackPane(
-                new Button("a")
-        );
-        final FxIdeScene scene = new FxIdeScene(stackPane, 600, 400);
-        stage.setScene(scene);
-        stage.setTitle(L10n.s("Marid IDE"));
-        stage.sizeToScene();
-        stage.show();
-    }
-
-    public static void launch(String... args) {
-        Application.launch(args);
-    }
+    public abstract BlockLink<? extends Specie> createBlockLink(int sCount, BlockView.In in, BlockView.Out out);
 }

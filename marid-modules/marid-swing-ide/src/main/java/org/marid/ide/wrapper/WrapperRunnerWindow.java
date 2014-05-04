@@ -61,7 +61,7 @@ public class WrapperRunnerWindow extends AbstractMultiFrame implements WrapperRu
         actionList.add("mainMenu", "Wrapper");
         stopAction = actionList.add(true, "control", "Stop", "Wrapper")
                 .setIcon("stop")
-                .setListener((a, ev) -> sendShutdownSequence(bindAddress.get(), "marid-wrapper"))
+                .setListener((a, ev) -> sendShutdownSequence(BIND_ADDRESS.get(), "marid-wrapper"))
                 .setInitializer(a -> a.setEnabled(false));
         actionList.add(true, "control", "Start", "Wrapper")
                 .setIcon("start")
@@ -109,7 +109,7 @@ public class WrapperRunnerWindow extends AbstractMultiFrame implements WrapperRu
 
         private ProcessBuilder createProcessBuilder() {
             try {
-                final File dir = targetDirectory.get();
+                final File dir = TARGET_DIRECTORY.get();
                 if (!checkTargetDirectory(dir)) {
                     throw new IllegalStateException("Target directory will not be created");
                 }
@@ -118,13 +118,13 @@ public class WrapperRunnerWindow extends AbstractMultiFrame implements WrapperRu
                     throw new IllegalStateException("Unable to create directory");
                 }
                 final ArrayList<String> args = new ArrayList<>();
-                args.add(jvmPath.get());
-                args.addAll(Arrays.asList(jvmArgs.get()));
+                args.add(JVM_PATH.get());
+                args.addAll(Arrays.asList(JVM_ARGS.get()));
                 args.add("-cp");
                 args.add(System.getProperty("java.class.path"));
                 args.add(Wrapper.class.getName());
                 args.add("-b");
-                args.add(bindAddress.get().getHostString() + ":" + bindAddress.get().getPort());
+                args.add(BIND_ADDRESS.get().getHostString() + ":" + BIND_ADDRESS.get().getPort());
                 args.add("start");
                 info("ProcessBuilder will run with: {0}", String.join(" ", args));
                 return new ProcessBuilder(args).directory(dir);

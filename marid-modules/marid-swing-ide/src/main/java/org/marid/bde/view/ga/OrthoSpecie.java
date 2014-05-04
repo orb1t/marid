@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.servcon.view.ga;
+package org.marid.bde.view.ga;
 
 import com.google.common.collect.ImmutableMap;
-import org.marid.servcon.view.BlockLink;
+import org.marid.bde.view.BlockLink;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
@@ -111,7 +111,7 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
                 isectFactor += r.height * 2 - Math.abs(cy - gc.p2.y);
             }
         }
-        return length(gc) + Math.pow(isectFactor, 4.0) * 10.0 + Math.sqrt(distFactor);
+        return length(gc) + isectFactor * isectFactor + distFactor;
     }
 
     @Override

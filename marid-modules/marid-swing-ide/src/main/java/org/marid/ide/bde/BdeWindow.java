@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.servcon;
+package org.marid.ide.bde;
 
-import org.marid.servcon.view.BlockEditor;
+import org.marid.bde.view.BlockEditor;
 import org.marid.swing.AbstractFrame;
 import org.marid.swing.menu.MenuActionList;
 
@@ -29,13 +29,13 @@ import java.awt.event.WindowEvent;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ServconWindow extends AbstractFrame implements ServconConfiguration {
+public class BdeWindow extends AbstractFrame implements BdeConfiguration {
 
     private final ServconServices services = new ServconServices();
     private final BlockEditor blockEditor = new BlockEditor();
     private final JSplitPane splitPane;
 
-    public ServconWindow() {
+    public BdeWindow() {
         super("Service configurer");
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(services), blockEditor);
         splitPane.setDividerLocation(getPref("divider", 200));

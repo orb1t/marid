@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.servcon;
+package org.marid.ide.bde;
 
-import org.marid.servcon.view.BlockLinkType;
+import org.marid.bde.view.BlockLinkType;
 import org.marid.swing.forms.Configuration;
 import org.marid.swing.forms.Input;
 import org.marid.swing.forms.Tab;
@@ -26,30 +26,24 @@ import org.marid.swing.input.EnumInputControl;
 import org.marid.swing.input.FloatInputControl;
 import org.marid.swing.input.SpinIntInputControl;
 
+import static org.marid.bde.view.BlockLinkType.LINE_LINK;
+
 /**
  * @author Dmitry Ovchinnikov.
  */
 @Tab(node = "appearance")
 @Tab(node = "GA")
-public interface ServconConfiguration extends Configuration {
+public interface BdeConfiguration extends Configuration {
 
     @Input(tab = "appearance")
-    Pv<BlockLinkType, EnumInputControl<BlockLinkType>> linkType = new Pv<>(
-            () -> new EnumInputControl<>(BlockLinkType::values),
-            () -> BlockLinkType.LINE_LINK);
+    Pv<BlockLinkType> LINK_TYPE = new Pv<>(() -> new EnumInputControl<>(BlockLinkType::values), () -> LINE_LINK);
 
     @Input(tab = "GA")
-    Pv<Float, FloatInputControl> mutationProbability = new Pv<>(
-            FloatInputControl::new,
-            () -> 0.3f);
+    Pv<Float> MUTATION_PROBABILITY = new Pv<>(FloatInputControl::new, () -> 0.3f);
 
     @Input(tab = "GA")
-    Pv<Integer, SpinIntInputControl> incubatorSize = new Pv<>(
-            () -> new SpinIntInputControl(2, 10, 1),
-            () -> 4);
+    Pv<Integer> INCUBATOR_SIZE = new Pv<>(() -> new SpinIntInputControl(2, 10, 1), () -> 4);
 
     @Input(tab = "GA")
-    Pv<Integer, SpinIntInputControl> species = new Pv<>(
-            () -> new SpinIntInputControl(10, 100, 5),
-            () -> 30);
+    Pv<Integer> SPECIES = new Pv<>(() -> new SpinIntInputControl(10, 100, 5), () -> 30);
 }

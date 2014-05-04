@@ -52,16 +52,16 @@ import static java.util.Arrays.asList;
  */
 public interface Configuration {
 
-    public class Pv<V, C extends InputControl<V>> implements PrefSupport, LogSupport {
+    class Pv<V> implements PrefSupport, LogSupport {
 
         public final Class<?> caller = ClassResolver.CLASS_RESOLVER.getClassContext()[2];
         private Field field;
-        private final Supplier<C> controlSupplier;
+        private final Supplier<? extends InputControl<V>> controlSupplier;
         private final Supplier<V> defaultValueSupplier;
         private final Preferences preferences;
         private final Map<Object, List<BiConsumer<V, V>>> consumerMap = new WeakHashMap<>();
 
-        public Pv(Supplier<C> controlSupplier, Supplier<V> defaultValueSupplier) {
+        public Pv(Supplier<? extends InputControl<V>> controlSupplier, Supplier<V> defaultValueSupplier) {
             this.controlSupplier = controlSupplier;
             this.defaultValueSupplier = defaultValueSupplier;
             this.preferences = PrefUtils.preferences(caller, caller.isAnnotationPresent(Pref.class)
@@ -83,7 +83,7 @@ public interface Configuration {
             return defaultValueSupplier.get();
         }
 
-        public C getControl() {
+        public InputControl<V> getControl() {
             return controlSupplier.get();
         }
 
@@ -125,7 +125,7 @@ public interface Configuration {
             return getPref(key, getDefaultValue(), input.tab());
         }
 
-        public void save(C control) {
+        public void save(InputControl<V> control) {
             final Field field = getField();
             final Input input = field.getAnnotation(Input.class);
             final String key = input.name().isEmpty() ? field.getName() : input.name();
