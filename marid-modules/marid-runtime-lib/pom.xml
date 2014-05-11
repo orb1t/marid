@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2013 Dmitry Ovchinnikov
+  ~ Copyright (C) 2014 Dmitry Ovchinnikov
   ~ Marid, the free data acquisition and visualization software
   ~
   ~ This program is free software: you can redistribute it and/or modify
@@ -14,39 +14,41 @@
   ~ GNU Affero General Public License for more details.
   ~
   ~ You should have received a copy of the GNU Affero General Public License
-  ~ along with this program.  If not, see <http://www.gnu.org/licenses />.
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <artifactId>marid-modules</artifactId>
         <groupId>org.marid</groupId>
-        <artifactId>marid</artifactId>
         <version>0.7-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>marid-modules</artifactId>
-    <packaging>pom</packaging>
-
-    <modules>
-        <module>marid-lib</module>
-        <module>marid-wrapper</module>
-        <module>marid-swing</module>
-        <module>marid-gres</module>
-        <module>marid-runtime-lib</module>
-        <module>marid-runtime</module>
-        <module>marid-swing-ide</module>
-        <module>marid-gui</module>
-        <module>marid-ide</module>
-    </modules>
+    <artifactId>marid-runtime-lib</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.marid</groupId>
-            <artifactId>marid-test</artifactId>
-            <scope>test</scope>
+            <artifactId>marid-lib</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <classifier>${groovy.classifier}</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
     </dependencies>
 </project>

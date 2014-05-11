@@ -16,26 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.util;
 
-import java.util.function.Function;
+import org.marid.functions.UnsafeFunction;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@FunctionalInterface
-public interface UnsafeFunction<T, R> extends Function<T, R> {
+public class MaridClassValue<T> extends ClassValue<T> {
 
-    @Override
-    default R apply(T t) {
-        try {
-            return applyUnsafe(t);
-        } catch (RuntimeException x) {
-            throw x;
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
+    private final UnsafeFunction<Class<?>, T> function;
+
+    public MaridClassValue(UnsafeFunction<Class<?>, T> function) {
+        this.function = function;
     }
 
-    R applyUnsafe(T arg) throws Exception;
+    @Override
+    protected T computeValue(Class<?> type) {
+        return function.apply(type);
+    }
 }

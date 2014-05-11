@@ -16,26 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.types;
 
-import java.util.function.Function;
+import java.lang.reflect.Type;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@FunctionalInterface
-public interface UnsafeFunction<T, R> extends Function<T, R> {
+public class GenericTypes {
 
-    @Override
-    default R apply(T t) {
-        try {
-            return applyUnsafe(t);
-        } catch (RuntimeException x) {
-            throw x;
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
+    private static final Map<String, Type> TYPE_MAP = new WeakHashMap<>();
+
+    public static Type getType(String type) {
+        synchronized (TYPE_MAP) {
+            return null;
         }
     }
-
-    R applyUnsafe(T arg) throws Exception;
 }

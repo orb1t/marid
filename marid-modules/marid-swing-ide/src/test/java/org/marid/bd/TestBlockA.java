@@ -16,26 +16,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.bd;
 
-import java.util.function.Function;
+import javax.swing.*;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@FunctionalInterface
-public interface UnsafeFunction<T, R> extends Function<T, R> {
+@XmlRootElement(name = "test-block-a")
+public class TestBlockA extends Block {
 
-    @Override
-    default R apply(T t) {
-        try {
-            return applyUnsafe(t);
-        } catch (RuntimeException x) {
-            throw x;
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
+    @XmlAttribute
+    final int q;
+
+    public TestBlockA() {
+        this(0);
     }
 
-    R applyUnsafe(T arg) throws Exception;
+    public TestBlockA(int q) {
+        this.q = q;
+    }
+
+    @Override
+    public JComponent getComponent() {
+        return new JPanel();
+    }
+
+    @Override
+    public JFrame getEditor() {
+        return new JFrame();
+    }
+
+    @Override
+    public String getName() {
+        return "blockA";
+    }
+
+    @Override
+    public List<? extends Port> getPorts() {
+        return Collections.emptyList();
+    }
 }

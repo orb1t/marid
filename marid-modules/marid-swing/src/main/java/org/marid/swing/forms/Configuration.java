@@ -64,9 +64,12 @@ public interface Configuration {
         public Pv(Supplier<? extends InputControl<V>> controlSupplier, Supplier<V> defaultValueSupplier) {
             this.controlSupplier = controlSupplier;
             this.defaultValueSupplier = defaultValueSupplier;
-            this.preferences = PrefUtils.preferences(caller, caller.isAnnotationPresent(Pref.class)
-                    ? caller.getAnnotation(Pref.class).value()
-                    : new String[]{StringUtils.decapitalize(caller.getSimpleName())});
+            this.preferences = PrefUtils.preferences(caller, inferNodes());
+        }
+
+        private String[] inferNodes() {
+            final Pref pref = caller.getAnnotation(Pref.class);
+            return pref != null ? pref.value() : new String[]{StringUtils.decapitalize(caller.getSimpleName())};
         }
 
         @Override

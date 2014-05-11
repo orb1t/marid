@@ -16,26 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.bd;
 
-import java.util.function.Function;
+import org.marid.swing.AbstractFrame;
+import org.marid.swing.menu.MenuActionList;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@FunctionalInterface
-public interface UnsafeFunction<T, R> extends Function<T, R> {
+public class BlockDiagramFrame extends AbstractFrame {
 
-    @Override
-    default R apply(T t) {
-        try {
-            return applyUnsafe(t);
-        } catch (RuntimeException x) {
-            throw x;
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
+    private final BlockDiagramEditor editor;
+
+    public BlockDiagramFrame(BlockDiagramEditor editor) {
+        super(editor.getName());
+        this.editor = editor;
     }
 
-    R applyUnsafe(T arg) throws Exception;
+    @Override
+    protected void fillActions(MenuActionList actionList) {
+
+    }
 }

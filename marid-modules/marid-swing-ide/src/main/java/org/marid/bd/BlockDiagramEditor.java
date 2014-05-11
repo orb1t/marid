@@ -16,26 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.bd;
 
-import java.util.function.Function;
+import javax.swing.*;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@FunctionalInterface
-public interface UnsafeFunction<T, R> extends Function<T, R> {
+public class BlockDiagramEditor extends JComponent {
 
-    @Override
-    default R apply(T t) {
-        try {
-            return applyUnsafe(t);
-        } catch (RuntimeException x) {
-            throw x;
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
+    private final BlockDiagram blockDiagram;
+
+    public BlockDiagramEditor(BlockDiagram blockDiagram) {
+        this.blockDiagram = blockDiagram;
+        setName(blockDiagram.getName());
     }
 
-    R applyUnsafe(T arg) throws Exception;
+    @Override
+    public void validate() {
+        setName(blockDiagram.getName());
+        super.validate();
+    }
 }

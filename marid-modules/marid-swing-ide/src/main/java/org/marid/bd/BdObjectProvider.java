@@ -16,26 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.bd;
 
-import java.util.function.Function;
+import javax.xml.bind.JAXBContext;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import static java.util.ServiceLoader.load;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@FunctionalInterface
-public interface UnsafeFunction<T, R> extends Function<T, R> {
+public interface BdObjectProvider {
 
-    @Override
-    default R apply(T t) {
+    JAXBContext JAXB_CONTEXT = getJaxbContext();
+
+    Collection<Class<?>> getClasses();
+
+    static JAXBContext getJaxbContext() {
         try {
-            return applyUnsafe(t);
-        } catch (RuntimeException x) {
-            throw x;
+            final Set<Class<?>> classes = new LinkedHashSet<>();
+            for (final BdObjectProvider bdObjectProvider : load(BdObjectProvider.class)) {
+                classes.addAll(bdObjectProvider.getClasses());
+            }
+            return JAXBContext.newInstance(classes.toArray(new Class<?>[classes.size()]));
         } catch (Exception x) {
             throw new IllegalStateException(x);
         }
     }
-
-    R applyUnsafe(T arg) throws Exception;
 }

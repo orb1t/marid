@@ -16,26 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.script;
 
-import java.util.function.Function;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@FunctionalInterface
-public interface UnsafeFunction<T, R> extends Function<T, R> {
+public class ScriptUtils {
 
-    @Override
-    default R apply(T t) {
-        try {
-            return applyUnsafe(t);
-        } catch (RuntimeException x) {
-            throw x;
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
+    private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
+
+    public static ScriptEngine scriptEngine(String extension) {
+        return SCRIPT_ENGINE_MANAGER.getEngineByExtension(extension);
     }
-
-    R applyUnsafe(T arg) throws Exception;
 }

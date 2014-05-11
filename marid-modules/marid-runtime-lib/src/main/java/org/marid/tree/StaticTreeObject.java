@@ -20,6 +20,7 @@ package org.marid.tree;
 
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.marid.methods.PropMethods;
+import org.marid.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,7 +30,6 @@ import java.util.logging.Logger;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.Map.Entry;
-import static org.marid.util.CollectionUtils.concat;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -45,7 +45,7 @@ public class StaticTreeObject implements TreeObject {
 
     public StaticTreeObject(StaticTreeObject parent, String name, Map params) {
         this.parent = parent;
-        this.path = parent == null ? new String[] {name} : concat(parent.path, name);
+        this.path = parent == null ? new String[] {name} : CollectionUtils.concat(parent.path, name);
         for (final Object e : PropMethods.get(params, Map.class, "vars", emptyMap()).entrySet()) {
             vars.put(String.valueOf(((Entry) e).getKey()), ((Entry) e).getValue());
         }

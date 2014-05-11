@@ -21,12 +21,14 @@ package org.marid.util;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.time.ZoneId;
 import java.util.Properties;
 
@@ -36,6 +38,7 @@ import java.util.Properties;
 public class Utils {
 
     public static final ZoneId ZONE_ID = ZoneId.systemDefault();
+    public static final SecureRandom RANDOM = new SecureRandom();
 
     public static <T> T newInstance(Class<T> type, String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -76,6 +79,16 @@ public class Utils {
         } catch (URISyntaxException x) {
             return Paths.get(file).toUri();
         }
+    }
+
+    public static BigInteger getUid(int len) {
+        final byte[] num = new byte[len];
+        RANDOM.nextBytes(num);
+        return new BigInteger(1, num);
+    }
+
+    public static BigInteger getUid() {
+        return getUid(16);
     }
 
     public static Class<?> wrapperType(Class<?> primitiveType) {

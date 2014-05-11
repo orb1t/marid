@@ -75,11 +75,8 @@ public abstract class SerializableObject implements Serializable {
         try {
             for (final PropertyDescriptor pd : Introspector.getBeanInfo(getClass()).getPropertyDescriptors()) {
                 final Method readMethod = pd.getReadMethod();
-                if (readMethod.isAnnotationPresent(Transient.class)) {
-                    continue;
-                }
-                if (readMethod != null) {
-                    map.put(pd.getName(), readMethod.invoke(null));
+                if (readMethod != null && !readMethod.isAnnotationPresent(Transient.class)) {
+                    map.put(pd.getName(), readMethod.invoke(this));
                 }
             }
         } catch (IntrospectionException | ReflectiveOperationException x) {
