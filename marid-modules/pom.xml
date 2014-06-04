@@ -35,8 +35,8 @@
         <module>marid-wrapper</module>
         <module>marid-swing</module>
         <module>marid-gres</module>
-        <module>marid-runtime-lib</module>
         <module>marid-runtime</module>
+        <module>marid-ide-lib</module>
         <module>marid-swing-ide</module>
         <module>marid-gui</module>
         <module>marid-ide</module>

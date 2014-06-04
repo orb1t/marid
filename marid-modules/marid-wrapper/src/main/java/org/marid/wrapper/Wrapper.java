@@ -42,7 +42,7 @@ public class Wrapper {
     private static final Logger LOG = Logger.getLogger(Wrapper.class.getName());
 
     public static void main(String... args) throws Exception {
-        Logging.init(Wrapper.class, "marid-wrapper-logging.properties");
+        Logging.init("marid-wrapper-logging.properties");
         final WrapperCli cli = new WrapperCli(Utils.loadProperties("marid-wrapper.properties"), args);
         if (cli.isHelp()) {
             cli.showHelp();

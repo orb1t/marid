@@ -51,6 +51,6 @@ public interface DndSource<T extends DndObject> extends DndConstants {
         return dataFlavor.getRepresentationClass().isInstance(dndObject) ? dndObject : null;
     }
 
-    default void fireDndObjectExportDone(T dndObject, int action) {
+    default void dndObjectExportDone(T dndObject, int action) {
     }
 }

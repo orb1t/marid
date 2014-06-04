@@ -23,7 +23,6 @@ import java.nio.file.*;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
-import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
@@ -54,6 +53,20 @@ public class FileUtils {
             return FileVisitResult.CONTINUE;
         }
     };
+
+    public static String fileNameWithoutExtension(String file) {
+        final Path path = Paths.get(file);
+        final String name = path.getFileName().toString();
+        final int p = name.lastIndexOf('.');
+        return p >= 0 ? name.substring(0, p) : name;
+    }
+
+    public static String extension(String file) {
+        final Path path = Paths.get(file);
+        final String name = path.getFileName().toString();
+        final int p = name.lastIndexOf('.');
+        return p >= 0 ? name.substring(p) : name;
+    }
 
     public static TreeSet<Path> listSorted(Path dir, String glob) throws IOException {
         final TreeSet<Path> set = new TreeSet<>();

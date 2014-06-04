@@ -81,6 +81,14 @@ public class Utils {
         }
     }
 
+    public static void sleep(long timeout) {
+        try {
+            Thread.sleep(timeout);
+        } catch (InterruptedException x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
     public static BigInteger getUid(int len) {
         final byte[] num = new byte[len];
         RANDOM.nextBytes(num);

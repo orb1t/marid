@@ -59,7 +59,7 @@ public class XmlLogRecordTest implements LogSupport {
                 new Date()});
         final StringWriter sw = new StringWriter();
         final XmlLogRecord xmlLogRecord = new XmlLogRecord(logRecord);
-        JaxbUtil.save(xmlLogRecord, sw, true, true);
+        XmlDomain.save(xmlLogRecord, sw, true, true);
     }
 
     @Test
@@ -82,9 +82,9 @@ public class XmlLogRecordTest implements LogSupport {
                 new Date()});
         final StringWriter sw = new StringWriter();
         final XmlLogRecord xmlLogRecord = new XmlLogRecord(logRecord);
-        JaxbUtil.save(xmlLogRecord, sw, true, true);
+        XmlDomain.save(xmlLogRecord, sw, true, true);
         final StringReader sr = new StringReader(sw.toString());
-        final XmlLogRecord cloned = JaxbUtil.load(XmlLogRecord.class, sr);
+        final XmlLogRecord cloned = XmlDomain.load(XmlLogRecord.class, sr);
         Assert.assertEquals(xmlLogRecord, cloned);
     }
 

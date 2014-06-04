@@ -38,7 +38,7 @@ public class Marid implements UncaughtExceptionHandler {
 
     public static void main(String... args) {
         TimeZone.setDefault(UTC);
-        Logging.init(Marid.class, "log.properties");
+        Logging.init("log.properties");
         Thread.setDefaultUncaughtExceptionHandler(new Marid());
         Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
         MaridServices.start();

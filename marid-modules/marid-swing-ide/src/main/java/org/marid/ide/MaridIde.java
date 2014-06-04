@@ -41,7 +41,7 @@ public class MaridIde implements Thread.UncaughtExceptionHandler {
     private static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
 
     public static void main(String[] args) throws Exception {
-        Logging.init(MaridIde.class, "marid-ide-logging.properties");
+        Logging.init("marid-ide-logging.properties");
         Logger.getLogger("").addHandler(new SwingHandler());
         Thread.setDefaultUncaughtExceptionHandler(new MaridIde());
         Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);

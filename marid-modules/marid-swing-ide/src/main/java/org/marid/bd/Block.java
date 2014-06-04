@@ -18,149 +18,158 @@
 
 package org.marid.bd;
 
-import com.google.common.collect.ImmutableSet;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.marid.util.Utils;
+import org.marid.itf.Named;
+import org.marid.swing.dnd.DndObject;
 
-import javax.swing.*;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.*;
 import java.awt.*;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@XmlAccessorType(XmlAccessType.NONE)
-@XmlSeeAlso({
-        Block.PortKey.class
-})
-public abstract class Block implements Serializable {
+public abstract class Block implements Named, Serializable, DndObject {
 
-    @XmlID
-    @XmlAttribute
-    public final String id = Utils.getUid().toString(Character.MAX_RADIX);
+    protected final Map<Class<?>, List<BlockEventListener>> listeners = new IdentityHashMap<>();
 
-    public abstract JComponent getComponent();
-
-    public abstract Window getEditor();
-
-    public abstract List<? extends Port> getPorts();
-
-    public abstract String getName();
-
-    public List<? extends Port> getPorts(PortType portType) {
-        return getPorts().stream().filter(p -> p.getPortKey().portType == portType).collect(Collectors.toList());
+    public <T extends BlockEvent, L extends BlockEventListener<T>> void addEventListener(Class<L> type, L listener) {
+        listeners.computeIfAbsent(type, t -> new ArrayList<>()).add(listener);
     }
 
-    public Port getPort(PortKey portKey) {
-        return getPorts().stream().filter(p -> portKey.equals(p.getPortKey())).findFirst().get();
+    public <T extends BlockEvent, L extends BlockEventListener<T>> void removeEventListener(Class<L> type, L listener) {
+        listeners.computeIfAbsent(type, t -> new ArrayList<>()).remove(listener);
+        listeners.computeIfPresent(type, (t, l) -> l.isEmpty() ? null : l);
     }
 
-    protected Object writeReplace() throws ObjectStreamException {
-        try {
-            final Marshaller marshaller = BdObjectProvider.JAXB_CONTEXT.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
-            final ByteArrayOutputStream bos = new ByteArrayOutputStream(256);
-            marshaller.marshal(this, bos);
-            return new BlockProxy(bos.toByteArray());
-        } catch (JAXBException x) {
-            throw new IllegalStateException(x);
-        }
+    public void removeEventListeners(Class<? extends BlockEventListener<?>> type) {
+        listeners.remove(type);
     }
 
-    @Override
-    public String toString() {
-        final Set<Class<? extends Annotation>> xmlAnnotations = ImmutableSet.of(XmlElement.class, XmlAttribute.class);
-        return new ReflectionToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE) {
-            @Override
-            protected boolean accept(Field field) {
-                return Arrays.stream(field.getAnnotations()).anyMatch(a -> xmlAnnotations.contains(a.annotationType()));
-            }
-        }.toString();
+    @SuppressWarnings("unchecked")
+    public <T extends BlockEvent, L extends BlockEventListener<T>> void fireEvent(Class<L> type, T event) {
+        listeners.getOrDefault(type, Collections.emptyList()).forEach(l -> l.listen(event));
     }
 
-    public abstract class Port {
+    public abstract BlockComponent createComponent();
 
-        public abstract PortKey getPortKey();
+    public abstract Window createWindow();
 
-        public abstract Type getDataType();
+    public abstract List<Input<?>> getInputs();
 
-        public abstract ImageIcon getIcon();
+    public abstract List<Output<?>> getOutputs();
+
+    public abstract class Port<T> implements Named {
+
+        public abstract Class<T> getType();
 
         public Block getBlock() {
             return Block.this;
         }
     }
 
-    @XmlRootElement(name = "port")
-    public static final class PortKey {
+    public abstract class Input<T> extends Port<T> {
 
-        @XmlAttribute
-        public final PortType portType;
-
-        @XmlAttribute
-        public final String name;
-
-        private PortKey() {
-            this(null, null);
-        }
-
-        public PortKey(PortType portType, String name) {
-            this.portType = portType;
-            this.name = name;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(portType, name);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof PortKey) {
-                final PortKey that = (PortKey) obj;
-                return Arrays.equals(new Object[] {this.portType, this.name}, new Object[] {that.portType, that.name});
-            } else {
-                return false;
-            }
-        }
+        public abstract void set(T value);
 
         @Override
         public String toString() {
-            return String.format("%s(%s)", portType, name);
+            return getBlock().getName() + "<-" + getName();
         }
     }
 
-    protected static class BlockProxy implements Serializable {
+    public class In<T> extends Input<T> {
 
-        private final byte[] data;
+        private final String name;
+        private final Class<T> type;
+        private final Consumer<T> consumer;
 
-        private BlockProxy(byte[] data) {
-            this.data = data;
+        public In(String name, Class<T> type, Consumer<T> consumer) {
+            this.name = name;
+            this.type = type;
+            this.consumer = consumer;
         }
 
-        protected Object readResolve() throws ObjectStreamException {
-            try {
-                final Unmarshaller unmarshaller = BdObjectProvider.JAXB_CONTEXT.createUnmarshaller();
-                return unmarshaller.unmarshal(new ByteArrayInputStream(data));
-            } catch (JAXBException x) {
-                throw new IllegalStateException(x);
-            }
+        @Override
+        public String getName() {
+            return name;
         }
+
+        @Override
+        public void set(T value) {
+            consumer.accept(value);
+        }
+
+        @Override
+        public Class<T> getType() {
+            return type;
+        }
+    }
+
+    public abstract class Output<T> extends Port<T> {
+
+        public abstract T get();
+
+        @Override
+        public String toString() {
+            return getBlock().getName() + "->" + getName();
+        }
+    }
+
+    public class Out<T> extends Output<T> {
+
+        private final String name;
+        private final Class<T> type;
+        private final Supplier<T> supplier;
+
+        public Out(String name, Class<T> type, Supplier<T> supplier) {
+            this.name = name;
+            this.type = type;
+            this.supplier = supplier;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        public Class<T> getType() {
+            return type;
+        }
+
+        @Override
+        public T get() {
+            return supplier.get();
+        }
+    }
+
+    public abstract class BlockEvent extends EventObject {
+
+        public BlockEvent() {
+            super(Block.this);
+        }
+
+        @Override
+        public Block getSource() {
+            return (Block) super.getSource();
+        }
+    }
+
+    public class PropertyChangeEvent<T> extends BlockEvent {
+
+        public final T oldValue;
+        public final T newValue;
+
+        public PropertyChangeEvent(T oldValue, T newValue) {
+            this.oldValue = oldValue;
+            this.newValue = newValue;
+        }
+    }
+
+    public interface BlockEventListener<T extends BlockEvent> extends EventListener {
+
+        void listen(T blockEvent);
     }
 }

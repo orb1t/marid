@@ -18,13 +18,14 @@
 
 package org.marid.bde.view;
 
-import org.marid.ide.bde.BdeConfiguration;
 import org.marid.bde.model.Block;
 import org.marid.bde.view.ga.GaContext;
+import org.marid.ide.bde.BdeConfiguration;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.dnd.DndTarget;
 import org.marid.swing.dnd.MaridTransferHandler;
 import org.marid.swing.geom.ShapeUtils;
+import org.marid.util.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,9 +39,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.TimeUnit;
 
-import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static java.awt.AWTEvent.MOUSE_EVENT_MASK;
 import static java.awt.AWTEvent.MOUSE_MOTION_EVENT_MASK;
 import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
@@ -123,7 +122,7 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
             }
             tasks.forEach(ForkJoinTask::join);
             EventQueue.invokeLater(this::repaint);
-            sleepUninterruptibly(100L, TimeUnit.MILLISECONDS);
+            Utils.sleep(100L);
         }
     }
 

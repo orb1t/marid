@@ -42,9 +42,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.common.io.Files.getFileExtension;
-import static com.google.common.io.Files.getNameWithoutExtension;
 import static java.net.HttpURLConnection.*;
+import static org.marid.nio.FileUtils.extension;
+import static org.marid.nio.FileUtils.fileNameWithoutExtension;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -162,7 +162,7 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
         for (Path d = context.getParent(); d != null; d = d.getParent()) {
             scriptPaths.addAll(Arrays.asList(
                     dir.resolve(d).resolve("_" + fname + ".groovy"),
-                    dir.resolve(d).resolve("_." + getFileExtension(fname) + ".groovy"),
+                    dir.resolve(d).resolve("_." + extension(fname) + ".groovy"),
                     dir.resolve(d).resolve("_.groovy")));
         }
         final Map<Closure, Path> scripts = new LinkedHashMap<>();
@@ -219,7 +219,7 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
     }
 
     protected void applyScripts(final Path dir, Path context, String fname) {
-        final String name = getNameWithoutExtension(fname).substring(1);
+        final String name = fileNameWithoutExtension(fname).substring(1);
         try {
             Files.walkFileTree(dir.resolve(context).getParent(), new SimpleFileVisitor<Path>() {
                 @Override
@@ -230,7 +230,7 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
                             modify = true;
                         } else if (name.startsWith(".")) {
                             final String file = f.getFileName().toString();
-                            modify = name.substring(1).equals(getFileExtension(file));
+                            modify = name.substring(1).equals(extension(file));
                         } else {
                             modify = name.equals(f.getFileName().toString());
                         }

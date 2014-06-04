@@ -106,7 +106,7 @@ public class MaridTransferHandler extends TransferHandler implements LogSupport 
                 if (rc != null && DndObject.class.isAssignableFrom(rc)) {
                     try {
                         final DndObject dndObject = (DndObject) data.getTransferData(dataFlavor);
-                        ((DndSource) source).fireDndObjectExportDone(dndObject, action);
+                        ((DndSource) source).dndObjectExportDone(dndObject, action);
                     } catch (UnsupportedFlavorException | IOException x) {
                         warning("Unable to get transfer data for {0}", x, data);
                     }

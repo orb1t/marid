@@ -18,8 +18,8 @@
 
 package org.marid.bde.view.ga;
 
-import com.google.common.collect.ImmutableMap;
 import org.marid.bde.view.BlockLink;
+import org.marid.collections.ImmutableArrayMap;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
@@ -144,6 +144,6 @@ public class OrthoSpecie extends Specie<OrthoSpecie> {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + ImmutableMap.of("xs", Arrays.toString(xs), "ys", Arrays.toString(ys));
+        return getClass().getSimpleName() + new ImmutableArrayMap<>("xs", Arrays.toString(xs), "ys", Arrays.toString(ys));
     }
 }

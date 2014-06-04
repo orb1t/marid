@@ -18,12 +18,12 @@
 
 package org.marid.bde.view;
 
-import com.google.common.collect.ImmutableMap;
-import org.marid.logging.LogSupport;
 import org.marid.bde.view.BlockView.In;
 import org.marid.bde.view.BlockView.Out;
 import org.marid.bde.view.ga.GaContext;
 import org.marid.bde.view.ga.Specie;
+import org.marid.collections.ImmutableArrayMap;
+import org.marid.logging.LogSupport;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -84,7 +84,7 @@ public class BlockLink<S extends Specie<S>> implements LogSupport {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + ImmutableMap.of("in", in, "out", out, "specie", species[0]);
+        return getClass().getSimpleName() + new ImmutableArrayMap<>("in", in, "out", out, "specie", species[0]);
     }
 
     class Incubator {

@@ -26,13 +26,14 @@
     </developers>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.encoding>UTF-8</project.encoding>
+        <project.build.sourceEncoding>${project.encoding}</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>${project.encoding}</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <lib>${project.build.directory}/lib</lib>
-        <groovy.version>2.3.0</groovy.version>
+        <groovy.version>2.3.2</groovy.version>
         <jetty.version>9.0.5.v20130815</jetty.version>
         <catalina.version>7.0.42</catalina.version>
         <s.version>${i.version}</s.version>
@@ -342,7 +343,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
-                    <version>1.2.1</version>
+                    <version>1.3</version>
                 </plugin>
 
                 <plugin>
@@ -361,7 +362,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>appassembler-maven-plugin</artifactId>
-                    <version>1.7</version>
+                    <version>1.8</version>
                 </plugin>
 
                 <plugin>
@@ -478,7 +479,7 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>marid-runtime-lib</artifactId>
+                <artifactId>marid-ide-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

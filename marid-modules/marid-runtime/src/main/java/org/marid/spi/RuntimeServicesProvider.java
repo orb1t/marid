@@ -18,7 +18,7 @@
 
 package org.marid.spi;
 
-import com.google.common.collect.ImmutableSet;
+import org.marid.collections.ImmutableArraySet;
 import org.marid.service.MaridService;
 import org.marid.service.MaridServiceProvider;
 import org.marid.web.SimpleWebServer;
@@ -28,10 +28,10 @@ import java.util.Set;
 /**
  * @author Dmitry Ovchinnikov
  */
+@SuppressWarnings("unchecked")
 public class RuntimeServicesProvider implements MaridServiceProvider {
     @Override
     public Set<Class<? extends MaridService>> getServices() {
-        return ImmutableSet.of(
-                SimpleWebServer.class);
+        return new ImmutableArraySet<>(SimpleWebServer.class);
     }
 }

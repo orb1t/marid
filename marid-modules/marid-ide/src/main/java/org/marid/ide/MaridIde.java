@@ -36,7 +36,7 @@ public class MaridIde {
     private static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
 
     public static void main(String... args) throws Exception {
-        Logging.init(MaridIde.class, "marid-ide-logging.properties");
+        Logging.init("marid-ide-logging.properties");
         Thread.setDefaultUncaughtExceptionHandler((t, x) -> warning(LOG, "Uncaught exception in {0}", x, t));
         Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
         info(LOG, "Starting Marid {0} on {1} {2}",

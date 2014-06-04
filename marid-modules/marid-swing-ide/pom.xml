@@ -20,7 +20,7 @@
     <dependencies>
         <dependency>
             <groupId>org.marid</groupId>
-            <artifactId>marid-runtime</artifactId>
+            <artifactId>marid-ide-lib</artifactId>
         </dependency>
 
         <dependency>
@@ -103,10 +103,18 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>org.marid.ide.TestMaridIde</mainClass>
-                    <classpathScope>test</classpathScope>
-                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.marid.ide.TestMaridIde</mainClass>
+                            <classpathScope>test</classpathScope>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -122,7 +130,7 @@
                             <outputDirectory>${project.build.directory}/ext</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.basedir}/src/ext</directory>
+                                    <directory>src/test/ext</directory>
                                 </resource>
                             </resources>
                         </configuration>
@@ -156,10 +164,10 @@
                 <executions>
                     <execution>
                         <id>add-test-groovy-source</id>
+                        <phase>generate-test-sources</phase>
                         <goals>
                             <goal>add-test-source</goal>
                         </goals>
-                        <phase>generate-test-sources</phase>
                         <configuration>
                             <sources>
                                 <source>src/test/groovy</source>
@@ -168,18 +176,19 @@
                     </execution>
 
                     <execution>
-                        <id>add-marid-runtime</id>
+                        <id>add-test-ext-resources</id>
+                        <phase>generate-test-resources</phase>
                         <goals>
                             <goal>add-test-resource</goal>
                         </goals>
-                        <phase>generate-test-resources</phase>
                         <configuration>
                             <resources>
                                 <resource>
-                                    <directory>${project.build.directory}/ext</directory>
+                                    <directory>src/test/ext</directory>
                                 </resource>
+
                                 <resource>
-                                    <directory>${project.basedir}/src/ext</directory>
+                                    <directory>${project.build.directory}/ext</directory>
                                 </resource>
                             </resources>
                         </configuration>

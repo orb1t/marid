@@ -25,7 +25,7 @@ import org.marid.logging.monitoring.CompressedLogRecords;
 import org.marid.logging.monitoring.LogMXBean;
 import org.marid.logging.monitoring.LogRecordsArray;
 import org.marid.management.MaridNotificationEmitter;
-import org.marid.xml.bind.JaxbUtil;
+import org.marid.xml.bind.XmlDomain;
 import org.marid.xml.bind.XmlLogRecord;
 
 import javax.management.MBeanNotificationInfo;
@@ -117,7 +117,7 @@ public class FsHandler extends AbstractHandler implements LogMXBean, MaridNotifi
                 outputStream = newOutputStream(file);
             }
             final FastArrayOutputStream faos = new FastArrayOutputStream(1024);
-            JaxbUtil.save(new XmlLogRecord(record), faos, true, formatted);
+            XmlDomain.save(new XmlLogRecord(record), faos, true, formatted);
             final ByteBuffer trimmedBuffer = faos.getTrimmedByteBuffer();
             if (faos.size() - trimmedBuffer.limit() >= 2) {
                 trimmedBuffer.array()[trimmedBuffer.limit() - 2] = '\n';
@@ -224,7 +224,7 @@ public class FsHandler extends AbstractHandler implements LogMXBean, MaridNotifi
                 for (final File f : files) {
                     try (final Scanner scanner = new Scanner(newInputStream(f), "UTF-8").useDelimiter("\\f")) {
                         while (scanner.hasNext()) {
-                            final XmlLogRecord r = JaxbUtil.load(XmlLogRecord.class, new StringReader(scanner.next()));
+                            final XmlLogRecord r = XmlDomain.load(XmlLogRecord.class, new StringReader(scanner.next()));
                             final long millis = r.getMillis();
                             if (millis >= stopTime) {
                                 break FileLoop;

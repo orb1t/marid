@@ -42,9 +42,5 @@ public class DndSourceTest {
 
     class TestDndObject implements DndObject {
 
-        @Override
-        public Object getObject() {
-            return null;
-        }
     }
 }

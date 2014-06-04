@@ -18,12 +18,15 @@
 
 package org.marid.ide;
 
+import org.marid.logging.TestLogConfigurer;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public class TestMaridIde {
 
     public static void main(String... args) throws Exception {
+        TestLogConfigurer.configureTestLogging();
         MaridIde.main(args);
     }
 }

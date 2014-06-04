@@ -19,7 +19,6 @@ package org.marid.logging;
 
 import org.marid.logging.monitoring.LogMXBean;
 import org.marid.management.JmxUtils;
-import org.marid.util.Utils;
 
 import javax.management.MBeanServer;
 import java.io.InputStream;
@@ -44,7 +43,7 @@ public class Logging {
             Level.FINEST
     };
 
-    public static void init(Class<?> c, String res) {
+    public static void init(String res) {
         final ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try (final InputStream is = cl.getResourceAsStream(res)) {
             final LogManager lm = LogManager.getLogManager();

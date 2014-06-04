@@ -28,8 +28,6 @@ import static java.awt.Image.SCALE_SMOOTH;
  */
 public interface DndObject extends Serializable {
 
-    Object getObject();
-
     default ImageIcon getVisualRepresentation() {
         return null;
     }
