@@ -23,15 +23,15 @@ import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.function.BiConsumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface PersistenceDelagateFactory {
+public interface MaridBeans {
 
-    Map<Class<?>, PersistenceDelegate> getPersistenceDelegateMap();
+    void visitPersistenceDelegates(BiConsumer<Class<?>, PersistenceDelegate> consumer);
 
     public static <T> T read(Class<T> type, InputStream inputStream) {
         try (final XMLDecoder decoder = new XMLDecoder(inputStream)) {
@@ -41,8 +41,8 @@ public interface PersistenceDelagateFactory {
 
     public static void write(OutputStream outputStream, Object object) {
         try (final XMLEncoder encoder = new XMLEncoder(outputStream, "UTF-8", true, 0)) {
-            for (final PersistenceDelagateFactory factory : ServiceLoader.load(PersistenceDelagateFactory.class)) {
-                factory.getPersistenceDelegateMap().forEach(encoder::setPersistenceDelegate);
+            for (final MaridBeans maridBeans : ServiceLoader.load(MaridBeans.class)) {
+                maridBeans.visitPersistenceDelegates(encoder::setPersistenceDelegate);
             }
             encoder.writeObject(object);
         }

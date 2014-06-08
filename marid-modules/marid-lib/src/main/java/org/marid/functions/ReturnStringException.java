@@ -16,16 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package menu
+package org.marid.functions;
 
-import org.marid.bd.schema.SchemaFrame
-import org.marid.ide.bde.BdeWindow
-import org.marid.ide.wrapper.WrapperRunnerWindow
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public class ReturnStringException extends ReturnException {
 
-[
-        [[], "mainMenu", "Deploy"],
-        [["Deploy"], "main", "Wrapper", null, {a, e -> WrapperRunnerWindow.show()}],
-        [[], "mainMenu", "Services"],
-        [["Services"], "main", "Service configurer", null, {a, e -> BdeWindow.show()}],
-        [["Services"], "main", "Schema frame", null, {a, e -> SchemaFrame.show()}]
-]
+    public ReturnStringException(String value) {
+        super(value);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getResult() {
+        return (T) getMessage();
+    }
+}

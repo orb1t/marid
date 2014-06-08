@@ -16,24 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.beans.ast;
-
-import org.codehaus.groovy.ast.ClassHelper;
-import org.codehaus.groovy.ast.expr.ConstantExpression;
+package org.marid.beans;
 
 import java.beans.Encoder;
 import java.beans.Expression;
-import java.beans.PersistenceDelegate;
+import java.util.function.BiFunction;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ConstantExpressionDelegate extends PersistenceDelegate {
+public class LambdaPersistenceDelegate<T> extends MaridPersistenceDelegate<T> {
+
+    private final BiFunction<T, Encoder, Expression> function;
+
+    public LambdaPersistenceDelegate(BiFunction<T, Encoder, Expression> function) {
+        this.function = function;
+    }
+
     @Override
-    protected Expression instantiate(Object oldInstance, Encoder out) {
-        final ConstantExpression expression = (ConstantExpression) oldInstance;
-        final Object value = expression.getValue();
-        final boolean primitive = ClassHelper.isPrimitiveType(expression.getType());
-        return new Expression(oldInstance, oldInstance.getClass(), "new", new Object[] {value, primitive});
+    protected Expression getExpression(T object, Encoder encoder) {
+        return function.apply(object, encoder);
     }
 }

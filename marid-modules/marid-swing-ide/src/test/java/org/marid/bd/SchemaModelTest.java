@@ -31,8 +31,8 @@ import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import static org.marid.beans.PersistenceDelagateFactory.read;
-import static org.marid.beans.PersistenceDelagateFactory.write;
+import static org.marid.beans.MaridBeans.read;
+import static org.marid.beans.MaridBeans.write;
 
 /**
  * @author Dmitry Ovchinnikov

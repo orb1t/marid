@@ -16,16 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package menu
+package org.marid.swing.beans;
 
-import org.marid.bd.schema.SchemaFrame
-import org.marid.ide.bde.BdeWindow
-import org.marid.ide.wrapper.WrapperRunnerWindow
+import org.marid.beans.ConstructorDelegate;
+import org.marid.beans.MaridBeans;
 
-[
-        [[], "mainMenu", "Deploy"],
-        [["Deploy"], "main", "Wrapper", null, {a, e -> WrapperRunnerWindow.show()}],
-        [[], "mainMenu", "Services"],
-        [["Services"], "main", "Service configurer", null, {a, e -> BdeWindow.show()}],
-        [["Services"], "main", "Schema frame", null, {a, e -> SchemaFrame.show()}]
-]
+import java.awt.*;
+import java.beans.PersistenceDelegate;
+import java.util.function.BiConsumer;
+
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public class SwingPersistenceDelegates implements MaridBeans {
+
+    @Override
+    public void visitPersistenceDelegates(BiConsumer<Class<?>, PersistenceDelegate> consumer) {
+        consumer.accept(Point.class, new ConstructorDelegate<Point>((p, e) -> new Object[] {(int) p.getX(), (int) p.getY()}));
+    }
+}

@@ -16,4 +16,4 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-org.marid.beans.GroovyPersistenceDelegateFactory
+org.marid.beans.GroovyPersistenceDelegates

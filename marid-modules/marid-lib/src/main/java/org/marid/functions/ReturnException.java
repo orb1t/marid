@@ -16,16 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package menu
+package org.marid.functions;
 
-import org.marid.bd.schema.SchemaFrame
-import org.marid.ide.bde.BdeWindow
-import org.marid.ide.wrapper.WrapperRunnerWindow
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public class ReturnException extends RuntimeException {
 
-[
-        [[], "mainMenu", "Deploy"],
-        [["Deploy"], "main", "Wrapper", null, {a, e -> WrapperRunnerWindow.show()}],
-        [[], "mainMenu", "Services"],
-        [["Services"], "main", "Service configurer", null, {a, e -> BdeWindow.show()}],
-        [["Services"], "main", "Schema frame", null, {a, e -> SchemaFrame.show()}]
-]
+    public ReturnException(String message) {
+        super(message, null, false, false);
+    }
+
+    public ReturnException() {
+        this(null);
+    }
+
+    public <T> T getResult() {
+        return null;
+    }
+}

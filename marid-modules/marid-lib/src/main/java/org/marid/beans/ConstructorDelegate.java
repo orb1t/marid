@@ -18,21 +18,16 @@
 
 package org.marid.beans;
 
-import org.codehaus.groovy.ast.expr.ConstantExpression;
-import org.marid.beans.ast.ConstantExpressionDelegate;
-
-import java.beans.PersistenceDelegate;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.beans.Encoder;
+import java.beans.Expression;
+import java.util.function.BiFunction;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class GroovyPersistenceDelegateFactory implements PersistenceDelagateFactory {
-    @Override
-    public Map<Class<?>, PersistenceDelegate> getPersistenceDelegateMap() {
-        final Map<Class<?>, PersistenceDelegate> map = new LinkedHashMap<>();
-        map.put(ConstantExpression.class, new ConstantExpressionDelegate());
-        return map;
+public class ConstructorDelegate<T> extends LambdaPersistenceDelegate<T> {
+
+    public ConstructorDelegate(BiFunction<T, Encoder, Object[]> function) {
+        super((o, enc) -> new Expression(o, o.getClass(), "new", function.apply(o, enc)));
     }
 }

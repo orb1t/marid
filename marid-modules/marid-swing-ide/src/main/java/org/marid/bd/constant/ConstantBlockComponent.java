@@ -21,10 +21,9 @@ package org.marid.bd.constant;
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.NamedBlock;
-import org.marid.swing.actions.AncestorAction;
 
 import javax.swing.*;
-import javax.swing.event.AncestorEvent;
+import java.awt.event.HierarchyEvent;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,22 +33,26 @@ import java.util.List;
 public class ConstantBlockComponent extends JToggleButton implements BlockComponent, BlockComponent.Output {
 
     protected final ConstantBlock constantBlock;
+    protected final NamedBlock.ChangeNameListener changeNameListener = e -> setText(e.newValue);
 
     protected ConstantBlockComponent(ConstantBlock constantBlock) {
-        super(constantBlock.getName());
+        super("constantBlock");
         this.constantBlock = constantBlock;
-        final NamedBlock.ChangeNameListener changeNameListener = e -> setText(e.newValue);
-        addAncestorListener(new AncestorAction(ev -> {
-            switch (ev.getID()) {
-                case AncestorEvent.ANCESTOR_ADDED:
-                    constantBlock.addEventListener(NamedBlock.ChangeNameListener.class, changeNameListener);
-                    break;
-                case AncestorEvent.ANCESTOR_REMOVED:
-                    constantBlock.removeEventListener(NamedBlock.ChangeNameListener.class, changeNameListener);
-                    break;
-            }
-        }));
+        enableEvents(HierarchyEvent.HIERARCHY_EVENT_MASK);
+    }
 
+    @Override
+    protected void processHierarchyEvent(HierarchyEvent e) {
+        super.processHierarchyEvent(e);
+        switch (e.getID()) {
+            case HierarchyEvent.SHOWING_CHANGED:
+                if (isShowing()) {
+                    constantBlock.addEventListener(NamedBlock.ChangeNameListener.class, changeNameListener);
+                } else {
+                    constantBlock.removeEventListener(NamedBlock.ChangeNameListener.class, changeNameListener);
+                }
+                break;
+        }
     }
 
     @Override

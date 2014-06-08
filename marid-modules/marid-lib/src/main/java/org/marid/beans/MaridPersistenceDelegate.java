@@ -16,16 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package menu
+package org.marid.beans;
 
-import org.marid.bd.schema.SchemaFrame
-import org.marid.ide.bde.BdeWindow
-import org.marid.ide.wrapper.WrapperRunnerWindow
+import java.beans.Encoder;
+import java.beans.Expression;
+import java.beans.PersistenceDelegate;
 
-[
-        [[], "mainMenu", "Deploy"],
-        [["Deploy"], "main", "Wrapper", null, {a, e -> WrapperRunnerWindow.show()}],
-        [[], "mainMenu", "Services"],
-        [["Services"], "main", "Service configurer", null, {a, e -> BdeWindow.show()}],
-        [["Services"], "main", "Schema frame", null, {a, e -> SchemaFrame.show()}]
-]
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public abstract class MaridPersistenceDelegate<T> extends PersistenceDelegate {
+
+    protected abstract Expression getExpression(T object, Encoder encoder);
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Expression instantiate(Object oldInstance, Encoder out) {
+        return getExpression((T) oldInstance, out);
+    }
+}

@@ -18,11 +18,12 @@
 
 package org.marid.bd;
 
+import org.marid.beans.MaridBeans;
 import org.marid.itf.Named;
 import org.marid.swing.dnd.DndObject;
 
 import java.awt.*;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
@@ -60,6 +61,27 @@ public abstract class Block implements Named, Serializable, DndObject {
     public abstract List<Input<?>> getInputs();
 
     public abstract List<Output<?>> getOutputs();
+
+    protected Object writeReplace() throws ObjectStreamException {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        MaridBeans.write(bos, this);
+        return new BlockProxy(getClass(), bos.toByteArray());
+    }
+
+    protected static class BlockProxy implements Serializable {
+
+        private final Class<?> type;
+        private final byte[] data;
+
+        public BlockProxy(Class<?> type, byte[] data) {
+            this.type = type;
+            this.data = data;
+        }
+
+        public Object readResolve() throws ObjectStreamException {
+            return MaridBeans.read(type, new ByteArrayInputStream(data));
+        }
+    }
 
     public abstract class Port<T> implements Named {
 

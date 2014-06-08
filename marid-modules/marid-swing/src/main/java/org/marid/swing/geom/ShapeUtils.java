@@ -19,6 +19,7 @@
 package org.marid.swing.geom;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
@@ -34,7 +35,8 @@ public class ShapeUtils {
         for (final PathIterator it = shape.getPathIterator(null); !it.isDone(); it.next()) {
             switch (it.currentSegment(coords)) {
                 case PathIterator.SEG_MOVETO:
-                    cx = coords[0]; cy = coords[1];
+                    cx = coords[0];
+                    cy = coords[1];
                     break;
                 case PathIterator.SEG_LINETO:
                     final double dist = Line2D.ptSegDist(cx, cy, cx = coords[0], cy = coords[1], x, y);
@@ -49,5 +51,39 @@ public class ShapeUtils {
 
     public static boolean contains(Shape shape, Point2D point, double eps) {
         return contains(shape, point.getX(), point.getY(), eps);
+    }
+
+    public static Point add(Point... points) {
+        final Point result = new Point();
+        for (final Point point : points) {
+            result.translate(point.x, point.y);
+        }
+        return result;
+    }
+
+    public static Point ptNeg(Point point) {
+        return new Point(-point.x, -point.y);
+    }
+
+    public static Point ptAdd(int s1, Point p1, int s2, Point p2) {
+        final Point point = new Point();
+        point.translate(s1 * p1.x, s1 * p1.y);
+        point.translate(s2 * p2.x, s2 * p2.y);
+        return point;
+    }
+
+    public static Point ptAdd(int s1, Point p1, int s2, Point p2, int s3, Point p3) {
+        final Point point = new Point();
+        point.translate(s1 * p1.x, s1 * p1.y);
+        point.translate(s2 * p2.x, s2 * p2.y);
+        point.translate(s3 * p3.x, s3 * p3.y);
+        return point;
+    }
+
+    public static MouseEvent mouseEvent(Component component, MouseEvent mouseEvent, int id, Point point) {
+        return new MouseEvent(component,
+                id, mouseEvent.getWhen(), mouseEvent.getModifiers(), point.x, point.y,
+                mouseEvent.getXOnScreen(), mouseEvent.getYOnScreen(),
+                mouseEvent.getClickCount(), mouseEvent.isPopupTrigger(), mouseEvent.getButton());
     }
 }
