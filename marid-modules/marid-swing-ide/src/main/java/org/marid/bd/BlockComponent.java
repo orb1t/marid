@@ -37,14 +37,6 @@ public interface BlockComponent {
 
     Point getLocation();
 
-    int getX();
-
-    int getY();
-
-    void print(Graphics graphics);
-
-    boolean contains(Point point);
-
     void setBounds(Rectangle rectangle);
 
     void setLocation(Point location);

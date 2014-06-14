@@ -24,6 +24,7 @@ import org.marid.bd.BlockLink;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.dnd.DndTarget;
 import org.marid.swing.dnd.MaridTransferHandler;
+import org.marid.swing.geom.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -85,12 +86,6 @@ public class SchemaEditor extends JComponent implements DndTarget<Block> {
 
     @Override
     protected void processMouseMotionEvent(MouseEvent e) {
-        onMouseEvent(e);
-        super.processMouseMotionEvent(e);
-    }
-
-    protected void onMouseEvent(MouseEvent e) {
-        final Point mp = SwingUtil.transform(transform::inverseTransform, e.getPoint());
         switch (e.getID()) {
             case MouseEvent.MOUSE_DRAGGED:
                 if (e.isShiftDown()) {
@@ -100,49 +95,45 @@ public class SchemaEditor extends JComponent implements DndTarget<Block> {
                     repaint();
                     return;
                 } else if (movingComponent != null && e.isControlDown()) {
+                    final Point mp = SwingUtil.transform(transform::inverseTransform, e.getPoint());
                     movingComponent.setLocation(ptAdd(1, movingComponentLocation, 1, mp, -1, movingComponentPoint));
                     repaint();
                     currentLink = null;
                     return;
                 }
                 break;
-            case MouseEvent.MOUSE_RELEASED:
-                if (movingComponent != null) {
-                    movingComponent = null;
-                    movingComponentPoint = null;
-                    movingComponentLocation = null;
-                    return;
-                }
-            default:
-                mousePoint = mp;
-                mouseTransform = (AffineTransform) transform.clone();
-                break;
         }
+        onMouseEvent(e);
+        super.processMouseMotionEvent(e);
+    }
+
+    protected void onMouseEvent(MouseEvent e) {
+        final Point mp = SwingUtil.transform(transform::inverseTransform, e.getPoint());
+        if (e.getID() == MouseEvent.MOUSE_RELEASED && movingComponent != null) {
+            movingComponent = null;
+            return;
+        }
+        mousePoint = mp;
+        mouseTransform = (AffineTransform) transform.clone();
         for (int i = getComponentCount() - 1; i >= 0; i--) {
             final Component component = getComponent(i);
             final Point p = ptAdd(1, mp, -1, component.getLocation());
             if (component.contains(p)) {
                 if (e.getID() == MouseEvent.MOUSE_PRESSED && e.isControlDown()) {
-                    movingComponent = component;
-                    movingComponentPoint = mp;
-                    movingComponentLocation = component.getLocation();
+                    prepareMove(component, mp);
                     break;
                 }
-                Component s = component;
-                final Point sp = new Point(p);
-                for (Component c = s.getComponentAt(sp); c != null && c != s; sp.translate(-s.getX(), -s.getY())) {
-                    s = c;
-                }
+                final Component s = ShapeUtils.findChild(component, p);
                 try {
-                    s.dispatchEvent(mouseEvent(s, e, e.getID(), sp));
+                    s.dispatchEvent(mouseEvent(s, e, e.getID(), p));
                 } catch (IllegalComponentStateException x) {
                     //ignore
                 }
                 if (s != curComponent) {
                     if (curComponent != null) {
-                        curComponent.dispatchEvent(mouseEvent(curComponent, e, MOUSE_EXITED, sp));
+                        curComponent.dispatchEvent(mouseEvent(curComponent, e, MOUSE_EXITED, p));
                     }
-                    s.dispatchEvent(mouseEvent(s, e, MOUSE_ENTERED, sp));
+                    s.dispatchEvent(mouseEvent(s, e, MOUSE_ENTERED, p));
                     curComponent = s;
                 }
                 currentLink = null;
@@ -152,6 +143,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block> {
         }
         if (curComponent != null) {
             curComponent.dispatchEvent(mouseEvent(curComponent, e, MOUSE_EXITED, mp));
+            repaint();
             curComponent = null;
         }
     }
@@ -166,15 +158,22 @@ public class SchemaEditor extends JComponent implements DndTarget<Block> {
         final Stroke oldStroke = g.getStroke();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setStroke(oldStroke);
-        visitBlockComponents(bc -> {
-            g.translate(bc.getX(), bc.getY());
-            bc.print(g);
-            g.translate(-bc.getX(), -bc.getY());
-        });
+        for (int i = getComponentCount() - 1; i >= 0; i--) {
+            final Component c = getComponent(i);
+            g.translate(c.getX(), c.getY());
+            c.print(g);
+            g.translate(-c.getX(), -c.getY());
+        }
     }
 
     @Override
     protected void paintChildren(Graphics g) {
+    }
+
+    protected void prepareMove(Component component, Point point) {
+        movingComponent = component;
+        movingComponentPoint = point;
+        movingComponentLocation = component.getLocation();
     }
 
     public void visitBlockComponents(Consumer<BlockComponent> componentConsumer) {

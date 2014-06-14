@@ -20,11 +20,12 @@ package org.marid.bd.test;
 
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
+import org.marid.bd.components.DefaultBlockComponentBorder;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.*;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -59,7 +60,7 @@ public class TestBlock extends Block {
     private class TestBlockComponent extends JPanel implements BlockComponent {
 
         public TestBlockComponent() {
-            setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            setBorder(new DefaultBlockComponentBorder());
             add(new JToggleButton(new AbstractAction("test1") {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -69,6 +70,10 @@ public class TestBlock extends Block {
             add(new JToggleButton("test2"));
             add(new JToggleButton("test3"));
             add(new JButton("xx"));
+            final JPanel panel = new JPanel();
+            panel.add(new JButton("y"));
+            panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            add(panel);
         }
 
         @Override

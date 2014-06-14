@@ -26,6 +26,6 @@ import java.util.logging.Level;
 public class AllLogs extends AbstractLoggingConfigurer {
 
     public AllLogs() {
-        super(Level.ALL);
+        super(Level.INFO);
     }
 }

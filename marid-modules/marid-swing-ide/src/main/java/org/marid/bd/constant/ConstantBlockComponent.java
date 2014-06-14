@@ -21,8 +21,10 @@ package org.marid.bd.constant;
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.NamedBlock;
+import org.marid.bd.components.DefaultBlockComponentBorder;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.HierarchyEvent;
 import java.util.Collections;
 import java.util.List;
@@ -30,14 +32,18 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ConstantBlockComponent extends JToggleButton implements BlockComponent, BlockComponent.Output {
+public class ConstantBlockComponent extends JPanel implements BlockComponent {
 
     protected final ConstantBlock constantBlock;
-    protected final NamedBlock.ChangeNameListener changeNameListener = e -> setText(e.newValue);
+    protected final ConstantBlockComponentOutput output = new ConstantBlockComponentOutput();
+    protected final NamedBlock.ChangeNameListener changeNameListener = e -> output.setText(e.newValue);
 
     protected ConstantBlockComponent(ConstantBlock constantBlock) {
-        super("constantBlock");
+        super(new BorderLayout());
         this.constantBlock = constantBlock;
+        add(output);
+        setOpaque(false);
+        setBorder(new DefaultBlockComponentBorder());
         enableEvents(HierarchyEvent.HIERARCHY_EVENT_MASK);
     }
 
@@ -67,16 +73,23 @@ public class ConstantBlockComponent extends JToggleButton implements BlockCompon
 
     @Override
     public List<Output> getOutputs() {
-        return Collections.singletonList(this);
+        return Collections.singletonList(output);
     }
 
-    @Override
-    public Block.Output<?> getOutput() {
-        return constantBlock.output;
-    }
+    protected class ConstantBlockComponentOutput extends JToggleButton implements Output {
 
-    @Override
-    public BlockComponent getBlockComponent() {
-        return this;
+        public ConstantBlockComponentOutput() {
+            super("constantBlock");
+        }
+
+        @Override
+        public Block.Output<?> getOutput() {
+            return constantBlock.output;
+        }
+
+        @Override
+        public BlockComponent getBlockComponent() {
+            return ConstantBlockComponent.this;
+        }
     }
 }

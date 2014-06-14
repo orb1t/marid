@@ -86,4 +86,22 @@ public class ShapeUtils {
                 mouseEvent.getXOnScreen(), mouseEvent.getYOnScreen(),
                 mouseEvent.getClickCount(), mouseEvent.isPopupTrigger(), mouseEvent.getButton());
     }
+
+    public static Rectangle toParent(Component component, Component parent) {
+        final Rectangle result = component.getBounds();
+        for (Component c = component.getParent(); c != null && c != parent; c = c.getParent()) {
+            result.translate(c.getX(), c.getY());
+        }
+        return result;
+    }
+
+    public static Component findChild(Component parent, Point p) {
+        Component s = parent;
+        for (Component c = s.getComponentAt(p); c != null && c != s; ) {
+            s = c;
+            p.translate(-s.getX(), -s.getY());
+            c = s.getComponentAt(p);
+        }
+        return s;
+    }
 }

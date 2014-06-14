@@ -30,7 +30,7 @@ import java.awt.event.WindowEvent;
  */
 public class SchemaFrame extends AbstractFrame {
 
-    protected final BlockListWindow blockListWindow = new BlockListWindow();
+    protected final BlockListWindow blockListWindow = new BlockListWindow(this);
     protected final SchemaEditor schemaEditor = new SchemaEditor(new SchemaModel());
 
     public SchemaFrame() {

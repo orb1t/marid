@@ -33,15 +33,9 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <lib>${project.build.directory}/lib</lib>
-        <groovy.version>2.3.2</groovy.version>
+        <groovy.version>2.3.3</groovy.version>
         <jetty.version>9.0.5.v20130815</jetty.version>
         <catalina.version>7.0.42</catalina.version>
-        <s.version>${i.version}</s.version>
-        <s.vendor>${project.organization.name}</s.vendor>
-        <s.title>${project.name}</s.title>
-        <i.version>${project.version}</i.version>
-        <i.vendor>${project.organization.name}</i.vendor>
-        <i.title>${project.description}</i.title>
         <excluded.benchmarks>org.marid.test.BrokenBenchmarks</excluded.benchmarks>
         <excluded.tests>org.marid.test.BrokenTests</excluded.tests>
         <test.groups>org.marid.test.NormalTests</test.groups>
@@ -228,12 +222,12 @@
                             <manifestEntries>
                                 <Class-Path>ext/</Class-Path>
                                 <Built-By>${project.organization.name}</Built-By>
-                                <Implementation-Version>${i.version}</Implementation-Version>
-                                <Implementation-Title>${i.title}</Implementation-Title>
-                                <Implementation-Vendor>${i.vendor}</Implementation-Vendor>
-                                <Specification-Version>${s.version}</Specification-Version>
-                                <Specification-Title>${s.title}</Specification-Title>
-                                <Specification-Vendor>${s.vendor}</Specification-Vendor>
+                                <Implementation-Version>${project.version}</Implementation-Version>
+                                <Implementation-Title>${project.description}</Implementation-Title>
+                                <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+                                <Specification-Version>${project.version}</Specification-Version>
+                                <Specification-Title>${project.name}</Specification-Title>
+                                <Specification-Vendor>${project.organization.name}</Specification-Vendor>
                             </manifestEntries>
                         </archive>
                     </configuration>
@@ -405,7 +399,7 @@
     <inceptionYear>2012</inceptionYear>
 
     <prerequisites>
-        <maven>3.1</maven>
+        <maven>3.2</maven>
     </prerequisites>
 
     <dependencyManagement>
@@ -419,7 +413,7 @@
             <dependency>
                 <groupId>org.apache.ivy</groupId>
                 <artifactId>ivy</artifactId>
-                <version>2.3.0</version>
+                <version>2.4.0-rc1</version>
             </dependency>
 
             <dependency>

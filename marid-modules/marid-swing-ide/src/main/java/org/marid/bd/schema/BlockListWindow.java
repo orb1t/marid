@@ -21,25 +21,45 @@ package org.marid.bd.schema;
 import org.marid.bd.Block;
 import org.marid.bd.constant.ConstantBlock;
 import org.marid.bd.test.TestBlock;
+import org.marid.pref.PrefSupport;
 import org.marid.swing.dnd.DndSource;
 import org.marid.swing.dnd.MaridTransferHandler;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.prefs.Preferences;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BlockListWindow extends JWindow {
+public class BlockListWindow extends JDialog implements PrefSupport {
 
     protected final BlockList blockList = new BlockList();
+    protected final Preferences preferences;
 
-    public BlockListWindow() {
-        setAlwaysOnTop(true);
+    public BlockListWindow(SchemaFrame schemaFrame) {
+        super(schemaFrame, "Block list", false);
+        preferences = schemaFrame.preferences();
         add(new JScrollPane(blockList));
         setPreferredSize(new Dimension(300, 500));
         pack();
-        setLocationByPlatform(true);
+        setLocation(getPref("blockListLocation", new Point(0, 0)));
+        setSize(getPref("blockListSize", getPreferredSize()));
+    }
+
+    @Override
+    public void dispose() {
+        try {
+            putPref("blockListLocation", getLocation());
+            putPref("blockListSize", getSize());
+        } finally {
+            super.dispose();
+        }
+    }
+
+    @Override
+    public Preferences preferences() {
+        return preferences;
     }
 
     protected class BlockList extends JList<Block> implements DndSource<Block> {
