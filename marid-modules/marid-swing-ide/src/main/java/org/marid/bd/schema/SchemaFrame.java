@@ -45,7 +45,7 @@ public class SchemaFrame extends AbstractFrame {
         super.processComponentEvent(e);
         switch (e.getID()) {
             case ComponentEvent.COMPONENT_SHOWN:
-                blockListWindow.setVisible(true);
+                blockListWindow.setVisible(getPref("visible", true, "blockList"));
                 break;
             case ComponentEvent.COMPONENT_HIDDEN:
                 blockListWindow.setVisible(false);
@@ -55,6 +55,11 @@ public class SchemaFrame extends AbstractFrame {
 
     @Override
     protected void processWindowEvent(WindowEvent e) {
+        switch (e.getID()) {
+            case WindowEvent.WINDOW_CLOSING:
+                putPref("visible", blockListWindow.isVisible(), "blockList");
+                break;
+        }
         super.processWindowEvent(e);
         switch (e.getID()) {
             case WindowEvent.WINDOW_CLOSED:
@@ -65,5 +70,9 @@ public class SchemaFrame extends AbstractFrame {
 
     @Override
     protected void fillActions(MenuActionList actionList) {
+        actionList.add("main", "Schema");
+        actionList.add(true, "main", "Show block list", "Schema")
+                .setKey("control L")
+                .setListener(e -> blockListWindow.setVisible(!blockListWindow.isVisible()));
     }
 }

@@ -26,6 +26,7 @@ import org.marid.swing.MaridAction;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -82,6 +83,10 @@ public class ActionBuilder extends AbstractAction {
     public ActionBuilder setListener(MaridAction.MaridActionListener listener) {
         this.actionListener = listener;
         return this;
+    }
+
+    public ActionBuilder setListener(ActionListener listener) {
+        return setListener((a, e) -> listener.actionPerformed(e));
     }
 
     public ActionBuilder setShortDescription(String shortDescription) {

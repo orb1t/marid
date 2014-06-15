@@ -43,7 +43,8 @@ public class DefaultBlockComponentBorder extends AbstractBorder {
             g.setColor(SystemColor.controlDkShadow);
             for (final BlockComponent.Input input : blockComponent.getInputs()) {
                 final Rectangle bounds = ShapeUtils.toParent(input.getButton(), c);
-                System.out.printf("%s %s%n", new Rectangle(x, y, width, height), bounds);
+                final int ly = (int) bounds.getCenterY();
+                g.drawLine(0, ly, DEFAULT_INSETS.left, ly);
             }
             for (final BlockComponent.Output output : blockComponent.getOutputs()) {
                 final Rectangle bounds = ShapeUtils.toParent(output.getButton(), c);

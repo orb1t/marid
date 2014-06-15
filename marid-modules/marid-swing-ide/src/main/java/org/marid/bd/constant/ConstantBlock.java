@@ -18,9 +18,11 @@
 
 package org.marid.bd.constant;
 
+import images.Images;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.marid.bd.NamedBlock;
 
+import javax.swing.*;
 import java.awt.*;
 import java.beans.ConstructorProperties;
 import java.util.Collections;
@@ -35,16 +37,23 @@ public class ConstantBlock extends NamedBlock {
     protected final Out<ConstantExpression> output = new Out<>("out", ConstantExpression.class, () -> value);
 
     public ConstantBlock() {
+        name = "Constant block";
     }
 
     @ConstructorProperties({"value"})
     public ConstantBlock(ConstantExpression value) {
+        this();
         this.value = value;
     }
 
     @Override
     public ConstantBlockComponent createComponent() {
         return new ConstantBlockComponent(this);
+    }
+
+    @Override
+    public ImageIcon getVisualRepresentation() {
+        return Images.getIcon("block/constant.png");
     }
 
     @Override
