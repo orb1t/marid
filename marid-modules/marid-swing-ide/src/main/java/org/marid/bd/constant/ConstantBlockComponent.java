@@ -35,12 +35,14 @@ import java.util.List;
 public class ConstantBlockComponent extends JPanel implements BlockComponent {
 
     protected final ConstantBlock constantBlock;
-    protected final ConstantBlockComponentOutput output = new ConstantBlockComponentOutput();
-    protected final NamedBlock.ChangeNameListener changeNameListener = e -> output.setText(e.newValue);
+    protected final ConstantBlockComponentOutput output;
+    protected final NamedBlock.ChangeNameListener changeNameListener;
 
     protected ConstantBlockComponent(ConstantBlock constantBlock) {
         super(new BorderLayout());
         this.constantBlock = constantBlock;
+        output = new ConstantBlockComponentOutput();
+        changeNameListener = e -> output.setText(e.newValue);
         add(output);
         setOpaque(false);
         setBorder(new DefaultBlockComponentBorder());
@@ -51,7 +53,7 @@ public class ConstantBlockComponent extends JPanel implements BlockComponent {
     protected void processHierarchyEvent(HierarchyEvent e) {
         super.processHierarchyEvent(e);
         switch (e.getID()) {
-            case HierarchyEvent.SHOWING_CHANGED:
+            case HierarchyEvent.HIERARCHY_CHANGED:
                 if (isShowing()) {
                     constantBlock.addEventListener(NamedBlock.ChangeNameListener.class, changeNameListener);
                 } else {
@@ -79,7 +81,7 @@ public class ConstantBlockComponent extends JPanel implements BlockComponent {
     protected class ConstantBlockComponentOutput extends JToggleButton implements Output {
 
         public ConstantBlockComponentOutput() {
-            super("constantBlock");
+            super(getBlock().getName());
         }
 
         @Override

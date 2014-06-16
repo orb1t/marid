@@ -23,7 +23,10 @@ import org.marid.itf.Named;
 import org.marid.swing.dnd.DndObject;
 
 import java.awt.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
@@ -56,7 +59,7 @@ public abstract class Block implements Named, Serializable, DndObject {
 
     public abstract BlockComponent createComponent();
 
-    public abstract Window createWindow();
+    public abstract Window createWindow(Window parent);
 
     public abstract List<Input<?>> getInputs();
 

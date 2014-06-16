@@ -33,14 +33,12 @@ public class MenuActionList extends ArrayList<MenuAction> {
 
     public MenuActionTreeElement createTreeElement() {
         final MenuActionTreeElement root = new MenuActionTreeElement(null, null);
-        for (final MenuAction action : this) {
-            if (action.path.length == 0) {
-                final MenuActionTreeElement element = new MenuActionTreeElement(root, action);
-                final TreeMap<String, MenuActionTreeElement> map = root.children.computeIfAbsent(action.group, g -> new TreeMap<>());
-                map.put(action.name, element);
-                fillMenuActionTreeElement(element);
-            }
-        }
+        stream().filter(a -> a.path.length == 0).forEach(a -> {
+            final MenuActionTreeElement element = new MenuActionTreeElement(root, a);
+            final TreeMap<String, MenuActionTreeElement> map = root.children.computeIfAbsent(a.group, g -> new TreeMap<>());
+            map.put(a.name, element);
+            fillMenuActionTreeElement(element);
+        });
         return root;
     }
 
@@ -89,14 +87,11 @@ public class MenuActionList extends ArrayList<MenuAction> {
     }
 
     private void fillMenuActionTreeElement(MenuActionTreeElement element) {
-        final String[] path = element.getChildPath();
-        for (final MenuAction action : this) {
-            if (Arrays.equals(action.path, path)) {
-                final TreeMap<String, MenuActionTreeElement> map = element.children.computeIfAbsent(action.group, g -> new TreeMap<>());
-                final MenuActionTreeElement child = new MenuActionTreeElement(element, action);
-                map.put(action.name, child);
-                fillMenuActionTreeElement(child);
-            }
-        }
+        stream().filter(a -> Arrays.equals(a.path, element.getChildPath())).forEach(a -> {
+            final TreeMap<String, MenuActionTreeElement> map = element.children.computeIfAbsent(a.group, g -> new TreeMap<>());
+            final MenuActionTreeElement child = new MenuActionTreeElement(element, a);
+            map.put(a.name, child);
+            fillMenuActionTreeElement(child);
+        });
     }
 }

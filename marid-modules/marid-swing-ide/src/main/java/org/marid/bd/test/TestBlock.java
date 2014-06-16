@@ -38,7 +38,7 @@ public class TestBlock extends Block {
     }
 
     @Override
-    public Window createWindow() {
+    public Window createWindow(Window parent) {
         return null;
     }
 

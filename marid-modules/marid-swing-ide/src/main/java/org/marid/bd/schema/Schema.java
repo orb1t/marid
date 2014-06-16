@@ -88,7 +88,7 @@ public class Schema extends NamedBlock {
     }
 
     @Override
-    public Window createWindow() {
+    public Window createWindow(Window parent) {
         return null;
     }
 

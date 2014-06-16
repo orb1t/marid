@@ -57,8 +57,8 @@ public class ConstantBlock extends NamedBlock {
     }
 
     @Override
-    public Window createWindow() {
-        return null;
+    public ConstantBlockEditor createWindow(Window parent) {
+        return new ConstantBlockEditor(parent, this);
     }
 
     @Override

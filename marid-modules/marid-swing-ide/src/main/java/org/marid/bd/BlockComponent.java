@@ -19,9 +19,12 @@
 package org.marid.bd;
 
 import org.marid.bd.schema.SchemaEditor;
+import org.marid.swing.MaridAction;
+import org.marid.swing.actions.WindowAction;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowEvent;
 import java.util.List;
 
 /**
@@ -45,10 +48,35 @@ public interface BlockComponent {
 
     boolean isVisible();
 
+    void validate();
+
     void setVisible(boolean visible);
 
     default SchemaEditor getSchemaEditor() {
         return (SchemaEditor) getComponent().getParent();
+    }
+
+    default void updateBlock() {
+        validate();
+        setBounds(new Rectangle(getLocation(), getPreferredSize()));
+    }
+
+    default JPopupMenu popupMenu() {
+        final JPopupMenu popupMenu = new JPopupMenu();
+        popupMenu.add(new MaridAction("Settings", "settings", e -> {
+            final Window window = getBlock().createWindow(SwingUtilities.windowForComponent(getSchemaEditor()));
+            window.addWindowListener(new WindowAction(we -> {
+                switch (we.getID()) {
+                    case WindowEvent.WINDOW_CLOSED:
+                        updateBlock();
+                        getSchemaEditor().validate();
+                        getSchemaEditor().repaint();
+                        break;
+                }
+            }));
+            window.setVisible(true);
+        }));
+        return popupMenu;
     }
 
     Block getBlock();

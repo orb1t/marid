@@ -75,7 +75,6 @@ public interface PrefSupport {
         }
     }
 
-    @SuppressWarnings("unchecked")
     default void putPref(String key, Object value, String... nodes) {
         try {
             PrefUtils.putPref(preferences(), key, value, nodes);

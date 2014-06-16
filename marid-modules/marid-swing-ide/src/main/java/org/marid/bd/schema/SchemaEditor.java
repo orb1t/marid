@@ -119,7 +119,11 @@ public class SchemaEditor extends JComponent implements DndTarget<Block> {
             final Component component = getComponent(i);
             final Point p = ptAdd(1, mp, -1, component.getLocation());
             if (component.contains(p)) {
-                if (e.getID() == MouseEvent.MOUSE_PRESSED && e.isControlDown()) {
+                if (component instanceof BlockComponent && e.isPopupTrigger()) {
+                    final JPopupMenu popupMenu = ((BlockComponent) component).popupMenu();
+                    popupMenu.show(this, e.getX(), e.getY());
+                    break;
+                } else if (e.getID() == MouseEvent.MOUSE_PRESSED && e.isControlDown()) {
                     prepareMove(component, mp);
                     break;
                 }
