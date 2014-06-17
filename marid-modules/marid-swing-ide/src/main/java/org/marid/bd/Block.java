@@ -37,24 +37,22 @@ import java.util.function.Supplier;
  */
 public abstract class Block implements Named, Serializable, DndObject {
 
-    protected final Map<Class<?>, List<BlockEventListener>> listeners = new IdentityHashMap<>();
+    protected final Map<Object, Set<BlockEventListener>> listeners = new WeakHashMap<>();
 
-    public <T extends BlockEvent, L extends BlockEventListener<T>> void addEventListener(Class<L> type, L listener) {
-        listeners.computeIfAbsent(type, t -> new ArrayList<>()).add(listener);
+    public void addEventListener(Object source, BlockEventListener listener) {
+        listeners.computeIfAbsent(source, o -> new HashSet<>()).add(listener);
     }
 
-    public <T extends BlockEvent, L extends BlockEventListener<T>> void removeEventListener(Class<L> type, L listener) {
-        listeners.computeIfAbsent(type, t -> new ArrayList<>()).remove(listener);
-        listeners.computeIfPresent(type, (t, l) -> l.isEmpty() ? null : l);
+    public void removeListener(Object source, BlockEventListener listener) {
+        listeners.computeIfAbsent(source, o -> new HashSet<>()).remove(listener);
     }
 
-    public void removeEventListeners(Class<? extends BlockEventListener<?>> type) {
-        listeners.remove(type);
+    public void removeEventListeners(Object source) {
+        listeners.remove(source);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends BlockEvent, L extends BlockEventListener<T>> void fireEvent(Class<L> type, T event) {
-        listeners.getOrDefault(type, Collections.emptyList()).forEach(l -> l.listen(event));
+    public <L extends BlockEventListener> void fireEvent(Class<L> t, Consumer<L> consumer) {
+        listeners.values().forEach(ls -> ls.stream().filter(t::isInstance).forEach(l -> consumer.accept(t.cast(l))));
     }
 
     public abstract BlockComponent createComponent();
@@ -168,33 +166,5 @@ public abstract class Block implements Named, Serializable, DndObject {
         public T get() {
             return supplier.get();
         }
-    }
-
-    public abstract class BlockEvent extends EventObject {
-
-        public BlockEvent() {
-            super(Block.this);
-        }
-
-        @Override
-        public Block getSource() {
-            return (Block) super.getSource();
-        }
-    }
-
-    public class PropertyChangeEvent<T> extends BlockEvent {
-
-        public final T oldValue;
-        public final T newValue;
-
-        public PropertyChangeEvent(T oldValue, T newValue) {
-            this.oldValue = oldValue;
-            this.newValue = newValue;
-        }
-    }
-
-    public interface BlockEventListener<T extends BlockEvent> extends EventListener {
-
-        void listen(T blockEvent);
     }
 }

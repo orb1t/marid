@@ -16,23 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
+package org.marid.bd.schema;
+
+import org.marid.bd.Block;
+import org.marid.bd.BlockLink;
+import org.marid.bd.NamedBlockEventListener;
 
 /**
- * @author Dmitry Ovchinnikov.
- */
-public abstract class NamedBlock extends Block {
+* @author Dmitry Ovchinnikov
+*/
+public interface SchemaListener extends NamedBlockEventListener {
 
-    protected String name;
+    void addedBlock(Block block);
 
-    @Override
-    public String getName() {
-        return name;
-    }
+    void removedBlock(Block block);
 
-    public void setName(String name) {
-        final String oldValue = this.name;
-        this.name = name;
-        fireEvent(NamedBlockEventListener.class, l -> l.nameChanged(oldValue, name));
-    }
+    void addedLink(BlockLink link);
+
+    void removedLink(BlockLink link);
 }

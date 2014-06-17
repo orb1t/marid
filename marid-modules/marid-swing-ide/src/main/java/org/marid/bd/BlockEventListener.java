@@ -18,21 +18,11 @@
 
 package org.marid.bd;
 
+import java.util.EventListener;
+
 /**
- * @author Dmitry Ovchinnikov.
- */
-public abstract class NamedBlock extends Block {
+* @author Dmitry Ovchinnikov
+*/
+public interface BlockEventListener extends EventListener {
 
-    protected String name;
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        final String oldValue = this.name;
-        this.name = name;
-        fireEvent(NamedBlockEventListener.class, l -> l.nameChanged(oldValue, name));
-    }
 }

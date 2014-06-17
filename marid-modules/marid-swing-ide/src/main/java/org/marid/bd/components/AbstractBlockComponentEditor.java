@@ -20,6 +20,7 @@ package org.marid.bd.components;
 
 import org.marid.bd.Block;
 import org.marid.l10n.L10n;
+import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.GridBags;
 import org.marid.swing.MaridAction;
@@ -38,7 +39,7 @@ import static javax.swing.KeyStroke.getKeyStroke;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class AbstractBlockComponentEditor<B extends Block> extends JDialog implements PrefSupport {
+public class AbstractBlockComponentEditor<B extends Block> extends JDialog implements PrefSupport, LogSupport {
 
     protected final B block;
     protected final JTabbedPane tabbedPane = new JTabbedPane();
@@ -54,8 +55,8 @@ public class AbstractBlockComponentEditor<B extends Block> extends JDialog imple
     protected void afterInit() {
         tabPaneMap.values().forEach(TabPane::finish);
         final JPanel buttonPanel = new JPanel(new BorderLayout());
-        final JButton okButton = new JButton(new MaridAction("Submit", "ok.png", this::submit));
-        final JButton cancelButton = new JButton(new MaridAction("Cancel", "cancel.png", this::reject));
+        final JButton okButton = new JButton(new MaridAction("Submit", "ok", this::submit));
+        final JButton cancelButton = new JButton(new MaridAction("Cancel", "cancel", this::reject));
         buttonPanel.add(cancelButton, BorderLayout.WEST);
         buttonPanel.add(okButton, BorderLayout.EAST);
         add(buttonPanel, BorderLayout.SOUTH);
@@ -86,6 +87,8 @@ public class AbstractBlockComponentEditor<B extends Block> extends JDialog imple
     protected void submit(Action action, ActionEvent actionEvent) {
         try {
             onSubmit(action, actionEvent);
+        } catch (Exception x) {
+            warning("Submit error", x);
         } finally {
             dispose();
         }
@@ -94,15 +97,17 @@ public class AbstractBlockComponentEditor<B extends Block> extends JDialog imple
     protected void reject(Action action, ActionEvent actionEvent) {
         try {
             onReject(action, actionEvent);
+        } catch (Exception x) {
+            warning("Reject error", x);
         } finally {
             dispose();
         }
     }
 
-    protected void onSubmit(Action action, ActionEvent actionEvent) {
+    protected void onSubmit(Action action, ActionEvent actionEvent) throws Exception {
     }
 
-    protected void onReject(Action action, ActionEvent actionEvent) {
+    protected void onReject(Action action, ActionEvent actionEvent) throws Exception {
     }
 
     protected static class TabPane extends JPanel {

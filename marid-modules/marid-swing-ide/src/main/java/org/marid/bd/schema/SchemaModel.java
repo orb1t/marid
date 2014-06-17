@@ -58,10 +58,7 @@ public class SchemaModel {
     }
 
     public void addBlockLink(BlockComponent.Output output, BlockComponent.Input input) {
-        final Schema.AddBlockLinkListener addListener = e -> blockLinkMap.put(e.link, new BlockLinkLayoutInfo());
-        schema.addEventListener(Schema.AddBlockLinkListener.class, addListener);
-        schema.addBlockLink(output.getOutput(), input.getInput());
-        schema.removeEventListener(Schema.AddBlockLinkListener.class, addListener);
+        schema.addBlockLink(new BlockLink(output.getOutput(), input.getInput()));
     }
 
     public void removeBlockLink(BlockLink blockLink) {

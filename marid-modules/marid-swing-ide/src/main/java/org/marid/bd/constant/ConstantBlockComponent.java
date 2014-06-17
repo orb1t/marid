@@ -18,9 +18,9 @@
 
 package org.marid.bd.constant;
 
+import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
-import org.marid.bd.NamedBlock;
 import org.marid.bd.components.DefaultBlockComponentBorder;
 
 import javax.swing.*;
@@ -32,18 +32,18 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ConstantBlockComponent extends JPanel implements BlockComponent {
+public class ConstantBlockComponent extends JPanel implements BlockComponent, ConstantBlock.ConstantBlockListener {
 
     protected final ConstantBlock constantBlock;
     protected final ConstantBlockComponentOutput output;
-    protected final NamedBlock.ChangeNameListener changeNameListener;
+    protected final JLabel valueLabel;
 
     protected ConstantBlockComponent(ConstantBlock constantBlock) {
         super(new BorderLayout());
         this.constantBlock = constantBlock;
-        output = new ConstantBlockComponentOutput();
-        changeNameListener = e -> output.setText(e.newValue);
-        add(output);
+        add(output = new ConstantBlockComponentOutput());
+        add(valueLabel = new JLabel(String.valueOf(constantBlock.getValue().getValue())), BorderLayout.NORTH);
+        valueLabel.setHorizontalAlignment(SwingConstants.CENTER);
         setOpaque(false);
         setBorder(new DefaultBlockComponentBorder());
         enableEvents(HierarchyEvent.HIERARCHY_EVENT_MASK);
@@ -52,14 +52,12 @@ public class ConstantBlockComponent extends JPanel implements BlockComponent {
     @Override
     protected void processHierarchyEvent(HierarchyEvent e) {
         super.processHierarchyEvent(e);
-        switch (e.getID()) {
-            case HierarchyEvent.HIERARCHY_CHANGED:
-                if (isShowing()) {
-                    constantBlock.addEventListener(NamedBlock.ChangeNameListener.class, changeNameListener);
-                } else {
-                    constantBlock.removeEventListener(NamedBlock.ChangeNameListener.class, changeNameListener);
-                }
-                break;
+        if (e.getID() == HierarchyEvent.HIERARCHY_CHANGED) {
+            if (e.getChangedParent() != null) {
+                constantBlock.addEventListener(this, this);
+            } else {
+                constantBlock.removeEventListeners(this);
+            }
         }
     }
 
@@ -76,6 +74,16 @@ public class ConstantBlockComponent extends JPanel implements BlockComponent {
     @Override
     public List<Output> getOutputs() {
         return Collections.singletonList(output);
+    }
+
+    @Override
+    public void changedValue(ConstantExpression oldValue, ConstantExpression newValue) {
+        valueLabel.setText(String.valueOf(newValue.getValue()));
+    }
+
+    @Override
+    public void nameChanged(String oldName, String newName) {
+        output.setText(newName);
     }
 
     protected class ConstantBlockComponentOutput extends JToggleButton implements Output {

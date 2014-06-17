@@ -55,30 +55,29 @@ public class Schema extends NamedBlock {
         return links;
     }
 
-    public void addBlockLink(Block.Output output, Block.Input input) {
-        if (links.stream().noneMatch(l -> l.matches(output, input))) {
-            final BlockLink blockLink = new BlockLink(output, input);
-            if (links.add(blockLink)) {
-                fireEvent(AddBlockLinkListener.class, new AddBlockLinkEvent(blockLink));
+    public void addBlockLink(BlockLink link) {
+        if (links.stream().noneMatch(l -> l.matches(link.getOutput(), link.getInput()))) {
+            if (links.add(link)) {
+                fireEvent(SchemaListener.class, l -> l.addedLink(link));
             }
         }
     }
 
     public void removeBlockLink(BlockLink link) {
         if (links.remove(link)) {
-            fireEvent(RemoveBlockLinkListener.class, new RemoveBlockLinkEvent(link));
+            fireEvent(SchemaListener.class, l -> l.removedLink(link));
         }
     }
     
     public void addBlock(Block block) {
         if (blocks.add(block)) {
-            fireEvent(AddBlockListener.class, new AddBlockEvent(block));
+            fireEvent(SchemaListener.class, l -> l.addedBlock(block));
         }
     }
 
     public void removeBlock(Block block) {
         if (blocks.remove(block)) {
-            fireEvent(RemoveBlockListener.class, new RemoveBlockEvent(block));
+            fireEvent(SchemaListener.class, l -> l.removedBlock(block));
         }
     }
 
@@ -100,73 +99,5 @@ public class Schema extends NamedBlock {
     @Override
     public List<Output<?>> getOutputs() {
         return Collections.emptyList();
-    }
-
-    public class AddBlockEvent extends BlockEvent {
-
-        public final Block block;
-
-        public AddBlockEvent(Block block) {
-            this.block = block;
-        }
-
-        @Override
-        public Schema getSource() {
-            return (Schema) super.getSource();
-        }
-    }
-
-    public class RemoveBlockEvent extends BlockEvent {
-
-        public final Block block;
-
-        public RemoveBlockEvent(Block block) {
-            this.block = block;
-        }
-
-        @Override
-        public Schema getSource() {
-            return (Schema) super.getSource();
-        }
-    }
-
-    public class AddBlockLinkEvent extends BlockEvent {
-
-        public final BlockLink link;
-
-        public AddBlockLinkEvent(BlockLink link) {
-            this.link = link;
-        }
-
-        @Override
-        public Schema getSource() {
-            return (Schema) super.getSource();
-        }
-    }
-
-    public class RemoveBlockLinkEvent extends BlockEvent {
-
-        public final BlockLink link;
-
-        public RemoveBlockLinkEvent(BlockLink link) {
-            this.link = link;
-        }
-
-        @Override
-        public Schema getSource() {
-            return (Schema) super.getSource();
-        }
-    }
-
-    public interface AddBlockListener extends BlockEventListener<AddBlockEvent> {
-    }
-
-    public interface RemoveBlockListener extends BlockEventListener<RemoveBlockEvent> {
-    }
-
-    public interface AddBlockLinkListener extends BlockEventListener<AddBlockLinkEvent> {
-    }
-
-    public interface RemoveBlockLinkListener extends BlockEventListener<RemoveBlockLinkEvent> {
     }
 }

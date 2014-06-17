@@ -18,17 +18,46 @@
 
 package org.marid.bd.constant;
 
+import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.marid.bd.components.NamedBlockComponentEditor;
+import org.marid.groovy.GroovyRuntime;
+import org.marid.logging.LogSupport;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Vector;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ConstantBlockEditor extends NamedBlockComponentEditor<ConstantBlock> {
+public class ConstantBlockEditor extends NamedBlockComponentEditor<ConstantBlock> implements LogSupport {
+
+    protected final JComboBox<String> valueCombo;
 
     public ConstantBlockEditor(Window window, ConstantBlock constantBlock) {
         super(window, constantBlock);
+        tabPane("Common").addLine("Value", valueCombo = new JComboBox<>(getExpressions()));
+        valueCombo.setEditable(true);
         afterInit();
+    }
+
+    @Override
+    protected void onSubmit(Action action, ActionEvent actionEvent) throws Exception {
+        final Object value = GroovyRuntime.SHELL.evaluate(valueCombo.getSelectedItem().toString(), "expt.groovy");
+        block.setValue((ConstantExpression) value);
+    }
+
+    private static Vector<String> getExpressions() {
+        final Vector<String> vector = new Vector<>();
+        final String cexpr = ConstantExpression.class.getCanonicalName();
+        for (final Field field : ConstantExpression.class.getDeclaredFields()) {
+            if (Modifier.isStatic(field.getModifiers()) && field.getType() == ConstantExpression.class) {
+                vector.add(String.format("%s.%s", cexpr, field.getName()));
+            }
+        }
+        return vector;
     }
 }
