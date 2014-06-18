@@ -18,12 +18,12 @@
 
 package org.marid.bd.constant;
 
-import org.marid.bd.NamedBlockEventListener;
+import org.marid.bd.NamedBlockListener;
 
 /**
 * @author Dmitry Ovchinnikov
 */
-public interface ConstantBlockListener extends NamedBlockEventListener {
+public interface ConstantBlockListener extends NamedBlockListener {
 
     void changedValue(String oldValue, String newValue);
 }

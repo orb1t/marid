@@ -20,6 +20,7 @@ package org.marid.bd;
 
 import org.marid.beans.MaridBeans;
 import org.marid.dyn.TypeCaster;
+import org.marid.functions.Changer;
 import org.marid.itf.Named;
 import org.marid.swing.dnd.DndObject;
 
@@ -40,13 +41,13 @@ import static org.marid.groovy.GroovyRuntime.SHELL;
  */
 public abstract class Block implements Named, Serializable, DndObject {
 
-    protected final Map<Object, Set<BlockEventListener>> listeners = new WeakHashMap<>();
+    protected final Map<Object, Set<BlockListener>> listeners = new WeakHashMap<>();
 
-    public void addEventListener(Object source, BlockEventListener listener) {
+    public void addEventListener(Object source, BlockListener listener) {
         listeners.computeIfAbsent(source, o -> new HashSet<>()).add(listener);
     }
 
-    public void removeListener(Object source, BlockEventListener listener) {
+    public void removeListener(Object source, BlockListener listener) {
         listeners.computeIfAbsent(source, o -> new HashSet<>()).remove(listener);
     }
 
@@ -54,8 +55,18 @@ public abstract class Block implements Named, Serializable, DndObject {
         listeners.remove(source);
     }
 
-    public <L extends BlockEventListener> void fireEvent(Class<L> t, Consumer<L> consumer) {
+    public <L extends BlockListener> void fireEvent(Class<L> t, Consumer<L> consumer) {
         listeners.values().forEach(ls -> ls.stream().filter(t::isInstance).forEach(l -> consumer.accept(t.cast(l))));
+    }
+
+    public <L extends BlockListener, T> void fire(Class<L> t, Supplier<T> s, Consumer<T> c, T nv, Changer<L, T> es) {
+        listeners.values().forEach(ls -> ls.stream().filter(t::isInstance).forEach(l -> {
+            final T old = s.get();
+            if (!Objects.equals(old, nv)) {
+                c.accept(nv);
+                es.accept(t.cast(l), old, nv);
+            }
+        }));
     }
 
     public abstract BlockComponent createComponent();

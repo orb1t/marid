@@ -20,12 +20,12 @@ package org.marid.bd.schema;
 
 import org.marid.bd.Block;
 import org.marid.bd.BlockLink;
-import org.marid.bd.NamedBlockEventListener;
+import org.marid.bd.NamedBlockListener;
 
 /**
 * @author Dmitry Ovchinnikov
 */
-public interface SchemaListener extends NamedBlockEventListener {
+public interface SchemaListener extends NamedBlockListener {
 
     void addedBlock(Block block);
 

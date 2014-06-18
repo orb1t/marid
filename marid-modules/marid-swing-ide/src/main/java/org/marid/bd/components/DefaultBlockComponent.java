@@ -20,7 +20,7 @@ package org.marid.bd.components;
 
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
-import org.marid.bd.BlockEventListener;
+import org.marid.bd.BlockListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -44,9 +44,9 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
     @Override
     protected void processHierarchyEvent(HierarchyEvent e) {
         super.processHierarchyEvent(e);
-        if (this instanceof BlockEventListener && e.getID() == HierarchyEvent.HIERARCHY_CHANGED) {
+        if (this instanceof BlockListener && e.getID() == HierarchyEvent.HIERARCHY_CHANGED) {
             if (e.getChangedParent() != null) {
-                block.addEventListener(this, (BlockEventListener) this);
+                block.addEventListener(this, (BlockListener) this);
             } else {
                 block.removeEventListeners(this);
             }

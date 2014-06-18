@@ -16,13 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
+package org.marid.bd.binary;
 
-import java.util.EventListener;
+import org.marid.bd.components.StandardBlockComponent;
+
+import javax.swing.*;
 
 /**
-* @author Dmitry Ovchinnikov
-*/
-public interface BlockEventListener extends EventListener {
+ * @author Dmitry Ovchinnikov
+ */
+public class BinExpComponent extends StandardBlockComponent<BinExpBlock> implements BinExpListener {
 
+    protected final JLabel tokenLabel;
+
+    public BinExpComponent(BinExpBlock block) {
+        super(block);
+        add(tokenLabel = new JLabel(block.getTokenType().icon));
+    }
+
+    @Override
+    public void changedTokenType(BinExpBlock.TokenType oldType, BinExpBlock.TokenType newType) {
+        tokenLabel.setIcon(newType.icon);
+    }
 }

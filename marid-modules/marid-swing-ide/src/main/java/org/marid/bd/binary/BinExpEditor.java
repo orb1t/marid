@@ -19,15 +19,29 @@
 package org.marid.bd.binary;
 
 import org.marid.bd.components.AbstractBlockComponentEditor;
+import org.marid.swing.input.EnumInputControl;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+
+import static org.marid.bd.binary.BinExpBlock.TokenType;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BinaryExpressionEditor extends AbstractBlockComponentEditor<BinaryExpressionBlock> {
+public class BinExpEditor extends AbstractBlockComponentEditor<BinExpBlock> {
 
-    public BinaryExpressionEditor(Window window, BinaryExpressionBlock block) {
+    protected final EnumInputControl<TokenType> tokenTypeBox = new EnumInputControl<>(TokenType::values);
+
+    public BinExpEditor(Window window, BinExpBlock block) {
         super(window, block);
+        tabPane("Common").addLine("Token type", tokenTypeBox);
+        afterInit();
+    }
+
+    @Override
+    protected void onSubmit(Action action, ActionEvent actionEvent) throws Exception {
+        block.setTokenType(tokenTypeBox.getInputValue());
     }
 }

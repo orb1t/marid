@@ -16,20 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
-
-import org.marid.bd.binary.BinExpBlock;
-import org.marid.bd.constant.ConstantBlock;
-
-import java.util.function.BiConsumer;
+package org.marid.functions;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DefaultBlockProvider implements BlockProvider {
-    @Override
-    public void visit(BiConsumer<String, Block> blockConsumer) {
-        blockConsumer.accept("Expressions", new ConstantBlock());
-        blockConsumer.accept("Expressions", new BinExpBlock());
-    }
+@FunctionalInterface
+public interface TriConsumer<A1, A2, A3> {
+
+    void accept(A1 arg1, A2 arg2, A3 arg3);
 }

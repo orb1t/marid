@@ -16,20 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
+package org.marid.concurrent;
 
-import org.marid.bd.binary.BinExpBlock;
-import org.marid.bd.constant.ConstantBlock;
-
-import java.util.function.BiConsumer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DefaultBlockProvider implements BlockProvider {
-    @Override
-    public void visit(BiConsumer<String, Block> blockConsumer) {
-        blockConsumer.accept("Expressions", new ConstantBlock());
-        blockConsumer.accept("Expressions", new BinExpBlock());
+public class AtomicUtils {
+
+    public static void processDirty(AtomicBoolean dirtyFlag, Runnable action) {
+        if (dirtyFlag.compareAndSet(true, false)) {
+            action.run();
+        }
     }
 }

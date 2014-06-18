@@ -67,31 +67,35 @@ public class MaridTransferHandler extends TransferHandler implements LogSupport 
             final DndSource dndSource = (DndSource) c;
             final DataFlavor[] dataFlavors = dndSource.getSourceDataFlavors();
             final DndObject data = dndSource.getDndObject();
-            return new Transferable() {
-                @Override
-                public DataFlavor[] getTransferDataFlavors() {
-                    return dataFlavors;
-                }
+            if (data == null) {
+                return null;
+            } else {
+                return new Transferable() {
+                    @Override
+                    public DataFlavor[] getTransferDataFlavors() {
+                        return dataFlavors;
+                    }
 
-                @Override
-                public boolean isDataFlavorSupported(DataFlavor flavor) {
-                    for (final DataFlavor df : dataFlavors) {
-                        if (df.match(flavor)) {
-                            return true;
+                    @Override
+                    public boolean isDataFlavorSupported(DataFlavor flavor) {
+                        for (final DataFlavor df : dataFlavors) {
+                            if (df.match(flavor)) {
+                                return true;
+                            }
                         }
+                        return false;
                     }
-                    return false;
-                }
 
-                @SuppressWarnings("unchecked")
-                @Override
-                public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-                    if (!isDataFlavorSupported(flavor)) {
-                        throw new UnsupportedFlavorException(flavor);
+                    @SuppressWarnings("unchecked")
+                    @Override
+                    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+                        if (!isDataFlavorSupported(flavor)) {
+                            throw new UnsupportedFlavorException(flavor);
+                        }
+                        return dndSource.encodeDndSource(flavor, data);
                     }
-                    return dndSource.encodeDndSource(flavor, data);
-                }
-            };
+                };
+            }
         } else {
             return null;
         }

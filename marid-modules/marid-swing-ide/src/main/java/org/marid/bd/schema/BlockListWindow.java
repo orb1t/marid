@@ -84,7 +84,7 @@ public class BlockListWindow extends JDialog implements PrefSupport {
             } else if (v instanceof Block) {
                 final Block block = (Block) v;
                 cr.setText(block.getName());
-                cr.setIcon(block.getVisualRepresentation());
+                cr.setIcon(block.getVisualRepresentation(16, 16));
             }
             return cr;
         }

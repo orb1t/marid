@@ -75,9 +75,7 @@ public class ConstantBlock extends NamedBlock {
         return value;
     }
 
-    public void setValue(String value) {
-        final String old = this.value;
-        this.value = value;
-        fireEvent(ConstantBlockListener.class, l -> l.changedValue(old, value));
+    public void setValue(String newValue) {
+        fire(ConstantBlockListener.class, () -> value, v -> value = v, newValue, ConstantBlockListener::changedValue);
     }
 }

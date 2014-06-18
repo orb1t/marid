@@ -37,6 +37,8 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
         super("Schema");
         enableEvents(AWTEvent.COMPONENT_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
         add(schemaEditor);
+        setBackground(SystemColor.controlLtHighlight);
+        getContentPane().setBackground(getBackground());
         pack();
     }
 
@@ -62,7 +64,11 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
         }
         super.processWindowEvent(e);
         switch (e.getID()) {
+            case WindowEvent.WINDOW_OPENED:
+                schemaEditor.start();
+                break;
             case WindowEvent.WINDOW_CLOSED:
+                schemaEditor.stop();
                 blockListWindow.dispose();
                 break;
         }

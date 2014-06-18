@@ -36,33 +36,32 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BinaryExpressionBlock extends Block {
+public class BinExpBlock extends Block {
 
-    protected Expression leftExpression;
-    protected Expression rightExpression;
+    protected Expression left;
+    protected Expression right;
     protected TokenType tokenType;
-    protected final In<Expression> leftInput = new In<>("left", Expression.class, e -> leftExpression = e);
-    protected final In<Expression> rightInput = new In<>("right", Expression.class, e -> rightExpression = e);
-    protected final Out<Expression> output = new Out<>("result", Expression.class,
-            () -> new BinaryExpression(leftExpression, tokenType.token, rightExpression));
+    protected final In<Expression> leftInput = new In<>("left", Expression.class, e -> left = e);
+    protected final In<Expression> rightInput = new In<>("right", Expression.class, e -> right = e);
+    protected final Out<Expression> output = new Out<>("result", Expression.class, this::binaryExpression);
 
-    public BinaryExpressionBlock() {
+    public BinExpBlock() {
         this(TokenType.PLUS);
     }
 
     @ConstructorProperties({"tokenType"})
-    public BinaryExpressionBlock(TokenType tokenType) {
+    public BinExpBlock(TokenType tokenType) {
         this.tokenType = tokenType;
     }
 
     @Override
     public BlockComponent createComponent() {
-        return new BinaryExpressionBlockComponent(this);
+        return new BinExpComponent(this);
     }
 
     @Override
-    public BinaryExpressionEditor createWindow(Window parent) {
-        return new BinaryExpressionEditor(parent, this);
+    public BinExpEditor createWindow(Window parent) {
+        return new BinExpEditor(parent, this);
     }
 
     @Override
@@ -76,12 +75,25 @@ public class BinaryExpressionBlock extends Block {
     }
 
     @Override
+    public ImageIcon getVisualRepresentation() {
+        return Images.getIcon("block/two.png");
+    }
+
+    @Override
     public String getName() {
         return "Binary Expression";
     }
 
     public TokenType getTokenType() {
         return tokenType;
+    }
+
+    public void setTokenType(TokenType token) {
+        fire(BinExpListener.class, () -> tokenType, t -> tokenType = t, token, BinExpListener::changedTokenType);
+    }
+
+    public BinaryExpression binaryExpression() {
+        return new BinaryExpression(left, tokenType.token, right);
     }
 
     public static enum TokenType {

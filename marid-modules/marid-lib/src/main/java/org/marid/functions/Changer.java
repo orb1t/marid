@@ -16,21 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.binary;
-
-import org.marid.bd.components.StandardBlockComponent;
-
-import javax.swing.*;
+package org.marid.functions;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BinaryExpressionBlockComponent extends StandardBlockComponent<BinaryExpressionBlock> {
-
-    protected final JLabel tokenLabel;
-
-    public BinaryExpressionBlockComponent(BinaryExpressionBlock block) {
-        super(block);
-        add(tokenLabel = new JLabel(block.getTokenType().icon));
-    }
+@FunctionalInterface
+public interface Changer<S, A> extends TriConsumer<S, A, A> {
 }

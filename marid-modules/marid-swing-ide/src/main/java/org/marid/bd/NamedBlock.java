@@ -30,9 +30,7 @@ public abstract class NamedBlock extends Block {
         return name;
     }
 
-    public void setName(String name) {
-        final String oldValue = this.name;
-        this.name = name;
-        fireEvent(NamedBlockEventListener.class, l -> l.nameChanged(oldValue, name));
+    public void setName(String newName) {
+        fire(NamedBlockListener.class, () -> name, n -> name = n, newName, NamedBlockListener::nameChanged);
     }
 }

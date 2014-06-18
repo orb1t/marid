@@ -21,8 +21,10 @@ package org.marid.bd.schema;
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.BlockLink;
+import org.marid.concurrent.MaridTimerTask;
 import org.marid.swing.InputMaskType;
 import org.marid.swing.SwingUtil;
+import org.marid.swing.dnd.DndSource;
 import org.marid.swing.dnd.DndTarget;
 import org.marid.swing.dnd.MaridTransferHandler;
 import org.marid.swing.geom.ShapeUtils;
@@ -32,20 +34,25 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
+import java.util.Timer;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import static java.awt.AWTEvent.*;
+import static java.awt.AWTEvent.MOUSE_EVENT_MASK;
+import static java.awt.AWTEvent.MOUSE_MOTION_EVENT_MASK;
+import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
+import static java.awt.EventQueue.invokeLater;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.event.MouseEvent.MOUSE_ENTERED;
-import static java.awt.event.MouseEvent.MOUSE_EXITED;
+import static java.awt.event.MouseEvent.*;
+import static org.marid.concurrent.AtomicUtils.processDirty;
 import static org.marid.swing.geom.ShapeUtils.mouseEvent;
 import static org.marid.swing.geom.ShapeUtils.ptAdd;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SchemaEditor extends JComponent implements DndTarget<Block>, SchemaFrameConfiguration {
+public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSource<Block>, SchemaFrameConfiguration {
 
     protected final SchemaModel model;
     protected final AffineTransform transform = new AffineTransform();
@@ -60,18 +67,30 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, Schema
     private volatile InputMaskType panType = PAN.get();
     private volatile InputMaskType moveType = MOVE.get();
     private volatile InputMaskType dragType = DRAG.get();
+    private final AtomicBoolean dirty = new AtomicBoolean();
+    private final Timer timer = new Timer(true);
+    private Block draggingBlock;
 
     public SchemaEditor(SchemaModel model) {
         this.model = model;
         setFont(UIManager.getFont("Label.font"));
         setBackground(SystemColor.controlLtHighlight);
         setDoubleBuffered(true);
+        setOpaque(false);
         setTransferHandler(new MaridTransferHandler());
         setForeground(SystemColor.controlDkShadow);
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
         PAN.addConsumer(this, (o, n) -> panType = n);
         MOVE.addConsumer(this, (o, n) -> moveType = n);
         DRAG.addConsumer(this, (o, n) -> dragType = n);
+    }
+
+    public void start() {
+        timer.schedule(new MaridTimerTask(() -> processDirty(dirty, () -> invokeLater(super::repaint))), 40L, 40L);
+    }
+
+    public void stop() {
+        timer.cancel();
     }
 
     @Override
@@ -126,13 +145,19 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, Schema
             final Component component = getComponent(i);
             final Point p = ptAdd(1, mp, -1, component.getLocation());
             if (component.contains(p)) {
-                if (component instanceof BlockComponent && e.isPopupTrigger()) {
-                    final JPopupMenu popupMenu = ((BlockComponent) component).popupMenu();
-                    popupMenu.show(this, e.getX(), e.getY());
-                    break;
-                } else if (e.getID() == MouseEvent.MOUSE_PRESSED && moveType.isEnabled(e)) {
-                    prepareMove(component, mp);
-                    break;
+                if (component instanceof BlockComponent) {
+                    if (e.isPopupTrigger()) {
+                        final JPopupMenu popupMenu = ((BlockComponent) component).popupMenu();
+                        popupMenu.show(this, e.getX(), e.getY());
+                        break;
+                    } else if (e.getID() == MouseEvent.MOUSE_PRESSED && moveType.isEnabled(e)) {
+                        prepareMove(component, mp);
+                        break;
+                    } else if (e.getID() == MOUSE_DRAGGED && dragType.isEnabled(e)) {
+                        draggingBlock = ((BlockComponent) component).getBlock();
+                        getTransferHandler().exportAsDrag(this, e, DND_COPY);
+                        break;
+                    }
                 }
                 final Component s = ShapeUtils.findChild(component, p);
                 try {
@@ -163,8 +188,6 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, Schema
     protected void paintComponent(Graphics graphics) {
         final Graphics2D g = (Graphics2D) graphics;
         g.getClipBounds(clip);
-        g.setBackground(getBackground());
-        g.clearRect(clip.x, clip.y, clip.width, clip.height);
         g.transform(transform);
         final Stroke oldStroke = g.getStroke();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -179,6 +202,11 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, Schema
 
     @Override
     protected void paintChildren(Graphics g) {
+    }
+
+    @Override
+    public void repaint() {
+        dirty.set(true);
     }
 
     protected void prepareMove(Component component, Point point) {
@@ -213,5 +241,15 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, Schema
             warning("Unable to transform coordinates", x);
             return false;
         }
+    }
+
+    @Override
+    public int getDndActions() {
+        return DND_COPY;
+    }
+
+    @Override
+    public Block getDndObject() {
+        return draggingBlock;
     }
 }

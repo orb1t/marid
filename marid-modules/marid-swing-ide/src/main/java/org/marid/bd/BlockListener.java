@@ -18,18 +18,11 @@
 
 package org.marid.bd;
 
-import org.marid.bd.binary.BinExpBlock;
-import org.marid.bd.constant.ConstantBlock;
-
-import java.util.function.BiConsumer;
+import java.util.EventListener;
 
 /**
- * @author Dmitry Ovchinnikov
- */
-public class DefaultBlockProvider implements BlockProvider {
-    @Override
-    public void visit(BiConsumer<String, Block> blockConsumer) {
-        blockConsumer.accept("Expressions", new ConstantBlock());
-        blockConsumer.accept("Expressions", new BinExpBlock());
-    }
+* @author Dmitry Ovchinnikov
+*/
+public interface BlockListener extends EventListener {
+
 }

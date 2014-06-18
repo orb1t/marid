@@ -21,7 +21,7 @@ package org.marid.bd;
 /**
 * @author Dmitry Ovchinnikov
 */
-public interface NamedBlockEventListener extends BlockEventListener {
+public interface NamedBlockListener extends BlockListener {
 
     void nameChanged(String oldName, String newName);
 }
