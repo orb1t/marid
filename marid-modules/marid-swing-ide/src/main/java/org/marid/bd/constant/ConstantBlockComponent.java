@@ -18,52 +18,27 @@
 
 package org.marid.bd.constant;
 
-import org.codehaus.groovy.ast.expr.ConstantExpression;
-import org.marid.bd.Block;
-import org.marid.bd.BlockComponent;
-import org.marid.bd.components.DefaultBlockComponentBorder;
+import org.marid.bd.components.DefaultBlockComponent;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.HierarchyEvent;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ConstantBlockComponent extends JPanel implements BlockComponent, ConstantBlock.ConstantBlockListener {
+public class ConstantBlockComponent extends DefaultBlockComponent<ConstantBlock> implements ConstantBlockListener {
 
-    protected final ConstantBlock constantBlock;
     protected final ConstantBlockComponentOutput output;
-    protected final JLabel valueLabel;
+    protected final JLabel nameLabel;
 
     protected ConstantBlockComponent(ConstantBlock constantBlock) {
-        super(new BorderLayout());
-        this.constantBlock = constantBlock;
+        super(new BorderLayout(), constantBlock);
         add(output = new ConstantBlockComponentOutput());
-        add(valueLabel = new JLabel(String.valueOf(constantBlock.getValue().getValue())), BorderLayout.NORTH);
-        valueLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        setOpaque(false);
-        setBorder(new DefaultBlockComponentBorder());
-        enableEvents(HierarchyEvent.HIERARCHY_EVENT_MASK);
-    }
-
-    @Override
-    protected void processHierarchyEvent(HierarchyEvent e) {
-        super.processHierarchyEvent(e);
-        if (e.getID() == HierarchyEvent.HIERARCHY_CHANGED) {
-            if (e.getChangedParent() != null) {
-                constantBlock.addEventListener(this, this);
-            } else {
-                constantBlock.removeEventListeners(this);
-            }
-        }
-    }
-
-    @Override
-    public ConstantBlock getBlock() {
-        return constantBlock;
+        add(nameLabel = new JLabel(block.getName()), BorderLayout.NORTH);
+        nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        output.setToolTipText(block.getValue());
     }
 
     @Override
@@ -77,29 +52,19 @@ public class ConstantBlockComponent extends JPanel implements BlockComponent, Co
     }
 
     @Override
-    public void changedValue(ConstantExpression oldValue, ConstantExpression newValue) {
-        valueLabel.setText(String.valueOf(newValue.getValue()));
+    public void changedValue(String oldValue, String newValue) {
+        output.setToolTipText(newValue);
     }
 
     @Override
     public void nameChanged(String oldName, String newName) {
-        output.setText(newName);
+        nameLabel.setText(newName);
     }
 
-    protected class ConstantBlockComponentOutput extends JToggleButton implements Output {
+    protected class ConstantBlockComponentOutput extends DefaultOutput {
 
         public ConstantBlockComponentOutput() {
-            super(getBlock().getName());
-        }
-
-        @Override
-        public Block.Output<?> getOutput() {
-            return constantBlock.output;
-        }
-
-        @Override
-        public BlockComponent getBlockComponent() {
-            return ConstantBlockComponent.this;
+            super(block.output);
         }
     }
 }

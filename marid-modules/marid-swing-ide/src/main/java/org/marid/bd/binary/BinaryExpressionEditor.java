@@ -16,20 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
+package org.marid.bd.binary;
 
-import org.marid.bd.binary.BinaryExpressionBlock;
-import org.marid.bd.constant.ConstantBlock;
+import org.marid.bd.components.AbstractBlockComponentEditor;
 
-import java.util.function.BiConsumer;
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DefaultBlockProvider implements BlockProvider {
-    @Override
-    public void visit(BiConsumer<String, Block> blockConsumer) {
-        blockConsumer.accept("Expressions", new ConstantBlock());
-        blockConsumer.accept("Expressions", new BinaryExpressionBlock());
+public class BinaryExpressionEditor extends AbstractBlockComponentEditor<BinaryExpressionBlock> {
+
+    public BinaryExpressionEditor(Window window, BinaryExpressionBlock block) {
+        super(window, block);
     }
 }

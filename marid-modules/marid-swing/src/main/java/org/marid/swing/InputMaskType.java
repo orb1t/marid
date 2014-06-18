@@ -16,20 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
+package org.marid.swing;
 
-import org.marid.bd.binary.BinaryExpressionBlock;
-import org.marid.bd.constant.ConstantBlock;
-
-import java.util.function.BiConsumer;
+import java.awt.event.InputEvent;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DefaultBlockProvider implements BlockProvider {
-    @Override
-    public void visit(BiConsumer<String, Block> blockConsumer) {
-        blockConsumer.accept("Expressions", new ConstantBlock());
-        blockConsumer.accept("Expressions", new BinaryExpressionBlock());
+public enum InputMaskType {
+
+    ALT(InputEvent.ALT_MASK),
+    CONTROL(InputEvent.CTRL_MASK),
+    SHIFT(InputEvent.SHIFT_MASK),
+    ALT_GRAPH(InputEvent.ALT_GRAPH_MASK),
+    META(InputEvent.META_MASK);
+
+    private final int mask;
+
+    private InputMaskType(int mask) {
+        this.mask = mask;
+    }
+
+    public boolean isEnabled(InputEvent inputEvent) {
+        return (inputEvent.getModifiers() & mask) != 0;
     }
 }

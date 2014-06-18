@@ -20,7 +20,6 @@ package org.marid.bd.constant;
 
 import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.marid.bd.components.NamedBlockComponentEditor;
-import org.marid.groovy.GroovyRuntime;
 import org.marid.logging.LogSupport;
 
 import javax.swing.*;
@@ -41,13 +40,13 @@ public class ConstantBlockEditor extends NamedBlockComponentEditor<ConstantBlock
         super(window, constantBlock);
         tabPane("Common").addLine("Value", valueCombo = new JComboBox<>(getExpressions()));
         valueCombo.setEditable(true);
+        valueCombo.setSelectedItem(block.getValue());
         afterInit();
     }
 
     @Override
     protected void onSubmit(Action action, ActionEvent actionEvent) throws Exception {
-        final Object value = GroovyRuntime.SHELL.evaluate(valueCombo.getSelectedItem().toString(), "expt.groovy");
-        block.setValue((ConstantExpression) value);
+        block.setValue(valueCombo.getSelectedItem().toString());
     }
 
     private static Vector<String> getExpressions() {

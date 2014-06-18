@@ -21,6 +21,7 @@ package org.marid.bd.schema;
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.BlockLink;
+import org.marid.swing.InputMaskType;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.dnd.DndTarget;
 import org.marid.swing.dnd.MaridTransferHandler;
@@ -44,7 +45,7 @@ import static org.marid.swing.geom.ShapeUtils.ptAdd;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SchemaEditor extends JComponent implements DndTarget<Block> {
+public class SchemaEditor extends JComponent implements DndTarget<Block>, SchemaFrameConfiguration {
 
     protected final SchemaModel model;
     protected final AffineTransform transform = new AffineTransform();
@@ -56,6 +57,9 @@ public class SchemaEditor extends JComponent implements DndTarget<Block> {
     private BlockLink currentLink;
     private Point movingComponentPoint;
     private Point movingComponentLocation;
+    private volatile InputMaskType panType = PAN.get();
+    private volatile InputMaskType moveType = MOVE.get();
+    private volatile InputMaskType dragType = DRAG.get();
 
     public SchemaEditor(SchemaModel model) {
         this.model = model;
@@ -65,6 +69,9 @@ public class SchemaEditor extends JComponent implements DndTarget<Block> {
         setTransferHandler(new MaridTransferHandler());
         setForeground(SystemColor.controlDkShadow);
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
+        PAN.addConsumer(this, (o, n) -> panType = n);
+        MOVE.addConsumer(this, (o, n) -> moveType = n);
+        DRAG.addConsumer(this, (o, n) -> dragType = n);
     }
 
     @Override
@@ -88,13 +95,13 @@ public class SchemaEditor extends JComponent implements DndTarget<Block> {
     protected void processMouseMotionEvent(MouseEvent e) {
         switch (e.getID()) {
             case MouseEvent.MOUSE_DRAGGED:
-                if (e.isShiftDown()) {
+                if (panType.isEnabled(e)) {
                     final Point p = SwingUtil.transform(mouseTransform::inverseTransform, e.getPoint());
                     transform.setTransform(mouseTransform);
                     transform.translate(p.getX() - mousePoint.getX(), p.getY() - mousePoint.getY());
                     repaint();
                     return;
-                } else if (movingComponent != null && e.isControlDown()) {
+                } else if (movingComponent != null && moveType.isEnabled(e)) {
                     final Point mp = SwingUtil.transform(transform::inverseTransform, e.getPoint());
                     movingComponent.setLocation(ptAdd(1, movingComponentLocation, 1, mp, -1, movingComponentPoint));
                     repaint();
@@ -123,7 +130,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block> {
                     final JPopupMenu popupMenu = ((BlockComponent) component).popupMenu();
                     popupMenu.show(this, e.getX(), e.getY());
                     break;
-                } else if (e.getID() == MouseEvent.MOUSE_PRESSED && e.isControlDown()) {
+                } else if (e.getID() == MouseEvent.MOUSE_PRESSED && moveType.isEnabled(e)) {
                     prepareMove(component, mp);
                     break;
                 }

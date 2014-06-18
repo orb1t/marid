@@ -19,6 +19,7 @@
 package org.marid.bd;
 
 import org.marid.beans.MaridBeans;
+import org.marid.dyn.TypeCaster;
 import org.marid.itf.Named;
 import org.marid.swing.dnd.DndObject;
 
@@ -31,6 +32,8 @@ import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static org.marid.groovy.GroovyRuntime.SHELL;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -151,6 +154,10 @@ public abstract class Block implements Named, Serializable, DndObject {
             this.name = name;
             this.type = type;
             this.supplier = supplier;
+        }
+
+        public Out(Class<T> type, String name, Supplier<String> supplier) {
+            this(name, type, () -> TypeCaster.getDefault().cast(type, SHELL.evaluate(supplier.get(), "expr.groovy")));
         }
 
         @Override

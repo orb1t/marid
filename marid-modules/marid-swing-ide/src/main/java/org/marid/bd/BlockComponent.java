@@ -52,6 +52,13 @@ public interface BlockComponent {
 
     void setVisible(boolean visible);
 
+    default void remove() {
+        final SchemaEditor schemaEditor = getSchemaEditor();
+        schemaEditor.remove(getComponent());
+        schemaEditor.validate();
+        schemaEditor.repaint();
+    }
+
     default SchemaEditor getSchemaEditor() {
         return (SchemaEditor) getComponent().getParent();
     }
@@ -76,6 +83,8 @@ public interface BlockComponent {
             }));
             window.setVisible(true);
         }));
+        popupMenu.addSeparator();
+        popupMenu.add(new MaridAction("Remove", "remove", e -> remove()));
         return popupMenu;
     }
 

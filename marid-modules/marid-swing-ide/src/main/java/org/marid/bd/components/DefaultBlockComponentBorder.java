@@ -29,7 +29,7 @@ import java.awt.*;
  */
 public class DefaultBlockComponentBorder extends AbstractBorder {
 
-    private static final Insets DEFAULT_INSETS = new Insets(0, 0, 0, 10);
+    private static final Insets DEFAULT_INSETS = new Insets(0, 10, 0, 10);
 
     @Override
     public void paintBorder(Component c, Graphics graphics, int x, int y, int width, int height) {

@@ -16,20 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
+package org.marid.bd.schema;
 
-import org.marid.bd.binary.BinaryExpressionBlock;
-import org.marid.bd.constant.ConstantBlock;
-
-import java.util.function.BiConsumer;
+import org.marid.swing.InputMaskType;
+import org.marid.swing.forms.Configuration;
+import org.marid.swing.forms.Input;
+import org.marid.swing.forms.Tab;
+import org.marid.swing.input.EnumInputControl;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DefaultBlockProvider implements BlockProvider {
-    @Override
-    public void visit(BiConsumer<String, Block> blockConsumer) {
-        blockConsumer.accept("Expressions", new ConstantBlock());
-        blockConsumer.accept("Expressions", new BinaryExpressionBlock());
-    }
+@Tab(node = "mouse")
+public interface SchemaFrameConfiguration extends Configuration {
+
+    @Input(tab = "mouse")
+    Pv<InputMaskType> PAN = new Pv<>(() -> new EnumInputControl<>(InputMaskType::values), () -> InputMaskType.SHIFT);
+
+    @Input(tab = "mouse")
+    Pv<InputMaskType> MOVE = new Pv<>(() -> new EnumInputControl<>(InputMaskType::values), () -> InputMaskType.ALT);
+
+    @Input(tab = "mouse")
+    Pv<InputMaskType> DRAG = new Pv<>(() -> new EnumInputControl<>(InputMaskType::values), () -> InputMaskType.CONTROL);
 }

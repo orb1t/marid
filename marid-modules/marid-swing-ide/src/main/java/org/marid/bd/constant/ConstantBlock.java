@@ -21,7 +21,6 @@ package org.marid.bd.constant;
 import images.Images;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.marid.bd.NamedBlock;
-import org.marid.bd.NamedBlockEventListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,15 +33,15 @@ import java.util.List;
  */
 public class ConstantBlock extends NamedBlock {
 
-    protected ConstantExpression value = ConstantExpression.NULL;
-    protected final Out<ConstantExpression> output = new Out<>("out", ConstantExpression.class, () -> value);
+    protected String value = ConstantExpression.class.getCanonicalName() + ".EMPTY_EXPRESSION";
+    protected final Out<ConstantExpression> output = new Out<>(ConstantExpression.class, "out", () -> value);
 
     public ConstantBlock() {
         name = "Constant block";
     }
 
     @ConstructorProperties({"value"})
-    public ConstantBlock(ConstantExpression value) {
+    public ConstantBlock(String value) {
         this();
         this.value = value;
     }
@@ -72,18 +71,13 @@ public class ConstantBlock extends NamedBlock {
         return Collections.singletonList(output);
     }
 
-    public ConstantExpression getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(ConstantExpression value) {
-        final ConstantExpression old = this.value;
+    public void setValue(String value) {
+        final String old = this.value;
         this.value = value;
         fireEvent(ConstantBlockListener.class, l -> l.changedValue(old, value));
-    }
-
-    public interface ConstantBlockListener extends NamedBlockEventListener {
-
-        void changedValue(ConstantExpression oldValue, ConstantExpression newValue);
     }
 }

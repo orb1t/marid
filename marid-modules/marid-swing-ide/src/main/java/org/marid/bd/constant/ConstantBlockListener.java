@@ -16,20 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
+package org.marid.bd.constant;
 
-import org.marid.bd.binary.BinaryExpressionBlock;
-import org.marid.bd.constant.ConstantBlock;
-
-import java.util.function.BiConsumer;
+import org.marid.bd.NamedBlockEventListener;
 
 /**
- * @author Dmitry Ovchinnikov
- */
-public class DefaultBlockProvider implements BlockProvider {
-    @Override
-    public void visit(BiConsumer<String, Block> blockConsumer) {
-        blockConsumer.accept("Expressions", new ConstantBlock());
-        blockConsumer.accept("Expressions", new BinaryExpressionBlock());
-    }
+* @author Dmitry Ovchinnikov
+*/
+public interface ConstantBlockListener extends NamedBlockEventListener {
+
+    void changedValue(String oldValue, String newValue);
 }

@@ -16,20 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
+package org.marid.bd.binary;
 
-import org.marid.bd.binary.BinaryExpressionBlock;
-import org.marid.bd.constant.ConstantBlock;
+import org.marid.bd.components.StandardBlockComponent;
 
-import java.util.function.BiConsumer;
+import javax.swing.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DefaultBlockProvider implements BlockProvider {
-    @Override
-    public void visit(BiConsumer<String, Block> blockConsumer) {
-        blockConsumer.accept("Expressions", new ConstantBlock());
-        blockConsumer.accept("Expressions", new BinaryExpressionBlock());
+public class BinaryExpressionBlockComponent extends StandardBlockComponent<BinaryExpressionBlock> {
+
+    protected final JLabel tokenLabel;
+
+    public BinaryExpressionBlockComponent(BinaryExpressionBlock block) {
+        super(block);
+        add(tokenLabel = new JLabel(block.getTokenType().icon));
     }
 }

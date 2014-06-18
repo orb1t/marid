@@ -28,7 +28,7 @@ import java.awt.event.WindowEvent;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SchemaFrame extends AbstractFrame {
+public class SchemaFrame extends AbstractFrame implements SchemaFrameConfiguration {
 
     protected final BlockListWindow blockListWindow = new BlockListWindow(this);
     protected final SchemaEditor schemaEditor = new SchemaEditor(new SchemaModel());
