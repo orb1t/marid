@@ -28,5 +28,6 @@ public class DefaultBlockGroupProvider implements BlockGroupProvider {
     public void visit(BiConsumer<String, String> groupConsumer) {
         groupConsumer.accept("Expressions", null);
         groupConsumer.accept("Operators", null);
+        groupConsumer.accept("Statements", null);
     }
 }

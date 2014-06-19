@@ -16,26 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.binary;
+package org.marid.bd.expressions.binary;
 
-import org.marid.bd.components.StandardBlockComponent;
+import org.marid.bd.components.AbstractBlockComponentEditor;
+import org.marid.swing.input.EnumInputControl;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+
+import static org.marid.bd.expressions.binary.BinExpBlock.TokenType;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BinExpComponent extends StandardBlockComponent<BinExpBlock> implements BinExpListener {
+public class BinExpEditor extends AbstractBlockComponentEditor<BinExpBlock> {
 
-    protected final JLabel tokenLabel;
+    protected final EnumInputControl<TokenType> tokenTypeBox = new EnumInputControl<>(TokenType::values);
 
-    public BinExpComponent(BinExpBlock block) {
-        super(block);
-        add(tokenLabel = new JLabel(block.getTokenType().icon));
+    public BinExpEditor(Window window, BinExpBlock block) {
+        super(window, block);
+        tabPane("Common").addLine("Token type", tokenTypeBox);
+        tokenTypeBox.setInputValue(block.getTokenType());
+        afterInit();
     }
 
     @Override
-    public void changedTokenType(BinExpBlock.TokenType oldType, BinExpBlock.TokenType newType) {
-        tokenLabel.setIcon(newType.icon);
+    protected void onSubmit(Action action, ActionEvent actionEvent) throws Exception {
+        block.setTokenType(tokenTypeBox.getInputValue());
     }
 }

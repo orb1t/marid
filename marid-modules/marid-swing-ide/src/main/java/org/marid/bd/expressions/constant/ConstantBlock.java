@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.constant;
+package org.marid.bd.expressions.constant;
 
 import images.Images;
 import org.codehaus.groovy.ast.expr.ConstantExpression;

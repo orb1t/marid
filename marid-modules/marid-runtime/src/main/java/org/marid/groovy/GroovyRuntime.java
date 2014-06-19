@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -63,9 +62,7 @@ public class GroovyRuntime {
         try {
             for (final CompilerUrlProvider provider : ServiceLoader.load(CompilerUrlProvider.class)) {
                 try {
-                    for (final URL url : provider.getUrls()) {
-                        CLASS_LOADER.addURL(url);
-                    }
+                    provider.getUrls().forEach(CLASS_LOADER::addURL);
                 } catch (Exception x) {
                     warning(LOG, "Unable to import URLs from the url provider {0}", x, provider);
                 }

@@ -60,13 +60,13 @@ public abstract class Block implements Named, Serializable, DndObject {
     }
 
     public <L extends BlockListener, T> void fire(Class<L> t, Supplier<T> s, Consumer<T> c, T nv, Changer<L, T> es) {
-        listeners.values().forEach(ls -> ls.stream().filter(t::isInstance).forEach(l -> {
-            final T old = s.get();
-            if (!Objects.equals(old, nv)) {
-                c.accept(nv);
-                es.accept(t.cast(l), old, nv);
-            }
-        }));
+        final T old = s.get();
+        if (!Objects.equals(old, nv)) {
+            c.accept(nv);
+            listeners.values().forEach(ls -> ls.stream()
+                    .filter(t::isInstance)
+                    .forEach(l -> es.accept(t.cast(l), old, nv)));
+        }
     }
 
     public abstract BlockComponent createComponent();

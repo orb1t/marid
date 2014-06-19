@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.constant;
+package org.marid.bd.expressions.constant;
 
 import org.marid.bd.components.DefaultBlockComponent;
 
@@ -30,12 +30,12 @@ import java.util.List;
  */
 public class ConstantBlockComponent extends DefaultBlockComponent<ConstantBlock> implements ConstantBlockListener {
 
-    protected final ConstantBlockComponentOutput output;
+    protected final DefaultOutput output;
     protected final JLabel nameLabel;
 
     protected ConstantBlockComponent(ConstantBlock constantBlock) {
         super(new BorderLayout(), constantBlock);
-        add(output = new ConstantBlockComponentOutput());
+        add(output = new DefaultOutput(block.output));
         add(nameLabel = new JLabel(block.getName()), BorderLayout.NORTH);
         nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         output.setToolTipText(block.getValue());
@@ -59,12 +59,5 @@ public class ConstantBlockComponent extends DefaultBlockComponent<ConstantBlock>
     @Override
     public void nameChanged(String oldName, String newName) {
         nameLabel.setText(newName);
-    }
-
-    protected class ConstantBlockComponentOutput extends DefaultOutput {
-
-        public ConstantBlockComponentOutput() {
-            super(block.output);
-        }
     }
 }

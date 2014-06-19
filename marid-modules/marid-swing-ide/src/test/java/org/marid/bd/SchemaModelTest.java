@@ -21,8 +21,8 @@ package org.marid.bd;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.marid.bd.constant.ConstantBlock;
-import org.marid.bd.constant.ConstantBlockComponent;
+import org.marid.bd.expressions.constant.ConstantBlock;
+import org.marid.bd.expressions.constant.ConstantBlockComponent;
 import org.marid.bd.schema.SchemaModel;
 import org.marid.test.NormalTests;
 
@@ -46,6 +46,7 @@ public class SchemaModelTest {
         final SchemaModel model = new SchemaModel();
         final ConstantBlock constantBlock = new ConstantBlock();
         constantBlock.setValue(ConstantExpression.class.getCanonicalName() + ".PRIM_FALSE");
+        assertTrue(((ConstantExpression) constantBlock.getOutputs().get(0).get()).isFalseExpression());
         final ConstantBlockComponent constantBlockComponent = constantBlock.createComponent();
         model.addBlock(constantBlockComponent, new Point(10, 20));
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();

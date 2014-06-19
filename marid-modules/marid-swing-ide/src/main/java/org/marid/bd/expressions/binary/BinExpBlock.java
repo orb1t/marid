@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.binary;
+package org.marid.bd.expressions.binary;
 
 import images.Images;
 import org.codehaus.groovy.ast.expr.BinaryExpression;
