@@ -16,7 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.util;
+package org.marid.reflect;
+
+import org.marid.util.MaridClassValue;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -54,6 +56,14 @@ public class ReflectionUtils {
             }
         }
     };
+
+    private static final ClassValue<Field[]> DECLARED_FIELDS = new MaridClassValue<>(c -> {
+        final Field[] fields = c.getDeclaredFields();
+        for (final Field field : fields) {
+            field.setAccessible(true);
+        }
+        return fields;
+    });
 
     private static Class<?> declaringClass(Class<?> type, String method, Class<?>... types) {
         try {
@@ -132,6 +142,14 @@ public class ReflectionUtils {
             }
             return object.getClass().getSimpleName() + map;
         }
+    }
+
+    public static Field[] getFields(Class<?> type) {
+        return FIELDS.get(type);
+    }
+
+    public static Field[] getDeclaredFields(Class<?> type) {
+        return DECLARED_FIELDS.get(type);
     }
 
     public static class HET {

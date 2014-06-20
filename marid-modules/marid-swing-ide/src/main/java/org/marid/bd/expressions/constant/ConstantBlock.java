@@ -21,6 +21,7 @@ package org.marid.bd.expressions.constant;
 import images.Images;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.marid.bd.NamedBlock;
+import org.marid.groovy.GroovyRuntime;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,7 +35,7 @@ import java.util.List;
 public class ConstantBlock extends NamedBlock {
 
     protected String value = ConstantExpression.class.getCanonicalName() + ".EMPTY_EXPRESSION";
-    protected final Out<ConstantExpression> output = new Out<>(ConstantExpression.class, "out", () -> value);
+    protected final Out<ConstantExpression> output = new Out<>(">", ConstantExpression.class, this::constantExpression);
 
     public ConstantBlock() {
         name = "Constant block";
@@ -77,5 +78,10 @@ public class ConstantBlock extends NamedBlock {
 
     public void setValue(String newValue) {
         fire(ConstantBlockListener.class, () -> value, v -> value = v, newValue, ConstantBlockListener::changedValue);
+    }
+
+    public ConstantExpression constantExpression() {
+        final Object o = GroovyRuntime.SHELL.evaluate(value, "expression.groovy");
+        return o instanceof ConstantExpression ? (ConstantExpression) o : new ConstantExpression(o);
     }
 }

@@ -18,9 +18,7 @@
 
 package org.marid.bd.schema;
 
-import images.Images;
 import org.marid.bd.Block;
-import org.marid.bd.BlockGroupProvider;
 import org.marid.bd.BlockProvider;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.dnd.DndSource;
@@ -142,9 +140,8 @@ public class BlockListWindow extends JDialog implements PrefSupport {
         public void update() {
             nodes.clear();
             final Map<String, Group> gmap = new TreeMap<>();
-            BlockGroupProvider.visit(p -> p.visit((g, i) -> gmap.put(g, new Group(g, Images.getIcon(i)))));
-            gmap.forEach((k, g) -> nodes.add(g));
             BlockProvider.visit(p -> p.visit((g, b) -> gmap.computeIfAbsent(g, k -> new Group(k, null)).nodes.add(b)));
+            nodes.addAll(gmap.values());
         }
     }
 

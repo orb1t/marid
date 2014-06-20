@@ -24,6 +24,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -52,6 +53,11 @@ public class StandardBlockComponent<B extends Block> extends DefaultBlockCompone
             outputs.add(output);
             outputsPanel.add(output);
         }
+    }
+
+    public StandardBlockComponent(B block, Consumer<StandardBlockComponent<B>> consumer) {
+        this(block);
+        consumer.accept(this);
     }
 
     @Override

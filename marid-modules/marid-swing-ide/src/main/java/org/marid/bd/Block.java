@@ -19,9 +19,9 @@
 package org.marid.bd;
 
 import org.marid.beans.MaridBeans;
-import org.marid.dyn.TypeCaster;
 import org.marid.functions.Changer;
 import org.marid.itf.Named;
+import org.marid.reflect.ReflectionUtils;
 import org.marid.swing.dnd.DndObject;
 
 import java.awt.*;
@@ -29,12 +29,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import static org.marid.groovy.GroovyRuntime.SHELL;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -71,7 +71,129 @@ public abstract class Block implements Named, Serializable, DndObject {
 
     public abstract BlockComponent createComponent();
 
-    public abstract Window createWindow(Window parent);
+    public Window createWindow(Window parent) {
+        return null;
+    }
+
+    public boolean isStateless() {
+        try {
+            return getClass().getMethod("createWindow", Window.class).getDeclaringClass() == Block.class;
+        } catch (ReflectiveOperationException x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
+    protected <T> Output<T> out(String name, Supplier<T> supplier) {
+        return new Output<T>() {
+            @Override
+            public T get() {
+                return supplier.get();
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public Class<T> getOutputType() {
+                try {
+                    for (final Field field : ReflectionUtils.getDeclaredFields(getBlock().getClass())) {
+                        if (field.get(getBlock()) == this) {
+                            return (Class<T>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                        }
+                    }
+                    throw new IllegalStateException("Unable to infer output class");
+                } catch (ReflectiveOperationException x) {
+                    throw new IllegalStateException(x);
+                }
+            }
+
+            @Override
+            public Block getBlock() {
+                return Block.this;
+            }
+
+            @Override
+            public String getName() {
+                return name;
+            }
+        };
+    }
+
+    protected <T> Input<T> in(String name, Consumer<T> consumer, Runnable resetter) {
+        return new Input<T>() {
+            @Override
+            public void set(T value) {
+                consumer.accept(value);
+            }
+
+            @Override
+            public void reset() {
+                resetter.run();
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public Class<T> getInputType() {
+                try {
+                    for (final Field field : ReflectionUtils.getDeclaredFields(getBlock().getClass())) {
+                        if (field.get(getBlock()) == this) {
+                            return (Class<T>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                        }
+                    }
+                    throw new IllegalStateException("Unable to infer output class");
+                } catch (ReflectiveOperationException x) {
+                    throw new IllegalStateException(x);
+                }
+            }
+
+            @Override
+            public Block getBlock() {
+                return Block.this;
+            }
+
+            @Override
+            public String getName() {
+                return name;
+            }
+        };
+    }
+
+    protected <I, O> InputOutput<I, O> io(String name, Consumer<I> consumer, Runnable resetter, Supplier<O> supplier) {
+        return new InputOutput<I, O>() {
+            @Override
+            public void set(I value) {
+                consumer.accept(value);
+            }
+
+            @Override
+            public void reset() {
+                resetter.run();
+            }
+
+            @Override
+            public Class<I> getInputType() {
+                return null;
+            }
+
+            @Override
+            public Block getBlock() {
+                return Block.this;
+            }
+
+            @Override
+            public O get() {
+                return supplier.get();
+            }
+
+            @Override
+            public Class<O> getOutputType() {
+                return null;
+            }
+
+            @Override
+            public String getName() {
+                return name;
+            }
+        };
+    }
 
     public abstract List<Input<?>> getInputs();
 
@@ -98,35 +220,42 @@ public abstract class Block implements Named, Serializable, DndObject {
         }
     }
 
-    public abstract class Port<T> implements Named {
+    public interface Input<T> extends Named {
 
-        public abstract Class<T> getType();
+        void set(T value);
 
-        public Block getBlock() {
-            return Block.this;
-        }
+        void reset();
+
+        Class<T> getInputType();
+
+        Block getBlock();
     }
 
-    public abstract class Input<T> extends Port<T> {
+    public interface Output<T> extends Named {
 
-        public abstract void set(T value);
+        T get();
 
-        @Override
-        public String toString() {
-            return getBlock().getName() + "<-" + getName();
-        }
+        Class<T> getOutputType();
+
+        Block getBlock();
     }
 
-    public class In<T> extends Input<T> {
+    public interface InputOutput<I, O> extends Input<I>, Output<O> {
+
+    }
+
+    public class In<T> implements Input<T> {
 
         private final String name;
         private final Class<T> type;
         private final Consumer<T> consumer;
+        private final Runnable resetter;
 
-        public In(String name, Class<T> type, Consumer<T> consumer) {
+        public In(String name, Class<T> type, Consumer<T> consumer, Runnable resetter) {
             this.name = name;
             this.type = type;
             this.consumer = consumer;
+            this.resetter = resetter;
         }
 
         @Override
@@ -135,27 +264,27 @@ public abstract class Block implements Named, Serializable, DndObject {
         }
 
         @Override
+        public Class<T> getInputType() {
+            return type;
+        }
+
+        @Override
         public void set(T value) {
             consumer.accept(value);
         }
 
         @Override
-        public Class<T> getType() {
-            return type;
+        public void reset() {
+            resetter.run();
         }
-    }
-
-    public abstract class Output<T> extends Port<T> {
-
-        public abstract T get();
 
         @Override
-        public String toString() {
-            return getBlock().getName() + "->" + getName();
+        public Block getBlock() {
+            return Block.this;
         }
     }
 
-    public class Out<T> extends Output<T> {
+    public class Out<T> implements Output<T> {
 
         private final String name;
         private final Class<T> type;
@@ -167,22 +296,77 @@ public abstract class Block implements Named, Serializable, DndObject {
             this.supplier = supplier;
         }
 
-        public Out(Class<T> type, String name, Supplier<String> supplier) {
-            this(name, type, () -> TypeCaster.getDefault().cast(type, SHELL.evaluate(supplier.get(), "expr.groovy")));
-        }
-
         @Override
         public String getName() {
             return name;
         }
 
-        public Class<T> getType() {
+        public Class<T> getOutputType() {
             return type;
+        }
+
+        @Override
+        public Block getBlock() {
+            return Block.this;
         }
 
         @Override
         public T get() {
             return supplier.get();
+        }
+    }
+
+    public class InOut<I, O> implements InputOutput<I, O> {
+
+        private final String name;
+        private final Class<I> inputType;
+        private final Class<O> outputType;
+        private final Consumer<I> consumer;
+        private final Runnable resetter;
+        private final Supplier<O> supplier;
+
+        public InOut(String name, Class<I> i, Class<O> o, Consumer<I> consumer, Runnable reset, Supplier<O> supplier) {
+            this.name = name;
+            this.inputType = i;
+            this.outputType = o;
+            this.consumer = consumer;
+            this.resetter = reset;
+            this.supplier = supplier;
+        }
+
+        @Override
+        public void set(I value) {
+            consumer.accept(value);
+        }
+
+        @Override
+        public void reset() {
+            resetter.run();
+        }
+
+        @Override
+        public O get() {
+            return supplier.get();
+        }
+
+        @Override
+        public Class<I> getInputType() {
+            return inputType;
+        }
+
+        @Override
+        public Class<O> getOutputType() {
+            return outputType;
+        }
+
+        @Override
+        public Block getBlock() {
+            return Block.this;
+        }
+
+        @Override
+        public String getName() {
+            return name;
         }
     }
 }

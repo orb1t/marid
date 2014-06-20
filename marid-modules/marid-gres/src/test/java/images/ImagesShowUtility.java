@@ -16,18 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
+package images;
 
-import java.util.function.BiConsumer;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DefaultBlockGroupProvider implements BlockGroupProvider {
-    @Override
-    public void visit(BiConsumer<String, String> groupConsumer) {
-        groupConsumer.accept("Expressions", null);
-        groupConsumer.accept("Operators", null);
-        groupConsumer.accept("Statements", null);
+public class ImagesShowUtility {
+
+    public static void main(String... args) {
+        EventQueue.invokeLater(() -> {
+            JOptionPane.showMessageDialog(null, Images.getIconFromText(" + ", 32, 32, Color.DARK_GRAY, Color.WHITE));
+        });
     }
 }

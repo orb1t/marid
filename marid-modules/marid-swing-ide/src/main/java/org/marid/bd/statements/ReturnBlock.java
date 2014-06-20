@@ -18,81 +18,33 @@
 
 package org.marid.bd.statements;
 
-import images.Images;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.ReturnStatement;
-import org.marid.bd.Block;
-import org.marid.bd.BlockComponent;
-import org.marid.bd.components.DefaultBlockComponent;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.Collections;
-import java.util.List;
+import org.marid.bd.IoBlock;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ReturnBlock extends Block {
+public class ReturnBlock extends IoBlock<Expression, ReturnStatement> {
 
     protected Expression expression;
-    protected final In<Expression> in = new In<>("in", Expression.class, e -> expression = e);
-    protected final Out<ReturnStatement> out = new Out<>("out", ReturnStatement.class, this::returnStatement);
 
-    @Override
-    public BlockComponent createComponent() {
-        return new ReturnBlockComponent();
+    public ReturnBlock() {
+        super("Return Statement", "", "block/return.png");
     }
 
     @Override
-    public Window createWindow(Window parent) {
-        return null;
+    public void set(Expression value) {
+        expression = value;
     }
 
     @Override
-    public List<Input<?>> getInputs() {
-        return Collections.singletonList(in);
+    public void reset() {
+        expression = null;
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
-        return Collections.singletonList(out);
-    }
-
-    @Override
-    public String getName() {
-        return "return";
-    }
-
-    @Override
-    public ImageIcon getVisualRepresentation() {
-        return Images.getIcon("block/return.png");
-    }
-
-    public ReturnStatement returnStatement() {
+    public ReturnStatement get() {
         return new ReturnStatement(expression);
-    }
-
-    protected class ReturnBlockComponent extends DefaultBlockComponent<ReturnBlock> {
-
-        protected final DefaultInput input = new DefaultInput(in);
-        protected final DefaultOutput output = new DefaultOutput(out);
-
-        public ReturnBlockComponent() {
-            super(new BorderLayout(), ReturnBlock.this);
-            add(input, BorderLayout.WEST);
-            add(output, BorderLayout.EAST);
-            add(new JLabel(getVisualRepresentation()));
-        }
-
-        @Override
-        public List<Input> getInputs() {
-            return Collections.singletonList(input);
-        }
-
-        @Override
-        public List<Output> getOutputs() {
-            return Collections.singletonList(output);
-        }
     }
 }

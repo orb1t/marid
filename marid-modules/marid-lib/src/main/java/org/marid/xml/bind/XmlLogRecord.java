@@ -18,7 +18,7 @@
 
 package org.marid.xml.bind;
 
-import org.marid.util.ReflectionUtils;
+import org.marid.reflect.ReflectionUtils;
 
 import javax.xml.bind.annotation.*;
 import java.math.BigDecimal;

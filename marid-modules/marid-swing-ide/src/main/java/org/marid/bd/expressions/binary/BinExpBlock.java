@@ -41,9 +41,9 @@ public class BinExpBlock extends Block {
     protected Expression left;
     protected Expression right;
     protected TokenType tokenType;
-    protected final In<Expression> leftInput = new In<>("left", Expression.class, e -> left = e);
-    protected final In<Expression> rightInput = new In<>("right", Expression.class, e -> right = e);
-    protected final Out<Expression> output = new Out<>("result", Expression.class, this::binaryExpression);
+    protected final In<Expression> leftInput = new In<>("L", Expression.class, e -> left = e, () -> left = null);
+    protected final In<Expression> rightInput = new In<>("R", Expression.class, e -> right = e, () -> right = null);
+    protected final Out<Expression> output = new Out<>(">", Expression.class, this::binaryExpression);
 
     public BinExpBlock() {
         this(TokenType.PLUS);

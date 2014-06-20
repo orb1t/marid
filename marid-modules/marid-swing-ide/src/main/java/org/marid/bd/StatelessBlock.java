@@ -18,25 +18,40 @@
 
 package org.marid.bd;
 
-import org.marid.bd.expressions.BoolExpBlock;
-import org.marid.bd.expressions.NotExpBlock;
-import org.marid.bd.expressions.binary.BinExpBlock;
-import org.marid.bd.expressions.constant.ConstantBlock;
-import org.marid.bd.statements.ReturnBlock;
+import images.Images;
+import org.marid.bd.components.StandardBlockComponent;
 
-import java.util.function.BiConsumer;
+import javax.swing.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DefaultBlockProvider implements BlockProvider {
-    @Override
-    public void visit(BiConsumer<String, Block> blockConsumer) {
-        blockConsumer.accept("Expressions", new ConstantBlock());
-        blockConsumer.accept("Expressions", new BinExpBlock());
-        blockConsumer.accept("Expressions", new BoolExpBlock());
-        blockConsumer.accept("Expressions", new NotExpBlock());
+public abstract class StatelessBlock extends Block {
 
-        blockConsumer.accept("Statements", new ReturnBlock());
+    protected final String name;
+    protected final ImageIcon visualRepresentation;
+
+    public StatelessBlock(String name, String icon) {
+        this(name, Images.getIcon(icon));
+    }
+
+    public StatelessBlock(String name, ImageIcon icon) {
+        this.name = name;
+        this.visualRepresentation = icon;
+    }
+
+    @Override
+    public BlockComponent createComponent() {
+        return new StandardBlockComponent<>(this, c -> c.add(new JLabel(getVisualRepresentation())));
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public ImageIcon getVisualRepresentation() {
+        return visualRepresentation;
     }
 }

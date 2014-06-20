@@ -16,20 +16,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
+package org.marid.bd.expressions;
 
-import java.util.ServiceLoader;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import images.Images;
+import org.codehaus.groovy.ast.expr.BooleanExpression;
+import org.codehaus.groovy.ast.expr.Expression;
+import org.marid.bd.IoBlock;
+
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface BlockGroupProvider {
+public class BoolExpBlock extends IoBlock<Expression, BooleanExpression> {
 
-    void visit(BiConsumer<String, String> groupConsumer);
+    protected Expression expression;
 
-    static void visit(Consumer<BlockGroupProvider> providerConsumer) {
-        ServiceLoader.load(BlockGroupProvider.class).forEach(providerConsumer::accept);
+    public BoolExpBlock() {
+        super("Boolean Expression", "", Images.getIconFromText("bool", 32, 32, Color.BLUE, Color.WHITE));
+    }
+
+    @Override
+    public void set(Expression value) {
+        expression = value;
+    }
+
+    @Override
+    public void reset() {
+        expression = null;
+    }
+
+    @Override
+    public BooleanExpression get() {
+        return new BooleanExpression(expression);
     }
 }

@@ -18,94 +18,85 @@
 package org.marid.image;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
-import static java.awt.BasicStroke.*;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.LinearGradientPaint;
-import java.awt.RadialGradientPaint;
-import static java.awt.RenderingHints.*;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import static java.awt.image.BufferedImage.*;
+
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.JOIN_BEVEL;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
- *
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class MaridImage {
 
-    /**
-     * Get the Marid image.
-     *
-     * @param size Image size.
-     * @return Image.
-     */
     public static BufferedImage getImage(int size) {
-        BufferedImage img = new BufferedImage(size, size, TYPE_INT_ARGB);
-        Graphics2D g = img.createGraphics();
-        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        double scale = (double) size / 2.0;
-        g.translate(size / 2, size / 2);
-        g.scale(scale, scale);
-        float[] fs = new float[16];
-        Color[] cs = new Color[16];
-        for (int i = 0; i < fs.length; i++) {
-            fs[i] = (float) i / (float) (fs.length - 1);
+        final BufferedImage img = new BufferedImage(size, size, TYPE_INT_ARGB);
+        final Graphics2D g = img.createGraphics();
+        try {
+            g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+            final double scale = (double) size / 2.0;
+            g.translate(size / 2, size / 2);
+            g.scale(scale, scale);
+            final float[] fs = new float[16];
+            final Color[] cs = new Color[16];
+            for (int i = 0; i < fs.length; i++) {
+                fs[i] = (float) i / (float) (fs.length - 1);
+            }
+            for (int i = 0; i < fs.length; i++) {
+                cs[i] = new Color(240 - i * 10, 240 - i * 10, 240);
+            }
+            g.setPaint(new LinearGradientPaint(0f, -1f, 0f, 0.5f, fs, cs));
+            g.fill(new Rectangle2D.Float(-1f, -1f, 2f, 2f));
+            final AffineTransform tr = g.getTransform();
+            g.rotate(1f / 3f, 0.0f, 0.0f);
+            g.translate(+0.0f, +0.2f);
+            GeneralPath path = new GeneralPath();
+            path.moveTo(-0.15f, +0.3f);
+            path.lineTo(+0.15f, +0.3f);
+            path.quadTo(+0.3f, +0.2f, +0.06f, -0.4f);
+            path.quadTo(+0.03f, -0.5f, +0.04f, -0.6f);
+            path.lineTo(+0.04f, -0.7f);
+            path.lineTo(-0.04f, -0.7f);
+            path.lineTo(-0.04f, -0.6f);
+            path.quadTo(-0.03f, -0.5f, -0.06f, -0.4f);
+            path.quadTo(-0.3f, 0.2f, -0.15f, +0.3f);
+            path.closePath();
+            g.setStroke(new BasicStroke(0.05f, CAP_BUTT, JOIN_BEVEL));
+            for (int i = 0; i < fs.length; i++) {
+                cs[i] = new Color(255 - i * 4, 255 - i * 4, 255);
+            }
+            g.setPaint(new RadialGradientPaint(0f, 0f, 0.5f, fs, cs));
+            g.fill(path);
+            g.setColor(new Color(240, 240, 255));
+            g.draw(path);
+            g.setTransform(tr);
+            path = new GeneralPath();
+            path.moveTo(-1.0f, +0.0f);
+            path.quadTo(-0.8f, +0.1f, -0.6f, +0.0f);
+            path.quadTo(-0.4f, -0.1f, -0.2f, +0.0f);
+            path.quadTo(+0.0f, +0.1f, +0.2f, +0.0f);
+            path.quadTo(+0.4f, -0.1f, +0.6f, +0.0f);
+            path.quadTo(+0.8f, +0.1f, +1.0f, +0.0f);
+            path.lineTo(+1.0f, +1.0f);
+            path.lineTo(-1.0f, +1.0f);
+            path.closePath();
+            for (int i = 0; i < fs.length; i++) {
+                cs[i] = new Color(0, 0, 170 - i * 11, 100 + i * 9);
+            }
+            g.setPaint(new LinearGradientPaint(0f, 0f, 0f, 1f, fs, cs));
+            g.fill(path);
+        } finally {
+            g.dispose();
         }
-        for (int i = 0; i < fs.length; i++) {
-            cs[i] = new Color(240 - i * 10, 240 - i * 10, 240);
-        }
-        g.setPaint(new LinearGradientPaint(0f, -1f, 0f, 0.5f, fs, cs));
-        g.fill(new Rectangle2D.Float(-1f, -1f, 2f, 2f));
-        AffineTransform tr = g.getTransform();
-        g.rotate(1f / 3f, 0.0f, 0.0f);
-        g.translate(+0.0f, +0.2f);
-        GeneralPath path = new GeneralPath();
-        path.moveTo(-0.15f, +0.3f);
-        path.lineTo(+0.15f, +0.3f);
-        path.quadTo(+0.3f, +0.2f, +0.06f, -0.4f);
-        path.quadTo(+0.03f, -0.5f, +0.04f, -0.6f);
-        path.lineTo(+0.04f, -0.7f);
-        path.lineTo(-0.04f, -0.7f);
-        path.lineTo(-0.04f, -0.6f);
-        path.quadTo(-0.03f, -0.5f, -0.06f, -0.4f);
-        path.quadTo(-0.3f, 0.2f, -0.15f, +0.3f);
-        path.closePath();
-        g.setStroke(new BasicStroke(0.05f, CAP_BUTT, JOIN_BEVEL));
-        for (int i = 0; i < fs.length; i++) {
-            cs[i] = new Color(255 - i * 4, 255 - i * 4, 255);
-        }
-        g.setPaint(new RadialGradientPaint(0f, 0f, 0.5f, fs, cs));
-        g.fill(path);
-        g.setColor(new Color(240, 240, 255));
-        g.draw(path);
-        g.setTransform(tr);
-        path = new GeneralPath();
-        path.moveTo(-1.0f, +0.0f);
-        path.quadTo(-0.8f, +0.1f, -0.6f, +0.0f);
-        path.quadTo(-0.4f, -0.1f, -0.2f, +0.0f);
-        path.quadTo(+0.0f, +0.1f, +0.2f, +0.0f);
-        path.quadTo(+0.4f, -0.1f, +0.6f, +0.0f);
-        path.quadTo(+0.8f, +0.1f, +1.0f, +0.0f);
-        path.lineTo(+1.0f, +1.0f);
-        path.lineTo(-1.0f, +1.0f);
-        path.closePath();
-        for (int i = 0; i < fs.length; i++) {
-            cs[i] = new Color(0, 0, 170 - i * 11, 100 + i * 9);
-        }
-        g.setPaint(new LinearGradientPaint(0f, 0f, 0f, 1f, fs, cs));
-        g.fill(path);
         return img;
     }
 
-    /**
-     * Get marid icon.
-     * @param size Icon size.
-     * @return Marid icon.
-     */
     public static ImageIcon getIcon(int size) {
         return new ImageIcon(getImage(size));
     }

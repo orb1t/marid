@@ -16,27 +16,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
+package org.marid.bd.expressions;
 
-import org.marid.bd.expressions.BoolExpBlock;
-import org.marid.bd.expressions.NotExpBlock;
-import org.marid.bd.expressions.binary.BinExpBlock;
-import org.marid.bd.expressions.constant.ConstantBlock;
-import org.marid.bd.statements.ReturnBlock;
+import images.Images;
+import org.codehaus.groovy.ast.expr.Expression;
+import org.codehaus.groovy.ast.expr.NotExpression;
+import org.marid.bd.IoBlock;
 
-import java.util.function.BiConsumer;
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DefaultBlockProvider implements BlockProvider {
-    @Override
-    public void visit(BiConsumer<String, Block> blockConsumer) {
-        blockConsumer.accept("Expressions", new ConstantBlock());
-        blockConsumer.accept("Expressions", new BinExpBlock());
-        blockConsumer.accept("Expressions", new BoolExpBlock());
-        blockConsumer.accept("Expressions", new NotExpBlock());
+public class NotExpBlock extends IoBlock<Expression, NotExpression> {
 
-        blockConsumer.accept("Statements", new ReturnBlock());
+    protected Expression expression;
+
+    public NotExpBlock() {
+        super("Not Expression", "", Images.getIconFromText(" ! ", 32, 32, Color.BLUE, Color.WHITE));
+    }
+
+    @Override
+    public void set(Expression value) {
+        expression = value;
+    }
+
+    @Override
+    public void reset() {
+        expression = null;
+    }
+
+    @Override
+    public NotExpression get() {
+        return new NotExpression(expression);
     }
 }

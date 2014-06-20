@@ -20,6 +20,7 @@ package images;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.net.URL;
@@ -91,5 +92,36 @@ public class Images {
     public static Image getImage(String path) {
         final URL url = path == null ? null : Images.class.getResource(path);
         return url == null ? null : Toolkit.getDefaultToolkit().getImage(url);
+    }
+
+    public static BufferedImage getImageFromText(String text, int width, int height, Color back, Color fore) {
+        final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        final Graphics2D g = image.createGraphics();
+        try {
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g.setColor(back);
+            g.fillRoundRect(0, 0, width, height, width / 3, height / 3);
+            g.translate(3, 3);
+            width -= 6;
+            height -= 6;
+            g.setColor(fore);
+            g.setFont(new Font(Font.DIALOG, Font.BOLD, 12));
+            final Rectangle2D bounds = g.getFont().getStringBounds(text, g.getFontRenderContext());
+            final float yo = - (float) bounds.getY() + height / 2.0f - (float) bounds.getHeight() / 2.0f;
+            final double w = bounds.getWidth();
+            final double h = bounds.getHeight() - (float) bounds.getY();
+            final double sx = width / w;
+            final double sy = height / h;
+            g.scale(sx, sy);
+            g.drawString(text, 0.0f, yo / (float) sy);
+        } finally {
+            g.dispose();
+        }
+        return image;
+    }
+
+    public static ImageIcon getIconFromText(String text, int width, int height, Color back, Color fore) {
+        return new ImageIcon(getImageFromText(text, width, height, back, fore));
     }
 }

@@ -70,20 +70,22 @@ public interface BlockComponent {
 
     default JPopupMenu popupMenu() {
         final JPopupMenu popupMenu = new JPopupMenu();
-        popupMenu.add(new MaridAction("Settings", "settings", e -> {
-            final Window window = getBlock().createWindow(SwingUtilities.windowForComponent(getSchemaEditor()));
-            window.addWindowListener(new WindowAction(we -> {
-                switch (we.getID()) {
-                    case WindowEvent.WINDOW_CLOSED:
-                        updateBlock();
-                        getSchemaEditor().validate();
-                        getSchemaEditor().repaint();
-                        break;
-                }
+        if (!getBlock().isStateless()) {
+            popupMenu.add(new MaridAction("Settings", "settings", e -> {
+                final Window window = getBlock().createWindow(SwingUtilities.windowForComponent(getSchemaEditor()));
+                window.addWindowListener(new WindowAction(we -> {
+                    switch (we.getID()) {
+                        case WindowEvent.WINDOW_CLOSED:
+                            updateBlock();
+                            getSchemaEditor().validate();
+                            getSchemaEditor().repaint();
+                            break;
+                    }
+                }));
+                window.setVisible(true);
             }));
-            window.setVisible(true);
-        }));
-        popupMenu.addSeparator();
+            popupMenu.addSeparator();
+        }
         popupMenu.add(new MaridAction("Remove", "remove", e -> remove()));
         return popupMenu;
     }
