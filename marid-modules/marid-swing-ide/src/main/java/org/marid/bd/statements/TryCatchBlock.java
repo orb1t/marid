@@ -16,12 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.expressions;
+package org.marid.bd.statements;
 
 import images.Images;
-import org.codehaus.groovy.ast.expr.BooleanExpression;
-import org.codehaus.groovy.ast.expr.Expression;
-import org.codehaus.groovy.ast.expr.TernaryExpression;
+import org.codehaus.groovy.ast.stmt.Statement;
+import org.codehaus.groovy.ast.stmt.TryCatchStatement;
 import org.marid.bd.StatelessBlock;
 
 import java.awt.*;
@@ -32,24 +31,22 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TernaryBlock extends StatelessBlock {
+public class TryCatchBlock extends StatelessBlock {
 
-    protected BooleanExpression expression;
-    protected Expression trueExpr;
-    protected Expression falseExpr;
+    protected Statement tryStatement;
+    protected Statement body;
 
-    protected final Input<BooleanExpression> expInput = in("?", e -> expression = e, () -> expression = null);
-    protected final Input<Expression> trueInput = in("+", e -> trueExpr = e, () -> trueExpr = null);
-    protected final Input<Expression> falseInput = in("-", e -> falseExpr = e, () -> falseExpr = null);
-    protected final Output<TernaryExpression> out = out(">", () -> new TernaryExpression(expression, trueExpr, falseExpr));
+    protected final Input<Statement> tryInput = in("t", s -> tryStatement = s, () -> tryStatement = null);
+    protected final Input<Statement> bodyInput = in("c", s -> body = s, () -> body = null);
+    protected final Output<TryCatchStatement> out = out(">", () -> new TryCatchStatement(tryStatement, body));
 
-    public TernaryBlock() {
-        super("Ternary Expression", Images.getIconFromText("?:", 32, 32, Color.BLUE, Color.WHITE));
+    public TryCatchBlock() {
+        super("Try/Catch Block", Images.getIconFromText("t/c", 32, 32, Color.GREEN.darker(), Color.WHITE));
     }
 
     @Override
     public List<Input<?>> getInputs() {
-        return Arrays.asList(expInput, trueInput, falseInput);
+        return Arrays.asList(tryInput, bodyInput);
     }
 
     @Override

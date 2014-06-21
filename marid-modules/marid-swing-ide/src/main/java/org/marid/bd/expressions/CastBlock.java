@@ -19,43 +19,41 @@
 package org.marid.bd.expressions;
 
 import images.Images;
-import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.expr.CastExpression;
 import org.codehaus.groovy.ast.expr.Expression;
-import org.marid.bd.IoBlock;
+import org.marid.bd.StatelessBlock;
 
 import java.awt.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.codehaus.groovy.ast.ClassHelper.OBJECT_TYPE;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class CastBlock extends IoBlock<Expression, CastExpression> {
+public class CastBlock extends StatelessBlock {
 
     protected Expression expression;
-    protected ClassNode classNode = ClassHelper.OBJECT_TYPE;
+    protected ClassNode classNode = OBJECT_TYPE;
+
+    protected final Input<Expression> exprInput = in("A", e -> expression = e, () -> expression = null);
+    protected final Input<ClassNode> classInput = in("*", c -> classNode = c, () -> classNode = OBJECT_TYPE);
+    protected final Output<CastExpression> castExpr = out(">", () -> new CastExpression(classNode, expression));
 
     public CastBlock() {
-        super("Cast Expression", "", Images.getIconFromText(" () ", 32, 32, Color.BLUE, Color.WHITE));
+        super("Cast Expression", Images.getIconFromText("(*)", 32, 32, Color.BLUE, Color.WHITE));
     }
 
     @Override
-    public void set(Expression value) {
-        expression = value;
+    public List<Input<?>> getInputs() {
+        return Arrays.asList(exprInput, classInput);
     }
 
     @Override
-    public void reset() {
-        expression = null;
-    }
-
-    @Override
-    public boolean isStateless() {
-        return false;
-    }
-
-    @Override
-    public CastExpression get() {
-        return new CastExpression(classNode, expression);
+    public List<Output<?>> getOutputs() {
+        return Collections.singletonList(castExpr);
     }
 }

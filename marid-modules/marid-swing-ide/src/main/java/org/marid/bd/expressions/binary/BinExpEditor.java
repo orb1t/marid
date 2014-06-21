@@ -38,6 +38,14 @@ public class BinExpEditor extends AbstractBlockComponentEditor<BinExpBlock> {
         super(window, block);
         tabPane("Common").addLine("Token type", tokenTypeBox);
         tokenTypeBox.setInputValue(block.getTokenType());
+        tokenTypeBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> l, Object v, int i, boolean s, boolean f) {
+                final JLabel label = (JLabel) super.getListCellRendererComponent(l, v, i, s, f);
+                label.setIcon(((TokenType) v).getIcon(16));
+                return label;
+            }
+        });
         afterInit();
     }
 

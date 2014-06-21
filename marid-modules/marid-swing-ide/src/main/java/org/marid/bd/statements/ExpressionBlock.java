@@ -16,25 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.expressions;
+package org.marid.bd.statements;
 
 import images.Images;
 import org.codehaus.groovy.ast.expr.Expression;
-import org.codehaus.groovy.transform.sc.transformers.CompareToNullExpression;
+import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.marid.bd.IoBlock;
 
-import static java.awt.Color.BLUE;
-import static java.awt.Color.WHITE;
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class CompareToNonNullBlock extends IoBlock<Expression, CompareToNullExpression> {
+public class ExpressionBlock extends IoBlock<Expression, ExpressionStatement> {
 
     protected Expression expression;
 
-    public CompareToNonNullBlock() {
-        super("Compare To Not null Expression", "", Images.getIconFromText("!= null", 32, 32, BLUE, WHITE));
+    public ExpressionBlock() {
+        super("Expression Statement", "", Images.getIconFromText("expr", 32, 32, Color.GREEN.darker(), Color.WHITE));
     }
 
     @Override
@@ -48,7 +47,7 @@ public class CompareToNonNullBlock extends IoBlock<Expression, CompareToNullExpr
     }
 
     @Override
-    public CompareToNullExpression get() {
-        return new CompareToNullExpression(expression, false);
+    public ExpressionStatement get() {
+        return new ExpressionStatement(expression);
     }
 }

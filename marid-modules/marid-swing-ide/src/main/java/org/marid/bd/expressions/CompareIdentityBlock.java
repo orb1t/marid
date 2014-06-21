@@ -41,7 +41,7 @@ public class CompareIdentityBlock extends StatelessBlock {
     protected final Output<CompareIdentityExpression> out = out(">", () -> new CompareIdentityExpression(left, right));
 
     public CompareIdentityBlock() {
-        super("Compare Identity Expression", Images.getIconFromText("===", 32, 32, Color.DARK_GRAY, Color.WHITE));
+        super("Compare Identity Expression", Images.getIconFromText("===", 32, 32, Color.BLUE, Color.WHITE));
     }
 
     @Override

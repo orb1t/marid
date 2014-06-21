@@ -16,12 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.expressions;
+package org.marid.bd.statements;
 
 import images.Images;
-import org.codehaus.groovy.ast.expr.BooleanExpression;
+import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.ast.expr.Expression;
-import org.codehaus.groovy.ast.expr.TernaryExpression;
+import org.codehaus.groovy.ast.stmt.ForStatement;
+import org.codehaus.groovy.ast.stmt.Statement;
 import org.marid.bd.StatelessBlock;
 
 import java.awt.*;
@@ -32,24 +33,24 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TernaryBlock extends StatelessBlock {
+public class ForBlock extends StatelessBlock {
 
-    protected BooleanExpression expression;
-    protected Expression trueExpr;
-    protected Expression falseExpr;
+    protected Parameter parameter;
+    protected Expression expression;
+    protected Statement body;
 
-    protected final Input<BooleanExpression> expInput = in("?", e -> expression = e, () -> expression = null);
-    protected final Input<Expression> trueInput = in("+", e -> trueExpr = e, () -> trueExpr = null);
-    protected final Input<Expression> falseInput = in("-", e -> falseExpr = e, () -> falseExpr = null);
-    protected final Output<TernaryExpression> out = out(">", () -> new TernaryExpression(expression, trueExpr, falseExpr));
+    protected final Input<Parameter> paramInput = in("i", p -> parameter = p, () -> parameter = null);
+    protected final Input<Expression> exprInput = in("?", e -> expression = e, () -> expression = null);
+    protected final Input<Statement> bodyInput = in("*", s -> body = s, () -> body = null);
+    protected final Output<ForStatement> out = out(">", () -> new ForStatement(parameter, expression, body));
 
-    public TernaryBlock() {
-        super("Ternary Expression", Images.getIconFromText("?:", 32, 32, Color.BLUE, Color.WHITE));
+    public ForBlock() {
+        super("For Statement", Images.getIconFromText("for", 32, 32, Color.GREEN.darker(), Color.WHITE));
     }
 
     @Override
     public List<Input<?>> getInputs() {
-        return Arrays.asList(expInput, trueInput, falseInput);
+        return Arrays.asList(paramInput, exprInput, bodyInput);
     }
 
     @Override

@@ -76,7 +76,7 @@ public class BinExpBlock extends Block {
 
     @Override
     public ImageIcon getVisualRepresentation() {
-        return Images.getIcon("block/two.png");
+        return Images.getIconFromText(" 2 ", 32, 32, Color.BLUE, Color.WHITE);
     }
 
     @Override
@@ -98,15 +98,25 @@ public class BinExpBlock extends Block {
 
     public static enum TokenType {
 
-        PLUS(Token.newPlaceholder(Types.PLUS), "tokens/plus.png"),
-        MINUS(Token.newPlaceholder(Types.MINUS), "tokens/minus.png");
+        PLUS(Token.newPlaceholder(Types.PLUS), " + "),
+        MINUS(Token.newPlaceholder(Types.MINUS), " - "),
+        PRODUCT(Token.newPlaceholder(Types.STAR), " * "),
+        DIVISION(Token.newPlaceholder(Types.DIVIDE), " / "),
+        POWER(Token.newPlaceholder(Types.STAR_STAR), " ** "),
+        INSTANCEOF(Token.newPlaceholder(Types.KEYWORD_INSTANCEOF), " i.of"),
+        IN(Token.newPlaceholder(Types.KEYWORD_IN), "in"),
+        AS(Token.newPlaceholder(Types.KEYWORD_AS), "as");
 
         public final Token token;
         public final ImageIcon icon;
 
-        private TokenType(Token token, String icon) {
+        private TokenType(Token token, String text) {
             this.token = token;
-            this.icon = Images.getIcon(icon);
+            this.icon = Images.getIconFromText(text, 32, 32, Color.BLUE, Color.WHITE);
+        }
+
+        public ImageIcon getIcon(int size) {
+            return new ImageIcon(icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH));
         }
     }
 }

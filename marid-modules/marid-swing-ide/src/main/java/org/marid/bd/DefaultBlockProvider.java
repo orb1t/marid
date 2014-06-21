@@ -21,8 +21,7 @@ package org.marid.bd;
 import org.marid.bd.expressions.*;
 import org.marid.bd.expressions.binary.BinExpBlock;
 import org.marid.bd.expressions.constant.ConstantBlock;
-import org.marid.bd.statements.IfBlock;
-import org.marid.bd.statements.ReturnBlock;
+import org.marid.bd.statements.*;
 
 import java.util.function.BiConsumer;
 
@@ -44,5 +43,10 @@ public class DefaultBlockProvider implements BlockProvider {
 
         blockConsumer.accept("Statements", new ReturnBlock());
         blockConsumer.accept("Statements", new IfBlock());
+        blockConsumer.accept("Statements", new WhileBlock());
+        blockConsumer.accept("Statements", new ForBlock());
+        blockConsumer.accept("Statements", new TryCatchBlock());
+        blockConsumer.accept("Statements", new SwitchBlock());
+        blockConsumer.accept("Statements", new ExpressionBlock());
     }
 }

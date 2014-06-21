@@ -16,40 +16,44 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.expressions;
+package org.marid.bd.statements;
 
 import images.Images;
-import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.Expression;
-import org.codehaus.groovy.ast.expr.TernaryExpression;
+import org.codehaus.groovy.ast.stmt.CaseStatement;
+import org.codehaus.groovy.ast.stmt.Statement;
+import org.codehaus.groovy.ast.stmt.SwitchStatement;
 import org.marid.bd.StatelessBlock;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.codehaus.groovy.ast.stmt.EmptyStatement.INSTANCE;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TernaryBlock extends StatelessBlock {
+public class SwitchBlock extends StatelessBlock {
 
-    protected BooleanExpression expression;
-    protected Expression trueExpr;
-    protected Expression falseExpr;
+    protected final List<CaseStatement> cases = new ArrayList<>();
+    protected Statement defStatement = INSTANCE;
+    protected Expression expression = null;
 
-    protected final Input<BooleanExpression> expInput = in("?", e -> expression = e, () -> expression = null);
-    protected final Input<Expression> trueInput = in("+", e -> trueExpr = e, () -> trueExpr = null);
-    protected final Input<Expression> falseInput = in("-", e -> falseExpr = e, () -> falseExpr = null);
-    protected final Output<TernaryExpression> out = out(">", () -> new TernaryExpression(expression, trueExpr, falseExpr));
+    protected final Input<Expression> expressionInput = in("()", e -> expression = e, () -> expression = null);
+    protected final Input<CaseStatement> caseInput = in("?", cases::add, cases::clear);
+    protected final Input<Statement> defaultInput = in(":", s -> defStatement = s, () -> defStatement = INSTANCE);
+    protected final Output<SwitchStatement> out = out(">", () -> new SwitchStatement(expression, cases, defStatement));
 
-    public TernaryBlock() {
-        super("Ternary Expression", Images.getIconFromText("?:", 32, 32, Color.BLUE, Color.WHITE));
+    public SwitchBlock() {
+        super("Switch Statement", Images.getIconFromText("switch", 32, 32, Color.GREEN.darker(), Color.WHITE));
     }
 
     @Override
     public List<Input<?>> getInputs() {
-        return Arrays.asList(expInput, trueInput, falseInput);
+        return Arrays.asList(expressionInput, caseInput, defaultInput);
     }
 
     @Override
