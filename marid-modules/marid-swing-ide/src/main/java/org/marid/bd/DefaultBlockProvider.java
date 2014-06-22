@@ -40,6 +40,7 @@ public class DefaultBlockProvider implements BlockProvider {
         blockConsumer.accept("Expressions", new CompareIdentityBlock());
         blockConsumer.accept("Expressions", new CompareToNullBlock());
         blockConsumer.accept("Expressions", new CompareToNonNullBlock());
+        blockConsumer.accept("Expressions", new VariableBlock());
 
         blockConsumer.accept("Statements", new ReturnBlock());
         blockConsumer.accept("Statements", new IfBlock());
@@ -48,5 +49,8 @@ public class DefaultBlockProvider implements BlockProvider {
         blockConsumer.accept("Statements", new TryCatchBlock());
         blockConsumer.accept("Statements", new SwitchBlock());
         blockConsumer.accept("Statements", new ExpressionBlock());
+        blockConsumer.accept("Statements", new SynchronizedBlock());
+        blockConsumer.accept("Statements", new EmptyBlock());
+        blockConsumer.accept("Statements", new ThrowBlock());
     }
 }

@@ -19,39 +19,45 @@
 package org.marid.bd.statements;
 
 import images.Images;
-import org.codehaus.groovy.ast.expr.BooleanExpression;
-import org.codehaus.groovy.ast.stmt.Statement;
-import org.codehaus.groovy.ast.stmt.WhileStatement;
-import org.marid.bd.StandardBlock;
+import org.codehaus.groovy.ast.stmt.EmptyStatement;
+import org.marid.bd.Block;
+import org.marid.bd.BlockComponent;
+import org.marid.bd.components.StandardBlockComponent;
 
+import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class WhileBlock extends StandardBlock {
+public class EmptyBlock extends Block {
 
-    protected BooleanExpression expression;
-    protected Statement body;
+    protected final Output<EmptyStatement> out = out("{}", () -> EmptyStatement.INSTANCE);
 
-    protected final Input<BooleanExpression> exprInput = in("?", e -> expression = e, () -> expression = null);
-    protected final Input<Statement> bodyInput = in("*", s -> body = s, () -> body = null);
-    protected final Output<WhileStatement> out = out(">", () -> new WhileStatement(expression, body));
-
-    public WhileBlock() {
-        super("While Statement", Images.getIconFromText("while", 32, 32, Color.GREEN.darker(), Color.WHITE));
+    @Override
+    public BlockComponent createComponent() {
+        return new StandardBlockComponent<>(this);
     }
 
     @Override
     public List<Input<?>> getInputs() {
-        return Arrays.asList(exprInput, bodyInput);
+        return Collections.emptyList();
     }
 
     @Override
     public List<Output<?>> getOutputs() {
         return Collections.singletonList(out);
+    }
+
+    @Override
+    public String getName() {
+        return "Empty Statement";
+    }
+
+    @Override
+    public ImageIcon getVisualRepresentation() {
+        return Images.getIconFromText("empty", 32, 32, Color.GREEN.darker(), Color.WHITE);
     }
 }

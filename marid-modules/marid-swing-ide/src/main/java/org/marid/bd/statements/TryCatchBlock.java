@@ -21,7 +21,7 @@ package org.marid.bd.statements;
 import images.Images;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.TryCatchStatement;
-import org.marid.bd.StatelessBlock;
+import org.marid.bd.StandardBlock;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TryCatchBlock extends StatelessBlock {
+public class TryCatchBlock extends StandardBlock {
 
     protected Statement tryStatement;
     protected Statement body;

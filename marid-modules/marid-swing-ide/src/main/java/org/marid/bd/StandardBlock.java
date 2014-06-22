@@ -26,16 +26,16 @@ import javax.swing.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class StatelessBlock extends Block {
+public abstract class StandardBlock extends Block {
 
     protected final String name;
     protected final ImageIcon visualRepresentation;
 
-    public StatelessBlock(String name, String icon) {
+    public StandardBlock(String name, String icon) {
         this(name, Images.getIcon(icon));
     }
 
-    public StatelessBlock(String name, ImageIcon icon) {
+    public StandardBlock(String name, ImageIcon icon) {
         this.name = name;
         this.visualRepresentation = icon;
     }

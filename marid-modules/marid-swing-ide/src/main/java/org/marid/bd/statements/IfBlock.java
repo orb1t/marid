@@ -22,7 +22,7 @@ import images.Images;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.stmt.IfStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
-import org.marid.bd.StatelessBlock;
+import org.marid.bd.StandardBlock;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class IfBlock extends StatelessBlock {
+public class IfBlock extends StandardBlock {
 
     protected BooleanExpression expression;
     protected Statement statement;

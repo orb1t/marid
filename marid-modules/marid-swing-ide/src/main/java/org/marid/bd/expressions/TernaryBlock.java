@@ -22,7 +22,7 @@ import images.Images;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.expr.TernaryExpression;
-import org.marid.bd.StatelessBlock;
+import org.marid.bd.StandardBlock;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TernaryBlock extends StatelessBlock {
+public class TernaryBlock extends StandardBlock {
 
     protected BooleanExpression expression;
     protected Expression trueExpr;

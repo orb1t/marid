@@ -19,9 +19,9 @@
 package org.marid.bd.statements;
 
 import images.Images;
-import org.codehaus.groovy.ast.expr.BooleanExpression;
+import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.Statement;
-import org.codehaus.groovy.ast.stmt.WhileStatement;
+import org.codehaus.groovy.ast.stmt.SynchronizedStatement;
 import org.marid.bd.StandardBlock;
 
 import java.awt.*;
@@ -32,22 +32,22 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class WhileBlock extends StandardBlock {
+public class SynchronizedBlock extends StandardBlock {
 
-    protected BooleanExpression expression;
-    protected Statement body;
+    protected Expression expression;
+    protected Statement statement;
 
-    protected final Input<BooleanExpression> exprInput = in("?", e -> expression = e, () -> expression = null);
-    protected final Input<Statement> bodyInput = in("*", s -> body = s, () -> body = null);
-    protected final Output<WhileStatement> out = out(">", () -> new WhileStatement(expression, body));
+    protected final Input<Expression> exprInput = in("mon", e -> expression = e, () -> expression = null);
+    protected final Input<Statement> stmtInput = in("*", s -> statement = s, () -> statement = null);
+    protected final Output<SynchronizedStatement> out = out(">", () -> new SynchronizedStatement(expression, statement));
 
-    public WhileBlock() {
-        super("While Statement", Images.getIconFromText("while", 32, 32, Color.GREEN.darker(), Color.WHITE));
+    public SynchronizedBlock() {
+        super("Synchronized Statement", Images.getIconFromText("sync", 32, 32, Color.GREEN.darker(), Color.WHITE));
     }
 
     @Override
     public List<Input<?>> getInputs() {
-        return Arrays.asList(exprInput, bodyInput);
+        return Arrays.asList(exprInput, stmtInput);
     }
 
     @Override

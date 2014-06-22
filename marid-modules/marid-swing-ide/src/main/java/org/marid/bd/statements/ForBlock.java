@@ -23,7 +23,7 @@ import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.ForStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
-import org.marid.bd.StatelessBlock;
+import org.marid.bd.StandardBlock;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ForBlock extends StatelessBlock {
+public class ForBlock extends StandardBlock {
 
     protected Parameter parameter;
     protected Expression expression;

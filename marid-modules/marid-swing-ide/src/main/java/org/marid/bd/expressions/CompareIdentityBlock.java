@@ -21,7 +21,7 @@ package org.marid.bd.expressions;
 import images.Images;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.transform.sc.transformers.CompareIdentityExpression;
-import org.marid.bd.StatelessBlock;
+import org.marid.bd.StandardBlock;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class CompareIdentityBlock extends StatelessBlock {
+public class CompareIdentityBlock extends StandardBlock {
 
     protected Expression left;
     protected Expression right;

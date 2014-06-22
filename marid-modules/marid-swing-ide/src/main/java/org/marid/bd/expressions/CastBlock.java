@@ -22,7 +22,7 @@ import images.Images;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.expr.CastExpression;
 import org.codehaus.groovy.ast.expr.Expression;
-import org.marid.bd.StatelessBlock;
+import org.marid.bd.StandardBlock;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -34,7 +34,7 @@ import static org.codehaus.groovy.ast.ClassHelper.OBJECT_TYPE;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class CastBlock extends StatelessBlock {
+public class CastBlock extends StandardBlock {
 
     protected Expression expression;
     protected ClassNode classNode = OBJECT_TYPE;

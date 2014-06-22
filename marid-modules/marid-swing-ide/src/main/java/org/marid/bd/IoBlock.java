@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class IoBlock<I, O> extends StatelessBlock implements Block.InputOutput<I, O> {
+public abstract class IoBlock<I, O> extends StandardBlock implements Block.InputOutput<I, O> {
 
     protected final String buttonName;
 

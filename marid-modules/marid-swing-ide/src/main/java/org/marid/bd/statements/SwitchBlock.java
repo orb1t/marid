@@ -23,7 +23,7 @@ import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.CaseStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.SwitchStatement;
-import org.marid.bd.StatelessBlock;
+import org.marid.bd.StandardBlock;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import static org.codehaus.groovy.ast.stmt.EmptyStatement.INSTANCE;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SwitchBlock extends StatelessBlock {
+public class SwitchBlock extends StandardBlock {
 
     protected final List<CaseStatement> cases = new ArrayList<>();
     protected Statement defStatement = INSTANCE;
