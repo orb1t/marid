@@ -95,12 +95,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
 
     @Override
     protected void processMouseWheelEvent(MouseWheelEvent e) {
-        final double s = 1.0 + e.getPreciseWheelRotation() / 10.0;
-        final Point mp = SwingUtil.transform(transform::inverseTransform, e.getPoint());
-        transform.translate(mp.getX(), mp.getY());
-        transform.scale(s, s);
-        transform.translate(-mp.getX(), -mp.getY());
-        repaint();
+        zoom(1.0 + e.getPreciseWheelRotation() / 10.0, e.getPoint());
         super.processMouseWheelEvent(e);
     }
 
@@ -224,6 +219,27 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                 }
             }
         }
+    }
+
+    public void zoom(double scale, Point point) {
+        final Point mp = SwingUtil.transform(transform::inverseTransform, point);
+        transform.translate(mp.getX(), mp.getY());
+        transform.scale(scale, scale);
+        transform.translate(-mp.getX(), -mp.getY());
+        repaint();
+    }
+
+    public void zoomIn() {
+        zoom(1.1, new Point(getWidth() / 2, getHeight() / 2));
+    }
+
+    public void zoomOut() {
+        zoom(0.9, new Point(getWidth() / 2, getHeight() / 2));
+    }
+
+    public void resetZoom() {
+        transform.setToIdentity();
+        repaint();
     }
 
     @Override

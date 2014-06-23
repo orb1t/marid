@@ -35,7 +35,7 @@ import java.util.prefs.Preferences;
 
 import static java.awt.BorderLayout.NORTH;
 import static java.awt.BorderLayout.SOUTH;
-import static java.awt.Dialog.ModalityType.DOCUMENT_MODAL;
+import static java.awt.Dialog.ModalityType.MODELESS;
 import static java.awt.GridBagConstraints.*;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -68,9 +68,8 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
     private final Map<String, Map<String, String>> keyLabelMap = new HashMap<>();
     private final JTabbedPane tabbedPane;
 
-    @SuppressWarnings("MagicConstant")
     public ConfigurationDialog(C component) {
-        super(windowForComponent(component), s("Configuration") + ": " + s(component.getName()), DOCUMENT_MODAL);
+        super(windowFor(component), s("Configuration") + ": " + s(component.getName()), MODELESS);
         this.component = component;
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         add(tabbedPane = new JTabbedPane(getPref("tabPlacement", TOP), getPref("tabLayoutPolicy", WRAP_TAB_LAYOUT)));
@@ -101,6 +100,10 @@ public class ConfigurationDialog<C extends Component & Configuration & PrefSuppo
         getRootPane().registerKeyboardAction(cclBtn.getAction(), getKeyStroke("ESCAPE"), WHEN_IN_FOCUSED_WINDOW);
         pack();
         setLocationRelativeTo(getOwner());
+    }
+
+    private static Window windowFor(Component component) {
+        return component instanceof Window ? (Window) component : windowForComponent(component);
     }
 
     @Override

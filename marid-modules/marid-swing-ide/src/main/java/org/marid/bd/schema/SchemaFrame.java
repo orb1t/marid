@@ -19,8 +19,10 @@
 package org.marid.bd.schema;
 
 import org.marid.swing.AbstractFrame;
+import org.marid.swing.actions.ComponentAction;
 import org.marid.swing.menu.MenuActionList;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
@@ -36,7 +38,8 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
     public SchemaFrame() {
         super("Schema");
         enableEvents(AWTEvent.COMPONENT_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
-        add(schemaEditor);
+        centerPanel.add(schemaEditor);
+        centerPanel.setOpaque(false);
         setBackground(SystemColor.controlLtHighlight);
         getContentPane().setBackground(getBackground());
         pack();
@@ -77,8 +80,40 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
     @Override
     protected void fillActions(MenuActionList actionList) {
         actionList.add("main", "Schema");
-        actionList.add(true, "main", "Show block list", "Schema")
+        final Action showBlockListAction = actionList.add("main", "Show block list", "Schema")
                 .setKey("control L")
+                .setIcon("item")
                 .setListener(e -> blockListWindow.setVisible(!blockListWindow.isVisible()));
+        actionList.add(true, "zoom", "Zoom in", "Schema")
+                .setKey("control I")
+                .setIcon("zoomin")
+                .setListener(e -> schemaEditor.zoomIn());
+        actionList.add(true, "zoom", "Zoom out", "Schema")
+                .setKey("control I")
+                .setIcon("zoomout")
+                .setListener(e -> schemaEditor.zoomOut());
+        actionList.add(true, "zoom", "Reset zoom", "Schema")
+                .setKey("control R")
+                .setIcon("zoom")
+                .setListener(e -> schemaEditor.resetZoom());
+        addBlockListButton(showBlockListAction);
+    }
+
+    private void addBlockListButton(Action action) {
+        final JToggleButton toggleButton = new JToggleButton(action);
+        toggleButton.setFocusable(false);
+        toggleButton.setText("");
+        blockListWindow.addComponentListener(new ComponentAction(ce -> {
+            switch (ce.getID()) {
+                case ComponentEvent.COMPONENT_SHOWN:
+                    toggleButton.setSelected(true);
+                    break;
+                case ComponentEvent.COMPONENT_HIDDEN:
+                    toggleButton.setSelected(false);
+                    break;
+            }
+        }));
+        toolBar.add(toggleButton);
+        toolBar.addSeparator();
     }
 }

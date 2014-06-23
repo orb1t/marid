@@ -59,6 +59,7 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         setUndecorated(getPref("undecorated", getSysPref("undecorated", false, "windows")));
         centerPanel.setBorder(CENTER_PANEL_BORDER);
         centerPanel.add(toolBar, getPref("pos", NORTH, "toolbar"));
+        toolBar.setOpaque(true);
         toolBar.setBorderPainted(true);
         toolBar.setVisible(getPref("visible", true, "toolbar"));
         add(centerPanel);

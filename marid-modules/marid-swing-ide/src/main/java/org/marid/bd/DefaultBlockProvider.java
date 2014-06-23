@@ -52,5 +52,6 @@ public class DefaultBlockProvider implements BlockProvider {
         blockConsumer.accept("Statements", new SynchronizedBlock());
         blockConsumer.accept("Statements", new EmptyBlock());
         blockConsumer.accept("Statements", new ThrowBlock());
+        blockConsumer.accept("Statements", new BlockBlock());
     }
 }
