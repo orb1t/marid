@@ -23,7 +23,8 @@ import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.marid.bd.IoBlock;
 
-import java.awt.*;
+import static java.awt.Color.GREEN;
+import static java.awt.Color.WHITE;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -33,7 +34,7 @@ public class ExpressionBlock extends IoBlock<Expression, ExpressionStatement> {
     protected Expression expression;
 
     public ExpressionBlock() {
-        super("Expression Statement", "", Images.getIconFromText("expr", 32, 32, Color.GREEN.darker(), Color.WHITE));
+        super("Expression Statement", "E", "S", Images.getIconFromText("expr", 32, 32, GREEN.darker(), WHITE));
     }
 
     @Override

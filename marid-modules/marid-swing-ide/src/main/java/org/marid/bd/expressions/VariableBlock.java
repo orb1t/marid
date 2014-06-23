@@ -35,7 +35,7 @@ public class VariableBlock extends IoBlock<ClassNode, VariableExpression> {
     protected String varName = "x";
 
     public VariableBlock() {
-        super("Variable expression", "", Images.getIconFromText("var", 32, 32, Color.BLUE, Color.WHITE));
+        super("Variable expression", "*", ">", Images.getIconFromText("var", 32, 32, Color.BLUE, Color.WHITE));
     }
 
     @ConstructorProperties({"varName"})

@@ -18,7 +18,7 @@
 
 package org.marid.bd;
 
-import org.marid.bd.components.IoBlockComponent;
+import org.marid.bd.components.StandardBlockComponent;
 
 import javax.swing.*;
 import java.lang.reflect.ParameterizedType;
@@ -29,63 +29,102 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class IoBlock<I, O> extends StandardBlock implements Block.InputOutput<I, O> {
+public abstract class IoBlock<I, O> extends StandardBlock {
 
-    protected final String buttonName;
+    protected final String inputName;
+    protected final String outputName;
 
-    public IoBlock(String name, String buttonName, String icon) {
+    protected final Input<I> input = new Input<I>() {
+        @Override
+        public void set(I value) {
+            IoBlock.this.set(value);
+        }
+
+        @Override
+        public void reset() {
+            IoBlock.this.reset();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Class<I> getInputType() {
+            for (final Type type : IoBlock.this.getClass().getGenericInterfaces()) {
+                if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == Input.class) {
+                    return (Class<I>) ((ParameterizedType) type).getActualTypeArguments()[0];
+                }
+            }
+            throw new IllegalStateException("Unable to infer input type");
+        }
+
+        @Override
+        public Block getBlock() {
+            return IoBlock.this;
+        }
+
+        @Override
+        public String getName() {
+            return inputName;
+        }
+    };
+
+    protected final Output<O> output = new Output<O>() {
+        @Override
+        public O get() {
+            return IoBlock.this.get();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Class<O> getOutputType() {
+            for (final Type type : IoBlock.this.getClass().getGenericInterfaces()) {
+                if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == Output.class) {
+                    return (Class<O>) ((ParameterizedType) type).getActualTypeArguments()[0];
+                }
+            }
+            throw new IllegalStateException("Unable to infer input type");
+        }
+
+        @Override
+        public Block getBlock() {
+            return IoBlock.this;
+        }
+
+        @Override
+        public String getName() {
+            return outputName;
+        }
+    };
+
+    public IoBlock(String name, String inputName, String outputName, String icon) {
         super(name, icon);
-        this.buttonName = buttonName;
+        this.inputName = inputName;
+        this.outputName = outputName;
     }
 
-    public IoBlock(String name, String buttonName, ImageIcon icon) {
+    public IoBlock(String name, String inputName, String outputName, ImageIcon icon) {
         super(name, icon);
-        this.buttonName = buttonName;
+        this.inputName = inputName;
+        this.outputName = outputName;
     }
 
     @Override
     public BlockComponent createComponent() {
-        return new IoBlockComponent<>(this);
+        return new StandardBlockComponent<>(this, c -> c.add(new JLabel(getVisualRepresentation())));
     }
 
     @Override
     public List<Input<?>> getInputs() {
-        return Collections.singletonList(this);
+        return Collections.singletonList(input);
     }
 
     @Override
     public List<Output<?>> getOutputs() {
-        return Collections.singletonList(this);
+        return Collections.singletonList(output);
     }
 
-    @Override
-    public Block getBlock() {
-        return this;
-    }
+    protected abstract void reset();
 
-    public String getButtonName() {
-        return buttonName;
-    }
+    protected abstract void set(I value);
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public Class<I> getInputType() {
-        for (final Type type : getClass().getGenericInterfaces()) {
-            if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == InputOutput.class) {
-                return (Class<I>) ((ParameterizedType) type).getActualTypeArguments()[0];
-            }
-        }
-        throw new IllegalStateException("Unable to infer input type");
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Class<O> getOutputType() {
-        for (final Type type : getClass().getGenericInterfaces()) {
-            if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == InputOutput.class) {
-                return (Class<O>) ((ParameterizedType) type).getActualTypeArguments()[1];
-            }
-        }
-        throw new IllegalStateException("Unable to infer input type");
-    }
+    protected abstract O get();
 }

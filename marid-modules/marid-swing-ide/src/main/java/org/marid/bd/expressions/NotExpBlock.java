@@ -33,7 +33,7 @@ public class NotExpBlock extends IoBlock<Expression, NotExpression> {
     protected Expression expression;
 
     public NotExpBlock() {
-        super("Not Expression", "", Images.getIconFromText(" ! ", 32, 32, Color.BLUE, Color.WHITE));
+        super("Not Expression", "*", ">", Images.getIconFromText(" ! ", 32, 32, Color.BLUE, Color.WHITE));
     }
 
     @Override

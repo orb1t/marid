@@ -34,7 +34,7 @@ public class CompareToNullBlock extends IoBlock<Expression, CompareToNullExpress
     protected Expression expression;
 
     public CompareToNullBlock() {
-        super("Compare To null Expression", "", Images.getIconFromText("== null", 32, 32, BLUE, WHITE));
+        super("Compare To null Expression", "*", "", Images.getIconFromText("== null", 32, 32, BLUE, WHITE));
     }
 
     @Override

@@ -156,45 +156,6 @@ public abstract class Block implements Named, Serializable, DndObject {
         };
     }
 
-    protected <I, O> InputOutput<I, O> io(String name, Consumer<I> consumer, Runnable resetter, Supplier<O> supplier) {
-        return new InputOutput<I, O>() {
-            @Override
-            public void set(I value) {
-                consumer.accept(value);
-            }
-
-            @Override
-            public void reset() {
-                resetter.run();
-            }
-
-            @Override
-            public Class<I> getInputType() {
-                return null;
-            }
-
-            @Override
-            public Block getBlock() {
-                return Block.this;
-            }
-
-            @Override
-            public O get() {
-                return supplier.get();
-            }
-
-            @Override
-            public Class<O> getOutputType() {
-                return null;
-            }
-
-            @Override
-            public String getName() {
-                return name;
-            }
-        };
-    }
-
     public abstract List<Input<?>> getInputs();
 
     public abstract List<Output<?>> getOutputs();
@@ -238,10 +199,6 @@ public abstract class Block implements Named, Serializable, DndObject {
         Class<T> getOutputType();
 
         Block getBlock();
-    }
-
-    public interface InputOutput<I, O> extends Input<I>, Output<O> {
-
     }
 
     public class In<T> implements Input<T> {
@@ -313,60 +270,6 @@ public abstract class Block implements Named, Serializable, DndObject {
         @Override
         public T get() {
             return supplier.get();
-        }
-    }
-
-    public class InOut<I, O> implements InputOutput<I, O> {
-
-        private final String name;
-        private final Class<I> inputType;
-        private final Class<O> outputType;
-        private final Consumer<I> consumer;
-        private final Runnable resetter;
-        private final Supplier<O> supplier;
-
-        public InOut(String name, Class<I> i, Class<O> o, Consumer<I> consumer, Runnable reset, Supplier<O> supplier) {
-            this.name = name;
-            this.inputType = i;
-            this.outputType = o;
-            this.consumer = consumer;
-            this.resetter = reset;
-            this.supplier = supplier;
-        }
-
-        @Override
-        public void set(I value) {
-            consumer.accept(value);
-        }
-
-        @Override
-        public void reset() {
-            resetter.run();
-        }
-
-        @Override
-        public O get() {
-            return supplier.get();
-        }
-
-        @Override
-        public Class<I> getInputType() {
-            return inputType;
-        }
-
-        @Override
-        public Class<O> getOutputType() {
-            return outputType;
-        }
-
-        @Override
-        public Block getBlock() {
-            return Block.this;
-        }
-
-        @Override
-        public String getName() {
-            return name;
         }
     }
 }

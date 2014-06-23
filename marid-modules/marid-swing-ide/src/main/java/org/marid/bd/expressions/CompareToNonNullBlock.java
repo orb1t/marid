@@ -34,7 +34,7 @@ public class CompareToNonNullBlock extends IoBlock<Expression, CompareToNullExpr
     protected Expression expression;
 
     public CompareToNonNullBlock() {
-        super("Compare To Not null Expression", "", Images.getIconFromText("!= null", 32, 32, BLUE, WHITE));
+        super("Compare To Not null Expression", "*", ">", Images.getIconFromText("!= null", 32, 32, BLUE, WHITE));
     }
 
     @Override

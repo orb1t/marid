@@ -36,7 +36,7 @@ public class BlockBlock extends IoBlock<Statement, BlockStatement> {
     protected final List<Statement> statements = new ArrayList<>();
 
     public BlockBlock() {
-        super("Block Statement", "", Images.getIconFromText("{...}", 32, 32, Color.GREEN.darker(), Color.WHITE));
+        super("Block Statement", "*", ">", Images.getIconFromText("{...}", 32, 32, Color.GREEN.darker(), Color.WHITE));
     }
 
     @Override

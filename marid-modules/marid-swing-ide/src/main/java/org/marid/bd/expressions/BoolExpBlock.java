@@ -33,7 +33,7 @@ public class BoolExpBlock extends IoBlock<Expression, BooleanExpression> {
     protected Expression expression;
 
     public BoolExpBlock() {
-        super("Boolean Expression", "", Images.getIconFromText("bool", 32, 32, Color.BLUE, Color.WHITE));
+        super("Boolean Expression", "*", ">", Images.getIconFromText("bool", 32, 32, Color.BLUE, Color.WHITE));
     }
 
     @Override
