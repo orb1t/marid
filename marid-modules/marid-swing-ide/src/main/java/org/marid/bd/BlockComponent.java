@@ -21,6 +21,7 @@ package org.marid.bd;
 import org.marid.bd.schema.SchemaEditor;
 import org.marid.swing.MaridAction;
 import org.marid.swing.actions.WindowAction;
+import org.marid.swing.geom.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -111,15 +112,31 @@ public interface BlockComponent {
         default AbstractButton getButton() {
             return (AbstractButton) this;
         }
+
+        Point getConnectionPoint();
     }
 
     interface Input extends Port {
 
         Block.Input<?> getInput();
+
+        @Override
+        default Point getConnectionPoint() {
+            final Rectangle bounds = ShapeUtils.toParent(getButton(), getBlockComponent().getComponent());
+            final Rectangle blockBounds = getBlockComponent().getBounds();
+            return new Point(blockBounds.x, blockBounds.y + bounds.y + bounds.height / 2);
+        }
     }
 
     interface Output extends Port {
 
         Block.Output<?> getOutput();
+
+        @Override
+        default Point getConnectionPoint() {
+            final Rectangle bounds = ShapeUtils.toParent(getButton(), getBlockComponent().getComponent());
+            final Rectangle blockBounds = getBlockComponent().getBounds();
+            return new Point(blockBounds.x + blockBounds.width, blockBounds.y + bounds.y + bounds.height / 2);
+        }
     }
 }

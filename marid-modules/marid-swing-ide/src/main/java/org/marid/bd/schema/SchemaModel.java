@@ -24,7 +24,9 @@ import org.marid.bd.BlockLink;
 
 import java.awt.*;
 import java.beans.ConstructorProperties;
+import java.util.ArrayList;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,6 +47,15 @@ public class SchemaModel {
 
     public SchemaModel() {
         this(new Schema(), new IdentityHashMap<>(), new IdentityHashMap<>());
+    }
+
+    public SchemaModel(SchemaEditor schemaEditor) {
+        final List<Block> blockList = new ArrayList<>();
+        final List<BlockLink> linkList = new ArrayList<>();
+        schemaEditor.visitBlockComponents(c -> blockList.add(c.getBlock()));
+        this.schema = new Schema(blockList, linkList);
+        this.blockMap = new IdentityHashMap<>();
+        this.blockLinkMap = new IdentityHashMap<>();
     }
 
     public void addBlock(BlockComponent blockComponent, Point location) {

@@ -20,7 +20,7 @@ package org.marid.bd.schema;
 
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
-import org.marid.bd.BlockLink;
+import org.marid.bd.shapes.LinkShape;
 import org.marid.concurrent.MaridTimerTask;
 import org.marid.swing.InputMaskType;
 import org.marid.swing.SwingUtil;
@@ -34,7 +34,9 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
+import java.util.List;
 import java.util.Timer;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -54,14 +56,13 @@ import static org.marid.swing.geom.ShapeUtils.ptAdd;
  */
 public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSource<Block>, SchemaFrameConfiguration {
 
-    protected final SchemaModel model;
     protected final AffineTransform transform = new AffineTransform();
     private Point mousePoint = new Point();
     private final Rectangle clip = new Rectangle();
     private AffineTransform mouseTransform = (AffineTransform) transform.clone();
     private Component curComponent;
     private Component movingComponent;
-    private BlockLink currentLink;
+    private LinkShape currentLink;
     private Point movingComponentPoint;
     private Point movingComponentLocation;
     private volatile InputMaskType panType = PAN.get();
@@ -70,9 +71,9 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     private final AtomicBoolean dirty = new AtomicBoolean();
     private final Timer timer = new Timer(true);
     private Block draggingBlock;
+    private final List<LinkShape> links = new CopyOnWriteArrayList<>();
 
-    public SchemaEditor(SchemaModel model) {
-        this.model = model;
+    public SchemaEditor() {
         setFont(UIManager.getFont("Label.font"));
         setBackground(SystemColor.controlLtHighlight);
         setDoubleBuffered(true);
