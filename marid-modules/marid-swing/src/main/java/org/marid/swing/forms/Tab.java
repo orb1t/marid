@@ -26,6 +26,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Repeatable(Tabs.class)
+@Inherited
 public @interface Tab {
 
     String label() default "";

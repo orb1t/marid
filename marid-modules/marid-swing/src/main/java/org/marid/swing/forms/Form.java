@@ -26,7 +26,11 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface Tabs {
+public @interface Form {
 
-    Tab[] value() default {};
+    String name() default "";
+
+    String icon() default "";
+
+    String description() default "";
 }

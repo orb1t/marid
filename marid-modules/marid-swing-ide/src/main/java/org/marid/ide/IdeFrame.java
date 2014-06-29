@@ -25,6 +25,9 @@ import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.MaridAction;
+import org.marid.swing.forms.ConfigurationProvider;
+import org.marid.swing.forms.Form;
+import org.marid.swing.forms.StaticConfigurationDialog;
 import org.marid.swing.log.SwingHandler;
 import org.marid.swing.menu.MenuActionTreeElement;
 
@@ -32,6 +35,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
@@ -54,6 +58,7 @@ public class IdeFrame extends JFrame implements PrefSupport, LogSupport {
         setJMenuBar(new JMenuBar());
         setLocationByPlatform(true);
         getJMenuBar().add(widgetsMenu());
+        getJMenuBar().add(preferencesMenu());
         getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
         menuRoot.fillJMenuBar(getJMenuBar());
         add(desktop = new IdeDesktop());
@@ -84,6 +89,20 @@ public class IdeFrame extends JFrame implements PrefSupport, LogSupport {
                 }
             }));
         }
+        return menu;
+    }
+
+    private JMenu preferencesMenu() {
+        final JMenu menu = new JMenu(s("Preferences"));
+        ConfigurationProvider.visitConfigurations(c -> {
+            final Form form = c.getAnnotation(Form.class);
+            final String name = form == null || form.name().isEmpty() ? s(c.getSimpleName()) : s(form.name());
+            final String icon = form == null || form.icon().isEmpty() ? null : form.icon();
+            final String description = form == null || form.description().isEmpty() ? null : s(form.description());
+            menu.add(new MaridAction(name, icon, e -> {
+                new StaticConfigurationDialog(IdeFrame.getIdeFrame(), name, c).setVisible(true);
+            }, Action.SHORT_DESCRIPTION, description));
+        });
         return menu;
     }
 
@@ -129,5 +148,9 @@ public class IdeFrame extends JFrame implements PrefSupport, LogSupport {
         }
         dispose();
         System.exit(0);
+    }
+
+    public static IdeFrame getIdeFrame() {
+        return (IdeFrame) Arrays.stream(Frame.getFrames()).filter(f -> f instanceof IdeFrame).findFirst().get();
     }
 }

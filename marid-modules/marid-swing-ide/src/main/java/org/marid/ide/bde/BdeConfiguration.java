@@ -20,6 +20,7 @@ package org.marid.ide.bde;
 
 import org.marid.bde.view.BlockLinkType;
 import org.marid.swing.forms.Configuration;
+import org.marid.swing.forms.Form;
 import org.marid.swing.forms.Input;
 import org.marid.swing.forms.Tab;
 import org.marid.swing.input.EnumInputControl;
@@ -31,6 +32,7 @@ import static org.marid.bde.view.BlockLinkType.LINE_LINK;
 /**
  * @author Dmitry Ovchinnikov.
  */
+@Form(name = "BDE configuration")
 @Tab(node = "appearance")
 @Tab(node = "GA")
 public interface BdeConfiguration extends Configuration {

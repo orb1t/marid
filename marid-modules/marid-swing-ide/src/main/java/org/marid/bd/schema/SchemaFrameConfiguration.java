@@ -21,6 +21,7 @@ package org.marid.bd.schema;
 import org.marid.bd.shapes.LinkShapeTypes;
 import org.marid.swing.InputMaskType;
 import org.marid.swing.forms.Configuration;
+import org.marid.swing.forms.Form;
 import org.marid.swing.forms.Input;
 import org.marid.swing.forms.Tab;
 import org.marid.swing.input.ComboInputControl;
@@ -33,6 +34,7 @@ import static org.marid.swing.InputMaskType.*;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Form(name = "BD configuration")
 @Tab(node = "mouse")
 @Tab(node = "links")
 public interface SchemaFrameConfiguration extends Configuration {
