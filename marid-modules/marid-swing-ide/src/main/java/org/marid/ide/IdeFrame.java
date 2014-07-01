@@ -96,12 +96,13 @@ public class IdeFrame extends JFrame implements PrefSupport, LogSupport {
         final JMenu menu = new JMenu(s("Preferences"));
         ConfigurationProvider.visitConfigurations(c -> {
             final Form form = c.getAnnotation(Form.class);
-            final String name = form == null || form.name().isEmpty() ? s(c.getSimpleName()) : s(form.name());
             final String icon = form == null || form.icon().isEmpty() ? null : form.icon();
             final String description = form == null || form.description().isEmpty() ? null : s(form.description());
-            menu.add(new MaridAction(name, icon, e -> {
-                new StaticConfigurationDialog(IdeFrame.getIdeFrame(), name, c).setVisible(true);
-            }, Action.SHORT_DESCRIPTION, description));
+            menu.add(new MaridAction(
+                    StaticConfigurationDialog.nameFor(c),
+                    icon,
+                    e -> new StaticConfigurationDialog(IdeFrame.getIdeFrame(), c).setVisible(true),
+                    Action.SHORT_DESCRIPTION, description));
         });
         return menu;
     }

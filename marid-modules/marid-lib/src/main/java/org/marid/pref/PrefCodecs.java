@@ -18,7 +18,7 @@
 
 package org.marid.pref;
 
-import org.marid.functions.UnsafeFunction;
+import org.marid.functions.SafeFunction;
 import org.marid.methods.LogMethods;
 
 import java.io.File;
@@ -160,29 +160,29 @@ public abstract class PrefCodecs {
         WRITERS.put(type, writer);
     }
 
-    protected static <T> PrefReader<T> stringReader(UnsafeFunction<String, T> function) {
+    protected static <T> PrefReader<T> stringReader(SafeFunction<String, T> function) {
         return (prefs, key) -> {
             final String v = prefs.get(key, null);
             return v == null ? null : function.applyUnsafe(v);
         };
     }
 
-    protected static <T> PrefReader<T> splitReader(String separator, UnsafeFunction<String[], T> function) {
+    protected static <T> PrefReader<T> splitReader(String separator, SafeFunction<String[], T> function) {
         return (pref, key) -> {
             final String v = pref.get(key, null);
             return v == null ? null : function.applyUnsafe(v.split(separator));
         };
     }
 
-    protected static <T> PrefWriter<T> stringWriter(UnsafeFunction<T, String> function) {
+    protected static <T> PrefWriter<T> stringWriter(SafeFunction<T, String> function) {
         return (pref, key, value) -> pref.put(key, function.apply(value));
     }
 
-    protected static <T> PrefWriter<T> formattedWriter(String format, UnsafeFunction<T, Object[]> function) {
+    protected static <T> PrefWriter<T> formattedWriter(String format, SafeFunction<T, Object[]> function) {
         return (pref, key, value) -> pref.put(key, String.format(format, function.apply(value)));
     }
 
-    protected static <T> PrefReader<T> byteArrayReader(UnsafeFunction<byte[], T> function) {
+    protected static <T> PrefReader<T> byteArrayReader(SafeFunction<byte[], T> function) {
         return (prefs, key) -> {
             final byte[] v = prefs.getByteArray(key, null);
             return v == null ? null : function.applyUnsafe(v);

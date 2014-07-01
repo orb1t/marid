@@ -22,8 +22,6 @@ import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.SysPrefSupport;
-import org.marid.swing.forms.Configuration;
-import org.marid.swing.forms.ConfigurationDialog;
 import org.marid.swing.menu.MenuActionList;
 import org.marid.swing.menu.MenuActionTreeElement;
 import org.marid.swing.util.MessageType;
@@ -77,19 +75,16 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         menu.addSeparator();
         menu.add(new MaridAction("Switch full screen mode", null, this::switchFullScreen)
                 .setKey(getSysPref("fullScreenKey", "control alt F")));
+        /*
         if (this instanceof Configuration) {
             menu.addSeparator();
             menu.add(new MaridAction("Configuration...", null, this::showConfiguration)
                     .setKey(getSysPref("showConfigurationKey", "control alt C")));
-        }
+        }*/
         menu.addSeparator();
         menu.add(new MaridAction("Close", null, e -> dispose())
                 .setKey(getSysPref("closeWindowKey", "control alt Q")));
         return menu;
-    }
-
-    private void showConfiguration(ActionEvent event) {
-        new ConfigurationDialog<>((Component & Configuration & PrefSupport) this).setVisible(true);
     }
 
     protected void switchAlwaysOnTop(ActionEvent event) {

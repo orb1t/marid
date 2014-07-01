@@ -49,8 +49,11 @@ import static javax.swing.KeyStroke.getKeyStroke;
 import static javax.swing.SwingConstants.HORIZONTAL;
 import static javax.swing.SwingConstants.*;
 import static javax.swing.SwingConstants.VERTICAL;
+import static org.marid.functions.Functions.safeConsumer;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
+import static org.marid.reflect.ReflectionUtils.annotations;
+import static org.marid.swing.forms.FormUtils.tabComparator;
 import static org.marid.swing.util.PanelUtils.groupedPanel;
 import static org.marid.util.StringUtils.capitalize;
 import static org.marid.util.StringUtils.constantToText;
@@ -60,28 +63,20 @@ import static org.marid.util.StringUtils.constantToText;
  */
 public class StaticConfigurationDialog extends JDialog implements LogSupport, PrefSupport {
 
-    protected final Class<? extends Configuration> conf;
+    protected final Class<?> conf;
     protected final Preferences preferences;
     protected final JTabbedPane tabbedPane;
     private final Map<Component, ComponentHolder> containerMap = new IdentityHashMap<>();
     private final Map<String, String> tabLabelMap = new HashMap<>();
     private final Map<String, Map<String, String>> keyLabelMap = new HashMap<>();
 
-    public StaticConfigurationDialog(Window window, String name, Class<? extends Configuration> conf) {
-        super(window, s(name), ModalityType.MODELESS);
+    public StaticConfigurationDialog(Window window, Class<?> conf) {
+        super(window, nameFor(conf), ModalityType.MODELESS);
         this.conf = conf;
         this.preferences = PrefUtils.preferences(conf, conf.getCanonicalName().split("."));
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         add(tabbedPane = new JTabbedPane(getPref("tabPlacement", TOP), getPref("tabLayoutPolicy", WRAP_TAB_LAYOUT)));
-        Arrays.stream(conf.getAnnotationsByType(Tab.class))
-                .sorted((a, b) -> a.order() != b.order() ? a.order() - b.order() : a.node().compareTo(b.node()))
-                .forEach(tab -> {
-                    try {
-                        addTab(tab);
-                    } catch (Exception x) {
-                        warning("Unable to add {0}", tab.node());
-                    }
-                });
+        annotations(conf, Tab.class, tabComparator()).forEach(safeConsumer(this::addTab, x -> warning("Tab error", x)));
         final JButton impBtn = new JButton(new MaridAction("Import preferences", "importPrefs", this::importPrefs));
         final JButton expBtn = new JButton(new MaridAction("Export preferences", "exportPrefs", this::exportPrefs));
         final JButton defBtn = new JButton(new MaridAction("Load defaults", "loadDefaults", this::loadDefaults));
@@ -97,7 +92,12 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
         getRootPane().setDefaultButton(okBtn);
         getRootPane().registerKeyboardAction(cclBtn.getAction(), getKeyStroke("ESCAPE"), WHEN_IN_FOCUSED_WINDOW);
         pack();
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(window);
+    }
+
+    public static String nameFor(Class<?> conf) {
+        final Form f = conf.getAnnotation(Form.class);
+        return f == null || f.name().isEmpty() ? s(StaticConfigurationDialog.class.getSimpleName()) : s(f.name());
     }
 
     @Override

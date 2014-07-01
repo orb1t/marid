@@ -20,9 +20,11 @@ package org.marid.reflect;
 
 import org.marid.util.MaridClassValue;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static java.lang.reflect.Modifier.*;
 
@@ -142,6 +144,28 @@ public class ReflectionUtils {
             }
             return object.getClass().getSimpleName() + map;
         }
+    }
+
+    public static <A extends Annotation> void visitAnnotations(Class<?> target, Class<A> type, Consumer<A> consumer) {
+        for (final A annotation : target.getAnnotationsByType(type)) {
+            consumer.accept(annotation);
+        }
+        for (Class<?> c = target.getSuperclass(); c != null; c = c.getSuperclass()) {
+            for (final A annotation : c.getAnnotationsByType(type)) {
+                consumer.accept(annotation);
+            }
+        }
+        for (final Class<?> i : target.getInterfaces()) {
+            for (final A annotation : i.getAnnotationsByType(type)) {
+                consumer.accept(annotation);
+            }
+        }
+    }
+
+    public static <A extends Annotation> TreeSet<A> annotations(Class<?> target, Class<A> type, Comparator<A> comparator) {
+        final TreeSet<A> set = new TreeSet<>(comparator);
+        visitAnnotations(target, type, set::add);
+        return set;
     }
 
     public static Field[] getFields(Class<?> type) {

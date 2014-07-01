@@ -16,23 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.util;
+package org.marid.functions;
 
-import org.marid.functions.SafeFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-public class MaridClassValue<T> extends ClassValue<T> {
+public class Functions {
 
-    private final SafeFunction<Class<?>, T> function;
-
-    public MaridClassValue(SafeFunction<Class<?>, T> function) {
-        this.function = function;
+    public static <T> Consumer<T> safeConsumer(SafeConsumer<T> safeConsumer, Consumer<Exception> exceptionConsumer) {
+        return arg -> {
+            try {
+                safeConsumer.acceptUnsafe(arg);
+            } catch (Exception x) {
+                exceptionConsumer.accept(x);
+            }
+        };
     }
 
-    @Override
-    protected T computeValue(Class<?> type) {
-        return function.apply(type);
+    public static <T, R> Function<T, R> safeFunction(SafeFunction<T, R> safeFunction, Function<Exception, R> exceptionFunction) {
+        return t -> {
+            try {
+                return safeFunction.apply(t);
+            } catch (Exception x) {
+                return exceptionFunction.apply(x);
+            }
+        };
     }
 }

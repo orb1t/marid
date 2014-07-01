@@ -16,26 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.swing.forms;
 
-import java.util.function.Function;
+import java.util.Comparator;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface UnsafeFunction<T, R> extends Function<T, R> {
+public class FormUtils {
 
-    @Override
-    default R apply(T t) {
-        try {
-            return applyUnsafe(t);
-        } catch (RuntimeException x) {
-            throw x;
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
+    public static Comparator<Tab> tabComparator() {
+        return (a, b) -> a.order() != b.order() ? a.order() - b.order() : a.node().compareTo(b.node());
     }
-
-    R applyUnsafe(T arg) throws Exception;
 }

@@ -23,7 +23,7 @@ import org.marid.ide.IdeFrame;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.MaridAction;
 import org.marid.swing.forms.Configuration;
-import org.marid.swing.forms.ConfigurationDialog;
+import org.marid.swing.forms.StaticConfigurationDialog;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
@@ -51,8 +51,8 @@ public abstract class Widget extends JInternalFrame implements PrefSupport {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         add(toolBar, getPref("pos", BorderLayout.NORTH, "toolbar"));
         if (this instanceof Configuration) {
-            toolBar.add(new MaridAction("Configuration", "settings", e -> new ConfigurationDialog<>(
-                    (Component & Configuration & PrefSupport) this).setVisible(true))).setFocusable(false);
+            toolBar.add(new MaridAction("Configuration", "settings", e ->
+                    new StaticConfigurationDialog(owner, Widget.this.getClass()).setVisible(true))).setFocusable(false);
             toolBar.addSeparator();
         }
         addInternalFrameListener(new InternalFrameAdapter() {
