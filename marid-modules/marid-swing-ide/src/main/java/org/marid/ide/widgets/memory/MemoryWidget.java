@@ -31,8 +31,6 @@ import org.marid.ide.widgets.Widget;
 import org.marid.pref.PrefSupport;
 
 import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 import java.util.Date;
 
 import static org.marid.l10n.L10n.s;
@@ -63,19 +61,20 @@ public class MemoryWidget extends Widget implements PrefSupport, MemoryWidgetCon
         dataset.addSeries(freeMemorySeries);
         chart = ChartFactory.createTimeSeriesChart(s("Memory"), s("Time"), s("Memory") + ", MiB", dataset);
         add(new ChartPanel(chart, useBuffer.get(), save.get(), print.get(), zoom.get(), tooltips.get()));
-        addInternalFrameListener(new InternalFrameAdapter() {
-            @Override
-            public void internalFrameOpened(InternalFrameEvent e) {
-                timer.start();
-            }
-
-            @Override
-            public void internalFrameClosed(InternalFrameEvent e) {
-                timer.stop();
-            }
-        });
         updateInterval.addConsumer(this, (o, n) -> timer.setDelay(n * 1000));
         pack();
+    }
+
+    @Override
+    public void show() {
+        super.show();
+        timer.start();
+    }
+
+    @Override
+    public void dispose() {
+        timer.stop();
+        super.dispose();
     }
 
     private TimeSeries createTimeSeries(String title) {

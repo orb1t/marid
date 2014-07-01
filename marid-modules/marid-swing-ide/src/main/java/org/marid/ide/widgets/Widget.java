@@ -26,8 +26,6 @@ import org.marid.swing.forms.Configuration;
 import org.marid.swing.forms.StaticConfigurationDialog;
 
 import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 import java.awt.*;
 
 import static javax.swing.SwingConstants.HORIZONTAL;
@@ -55,23 +53,27 @@ public abstract class Widget extends JInternalFrame implements PrefSupport {
                     new StaticConfigurationDialog(owner, Widget.this.getClass()).setVisible(true))).setFocusable(false);
             toolBar.addSeparator();
         }
-        addInternalFrameListener(new InternalFrameAdapter() {
-            @Override
-            public void internalFrameClosed(InternalFrameEvent e) {
-                putPref("orientation", toolBar.getOrientation(), "toolbar");
-                putPref("pos", getToolbarPosition(), "toolbar");
-                if (!isMaximum()) {
-                    putPref("location", getLocation());
-                    putPref("size", getSize());
-                }
-            }
+    }
 
-            @Override
-            public void internalFrameOpened(InternalFrameEvent e) {
-                setSize(getPref("size", getSize()));
-            }
-        });
+    @Override
+    public void show() {
         setLocation(getPref("location", new Point()));
+        setSize(getPref("size", getSize()));
+        super.show();
+    }
+
+    @Override
+    public void dispose() {
+        try {
+            putPref("orientation", toolBar.getOrientation(), "toolbar");
+            putPref("pos", getToolbarPosition(), "toolbar");
+            if (!isMaximum()) {
+                putPref("location", getLocation());
+                putPref("size", getSize());
+            }
+        } finally {
+            super.dispose();
+        }
     }
 
     private String getToolbarPosition() {
