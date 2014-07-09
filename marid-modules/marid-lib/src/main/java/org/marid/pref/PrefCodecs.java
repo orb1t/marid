@@ -18,17 +18,14 @@
 
 package org.marid.pref;
 
+import org.marid.functions.SafeBiConsumer;
 import org.marid.functions.SafeFunction;
 import org.marid.methods.LogMethods;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URL;
+import java.net.*;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -112,40 +109,6 @@ public abstract class PrefCodecs {
         } catch (Exception x) {
             LogMethods.warning(LOG, "Unable to enumerate pref codecs", x);
         }
-        final Map<Class<?>, PrefReader<Object>> arrayReaders = new IdentityHashMap<>();
-        final Map<Class<?>, PrefWriter<Object>> arrayWriters = new IdentityHashMap<>();
-        for (final Map.Entry<Class<?>, PrefReader<?>> e : READERS.entrySet()) {
-            final Class<?> arrayType = Array.newInstance(e.getKey(), 0).getClass();
-            arrayReaders.put(arrayType, (prefs, key) -> {
-                if (prefs.nodeExists(key)) {
-                    final Preferences node = prefs.node(key);
-                    final String[] keys = node.keys();
-                    final int n = keys.length;
-                    final Object array = Array.newInstance(e.getKey(), n);
-                    for (int i = 0; i < n; i++) {
-                        Array.set(array, i, e.getValue().load(node, keys[i]));
-                    }
-                    return array;
-                } else {
-                    return null;
-                }
-            });
-        }
-        for (final Map.Entry<Class<?>, PrefWriter<?>> e : WRITERS.entrySet()) {
-            final Class<?> arrayType = Array.newInstance(e.getKey(), 0).getClass();
-            arrayWriters.put(arrayType, (prefs, key, val) -> {
-                final Preferences node = prefs.node(key);
-                for (final String k : node.keys()) {
-                    node.remove(k);
-                }
-                final int n = Array.getLength(val);
-                for (int i = 0; i < n; i++) {
-                    ((PrefWriter<Object>) e.getValue()).save(node, Integer.toString(i), Array.get(val, i));
-                }
-            });
-        }
-        READERS.putAll(arrayReaders);
-        WRITERS.putAll(arrayWriters);
     }
 
     public abstract Map<Class<?>, PrefReader<?>> readers();
@@ -180,6 +143,50 @@ public abstract class PrefCodecs {
 
     protected static <T> PrefWriter<T> formattedWriter(String format, SafeFunction<T, Object[]> function) {
         return (pref, key, value) -> pref.put(key, String.format(format, function.apply(value)));
+    }
+
+    protected static <T, K, V> PrefWriter<T> mapWriter(Class<K> keyType, Class<V> valueType, SafeBiConsumer<T, Map<K, V>> consumer) {
+        return (pref, key, value) -> {
+            final Map<K, V> map = new LinkedHashMap<>();
+            consumer.accept(value, map);
+            final String[] entries = map.entrySet().stream().map(e -> {
+                final PrefWriter<K> keyWriter = getWriter(keyType);
+                final PrefWriter<V> valueWriter = getWriter(valueType);
+                final MapBasedPreferences preferences = new MapBasedPreferences();
+                final String k, v;
+                try {
+                    keyWriter.save(preferences, "key", e.getKey());
+                    valueWriter.save(preferences, "value", e.getValue());
+                    k = URLEncoder.encode(preferences.getSpi("key"), "UTF-8");
+                    v = URLEncoder.encode(preferences.getSpi("value"), "UTF-8");
+                } catch (Exception x) {
+                    throw new IllegalStateException(x);
+                }
+                return k + "=" + v;
+            }).toArray(String[]::new);
+            pref.put(key, String.join("|", entries));
+        };
+    }
+
+    protected static <T, K, V> PrefReader<T> mapReader(Class<K> keyType, Class<V> valueType, SafeFunction<Map<K, V>, T> function) {
+        return (prefs, key) -> {
+            final String entriesText = prefs.get(key, null);
+            if (entriesText == null) {
+                return null;
+            }
+            final String[] entries = entriesText.split("[|]");
+            final Map<K, V> map = new LinkedHashMap<>();
+            final PrefReader<K> keyReader = getReader(keyType);
+            final PrefReader<V> valueReader = getReader(valueType);
+            final MapBasedPreferences preferences = new MapBasedPreferences();
+            for (final String entry : entries) {
+                final String[] kv = entry.split("=");
+                preferences.putSpi("key", kv[0]);
+                preferences.putSpi("value", kv[1]);
+                map.put(keyReader.load(preferences, "key"), valueReader.load(preferences, "value"));
+            }
+            return function.apply(map);
+        };
     }
 
     protected static <T> PrefReader<T> byteArrayReader(SafeFunction<byte[], T> function) {

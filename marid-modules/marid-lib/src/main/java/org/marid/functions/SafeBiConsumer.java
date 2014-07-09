@@ -16,34 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.pref;
+package org.marid.functions;
 
-import java.util.prefs.Preferences;
+import java.util.function.BiConsumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @FunctionalInterface
-public interface PrefReader<T> {
+public interface SafeBiConsumer<A1, A2> extends BiConsumer<A1, A2> {
 
-    T load(Preferences preferences, String key) throws Exception;
+    void acceptUnsafe(A1 arg1, A2 arg2) throws Exception;
 
-    default T load(Preferences preferences, String key, T def) throws Exception {
-        final T v = load(preferences, key);
-        return v == null ? def : v;
-    }
-
-    default T loadSafe(Preferences preferences, String key) {
+    default void accept(A1 arg1, A2 arg2) {
         try {
-            return load(preferences, key);
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
-    }
-
-    default T loadSafe(Preferences preferences, String key, T def) {
-        try {
-            return load(preferences, key, def);
+            acceptUnsafe(arg1, arg2);
         } catch (Exception x) {
             throw new IllegalStateException(x);
         }

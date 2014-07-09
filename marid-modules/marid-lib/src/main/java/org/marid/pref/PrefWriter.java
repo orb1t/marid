@@ -27,4 +27,12 @@ import java.util.prefs.Preferences;
 public interface PrefWriter<T> {
 
     void save(Preferences preferences, String key, T value) throws Exception;
+
+    default void saveSafe(Preferences preferences, String key, T value) {
+        try {
+            save(preferences, key, value);
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
+    }
 }

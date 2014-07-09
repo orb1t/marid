@@ -31,23 +31,23 @@ import org.marid.swing.input.SpinIntInputControl;
 public interface MemoryWidgetConfiguration extends Configuration {
 
     @Input(tab = "chart")
-    Pv<Boolean> useBuffer = new Pv<>(BooleanInputControl::new, () -> true);
+    Pv<Boolean> USE_BUFFER = new Pv<>(BooleanInputControl::new, () -> true);
 
     @Input(tab = "chart")
-    Pv<Boolean> save = new Pv<>(BooleanInputControl::new, () -> true);
+    Pv<Boolean> SAVE = new Pv<>(BooleanInputControl::new, () -> true);
 
     @Input(tab = "chart")
-    Pv<Boolean> print = new Pv<>(BooleanInputControl::new, () -> true);
+    Pv<Boolean> PRINT = new Pv<>(BooleanInputControl::new, () -> true);
 
     @Input(tab = "chart")
-    Pv<Boolean> zoom = new Pv<>(BooleanInputControl::new, () -> true);
+    Pv<Boolean> ZOOM = new Pv<>(BooleanInputControl::new, () -> true);
 
     @Input(tab = "chart")
-    Pv<Boolean> tooltips = new Pv<>(BooleanInputControl::new, () -> true);
+    Pv<Boolean> TOOLTIPS = new Pv<>(BooleanInputControl::new, () -> true);
 
     @Input(tab = "chart")
-    Pv<Integer> updateInterval = new Pv<>(() -> new SpinIntInputControl(1, 10, 1), () -> 1);
+    Pv<Integer> UPDATE_INTERVAL = new Pv<>(() -> new SpinIntInputControl(1, 10, 1), () -> 1);
 
     @Input(tab = "chart")
-    Pv<Integer> historySize = new Pv<>(() -> new SpinIntInputControl(1, 60, 1), () -> 3);
+    Pv<Integer> HISTORY_SIZE = new Pv<>(() -> new SpinIntInputControl(1, 60, 1), () -> 3);
 }
