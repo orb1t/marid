@@ -18,7 +18,6 @@
 
 package org.marid.bd.schema;
 
-import org.marid.bd.shapes.LinkShapeTypes;
 import org.marid.swing.InputMaskType;
 import org.marid.swing.forms.Configuration;
 import org.marid.swing.forms.Form;
@@ -49,11 +48,5 @@ public interface SchemaFrameConfiguration extends Configuration {
     Pv<InputMaskType> DRAG = new Pv<>(() -> new EnumInputControl<>(InputMaskType::values), () -> CONTROL);
 
     @Input(tab = "links")
-    Pv<LinkShapeType> LINK_SHAPE_TYPE = new Pv<>(() -> {
-        final ComboInputControl<LinkShapeType> ctl = new ComboInputControl<>(LinkShapeType.class, LinkShapeTypes.class);
-        ctl.addActionListener(e -> {
-
-        });
-        return ctl;
-    }, () -> LINE);
+    Pv<LinkShapeType> LINK_SHAPE_TYPE = new Pv<>(() -> new ComboInputControl<>(LinkShapeType.class), () -> LINE);
 }

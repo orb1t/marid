@@ -126,7 +126,6 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
                         ch.pv.save(ch.control);
                         fine("Saved {0}.{1}: {2}", ch.node, ch.key, newValue);
                     }
-                    ch.pv.fireConsumers(oldValue, newValue);
                 }
             } catch (Exception x) {
                 exceptionMap.put(e.getValue(), x);
@@ -283,7 +282,7 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
         }
 
         public Object getDefaultValue() {
-            return pv.getDefaultValue();
+            return pv.getDefaultValueSupplier().get();
         }
 
         public MaridAction.MaridActionListener getActionListener() {

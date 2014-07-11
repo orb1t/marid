@@ -23,29 +23,26 @@ import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.PrefUtils;
 import org.marid.swing.input.InputControl;
+import org.marid.swing.pref.SwingPrefCodecs;
 import org.marid.util.StringUtils;
 
 import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 import java.awt.*;
-import java.awt.event.HierarchyEvent;
-import java.awt.event.HierarchyListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.LinkedList;
-import java.util.List;
+import java.lang.reflect.ParameterizedType;
+import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+import static org.marid.functions.Functions.safePredicate;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -54,12 +51,12 @@ public interface Configuration {
 
     class Pv<V> implements PrefSupport, LogSupport {
 
+        private static final Map<Pv, PvData> PV_MAP = Collections.synchronizedMap(new WeakHashMap<>());
+
         public final Class<?> caller = ClassResolver.CLASS_RESOLVER.getClassContext()[2];
-        private Field field;
         private final Supplier<? extends InputControl<V>> controlSupplier;
         private final Supplier<V> defaultValueSupplier;
         private final Preferences preferences;
-        private final Map<Object, List<BiConsumer<V, V>>> consumerMap = new WeakHashMap<>();
 
         public Pv(Supplier<? extends InputControl<V>> controlSupplier, Supplier<V> defaultValueSupplier) {
             this.controlSupplier = controlSupplier;
@@ -82,10 +79,6 @@ public interface Configuration {
             return preferences;
         }
 
-        public V getDefaultValue() {
-            return defaultValueSupplier.get();
-        }
-
         public InputControl<V> getControl() {
             return controlSupplier.get();
         }
@@ -94,69 +87,39 @@ public interface Configuration {
             return defaultValueSupplier;
         }
 
-        private Field getField() {
-            if (field == null) {
-                for (final Field field : caller.getFields()) {
-                    if (Modifier.isStatic(field.getModifiers())) {
-                        final Input input = field.getAnnotation(Input.class);
-                        if (input != null) {
-                            try {
-                                if (this == field.get(null)) {
-                                    return this.field = field;
-                                }
-                            } catch (ReflectiveOperationException x) {
-                                throw new IllegalStateException(x);
-                            }
-                        }
-                    }
-                }
-                throw new IllegalStateException("No such field");
-            } else {
-                return field;
-            }
-        }
-
-        private String getFieldName() {
-            final Field field = getField();
-            return field == null ? null : field.getName();
+        @SuppressWarnings("unchecked")
+        public PvData<V> getPvData() {
+            return PV_MAP.computeIfAbsent(this, pv -> stream(pv.caller.getFields())
+                    .filter(safePredicate(f -> isStatic(f.getModifiers())
+                            && f.isAnnotationPresent(Input.class)
+                            && f.get(null) == pv))
+                    .map(PvData::new)
+                    .findFirst()
+                    .get());
         }
 
         public V get() {
-            final Field field = getField();
-            final Input input = field.getAnnotation(Input.class);
-            final String key = input.name().isEmpty() ? field.getName() : input.name();
-            return getPref(key, getDefaultValue(), input.tab());
+            return getPref(getPvData().type, getPvData().getKey(), getDefaultValueSupplier().get(), getPvData().getTab());
         }
 
         public void save(InputControl<V> control) {
-            final Field field = getField();
-            final Input input = field.getAnnotation(Input.class);
-            final String key = input.name().isEmpty() ? field.getName() : input.name();
-            putPref(key, control.getInputValue(), input.tab());
+            putPref(getPvData().type, getPvData().getKey(), control.getInputValue(), getPvData().getTab());
         }
 
         public boolean contains() {
-            final Field field = getField();
-            final Input input = field.getAnnotation(Input.class);
-            final String key = input.name().isEmpty() ? field.getName() : input.name();
-            final Preferences p = preferences.node(input.tab());
+            final Preferences p = preferences.node(getPvData().getTab());
             try {
-                return asList(p.keys()).contains(key) || asList(p.childrenNames()).contains(key);
+                return asList(p.keys()).contains(getPvData().getKey());
             } catch (BackingStoreException x) {
                 throw new IllegalStateException(x);
             }
         }
 
         public void remove() {
-            final Field field = getField();
-            final Input input = field.getAnnotation(Input.class);
-            final String key = input.name().isEmpty() ? field.getName() : input.name();
-            final Preferences p = preferences.node(input.tab());
+            final Preferences p = preferences.node(getPvData().getTab());
             try {
-                if (asList(p.keys()).contains(key)) {
-                    p.remove(key);
-                } else if (asList(p.childrenNames()).contains(key)) {
-                    p.node(key).removeNode();
+                if (asList(p.keys()).contains(getPvData().getKey())) {
+                    p.remove(getPvData().getKey());
                 }
             } catch (BackingStoreException x) {
                 throw new IllegalStateException(x);
@@ -167,76 +130,38 @@ public interface Configuration {
             return TypeCaster.TYPE_CASTER.cast(type, get());
         }
 
-        public void addConsumer(JInternalFrame frame, BiConsumer<V, V> consumer) {
-            frame.addInternalFrameListener(new InternalFrameAdapter() {
-                @Override
-                public void internalFrameOpened(InternalFrameEvent e) {
-                    info("Adding configuration listener to {0}", getFieldName());
-                    appendConsumer(frame, consumer);
-                }
-
-                @Override
-                public void internalFrameClosed(InternalFrameEvent e) {
-                    info("Removing configuration listener from {0}", getFieldName());
-                    removeConsumer(frame, consumer);
-                    frame.removeInternalFrameListener(this);
-                }
-            });
+        public void addConsumer(JInternalFrame frame, Consumer<V> consumer) {
+            SwingPrefCodecs.addConsumer(frame, getPvData().type, preferences().node(getPvData().getTab()), getPvData().getKey(), consumer);
         }
 
-        public void addConsumer(Window window, BiConsumer<V, V> consumer) {
-            window.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowOpened(WindowEvent e) {
-                    info("Adding configuration listener to {0}", getFieldName());
-                    appendConsumer(window, consumer);
-                }
-
-                @Override
-                public void windowClosed(WindowEvent e) {
-                    info("Removing configuration listener from {0}", getFieldName());
-                    appendConsumer(window, consumer);
-                    window.removeWindowListener(this);
-                }
-            });
+        public void addConsumer(Window window, Consumer<V> consumer) {
+            SwingPrefCodecs.addConsumer(window, getPvData().type, preferences().node(getPvData().getTab()), getPvData().getKey(), consumer);
         }
 
-        public void addConsumer(Component component, BiConsumer<V, V> consumer) {
-            component.addHierarchyListener(new HierarchyListener() {
-                @Override
-                public void hierarchyChanged(HierarchyEvent e) {
-                    if (e.getChanged() instanceof Window) {
-                        addConsumer((Window) e.getChanged(), consumer);
-                        component.removeHierarchyListener(this);
-                    } else if (e.getChanged() instanceof JInternalFrame) {
-                        addConsumer((JInternalFrame) e.getChanged(), consumer);
-                        component.removeHierarchyListener(this);
-                    }
-                }
-            });
+        public void addConsumer(Component component, Consumer<V> consumer) {
+            SwingPrefCodecs.addConsumer(component, getPvData().type, preferences().node(getPvData().getTab()), getPvData().getKey(), consumer);
         }
 
-        private void appendConsumer(Object gcBase, BiConsumer<V, V> consumer) {
-            consumerMap.computeIfAbsent(gcBase, o -> new LinkedList<>()).add(consumer);
-        }
+        public static final class PvData<V> {
 
-        private void removeConsumer(Object gcBase, BiConsumer<V, V> consumer) {
-            final List<BiConsumer<V, V>> consumers = consumerMap.get(gcBase);
-            if (consumers != null) {
-                consumers.remove(consumer);
+            public final Field field;
+            public final Input input;
+            public final Class<V> type;
+
+            @SuppressWarnings("unchecked")
+            private PvData(Field field) {
+                this.field = field;
+                this.input = field.getAnnotation(Input.class);
+                this.type = (Class<V>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
             }
-        }
 
-        public void clearConsumers(Object gcBase) {
-            consumerMap.remove(gcBase);
-        }
+            public String getKey() {
+                return input.name().isEmpty() ? field.getName() : input.name();
+            }
 
-        public void fireConsumers(V oldValue, V newValue) {
-            consumerMap.forEach((k, v) -> {
-                for (final BiConsumer<V, V> consumer : v) {
-                    consumer.accept(oldValue, newValue);
-                }
-            });
+            public String getTab() {
+                return input.tab();
+            }
         }
 
         private static final class ClassResolver extends SecurityManager {

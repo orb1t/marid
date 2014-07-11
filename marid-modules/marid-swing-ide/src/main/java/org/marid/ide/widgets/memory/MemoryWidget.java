@@ -59,7 +59,7 @@ public class MemoryWidget extends Widget implements PrefSupport, MemoryWidgetCon
         dataset.addSeries(freeMemorySeries);
         final JFreeChart chart = createTimeSeriesChart(s("Memory"), s("Time"), s("Memory") + ", MiB", dataset);
         add(new ChartPanel(chart, USE_BUFFER.get(), SAVE.get(), PRINT.get(), ZOOM.get(), TOOLTIPS.get()));
-        UPDATE_INTERVAL.addConsumer(this, (o, n) -> timer.setDelay(n * 1000));
+        UPDATE_INTERVAL.addConsumer(this, n -> timer.setDelay(n * 1000));
         pack();
     }
 

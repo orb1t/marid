@@ -80,10 +80,10 @@ public class BlockEditor extends JComponent implements DndTarget<Block>, Runnabl
         setTransferHandler(new MaridTransferHandler());
         setForeground(SystemColor.controlDkShadow);
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
-        MUTATION_PROBABILITY.addConsumer(this, (o, n) -> mutationProbability = n);
-        INCUBATOR_SIZE.addConsumer(this, (o, n) -> incubatorSize = n);
-        LINK_TYPE.addConsumer(this, (o, n) -> updateLinks());
-        SPECIES.addConsumer(this, (o, n) -> updateLinks());
+        MUTATION_PROBABILITY.addConsumer(this, n -> mutationProbability = n);
+        INCUBATOR_SIZE.addConsumer(this, n -> incubatorSize = n);
+        LINK_TYPE.addConsumer(this, n -> updateLinks());
+        SPECIES.addConsumer(this, n -> updateLinks());
     }
 
     private void updateLinks() {

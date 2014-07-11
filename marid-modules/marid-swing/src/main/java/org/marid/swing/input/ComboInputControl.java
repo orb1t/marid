@@ -47,6 +47,10 @@ public class ComboInputControl<E> extends JComboBox<E> implements InputControl<E
         super(vectorFrom(type, constantContainer));
     }
 
+    public ComboInputControl(Class<E> type) {
+        super(vectorFrom(type, type));
+    }
+
     @Override
     public E getInputValue() {
         return getModel().getElementAt(getSelectedIndex());

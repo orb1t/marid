@@ -81,9 +81,9 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         setTransferHandler(new MaridTransferHandler());
         setForeground(SystemColor.controlDkShadow);
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
-        PAN.addConsumer(this, (o, n) -> panType = n);
-        MOVE.addConsumer(this, (o, n) -> moveType = n);
-        DRAG.addConsumer(this, (o, n) -> dragType = n);
+        PAN.addConsumer(this, n -> panType = n);
+        MOVE.addConsumer(this, n -> moveType = n);
+        DRAG.addConsumer(this, n -> dragType = n);
     }
 
     public void start() {
