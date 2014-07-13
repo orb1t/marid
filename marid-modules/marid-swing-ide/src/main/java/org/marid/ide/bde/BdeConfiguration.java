@@ -23,7 +23,7 @@ import org.marid.swing.forms.Configuration;
 import org.marid.swing.forms.Form;
 import org.marid.swing.forms.Input;
 import org.marid.swing.forms.Tab;
-import org.marid.swing.input.EnumInputControl;
+import org.marid.swing.input.ComboInputControl;
 import org.marid.swing.input.FloatInputControl;
 import org.marid.swing.input.SpinIntInputControl;
 
@@ -38,7 +38,7 @@ import static org.marid.bde.view.BlockLinkType.LINE_LINK;
 public interface BdeConfiguration extends Configuration {
 
     @Input(tab = "appearance")
-    Pv<BlockLinkType> LINK_TYPE = new Pv<>(() -> new EnumInputControl<>(BlockLinkType::values), () -> LINE_LINK);
+    Pv<BlockLinkType> LINK_TYPE = new Pv<>(() -> new ComboInputControl<>(BlockLinkType.class), () -> LINE_LINK);
 
     @Input(tab = "GA")
     Pv<Float> MUTATION_PROBABILITY = new Pv<>(FloatInputControl::new, () -> 0.3f);

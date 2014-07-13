@@ -43,17 +43,7 @@ public abstract class AbstractDialog extends JDialog implements WindowListener {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
-    public AbstractDialog(Frame frame, String title, boolean modal) {
-        super(frame, s(title), modal);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-    }
-
-    public AbstractDialog(Dialog dialog, String title, ModalityType modalityType) {
-        super(dialog, s(title), modalityType);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-    }
-
-    protected final Action acceptAction = new MaridAction(getAcceptLabel(), getAcceptIcon(), (a, e) -> {
+    protected final Action acceptAction = new MaridAction(getAcceptLabel(), getAcceptIcon(), e -> {
         try {
             accept();
         } catch (Exception x) {
@@ -63,7 +53,7 @@ public abstract class AbstractDialog extends JDialog implements WindowListener {
         }
     });
 
-    protected final Action rejectAction = new MaridAction(getRejectLabel(), getRejectIcon(), (a, e) -> {
+    protected final Action rejectAction = new MaridAction(getRejectLabel(), getRejectIcon(), e -> {
         try {
             reject();
         } catch (Exception x) {
@@ -103,11 +93,11 @@ public abstract class AbstractDialog extends JDialog implements WindowListener {
     }
 
     protected String getAcceptIcon() {
-        return "s16/ok.png";
+        return "ok";
     }
 
     protected String getRejectIcon() {
-        return "s16/cancel.png";
+        return "cancel";
     }
 
     protected String getAcceptLabel() {
@@ -124,15 +114,19 @@ public abstract class AbstractDialog extends JDialog implements WindowListener {
     protected void reject() {
     }
 
-    protected abstract void fill(GroupLayout gl, SequentialGroup vg, ParallelGroup hg);
+    protected abstract void fill(GroupLayout gl, SequentialGroup vg, SequentialGroup hg);
 
-    protected void addDefaultButtons(GroupLayout gl, SequentialGroup vg, ParallelGroup hg) {
-        vg.addGap(24, 32, Integer.MAX_VALUE);
-        JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
+    protected void addDefaultButtons() {
+        final JPanel panel = new JPanel();
+        final GroupLayout gl = new GroupLayout(panel);
+        gl.setAutoCreateGaps(true);
+        final SequentialGroup vg = gl.createSequentialGroup();
+        final ParallelGroup hg = gl.createParallelGroup();
+        final JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
         vg.addComponent(separator);
         hg.addComponent(separator);
-        JButton acceptButton = new JButton(acceptAction);
-        JButton rejectButton = new JButton(rejectAction);
+        final JButton acceptButton = new JButton(acceptAction);
+        final JButton rejectButton = new JButton(rejectAction);
         vg.addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
                 .addComponent(rejectButton)
                 .addComponent(acceptButton));
@@ -140,31 +134,29 @@ public abstract class AbstractDialog extends JDialog implements WindowListener {
                 .addComponent(rejectButton)
                 .addGap(32, 64, Integer.MAX_VALUE)
                 .addComponent(acceptButton));
+        gl.setVerticalGroup(vg);
+        gl.setHorizontalGroup(hg);
+        panel.setLayout(gl);
+        add(panel, BorderLayout.SOUTH);
         rootPane.setDefaultButton(acceptButton);
     }
 
-    private void init() {
+    @Override
+    public void pack() {
         addWindowListener(this);
-        GroupLayout gl = new GroupLayout(getContentPane());
+        final JPanel mainPanel = new JPanel();
+        final GroupLayout gl = new GroupLayout(mainPanel);
         gl.setAutoCreateContainerGaps(true);
         gl.setAutoCreateGaps(true);
-        SequentialGroup vg = gl.createSequentialGroup();
-        ParallelGroup hg = gl.createParallelGroup();
+        final SequentialGroup vg = gl.createSequentialGroup();
+        final SequentialGroup hg = gl.createSequentialGroup();
         fill(gl, vg, hg);
         gl.setVerticalGroup(vg);
         gl.setHorizontalGroup(hg);
-        getContentPane().setLayout(gl);
-        KeyStroke escape = KeyStroke.getKeyStroke("ESCAPE");
-        rootPane.registerKeyboardAction(rejectAction, escape, WHEN_IN_FOCUSED_WINDOW);
-        pack();
+        mainPanel.setLayout(gl);
+        add(mainPanel);
+        rootPane.registerKeyboardAction(rejectAction, KeyStroke.getKeyStroke("ESCAPE"), WHEN_IN_FOCUSED_WINDOW);
+        super.pack();
         setLocationRelativeTo(getOwner());
-    }
-
-    @Override
-    public void setVisible(boolean b) {
-        if (!(getLayout() instanceof GroupLayout)) {
-            init();
-        }
-        super.setVisible(b);
     }
 }

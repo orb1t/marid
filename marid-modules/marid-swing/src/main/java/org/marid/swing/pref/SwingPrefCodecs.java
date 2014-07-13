@@ -175,17 +175,22 @@ public class SwingPrefCodecs extends PrefCodecs {
     }
 
     public static <T> void addConsumer(Component component, Class<T> type, Preferences prefs, String key, Consumer<T> consumer) {
-        component.addHierarchyListener(new HierarchyListener() {
-            @Override
-            public void hierarchyChanged(HierarchyEvent e) {
-                if (e.getChanged() instanceof Window) {
-                    addConsumer((Window) e.getChanged(), type, prefs, key, consumer);
-                    component.removeHierarchyListener(this);
-                } else if (e.getChanged() instanceof JInternalFrame) {
-                    addConsumer((JInternalFrame) e.getChanged(), type, prefs, key, consumer);
-                    component.removeHierarchyListener(this);
+        final Window window = SwingUtilities.windowForComponent(component);
+        if (window != null) {
+            addConsumer(window, type, prefs, key, consumer);
+        } else {
+            component.addHierarchyListener(new HierarchyListener() {
+                @Override
+                public void hierarchyChanged(HierarchyEvent e) {
+                    if (e.getChanged() instanceof Window) {
+                        addConsumer((Window) e.getChanged(), type, prefs, key, consumer);
+                        component.removeHierarchyListener(this);
+                    } else if (e.getChanged() instanceof JInternalFrame) {
+                        addConsumer((JInternalFrame) e.getChanged(), type, prefs, key, consumer);
+                        component.removeHierarchyListener(this);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 }

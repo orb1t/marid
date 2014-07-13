@@ -212,7 +212,7 @@ public abstract class PrefCodecs {
         if (writer != null) {
             return writer;
         } else if (type.isEnum()) {
-            return (pref, key, val) -> pref.put(key, val.toString());
+            return (pref, key, val) -> pref.put(key, ((Enum) val).name());
         } else {
             return (pref, key, val) -> pref.put(key, TYPE_CASTER.cast(String.class, val));
         }

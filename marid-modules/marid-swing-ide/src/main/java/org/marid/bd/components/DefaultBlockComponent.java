@@ -64,6 +64,18 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
 
         public DefaultInput(Block.Input<?> input) {
             super(input.getName());
+            addActionListener(e -> getBlockComponent().getSchemaEditor().visitBlockComponents(bc -> {
+                if (bc != getBlockComponent()) {
+                    bc.getOutputs().forEach(o -> {
+                        if (o.getButton().isSelected()) {
+                            o.getButton().setSelected(false);
+                            getBlockComponent().getSchemaEditor().addLink(o, this);
+                        }
+                    });
+                }
+                getButton().setSelected(false);
+                getBlockComponent().getSchemaEditor().repaint();
+            }));
             this.input = input;
         }
 

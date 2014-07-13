@@ -31,12 +31,13 @@ import org.marid.swing.geom.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
+import java.util.*;
 import java.util.List;
 import java.util.Timer;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -71,7 +72,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     private final AtomicBoolean dirty = new AtomicBoolean();
     private final Timer timer = new Timer(true);
     private Block draggingBlock;
-    private final List<LinkShape> links = new CopyOnWriteArrayList<>();
+    private final List<LinkShape> links = new ArrayList<>();
 
     public SchemaEditor() {
         setFont(UIManager.getFont("Label.font"));
@@ -84,14 +85,31 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         PAN.addConsumer(this, n -> panType = n);
         MOVE.addConsumer(this, n -> moveType = n);
         DRAG.addConsumer(this, n -> dragType = n);
+        LINK_SHAPE_TYPE.addConsumer(this, n -> EventQueue.invokeLater(() -> {
+            final Map<BlockComponent.Output, BlockComponent.Input> map = new IdentityHashMap<>();
+            links.forEach(shape -> map.put(shape.output, shape.input));
+            links.clear();
+            map.forEach(this::addLink);
+        }));
     }
 
     public void start() {
-        timer.schedule(new MaridTimerTask(() -> processDirty(dirty, () -> invokeLater(super::repaint))), 40L, 40L);
+        timer.schedule(new MaridTimerTask(() -> processDirty(dirty, this::update)), 40L, 40L);
     }
 
     public void stop() {
         timer.cancel();
+    }
+
+    public void update() {
+        invokeLater(() -> {
+            links.forEach(LinkShape::update);
+            super.repaint();
+        });
+    }
+
+    public void addLink(BlockComponent.Output output, BlockComponent.Input input) {
+        links.add(LINK_SHAPE_TYPE.get().linkShapeFor(output, input));
     }
 
     @Override
@@ -187,6 +205,9 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         g.transform(transform);
         final Stroke oldStroke = g.getStroke();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        for (final LinkShape linkShape : links) {
+            linkShape.paint(g);
+        }
         g.setStroke(oldStroke);
         for (int i = getComponentCount() - 1; i >= 0; i--) {
             final Component c = getComponent(i);
@@ -203,6 +224,13 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     @Override
     public void repaint() {
         dirty.set(true);
+    }
+
+    public void resetInputOutputSelection(ActionEvent actionEvent) {
+        visitBlockComponents(bc -> {
+            bc.getOutputs().forEach(o -> o.getButton().setSelected(false));
+            bc.getInputs().forEach(i -> i.getButton().setSelected(false));
+        });
     }
 
     protected void prepareMove(Component component, Point point) {

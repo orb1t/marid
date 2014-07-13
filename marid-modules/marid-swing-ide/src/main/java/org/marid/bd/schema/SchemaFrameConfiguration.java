@@ -18,16 +18,16 @@
 
 package org.marid.bd.schema;
 
+import org.marid.bd.shapes.LinkShapeType;
 import org.marid.swing.InputMaskType;
 import org.marid.swing.forms.Configuration;
 import org.marid.swing.forms.Form;
 import org.marid.swing.forms.Input;
 import org.marid.swing.forms.Tab;
 import org.marid.swing.input.ComboInputControl;
-import org.marid.swing.input.EnumInputControl;
+import org.marid.swing.input.ExtComboInputControl;
 
-import static org.marid.bd.shapes.LinkShapeTypes.LINE;
-import static org.marid.bd.shapes.LinkShapeTypes.LinkShapeType;
+import static org.marid.bd.shapes.LinkShapeType.LINE;
 import static org.marid.swing.InputMaskType.*;
 
 /**
@@ -39,14 +39,14 @@ import static org.marid.swing.InputMaskType.*;
 public interface SchemaFrameConfiguration extends Configuration {
 
     @Input(tab = "mouse")
-    Pv<InputMaskType> PAN = new Pv<>(() -> new EnumInputControl<>(InputMaskType::values), () -> SHIFT);
+    Pv<InputMaskType> PAN = new Pv<>(() -> new ComboInputControl<>(InputMaskType.class), () -> SHIFT);
 
     @Input(tab = "mouse")
-    Pv<InputMaskType> MOVE = new Pv<>(() -> new EnumInputControl<>(InputMaskType::values), () -> ALT);
+    Pv<InputMaskType> MOVE = new Pv<>(() -> new ComboInputControl<>(InputMaskType.class), () -> ALT);
 
     @Input(tab = "mouse")
-    Pv<InputMaskType> DRAG = new Pv<>(() -> new EnumInputControl<>(InputMaskType::values), () -> CONTROL);
+    Pv<InputMaskType> DRAG = new Pv<>(() -> new ComboInputControl<>(InputMaskType.class), () -> CONTROL);
 
     @Input(tab = "links")
-    Pv<LinkShapeType> LINK_SHAPE_TYPE = new Pv<>(() -> new ComboInputControl<>(LinkShapeType.class), () -> LINE);
+    Pv<LinkShapeType> LINK_SHAPE_TYPE = new Pv<>(() -> new ExtComboInputControl<>(LinkShapeType.class), () -> LINE);
 }

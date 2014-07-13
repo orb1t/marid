@@ -19,7 +19,7 @@
 package org.marid.bd.expressions.binary;
 
 import org.marid.bd.components.AbstractBlockComponentEditor;
-import org.marid.swing.input.EnumInputControl;
+import org.marid.swing.input.ComboInputControl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,7 +32,7 @@ import static org.marid.bd.expressions.binary.BinExpBlock.TokenType;
  */
 public class BinExpEditor extends AbstractBlockComponentEditor<BinExpBlock> {
 
-    protected final EnumInputControl<TokenType> tokenTypeBox = new EnumInputControl<>(TokenType::values);
+    protected final ComboInputControl<TokenType> tokenTypeBox = new ComboInputControl<>(TokenType.class);
 
     public BinExpEditor(Window window, BinExpBlock block) {
         super(window, block);

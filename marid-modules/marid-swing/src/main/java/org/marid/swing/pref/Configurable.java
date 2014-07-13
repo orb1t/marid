@@ -16,27 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.input;
+package org.marid.swing.pref;
 
 import javax.swing.*;
-import java.util.function.Supplier;
+import java.awt.*;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-public class EnumInputControl<E extends Enum<E>> extends JComboBox<E> implements InputControl<E> {
+public interface Configurable {
 
-    public EnumInputControl(Supplier<E[]> enumSupplier) {
-        super(enumSupplier.get());
-    }
-
-    @Override
-    public E getInputValue() {
-        return getModel().getElementAt(getSelectedIndex());
-    }
-
-    @Override
-    public void setInputValue(E value) {
-        getModel().setSelectedItem(value);
-    }
+    JDialog createConfigurationDialog(Window window);
 }

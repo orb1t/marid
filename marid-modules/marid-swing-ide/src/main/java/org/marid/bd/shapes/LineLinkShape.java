@@ -21,6 +21,7 @@ package org.marid.bd.shapes;
 import org.marid.bd.BlockComponent;
 
 import java.awt.*;
+import java.awt.geom.Line2D;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -32,15 +33,8 @@ public class LineLinkShape extends LinkShape {
     }
 
     @Override
-    public void onAdd() {
-    }
+    public void update() {
 
-    @Override
-    public void onRemove() {
-    }
-
-    @Override
-    public void onMove() {
     }
 
     @Override
@@ -48,5 +42,10 @@ public class LineLinkShape extends LinkShape {
         final Point p1 = output.getConnectionPoint();
         final Point p2 = input.getConnectionPoint();
         g.drawLine(p1.x, p1.y, p2.x, p2.y);
+    }
+
+    @Override
+    public Shape getShape() {
+        return new Line2D.Double(output.getConnectionPoint(), input.getConnectionPoint());
     }
 }

@@ -32,22 +32,17 @@ public class LiveLinkShape extends LinkShape {
     }
 
     @Override
-    public void onAdd() {
-
-    }
-
-    @Override
-    public void onRemove() {
-
-    }
-
-    @Override
-    public void onMove() {
+    public void update() {
 
     }
 
     @Override
     public void paint(Graphics2D g) {
 
+    }
+
+    @Override
+    public Shape getShape() {
+        return null;
     }
 }

@@ -43,12 +43,12 @@ public class DefaultBlockComponentBorder extends AbstractBorder {
             g.setColor(SystemColor.controlDkShadow);
             for (final BlockComponent.Input input : blockComponent.getInputs()) {
                 final Rectangle bounds = ShapeUtils.toParent(input.getButton(), c);
-                final int ly = bounds.y + bounds.height / 2 + 1;
+                final int ly = bounds.y + bounds.height / 2;
                 g.drawLine(0, ly, DEFAULT_INSETS.left, ly);
             }
             for (final BlockComponent.Output output : blockComponent.getOutputs()) {
                 final Rectangle bounds = ShapeUtils.toParent(output.getButton(), c);
-                final int ly = bounds.y + bounds.height / 2 + 1;
+                final int ly = bounds.y + bounds.height / 2;
                 g.drawLine(width - DEFAULT_INSETS.right, ly, width, ly);
             }
         } finally {

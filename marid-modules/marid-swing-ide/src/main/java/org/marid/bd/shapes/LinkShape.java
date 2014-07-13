@@ -35,11 +35,9 @@ public abstract class LinkShape {
         this.input = input;
     }
 
-    public abstract void onAdd();
-
-    public abstract void onRemove();
-
-    public abstract void onMove();
+    public abstract void update();
 
     public abstract void paint(Graphics2D g);
+
+    public abstract Shape getShape();
 }
