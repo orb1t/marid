@@ -40,4 +40,19 @@ public abstract class LinkShape {
     public abstract void paint(Graphics2D g);
 
     public abstract Shape getShape();
+
+    @Override
+    public int hashCode() {
+        return output.hashCode() ^ input.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof LinkShape) {
+            final LinkShape that = (LinkShape) obj;
+            return this.input == that.input && this.output == that.output;
+        } else {
+            return false;
+        }
+    }
 }

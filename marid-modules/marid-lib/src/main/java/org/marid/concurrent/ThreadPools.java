@@ -18,22 +18,32 @@
 
 package org.marid.concurrent;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 public class ThreadPools {
 
+    public static int getPoolSize(int minPoolSize) {
+        return Math.max(minPoolSize, Runtime.getRuntime().availableProcessors());
+    }
+
+    public static ThreadPoolExecutor newThreadPool(int threads, long keepAliveTime, RejectedExecutionHandler handler) {
+        return new ThreadPoolExecutor(0, threads, keepAliveTime, MILLISECONDS, new SynchronousQueue<>(), handler);
+    }
+
     public static ThreadPoolExecutor newThreadPool(int threads, long keepAliveTime) {
-        return new ThreadPoolExecutor(
-                0,
-                threads,
-                keepAliveTime,
-                TimeUnit.MILLISECONDS,
-                new SynchronousQueue<>(),
-                new ThreadPoolExecutor.CallerRunsPolicy());
+        return newThreadPool(threads, keepAliveTime, new CallerRunsPolicy());
+    }
+
+    public static ThreadPoolExecutor newArrayThreadPool(int threads, int size, RejectedExecutionHandler handler) {
+        return new ThreadPoolExecutor(threads, threads, 0L, MILLISECONDS, new ArrayBlockingQueue<>(size), handler);
     }
 }

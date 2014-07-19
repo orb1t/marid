@@ -22,6 +22,7 @@ import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.shapes.LinkShape;
 import org.marid.concurrent.MaridTimerTask;
+import org.marid.functions.ReturnObjectException;
 import org.marid.swing.InputMaskType;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.dnd.DndSource;
@@ -36,8 +37,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.util.*;
-import java.util.List;
 import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -57,6 +58,9 @@ import static org.marid.swing.geom.ShapeUtils.ptAdd;
  */
 public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSource<Block>, SchemaFrameConfiguration {
 
+    private static final Stroke STROKE = new BasicStroke(1.0f);
+    private static final Stroke SELECTED_STROKE = new BasicStroke(3.0f);
+
     protected final AffineTransform transform = new AffineTransform();
     private Point mousePoint = new Point();
     private final Rectangle clip = new Rectangle();
@@ -72,7 +76,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     private final AtomicBoolean dirty = new AtomicBoolean();
     private final Timer timer = new Timer(true);
     private Block draggingBlock;
-    private final List<LinkShape> links = new ArrayList<>();
+    private final Set<LinkShape> links = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public SchemaEditor() {
         setFont(UIManager.getFont("Label.font"));
@@ -94,7 +98,45 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     }
 
     public void start() {
-        timer.schedule(new MaridTimerTask(() -> processDirty(dirty, this::update)), 40L, 40L);
+        timer.schedule(new MaridTimerTask(() -> {
+            if (!dirty.get()) {
+                final Point mousePoint = MouseInfo.getPointerInfo().getLocation();
+                final Point topLeft = new Point(0, 0);
+                SwingUtilities.convertPointToScreen(topLeft, this);
+                final Rectangle screenBounds = new Rectangle(topLeft, getSize());
+                boolean updated = false;
+                if (screenBounds.contains(mousePoint)) {
+                    SwingUtilities.convertPointFromScreen(mousePoint, this);
+                    try {
+                        visitBlockComponents(bc -> {
+                            if (bc.getBounds().contains(mousePoint)) {
+                                throw new ReturnObjectException(bc);
+                            }
+                        });
+                    } catch (ReturnObjectException x) {
+                        final BlockComponent blockComponent = x.getResult();
+                        final Set<BlockComponent.Output> outputs = new HashSet<>(blockComponent.getOutputs());
+                        final Set<BlockComponent.Input> inputs = new HashSet<>(blockComponent.getInputs());
+                        for (final LinkShape link : links) {
+                            if (outputs.contains(link.output) || inputs.contains(link.input)) {
+                                link.update();
+                                updated = true;
+                            }
+                        }
+                    }
+                    final LinkShape clink = currentLink;
+                    if (clink != null) {
+                        clink.update();
+                        updated = true;
+                    }
+                    if (updated) {
+                        super.repaint();
+                    }
+                }
+            } else {
+                processDirty(dirty, this::update);
+            }
+        }), 50L, 50L);
     }
 
     public void stop() {
@@ -102,10 +144,10 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     }
 
     public void update() {
-        invokeLater(() -> {
+        synchronized (getTreeLock()) {
             links.forEach(LinkShape::update);
-            super.repaint();
-        });
+        }
+        invokeLater(super::repaint);
     }
 
     public void addLink(BlockComponent.Output output, BlockComponent.Input input) {
@@ -196,6 +238,20 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
             repaint();
             curComponent = null;
         }
+        for (final LinkShape linkShape : links) {
+            final Shape shape = linkShape.getShape();
+            if (ShapeUtils.contains(shape, mp, 3.0)) {
+                if (currentLink != linkShape) {
+                    currentLink = linkShape;
+                    repaint();
+                }
+                return;
+            }
+        }
+        if (currentLink != null) {
+            currentLink = null;
+            repaint();
+        }
     }
 
     @Override
@@ -206,6 +262,13 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         final Stroke oldStroke = g.getStroke();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         for (final LinkShape linkShape : links) {
+            if (currentLink == linkShape) {
+                g.setColor(SystemColor.activeCaption);
+                g.setStroke(SELECTED_STROKE);
+            } else {
+                g.setColor(getForeground());
+                g.setStroke(STROKE);
+            }
             linkShape.paint(g);
         }
         g.setStroke(oldStroke);

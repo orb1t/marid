@@ -36,7 +36,6 @@ import static org.marid.dyn.TypeCaster.TYPE_CASTER;
 /**
  * @author Dmitry Ovchinnikov
  */
-@SuppressWarnings("unchecked")
 public abstract class PrefCodecs {
 
     private static final Logger LOG = Logger.getLogger(PrefCodecs.class.getName());
@@ -196,17 +195,20 @@ public abstract class PrefCodecs {
         };
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> PrefReader<T> getReader(Class<T> type) {
         final PrefReader<T> reader = (PrefReader<T>) READERS.get(type);
         if (reader != null) {
             return reader;
         } else if (type.isEnum()) {
-            return stringReader(s -> (T) Enum.valueOf((Class<Enum>) type, s));
+            final Class<? extends Enum> enumType = type.asSubclass(Enum.class);
+            return stringReader(s -> type.cast(Enum.valueOf(enumType, s)));
         } else {
             return stringReader(s -> TYPE_CASTER.cast(type, s));
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> PrefWriter<T> getWriter(Class<T> type) {
         final PrefWriter<T> writer = (PrefWriter<T>) WRITERS.get(type);
         if (writer != null) {
