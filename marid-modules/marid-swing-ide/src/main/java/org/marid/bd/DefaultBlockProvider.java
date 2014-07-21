@@ -19,8 +19,8 @@
 package org.marid.bd;
 
 import org.marid.bd.expressions.*;
-import org.marid.bd.expressions.binary.BinExpBlock;
-import org.marid.bd.expressions.constant.ConstantBlock;
+import org.marid.bd.expressions.BinExpBlock;
+import org.marid.bd.expressions.ConstantBlock;
 import org.marid.bd.statements.*;
 
 import java.util.function.BiConsumer;

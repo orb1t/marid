@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.expressions.binary;
+package org.marid.bd.expressions;
 
 import images.Images;
 import org.codehaus.groovy.ast.expr.BinaryExpression;
@@ -25,9 +25,14 @@ import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
+import org.marid.bd.BlockListener;
+import org.marid.bd.components.AbstractBlockComponentEditor;
+import org.marid.bd.components.StandardBlockComponent;
+import org.marid.swing.input.ComboInputControl;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.beans.ConstructorProperties;
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,12 +61,19 @@ public class BinExpBlock extends Block {
 
     @Override
     public BlockComponent createComponent() {
-        return new BinExpComponent(this);
+        final JLabel label = new JLabel(tokenType.icon);
+        return new StandardBlockComponent<>(this, c -> {
+            c.add(label);
+            addEventListener(c, (BinExpListener) (oldType, newType) -> {
+                label.setIcon(newType.icon);
+                c.getSchemaEditor().repaint();
+            });
+        });
     }
 
     @Override
     public BinExpEditor createWindow(Window parent) {
-        return new BinExpEditor(parent, this);
+        return new BinExpEditor(parent);
     }
 
     @Override
@@ -109,14 +121,42 @@ public class BinExpBlock extends Block {
 
         public final Token token;
         public final ImageIcon icon;
+        public final String text;
 
         private TokenType(Token token, String text) {
             this.token = token;
             this.icon = Images.getIconFromText(text, 32, 32, Color.BLUE, Color.WHITE);
+            this.text = text;
+        }
+    }
+
+    public class BinExpEditor extends AbstractBlockComponentEditor<BinExpBlock> {
+
+        protected final ComboInputControl<TokenType> tokenTypeBox = new ComboInputControl<>(TokenType.class);
+
+        public BinExpEditor(Window window) {
+            super(window, BinExpBlock.this);
+            tabPane("Common").addLine("Token type", tokenTypeBox);
+            tokenTypeBox.setInputValue(block.getTokenType());
+            tokenTypeBox.setRenderer(new DefaultListCellRenderer() {
+                @Override
+                public Component getListCellRendererComponent(JList<?> l, Object v, int i, boolean s, boolean f) {
+                    final JLabel label = (JLabel) super.getListCellRendererComponent(l, v, i, s, f);
+                    label.setIcon(((TokenType) v).icon);
+                    return label;
+                }
+            });
+            afterInit();
         }
 
-        public ImageIcon getIcon(int size) {
-            return new ImageIcon(icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH));
+        @Override
+        protected void onSubmit(Action action, ActionEvent actionEvent) throws Exception {
+            block.setTokenType(tokenTypeBox.getInputValue());
         }
+    }
+
+    public interface BinExpListener extends BlockListener {
+
+        void changedTokenType(TokenType oldType, TokenType newType);
     }
 }

@@ -16,19 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.expressions.constant;
+package org.marid.bd.expressions;
 
 import images.Images;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.marid.bd.NamedBlock;
+import org.marid.bd.NamedBlockListener;
+import org.marid.bd.components.NamedBlockComponentEditor;
 import org.marid.bd.components.StandardBlockComponent;
 import org.marid.groovy.GroovyRuntime;
+import org.marid.logging.LogSupport;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.beans.ConstructorProperties;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,7 +43,7 @@ import java.util.List;
 public class ConstantBlock extends NamedBlock {
 
     protected String value = "null";
-    protected final Out<ConstantExpression> output = new Out<>("out", ConstantExpression.class, this::constantExpression);
+    protected final Out<ConstantExpression> output = new Out<>("", ConstantExpression.class, this::constantExpression);
 
     public ConstantBlock() {
         name = "Constant block";
@@ -89,7 +96,7 @@ public class ConstantBlock extends NamedBlock {
 
     @Override
     public ConstantBlockEditor createWindow(Window parent) {
-        return new ConstantBlockEditor(parent, this);
+        return new ConstantBlockEditor(parent);
     }
 
     @Override
@@ -112,6 +119,51 @@ public class ConstantBlock extends NamedBlock {
 
     public ConstantExpression constantExpression() {
         final Object o = GroovyRuntime.SHELL.evaluate(value, "expression.groovy");
-        return o instanceof ConstantExpression ? (ConstantExpression) o : new ConstantExpression(o);
+        return new ConstantExpression(o);
+    }
+
+    public class ConstantBlockEditor extends NamedBlockComponentEditor<ConstantBlock> implements LogSupport {
+
+        protected final JComboBox<String> valueCombo;
+
+        public ConstantBlockEditor(Window window) {
+            super(window, ConstantBlock.this);
+            tabPane("Common").addLine("Value", valueCombo = new JComboBox<>(getExpressions()));
+            valueCombo.setEditable(true);
+            valueCombo.setSelectedItem(block.getValue());
+            afterInit();
+        }
+
+        @Override
+        protected void onSubmit(Action action, ActionEvent actionEvent) throws Exception {
+            block.setValue(valueCombo.getSelectedItem().toString());
+        }
+
+        private Vector<String> getExpressions() {
+            final Vector<String> vector = new Vector<>();
+            for (final Field field : ConstantExpression.class.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers()) && field.getType() == ConstantExpression.class) {
+                    try {
+                        final ConstantExpression constantExpression = (ConstantExpression) field.get(null);
+                        final Object v = constantExpression.getValue();
+                        if (v instanceof String) {
+                            vector.add('"' + String.valueOf(v) + '"');
+                        } else if (v instanceof Class<?>) {
+                            vector.add(((Class<?>) v).getSimpleName());
+                        } else {
+                            vector.add(String.valueOf(v));
+                        }
+                    } catch (ReflectiveOperationException x) {
+                        throw new IllegalStateException(x);
+                    }
+                }
+            }
+            return vector;
+        }
+    }
+
+    public interface ConstantBlockListener extends NamedBlockListener {
+
+        void changedValue(String oldValue, String newValue);
     }
 }
