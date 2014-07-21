@@ -52,6 +52,14 @@ public abstract class StandardBlock extends Block {
         return name;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
     @Override
     public ImageIcon getVisualRepresentation() {
         return visualRepresentation;

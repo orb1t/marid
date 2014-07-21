@@ -20,6 +20,7 @@ package org.marid.util;
 
 import java.lang.reflect.Array;
 import java.util.Objects;
+import java.util.function.IntFunction;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -82,5 +83,15 @@ public class CollectionUtils {
             }
         }
         return -1;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <E> Class<E[]> getArrayType(Class<E> type) {
+        return (Class<E[]>) Array.newInstance(type, 0).getClass();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <E> IntFunction<E[]> getArrayFunction(Class<E> type) {
+        return n -> (E[]) Array.newInstance(type, n);
     }
 }

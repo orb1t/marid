@@ -132,7 +132,7 @@ public class BinExpBlock extends Block {
 
     public class BinExpEditor extends AbstractBlockComponentEditor<BinExpBlock> {
 
-        protected final ComboInputControl<TokenType> tokenTypeBox = new ComboInputControl<>(TokenType.class);
+        protected final ComboInputControl<TokenType> tokenTypeBox = new ComboInputControl<>(TokenType.values());
 
         public BinExpEditor(Window window) {
             super(window, BinExpBlock.this);

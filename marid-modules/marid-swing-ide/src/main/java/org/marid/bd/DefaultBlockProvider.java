@@ -18,9 +18,9 @@
 
 package org.marid.bd;
 
+import org.codehaus.groovy.ast.stmt.CaseStatement;
 import org.marid.bd.expressions.*;
-import org.marid.bd.expressions.BinExpBlock;
-import org.marid.bd.expressions.ConstantBlock;
+import org.marid.bd.multiplexors.Multiplexor;
 import org.marid.bd.statements.*;
 
 import java.util.function.BiConsumer;
@@ -53,5 +53,7 @@ public class DefaultBlockProvider implements BlockProvider {
         blockConsumer.accept("Statements", new EmptyBlock());
         blockConsumer.accept("Statements", new ThrowBlock());
         blockConsumer.accept("Statements", new BlockBlock());
+
+        blockConsumer.accept("Multiplexors", new Multiplexor<>("Case multiplexor", "CSM", "CSM", CaseStatement.class, 2));
     }
 }
