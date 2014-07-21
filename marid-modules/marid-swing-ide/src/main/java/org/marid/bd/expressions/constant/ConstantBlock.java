@@ -21,6 +21,7 @@ package org.marid.bd.expressions.constant;
 import images.Images;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.marid.bd.NamedBlock;
+import org.marid.bd.components.StandardBlockComponent;
 import org.marid.groovy.GroovyRuntime;
 
 import javax.swing.*;
@@ -34,8 +35,8 @@ import java.util.List;
  */
 public class ConstantBlock extends NamedBlock {
 
-    protected String value = ConstantExpression.class.getCanonicalName() + ".EMPTY_EXPRESSION";
-    protected final Out<ConstantExpression> output = new Out<>(">", ConstantExpression.class, this::constantExpression);
+    protected String value = "null";
+    protected final Out<ConstantExpression> output = new Out<>("out", ConstantExpression.class, this::constantExpression);
 
     public ConstantBlock() {
         name = "Constant block";
@@ -48,8 +49,37 @@ public class ConstantBlock extends NamedBlock {
     }
 
     @Override
-    public ConstantBlockComponent createComponent() {
-        return new ConstantBlockComponent(this);
+    public StandardBlockComponent<ConstantBlock> createComponent() {
+        final JLabel titleLabel = new JLabel(name);
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        titleLabel.setFont(UIManager.getFont("Label.font").deriveFont(Font.BOLD));
+        final JLabel label = new JLabel(value);
+        return new StandardBlockComponent<>(this, c -> {
+            final JPanel panel = new JPanel(new BorderLayout(0, 5));
+            panel.setOpaque(false);
+            panel.add(titleLabel, BorderLayout.NORTH);
+            panel.add(label);
+            addEventListener(c, new ConstantBlockListener() {
+                @Override
+                public void changedValue(String oldValue, String newValue) {
+                    label.setText(newValue);
+                    update();
+                }
+
+                @Override
+                public void nameChanged(String oldName, String newName) {
+                    titleLabel.setText(newName);
+                    update();
+                }
+
+                void update() {
+                    c.validate();
+                    c.setSize(c.getPreferredSize());
+                    c.getSchemaEditor().repaint();
+                }
+            });
+            c.add(panel);
+        });
     }
 
     @Override
