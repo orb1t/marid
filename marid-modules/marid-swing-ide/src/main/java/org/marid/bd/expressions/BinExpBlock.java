@@ -27,6 +27,7 @@ import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.BlockListener;
 import org.marid.bd.components.AbstractBlockComponentEditor;
+import org.marid.bd.components.BlockLabel;
 import org.marid.bd.components.StandardBlockComponent;
 import org.marid.swing.input.ComboInputControl;
 
@@ -61,13 +62,12 @@ public class BinExpBlock extends Block {
 
     @Override
     public BlockComponent createComponent() {
-        final JLabel label = new JLabel(tokenType.icon);
         return new StandardBlockComponent<>(this, c -> {
-            c.add(label);
             addEventListener(c, (BinExpListener) (oldType, newType) -> {
-                label.setIcon(newType.icon);
+                c.updateBlock();
                 c.getSchemaEditor().repaint();
             });
+            c.add(new BlockLabel(() -> tokenType.text, () -> Color.BLUE));
         });
     }
 

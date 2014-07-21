@@ -67,6 +67,7 @@ public interface BlockComponent {
     }
 
     default void updateBlock() {
+        update();
         validate();
         setBounds(new Rectangle(getLocation(), getPreferredSize()));
     }
