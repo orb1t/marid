@@ -18,7 +18,6 @@
 
 package org.marid.bd.expressions;
 
-import images.Images;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.expr.VariableExpression;
 import org.marid.bd.IoBlock;
@@ -35,7 +34,7 @@ public class VariableBlock extends IoBlock<ClassNode, VariableExpression> {
     protected String varName = "x";
 
     public VariableBlock() {
-        super("Variable expression", "*", ">", Images.getIconFromText("var", 32, 32, Color.BLUE, Color.WHITE));
+        super("Variable expression", "var", "var", Color.BLUE);
     }
 
     @ConstructorProperties({"varName"})

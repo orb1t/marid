@@ -18,7 +18,6 @@
 
 package org.marid.bd.statements;
 
-import images.Images;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.ThrowStatement;
 import org.marid.bd.IoBlock;
@@ -33,7 +32,7 @@ public class ThrowBlock extends IoBlock<Expression, ThrowStatement> {
     protected Expression expression;
 
     public ThrowBlock() {
-        super("Throw Statement", "*", ">", Images.getIconFromText("throw", 32, 32, Color.GREEN.darker(), Color.WHITE));
+        super("Throw Statement", "throw", "throw", Color.GREEN.darker());
     }
 
     @Override

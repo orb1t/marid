@@ -16,37 +16,45 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.statements;
+package org.marid.swing.actions;
 
-import org.codehaus.groovy.ast.expr.Expression;
-import org.codehaus.groovy.ast.stmt.ExpressionStatement;
-import org.marid.bd.IoBlock;
-
-import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ExpressionBlock extends IoBlock<Expression, ExpressionStatement> {
+public class MouseAction implements MouseListener {
 
-    protected Expression expression;
+    private final Consumer<MouseEvent> consumer;
 
-    public ExpressionBlock() {
-        super("Expression Statement", "e->s", "e -> s", Color.GREEN.darker());
+    public MouseAction(Consumer<MouseEvent> consumer) {
+        this.consumer = consumer;
     }
 
     @Override
-    public void set(Expression value) {
-        expression = value;
+    public void mouseClicked(MouseEvent e) {
+        consumer.accept(e);
     }
 
     @Override
-    public void reset() {
-        expression = null;
+    public void mousePressed(MouseEvent e) {
+        consumer.accept(e);
     }
 
     @Override
-    public ExpressionStatement get() {
-        return new ExpressionStatement(expression);
+    public void mouseReleased(MouseEvent e) {
+        consumer.accept(e);
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        consumer.accept(e);
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        consumer.accept(e);
     }
 }

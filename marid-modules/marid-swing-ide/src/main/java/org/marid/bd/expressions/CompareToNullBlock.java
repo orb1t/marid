@@ -18,13 +18,11 @@
 
 package org.marid.bd.expressions;
 
-import images.Images;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.transform.sc.transformers.CompareToNullExpression;
 import org.marid.bd.IoBlock;
 
-import static java.awt.Color.BLUE;
-import static java.awt.Color.WHITE;
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -34,7 +32,7 @@ public class CompareToNullBlock extends IoBlock<Expression, CompareToNullExpress
     protected Expression expression;
 
     public CompareToNullBlock() {
-        super("Compare To null Expression", "*", "", Images.getIconFromText("== null", 32, 32, BLUE, WHITE));
+        super("Compare To null Expression", "== null", "== null", Color.BLUE);
     }
 
     @Override

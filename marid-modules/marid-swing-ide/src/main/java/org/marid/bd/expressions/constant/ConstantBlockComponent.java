@@ -60,4 +60,9 @@ public class ConstantBlockComponent extends DefaultBlockComponent<ConstantBlock>
     public void nameChanged(String oldName, String newName) {
         nameLabel.setText(newName);
     }
+
+    @Override
+    public void update() {
+
+    }
 }

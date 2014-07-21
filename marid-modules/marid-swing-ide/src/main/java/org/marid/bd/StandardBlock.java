@@ -22,6 +22,8 @@ import images.Images;
 import org.marid.bd.components.StandardBlockComponent;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -30,19 +32,19 @@ public abstract class StandardBlock extends Block {
 
     protected final String name;
     protected final ImageIcon visualRepresentation;
+    protected final String label;
+    protected final Color color;
 
-    public StandardBlock(String name, String icon) {
-        this(name, Images.getIcon(icon));
-    }
-
-    public StandardBlock(String name, ImageIcon icon) {
+    public StandardBlock(String name, String iconText, String label, Color color) {
         this.name = name;
-        this.visualRepresentation = icon;
+        this.visualRepresentation = Images.getIconFromText(iconText, 32, 32, color, Color.WHITE);
+        this.label = label;
+        this.color = color;
     }
 
     @Override
     public BlockComponent createComponent() {
-        return new StandardBlockComponent<>(this, c -> c.add(new JLabel(getVisualRepresentation())));
+        return new StandardBlockComponent<>(this, c -> c.add(new Label()));
     }
 
     @Override
@@ -53,5 +55,35 @@ public abstract class StandardBlock extends Block {
     @Override
     public ImageIcon getVisualRepresentation() {
         return visualRepresentation;
+    }
+
+    protected class Label extends JComponent {
+
+        public Label() {
+            setFont(UIManager.getFont("Label.font").deriveFont(Font.BOLD));
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            final Rectangle2D b = getFont().getStringBounds(label, getFontMetrics(getFont()).getFontRenderContext());
+            final int w = (int) (b.getWidth() - b.getX());
+            final int h = (int) (b.getHeight() - b.getY());
+            return new Dimension(w + 10, h + 10);
+        }
+
+        @Override
+        protected void paintComponent(Graphics graphics) {
+            final Graphics2D g = (Graphics2D) graphics;
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            final Dimension d = getPreferredSize();
+            final Dimension size = getSize();
+            final Rectangle2D b = getFont().getStringBounds(label, getFontMetrics(getFont()).getFontRenderContext());
+            g.setColor(color);
+            g.fillRoundRect((size.width - d.width) / 2, (size.height - d.height) / 2, d.width, d.height, 5, 5);
+            g.setColor(Color.WHITE);
+            final float x = (float) (size.width - b.getWidth() - b.getX()) / 2.0f;
+            final float y = (float) (size.height - b.getHeight() - b.getY()) / 2.0f + 5;
+            g.drawString(label, x, y);
+        }
     }
 }

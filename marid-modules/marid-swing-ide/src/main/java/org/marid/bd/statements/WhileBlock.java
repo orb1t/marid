@@ -18,7 +18,6 @@
 
 package org.marid.bd.statements;
 
-import images.Images;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.WhileStatement;
@@ -37,12 +36,12 @@ public class WhileBlock extends StandardBlock {
     protected BooleanExpression expression;
     protected Statement body;
 
-    protected final Input<BooleanExpression> exprInput = in("?", e -> expression = e, () -> expression = null);
-    protected final Input<Statement> bodyInput = in("*", s -> body = s, () -> body = null);
-    protected final Output<WhileStatement> out = out(">", () -> new WhileStatement(expression, body));
+    protected final Input<BooleanExpression> exprInput = in("test", e -> expression = e, () -> expression = null);
+    protected final Input<Statement> bodyInput = in("body", s -> body = s, () -> body = null);
+    protected final Output<WhileStatement> out = out("out", () -> new WhileStatement(expression, body));
 
     public WhileBlock() {
-        super("While Statement", Images.getIconFromText("while", 32, 32, Color.GREEN.darker(), Color.WHITE));
+        super("While Statement", "while", "while", Color.GREEN.darker());
     }
 
     @Override

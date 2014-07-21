@@ -33,7 +33,7 @@ public class ReturnBlock extends IoBlock<Expression, ReturnStatement> {
     protected Expression expression;
 
     public ReturnBlock() {
-        super("Return Statement", "*", ">", Images.getIconFromText("ret", 32, 32, Color.GREEN.darker(), Color.WHITE));
+        super("Return Statement", "ret", "return", Color.GREEN.darker());
     }
 
     @Override

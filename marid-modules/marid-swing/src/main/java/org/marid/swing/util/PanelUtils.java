@@ -19,9 +19,8 @@
 package org.marid.swing.util;
 
 import javax.swing.*;
-import java.util.function.Function;
-
 import javax.swing.GroupLayout.Group;
+import java.util.function.Function;
 
 /**
  * @author Dmitry Ovchinnikov

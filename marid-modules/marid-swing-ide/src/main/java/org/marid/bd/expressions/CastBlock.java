@@ -18,7 +18,6 @@
 
 package org.marid.bd.expressions;
 
-import images.Images;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.expr.CastExpression;
 import org.codehaus.groovy.ast.expr.Expression;
@@ -39,12 +38,12 @@ public class CastBlock extends StandardBlock {
     protected Expression expression;
     protected ClassNode classNode = OBJECT_TYPE;
 
-    protected final Input<Expression> exprInput = in("A", e -> expression = e, () -> expression = null);
-    protected final Input<ClassNode> classInput = in("*", c -> classNode = c, () -> classNode = OBJECT_TYPE);
-    protected final Output<CastExpression> castExpr = out(">", () -> new CastExpression(classNode, expression));
+    protected final Input<Expression> exprInput = in("expr", e -> expression = e, () -> expression = null);
+    protected final Input<ClassNode> classInput = in("class", c -> classNode = c, () -> classNode = OBJECT_TYPE);
+    protected final Output<CastExpression> castExpr = out("out", () -> new CastExpression(classNode, expression));
 
     public CastBlock() {
-        super("Cast Expression", Images.getIconFromText("(*)", 32, 32, Color.BLUE, Color.WHITE));
+        super("Cast Expression", "(*)", "(*)", Color.BLUE);
     }
 
     @Override

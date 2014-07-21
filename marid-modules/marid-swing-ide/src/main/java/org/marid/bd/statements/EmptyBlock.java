@@ -18,13 +18,9 @@
 
 package org.marid.bd.statements;
 
-import images.Images;
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
-import org.marid.bd.Block;
-import org.marid.bd.BlockComponent;
-import org.marid.bd.components.StandardBlockComponent;
+import org.marid.bd.StandardBlock;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.Collections;
 import java.util.List;
@@ -32,13 +28,12 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class EmptyBlock extends Block {
+public class EmptyBlock extends StandardBlock {
 
-    protected final Output<EmptyStatement> out = out("{}", () -> EmptyStatement.INSTANCE);
+    protected final Output<EmptyStatement> out = out("out", () -> EmptyStatement.INSTANCE);
 
-    @Override
-    public BlockComponent createComponent() {
-        return new StandardBlockComponent<>(this);
+    public EmptyBlock() {
+        super("Empty block", "{}", "{}", Color.GREEN.darker());
     }
 
     @Override
@@ -49,15 +44,5 @@ public class EmptyBlock extends Block {
     @Override
     public List<Output<?>> getOutputs() {
         return Collections.singletonList(out);
-    }
-
-    @Override
-    public String getName() {
-        return "Empty Statement";
-    }
-
-    @Override
-    public ImageIcon getVisualRepresentation() {
-        return Images.getIconFromText("empty", 32, 32, Color.GREEN.darker(), Color.WHITE);
     }
 }

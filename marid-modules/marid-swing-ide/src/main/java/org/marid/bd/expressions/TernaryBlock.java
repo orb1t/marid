@@ -18,7 +18,6 @@
 
 package org.marid.bd.expressions;
 
-import images.Images;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.expr.TernaryExpression;
@@ -38,13 +37,13 @@ public class TernaryBlock extends StandardBlock {
     protected Expression trueExpr;
     protected Expression falseExpr;
 
-    protected final Input<BooleanExpression> expInput = in("?", e -> expression = e, () -> expression = null);
+    protected final Input<BooleanExpression> expInput = in("test", e -> expression = e, () -> expression = null);
     protected final Input<Expression> trueInput = in("+", e -> trueExpr = e, () -> trueExpr = null);
     protected final Input<Expression> falseInput = in("-", e -> falseExpr = e, () -> falseExpr = null);
-    protected final Output<TernaryExpression> out = out(">", () -> new TernaryExpression(expression, trueExpr, falseExpr));
+    protected final Output<TernaryExpression> out = out("out", () -> new TernaryExpression(expression, trueExpr, falseExpr));
 
     public TernaryBlock() {
-        super("Ternary Expression", Images.getIconFromText("?:", 32, 32, Color.BLUE, Color.WHITE));
+        super("Ternary Expression", "?:", "?:", Color.BLUE);
     }
 
     @Override

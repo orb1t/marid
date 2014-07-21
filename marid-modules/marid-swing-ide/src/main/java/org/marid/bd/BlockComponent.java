@@ -53,6 +53,8 @@ public interface BlockComponent {
 
     void setVisible(boolean visible);
 
+    void update();
+
     default void remove() {
         final SchemaEditor schemaEditor = getSchemaEditor();
         schemaEditor.remove(getComponent());

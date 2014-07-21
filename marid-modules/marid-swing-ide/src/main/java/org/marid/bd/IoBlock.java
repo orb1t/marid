@@ -18,9 +18,7 @@
 
 package org.marid.bd;
 
-import org.marid.bd.components.StandardBlockComponent;
-
-import javax.swing.*;
+import java.awt.*;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -95,21 +93,10 @@ public abstract class IoBlock<I, O> extends StandardBlock {
         }
     };
 
-    public IoBlock(String name, String inputName, String outputName, String icon) {
-        super(name, icon);
-        this.inputName = inputName;
-        this.outputName = outputName;
-    }
-
-    public IoBlock(String name, String inputName, String outputName, ImageIcon icon) {
-        super(name, icon);
-        this.inputName = inputName;
-        this.outputName = outputName;
-    }
-
-    @Override
-    public BlockComponent createComponent() {
-        return new StandardBlockComponent<>(this, c -> c.add(new JLabel(getVisualRepresentation())));
+    public IoBlock(String name, String iconText, String label, Color color) {
+        super(name, iconText, label, color);
+        this.inputName = "in";
+        this.outputName = "out";
     }
 
     @Override

@@ -18,7 +18,6 @@
 
 package org.marid.bd.statements;
 
-import images.Images;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.TryCatchStatement;
 import org.marid.bd.StandardBlock;
@@ -36,12 +35,12 @@ public class TryCatchBlock extends StandardBlock {
     protected Statement tryStatement;
     protected Statement body;
 
-    protected final Input<Statement> tryInput = in("t", s -> tryStatement = s, () -> tryStatement = null);
-    protected final Input<Statement> bodyInput = in("c", s -> body = s, () -> body = null);
-    protected final Output<TryCatchStatement> out = out(">", () -> new TryCatchStatement(tryStatement, body));
+    protected final Input<Statement> tryInput = in("try", s -> tryStatement = s, () -> tryStatement = null);
+    protected final Input<Statement> bodyInput = in("catch", s -> body = s, () -> body = null);
+    protected final Output<TryCatchStatement> out = out("out", () -> new TryCatchStatement(tryStatement, body));
 
     public TryCatchBlock() {
-        super("Try/Catch Block", Images.getIconFromText("t/c", 32, 32, Color.GREEN.darker(), Color.WHITE));
+        super("Try/Catch Block", "t/c", "try/catch", Color.GREEN.darker());
     }
 
     @Override

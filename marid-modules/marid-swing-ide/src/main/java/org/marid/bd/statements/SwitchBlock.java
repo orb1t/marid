@@ -18,7 +18,6 @@
 
 package org.marid.bd.statements;
 
-import images.Images;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.CaseStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
@@ -42,13 +41,13 @@ public class SwitchBlock extends StandardBlock {
     protected Statement defStatement = INSTANCE;
     protected Expression expression = null;
 
-    protected final Input<Expression> expressionInput = in("()", e -> expression = e, () -> expression = null);
-    protected final Input<CaseStatement> caseInput = in("?", cases::add, cases::clear);
-    protected final Input<Statement> defaultInput = in(":", s -> defStatement = s, () -> defStatement = INSTANCE);
-    protected final Output<SwitchStatement> out = out(">", () -> new SwitchStatement(expression, cases, defStatement));
+    protected final Input<Expression> expressionInput = in("expr", e -> expression = e, () -> expression = null);
+    protected final Input<CaseStatement> caseInput = in("cases", cases::add, cases::clear);
+    protected final Input<Statement> defaultInput = in("default", s -> defStatement = s, () -> defStatement = INSTANCE);
+    protected final Output<SwitchStatement> out = out("out", () -> new SwitchStatement(expression, cases, defStatement));
 
     public SwitchBlock() {
-        super("Switch Statement", Images.getIconFromText("switch", 32, 32, Color.GREEN.darker(), Color.WHITE));
+        super("Switch Statement", "switch", "switch", Color.GREEN.darker());
     }
 
     @Override

@@ -18,7 +18,6 @@
 
 package org.marid.bd.expressions;
 
-import images.Images;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.expr.NotExpression;
 import org.marid.bd.IoBlock;
@@ -33,7 +32,7 @@ public class NotExpBlock extends IoBlock<Expression, NotExpression> {
     protected Expression expression;
 
     public NotExpBlock() {
-        super("Not Expression", "*", ">", Images.getIconFromText(" ! ", 32, 32, Color.BLUE, Color.WHITE));
+        super("Not Expression", " ! ", "! expr", Color.BLUE);
     }
 
     @Override

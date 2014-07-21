@@ -38,11 +38,11 @@ public class SynchronizedBlock extends StandardBlock {
     protected Statement statement;
 
     protected final Input<Expression> exprInput = in("mon", e -> expression = e, () -> expression = null);
-    protected final Input<Statement> stmtInput = in("*", s -> statement = s, () -> statement = null);
-    protected final Output<SynchronizedStatement> out = out(">", () -> new SynchronizedStatement(expression, statement));
+    protected final Input<Statement> stmtInput = in("body", s -> statement = s, () -> statement = null);
+    protected final Output<SynchronizedStatement> out = out("out", () -> new SynchronizedStatement(expression, statement));
 
     public SynchronizedBlock() {
-        super("Synchronized Statement", Images.getIconFromText("sync", 32, 32, Color.GREEN.darker(), Color.WHITE));
+        super("Synchronized Statement", "sync", "sync", Color.GREEN.darker());
     }
 
     @Override

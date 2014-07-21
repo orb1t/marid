@@ -18,7 +18,6 @@
 
 package org.marid.bd.statements;
 
-import images.Images;
 import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.ForStatement;
@@ -40,12 +39,12 @@ public class ForBlock extends StandardBlock {
     protected Statement body;
 
     protected final Input<Parameter> paramInput = in("i", p -> parameter = p, () -> parameter = null);
-    protected final Input<Expression> exprInput = in("?", e -> expression = e, () -> expression = null);
-    protected final Input<Statement> bodyInput = in("*", s -> body = s, () -> body = null);
-    protected final Output<ForStatement> out = out(">", () -> new ForStatement(parameter, expression, body));
+    protected final Input<Expression> exprInput = in("expr", e -> expression = e, () -> expression = null);
+    protected final Input<Statement> bodyInput = in("body", s -> body = s, () -> body = null);
+    protected final Output<ForStatement> out = out("out", () -> new ForStatement(parameter, expression, body));
 
     public ForBlock() {
-        super("For Statement", Images.getIconFromText("for", 32, 32, Color.GREEN.darker(), Color.WHITE));
+        super("For Statement", "for", "for", Color.GREEN.darker());
     }
 
     @Override

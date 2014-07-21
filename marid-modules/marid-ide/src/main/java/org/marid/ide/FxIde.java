@@ -20,7 +20,9 @@ package org.marid.ide;
 
 import javafx.application.Application;
 import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.marid.l10n.L10n;
 
@@ -35,10 +37,10 @@ public class FxIde extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        final StackPane stackPane = new StackPane(
-                new Button("a")
-        );
-        final FxIdeScene scene = new FxIdeScene(stackPane, 600, 400);
+        final MenuBar menuBar = new MenuBar();
+        menuBar.getMenus().add(new Menu("File"));
+        final VBox vBox = new VBox(menuBar, new Button("a"));
+        final FxIdeScene scene = new FxIdeScene(vBox, 600, 400);
         stage.setScene(scene);
         stage.setTitle(L10n.s("Marid IDE"));
         stage.sizeToScene();
@@ -46,6 +48,6 @@ public class FxIde extends Application {
     }
 
     public static void launch(String... args) {
-        Application.launch(args);
+        Application.launch(FxIde.class, args);
     }
 }

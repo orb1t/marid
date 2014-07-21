@@ -36,7 +36,6 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
     public DefaultBlockComponent(LayoutManager layoutManager, B block) {
         super(layoutManager);
         this.block = block;
-        setBorder(new DefaultBlockComponentBorder());
         enableEvents(HierarchyEvent.HIERARCHY_EVENT_MASK);
         setOpaque(false);
     }
@@ -58,18 +57,20 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
         return block;
     }
 
-    protected class DefaultInput extends JToggleButton implements Input {
+    protected class DefaultInput extends ArrowButton implements Input {
 
         protected final Block.Input<?> input;
+        protected final JLabel label;
 
         public DefaultInput(Block.Input<?> input) {
-            super(input.getName());
+            super(input.getName(), SwingConstants.WEST);
+            this.label = new JLabel(getName());
             addActionListener(e -> getBlockComponent().getSchemaEditor().visitBlockComponents(bc -> {
                 if (bc != getBlockComponent()) {
                     bc.getOutputs().forEach(o -> {
                         if (o.getButton().isSelected()) {
                             o.getButton().setSelected(false);
-                            getBlockComponent().getSchemaEditor().addLink(o, this);
+                            getBlockComponent().getSchemaEditor().addLink(o, DefaultInput.this);
                         }
                     });
                 }
@@ -88,14 +89,30 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
         public DefaultBlockComponent getBlockComponent() {
             return DefaultBlockComponent.this;
         }
+
+        public JLabel getAssociatedLabel() {
+            return label;
+        }
+
+        @Override
+        public BaselineResizeBehavior getBaselineResizeBehavior() {
+            return label.getBaselineResizeBehavior();
+        }
+
+        @Override
+        public int getBaseline(int width, int height) {
+            return label.getBaseline(width, height);
+        }
     }
 
-    protected class DefaultOutput extends JToggleButton implements Output {
+    protected class DefaultOutput extends ArrowButton implements Output {
 
         protected final Block.Output<?> output;
+        protected final JLabel label;
 
         public DefaultOutput(Block.Output<?> output) {
-            super(output.getName());
+            super(output.getName(), SwingConstants.EAST);
+            this.label = new JLabel(getName());
             this.output = output;
         }
 
@@ -107,6 +124,20 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
         @Override
         public DefaultBlockComponent getBlockComponent() {
             return DefaultBlockComponent.this;
+        }
+
+        public JLabel getAssociatedLabel() {
+            return label;
+        }
+
+        @Override
+        public BaselineResizeBehavior getBaselineResizeBehavior() {
+            return label.getBaselineResizeBehavior();
+        }
+
+        @Override
+        public int getBaseline(int width, int height) {
+            return label.getBaseline(width, height);
         }
     }
 }

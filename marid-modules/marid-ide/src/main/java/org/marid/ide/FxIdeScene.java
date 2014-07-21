@@ -18,7 +18,6 @@
 
 package org.marid.ide;
 
-import javafx.beans.NamedArg;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 
@@ -27,9 +26,7 @@ import javafx.scene.Scene;
  */
 public class FxIdeScene extends Scene {
 
-    public FxIdeScene(@NamedArg("root") Parent root,
-                      @NamedArg("width") double width,
-                      @NamedArg("height") double height) {
+    public FxIdeScene(Parent root, double width, double height) {
         super(root, width, height);
     }
 }

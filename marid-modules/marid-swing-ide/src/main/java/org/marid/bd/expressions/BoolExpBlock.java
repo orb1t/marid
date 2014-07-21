@@ -18,7 +18,6 @@
 
 package org.marid.bd.expressions;
 
-import images.Images;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.marid.bd.IoBlock;
@@ -33,7 +32,7 @@ public class BoolExpBlock extends IoBlock<Expression, BooleanExpression> {
     protected Expression expression;
 
     public BoolExpBlock() {
-        super("Boolean Expression", "*", ">", Images.getIconFromText("bool", 32, 32, Color.BLUE, Color.WHITE));
+        super("Boolean Expression", "bool", "(bool)", Color.BLUE);
     }
 
     @Override

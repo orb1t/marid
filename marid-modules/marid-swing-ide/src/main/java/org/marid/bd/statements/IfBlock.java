@@ -18,7 +18,6 @@
 
 package org.marid.bd.statements;
 
-import images.Images;
 import org.codehaus.groovy.ast.expr.BooleanExpression;
 import org.codehaus.groovy.ast.stmt.IfStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
@@ -38,13 +37,13 @@ public class IfBlock extends StandardBlock {
     protected Statement statement;
     protected Statement elseStatement;
 
-    protected final Input<BooleanExpression> exprInput = in("?", e -> expression = e, () -> expression = null);
+    protected final Input<BooleanExpression> exprInput = in("test", e -> expression = e, () -> expression = null);
     protected final Input<Statement> statementInput = in("+", s -> statement = s, () -> statement = null);
     protected final Input<Statement> elseInput = in("-", s -> elseStatement = s, () -> elseStatement = null);
-    protected final Output<IfStatement> output = out(">", () -> new IfStatement(expression, statement, elseStatement));
+    protected final Output<IfStatement> output = out("out", () -> new IfStatement(expression, statement, elseStatement));
 
     public IfBlock() {
-        super("If Statement", Images.getIconFromText(" if ", 32, 32, Color.GREEN.darker(), Color.WHITE));
+        super("If Statement", " if ", "if", Color.GREEN.darker());
     }
 
     @Override
