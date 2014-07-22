@@ -16,30 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.logging;
+package org.marid.bd.shapes;
 
-import org.marid.logging.formatters.DefaultFormatter;
-
-import java.util.logging.ConsoleHandler;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
+import org.marid.bd.BlockComponent;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TestLogConfigurer {
+public class Link {
 
-    public static void configureTestLogging() {
-        LogManager.getLogManager().reset();
-        final Logger logger = Logger.getLogger("");
-        try {
-            final FsHandler fsHandler = new FsHandler();
-            final ConsoleHandler consoleHandler = new ConsoleHandler();
-            consoleHandler.setFormatter(new DefaultFormatter());
-            logger.addHandler(consoleHandler);
-            logger.addHandler(fsHandler);
-        } catch (Exception x) {
-            x.printStackTrace();
-        }
+    public final BlockComponent outputComponent;
+    public final String output;
+    public final BlockComponent inputComponent;
+    public final String input;
+
+    public Link(BlockComponent outputComponent, String output, BlockComponent inputComponent, String input) {
+        this.outputComponent = outputComponent;
+        this.output = output;
+        this.inputComponent = inputComponent;
+        this.input = input;
+    }
+
+    public Link(BlockComponent.Output output, BlockComponent.Input input) {
+        this(output.getBlockComponent(), output.getOutput().getName(), input.getBlockComponent(), input.getInput().getName());
+    }
+
+    public Link(LinkShape linkShape) {
+        this(linkShape.output, linkShape.input);
     }
 }

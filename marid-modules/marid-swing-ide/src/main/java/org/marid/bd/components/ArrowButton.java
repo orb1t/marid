@@ -25,7 +25,6 @@ import java.awt.*;
 import static java.awt.Color.GREEN;
 import static java.awt.Color.RED;
 import static java.awt.SystemColor.controlDkShadow;
-import static java.awt.SystemColor.info;
 
 /**
  * @author Dmitry Ovchinnikov

@@ -96,12 +96,12 @@ public interface BlockComponent {
 
     Block getBlock();
 
-    default Input inputFor(Block.Input<?> input) {
-        return getInputs().stream().filter(i -> i.getInput() == input).findFirst().get();
+    default Input inputFor(String name) {
+        return getInputs().stream().filter(i -> name.equals(i.getInput().getName())).findFirst().orElse(null);
     }
 
-    default Output outputFor(Block.Output<?> output) {
-        return getOutputs().stream().filter(o -> o.getOutput() == output).findFirst().get();
+    default Output outputFor(String name) {
+        return getOutputs().stream().filter(o -> name.equals(o.getOutput().getName())).findFirst().orElse(null);
     }
 
     List<Input> getInputs();

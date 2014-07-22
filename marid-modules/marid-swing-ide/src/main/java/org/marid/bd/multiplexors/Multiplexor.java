@@ -23,6 +23,7 @@ import org.marid.bd.BlockComponent;
 import org.marid.bd.BlockListener;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
+import org.marid.bd.shapes.Link;
 import org.marid.util.CollectionUtils;
 
 import javax.swing.*;
@@ -37,7 +38,7 @@ import java.util.List;
  */
 public class Multiplexor<E> extends StandardBlock {
 
-    protected int inputCount;
+    protected volatile int inputCount;
     protected final Class<E> type;
     protected final List<Input<?>> inputs = new ArrayList<>();
     protected final List<E> list = new ArrayList<>();
@@ -50,9 +51,6 @@ public class Multiplexor<E> extends StandardBlock {
         this.type = type;
         this.out = new MultiplexorOutput();
         this.iconText = iconText;
-        addEventListener(this, (MultiplexorListener) (oldValue, newValue) -> {
-            updateInputs(newValue);
-        });
         updateInputs(inputCount);
     }
 
@@ -81,10 +79,13 @@ public class Multiplexor<E> extends StandardBlock {
     @Override
     public BlockComponent createComponent() {
         final BlockComponent component = super.createComponent();
-        addEventListener(component, (MultiplexorListener) (oldValue, newValue) -> {
+        addEventListener(component, (MultiplexorListener) (oldValue, newValue) -> EventQueue.invokeLater(() -> {
+            final List<Link> links = component.getSchemaEditor().removeAllLinks(component);
+            updateInputs(newValue);
             component.updateBlock();
+            component.getSchemaEditor().createLinks(links);
             component.getSchemaEditor().repaint();
-        });
+        }));
         return component;
     }
 
@@ -102,7 +103,6 @@ public class Multiplexor<E> extends StandardBlock {
         for (int i = 1; i <= count; i++) {
             inputs.add(this.<E>in(Integer.toString(i), list::add, list::clear));
         }
-        System.out.println(inputs.size());
     }
 
     protected class MultiplexorOutput implements Output<E[]> {

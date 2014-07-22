@@ -20,6 +20,7 @@ package org.marid.bd.schema;
 
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
+import org.marid.bd.shapes.Link;
 import org.marid.bd.shapes.LinkShape;
 import org.marid.concurrent.MaridTimerTask;
 import org.marid.functions.ReturnObjectException;
@@ -37,6 +38,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.util.*;
+import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -104,8 +106,8 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                 final Point topLeft = new Point(0, 0);
                 SwingUtilities.convertPointToScreen(topLeft, this);
                 final Rectangle screenBounds = new Rectangle(topLeft, getSize());
-                boolean updated = false;
                 if (screenBounds.contains(mousePoint)) {
+                    boolean updated = false;
                     SwingUtilities.convertPointFromScreen(mousePoint, this);
                     try {
                         visitBlockComponents(bc -> {
@@ -115,10 +117,8 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                         });
                     } catch (ReturnObjectException x) {
                         final BlockComponent blockComponent = x.getResult();
-                        final Set<BlockComponent.Output> outputs = new HashSet<>(blockComponent.getOutputs());
-                        final Set<BlockComponent.Input> inputs = new HashSet<>(blockComponent.getInputs());
                         for (final LinkShape link : links) {
-                            if (outputs.contains(link.output) || inputs.contains(link.input)) {
+                            if (link.isAssociatedWith(blockComponent)) {
                                 link.update();
                                 updated = true;
                             }
@@ -151,7 +151,31 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     }
 
     public void addLink(BlockComponent.Output output, BlockComponent.Input input) {
-        links.add(LINK_SHAPE_TYPE.get().linkShapeFor(output, input));
+        final LinkShape link = LINK_SHAPE_TYPE.get().linkShapeFor(output, input);
+        links.add(link);
+        info("Added link: {0}", link);
+    }
+
+    public List<Link> removeAllLinks(BlockComponent component) {
+        final List<Link> removed = new ArrayList<>();
+        for (final Iterator<LinkShape> i = links.iterator(); i.hasNext(); ) {
+            final LinkShape link = i.next();
+            if (link.output.getBlockComponent() == component || link.input.getBlockComponent() == component) {
+                i.remove();
+                removed.add(new Link(link));
+            }
+        }
+        return removed;
+    }
+
+    public void createLinks(List<Link> links) {
+        for (final Link link : links) {
+            final BlockComponent.Output output = link.outputComponent.outputFor(link.output);
+            final BlockComponent.Input input = link.inputComponent.inputFor(link.input);
+            if (output != null && input != null) {
+                addLink(output, input);
+            }
+        }
     }
 
     @Override

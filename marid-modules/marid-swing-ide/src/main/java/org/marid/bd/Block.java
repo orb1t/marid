@@ -39,7 +39,7 @@ import java.util.function.Supplier;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public abstract class Block implements Named, Serializable, DndObject {
+public abstract class Block implements Named, DndObject {
 
     protected final Map<Object, Set<BlockListener>> listeners = new WeakHashMap<>();
 

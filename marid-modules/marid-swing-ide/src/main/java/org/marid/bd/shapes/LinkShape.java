@@ -41,6 +41,10 @@ public abstract class LinkShape {
 
     public abstract Shape getShape();
 
+    public boolean isAssociatedWith(BlockComponent blockComponent) {
+        return output.getBlockComponent() == blockComponent || input.getBlockComponent() == blockComponent;
+    }
+
     @Override
     public int hashCode() {
         return output.hashCode() ^ input.hashCode();
@@ -54,5 +58,12 @@ public abstract class LinkShape {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s:%s - %s:%s",
+                System.identityHashCode(output), output.getOutput().getName(),
+                System.identityHashCode(input), input.getInput().getName());
     }
 }
