@@ -18,7 +18,6 @@
 
 package org.marid.bd.statements;
 
-import images.Images;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.SynchronizedStatement;
@@ -37,9 +36,9 @@ public class SynchronizedBlock extends StandardBlock {
     protected Expression expression;
     protected Statement statement;
 
-    protected final Input<Expression> exprInput = in("mon", e -> expression = e, () -> expression = null);
-    protected final Input<Statement> stmtInput = in("body", s -> statement = s, () -> statement = null);
-    protected final Output<SynchronizedStatement> out = out("out", () -> new SynchronizedStatement(expression, statement));
+    protected final Input<Expression> exprInput = in("mon", Expression.class, e -> expression = e, () -> expression = null);
+    protected final Input<Statement> stmtInput = in("body", Statement.class, s -> statement = s, () -> statement = null);
+    protected final Output<SynchronizedStatement> out = out("out", SynchronizedStatement.class, () -> new SynchronizedStatement(expression, statement));
 
     public SynchronizedBlock() {
         super("Synchronized Statement", "sync", "sync", Color.GREEN.darker());

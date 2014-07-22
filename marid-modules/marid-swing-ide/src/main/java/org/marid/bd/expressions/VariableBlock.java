@@ -34,7 +34,7 @@ public class VariableBlock extends IoBlock<ClassNode, VariableExpression> {
     protected String varName = "x";
 
     public VariableBlock() {
-        super("Variable expression", "var", "var", Color.BLUE);
+        super("Variable expression", "var", "var", Color.BLUE, ClassNode.class, VariableExpression.class);
     }
 
     @ConstructorProperties({"varName"})

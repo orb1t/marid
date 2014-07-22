@@ -36,9 +36,9 @@ public class CompareIdentityBlock extends StandardBlock {
     protected Expression left;
     protected Expression right;
 
-    protected final Input<Expression> leftInput = in("expr1", e -> left = e, () -> left = null);
-    protected final Input<Expression> rightInput = in("expr2", e -> right = e, () -> right = null);
-    protected final Output<CompareIdentityExpression> out = out("out", () -> new CompareIdentityExpression(left, right));
+    protected final Input<Expression> leftInput = in("expr1", Expression.class, e -> left = e, () -> left = null);
+    protected final Input<Expression> rightInput = in("expr2", Expression.class, e -> right = e, () -> right = null);
+    protected final Output<CompareIdentityExpression> out = out("out", CompareIdentityExpression.class, () -> new CompareIdentityExpression(left, right));
 
     public CompareIdentityBlock() {
         super("Compare Identity Expression", "===", "===", Color.BLUE);

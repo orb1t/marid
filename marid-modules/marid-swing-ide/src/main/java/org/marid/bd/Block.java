@@ -21,7 +21,6 @@ package org.marid.bd;
 import org.marid.beans.MaridBeans;
 import org.marid.functions.Changer;
 import org.marid.itf.Named;
-import org.marid.reflect.ReflectionUtils;
 import org.marid.swing.dnd.DndObject;
 
 import java.awt.*;
@@ -29,8 +28,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
@@ -83,26 +80,16 @@ public abstract class Block implements Named, DndObject {
         }
     }
 
-    protected <T> Output<T> out(String name, Supplier<T> supplier) {
+    protected <T> Output<T> out(String name, Class<T> type, Supplier<T> supplier) {
         return new Output<T>() {
             @Override
             public T get() {
                 return supplier.get();
             }
 
-            @SuppressWarnings("unchecked")
             @Override
             public Class<T> getOutputType() {
-                try {
-                    for (final Field field : ReflectionUtils.getDeclaredFields(getBlock().getClass())) {
-                        if (field.get(getBlock()) == this) {
-                            return (Class<T>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                        }
-                    }
-                    throw new IllegalStateException("Unable to infer output class");
-                } catch (ReflectiveOperationException x) {
-                    throw new IllegalStateException(x);
-                }
+                return type;
             }
 
             @Override
@@ -117,7 +104,7 @@ public abstract class Block implements Named, DndObject {
         };
     }
 
-    protected <T> Input<T> in(String name, Consumer<T> consumer, Runnable resetter) {
+    protected <T> Input<T> in(String name, Class<T> type, Consumer<T> consumer, Runnable resetter) {
         return new Input<T>() {
             @Override
             public void set(T value) {
@@ -129,19 +116,9 @@ public abstract class Block implements Named, DndObject {
                 resetter.run();
             }
 
-            @SuppressWarnings("unchecked")
             @Override
             public Class<T> getInputType() {
-                try {
-                    for (final Field field : ReflectionUtils.getDeclaredFields(getBlock().getClass())) {
-                        if (field.get(getBlock()) == this) {
-                            return (Class<T>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                        }
-                    }
-                    throw new IllegalStateException("Unable to infer output class");
-                } catch (ReflectiveOperationException x) {
-                    throw new IllegalStateException(x);
-                }
+                return type;
             }
 
             @Override

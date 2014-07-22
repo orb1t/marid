@@ -32,7 +32,7 @@ public class BoolExpBlock extends IoBlock<Expression, BooleanExpression> {
     protected Expression expression;
 
     public BoolExpBlock() {
-        super("Boolean Expression", "bool", "(bool)", Color.BLUE);
+        super("Boolean Expression", "bool", "(bool)", Color.BLUE, Expression.class, BooleanExpression.class);
     }
 
     @Override

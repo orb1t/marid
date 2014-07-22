@@ -32,7 +32,7 @@ public class CompareToNullBlock extends IoBlock<Expression, CompareToNullExpress
     protected Expression expression;
 
     public CompareToNullBlock() {
-        super("Compare To null Expression", "== null", "== null", Color.BLUE);
+        super("Compare To null Expression", "== null", "== null", Color.BLUE, Expression.class, CompareToNullExpression.class);
     }
 
     @Override

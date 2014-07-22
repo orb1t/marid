@@ -32,7 +32,7 @@ public class NotExpBlock extends IoBlock<Expression, NotExpression> {
     protected Expression expression;
 
     public NotExpBlock() {
-        super("Not Expression", " ! ", "! expr", Color.BLUE);
+        super("Not Expression", " ! ", "! expr", Color.BLUE, Expression.class, NotExpression.class);
     }
 
     @Override

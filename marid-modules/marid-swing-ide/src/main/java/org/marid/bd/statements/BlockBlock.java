@@ -18,7 +18,6 @@
 
 package org.marid.bd.statements;
 
-import images.Images;
 import org.codehaus.groovy.ast.VariableScope;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
@@ -36,7 +35,7 @@ public class BlockBlock extends IoBlock<Statement, BlockStatement> {
     protected final List<Statement> statements = new ArrayList<>();
 
     public BlockBlock() {
-        super("Block Statement", "{...}", "{...}", Color.GREEN.darker());
+        super("Block Statement", "{...}", "{...}", Color.GREEN.darker(), Statement.class, BlockStatement.class);
     }
 
     @Override

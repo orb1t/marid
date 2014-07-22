@@ -19,8 +19,6 @@
 package org.marid.bd;
 
 import java.awt.*;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,8 +27,8 @@ import java.util.List;
  */
 public abstract class IoBlock<I, O> extends StandardBlock {
 
-    protected final String inputName;
-    protected final String outputName;
+    protected final Class<I> inputType;
+    protected final Class<O> outputType;
 
     protected final Input<I> input = new Input<I>() {
         @Override
@@ -43,15 +41,9 @@ public abstract class IoBlock<I, O> extends StandardBlock {
             IoBlock.this.reset();
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public Class<I> getInputType() {
-            for (final Type type : IoBlock.this.getClass().getGenericInterfaces()) {
-                if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == Input.class) {
-                    return (Class<I>) ((ParameterizedType) type).getActualTypeArguments()[0];
-                }
-            }
-            throw new IllegalStateException("Unable to infer input type");
+            return inputType;
         }
 
         @Override
@@ -61,7 +53,7 @@ public abstract class IoBlock<I, O> extends StandardBlock {
 
         @Override
         public String getName() {
-            return inputName;
+            return "in";
         }
     };
 
@@ -71,15 +63,9 @@ public abstract class IoBlock<I, O> extends StandardBlock {
             return IoBlock.this.get();
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public Class<O> getOutputType() {
-            for (final Type type : IoBlock.this.getClass().getGenericInterfaces()) {
-                if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == Output.class) {
-                    return (Class<O>) ((ParameterizedType) type).getActualTypeArguments()[0];
-                }
-            }
-            throw new IllegalStateException("Unable to infer input type");
+            return outputType;
         }
 
         @Override
@@ -89,14 +75,14 @@ public abstract class IoBlock<I, O> extends StandardBlock {
 
         @Override
         public String getName() {
-            return outputName;
+            return "out";
         }
     };
 
-    public IoBlock(String name, String iconText, String label, Color color) {
+    public IoBlock(String name, String iconText, String label, Color color, Class<I> inputType, Class<O> outputType) {
         super(name, iconText, label, color);
-        this.inputName = "in";
-        this.outputName = "out";
+        this.inputType = inputType;
+        this.outputType = outputType;
     }
 
     @Override

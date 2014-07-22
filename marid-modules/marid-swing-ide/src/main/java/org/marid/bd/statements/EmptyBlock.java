@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class EmptyBlock extends StandardBlock {
 
-    protected final Output<EmptyStatement> out = out("out", () -> EmptyStatement.INSTANCE);
+    protected final Output<EmptyStatement> out = out("out", EmptyStatement.class, () -> EmptyStatement.INSTANCE);
 
     public EmptyBlock() {
         super("Empty block", "{}", "{}", Color.GREEN.darker());

@@ -37,10 +37,10 @@ public class TernaryBlock extends StandardBlock {
     protected Expression trueExpr;
     protected Expression falseExpr;
 
-    protected final Input<BooleanExpression> expInput = in("test", e -> expression = e, () -> expression = null);
-    protected final Input<Expression> trueInput = in("+", e -> trueExpr = e, () -> trueExpr = null);
-    protected final Input<Expression> falseInput = in("-", e -> falseExpr = e, () -> falseExpr = null);
-    protected final Output<TernaryExpression> out = out("out", () -> new TernaryExpression(expression, trueExpr, falseExpr));
+    protected final Input<BooleanExpression> expInput = in("test", BooleanExpression.class, e -> expression = e, () -> expression = null);
+    protected final Input<Expression> trueInput = in("+", Expression.class, e -> trueExpr = e, () -> trueExpr = null);
+    protected final Input<Expression> falseInput = in("-", Expression.class, e -> falseExpr = e, () -> falseExpr = null);
+    protected final Output<TernaryExpression> out = out("out", TernaryExpression.class, () -> new TernaryExpression(expression, trueExpr, falseExpr));
 
     public TernaryBlock() {
         super("Ternary Expression", "?:", "?:", Color.BLUE);

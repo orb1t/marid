@@ -84,7 +84,6 @@ public class Multiplexor<E> extends StandardBlock {
             updateInputs(newValue);
             component.updateBlock();
             component.getSchemaEditor().createLinks(links);
-            component.getSchemaEditor().repaint();
         }));
         return component;
     }
@@ -101,7 +100,7 @@ public class Multiplexor<E> extends StandardBlock {
     public void updateInputs(int count) {
         inputs.clear();
         for (int i = 1; i <= count; i++) {
-            inputs.add(this.<E>in(Integer.toString(i), list::add, list::clear));
+            inputs.add(in(Integer.toString(i), type, list::add, list::clear));
         }
     }
 

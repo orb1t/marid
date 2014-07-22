@@ -32,7 +32,7 @@ public class ThrowBlock extends IoBlock<Expression, ThrowStatement> {
     protected Expression expression;
 
     public ThrowBlock() {
-        super("Throw Statement", "throw", "throw", Color.GREEN.darker());
+        super("Throw Statement", "throw", "throw", Color.GREEN.darker(), Expression.class, ThrowStatement.class);
     }
 
     @Override

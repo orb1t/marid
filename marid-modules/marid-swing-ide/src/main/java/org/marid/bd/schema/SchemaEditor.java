@@ -63,6 +63,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     private static final Stroke STROKE = new BasicStroke(1.0f);
     private static final Stroke SELECTED_STROKE = new BasicStroke(3.0f);
 
+    protected final SchemaFrame schemaFrame;
     protected final AffineTransform transform = new AffineTransform();
     private Point mousePoint = new Point();
     private final Rectangle clip = new Rectangle();
@@ -80,11 +81,11 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     private Block draggingBlock;
     private final Set<LinkShape> links = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-    public SchemaEditor() {
+    public SchemaEditor(SchemaFrame schemaFrame) {
+        this.schemaFrame = schemaFrame;
         setFont(UIManager.getFont("Label.font"));
         setBackground(SystemColor.controlLtHighlight);
         setDoubleBuffered(true);
-        setOpaque(false);
         setTransferHandler(new MaridTransferHandler());
         setForeground(SystemColor.controlDkShadow);
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
@@ -168,6 +169,11 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         return removed;
     }
 
+    public void removeLink(LinkShape link) {
+        links.remove(link);
+        repaint();
+    }
+
     public void createLinks(List<Link> links) {
         for (final Link link : links) {
             final BlockComponent.Output output = link.outputComponent.outputFor(link.output);
@@ -176,6 +182,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                 addLink(output, input);
             }
         }
+        repaint();
     }
 
     @Override
@@ -265,6 +272,9 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         for (final LinkShape linkShape : links) {
             final Shape shape = linkShape.getShape();
             if (ShapeUtils.contains(shape, mp, 3.0)) {
+                if (e.isPopupTrigger()) {
+                    linkShape.popupMenu().show(this, e.getX(), e.getY());
+                }
                 if (currentLink != linkShape) {
                     currentLink = linkShape;
                     repaint();
@@ -282,6 +292,8 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     protected void paintComponent(Graphics graphics) {
         final Graphics2D g = (Graphics2D) graphics;
         g.getClipBounds(clip);
+        g.setBackground(getBackground());
+        g.clearRect(clip.x, clip.y, clip.width, clip.height);
         g.transform(transform);
         final Stroke oldStroke = g.getStroke();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -290,7 +302,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                 g.setColor(SystemColor.activeCaption);
                 g.setStroke(SELECTED_STROKE);
             } else {
-                g.setColor(getForeground());
+                g.setColor(linkShape.getColor());
                 g.setStroke(STROKE);
             }
             linkShape.paint(g);

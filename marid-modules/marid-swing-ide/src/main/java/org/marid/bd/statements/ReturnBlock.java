@@ -18,7 +18,6 @@
 
 package org.marid.bd.statements;
 
-import images.Images;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.ReturnStatement;
 import org.marid.bd.IoBlock;
@@ -33,7 +32,7 @@ public class ReturnBlock extends IoBlock<Expression, ReturnStatement> {
     protected Expression expression;
 
     public ReturnBlock() {
-        super("Return Statement", "ret", "return", Color.GREEN.darker());
+        super("Return Statement", "ret", "return", Color.GREEN.darker(), Expression.class, ReturnStatement.class);
     }
 
     @Override

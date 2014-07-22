@@ -57,6 +57,7 @@ public interface BlockComponent {
 
     default void remove() {
         final SchemaEditor schemaEditor = getSchemaEditor();
+        schemaEditor.removeAllLinks(this);
         schemaEditor.remove(getComponent());
         schemaEditor.validate();
         schemaEditor.repaint();

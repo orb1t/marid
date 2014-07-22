@@ -32,7 +32,7 @@ public class ExpressionBlock extends IoBlock<Expression, ExpressionStatement> {
     protected Expression expression;
 
     public ExpressionBlock() {
-        super("Expression Statement", "e->s", "e -> s", Color.GREEN.darker());
+        super("Expression Statement", "e->s", "e -> s", Color.GREEN.darker(), Expression.class, ExpressionStatement.class);
     }
 
     @Override

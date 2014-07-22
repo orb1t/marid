@@ -32,7 +32,7 @@ public class CompareToNonNullBlock extends IoBlock<Expression, CompareToNullExpr
     protected Expression expression;
 
     public CompareToNonNullBlock() {
-        super("Compare To Not null Expression", "!= null", "!= null", Color.BLUE);
+        super("Compare To Not null Expression", "!= null", "!= null", Color.BLUE, Expression.class, CompareToNullExpression.class);
     }
 
     @Override

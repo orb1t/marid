@@ -36,9 +36,9 @@ public class WhileBlock extends StandardBlock {
     protected BooleanExpression expression;
     protected Statement body;
 
-    protected final Input<BooleanExpression> exprInput = in("test", e -> expression = e, () -> expression = null);
-    protected final Input<Statement> bodyInput = in("body", s -> body = s, () -> body = null);
-    protected final Output<WhileStatement> out = out("out", () -> new WhileStatement(expression, body));
+    protected final Input<BooleanExpression> exprInput = in("test", BooleanExpression.class, e -> expression = e, () -> expression = null);
+    protected final Input<Statement> bodyInput = in("body", Statement.class, s -> body = s, () -> body = null);
+    protected final Output<WhileStatement> out = out("out", WhileStatement.class, () -> new WhileStatement(expression, body));
 
     public WhileBlock() {
         super("While Statement", "while", "while", Color.GREEN.darker());

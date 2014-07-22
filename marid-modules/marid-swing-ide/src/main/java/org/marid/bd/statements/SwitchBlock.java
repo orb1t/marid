@@ -41,10 +41,10 @@ public class SwitchBlock extends StandardBlock {
     protected Statement defStatement = INSTANCE;
     protected Expression expression = null;
 
-    protected final Input<Expression> expressionInput = in("expr", e -> expression = e, () -> expression = null);
-    protected final Input<CaseStatement> caseInput = in("cases", cases::add, cases::clear);
-    protected final Input<Statement> defaultInput = in("default", s -> defStatement = s, () -> defStatement = INSTANCE);
-    protected final Output<SwitchStatement> out = out("out", () -> new SwitchStatement(expression, cases, defStatement));
+    protected final Input<Expression> expressionInput = in("expr", Expression.class, e -> expression = e, () -> expression = null);
+    protected final Input<CaseStatement> caseInput = in("cases", CaseStatement.class, cases::add, cases::clear);
+    protected final Input<Statement> defaultInput = in("default", Statement.class, s -> defStatement = s, () -> defStatement = INSTANCE);
+    protected final Output<SwitchStatement> out = out("out", SwitchStatement.class, () -> new SwitchStatement(expression, cases, defStatement));
 
     public SwitchBlock() {
         super("Switch Statement", "switch", "switch", Color.GREEN.darker());

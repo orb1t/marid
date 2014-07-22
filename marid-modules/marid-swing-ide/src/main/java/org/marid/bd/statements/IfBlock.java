@@ -37,10 +37,10 @@ public class IfBlock extends StandardBlock {
     protected Statement statement;
     protected Statement elseStatement;
 
-    protected final Input<BooleanExpression> exprInput = in("test", e -> expression = e, () -> expression = null);
-    protected final Input<Statement> statementInput = in("+", s -> statement = s, () -> statement = null);
-    protected final Input<Statement> elseInput = in("-", s -> elseStatement = s, () -> elseStatement = null);
-    protected final Output<IfStatement> output = out("out", () -> new IfStatement(expression, statement, elseStatement));
+    protected final Input<BooleanExpression> exprInput = in("test", BooleanExpression.class, e -> expression = e, () -> expression = null);
+    protected final Input<Statement> statementInput = in("+", Statement.class, s -> statement = s, () -> statement = null);
+    protected final Input<Statement> elseInput = in("-", Statement.class, s -> elseStatement = s, () -> elseStatement = null);
+    protected final Output<IfStatement> output = out("out", IfStatement.class, () -> new IfStatement(expression, statement, elseStatement));
 
     public IfBlock() {
         super("If Statement", " if ", "if", Color.GREEN.darker());

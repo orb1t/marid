@@ -35,9 +35,9 @@ public class TryCatchBlock extends StandardBlock {
     protected Statement tryStatement;
     protected Statement body;
 
-    protected final Input<Statement> tryInput = in("try", s -> tryStatement = s, () -> tryStatement = null);
-    protected final Input<Statement> bodyInput = in("catch", s -> body = s, () -> body = null);
-    protected final Output<TryCatchStatement> out = out("out", () -> new TryCatchStatement(tryStatement, body));
+    protected final Input<Statement> tryInput = in("try", Statement.class, s -> tryStatement = s, () -> tryStatement = null);
+    protected final Input<Statement> bodyInput = in("catch", Statement.class, s -> body = s, () -> body = null);
+    protected final Output<TryCatchStatement> out = out("out", TryCatchStatement.class, () -> new TryCatchStatement(tryStatement, body));
 
     public TryCatchBlock() {
         super("Try/Catch Block", "t/c", "try/catch", Color.GREEN.darker());

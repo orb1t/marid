@@ -18,8 +18,11 @@
 
 package org.marid.bd.shapes;
 
+import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
+import org.marid.swing.MaridAction;
 
+import javax.swing.*;
 import java.awt.*;
 
 /**
@@ -43,6 +46,23 @@ public abstract class LinkShape {
 
     public boolean isAssociatedWith(BlockComponent blockComponent) {
         return output.getBlockComponent() == blockComponent || input.getBlockComponent() == blockComponent;
+    }
+
+    public JPopupMenu popupMenu() {
+        final JPopupMenu popupMenu = new JPopupMenu();
+        popupMenu.add(new MaridAction("Remove", "remove",
+                ev -> output.getBlockComponent().getSchemaEditor().removeLink(this)));
+        return popupMenu;
+    }
+
+    public Color getColor() {
+        final Block.Output<?> o = output.getOutput();
+        final Block.Input<?> i = input.getInput();
+        if (i.getInputType().isAssignableFrom(o.getOutputType())) {
+            return SystemColor.controlDkShadow;
+        } else {
+            return SystemColor.RED;
+        }
     }
 
     @Override
