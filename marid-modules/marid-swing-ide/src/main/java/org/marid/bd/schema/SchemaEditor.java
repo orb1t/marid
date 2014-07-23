@@ -279,17 +279,33 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     private void changeCurrentLink(LinkShape newLink, MouseEvent e) {
         if (newLink != currentLink) {
             if (newLink == null) {
-                schemaFrame.fireEvent(new LinkShapeEvent(currentLink, LinkShapeEvent.MOUSE_EXITED, e));
+                fireLinkEvent(currentLink, LinkShapeEvent.MOUSE_EXITED, e);
             } else {
                 if (currentLink == null) {
-                    schemaFrame.fireEvent(new LinkShapeEvent(newLink, LinkShapeEvent.MOUSE_ENTERED, e));
+                    fireLinkEvent(newLink, LinkShapeEvent.MOUSE_ENTERED, e);
                 } else {
-                    schemaFrame.fireEvent(new LinkShapeEvent(currentLink, LinkShapeEvent.MOUSE_EXITED, e));
-                    schemaFrame.fireEvent(new LinkShapeEvent(newLink, LinkShapeEvent.MOUSE_ENTERED, e));
+                    fireLinkEvent(currentLink, LinkShapeEvent.MOUSE_EXITED, e);
+                    fireLinkEvent(newLink, LinkShapeEvent.MOUSE_ENTERED, e);
                 }
             }
             currentLink = newLink;
             repaint();
+        }
+    }
+
+    private void fireLinkEvent(LinkShape link, int id, MouseEvent e) {
+        schemaFrame.fireEvent(new LinkShapeEvent(link, id, e));
+        final AbstractButton outputButton = link.output.getButton();
+        final AbstractButton inputButton = link.input.getButton();
+        switch (id) {
+            case LinkShapeEvent.MOUSE_ENTERED:
+                outputButton.dispatchEvent(mouseEvent(outputButton, e, MOUSE_ENTERED, new Point()));
+                inputButton.dispatchEvent(mouseEvent(inputButton, e, MOUSE_ENTERED, new Point()));
+                break;
+            case LinkShapeEvent.MOUSE_EXITED:
+                outputButton.dispatchEvent(mouseEvent(outputButton, e, MOUSE_EXITED, new Point()));
+                inputButton.dispatchEvent(mouseEvent(inputButton, e, MOUSE_EXITED, new Point()));
+                break;
         }
     }
 
