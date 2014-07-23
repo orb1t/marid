@@ -19,6 +19,7 @@
 package org.marid.bd.schema;
 
 import org.marid.bd.BlockComponent;
+import org.marid.bd.shapes.LinkShapeEvent;
 import org.marid.swing.AbstractFrame;
 import org.marid.swing.actions.ComponentAction;
 import org.marid.swing.menu.MenuActionList;
@@ -47,6 +48,10 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
         centerPanel.add(layer);
         getContentPane().setBackground(getBackground());
         pack();
+    }
+
+    protected void fireEvent(AWTEvent event) {
+        layer.getUI().eventDispatched(event, layer);
     }
 
     @Override
@@ -180,6 +185,16 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
                         layer.repaint();
                     }
                     break;
+            }
+            if (e instanceof LinkShapeEvent) {
+                switch (e.getID()) {
+                    case LinkShapeEvent.MOUSE_ENTERED:
+                        System.out.println(e);
+                        break;
+                    case LinkShapeEvent.MOUSE_EXITED:
+                        System.out.println(e);
+                        break;
+                }
             }
         }
 

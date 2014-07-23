@@ -22,6 +22,7 @@ import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.shapes.Link;
 import org.marid.bd.shapes.LinkShape;
+import org.marid.bd.shapes.LinkShapeEvent;
 import org.marid.concurrent.MaridTimerTask;
 import org.marid.functions.ReturnObjectException;
 import org.marid.swing.InputMaskType;
@@ -188,13 +189,6 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     @Override
     protected void processMouseWheelEvent(MouseWheelEvent e) {
         zoom(1.0 + e.getPreciseWheelRotation() / 10.0, e.getPoint());
-        super.processMouseWheelEvent(e);
-    }
-
-    @Override
-    protected void processMouseEvent(MouseEvent e) {
-        onMouseEvent(e);
-        super.processMouseEvent(e);
     }
 
     @Override
@@ -216,11 +210,11 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                 }
                 break;
         }
-        onMouseEvent(e);
-        super.processMouseMotionEvent(e);
+        processMouseEvent(e);
     }
 
-    protected void onMouseEvent(MouseEvent e) {
+    @Override
+    protected void processMouseEvent(MouseEvent e) {
         final Point mp = SwingUtil.transform(transform::inverseTransform, e.getPoint());
         if (e.getID() == MouseEvent.MOUSE_RELEASED && movingComponent != null) {
             movingComponent = null;
@@ -259,8 +253,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                     s.dispatchEvent(mouseEvent(s, e, MOUSE_ENTERED, p));
                     curComponent = s;
                 }
-                currentLink = null;
-                repaint();
+                changeCurrentLink(null, e);
                 return;
             }
         }
@@ -275,15 +268,26 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                 if (e.isPopupTrigger()) {
                     linkShape.popupMenu().show(this, e.getX(), e.getY());
                 }
-                if (currentLink != linkShape) {
-                    currentLink = linkShape;
-                    repaint();
-                }
+                changeCurrentLink(linkShape, e);
                 return;
             }
         }
-        if (currentLink != null) {
-            currentLink = null;
+        changeCurrentLink(null, e);
+    }
+
+    private void changeCurrentLink(LinkShape newLink, MouseEvent e) {
+        if (newLink != currentLink) {
+            if (newLink == null) {
+                schemaFrame.fireEvent(new LinkShapeEvent(currentLink, LinkShapeEvent.MOUSE_EXITED, e));
+            } else {
+                if (currentLink == null) {
+                    schemaFrame.fireEvent(new LinkShapeEvent(newLink, LinkShapeEvent.MOUSE_ENTERED, e));
+                } else {
+                    schemaFrame.fireEvent(new LinkShapeEvent(currentLink, LinkShapeEvent.MOUSE_EXITED, e));
+                    schemaFrame.fireEvent(new LinkShapeEvent(newLink, LinkShapeEvent.MOUSE_ENTERED, e));
+                }
+            }
+            currentLink = newLink;
             repaint();
         }
     }
