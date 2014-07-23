@@ -31,13 +31,11 @@ public class LinkShapeEvent extends AWTEvent {
 
     protected final Point point;
     protected final Point pointOnScreen;
-    protected final Point realPoint;
 
     public LinkShapeEvent(LinkShape link, int id, MouseEvent sourceEvent) {
         super(link, id);
         this.point = sourceEvent.getPoint();
         this.pointOnScreen = sourceEvent.getLocationOnScreen();
-        this.realPoint = point;
     }
 
     @Override
@@ -53,10 +51,6 @@ public class LinkShapeEvent extends AWTEvent {
         return pointOnScreen;
     }
 
-    public Point getRealPoint() {
-        return realPoint;
-    }
-
     public String action() {
         switch (id) {
             case MOUSE_ENTERED:
@@ -70,6 +64,6 @@ public class LinkShapeEvent extends AWTEvent {
 
     @Override
     public String paramString() {
-        return String.format("%s point=%s, onScreen=%s, real=%s", action(), point, pointOnScreen, realPoint);
+        return String.format("%s point=%s, onScreen=%s", action(), point, pointOnScreen);
     }
 }

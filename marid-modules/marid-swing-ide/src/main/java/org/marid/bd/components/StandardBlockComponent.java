@@ -142,7 +142,7 @@ public class StandardBlockComponent<B extends Block> extends DefaultBlockCompone
         for (final Block.Input<?> in : block.getInputs()) {
             final DefaultInput input = new DefaultInput(in);
             inputs.add(input);
-            map.put(input, new JLabel(in.getName()));
+            map.put(input, input.getAssociatedLabel());
         }
         v.addGap(0, 0, Integer.MAX_VALUE);
         map.forEach((i, l) -> {

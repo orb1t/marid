@@ -18,6 +18,7 @@
 
 package org.marid.bd.statements;
 
+import org.codehaus.groovy.ast.stmt.CatchStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.TryCatchStatement;
 import org.marid.bd.StandardBlock;
@@ -33,11 +34,22 @@ import java.util.List;
 public class TryCatchBlock extends StandardBlock {
 
     protected Statement tryStatement;
-    protected Statement body;
+    protected Statement finallyStatement;
+    protected CatchStatement[] catchStatements;
 
-    protected final Input<Statement> tryInput = in("try", Statement.class, s -> tryStatement = s, () -> tryStatement = null);
-    protected final Input<Statement> bodyInput = in("catch", Statement.class, s -> body = s, () -> body = null);
-    protected final Output<TryCatchStatement> out = out("out", TryCatchStatement.class, () -> new TryCatchStatement(tryStatement, body));
+    protected final Input<Statement> tryInput = in("try", Statement.class, s -> tryStatement = s);
+    protected final Input<CatchStatement[]> catchInput = in("catch", CatchStatement[].class, s -> catchStatements = s);
+    protected final Input<Statement> finallyInput = in("finally", Statement.class, s -> finallyStatement = s);
+
+    protected final Output<TryCatchStatement> out = out("out", TryCatchStatement.class, () -> {
+        final TryCatchStatement statement = new TryCatchStatement(tryStatement, finallyStatement);
+        if (catchStatements != null) {
+            for (final CatchStatement catchStatement : catchStatements) {
+                statement.addCatch(catchStatement);
+            }
+        }
+        return statement;
+    });
 
     public TryCatchBlock() {
         super("Try/Catch Block", "t/c", "try/catch", Color.GREEN.darker());
@@ -45,7 +57,7 @@ public class TryCatchBlock extends StandardBlock {
 
     @Override
     public List<Input<?>> getInputs() {
-        return Arrays.asList(tryInput, bodyInput);
+        return Arrays.asList(tryInput, catchInput, finallyInput);
     }
 
     @Override

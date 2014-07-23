@@ -18,7 +18,6 @@
 
 package org.marid.bd.expressions;
 
-import images.Images;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.transform.sc.transformers.CompareIdentityExpression;
 import org.marid.bd.StandardBlock;
@@ -36,8 +35,8 @@ public class CompareIdentityBlock extends StandardBlock {
     protected Expression left;
     protected Expression right;
 
-    protected final Input<Expression> leftInput = in("expr1", Expression.class, e -> left = e, () -> left = null);
-    protected final Input<Expression> rightInput = in("expr2", Expression.class, e -> right = e, () -> right = null);
+    protected final Input<Expression> leftInput = in("expr1", Expression.class, e -> left = e);
+    protected final Input<Expression> rightInput = in("expr2", Expression.class, e -> right = e);
     protected final Output<CompareIdentityExpression> out = out("out", CompareIdentityExpression.class, () -> new CompareIdentityExpression(left, right));
 
     public CompareIdentityBlock() {

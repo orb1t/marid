@@ -100,7 +100,7 @@ public class Multiplexor<E> extends StandardBlock {
     public void updateInputs(int count) {
         inputs.clear();
         for (int i = 1; i <= count; i++) {
-            inputs.add(in(Integer.toString(i), type, list::add, list::clear));
+            inputs.add(in(Integer.toString(i), type, list::add));
         }
     }
 

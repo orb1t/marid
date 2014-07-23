@@ -51,6 +51,7 @@ import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
 import static java.awt.EventQueue.invokeLater;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.SystemColor.activeCaption;
 import static java.awt.event.MouseEvent.*;
 import static org.marid.concurrent.AtomicUtils.processDirty;
 import static org.marid.swing.geom.ShapeUtils.mouseEvent;
@@ -302,13 +303,8 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         final Stroke oldStroke = g.getStroke();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         for (final LinkShape linkShape : links) {
-            if (currentLink == linkShape) {
-                g.setColor(SystemColor.activeCaption);
-                g.setStroke(SELECTED_STROKE);
-            } else {
-                g.setColor(linkShape.getColor());
-                g.setStroke(STROKE);
-            }
+            g.setColor(currentLink == linkShape ? activeCaption : linkShape.getColor());
+            g.setStroke(linkShape.getStroke());
             linkShape.paint(g);
         }
         g.setStroke(oldStroke);

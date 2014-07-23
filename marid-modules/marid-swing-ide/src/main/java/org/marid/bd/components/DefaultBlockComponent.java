@@ -21,10 +21,14 @@ package org.marid.bd.components;
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.BlockListener;
+import org.marid.collections.ImmutableArrayMap;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.HierarchyEvent;
+
+import static java.awt.font.TextAttribute.UNDERLINE;
+import static java.awt.font.TextAttribute.UNDERLINE_LOW_DASHED;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -64,7 +68,11 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
 
         public DefaultInput(Block.Input<?> input) {
             super(input.getName(), SwingConstants.WEST);
-            this.label = new JLabel(getName());
+            label = new JLabel(getName());
+            label.setFont(UIManager.getFont("Label.font"));
+            if (input.getInputType().isArray()) {
+                label.setFont(label.getFont().deriveFont(new ImmutableArrayMap<>(UNDERLINE, UNDERLINE_LOW_DASHED)));
+            }
             addActionListener(e -> getBlockComponent().getSchemaEditor().visitBlockComponents(bc -> {
                 if (bc != getBlockComponent()) {
                     bc.getOutputs().forEach(o -> {

@@ -104,16 +104,11 @@ public abstract class Block implements Named, DndObject {
         };
     }
 
-    protected <T> Input<T> in(String name, Class<T> type, Consumer<T> consumer, Runnable resetter) {
+    protected <T> Input<T> in(String name, Class<T> type, Consumer<T> consumer) {
         return new Input<T>() {
             @Override
             public void set(T value) {
                 consumer.accept(value);
-            }
-
-            @Override
-            public void reset() {
-                resetter.run();
             }
 
             @Override
@@ -162,8 +157,6 @@ public abstract class Block implements Named, DndObject {
 
         void set(T value);
 
-        void reset();
-
         Class<T> getInputType();
 
         Block getBlock();
@@ -183,13 +176,11 @@ public abstract class Block implements Named, DndObject {
         private final String name;
         private final Class<T> type;
         private final Consumer<T> consumer;
-        private final Runnable resetter;
 
-        public In(String name, Class<T> type, Consumer<T> consumer, Runnable resetter) {
+        public In(String name, Class<T> type, Consumer<T> consumer) {
             this.name = name;
             this.type = type;
             this.consumer = consumer;
-            this.resetter = resetter;
         }
 
         @Override
@@ -205,11 +196,6 @@ public abstract class Block implements Named, DndObject {
         @Override
         public void set(T value) {
             consumer.accept(value);
-        }
-
-        @Override
-        public void reset() {
-            resetter.run();
         }
 
         @Override

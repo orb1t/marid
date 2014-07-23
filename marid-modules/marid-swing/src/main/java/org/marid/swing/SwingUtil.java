@@ -93,6 +93,10 @@ public class SwingUtil {
         return new Rectangle(tp1.x, tp1.y, tp2.x - tp1.x, tp2.y - tp1.y);
     }
 
+    public static Color color(Color base, int alpha) {
+        return new Color(base.getRed(), base.getGreen(), base.getBlue(), alpha);
+    }
+
     @FunctionalInterface
     public static interface CoordinateTransformFunction {
 

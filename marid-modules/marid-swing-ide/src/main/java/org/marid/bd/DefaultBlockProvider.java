@@ -19,6 +19,7 @@
 package org.marid.bd;
 
 import org.codehaus.groovy.ast.stmt.CaseStatement;
+import org.codehaus.groovy.ast.stmt.CatchStatement;
 import org.marid.bd.expressions.*;
 import org.marid.bd.multiplexors.Multiplexor;
 import org.marid.bd.statements.*;
@@ -47,6 +48,7 @@ public class DefaultBlockProvider implements BlockProvider {
         blockConsumer.accept("Statements", new WhileBlock());
         blockConsumer.accept("Statements", new ForBlock());
         blockConsumer.accept("Statements", new TryCatchBlock());
+        blockConsumer.accept("Statements", new CatchBlock());
         blockConsumer.accept("Statements", new SwitchBlock());
         blockConsumer.accept("Statements", new ExpressionBlock());
         blockConsumer.accept("Statements", new SynchronizedBlock());
@@ -54,6 +56,7 @@ public class DefaultBlockProvider implements BlockProvider {
         blockConsumer.accept("Statements", new ThrowBlock());
         blockConsumer.accept("Statements", new BlockBlock());
 
-        blockConsumer.accept("Multiplexors", new Multiplexor<>("Case multiplexor", "CSM", "CSM", CaseStatement.class, 2));
+        blockConsumer.accept("Multiplexors", new Multiplexor<>("Case multiplexor", "case", "case", CaseStatement.class, 2));
+        blockConsumer.accept("Multiplexors", new Multiplexor<>("Catch multiplexor", "catch", "catch", CatchStatement.class, 2));
     }
 }

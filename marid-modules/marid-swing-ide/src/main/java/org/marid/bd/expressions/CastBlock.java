@@ -28,18 +28,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.codehaus.groovy.ast.ClassHelper.OBJECT_TYPE;
-
 /**
  * @author Dmitry Ovchinnikov
  */
 public class CastBlock extends StandardBlock {
 
     protected Expression expression;
-    protected ClassNode classNode = OBJECT_TYPE;
+    protected ClassNode classNode;
 
-    protected final Input<Expression> exprInput = in("expr", Expression.class, e -> expression = e, () -> expression = null);
-    protected final Input<ClassNode> classInput = in("class", ClassNode.class, c -> classNode = c, () -> classNode = OBJECT_TYPE);
+    protected final Input<Expression> exprInput = in("expr", Expression.class, e -> expression = e);
+    protected final Input<ClassNode> classInput = in("class", ClassNode.class, c -> classNode = c);
     protected final Output<CastExpression> castExpr = out("out", CastExpression.class, () -> new CastExpression(classNode, expression));
 
     public CastBlock() {

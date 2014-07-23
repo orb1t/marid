@@ -37,11 +37,6 @@ public abstract class IoBlock<I, O> extends StandardBlock {
         }
 
         @Override
-        public void reset() {
-            IoBlock.this.reset();
-        }
-
-        @Override
         public Class<I> getInputType() {
             return inputType;
         }

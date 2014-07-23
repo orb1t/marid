@@ -36,8 +36,8 @@ public class SynchronizedBlock extends StandardBlock {
     protected Expression expression;
     protected Statement statement;
 
-    protected final Input<Expression> exprInput = in("mon", Expression.class, e -> expression = e, () -> expression = null);
-    protected final Input<Statement> stmtInput = in("body", Statement.class, s -> statement = s, () -> statement = null);
+    protected final Input<Expression> exprInput = in("mon", Expression.class, e -> expression = e);
+    protected final Input<Statement> stmtInput = in("body", Statement.class, s -> statement = s);
     protected final Output<SynchronizedStatement> out = out("out", SynchronizedStatement.class, () -> new SynchronizedStatement(expression, statement));
 
     public SynchronizedBlock() {

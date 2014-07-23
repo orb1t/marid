@@ -25,10 +25,16 @@ import org.marid.swing.MaridAction;
 import javax.swing.*;
 import java.awt.*;
 
+import static java.awt.BasicStroke.CAP_SQUARE;
+import static java.awt.BasicStroke.JOIN_MITER;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public abstract class LinkShape {
+
+    public static final Stroke NORMAL = new BasicStroke(1.0f);
+    public static final Stroke VECTOR = new BasicStroke(1.0f, CAP_SQUARE, JOIN_MITER, 5.0f, new float[] {5.0f}, 0.0f);
 
     public final BlockComponent.Output output;
     public final BlockComponent.Input input;
@@ -55,14 +61,34 @@ public abstract class LinkShape {
         return popupMenu;
     }
 
-    public Color getColor() {
+    public boolean isValid() {
         final Block.Output<?> o = output.getOutput();
         final Block.Input<?> i = input.getInput();
-        if (i.getInputType().isAssignableFrom(o.getOutputType())) {
+        return i.getInputType().isAssignableFrom(o.getOutputType());
+    }
+
+    public Color getColor() {
+        if (isValid()) {
             return SystemColor.controlDkShadow;
         } else {
             return SystemColor.RED;
         }
+    }
+
+    public Stroke getStroke() {
+        if (getOutputType().isArray() || getInputType().isArray()) {
+            return VECTOR;
+        } else {
+            return NORMAL;
+        }
+    }
+
+    public Class<?> getOutputType() {
+        return output.getOutput().getOutputType();
+    }
+
+    public Class<?> getInputType() {
+        return input.getInput().getInputType();
     }
 
     @Override

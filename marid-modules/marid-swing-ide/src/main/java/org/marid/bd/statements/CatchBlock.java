@@ -18,8 +18,8 @@
 
 package org.marid.bd.statements;
 
-import org.codehaus.groovy.ast.expr.BooleanExpression;
-import org.codehaus.groovy.ast.stmt.IfStatement;
+import org.codehaus.groovy.ast.Parameter;
+import org.codehaus.groovy.ast.stmt.CatchStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.marid.bd.StandardBlock;
 
@@ -31,28 +31,27 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class IfBlock extends StandardBlock {
+public class CatchBlock extends StandardBlock {
 
-    protected BooleanExpression expression;
-    protected Statement statement;
-    protected Statement elseStatement;
+    protected Parameter variable;
+    protected Statement body;
 
-    protected final Input<BooleanExpression> exprInput = in("test", BooleanExpression.class, e -> expression = e);
-    protected final Input<Statement> statementInput = in("+", Statement.class, s -> statement = s);
-    protected final Input<Statement> elseInput = in("-", Statement.class, s -> elseStatement = s);
-    protected final Output<IfStatement> output = out("out", IfStatement.class, () -> new IfStatement(expression, statement, elseStatement));
+    protected final Input<Parameter> variableInput = in("var", Parameter.class, p -> variable = p);
+    protected final Input<Statement> bodyInput = in("body", Statement.class, s -> body = s);
 
-    public IfBlock() {
-        super("If Statement", " if ", "if", Color.GREEN.darker());
+    protected final Output<CatchStatement> out = out("out", CatchStatement.class, () -> new CatchStatement(variable, body));
+
+    public CatchBlock() {
+        super("Catch Block", "catch", "catch", Color.GREEN.darker());
     }
 
     @Override
     public List<Input<?>> getInputs() {
-        return Arrays.asList(exprInput, statementInput, elseInput);
+        return Arrays.asList(variableInput, bodyInput);
     }
 
     @Override
     public List<Output<?>> getOutputs() {
-        return Collections.singletonList(output);
+        return Collections.singletonList(out);
     }
 }

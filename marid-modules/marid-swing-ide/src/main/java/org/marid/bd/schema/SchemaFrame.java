@@ -18,9 +18,13 @@
 
 package org.marid.bd.schema;
 
+import images.Images;
 import org.marid.bd.BlockComponent;
+import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
+import org.marid.l10n.L10n;
 import org.marid.swing.AbstractFrame;
+import org.marid.swing.SwingUtil;
 import org.marid.swing.actions.ComponentAction;
 import org.marid.swing.menu.MenuActionList;
 
@@ -31,6 +35,9 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 
+import static java.awt.Color.RED;
+import static java.awt.SystemColor.infoText;
+import static java.lang.String.format;
 import static javax.swing.BorderFactory.*;
 
 /**
@@ -171,52 +178,65 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
                         final BlockComponent.Input input = (BlockComponent.Input) e.getSource();
                         final Point point = ((MouseEvent) e).getLocationOnScreen();
                         SwingUtilities.convertPointFromScreen(point, schemaEditor);
-                        showTooltip(point, input);
+                        showTooltip(format("%s: %s", input.getInput().getName(), input.getInput().getInputType().getCanonicalName()), point);
                     } else if (e.getSource() instanceof BlockComponent.Output) {
                         final BlockComponent.Output output = (BlockComponent.Output) e.getSource();
                         final Point point = ((MouseEvent) e).getLocationOnScreen();
                         SwingUtilities.convertPointFromScreen(point, schemaEditor);
-                        showTooltip(point, output);
+                        showTooltip(format("%s: %s", output.getOutput().getName(), output.getOutput().getOutputType().getCanonicalName()), point);
                     }
                     break;
                 case MouseEvent.MOUSE_EXITED:
                     if (e.getSource() instanceof BlockComponent.Input || e.getSource() instanceof BlockComponent.Output) {
-                        tooltip = null;
-                        layer.repaint();
+                        hideTooltip();
+                    }
+                    break;
+                default:
+                    if (e instanceof LinkShapeEvent) {
+                        switch (e.getID()) {
+                            case LinkShapeEvent.MOUSE_ENTERED:
+                                final LinkShapeEvent event = (LinkShapeEvent) e;
+                                final LinkShape link = event.getSource();
+                                if (!link.isValid()) {
+                                    showError(L10n.m("Types mismatch: {0} -> {1}",
+                                            link.getOutputType().getCanonicalName(),
+                                            link.getInputType().getCanonicalName()), event.getPoint());
+                                }
+                                break;
+                            case LinkShapeEvent.MOUSE_EXITED:
+                                hideTooltip();
+                                break;
+                        }
                     }
                     break;
             }
-            if (e instanceof LinkShapeEvent) {
-                switch (e.getID()) {
-                    case LinkShapeEvent.MOUSE_ENTERED:
-                        System.out.println(e);
-                        break;
-                    case LinkShapeEvent.MOUSE_EXITED:
-                        System.out.println(e);
-                        break;
-                }
+        }
+
+        public void hideTooltip() {
+            if (tooltip != null) {
+                tooltip = null;
+                layer.repaint();
             }
         }
 
-        public void showTooltip(Point point, BlockComponent.Input input) {
-            showTooltip(String.format("%s: %s", input.getInput().getName(), input.getInput().getInputType().getCanonicalName()), point);
-            layer.repaint();
-        }
-
-        public void showTooltip(Point point, BlockComponent.Output output) {
-            showTooltip(String.format("%s: %s", output.getOutput().getName(), output.getOutput().getOutputType().getCanonicalName()), point);
-            layer.repaint();
-        }
-
         public void showTooltip(String text, Point point) {
-            final JLabel label = new JLabel(text);
+            showMessage(Images.getIcon("info.png"), SystemColor.info, text, point);
+        }
+
+        public void showError(String text, Point point) {
+            showMessage(Images.getIcon("warning.png"), RED.brighter().brighter(), text, point);
+        }
+
+        public void showMessage(ImageIcon icon, Color color, String text, Point point) {
+            final JLabel label = new JLabel(text, icon, SwingConstants.LEFT);
             label.setOpaque(true);
-            label.setForeground(SystemColor.infoText);
-            label.setBackground(SystemColor.info);
-            label.setBorder(createCompoundBorder(createRaisedBevelBorder(), createEmptyBorder(3, 3, 3, 3)));
+            label.setForeground(infoText);
+            label.setBackground(SwingUtil.color(color, 200));
+            label.setBorder(createCompoundBorder(createEtchedBorder(), createEmptyBorder(3, 3, 3, 3)));
             label.setLocation(point.x + 10, point.y + 10);
             label.setSize(label.getPreferredSize());
             tooltip = label;
+            layer.repaint();
         }
     }
 }
