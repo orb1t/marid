@@ -89,6 +89,11 @@ public class Multiplexor<E> extends StandardBlock {
         return component;
     }
 
+    @Override
+    public void reset() {
+        list.clear();
+    }
+
     public void setInputCount(int newValue) {
         fire(MultiplexorListener.class, () -> inputCount, n -> inputCount = n, newValue, MultiplexorListener::inputCountChanged);
     }

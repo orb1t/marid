@@ -68,6 +68,8 @@ public abstract class Block implements Named, DndObject {
 
     public abstract BlockComponent createComponent();
 
+    public abstract void reset();
+
     public Window createWindow(Window parent) {
         return null;
     }

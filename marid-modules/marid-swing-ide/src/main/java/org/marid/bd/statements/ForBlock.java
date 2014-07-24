@@ -19,7 +19,9 @@
 package org.marid.bd.statements;
 
 import org.codehaus.groovy.ast.Parameter;
+import org.codehaus.groovy.ast.expr.EmptyExpression;
 import org.codehaus.groovy.ast.expr.Expression;
+import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.ForStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.marid.bd.StandardBlock;
@@ -45,6 +47,13 @@ public class ForBlock extends StandardBlock {
 
     public ForBlock() {
         super("For Statement", "for", "for", Color.GREEN.darker());
+    }
+
+    @Override
+    public void reset() {
+        parameter = null;
+        expression = EmptyExpression.INSTANCE;
+        body = EmptyStatement.INSTANCE;
     }
 
     @Override

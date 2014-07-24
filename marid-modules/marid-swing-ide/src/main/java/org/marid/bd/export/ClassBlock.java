@@ -67,6 +67,11 @@ public class ClassBlock extends StandardBlock {
     }
 
     @Override
+    public void reset() {
+        targetClass = null;
+    }
+
+    @Override
     public Window createWindow(Window parent) {
         final ClassInputControl classInputControl = new ClassInputControl();
         classInputControl.setInputValue(targetClass);

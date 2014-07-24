@@ -90,8 +90,6 @@ public abstract class IoBlock<I, O> extends StandardBlock {
         return Collections.singletonList(output);
     }
 
-    protected abstract void reset();
-
     protected abstract void set(I value);
 
     protected abstract O get();

@@ -19,6 +19,8 @@
 package org.marid.bd.statements;
 
 import org.codehaus.groovy.ast.expr.BooleanExpression;
+import org.codehaus.groovy.ast.expr.ConstantExpression;
+import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.WhileStatement;
 import org.marid.bd.StandardBlock;
@@ -42,6 +44,12 @@ public class WhileBlock extends StandardBlock {
 
     public WhileBlock() {
         super("While Statement", "while", "while", Color.GREEN.darker());
+    }
+
+    @Override
+    public void reset() {
+        expression = new BooleanExpression(ConstantExpression.PRIM_FALSE);
+        body = EmptyStatement.INSTANCE;
     }
 
     @Override

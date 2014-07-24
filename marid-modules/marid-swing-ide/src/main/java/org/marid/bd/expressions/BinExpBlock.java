@@ -20,6 +20,7 @@ package org.marid.bd.expressions;
 
 import images.Images;
 import org.codehaus.groovy.ast.expr.BinaryExpression;
+import org.codehaus.groovy.ast.expr.EmptyExpression;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
@@ -47,8 +48,10 @@ public class BinExpBlock extends Block {
     protected Expression left;
     protected Expression right;
     protected TokenType tokenType;
+
     protected final In<Expression> leftInput = new In<>("arg1", Expression.class, e -> left = e);
     protected final In<Expression> rightInput = new In<>("arg2", Expression.class, e -> right = e);
+
     protected final Out<Expression> output = new Out<>("out", Expression.class, this::binaryExpression);
 
     public BinExpBlock() {
@@ -69,6 +72,13 @@ public class BinExpBlock extends Block {
             });
             c.add(new BlockLabel(() -> tokenType.text, () -> Color.BLUE));
         });
+    }
+
+    @Override
+    public void reset() {
+        left = EmptyExpression.INSTANCE;
+        right = EmptyExpression.INSTANCE;
+        tokenType = TokenType.PLUS;
     }
 
     @Override

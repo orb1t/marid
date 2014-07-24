@@ -18,9 +18,7 @@
 
 package org.marid.bd.expressions;
 
-import org.codehaus.groovy.ast.expr.BooleanExpression;
-import org.codehaus.groovy.ast.expr.Expression;
-import org.codehaus.groovy.ast.expr.TernaryExpression;
+import org.codehaus.groovy.ast.expr.*;
 import org.marid.bd.StandardBlock;
 
 import java.awt.*;
@@ -40,10 +38,18 @@ public class TernaryBlock extends StandardBlock {
     protected final In<BooleanExpression> expInput = new In<>("test", BooleanExpression.class, e -> expression = e);
     protected final In<Expression> trueInput = new In<>("+", Expression.class, e -> trueExpr = e);
     protected final In<Expression> falseInput = new In<>("-", Expression.class, e -> falseExpr = e);
+
     protected final Out<TernaryExpression> out = new Out<>("out", TernaryExpression.class, () -> new TernaryExpression(expression, trueExpr, falseExpr));
 
     public TernaryBlock() {
         super("Ternary Expression", "?:", "?:", Color.BLUE);
+    }
+
+    @Override
+    public void reset() {
+        expression = new BooleanExpression(ConstantExpression.TRUE);
+        trueExpr = EmptyExpression.INSTANCE;
+        falseExpr = EmptyExpression.INSTANCE;
     }
 
     @Override

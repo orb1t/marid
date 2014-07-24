@@ -19,6 +19,7 @@
 package org.marid.bd.statements;
 
 import org.codehaus.groovy.ast.stmt.CatchStatement;
+import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.TryCatchStatement;
 import org.marid.bd.StandardBlock;
@@ -51,6 +52,13 @@ public class TryCatchBlock extends StandardBlock {
 
     public TryCatchBlock() {
         super("Try/Catch Block", "t/c", "try/catch", Color.GREEN.darker());
+    }
+
+    @Override
+    public void reset() {
+        tryStatement = EmptyStatement.INSTANCE;
+        finallyStatement = EmptyStatement.INSTANCE;
+        catchStatements = new CatchStatement[0];
     }
 
     @Override

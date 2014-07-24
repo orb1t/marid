@@ -16,13 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.expressions;
+package org.marid.bd.export;
 
+import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.expr.CastExpression;
-import org.codehaus.groovy.ast.expr.EmptyExpression;
-import org.codehaus.groovy.ast.expr.Expression;
 import org.marid.bd.StandardBlock;
 
 import java.awt.*;
@@ -30,35 +28,46 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.marid.bd.expressions.NamedExpressionBlock.NamedExpression;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-public class CastBlock extends StandardBlock {
+public class AnnotationBlock extends StandardBlock {
 
-    protected Expression expression;
     protected ClassNode classNode;
+    protected NamedExpression[] members;
 
-    protected final In<Expression> exprInput = new In<>("expr", Expression.class, e -> expression = e);
-    protected final In<ClassNode> classInput = new In<>("class", ClassNode.class, c -> classNode = c);
-    protected final Out<CastExpression> castExpr = new Out<>("out", CastExpression.class, () -> new CastExpression(classNode, expression));
+    protected final In<ClassNode> classNodeInput = new In<>("class", ClassNode.class, n -> classNode = n);
+    protected final In<NamedExpression[]> membersInput = new In<>("parameters", NamedExpression[].class, v -> members = v);
 
-    public CastBlock() {
-        super("Cast Expression", "(*)", "(*)", Color.BLUE);
+    protected final Out<AnnotationNode> out = new Out<>("out", AnnotationNode.class, this::annotationNode);
+
+    public AnnotationBlock() {
+        super("Annotation Block", " @ ", "@", Color.CYAN.darker());
     }
 
     @Override
     public void reset() {
-        expression = EmptyExpression.INSTANCE;
-        classNode = ClassHelper.OBJECT_TYPE;
+        classNode = ClassHelper.STRING_TYPE;
+        members = new NamedExpression[0];
     }
 
     @Override
     public List<Input<?>> getInputs() {
-        return Arrays.asList(exprInput, classInput);
+        return Arrays.asList(classNodeInput, membersInput);
     }
 
     @Override
     public List<Output<?>> getOutputs() {
-        return Collections.singletonList(castExpr);
+        return Collections.singletonList(out);
+    }
+
+    public AnnotationNode annotationNode() {
+        final AnnotationNode node = new AnnotationNode(classNode);
+        for (final NamedExpression member : members) {
+            node.addMember(member.name, member.expression);
+        }
+        return node;
     }
 }

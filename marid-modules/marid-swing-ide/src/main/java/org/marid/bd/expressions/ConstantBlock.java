@@ -90,6 +90,11 @@ public class ConstantBlock extends NamedBlock {
     }
 
     @Override
+    public void reset() {
+        value = "null";
+    }
+
+    @Override
     public ImageIcon getVisualRepresentation() {
         return Images.getIconFromText("const", 32, 32, Color.BLUE, Color.WHITE);
     }

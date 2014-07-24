@@ -19,6 +19,7 @@
 package org.marid.bd.statements;
 
 import org.codehaus.groovy.ast.expr.Expression;
+import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.SynchronizedStatement;
 import org.marid.bd.StandardBlock;
@@ -42,6 +43,12 @@ public class SynchronizedBlock extends StandardBlock {
 
     public SynchronizedBlock() {
         super("Synchronized Statement", "sync", "sync", Color.GREEN.darker());
+    }
+
+    @Override
+    public void reset() {
+        expression = null;
+        statement = EmptyStatement.INSTANCE;
     }
 
     @Override

@@ -18,8 +18,10 @@
 
 package org.marid.bd.statements;
 
+import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.ast.stmt.CatchStatement;
+import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.marid.bd.StandardBlock;
 
@@ -43,6 +45,12 @@ public class CatchBlock extends StandardBlock {
 
     public CatchBlock() {
         super("Catch Block", "catch", "catch", Color.GREEN.darker());
+    }
+
+    @Override
+    public void reset() {
+        variable = new Parameter(ClassHelper.makeCached(Exception.class), "x");
+        body = EmptyStatement.INSTANCE;
     }
 
     @Override

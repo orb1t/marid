@@ -55,6 +55,13 @@ public class SwitchBlock extends StandardBlock {
     }
 
     @Override
+    public void reset() {
+        caseStatements = null;
+        defStatement = EmptyStatement.INSTANCE;
+        expression = null;
+    }
+
+    @Override
     public List<Input<?>> getInputs() {
         return asList(expressionInput, caseInput, defaultInput);
     }

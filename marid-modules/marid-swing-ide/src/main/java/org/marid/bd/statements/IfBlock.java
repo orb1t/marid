@@ -19,6 +19,8 @@
 package org.marid.bd.statements;
 
 import org.codehaus.groovy.ast.expr.BooleanExpression;
+import org.codehaus.groovy.ast.expr.ConstantExpression;
+import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.IfStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.marid.bd.StandardBlock;
@@ -44,6 +46,13 @@ public class IfBlock extends StandardBlock {
 
     public IfBlock() {
         super("If Statement", " if ", "if", Color.GREEN.darker());
+    }
+
+    @Override
+    public void reset() {
+        expression = new BooleanExpression(ConstantExpression.TRUE);
+        statement = EmptyStatement.INSTANCE;
+        elseStatement = EmptyStatement.INSTANCE;
     }
 
     @Override

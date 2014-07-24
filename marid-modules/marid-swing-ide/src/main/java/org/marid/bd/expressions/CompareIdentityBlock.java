@@ -18,6 +18,7 @@
 
 package org.marid.bd.expressions;
 
+import org.codehaus.groovy.ast.expr.EmptyExpression;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.transform.sc.transformers.CompareIdentityExpression;
 import org.marid.bd.StandardBlock;
@@ -41,6 +42,12 @@ public class CompareIdentityBlock extends StandardBlock {
 
     public CompareIdentityBlock() {
         super("Compare Identity Expression", "===", "===", Color.BLUE);
+    }
+
+    @Override
+    public void reset() {
+        left = EmptyExpression.INSTANCE;
+        right = EmptyExpression.INSTANCE;
     }
 
     @Override

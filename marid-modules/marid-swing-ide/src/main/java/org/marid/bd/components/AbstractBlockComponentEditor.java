@@ -110,7 +110,7 @@ public class AbstractBlockComponentEditor<B extends Block> extends JDialog imple
     protected void onReject(Action action, ActionEvent actionEvent) throws Exception {
     }
 
-    protected static class TabPane extends JPanel {
+    public static class TabPane extends JPanel {
 
         protected final String tab;
 

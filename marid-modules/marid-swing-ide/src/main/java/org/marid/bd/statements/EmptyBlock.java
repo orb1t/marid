@@ -37,6 +37,10 @@ public class EmptyBlock extends StandardBlock {
     }
 
     @Override
+    public void reset() {
+    }
+
+    @Override
     public List<Input<?>> getInputs() {
         return Collections.emptyList();
     }

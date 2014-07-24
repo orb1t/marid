@@ -18,10 +18,8 @@
 
 package org.marid.bd.export;
 
-import org.codehaus.groovy.ast.AnnotationNode;
-import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.MethodNode;
-import org.codehaus.groovy.ast.Parameter;
+import org.codehaus.groovy.ast.*;
+import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
@@ -80,6 +78,14 @@ public class MethodBlock extends StandardBlock {
     @Override
     public List<Input<?>> getInputs() {
         return Arrays.asList(returnTypeInput, parametersInput, bodyInput, annotationsInput);
+    }
+
+    @Override
+    public void reset() {
+        returnType = ClassHelper.OBJECT_TYPE;
+        parameters = new Parameter[0];
+        body = EmptyStatement.INSTANCE;
+        annotationNodes = new AnnotationNode[0];
     }
 
     @Override
