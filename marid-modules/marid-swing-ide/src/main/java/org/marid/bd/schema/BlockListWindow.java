@@ -71,20 +71,20 @@ public class BlockListWindow extends JDialog implements PrefSupport {
         return preferences;
     }
 
-    protected static class Cr extends DefaultTreeCellRenderer {
+    protected static class Renderer extends DefaultTreeCellRenderer {
         @Override
-        public Cr getTreeCellRendererComponent(JTree t, Object v, boolean s, boolean e, boolean l, int r, boolean f) {
-            final Cr cr = (Cr) super.getTreeCellRendererComponent(t, v, s, e, l, r, f);
+        public Renderer getTreeCellRendererComponent(JTree t, Object v, boolean s, boolean e, boolean l, int r, boolean f) {
+            final Renderer renderer = (Renderer) super.getTreeCellRendererComponent(t, v, s, e, l, r, f);
             if (v instanceof Group) {
                 final Group g = (Group) v;
-                cr.setText(g.name);
-                cr.setIcon(g.icon);
+                renderer.setText(g.name);
+                renderer.setIcon(g.icon);
             } else if (v instanceof Block) {
                 final Block block = (Block) v;
-                cr.setText(block.getName());
-                cr.setIcon(block.getVisualRepresentation(16, 16));
+                renderer.setText(block.getName());
+                renderer.setIcon(block.getVisualRepresentation(16, 16));
             }
-            return cr;
+            return renderer;
         }
     }
 
@@ -95,7 +95,7 @@ public class BlockListWindow extends JDialog implements PrefSupport {
             setTransferHandler(new MaridTransferHandler());
             setDragEnabled(true);
             setRootVisible(false);
-            setCellRenderer(new Cr());
+            setCellRenderer(new Renderer());
         }
 
         @Override

@@ -99,6 +99,11 @@ public class Utils {
         return getUid(16);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T cast(Object x) {
+        return (T) x;
+    }
+
     public static Class<?> wrapperType(Class<?> primitiveType) {
         switch (primitiveType.getName()) {
             case "int":     return Integer.class;

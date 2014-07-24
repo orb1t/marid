@@ -20,6 +20,7 @@ package org.marid.swing.dnd;
 
 import images.Images;
 import org.marid.logging.LogSupport;
+import org.marid.util.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -101,16 +102,19 @@ public class MaridTransferHandler extends TransferHandler implements LogSupport 
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void exportDone(JComponent source, Transferable data, int action) {
+        if (data == null) {
+            return;
+        }
         if (source instanceof DndSource) {
             for (final DataFlavor dataFlavor : data.getTransferDataFlavors()) {
                 final Class<?> rc = dataFlavor.getRepresentationClass();
                 if (rc != null && DndObject.class.isAssignableFrom(rc)) {
                     try {
                         final DndObject dndObject = (DndObject) data.getTransferData(dataFlavor);
-                        ((DndSource) source).dndObjectExportDone(dndObject, action);
+                        final DndSource<DndObject> dndSource = Utils.cast(source);
+                        dndSource.dndObjectExportDone(dndObject, action);
                     } catch (UnsupportedFlavorException | IOException x) {
                         warning("Unable to get transfer data for {0}", x, data);
                     }
@@ -131,11 +135,10 @@ public class MaridTransferHandler extends TransferHandler implements LogSupport 
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean importData(TransferSupport support) {
         if (support.getComponent() instanceof DndTarget) {
-            final DndTarget dndTarget = (DndTarget) support.getComponent();
+            final DndTarget<DndObject> dndTarget = Utils.cast(support.getComponent());
             final DndObject dndObject = dndTarget.getImported(support.getTransferable());
             return dndObject != null && dndTarget.dropDndObject(dndObject, support);
         } else {
