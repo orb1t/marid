@@ -16,13 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
+package org.marid.functions;
 
-import java.util.EventListener;
+import java.util.function.Supplier;
 
 /**
-* @author Dmitry Ovchinnikov
-*/
-public interface BlockListener extends EventListener {
+ * @author Dmitry Ovchinnikov
+ */
+@FunctionalInterface
+public interface SafeSupplier<T> extends Supplier<T> {
 
+    T getUnsafe() throws Exception;
+
+    @Override
+    default T get() {
+        try {
+            return getUnsafe();
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
+    }
 }

@@ -38,10 +38,10 @@ public class ForBlock extends StandardBlock {
     protected Expression expression;
     protected Statement body;
 
-    protected final Input<Parameter> paramInput = in("i", Parameter.class, p -> parameter = p);
-    protected final Input<Expression> exprInput = in("expr", Expression.class, e -> expression = e);
-    protected final Input<Statement> bodyInput = in("body", Statement.class, s -> body = s);
-    protected final Output<ForStatement> out = out("out", ForStatement.class, () -> new ForStatement(parameter, expression, body));
+    protected final In<Parameter> paramInput = new In<>("i", Parameter.class, p -> parameter = p);
+    protected final In<Expression> exprInput = new In<>("expr", Expression.class, e -> expression = e);
+    protected final In<Statement> bodyInput = new In<>("body", Statement.class, s -> body = s);
+    protected final Out<ForStatement> out = new Out<>("out", ForStatement.class, () -> new ForStatement(parameter, expression, body));
 
     public ForBlock() {
         super("For Statement", "for", "for", Color.GREEN.darker());

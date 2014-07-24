@@ -62,9 +62,6 @@ import static org.marid.swing.geom.ShapeUtils.ptAdd;
  */
 public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSource<Block>, SchemaFrameConfiguration {
 
-    private static final Stroke STROKE = new BasicStroke(1.0f);
-    private static final Stroke SELECTED_STROKE = new BasicStroke(3.0f);
-
     protected final SchemaFrame schemaFrame;
     protected final AffineTransform transform = new AffineTransform();
     private Point mousePoint = new Point();
@@ -247,22 +244,12 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                 } catch (IllegalComponentStateException x) {
                     //ignore
                 }
-                if (s != curComponent) {
-                    if (curComponent != null) {
-                        curComponent.dispatchEvent(mouseEvent(curComponent, e, MOUSE_EXITED, p));
-                    }
-                    s.dispatchEvent(mouseEvent(s, e, MOUSE_ENTERED, p));
-                    curComponent = s;
-                }
+                changeCurrentComponent(s, e, p);
                 changeCurrentLink(null, e);
                 return;
             }
         }
-        if (curComponent != null) {
-            curComponent.dispatchEvent(mouseEvent(curComponent, e, MOUSE_EXITED, mp));
-            repaint();
-            curComponent = null;
-        }
+        changeCurrentComponent(null, e, mp);
         for (final LinkShape linkShape : links) {
             final Shape shape = linkShape.getShape();
             if (ShapeUtils.contains(shape, mp, 3.0)) {
@@ -274,6 +261,23 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
             }
         }
         changeCurrentLink(null, e);
+    }
+
+    private void changeCurrentComponent(Component component, MouseEvent e, Point point) {
+        if (component != curComponent) {
+            if (component == null) {
+                curComponent.dispatchEvent(mouseEvent(curComponent, e, MOUSE_EXITED, point));
+            } else {
+                if (curComponent == null) {
+                    component.dispatchEvent(mouseEvent(component, e, MOUSE_ENTERED, point));
+                } else {
+                    curComponent.dispatchEvent(mouseEvent(curComponent, e, MOUSE_EXITED, point));
+                    component.dispatchEvent(mouseEvent(component, e, MOUSE_ENTERED, point));
+                }
+            }
+            curComponent = component;
+            repaint();
+        }
     }
 
     private void changeCurrentLink(LinkShape newLink, MouseEvent e) {

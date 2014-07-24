@@ -25,7 +25,6 @@ import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
-import org.marid.bd.BlockListener;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.bd.components.BlockLabel;
 import org.marid.bd.components.StandardBlockComponent;
@@ -37,6 +36,7 @@ import java.awt.event.ActionEvent;
 import java.beans.ConstructorProperties;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EventListener;
 import java.util.List;
 
 /**
@@ -155,7 +155,7 @@ public class BinExpBlock extends Block {
         }
     }
 
-    public interface BinExpListener extends BlockListener {
+    public interface BinExpListener extends EventListener {
 
         void changedTokenType(TokenType oldType, TokenType newType);
     }

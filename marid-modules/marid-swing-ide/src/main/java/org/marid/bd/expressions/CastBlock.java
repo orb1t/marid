@@ -36,9 +36,9 @@ public class CastBlock extends StandardBlock {
     protected Expression expression;
     protected ClassNode classNode;
 
-    protected final Input<Expression> exprInput = in("expr", Expression.class, e -> expression = e);
-    protected final Input<ClassNode> classInput = in("class", ClassNode.class, c -> classNode = c);
-    protected final Output<CastExpression> castExpr = out("out", CastExpression.class, () -> new CastExpression(classNode, expression));
+    protected final In<Expression> exprInput = new In<>("expr", Expression.class, e -> expression = e);
+    protected final In<ClassNode> classInput = new In<>("class", ClassNode.class, c -> classNode = c);
+    protected final Out<CastExpression> castExpr = new Out<>("out", CastExpression.class, () -> new CastExpression(classNode, expression));
 
     public CastBlock() {
         super("Cast Expression", "(*)", "(*)", Color.BLUE);

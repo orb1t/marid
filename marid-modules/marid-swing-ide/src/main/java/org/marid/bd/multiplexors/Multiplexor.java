@@ -20,7 +20,6 @@ package org.marid.bd.multiplexors;
 
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
-import org.marid.bd.BlockListener;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.bd.shapes.Link;
@@ -31,6 +30,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EventListener;
 import java.util.List;
 
 /**
@@ -84,6 +84,7 @@ public class Multiplexor<E> extends StandardBlock {
             updateInputs(newValue);
             component.updateBlock();
             component.getSchemaEditor().createLinks(links);
+            component.getSchemaEditor().validate();
         }));
         return component;
     }
@@ -100,7 +101,7 @@ public class Multiplexor<E> extends StandardBlock {
     public void updateInputs(int count) {
         inputs.clear();
         for (int i = 1; i <= count; i++) {
-            inputs.add(in(Integer.toString(i), type, list::add));
+            inputs.add(new In<>(Integer.toString(i), type, list::add));
         }
     }
 
@@ -127,7 +128,7 @@ public class Multiplexor<E> extends StandardBlock {
         }
     }
 
-    public interface MultiplexorListener extends BlockListener {
+    public interface MultiplexorListener extends EventListener {
 
         void inputCountChanged(int oldValue, int newValue);
     }
@@ -138,7 +139,7 @@ public class Multiplexor<E> extends StandardBlock {
 
         public MultiplexorEditor(Window window) {
             super(window, Multiplexor.this);
-            tabPane("common").addLine("Input count", spinner);
+            tabPane("Сommon").addLine("Input count", spinner);
             afterInit();
         }
 

@@ -44,7 +44,7 @@ public abstract class StandardBlock extends Block {
 
     @Override
     public BlockComponent createComponent() {
-        return new StandardBlockComponent<>(this, c -> c.add(new BlockLabel(() -> label, () -> color)));
+        return new StandardBlockComponent<>(this, c -> c.add(new BlockLabel(this::getLabel, this::getColor)));
     }
 
     @Override

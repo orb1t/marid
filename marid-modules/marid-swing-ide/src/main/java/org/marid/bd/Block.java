@@ -38,13 +38,13 @@ import java.util.function.Supplier;
  */
 public abstract class Block implements Named, DndObject {
 
-    protected final Map<Object, Set<BlockListener>> listeners = new WeakHashMap<>();
+    protected final Map<Object, Set<EventListener>> listeners = new WeakHashMap<>();
 
-    public void addEventListener(Object source, BlockListener listener) {
+    public void addEventListener(Object source, EventListener listener) {
         listeners.computeIfAbsent(source, o -> new HashSet<>()).add(listener);
     }
 
-    public void removeListener(Object source, BlockListener listener) {
+    public void removeListener(Object source, EventListener listener) {
         listeners.computeIfAbsent(source, o -> new HashSet<>()).remove(listener);
     }
 
@@ -52,11 +52,11 @@ public abstract class Block implements Named, DndObject {
         listeners.remove(source);
     }
 
-    public <L extends BlockListener> void fireEvent(Class<L> t, Consumer<L> consumer) {
+    public <L extends EventListener> void fireEvent(Class<L> t, Consumer<L> consumer) {
         listeners.values().forEach(ls -> ls.stream().filter(t::isInstance).forEach(l -> consumer.accept(t.cast(l))));
     }
 
-    public <L extends BlockListener, T> void fire(Class<L> t, Supplier<T> s, Consumer<T> c, T nv, Changer<L, T> es) {
+    public <L extends EventListener, T> void fire(Class<L> t, Supplier<T> s, Consumer<T> c, T nv, Changer<L, T> es) {
         final T old = s.get();
         if (!Objects.equals(old, nv)) {
             c.accept(nv);
@@ -78,54 +78,6 @@ public abstract class Block implements Named, DndObject {
         } catch (ReflectiveOperationException x) {
             throw new IllegalStateException(x);
         }
-    }
-
-    protected <T> Output<T> out(String name, Class<T> type, Supplier<T> supplier) {
-        return new Output<T>() {
-            @Override
-            public T get() {
-                return supplier.get();
-            }
-
-            @Override
-            public Class<T> getOutputType() {
-                return type;
-            }
-
-            @Override
-            public Block getBlock() {
-                return Block.this;
-            }
-
-            @Override
-            public String getName() {
-                return name;
-            }
-        };
-    }
-
-    protected <T> Input<T> in(String name, Class<T> type, Consumer<T> consumer) {
-        return new Input<T>() {
-            @Override
-            public void set(T value) {
-                consumer.accept(value);
-            }
-
-            @Override
-            public Class<T> getInputType() {
-                return type;
-            }
-
-            @Override
-            public Block getBlock() {
-                return Block.this;
-            }
-
-            @Override
-            public String getName() {
-                return name;
-            }
-        };
     }
 
     public abstract List<Input<?>> getInputs();

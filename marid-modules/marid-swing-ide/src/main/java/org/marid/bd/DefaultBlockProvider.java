@@ -20,6 +20,8 @@ package org.marid.bd;
 
 import org.codehaus.groovy.ast.stmt.CaseStatement;
 import org.codehaus.groovy.ast.stmt.CatchStatement;
+import org.marid.bd.export.ClassBlock;
+import org.marid.bd.export.MethodBlock;
 import org.marid.bd.expressions.*;
 import org.marid.bd.multiplexors.Multiplexor;
 import org.marid.bd.statements.*;
@@ -58,5 +60,8 @@ public class DefaultBlockProvider implements BlockProvider {
 
         blockConsumer.accept("Multiplexors", new Multiplexor<>("Case multiplexor", "case", "case", CaseStatement.class, 2));
         blockConsumer.accept("Multiplexors", new Multiplexor<>("Catch multiplexor", "catch", "catch", CatchStatement.class, 2));
+
+        blockConsumer.accept("Export", new MethodBlock());
+        blockConsumer.accept("Export", new ClassBlock());
     }
 }

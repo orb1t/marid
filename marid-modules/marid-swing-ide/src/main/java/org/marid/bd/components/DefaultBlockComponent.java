@@ -20,12 +20,12 @@ package org.marid.bd.components;
 
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
-import org.marid.bd.BlockListener;
 import org.marid.collections.ImmutableArrayMap;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.HierarchyEvent;
+import java.util.EventListener;
 
 import static java.awt.font.TextAttribute.UNDERLINE;
 import static java.awt.font.TextAttribute.UNDERLINE_LOW_DASHED;
@@ -47,9 +47,9 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
     @Override
     protected void processHierarchyEvent(HierarchyEvent e) {
         super.processHierarchyEvent(e);
-        if (this instanceof BlockListener && e.getID() == HierarchyEvent.HIERARCHY_CHANGED) {
+        if (this instanceof EventListener && e.getID() == HierarchyEvent.HIERARCHY_CHANGED) {
             if (e.getChangedParent() != null) {
-                block.addEventListener(this, (BlockListener) this);
+                block.addEventListener(this, (EventListener) this);
             } else {
                 block.removeEventListeners(this);
             }

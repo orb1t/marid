@@ -18,10 +18,12 @@
 
 package org.marid.bd;
 
+import java.util.EventListener;
+
 /**
 * @author Dmitry Ovchinnikov
 */
-public interface NamedBlockListener extends BlockListener {
+public interface NamedBlockListener extends EventListener {
 
     void nameChanged(String oldName, String newName);
 }

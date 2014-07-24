@@ -36,10 +36,10 @@ public class CatchBlock extends StandardBlock {
     protected Parameter variable;
     protected Statement body;
 
-    protected final Input<Parameter> variableInput = in("var", Parameter.class, p -> variable = p);
-    protected final Input<Statement> bodyInput = in("body", Statement.class, s -> body = s);
+    protected final In<Parameter> variableInput = new In<>("var", Parameter.class, p -> variable = p);
+    protected final In<Statement> bodyInput = new In<>("body", Statement.class, s -> body = s);
 
-    protected final Output<CatchStatement> out = out("out", CatchStatement.class, () -> new CatchStatement(variable, body));
+    protected final Out<CatchStatement> out = new Out<>("out", CatchStatement.class, () -> new CatchStatement(variable, body));
 
     public CatchBlock() {
         super("Catch Block", "catch", "catch", Color.GREEN.darker());

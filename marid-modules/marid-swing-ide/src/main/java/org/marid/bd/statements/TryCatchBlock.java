@@ -37,16 +37,14 @@ public class TryCatchBlock extends StandardBlock {
     protected Statement finallyStatement;
     protected CatchStatement[] catchStatements;
 
-    protected final Input<Statement> tryInput = in("try", Statement.class, s -> tryStatement = s);
-    protected final Input<CatchStatement[]> catchInput = in("catch", CatchStatement[].class, s -> catchStatements = s);
-    protected final Input<Statement> finallyInput = in("finally", Statement.class, s -> finallyStatement = s);
+    protected final In<Statement> tryInput = new In<>("try", Statement.class, s -> tryStatement = s);
+    protected final In<CatchStatement[]> catchInput = new In<>("catch", CatchStatement[].class, s -> catchStatements = s);
+    protected final In<Statement> finallyInput = new In<>("finally", Statement.class, s -> finallyStatement = s);
 
-    protected final Output<TryCatchStatement> out = out("out", TryCatchStatement.class, () -> {
+    protected final Out<TryCatchStatement> out = new Out<>("out", TryCatchStatement.class, () -> {
         final TryCatchStatement statement = new TryCatchStatement(tryStatement, finallyStatement);
-        if (catchStatements != null) {
-            for (final CatchStatement catchStatement : catchStatements) {
-                statement.addCatch(catchStatement);
-            }
+        for (final CatchStatement catchStatement : catchStatements) {
+            statement.addCatch(catchStatement);
         }
         return statement;
     });
