@@ -28,7 +28,7 @@ import java.awt.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class StandardBlock extends Block {
+public abstract class StandardBlock extends AbstractBlock {
 
     protected final String name;
     protected final ImageIcon visualRepresentation;

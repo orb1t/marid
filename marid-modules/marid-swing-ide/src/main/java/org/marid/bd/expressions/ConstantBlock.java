@@ -20,6 +20,7 @@ package org.marid.bd.expressions;
 
 import images.Images;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
+import org.marid.bd.AbstractBlock;
 import org.marid.bd.NamedBlock;
 import org.marid.bd.NamedBlockListener;
 import org.marid.bd.components.NamedBlockComponentEditor;
@@ -40,13 +41,13 @@ import java.util.Vector;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ConstantBlock extends NamedBlock {
+public class ConstantBlock extends AbstractBlock implements NamedBlock {
 
     protected String value = "null";
     protected final Out<ConstantExpression> output = new Out<>("", ConstantExpression.class, this::constantExpression);
 
     public ConstantBlock() {
-        name = "Constant block";
+        setName("Constant block");
     }
 
     @ConstructorProperties({"value"})
@@ -57,7 +58,7 @@ public class ConstantBlock extends NamedBlock {
 
     @Override
     public StandardBlockComponent<ConstantBlock> createComponent() {
-        final JLabel titleLabel = new JLabel(name);
+        final JLabel titleLabel = new JLabel(getName());
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         titleLabel.setFont(UIManager.getFont("Label.font").deriveFont(Font.BOLD));
         final JLabel label = new JLabel(value);

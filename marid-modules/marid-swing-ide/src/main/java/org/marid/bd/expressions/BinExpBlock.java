@@ -24,6 +24,7 @@ import org.codehaus.groovy.ast.expr.EmptyExpression;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
+import org.marid.bd.AbstractBlock;
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.components.AbstractBlockComponentEditor;
@@ -43,7 +44,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BinExpBlock extends Block {
+public class BinExpBlock extends AbstractBlock {
 
     protected Expression left;
     protected Expression right;

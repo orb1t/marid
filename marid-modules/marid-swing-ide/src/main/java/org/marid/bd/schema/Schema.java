@@ -18,12 +18,8 @@
 
 package org.marid.bd.schema;
 
-import org.marid.bd.Block;
-import org.marid.bd.BlockComponent;
-import org.marid.bd.BlockLink;
-import org.marid.bd.NamedBlock;
+import org.marid.bd.*;
 
-import java.awt.*;
 import java.beans.ConstructorProperties;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,7 +28,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class Schema extends NamedBlock {
+public class Schema extends AbstractBlock implements NamedBlock {
 
     protected final List<Block> blocks;
     protected final List<BlockLink> links;
@@ -89,11 +85,6 @@ public class Schema extends NamedBlock {
     @Override
     public void reset() {
 
-    }
-
-    @Override
-    public Window createWindow(Window parent) {
-        return null;
     }
 
     @Override

@@ -18,19 +18,22 @@
 
 package org.marid.bd;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
 /**
  * @author Dmitry Ovchinnikov.
  */
-public abstract class NamedBlock extends Block {
+public interface NamedBlock extends Block {
 
-    protected String name;
+    Map<NamedBlock, String> NAMED_BLOCK_NAME_MAP = new WeakHashMap<>();
 
     @Override
-    public String getName() {
-        return name;
+    default String getName() {
+        return NAMED_BLOCK_NAME_MAP.get(this);
     }
 
-    public void setName(String newName) {
-        fire(NamedBlockListener.class, () -> name, n -> name = n, newName, NamedBlockListener::nameChanged);
+    default void setName(String newName) {
+        fire(NamedBlockListener.class, this::getName, n -> NAMED_BLOCK_NAME_MAP.put(this, n), newName, NamedBlockListener::nameChanged);
     }
 }
