@@ -32,7 +32,7 @@ import java.util.EventListener;
 public class NamedExpressionBlock extends IoBlock<Expression, NamedExpressionBlock.NamedExpression> {
 
     protected Expression expression;
-    protected String name;
+    protected String key;
 
     public NamedExpressionBlock() {
         super("Named Expression Block", "n.expr", "e -> n.e", Color.BLUE, Expression.class, NamedExpression.class);
@@ -40,7 +40,7 @@ public class NamedExpressionBlock extends IoBlock<Expression, NamedExpressionBlo
 
     @Override
     public void reset() {
-        name = "value";
+        key = "value";
         expression = null;
     }
 
@@ -51,31 +51,24 @@ public class NamedExpressionBlock extends IoBlock<Expression, NamedExpressionBlo
 
     @Override
     protected NamedExpression get() {
-        return new NamedExpression(expression, name);
+        return new NamedExpression(expression, key);
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String newName) {
-        fire(NamedExpressionBlockListener.class, () -> name, n -> name = n, newName, NamedExpressionBlockListener::nameChanged);
+    public void setName(String newKey) {
+        fire(NamedExpressionBlockListener.class, () -> key, n -> key = n, newKey, NamedExpressionBlockListener::keyChanged);
     }
 
     @Override
     public String getLabel() {
-        return name == null ? "value" : name;
+        return key == null ? "value" : key;
     }
 
     @Override
     public Window createWindow(Window parent) {
         final JTextField nameField = new JTextField(name);
-        return new DefaultBlockComponentEditor<>(parent, this, ed -> {
-            ed.tabPane("Common").addLine("Name", nameField);
-        }, (ed, a, e) -> {
-            setName(nameField.getText());
-        });
+        return new DefaultBlockComponentEditor<>(parent, this,
+                ed -> ed.tabPane("Common").addLine("Name", nameField),
+                (ed, a, e) -> setName(nameField.getText()));
     }
 
     public static class NamedExpression {
@@ -91,6 +84,6 @@ public class NamedExpressionBlock extends IoBlock<Expression, NamedExpressionBlo
 
     public interface NamedExpressionBlockListener extends EventListener {
 
-        void nameChanged(String oldName, String newName);
+        void keyChanged(String oldKey, String newKey);
     }
 }

@@ -20,15 +20,16 @@ package org.marid.bd.components;
 
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
-import org.marid.collections.ImmutableArrayMap;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.HierarchyEvent;
+import java.awt.font.TextAttribute;
 import java.util.EventListener;
+import java.util.HashMap;
+import java.util.Map;
 
-import static java.awt.font.TextAttribute.UNDERLINE;
-import static java.awt.font.TextAttribute.UNDERLINE_LOW_DASHED;
+import static java.awt.font.TextAttribute.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -69,10 +70,15 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
         public DefaultInput(Block.Input<?> input) {
             super(input.getName(), SwingConstants.WEST);
             label = new JLabel(getName());
-            label.setFont(UIManager.getFont("Label.font"));
+            final Font font = UIManager.getFont("Label.font");
+            final Map<TextAttribute, Object> map = new HashMap<>();
             if (input.getInputType().isArray()) {
-                label.setFont(label.getFont().deriveFont(new ImmutableArrayMap<>(UNDERLINE, UNDERLINE_LOW_DASHED)));
+                map.put(UNDERLINE, UNDERLINE_LOW_DASHED);
             }
+            if (input.isRequired()) {
+                map.put(WEIGHT, WEIGHT_BOLD);
+            }
+            label.setFont(map.isEmpty() ? font : font.deriveFont(map));
             addActionListener(e -> getBlockComponent().getSchemaEditor().visitBlockComponents(bc -> {
                 if (bc != getBlockComponent()) {
                     bc.getOutputs().forEach(o -> {

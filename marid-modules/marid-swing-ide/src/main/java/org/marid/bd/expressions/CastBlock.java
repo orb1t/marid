@@ -39,7 +39,7 @@ public class CastBlock extends StandardBlock {
     protected ClassNode classNode;
 
     protected final In<Expression> exprInput = new In<>("expr", Expression.class, e -> expression = e);
-    protected final In<ClassNode> classInput = new In<>("class", ClassNode.class, c -> classNode = c);
+    protected final In<ClassNode> classInput = new In<>("class", ClassNode.class, true, c -> classNode = c);
     protected final Out<CastExpression> castExpr = new Out<>("out", CastExpression.class, () -> new CastExpression(classNode, expression));
 
     public CastBlock() {

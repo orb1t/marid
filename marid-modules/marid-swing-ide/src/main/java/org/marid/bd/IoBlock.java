@@ -47,6 +47,11 @@ public abstract class IoBlock<I, O> extends StandardBlock {
         }
 
         @Override
+        public boolean isRequired() {
+            return true;
+        }
+
+        @Override
         public String getName() {
             return "in";
         }

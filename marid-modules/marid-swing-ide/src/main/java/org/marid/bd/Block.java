@@ -114,6 +114,8 @@ public abstract class Block implements Named, DndObject {
         Class<T> getInputType();
 
         Block getBlock();
+
+        boolean isRequired();
     }
 
     public interface Output<T> extends Named {
@@ -129,12 +131,23 @@ public abstract class Block implements Named, DndObject {
 
         private final String name;
         private final Class<T> type;
+        private final boolean required;
         private final Consumer<T> consumer;
 
-        public In(String name, Class<T> type, Consumer<T> consumer) {
+        public In(String name, Class<T> type, boolean required, Consumer<T> consumer) {
             this.name = name;
             this.type = type;
+            this.required = required;
             this.consumer = consumer;
+        }
+
+        public In(String name, Class<T> type, Consumer<T> consumer) {
+            this(name, type, false, consumer);
+        }
+
+        @Override
+        public boolean isRequired() {
+            return required;
         }
 
         @Override
