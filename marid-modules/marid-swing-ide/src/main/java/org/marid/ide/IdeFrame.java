@@ -50,6 +50,7 @@ public class IdeFrame extends JFrame implements PrefSupport, LogSupport {
 
     private final boolean closeable;
     private final IdeDesktop desktop;
+    private final IdeStatusLine statusLine;
 
     public IdeFrame(boolean closeable, MenuActionTreeElement menuRoot) {
         super(s("Marid IDE"));
@@ -62,6 +63,7 @@ public class IdeFrame extends JFrame implements PrefSupport, LogSupport {
         getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
         menuRoot.fillJMenuBar(getJMenuBar());
         add(desktop = new IdeDesktop());
+        add(statusLine = new IdeStatusLine(this), BorderLayout.SOUTH);
         pack();
         setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
         setState(getPref("state", getState()));

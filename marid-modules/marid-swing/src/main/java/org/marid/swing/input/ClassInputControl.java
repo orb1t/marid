@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
+import java.util.stream.Stream;
 
 import static java.lang.Thread.currentThread;
 
@@ -140,10 +141,8 @@ public class ClassInputControl extends JPanel implements InputControl<Class<?>>,
     }
 
     private void processDirectory(Path path, Map<String, Collection<String>> map) {
-        try {
-            Files.walk(path)
-                    .parallel()
-                    .map(path::relativize)
+        try (final Stream<Path> stream = Files.walk(path)) {
+            stream.map(path::relativize)
                     .filter(p -> {
                         final Path fileName = p.getFileName();
                         return p.getNameCount() > 1 && fileName != null && fileName.toString().endsWith(".class");
@@ -154,7 +153,8 @@ public class ClassInputControl extends JPanel implements InputControl<Class<?>>,
                         final String className = text.substring(0, text.length() - ".class".length());
                         map.computeIfAbsent(pkg, v -> new ConcurrentSkipListSet<>()).add(className);
                     });
-        } catch (IOException x) {
+
+        } catch (Exception x) {
             warning("Unable to process {0}", x, path);
         }
     }

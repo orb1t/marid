@@ -26,6 +26,8 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -68,6 +70,7 @@ public abstract class PrefCodecs {
         putReader(URL.class, stringReader(URL::new));
         putReader(URI.class, stringReader(URI::new));
         putReader(File.class, stringReader(File::new));
+        putReader(Path.class, stringReader(Paths::get));
         putReader(InetSocketAddress.class, stringReader(PrefCodecs::parseInetSocketAddress));
         putReader(InetAddress.class, stringReader(InetAddress::getByName));
 
@@ -88,16 +91,17 @@ public abstract class PrefCodecs {
         putWriter(Boolean.class, Preferences::putBoolean);
         putWriter(boolean.class, Preferences::putBoolean);
         putWriter(byte[].class, Preferences::putByteArray);
-        putWriter(BigInteger.class, (prefs, key, val) -> prefs.put(key, val.toString()));
-        putWriter(BigDecimal.class, (prefs, key, val) -> prefs.put(key, val.toString()));
+        putWriter(BigInteger.class, stringWriter(BigInteger::toString));
+        putWriter(BigDecimal.class, stringWriter(BigDecimal::toString));
         putWriter(BitSet.class, (prefs, key, val) -> prefs.putByteArray(key, val.toByteArray()));
-        putWriter(TimeZone.class, (prefs, key, val) -> prefs.put(key, val.getID()));
-        putWriter(Currency.class, (prefs, key, val) -> prefs.put(key, val.getCurrencyCode()));
-        putWriter(URL.class, (prefs, key, val) -> prefs.put(key, val.toString()));
-        putWriter(URI.class, (prefs, key, val) -> prefs.put(key, val.toString()));
-        putWriter(File.class, (prefs, key, val) -> prefs.put(key, val.toString()));
-        putWriter(InetSocketAddress.class, (prefs, key, val) -> prefs.put(key, val.toString()));
-        putWriter(InetAddress.class, (prefs, key, val) -> prefs.put(key, val.toString()));
+        putWriter(TimeZone.class, stringWriter(TimeZone::getID));
+        putWriter(Currency.class, stringWriter(Currency::getCurrencyCode));
+        putWriter(URL.class, stringWriter(URL::toString));
+        putWriter(URI.class, stringWriter(URI::toString));
+        putWriter(File.class, stringWriter(File::toString));
+        putWriter(Path.class, stringWriter(Path::toString));
+        putWriter(InetSocketAddress.class, stringWriter(InetSocketAddress::toString));
+        putWriter(InetAddress.class, stringWriter(InetAddress::toString));
 
         // Custom readers and writers
         try {

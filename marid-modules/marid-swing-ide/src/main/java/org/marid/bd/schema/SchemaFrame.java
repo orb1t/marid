@@ -25,13 +25,11 @@ import org.marid.bd.shapes.LinkShapeEvent;
 import org.marid.l10n.L10n;
 import org.marid.swing.AbstractFrame;
 import org.marid.swing.SwingUtil;
-import org.marid.swing.actions.ComponentAction;
 import org.marid.swing.menu.MenuActionList;
 
 import javax.swing.*;
 import javax.swing.plaf.LayerUI;
 import java.awt.*;
-import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 
@@ -45,15 +43,17 @@ import static javax.swing.BorderFactory.*;
  */
 public class SchemaFrame extends AbstractFrame implements SchemaFrameConfiguration {
 
-    protected final BlockListWindow blockListWindow = new BlockListWindow(this);
     protected final SchemaEditor schemaEditor = new SchemaEditor(this);
     protected final JLayer<SchemaEditor> layer = new JLayer<>(schemaEditor, new SchemaEditorLayerUI());
+    protected final JMenu blocksMenu = new JMenu(L10n.s("Blocks"));
 
     public SchemaFrame() {
         super("Schema");
         enableEvents(AWTEvent.COMPONENT_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
         centerPanel.add(layer);
         getContentPane().setBackground(getBackground());
+        getJMenuBar().add(blocksMenu);
+        BlockMenuSupport.fillMenu(blocksMenu);
         pack();
     }
 
@@ -62,25 +62,7 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
     }
 
     @Override
-    protected void processComponentEvent(ComponentEvent e) {
-        super.processComponentEvent(e);
-        switch (e.getID()) {
-            case ComponentEvent.COMPONENT_SHOWN:
-                blockListWindow.setVisible(getPref("visible", true, "blockList"));
-                break;
-            case ComponentEvent.COMPONENT_HIDDEN:
-                blockListWindow.setVisible(false);
-                break;
-        }
-    }
-
-    @Override
     protected void processWindowEvent(WindowEvent e) {
-        switch (e.getID()) {
-            case WindowEvent.WINDOW_CLOSING:
-                putPref("visible", blockListWindow.isVisible(), "blockList");
-                break;
-        }
         super.processWindowEvent(e);
         switch (e.getID()) {
             case WindowEvent.WINDOW_OPENED:
@@ -88,7 +70,6 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
                 break;
             case WindowEvent.WINDOW_CLOSED:
                 schemaEditor.stop();
-                blockListWindow.dispose();
                 break;
         }
     }
@@ -96,10 +77,6 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
     @Override
     protected void fillActions(MenuActionList actionList) {
         actionList.add("main", "Schema");
-        final Action showBlockListAction = actionList.add("main", "Show block list", "Schema")
-                .setKey("control L")
-                .setIcon("item")
-                .setListener(e -> blockListWindow.setVisible(!blockListWindow.isVisible()));
         actionList.add(true, "zoom", "Zoom in", "Schema")
                 .setKey("control I")
                 .setIcon("zoomin")
@@ -112,25 +89,6 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
                 .setKey("control R")
                 .setIcon("zoom")
                 .setListener(e -> schemaEditor.resetZoom());
-        addBlockListButton(showBlockListAction);
-    }
-
-    private void addBlockListButton(Action action) {
-        final JToggleButton toggleButton = new JToggleButton(action);
-        toggleButton.setFocusable(false);
-        toggleButton.setText("");
-        blockListWindow.addComponentListener(new ComponentAction(ce -> {
-            switch (ce.getID()) {
-                case ComponentEvent.COMPONENT_SHOWN:
-                    toggleButton.setSelected(true);
-                    break;
-                case ComponentEvent.COMPONENT_HIDDEN:
-                    toggleButton.setSelected(false);
-                    break;
-            }
-        }));
-        toolBar.add(toggleButton);
-        toolBar.addSeparator();
     }
 
     protected class SchemaEditorLayerUI extends LayerUI<SchemaEditor> {

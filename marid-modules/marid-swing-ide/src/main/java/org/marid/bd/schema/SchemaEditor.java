@@ -77,7 +77,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     private volatile InputMaskType dragType = DRAG.get();
     private final AtomicBoolean dirty = new AtomicBoolean();
     private final Timer timer = new Timer(true);
-    private Block draggingBlock;
+    private Block selectedBlock;
     private final Set<LinkShape> links = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public SchemaEditor(SchemaFrame schemaFrame) {
@@ -233,7 +233,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                         prepareMove(component, mp);
                         break;
                     } else if (e.getID() == MOUSE_DRAGGED && dragType.isEnabled(e)) {
-                        draggingBlock = ((BlockComponent) component).getBlock();
+                        selectedBlock = ((BlockComponent) component).getBlock();
                         getTransferHandler().exportAsDrag(this, e, DND_COPY);
                         break;
                     }
@@ -414,6 +414,11 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
 
     @Override
     public Block getDndObject() {
-        return draggingBlock;
+        return selectedBlock;
+    }
+
+    @Override
+    public void dndObjectExportDone(Block dndObject, int action) {
+        selectedBlock = null;
     }
 }

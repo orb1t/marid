@@ -33,6 +33,9 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
 import java.lang.invoke.MethodHandles;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Level;
@@ -139,6 +142,20 @@ public class Ide implements SysPrefSupport {
                 frame = new IdeFrame(false, menuRoot);
                 frame.setVisible(true);
             }
+        }
+    }
+
+    public static Path getProfilesDir() {
+        try {
+            final Path defaultDir = Paths.get(System.getProperty("user.home"), "marid", "profiles");
+            final Path path = Paths.get(SYSPREFS.get("profilesDir", defaultDir.toString()));
+            if (!Files.isDirectory(path)) {
+                Files.createDirectories(path);
+            }
+            return path;
+        } catch (Exception x) {
+            warning(LOG, "Unable to get profiles directory", x);
+            return Paths.get(System.getProperty("user.dir"));
         }
     }
 
