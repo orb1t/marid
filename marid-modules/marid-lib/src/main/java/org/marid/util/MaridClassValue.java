@@ -35,4 +35,33 @@ public class MaridClassValue<T> extends ClassValue<T> {
     protected T computeValue(Class<?> type) {
         return function.apply(type);
     }
+
+    public static Class<?>[] getCallContext() {
+        return ClassResolver.CLASS_RESOLVER.getClassContext().clone();
+    }
+
+    public static Class<?> getCaller(Class<?> after) {
+        final Class<?>[] context = ClassResolver.CLASS_RESOLVER.getClassContext();
+        for (int i = 0; i < context.length; i++) {
+            final Class<?> current = context[i];
+            if (current == after && i < context.length - 1) {
+                return context[i + 1];
+            }
+        }
+        return null;
+    }
+
+    public static Class<?> getCaller(int index) {
+        return ClassResolver.CLASS_RESOLVER.getClassContext()[index];
+    }
+
+    private static final class ClassResolver extends SecurityManager {
+
+        @Override
+        protected Class[] getClassContext() {
+            return super.getClassContext();
+        }
+
+        private static final ClassResolver CLASS_RESOLVER = new ClassResolver();
+    }
 }

@@ -33,7 +33,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <lib>${project.build.directory}/lib</lib>
-        <groovy.version>2.3.4</groovy.version>
+        <groovy.version>2.3.6</groovy.version>
         <jetty.version>9.0.5.v20130815</jetty.version>
         <catalina.version>7.0.42</catalina.version>
         <excluded.benchmarks>org.marid.test.BrokenBenchmarks</excluded.benchmarks>
@@ -284,7 +284,7 @@
 
                 <plugin>
                     <artifactId>maven-scm-plugin</artifactId>
-                    <version>1.9</version>
+                    <version>1.9.1</version>
                     <configuration>
                         <username>eosms</username>
                     </configuration>

@@ -21,6 +21,7 @@ package org.marid.functions;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -67,5 +68,19 @@ public class Functions {
 
     public static <T> Predicate<T> safePredicate(SafePredicate<T> safePredicate) {
         return safePredicate;
+    }
+
+    public static <T> Supplier<T> safeSupplier(SafeSupplier<T> safeSupplier, Function<Exception, T> exceptionFunction) {
+        return () -> {
+            try {
+                return safeSupplier.getUnsafe();
+            } catch (Exception x) {
+                return exceptionFunction.apply(x);
+            }
+        };
+    }
+
+    public static <T> Supplier<T> safeSupplier(SafeSupplier<T> safeSupplier) {
+        return safeSupplier;
     }
 }

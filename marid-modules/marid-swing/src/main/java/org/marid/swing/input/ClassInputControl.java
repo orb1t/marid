@@ -19,6 +19,7 @@
 package org.marid.swing.input;
 
 import org.marid.logging.LogSupport;
+import org.marid.nio.ClasspathUtils;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
@@ -27,24 +28,25 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.*;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.lang.Thread.currentThread;
+import static java.util.Collections.binarySearch;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class ClassInputControl extends JPanel implements InputControl<Class<?>>, LogSupport {
+
+    public static final Pattern CLASS_FILE_PATTERN = Pattern.compile("^\\p{Upper}[^$]+[.]class$");
 
     protected final JTree tree;
     protected final JTextField classField = new JTextField();
@@ -99,56 +101,46 @@ public class ClassInputControl extends JPanel implements InputControl<Class<?>>,
     }
 
     private Map<String, Collection<String>> classNames(ClassLoader classLoader) {
-        final Map<String, Collection<String>> map = new ConcurrentHashMap<>();
-        processClasses(classLoader, classLoader, map);
-        return map;
-    }
-
-    private void processClasses(ClassLoader classLoader, ClassLoader mainLoader, Map<String, Collection<String>> map) {
-        if (classLoader == null) {
-            return;
-        }
-        if (classLoader instanceof URLClassLoader) {
-            final URLClassLoader urlClassLoader = (URLClassLoader) classLoader;
-            final URL[] urls = urlClassLoader.getURLs();
-            if (urls != null) {
-                final List<ForkJoinTask<?>> tasks = new ArrayList<>(urls.length);
-                for (final URL url : urls) {
-                    tasks.add(ForkJoinPool.commonPool().submit(() -> {
-                        final Path path = Paths.get(url.toURI());
-                        if (Files.isDirectory(path)) {
-                            processDirectory(path, map);
-                        } else if (path.getFileName().toString().endsWith(".jar")) {
-                            try (final FileSystem fs = FileSystems.newFileSystem(path, mainLoader)) {
-                                for (final Path root : fs.getRootDirectories()) {
-                                    processDirectory(root, map);
-                                }
-                            }
-                        }
-                        return null;
-                    }));
-                }
-                for (final ForkJoinTask<?> task : tasks) {
-                    try {
-                        task.join();
-                    } catch (Exception x) {
-                        warning("Unable to process task", x);
+        final Map<String, Collection<String>> map = new ConcurrentSkipListMap<>();
+        final List<ForkJoinTask<?>> tasks = new LinkedList<>();
+        ClasspathUtils.visitUrls(classLoader, url -> tasks.add(ForkJoinPool.commonPool().submit(() -> {
+            final Path path = Paths.get(url.toURI());
+            if (Files.isDirectory(path)) {
+                processDirectory(path, map);
+            } else if (path.getFileName().toString().endsWith(".jar")) {
+                try (final FileSystem fs = FileSystems.newFileSystem(path, classLoader)) {
+                    for (final Path root : fs.getRootDirectories()) {
+                        processDirectory(root, map);
                     }
                 }
             }
+            return null;
+        })));
+        for (final ForkJoinTask<?> task : tasks) {
+            try {
+                task.join();
+            } catch (Exception x) {
+                warning("Unable to process task", x);
+            }
         }
-        processClasses(classLoader.getParent(), mainLoader, map);
+        return map;
     }
 
     private void processDirectory(Path path, Map<String, Collection<String>> map) {
         try (final Stream<Path> stream = Files.walk(path)) {
             stream.map(path::relativize)
                     .filter(p -> {
-                        final Path fileName = p.getFileName();
-                        return p.getNameCount() > 1 && fileName != null && fileName.toString().endsWith(".class");
+                        if (p.getNameCount() <= 1) {
+                            return false;
+                        }
+                        final Path last = p.getFileName();
+                        return last != null && CLASS_FILE_PATTERN.matcher(last.toString()).matches();
                     })
                     .forEach(p -> {
                         final String pkg = p.getParent().toString().replace(File.separatorChar, '.');
+                        if (pkg.startsWith("sun.") || pkg.startsWith("com.sun.") || pkg.startsWith("com.oracle")) {
+                            return;
+                        }
                         final String text = p.getFileName().toString();
                         final String className = text.substring(0, text.length() - ".class".length());
                         map.computeIfAbsent(pkg, v -> new ConcurrentSkipListSet<>()).add(className);
@@ -162,12 +154,13 @@ public class ClassInputControl extends JPanel implements InputControl<Class<?>>,
     protected static class ClassTreeModel implements TreeModel {
 
         protected final List<String> keys;
-        protected final TreeMap<String, List<String>> classMap = new TreeMap<>();
+        protected final List<List<String>> classes;
         protected final EventListenerList listenerList = new EventListenerList();
 
         public ClassTreeModel(Map<String, Collection<String>> map) {
-            map.forEach((k, v) -> classMap.put(k, new ArrayList<>(v)));
-            keys = new ArrayList<>(classMap.keySet());
+            keys = new ArrayList<>(map.keySet());
+            classes = new ArrayList<>(map.size());
+            map.values().forEach(v -> classes.add(new ArrayList<>(v)));
         }
 
         @Override
@@ -180,7 +173,7 @@ public class ClassInputControl extends JPanel implements InputControl<Class<?>>,
             if (parent == getRoot()) {
                 return keys.get(index);
             } else {
-                return classMap.get(parent.toString()).get(index);
+                return classes.get(binarySearch(keys, parent.toString())).get(index);
             }
         }
 
@@ -189,13 +182,13 @@ public class ClassInputControl extends JPanel implements InputControl<Class<?>>,
             if (parent == getRoot()) {
                 return keys.size();
             } else {
-                return classMap.get(parent.toString()).size();
+                return classes.get(binarySearch(keys, parent.toString())).size();
             }
         }
 
         @Override
         public boolean isLeaf(Object node) {
-            return node != getRoot() && !classMap.containsKey(node.toString());
+            return node != getRoot() && binarySearch(keys, node.toString()) < 0;
         }
 
         @Override
@@ -207,7 +200,7 @@ public class ClassInputControl extends JPanel implements InputControl<Class<?>>,
             if (parent == getRoot()) {
                 return keys.indexOf(child.toString());
             } else {
-                return classMap.get(parent.toString()).indexOf(child.toString());
+                return classes.get(binarySearch(keys, parent.toString())).indexOf(child.toString());
             }
         }
 
