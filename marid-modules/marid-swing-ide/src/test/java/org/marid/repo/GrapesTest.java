@@ -23,7 +23,6 @@ import groovy.lang.GroovyClassLoader;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.marid.groovy.GroovyRuntime;
 import org.marid.logging.LogSupport;
 import org.marid.test.ManualTests;
 
@@ -52,13 +51,13 @@ public class GrapesTest implements LogSupport {
         if (cacheDir.mkdirs()) {
             Log.info("Directory {0} was created", cacheDir);
         }
-        //Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(classLoader);
     }
 
     @Test
     public void test() throws Exception {
         final Map<String, Object> args = new HashMap<>();
-        args.put("classLoader", GroovyRuntime.CLASS_LOADER);
+        args.put("classLoader", classLoader);
         final Map<String, Object> dependency1 = new HashMap<>();
         dependency1.put("group", "commons-cli");
         dependency1.put("module", "commons-cli");

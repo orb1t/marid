@@ -133,6 +133,15 @@ public class FileUtils {
         remove(source);
     }
 
+    public static Path getOrCreateDirectory(Path path) {
+        try {
+            Files.createDirectories(path);
+            return path;
+        } catch (IOException x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
     public static class PatternFileFilter implements Filter<Path> {
 
         private final Pattern pattern;

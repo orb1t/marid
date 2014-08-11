@@ -22,14 +22,14 @@ import groovy.lang.*;
 import org.codehaus.groovy.control.CompilerConfiguration;
 
 import java.io.IOException;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+import static java.lang.Thread.currentThread;
 import static org.marid.methods.LogMethods.*;
 
 /**
@@ -38,43 +38,40 @@ import static org.marid.methods.LogMethods.*;
 public class GroovyRuntime {
 
     private static final Logger LOG = Logger.getLogger(GroovyRuntime.class.getName());
-    private static final CompilerConfiguration COMPILER_CONFIGURATION = new CompilerConfiguration();
+    private static final CompilerConfiguration COMPILER_CONFIGURATION = newCompilerConfiguration(c -> {
+    });
 
-    static {
+    public static final GroovyShell SHELL = newShell(COMPILER_CONFIGURATION, (l, s) -> {});
+    public static final GroovyClassLoader CLASS_LOADER = SHELL.getClassLoader();
+
+    public static GroovyShell newShell(Binding binding) {
+        return new GroovyShell(CLASS_LOADER, binding, COMPILER_CONFIGURATION);
+    }
+
+    public static Closure getClosure(GroovyCodeSource source) throws IOException {
+        return (Closure) SHELL.parse(source).run();
+    }
+
+    public static CompilerConfiguration newCompilerConfiguration(Consumer<CompilerConfiguration> configurer) {
         try {
+            final CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
             for (final CompilerCustomizer customizer : ServiceLoader.load(CompilerCustomizer.class)) {
                 try {
-                    customizer.customize(COMPILER_CONFIGURATION);
+                    customizer.customize(compilerConfiguration);
                     fine(LOG, "Compiler customizer {0} loaded", customizer);
                 } catch (Exception x) {
                     warning(LOG, "Compiler customizer {0} error", x, customizer);
                 }
             }
+            configurer.accept(compilerConfiguration);
+            return compilerConfiguration;
         } catch (Exception x) {
             severe(LOG, "Unable to load compiler customizers", x);
+            return CompilerConfiguration.DEFAULT;
         }
     }
 
-    public static final GroovyClassLoader CLASS_LOADER;
-
-    static {
-        CLASS_LOADER = new GroovyClassLoader(Thread.currentThread().getContextClassLoader(), COMPILER_CONFIGURATION);
-        try {
-            for (final CompilerUrlProvider provider : ServiceLoader.load(CompilerUrlProvider.class)) {
-                try {
-                    provider.getUrls().forEach(CLASS_LOADER::addURL);
-                } catch (Exception x) {
-                    warning(LOG, "Unable to import URLs from the url provider {0}", x, provider);
-                }
-            }
-        } catch (Exception x) {
-            severe(LOG, "Unable to set class loader", x);
-        }
-    }
-
-    public static final GroovyShell SHELL;
-
-    static {
+    public static GroovyShell newShell(CompilerConfiguration cc, BiConsumer<GroovyClassLoader, GroovyShell> configurer) {
         final Map<String, Object> bindings = new HashMap<>();
         try {
             for (final BindingProvider provider : ServiceLoader.load(BindingProvider.class)) {
@@ -88,50 +85,25 @@ public class GroovyRuntime {
         } catch (Exception x) {
             severe(LOG, "Unable to create groovy shell", x);
         }
-        SHELL = new GroovyShell(CLASS_LOADER, new Binding(bindings), COMPILER_CONFIGURATION);
-        try {
-            final Field loaderField = GroovyShell.class.getDeclaredField("loader");
-            loaderField.setAccessible(true);
-            loaderField.set(SHELL, CLASS_LOADER);
-        } catch (Exception x) {
-            warning(LOG, "Unable to set class loader for the groovy shell", x);
-        }
+        final GroovyShell shell = new GroovyShell(currentThread().getContextClassLoader(), new Binding(bindings), cc);
+        configurer.accept(shell.getClassLoader(), shell);
+        return shell;
     }
 
-    private static final MethodHandle CONTEXT_MH;
-
-    static {
-        MethodHandle handle = null;
+    public static GroovyClassLoader newClassLoader(CompilerConfiguration cc, Consumer<GroovyClassLoader> configurer) {
+        final GroovyClassLoader l = new GroovyClassLoader(currentThread().getContextClassLoader(), cc);
         try {
-            final Field field = GroovyShell.class.getDeclaredField("context");
-            field.setAccessible(true);
-            handle = MethodHandles.lookup().unreflectSetter(field);
-        } catch (Exception x) {
-            warning(LOG, "Unable to get GroovyShell's context field setter", x);
-        }
-        CONTEXT_MH = handle;
-    }
-
-    public static GroovyShell forkShell(Binding binding) {
-        if (CONTEXT_MH != null) {
-            try {
-                final GroovyShell shell = new GroovyShell(SHELL);
-                CONTEXT_MH.invokeExact(shell, binding);
-                return shell;
-            } catch (Throwable x) {
-                warning(LOG, "Unable to fork the groovy shell", x);
-                return newShell(binding);
+            for (final CompilerUrlProvider provider : ServiceLoader.load(CompilerUrlProvider.class)) {
+                try {
+                    provider.getUrls().forEach(CLASS_LOADER::addURL);
+                } catch (Exception x) {
+                    warning(LOG, "Unable to import URLs from the url provider {0}", x, provider);
+                }
             }
-        } else {
-            return newShell(binding);
+            configurer.accept(l);
+        } catch (Exception x) {
+            severe(LOG, "Unable to set class loader", x);
         }
-    }
-
-    public static GroovyShell newShell(Binding binding) {
-        return new GroovyShell(CLASS_LOADER, binding, COMPILER_CONFIGURATION);
-    }
-
-    public static Closure getClosure(GroovyCodeSource source) throws IOException {
-        return (Closure) SHELL.parse(source).run();
+        return l;
     }
 }
