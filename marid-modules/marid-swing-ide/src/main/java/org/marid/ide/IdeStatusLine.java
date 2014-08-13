@@ -18,6 +18,7 @@
 
 package org.marid.ide;
 
+import org.marid.ide.profile.Profile;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
 import org.marid.util.SysPropsSupport;
@@ -43,7 +44,7 @@ public class IdeStatusLine extends JPanel implements SysPrefSupport, SysPropsSup
     protected final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
     protected final JLabel timeLabel = new JLabel(currentTime());
     protected final ProfileListModel profileListModel = new ProfileListModel();
-    protected final JComboBox<Path> profilesCombo = new JComboBox<>(profileListModel);
+    protected final JComboBox<Profile> profilesCombo = new JComboBox<>(profileListModel);
 
     public IdeStatusLine(IdeFrame ideFrame) {
         setLayout(new GridBagLayout());
@@ -59,63 +60,51 @@ public class IdeStatusLine extends JPanel implements SysPrefSupport, SysPropsSup
         add(profilesCombo, c);
         add(new JSeparator(SwingConstants.VERTICAL), c);
         add(timeLabel, c);
-        profilesCombo.setRenderer(new DirectoryRenderer());
     }
 
     private String currentTime() {
         return dateFormat.format(new Date());
     }
 
-    protected class DirectoryRenderer extends DefaultListCellRenderer {
-        @Override
-        public Component getListCellRendererComponent(JList<?> l, Object v, int i, boolean s, boolean f) {
-            final DirectoryRenderer renderer = (DirectoryRenderer) super.getListCellRendererComponent(l, v, i, s, f);
-            if (v instanceof Path) {
-                renderer.setText(((Path) v).getFileName().toString());
-            }
-            return renderer;
-        }
-    }
+    protected class ProfileListModel extends AbstractListModel<Profile> implements ComboBoxModel<Profile> {
 
-    protected class ProfileListModel extends AbstractListModel<Path> implements ComboBoxModel<Path> {
-
-        protected final List<Path> directories = new ArrayList<>();
-        protected Path selectedItem;
+        protected final List<Profile> profiles = new ArrayList<>();
+        protected Profile selectedItem;
 
         public ProfileListModel() {
             update();
         }
 
         public void update() {
-            directories.clear();
-            final Path profilesDir = Ide.getProfilesDir();
-            try (final Stream<Path> stream = Files.walk(profilesDir, 1)) {
-                stream.filter(Files::isDirectory).filter(p -> !profilesDir.equals(p)).forEach(directories::add);
+            profiles.clear();
+            final Path pd = Ide.getProfilesDir();
+            try (final Stream<Path> stream = Files.walk(pd, 1)) {
+                stream.filter(Files::isDirectory).filter(p -> !pd.equals(p)).map(Profile::new).forEach(profiles::add);
             } catch (Exception x) {
-                warning("Unable to walk {0}", x, profilesDir);
+                warning("Unable to walk {0}", x, pd);
             }
-            Collections.sort(directories);
+            Collections.sort(profiles);
             fireContentsChanged(this, 0, getSize());
         }
 
         @Override
         public void setSelectedItem(Object anItem) {
-            selectedItem = (Path) anItem;
+            selectedItem = (Profile) anItem;
         }
 
         @Override
-        public Path getSelectedItem() {
+        public Profile getSelectedItem() {
             return selectedItem;
         }
 
         @Override
         public int getSize() {
-            return directories.size();
+            return profiles.size();
         }
 
         @Override
-        public Path getElementAt(int index) {
-            return directories.get(index);
+        public Profile getElementAt(int index) {
+            return profiles.get(index);
         }
     }
 }

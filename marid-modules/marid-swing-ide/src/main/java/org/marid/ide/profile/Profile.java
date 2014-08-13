@@ -18,36 +18,70 @@
 
 package org.marid.ide.profile;
 
-import groovy.lang.GroovyClassLoader;
+import groovy.lang.GroovyShell;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.marid.groovy.GroovyRuntime;
 import org.marid.ide.Ide;
+import org.marid.io.SimpleWriter;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class Profile implements Named, Closeable, LogSupport {
 
+    protected final List<Consumer<String>> outputConsumers = new CopyOnWriteArrayList<>();
     protected final CompilerConfiguration compilerConfiguration = GroovyRuntime.newCompilerConfiguration(c -> {
+        c.setRecompileGroovySource(true);
+        c.setOutput(new PrintWriter(new SimpleWriter((w, s) -> outputConsumers.forEach(cs -> cs.accept(s))), true));
     });
-    protected final GroovyClassLoader classLoader = new GroovyClassLoader();
-    protected final String name;
+    protected final Path path;
+    protected final Path classesPath;
+    protected final GroovyShell shell;
 
     public Profile(String name) {
-        this.name = name;
-        this.classLoader.setShouldRecompile(true);
+        this(Ide.getProfilesDir().resolve(name));
+    }
+
+    public Profile(Path path) {
+        this.path = path;
+        this.classesPath = path.resolve("classes");
+        this.shell = GroovyRuntime.newShell(compilerConfiguration, (l, s) -> {
+            l.setShouldRecompile(true);
+            l.setDefaultAssertionStatus(true);
+            Files.createDirectories(classesPath);
+            l.addURL(classesPath.toUri().toURL());
+        });
+    }
+
+    public void addOutputConsumer(Consumer<String> outputConsumer) {
+        outputConsumers.add(outputConsumer);
+    }
+
+    public void removeOutputConsumer(Consumer<String> outputConsumer) {
+        outputConsumers.remove(outputConsumer);
     }
 
     public String getName() {
-        return name;
+        return path.getFileName().toString();
+    }
+
+    public Class<?> loadClass(String name) {
+        try {
+            return shell.getClassLoader().loadClass(name);
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
     }
 
     @Override
@@ -61,16 +95,15 @@ public class Profile implements Named, Closeable, LogSupport {
 
     @Override
     public void close() throws IOException {
-        classLoader.close();
+        shell.getClassLoader().close();
     }
 
     public void update() {
-        classLoader.clearCache();
-        final Path classesDir = Ide.getProfilesDir().resolve("classes");
-        try (final Stream<Path> stream = Files.walk(classesDir)) {
+        shell.resetLoadedClasses();
+    }
 
-        } catch (Exception x) {
-            warning("Unable to enumerate profiles directory", x);
-        }
+    @Override
+    public String toString() {
+        return getName();
     }
 }

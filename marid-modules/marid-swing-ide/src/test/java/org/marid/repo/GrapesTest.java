@@ -19,10 +19,13 @@
 package org.marid.repo;
 
 import groovy.grape.Grape;
-import groovy.lang.GroovyClassLoader;
+import groovy.grape.GrapeEngine;
+import groovy.lang.GroovyShell;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.marid.groovy.GroovyRuntime;
+import org.marid.ide.profile.GrapeEngineImpl;
 import org.marid.logging.LogSupport;
 import org.marid.test.ManualTests;
 
@@ -41,7 +44,7 @@ public class GrapesTest implements LogSupport {
     private static final File testProfileDir = new File(profilesDir, "grapesProfile");
     private static final File repoDir = new File(testProfileDir, "repo");
     private static final File cacheDir = new File(testProfileDir, "repo");
-    private static final GroovyClassLoader classLoader = new GroovyClassLoader();
+    private static final GroovyShell shell = GroovyRuntime.newShell();
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -51,17 +54,24 @@ public class GrapesTest implements LogSupport {
         if (cacheDir.mkdirs()) {
             Log.info("Directory {0} was created", cacheDir);
         }
-        Thread.currentThread().setContextClassLoader(classLoader);
+        Thread.currentThread().setContextClassLoader(shell.getClassLoader());
     }
 
     @Test
     public void test() throws Exception {
         final Map<String, Object> args = new HashMap<>();
-        args.put("classLoader", classLoader);
+        args.put("classLoader", shell.getClassLoader());
+        args.put(Grape.AUTO_DOWNLOAD_SETTING, true);
         final Map<String, Object> dependency1 = new HashMap<>();
         dependency1.put("group", "commons-cli");
         dependency1.put("module", "commons-cli");
         dependency1.put("version", "1.2");
-        Grape.grab(args, dependency1);
+        final GrapeEngine grapeEngine = new GrapeEngineImpl() {
+            @Override
+            public File getGrapeDir() {
+                return repoDir;
+            }
+        };
+        grapeEngine.grab(args, dependency1);
     }
 }

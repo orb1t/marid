@@ -20,12 +20,13 @@ package org.marid.groovy;
 
 import groovy.lang.*;
 import org.codehaus.groovy.control.CompilerConfiguration;
+import org.marid.functions.SafeBiConsumer;
+import org.marid.functions.SafeConsumer;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -44,10 +45,6 @@ public class GroovyRuntime {
     public static final GroovyShell SHELL = newShell(COMPILER_CONFIGURATION, (l, s) -> {});
     public static final GroovyClassLoader CLASS_LOADER = SHELL.getClassLoader();
 
-    public static GroovyShell newShell(Binding binding) {
-        return new GroovyShell(CLASS_LOADER, binding, COMPILER_CONFIGURATION);
-    }
-
     public static Closure getClosure(GroovyCodeSource source) throws IOException {
         return (Closure) SHELL.parse(source).run();
     }
@@ -55,6 +52,7 @@ public class GroovyRuntime {
     public static CompilerConfiguration newCompilerConfiguration(Consumer<CompilerConfiguration> configurer) {
         try {
             final CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
+            compilerConfiguration.setSourceEncoding("UTF-8");
             for (final CompilerCustomizer customizer : ServiceLoader.load(CompilerCustomizer.class)) {
                 try {
                     customizer.customize(compilerConfiguration);
@@ -71,7 +69,7 @@ public class GroovyRuntime {
         }
     }
 
-    public static GroovyShell newShell(CompilerConfiguration cc, BiConsumer<GroovyClassLoader, GroovyShell> configurer) {
+    public static GroovyShell newShell(CompilerConfiguration cc, SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
         final Map<String, Object> bindings = new HashMap<>();
         try {
             for (final BindingProvider provider : ServiceLoader.load(BindingProvider.class)) {
@@ -81,29 +79,41 @@ public class GroovyRuntime {
                     warning(LOG, "Unable to import bindings from {0}", x, provider);
                 }
             }
-
         } catch (Exception x) {
             severe(LOG, "Unable to create groovy shell", x);
         }
         final GroovyShell shell = new GroovyShell(currentThread().getContextClassLoader(), new Binding(bindings), cc);
+        configureClassLoader(shell.getClassLoader());
         configurer.accept(shell.getClassLoader(), shell);
         return shell;
     }
 
-    public static GroovyClassLoader newClassLoader(CompilerConfiguration cc, Consumer<GroovyClassLoader> configurer) {
+    public static GroovyShell newShell(SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
+        return newShell(COMPILER_CONFIGURATION, configurer);
+    }
+
+    public static GroovyShell newShell() {
+        return newShell((l, s) -> {});
+    }
+
+    public static GroovyClassLoader newClassLoader(CompilerConfiguration cc, SafeConsumer<GroovyClassLoader> configurer) {
         final GroovyClassLoader l = new GroovyClassLoader(currentThread().getContextClassLoader(), cc);
+        configureClassLoader(l);
+        configurer.accept(l);
+        return l;
+    }
+
+    private static void configureClassLoader(GroovyClassLoader loader) {
         try {
             for (final CompilerUrlProvider provider : ServiceLoader.load(CompilerUrlProvider.class)) {
                 try {
-                    provider.getUrls().forEach(CLASS_LOADER::addURL);
+                    provider.getUrls().forEach(loader::addURL);
                 } catch (Exception x) {
                     warning(LOG, "Unable to import URLs from the url provider {0}", x, provider);
                 }
             }
-            configurer.accept(l);
         } catch (Exception x) {
             severe(LOG, "Unable to set class loader", x);
         }
-        return l;
     }
 }
