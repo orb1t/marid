@@ -70,30 +70,6 @@
             </plugin>
 
             <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>test-compile-groovy</id>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <phase>test-compile</phase>
-                        <configuration>
-                            <target>
-                                <taskdef name="groovyc"
-                                         classname="org.codehaus.groovy.ant.Groovyc"
-                                         classpathref="maven.test.classpath"/>
-                                <groovyc srcdir="${project.basedir}/src/test/groovy"
-                                         destdir="${project.build.directory}/test-classes"
-                                         classpathref="maven.test.classpath"
-                                         encoding="${project.build.sourceEncoding}"/>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
