@@ -113,7 +113,7 @@
         <site>
             <id>marid-web</id>
             <name>web</name>
-            <url>scp://shell.sf.net/home/project-web/marid/htdocs</url>
+            <url>sftp://frs.sf.net/home/project-web/marid/htdocs</url>
         </site>
 
         <repository>
@@ -199,10 +199,6 @@
                         <compilerArgs>
                             <arg>-Xlint:unchecked</arg>
                         </compilerArgs>
-                        <source>${maven.compiler.source}</source>
-                        <target>${maven.compiler.target}</target>
-                        <testSource>${maven.compiler.source}</testSource>
-                        <testTarget>${maven.compiler.target}</testTarget>
                     </configuration>
                 </plugin>
 
@@ -293,7 +289,6 @@
                     <version>2.5</version>
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <username>eosms</username>
                         <goals>deploy</goals>
                     </configuration>
                 </plugin>
@@ -301,9 +296,6 @@
                 <plugin>
                     <artifactId>maven-scm-plugin</artifactId>
                     <version>1.9.1</version>
-                    <configuration>
-                        <username>eosms</username>
-                    </configuration>
                 </plugin>
 
                 <plugin>
