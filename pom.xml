@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.marid</groupId>
     <artifactId>marid</artifactId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.8</version>
     <packaging>pom</packaging>
 
     <name>marid</name>
@@ -43,14 +41,14 @@
         <scripting>groovy</scripting>
         <sf.frs>frs.sf.net/home/frs/project/marid</sf.frs>
         <logs>org.marid.test.logging.AllLogs</logs>
-        <groovy.classifier></groovy.classifier>
+        <groovy.classifier />
     </properties>
 
     <scm>
         <connection>scm:git:git://git.code.sf.net/p/marid/code</connection>
         <developerConnection>scm:git:https://git.code.sf.net/p/marid/code</developerConnection>
         <url>http://sf.net/p/marid/code</url>
-        <tag>HEAD</tag>
+        <tag>marid-0.8</tag>
     </scm>
 
     <profiles>
