@@ -32,7 +32,6 @@
 
     <modules>
         <module>marid-lib</module>
-        <module>marid-wrapper</module>
         <module>marid-swing</module>
         <module>marid-gres</module>
         <module>marid-runtime</module>

@@ -431,12 +431,6 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>marid-wrapper</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>marid-ide-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>

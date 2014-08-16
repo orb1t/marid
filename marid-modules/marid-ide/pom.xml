@@ -49,11 +49,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.marid</groupId>
-            <artifactId>marid-wrapper</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.ivy</groupId>
             <artifactId>ivy</artifactId>
         </dependency>

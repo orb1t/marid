@@ -66,12 +66,7 @@ public class GrapesTest implements LogSupport {
         dependency1.put("group", "commons-cli");
         dependency1.put("module", "commons-cli");
         dependency1.put("version", "1.2");
-        final GrapeEngine grapeEngine = new GrapeEngineImpl() {
-            @Override
-            public File getGrapeDir() {
-                return repoDir;
-            }
-        };
+        final GrapeEngine grapeEngine = new GrapeEngineImpl(repoDir);
         grapeEngine.grab(args, dependency1);
     }
 }

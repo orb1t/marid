@@ -22,12 +22,23 @@ import groovy.grape.GrapeIvy;
 import groovy.lang.MetaClass;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
+import java.io.File;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public class GrapeEngineImpl extends GrapeIvy {
 
     private transient MetaClass metaClass = InvokerHelper.getMetaClass(GrapeIvy.class);
+
+    protected final File directory;
+
+    public GrapeEngineImpl(File directory) {
+        this.directory = directory;
+        if (directory.mkdirs()) {
+            assert directory.isDirectory();
+        }
+    }
 
     @Override
     public Object invokeMethod(String name, Object args) {
@@ -52,5 +63,15 @@ public class GrapeEngineImpl extends GrapeIvy {
     @Override
     public void setMetaClass(MetaClass metaClass) {
         this.metaClass = metaClass;
+    }
+
+    @Override
+    public File getGroovyRoot() {
+        return directory;
+    }
+
+    @Override
+    public File getGrapeDir() {
+        return directory;
     }
 }
