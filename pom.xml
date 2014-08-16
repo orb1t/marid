@@ -41,7 +41,6 @@
         <test.groups>org.marid.test.NormalTests</test.groups>
         <benchmark.groups>org.marid.test.NormalBenchmarks</benchmark.groups>
         <scripting>groovy</scripting>
-        <sf.frs>frs.sf.net/home/frs/project/marid</sf.frs>
         <logs>org.marid.test.logging.AllLogs</logs>
         <groovy.classifier></groovy.classifier>
     </properties>
@@ -103,7 +102,7 @@
         <repository>
             <id>sourceforge</id>
             <name>sourceforge</name>
-            <url>sftp://${sf.frs}/repo</url>
+            <url>sftp://frs.sf.net/home/frs/project/marid/repo</url>
         </repository>
     </distributionManagement>
 
