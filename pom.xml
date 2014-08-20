@@ -318,6 +318,9 @@
                 <plugin>
                     <artifactId>maven-scm-plugin</artifactId>
                     <version>1.9.1</version>
+                    <configuration>
+                        <username>eosms</username>
+                    </configuration>
                 </plugin>
 
                 <plugin>
