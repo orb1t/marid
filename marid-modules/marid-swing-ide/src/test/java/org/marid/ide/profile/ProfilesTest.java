@@ -57,7 +57,7 @@ public class ProfilesTest implements LogSupport {
     public void testUpdateProfile() throws Exception {
         final Profile profile = new Profile(dir.resolve("profile1"));
         Assert.assertEquals("profile1", profile.getName());
-        final Path classesPath = profile.classesPath;
+        final Path classesPath = profile.getClassesPath();
         Files.write(classesPath.resolve("Test1.groovy"), "1".getBytes(UTF_8));
         final Class<?> test1Class = profile.loadClass("Test1");
         info("Loaded class: {0} {1}", test1Class, System.identityHashCode(test1Class));

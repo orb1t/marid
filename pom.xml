@@ -51,6 +51,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <lib>${project.build.directory}/lib</lib>
         <groovy.version>2.3.6</groovy.version>
+        <spring.version>4.0.6.RELEASE</spring.version>
         <jetty.version>9.0.5.v20130815</jetty.version>
         <catalina.version>7.0.42</catalina.version>
         <excluded.benchmarks>org.marid.test.BrokenBenchmarks</excluded.benchmarks>
@@ -60,6 +61,10 @@
         <scripting>groovy</scripting>
         <logs>org.marid.test.logging.AllLogs</logs>
         <groovy.classifier />
+
+        <repo-id>sourceforge</repo-id>
+        <repo-name>sourceforge</repo-name>
+        <repo-url>sftp://frs.sf.net/home/frs/project/marid/repo</repo-url>
     </properties>
 
     <scm>
@@ -107,6 +112,23 @@
                 <test.groups>org.marid.test.SlowTests</test.groups>
             </properties>
         </profile>
+
+        <profile>
+            <id>nexus</id>
+
+            <properties>
+                <repo-id>ossrh</repo-id>
+                <repo-name>nexus</repo-name>
+                <repo-url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</repo-url>
+            </properties>
+
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
     </profiles>
 
     <distributionManagement>
@@ -117,9 +139,9 @@
         </site>
 
         <repository>
-            <id>sourceforge</id>
-            <name>sourceforge</name>
-            <url>sftp://frs.sf.net/home/frs/project/marid/repo</url>
+            <id>${repo-id}</id>
+            <name>${repo-name}</name>
+            <url>${repo-url}</url>
         </repository>
     </distributionManagement>
 
@@ -275,7 +297,7 @@
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>2.8.1</version>
                     <configuration>
-                        <repositoryId>sourceforge</repositoryId>
+                        <repositoryId>${repo-id}</repositoryId>
                     </configuration>
                 </plugin>
 
@@ -342,6 +364,18 @@
                     <artifactId>build-helper-maven-plugin</artifactId>
                     <version>1.9</version>
                 </plugin>
+
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.6.2</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <serverId>ossrh</serverId>
+                        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                        <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -399,6 +433,31 @@
                 <artifactId>groovy-all</artifactId>
                 <classifier>${groovy.classifier}</classifier>
                 <version>${groovy.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-jdbc</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-messaging</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>${spring.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>

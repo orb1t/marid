@@ -18,13 +18,12 @@
 
 package org.marid.service;
 
-import org.marid.methods.LogMethods;
+import org.marid.logging.LogSupport;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Logger;
 
 import static java.lang.Runtime.getRuntime;
 import static java.util.ServiceLoader.load;
@@ -32,9 +31,8 @@ import static java.util.ServiceLoader.load;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridServices {
+public class MaridServices implements LogSupport {
 
-    private static final Logger LOG = Logger.getLogger(MaridServices.class.getName());
     private static final ServiceLoader<MaridServiceProvider> SERVICE_PROVIDERS = load(MaridServiceProvider.class);
     static final NavigableMap<Class<?>, Collection<MaridService>> SERVICES = new ConcurrentSkipListMap<>((a, b) -> {
         if (a == b) {
@@ -74,7 +72,7 @@ public class MaridServices {
                 try {
                     s.start();
                 } catch (Exception x) {
-                    LogMethods.severe(LOG, "Unable to start {0}", x, s);
+                    Log.severe("Unable to start {0}", x, s);
                 }
             })));
         } finally {
@@ -90,7 +88,7 @@ public class MaridServices {
                 try {
                     s.close();
                 } catch (Exception x) {
-                    LogMethods.severe(LOG, "Unable to close {0}", x, s);
+                    Log.severe("Unable to close {0}", x, s);
                 }
             })));
         } finally {
@@ -105,11 +103,11 @@ public class MaridServices {
                 try {
                     classes.addAll(provider.getServices());
                 } catch (Exception x) {
-                    LogMethods.warning(LOG, "Unable to load services from {0}", x, provider);
+                    Log.warning("Unable to load services from {0}", x, provider);
                 }
             }
         } catch (Exception x) {
-            LogMethods.severe(LOG, "Unable to enumerate services", x);
+            Log.severe("Unable to enumerate services", x);
         }
         return classes;
     }

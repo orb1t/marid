@@ -70,6 +70,10 @@ public class GroovyRuntime {
     }
 
     public static GroovyShell newShell(CompilerConfiguration cc, SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
+        return newShell(Thread.currentThread().getContextClassLoader(), cc, configurer);
+    }
+
+    public static GroovyShell newShell(ClassLoader classLoader, CompilerConfiguration cc, SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
         final Map<String, Object> bindings = new HashMap<>();
         try {
             for (final BindingProvider provider : ServiceLoader.load(BindingProvider.class)) {
@@ -82,7 +86,7 @@ public class GroovyRuntime {
         } catch (Exception x) {
             severe(LOG, "Unable to create groovy shell", x);
         }
-        final GroovyShell shell = new GroovyShell(currentThread().getContextClassLoader(), new Binding(bindings), cc);
+        final GroovyShell shell = new GroovyShell(classLoader, new Binding(bindings), cc);
         configureClassLoader(shell.getClassLoader());
         configurer.accept(shell.getClassLoader(), shell);
         return shell;
