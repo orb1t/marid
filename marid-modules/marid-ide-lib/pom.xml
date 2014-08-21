@@ -21,7 +21,7 @@
     <parent>
         <artifactId>marid-modules</artifactId>
         <groupId>org.marid</groupId>
-        <version>0.8.5-SNAPSHOT</version>
+        <version>0.8.5.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
