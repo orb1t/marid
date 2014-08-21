@@ -311,7 +311,17 @@
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <goals>deploy</goals>
                         <username>eosms</username>
+                        <providerImplementations>
+                            <git>jgit</git>
+                        </providerImplementations>
                     </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.scm</groupId>
+                            <artifactId>maven-scm-provider-jgit</artifactId>
+                            <version>1.9.1</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
 
                 <plugin>
