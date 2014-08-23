@@ -16,4 +16,4 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-org.marid.ide.DefaultConfigurationProvider
+org.marid.ide.swing.DefaultConfigurationProvider

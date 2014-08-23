@@ -39,10 +39,7 @@
         <module>marid-swing</module>
         <module>marid-gres</module>
         <module>marid-runtime</module>
-        <module>marid-ide-lib</module>
         <module>marid-swing-ide</module>
-        <module>marid-gui</module>
-        <module>marid-ide</module>
         <module>marid-site</module>
         <module>marid-site-standalone</module>
     </modules>

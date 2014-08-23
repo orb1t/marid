@@ -21,7 +21,7 @@ package org.marid.ide.profile;
 import groovy.lang.GroovyShell;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.marid.groovy.GroovyRuntime;
-import org.marid.ide.Ide;
+import org.marid.ide.swing.IdeImpl;
 import org.marid.io.SimpleWriter;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
@@ -55,10 +55,6 @@ public class Profile implements Named, Closeable, LogSupport {
     protected final ThreadGroup threadGroup;
 
     protected volatile GenericApplicationContext applicationContext;
-
-    public Profile(String name) {
-        this(Ide.getProfilesDir().resolve(name));
-    }
 
     public Profile(Path path) {
         this.path = path;

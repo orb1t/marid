@@ -25,7 +25,7 @@ import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.marid.dyn.MetaInfo;
-import org.marid.ide.IdeFrame;
+import org.marid.ide.swing.IdeFrameImpl;
 import org.marid.ide.widgets.Widget;
 import org.marid.pref.PrefSupport;
 
@@ -52,7 +52,7 @@ public class MemoryWidget extends Widget implements PrefSupport, MemoryWidgetCon
         freeMemorySeries.add(second, freeMemory);
     });
 
-    public MemoryWidget(IdeFrame owner) {
+    public MemoryWidget(IdeFrameImpl owner) {
         super(owner, "Memory");
         final TimeSeriesCollection dataset = new TimeSeriesCollection();
         dataset.addSeries(totalMemorySeries);

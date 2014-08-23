@@ -19,7 +19,7 @@
 package org.marid.ide.widgets;
 
 import org.marid.dyn.MetaInfo;
-import org.marid.ide.IdeFrame;
+import org.marid.ide.swing.IdeFrameImpl;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.MaridAction;
 import org.marid.swing.forms.Configuration;
@@ -38,10 +38,10 @@ import static org.marid.l10n.L10n.s;
 public abstract class Widget extends JInternalFrame implements PrefSupport {
 
     protected final JToolBar toolBar = new JToolBar(getPref("orientation", HORIZONTAL, "toolbar"));
-    protected final IdeFrame owner;
+    protected final IdeFrameImpl owner;
     protected final BorderLayout layout = new BorderLayout();
 
-    public Widget(IdeFrame owner, String title) {
+    public Widget(IdeFrameImpl owner, String title) {
         super(s(title), true, true, true, true);
         this.owner = owner;
         setLayout(layout);

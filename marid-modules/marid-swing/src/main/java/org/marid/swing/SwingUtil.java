@@ -53,8 +53,6 @@ public class SwingUtil {
         if (EventQueue.isDispatchThread()) {
             try {
                 return callable.call();
-            } catch (RuntimeException x) {
-                throw x;
             } catch (Exception x) {
                 throw new IllegalStateException(x);
             }

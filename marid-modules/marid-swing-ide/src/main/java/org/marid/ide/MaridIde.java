@@ -18,51 +18,33 @@
 
 package org.marid.ide;
 
-import groovy.lang.GroovyCodeSource;
-import org.marid.Versioning;
 import org.marid.groovy.GroovyRuntime;
+import org.marid.ide.swing.context.GuiContext;
+import org.marid.logging.LogSupport;
 import org.marid.logging.Logging;
+import org.marid.swing.SwingUtil;
 import org.marid.swing.log.SwingHandler;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import javax.swing.*;
-import java.awt.*;
-import java.lang.invoke.MethodHandles;
-import java.net.URL;
 import java.util.logging.Logger;
-
-import static org.marid.methods.LogMethods.info;
-import static org.marid.methods.LogMethods.warning;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridIde implements Thread.UncaughtExceptionHandler {
-
-    private static final Logger LOG = Logger.getLogger(MethodHandles.lookup().toString());
+public class MaridIde implements LogSupport {
 
     public static void main(String[] args) throws Exception {
         Logging.init("marid-ide-logging.properties");
         Logger.getLogger("").addHandler(new SwingHandler());
-        Thread.setDefaultUncaughtExceptionHandler(new MaridIde());
+        Thread.setDefaultUncaughtExceptionHandler((t, x) -> Log.warning("Uncaught exception in {0}", x, t));
         Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
-        info(LOG, "Starting Marid {0} on {1} {2}",
-                Versioning.getImplementationVersion(MaridIde.class),
-                System.getProperty("java.vm.name"),
-                System.getProperty("java.vm.version"));
-        final URL url = Thread.currentThread().getContextClassLoader().getResource("Init.groovy");
-        if (url != null) {
-            try {
-                GroovyRuntime.SHELL.evaluate(new GroovyCodeSource(url));
-            } catch (Exception x) {
-                JOptionPane.showMessageDialog(null, x, "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } else {
-            EventQueue.invokeLater(Ide::run);
-        }
-    }
-
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
-        warning(LOG, "Uncaught exception in {0}", e, t);
+        SwingUtil.execute(() -> {
+            final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+                    GuiContext.class.getPackage().getName());
+            context.addApplicationListener(event -> {
+                Log.info("{0}", event);
+            });
+            context.start();
+        });
     }
 }
