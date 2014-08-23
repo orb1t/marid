@@ -41,7 +41,7 @@ public class CompactFormatter extends Formatter {
                 .append(' ');
         if (record.getParameters() != null) {
             try {
-                sw.append(MessageFormat.format(record.getMessage(), record.getParameters()));
+                new MessageFormat(record.getMessage()).format(record.getParameters(), sw.getBuffer(), null);
             } catch (Exception x) {
                 sw.append(record.getMessage());
             }
@@ -50,8 +50,9 @@ public class CompactFormatter extends Formatter {
         }
         sw.append(System.lineSeparator());
         if (record.getThrown() != null) {
-            final PrintWriter pw = new PrintWriter(sw);
-            record.getThrown().printStackTrace(pw);
+            try (final PrintWriter pw = new PrintWriter(sw)) {
+                record.getThrown().printStackTrace(pw);
+            }
         }
         return sw.toString();
     }
