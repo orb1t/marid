@@ -38,16 +38,21 @@ import static org.junit.runners.Parameterized.Parameters;
  */
 @RunWith(Parameterized.class)
 @Category(NormalBenchmarks.class)
-public class LoggingBenchmark extends AbstractBenchmark {
+public class LoggingBenchmark extends AbstractBenchmark implements LogSupport {
 
     private final LogSupport logSupport;
 
     public LoggingBenchmark(LogSupport logSupport) {
+        info("Testing {0} ...", logSupport.getClass().getCanonicalName());
         this.logSupport = logSupport;
         this.logSupport.logger().setUseParentHandlers(false);
         this.logSupport.logger().addHandler(new MemoryHandler(new Handler() {
+
+            private volatile LogRecord logRecord;
+
             @Override
             public void publish(LogRecord record) {
+                logRecord = record;
             }
 
             @Override
@@ -85,7 +90,7 @@ public class LoggingBenchmark extends AbstractBenchmark {
         );
     }
 
-    private static class WithDirectStaticLogger implements LogSupport {
+    static class WithDirectStaticLogger implements LogSupport {
 
         private static final Logger LOGGER = Logger.getLogger(WithDirectStaticLogger.class.getName());
 
@@ -95,10 +100,10 @@ public class LoggingBenchmark extends AbstractBenchmark {
         }
     }
 
-    private static class WithLogSupport implements LogSupport {
+    static class WithLogSupport implements LogSupport {
     }
 
-    private static class WithLocalLogger implements LogSupport {
+    static class WithLocalLogger implements LogSupport {
 
         private final Logger logger = Logger.getLogger(getClass().getName());
 

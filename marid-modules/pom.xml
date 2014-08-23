@@ -39,6 +39,8 @@
         <module>marid-swing-ide</module>
         <module>marid-gui</module>
         <module>marid-ide</module>
+        <module>marid-site</module>
+        <module>marid-site-standalone</module>
     </modules>
 
     <dependencies>
@@ -48,4 +50,36 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <java.util.logging.config.class>org.marid.test.logging.AllLogs</java.util.logging.config.class>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>benchmark</id>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <java.util.logging.config.class>org.marid.test.logging.AllLogs</java.util.logging.config.class>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

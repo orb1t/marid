@@ -30,7 +30,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.text.NumberFormat;
-import java.util.Currency;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.logging.Level;
