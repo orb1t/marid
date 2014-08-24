@@ -128,7 +128,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
                 setExtendedState(getPref("extendedState", getExtendedState()));
                 break;
             case WindowEvent.WINDOW_CLOSING:
-                exitWithConfirm();
+                setVisible(false);
                 break;
         }
     }
