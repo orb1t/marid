@@ -20,12 +20,12 @@ package org.marid.ide.log;
 
 import org.marid.logging.LogSupport;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class LoggingPostProcessor implements BeanPostProcessor, LogSupport {
+public class LoggingPostProcessor implements DestructionAwareBeanPostProcessor, LogSupport {
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -36,5 +36,10 @@ public class LoggingPostProcessor implements BeanPostProcessor, LogSupport {
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         info("Bean {0} initialized: {1}", beanName, bean);
         return bean;
+    }
+
+    @Override
+    public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
+        info("Bean {0} destroying", beanName);
     }
 }

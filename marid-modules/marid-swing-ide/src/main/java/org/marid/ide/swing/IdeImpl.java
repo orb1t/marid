@@ -21,6 +21,8 @@ package org.marid.ide.swing;
 import org.marid.ide.base.Ide;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.GenericApplicationContext;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +32,9 @@ import java.nio.file.Paths;
  * @author Dmitry Ovchinnikov
  */
 public class IdeImpl implements Ide, SysPrefSupport, LogSupport {
+
+    @Autowired
+    private GenericApplicationContext applicationContext;
 
     @Override
     public Path getProfilesDir() {
@@ -44,6 +49,12 @@ public class IdeImpl implements Ide, SysPrefSupport, LogSupport {
             warning("Unable to get profiles directory", x);
             return Paths.get(System.getProperty("user.dir"));
         }
+    }
+
+    @Override
+    public void exit() {
+        applicationContext.close();
+        System.exit(0);
     }
 
     @Override

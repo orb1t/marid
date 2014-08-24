@@ -68,7 +68,7 @@ public class GuiContext implements LogSupport, SysPrefSupport {
         return new IdeImpl();
     }
 
-    @Bean
+    @Bean(destroyMethod = "dispose")
     public IdeFrame ideFrame() {
         return new IdeFrameImpl(ide(), true, menuActionList.createTreeElement());
     }

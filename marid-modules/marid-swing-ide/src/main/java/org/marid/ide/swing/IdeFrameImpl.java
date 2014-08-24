@@ -156,18 +156,18 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     public void exitWithConfirm() {
         switch (showConfirmDialog(null, m("Do you want to exit?"), s("Exit"), YES_NO_OPTION, QUESTION_MESSAGE)) {
             case YES_OPTION:
-                exit();
+                ide.exit();
                 break;
         }
     }
 
-    public void exit() {
+    @Override
+    public void dispose() {
         putPref("state", getState());
         putPref("extendedState", getExtendedState());
         if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
             putPref("bounds", getBounds());
         }
-        dispose();
-        System.exit(0);
+        super.dispose();
     }
 }

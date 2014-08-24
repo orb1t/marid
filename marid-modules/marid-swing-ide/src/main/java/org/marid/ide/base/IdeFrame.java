@@ -36,4 +36,6 @@ public interface IdeFrame {
     void exitWithConfirm();
 
     Ide getIde();
+
+    void dispose();
 }

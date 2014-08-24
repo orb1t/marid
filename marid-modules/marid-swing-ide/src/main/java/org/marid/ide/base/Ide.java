@@ -28,4 +28,6 @@ import java.nio.file.Path;
 public interface Ide extends Named {
 
     Path getProfilesDir();
+
+    void exit();
 }
