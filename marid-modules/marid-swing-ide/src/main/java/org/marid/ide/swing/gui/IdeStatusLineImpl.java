@@ -16,13 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing;
+package org.marid.ide.swing.gui;
 
+import org.marid.ide.base.IdeFrame;
 import org.marid.ide.base.IdeStatusLine;
 import org.marid.ide.profile.Profile;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
 import org.marid.util.SysPropsSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,16 +41,18 @@ import java.util.stream.Stream;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component
 public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefSupport, SysPropsSupport, LogSupport {
 
-    protected final IdeFrameImpl ideFrame;
+    protected final IdeFrame ideFrame;
     protected final JLabel status = new JLabel("Done");
     protected final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
     protected final JLabel timeLabel = new JLabel(currentTime());
     protected final ProfileListModel profileListModel;
     protected final JComboBox<Profile> profilesCombo;
 
-    public IdeStatusLineImpl(IdeFrameImpl ideFrame) {
+    @Autowired
+    public IdeStatusLineImpl(IdeFrame ideFrame) {
         setLayout(new GridBagLayout());
         this.ideFrame = ideFrame;
         profileListModel = new ProfileListModel();

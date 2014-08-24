@@ -24,6 +24,7 @@ import org.marid.logging.LogSupport;
 import org.marid.swing.MaridAction;
 import org.marid.swing.menu.MenuAction;
 import org.marid.swing.menu.MenuActionList;
+import org.marid.swing.menu.MenuActionTreeElement;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -41,7 +42,7 @@ import static org.marid.l10n.L10n.s;
 public class MenuContext implements LogSupport {
 
     @Bean
-    public MenuActionList ideMenuActionList() {
+    public MenuActionTreeElement ideMenuActionTreeElement() {
         final MenuActionList menuActions = new MenuActionList();
         try {
             final ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -99,6 +100,6 @@ public class MenuContext implements LogSupport {
         } catch (Exception x) {
             warning("Unable to load menu entries", x);
         }
-        return menuActions;
+        return menuActions.createTreeElement();
     }
 }

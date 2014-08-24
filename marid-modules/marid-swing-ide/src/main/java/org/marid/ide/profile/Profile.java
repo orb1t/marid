@@ -21,7 +21,6 @@ package org.marid.ide.profile;
 import groovy.lang.GroovyShell;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.marid.groovy.GroovyRuntime;
-import org.marid.ide.swing.IdeImpl;
 import org.marid.io.SimpleWriter;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;

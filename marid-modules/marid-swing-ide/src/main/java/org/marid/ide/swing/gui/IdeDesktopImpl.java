@@ -16,27 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.context;
+package org.marid.ide.swing.gui;
 
-import org.marid.ide.base.IdeFrame;
-import org.marid.logging.LogSupport;
-import org.marid.pref.SysPrefSupport;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
+import org.marid.ide.base.IdeDesktop;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import javax.swing.*;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@Configuration
-public class GuiContext implements LogSupport, SysPrefSupport {
-
-    @Autowired
-    private IdeFrame ideFrame;
-
-    @PostConstruct
-    public void init() {
-        ideFrame.setVisible(true);
-    }
+@Component
+public class IdeDesktopImpl extends JDesktopPane implements IdeDesktop {
 }

@@ -20,6 +20,7 @@ package org.marid.ide;
 
 import org.marid.groovy.GroovyRuntime;
 import org.marid.ide.swing.context.GuiContext;
+import org.marid.ide.swing.gui.IdeImpl;
 import org.marid.logging.LogSupport;
 import org.marid.logging.Logging;
 import org.marid.swing.SwingUtil;
@@ -38,7 +39,8 @@ public class MaridIde implements LogSupport {
         Logger.getLogger("").addHandler(new SwingHandler());
         Thread.setDefaultUncaughtExceptionHandler((t, x) -> Log.warning("Uncaught exception in {0}", x, t));
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-                GuiContext.class.getPackage().getName());
+                GuiContext.class.getPackage().getName(),
+                IdeImpl.class.getPackage().getName());
         context.setClassLoader(GroovyRuntime.CLASS_LOADER);
         context.addApplicationListener(event -> Log.info("{0}", event));
         SwingUtil.execute(context::start);

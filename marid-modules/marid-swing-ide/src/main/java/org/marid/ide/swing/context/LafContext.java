@@ -16,14 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing;
+package org.marid.ide.swing.context;
 
-import org.marid.ide.base.IdeDesktop;
+import org.marid.logging.LogSupport;
+import org.marid.pref.SysPrefSupport;
+import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
 import javax.swing.*;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-public class IdeDesktopImpl extends JDesktopPane implements IdeDesktop {
+@Configuration
+public class LafContext implements LogSupport, SysPrefSupport {
+
+    @PostConstruct
+    public void init() {
+        final String laf = getSysPref("laf", "");
+        try {
+            if (!laf.isEmpty()) {
+                UIManager.setLookAndFeel(laf);
+            } else {
+                UIManager.setLookAndFeel(new NimbusLookAndFeel());
+            }
+        } catch (Exception x) {
+            warning("Unable to set LAF {0}", x, laf);
+        }
+    }
 }

@@ -19,7 +19,7 @@
 package org.marid.ide.widgets;
 
 import org.marid.dyn.MetaInfo;
-import org.marid.ide.swing.IdeFrameImpl;
+import org.marid.ide.swing.gui.IdeFrameImpl;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.MaridAction;
 import org.marid.swing.forms.Configuration;

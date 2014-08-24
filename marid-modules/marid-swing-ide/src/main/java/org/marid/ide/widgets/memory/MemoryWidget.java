@@ -25,7 +25,7 @@ import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.marid.dyn.MetaInfo;
-import org.marid.ide.swing.IdeFrameImpl;
+import org.marid.ide.swing.gui.IdeFrameImpl;
 import org.marid.ide.widgets.Widget;
 import org.marid.pref.PrefSupport;
 

@@ -16,13 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing;
+package org.marid.ide.swing.gui;
 
 import org.marid.ide.base.Ide;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,6 +32,7 @@ import java.nio.file.Paths;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component
 public class IdeImpl implements Ide, SysPrefSupport, LogSupport {
 
     @Autowired

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing;
+package org.marid.ide.swing.gui;
 
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.base.Ide;
@@ -32,6 +32,8 @@ import org.marid.swing.forms.Form;
 import org.marid.swing.forms.StaticConfigurationDialog;
 import org.marid.swing.log.SwingHandler;
 import org.marid.swing.menu.MenuActionTreeElement;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
@@ -47,17 +49,17 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component
 public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSupport {
 
     private final Ide ide;
-    private final boolean closeable;
     private final IdeDesktopImpl desktop;
     private final IdeStatusLineImpl statusLine;
 
-    public IdeFrameImpl(Ide ide, boolean closeable, MenuActionTreeElement menuRoot) {
+    @Autowired
+    public IdeFrameImpl(Ide ide, MenuActionTreeElement menuRoot) {
         super(s("Marid IDE"));
         this.ide = ide;
-        this.closeable = closeable;
         setIconImages(MaridIcons.ICONS);
         setJMenuBar(new JMenuBar());
         setLocationByPlatform(true);
@@ -126,11 +128,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
                 setExtendedState(getPref("extendedState", getExtendedState()));
                 break;
             case WindowEvent.WINDOW_CLOSING:
-                if (closeable) {
-                    setVisible(false);
-                } else {
-                    exitWithConfirm();
-                }
+                exitWithConfirm();
                 break;
         }
     }
