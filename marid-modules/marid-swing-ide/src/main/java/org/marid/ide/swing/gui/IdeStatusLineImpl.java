@@ -18,8 +18,8 @@
 
 package org.marid.ide.swing.gui;
 
-import org.marid.ide.base.IdeFrame;
 import org.marid.ide.base.IdeStatusLine;
+import org.marid.ide.components.ProfileManager;
 import org.marid.ide.profile.Profile;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
@@ -29,14 +29,11 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
+
+import static org.marid.ide.components.ProfileManager.ProfileEventListener;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -44,7 +41,7 @@ import java.util.stream.Stream;
 @Component
 public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefSupport, SysPropsSupport, LogSupport {
 
-    protected final IdeFrame ideFrame;
+    protected final ProfileManager profileManager;
     protected final JLabel status = new JLabel("Done");
     protected final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
     protected final JLabel timeLabel = new JLabel(currentTime());
@@ -52,9 +49,9 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
     protected final JComboBox<Profile> profilesCombo;
 
     @Autowired
-    public IdeStatusLineImpl(IdeFrame ideFrame) {
+    public IdeStatusLineImpl(ProfileManager profileManager) {
         setLayout(new GridBagLayout());
-        this.ideFrame = ideFrame;
+        this.profileManager = profileManager;
         profileListModel = new ProfileListModel();
         final GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.BASELINE;
@@ -73,25 +70,14 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
         return dateFormat.format(new Date());
     }
 
-    protected class ProfileListModel extends AbstractListModel<Profile> implements ComboBoxModel<Profile> {
+    protected class ProfileListModel extends AbstractListModel<Profile> implements ComboBoxModel<Profile>, ProfileEventListener {
 
-        protected final List<Profile> profiles = new ArrayList<>();
+        protected final List<Profile> profiles;
         protected Profile selectedItem;
 
         public ProfileListModel() {
-            update();
-        }
-
-        public void update() {
-            profiles.clear();
-            final Path pd = ideFrame.getIde().getProfilesDir();
-            try (final Stream<Path> stream = Files.walk(pd, 1)) {
-                stream.filter(Files::isDirectory).filter(p -> !pd.equals(p)).map(Profile::new).forEach(profiles::add);
-            } catch (Exception x) {
-                warning("Unable to walk {0}", x, pd);
-            }
-            Collections.sort(profiles);
-            fireContentsChanged(this, 0, getSize());
+            profiles = profileManager.getProfiles();
+            profileManager.addProfileEventListener(this);
         }
 
         @Override
@@ -112,6 +98,30 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
         @Override
         public Profile getElementAt(int index) {
             return profiles.get(index);
+        }
+
+        @Override
+        public void profileAdded(Profile profile) {
+            profiles.clear();
+            profiles.addAll(profileManager.getProfiles());
+            final int index = profiles.indexOf(profile);
+            if (index >= 0) {
+                fireIntervalAdded(this, index, index);
+            }
+        }
+
+        @Override
+        public void profileRemoved(Profile profile) {
+            final int index = profiles.indexOf(profile);
+            if (index >= 0) {
+                profiles.remove(index);
+                fireIntervalRemoved(this, index, index);
+            }
+        }
+
+        @Override
+        public void update() {
+            fireContentsChanged(this, 0, getSize());
         }
     }
 }

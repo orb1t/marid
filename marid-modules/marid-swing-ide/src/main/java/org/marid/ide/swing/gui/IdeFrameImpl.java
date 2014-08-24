@@ -57,9 +57,10 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     private final IdeStatusLineImpl statusLine;
 
     @Autowired
-    public IdeFrameImpl(Ide ide, MenuActionTreeElement menuRoot) {
+    public IdeFrameImpl(Ide ide, MenuActionTreeElement menuRoot, IdeStatusLineImpl statusLine) {
         super(s("Marid IDE"));
         this.ide = ide;
+        this.statusLine = statusLine;
         setIconImages(MaridIcons.ICONS);
         setJMenuBar(new JMenuBar());
         setLocationByPlatform(true);
@@ -68,7 +69,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
         menuRoot.fillJMenuBar(getJMenuBar());
         add(desktop = new IdeDesktopImpl());
-        add(statusLine = new IdeStatusLineImpl(this), BorderLayout.SOUTH);
+        add(statusLine, BorderLayout.SOUTH);
         pack();
         setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
         setState(getPref("state", getState()));

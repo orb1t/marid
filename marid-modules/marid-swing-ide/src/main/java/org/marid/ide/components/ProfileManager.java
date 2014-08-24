@@ -16,27 +16,43 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.profile;
+package org.marid.ide.components;
 
+import org.marid.ide.profile.Profile;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
+import org.springframework.stereotype.Component;
 
 import javax.swing.event.EventListenerList;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.EventListener;
+import java.util.List;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component
 public class ProfileManager implements LogSupport, SysPrefSupport {
 
     protected final ConcurrentSkipListMap<String, Profile> profileMap = new ConcurrentSkipListMap<>();
     protected final EventListenerList listenerList = new EventListenerList();
 
     public ProfileManager() {
-        final Path dir = getSysPref(Path.class, "profilesDir", defaultPath());
+        final Path profilesDir = getProfilesDir();
+        try (final Stream<Path> stream = Files.walk(profilesDir, 1)) {
+            stream
+                    .filter(Files::isDirectory)
+                    .filter(p -> !profilesDir.equals(p))
+                    .map(Profile::new)
+                    .forEach(p -> profileMap.put(p.getName(), p));
+        } catch (Exception x) {
+            warning("Unable to walk {0}", x, profilesDir);
+        }
     }
 
     public void addProfileEventListener(ProfileEventListener profileEventListener) {
@@ -49,6 +65,19 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
 
     protected Path defaultPath() {
         return Paths.get(System.getProperty("user.home"), "marid", "profiles");
+    }
+
+    public Path getProfilesDir() {
+        try {
+            final Path path = getSysPref("profilesDir", defaultPath());
+            if (!Files.isDirectory(path)) {
+                Files.createDirectories(path);
+            }
+            return path;
+        } catch (Exception x) {
+            warning("Unable to get profiles directory", x);
+            return Paths.get(System.getProperty("user.dir"));
+        }
     }
 
     public void addProfile(Profile profile) {
@@ -71,6 +100,10 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
         }
     }
 
+    public List<Profile> getProfiles() {
+        return new ArrayList<>(profileMap.values());
+    }
+
     public void removeProfile(Profile profile) {
         removeProfile(profile.getName());
     }
@@ -85,5 +118,7 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
         void profileAdded(Profile profile);
 
         void profileRemoved(Profile profile);
+
+        void update();
     }
 }

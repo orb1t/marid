@@ -20,14 +20,10 @@ package org.marid.ide.base;
 
 import org.marid.itf.Named;
 
-import java.nio.file.Path;
-
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface Ide extends Named {
-
-    Path getProfilesDir();
 
     void exit();
 }

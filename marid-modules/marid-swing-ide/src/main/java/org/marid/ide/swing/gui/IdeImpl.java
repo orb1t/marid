@@ -25,10 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -37,21 +33,6 @@ public class IdeImpl implements Ide, SysPrefSupport, LogSupport {
 
     @Autowired
     private GenericApplicationContext applicationContext;
-
-    @Override
-    public Path getProfilesDir() {
-        try {
-            final Path defaultDir = Paths.get(System.getProperty("user.home"), "marid", "profiles");
-            final Path path = Paths.get(SYSPREFS.get("profilesDir", defaultDir.toString()));
-            if (!Files.isDirectory(path)) {
-                Files.createDirectories(path);
-            }
-            return path;
-        } catch (Exception x) {
-            warning("Unable to get profiles directory", x);
-            return Paths.get(System.getProperty("user.dir"));
-        }
-    }
 
     @Override
     public void exit() {
