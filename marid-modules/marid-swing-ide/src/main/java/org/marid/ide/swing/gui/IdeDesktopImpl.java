@@ -28,4 +28,5 @@ import javax.swing.*;
  */
 @Component
 public class IdeDesktopImpl extends JDesktopPane implements IdeDesktop {
+
 }

@@ -18,7 +18,14 @@
 
 package org.marid.swing;
 
+import javax.swing.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.geom.Point2D;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -71,6 +78,41 @@ public class SwingUtil {
                 }
             }
         }
+    }
+
+    public static void addDisposeListener(JComponent component, Runnable disposeListener) {
+        component.addAncestorListener(new AncestorListener() {
+            @Override
+            public void ancestorAdded(AncestorEvent event) {
+                System.out.println("A:" + event.getAncestor());
+                if (event.getAncestor() instanceof Window) {
+                    ((Window) event.getAncestor()).addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosed(WindowEvent e) {
+                            disposeListener.run();
+                        }
+                    });
+                    component.removeAncestorListener(this);
+                } else if (event.getAncestor() instanceof JInternalFrame) {
+                    ((JInternalFrame) event.getAncestor()).addInternalFrameListener(new InternalFrameAdapter() {
+                        @Override
+                        public void internalFrameClosed(InternalFrameEvent e) {
+                            disposeListener.run();
+                        }
+                    });
+                    component.removeAncestorListener(this);
+                }
+            }
+
+            @Override
+            public void ancestorRemoved(AncestorEvent event) {
+                System.out.println("R:" + event.getAncestor());
+            }
+
+            @Override
+            public void ancestorMoved(AncestorEvent event) {
+            }
+        });
     }
 
     public static Point transform(CoordinateTransformFunction transform, Point point) {

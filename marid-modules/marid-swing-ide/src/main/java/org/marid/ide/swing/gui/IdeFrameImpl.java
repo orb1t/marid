@@ -35,9 +35,11 @@ import org.marid.swing.menu.MenuActionTreeElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.lang.reflect.Constructor;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
@@ -52,15 +54,18 @@ import static org.marid.l10n.L10n.s;
 @Component
 public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSupport {
 
-    private final Ide ide;
-    private final IdeDesktopImpl desktop;
-    private final IdeStatusLineImpl statusLine;
+    private final IdeImpl ide;
 
     @Autowired
-    public IdeFrameImpl(Ide ide, MenuActionTreeElement menuRoot, IdeStatusLineImpl statusLine) {
+    private IdeDesktopImpl desktop;
+
+    @Autowired
+    private IdeStatusLineImpl statusLine;
+
+    @Autowired
+    public IdeFrameImpl(IdeImpl ide, MenuActionTreeElement menuRoot) {
         super(s("Marid IDE"));
         this.ide = ide;
-        this.statusLine = statusLine;
         setIconImages(MaridIcons.ICONS);
         setJMenuBar(new JMenuBar());
         setLocationByPlatform(true);
@@ -68,7 +73,11 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         getJMenuBar().add(preferencesMenu());
         getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
         menuRoot.fillJMenuBar(getJMenuBar());
-        add(desktop = new IdeDesktopImpl());
+    }
+
+    @PostConstruct
+    private void init() {
+        add(desktop);
         add(statusLine, BorderLayout.SOUTH);
         pack();
         setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
@@ -128,9 +137,6 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
                 setState(getPref("state", getState()));
                 setExtendedState(getPref("extendedState", getExtendedState()));
                 break;
-            case WindowEvent.WINDOW_CLOSING:
-                setVisible(false);
-                break;
         }
     }
 
@@ -155,6 +161,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     public void exitWithConfirm() {
         switch (showConfirmDialog(null, m("Do you want to exit?"), s("Exit"), YES_NO_OPTION, QUESTION_MESSAGE)) {
             case YES_OPTION:
+                dispose();
                 ide.exit();
                 break;
         }
@@ -166,6 +173,9 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         putPref("extendedState", getExtendedState());
         if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
             putPref("bounds", getBounds());
+        }
+        for (final WindowListener windowListener : getWindowListeners()) {
+            windowListener.windowClosed(new WindowEvent(this, WindowEvent.WINDOW_CLOSED));
         }
         super.dispose();
     }

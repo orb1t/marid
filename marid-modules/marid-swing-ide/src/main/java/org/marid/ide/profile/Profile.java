@@ -24,20 +24,23 @@ import org.marid.groovy.GroovyRuntime;
 import org.marid.io.SimpleWriter;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
+import org.marid.logging.SimpleHandler;
+import org.marid.nio.FileUtils;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.context.support.GenericGroovyApplicationContext;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
+import java.util.logging.LogRecord;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -45,6 +48,7 @@ import java.util.function.Consumer;
 public class Profile implements Named, Closeable, LogSupport {
 
     protected final List<Consumer<String>> outputConsumers = new CopyOnWriteArrayList<>();
+    protected final List<Consumer<LogRecord>> logConsumers = new CopyOnWriteArrayList<>();
     protected final CompilerConfiguration compilerConfiguration = GroovyRuntime.newCompilerConfiguration(c -> {
         c.setRecompileGroovySource(true);
         c.setOutput(new PrintWriter(new SimpleWriter((w, s) -> outputConsumers.forEach(cs -> cs.accept(s))), true));
@@ -53,7 +57,7 @@ public class Profile implements Named, Closeable, LogSupport {
     protected final GroovyShell shell;
     protected final ThreadGroup threadGroup;
 
-    protected volatile GenericApplicationContext applicationContext;
+    protected volatile AnnotationConfigApplicationContext applicationContext;
 
     public Profile(Path path) {
         this.path = path;
@@ -62,7 +66,9 @@ public class Profile implements Named, Closeable, LogSupport {
             l.setShouldRecompile(true);
             l.setDefaultAssertionStatus(true);
             Files.createDirectories(getClassesPath());
+            Files.createDirectories(getContextPath());
             l.addURL(getClassesPath().toUri().toURL());
+            l.addURL(getContextPath().toUri().toURL());
         });
     }
 
@@ -74,8 +80,20 @@ public class Profile implements Named, Closeable, LogSupport {
         outputConsumers.remove(outputConsumer);
     }
 
+    public void addLogConsumer(Consumer<LogRecord> logRecordConsumer) {
+        logConsumers.add(logRecordConsumer);
+    }
+
+    public void removeLogRecordConsumer(Consumer<LogRecord> logRecordConsumer) {
+        logConsumers.remove(logRecordConsumer);
+    }
+
     public Path getClassesPath() {
         return path.resolve("classes");
+    }
+
+    public Path getContextPath() {
+        return path.resolve("context");
     }
 
     public String getName() {
@@ -101,7 +119,11 @@ public class Profile implements Named, Closeable, LogSupport {
 
     @Override
     public void close() throws IOException {
-        shell.getClassLoader().close();
+        try {
+            shell.getClassLoader().close();
+        } finally {
+            Files.walkFileTree(path, FileUtils.RECURSIVE_CLEANER);
+        }
     }
 
     public void update() {
@@ -112,15 +134,32 @@ public class Profile implements Named, Closeable, LogSupport {
         if (applicationContext != null) {
             return;
         }
-        applicationContext = new GenericGroovyApplicationContext();
+        applicationContext = new AnnotationConfigApplicationContext();
+        applicationContext.setClassLoader(shell.getClassLoader());
+        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(getContextPath(), "*.groovy")) {
+            for (final Path file : stream) {
+                final String className = FileUtils.fileNameWithoutExtension(file.getFileName().toString());
+                try {
+                    applicationContext.register(shell.getClassLoader().loadClass(className, true, true, true));
+                } catch (Exception x) {
+                    warning("Unable to load {0}", x, className);
+                }
+            }
+        } catch (IOException x) {
+            warning("Unable to stream {0}", x, path);
+        }
         applicationContext.addApplicationListener(event -> {
             if (event instanceof ContextClosedEvent) {
                 info("Context {0} closed at {1}", event.getSource(), Instant.ofEpochMilli(event.getTimestamp()));
                 applicationContext = null;
             } else if (event instanceof ContextStartedEvent) {
                 info("Context {0} started at {1}", event.getSource(), Instant.ofEpochMilli(event.getTimestamp()));
+                for (final LogSupport logSupport : applicationContext.getBeansOfType(LogSupport.class).values()) {
+                    logSupport.logger().addHandler(new SimpleHandler((h, r) -> logConsumers.forEach(c -> c.accept(r))));
+                }
             }
         });
+        applicationContext.refresh();
         applicationContext.start();
     }
 
@@ -128,9 +167,7 @@ public class Profile implements Named, Closeable, LogSupport {
         if (applicationContext == null) {
             return;
         }
-        try (final GenericApplicationContext ctx = applicationContext) {
-            info("Closing context: {0}", ctx);
-        }
+        applicationContext.close();
     }
 
     @Override

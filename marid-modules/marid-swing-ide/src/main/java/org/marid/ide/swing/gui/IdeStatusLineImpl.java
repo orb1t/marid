@@ -29,11 +29,11 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
-
-import static org.marid.ide.components.ProfileManager.ProfileEventListener;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,18 +41,29 @@ import static org.marid.ide.components.ProfileManager.ProfileEventListener;
 @Component
 public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefSupport, SysPropsSupport, LogSupport {
 
+    protected final IdeFrameImpl ideFrame;
     protected final ProfileManager profileManager;
     protected final JLabel status = new JLabel("Done");
     protected final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
     protected final JLabel timeLabel = new JLabel(currentTime());
-    protected final ProfileListModel profileListModel;
+    protected final ProfileManagerListModel profileListModel;
     protected final JComboBox<Profile> profilesCombo;
 
     @Autowired
-    public IdeStatusLineImpl(ProfileManager profileManager) {
+    public IdeStatusLineImpl(IdeFrameImpl ideFrame, ProfileManager profileManager) {
+        this.ideFrame = ideFrame;
         setLayout(new GridBagLayout());
         this.profileManager = profileManager;
-        profileListModel = new ProfileListModel();
+        this.profileListModel = new ProfileManagerListModel();
+        ideFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if (profileListModel.selectedItem != null) {
+                    putSysPref("currentProfile", profileListModel.selectedItem.getName());
+                    info("Saved {0}", profileListModel.selectedItem.getName());
+                }
+            }
+        });
         final GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.BASELINE;
         c.fill = GridBagConstraints.BOTH;
@@ -70,14 +81,30 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
         return dateFormat.format(new Date());
     }
 
-    protected class ProfileListModel extends AbstractListModel<Profile> implements ComboBoxModel<Profile>, ProfileEventListener {
+    protected class ProfileManagerListModel extends AbstractListModel<Profile> implements ComboBoxModel<Profile> {
 
         protected final List<Profile> profiles;
         protected Profile selectedItem;
 
-        public ProfileListModel() {
+        public ProfileManagerListModel() {
             profiles = profileManager.getProfiles();
-            profileManager.addProfileEventListener(this);
+            profileManager.addProfileAddConsumer(this, p -> {
+                profiles.clear();
+                profiles.addAll(profileManager.getProfiles());
+                final int index = profiles.indexOf(p);
+                if (index >= 0) {
+                    fireIntervalAdded(this, index, index);
+                }
+            });
+            profileManager.addProfileRemoveConsumer(this, p -> {
+                final int index = profiles.indexOf(p);
+                if (index >= 0) {
+                    profiles.remove(p);
+                    fireIntervalRemoved(this, index, index);
+                }
+            });
+            final String profileName = getSysPref("currentProfile", "default");
+            selectedItem = profiles.stream().filter(p -> p.getName().equals(profileName)).findAny().orElse(null);
         }
 
         @Override
@@ -100,26 +127,6 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
             return profiles.get(index);
         }
 
-        @Override
-        public void profileAdded(Profile profile) {
-            profiles.clear();
-            profiles.addAll(profileManager.getProfiles());
-            final int index = profiles.indexOf(profile);
-            if (index >= 0) {
-                fireIntervalAdded(this, index, index);
-            }
-        }
-
-        @Override
-        public void profileRemoved(Profile profile) {
-            final int index = profiles.indexOf(profile);
-            if (index >= 0) {
-                profiles.remove(index);
-                fireIntervalRemoved(this, index, index);
-            }
-        }
-
-        @Override
         public void update() {
             fireContentsChanged(this, 0, getSize());
         }
