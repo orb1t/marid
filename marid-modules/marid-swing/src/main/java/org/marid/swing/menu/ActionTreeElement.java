@@ -71,7 +71,7 @@ public class ActionTreeElement implements Comparable<ActionTreeElement>, L10nSup
 
     private void fill(String[] path, MenuActionList menuActions) {
         menuActions.stream().filter(a -> a.path != null && Arrays.equals(path, a.path)).forEach(a -> {
-            final ActionTreeElement e = new ActionTreeElement(this, a.name, a.group, action);
+            final ActionTreeElement e = new ActionTreeElement(this, a.name, a.group, a.action);
             final String[] newPath = new String[path.length + 1];
             System.arraycopy(path, 0, newPath, 0, path.length);
             newPath[path.length] = a.name;
@@ -106,8 +106,8 @@ public class ActionTreeElement implements Comparable<ActionTreeElement>, L10nSup
             } else {
                 final JMenu sub = new JMenu(s(e.name));
                 sub.setName(e.name);
-                menu.add(sub);
                 e.fillMenu(sub);
+                menu.add(sub);
             }
         }
     }
@@ -117,8 +117,8 @@ public class ActionTreeElement implements Comparable<ActionTreeElement>, L10nSup
             if (!e.isItem()) {
                 final JMenu menu = new JMenu(s(e.name));
                 menu.setName(e.name);
-                menuBar.add(menu);
                 e.fillMenu(menu);
+                menuBar.add(menu);
             }
         }
     }
@@ -137,8 +137,8 @@ public class ActionTreeElement implements Comparable<ActionTreeElement>, L10nSup
             } else {
                 final Menu sub = new Menu(s(e.name));
                 sub.setName(e.name);
-                menu.add(sub);
                 e.fillMenu(sub);
+                menu.add(sub);
             }
         }
     }
@@ -148,8 +148,8 @@ public class ActionTreeElement implements Comparable<ActionTreeElement>, L10nSup
             if (!e.isItem()) {
                 final Menu menu = new Menu(s(e.name));
                 menu.setName(e.name);
-                menuBar.add(menu);
                 e.fillMenu(menu);
+                menuBar.add(menu);
             }
         }
     }
