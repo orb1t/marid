@@ -18,17 +18,22 @@
 
 package org.marid.ide;
 
+import groovy.lang.Script;
 import org.marid.groovy.GroovyRuntime;
-import org.marid.ide.components.ProfileManager;
-import org.marid.ide.swing.context.GuiContext;
-import org.marid.ide.swing.gui.IdeImpl;
 import org.marid.logging.LogSupport;
 import org.marid.logging.Logging;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.log.SwingHandler;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
 import java.util.logging.Logger;
+
+import static org.marid.groovy.GroovyRuntime.CLASS_LOADER;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -40,13 +45,16 @@ public class MaridIde implements LogSupport {
         Logger.getLogger("").addHandler(new SwingHandler());
         Thread.setDefaultUncaughtExceptionHandler((t, x) -> Log.warning("Uncaught exception in {0}", x, t));
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        context.setClassLoader(GroovyRuntime.CLASS_LOADER);
-        context.scan(
-                GuiContext.class.getPackage().getName(),
-                IdeImpl.class.getPackage().getName(),
-                ProfileManager.class.getPackage().getName());
-        context.refresh();
+        context.setClassLoader(CLASS_LOADER);
         context.addApplicationListener(event -> Log.info("{0}", event));
+        for (final Enumeration<URL> e = CLASS_LOADER.getResources("context/init.groovy"); e.hasMoreElements(); ) {
+            try (final Reader reader = new InputStreamReader(e.nextElement().openStream(), StandardCharsets.UTF_8)) {
+                final Script script = GroovyRuntime.SHELL.parse(reader);
+                script.getBinding().setVariable("context", context);
+                script.run();
+            }
+        }
+        context.refresh();
         SwingUtil.execute(context::start);
     }
 }

@@ -22,7 +22,8 @@ import images.Images;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
-import org.marid.l10n.L10n;
+import org.marid.ide.components.BlockMenuProvider;
+import org.marid.l10n.L10nSupport;
 import org.marid.swing.AbstractFrame;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.menu.MenuActionList;
@@ -41,19 +42,19 @@ import static javax.swing.BorderFactory.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SchemaFrame extends AbstractFrame implements SchemaFrameConfiguration {
+public class SchemaFrame extends AbstractFrame implements SchemaFrameConfiguration, L10nSupport {
 
     protected final SchemaEditor schemaEditor = new SchemaEditor(this);
     protected final JLayer<SchemaEditor> layer = new JLayer<>(schemaEditor, new SchemaEditorLayerUI());
-    protected final JMenu blocksMenu = new JMenu(L10n.s("Blocks"));
+    protected final JMenu blocksMenu = new JMenu(s("Blocks"));
 
-    public SchemaFrame() {
+    public SchemaFrame(BlockMenuProvider blockMenuProvider) {
         super("Schema");
         enableEvents(AWTEvent.COMPONENT_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
         centerPanel.add(layer);
         getContentPane().setBackground(getBackground());
         getJMenuBar().add(blocksMenu);
-        BlockMenuSupport.fillMenu(blocksMenu);
+        blockMenuProvider.fillMenu(blocksMenu);
         pack();
     }
 
@@ -156,7 +157,7 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
                                 final LinkShapeEvent event = (LinkShapeEvent) e;
                                 final LinkShape link = event.getSource();
                                 if (!link.isValid()) {
-                                    showError(L10n.m("Types mismatch: {0} -> {1}",
+                                    showError(m("Types mismatch: {0} -> {1}",
                                             link.getOutputType().getCanonicalName(),
                                             link.getInputType().getCanonicalName()), event.getPoint());
                                 }

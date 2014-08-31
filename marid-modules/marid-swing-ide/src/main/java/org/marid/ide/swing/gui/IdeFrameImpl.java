@@ -31,7 +31,7 @@ import org.marid.swing.forms.ConfigurationProvider;
 import org.marid.swing.forms.Form;
 import org.marid.swing.forms.StaticConfigurationDialog;
 import org.marid.swing.log.SwingHandler;
-import org.marid.swing.menu.MenuActionTreeElement;
+import org.marid.swing.menu.ActionTreeElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +39,6 @@ import javax.annotation.PostConstruct;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.lang.reflect.Constructor;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
@@ -63,7 +62,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     private IdeStatusLineImpl statusLine;
 
     @Autowired
-    public IdeFrameImpl(IdeImpl ide, MenuActionTreeElement menuRoot) {
+    public IdeFrameImpl(IdeImpl ide, ActionTreeElement menuRoot) {
         super(s("Marid IDE"));
         this.ide = ide;
         setIconImages(MaridIcons.ICONS);
@@ -173,9 +172,6 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         putPref("extendedState", getExtendedState());
         if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
             putPref("bounds", getBounds());
-        }
-        for (final WindowListener windowListener : getWindowListeners()) {
-            windowListener.windowClosed(new WindowEvent(this, WindowEvent.WINDOW_CLOSED));
         }
         super.dispose();
     }

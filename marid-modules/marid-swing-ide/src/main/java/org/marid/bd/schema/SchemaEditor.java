@@ -99,6 +99,24 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         }));
     }
 
+    public void load(SchemaModel schemaModel) {
+        removeAll();
+        links.clear();
+        final Map<Block, BlockComponent> blockMap = new IdentityHashMap<>();
+        schemaModel.getBlockMap().forEach((block, info) -> {
+            final BlockComponent blockComponent = block.createComponent();
+            add(blockComponent.getComponent());
+            blockComponent.setLocation(info.getLocation());
+            blockMap.put(block, blockComponent);
+        });
+        schemaModel.getBlockLinkMap().forEach((link, info) -> {
+            final BlockComponent source = blockMap.get(link.source);
+            final BlockComponent target = blockMap.get(link.target);
+            addLink(source.outputFor(link.output), target.inputFor(link.input));
+        });
+        repaint();
+    }
+
     public void start() {
         timer.schedule(new MaridTimerTask(() -> {
             if (!dirty.get()) {

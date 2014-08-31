@@ -57,10 +57,10 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
         this.profileListModel = new ProfileManagerListModel();
         ideFrame.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosed(WindowEvent e) {
+            public void windowDeactivated(WindowEvent e) {
                 if (profileListModel.selectedItem != null) {
                     putSysPref("currentProfile", profileListModel.selectedItem.getName());
-                    info("Saved {0}", profileListModel.selectedItem.getName());
+                    info("Saved {0} as default", profileListModel.selectedItem.getName());
                 }
             }
         });

@@ -18,6 +18,8 @@
 
 package org.marid.swing.menu;
 
+import org.marid.l10n.L10nSupport;
+
 import javax.swing.*;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,7 +29,7 @@ import java.util.Objects;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MenuAction {
+public class MenuAction implements L10nSupport {
 
     public final String name;
     public final String group;

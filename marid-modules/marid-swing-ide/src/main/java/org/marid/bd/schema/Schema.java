@@ -18,6 +18,7 @@
 
 package org.marid.bd.schema;
 
+import org.codehaus.groovy.ast.ClassNode;
 import org.marid.bd.*;
 
 import java.beans.ConstructorProperties;
@@ -95,5 +96,9 @@ public class Schema extends AbstractBlock implements NamedBlock {
     @Override
     public List<Output<?>> getOutputs() {
         return Collections.emptyList();
+    }
+
+    public ClassNode toClassNode() {
+        return null;
     }
 }

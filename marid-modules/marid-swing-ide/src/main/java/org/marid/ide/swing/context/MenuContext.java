@@ -18,22 +18,15 @@
 
 package org.marid.ide.swing.context;
 
-import groovy.lang.GroovyCodeSource;
-import org.marid.groovy.GroovyRuntime;
+import org.marid.bd.schema.SchemaFrame;
+import org.marid.ide.bde.BdeWindow;
+import org.marid.ide.components.BlockMenuProvider;
 import org.marid.logging.LogSupport;
 import org.marid.swing.MaridAction;
-import org.marid.swing.menu.MenuAction;
-import org.marid.swing.menu.MenuActionList;
-import org.marid.swing.menu.MenuActionTreeElement;
+import org.marid.swing.menu.ActionTreeElement;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.List;
-
-import static org.marid.dyn.TypeCaster.TYPE_CASTER;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,65 +34,20 @@ import static org.marid.l10n.L10n.s;
 @Configuration
 public class MenuContext implements LogSupport {
 
+    @Autowired
+    BlockMenuProvider blockMenuProvider;
+
     @Bean
-    public MenuActionTreeElement ideMenuActionTreeElement() {
-        final MenuActionList menuActions = new MenuActionList();
-        try {
-            final ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            for (final Enumeration<URL> e = cl.getResources("menu/Menu.groovy"); e.hasMoreElements();) {
-                final URL url = e.nextElement();
-                try {
-                    final List list = (List) GroovyRuntime.SHELL.evaluate(new GroovyCodeSource(url));
-                    for (final Object le : list) {
-                        if (!(le instanceof List)) {
-                            continue;
-                        }
-                        final List l = (List) le;
-                        final String[] path;
-                        final String group;
-                        final String name;
-                        final String icon;
-                        final MaridAction.MaridActionListener mal;
-                        final Object[] args;
-                        switch (l.size()) {
-                            case 6:
-                                path = TYPE_CASTER.cast(String[].class, l.get(0));
-                                group = TYPE_CASTER.cast(String.class, l.get(1));
-                                name = TYPE_CASTER.cast(String.class, l.get(2));
-                                icon = TYPE_CASTER.cast(String.class, l.get(3));
-                                mal = TYPE_CASTER.cast(MaridAction.MaridActionListener.class, l.get(4));
-                                args = TYPE_CASTER.cast(Object[].class, l.get(5));
-                                break;
-                            case 5:
-                                path = TYPE_CASTER.cast(String[].class, l.get(0));
-                                group = TYPE_CASTER.cast(String.class, l.get(1));
-                                name = TYPE_CASTER.cast(String.class, l.get(2));
-                                icon = TYPE_CASTER.cast(String.class, l.get(3));
-                                mal = TYPE_CASTER.cast(MaridAction.MaridActionListener.class, l.get(4));
-                                args = new String[0];
-                                break;
-                            case 3:
-                                path = TYPE_CASTER.cast(String[].class, l.get(0));
-                                group = TYPE_CASTER.cast(String.class, l.get(1));
-                                name = TYPE_CASTER.cast(String.class, l.get(2));
-                                icon = null;
-                                mal = null;
-                                args = null;
-                                break;
-                            default:
-                                warning("Invalid menu line: {0}", l);
-                                continue;
-                        }
-                        final MaridAction action = mal == null ? null : new MaridAction(s(name), icon, mal, args);
-                        menuActions.add(new MenuAction(name, group, path, action));
-                    }
-                } catch (Exception x) {
-                    warning("Unable to load menu entries from {0}", x, url);
-                }
-            }
-        } catch (Exception x) {
-            warning("Unable to load menu entries", x);
-        }
-        return menuActions.createTreeElement();
+    public ActionTreeElement ideMenuActionTreeElement() {
+        return new ActionTreeElement()
+                .add("Services", null, servicesMenu -> {
+                    servicesMenu
+                            .add("Service configurer", null, new MaridAction("BDE Window", null, e -> {
+                                new BdeWindow().setVisible(true);
+                            }))
+                            .add("Schema frame", null, new MaridAction("Schema frame", null, e -> {
+                                new SchemaFrame(blockMenuProvider).setVisible(true);
+                            }));
+                });
     }
 }

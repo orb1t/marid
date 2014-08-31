@@ -22,7 +22,6 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,17 +29,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author Dmitry Ovchinnikov
  */
 public class MenuActionList extends ArrayList<MenuAction> {
-
-    public MenuActionTreeElement createTreeElement() {
-        final MenuActionTreeElement root = new MenuActionTreeElement(null, null);
-        stream().filter(a -> a.path.length == 0).forEach(a -> {
-            final MenuActionTreeElement element = new MenuActionTreeElement(root, a);
-            final TreeMap<String, MenuActionTreeElement> map = root.children.computeIfAbsent(a.group, g -> new TreeMap<>());
-            map.put(a.name, element);
-            fillMenuActionTreeElement(element);
-        });
-        return root;
-    }
 
     public void fillToolbar(JToolBar toolBar) {
         final AtomicBoolean first = new AtomicBoolean(true);
@@ -84,14 +72,5 @@ public class MenuActionList extends ArrayList<MenuAction> {
 
     public ActionBuilder add(String group, String name, String... path) {
         return add(false, group, name, path);
-    }
-
-    private void fillMenuActionTreeElement(MenuActionTreeElement element) {
-        stream().filter(a -> Arrays.equals(a.path, element.getChildPath())).forEach(a -> {
-            final TreeMap<String, MenuActionTreeElement> map = element.children.computeIfAbsent(a.group, g -> new TreeMap<>());
-            final MenuActionTreeElement child = new MenuActionTreeElement(element, a);
-            map.put(a.name, child);
-            fillMenuActionTreeElement(child);
-        });
     }
 }

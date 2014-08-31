@@ -22,8 +22,8 @@ import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.SysPrefSupport;
+import org.marid.swing.menu.ActionTreeElement;
 import org.marid.swing.menu.MenuActionList;
-import org.marid.swing.menu.MenuActionTreeElement;
 import org.marid.swing.util.MessageType;
 
 import javax.swing.*;
@@ -110,7 +110,7 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
         final MenuActionList actions = new MenuActionList();
         fillActions(actions);
-        final MenuActionTreeElement element = actions.createTreeElement();
+        final ActionTreeElement element = new ActionTreeElement(actions);
         element.fillJMenuBar(getJMenuBar());
         actions.fillToolbar(toolBar);
         super.pack();
