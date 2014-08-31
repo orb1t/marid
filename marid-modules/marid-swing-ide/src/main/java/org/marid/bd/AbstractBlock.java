@@ -18,6 +18,7 @@
 
 package org.marid.bd;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.marid.beans.MaridBeans;
 import org.marid.functions.Changer;
 
@@ -66,6 +67,11 @@ public abstract class AbstractBlock implements Block {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         MaridBeans.write(bos, this);
         return new BlockProxy(getClass(), bos.toByteArray());
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 
     protected static class BlockProxy implements Serializable {

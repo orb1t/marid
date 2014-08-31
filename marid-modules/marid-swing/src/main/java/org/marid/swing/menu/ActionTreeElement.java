@@ -19,6 +19,7 @@
 package org.marid.swing.menu;
 
 import org.marid.l10n.L10nSupport;
+import org.marid.util.CollectionUtils;
 
 import javax.annotation.Nonnull;
 import javax.swing.*;
@@ -72,10 +73,7 @@ public class ActionTreeElement implements Comparable<ActionTreeElement>, L10nSup
     private void fill(String[] path, MenuActionList menuActions) {
         menuActions.stream().filter(a -> a.path != null && Arrays.equals(path, a.path)).forEach(a -> {
             final ActionTreeElement e = new ActionTreeElement(this, a.name, a.group, a.action);
-            final String[] newPath = new String[path.length + 1];
-            System.arraycopy(path, 0, newPath, 0, path.length);
-            newPath[path.length] = a.name;
-            e.fill(newPath, menuActions);
+            e.fill(CollectionUtils.concat(path, a.name), menuActions);
             children.add(e);
         });
     }

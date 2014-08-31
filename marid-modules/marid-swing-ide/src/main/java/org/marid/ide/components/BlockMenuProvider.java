@@ -20,7 +20,7 @@ package org.marid.ide.components;
 
 import org.marid.bd.Block;
 import org.marid.itf.Named;
-import org.marid.l10n.L10n;
+import org.marid.l10n.L10nSupport;
 import org.marid.swing.dnd.DndSource;
 import org.marid.swing.dnd.MaridTransferHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,7 @@ import java.util.*;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BlockMenuProvider {
+public class BlockMenuProvider implements L10nSupport {
 
     private static final Comparator<Block> BLOCK_COMPARATOR = Comparator.comparing(Named::getName);
 
@@ -57,7 +57,7 @@ public class BlockMenuProvider {
             blockMap.computeIfAbsent(group, v -> new TreeSet<>(BLOCK_COMPARATOR)).add(b);
         });
         blockMap.forEach((group, blockSet) -> {
-            final JMenu groupMenu = new JMenu(L10n.s(group));
+            final JMenu groupMenu = new JMenu(s(group));
             menu.add(groupMenu);
             blockSet.forEach(block -> groupMenu.add(new BlockMenuItem(block)));
         });
