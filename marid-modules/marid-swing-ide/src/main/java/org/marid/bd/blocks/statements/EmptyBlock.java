@@ -20,7 +20,7 @@ package org.marid.bd.blocks.statements;
 
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.marid.bd.StandardBlock;
-import org.springframework.stereotype.Component;
+import org.marid.bd.blocks.BdBlock;
 
 import java.awt.*;
 import java.util.Collections;
@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@BdBlock
 public class EmptyBlock extends StandardBlock {
 
     protected final Out<EmptyStatement> out = new Out<>("out", EmptyStatement.class, () -> EmptyStatement.INSTANCE);

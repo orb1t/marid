@@ -29,8 +29,6 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
@@ -55,15 +53,6 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
         setLayout(new GridBagLayout());
         this.profileManager = profileManager;
         this.profileListModel = new ProfileManagerListModel();
-        ideFrame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowDeactivated(WindowEvent e) {
-                if (profileListModel.selectedItem != null) {
-                    putSysPref("currentProfile", profileListModel.selectedItem.getName());
-                    info("Saved {0} as default", profileListModel.selectedItem.getName());
-                }
-            }
-        });
         final GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.BASELINE;
         c.fill = GridBagConstraints.BOTH;
@@ -84,7 +73,6 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
     protected class ProfileManagerListModel extends AbstractListModel<Profile> implements ComboBoxModel<Profile> {
 
         protected final List<Profile> profiles;
-        protected Profile selectedItem;
 
         public ProfileManagerListModel() {
             profiles = profileManager.getProfiles();
@@ -103,18 +91,16 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
                     fireIntervalRemoved(this, index, index);
                 }
             });
-            final String profileName = getSysPref("currentProfile", "default");
-            selectedItem = profiles.stream().filter(p -> p.getName().equals(profileName)).findAny().orElse(null);
         }
 
         @Override
         public void setSelectedItem(Object anItem) {
-            selectedItem = (Profile) anItem;
+            profileManager.setCurrentProfile((Profile) anItem);
         }
 
         @Override
         public Profile getSelectedItem() {
-            return selectedItem;
+            return profileManager.getCurrentProfile();
         }
 
         @Override

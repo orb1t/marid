@@ -24,7 +24,7 @@ import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.IfStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.marid.bd.StandardBlock;
-import org.springframework.stereotype.Component;
+import org.marid.bd.blocks.BdBlock;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@BdBlock
 public class IfBlock extends StandardBlock {
 
     protected BooleanExpression expression;

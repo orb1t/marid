@@ -19,15 +19,22 @@
 package org.marid.bd.blocks.multiplexors;
 
 import org.codehaus.groovy.ast.stmt.CatchStatement;
-import org.springframework.stereotype.Component;
+import org.marid.bd.blocks.BdBlock;
+
+import java.beans.ConstructorProperties;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@BdBlock
 public class CatchMultiplexor extends Multiplexor<CatchStatement> {
 
+    @ConstructorProperties({"inputCount"})
+    public CatchMultiplexor(int inputCount) {
+        super("Catch multiplexor", "catch", "catch", CatchStatement.class, inputCount);
+    }
+
     public CatchMultiplexor() {
-        super("Catch multiplexor", "catch", "catch", CatchStatement.class, 2);
+        this(2);
     }
 }

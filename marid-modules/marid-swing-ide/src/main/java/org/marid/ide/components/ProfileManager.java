@@ -66,22 +66,22 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
         return Paths.get(System.getProperty("user.home"), "marid", "profiles");
     }
 
-    public Path getProfilesDir() throws IOException {
+    public Path getProfilesDir() {
         final Path path = getSysPref("profilesDir", defaultPath());
         if (!Files.isDirectory(path)) {
-            Files.createDirectories(path);
+            try {
+                Files.createDirectories(path);
+            } catch (IOException x) {
+                throw new IllegalStateException(x);
+            }
         }
         return path;
     }
 
     public Profile addProfile(String name) {
-        try {
-            final Profile profile = new Profile(getProfilesDir().resolve(name));
-            addProfileConsumers.forEach((k, v) -> v.accept(profile));
-            return profile;
-        } catch (IOException x) {
-            throw new IllegalStateException(x);
-        }
+        final Profile profile = new Profile(getProfilesDir().resolve(name));
+        addProfileConsumers.forEach((k, v) -> v.accept(profile));
+        return profile;
     }
 
     public void removeProfile(String name) {
@@ -89,6 +89,22 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
             removeProfileConsumers.forEach((k, v) -> v.accept(profile));
         } catch (IOException x) {
             throw new IllegalStateException(x);
+        }
+    }
+
+    public Profile getProfileByName(String name) {
+        return profileMap.get(name);
+    }
+
+    public Profile getCurrentProfile() {
+        return profileMap.get(getSysPref("currentProfile", "default"));
+    }
+
+    public void setCurrentProfile(Profile profile) {
+        if (profile == null) {
+            SYSPREFS.remove("currentProfile");
+        } else {
+            putSysPref("currentProfile", profile.getName());
         }
     }
 

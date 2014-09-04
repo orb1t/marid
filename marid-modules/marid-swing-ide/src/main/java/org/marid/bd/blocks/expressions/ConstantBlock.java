@@ -23,6 +23,7 @@ import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.marid.bd.AbstractBlock;
 import org.marid.bd.NamedBlock;
 import org.marid.bd.NamedBlockListener;
+import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.NamedBlockComponentEditor;
 import org.marid.bd.components.StandardBlockComponent;
 import org.marid.groovy.GroovyRuntime;
@@ -41,7 +42,7 @@ import java.util.Vector;
 /**
  * @author Dmitry Ovchinnikov
  */
-@org.springframework.stereotype.Component
+@BdBlock
 public class ConstantBlock extends AbstractBlock implements NamedBlock {
 
     protected String value = "null";

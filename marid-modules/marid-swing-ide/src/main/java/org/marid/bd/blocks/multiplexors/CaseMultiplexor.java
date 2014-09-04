@@ -19,15 +19,22 @@
 package org.marid.bd.blocks.multiplexors;
 
 import org.codehaus.groovy.ast.stmt.CaseStatement;
-import org.springframework.stereotype.Component;
+import org.marid.bd.blocks.BdBlock;
+
+import java.beans.ConstructorProperties;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@BdBlock
 public class CaseMultiplexor extends Multiplexor<CaseStatement> {
 
+    @ConstructorProperties({"inputCount"})
+    public CaseMultiplexor(int inputCount) {
+        super("Case multiplexor", "case", "case", CaseStatement.class, inputCount);
+    }
+
     public CaseMultiplexor() {
-        super("Case multiplexor", "case", "case", CaseStatement.class, 2);
+        this(2);
     }
 }

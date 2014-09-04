@@ -25,6 +25,7 @@ import org.marid.logging.LogSupport;
 import org.marid.swing.MaridAction;
 import org.marid.swing.menu.ActionTreeElement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -37,6 +38,9 @@ public class MenuContext implements LogSupport {
     @Autowired
     BlockMenuProvider blockMenuProvider;
 
+    @Autowired
+    AutowireCapableBeanFactory autowireCapableBeanFactory;
+
     @Bean
     public ActionTreeElement ideMenuActionTreeElement() {
         return new ActionTreeElement()
@@ -46,7 +50,7 @@ public class MenuContext implements LogSupport {
                                 new BdeWindow().setVisible(true);
                             }))
                             .add("Schema frame", null, new MaridAction("Schema frame", null, e -> {
-                                new SchemaFrame(blockMenuProvider).setVisible(true);
+                                autowireCapableBeanFactory.createBean(SchemaFrame.class).setVisible(true);
                             }));
                 });
     }

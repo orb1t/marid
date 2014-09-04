@@ -20,6 +20,7 @@ package org.marid.bd.blocks.expressions;
 
 import org.codehaus.groovy.ast.expr.*;
 import org.marid.bd.StandardBlock;
+import org.marid.bd.blocks.BdBlock;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -29,7 +30,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@org.springframework.stereotype.Component
+@BdBlock
 public class TernaryBlock extends StandardBlock {
 
     protected BooleanExpression expression;

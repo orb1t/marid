@@ -75,7 +75,7 @@ public interface BlockComponent {
 
     default JPopupMenu popupMenu() {
         final JPopupMenu popupMenu = new JPopupMenu();
-        if (!getBlock().isStateless()) {
+        if (!getBlock().isConfigurable()) {
             popupMenu.add(new MaridAction("Settings", "settings", e -> {
                 final Window window = getBlock().createWindow(SwingUtilities.windowForComponent(getSchemaEditor()));
                 window.addWindowListener(new WindowAction(we -> {

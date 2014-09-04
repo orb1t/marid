@@ -16,39 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.blocks.statements;
+package org.marid.bd.blocks;
 
-import org.codehaus.groovy.ast.expr.Expression;
-import org.codehaus.groovy.ast.stmt.ReturnStatement;
-import org.marid.bd.IoBlock;
-import org.marid.bd.blocks.BdBlock;
+import org.springframework.stereotype.Component;
 
-import java.awt.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
-public class ReturnBlock extends IoBlock<Expression, ReturnStatement> {
-
-    protected Expression expression;
-
-    public ReturnBlock() {
-        super("Return Statement", "ret", "return", Color.GREEN.darker(), Expression.class, ReturnStatement.class);
-    }
-
-    @Override
-    public void set(Expression value) {
-        expression = value;
-    }
-
-    @Override
-    public void reset() {
-        expression = null;
-    }
-
-    @Override
-    public ReturnStatement get() {
-        return new ReturnStatement(expression);
-    }
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Component
+public @interface BdBlock {
 }

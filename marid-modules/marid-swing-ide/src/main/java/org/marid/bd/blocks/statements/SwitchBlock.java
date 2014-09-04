@@ -24,7 +24,7 @@ import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.SwitchStatement;
 import org.marid.bd.StandardBlock;
-import org.springframework.stereotype.Component;
+import org.marid.bd.blocks.BdBlock;
 
 import java.awt.*;
 import java.util.Collections;
@@ -36,7 +36,7 @@ import static java.util.Collections.emptyList;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@BdBlock
 public class SwitchBlock extends StandardBlock {
 
     protected CaseStatement[] caseStatements;

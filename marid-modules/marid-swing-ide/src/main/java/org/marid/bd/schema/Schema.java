@@ -53,7 +53,7 @@ public class Schema extends AbstractBlock implements NamedBlock {
     }
 
     public void addBlockLink(BlockLink link) {
-        if (links.stream().noneMatch(l -> l.matches(link.getOutput(), link.getInput()))) {
+        if (links.stream().noneMatch(l -> l.matches(link.getBlockOutput(), link.getBlockInput()))) {
             if (links.add(link)) {
                 fireEvent(SchemaListener.class, l -> l.addedLink(link));
             }

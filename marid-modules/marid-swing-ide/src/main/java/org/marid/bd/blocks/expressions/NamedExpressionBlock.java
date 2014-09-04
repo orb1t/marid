@@ -20,6 +20,7 @@ package org.marid.bd.blocks.expressions;
 
 import org.codehaus.groovy.ast.expr.Expression;
 import org.marid.bd.IoBlock;
+import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.DefaultBlockComponentEditor;
 
 import javax.swing.*;
@@ -29,7 +30,7 @@ import java.util.EventListener;
 /**
  * @author Dmitry Ovchinnikov
  */
-@org.springframework.stereotype.Component
+@BdBlock
 public class NamedExpressionBlock extends IoBlock<Expression, NamedExpressionBlock.NamedExpression> {
 
     protected Expression expression;

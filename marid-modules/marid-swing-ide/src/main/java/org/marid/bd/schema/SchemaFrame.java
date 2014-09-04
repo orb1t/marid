@@ -22,34 +22,47 @@ import images.Images;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
+import org.marid.beans.MaridBeans;
 import org.marid.ide.components.BlockMenuProvider;
+import org.marid.ide.components.ProfileManager;
+import org.marid.ide.profile.Profile;
 import org.marid.l10n.L10nSupport;
 import org.marid.swing.AbstractFrame;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.menu.MenuActionList;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.LayerUI;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
+import java.io.*;
 
 import static java.awt.Color.RED;
 import static java.awt.SystemColor.infoText;
 import static java.lang.String.format;
 import static javax.swing.BorderFactory.*;
+import static javax.swing.JOptionPane.WARNING_MESSAGE;
+import static javax.swing.JOptionPane.showMessageDialog;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class SchemaFrame extends AbstractFrame implements SchemaFrameConfiguration, L10nSupport {
 
+    protected final ProfileManager profileManager;
     protected final SchemaEditor schemaEditor = new SchemaEditor(this);
     protected final JLayer<SchemaEditor> layer = new JLayer<>(schemaEditor, new SchemaEditorLayerUI());
     protected final JMenu blocksMenu = new JMenu(s("Blocks"));
+    protected File file;
 
-    public SchemaFrame(BlockMenuProvider blockMenuProvider) {
+    @Autowired
+    public SchemaFrame(BlockMenuProvider blockMenuProvider, ProfileManager profileManager) {
         super("Schema");
+        this.profileManager = profileManager;
         enableEvents(AWTEvent.COMPONENT_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
         centerPanel.add(layer);
         getContentPane().setBackground(getBackground());
@@ -77,6 +90,19 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
 
     @Override
     protected void fillActions(MenuActionList actionList) {
+        actionList.add("main", "File");
+        actionList.add(true, "open", "Open...", "File")
+                .setKey("control O")
+                .setIcon("open")
+                .setListener(this::open);
+        actionList.add(true, "save", "Save", "File")
+                .setKey("control S")
+                .setIcon("save")
+                .setListener(this::save);
+        actionList.add("save", "Save As...", "File")
+                .setKey("control shift S")
+                .setIcon("save")
+                .setListener(this::saveAs);
         actionList.add("main", "Schema");
         actionList.add(true, "zoom", "Zoom in", "Schema")
                 .setKey("control I")
@@ -90,6 +116,51 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
                 .setKey("control R")
                 .setIcon("zoom")
                 .setListener(e -> schemaEditor.resetZoom());
+    }
+
+    protected void open(ActionEvent actionEvent) {
+        final Profile profile = profileManager.getCurrentProfile();
+        final File dir = profile == null ? new File(".") : profile.getClassesPath().toFile();
+        final JFileChooser chooser = new JFileChooser(dir);
+        chooser.setAcceptAllFileFilterUsed(false);
+        chooser.addChoosableFileFilter(new FileNameExtensionFilter("XML files", "xml"));
+        chooser.setMultiSelectionEnabled(false);
+        switch (chooser.showOpenDialog(this)) {
+            case JFileChooser.APPROVE_OPTION:
+                try (final InputStream inputStream = new FileInputStream(chooser.getSelectedFile())) {
+                    schemaEditor.load(MaridBeans.read(SchemaModel.class, inputStream));
+                } catch (Exception x) {
+                    showMessageDialog(this, x, s("Load error"), WARNING_MESSAGE);
+                }
+                break;
+        }
+    }
+
+    protected void save(ActionEvent actionEvent) {
+        if (file == null) {
+            saveAs(actionEvent);
+            return;
+        }
+        try (final OutputStream outputStream = new FileOutputStream(file)) {
+            MaridBeans.write(outputStream, new SchemaModel(schemaEditor));
+        } catch (Exception x) {
+            showMessageDialog(this, x, s("Save error"), WARNING_MESSAGE);
+        }
+    }
+
+    protected void saveAs(ActionEvent actionEvent) {
+        final Profile profile = profileManager.getCurrentProfile();
+        final File dir = profile == null ? new File(".") : profile.getClassesPath().toFile();
+        final JFileChooser chooser = new JFileChooser(dir);
+        chooser.setAcceptAllFileFilterUsed(false);
+        chooser.addChoosableFileFilter(new FileNameExtensionFilter("XML files", "xml"));
+        chooser.setMultiSelectionEnabled(false);
+        switch (chooser.showSaveDialog(this)) {
+            case JFileChooser.APPROVE_OPTION:
+                file = chooser.getSelectedFile();
+                save(actionEvent);
+                break;
+        }
     }
 
     protected class SchemaEditorLayerUI extends LayerUI<SchemaEditor> {

@@ -54,11 +54,27 @@ public class BlockLink {
         return matchesOutput(output) && matchesInput(input);
     }
 
-    public Block.Output<?> getOutput() {
+    public Block.Output<?> getBlockOutput() {
         return source.getOutputs().stream().filter(o -> o.getName().equals(output)).findFirst().get();
     }
 
-    public Block.Input<?> getInput() {
+    public Block.Input<?> getBlockInput() {
         return target.getInputs().stream().filter(i -> i.getName().equals(input)).findFirst().get();
+    }
+
+    public Block getSource() {
+        return source;
+    }
+
+    public Block getTarget() {
+        return target;
+    }
+
+    public String getOutput() {
+        return output;
+    }
+
+    public String getInput() {
+        return input;
     }
 }

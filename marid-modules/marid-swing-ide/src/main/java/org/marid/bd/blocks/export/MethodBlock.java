@@ -22,6 +22,7 @@ import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.marid.bd.StandardBlock;
+import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 
 import javax.swing.*;
@@ -37,7 +38,7 @@ import static groovyjarjarasm.asm.Opcodes.ACC_PUBLIC;
 /**
  * @author Dmitry Ovchinnikov
  */
-@org.springframework.stereotype.Component
+@BdBlock
 public class MethodBlock extends StandardBlock {
 
     protected String methodName = "method";

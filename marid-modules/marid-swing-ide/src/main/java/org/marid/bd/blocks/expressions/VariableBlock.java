@@ -21,6 +21,7 @@ package org.marid.bd.blocks.expressions;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.expr.VariableExpression;
 import org.marid.bd.IoBlock;
+import org.marid.bd.blocks.BdBlock;
 
 import java.awt.*;
 import java.beans.ConstructorProperties;
@@ -28,7 +29,7 @@ import java.beans.ConstructorProperties;
 /**
  * @author Dmitry Ovchinnikov
  */
-@org.springframework.stereotype.Component
+@BdBlock
 public class VariableBlock extends IoBlock<ClassNode, VariableExpression> {
 
     protected ClassNode type;

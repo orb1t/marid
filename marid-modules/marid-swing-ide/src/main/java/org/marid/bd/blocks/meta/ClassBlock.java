@@ -20,9 +20,9 @@ package org.marid.bd.blocks.meta;
 
 import org.codehaus.groovy.ast.ClassNode;
 import org.marid.bd.StandardBlock;
+import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.swing.input.ClassInputControl;
-import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@BdBlock
 public class ClassBlock extends StandardBlock {
 
     protected Class<?> targetClass;

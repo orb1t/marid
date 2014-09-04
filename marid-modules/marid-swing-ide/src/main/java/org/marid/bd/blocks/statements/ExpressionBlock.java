@@ -21,14 +21,14 @@ package org.marid.bd.blocks.statements;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.marid.bd.IoBlock;
-import org.springframework.stereotype.Component;
+import org.marid.bd.blocks.BdBlock;
 
 import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@BdBlock
 public class ExpressionBlock extends IoBlock<Expression, ExpressionStatement> {
 
     protected Expression expression;

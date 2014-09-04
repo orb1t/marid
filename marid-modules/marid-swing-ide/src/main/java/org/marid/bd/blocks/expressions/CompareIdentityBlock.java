@@ -22,6 +22,7 @@ import org.codehaus.groovy.ast.expr.EmptyExpression;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.transform.sc.transformers.CompareIdentityExpression;
 import org.marid.bd.StandardBlock;
+import org.marid.bd.blocks.BdBlock;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -31,7 +32,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@org.springframework.stereotype.Component
+@BdBlock
 public class CompareIdentityBlock extends StandardBlock {
 
     protected Expression left;

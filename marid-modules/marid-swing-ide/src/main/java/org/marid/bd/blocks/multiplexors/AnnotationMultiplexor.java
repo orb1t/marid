@@ -16,39 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.blocks.statements;
+package org.marid.bd.blocks.multiplexors;
 
-import org.codehaus.groovy.ast.expr.Expression;
-import org.codehaus.groovy.ast.stmt.ReturnStatement;
-import org.marid.bd.IoBlock;
+import org.codehaus.groovy.ast.AnnotationNode;
 import org.marid.bd.blocks.BdBlock;
 
-import java.awt.*;
+import java.beans.ConstructorProperties;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
-public class ReturnBlock extends IoBlock<Expression, ReturnStatement> {
+public class AnnotationMultiplexor extends Multiplexor<AnnotationNode> {
 
-    protected Expression expression;
-
-    public ReturnBlock() {
-        super("Return Statement", "ret", "return", Color.GREEN.darker(), Expression.class, ReturnStatement.class);
+    public AnnotationMultiplexor() {
+        this(2);
     }
 
-    @Override
-    public void set(Expression value) {
-        expression = value;
-    }
-
-    @Override
-    public void reset() {
-        expression = null;
-    }
-
-    @Override
-    public ReturnStatement get() {
-        return new ReturnStatement(expression);
+    @ConstructorProperties({"inputCount"})
+    public AnnotationMultiplexor(int inputCount) {
+        super("Annotation multiplexor", " @ ", "@", AnnotationNode.class, inputCount);
     }
 }

@@ -21,13 +21,14 @@ package org.marid.bd.blocks.expressions;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.transform.sc.transformers.CompareToNullExpression;
 import org.marid.bd.IoBlock;
+import org.marid.bd.blocks.BdBlock;
 
 import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@org.springframework.stereotype.Component
+@BdBlock
 public class CompareToNonNullBlock extends IoBlock<Expression, CompareToNullExpression> {
 
     protected Expression expression;

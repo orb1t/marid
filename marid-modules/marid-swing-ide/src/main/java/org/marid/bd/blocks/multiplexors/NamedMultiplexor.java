@@ -18,17 +18,24 @@
 
 package org.marid.bd.blocks.multiplexors;
 
-import org.springframework.stereotype.Component;
+import org.marid.bd.blocks.BdBlock;
+
+import java.beans.ConstructorProperties;
 
 import static org.marid.bd.blocks.expressions.NamedExpressionBlock.NamedExpression;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@BdBlock
 public class NamedMultiplexor extends Multiplexor<NamedExpression> {
 
-    public NamedMultiplexor() {
+    @ConstructorProperties({"inputCount"})
+    public NamedMultiplexor(int inputCount) {
         super("Named expression multiplexor", "n.expr", "n.expr", NamedExpression.class, 2);
+    }
+
+    public NamedMultiplexor() {
+        this(2);
     }
 }

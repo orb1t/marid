@@ -26,6 +26,7 @@ import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.marid.bd.AbstractBlock;
 import org.marid.bd.BlockComponent;
+import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.bd.components.BlockLabel;
 import org.marid.bd.components.StandardBlockComponent;
@@ -43,7 +44,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@org.springframework.stereotype.Component
+@BdBlock
 public class BinExpBlock extends AbstractBlock {
 
     protected Expression left;

@@ -43,15 +43,24 @@ public interface Block extends Named, DndObject {
 
     <L extends EventListener, T> void fire(Class<L> t, Supplier<T> s, Consumer<T> c, T nv, Changer<L, T> es);
 
-    public abstract BlockComponent createComponent();
+    BlockComponent createComponent();
 
-    public abstract void reset();
+    default void reset() {
+    }
 
     default Window createWindow(Window parent) {
         return null;
     }
 
     default boolean isStateless() {
+        try {
+            return getClass().getMethod("reset").getDeclaringClass() == Block.class;
+        } catch (ReflectiveOperationException x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
+    default boolean isConfigurable() {
         try {
             return getClass().getMethod("createWindow", Window.class).getDeclaringClass() == Block.class;
         } catch (ReflectiveOperationException x) {

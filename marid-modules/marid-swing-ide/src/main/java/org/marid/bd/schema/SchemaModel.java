@@ -52,10 +52,18 @@ public class SchemaModel {
     public SchemaModel(SchemaEditor schemaEditor) {
         final List<Block> blockList = new ArrayList<>();
         final List<BlockLink> linkList = new ArrayList<>();
-        schemaEditor.visitBlockComponents(c -> blockList.add(c.getBlock()));
-        this.schema = new Schema(blockList, linkList);
         this.blockMap = new IdentityHashMap<>();
         this.blockLinkMap = new IdentityHashMap<>();
+        schemaEditor.visitBlockComponents(c -> {
+            blockList.add(c.getBlock());
+            blockMap.put(c.getBlock(), new BlockLayoutInfo(c.getLocation()));
+        });
+        schemaEditor.getLinkShapes().forEach(linkShape -> {
+            final BlockLink blockLink = new BlockLink(linkShape.output.getOutput(), linkShape.input.getInput());
+            linkList.add(blockLink);
+            blockLinkMap.put(blockLink, new BlockLinkLayoutInfo());
+        });
+        this.schema = new Schema(blockList, linkList);
     }
 
     public void addBlock(BlockComponent blockComponent, Point location) {

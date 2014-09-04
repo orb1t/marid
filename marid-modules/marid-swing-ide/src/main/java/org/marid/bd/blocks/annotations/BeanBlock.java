@@ -18,7 +18,12 @@
 
 package org.marid.bd.blocks.annotations;
 
+import org.codehaus.groovy.ast.AnnotationNode;
+import org.codehaus.groovy.ast.ClassHelper;
+import org.codehaus.groovy.ast.ClassNode;
 import org.marid.bd.StandardBlock;
+import org.marid.bd.blocks.BdBlock;
+import org.springframework.context.annotation.Bean;
 
 import java.awt.*;
 import java.util.Collections;
@@ -27,16 +32,15 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@org.springframework.stereotype.Component
+@BdBlock
 public class BeanBlock extends StandardBlock {
+
+    private static final ClassNode BEAN_CLASS = ClassHelper.make(Bean.class);
+
+    private final Out<AnnotationNode> out = new Out<>("node", AnnotationNode.class, () -> new AnnotationNode(BEAN_CLASS));
 
     public BeanBlock() {
         super("Bean", "@Bean", "@Bean", Color.magenta.brighter());
-    }
-
-    @Override
-    public void reset() {
-
     }
 
     @Override
@@ -46,6 +50,6 @@ public class BeanBlock extends StandardBlock {
 
     @Override
     public List<Output<?>> getOutputs() {
-        return Collections.emptyList();
+        return Collections.singletonList(out);
     }
 }

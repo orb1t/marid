@@ -22,7 +22,7 @@ import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
 import org.marid.bd.StandardBlock;
-import org.springframework.stereotype.Component;
+import org.marid.bd.blocks.BdBlock;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -34,7 +34,7 @@ import static org.marid.bd.blocks.expressions.NamedExpressionBlock.NamedExpressi
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@BdBlock
 public class AnnotationBlock extends StandardBlock {
 
     protected ClassNode classNode;
