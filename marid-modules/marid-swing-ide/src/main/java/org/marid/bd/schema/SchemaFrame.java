@@ -45,8 +45,6 @@ import static java.awt.Color.RED;
 import static java.awt.SystemColor.infoText;
 import static java.lang.String.format;
 import static javax.swing.BorderFactory.*;
-import static javax.swing.JOptionPane.WARNING_MESSAGE;
-import static javax.swing.JOptionPane.showMessageDialog;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -120,7 +118,7 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
 
     protected void open(ActionEvent actionEvent) {
         final Profile profile = profileManager.getCurrentProfile();
-        final File dir = profile == null ? new File(".") : profile.getClassesPath().toFile();
+        final File dir = profile == null ? new File(".") : profile.getContextPath().toFile();
         final JFileChooser chooser = new JFileChooser(dir);
         chooser.setAcceptAllFileFilterUsed(false);
         chooser.addChoosableFileFilter(new FileNameExtensionFilter("XML files", "xml"));
@@ -129,8 +127,9 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
             case JFileChooser.APPROVE_OPTION:
                 try (final InputStream inputStream = new FileInputStream(chooser.getSelectedFile())) {
                     schemaEditor.load(MaridBeans.read(SchemaModel.class, inputStream));
+                    file = chooser.getSelectedFile();
                 } catch (Exception x) {
-                    showMessageDialog(this, x, s("Load error"), WARNING_MESSAGE);
+                    showMessage(ERROR_MESSAGE, "Load error", "Load {0} error", x, chooser.getSelectedFile());
                 }
                 break;
         }
@@ -144,7 +143,7 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
         try (final OutputStream outputStream = new FileOutputStream(file)) {
             MaridBeans.write(outputStream, new SchemaModel(schemaEditor));
         } catch (Exception x) {
-            showMessageDialog(this, x, s("Save error"), WARNING_MESSAGE);
+            showMessage(ERROR_MESSAGE, "Save error", "Save {0} error", x, file);
         }
     }
 

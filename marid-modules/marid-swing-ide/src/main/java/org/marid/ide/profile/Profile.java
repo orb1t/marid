@@ -18,9 +18,7 @@
 
 package org.marid.ide.profile;
 
-import groovy.inspect.swingui.AstNodeToScriptVisitor;
 import groovy.lang.GroovyShell;
-import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.marid.bd.schema.SchemaModel;
 import org.marid.beans.MaridBeans;
@@ -34,8 +32,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -71,22 +71,13 @@ public class Profile implements Named, Closeable, LogSupport {
             Files.createDirectories(getClassesPath());
             Files.createDirectories(getContextPath());
             l.addURL(getClassesPath().toUri().toURL());
-            l.addURL(getContextPath().toUri().toURL());
         });
     }
 
     public void saveContextClass(SchemaModel schemaModel) {
-        final ClassNode classNode = schemaModel.getSchema().toClassNode();
-        final Path metaPath = getClassesPath().resolve(classNode.getNameWithoutPackage() + ".xml");
+        final Path metaPath = getContextPath().resolve(schemaModel.getSchema().getName() + ".xml");
         try (final OutputStream outputStream = Files.newOutputStream(metaPath)) {
             MaridBeans.write(outputStream, schemaModel);
-        } catch (IOException x) {
-            throw new IllegalStateException(x);
-        }
-        final Path scriptPath = getContextPath().resolve(classNode.getNameWithoutPackage() + ".groovy");
-        try (final Writer writer = Files.newBufferedWriter(scriptPath, StandardCharsets.UTF_8)) {
-            final AstNodeToScriptVisitor astNodeToScriptVisitor = new AstNodeToScriptVisitor(writer);
-            astNodeToScriptVisitor.visitClass(classNode);
         } catch (IOException x) {
             throw new IllegalStateException(x);
         }

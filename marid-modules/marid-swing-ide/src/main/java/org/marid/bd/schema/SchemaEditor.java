@@ -38,6 +38,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
+import java.rmi.server.UID;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
@@ -85,6 +86,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         setFont(UIManager.getFont("Label.font"));
         setBackground(SystemColor.controlLtHighlight);
         setDoubleBuffered(true);
+        setName(new UID().toString());
         setTransferHandler(new MaridTransferHandler());
         setForeground(SystemColor.controlDkShadow);
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);

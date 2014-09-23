@@ -63,7 +63,7 @@ public class SchemaModel {
             linkList.add(blockLink);
             blockLinkMap.put(blockLink, new BlockLinkLayoutInfo());
         });
-        this.schema = new Schema(blockList, linkList);
+        this.schema = new Schema(schemaEditor.getName(), blockList, linkList);
     }
 
     public void addBlock(BlockComponent blockComponent, Point location) {

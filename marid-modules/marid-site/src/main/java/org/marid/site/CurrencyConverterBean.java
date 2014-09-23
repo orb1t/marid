@@ -16,33 +16,27 @@
  */
 package org.marid.site;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Currency;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.faces.bean.ApplicationScoped;
-import javax.faces.bean.ManagedBean;
+import org.marid.logging.LogSupport;
 import org.primefaces.json.JSONException;
 import org.primefaces.json.JSONObject;
+
+import javax.faces.bean.ApplicationScoped;
+import javax.faces.bean.ManagedBean;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.URL;
+import java.util.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @ManagedBean
 @ApplicationScoped
-public class CurrencyConverterBean implements Serializable, Comparator<Currency> {
-    
-    private static final Logger LOG = Logger.getLogger(CurrencyConverterBean.class.getName());
-    
-    private final Set<String> currencies = new LinkedHashSet<>(Arrays.asList("USD", "EUR", "GBP", "CHF", "RUR"));
+public class CurrencyConverterBean implements Serializable, Comparator<Currency>, LogSupport {
+
+    private static final String RATE_EXCHANGE_SITE = "http://rate-exchange.appspot.com/currency";
+
+    private final Set<String> currencies = new LinkedHashSet<>(Arrays.asList("USD", "EUR", "GBP", "CHF"));
 
     @Override
     public int compare(Currency o1, Currency o2) {
@@ -55,28 +49,15 @@ public class CurrencyConverterBean implements Serializable, Comparator<Currency>
     
     public float convertTo(float amount, String currency) {
         try {
-            final URL url = new URL(new StringBuilder("http://www.google.com/ig/calculator?hl=en&q=")
-                    .append(amount)
-                    .append("USD")
-                    .append("%3D%3F")
-                    .append(currency)
-                    .toString());
-            final StringBuilder responseBuilder = new StringBuilder();
-            try (final InputStreamReader r = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)) {
-                final char[] buf = new char[128];
-                while (true) {
-                    final int n = r.read(buf);
-                    if (n < 0) {
-                        break;
-                    }
-                    responseBuilder.append(buf, 0, n);
-                }
+            final URL url = new URL(RATE_EXCHANGE_SITE + "?from=USD&to=" + currency);
+            final JSONObject json;
+            try (final Scanner scanner = new Scanner(url.openStream()).useDelimiter("\\z")) {
+                json = new JSONObject(scanner.next());
             }
-            final JSONObject json = new JSONObject(responseBuilder.toString());
-            final String value = json.getString("rhs").split("\\s+")[0];
-            return Float.parseFloat(value.replaceAll("[^\\d.]", ""));
+            final double rate = json.getDouble("rate");
+            return (float) (rate * amount);
         } catch (IOException | JSONException x) {
-            LOG.log(Level.WARNING, "Unable to convert the currency", x);
+            warning("Unable to convert the currency", x);
             return amount;
         }
     }

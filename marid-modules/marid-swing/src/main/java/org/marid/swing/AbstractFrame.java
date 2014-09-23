@@ -24,26 +24,24 @@ import org.marid.pref.PrefSupport;
 import org.marid.pref.SysPrefSupport;
 import org.marid.swing.menu.ActionTreeElement;
 import org.marid.swing.menu.MenuActionList;
-import org.marid.swing.util.MessageType;
+import org.marid.swing.util.MessageSupport;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 import static java.awt.BorderLayout.NORTH;
 import static javax.swing.SwingConstants.HORIZONTAL;
-import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
-import static org.marid.swing.util.MessageType.WARNING;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPrefSupport, LogSupport {
+public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPrefSupport, LogSupport, MessageSupport {
 
     public static final Border CENTER_PANEL_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 
@@ -75,23 +73,27 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         menu.addSeparator();
         menu.add(new MaridAction("Switch full screen mode", null, this::switchFullScreen)
                 .setKey(getSysPref("fullScreenKey", "control alt F")));
-        /*
-        if (this instanceof Configuration) {
-            menu.addSeparator();
-            menu.add(new MaridAction("Configuration...", null, this::showConfiguration)
-                    .setKey(getSysPref("showConfigurationKey", "control alt C")));
-        }*/
         menu.addSeparator();
         menu.add(new MaridAction("Close", null, e -> dispose())
                 .setKey(getSysPref("closeWindowKey", "control alt Q")));
         return menu;
     }
 
+    @PostConstruct
+    public void init() {
+        setVisible(true);
+    }
+
+    @PreDestroy
+    public void destroy() {
+        dispose();
+    }
+
     protected void switchAlwaysOnTop(ActionEvent event) {
         if (isAlwaysOnTopSupported()) {
             setAlwaysOnTop(!isAlwaysOnTop());
         } else {
-            showMessage(WARNING, "Warning", "Always on top windows are not supported");
+            showMessage(WARNING_MESSAGE, "Warning", "Always on top windows are not supported");
         }
     }
 
@@ -101,7 +103,7 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         if (device.isFullScreenSupported()) {
             device.setFullScreenWindow(device.getFullScreenWindow() == this ? null : this);
         } else {
-            showMessage(WARNING, "Warning", "Full-screen mode is not supported");
+            showMessage(WARNING_MESSAGE, "Warning", "Full-screen mode is not supported");
         }
     }
 
@@ -144,21 +146,4 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
     }
 
     protected abstract void fillActions(MenuActionList actionList);
-
-    protected void showMessage(MessageType messageType, String title, Object message) {
-        JOptionPane.showMessageDialog(this, message, s(title), messageType.messageType);
-    }
-
-    protected void showMessage(MessageType messageType, String title, String message, Object... args) {
-        JOptionPane.showMessageDialog(this, m(message, args), s(title), messageType.messageType);
-    }
-
-    protected void showMessage(MessageType messageType, String title, String message, Throwable error, Object... args) {
-        final StringWriter sw = new StringWriter();
-        try (final PrintWriter pw = new PrintWriter(sw)) {
-            pw.println(m(message, args));
-            error.printStackTrace(pw);
-        }
-        JOptionPane.showMessageDialog(this, sw.toString(), s(title), messageType.messageType);
-    }
 }

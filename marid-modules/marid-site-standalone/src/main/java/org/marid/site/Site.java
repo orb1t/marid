@@ -17,47 +17,32 @@
 package org.marid.site;
 
 import org.apache.catalina.startup.Tomcat;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.marid.logging.LogSupport;
+import org.marid.logging.Logging;
 
-import java.io.InputStream;
-import java.nio.file.Files;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Site {
-
-    private static final Logger LOG = Logger.getLogger(Site.class.getName());
+public class Site implements LogSupport {
 
     public static void main(String... args) throws Exception {
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                final LogRecord r = new LogRecord(Level.WARNING, "Unhandled error in {0}");
-                r.setParameters(new Object[] {t});
-                r.setThrown(e);
-                LOG.log(r);
-            }
-        });
+        Logging.init("marid-site-logging.properties");
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Log.warning("Unhandled error in {0}", e, t));
         final int port = Integer.parseInt(get("MARID.SITE.PORT", "8080"));
-        final Path basePath = Paths.get("base");
-        if (Files.exists(basePath)) {
-            FileUtils.deleteDirectory(basePath.toFile());
-        }
-        final Path webApps = basePath.resolve("webapps");
-        Files.createDirectories(webApps);
-        try (final InputStream is = Site.class.getResourceAsStream("/marid-site.war")) {
-            Files.copy(is, webApps.resolve("marid-site.war"));
-        }
+        final URL warUrl = requireNonNull(Thread.currentThread().getContextClassLoader().getResource("webapps/marid-site.war"));
+        Log.info("WAR url: {0}", warUrl);
+        final Path warPath = Paths.get(warUrl.toURI());
+        final Path basePath = warPath.getParent().getParent();
         final Tomcat tomcat = new Tomcat();
         tomcat.setPort(port);
         tomcat.setBaseDir(basePath.toString());
-        tomcat.addWebapp("/", "marid-site.war");
+        tomcat.addWebapp("/", warPath.toString());
         tomcat.start();
         tomcat.getServer().await();
     }

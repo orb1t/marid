@@ -18,30 +18,33 @@
 
 package org.marid.bd.schema;
 
-import org.codehaus.groovy.ast.ClassNode;
-import org.marid.bd.*;
+import org.marid.bd.Block;
+import org.marid.bd.BlockLink;
+import org.marid.itf.Named;
 
 import java.beans.ConstructorProperties;
+import java.rmi.server.UID;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class Schema extends AbstractBlock implements NamedBlock {
+public class Schema implements Named {
 
+    protected String name;
     protected final List<Block> blocks;
     protected final List<BlockLink> links;
 
-    @ConstructorProperties({"blocks", "links"})
-    public Schema(List<Block> blocks, List<BlockLink> links) {
+    @ConstructorProperties({"name", "blocks", "links"})
+    public Schema(String name, List<Block> blocks, List<BlockLink> links) {
+        this.name = name;
         this.blocks = blocks;
         this.links = links;
     }
 
     public Schema() {
-        this(new ArrayList<>(), new ArrayList<>());
+        this(new UID().toString(), new ArrayList<>(), new ArrayList<>());
     }
 
     public List<Block> getBlocks() {
@@ -55,50 +58,31 @@ public class Schema extends AbstractBlock implements NamedBlock {
     public void addBlockLink(BlockLink link) {
         if (links.stream().noneMatch(l -> l.matches(link.getBlockOutput(), link.getBlockInput()))) {
             if (links.add(link)) {
-                fireEvent(SchemaListener.class, l -> l.addedLink(link));
+                // fire event
             }
         }
     }
 
     public void removeBlockLink(BlockLink link) {
         if (links.remove(link)) {
-            fireEvent(SchemaListener.class, l -> l.removedLink(link));
+            // fire event
         }
     }
     
     public void addBlock(Block block) {
         if (blocks.add(block)) {
-            fireEvent(SchemaListener.class, l -> l.addedBlock(block));
+            // fire event
         }
     }
 
     public void removeBlock(Block block) {
         if (blocks.remove(block)) {
-            fireEvent(SchemaListener.class, l -> l.removedBlock(block));
+            // fire event
         }
     }
 
     @Override
-    public BlockComponent createComponent() {
-        return null;
-    }
-
-    @Override
-    public void reset() {
-
-    }
-
-    @Override
-    public List<Input<?>> getInputs() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<Output<?>> getOutputs() {
-        return Collections.emptyList();
-    }
-
-    public ClassNode toClassNode() {
-        return null;
+    public String getName() {
+        return name;
     }
 }

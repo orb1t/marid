@@ -63,7 +63,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
@@ -71,6 +70,9 @@
                             <goal>assembly</goal>
                         </goals>
                         <phase>package</phase>
+                        <configuration>
+                            <descriptor>src/main/assembly/${project.name}.xml</descriptor>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

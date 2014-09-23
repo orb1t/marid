@@ -50,7 +50,7 @@ public class MenuContext implements LogSupport {
                                 new BdeWindow().setVisible(true);
                             }))
                             .add("Schema frame", null, new MaridAction("Schema frame", null, e -> {
-                                autowireCapableBeanFactory.createBean(SchemaFrame.class).setVisible(true);
+                                autowireCapableBeanFactory.createBean(SchemaFrame.class);
                             }));
                 });
     }

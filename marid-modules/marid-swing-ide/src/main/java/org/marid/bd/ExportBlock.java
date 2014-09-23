@@ -16,24 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.util;
+package org.marid.bd;
 
-import javax.swing.*;
+import java.util.List;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-public enum MessageType {
+public interface ExportBlock extends Block {
 
-    INFO(JOptionPane.INFORMATION_MESSAGE),
-    WARNING(JOptionPane.WARNING_MESSAGE),
-    ERROR(JOptionPane.ERROR_MESSAGE),
-    QUESTION(JOptionPane.QUESTION_MESSAGE),
-    PLAIN(JOptionPane.PLAIN_MESSAGE);
-
-    public final int messageType;
-
-    private MessageType(int messageType) {
-        this.messageType = messageType;
+    default List<Output<?>> getExports() {
+        return getOutputs();
     }
 }

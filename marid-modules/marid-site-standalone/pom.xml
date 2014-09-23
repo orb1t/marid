@@ -30,6 +30,7 @@
 
     <properties>
         <appassdir>${project.build.directory}/appassembler</appassdir>
+        <catalina.version>8.0.12</catalina.version>
     </properties>
 
     <dependencies>
@@ -55,15 +56,19 @@
             <groupId>org.marid</groupId>
             <artifactId>marid-site</artifactId>
             <type>war</type>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.marid</groupId>
+            <artifactId>marid-lib</artifactId>
         </dependency>
     </dependencies>
     
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -74,7 +79,7 @@
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>
                         <manifestEntries>
-                            <Class-Path>lib/</Class-Path>
+                            <Class-Path>lib/ etc/</Class-Path>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -83,7 +88,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.7</version>
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>
@@ -92,40 +96,69 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                            <excludeArtifactIds>marid-site</excludeArtifactIds>
                         </configuration>
                     </execution>
+
                     <execution>
                         <id>copy-war</id>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeArtifactIds>marid-site</includeArtifactIds>
                             <stripVersion>true</stripVersion>
+                            <includeScope>provided</includeScope>
+                            <includeTypes>war</includeTypes>
+                            <outputDirectory>${project.build.directory}/etc/webapps</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>appassembler-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>make-zip</id>
+                        <id>assembly</id>
                         <goals>
-                            <goal>run</goal>
+                            <goal>assemble</goal>
                         </goals>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <configuration>
-                            <target>
-                                <zip destfile="${project.build.directory}/${project.name}-${project.version}.zip" level="9">
-                                    <zipfileset dir="${project.build.directory}/lib" prefix="marid-site/lib" />
-                                    <zipfileset dir="${project.build.directory}" prefix="marid-site" includes="*.jar" />
-                                </zip>
-                            </target>
+                            <repositoryLayout>flat</repositoryLayout>
+                            <useWildcardClassPath>true</useWildcardClassPath>
+                            <repositoryName>lib</repositoryName>
+                            <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
+                            <configurationSourceDirectory>${project.build.directory}/etc</configurationSourceDirectory>
+                            <copyConfigurationDirectory>true</copyConfigurationDirectory>
+                            <programs>
+                                <program>
+                                    <id>site</id>
+                                    <mainClass>org.marid.site.Site</mainClass>
+                                </program>
+                            </programs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-etc</id>
+                        <goals>
+                            <goal>add-test-resource</goal>
+                        </goals>
+                        <phase>generate-test-resources</phase>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/etc/webapps</directory>
+                                    <targetPath>webapps</targetPath>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>
@@ -135,7 +168,8 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>org.marid.site.Site</mainClass>
+                    <mainClass>org.marid.site.TestSite</mainClass>
+                    <classpathScope>test</classpathScope>
                 </configuration>
             </plugin>
         </plugins>
