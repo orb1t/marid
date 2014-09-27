@@ -41,7 +41,6 @@
         <module>marid-runtime</module>
         <module>marid-swing-ide</module>
         <module>marid-site</module>
-        <module>marid-site-standalone</module>
     </modules>
 
     <dependencies>
