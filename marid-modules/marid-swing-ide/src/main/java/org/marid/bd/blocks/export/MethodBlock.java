@@ -47,12 +47,12 @@ public class MethodBlock extends StandardBlock {
     protected Statement body;
     protected AnnotationNode[] annotationNodes;
 
-    protected final In<ClassNode> returnTypeInput = new In<>("returnType", ClassNode.class, v -> returnType = v);
-    protected final In<Parameter[]> parametersInput = new In<>("parameters", Parameter[].class, v -> parameters = v);
-    protected final In<Statement> bodyInput = new In<>("body", Statement.class, v -> body = v);
-    protected final In<AnnotationNode[]> annotationsInput = new In<>("annotations", AnnotationNode[].class, v -> annotationNodes = v);
+    protected final In returnTypeInput = new In("returnType", ClassNode.class, v -> returnType = v);
+    protected final In parametersInput = new In("parameters", Parameter[].class, v -> parameters = v);
+    protected final In bodyInput = new In("body", Statement.class, v -> body = v);
+    protected final In annotationsInput = new In("annotations", AnnotationNode[].class, v -> annotationNodes = v);
 
-    protected final Out<MethodNode> out = new Out<>("out", MethodNode.class, this::methodNode);
+    protected final Out out = new Out("out", MethodNode.class, this::methodNode);
 
     public MethodBlock() {
         super("Method Block", "method", "method", Color.CYAN.darker());
@@ -78,7 +78,7 @@ public class MethodBlock extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Arrays.asList(returnTypeInput, parametersInput, bodyInput, annotationsInput);
     }
 
@@ -107,7 +107,7 @@ public class MethodBlock extends StandardBlock {
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(out);
     }
 

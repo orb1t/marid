@@ -37,11 +37,10 @@ public class TernaryBlock extends StandardBlock {
     protected Expression trueExpr;
     protected Expression falseExpr;
 
-    protected final In<BooleanExpression> expInput = new In<>("test", BooleanExpression.class, e -> expression = e);
-    protected final In<Expression> trueInput = new In<>("+", Expression.class, e -> trueExpr = e);
-    protected final In<Expression> falseInput = new In<>("-", Expression.class, e -> falseExpr = e);
-
-    protected final Out<TernaryExpression> out = new Out<>("out", TernaryExpression.class, () -> new TernaryExpression(expression, trueExpr, falseExpr));
+    protected final In expInput = new In("test", BooleanExpression.class, e -> expression = e);
+    protected final In trueInput = new In("+", Expression.class, e -> trueExpr = e);
+    protected final In falseInput = new In("-", Expression.class, e -> falseExpr = e);
+    protected final Out out = new Out("out", TernaryExpression.class, () -> new TernaryExpression(expression, trueExpr, falseExpr));
 
     public TernaryBlock() {
         super("Ternary Expression", "?:", "?:", Color.BLUE);
@@ -55,12 +54,12 @@ public class TernaryBlock extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Arrays.asList(expInput, trueInput, falseInput);
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(out);
     }
 }

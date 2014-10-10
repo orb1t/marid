@@ -19,6 +19,7 @@
 package org.marid.swing.menu;
 
 import images.Images;
+import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.methods.LogMethods;
 import org.marid.swing.MaridAction;
@@ -30,19 +31,17 @@ import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-import static org.marid.l10n.L10n.s;
-
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class ActionBuilder extends AbstractAction {
+public class ActionBuilder extends AbstractAction implements L10nSupport {
 
     private static final Logger LOG = Logger.getLogger(ActionBuilder.class.getName());
     private MaridAction.MaridActionListener actionListener;
     private Consumer<Action> actionInitializer;
 
     ActionBuilder(String name) {
-        super(s(name));
+        super(LS.s(name));
     }
 
     @Override

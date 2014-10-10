@@ -18,7 +18,7 @@
 
 package org.marid.logging.formatters;
 
-import org.marid.l10n.L10n;
+import org.marid.l10n.L10nSupport;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -29,7 +29,7 @@ import java.util.logging.LogRecord;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DefaultFormatter extends Formatter {
+public class DefaultFormatter extends Formatter implements L10nSupport {
     @Override
     public String format(LogRecord record) {
         final StringWriter sw = new StringWriter(128)
@@ -39,7 +39,7 @@ public class DefaultFormatter extends Formatter {
                 .append(' ')
                 .append(record.getLoggerName())
                 .append(' ')
-                .append(L10n.m(record.getMessage(), record.getParameters()))
+                .append(m(record.getMessage(), record.getParameters()))
                 .append(System.lineSeparator());
         if (record.getThrown() != null) {
             final PrintWriter pw = new PrintWriter(sw);

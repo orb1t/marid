@@ -1,6 +1,7 @@
 package org.marid.swing;
 
 import images.Images;
+import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.methods.LogMethods;
 
@@ -10,18 +11,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Logger;
 
-import static org.marid.l10n.L10n.s;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridAction extends AbstractAction {
+public class MaridAction extends AbstractAction implements L10nSupport {
 
     private static final Logger LOG = Logger.getLogger(MaridAction.class.getName());
     private final MaridActionListener actionListener;
 
     public MaridAction(String title, String icon, MaridActionListener actionListener, Object... args) {
-        super(s(title));
+        super(LS.s(title));
         this.actionListener = actionListener;
         if (icon != null && icon.indexOf('.') < 0) {
             final ImageIcon smallIcon = Images.getIcon(icon + "16.png");

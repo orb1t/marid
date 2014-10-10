@@ -18,18 +18,17 @@
 
 package org.marid.swing.util;
 
+import org.marid.l10n.L10nSupport;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static org.marid.l10n.L10n.m;
-import static org.marid.l10n.L10n.s;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface MessageSupport {
+public interface MessageSupport extends L10nSupport {
 
     int WARNING_MESSAGE = JOptionPane.WARNING_MESSAGE;
     int ERROR_MESSAGE = JOptionPane.ERROR_MESSAGE;

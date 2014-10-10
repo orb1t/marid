@@ -46,7 +46,7 @@ import java.util.Vector;
 public class ConstantBlock extends AbstractBlock implements NamedBlock {
 
     protected String value = "null";
-    protected final Out<ConstantExpression> output = new Out<>("", ConstantExpression.class, this::constantExpression);
+    protected final Out output = new Out("", ConstantExpression.class, this::constantExpression);
 
     public ConstantBlock() {
         setName("Constant block");
@@ -108,12 +108,12 @@ public class ConstantBlock extends AbstractBlock implements NamedBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Collections.emptyList();
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(output);
     }
 

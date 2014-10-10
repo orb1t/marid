@@ -40,9 +40,9 @@ public class CastBlock extends StandardBlock {
     protected Expression expression;
     protected ClassNode classNode;
 
-    protected final In<Expression> exprInput = new In<>("expr", Expression.class, e -> expression = e);
-    protected final In<ClassNode> classInput = new In<>("class", ClassNode.class, true, c -> classNode = c);
-    protected final Out<CastExpression> castExpr = new Out<>("out", CastExpression.class, () -> new CastExpression(classNode, expression));
+    protected final In exprInput = new In("expr", Expression.class, e -> expression = e);
+    protected final In classInput = new In("class", ClassNode.class, true, c -> classNode = c);
+    protected final Out castExpr = new Out("out", CastExpression.class, () -> new CastExpression(classNode, expression));
 
     public CastBlock() {
         super("Cast Expression", "(*)", "(*)", Color.BLUE);
@@ -55,12 +55,12 @@ public class CastBlock extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Arrays.asList(exprInput, classInput);
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(castExpr);
     }
 }

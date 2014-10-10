@@ -21,6 +21,7 @@ package org.marid.bde.model;
 import images.Images;
 import org.marid.dyn.MetaInfo;
 import org.marid.itf.Named;
+import org.marid.l10n.L10nSupport;
 import org.marid.swing.dnd.DndObject;
 
 import javax.swing.*;
@@ -32,7 +33,7 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov.
  */
 @MetaInfo
-public abstract class Block implements Named, DndObject {
+public abstract class Block implements Named, DndObject, L10nSupport {
 
     public abstract Object getObject();
 

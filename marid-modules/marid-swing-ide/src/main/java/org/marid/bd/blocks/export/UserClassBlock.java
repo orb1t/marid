@@ -23,6 +23,7 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import java.awt.*;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -36,12 +37,12 @@ public class UserClassBlock extends StandardBlock implements ExportBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
-        return null;
+    public List<Input> getInputs() {
+        return Collections.emptyList();
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
-        return null;
+    public List<Output> getOutputs() {
+        return Collections.emptyList();
     }
 }

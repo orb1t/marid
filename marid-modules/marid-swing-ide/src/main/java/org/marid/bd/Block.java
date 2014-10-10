@@ -68,26 +68,26 @@ public interface Block extends Named, DndObject {
         }
     }
 
-    List<Input<?>> getInputs();
+    List<Input> getInputs();
 
-    List<Output<?>> getOutputs();
+    List<Output> getOutputs();
 
-    interface Input<T> extends Named {
+    interface Input extends Named {
 
-        void set(T value);
+        void set(Object value);
 
-        Class<T> getInputType();
+        Class<?> getInputType();
 
         Block getBlock();
 
         boolean isRequired();
     }
 
-    interface Output<T> extends Named {
+    interface Output extends Named {
 
-        T get();
+        Object get();
 
-        Class<T> getOutputType();
+        Class<?> getOutputType();
 
         Block getBlock();
     }

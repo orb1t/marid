@@ -21,6 +21,7 @@ package org.marid.bde.view;
 import images.Images;
 import org.marid.bde.model.Block;
 import org.marid.ide.bde.BdeConfiguration;
+import org.marid.l10n.L10nSupport;
 import org.marid.swing.MaridAction;
 
 import javax.swing.*;
@@ -34,12 +35,11 @@ import static javax.swing.BorderFactory.createEtchedBorder;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static javax.swing.border.TitledBorder.CENTER;
 import static javax.swing.border.TitledBorder.LEADING;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class BlockView extends JPanel implements BdeConfiguration {
+public class BlockView extends JPanel implements BdeConfiguration, L10nSupport {
 
     public static final String MOVEABLE = "$moveable";
 

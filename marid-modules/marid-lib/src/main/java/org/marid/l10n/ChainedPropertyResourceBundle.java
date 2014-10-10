@@ -18,18 +18,68 @@
 
 package org.marid.l10n;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ChainedPropertyResourceBundle extends PropertyResourceBundle {
+public class ChainedPropertyResourceBundle extends ResourceBundle {
 
-    public ChainedPropertyResourceBundle(ResourceBundle parent, Reader reader) throws IOException {
-        super(reader);
-        this.parent = parent;
+    private final List<Properties> propertiesList = new ArrayList<>();
+
+    public void load(URL url, boolean useCaches) throws IOException {
+        final URLConnection connection = url.openConnection();
+        connection.setUseCaches(useCaches);
+        try (final Reader reader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8)) {
+            final Properties properties = new Properties();
+            properties.load(reader);
+            propertiesList.add(properties);
+        }
+    }
+
+    @Override
+    public boolean containsKey(@Nonnull String key) {
+        final String k = Objects.requireNonNull(key);
+        for (final Properties properties : propertiesList) {
+            if (properties.containsKey(k)) {
+                return true;
+            }
+        }
+        return parent != null && parent.containsKey(k);
+    }
+
+    @Override
+    protected String handleGetObject(@Nonnull String key) {
+        final String k = Objects.requireNonNull(key);
+        for (final Properties properties : propertiesList) {
+            final String value = properties.getProperty(k);
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    @Nonnull
+    @Override
+    protected Set<String> handleKeySet() {
+        final Set<String> set = new HashSet<>();
+        for (final Properties properties : propertiesList) {
+            set.addAll(properties.stringPropertyNames());
+        }
+        return set;
+    }
+
+    @Nonnull
+    @Override
+    public Enumeration<String> getKeys() {
+        return Collections.enumeration(keySet());
     }
 }

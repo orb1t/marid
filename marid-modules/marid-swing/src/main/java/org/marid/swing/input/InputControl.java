@@ -18,6 +18,8 @@
 
 package org.marid.swing.input;
 
+import org.marid.l10n.L10nSupport;
+
 import javax.swing.*;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -25,7 +27,7 @@ import java.lang.reflect.Type;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface InputControl<V> {
+public interface InputControl<V> extends L10nSupport {
 
     V getInputValue();
 

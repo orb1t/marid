@@ -18,7 +18,7 @@
 
 package org.marid.swing;
 
-import org.marid.l10n.L10n;
+import org.marid.l10n.L10nSupport;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -26,13 +26,13 @@ import javax.swing.text.JTextComponent;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridButtons {
+public class MaridButtons implements L10nSupport {
 
     public static JButton browseButton(final JTextComponent textField) {
         return new JButton(new MaridAction("Browse", "browse.png", (a, e) -> {
             JFileChooser fileChooser = new JFileChooser(textField.getText());
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            int result = fileChooser.showDialog(textField, L10n.s("Select"));
+            int result = fileChooser.showDialog(textField, LS.s("Select"));
             if (result == JFileChooser.APPROVE_OPTION) {
                 textField.setText(fileChooser.getSelectedFile().toString());
             }

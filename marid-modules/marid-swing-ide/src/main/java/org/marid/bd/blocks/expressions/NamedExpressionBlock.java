@@ -31,7 +31,7 @@ import java.util.EventListener;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
-public class NamedExpressionBlock extends IoBlock<Expression, NamedExpressionBlock.NamedExpression> {
+public class NamedExpressionBlock extends IoBlock {
 
     protected Expression expression;
     protected String key;
@@ -47,8 +47,8 @@ public class NamedExpressionBlock extends IoBlock<Expression, NamedExpressionBlo
     }
 
     @Override
-    protected void set(Expression value) {
-        expression = value;
+    protected void set(Object value) {
+        expression = (Expression) value;
     }
 
     @Override

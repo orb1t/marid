@@ -18,6 +18,8 @@
 
 package org.marid.swing;
 
+import org.marid.l10n.L10nSupport;
+
 import javax.swing.*;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
@@ -28,18 +30,17 @@ import java.awt.event.WindowListener;
 import java.util.logging.Logger;
 
 import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW;
-import static org.marid.l10n.L10n.s;
 import static org.marid.methods.LogMethods.warning;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractDialog extends JDialog implements WindowListener {
+public abstract class AbstractDialog extends JDialog implements WindowListener, L10nSupport {
 
     protected final Logger log = Logger.getLogger(getClass().getName());
 
     public AbstractDialog(Window window, String title, ModalityType modalityType) {
-        super(window, s(title), modalityType);
+        super(window, LS.s(title), modalityType);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 

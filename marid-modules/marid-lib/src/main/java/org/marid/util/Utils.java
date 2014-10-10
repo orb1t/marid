@@ -65,6 +65,10 @@ public class Utils {
         return properties;
     }
 
+    public static ClassLoader currentClassLoader() {
+        return Thread.currentThread().getContextClassLoader();
+    }
+
     public static URL getUrl(String file) throws MalformedURLException {
         try {
             return new URL(file);

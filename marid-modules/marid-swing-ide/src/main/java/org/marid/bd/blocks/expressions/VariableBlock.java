@@ -30,7 +30,7 @@ import java.beans.ConstructorProperties;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
-public class VariableBlock extends IoBlock<ClassNode, VariableExpression> {
+public class VariableBlock extends IoBlock {
 
     protected ClassNode type;
     protected String varName = "x";
@@ -46,8 +46,8 @@ public class VariableBlock extends IoBlock<ClassNode, VariableExpression> {
     }
 
     @Override
-    public void set(ClassNode value) {
-        type = value;
+    public void set(Object value) {
+        type = (ClassNode) value;
     }
 
     @Override

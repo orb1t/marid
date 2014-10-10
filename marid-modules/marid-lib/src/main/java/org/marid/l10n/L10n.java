@@ -17,18 +17,14 @@
  */
 package org.marid.l10n;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.text.MessageFormat;
-import java.util.Enumeration;
-import java.util.Formatter;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import org.marid.util.Utils;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import java.io.IOException;
+import java.net.URL;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.function.Function;
+
 import static java.util.ResourceBundle.getBundle;
 
 /**
@@ -36,75 +32,89 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class L10n {
 
+    public static final String MSGS = "res.messages";
+    public static final String STRS = "res.strings";
+
     public static final ResourceBundle.Control UTF8_CONTROL = new ResourceBundle.Control() {
         @Override
         public ResourceBundle newBundle(String b, Locale l, String f, ClassLoader ld, boolean r) throws IllegalAccessException, InstantiationException, IOException {
-            return FORMAT_PROPERTIES.contains(f)
-                    ? getResourceBundle(ld, toResourceName(toBundleName(b, l), "properties"), r)
-                    : super.newBundle(b, l, f, ld, r);
+            return getResourceBundle(ld, toResourceName(toBundleName(b, l), "properties"), r);
+        }
+
+        @Override
+        public List<String> getFormats(String baseName) {
+            return FORMAT_PROPERTIES;
         }
 
         private ResourceBundle getResourceBundle(ClassLoader ld, String resourceName, boolean reload) throws IOException {
-            ResourceBundle resourceBundle = null;
+            final ChainedPropertyResourceBundle bundle = new ChainedPropertyResourceBundle();
             for (final Enumeration<URL> e = ld.getResources(resourceName); e.hasMoreElements(); ) {
-                final URLConnection urlConnection = e.nextElement().openConnection();
-                urlConnection.setUseCaches(!reload);
-                try (final Reader rd = new InputStreamReader(urlConnection.getInputStream(), UTF_8)) {
-                    resourceBundle = new ChainedPropertyResourceBundle(resourceBundle, rd);
-                }
+                bundle.load(e.nextElement(), !reload);
             }
-            return resourceBundle;
+            return bundle;
         }
     };
 
-    public static final ResourceBundle SB, MB;
-
-    static {
-        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        ResourceBundle sb, mb;
-        try {
-            sb = getBundle("res.strings", Locale.getDefault(), cl, UTF8_CONTROL);
-        } catch (Exception x) {
-            x.printStackTrace(System.err);
-            sb = ConstantListResourceBundle.EMPTY_BUNDLE;
-        }
-        try {
-            mb = getBundle("res.messages", Locale.getDefault(), cl, UTF8_CONTROL);
-        } catch (Exception x) {
-            x.printStackTrace(System.err);
-            mb = ConstantListResourceBundle.EMPTY_BUNDLE;
-        }
-        SB = sb;
-        MB = mb;
+    public static String s(Locale locale, String key, Function<String, String> func, Object... ps) {
+        return s(getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL), key, func, ps);
     }
 
-    public static String s(String key, Object... ps) {
-        final String r = SB.containsKey(key) ? SB.getString(key) : key;
-        return ps == null || ps.length == 0 ? r : String.format(r, ps);
+    public static void s(Locale locale, String key, Appendable out, Function<String, String> func, Object... ps) {
+        s(getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL), out, key, func, ps);
     }
 
-    public static void s(String key, Appendable out, Object... ps) {
-        final String r = SB.containsKey(key) ? SB.getString(key) : key;
-        final Formatter formatter = new Formatter(out);
-        formatter.format(r, ps);
+    public static void s(Locale locale, String key, Formatter formatter, Function<String, String> func, Object... ps) {
+        s(getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL), formatter, key, func, ps);
     }
 
-    public static void s(String key, Formatter formatter, Object... ps) {
-        final String r = SB.containsKey(key) ? SB.getString(key) : key;
-        formatter.format(r, ps);
+    public static String m(Locale locale, String k, Function<String, String> func, Object... v) {
+        return m(getBundle(MSGS, locale, Utils.currentClassLoader(), UTF8_CONTROL), k, func, v);
     }
 
-    public static String m(String k, Object... v) {
-        final String r = MB.containsKey(k) ? MB.getString(k) : k;
-        return v == null || v.length == 0 ? r : MessageFormat.format(r, v);
+    public static void m(Locale locale, String k, StringBuffer buffer, Function<String, String> func, Object... v) {
+        m(getBundle(MSGS, locale, Utils.currentClassLoader(), UTF8_CONTROL), buffer, k, func, v);
     }
 
-    public static void m(String k, StringBuffer buffer, Object... v) {
-        final String r = MB.containsKey(k) ? MB.getString(k) : k;
+    private static void m(ResourceBundle b, StringBuffer buf, String key, Function<String, String> func, Object... v) {
+        final String r = b.containsKey(key) ? b.getString(key) : func.apply(key);
         if (v == null || v.length == 0) {
-            buffer.append(r);
+            buf.append(r);
         } else {
-            new MessageFormat(r).format(v, buffer, null);
+            try {
+                new MessageFormat(r, b.getLocale()).format(v, buf, null);
+            } catch (Exception x) {
+                buf.append('!').append(r);
+            }
         }
+    }
+
+    private static String m(ResourceBundle b, String key, Function<String, String> func, Object... v) {
+        final StringBuffer buffer = new StringBuffer(key.length());
+        m(b, buffer, key, func, v);
+        return buffer.toString();
+    }
+
+    private static void s(ResourceBundle b, Formatter fmt, String key, Function<String, String> func, Object... v) {
+        final String r = b.containsKey(key) ? b.getString(key) : func.apply(key);
+        if (v == null || v.length == 0) {
+            fmt.format("%s", r);
+        } else {
+            try {
+                fmt.format(b.getLocale(), r, v);
+            } catch (Exception x) {
+                fmt.format("!%s", r);
+            }
+        }
+    }
+
+    private static void s(ResourceBundle b, Appendable buf, String key, Function<String, String> func, Object... v) {
+        final Formatter formatter = new Formatter(buf);
+        s(b, formatter, key, func, v);
+    }
+
+    private static String s(ResourceBundle b, String key, Function<String, String> func, Object... v) {
+        final StringBuilder builder = new StringBuilder(key.length());
+        s(b, builder, key, func, v);
+        return builder.toString();
     }
 }

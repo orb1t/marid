@@ -40,10 +40,9 @@ public class AnnotationBlock extends StandardBlock {
     protected ClassNode classNode;
     protected NamedExpression[] members;
 
-    protected final In<ClassNode> classNodeInput = new In<>("class", ClassNode.class, n -> classNode = n);
-    protected final In<NamedExpression[]> membersInput = new In<>("parameters", NamedExpression[].class, v -> members = v);
-
-    protected final Out<AnnotationNode> out = new Out<>("out", AnnotationNode.class, this::annotationNode);
+    protected final In classNodeInput = new In("class", ClassNode.class, n -> classNode = n);
+    protected final In membersInput = new In("parameters", NamedExpression[].class, v -> members = v);
+    protected final Out out = new Out("out", AnnotationNode.class, this::annotationNode);
 
     public AnnotationBlock() {
         super("Annotation Block", " @ ", "@", Color.CYAN.darker());
@@ -56,12 +55,12 @@ public class AnnotationBlock extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Arrays.asList(classNodeInput, membersInput);
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(out);
     }
 

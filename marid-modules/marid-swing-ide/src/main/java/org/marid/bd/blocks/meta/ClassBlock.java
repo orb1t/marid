@@ -39,7 +39,7 @@ public class ClassBlock extends StandardBlock {
 
     protected Class<?> targetClass;
 
-    protected final Out<ClassNode> out = new Out<>("out", ClassNode.class, () -> new ClassNode(targetClass));
+    protected final Out out = new Out("out", ClassNode.class, () -> new ClassNode(targetClass));
 
     public ClassBlock() {
         super("Class Block", "class", "class", Color.CYAN.darker());
@@ -54,7 +54,7 @@ public class ClassBlock extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Collections.emptyList();
     }
 
@@ -64,7 +64,7 @@ public class ClassBlock extends StandardBlock {
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(out);
     }
 

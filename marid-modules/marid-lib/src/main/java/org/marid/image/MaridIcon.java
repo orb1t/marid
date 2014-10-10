@@ -18,10 +18,12 @@
 
 package org.marid.image;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
+import java.io.File;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
@@ -33,11 +35,11 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 public class MaridIcon {
 
     public static BufferedImage getImage(int size, Color color) {
-        BufferedImage img = new BufferedImage(size, size, TYPE_INT_ARGB);
-        Graphics2D g = img.createGraphics();
+        final BufferedImage img = new BufferedImage(size, size, TYPE_INT_ARGB);
+        final Graphics2D g = img.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        float[] fs = new float[16];
-        Color[] cs = new Color[16];
+        final float[] fs = new float[16];
+        final Color[] cs = new Color[16];
         for (int i = 0; i < fs.length; i++) {
             fs[i] = (i + 1) / (float)fs.length;
             cs[i] = new Color(150 - i * 10, 150 - i * 10, 255 - i * 10);
@@ -45,23 +47,23 @@ public class MaridIcon {
         g.setPaint(new LinearGradientPaint(0.0f, 0.0f, 0.0f, size - 1.0f, fs, cs));
         g.fillRect(0, 0, size, size);
         g.scale(size / 2.0, -size / 2.0);
-        BasicStroke stroke = new BasicStroke(0.15f);
+        final BasicStroke stroke = new BasicStroke(0.15f);
         g.translate(1.0, -1.0);
         g.setStroke(stroke);
         g.scale(2.0 / (2.0 + stroke.getLineWidth()), 2.0 / (2.0 + stroke.getLineWidth()));
         g.setColor(Color.WHITE);
-        GeneralPath onda1 = new GeneralPath();
+        final GeneralPath onda1 = new GeneralPath();
         onda1.moveTo(-1.1f, +0.1f);
         onda1.quadTo(-0.8f, +0.3f, -0.4f, +0.15f);
         g.draw(onda1);
-        GeneralPath onda2 = new GeneralPath();
+        final GeneralPath onda2 = new GeneralPath();
         onda2.moveTo(+1.1f, +0.1f);
         onda2.quadTo(+0.8f, +0.3f, +0.4f, +0.15f);
         g.draw(onda2);
         for (int i = 0; i < fs.length; i++) {
             cs[i] = new Color(255, 255, 255, 255 - i * 15);
         }
-        GeneralPath botella = new GeneralPath();
+        final GeneralPath botella = new GeneralPath();
         botella.moveTo(-0.5f, -1.0f);
         botella.curveTo(-0.6f, +0.0f, -0.1f, +0.3f, -0.1f, +1.0f);
         botella.lineTo(+0.1f, +1.0f);
@@ -78,5 +80,15 @@ public class MaridIcon {
 
     public static ImageIcon getIcon(int size, Color color) {
         return new ImageIcon(getImage(size, color));
+    }
+
+    public static void main(String... args) throws Exception {
+        final int size = args.length < 1 ? 32 : Integer.parseInt(args[0]);
+        final Color color = args.length < 2 || "-".equals(args[1]) ? Color.GREEN : Color.decode(args[1]);
+        final String format = args.length < 3 ? "PNG" : args[2];
+        final BufferedImage image = getImage(size, color);
+        final File file = new File("marid." + format.toLowerCase());
+        ImageIO.write(image, format, file);
+        System.out.println(file.getAbsolutePath() + " " + file.exists());
     }
 }

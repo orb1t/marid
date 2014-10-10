@@ -37,19 +37,19 @@ public class BeanBlock extends StandardBlock {
 
     private static final ClassNode BEAN_CLASS = ClassHelper.make(Bean.class);
 
-    private final Out<AnnotationNode> out = new Out<>("node", AnnotationNode.class, () -> new AnnotationNode(BEAN_CLASS));
+    private final Out out = new Out("node", AnnotationNode.class, () -> new AnnotationNode(BEAN_CLASS));
 
     public BeanBlock() {
         super("Bean", "@Bean", "@Bean", Color.magenta.brighter());
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Collections.emptyList();
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(out);
     }
 }

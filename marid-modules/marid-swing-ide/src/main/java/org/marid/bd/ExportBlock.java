@@ -25,7 +25,7 @@ import java.util.List;
  */
 public interface ExportBlock extends Block {
 
-    default List<Output<?>> getExports() {
+    default List<Output> getExports() {
         return getOutputs();
     }
 }

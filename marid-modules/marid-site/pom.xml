@@ -30,63 +30,52 @@
     <artifactId>marid-site</artifactId>
     <packaging>war</packaging>
 
-    <properties>
-        <netbeans.hint.license>agpl30</netbeans.hint.license>
-    </properties>
-
     <dependencies>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.faces</artifactId>
-            <version>2.1.29</version>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>jstl</artifactId>
-            <version>1.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>taglibs</groupId>
-            <artifactId>standard</artifactId>
-            <version>1.1.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.primefaces</groupId>
-            <artifactId>primefaces</artifactId>
-            <version>4.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.primefaces.extensions</groupId>
-            <artifactId>all-themes</artifactId>
-            <version>1.0.8</version>
-        </dependency>
-
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
-            <version>7.0</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.jclarion</groupId>
-            <artifactId>image4j</artifactId>
-            <version>0.7</version>
+            <groupId>org.eclipse.rap</groupId>
+            <artifactId>org.eclipse.rap.rwt</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.tinyjee.jgraphx</groupId>
-            <artifactId>jgraphx</artifactId>
-            <version>2.3.0.5</version>
+            <groupId>org.eclipse.rap</groupId>
+            <artifactId>org.eclipse.rap.jface</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.core</groupId>
+            <artifactId>runtime</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.core</groupId>
+            <artifactId>commands</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.marid</groupId>
             <artifactId>marid-lib</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.marid</groupId>
+            <artifactId>marid-gres</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty.aggregate</groupId>
+            <artifactId>jetty-all</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -95,17 +84,26 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.4</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.2.3.v20140905</version>
                 <configuration>
+                    <reload>manual</reload>
                     <stopKey>marid</stopKey>
                     <stopPort>8088</stopPort>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.marid</groupId>
+                        <artifactId>marid-lib</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

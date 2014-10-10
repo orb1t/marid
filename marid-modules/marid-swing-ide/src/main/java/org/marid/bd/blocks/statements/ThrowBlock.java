@@ -29,7 +29,7 @@ import java.awt.*;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
-public class ThrowBlock extends IoBlock<Expression, ThrowStatement> {
+public class ThrowBlock extends IoBlock {
 
     protected Expression expression;
 
@@ -38,8 +38,8 @@ public class ThrowBlock extends IoBlock<Expression, ThrowStatement> {
     }
 
     @Override
-    public void set(Expression value) {
-        expression = value;
+    public void set(Object value) {
+        expression = (Expression) value;
     }
 
     @Override

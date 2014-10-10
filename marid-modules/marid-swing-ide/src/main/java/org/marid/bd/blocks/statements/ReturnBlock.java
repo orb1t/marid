@@ -29,7 +29,7 @@ import java.awt.*;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
-public class ReturnBlock extends IoBlock<Expression, ReturnStatement> {
+public class ReturnBlock extends IoBlock {
 
     protected Expression expression;
 
@@ -38,8 +38,8 @@ public class ReturnBlock extends IoBlock<Expression, ReturnStatement> {
     }
 
     @Override
-    public void set(Expression value) {
-        expression = value;
+    public void set(Object value) {
+        expression = (Expression) value;
     }
 
     @Override

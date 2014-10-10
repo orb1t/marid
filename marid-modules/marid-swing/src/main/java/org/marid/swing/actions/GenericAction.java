@@ -18,7 +18,7 @@
 
 package org.marid.swing.actions;
 
-import org.marid.l10n.L10n;
+import org.marid.l10n.L10nSupport;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -27,17 +27,17 @@ import java.awt.event.ActionListener;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class GenericAction extends AbstractAction {
+public class GenericAction extends AbstractAction implements L10nSupport {
 
     private final ActionListener actionListener;
 
     public GenericAction(String name, ActionListener actionListener) {
-        super(L10n.s(name));
+        super(LS.s(name));
         this.actionListener = actionListener;
     }
 
     public GenericAction(String name, ImageIcon icon, ActionListener actionListener) {
-        super(L10n.s(name), icon);
+        super(LS.s(name), icon);
         this.actionListener = actionListener;
     }
 

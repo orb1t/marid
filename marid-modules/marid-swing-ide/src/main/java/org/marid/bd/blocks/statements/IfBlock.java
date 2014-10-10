@@ -41,10 +41,10 @@ public class IfBlock extends StandardBlock {
     protected Statement statement;
     protected Statement elseStatement;
 
-    protected final In<BooleanExpression> exprInput = new In<>("test", BooleanExpression.class, e -> expression = e);
-    protected final In<Statement> statementInput = new In<>("+", Statement.class, s -> statement = s);
-    protected final In<Statement> elseInput = new In<>("-", Statement.class, s -> elseStatement = s);
-    protected final Out<IfStatement> output = new Out<>("out", IfStatement.class, () -> new IfStatement(expression, statement, elseStatement));
+    protected final In exprInput = new In("test", BooleanExpression.class, e -> expression = e);
+    protected final In statementInput = new In("+", Statement.class, s -> statement = s);
+    protected final In elseInput = new In("-", Statement.class, s -> elseStatement = s);
+    protected final Out output = new Out("out", IfStatement.class, () -> new IfStatement(expression, statement, elseStatement));
 
     public IfBlock() {
         super("If Statement", " if ", "if", Color.GREEN.darker());
@@ -58,12 +58,12 @@ public class IfBlock extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Arrays.asList(exprInput, statementInput, elseInput);
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(output);
     }
 }

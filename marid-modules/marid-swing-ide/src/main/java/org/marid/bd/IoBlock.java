@@ -25,19 +25,19 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class IoBlock<I, O> extends StandardBlock {
+public abstract class IoBlock extends StandardBlock {
 
-    protected final Class<I> inputType;
-    protected final Class<O> outputType;
+    protected final Class inputType;
+    protected final Class outputType;
 
-    protected final Input<I> input = new Input<I>() {
+    protected final Input input = new Input() {
         @Override
-        public void set(I value) {
+        public void set(Object value) {
             IoBlock.this.set(value);
         }
 
         @Override
-        public Class<I> getInputType() {
+        public Class<?> getInputType() {
             return inputType;
         }
 
@@ -57,14 +57,14 @@ public abstract class IoBlock<I, O> extends StandardBlock {
         }
     };
 
-    protected final Output<O> output = new Output<O>() {
+    protected final Output output = new Output() {
         @Override
-        public O get() {
+        public Object get() {
             return IoBlock.this.get();
         }
 
         @Override
-        public Class<O> getOutputType() {
+        public Class<?> getOutputType() {
             return outputType;
         }
 
@@ -79,23 +79,23 @@ public abstract class IoBlock<I, O> extends StandardBlock {
         }
     };
 
-    public IoBlock(String name, String iconText, String label, Color color, Class<I> inputType, Class<O> outputType) {
+    public IoBlock(String name, String iconText, String label, Color color, Class<?> inputType, Class<?> outputType) {
         super(name, iconText, label, color);
         this.inputType = inputType;
         this.outputType = outputType;
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Collections.singletonList(input);
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(output);
     }
 
-    protected abstract void set(I value);
+    protected abstract void set(Object value);
 
-    protected abstract O get();
+    protected abstract Object get();
 }

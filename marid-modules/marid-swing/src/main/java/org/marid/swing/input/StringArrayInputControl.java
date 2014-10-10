@@ -18,7 +18,6 @@
 
 package org.marid.swing.input;
 
-import org.marid.l10n.L10n;
 import org.marid.swing.MaridAction;
 
 import javax.swing.*;
@@ -46,7 +45,7 @@ public class StringArrayInputControl extends AbstractTitledPanel<String[]> {
             }
         });
         toolBar.add(new MaridAction("Add", "add", (a, e) -> {
-            final String item = JOptionPane.showInputDialog(this, L10n.m("Input a value") + ":");
+            final String item = JOptionPane.showInputDialog(this, m("Input a value") + ":");
             if (item != null) {
                 model.addElement(item.trim());
             }

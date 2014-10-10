@@ -18,20 +18,21 @@
 
 package org.marid.swing;
 
+import org.marid.l10n.L10nSupport;
+
 import javax.swing.*;
 import java.awt.event.WindowEvent;
 import java.util.prefs.Preferences;
 
-import static org.marid.l10n.L10n.s;
 import static org.marid.swing.methods.GuiMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class MaridFrame extends JFrame {
+public abstract class MaridFrame extends JFrame implements L10nSupport {
 
     public MaridFrame(String title) {
-        super(s(title));
+        super(LS.s(title));
     }
 
     @Override

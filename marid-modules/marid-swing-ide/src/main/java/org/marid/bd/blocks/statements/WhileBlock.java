@@ -40,9 +40,9 @@ public class WhileBlock extends StandardBlock {
     protected BooleanExpression expression;
     protected Statement body;
 
-    protected final In<BooleanExpression> exprInput = new In<>("test", BooleanExpression.class, e -> expression = e);
-    protected final In<Statement> bodyInput = new In<>("body", Statement.class, s -> body = s);
-    protected final Out<WhileStatement> out = new Out<>("out", WhileStatement.class, () -> new WhileStatement(expression, body));
+    protected final In exprInput = new In("test", BooleanExpression.class, e -> expression = e);
+    protected final In bodyInput = new In("body", Statement.class, s -> body = s);
+    protected final Out out = new Out("out", WhileStatement.class, () -> new WhileStatement(expression, body));
 
     public WhileBlock() {
         super("While Statement", "while", "while", Color.GREEN.darker());
@@ -55,12 +55,12 @@ public class WhileBlock extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Arrays.asList(exprInput, bodyInput);
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(out);
     }
 }

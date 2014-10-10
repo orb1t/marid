@@ -18,8 +18,6 @@
 
 package org.marid.swing.input;
 
-import org.marid.l10n.L10n;
-
 import javax.swing.*;
 import java.net.InetSocketAddress;
 
@@ -35,8 +33,8 @@ public class InetSocketAddressInputControl extends JPanel implements InputContro
         ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField().setEditable(true);
         final GroupLayout g = new GroupLayout(this);
         g.setAutoCreateGaps(true);
-        final JLabel addressLabel = new JLabel(L10n.s("Address") + ":");
-        final JLabel portLabel = new JLabel(L10n.s("Port") + ":");
+        final JLabel addressLabel = new JLabel(s("Address") + ":");
+        final JLabel portLabel = new JLabel(s("Port") + ":");
         g.setVerticalGroup(g.createParallelGroup(GroupLayout.Alignment.BASELINE)
                 .addComponent(addressLabel).addComponent(addressField).addComponent(portLabel).addComponent(spinner));
         g.setHorizontalGroup(g.createSequentialGroup()

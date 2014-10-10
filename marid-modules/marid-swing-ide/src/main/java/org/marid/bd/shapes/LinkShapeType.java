@@ -19,7 +19,7 @@
 package org.marid.bd.shapes;
 
 import org.marid.bd.schema.SchemaEditor;
-import org.marid.l10n.L10n;
+import org.marid.l10n.L10nSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.PrefUtils;
 import org.marid.swing.AbstractDialog;
@@ -41,7 +41,7 @@ import static org.marid.bd.BlockComponent.Output;
 /**
  * @author Dmitry Ovchinnikov
  */
-public enum LinkShapeType implements Configurable, PrefSupport {
+public enum LinkShapeType implements Configurable, PrefSupport, L10nSupport {
 
     LINE("Simple line link", LineLinkShape::new, w -> null),
     ORTHO("Othogonal link", OrthoLinkShape::new, OrthoLinkConfigurationEditor::new),
@@ -61,7 +61,7 @@ public enum LinkShapeType implements Configurable, PrefSupport {
 
     @Override
     public String toString() {
-        return L10n.s(name);
+        return s(name);
     }
 
     public LinkShape linkShapeFor(Output output, Input input) {
@@ -114,15 +114,15 @@ public enum LinkShapeType implements Configurable, PrefSupport {
         private final JSpinner scSpinner = new JSpinner(new SpinnerNumberModel(species, 5, 100, 1));
 
         public LiveLinkConfigurationEditor(Window window) {
-            super(window, L10n.s("Live link configuration"), ModalityType.MODELESS);
+            super(window, LS.s("Live link configuration"), ModalityType.MODELESS);
             pack();
         }
 
         @Override
         protected void fill(GroupLayout g, GroupLayout.SequentialGroup v, GroupLayout.SequentialGroup h) {
-            final JLabel mpLabel = new JLabel(L10n.s("Mutation probability") + ":");
-            final JLabel isLabel = new JLabel(L10n.s("Incubator size") + ":");
-            final JLabel scLabel = new JLabel(L10n.s("Species count") + ":");
+            final JLabel mpLabel = new JLabel(s("Mutation probability") + ":");
+            final JLabel isLabel = new JLabel(s("Incubator size") + ":");
+            final JLabel scLabel = new JLabel(s("Species count") + ":");
             v.addGroup(g.createParallelGroup(BASELINE).addComponent(mpLabel).addComponent(mpSpinner));
             v.addGroup(g.createParallelGroup(BASELINE).addComponent(isLabel).addComponent(isSpinner));
             v.addGroup(g.createParallelGroup(BASELINE).addComponent(scLabel).addComponent(scSpinner));
@@ -157,13 +157,13 @@ public enum LinkShapeType implements Configurable, PrefSupport {
         private final JSpinner jlSpinner = new JSpinner(new SpinnerNumberModel(join, 0, 20, 1));
 
         public OrthoLinkConfigurationEditor(Window window) {
-            super(window, L10n.s("Ortho link configuration"), ModalityType.MODELESS);
+            super(window, LS.s("Ortho link configuration"), ModalityType.MODELESS);
             pack();
         }
 
         @Override
         protected void fill(GroupLayout gl, GroupLayout.SequentialGroup vg, GroupLayout.SequentialGroup hg) {
-            final JLabel jlLabel = new JLabel(L10n.s("Join size") + ":");
+            final JLabel jlLabel = new JLabel(LS.s("Join size") + ":");
             vg.addGroup(gl.createParallelGroup(BASELINE).addComponent(jlLabel).addComponent(jlSpinner));
             hg.addGroup(gl.createParallelGroup().addComponent(jlLabel));
             hg.addGroup(gl.createParallelGroup().addComponent(jlSpinner));

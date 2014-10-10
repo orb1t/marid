@@ -33,7 +33,6 @@ import javax.swing.*;
 import java.util.Date;
 
 import static org.jfree.chart.ChartFactory.createTimeSeriesChart;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.

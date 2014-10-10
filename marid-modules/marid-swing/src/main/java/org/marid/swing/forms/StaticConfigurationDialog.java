@@ -19,6 +19,7 @@
 package org.marid.swing.forms;
 
 import images.Images;
+import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.PrefUtils;
@@ -50,8 +51,6 @@ import static javax.swing.SwingConstants.HORIZONTAL;
 import static javax.swing.SwingConstants.*;
 import static javax.swing.SwingConstants.VERTICAL;
 import static org.marid.functions.Functions.safeConsumer;
-import static org.marid.l10n.L10n.m;
-import static org.marid.l10n.L10n.s;
 import static org.marid.reflect.ReflectionUtils.annotations;
 import static org.marid.swing.forms.FormUtils.tabComparator;
 import static org.marid.swing.util.PanelUtils.groupedPanel;
@@ -61,7 +60,7 @@ import static org.marid.util.StringUtils.constantToText;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class StaticConfigurationDialog extends JDialog implements LogSupport, PrefSupport {
+public class StaticConfigurationDialog extends JDialog implements LogSupport, PrefSupport, L10nSupport {
 
     protected final Class<?> conf;
     protected final Preferences preferences;
@@ -97,7 +96,7 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
 
     public static String nameFor(Class<?> conf) {
         final Form f = conf.getAnnotation(Form.class);
-        return f == null || f.name().isEmpty() ? s(StaticConfigurationDialog.class.getSimpleName()) : s(f.name());
+        return f == null || f.name().isEmpty() ? LS.s(StaticConfigurationDialog.class.getSimpleName()) : LS.s(f.name());
     }
 
     @Override
@@ -290,7 +289,7 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
         }
 
         public MaridAction getAction() {
-            return new MaridAction("", "defaultValue", getActionListener(), SHORT_DESCRIPTION, s("Set default value"));
+            return new MaridAction("", "defaultValue", getActionListener(), SHORT_DESCRIPTION, LS.s("Set default value"));
         }
     }
 }

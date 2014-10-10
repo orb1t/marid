@@ -52,7 +52,9 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <groovy.version>2.4.0-beta-3</groovy.version>
-        <spring.version>4.1.0.RELEASE</spring.version>
+        <spring.version>4.1.1.RELEASE</spring.version>
+        <rap.version>2.3.1</rap.version>
+        <jetty.version>9.2.3.v20140905</jetty.version>
 
         <excluded.benchmarks>org.marid.test.BrokenBenchmarks</excluded.benchmarks>
         <excluded.tests>org.marid.test.BrokenTests</excluded.tests>
@@ -258,6 +260,11 @@
                 </plugin>
 
                 <plugin>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>2.4</version>
+                </plugin>
+
+                <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>2.8</version>
                     <configuration>
@@ -370,6 +377,12 @@
                         <autoReleaseAfterClose>true</autoReleaseAfterClose>
                     </configuration>
                 </plugin>
+
+                <plugin>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-maven-plugin</artifactId>
+                    <version>${jetty.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -464,6 +477,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>18.0</version>
@@ -479,6 +498,42 @@
                 <groupId>org.hsqldb</groupId>
                 <artifactId>hsqldb</artifactId>
                 <version>2.3.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.rap</groupId>
+                <artifactId>org.eclipse.rap.rwt</artifactId>
+                <version>${rap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.rap</groupId>
+                <artifactId>org.eclipse.rap.jface</artifactId>
+                <version>${rap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.core</groupId>
+                <artifactId>runtime</artifactId>
+                <version>3.10.0-v20140318-2214</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.core</groupId>
+                <artifactId>commands</artifactId>
+                <version>3.3.0-I20070605-0010</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.jetty.aggregate</groupId>
+                <artifactId>jetty-all</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax</groupId>
+                <artifactId>javaee-web-api</artifactId>
+                <version>7.0</version>
             </dependency>
 
             <dependency>
@@ -535,10 +590,10 @@
 
     <dependencies>
         <dependency>
-            <groupId>edu.washington.cs.types.checker</groupId>
-            <artifactId>checker-framework</artifactId>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>findbugs</artifactId>
             <scope>provided</scope>
-            <version>1.7.5</version>
+            <version>3.0.0</version>
         </dependency>
     </dependencies>
 

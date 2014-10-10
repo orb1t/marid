@@ -32,7 +32,7 @@ import java.util.List;
 @BdBlock
 public class EmptyBlock extends StandardBlock {
 
-    protected final Out<EmptyStatement> out = new Out<>("out", EmptyStatement.class, () -> EmptyStatement.INSTANCE);
+    protected final Out out = new Out("out", EmptyStatement.class, () -> EmptyStatement.INSTANCE);
 
     public EmptyBlock() {
         super("Empty block", "{}", "{}", Color.GREEN.darker());
@@ -43,12 +43,12 @@ public class EmptyBlock extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Collections.emptyList();
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(out);
     }
 }

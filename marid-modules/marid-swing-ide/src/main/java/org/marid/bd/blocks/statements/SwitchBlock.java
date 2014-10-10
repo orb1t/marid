@@ -43,10 +43,10 @@ public class SwitchBlock extends StandardBlock {
     protected Statement defStatement;
     protected Expression expression;
 
-    protected final Input<Expression> expressionInput = new In<>("expr", Expression.class, e -> expression = e);
-    protected final Input<CaseStatement[]> caseInput = new In<>("cases", CaseStatement[].class, s -> caseStatements = s);
-    protected final Input<Statement> defaultInput = new In<>("default", Statement.class, s -> defStatement = s);
-    protected final Output<SwitchStatement> out = new Out<>("out", SwitchStatement.class, () -> {
+    protected final Input expressionInput = new In("expr", Expression.class, e -> expression = e);
+    protected final Input caseInput = new In("cases", CaseStatement[].class, s -> caseStatements = s);
+    protected final Input defaultInput = new In("default", Statement.class, s -> defStatement = s);
+    protected final Output out = new Out("out", SwitchStatement.class, () -> {
         final List<CaseStatement> caseStatementList = caseStatements == null ? emptyList() : asList(caseStatements);
         final Statement defaultStatement = defStatement == null ? EmptyStatement.INSTANCE : defStatement;
         return new SwitchStatement(expression, caseStatementList, defaultStatement);
@@ -64,12 +64,12 @@ public class SwitchBlock extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return asList(expressionInput, caseInput, defaultInput);
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(out);
     }
 }

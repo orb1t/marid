@@ -19,7 +19,7 @@
 package org.marid.bd.components;
 
 import org.marid.bd.Block;
-import org.marid.l10n.L10n;
+import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.GridBags;
@@ -39,14 +39,14 @@ import static javax.swing.KeyStroke.getKeyStroke;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class AbstractBlockComponentEditor<B extends Block> extends JDialog implements PrefSupport, LogSupport {
+public class AbstractBlockComponentEditor<B extends Block> extends JDialog implements PrefSupport, LogSupport, L10nSupport {
 
     protected final B block;
     protected final JTabbedPane tabbedPane = new JTabbedPane();
     protected final Map<String, TabPane> tabPaneMap = new HashMap<>();
 
     public AbstractBlockComponentEditor(Window window, B block) {
-        super(window, L10n.s("Settings") + ": " + block.getName(), ModalityType.MODELESS);
+        super(window, LS.s("Settings") + ": " + block.getName(), ModalityType.MODELESS);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.block = block;
         add(tabbedPane);
@@ -79,7 +79,7 @@ public class AbstractBlockComponentEditor<B extends Block> extends JDialog imple
     protected TabPane tabPane(String tab) {
         return tabPaneMap.computeIfAbsent(tab, t -> {
             final TabPane tabPane = new TabPane(t);
-            tabbedPane.addTab(L10n.s(t), new JScrollPane(tabPane));
+            tabbedPane.addTab(s(t), new JScrollPane(tabPane));
             return tabPane;
         });
     }
@@ -120,7 +120,7 @@ public class AbstractBlockComponentEditor<B extends Block> extends JDialog imple
         }
 
         public void addLine(String label, JComponent component) {
-            add(new JLabel(L10n.s(label)), GridBags.constraints(1, 1, 0.0, 0.0, BASELINE));
+            add(new JLabel(LS.s(label)), GridBags.constraints(1, 1, 0.0, 0.0, BASELINE));
             add(component, GridBags.constraints(REMAINDER, 1, 1.0, 0.0, BASELINE));
         }
 

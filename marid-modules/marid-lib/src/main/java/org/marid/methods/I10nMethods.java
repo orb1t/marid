@@ -18,6 +18,9 @@
 
 package org.marid.methods;
 
+import java.util.Locale;
+import java.util.function.Function;
+
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
 
@@ -27,10 +30,10 @@ import static org.marid.l10n.L10n.s;
 public class I10nMethods {
 
     public static String ls(String s, Object... args) {
-        return s(s, args);
+        return s(Locale.getDefault(), s, Function.identity(), args);
     }
 
     public static String lm(String m, Object... args) {
-        return m(m, args);
+        return m(Locale.getDefault(), m, Function.identity(), args);
     }
 }

@@ -29,6 +29,10 @@ import java.util.logging.Logger;
  */
 public class TestLogConfigurer {
 
+    public TestLogConfigurer() {
+        configureTestLogging();
+    }
+
     public static void configureTestLogging() {
         LogManager.getLogManager().reset();
         final Logger logger = Logger.getLogger("");

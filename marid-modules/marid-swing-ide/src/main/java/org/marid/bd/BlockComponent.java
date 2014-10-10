@@ -122,7 +122,7 @@ public interface BlockComponent {
 
     interface Input extends Port {
 
-        Block.Input<?> getInput();
+        Block.Input getInput();
 
         @Override
         default Point getConnectionPoint() {
@@ -134,7 +134,7 @@ public interface BlockComponent {
 
     interface Output extends Port {
 
-        Block.Output<?> getOutput();
+        Block.Output getOutput();
 
         @Override
         default Point getConnectionPoint() {

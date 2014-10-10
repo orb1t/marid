@@ -18,24 +18,23 @@
 
 package org.marid.swing;
 
+import org.marid.l10n.L10nSupport;
 import org.marid.pref.PrefSupport;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.prefs.Preferences;
 
-import static org.marid.l10n.L10n.s;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-class InternalFrame<F extends AbstractMultiFrame> extends JInternalFrame implements PrefSupport {
+class InternalFrame<F extends AbstractMultiFrame> extends JInternalFrame implements PrefSupport, L10nSupport {
 
     protected final F owner;
     protected final Preferences preferences;
 
     protected InternalFrame(F owner, String title, boolean closable) {
-        super(s(title), true, closable, true, true);
+        super(LS.s(title), true, closable, true, true);
         this.owner = owner;
         preferences = owner.preferences().node("frames").node(getClass().getSimpleName());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);

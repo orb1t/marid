@@ -18,6 +18,8 @@
 
 package org.marid.swing.log;
 
+import org.marid.l10n.L10nSupport;
+
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -26,12 +28,11 @@ import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
 import static java.util.Calendar.*;
-import static org.marid.l10n.L10n.m;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SwingHandlerFormatter extends Formatter {
+public class SwingHandlerFormatter extends Formatter implements L10nSupport {
 
     private final Calendar calendar = new GregorianCalendar(Locale.ROOT);
 

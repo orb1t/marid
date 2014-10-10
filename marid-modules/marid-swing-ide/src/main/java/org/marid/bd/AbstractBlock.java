@@ -89,21 +89,21 @@ public abstract class AbstractBlock implements Block {
         }
     }
 
-    public class In<T> implements Input<T> {
+    public class In implements Input {
 
         private final String name;
-        private final Class<T> type;
+        private final Class<?> type;
         private final boolean required;
-        private final Consumer<T> consumer;
+        private final Consumer consumer;
 
-        public In(String name, Class<T> type, boolean required, Consumer<T> consumer) {
+        public <T> In(String name, Class<T> type, boolean required, Consumer<T> consumer) {
             this.name = name;
             this.type = type;
             this.required = required;
-            this.consumer = consumer;
+            this.consumer = (Consumer) consumer;
         }
 
-        public In(String name, Class<T> type, Consumer<T> consumer) {
+        public <T> In(String name, Class<T> type, Consumer<T> consumer) {
             this(name, type, false, consumer);
         }
 
@@ -118,12 +118,13 @@ public abstract class AbstractBlock implements Block {
         }
 
         @Override
-        public Class<T> getInputType() {
+        public Class<?> getInputType() {
             return type;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        public void set(T value) {
+        public void set(Object value) {
             consumer.accept(value);
         }
 
@@ -133,13 +134,13 @@ public abstract class AbstractBlock implements Block {
         }
     }
 
-    public class Out<T> implements Output<T> {
+    public class Out implements Output {
 
         private final String name;
-        private final Class<T> type;
-        private final Supplier<T> supplier;
+        private final Class<?> type;
+        private final Supplier<?> supplier;
 
-        public Out(String name, Class<T> type, Supplier<T> supplier) {
+        public <T> Out(String name, Class<T> type, Supplier<T> supplier) {
             this.name = name;
             this.type = type;
             this.supplier = supplier;
@@ -150,7 +151,7 @@ public abstract class AbstractBlock implements Block {
             return name;
         }
 
-        public Class<T> getOutputType() {
+        public Class<?> getOutputType() {
             return type;
         }
 
@@ -160,7 +161,7 @@ public abstract class AbstractBlock implements Block {
         }
 
         @Override
-        public T get() {
+        public Object get() {
             return supplier.get();
         }
     }

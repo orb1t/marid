@@ -62,8 +62,8 @@ public abstract class LinkShape {
     }
 
     public boolean isValid() {
-        final Block.Output<?> o = output.getOutput();
-        final Block.Input<?> i = input.getInput();
+        final Block.Output o = output.getOutput();
+        final Block.Input i = input.getInput();
         return i.getInputType().isAssignableFrom(o.getOutputType());
     }
 

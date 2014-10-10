@@ -1,6 +1,7 @@
 package org.marid.swing.log;
 
 import org.marid.image.MaridIcons;
+import org.marid.l10n.L10nSupport;
 import org.marid.logging.AbstractHandler;
 import org.marid.logging.Logging;
 import org.marid.pref.PrefSupport;
@@ -24,12 +25,11 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 
 import static java.awt.RenderingHints.*;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SwingHandler extends AbstractHandler implements PrefSupport {
+public class SwingHandler extends AbstractHandler implements PrefSupport, L10nSupport {
 
     private static final Map<Level, ImageIcon> iconMap = new HashMap<>();
     private final int size;

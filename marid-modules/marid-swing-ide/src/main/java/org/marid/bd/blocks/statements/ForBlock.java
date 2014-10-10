@@ -42,10 +42,10 @@ public class ForBlock extends StandardBlock {
     protected Expression expression;
     protected Statement body;
 
-    protected final In<Parameter> paramInput = new In<>("i", Parameter.class, p -> parameter = p);
-    protected final In<Expression> exprInput = new In<>("expr", Expression.class, e -> expression = e);
-    protected final In<Statement> bodyInput = new In<>("body", Statement.class, s -> body = s);
-    protected final Out<ForStatement> out = new Out<>("out", ForStatement.class, () -> new ForStatement(parameter, expression, body));
+    protected final In paramInput = new In("i", Parameter.class, p -> parameter = p);
+    protected final In exprInput = new In("expr", Expression.class, e -> expression = e);
+    protected final In bodyInput = new In("body", Statement.class, s -> body = s);
+    protected final Out out = new Out("out", ForStatement.class, () -> new ForStatement(parameter, expression, body));
 
     public ForBlock() {
         super("For Statement", "for", "for", Color.GREEN.darker());
@@ -59,12 +59,12 @@ public class ForBlock extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Arrays.asList(paramInput, exprInput, bodyInput);
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(out);
     }
 }

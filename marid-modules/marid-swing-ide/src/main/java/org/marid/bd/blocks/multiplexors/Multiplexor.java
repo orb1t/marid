@@ -40,9 +40,9 @@ public class Multiplexor<E> extends StandardBlock {
 
     protected volatile int inputCount;
     protected final Class<E> type;
-    protected final List<Input<?>> inputs = new ArrayList<>();
+    protected final List<Input> inputs = new ArrayList<>();
     protected final List<E> list = new ArrayList<>();
-    protected final Output<E[]> out;
+    protected final Output out;
     protected final String iconText;
 
     public Multiplexor(String name, String iconText, String label, Class<E> type, int inputCount) {
@@ -55,12 +55,12 @@ public class Multiplexor<E> extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return inputs;
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(out);
     }
 
@@ -106,11 +106,11 @@ public class Multiplexor<E> extends StandardBlock {
     public void updateInputs(int count) {
         inputs.clear();
         for (int i = 1; i <= count; i++) {
-            inputs.add(new In<>(Integer.toString(i), type, list::add));
+            inputs.add(new In(Integer.toString(i), type, list::add));
         }
     }
 
-    protected class MultiplexorOutput implements Output<E[]> {
+    protected class MultiplexorOutput implements Output {
 
         @Override
         public E[] get() {

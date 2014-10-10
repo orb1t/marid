@@ -36,7 +36,6 @@ import java.awt.event.WindowEvent;
 
 import static java.awt.BorderLayout.NORTH;
 import static javax.swing.SwingConstants.HORIZONTAL;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -49,7 +48,7 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
     protected final JToolBar toolBar = new JToolBar(getPref("orientation", HORIZONTAL, "toolbar"));
 
     public AbstractFrame(String title) {
-        super(s(title));
+        super(LS.s(title));
         setName(title);
         setJMenuBar(new JMenuBar());
         setUndecorated(getPref("undecorated", getSysPref("undecorated", false, "windows")));

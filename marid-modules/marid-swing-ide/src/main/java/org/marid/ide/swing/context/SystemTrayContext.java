@@ -21,6 +21,7 @@ package org.marid.ide.swing.context;
 import images.Images;
 import org.marid.ide.base.IdeFrame;
 import org.marid.image.MaridIcon;
+import org.marid.l10n.L10nSupport;
 import org.marid.pref.SysPrefSupport;
 import org.marid.swing.log.TrayIconHandler;
 import org.marid.swing.menu.ActionTreeElement;
@@ -31,13 +32,11 @@ import org.springframework.context.annotation.Configuration;
 import java.awt.*;
 import java.util.logging.Level;
 
-import static org.marid.l10n.L10n.s;
-
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-public class SystemTrayContext implements SysPrefSupport {
+public class SystemTrayContext implements SysPrefSupport, L10nSupport {
 
     @Autowired
     ActionTreeElement ideActionTreeElement;

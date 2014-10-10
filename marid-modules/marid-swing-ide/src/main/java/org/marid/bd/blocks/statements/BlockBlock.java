@@ -32,7 +32,7 @@ import java.util.List;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
-public class BlockBlock extends IoBlock<Statement, BlockStatement> {
+public class BlockBlock extends IoBlock {
 
     protected final List<Statement> statements = new ArrayList<>();
 
@@ -41,8 +41,8 @@ public class BlockBlock extends IoBlock<Statement, BlockStatement> {
     }
 
     @Override
-    public void set(Statement value) {
-        statements.add(value);
+    public void set(Object value) {
+        statements.add((Statement) value);
     }
 
     @Override

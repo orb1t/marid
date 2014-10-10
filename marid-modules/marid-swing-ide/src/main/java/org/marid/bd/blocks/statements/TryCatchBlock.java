@@ -40,11 +40,11 @@ public class TryCatchBlock extends StandardBlock {
     protected Statement finallyStatement;
     protected CatchStatement[] catchStatements;
 
-    protected final In<Statement> tryInput = new In<>("try", Statement.class, s -> tryStatement = s);
-    protected final In<CatchStatement[]> catchInput = new In<>("catch", CatchStatement[].class, s -> catchStatements = s);
-    protected final In<Statement> finallyInput = new In<>("finally", Statement.class, s -> finallyStatement = s);
+    protected final In tryInput = new In("try", Statement.class, s -> tryStatement = s);
+    protected final In catchInput = new In("catch", CatchStatement[].class, s -> catchStatements = s);
+    protected final In finallyInput = new In("finally", Statement.class, s -> finallyStatement = s);
 
-    protected final Out<TryCatchStatement> out = new Out<>("out", TryCatchStatement.class, () -> {
+    protected final Out out = new Out("out", TryCatchStatement.class, () -> {
         final TryCatchStatement statement = new TryCatchStatement(tryStatement, finallyStatement);
         for (final CatchStatement catchStatement : catchStatements) {
             statement.addCatch(catchStatement);
@@ -64,12 +64,12 @@ public class TryCatchBlock extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Arrays.asList(tryInput, catchInput, finallyInput);
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(out);
     }
 }

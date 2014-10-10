@@ -18,20 +18,20 @@
 
 package org.marid.swing.profiles;
 
+import org.marid.l10n.L10nSupport;
+
 import javax.swing.*;
 import java.util.prefs.Preferences;
-
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProfileDialog extends JDialog {
+public class ProfileDialog extends JDialog implements L10nSupport {
 
     private final Preferences preferences;
 
     public ProfileDialog(JFrame frame, Preferences preferences) {
-        super(frame, s("Profiles") + ": " + frame.getTitle(), true);
+        super(frame, LS.s("Profiles") + ": " + frame.getTitle(), true);
         this.preferences = preferences;
     }
 }

@@ -40,10 +40,9 @@ public class CatchBlock extends StandardBlock {
     protected Parameter variable;
     protected Statement body;
 
-    protected final In<Parameter> variableInput = new In<>("var", Parameter.class, p -> variable = p);
-    protected final In<Statement> bodyInput = new In<>("body", Statement.class, s -> body = s);
-
-    protected final Out<CatchStatement> out = new Out<>("out", CatchStatement.class, () -> new CatchStatement(variable, body));
+    protected final In variableInput = new In("var", Parameter.class, p -> variable = p);
+    protected final In bodyInput = new In("body", Statement.class, s -> body = s);
+    protected final Out out = new Out("out", CatchStatement.class, () -> new CatchStatement(variable, body));
 
     public CatchBlock() {
         super("Catch Block", "catch", "catch", Color.GREEN.darker());
@@ -56,12 +55,12 @@ public class CatchBlock extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Arrays.asList(variableInput, bodyInput);
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(out);
     }
 }

@@ -51,10 +51,9 @@ public class BinExpBlock extends AbstractBlock {
     protected Expression right;
     protected TokenType tokenType;
 
-    protected final In<Expression> leftInput = new In<>("arg1", Expression.class, e -> left = e);
-    protected final In<Expression> rightInput = new In<>("arg2", Expression.class, e -> right = e);
-
-    protected final Out<Expression> output = new Out<>("out", Expression.class, this::binaryExpression);
+    protected final In leftInput = new In("arg1", Expression.class, e -> left = e);
+    protected final In rightInput = new In("arg2", Expression.class, e -> right = e);
+    protected final Out output = new Out("out", Expression.class, this::binaryExpression);
 
     public BinExpBlock() {
         this(TokenType.PLUS);
@@ -89,12 +88,12 @@ public class BinExpBlock extends AbstractBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Arrays.asList(leftInput, rightInput);
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(output);
     }
 

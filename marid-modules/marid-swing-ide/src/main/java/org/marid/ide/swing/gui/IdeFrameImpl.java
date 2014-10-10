@@ -24,6 +24,7 @@ import org.marid.ide.base.IdeFrame;
 import org.marid.ide.widgets.Widget;
 import org.marid.ide.widgets.WidgetProviders;
 import org.marid.image.MaridIcons;
+import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.MaridAction;
@@ -44,14 +45,12 @@ import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 import static javax.swing.JOptionPane.*;
-import static org.marid.l10n.L10n.m;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSupport {
+public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSupport, L10nSupport {
 
     private final IdeImpl ide;
 
@@ -63,7 +62,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
 
     @Autowired
     public IdeFrameImpl(IdeImpl ide, ActionTreeElement menuRoot) {
-        super(s("Marid IDE"));
+        super(LS.s("Marid IDE"));
         this.ide = ide;
         setIconImages(MaridIcons.ICONS);
         setJMenuBar(new JMenuBar());

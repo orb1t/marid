@@ -39,9 +39,9 @@ public class SynchronizedBlock extends StandardBlock {
     protected Expression expression;
     protected Statement statement;
 
-    protected final In<Expression> exprInput = new In<>("mon", Expression.class, e -> expression = e);
-    protected final In<Statement> stmtInput = new In<>("body", Statement.class, s -> statement = s);
-    protected final Out<SynchronizedStatement> out = new Out<>("out", SynchronizedStatement.class, () -> new SynchronizedStatement(expression, statement));
+    protected final In exprInput = new In("mon", Expression.class, e -> expression = e);
+    protected final In stmtInput = new In("body", Statement.class, s -> statement = s);
+    protected final Out out = new Out("out", SynchronizedStatement.class, () -> new SynchronizedStatement(expression, statement));
 
     public SynchronizedBlock() {
         super("Synchronized Statement", "sync", "sync", Color.GREEN.darker());
@@ -54,12 +54,12 @@ public class SynchronizedBlock extends StandardBlock {
     }
 
     @Override
-    public List<Input<?>> getInputs() {
+    public List<Input> getInputs() {
         return Arrays.asList(exprInput, stmtInput);
     }
 
     @Override
-    public List<Output<?>> getOutputs() {
+    public List<Output> getOutputs() {
         return Collections.singletonList(out);
     }
 }
