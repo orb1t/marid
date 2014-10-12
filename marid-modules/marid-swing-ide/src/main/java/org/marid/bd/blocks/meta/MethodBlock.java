@@ -16,11 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.blocks.export;
+package org.marid.bd.blocks.meta;
 
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
+import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
@@ -39,7 +40,7 @@ import static groovyjarjarasm.asm.Opcodes.ACC_PUBLIC;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
-public class MethodBlock extends StandardBlock {
+public class MethodBlock extends StandardBlock implements ConfigurableBlock {
 
     protected String methodName = "method";
     protected ClassNode returnType;
@@ -113,6 +114,6 @@ public class MethodBlock extends StandardBlock {
 
     public interface MethodBlockListener extends EventListener {
 
-        void methodNameChanged(String oldName, String newName);
+        void methodNameChanged(String name);
     }
 }

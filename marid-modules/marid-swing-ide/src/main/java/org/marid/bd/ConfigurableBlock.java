@@ -16,33 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.blocks.export;
-
-import org.marid.bd.ExportBlock;
-import org.marid.bd.StandardBlock;
-import org.marid.bd.blocks.BdBlock;
+package org.marid.bd;
 
 import java.awt.*;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
-public class UserClassBlock extends StandardBlock implements ExportBlock {
+public interface ConfigurableBlock extends Block {
 
-    public UserClassBlock() {
-        super("User class", "class", "class", Color.CYAN.darker());
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.emptyList();
-    }
+    Window createWindow(Window parent);
 }

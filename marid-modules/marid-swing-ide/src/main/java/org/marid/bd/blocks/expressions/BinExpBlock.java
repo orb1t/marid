@@ -26,6 +26,7 @@ import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.marid.bd.AbstractBlock;
 import org.marid.bd.BlockComponent;
+import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.bd.components.BlockLabel;
@@ -45,7 +46,7 @@ import java.util.List;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
-public class BinExpBlock extends AbstractBlock {
+public class BinExpBlock extends AbstractBlock implements ConfigurableBlock {
 
     protected Expression left;
     protected Expression right;
@@ -67,7 +68,7 @@ public class BinExpBlock extends AbstractBlock {
     @Override
     public BlockComponent createComponent() {
         return new StandardBlockComponent<>(this, c -> {
-            addEventListener(c, (BinExpListener) (oldType, newType) -> {
+            addEventListener(c, (BinExpListener) type -> {
                 c.updateBlock();
                 c.getSchemaEditor().repaint();
             });
@@ -168,6 +169,6 @@ public class BinExpBlock extends AbstractBlock {
 
     public interface BinExpListener extends EventListener {
 
-        void changedTokenType(TokenType oldType, TokenType newType);
+        void changedTokenType(TokenType type);
     }
 }

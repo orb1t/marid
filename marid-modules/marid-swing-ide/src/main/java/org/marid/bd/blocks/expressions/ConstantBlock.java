@@ -21,6 +21,7 @@ package org.marid.bd.blocks.expressions;
 import images.Images;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.marid.bd.AbstractBlock;
+import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.NamedBlock;
 import org.marid.bd.NamedBlockListener;
 import org.marid.bd.blocks.BdBlock;
@@ -43,7 +44,7 @@ import java.util.Vector;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
-public class ConstantBlock extends AbstractBlock implements NamedBlock {
+public class ConstantBlock extends AbstractBlock implements NamedBlock, ConfigurableBlock {
 
     protected String value = "null";
     protected final Out output = new Out("", ConstantExpression.class, this::constantExpression);
@@ -71,14 +72,14 @@ public class ConstantBlock extends AbstractBlock implements NamedBlock {
             panel.add(label);
             addEventListener(c, new ConstantBlockListener() {
                 @Override
-                public void changedValue(String oldValue, String newValue) {
-                    label.setText(newValue);
+                public void changedValue(String value) {
+                    label.setText(value);
                     update();
                 }
 
                 @Override
-                public void nameChanged(String oldName, String newName) {
-                    titleLabel.setText(newName);
+                public void nameChanged(String name) {
+                    titleLabel.setText(name);
                     update();
                 }
 
@@ -172,6 +173,6 @@ public class ConstantBlock extends AbstractBlock implements NamedBlock {
 
     public interface ConstantBlockListener extends NamedBlockListener {
 
-        void changedValue(String oldValue, String newValue);
+        void changedValue(String value);
     }
 }

@@ -16,11 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.bd;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface Changer<S, A> extends TriConsumer<S, A, A> {
+public interface SingletonBlock extends Block {
+
+    Block blockPort();
 }

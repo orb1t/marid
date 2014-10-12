@@ -20,13 +20,13 @@ package org.marid.bd;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.marid.beans.MaridBeans;
-import org.marid.functions.Changer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -53,13 +53,13 @@ public abstract class AbstractBlock implements Block {
         listeners.values().forEach(ls -> ls.stream().filter(t::isInstance).forEach(l -> consumer.accept(t.cast(l))));
     }
 
-    public <L extends EventListener, T> void fire(Class<L> t, Supplier<T> s, Consumer<T> c, T nv, Changer<L, T> es) {
+    public <L extends EventListener, T> void fire(Class<L> t, Supplier<T> s, Consumer<T> c, T nv, BiConsumer<L, T> ch) {
         final T old = s.get();
         if (!Objects.equals(old, nv)) {
             c.accept(nv);
             listeners.values().forEach(ls -> ls.stream()
                     .filter(t::isInstance)
-                    .forEach(l -> es.accept(t.cast(l), old, nv)));
+                    .forEach(l -> ch.accept(t.cast(l), nv)));
         }
     }
 

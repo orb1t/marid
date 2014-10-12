@@ -19,6 +19,7 @@
 package org.marid.bd.blocks.meta;
 
 import org.codehaus.groovy.ast.ClassNode;
+import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
@@ -35,7 +36,7 @@ import java.util.List;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
-public class ClassBlock extends StandardBlock {
+public class ClassBlock extends StandardBlock implements ConfigurableBlock {
 
     protected Class<?> targetClass;
 
@@ -92,6 +93,6 @@ public class ClassBlock extends StandardBlock {
 
     public interface ClassBlockListener extends EventListener {
 
-        void classChanged(Class<?> oldValue, Class<?> newValue);
+        void classChanged(Class<?> value);
     }
 }

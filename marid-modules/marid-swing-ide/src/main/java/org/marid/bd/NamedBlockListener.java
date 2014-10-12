@@ -25,5 +25,5 @@ import java.util.EventListener;
 */
 public interface NamedBlockListener extends EventListener {
 
-    void nameChanged(String oldName, String newName);
+    void nameChanged(String name);
 }

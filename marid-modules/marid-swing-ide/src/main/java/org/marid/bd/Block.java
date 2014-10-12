@@ -18,13 +18,13 @@
 
 package org.marid.bd;
 
-import org.marid.functions.Changer;
 import org.marid.itf.Named;
 import org.marid.swing.dnd.DndObject;
 
 import java.awt.*;
 import java.util.EventListener;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -41,15 +41,11 @@ public interface Block extends Named, DndObject {
 
     <L extends EventListener> void fireEvent(Class<L> t, Consumer<L> consumer);
 
-    <L extends EventListener, T> void fire(Class<L> t, Supplier<T> s, Consumer<T> c, T nv, Changer<L, T> es);
+    <L extends EventListener, T> void fire(Class<L> t, Supplier<T> s, Consumer<T> c, T nv, BiConsumer<L, T> es);
 
     BlockComponent createComponent();
 
     default void reset() {
-    }
-
-    default Window createWindow(Window parent) {
-        return null;
     }
 
     default boolean isStateless() {

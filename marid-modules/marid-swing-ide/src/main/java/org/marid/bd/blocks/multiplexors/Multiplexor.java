@@ -20,6 +20,7 @@ package org.marid.bd.blocks.multiplexors;
 
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
+import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.bd.shapes.Link;
@@ -36,7 +37,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Multiplexor<E> extends StandardBlock {
+public class Multiplexor<E> extends StandardBlock implements ConfigurableBlock {
 
     protected volatile int inputCount;
     protected final Class<E> type;
@@ -79,9 +80,9 @@ public class Multiplexor<E> extends StandardBlock {
     @Override
     public BlockComponent createComponent() {
         final BlockComponent component = super.createComponent();
-        addEventListener(component, (MultiplexorListener) (oldValue, newValue) -> EventQueue.invokeLater(() -> {
+        addEventListener(component, (MultiplexorListener) v -> EventQueue.invokeLater(() -> {
             final List<Link> links = component.getSchemaEditor().removeAllLinks(component);
-            updateInputs(newValue);
+            updateInputs(v);
             component.updateBlock();
             component.getSchemaEditor().createLinks(links);
             component.getSchemaEditor().validate();
@@ -135,7 +136,7 @@ public class Multiplexor<E> extends StandardBlock {
 
     public interface MultiplexorListener extends EventListener {
 
-        void inputCountChanged(int oldValue, int newValue);
+        void inputCountChanged(int count);
     }
 
     public class MultiplexorEditor extends AbstractBlockComponentEditor<Multiplexor<E>> {

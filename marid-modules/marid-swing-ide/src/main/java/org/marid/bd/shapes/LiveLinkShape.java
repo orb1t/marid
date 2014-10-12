@@ -61,7 +61,7 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
     @Override
     protected void mutate(LiveLinkShapeData specie, ThreadLocalRandom random) {
         if (random.nextDouble() < mutationProbability) {
-            final int r = random.nextInt(2000);
+            final int r = random.nextInt(5000);
             for (int i = 0; i < COUNT; i++) {
                 specie.xs[i] += random.nextInt(-r, r + 1);
                 specie.ys[i] += random.nextInt(-r, r + 1);
@@ -70,7 +70,6 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
     }
 
     private double lengthSq(LiveLinkShapeData data) {
-        final Point out = this.out, in = this.in;
         double length = Point.distanceSq(out.x, out.y, data.xs[0], data.ys[0]);
         for (int i = 0; i < COUNT - 1; i++) {
             length += Point.distanceSq(data.xs[i], data.ys[i], data.xs[i + 1], data.ys[i + 1]);

@@ -31,7 +31,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
+import static java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import static org.marid.bd.shapes.LinkShapeType.LiveLinkConfigurationEditor.incubatorSize;
 import static org.marid.bd.shapes.LinkShapeType.LiveLinkConfigurationEditor.species;
 import static org.marid.concurrent.ThreadPools.getPoolSize;
@@ -42,7 +42,7 @@ import static org.marid.concurrent.ThreadPools.newArrayThreadPool;
  */
 public abstract class AbstractLiveLinkShape<T> extends LinkShape implements Cloneable, LogSupport {
 
-    private static final ThreadPoolExecutor EXECUTOR = newArrayThreadPool(getPoolSize(4), 8192, new AbortPolicy());
+    private static final ThreadPoolExecutor EXECUTOR = newArrayThreadPool(getPoolSize(4), 8192, new DiscardPolicy());
 
     protected final List<T> specieList = new ArrayList<>();
     protected volatile T bestSpecie;
@@ -64,7 +64,7 @@ public abstract class AbstractLiveLinkShape<T> extends LinkShape implements Clon
         in = input.getConnectionPoint();
         rectangles.clear();
         output.getBlockComponent().getSchemaEditor().visitBlockComponents(bc -> rectangles.add(bc.getBounds()));
-        for (int i = 0; i < 32; i++) {
+        for (int i = 0; i < 64; i++) {
             try {
                 EXECUTOR.execute(this::doGA);
             } catch (RejectedExecutionException x) {

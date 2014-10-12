@@ -79,8 +79,8 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
         final JButton impBtn = new JButton(new MaridAction("Import preferences", "importPrefs", this::importPrefs));
         final JButton expBtn = new JButton(new MaridAction("Export preferences", "exportPrefs", this::exportPrefs));
         final JButton defBtn = new JButton(new MaridAction("Load defaults", "loadDefaults", this::loadDefaults));
-        final JButton cclBtn = new JButton(new MaridAction("Cancel", "cancel", (a, e) -> dispose()));
-        final JButton okBtn = new JButton(new MaridAction("OK", "ok", (ActionListener) this::savePreferences));
+        final JButton cclBtn = new JButton(new MaridAction("Cancel", "cancel.png", (a, e) -> dispose()));
+        final JButton okBtn = new JButton(new MaridAction("OK", "ok.png", (ActionListener) this::savePreferences));
         add(groupedPanel(GroupLayout::createSequentialGroup, GroupLayout::createParallelGroup, (g, h, v) -> {
             h.addComponent(impBtn).addComponent(expBtn).addGap(20).addComponent(defBtn);
             h.addGap(10, 10, Integer.MAX_VALUE);

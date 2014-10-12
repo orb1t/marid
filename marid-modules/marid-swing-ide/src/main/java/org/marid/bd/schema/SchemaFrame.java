@@ -149,7 +149,7 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
 
     protected void saveAs(ActionEvent actionEvent) {
         final Profile profile = profileManager.getCurrentProfile();
-        final File dir = profile == null ? new File(".") : profile.getClassesPath().toFile();
+        final File dir = profile == null ? new File(".") : profile.getContextPath().toFile();
         final JFileChooser chooser = new JFileChooser(dir);
         chooser.setAcceptAllFileFilterUsed(false);
         chooser.addChoosableFileFilter(new FileNameExtensionFilter("XML files", "xml"));

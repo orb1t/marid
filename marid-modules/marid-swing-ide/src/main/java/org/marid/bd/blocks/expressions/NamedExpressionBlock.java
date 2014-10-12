@@ -19,6 +19,7 @@
 package org.marid.bd.blocks.expressions;
 
 import org.codehaus.groovy.ast.expr.Expression;
+import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.DefaultBlockComponentEditor;
@@ -31,7 +32,7 @@ import java.util.EventListener;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
-public class NamedExpressionBlock extends IoBlock {
+public class NamedExpressionBlock extends IoBlock implements ConfigurableBlock {
 
     protected Expression expression;
     protected String key;
@@ -86,6 +87,6 @@ public class NamedExpressionBlock extends IoBlock {
 
     public interface NamedExpressionBlockListener extends EventListener {
 
-        void keyChanged(String oldKey, String newKey);
+        void keyChanged(String key);
     }
 }
