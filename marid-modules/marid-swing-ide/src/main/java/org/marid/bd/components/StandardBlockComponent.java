@@ -99,8 +99,6 @@ public class StandardBlockComponent<B extends Block> extends DefaultBlockCompone
 
     @Override
     public void update() {
-        inputs.clear();
-        outputs.clear();
         final Component westComponent = ((BorderLayout) getLayout()).getLayoutComponent(WEST);
         final Component eastComponent = ((BorderLayout) getLayout()).getLayoutComponent(EAST);
         if (westComponent != null) {
@@ -124,6 +122,7 @@ public class StandardBlockComponent<B extends Block> extends DefaultBlockCompone
     }
 
     public JPanel inputsPanel() {
+        inputs.clear();
         final JPanel panel = new JPanel();
         panel.setOpaque(false);
         if (block.getInputs().isEmpty()) {
@@ -158,6 +157,7 @@ public class StandardBlockComponent<B extends Block> extends DefaultBlockCompone
     }
 
     public JPanel outputsPanel() {
+        outputs.clear();
         final JPanel panel = new JPanel();
         panel.setOpaque(false);
         if (block.getOutputs().isEmpty()) {

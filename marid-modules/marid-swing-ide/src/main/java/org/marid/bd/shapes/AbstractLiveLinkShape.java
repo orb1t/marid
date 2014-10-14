@@ -22,12 +22,8 @@ import org.marid.bd.BlockComponent;
 import org.marid.logging.LogSupport;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
-import java.util.TreeMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -48,7 +44,7 @@ public abstract class AbstractLiveLinkShape<T> extends LinkShape implements Clon
     protected volatile T bestSpecie;
     protected volatile Point out;
     protected volatile Point in;
-    protected final CopyOnWriteArrayList<Rectangle> rectangles = new CopyOnWriteArrayList<>();
+    protected volatile Rectangle[] rectangles = new Rectangle[0];
 
     public AbstractLiveLinkShape(BlockComponent.Output output, BlockComponent.Input input) {
         super(output, input);
@@ -58,18 +54,19 @@ public abstract class AbstractLiveLinkShape<T> extends LinkShape implements Clon
         bestSpecie = specieList.get(0);
     }
 
+    protected void init() {
+        rectangles = Arrays.stream(output.getBlockComponent().getSchemaEditor().getComponents())
+                .map(Component::getBounds)
+                .toArray(Rectangle[]::new);
+    }
+
     @Override
     public void update() {
         out = output.getConnectionPoint();
         in = input.getConnectionPoint();
-        rectangles.clear();
-        output.getBlockComponent().getSchemaEditor().visitBlockComponents(bc -> rectangles.add(bc.getBounds()));
+        init();
         for (int i = 0; i < 64; i++) {
-            try {
-                EXECUTOR.execute(this::doGA);
-            } catch (RejectedExecutionException x) {
-                break;
-            }
+            EXECUTOR.execute(this::doGA);
         }
         bestSpecie = specieList.get(0);
     }
