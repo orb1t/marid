@@ -60,7 +60,7 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
     protected final In fieldsInput = new In("fields", FieldNode[].class, v -> fields = v);
     protected final In annotationsInput = new In("annotations", AnnotationNode[].class, v -> annotations = v);
     protected final In constructorsInput = new In("constructors", ConstructorNode[].class, v -> constructors = v);
-    protected final Out out = new Out("class", ClassNode.class, this::classNode);
+    protected final Out export = new Out("class", ClassNode.class, this::classNode);
 
     public UserClassBlock() {
         super("User class", "class", "class", Color.CYAN.darker());
@@ -92,7 +92,12 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
 
     @Override
     public List<Output> getOutputs() {
-        return Arrays.asList(out);
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<Output> getExports() {
+        return Collections.singletonList(export);
     }
 
     @Override

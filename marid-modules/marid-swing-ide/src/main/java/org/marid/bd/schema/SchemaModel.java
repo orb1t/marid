@@ -21,6 +21,7 @@ package org.marid.bd.schema;
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.BlockLink;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import java.awt.*;
 import java.beans.ConstructorProperties;
@@ -95,6 +96,10 @@ public class SchemaModel {
 
     public Map<BlockLink, BlockLinkLayoutInfo> getBlockLinkMap() {
         return blockLinkMap;
+    }
+
+    public void reset() {
+        blockMap.keySet().forEach(Block::reset);
     }
 
     public static class BlockLayoutInfo {

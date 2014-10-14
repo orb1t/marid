@@ -18,7 +18,9 @@
 
 package org.marid.bd.schema;
 
+import groovy.inspect.swingui.AstNodeToScriptVisitor;
 import images.Images;
+import org.codehaus.groovy.ast.ClassNode;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
@@ -26,7 +28,6 @@ import org.marid.beans.MaridBeans;
 import org.marid.ide.components.BlockMenuProvider;
 import org.marid.ide.components.ProfileManager;
 import org.marid.ide.profile.Profile;
-import org.marid.l10n.L10nSupport;
 import org.marid.swing.AbstractFrame;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.menu.MenuActionList;
@@ -40,6 +41,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.io.*;
+import java.nio.file.Files;
+import java.util.List;
 
 import static java.awt.Color.RED;
 import static java.awt.SystemColor.infoText;
@@ -49,7 +52,7 @@ import static javax.swing.BorderFactory.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SchemaFrame extends AbstractFrame implements SchemaFrameConfiguration, L10nSupport {
+public class SchemaFrame extends AbstractFrame implements SchemaFrameConfiguration {
 
     protected final ProfileManager profileManager;
     protected final SchemaEditor schemaEditor = new SchemaEditor(this);
@@ -126,7 +129,9 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
         switch (chooser.showOpenDialog(this)) {
             case JFileChooser.APPROVE_OPTION:
                 try (final InputStream inputStream = new FileInputStream(chooser.getSelectedFile())) {
-                    schemaEditor.load(MaridBeans.read(SchemaModel.class, inputStream));
+                    final SchemaModel model = MaridBeans.read(SchemaModel.class, inputStream);
+                    model.reset();
+                    schemaEditor.load(model);
                     file = chooser.getSelectedFile();
                 } catch (Exception x) {
                     showMessage(ERROR_MESSAGE, "Load error", "Load {0} error", x, chooser.getSelectedFile());
@@ -140,8 +145,20 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
             saveAs(actionEvent);
             return;
         }
-        try (final OutputStream outputStream = new FileOutputStream(file)) {
-            MaridBeans.write(outputStream, new SchemaModel(schemaEditor));
+        try {
+            final SchemaModel model = new SchemaModel(schemaEditor);
+            try (final OutputStream outputStream = new FileOutputStream(file)) {
+                MaridBeans.write(outputStream, model);
+            }
+            final List<ClassNode> classNodes = SchemaToCode.schemaToCode(model.getSchema());
+            final Profile profile = profileManager.getCurrentProfile();
+            for (final ClassNode classNode : classNodes) {
+                final String name = classNode.getNameWithoutPackage() + ".groovy";
+                try (final Writer writer = Files.newBufferedWriter(profile.getClassesPath().resolve(name))) {
+                    final AstNodeToScriptVisitor astNodeToScriptVisitor = new AstNodeToScriptVisitor(writer);
+                    astNodeToScriptVisitor.visitClass(classNode);
+                }
+            }
         } catch (Exception x) {
             showMessage(ERROR_MESSAGE, "Save error", "Save {0} error", x, file);
         }

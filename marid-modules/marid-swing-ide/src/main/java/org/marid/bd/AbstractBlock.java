@@ -74,6 +74,10 @@ public abstract class AbstractBlock implements Block {
         return ToStringBuilder.reflectionToString(this);
     }
 
+    @Override
+    public void reset() {
+    }
+
     protected static class BlockProxy implements Serializable {
 
         private final Class<?> type;

@@ -19,7 +19,6 @@
 package org.marid.swing;
 
 import org.marid.image.MaridIcons;
-import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.SysPrefSupport;
 import org.marid.swing.menu.ActionTreeElement;
@@ -40,7 +39,7 @@ import static javax.swing.SwingConstants.HORIZONTAL;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPrefSupport, LogSupport, MessageSupport {
+public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPrefSupport, MessageSupport {
 
     public static final Border CENTER_PANEL_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 

@@ -22,6 +22,7 @@ import org.marid.itf.Named;
 import org.marid.swing.dnd.DndObject;
 
 import java.awt.*;
+import java.util.Collections;
 import java.util.EventListener;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -45,8 +46,7 @@ public interface Block extends Named, DndObject {
 
     BlockComponent createComponent();
 
-    default void reset() {
-    }
+    void reset();
 
     default boolean isStateless() {
         try {
@@ -67,6 +67,10 @@ public interface Block extends Named, DndObject {
     List<Input> getInputs();
 
     List<Output> getOutputs();
+
+    default List<Output> getExports() {
+        return Collections.emptyList();
+    }
 
     interface Input extends Named {
 

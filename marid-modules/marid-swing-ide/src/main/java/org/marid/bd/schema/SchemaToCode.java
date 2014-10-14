@@ -62,7 +62,7 @@ public class SchemaToCode {
             for (final Block block : blockSet) {
                 block.reset();
                 links.stream().filter(l -> l.getTarget().equals(block)).forEach(BlockLink::transferValue);
-                for (final Block.Output output : block.getOutputs()) {
+                for (final Block.Output output : block.getExports()) {
                     final Object out = output.get();
                     if (out instanceof ClassNode) {
                         final ClassNode classNode = (ClassNode) out;

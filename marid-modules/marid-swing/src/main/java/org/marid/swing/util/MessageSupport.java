@@ -19,6 +19,7 @@
 package org.marid.swing.util;
 
 import org.marid.l10n.L10nSupport;
+import org.marid.logging.LogSupport;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,7 +29,7 @@ import java.io.StringWriter;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface MessageSupport extends L10nSupport {
+public interface MessageSupport extends L10nSupport, LogSupport {
 
     int WARNING_MESSAGE = JOptionPane.WARNING_MESSAGE;
     int ERROR_MESSAGE = JOptionPane.ERROR_MESSAGE;
@@ -51,6 +52,7 @@ public interface MessageSupport extends L10nSupport {
             error.printStackTrace(pw);
         }
         JOptionPane.showMessageDialog(component(this), sw.toString(), s(title), messageType);
+        warning(message, error, args);
     }
 
     static Component component(Object object) {
