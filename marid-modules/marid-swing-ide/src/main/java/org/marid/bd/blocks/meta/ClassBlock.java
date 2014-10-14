@@ -71,7 +71,6 @@ public class ClassBlock extends StandardBlock implements ConfigurableBlock {
 
     @Override
     public void reset() {
-        targetClass = null;
     }
 
     @Override
