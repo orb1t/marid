@@ -26,6 +26,7 @@ import org.codehaus.groovy.ast.stmt.SwitchStatement;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +38,7 @@ import static java.util.Collections.emptyList;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class SwitchBlock extends StandardBlock {
 
     protected CaseStatement[] caseStatements;

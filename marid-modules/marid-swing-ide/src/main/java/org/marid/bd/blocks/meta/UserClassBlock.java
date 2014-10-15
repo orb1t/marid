@@ -28,6 +28,8 @@ import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.swing.input.StringInputControl;
 
 import javax.swing.*;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.beans.ConstructorProperties;
@@ -42,9 +44,12 @@ import static groovyjarjarasm.asm.Opcodes.ACC_PUBLIC;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class UserClassBlock extends StandardBlock implements ConfigurableBlock, SingletonBlock {
 
-    protected String className;
+    @XmlAttribute
+    protected String className = "UserClass";
+
     protected ClassNode[] interfaces;
     protected MixinNode[] mixins;
     protected ClassNode superClass;
@@ -68,7 +73,6 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
 
     @Override
     public void reset() {
-        className = "UserClass";
         interfaces = new ClassNode[0];
         mixins = new MixinNode[0];
         superClass = ClassHelper.OBJECT_TYPE;

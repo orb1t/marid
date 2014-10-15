@@ -21,7 +21,7 @@ package org.marid.bd;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface SingletonBlock extends Block {
+public interface SingletonBlock {
 
     Block blockPort();
 }

@@ -24,6 +24,7 @@ import org.codehaus.groovy.ast.stmt.Statement;
 import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ import java.util.List;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class BlockBlock extends IoBlock {
 
     protected final List<Statement> statements = new ArrayList<>();

@@ -18,19 +18,36 @@
 
 package org.marid.bd;
 
-import java.beans.ConstructorProperties;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlIDREF;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.rmi.server.UID;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
+@XmlRootElement
 public class BlockLink {
 
+    @XmlID
+    @XmlAttribute
+    private final String id = new UID().toString();
+
+    @XmlIDREF
+    @XmlAttribute
     public final Block source;
+
+    @XmlIDREF
+    @XmlAttribute
     public final Block target;
+
+    @XmlAttribute
     public final String output;
+
+    @XmlAttribute
     public final String input;
 
-    @ConstructorProperties({"source", "target", "output", "input"})
     public BlockLink(Block source, Block target, String output, String input) {
         this.source = source;
         this.target = target;
@@ -40,6 +57,10 @@ public class BlockLink {
 
     public BlockLink(Block.Output output, Block.Input input) {
         this(output.getBlock(), input.getBlock(), output.getName(), input.getName());
+    }
+
+    public BlockLink() {
+        this(null, null, null, null);
     }
 
     public boolean matchesOutput(Block.Output output) {

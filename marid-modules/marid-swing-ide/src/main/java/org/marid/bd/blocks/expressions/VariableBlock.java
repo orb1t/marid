@@ -23,26 +23,24 @@ import org.codehaus.groovy.ast.expr.VariableExpression;
 import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
-import java.beans.ConstructorProperties;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class VariableBlock extends IoBlock {
 
-    protected ClassNode type;
+    @XmlAttribute
     protected String varName = "x";
+
+    protected ClassNode type;
 
     public VariableBlock() {
         super("Variable expression", "var", "var", Color.BLUE, ClassNode.class, VariableExpression.class);
-    }
-
-    @ConstructorProperties({"varName"})
-    public VariableBlock(String varName) {
-        this();
-        this.varName = varName;
     }
 
     @Override

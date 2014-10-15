@@ -24,6 +24,7 @@ import org.codehaus.groovy.ast.ClassNode;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,6 +36,7 @@ import static org.marid.bd.blocks.expressions.NamedExpressionBlock.NamedExpressi
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class AnnotationBlock extends StandardBlock {
 
     protected ClassNode classNode;

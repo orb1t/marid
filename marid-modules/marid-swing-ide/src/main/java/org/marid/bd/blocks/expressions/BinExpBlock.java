@@ -24,7 +24,7 @@ import org.codehaus.groovy.ast.expr.EmptyExpression;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
-import org.marid.bd.AbstractBlock;
+import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.blocks.BdBlock;
@@ -34,9 +34,10 @@ import org.marid.bd.components.StandardBlockComponent;
 import org.marid.swing.input.ComboInputControl;
 
 import javax.swing.*;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.beans.ConstructorProperties;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EventListener;
@@ -46,24 +47,18 @@ import java.util.List;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
-public class BinExpBlock extends AbstractBlock implements ConfigurableBlock {
+@XmlRootElement
+public class BinExpBlock extends Block implements ConfigurableBlock {
+
+    @XmlAttribute
+    protected TokenType tokenType;
 
     protected Expression left;
     protected Expression right;
-    protected TokenType tokenType;
 
     protected final In leftInput = new In("arg1", Expression.class, e -> left = e);
     protected final In rightInput = new In("arg2", Expression.class, e -> right = e);
     protected final Out output = new Out("out", Expression.class, this::binaryExpression);
-
-    public BinExpBlock() {
-        this(TokenType.PLUS);
-    }
-
-    @ConstructorProperties({"tokenType"})
-    public BinExpBlock(TokenType tokenType) {
-        this.tokenType = tokenType;
-    }
 
     @Override
     public BlockComponent createComponent() {

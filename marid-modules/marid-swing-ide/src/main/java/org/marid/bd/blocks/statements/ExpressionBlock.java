@@ -23,12 +23,14 @@ import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class ExpressionBlock extends IoBlock {
 
     protected Expression expression;

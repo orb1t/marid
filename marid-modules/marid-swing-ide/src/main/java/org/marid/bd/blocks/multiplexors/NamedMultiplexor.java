@@ -20,7 +20,7 @@ package org.marid.bd.blocks.multiplexors;
 
 import org.marid.bd.blocks.BdBlock;
 
-import java.beans.ConstructorProperties;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import static org.marid.bd.blocks.expressions.NamedExpressionBlock.NamedExpression;
 
@@ -28,14 +28,10 @@ import static org.marid.bd.blocks.expressions.NamedExpressionBlock.NamedExpressi
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class NamedMultiplexor extends Multiplexor<NamedExpression> {
 
-    @ConstructorProperties({"inputCount"})
-    public NamedMultiplexor(int inputCount) {
-        super("Named expression multiplexor", "n.expr", "n.expr", NamedExpression.class, 2);
-    }
-
     public NamedMultiplexor() {
-        this(2);
+        super("Named expression multiplexor", "n.expr", "n.expr", NamedExpression.class, 2);
     }
 }

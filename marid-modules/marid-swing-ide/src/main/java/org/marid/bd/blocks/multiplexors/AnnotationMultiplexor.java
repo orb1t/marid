@@ -21,20 +21,16 @@ package org.marid.bd.blocks.multiplexors;
 import org.codehaus.groovy.ast.AnnotationNode;
 import org.marid.bd.blocks.BdBlock;
 
-import java.beans.ConstructorProperties;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class AnnotationMultiplexor extends Multiplexor<AnnotationNode> {
 
     public AnnotationMultiplexor() {
-        this(2);
-    }
-
-    @ConstructorProperties({"inputCount"})
-    public AnnotationMultiplexor(int inputCount) {
-        super("Annotation multiplexor", " @ ", "@", AnnotationNode.class, inputCount);
+        super("Annotation multiplexor", " @ ", "@", AnnotationNode.class, 2);
     }
 }

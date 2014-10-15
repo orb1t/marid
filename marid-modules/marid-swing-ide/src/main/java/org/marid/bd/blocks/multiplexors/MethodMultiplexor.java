@@ -21,20 +21,16 @@ package org.marid.bd.blocks.multiplexors;
 import org.codehaus.groovy.ast.MethodNode;
 import org.marid.bd.blocks.BdBlock;
 
-import java.beans.ConstructorProperties;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class MethodMultiplexor extends Multiplexor<MethodNode> {
 
-    @ConstructorProperties({"inputCount"})
-    public MethodMultiplexor(int inputCount) {
-        super("Method multiplexor", "method", "method", MethodNode.class, inputCount);
-    }
-
     public MethodMultiplexor() {
-        this(2);
+        super("Method multiplexor", "method", "method", MethodNode.class, 2);
     }
 }

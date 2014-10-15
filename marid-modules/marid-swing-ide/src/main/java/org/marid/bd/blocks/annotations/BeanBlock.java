@@ -25,6 +25,7 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 import org.springframework.context.annotation.Bean;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.List;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class BeanBlock extends StandardBlock {
 
     private static final ClassNode BEAN_CLASS = ClassHelper.make(Bean.class);

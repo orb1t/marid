@@ -25,6 +25,8 @@ import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.DefaultBlockComponentEditor;
 
 import javax.swing.*;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.util.EventListener;
 
@@ -32,10 +34,13 @@ import java.util.EventListener;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class NamedExpressionBlock extends IoBlock implements ConfigurableBlock {
 
-    protected Expression expression;
+    @XmlAttribute
     protected String key;
+
+    protected Expression expression;
 
     public NamedExpressionBlock() {
         super("Named Expression Block", "n.expr", "e -> n.e", Color.BLUE, Expression.class, NamedExpression.class);

@@ -24,14 +24,15 @@ import org.codehaus.groovy.ast.ClassNode;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
-import org.marid.beans.MaridBeans;
 import org.marid.ide.components.BlockMenuProvider;
+import org.marid.ide.components.BlockPersister;
 import org.marid.ide.components.ProfileManager;
 import org.marid.ide.profile.Profile;
 import org.marid.swing.AbstractFrame;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.menu.MenuActionList;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -40,7 +41,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
-import java.io.*;
+import java.io.File;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.util.List;
 
@@ -55,15 +57,21 @@ import static javax.swing.BorderFactory.*;
 public class SchemaFrame extends AbstractFrame implements SchemaFrameConfiguration {
 
     protected final ProfileManager profileManager;
+    protected final BlockPersister persister;
     protected final SchemaEditor schemaEditor = new SchemaEditor(this);
     protected final JLayer<SchemaEditor> layer = new JLayer<>(schemaEditor, new SchemaEditorLayerUI());
     protected final JMenu blocksMenu = new JMenu(s("Blocks"));
     protected File file;
 
     @Autowired
-    public SchemaFrame(BlockMenuProvider blockMenuProvider, ProfileManager profileManager) {
+    public SchemaFrame(BlockMenuProvider blockMenuProvider,
+                       ProfileManager profileManager,
+                       BlockPersister persister,
+                       AutowireCapableBeanFactory autowireCapableBeanFactory) {
         super("Schema");
         this.profileManager = profileManager;
+        this.persister = persister;
+        autowireCapableBeanFactory.autowireBean(schemaEditor);
         enableEvents(AWTEvent.COMPONENT_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
         centerPanel.add(layer);
         getContentPane().setBackground(getBackground());
@@ -128,9 +136,8 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
         chooser.setMultiSelectionEnabled(false);
         switch (chooser.showOpenDialog(this)) {
             case JFileChooser.APPROVE_OPTION:
-                try (final InputStream inputStream = new FileInputStream(chooser.getSelectedFile())) {
-                    final SchemaModel model = MaridBeans.read(SchemaModel.class, inputStream);
-                    model.reset();
+                try {
+                    final SchemaModel model = persister.load(chooser.getSelectedFile().toPath());
                     schemaEditor.load(model);
                     file = chooser.getSelectedFile();
                 } catch (Exception x) {
@@ -147,9 +154,7 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
         }
         try {
             final SchemaModel model = new SchemaModel(schemaEditor);
-            try (final OutputStream outputStream = new FileOutputStream(file)) {
-                MaridBeans.write(outputStream, model);
-            }
+            persister.save(model, file.toPath());
             final List<ClassNode> classNodes = SchemaToCode.schemaToCode(model.getSchema());
             final Profile profile = profileManager.getCurrentProfile();
             for (final ClassNode classNode : classNodes) {

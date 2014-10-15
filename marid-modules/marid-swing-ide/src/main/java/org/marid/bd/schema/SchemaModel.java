@@ -19,108 +19,62 @@
 package org.marid.bd.schema;
 
 import org.marid.bd.Block;
-import org.marid.bd.BlockComponent;
 import org.marid.bd.BlockLink;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
-import java.awt.*;
-import java.beans.ConstructorProperties;
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@XmlRootElement
+@XmlSeeAlso({Schema.class, BlockLayoutInfo.class, BlockLinkLayoutInfo.class})
 public class SchemaModel {
 
+    @XmlElement
     protected final Schema schema;
-    protected final Map<Block, BlockLayoutInfo> blockMap;
-    protected final Map<BlockLink, BlockLinkLayoutInfo> blockLinkMap;
 
-    @ConstructorProperties({"schema", "blockMap", "blockLinkMap"})
-    public SchemaModel(Schema schema, Map<Block, BlockLayoutInfo> blockMap, Map<BlockLink, BlockLinkLayoutInfo> blockLinkMap) {
-        this.schema = schema;
-        this.blockMap = blockMap;
-        this.blockLinkMap = blockLinkMap;
-    }
+    @XmlElementWrapper(name = "blocks")
+    @XmlElementRef
+    protected final List<BlockLayoutInfo> blocks;
+
+    @XmlElementWrapper(name = "links")
+    @XmlElementRef
+    protected final List<BlockLinkLayoutInfo> links;
 
     public SchemaModel() {
-        this(new Schema(), new IdentityHashMap<>(), new IdentityHashMap<>());
+        schema = new Schema();
+        blocks = new ArrayList<>();
+        links = new ArrayList<>();
     }
 
     public SchemaModel(SchemaEditor schemaEditor) {
         final List<Block> blockList = new ArrayList<>();
         final List<BlockLink> linkList = new ArrayList<>();
-        this.blockMap = new IdentityHashMap<>();
-        this.blockLinkMap = new IdentityHashMap<>();
+        this.blocks = new ArrayList<>();
+        this.links = new ArrayList<>();
         schemaEditor.visitBlockComponents(c -> {
+            blocks.add(new BlockLayoutInfo(c.getLocation(), c.getBlock()));
             blockList.add(c.getBlock());
-            blockMap.put(c.getBlock(), new BlockLayoutInfo(c.getLocation()));
         });
         schemaEditor.getLinkShapes().forEach(linkShape -> {
-            final BlockLink blockLink = new BlockLink(linkShape.output.getOutput(), linkShape.input.getInput());
-            linkList.add(blockLink);
-            blockLinkMap.put(blockLink, new BlockLinkLayoutInfo());
+            final BlockLink link = new BlockLink(linkShape.output.getOutput(), linkShape.input.getInput());
+            links.add(new BlockLinkLayoutInfo(link));
+            linkList.add(link);
         });
         this.schema = new Schema(schemaEditor.getName(), blockList, linkList);
-    }
-
-    public void addBlock(BlockComponent blockComponent, Point location) {
-        schema.addBlock(blockComponent.getBlock());
-        blockMap.put(blockComponent.getBlock(), new BlockLayoutInfo(location));
-    }
-
-    public void removeBlock(BlockComponent blockComponent) {
-        schema.removeBlock(blockComponent.getBlock());
-        blockMap.remove(blockComponent.getBlock());
-    }
-
-    public void addBlockLink(BlockComponent.Output output, BlockComponent.Input input) {
-        schema.addBlockLink(new BlockLink(output.getOutput(), input.getInput()));
-    }
-
-    public void removeBlockLink(BlockLink blockLink) {
-        schema.removeBlockLink(blockLink);
-        blockLinkMap.remove(blockLink);
     }
 
     public Schema getSchema() {
         return schema;
     }
 
-    public Map<Block, BlockLayoutInfo> getBlockMap() {
-        return blockMap;
+    public List<BlockLayoutInfo> getBlocks() {
+        return blocks;
     }
 
-    public Map<BlockLink, BlockLinkLayoutInfo> getBlockLinkMap() {
-        return blockLinkMap;
-    }
-
-    public void reset() {
-        blockMap.keySet().forEach(Block::reset);
-    }
-
-    public static class BlockLayoutInfo {
-
-        private volatile Point location;
-
-        @ConstructorProperties({"location"})
-        public BlockLayoutInfo(Point location) {
-            this.location = location;
-        }
-
-        public Point getLocation() {
-            return location;
-        }
-
-        public void setLocation(Point location) {
-            this.location = location;
-        }
-    }
-
-    public static class BlockLinkLayoutInfo {
-
+    public List<BlockLinkLayoutInfo> getLinks() {
+        return links;
     }
 }

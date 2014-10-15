@@ -18,22 +18,24 @@
 
 package org.marid.bd;
 
+import org.marid.itf.Named;
+
 import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public interface NamedBlock extends Block {
+public interface NamedBlock extends Named {
 
     Map<NamedBlock, String> NAMED_BLOCK_NAME_MAP = new WeakHashMap<>();
 
-    @Override
     default String getName() {
         return NAMED_BLOCK_NAME_MAP.get(this);
     }
 
     default void setName(String newName) {
-        fire(NamedBlockListener.class, this::getName, n -> NAMED_BLOCK_NAME_MAP.put(this, n), newName, NamedBlockListener::nameChanged);
+        final Block block = (Block) this;
+        block.fire(NamedBlockListener.class, this::getName, n -> NAMED_BLOCK_NAME_MAP.put(this, n), newName, NamedBlockListener::nameChanged);
     }
 }

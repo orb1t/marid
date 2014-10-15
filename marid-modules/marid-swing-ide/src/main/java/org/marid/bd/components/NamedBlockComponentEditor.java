@@ -18,6 +18,7 @@
 
 package org.marid.bd.components;
 
+import org.marid.bd.Block;
 import org.marid.bd.NamedBlock;
 
 import javax.swing.*;
@@ -27,7 +28,7 @@ import java.awt.event.ActionEvent;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class NamedBlockComponentEditor<B extends NamedBlock> extends AbstractBlockComponentEditor<B> {
+public class NamedBlockComponentEditor<B extends Block & NamedBlock> extends AbstractBlockComponentEditor<B> {
 
     protected final JTextField nameField = new JTextField(block.getName());
 

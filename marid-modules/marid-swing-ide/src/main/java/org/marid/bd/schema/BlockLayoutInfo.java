@@ -16,21 +16,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.blocks.multiplexors;
+package org.marid.bd.schema;
 
-import org.codehaus.groovy.ast.stmt.CaseStatement;
-import org.marid.bd.blocks.BdBlock;
+import org.marid.bd.Block;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import java.awt.*;
 
 /**
- * @author Dmitry Ovchinnikov
- */
-@BdBlock
+* @author Dmitry Ovchinnikov
+*/
 @XmlRootElement
-public class CaseMultiplexor extends Multiplexor<CaseStatement> {
+@XmlSeeAlso({Block.class})
+public class BlockLayoutInfo {
 
-    public CaseMultiplexor() {
-        super("Case multiplexor", "case", "case", CaseStatement.class, 2);
+    @XmlAttribute
+    private final int x;
+
+    @XmlAttribute
+    private final int y;
+
+    @XmlAttribute
+    @XmlIDREF
+    private final Block block;
+
+    public BlockLayoutInfo(Point point, Block block) {
+        this.x = point.x;
+        this.y = point.y;
+        this.block = block;
+    }
+
+    public BlockLayoutInfo() {
+        this(new Point(), null);
+    }
+
+    public Point getLocation() {
+        return new Point(x, y);
+    }
+
+    public Block getBlock() {
+        return block;
     }
 }

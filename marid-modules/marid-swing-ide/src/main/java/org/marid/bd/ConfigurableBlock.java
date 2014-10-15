@@ -23,7 +23,7 @@ import java.awt.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ConfigurableBlock extends Block {
+public interface ConfigurableBlock {
 
     Window createWindow(Window parent);
 }

@@ -18,61 +18,122 @@
 
 package org.marid.bd;
 
+import org.marid.ide.components.BlockPersister;
 import org.marid.itf.Named;
 import org.marid.swing.dnd.DndObject;
 
-import java.awt.*;
-import java.util.Collections;
-import java.util.EventListener;
-import java.util.List;
+import javax.xml.bind.annotation.*;
+import java.io.*;
+import java.rmi.server.UID;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-public interface Block extends Named, DndObject {
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement
+public abstract class Block implements Named, DndObject {
 
-    void addEventListener(Object source, EventListener listener);
+    @XmlAttribute
+    @XmlID
+    protected String id = new UID().toString();
 
-    void removeListener(Object source, EventListener listener);
+    protected final Map<Object, Set<EventListener>> listeners = new WeakHashMap<>();
 
-    void removeEventListeners(Object source);
+    public String getId() {
+        return id;
+    }
 
-    <L extends EventListener> void fireEvent(Class<L> t, Consumer<L> consumer);
+    public void addEventListener(Object source, EventListener listener) {
+        listeners.computeIfAbsent(source, o -> new HashSet<>()).add(listener);
+    }
 
-    <L extends EventListener, T> void fire(Class<L> t, Supplier<T> s, Consumer<T> c, T nv, BiConsumer<L, T> es);
+    public void removeListener(Object source, EventListener listener) {
+        listeners.computeIfAbsent(source, o -> new HashSet<>()).remove(listener);
+    }
 
-    BlockComponent createComponent();
+    public void removeEventListeners(Object source) {
+        listeners.remove(source);
+    }
 
-    void reset();
+    public <L extends EventListener> void fireEvent(Class<L> t, Consumer<L> consumer) {
+        listeners.values().forEach(ls -> ls.stream().filter(t::isInstance).forEach(l -> consumer.accept(t.cast(l))));
+    }
 
-    default boolean isStateless() {
-        try {
-            return getClass().getMethod("reset").getDeclaringClass() == Block.class;
-        } catch (ReflectiveOperationException x) {
-            throw new IllegalStateException(x);
+    public <L extends EventListener, T> void fire(Class<L> t, Supplier<T> s, Consumer<T> c, T nv, BiConsumer<L, T> ch) {
+        final T old = s.get();
+        if (!Objects.equals(old, nv)) {
+            c.accept(nv);
+            listeners.values().forEach(ls -> ls.stream()
+                    .filter(t::isInstance)
+                    .forEach(l -> ch.accept(t.cast(l), nv)));
         }
     }
 
-    default boolean isConfigurable() {
-        try {
-            return getClass().getMethod("createWindow", Window.class).getDeclaringClass() == Block.class;
-        } catch (ReflectiveOperationException x) {
-            throw new IllegalStateException(x);
-        }
-    }
+    public abstract List<Input> getInputs();
 
-    List<Input> getInputs();
+    public abstract List<Output> getOutputs();
 
-    List<Output> getOutputs();
-
-    default List<Output> getExports() {
+    public List<Output> getExports() {
         return Collections.emptyList();
     }
 
-    interface Input extends Named {
+    public abstract BlockComponent createComponent();
+
+    protected Object writeReplace() throws ObjectStreamException {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            BlockPersister.instance.save(this, bos);
+            return new BlockProxy(bos.toByteArray());
+        } catch (IOException x) {
+            throw new WriteAbortedException("Replace error", x);
+        }
+    }
+
+    @Override
+    public String toString() {
+        final BlockPersister persister = BlockPersister.instance;
+        if (persister == null) {
+            return super.toString();
+        } else {
+            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            try {
+                persister.save(this, bos);
+                return bos.toString("UTF-8");
+            } catch (Exception x) {
+                throw new IllegalStateException(x);
+            }
+        }
+    }
+
+    public void reset() {
+    }
+
+    protected static class BlockProxy implements Serializable {
+
+        private final byte[] data;
+
+        public BlockProxy(byte[] data) {
+            this.data = data;
+        }
+
+        public Object readResolve() throws ObjectStreamException {
+            try {
+                final Block block = BlockPersister.instance.load(new ByteArrayInputStream(data));
+                block.id = new UID().toString();
+                return block;
+            } catch (Exception x) {
+                final StreamCorruptedException streamCorruptedException = new StreamCorruptedException("Resolve error");
+                streamCorruptedException.initCause(x);
+                throw streamCorruptedException;
+            }
+        }
+    }
+
+    public interface Input extends Named {
 
         void set(Object value);
 
@@ -83,12 +144,89 @@ public interface Block extends Named, DndObject {
         boolean isRequired();
     }
 
-    interface Output extends Named {
+    public interface Output extends Named {
 
         Object get();
 
         Class<?> getOutputType();
 
         Block getBlock();
+    }
+
+    public class In implements Input {
+
+        private final String name;
+        private final Class<?> type;
+        private final boolean required;
+        private final Consumer consumer;
+
+        public <T> In(String name, Class<T> type, boolean required, Consumer<T> consumer) {
+            this.name = name;
+            this.type = type;
+            this.required = required;
+            this.consumer = (Consumer) consumer;
+        }
+
+        public <T> In(String name, Class<T> type, Consumer<T> consumer) {
+            this(name, type, false, consumer);
+        }
+
+        @Override
+        public boolean isRequired() {
+            return required;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public Class<?> getInputType() {
+            return type;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public void set(Object value) {
+            consumer.accept(value);
+        }
+
+        @Override
+        public Block getBlock() {
+            return Block.this;
+        }
+    }
+
+    public class Out implements Output {
+
+        private final String name;
+        private final Class<?> type;
+        private final Supplier<?> supplier;
+
+        public <T> Out(String name, Class<T> type, Supplier<T> supplier) {
+            this.name = name;
+            this.type = type;
+            this.supplier = supplier;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        public Class<?> getOutputType() {
+            return type;
+        }
+
+        @Override
+        public Block getBlock() {
+            return Block.this;
+        }
+
+        @Override
+        public Object get() {
+            return supplier.get();
+        }
     }
 }

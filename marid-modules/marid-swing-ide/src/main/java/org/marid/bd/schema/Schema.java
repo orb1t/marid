@@ -22,7 +22,7 @@ import org.marid.bd.Block;
 import org.marid.bd.BlockLink;
 import org.marid.itf.Named;
 
-import java.beans.ConstructorProperties;
+import javax.xml.bind.annotation.*;
 import java.rmi.server.UID;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,21 +30,29 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov.
  */
+@XmlRootElement
+@XmlSeeAlso({Block.class, BlockLink.class})
 public class Schema implements Named {
 
+    @XmlAttribute
     protected String name;
+
+    @XmlElementWrapper(name = "blocks")
+    @XmlElementRef
     protected final List<Block> blocks;
+
+    @XmlElementWrapper(name = "links")
+    @XmlElementRef
     protected final List<BlockLink> links;
 
-    @ConstructorProperties({"name", "blocks", "links"})
+    public Schema() {
+        this(new UID().toString(), new ArrayList<>(), new ArrayList<>());
+    }
+
     public Schema(String name, List<Block> blocks, List<BlockLink> links) {
         this.name = name;
         this.blocks = blocks;
         this.links = links;
-    }
-
-    public Schema() {
-        this(new UID().toString(), new ArrayList<>(), new ArrayList<>());
     }
 
     public List<Block> getBlocks() {
@@ -57,28 +65,20 @@ public class Schema implements Named {
 
     public void addBlockLink(BlockLink link) {
         if (links.stream().noneMatch(l -> l.matches(link.getBlockOutput(), link.getBlockInput()))) {
-            if (links.add(link)) {
-                // fire event
-            }
+            links.add(link);
         }
     }
 
     public void removeBlockLink(BlockLink link) {
-        if (links.remove(link)) {
-            // fire event
-        }
+        links.remove(link);
     }
     
     public void addBlock(Block block) {
-        if (blocks.add(block)) {
-            // fire event
-        }
+        blocks.add(block);
     }
 
     public void removeBlock(Block block) {
-        if (blocks.remove(block)) {
-            // fire event
-        }
+        blocks.remove(block);
     }
 
     @Override

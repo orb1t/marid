@@ -27,6 +27,8 @@ import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 
 import javax.swing.*;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
@@ -40,9 +42,12 @@ import static groovyjarjarasm.asm.Opcodes.ACC_PUBLIC;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class MethodBlock extends StandardBlock implements ConfigurableBlock {
 
+    @XmlAttribute
     protected String methodName = "method";
+
     protected ClassNode returnType;
     protected Parameter[] parameters;
     protected Statement body;

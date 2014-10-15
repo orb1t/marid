@@ -20,6 +20,7 @@ package org.marid.bd.schema;
 
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
+import org.marid.bd.BlockLink;
 import org.marid.bd.SingletonBlock;
 import org.marid.bd.shapes.Link;
 import org.marid.bd.shapes.LinkShape;
@@ -107,29 +108,20 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         removeAll();
         links.clear();
         final Map<Block, BlockComponent> blockMap = new IdentityHashMap<>();
-        schemaModel.getBlockMap().forEach((block, info) -> {
-            final BlockComponent blockComponent = block.createComponent();
-            blockComponent.setLocation(info.getLocation());
+        schemaModel.getBlocks().forEach(i -> {
+            final BlockComponent blockComponent = i.getBlock().createComponent();
+            blockComponent.setLocation(i.getLocation());
             blockComponent.updateBlock();
             add(blockComponent.getComponent());
-            blockMap.put(block, blockComponent);
+            blockMap.put(blockComponent.getBlock(), blockComponent);
             blockComponent.setVisible(false);
         });
-        schemaModel.getBlockLinkMap().forEach((link, info) -> {
-            final BlockComponent source = blockMap.get(link.source);
-            final BlockComponent target = blockMap.get(link.target);
-            addLink(source.outputFor(link.output), target.inputFor(link.input));
+        schemaModel.getLinks().forEach(i -> {
+            final BlockLink link = i.getBlockLink();
+            final BlockComponent source = blockMap.get(link.getSource());
+            final BlockComponent target = blockMap.get(link.getTarget());
+            addLink(source.outputFor(link.getOutput()), target.inputFor(link.getInput()));
         });
-        new Thread(() -> {
-            for (int i = 0; i < 100; i++) {
-                try {
-                    Thread.sleep(100L);
-                } catch (InterruptedException x) {
-                    break;
-                }
-                repaint();
-            }
-        }).start();
         repaint();
     }
 

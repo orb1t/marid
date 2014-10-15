@@ -27,6 +27,7 @@ import org.codehaus.groovy.ast.stmt.Statement;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,6 +37,7 @@ import java.util.List;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class ForBlock extends StandardBlock {
 
     protected Parameter parameter;

@@ -20,7 +20,7 @@ package org.marid.bd.blocks.expressions;
 
 import images.Images;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
-import org.marid.bd.AbstractBlock;
+import org.marid.bd.Block;
 import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.NamedBlock;
 import org.marid.bd.NamedBlockListener;
@@ -31,9 +31,10 @@ import org.marid.groovy.GroovyRuntime;
 import org.marid.logging.LogSupport;
 
 import javax.swing.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.beans.ConstructorProperties;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -44,19 +45,16 @@ import java.util.Vector;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
-public class ConstantBlock extends AbstractBlock implements NamedBlock, ConfigurableBlock {
+@XmlRootElement
+public class ConstantBlock extends Block implements NamedBlock, ConfigurableBlock {
 
+    @XmlElement
     protected String value = "null";
+
     protected final Out output = new Out("", ConstantExpression.class, this::constantExpression);
 
     public ConstantBlock() {
         setName("Constant block");
-    }
-
-    @ConstructorProperties({"value"})
-    public ConstantBlock(String value) {
-        this();
-        this.value = value;
     }
 
     @Override
@@ -95,7 +93,6 @@ public class ConstantBlock extends AbstractBlock implements NamedBlock, Configur
 
     @Override
     public void reset() {
-        value = "null";
     }
 
     @Override

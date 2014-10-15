@@ -27,6 +27,7 @@ import org.marid.bd.shapes.Link;
 import org.marid.util.CollectionUtils;
 
 import javax.swing.*;
+import javax.xml.bind.annotation.XmlAttribute;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -39,7 +40,9 @@ import java.util.List;
  */
 public class Multiplexor<E> extends StandardBlock implements ConfigurableBlock {
 
-    protected volatile int inputCount;
+    @XmlAttribute
+    protected int inputCount;
+
     protected final Class<E> type;
     protected final List<Input> inputs = new ArrayList<>();
     protected final List<E> list = new ArrayList<>();

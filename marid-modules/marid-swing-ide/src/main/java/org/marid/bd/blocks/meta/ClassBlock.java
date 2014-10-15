@@ -26,6 +26,8 @@ import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.swing.input.ClassInputControl;
 
 import javax.swing.*;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Collections;
@@ -36,8 +38,10 @@ import java.util.List;
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class ClassBlock extends StandardBlock implements ConfigurableBlock {
 
+    @XmlAttribute
     protected Class<?> targetClass;
 
     protected final Out out = new Out("out", ClassNode.class, () -> new ClassNode(targetClass));

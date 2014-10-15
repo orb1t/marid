@@ -23,12 +23,14 @@ import org.codehaus.groovy.transform.sc.transformers.CompareToNullExpression;
 import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @BdBlock
+@XmlRootElement
 public class CompareToNonNullBlock extends IoBlock {
 
     protected Expression expression;
