@@ -158,13 +158,13 @@ public abstract class Block implements Named, DndObject {
         private final String name;
         private final Class<?> type;
         private final boolean required;
-        private final Consumer consumer;
+        private final Consumer<?> consumer;
 
         public <T> In(String name, Class<T> type, boolean required, Consumer<T> consumer) {
             this.name = name;
             this.type = type;
             this.required = required;
-            this.consumer = (Consumer) consumer;
+            this.consumer = consumer;
         }
 
         public <T> In(String name, Class<T> type, Consumer<T> consumer) {
@@ -189,7 +189,7 @@ public abstract class Block implements Named, DndObject {
         @SuppressWarnings("unchecked")
         @Override
         public void set(Object value) {
-            consumer.accept(value);
+            ((Consumer) consumer).accept(value);
         }
 
         @Override

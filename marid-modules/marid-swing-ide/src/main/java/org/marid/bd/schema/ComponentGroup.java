@@ -67,6 +67,10 @@ public class ComponentGroup {
         componentMap.forEach((c, p) -> c.setLocation(ShapeUtils.ptAdd(1, p, 1, point, -1, this.point)));
     }
 
+    public boolean contains(Point point) {
+        return !isEmpty() && componentMap.keySet().stream().anyMatch(c -> c.getBounds().contains(point));
+    }
+
     public Rectangle getBounds() {
         return componentMap.keySet()
                 .stream()

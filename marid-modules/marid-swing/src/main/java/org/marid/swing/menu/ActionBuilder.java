@@ -21,7 +21,6 @@ package org.marid.swing.menu;
 import images.Images;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
-import org.marid.methods.LogMethods;
 import org.marid.swing.MaridAction;
 
 import javax.swing.*;
@@ -29,14 +28,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.function.Consumer;
-import java.util.logging.Logger;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class ActionBuilder extends AbstractAction implements L10nSupport {
+public class ActionBuilder extends AbstractAction implements L10nSupport, LogSupport {
 
-    private static final Logger LOG = Logger.getLogger(ActionBuilder.class.getName());
     private MaridAction.MaridActionListener actionListener;
     private Consumer<Action> actionInitializer;
 
@@ -57,7 +54,7 @@ public class ActionBuilder extends AbstractAction implements L10nSupport {
                         return;
                     }
                 }
-                LogMethods.warning(LOG, "Action {0} error", x, getValue(NAME));
+                warning("Action {0} error", x, getValue(NAME));
             }
         }
     }
@@ -105,6 +102,11 @@ public class ActionBuilder extends AbstractAction implements L10nSupport {
 
     public ActionBuilder setInitializer(Consumer<Action> actionInitializer) {
         this.actionInitializer = actionInitializer;
+        return this;
+    }
+
+    public ActionBuilder setValue(String key, Object value) {
+        this.putValue(key, value);
         return this;
     }
 

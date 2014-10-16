@@ -137,6 +137,18 @@ public class SwingUtil {
         return new Color(base.getRed(), base.getGreen(), base.getBlue(), alpha);
     }
 
+    public static void dispatchEvent(Component component, AWTEvent event) {
+        try {
+            component.dispatchEvent(event);
+        } catch (IllegalComponentStateException x) {
+            // ignore
+        }
+    }
+
+    public static void dispatchEvent(AWTEvent event) {
+        dispatchEvent((Component) event.getSource(), event);
+    }
+
     @FunctionalInterface
     public static interface CoordinateTransformFunction {
 

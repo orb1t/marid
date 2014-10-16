@@ -24,6 +24,8 @@ import org.marid.util.CollectionUtils;
 import javax.annotation.Nonnull;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -98,8 +100,14 @@ public class ActionTreeElement implements Comparable<ActionTreeElement>, L10nSup
             }
             if (e.isItem()) {
                 if (e.action != null) {
-                    final JMenuItem menuItem = menu.add(e.action);
-                    menuItem.setName(e.name);
+                    if (e.action.getValue(Action.SELECTED_KEY) instanceof Boolean) {
+                        final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(e.action);
+                        menuItem.setName(e.name);
+                        menu.add(menuItem);
+                    } else {
+                        final JMenuItem menuItem = menu.add(e.action);
+                        menuItem.setName(e.name);
+                    }
                 }
             } else {
                 final JMenu sub = new JMenu(s(e.name));
@@ -129,8 +137,29 @@ public class ActionTreeElement implements Comparable<ActionTreeElement>, L10nSup
             }
             if (e.isItem()) {
                 if (e.action != null) {
-                    final MenuItem menuItem = menu.add(new MenuItem(e.action.getValue(Action.NAME).toString()));
-                    menuItem.setName(e.name);
+                    if (e.action.getValue(Action.SELECTED_KEY) instanceof Boolean) {
+                        final Action a = e.action;
+                        final CheckboxMenuItem menuItem = new CheckboxMenuItem(s(e.name));
+                        menuItem.setName(e.name);
+                        menuItem.addItemListener(ev -> {
+                            switch (ev.getStateChange()) {
+                                case ItemEvent.SELECTED:
+                                    a.putValue(Action.SELECTED_KEY, true);
+                                    a.actionPerformed(new ActionEvent(ev.getSource(), ev.getID(), e.name));
+                                    break;
+                                case ItemEvent.DESELECTED:
+                                    a.putValue(Action.SELECTED_KEY, false);
+                                    a.actionPerformed(new ActionEvent(ev.getSource(), ev.getID(), e.name));
+                                    break;
+                            }
+                        });
+                        menu.add(menuItem);
+                    } else {
+                        final MenuItem menuItem = new MenuItem(s(e.name));
+                        menuItem.setName(e.name);
+                        menuItem.addActionListener(e.action);
+                        menu.add(menuItem);
+                    }
                 }
             } else {
                 final Menu sub = new Menu(s(e.name));

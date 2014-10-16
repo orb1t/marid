@@ -58,8 +58,8 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
 
     protected final ProfileManager profileManager;
     protected final BlockPersister persister;
-    protected final SchemaEditor schemaEditor = new SchemaEditor(this);
-    protected final JLayer<SchemaEditor> layer = new JLayer<>(schemaEditor, new SchemaEditorLayerUI());
+    protected final SchemaEditor schemaEditor;
+    protected final JLayer<SchemaEditor> layer;
     protected final JMenu blocksMenu = new JMenu(s("Blocks"));
     protected File file;
 
@@ -67,13 +67,12 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
     public SchemaFrame(BlockMenuProvider blockMenuProvider,
                        ProfileManager profileManager,
                        BlockPersister persister,
-                       AutowireCapableBeanFactory autowireCapableBeanFactory) {
+                       AutowireCapableBeanFactory bf) {
         super("Schema");
         this.profileManager = profileManager;
         this.persister = persister;
-        autowireCapableBeanFactory.autowireBean(schemaEditor);
         enableEvents(AWTEvent.COMPONENT_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
-        centerPanel.add(layer);
+        centerPanel.add(layer = new JLayer<>(schemaEditor = bf.createBean(SchemaEditor.class), new SchemaLayerUI()));
         getContentPane().setBackground(getBackground());
         getJMenuBar().add(blocksMenu);
         blockMenuProvider.fillMenu(blocksMenu);
@@ -125,6 +124,11 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
                 .setKey("control R")
                 .setIcon("zoom")
                 .setListener(e -> schemaEditor.resetZoom());
+        actionList.add(true, "selection", "Selection mode", "Schema")
+                .setKey("control J")
+                .setIcon("selection")
+                .setValue(Action.SELECTED_KEY, false)
+                .setListener((a, e) -> schemaEditor.setSelectionMode((boolean) a.getValue(Action.SELECTED_KEY)));
     }
 
     protected void open(ActionEvent actionEvent) {
@@ -184,7 +188,7 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
         }
     }
 
-    protected class SchemaEditorLayerUI extends LayerUI<SchemaEditor> {
+    protected class SchemaLayerUI extends LayerUI<SchemaEditor> {
 
         private JLabel tooltip = null;
 

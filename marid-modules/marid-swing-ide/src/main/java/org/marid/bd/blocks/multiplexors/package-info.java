@@ -16,23 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dyn;
-
-import java.lang.annotation.*;
-
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-@Inherited
-@Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.METHOD, ElementType.TYPE_USE, ElementType.PACKAGE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface MetaInfo {
+@MetaInfo(icon = "block/multiplexor.png", name = "Multiplexors")
+package org.marid.bd.blocks.multiplexors;
 
-    String name() default "";
-
-    String description() default "";
-
-    String descriptionResource() default "";
-
-    String icon() default "";
-}
+import org.marid.dyn.MetaInfo;

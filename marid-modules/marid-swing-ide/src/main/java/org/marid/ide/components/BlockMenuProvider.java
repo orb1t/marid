@@ -18,8 +18,9 @@
 
 package org.marid.ide.components;
 
+import images.Images;
 import org.marid.bd.Block;
-import org.marid.itf.Named;
+import org.marid.dyn.MetaInfo;
 import org.marid.l10n.L10nSupport;
 import org.marid.swing.dnd.DndSource;
 import org.marid.swing.dnd.MaridTransferHandler;
@@ -34,13 +35,13 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.util.*;
 
+import static java.util.Comparator.comparing;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
 public class BlockMenuProvider implements L10nSupport {
-
-    private static final Comparator<Block> BLOCK_COMPARATOR = Comparator.comparing(Named::getName);
 
     private final GenericApplicationContext applicationContext;
 
@@ -50,14 +51,19 @@ public class BlockMenuProvider implements L10nSupport {
     }
 
     public void fillMenu(JMenu menu) {
-        final Map<String, Set<Block>> blockMap = new TreeMap<>();
+        final Map<Package, Set<Block>> map = new TreeMap<>(comparing(Package::getName));
         final Collection<Block> blocks = applicationContext.getBeansOfType(Block.class).values();
-        blocks.forEach(b -> {
-            final String group = b.getClass().getPackage().getName();
-            blockMap.computeIfAbsent(group, v -> new TreeSet<>(BLOCK_COMPARATOR)).add(b);
-        });
-        blockMap.forEach((group, blockSet) -> {
-            final JMenu groupMenu = new JMenu(s(group));
+        blocks.forEach(b ->
+                map.computeIfAbsent(b.getClass().getPackage(), v ->
+                        new TreeSet<>(comparing(Block::getName))
+                ).add(b)
+        );
+        map.forEach((group, blockSet) -> {
+            final MetaInfo metaInfo = group.getAnnotation(MetaInfo.class);
+            final JMenu groupMenu = new JMenu(s(metaInfo != null ? metaInfo.name() : group.getName()));
+            if (metaInfo != null && !metaInfo.icon().isEmpty()) {
+                groupMenu.setIcon(Images.getIcon(metaInfo.icon(), 22));
+            }
             menu.add(groupMenu);
             blockSet.forEach(block -> groupMenu.add(new BlockMenuItem(block)));
         });

@@ -58,6 +58,7 @@ import static java.awt.SystemColor.activeCaption;
 import static java.awt.event.InputEvent.ALT_DOWN_MASK;
 import static java.awt.event.InputEvent.META_DOWN_MASK;
 import static java.awt.event.InputEvent.SHIFT_DOWN_MASK;
+import static java.awt.event.MouseEvent.CTRL_DOWN_MASK;
 import static java.awt.event.MouseEvent.*;
 import static org.marid.concurrent.AtomicUtils.processDirty;
 import static org.marid.swing.geom.ShapeUtils.mouseEvent;
@@ -68,7 +69,6 @@ import static org.marid.swing.geom.ShapeUtils.ptAdd;
  */
 public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSource<Block>, SchemaFrameConfiguration {
 
-    protected final SchemaFrame schemaFrame;
     protected final AffineTransform transform = new AffineTransform();
     private final Point mousePoint = new Point();
     private final Rectangle clip = new Rectangle();
@@ -81,9 +81,9 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     private final Timer timer = new Timer(true);
     private Block selectedBlock;
     private final Set<LinkShape> links = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private boolean selectionMode;
 
-    public SchemaEditor(SchemaFrame schemaFrame) {
-        this.schemaFrame = schemaFrame;
+    public SchemaEditor() {
         setFont(UIManager.getFont("Label.font"));
         setBackground(SystemColor.controlLtHighlight);
         setDoubleBuffered(true);
@@ -167,6 +167,18 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         invokeLater(super::repaint);
     }
 
+    public void setSelectionMode(boolean selectionMode) {
+        this.selectionMode = selectionMode;
+        if (!selectionMode) {
+            selection.clear();
+            repaint();
+        }
+    }
+
+    public boolean isSelectionMode() {
+        return selectionMode;
+    }
+
     public LinkShape addLink(BlockComponent.Output output, BlockComponent.Input input) {
         final LinkShape link = LINK_SHAPE_TYPE.get().linkShapeFor(output, input);
         links.add(link);
@@ -221,7 +233,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                     transform.translate(p.getX() - mousePoint.getX(), p.getY() - mousePoint.getY());
                     repaint();
                     return;
-                } else if (!selection.isEmpty() && moveType.isEnabled(e)) {
+                } else if (isSelectionMode() && !selection.isEmpty()) {
                     final Point mp = SwingUtil.transform(transform::inverseTransform, e.getPoint());
                     selection.move(mp);
                     repaint();
@@ -239,21 +251,19 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
 
     @Override
     protected void processMouseEvent(MouseEvent e) {
-        final Point mp = SwingUtil.transform(transform::inverseTransform, e.getPoint());
-        if (e.getID() == MouseEvent.MOUSE_RELEASED && !selection.isEmpty()) {
-            selection.reset();
+        mousePoint.setLocation(SwingUtil.transform(transform::inverseTransform, e.getPoint()));
+        mouseTransform = (AffineTransform) transform.clone();
+        if (isSelectionMode() && dispatchSelection(e)) {
             return;
         }
-        mousePoint.setLocation(mp);
-        mouseTransform = (AffineTransform) transform.clone();
         if (dispatchBlocks(e)) {
             return;
         }
         if (dispatchLinks(e)) {
             return;
         }
-        if (dispatchSelection(e)) {
-            return;
+        if (e.isPopupTrigger()) {
+            new SchemaEditorPopupMenu().show(this, e.getX(), e.getY());
         }
     }
 
@@ -266,19 +276,15 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                     if (e.isPopupTrigger()) {
                         final JPopupMenu popupMenu = ((BlockComponent) component).popupMenu();
                         popupMenu.show(this, e.getX(), e.getY());
-                        break;
+                        return true;
                     } else if (e.getID() == MOUSE_DRAGGED && dragType.isEnabled(e)) {
                         selectedBlock = ((BlockComponent) component).getBlock();
                         getTransferHandler().exportAsDrag(this, e, DND_COPY);
-                        break;
+                        return true;
                     }
                 }
                 final Component s = ShapeUtils.findChild(component, p);
-                try {
-                    s.dispatchEvent(mouseEvent(s, e, e.getID(), p));
-                } catch (IllegalComponentStateException x) {
-                    //ignore
-                }
+                SwingUtil.dispatchEvent(mouseEvent(s, e, e.getID(), p));
                 changeCurrentComponent(s, e, p);
                 changeCurrentLink(null, e);
                 return true;
@@ -304,26 +310,38 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     }
 
     private boolean dispatchSelection(MouseEvent e) {
+        final Predicate<MouseEvent> action;
         switch (e.getID()) {
             case MOUSE_PRESSED:
-                if ((e.getModifiers() & (ALT_DOWN_MASK | SHIFT_DOWN_MASK | META_DOWN_MASK)) == 0) {
+                action = ev -> {
                     selection.clear();
                     selection.startSelection(mousePoint);
                     repaint();
                     return true;
-                }
+                };
                 break;
             case MOUSE_RELEASED:
-                if ((e.getModifiers() & (ALT_DOWN_MASK | SHIFT_DOWN_MASK | META_DOWN_MASK)) == 0) {
-                    selection.endSelection(mousePoint, Arrays.asList(getComponents()));
+                action = ev -> {
+                    if (!selection.isEmptySelection()) {
+                        selection.endSelection(mousePoint, Arrays.asList(getComponents()));
+                    } else {
+                        selection.reset();
+                    }
                     repaint();
                     return true;
-                }
-                selection.reset();
-                repaint();
+                };
                 break;
+            default:
+                return false;
         }
-        return false;
+        if (e.isPopupTrigger() || e.getButton() != MouseEvent.BUTTON1) {
+            return false;
+        } else if ((e.getModifiers() & (ALT_DOWN_MASK | SHIFT_DOWN_MASK | META_DOWN_MASK | CTRL_DOWN_MASK)) != 0) {
+            return false;
+        } else if (selection.contains(mousePoint)) {
+            return false;
+        }
+        return action.test(e);
     }
 
     private void changeCurrentComponent(Component component, MouseEvent e, Point point) {
@@ -361,6 +379,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     }
 
     private void fireLinkEvent(LinkShape link, int id, MouseEvent e) {
+        final SchemaFrame schemaFrame = (SchemaFrame) SwingUtilities.windowForComponent(this);
         schemaFrame.fireEvent(new LinkShapeEvent(link, id, e));
         final AbstractButton outputButton = link.output.getButton();
         final AbstractButton inputButton = link.input.getButton();
@@ -465,9 +484,12 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
 
     @Override
     public boolean dropDndObject(Block object, TransferHandler.TransferSupport support) {
+        return dropBlock(object, support.getDropLocation().getDropPoint());
+    }
+
+    protected boolean dropBlock(Block object, Point dropPoint) {
         try {
-            final Point dropPoint = new Point();
-            transform.inverseTransform(support.getDropLocation().getDropPoint(), dropPoint);
+            transform.inverseTransform(new Point(dropPoint), dropPoint);
             final BlockComponent blockComponent = object.createComponent();
             blockComponent.setBounds(new Rectangle(dropPoint, blockComponent.getPreferredSize()));
             add(blockComponent.getComponent());

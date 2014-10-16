@@ -56,7 +56,14 @@ public class MenuActionList extends ArrayList<MenuAction> {
             }
             oldGroup.set(a.group);
             oldPath.set(a.path);
-            toolBar.add(a.action).setFocusable(false);
+            if (a.action.getValue(Action.SELECTED_KEY) instanceof Boolean) {
+                final JToggleButton button = new JToggleButton(a.action);
+                toolBar.add(button);
+                button.setFocusable(false);
+                button.setHideActionText(true);
+            } else {
+                toolBar.add(a.action).setFocusable(false);
+            }
         });
     }
 
