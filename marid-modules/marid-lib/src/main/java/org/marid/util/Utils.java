@@ -30,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.time.ZoneId;
+import java.util.Base64;
 import java.util.Properties;
 
 /**
@@ -101,6 +102,12 @@ public class Utils {
 
     public static BigInteger getUid() {
         return getUid(16);
+    }
+
+    public static String textUid() {
+        final byte[] data = new byte[8];
+        RANDOM.nextBytes(data);
+        return Base64.getEncoder().encodeToString(data);
     }
 
     @SuppressWarnings("unchecked")

@@ -21,10 +21,10 @@ package org.marid.bd;
 import org.marid.ide.components.BlockPersister;
 import org.marid.itf.Named;
 import org.marid.swing.dnd.DndObject;
+import org.marid.util.Utils;
 
 import javax.xml.bind.annotation.*;
 import java.io.*;
-import java.rmi.server.UID;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -39,7 +39,7 @@ public abstract class Block implements Named, DndObject {
 
     @XmlAttribute
     @XmlID
-    protected String id = new UID().toString();
+    protected String id = Utils.textUid();
 
     protected final Map<Object, Set<EventListener>> listeners = new WeakHashMap<>();
 
@@ -123,7 +123,7 @@ public abstract class Block implements Named, DndObject {
         public Object readResolve() throws ObjectStreamException {
             try {
                 final Block block = BlockPersister.instance.load(new ByteArrayInputStream(data));
-                block.id = new UID().toString();
+                block.id = Utils.textUid();
                 return block;
             } catch (Exception x) {
                 final StreamCorruptedException streamCorruptedException = new StreamCorruptedException("Resolve error");
