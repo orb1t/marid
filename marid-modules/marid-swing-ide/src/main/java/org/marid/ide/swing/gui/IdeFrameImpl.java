@@ -28,6 +28,7 @@ import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.MaridAction;
+import org.marid.swing.WindowPrefs;
 import org.marid.swing.forms.ConfigurationProvider;
 import org.marid.swing.forms.Form;
 import org.marid.swing.forms.StaticConfigurationDialog;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
@@ -62,11 +64,13 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
 
     @Autowired
     public IdeFrameImpl(IdeImpl ide, ActionTreeElement menuRoot) {
-        super(LS.s("Marid IDE"));
+        super(LS.s("Marid IDE"), WindowPrefs.graphicsConfiguration("IDE"));
+        setName("IDE");
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
         this.ide = ide;
         setIconImages(MaridIcons.ICONS);
+        setLocationRelativeTo(null);
         setJMenuBar(new JMenuBar());
-        setLocationByPlatform(true);
         getJMenuBar().add(widgetsMenu());
         getJMenuBar().add(preferencesMenu());
         getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
@@ -81,6 +85,11 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
         setState(getPref("state", getState()));
         setExtendedState(getPref("extendedState", getExtendedState()));
+    }
+
+    @PreDestroy
+    private void destroy() {
+        dispose();
     }
 
     private JMenu widgetsMenu() {
@@ -129,13 +138,21 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
 
     @Override
     protected void processWindowEvent(WindowEvent e) {
-        super.processWindowEvent(e);
         switch (e.getID()) {
+            case WindowEvent.WINDOW_CLOSING:
+                WindowPrefs.saveGraphicsDevice(this);
+                putPref("state", getState());
+                putPref("extendedState", getExtendedState());
+                if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
+                    putPref("bounds", getBounds());
+                }
+                break;
             case WindowEvent.WINDOW_OPENED:
                 setState(getPref("state", getState()));
                 setExtendedState(getPref("extendedState", getExtendedState()));
                 break;
         }
+        super.processWindowEvent(e);
     }
 
     @Override
@@ -163,15 +180,5 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
                 ide.exit();
                 break;
         }
-    }
-
-    @Override
-    public void dispose() {
-        putPref("state", getState());
-        putPref("extendedState", getExtendedState());
-        if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) == 0) {
-            putPref("bounds", getBounds());
-        }
-        super.dispose();
     }
 }

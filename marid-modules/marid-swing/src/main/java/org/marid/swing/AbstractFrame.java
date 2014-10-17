@@ -47,7 +47,7 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
     protected final JToolBar toolBar = new JToolBar(getPref("orientation", HORIZONTAL, "toolbar"));
 
     public AbstractFrame(String title) {
-        super(LS.s(title));
+        super(LS.s(title), WindowPrefs.graphicsConfiguration(title));
         setName(title);
         setJMenuBar(new JMenuBar());
         setUndecorated(getPref("undecorated", getSysPref("undecorated", false, "windows")));
@@ -73,8 +73,9 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         menu.add(new MaridAction("Switch full screen mode", null, this::switchFullScreen)
                 .setKey(getSysPref("fullScreenKey", "control alt F")));
         menu.addSeparator();
-        menu.add(new MaridAction("Close", null, e -> dispose())
-                .setKey(getSysPref("closeWindowKey", "control alt Q")));
+        menu.add(new JCheckBoxMenuItem(new MaridAction("Close", null, e -> dispose())
+                .setValue(Action.SELECTED_KEY, false)
+                .setKey(getSysPref("closeWindowKey", "control alt Q"))));
         return menu;
     }
 
@@ -127,6 +128,7 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
                 setExtendedState(getPref("extendedState", getExtendedState()));
                 break;
             case WindowEvent.WINDOW_CLOSED:
+                WindowPrefs.saveGraphicsDevice(this);
                 putPref("pos", getToolbarPosition(), "toolbar");
                 putPref("orientation", toolBar.getOrientation(), "toolbar");
                 putPref("visible", toolBar.isVisible());
