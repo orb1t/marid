@@ -176,7 +176,6 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     public void exitWithConfirm() {
         switch (showConfirmDialog(null, m("Do you want to exit?"), s("Exit"), YES_NO_OPTION, QUESTION_MESSAGE)) {
             case YES_OPTION:
-                dispose();
                 ide.exit();
                 break;
         }
