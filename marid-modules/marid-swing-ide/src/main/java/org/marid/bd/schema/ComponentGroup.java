@@ -71,6 +71,16 @@ public class ComponentGroup {
         return !isEmpty() && componentMap.keySet().stream().anyMatch(c -> c.getBounds().contains(point));
     }
 
+    public void toLeft() {
+        final int x = componentMap.keySet().stream().mapToInt(Component::getX).min().orElse(0);
+        componentMap.keySet().forEach(c -> c.setLocation(x, c.getY()));
+    }
+
+    public void toRight() {
+        final int x = componentMap.keySet().stream().mapToInt(c -> c.getX() + c.getWidth()).max().orElse(0);
+        componentMap.keySet().forEach(c -> c.setLocation(x - c.getWidth(), c.getY()));
+    }
+
     public Rectangle getBounds() {
         return componentMap.keySet()
                 .stream()

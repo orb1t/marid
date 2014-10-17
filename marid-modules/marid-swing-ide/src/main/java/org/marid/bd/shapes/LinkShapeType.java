@@ -86,7 +86,7 @@ public enum LinkShapeType implements Configurable, PrefSupport, L10nSupport {
         private static final String INCUBATOR_SIZE_KEY = "incubatorSize";
         private static final String SPECIES_KEY = "species";
 
-        public static volatile double mutationProbability = LIVE.getPref(MUTATION_PROBABILITY_KEY, 0.3);
+        public static volatile int mutationProbability = LIVE.getPref(MUTATION_PROBABILITY_KEY, 30);
         public static volatile int incubatorSize = LIVE.getPref(INCUBATOR_SIZE_KEY, 10);
         public static volatile int species = LIVE.getPref(SPECIES_KEY, 10);
 
@@ -97,7 +97,7 @@ public enum LinkShapeType implements Configurable, PrefSupport, L10nSupport {
                 }
                 switch (ev.getKey()) {
                     case MUTATION_PROBABILITY_KEY:
-                        mutationProbability = Double.parseDouble(ev.getNewValue());
+                        mutationProbability = Integer.parseInt(ev.getNewValue());
                         break;
                     case INCUBATOR_SIZE_KEY:
                         incubatorSize = Integer.parseInt(ev.getNewValue());
@@ -109,7 +109,7 @@ public enum LinkShapeType implements Configurable, PrefSupport, L10nSupport {
             });
         }
 
-        private final JSpinner mpSpinner = new JSpinner(new SpinnerNumberModel(mutationProbability, 0.01, 0.5, 0.01));
+        private final JSpinner mpSpinner = new JSpinner(new SpinnerNumberModel(mutationProbability, 30, 100, 1));
         private final JSpinner isSpinner = new JSpinner(new SpinnerNumberModel(incubatorSize, 5, 100, 1));
         private final JSpinner scSpinner = new JSpinner(new SpinnerNumberModel(species, 5, 100, 1));
 
@@ -133,7 +133,7 @@ public enum LinkShapeType implements Configurable, PrefSupport, L10nSupport {
 
         @Override
         protected void accept() {
-            LIVE.preferences().putDouble(MUTATION_PROBABILITY_KEY, ((Number) mpSpinner.getValue()).doubleValue());
+            LIVE.preferences().putInt(MUTATION_PROBABILITY_KEY, ((Number) mpSpinner.getValue()).intValue());
             LIVE.preferences().putInt(INCUBATOR_SIZE_KEY, ((Number) isSpinner.getValue()).intValue());
             LIVE.preferences().putInt(SPECIES_KEY, ((Number) scSpinner.getValue()).intValue());
         }

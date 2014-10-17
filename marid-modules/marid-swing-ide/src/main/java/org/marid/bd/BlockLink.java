@@ -18,11 +18,12 @@
 
 package org.marid.bd;
 
+import org.marid.util.Utils;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.rmi.server.UID;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -32,7 +33,7 @@ public class BlockLink {
 
     @XmlID
     @XmlAttribute
-    private final String id = new UID().toString();
+    private final String id = Utils.textUid();
 
     @XmlIDREF
     @XmlAttribute

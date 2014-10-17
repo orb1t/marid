@@ -72,6 +72,11 @@ public class MaridAction extends AbstractAction implements L10nSupport {
         return this;
     }
 
+    public MaridAction setValue(String key, Object value) {
+        putValue(key, value);
+        return this;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         try {

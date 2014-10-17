@@ -76,7 +76,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     private Component curComponent;
     private final ComponentGroup selection = new ComponentGroup();
     private LinkShape currentLink;
-    private volatile InputMaskType panType = PAN.get(), moveType = MOVE.get(), dragType = DRAG.get();
+    private volatile InputMaskType panType = PAN.get(), dragType = DRAG.get();
     private final AtomicBoolean dirty = new AtomicBoolean();
     private final Timer timer = new Timer(true);
     private Block selectedBlock;
@@ -92,7 +92,6 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         setForeground(SystemColor.controlDkShadow);
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
         PAN.addConsumer(this, n -> panType = n);
-        MOVE.addConsumer(this, n -> moveType = n);
         DRAG.addConsumer(this, n -> dragType = n);
         LINK_SHAPE_TYPE.addConsumer(this, n -> EventQueue.invokeLater(() -> {
             final Map<BlockComponent.Output, BlockComponent.Input> map = new IdentityHashMap<>();
@@ -168,6 +167,9 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     }
 
     public void setSelectionMode(boolean selectionMode) {
+        if (this.selectionMode != selectionMode) {
+            firePropertyChange("selectionMode", this.selectionMode, selectionMode);
+        }
         this.selectionMode = selectionMode;
         if (!selectionMode) {
             selection.clear();
@@ -428,11 +430,22 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         dirty.set(true);
     }
 
+    public void alignToLeft(ActionEvent actionEvent) {
+        selection.toLeft();
+        repaint();
+    }
+
+    public void alignToRight(ActionEvent actionEvent) {
+        selection.toRight();
+        repaint();
+    }
+
     public void resetInputOutputSelection(ActionEvent actionEvent) {
         visitBlockComponents(bc -> {
             bc.getOutputs().forEach(o -> o.getButton().setSelected(false));
             bc.getInputs().forEach(i -> i.getButton().setSelected(false));
         });
+        repaint();
     }
 
     public void visitBlockComponents(Consumer<BlockComponent> componentConsumer) {

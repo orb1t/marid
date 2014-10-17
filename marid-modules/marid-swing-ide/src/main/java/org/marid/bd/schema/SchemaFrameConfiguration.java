@@ -28,7 +28,8 @@ import org.marid.swing.input.ComboInputControl;
 import org.marid.swing.input.ExtComboInputControl;
 
 import static org.marid.bd.shapes.LinkShapeType.LINE;
-import static org.marid.swing.InputMaskType.*;
+import static org.marid.swing.InputMaskType.CONTROL;
+import static org.marid.swing.InputMaskType.SHIFT;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -40,9 +41,6 @@ public interface SchemaFrameConfiguration extends Configuration {
 
     @Input(tab = "mouse")
     Pv<InputMaskType> PAN = new Pv<>(() -> new ComboInputControl<>(InputMaskType.class), () -> SHIFT);
-
-    @Input(tab = "mouse")
-    Pv<InputMaskType> MOVE = new Pv<>(() -> new ComboInputControl<>(InputMaskType.class), () -> ALT);
 
     @Input(tab = "mouse")
     Pv<InputMaskType> DRAG = new Pv<>(() -> new ComboInputControl<>(InputMaskType.class), () -> CONTROL);

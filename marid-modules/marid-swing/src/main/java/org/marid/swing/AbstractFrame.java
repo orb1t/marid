@@ -66,8 +66,9 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
 
     private JMenu windowMenu() {
         final JMenu menu = new JMenu(s("Window"));
-        menu.add(new MaridAction("Switch always-on-top mode", null, this::switchAlwaysOnTop)
-                .setKey(getSysPref("alwaysOnTopKey", "control alt O")));
+        menu.add(new JCheckBoxMenuItem(new MaridAction("Switch always-on-top mode", null, this::switchAlwaysOnTop)
+                .setValue(Action.SELECTED_KEY, false)
+                .setKey(getSysPref("alwaysOnTopKey", "control alt O"))));
         menu.addSeparator();
         menu.add(new MaridAction("Switch full screen mode", null, this::switchFullScreen)
                 .setKey(getSysPref("fullScreenKey", "control alt F")));
@@ -87,9 +88,9 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         dispose();
     }
 
-    protected void switchAlwaysOnTop(ActionEvent event) {
+    protected void switchAlwaysOnTop(Action action, ActionEvent event) {
         if (isAlwaysOnTopSupported()) {
-            setAlwaysOnTop(!isAlwaysOnTop());
+            setAlwaysOnTop((boolean) action.getValue(Action.SELECTED_KEY));
         } else {
             showMessage(WARNING_MESSAGE, "Warning", "Always on top windows are not supported");
         }

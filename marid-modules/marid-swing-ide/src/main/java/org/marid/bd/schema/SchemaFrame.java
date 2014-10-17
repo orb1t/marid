@@ -121,7 +121,7 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
                 .setIcon("zoomout")
                 .setListener(e -> schemaEditor.zoomOut());
         actionList.add(true, "zoom", "Reset zoom", "Schema")
-                .setKey("control R")
+                .setKey("control Z")
                 .setIcon("zoom")
                 .setListener(e -> schemaEditor.resetZoom());
         actionList.add(true, "selection", "Selection mode", "Schema")
@@ -129,6 +129,22 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
                 .setIcon("selection")
                 .setValue(Action.SELECTED_KEY, false)
                 .setListener((a, e) -> schemaEditor.setSelectionMode((boolean) a.getValue(Action.SELECTED_KEY)));
+        actionList.add(true, "refresh", "Refresh", "Schema")
+                .setKey("control R")
+                .setIcon("refresh")
+                .setListener(e -> schemaEditor.repaint());
+        actionList.add(true, "refresh", "Reset input/output selection", "Schema")
+                .setKey("control shift T")
+                .setIcon("reset")
+                .setListener(schemaEditor::resetInputOutputSelection);
+        actionList.add(true, "align", "Align to left", "Schema")
+                .setKey("control shift L")
+                .setIcon("alignleft")
+                .setListener(schemaEditor::alignToLeft);
+        actionList.add(true, "align", "Align to right", "Schema")
+                .setKey("control shift R")
+                .setIcon("alignright")
+                .setListener(schemaEditor::alignToRight);
     }
 
     protected void open(ActionEvent actionEvent) {

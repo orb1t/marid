@@ -144,7 +144,7 @@ public class Multiplexor<E> extends StandardBlock implements ConfigurableBlock {
 
     public class MultiplexorEditor extends AbstractBlockComponentEditor<Multiplexor<E>> {
 
-        protected final JSpinner spinner = new JSpinner(new SpinnerNumberModel(inputCount, 2, 32, 1));
+        protected final JSpinner spinner = new JSpinner(new SpinnerNumberModel(inputCount, 1, 32, 1));
 
         public MultiplexorEditor(Window window) {
             super(window, Multiplexor.this);
