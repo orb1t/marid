@@ -18,76 +18,76 @@
 
 package org.marid.swing.log;
 
-import org.marid.l10n.L10nSupport;
-
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Locale;
+import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.sql.Time;
+import java.text.MessageFormat;
+import java.util.*;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
-
-import static java.util.Calendar.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SwingHandlerFormatter extends Formatter implements L10nSupport {
+public class SwingHandlerFormatter extends Formatter {
 
-    private final Calendar calendar = new GregorianCalendar(Locale.ROOT);
+    private static final int CACHE_SIZE = 1024;
+    private static final Map<Object, Object> CACHE = new IdentityHashMap<>();
+
+    private static void cleanCache() {
+        for (final Iterator<Map.Entry<Object, Object>> i = CACHE.entrySet().iterator(); i.hasNext() && CACHE.size() > CACHE_SIZE; ) {
+            i.next();
+            i.remove();
+        }
+    }
+
+    private static Object get(Object key) {
+        if (key == null
+                || key.getClass().getPackage() == Byte.class.getPackage()
+                || key.getClass().getPackage() == BigDecimal.class.getPackage()) {
+            return key;
+        }
+        synchronized (CACHE) {
+            final Object value = CACHE.computeIfAbsent(key, Object::toString);
+            if (CACHE.size() > CACHE_SIZE) {
+                cleanCache();
+            }
+            return value;
+        }
+    }
+
+    private static Object[] transform(Object[] parameters) {
+        final Object[] result = new Object[parameters.length];
+        for (int i = 0; i < parameters.length; i++) {
+            result[i] = get(parameters[i]);
+        }
+        return result;
+    }
 
     @Override
     public String format(LogRecord record) {
-        calendar.setTimeInMillis(record.getMillis());
-        StringBuffer buffer = new StringBuffer(64);
-        buffer.append(Integer.toString(calendar.get(YEAR)));
-        buffer.append('-');
-        int field = calendar.get(MONTH) + 1;
-        if (field < 10) {
-            buffer.append('0');
+        final StringWriter writer = new StringWriter(128);
+        writer.append(new Time(record.getMillis()).toString());
+        writer.append(' ');
+        if (record.getParameters() == null || record.getParameters().length == 0) {
+            writer.append(record.getMessage());
+        } else {
+            try {
+                final Locale locale = record.getResourceBundle() != null
+                        ? record.getResourceBundle().getLocale()
+                        : Locale.getDefault();
+                final MessageFormat messageFormat = new MessageFormat(record.getMessage(), locale);
+                messageFormat.format(transform(record.getParameters()), writer.getBuffer(), null);
+            } catch (Exception x) {
+                writer.append(record.getMessage());
+                writer.append(" : ");
+                writer.append(Arrays.deepToString(transform(record.getParameters())));
+            }
         }
-        buffer.append(field);
-        buffer.append('-');
-        field = calendar.get(DATE);
-        if (field < 10) {
-            buffer.append('0');
+        if (record.getThrown() != null) {
+            writer.append(' ');
+            writer.append(record.getThrown().getMessage());
         }
-        buffer.append(field);
-        buffer.append(' ');
-        field = calendar.get(HOUR_OF_DAY);
-        if (field < 10) {
-            buffer.append('0');
-        }
-        buffer.append(field);
-        buffer.append(':');
-        field = calendar.get(MINUTE);
-        if (field < 10) {
-            buffer.append('0');
-        }
-        buffer.append(field);
-        buffer.append(':');
-        field = calendar.get(SECOND);
-        if (field < 10) {
-            buffer.append('0');
-        }
-        buffer.append(field);
-        buffer.append('.');
-        field = calendar.get(MILLISECOND);
-        if (field < 10) {
-            buffer.append("00");
-        } else if (field < 100) {
-            buffer.append('0');
-        }
-        buffer.append(field);
-        buffer.append(' ');
-        try {
-            m(record.getMessage(), buffer, record.getParameters());
-        } catch (Exception x) {
-            x.printStackTrace();
-            buffer.append(record.getMessage());
-            buffer.append(": ");
-            buffer.append(Arrays.toString(record.getParameters()));
-        }
-        return buffer.toString();
+        return writer.toString();
     }
 }
