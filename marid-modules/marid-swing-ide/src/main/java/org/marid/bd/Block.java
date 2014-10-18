@@ -24,6 +24,7 @@ import org.marid.swing.dnd.DndObject;
 import org.marid.util.Utils;
 
 import javax.xml.bind.annotation.*;
+import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -86,7 +87,7 @@ public abstract class Block implements Named, DndObject {
     protected Object writeReplace() throws ObjectStreamException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
-            BlockPersister.instance.save(this, bos);
+            BlockPersister.instance.save(this, new StreamResult(bos));
             return new BlockProxy(bos.toByteArray());
         } catch (IOException x) {
             throw new WriteAbortedException("Replace error", x);
@@ -99,10 +100,10 @@ public abstract class Block implements Named, DndObject {
         if (persister == null) {
             return super.toString();
         } else {
-            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            final StringWriter writer = new StringWriter();
             try {
-                persister.save(this, bos);
-                return bos.toString("UTF-8");
+                persister.save(this, new StreamResult(writer));
+                return writer.toString();
             } catch (Exception x) {
                 throw new IllegalStateException(x);
             }

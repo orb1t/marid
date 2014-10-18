@@ -28,9 +28,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +46,7 @@ public class BlockPersister extends Unmarshaller.Listener {
     public static BlockPersister instance;
 
     private final Class<?>[] classes;
+    private final JAXBContext context;
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
 
     @Autowired
@@ -54,18 +55,21 @@ public class BlockPersister extends Unmarshaller.Listener {
         classList.add(SchemaModel.class);
         classList.addAll(blocks.stream().map(Block::getClass).collect(Collectors.toSet()));
         this.classes = classList.toArray(new Class<?>[classList.size()]);
+        try {
+            this.context = JAXBContext.newInstance(classes);
+        } catch (JAXBException x) {
+            throw new IllegalStateException(x);
+        }
         this.autowireCapableBeanFactory = autowireCapableBeanFactory;
         instance = this;
     }
 
-    public void save(Block block, OutputStream outputStream) throws IOException {
+    public void save(Block block, StreamResult streamResult) throws IOException {
         try {
-            final JAXBContext context = JAXBContext.newInstance(classes);
             final Marshaller marshaller = context.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, false);
             marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
-            marshaller.marshal(block, outputStream);
+            marshaller.marshal(block, streamResult);
         } catch (JAXBException x) {
             throw new IOException(x);
         }
@@ -73,7 +77,6 @@ public class BlockPersister extends Unmarshaller.Listener {
 
     public Block load(InputStream inputStream) throws IOException {
         try {
-            final JAXBContext context = JAXBContext.newInstance(classes);
             final Unmarshaller unmarshaller = context.createUnmarshaller();
             unmarshaller.setListener(this);
             return (Block) unmarshaller.unmarshal(inputStream);
@@ -84,9 +87,7 @@ public class BlockPersister extends Unmarshaller.Listener {
 
     public void save(SchemaModel schemaModel, Path path) throws IOException {
         try {
-            final JAXBContext context = JAXBContext.newInstance(classes);
             final Marshaller marshaller = context.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             marshaller.setProperty(Marshaller.JAXB_FRAGMENT, false);
             marshaller.marshal(schemaModel, path.toFile());
@@ -97,7 +98,6 @@ public class BlockPersister extends Unmarshaller.Listener {
 
     public SchemaModel load(Path path) throws IOException {
         try {
-            final JAXBContext context = JAXBContext.newInstance(classes);
             final Unmarshaller unmarshaller = context.createUnmarshaller();
             unmarshaller.setListener(this);
             return (SchemaModel) unmarshaller.unmarshal(path.toFile());

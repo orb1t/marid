@@ -76,6 +76,9 @@ public class L10n {
     }
 
     private static void m(ResourceBundle b, StringBuffer buf, String key, Function<String, String> func, Object... v) {
+        if (key == null) {
+            return;
+        }
         final String r = b.containsKey(key) ? b.getString(key) : func.apply(key);
         if (v == null || v.length == 0) {
             buf.append(r);
@@ -95,6 +98,9 @@ public class L10n {
     }
 
     private static void s(ResourceBundle b, Formatter fmt, String key, Function<String, String> func, Object... v) {
+        if (key == null) {
+            return;
+        }
         final String r = b.containsKey(key) ? b.getString(key) : func.apply(key);
         if (v == null || v.length == 0) {
             fmt.format("%s", r);
