@@ -121,7 +121,7 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
         final Point p2 = input.getConnectionPoint();
         final Path2D.Double shape = new Path2D.Double();
         shape.moveTo(p1.x, p1.y);
-        final LiveLinkShapeData data = bestSpecie;
+        final LiveLinkShapeData data = bestSpecie();
         for (int i = 0; i < COUNT; i++) {
             shape.lineTo(data.xs[i], data.ys[i]);
         }

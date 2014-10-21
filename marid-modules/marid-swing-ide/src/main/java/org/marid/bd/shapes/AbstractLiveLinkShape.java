@@ -26,10 +26,9 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
-import static org.marid.bd.shapes.LinkShapeType.LiveLinkConfigurationEditor.incubatorSize;
-import static org.marid.bd.shapes.LinkShapeType.LiveLinkConfigurationEditor.species;
 import static org.marid.concurrent.ThreadPools.getPoolSize;
 import static org.marid.concurrent.ThreadPools.newArrayThreadPool;
 
@@ -40,35 +39,43 @@ public abstract class AbstractLiveLinkShape<T> extends LinkShape implements Clon
 
     private static final ThreadPoolExecutor EXECUTOR = newArrayThreadPool(getPoolSize(4), 8192, new DiscardPolicy());
 
-    protected final List<T> specieList = new ArrayList<>();
-    protected volatile T bestSpecie;
+    protected final List<T> list = new ArrayList<>();
     protected volatile Point out;
     protected volatile Point in;
     protected volatile Rectangle[] rectangles = new Rectangle[0];
+    protected static final AtomicLong COUNTER = new AtomicLong();
 
     public AbstractLiveLinkShape(BlockComponent.Output output, BlockComponent.Input input) {
         super(output, input);
-        for (int i = 0; i < species; i++) {
-            specieList.add(defaultSpecie());
-        }
-        bestSpecie = specieList.get(0);
+        init(LinkShapeType.LiveLinkConfigurationEditor.species);
     }
 
-    protected void init() {
+    protected void init(int species) {
+        out = output.getConnectionPoint();
+        in = input.getConnectionPoint();
         rectangles = Arrays.stream(output.getBlockComponent().getSchemaEditor().getComponents())
                 .map(Component::getBounds)
                 .toArray(Rectangle[]::new);
+        while (list.size() < species) {
+            list.add(defaultSpecie());
+        }
+        while (list.size() > species) {
+            list.remove(list.size() - 1);
+        }
+    }
+
+    protected T bestSpecie() {
+        return list.get(0);
     }
 
     @Override
     public void update() {
-        out = output.getConnectionPoint();
-        in = input.getConnectionPoint();
-        init();
+        final int species = LinkShapeType.LiveLinkConfigurationEditor.species;
+        final int incubatorSize = LinkShapeType.LiveLinkConfigurationEditor.incubatorSize * species;
+        init(species);
         for (int i = 0; i < 64; i++) {
-            EXECUTOR.execute(this::doGA);
+            EXECUTOR.execute(() -> doGA(incubatorSize));
         }
-        bestSpecie = specieList.get(0);
     }
 
     protected abstract T defaultSpecie();
@@ -79,37 +86,23 @@ public abstract class AbstractLiveLinkShape<T> extends LinkShape implements Clon
 
     protected abstract double fitness(T specie);
 
-    protected void doGA() {
-        final TreeMap<Double, T> incubator = new TreeMap<>();
+    protected void doGA(int incubatorSize) {
         final ThreadLocalRandom random = ThreadLocalRandom.current();
+        final TreeMap<Double, T> incubator = new TreeMap<>();
         try {
-            for (int i = 0; incubator.size() < species * incubatorSize; i++) {
-                if (i >= 65536) {
-                    throw new IllegalStateException("Singularity detected");
-                }
-                final int n = random.nextInt(1, specieList.size());
-                final int mi = random.nextInt(n);
-                final int fi = random.nextInt(n);
-                final T male = specieList.get(mi);
-                final T female = specieList.get(mi == fi ? fi + 1 : fi);
+            list.forEach(s -> incubator.put(fitness(s), s));
+            for (int i = 0; i < incubatorSize; i++) {
+                final int mi = random.nextInt(list.size() - 1);
+                final int fi = random.nextInt(list.size());
+                final T male = list.get(mi);
+                final T female = list.get(fi == mi ? mi + 1 : fi);
                 final T child = crossover(male, female, random);
                 mutate(child, random);
                 incubator.put(fitness(child), child);
             }
-            int i = 0;
-            for (final Iterator<T> it = incubator.values().iterator(); i < species && it.hasNext(); i++) {
-                if (i < specieList.size()) {
-                    specieList.set(i, it.next());
-                } else {
-                    synchronized (specieList) {
-                        specieList.add(it.next());
-                    }
-                }
-            }
-            synchronized (specieList) {
-                while (specieList.size() > species) {
-                    specieList.remove(specieList.size() - 1);
-                }
+            final Iterator<T> it = incubator.values().iterator();
+            for (int i = 0; i < list.size() && it.hasNext(); i++) {
+                list.set(i, it.next());
             }
         } catch (Exception x) {
             warning("GA error", x);
