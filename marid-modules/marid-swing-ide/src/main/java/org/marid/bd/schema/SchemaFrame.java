@@ -175,7 +175,7 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
         try {
             final SchemaModel model = new SchemaModel(schemaEditor);
             persister.save(model, file.toPath());
-            final List<ClassNode> classNodes = SchemaToCode.schemaToCode(model.getSchema());
+            final List<ClassNode> classNodes = model.getSchema().toCode();
             final Profile profile = profileManager.getCurrentProfile();
             for (final ClassNode classNode : classNodes) {
                 final String name = classNode.getNameWithoutPackage() + ".groovy";

@@ -18,6 +18,7 @@
 
 package org.marid.bd.schema;
 
+import org.codehaus.groovy.ast.ClassNode;
 import org.marid.bd.Block;
 import org.marid.bd.BlockLink;
 import org.marid.itf.Named;
@@ -26,6 +27,11 @@ import javax.xml.bind.annotation.*;
 import java.rmi.server.UID;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -84,5 +90,25 @@ public class Schema implements Named {
     @Override
     public String getName() {
         return name;
+    }
+
+    public List<ClassNode> toCode() {
+        getBlocks().forEach(Block::reset);
+        final Predicate<Block> filter = b -> b.getOutputs().isEmpty() && !b.getExports().isEmpty();
+        final Set<Block> blocks = getBlocks().stream().filter(b -> !filter.test(b)).collect(toSet());
+        final Set<Block> terminalBlocks = getBlocks().stream().filter(filter).collect(toSet());
+        terminalBlocks.forEach(b -> pass(blocks, b));
+        return terminalBlocks.stream()
+                .flatMap(b -> b.getExports().stream().filter(o -> o.getOutputType() == ClassNode.class))
+                .map(o -> (ClassNode) o.get())
+                .collect(toList());
+    }
+
+    void pass(Set<Block> blocks, Block block) {
+        final Set<BlockLink> links = getLinks().stream().filter(l -> l.getTarget() == block).collect(toSet());
+        final Set<Block> sources = links.stream().map(BlockLink::getSource).collect(toSet());
+        final Set<Block> rest = blocks.stream().filter(b -> !sources.contains(b)).collect(toSet());
+        sources.forEach(b -> pass(rest, b));
+        links.forEach(BlockLink::transferValue);
     }
 }
