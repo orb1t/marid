@@ -46,7 +46,9 @@ public abstract class LinkShape {
 
     public abstract void update();
 
-    public abstract void paint(Graphics2D g);
+    public void paint(Graphics2D g) {
+        g.draw(getShape());
+    }
 
     public abstract Shape getShape();
 

@@ -21,17 +21,17 @@ package org.marid.bd.shapes;
 import org.marid.bd.BlockComponent;
 
 import java.awt.*;
-import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.marid.bd.shapes.LinkShapeType.LiveLinkConfigurationEditor.mutationProbability;
-import static org.marid.bd.shapes.LiveLinkShape.LiveLinkShapeData.COUNT;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkShapeData> {
+
+    protected static final int COUNT = 4;
 
     public LiveLinkShape(BlockComponent.Output output, BlockComponent.Input input) {
         super(output, input);
@@ -69,50 +69,43 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
         }
     }
 
-    private double lengthSq(LiveLinkShapeData data) {
-        double length = Point.distanceSq(out.x, out.y, data.xs[0], data.ys[0]);
+    private double length(LiveLinkShapeData data) {
+        double length = Point.distance(out.x, out.y, data.xs[0], data.ys[0]);
         for (int i = 0; i < COUNT - 1; i++) {
-            length += Point.distanceSq(data.xs[i], data.ys[i], data.xs[i + 1], data.ys[i + 1]);
+            length += Point.distance(data.xs[i], data.ys[i], data.xs[i + 1], data.ys[i + 1]);
         }
-        length += Point.distanceSq(data.xs[COUNT - 1], data.ys[COUNT - 1], in.x, in.y);
+        length += Point.distance(data.xs[COUNT - 1], data.ys[COUNT - 1], in.x, in.y);
         return length;
     }
 
-    private double isectF(Rectangle r, double cx, double cy, double rr, double x1, double y1, double x2, double y2) {
-        if (r.intersectsLine(x1, y1, x2, y2)) {
-            return rr - Line2D.ptLineDistSq(x1, y1, x2, y2, cx, cy);
-        } else {
-            return 0.0;
+    private int isectF(Rectangle r, int x1, int y1, int x2, int y2) {
+        final Rectangle rect = new Rectangle(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+        final int dx = rect.width < 5 ? 5 : 0, dy = rect.height < 5 ? 5 : 0;
+        if (dx != 0 || dy != 0) {
+            rect.grow(dx, dy);
         }
+        final Rectangle isect = rect.intersection(r);
+        return isect.isEmpty() ? 0 : isect.width * isect.width + isect.height * isect.height;
     }
 
     @Override
     protected double fitness(LiveLinkShapeData specie) {
         final Point out = this.out, in = this.in;
         try {
-            final double lineDistance = Point.distanceSq(out.x, out.y, in.x, in.y) + 0.1;
-            final double distFactor = lengthSq(specie) / lineDistance;
-            double isectFactor = 0.0;
+            final double distFactor = length(specie);
+            int isectFactor = 0;
             for (final Rectangle r : rectangles) {
-                final double cx = r.getCenterX();
-                final double cy = r.getCenterY();
-                final double rr = r.width * r.width + r.height * r.height;
-                isectFactor += isectF(r, cx, cy, rr, out.x + 1, out.y, specie.xs[0], specie.ys[0]);
+                isectFactor += isectF(r, out.x + 1, out.y, specie.xs[0], specie.ys[0]);
                 for (int i = 0; i < COUNT - 1; i++) {
-                    isectFactor += isectF(r, cx, cy, rr, specie.xs[i], specie.ys[i], specie.xs[i + 1], specie.ys[i + 1]);
+                    isectFactor += isectF(r, specie.xs[i], specie.ys[i], specie.xs[i + 1], specie.ys[i + 1]);
                 }
-                isectFactor += isectF(r, cx, cy, rr, specie.xs[COUNT - 1], specie.ys[COUNT - 1], in.x - 1, in.y);
+                isectFactor += isectF(r, specie.xs[COUNT - 1], specie.ys[COUNT - 1], in.x - 1, in.y);
             }
             return distFactor + isectFactor;
         } catch (Exception x) {
             warning("GA fitness error on {0}", x, this);
             return 0.0;
         }
-    }
-
-    @Override
-    public void paint(Graphics2D g) {
-        g.draw(getShape());
     }
 
     @Override
@@ -131,8 +124,6 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
 
     protected static class LiveLinkShapeData {
 
-        protected static final int COUNT = 4;
-
         protected final int[] xs;
         protected final int[] ys;
 
@@ -141,12 +132,8 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
             this.ys = ys;
         }
 
-        public LiveLinkShapeData() {
-            this(new int[COUNT], new int[COUNT]);
-        }
-
         public LiveLinkShapeData(Point p1, Point p2) {
-            this();
+            this(new int[COUNT], new int[COUNT]);
             final int dx = (p2.x - p1.x) / COUNT;
             final int dy = (p2.y - p1.y) / COUNT;
             for (int i = 0; i < COUNT; i++) {

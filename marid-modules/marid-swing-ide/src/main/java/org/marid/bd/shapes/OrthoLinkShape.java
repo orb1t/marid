@@ -19,11 +19,15 @@
 package org.marid.bd.shapes;
 
 import org.marid.bd.BlockComponent;
+import org.marid.bd.schema.SchemaEditor;
 
 import java.awt.*;
+import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
+import java.util.List;
 
-import static org.marid.bd.shapes.LinkShapeType.OrthoLinkConfigurationEditor.join;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -37,29 +41,59 @@ public class OrthoLinkShape extends LinkShape {
         update();
     }
 
-    @Override
-    public void update() {
-        path = new Path2D.Float();
-        final Point out = output.getConnectionPoint();
-        final Point in = input.getConnectionPoint();
-        final int cx = (out.x + in.x) / 2;
-        final int sx = Integer.compare(out.x, in.x);
-        final int sy = Integer.compare(out.y, in.y);
-        path.moveTo(out.x, out.y);
-        path.lineTo(cx + sx * join, out.y);
-        path.lineTo(cx, out.y - sy * join);
-        path.lineTo(cx, in.y + sy * join);
-        path.lineTo(cx - sx * join, in.y);
-        path.lineTo(in.x, in.y);
+    public Line2D.Float[] getLines(int dogLeg, Point out, Point in) {
+        return new Line2D.Float[] {
+                new Line2D.Float(out.x, out.y, dogLeg, out.y),
+                new Line2D.Float(dogLeg, out.y, dogLeg, in.y),
+                new Line2D.Float(dogLeg, in.y, in.x, in.y)
+        };
     }
 
     @Override
-    public void paint(Graphics2D g) {
-        g.draw(path);
+    public void update() {
+        final Point out = output.getConnectionPoint(), in = input.getConnectionPoint();
+        final Line2D.Float[] lines = getLines(getDogLeg(out, in), out, in);
+        final Path2D.Float path = new Path2D.Float();
+        path.moveTo(lines[0].x1, lines[0].y1);
+        for (final Line2D.Float line : lines) {
+            path.lineTo(line.x2, line.y2);
+        }
+        this.path = path;
+    }
+
+    private int getDogLeg(Point out, Point in) {
+        final int cx = (out.x + in.x) / 2;
+        final int limit = Math.abs(in.x - out.x) / 2;
+        final SchemaEditor editor = output.getBlockComponent().getSchemaEditor();
+        final List<Rectangle> rs;
+        synchronized (editor.getTreeLock()) {
+            rs = stream(editor.getComponents()).map(Component::getBounds).collect(toList());
+        }
+        return dogLeg(cx, limit, rs, out, in);
     }
 
     @Override
     public Shape getShape() {
         return path;
+    }
+
+    private int dogLeg(int cx, int limit, List<Rectangle> rectangles, Point out, Point in) {
+        out = new Point(out.x + 1, out.y);
+        in = new Point(in.x - 1, in.y);
+        for (int dx = 0; dx < limit; dx += 5) {
+            {
+                final Line2D.Float[] lines = getLines(cx + dx, out, in);
+                if (stream(lines).allMatch(l -> rectangles.stream().noneMatch(r -> r.intersectsLine(l)))) {
+                    return cx + dx;
+                }
+            }
+            {
+                final Line2D.Float[] lines = getLines(cx - dx, out, in);
+                if (stream(lines).allMatch(l -> rectangles.stream().noneMatch(r -> r.intersectsLine(l)))) {
+                    return cx - dx;
+                }
+            }
+        }
+        return cx;
     }
 }

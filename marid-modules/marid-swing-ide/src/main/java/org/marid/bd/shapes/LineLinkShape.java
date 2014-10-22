@@ -34,14 +34,6 @@ public class LineLinkShape extends LinkShape {
 
     @Override
     public void update() {
-
-    }
-
-    @Override
-    public void paint(Graphics2D g) {
-        final Point p1 = output.getConnectionPoint();
-        final Point p2 = input.getConnectionPoint();
-        g.drawLine(p1.x, p1.y, p2.x, p2.y);
     }
 
     @Override
