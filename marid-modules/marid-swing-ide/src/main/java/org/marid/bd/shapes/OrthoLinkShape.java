@@ -24,6 +24,8 @@ import org.marid.bd.schema.SchemaEditor;
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Arrays.stream;
@@ -41,24 +43,19 @@ public class OrthoLinkShape extends LinkShape {
         update();
     }
 
-    public Line2D.Float[] getLines(int dogLeg, Point out, Point in) {
-        return new Line2D.Float[] {
-                new Line2D.Float(out.x, out.y, dogLeg, out.y),
-                new Line2D.Float(dogLeg, out.y, dogLeg, in.y),
-                new Line2D.Float(dogLeg, in.y, in.x, in.y)
-        };
+    public Path2D.Float getPath(int dogLeg, Point out, Point in) {
+        final Path2D.Float path = new Path2D.Float();
+        path.moveTo(out.x, out.y);
+        path.lineTo(dogLeg, out.y);
+        path.lineTo(dogLeg, in.y);
+        path.lineTo(in.x, in.y);
+        return path;
     }
 
     @Override
     public void update() {
         final Point out = output.getConnectionPoint(), in = input.getConnectionPoint();
-        final Line2D.Float[] lines = getLines(getDogLeg(out, in), out, in);
-        final Path2D.Float path = new Path2D.Float();
-        path.moveTo(lines[0].x1, lines[0].y1);
-        for (final Line2D.Float line : lines) {
-            path.lineTo(line.x2, line.y2);
-        }
-        this.path = path;
+        path = getPath(getDogLeg(out, in), out, in);
     }
 
     private int getDogLeg(Point out, Point in) {
@@ -82,18 +79,35 @@ public class OrthoLinkShape extends LinkShape {
         in = new Point(in.x - 1, in.y);
         for (int dx = 0; dx < limit; dx += 5) {
             {
-                final Line2D.Float[] lines = getLines(cx + dx, out, in);
-                if (stream(lines).allMatch(l -> rectangles.stream().noneMatch(r -> r.intersectsLine(l)))) {
+                final Path2D path = getPath(cx + dx, out, in);
+                final List<Line2D> lines = lines(path);
+                if (lines.stream().allMatch(l -> rectangles.stream().noneMatch(r -> r.intersectsLine(l)))) {
                     return cx + dx;
                 }
             }
             {
-                final Line2D.Float[] lines = getLines(cx - dx, out, in);
-                if (stream(lines).allMatch(l -> rectangles.stream().noneMatch(r -> r.intersectsLine(l)))) {
+                final Path2D path = getPath(cx - dx, out, in);
+                final List<Line2D> lines = lines(path);
+                if (lines.stream().allMatch(l -> rectangles.stream().noneMatch(r -> r.intersectsLine(l)))) {
                     return cx - dx;
                 }
             }
         }
         return cx;
+    }
+
+    private static List<Line2D> lines(Path2D path) {
+        final List<Line2D> lines = new ArrayList<>();
+        final float[] coords = new float[2], current = new float[2];
+        for (final PathIterator it = path.getPathIterator(null); !it.isDone(); it.next()) {
+            switch (it.currentSegment(current)) {
+                case PathIterator.SEG_LINETO:
+                    lines.add(new Line2D.Float(coords[0], coords[1], current[0], current[1]));
+                case PathIterator.SEG_MOVETO:
+                    System.arraycopy(current, 0, coords, 0, coords.length);
+                    break;
+            }
+        }
+        return lines;
     }
 }
