@@ -22,6 +22,7 @@ import org.marid.bd.BlockComponent;
 import org.marid.bd.schema.SchemaEditor;
 
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
@@ -70,6 +71,17 @@ public class OrthoLinkShape extends LinkShape {
     }
 
     @Override
+    public void paint(Graphics2D g) {
+        super.paint(g);
+        final List<Line2D.Float> lines = lines(path);
+        output.getBlockComponent().getSchemaEditor().getLinkShapes().stream()
+                .filter(l -> l.output.getOutput() == output.getOutput() && l != this)
+                .filter(l -> l instanceof OrthoLinkShape)
+                .map(OrthoLinkShape.class::cast)
+                .forEach(s -> lines(s.path).forEach(l1 -> lines.forEach(l2 -> intersection(g, l1, l2))));
+    }
+
+    @Override
     public Shape getShape() {
         return path;
     }
@@ -80,14 +92,14 @@ public class OrthoLinkShape extends LinkShape {
         for (int dx = 0; dx < limit; dx += 5) {
             {
                 final Path2D path = getPath(cx + dx, out, in);
-                final List<Line2D> lines = lines(path);
+                final List<Line2D.Float> lines = lines(path);
                 if (lines.stream().allMatch(l -> rectangles.stream().noneMatch(r -> r.intersectsLine(l)))) {
                     return cx + dx;
                 }
             }
             {
                 final Path2D path = getPath(cx - dx, out, in);
-                final List<Line2D> lines = lines(path);
+                final List<Line2D.Float> lines = lines(path);
                 if (lines.stream().allMatch(l -> rectangles.stream().noneMatch(r -> r.intersectsLine(l)))) {
                     return cx - dx;
                 }
@@ -96,8 +108,8 @@ public class OrthoLinkShape extends LinkShape {
         return cx;
     }
 
-    private static List<Line2D> lines(Path2D path) {
-        final List<Line2D> lines = new ArrayList<>();
+    private static List<Line2D.Float> lines(Path2D path) {
+        final List<Line2D.Float> lines = new ArrayList<>();
         final float[] coords = new float[2], current = new float[2];
         for (final PathIterator it = path.getPathIterator(null); !it.isDone(); it.next()) {
             switch (it.currentSegment(current)) {
@@ -109,5 +121,13 @@ public class OrthoLinkShape extends LinkShape {
             }
         }
         return lines;
+    }
+
+    private static void intersection(Graphics2D g, Line2D.Float l1, Line2D.Float l2) {
+        if (l1.x1 == l1.x2 && l2.y1 == l2.y2 && l1.ptSegDist(l2.getP1()) < 0.001) {
+            g.fill(new Ellipse2D.Float(l1.x1 - 2.0f, l2.y1 - 2.0f, 5.0f, 5.0f));
+        } else if (l1.x1 == l1.x2 && l2.x1 == l2.x2 && l1.y1 == l2.y1 && (l2.y2 - l2.y1) * (l1.y2 - l1.y1) < 0.0) {
+            g.fill(new Ellipse2D.Float(l1.x1 - 2.0f, l2.y1 - 2.0f, 5.0f, 5.0f));
+        }
     }
 }
