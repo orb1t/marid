@@ -19,7 +19,6 @@
 package org.marid.ide.swing;
 
 import org.marid.bd.schema.SchemaFrameConfiguration;
-import org.marid.ide.bde.BdeConfiguration;
 import org.marid.swing.forms.Configuration;
 import org.marid.swing.forms.ConfigurationProvider;
 
@@ -31,7 +30,6 @@ import java.util.function.Consumer;
 public class DefaultConfigurationProvider implements ConfigurationProvider {
     @Override
     public void visitConfigurationClasses(Consumer<Class<? extends Configuration>> consumer) {
-        consumer.accept(BdeConfiguration.class);
         consumer.accept(SchemaFrameConfiguration.class);
     }
 }

@@ -19,7 +19,6 @@
 package org.marid.ide.swing.context;
 
 import org.marid.bd.schema.SchemaFrame;
-import org.marid.ide.bde.BdeWindow;
 import org.marid.ide.components.BlockMenuProvider;
 import org.marid.logging.LogSupport;
 import org.marid.swing.MaridAction;
@@ -46,9 +45,6 @@ public class MenuContext implements LogSupport {
         return new ActionTreeElement()
                 .add("Services", null, servicesMenu -> {
                     servicesMenu
-                            .add("Service configurer", null, new MaridAction("BDE Window", null, e -> {
-                                new BdeWindow().setVisible(true);
-                            }))
                             .add("Schema frame", null, new MaridAction("Schema frame", null, e -> {
                                 autowireCapableBeanFactory.createBean(SchemaFrame.class);
                             }));
