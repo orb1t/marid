@@ -28,9 +28,13 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.min;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -44,15 +48,6 @@ public class OrthoLinkShape extends LinkShape {
         update();
     }
 
-    public Path2D.Float getPath(int dogLeg, Point out, Point in) {
-        final Path2D.Float path = new Path2D.Float();
-        path.moveTo(out.x, out.y);
-        path.lineTo(dogLeg, out.y);
-        path.lineTo(dogLeg, in.y);
-        path.lineTo(in.x, in.y);
-        return path;
-    }
-
     @Override
     public void update() {
         final Point out = output.getConnectionPoint(), in = input.getConnectionPoint();
@@ -61,13 +56,17 @@ public class OrthoLinkShape extends LinkShape {
 
     private int getDogLeg(Point out, Point in) {
         final int cx = (out.x + in.x) / 2;
-        final int limit = Math.abs(in.x - out.x) / 2;
         final SchemaEditor editor = output.getBlockComponent().getSchemaEditor();
         final List<Rectangle> rs;
         synchronized (editor.getTreeLock()) {
             rs = stream(editor.getComponents()).map(Component::getBounds).collect(toList());
         }
-        return dogLeg(cx, limit, rs, out, in);
+        final Set<List<Line2D.Float>> links = editor.getLinkShapes().stream()
+                .filter(l -> l != this && l instanceof OrthoLinkShape && l.output.getOutput() != output.getOutput())
+                .map(OrthoLinkShape.class::cast)
+                .map(s -> lines(s.path))
+                .collect(toSet());
+        return dogLeg(cx, rs, links, out, in);
     }
 
     @Override
@@ -86,29 +85,31 @@ public class OrthoLinkShape extends LinkShape {
         return path;
     }
 
-    private int dogLeg(int cx, int limit, List<Rectangle> rectangles, Point out, Point in) {
+    private int dogLeg(int cx, List<Rectangle> rectangles, Set<List<Line2D.Float>> links, Point out, Point in) {
         out = new Point(out.x + 1, out.y);
         in = new Point(in.x - 1, in.y);
-        for (int dx = 0; dx < limit; dx += 5) {
-            {
-                final Path2D path = getPath(cx + dx, out, in);
-                final List<Line2D.Float> lines = lines(path);
-                if (lines.stream().allMatch(l -> rectangles.stream().noneMatch(r -> r.intersectsLine(l)))) {
-                    return cx + dx;
-                }
-            }
-            {
-                final Path2D path = getPath(cx - dx, out, in);
-                final List<Line2D.Float> lines = lines(path);
-                if (lines.stream().allMatch(l -> rectangles.stream().noneMatch(r -> r.intersectsLine(l)))) {
-                    return cx - dx;
-                }
+        int dl = cx, fitness = Integer.MAX_VALUE;
+        final int x0 = min(out.x, in.x), xf = Math.max(out.x, in.x);
+        for (int x = x0; x <= xf; x += 5) {
+            final int f = fitness(x, cx, rectangles, links, out, in);
+            if (f < fitness) {
+                fitness = f;
+                dl = x;
             }
         }
-        return cx;
+        return dl;
     }
 
-    private static List<Line2D.Float> lines(Path2D path) {
+    static Path2D.Float getPath(int dogLeg, Point out, Point in) {
+        final Path2D.Float path = new Path2D.Float();
+        path.moveTo(out.x, out.y);
+        path.lineTo(dogLeg, out.y);
+        path.lineTo(dogLeg, in.y);
+        path.lineTo(in.x, in.y);
+        return path;
+    }
+
+    static List<Line2D.Float> lines(Path2D path) {
         final List<Line2D.Float> lines = new ArrayList<>();
         final float[] coords = new float[2], current = new float[2];
         for (final PathIterator it = path.getPathIterator(null); !it.isDone(); it.next()) {
@@ -123,11 +124,39 @@ public class OrthoLinkShape extends LinkShape {
         return lines;
     }
 
-    private static void intersection(Graphics2D g, Line2D.Float l1, Line2D.Float l2) {
+    static void intersection(Graphics2D g, Line2D.Float l1, Line2D.Float l2) {
         if (l1.x1 == l1.x2 && l2.y1 == l2.y2 && l1.ptSegDist(l2.getP1()) < 0.001) {
             g.fill(new Ellipse2D.Float(l1.x1 - 2.0f, l2.y1 - 2.0f, 5.0f, 5.0f));
         } else if (l1.x1 == l1.x2 && l2.x1 == l2.x2 && l1.y1 == l2.y1 && (l2.y2 - l2.y1) * (l1.y2 - l1.y1) < 0.0) {
             g.fill(new Ellipse2D.Float(l1.x1 - 2.0f, l2.y1 - 2.0f, 5.0f, 5.0f));
         }
+    }
+
+    static int fitness(int x, int cx, List<Rectangle> rectangles, Set<List<Line2D.Float>> links, Point out, Point in) {
+        int fitness = abs(x - cx);
+        final int len = abs(in.x - out.x);
+        final Path2D.Float path = getPath(x, out, in);
+        final List<Line2D.Float> lines = lines(path);
+        fitness += rectangles.stream()
+                .mapToInt(r -> lines.stream()
+                        .filter(r::intersectsLine)
+                        .mapToInt(l -> len)
+                        .sum())
+                .sum();
+        fitness += lines.stream()
+                .mapToInt(l1 -> links.stream()
+                        .mapToInt(l -> l.stream()
+                                .filter(l2 -> isParallel(l1, l2))
+                                .mapToInt(l2 -> len)
+                                .sum())
+                        .sum())
+                .sum();
+        return fitness;
+    }
+
+    static boolean isParallel(Line2D.Float l1, Line2D.Float l2) {
+        return !(l1.x1 != l1.x2 || l2.x1 != l2.x2)
+                && Math.abs(l2.x1 - l1.x1) <= 5.0f
+                && Line2D.linesIntersect(0.0, l1.y1, 0.0, l1.y2, 0.0, l2.y1, 0.0, l2.y2);
     }
 }
