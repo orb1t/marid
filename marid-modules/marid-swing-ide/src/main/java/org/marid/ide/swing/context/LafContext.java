@@ -34,13 +34,9 @@ public class LafContext implements LogSupport, SysPrefSupport {
 
     @PostConstruct
     public void init() {
-        final String laf = getSysPref("laf", "");
+        final String laf = getSysPref("laf", NimbusLookAndFeel.class.getCanonicalName());
         try {
-            if (!laf.isEmpty()) {
-                UIManager.setLookAndFeel(laf);
-            } else {
-                UIManager.setLookAndFeel(new NimbusLookAndFeel());
-            }
+            UIManager.setLookAndFeel(laf);
         } catch (Exception x) {
             warning("Unable to set LAF {0}", x, laf);
         }

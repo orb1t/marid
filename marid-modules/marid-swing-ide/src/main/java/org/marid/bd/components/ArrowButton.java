@@ -32,13 +32,38 @@ import static java.awt.SystemColor.controlDkShadow;
 public class ArrowButton extends JToggleButton {
 
     public static final int ARROW_SIZE = 10;
+    public static final int ARROW_H = ARROW_SIZE / 2;
 
     protected final int arrowPosition;
 
     public ArrowButton(String name, int arrowPosition) {
         this.arrowPosition = arrowPosition;
         setName(name);
-        setUI(new BasicToggleButtonUI());
+        setBorder(BorderFactory.createEmptyBorder());
+        setUI(new BasicToggleButtonUI() {
+            @Override
+            public void paint(Graphics graphics, JComponent c) {
+                final Graphics2D g = (Graphics2D) graphics;
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g.setColor(controlDkShadow);
+                switch (arrowPosition) {
+                    case SwingConstants.EAST:
+                    case SwingConstants.WEST:
+                        g.drawLine(0, ARROW_H, ARROW_SIZE * 2, ARROW_H);
+                        g.translate(ARROW_SIZE / 2, 0);
+                        g.setColor(getArrowColor());
+                        g.fillPolygon(new int[]{0, 0, ARROW_SIZE}, new int[]{0, ARROW_SIZE, ARROW_H}, 3);
+                        break;
+                    case SwingConstants.SOUTH:
+                    case SwingConstants.NORTH:
+                        g.drawLine(ARROW_H, 0, ARROW_H, ARROW_SIZE * 2);
+                        g.translate(0, ARROW_SIZE / 2);
+                        g.setColor(getArrowColor());
+                        g.fillPolygon(new int[]{0, ARROW_SIZE, ARROW_H}, new int[]{0, 0, ARROW_SIZE}, 3);
+                        break;
+                }
+            }
+        });
         setOpaque(false);
         setRolloverEnabled(true);
     }
@@ -46,35 +71,6 @@ public class ArrowButton extends JToggleButton {
     protected Color getArrowColor() {
         final ButtonModel m = getModel();
         return m.isRollover() ? RED : m.isPressed() ? GREEN : m.isSelected() ? RED.darker() : controlDkShadow;
-    }
-
-    @Override
-    protected void paintComponent(Graphics graphics) {
-        final Graphics2D g = (Graphics2D) graphics;
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setColor(controlDkShadow);
-        switch (arrowPosition) {
-            case SwingConstants.EAST:
-            case SwingConstants.WEST:
-                g.drawLine(0, ARROW_SIZE / 2, ARROW_SIZE / 2, ARROW_SIZE / 2);
-                g.translate(ARROW_SIZE / 2, 0);
-                g.setColor(getArrowColor());
-                g.fillPolygon(new int[]{0, 0, ARROW_SIZE + 1}, new int[]{0, ARROW_SIZE, ARROW_SIZE / 2}, 3);
-                g.setColor(controlDkShadow);
-                g.translate(ARROW_SIZE, 0);
-                g.drawLine(0, ARROW_SIZE / 2, ARROW_SIZE / 2, ARROW_SIZE / 2);
-                break;
-            case SwingConstants.SOUTH:
-            case SwingConstants.NORTH:
-                g.drawLine(ARROW_SIZE / 2, 0, ARROW_SIZE / 2, ARROW_SIZE / 2);
-                g.translate(0, ARROW_SIZE / 2);
-                g.setColor(getArrowColor());
-                g.fillPolygon(new int[]{0, ARROW_SIZE, ARROW_SIZE / 2}, new int[]{0, 0, ARROW_SIZE + 1}, 3);
-                g.setColor(controlDkShadow);
-                g.translate(0, ARROW_SIZE);
-                g.drawLine(ARROW_SIZE / 2, 0, ARROW_SIZE / 2, ARROW_SIZE / 2);
-                break;
-        }
     }
 
     @Override

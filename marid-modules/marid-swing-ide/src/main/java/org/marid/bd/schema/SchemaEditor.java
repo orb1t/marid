@@ -492,6 +492,12 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
 
     public void resetZoom() {
         transform.setToIdentity();
+        final int minX = Arrays.stream(getComponents()).mapToInt(Component::getX).min().orElse(0);
+        final int minY = Arrays.stream(getComponents()).mapToInt(Component::getY).min().orElse(0);
+        for (int i = 0; i < getComponentCount(); i++) {
+            final Component c = getComponent(i);
+            c.setLocation(c.getX() - minX + 10, c.getY() - minY + 10);
+        }
         repaint();
     }
 
