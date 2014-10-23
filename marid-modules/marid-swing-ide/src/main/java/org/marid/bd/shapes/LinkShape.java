@@ -18,7 +18,6 @@
 
 package org.marid.bd.shapes;
 
-import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.swing.MaridAction;
 
@@ -34,7 +33,7 @@ import static java.awt.BasicStroke.JOIN_MITER;
 public abstract class LinkShape {
 
     public static final Stroke NORMAL = new BasicStroke(1.0f);
-    public static final Stroke VECTOR = new BasicStroke(1.0f, CAP_SQUARE, JOIN_MITER, 5.0f, new float[] {5.0f}, 0.0f);
+    public static final Stroke VECTOR = new BasicStroke(1.0f, CAP_SQUARE, JOIN_MITER, 5.0f, new float[]{5.0f}, 0.0f);
 
     public final BlockComponent.Output output;
     public final BlockComponent.Input input;
@@ -64,9 +63,9 @@ public abstract class LinkShape {
     }
 
     public boolean isValid() {
-        final Block.Output o = output.getOutput();
-        final Block.Input i = input.getInput();
-        return i.getInputType().isAssignableFrom(o.getOutputType());
+        final Class<?> it = input.getInput().getInputType();
+        final Class<?> ot = output.getOutput().getOutputType();
+        return it.isAssignableFrom(ot) || it.isArray() && it.getComponentType().isAssignableFrom(ot);
     }
 
     public Color getColor() {
@@ -78,11 +77,7 @@ public abstract class LinkShape {
     }
 
     public Stroke getStroke() {
-        if (getOutputType().isArray() || getInputType().isArray()) {
-            return VECTOR;
-        } else {
-            return NORMAL;
-        }
+        return getOutputType().isArray() ? VECTOR : NORMAL;
     }
 
     public Class<?> getOutputType() {

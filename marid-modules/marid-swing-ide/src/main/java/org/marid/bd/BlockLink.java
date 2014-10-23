@@ -99,8 +99,4 @@ public class BlockLink {
     public String getInput() {
         return input;
     }
-
-    public void transferValue() {
-        getBlockInput().set(getBlockOutput().get());
-    }
 }

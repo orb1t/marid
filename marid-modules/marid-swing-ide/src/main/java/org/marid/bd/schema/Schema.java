@@ -109,6 +109,6 @@ public class Schema implements Named {
         final Set<Block> sources = links.stream().map(BlockLink::getSource).collect(toSet());
         final Set<Block> rest = blocks.stream().filter(b -> !sources.contains(b)).collect(toSet());
         sources.forEach(b -> pass(rest, b));
-        links.forEach(BlockLink::transferValue);
+        block.transfer(links);
     }
 }

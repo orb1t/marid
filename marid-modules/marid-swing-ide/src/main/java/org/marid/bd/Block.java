@@ -21,6 +21,7 @@ package org.marid.bd;
 import org.marid.ide.components.BlockPersister;
 import org.marid.itf.Named;
 import org.marid.swing.dnd.DndObject;
+import org.marid.util.CollectionUtils;
 import org.marid.util.Utils;
 
 import javax.xml.bind.annotation.*;
@@ -80,6 +81,23 @@ public abstract class Block implements Named, DndObject {
 
     public List<Output> getExports() {
         return Collections.emptyList();
+    }
+
+    public void transfer(Collection<BlockLink> links) {
+        getInputs().forEach(i -> {
+            if (i.getInputType().isArray()) {
+                i.set(links.stream()
+                        .filter(l -> l.getBlockInput() == i)
+                        .flatMap(l -> l.getBlockOutput().getOutputType().isArray()
+                                ? Arrays.stream((Object[]) l.getBlockOutput().get())
+                                : Arrays.asList(l.getBlockOutput().get()).stream())
+                        .toArray(CollectionUtils.getArrayFunction(i.getInputType().getComponentType())));
+            } else {
+                links.stream()
+                        .filter(l -> l.getBlockInput() == i)
+                        .forEach(l -> l.getBlockInput().set(l.getBlockOutput().get()));
+            }
+        });
     }
 
     public abstract BlockComponent createComponent();
