@@ -61,6 +61,7 @@ import static java.awt.event.InputEvent.SHIFT_DOWN_MASK;
 import static java.awt.event.MouseEvent.CTRL_DOWN_MASK;
 import static java.awt.event.MouseEvent.*;
 import static org.marid.concurrent.AtomicUtils.processDirty;
+import static org.marid.swing.SwingUtil.componentStream;
 import static org.marid.swing.geom.ShapeUtils.mouseEvent;
 import static org.marid.swing.geom.ShapeUtils.ptAdd;
 
@@ -492,12 +493,9 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
 
     public void resetZoom() {
         transform.setToIdentity();
-        final int minX = Arrays.stream(getComponents()).mapToInt(Component::getX).min().orElse(0);
-        final int minY = Arrays.stream(getComponents()).mapToInt(Component::getY).min().orElse(0);
-        for (int i = 0; i < getComponentCount(); i++) {
-            final Component c = getComponent(i);
-            c.setLocation(c.getX() - minX + 10, c.getY() - minY + 10);
-        }
+        final int minX = componentStream(this).mapToInt(Component::getX).min().orElse(0);
+        final int minY = componentStream(this).mapToInt(Component::getY).min().orElse(0);
+        componentStream(this).forEach(c -> c.setLocation(c.getX() - minX + 10, c.getY() - minY + 10));
         repaint();
     }
 

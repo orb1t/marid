@@ -27,9 +27,11 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Point2D;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -135,6 +137,12 @@ public class SwingUtil {
 
     public static Color color(Color base, int alpha) {
         return new Color(base.getRed(), base.getGreen(), base.getBlue(), alpha);
+    }
+
+    public static Stream<Component> componentStream(Container container) {
+        synchronized (container.getTreeLock()) {
+            return Arrays.stream(container.getComponents());
+        }
     }
 
     public static void dispatchEvent(Component component, AWTEvent event) {

@@ -30,32 +30,30 @@ import javax.swing.*;
 import javax.xml.bind.annotation.XmlAttribute;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EventListener;
+import java.util.*;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class Multiplexor<E> extends StandardBlock implements ConfigurableBlock {
 
-    @XmlAttribute
     protected int inputCount;
+    protected E[] array;
 
     protected final Class<E> type;
     protected final List<Input> inputs = new ArrayList<>();
-    protected final List<E> list = new ArrayList<>();
     protected final Output out;
     protected final String iconText;
 
     public Multiplexor(String name, String iconText, String label, Class<E> type, int inputCount) {
         super(name, iconText, label, Color.DARK_GRAY);
-        this.inputCount = inputCount;
         this.type = type;
         this.out = new MultiplexorOutput();
         this.iconText = iconText;
-        updateInputs(inputCount);
+        this.array = CollectionUtils.getArrayFunction(type).apply(0);
+        setInputCount(inputCount);
     }
 
     @Override
@@ -68,6 +66,7 @@ public class Multiplexor<E> extends StandardBlock implements ConfigurableBlock {
         return Collections.singletonList(out);
     }
 
+    @XmlAttribute
     public int getInputCount() {
         return inputCount;
     }
@@ -85,7 +84,7 @@ public class Multiplexor<E> extends StandardBlock implements ConfigurableBlock {
         final BlockComponent component = super.createComponent();
         addEventListener(component, (MultiplexorListener) v -> EventQueue.invokeLater(() -> {
             final List<Link> links = component.getSchemaEditor().removeAllLinks(component);
-            updateInputs(v);
+            setInputCount(v);
             component.updateBlock();
             component.getSchemaEditor().createLinks(links);
             component.getSchemaEditor().validate();
@@ -95,11 +94,16 @@ public class Multiplexor<E> extends StandardBlock implements ConfigurableBlock {
 
     @Override
     public void reset() {
-        list.clear();
+        Arrays.fill(array, null);
     }
 
     public void setInputCount(int newValue) {
-        fire(MultiplexorListener.class, () -> inputCount, n -> inputCount = n, newValue, MultiplexorListener::inputCountChanged);
+        fire(MultiplexorListener.class, () -> inputCount, n -> {
+            inputCount = n;
+            array = Arrays.copyOf(array, inputCount);
+            inputs.clear();
+            IntStream.range(0, n).forEach(i -> inputs.add(new In(Integer.toString(i + 1), type, v -> array[i] = v)));
+        }, newValue, MultiplexorListener::inputCountChanged);
     }
 
     @Override
@@ -107,18 +111,11 @@ public class Multiplexor<E> extends StandardBlock implements ConfigurableBlock {
         return new MultiplexorEditor(parent);
     }
 
-    public void updateInputs(int count) {
-        inputs.clear();
-        for (int i = 1; i <= count; i++) {
-            inputs.add(new In(Integer.toString(i), type, list::add));
-        }
-    }
-
     protected class MultiplexorOutput implements Output {
 
         @Override
         public E[] get() {
-            return list.toArray(CollectionUtils.getArrayFunction(type).apply(list.size()));
+            return Arrays.stream(array).filter(e -> e != null).toArray(CollectionUtils.getArrayFunction(type));
         }
 
         @Override
