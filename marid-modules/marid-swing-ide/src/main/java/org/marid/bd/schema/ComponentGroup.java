@@ -125,7 +125,6 @@ public class ComponentGroup {
                 selection.height = Math.abs(selection.height);
             }
         }
-        componentMap.clear();
         for (final Component component : components) {
             final Rectangle bounds = component.getBounds();
             if (lrSelection && bounds.intersects(selection) || !lrSelection && selection.contains(bounds)) {

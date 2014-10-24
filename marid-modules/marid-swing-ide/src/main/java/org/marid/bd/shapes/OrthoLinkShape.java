@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
+import static java.awt.geom.Line2D.linesIntersect;
 import static java.lang.Math.abs;
 import static java.lang.Math.min;
 import static java.util.Arrays.stream;
@@ -60,14 +61,7 @@ public class OrthoLinkShape extends LinkShape {
         synchronized (editor.getTreeLock()) {
             rs = stream(editor.getComponents()).map(Component::getBounds).collect(toList());
         }
-        final Set<List<Line2D.Float>> links = editor.getLinkShapes().stream()
-                .filter(l -> l.output.getOutput() != output.getOutput())
-                .filter(l -> l.input.getInput() != input.getInput())
-                .filter(l -> l != this && l instanceof OrthoLinkShape)
-                .map(OrthoLinkShape.class::cast)
-                .map(s -> lines(s.path))
-                .collect(toSet());
-        return dogLeg(cx, rs, links, out, in);
+        return dogLeg(cx, rs, out, in);
     }
 
     @Override
@@ -93,13 +87,25 @@ public class OrthoLinkShape extends LinkShape {
         return path;
     }
 
-    private int dogLeg(int cx, List<Rectangle> rectangles, Set<List<Line2D.Float>> links, Point out, Point in) {
+    private int dogLeg(int cx, List<Rectangle> rectangles, Point out, Point in) {
+        final Set<List<Line2D.Float>> ls = output.getBlockComponent().getSchemaEditor().getLinkShapes().stream()
+                .filter(l -> l.output.getOutput() != output.getOutput() && l.input.getInput() != input.getInput())
+                .filter(l -> l != this && l instanceof OrthoLinkShape)
+                .map(OrthoLinkShape.class::cast)
+                .map(s -> lines(s.path))
+                .collect(toSet());
+        final Set<List<Line2D.Float>> ss = output.getBlockComponent().getSchemaEditor().getLinkShapes().stream()
+                .filter(l -> l.output.getOutput() == output.getOutput() || l.input.getInput() == input.getInput())
+                .filter(l -> l != this && l instanceof OrthoLinkShape)
+                .map(OrthoLinkShape.class::cast)
+                .map(s -> lines(s.path))
+                .collect(toSet());
         out = new Point(out.x + 1, out.y);
         in = new Point(in.x - 1, in.y);
         int dl = cx, fitness = Integer.MAX_VALUE;
         final int x0 = min(out.x, in.x), xf = Math.max(out.x, in.x);
         for (int x = x0; x <= xf; x += 5) {
-            final int f = fitness(x, cx, rectangles, links, out, in);
+            final int f = fitness(x, cx, rectangles, ls, ss, out, in);
             if (f < fitness) {
                 fitness = f;
                 dl = x;
@@ -193,22 +199,30 @@ public class OrthoLinkShape extends LinkShape {
         }
     }
 
-    static int fitness(int x, int cx, List<Rectangle> rectangles, Set<List<Line2D.Float>> links, Point out, Point in) {
+    static int fitness(int x, int cx, List<Rectangle> rs, Set<List<Line2D.Float>> ls, Set<List<Line2D.Float>> ss, Point out, Point in) {
         int fitness = abs(x - cx);
         final int len = abs(in.x - out.x);
         final Path2D.Float path = getPath(x, out, in);
         final List<Line2D.Float> lines = lines(path);
-        fitness += rectangles.stream()
+        fitness += rs.stream()
                 .mapToInt(r -> lines.stream()
                         .filter(r::intersectsLine)
                         .mapToInt(l -> len)
                         .sum())
                 .sum();
         fitness += lines.stream()
-                .mapToInt(l1 -> links.stream()
+                .mapToInt(l1 -> ls.stream()
                         .mapToInt(l -> l.stream()
-                                .filter(l2 -> isParallel(l1, l2))
+                                .filter(l2 -> abs(l2.x1 - l1.x1) <= 5.0f && isParallel(l1, l2))
                                 .mapToInt(l2 -> len)
+                                .sum())
+                        .sum())
+                .sum();
+        fitness += lines.stream()
+                .mapToInt(l1 -> ss.stream()
+                        .mapToInt(l -> l.stream()
+                                .filter(l2 -> abs(l2.x1 - l1.x1) >= 0.001 && isParallel(l1, l2))
+                                .mapToInt(l2 -> len * 2)
                                 .sum())
                         .sum())
                 .sum();
@@ -216,8 +230,6 @@ public class OrthoLinkShape extends LinkShape {
     }
 
     static boolean isParallel(Line2D.Float l1, Line2D.Float l2) {
-        return !(l1.x1 != l1.x2 || l2.x1 != l2.x2)
-                && Math.abs(l2.x1 - l1.x1) <= 5.0f
-                && Line2D.linesIntersect(0.0, l1.y1, 0.0, l1.y2, 0.0, l2.y1, 0.0, l2.y2);
+        return !(l1.x1 != l1.x2 || l2.x1 != l2.x2) && linesIntersect(0, l1.y1, 0, l1.y2, 0, l2.y1, 0, l2.y2);
     }
 }

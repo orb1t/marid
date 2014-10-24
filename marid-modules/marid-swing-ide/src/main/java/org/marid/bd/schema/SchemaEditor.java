@@ -319,7 +319,9 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                 if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1) {
                     final BlockComponent component = findBlockComponent(c -> c.getBounds().contains(mousePoint));
                     if (component != null) {
-                        selection.clear();
+                        if (!e.isShiftDown()) {
+                            selection.clear();
+                        }
                         selection.addComponent(component.getComponent());
                         repaint();
                         return true;
@@ -328,7 +330,9 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                 return false;
             case MOUSE_PRESSED:
                 action = ev -> {
-                    selection.clear();
+                    if (!ev.isShiftDown()) {
+                        selection.clear();
+                    }
                     selection.startSelection(mousePoint);
                     repaint();
                     return true;
