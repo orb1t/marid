@@ -313,7 +313,6 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     }
 
     private boolean dispatchSelection(MouseEvent e) {
-        final Predicate<MouseEvent> action;
         switch (e.getID()) {
             case MOUSE_CLICKED:
                 if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1) {
@@ -329,38 +328,35 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                 }
                 return false;
             case MOUSE_PRESSED:
-                action = ev -> {
-                    if (!ev.isShiftDown() && !ev.isControlDown()) {
-                        selection.clear();
-                    }
-                    selection.startSelection(mousePoint);
-                    repaint();
-                    return true;
-                };
-                break;
             case MOUSE_RELEASED:
-                action = ev -> {
-                    if (!selection.isEmptySelection()) {
-                        selection.endSelection(mousePoint, Arrays.asList(getComponents()));
-                    } else {
-                        selection.reset();
-                    }
-                    repaint();
-                    return true;
-                };
-                break;
+                if (e.isPopupTrigger() || e.getButton() != MouseEvent.BUTTON1) {
+                    return false;
+                } else if ((e.getModifiers() & (ALT_DOWN_MASK | SHIFT_DOWN_MASK | META_DOWN_MASK)) != 0) {
+                    return false;
+                } else if (selection.contains(mousePoint)) {
+                    selection.reset();
+                    return false;
+                }
+                switch (e.getID()) {
+                    case MOUSE_PRESSED:
+                        if (!e.isShiftDown() && !e.isControlDown()) {
+                            selection.clear();
+                        }
+                        selection.startSelection(mousePoint);
+                        break;
+                    case MOUSE_RELEASED:
+                        if (!selection.isEmptySelection()) {
+                            selection.endSelection(mousePoint, Arrays.asList(getComponents()));
+                        } else {
+                            selection.reset();
+                        }
+                        break;
+                }
+                repaint();
+                return true;
             default:
                 return false;
         }
-        if (e.isPopupTrigger() || e.getButton() != MouseEvent.BUTTON1) {
-            return false;
-        } else if ((e.getModifiers() & (ALT_DOWN_MASK | SHIFT_DOWN_MASK | META_DOWN_MASK)) != 0) {
-            return false;
-        } else if (selection.contains(mousePoint)) {
-            selection.reset();
-            return false;
-        }
-        return action.test(e);
     }
 
     private void changeCurrentComponent(Component component, MouseEvent e, Point point) {
