@@ -315,6 +315,17 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     private boolean dispatchSelection(MouseEvent e) {
         final Predicate<MouseEvent> action;
         switch (e.getID()) {
+            case MOUSE_CLICKED:
+                if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1) {
+                    final BlockComponent component = findBlockComponent(c -> c.getBounds().contains(mousePoint));
+                    if (component != null) {
+                        selection.clear();
+                        selection.addComponent(component.getComponent());
+                        repaint();
+                        return true;
+                    }
+                }
+                return false;
             case MOUSE_PRESSED:
                 action = ev -> {
                     selection.clear();
