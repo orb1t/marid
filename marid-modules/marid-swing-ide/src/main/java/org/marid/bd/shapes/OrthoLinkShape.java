@@ -22,10 +22,7 @@ import org.marid.bd.BlockComponent;
 import org.marid.bd.schema.SchemaEditor;
 
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.geom.PathIterator;
+import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -62,7 +59,9 @@ public class OrthoLinkShape extends LinkShape {
             rs = stream(editor.getComponents()).map(Component::getBounds).collect(toList());
         }
         final Set<List<Line2D.Float>> links = editor.getLinkShapes().stream()
-                .filter(l -> l != this && l instanceof OrthoLinkShape && l.output.getOutput() != output.getOutput())
+                .filter(l -> l.output.getOutput() != output.getOutput())
+                .filter(l -> l.input.getInput() != input.getInput())
+                .filter(l -> l != this && l instanceof OrthoLinkShape)
                 .map(OrthoLinkShape.class::cast)
                 .map(s -> lines(s.path))
                 .collect(toSet());
@@ -74,10 +73,17 @@ public class OrthoLinkShape extends LinkShape {
         super.paint(g);
         final List<Line2D.Float> lines = lines(path);
         output.getBlockComponent().getSchemaEditor().getLinkShapes().stream()
-                .filter(l -> l.output.getOutput() == output.getOutput() && l != this)
-                .filter(l -> l instanceof OrthoLinkShape)
+                .filter(l -> l != this && l.output.getOutput() == output.getOutput() && l instanceof OrthoLinkShape)
                 .map(OrthoLinkShape.class::cast)
-                .forEach(s -> lines(s.path).forEach(l1 -> lines.forEach(l2 -> intersection(g, l1, l2))));
+                .flatMap(s -> lines(s.path).stream().map(l -> intersection(l, lines)))
+                .filter(p -> p != null)
+                .forEach(p -> paintIntersection(g, p));
+        output.getBlockComponent().getSchemaEditor().getLinkShapes().stream()
+                .filter(l -> l != this && l.input.getInput() == input.getInput() && l instanceof OrthoLinkShape)
+                .map(OrthoLinkShape.class::cast)
+                .flatMap(s -> lines(s.path).stream().map(l -> intersection(l, lines)))
+                .filter(p -> p != null)
+                .forEach(p -> paintIntersection(g, p));
     }
 
     @Override
@@ -124,12 +130,39 @@ public class OrthoLinkShape extends LinkShape {
         return lines;
     }
 
-    static void intersection(Graphics2D g, Line2D.Float l1, Line2D.Float l2) {
-        if (l1.x1 == l1.x2 && l2.y1 == l2.y2 && l1.ptSegDist(l2.getP1()) < 0.001) {
-            g.fill(new Ellipse2D.Float(l1.x1 - 2.0f, l2.y1 - 2.0f, 5.0f, 5.0f));
-        } else if (l1.x1 == l1.x2 && l2.x1 == l2.x2 && l1.y1 == l2.y1 && (l2.y2 - l2.y1) * (l1.y2 - l1.y1) < 0.0) {
-            g.fill(new Ellipse2D.Float(l1.x1 - 2.0f, l2.y1 - 2.0f, 5.0f, 5.0f));
+    static void paintIntersection(Graphics2D g, Point2D.Float p) {
+        g.fill(new Ellipse2D.Float(p.x - 2.0f, p.y - 2.0f, 5.0f, 5.0f));
+    }
+
+    static Point2D.Float intersectionPoint(Line2D.Float l1, Line2D.Float l2) {
+        final float x1 = l1.x1, y1 = l1.y1, x2 = l1.x2, y2 = l1.y2, x3 = l2.x1, y3 = l2.y1, x4 = l2.x2, y4 = l2.y2;
+        final float d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+        if (d == 0) {
+            return null;
         }
+        final float x = ((x2 - x1) * (x3 * y4 - x4 * y3) - (x4 - x3) * (x1 * y2 - x2 * y1)) / d;
+        final float y = ((y3 - y4) * (x1 * y2 - x2 * y1) - (y1 - y2) * (x3 * y4 - x4 * y3)) / d;
+        return l1.ptSegDist(x, y) > 0.001 || l2.ptSegDist(x, y) > 0.001 ? null : new Point2D.Float(x, y);
+    }
+
+    static Point2D.Float intersection(Line2D.Float l1, List<Line2D.Float> lines) {
+        for (final Line2D.Float l2 : lines) {
+            final Point2D.Float p = intersectionPoint(l2, l1);
+            if (p == null) {
+                continue;
+            }
+            final float x = p.x, y = p.y;
+            final int c1 = seg(l1, x + 1, y) + seg(l1, x - 1, y) + seg(l1, x, y + 1) + seg(l1, x, y - 1);
+            final int c2 = seg(l2, x + 1, y) + seg(l2, x - 1, y) + seg(l2, x, y + 1) + seg(l2, x, y - 1);
+            if (c1 + c2 > 2) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    static int seg(Line2D.Float line, float x, float y) {
+        return line.ptSegDist(x, y) < 0.001 ? 1 : 0;
     }
 
     static int fitness(int x, int cx, List<Rectangle> rectangles, Set<List<Line2D.Float>> links, Point out, Point in) {
