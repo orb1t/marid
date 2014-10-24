@@ -55,7 +55,7 @@ public class MethodBlock extends StandardBlock implements ConfigurableBlock {
 
     protected final In returnTypeInput = new In("returnType", ClassNode.class, v -> returnType = v);
     protected final In parametersInput = new In("parameters", Parameter[].class, v -> parameters = v);
-    protected final In bodyInput = new In("body", Statement.class, v -> body = v);
+    protected final In bodyInput = new In("body", Statement.class, true, v -> body = v);
     protected final In annotationsInput = new In("annotations", AnnotationNode[].class, v -> annotationNodes = v);
 
     protected final Out out = new Out("out", MethodNode.class, this::methodNode);

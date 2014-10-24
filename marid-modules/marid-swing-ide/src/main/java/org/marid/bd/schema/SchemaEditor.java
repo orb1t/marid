@@ -57,7 +57,6 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.event.InputEvent.ALT_DOWN_MASK;
 import static java.awt.event.InputEvent.META_DOWN_MASK;
 import static java.awt.event.InputEvent.SHIFT_DOWN_MASK;
-import static java.awt.event.MouseEvent.CTRL_DOWN_MASK;
 import static java.awt.event.MouseEvent.*;
 import static org.marid.concurrent.AtomicUtils.processDirty;
 import static org.marid.swing.SwingUtil.componentStream;
@@ -229,13 +228,13 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     protected void processMouseMotionEvent(MouseEvent e) {
         switch (e.getID()) {
             case MouseEvent.MOUSE_DRAGGED:
-                if (panType.isEnabled(e)) {
+                if (e.isShiftDown()) {
                     final Point p = SwingUtil.transform(mouseTransform::inverseTransform, e.getPoint());
                     transform.setTransform(mouseTransform);
                     transform.translate(p.getX() - mousePoint.getX(), p.getY() - mousePoint.getY());
                     repaint();
                     return;
-                } else if (isSelectionMode() && !selection.isEmpty()) {
+                } else if (isSelectionMode() && !selection.isEmpty() && !e.isControlDown()) {
                     final Point mp = SwingUtil.transform(transform::inverseTransform, e.getPoint());
                     selection.move(mp);
                     repaint();
@@ -258,10 +257,10 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         if (isSelectionMode() && dispatchSelection(e)) {
             return;
         }
-        if (dispatchBlocks(e)) {
+        if (!isSelectionMode() && dispatchBlocks(e)) {
             return;
         }
-        if (dispatchLinks(e)) {
+        if (!isSelectionMode() && dispatchLinks(e)) {
             return;
         }
         if (e.isPopupTrigger()) {
@@ -329,7 +328,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
                 return false;
             case MOUSE_PRESSED:
                 action = ev -> {
-                    if (!ev.isShiftDown()) {
+                    if (!ev.isShiftDown() && !ev.isControlDown()) {
                         selection.clear();
                     }
                     selection.startSelection(mousePoint);
@@ -353,9 +352,10 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         }
         if (e.isPopupTrigger() || e.getButton() != MouseEvent.BUTTON1) {
             return false;
-        } else if ((e.getModifiers() & (ALT_DOWN_MASK | SHIFT_DOWN_MASK | META_DOWN_MASK | CTRL_DOWN_MASK)) != 0) {
+        } else if ((e.getModifiers() & (ALT_DOWN_MASK | SHIFT_DOWN_MASK | META_DOWN_MASK)) != 0) {
             return false;
         } else if (selection.contains(mousePoint)) {
+            selection.reset();
             return false;
         }
         return action.test(e);
@@ -420,9 +420,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         g.clearRect(clip.x, clip.y, clip.width, clip.height);
         g.transform(transform);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        for (final LinkShape linkShape : links) {
-            linkShape.paint(g, linkShape == currentLink);
-        }
+        links.forEach(l -> l.paint(g, l == currentLink));
         for (int i = getComponentCount() - 1; i >= 0; i--) {
             final Component c = getComponent(i);
             g.translate(c.getX(), c.getY());
