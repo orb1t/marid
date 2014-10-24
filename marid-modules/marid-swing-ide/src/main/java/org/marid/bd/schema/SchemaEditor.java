@@ -54,7 +54,6 @@ import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
 import static java.awt.EventQueue.invokeLater;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.SystemColor.activeCaption;
 import static java.awt.event.InputEvent.ALT_DOWN_MASK;
 import static java.awt.event.InputEvent.META_DOWN_MASK;
 import static java.awt.event.InputEvent.SHIFT_DOWN_MASK;
@@ -73,7 +72,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     protected final AffineTransform transform = new AffineTransform();
     private final Point mousePoint = new Point();
     private final Rectangle clip = new Rectangle();
-    private AffineTransform mouseTransform = (AffineTransform) transform.clone();
+    private final AffineTransform mouseTransform = new AffineTransform();
     private Component curComponent;
     private final ComponentGroup selection = new ComponentGroup();
     private LinkShape currentLink;
@@ -255,7 +254,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     @Override
     protected void processMouseEvent(MouseEvent e) {
         mousePoint.setLocation(SwingUtil.transform(transform::inverseTransform, e.getPoint()));
-        mouseTransform = (AffineTransform) transform.clone();
+        mouseTransform.setTransform(transform);
         if (isSelectionMode() && dispatchSelection(e)) {
             return;
         }
@@ -420,14 +419,10 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         g.setBackground(getBackground());
         g.clearRect(clip.x, clip.y, clip.width, clip.height);
         g.transform(transform);
-        final Stroke oldStroke = g.getStroke();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         for (final LinkShape linkShape : links) {
-            g.setColor(currentLink == linkShape ? activeCaption : linkShape.getColor());
-            g.setStroke(linkShape.getStroke());
-            linkShape.paint(g);
+            linkShape.paint(g, linkShape == currentLink);
         }
-        g.setStroke(oldStroke);
         for (int i = getComponentCount() - 1; i >= 0; i--) {
             final Component c = getComponent(i);
             g.translate(c.getX(), c.getY());

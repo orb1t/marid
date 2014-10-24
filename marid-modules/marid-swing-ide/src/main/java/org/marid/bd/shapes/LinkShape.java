@@ -49,6 +49,14 @@ public abstract class LinkShape {
         g.draw(getShape());
     }
 
+    public void paint(Graphics2D g, boolean isCurrent) {
+        final Stroke oldStroke = g.getStroke();
+        g.setStroke(getStroke());
+        g.setColor(isCurrent ? SystemColor.activeCaption : getColor());
+        paint(g);
+        g.setStroke(oldStroke);
+    }
+
     public abstract Shape getShape();
 
     public boolean isAssociatedWith(BlockComponent blockComponent) {
