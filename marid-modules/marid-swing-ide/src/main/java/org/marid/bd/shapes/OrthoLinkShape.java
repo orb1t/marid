@@ -144,7 +144,7 @@ public class OrthoLinkShape extends LinkShape {
         }
         final float x = ((x2 - x1) * (x3 * y4 - x4 * y3) - (x4 - x3) * (x1 * y2 - x2 * y1)) / d;
         final float y = ((y3 - y4) * (x1 * y2 - x2 * y1) - (y1 - y2) * (x3 * y4 - x4 * y3)) / d;
-        return l1.ptSegDist(x, y) > 0.001 || l2.ptSegDist(x, y) > 0.001 ? null : new Point2D.Float(x, y);
+        return l1.ptSegDistSq(x, y) > 0.001 || l2.ptSegDistSq(x, y) > 0.001 ? null : new Point2D.Float(x, y);
     }
 
     static Point2D.Float intersection(Line2D.Float l1, List<Line2D.Float> lines) {
