@@ -18,6 +18,7 @@
 
 package org.marid.bd.schema;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.BlockLink;
@@ -58,6 +59,10 @@ import static java.awt.event.InputEvent.ALT_DOWN_MASK;
 import static java.awt.event.InputEvent.META_DOWN_MASK;
 import static java.awt.event.InputEvent.SHIFT_DOWN_MASK;
 import static java.awt.event.MouseEvent.*;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.tuple.Pair.of;
+import static org.marid.bd.BlockComponent.Input;
+import static org.marid.bd.BlockComponent.Output;
 import static org.marid.concurrent.AtomicUtils.processDirty;
 import static org.marid.swing.SwingUtil.componentStream;
 import static org.marid.swing.geom.ShapeUtils.mouseEvent;
@@ -93,10 +98,9 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         PAN.addConsumer(this, n -> panType = n);
         DRAG.addConsumer(this, n -> dragType = n);
         LINK_SHAPE_TYPE.addConsumer(this, n -> EventQueue.invokeLater(() -> {
-            final Map<BlockComponent.Output, BlockComponent.Input> map = new IdentityHashMap<>();
-            links.forEach(shape -> map.put(shape.output, shape.input));
+            final List<Pair<Output, Input>> pairs = links.stream().map(l -> of(l.output, l.input)).collect(toList());
             links.clear();
-            map.forEach(this::addLink);
+            pairs.forEach(p -> addLink(p.getLeft(), p.getRight()));
             repaint();
         }));
     }
@@ -159,9 +163,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     }
 
     public void update() {
-        synchronized (getTreeLock()) {
-            links.forEach(LinkShape::update);
-        }
+        links.forEach(LinkShape::update);
         invokeLater(super::repaint);
     }
 
@@ -180,7 +182,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         return selectionMode;
     }
 
-    public LinkShape addLink(BlockComponent.Output output, BlockComponent.Input input) {
+    public LinkShape addLink(Output output, Input input) {
         final LinkShape link = LINK_SHAPE_TYPE.get().linkShapeFor(output, input);
         links.add(link);
         info("Added link: {0}", link);
@@ -210,8 +212,8 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
 
     public void createLinks(List<Link> links) {
         for (final Link link : links) {
-            final BlockComponent.Output output = link.outputComponent.outputFor(link.output);
-            final BlockComponent.Input input = link.inputComponent.inputFor(link.input);
+            final Output output = link.outputComponent.outputFor(link.output);
+            final Input input = link.inputComponent.inputFor(link.input);
             if (output != null && input != null) {
                 addLink(output, input);
             }
@@ -228,7 +230,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     protected void processMouseMotionEvent(MouseEvent e) {
         switch (e.getID()) {
             case MouseEvent.MOUSE_DRAGGED:
-                if (e.isShiftDown()) {
+                if (panType.isEnabled(e)) {
                     final Point p = SwingUtil.transform(mouseTransform::inverseTransform, e.getPoint());
                     transform.setTransform(mouseTransform);
                     transform.translate(p.getX() - mousePoint.getX(), p.getY() - mousePoint.getY());
