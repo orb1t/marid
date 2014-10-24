@@ -24,8 +24,10 @@ import org.marid.bd.schema.SchemaEditor;
 import java.awt.*;
 import java.awt.geom.*;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.min;
@@ -146,23 +148,49 @@ public class OrthoLinkShape extends LinkShape {
     }
 
     static Point2D.Float intersection(Line2D.Float l1, List<Line2D.Float> lines) {
-        for (final Line2D.Float l2 : lines) {
-            final Point2D.Float p = intersectionPoint(l2, l1);
-            if (p == null) {
-                continue;
-            }
-            final float x = p.x, y = p.y;
-            final int c1 = seg(l1, x + 1, y) + seg(l1, x - 1, y) + seg(l1, x, y + 1) + seg(l1, x, y - 1);
-            final int c2 = seg(l2, x + 1, y) + seg(l2, x - 1, y) + seg(l2, x, y + 1) + seg(l2, x, y - 1);
-            if (c1 + c2 > 2) {
-                return p;
+        for (final Line2D.Float line : lines) {
+            final Point2D.Float p = intersectionPoint(line, l1);
+            if (p != null) {
+                final BitSet set = new BitSet(4);
+                int c = IntStream.range(0, 4).map(dir -> seg(l1, p.x, p.y, set, dir)).sum();
+                for (final Line2D.Float l2 : lines) {
+                    c += IntStream.range(0, 4).map(dir -> seg(l2, p.x, p.y, set, dir)).sum();
+                    if (c > 2) {
+                        return p;
+                    }
+                }
             }
         }
         return null;
     }
 
-    static int seg(Line2D.Float line, float x, float y) {
-        return line.ptSegDist(x, y) < 0.001 ? 1 : 0;
+    static int seg(Line2D.Float line, float x, float y, BitSet set, int direction) {
+        if (set.get(direction)) {
+            return 0;
+        } else {
+            switch (direction) {
+                case 0:
+                    x--;
+                    break;
+                case 1:
+                    x++;
+                    break;
+                case 2:
+                    y--;
+                    break;
+                case 3:
+                    y++;
+                    break;
+                default:
+                    throw new IllegalArgumentException(Integer.toString(direction));
+            }
+            if (line.ptSegDist(x, y) < 0.001) {
+                set.set(direction);
+                return 1;
+            } else {
+                return 0;
+            }
+        }
     }
 
     static int fitness(int x, int cx, List<Rectangle> rectangles, Set<List<Line2D.Float>> links, Point out, Point in) {
