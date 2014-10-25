@@ -127,9 +127,9 @@ public interface BlockComponent {
 
         @Override
         default Point getConnectionPoint() {
-            final Rectangle bounds = ShapeUtils.toParent(getButton(), getBlockComponent().getComponent());
-            final Rectangle blockBounds = getBlockComponent().getBounds();
-            return new Point(blockBounds.x, blockBounds.y + bounds.y + bounds.height / 2);
+            final Component c = getBlockComponent().getComponent();
+            final Rectangle bounds = ShapeUtils.toParent(getButton(), c);
+            return new Point(c.getX(), c.getY() + bounds.y + bounds.height / 2);
         }
     }
 
@@ -139,9 +139,9 @@ public interface BlockComponent {
 
         @Override
         default Point getConnectionPoint() {
-            final Rectangle bounds = ShapeUtils.toParent(getButton(), getBlockComponent().getComponent());
-            final Rectangle blockBounds = getBlockComponent().getBounds();
-            return new Point(blockBounds.x + blockBounds.width, blockBounds.y + bounds.y + bounds.height / 2);
+            final Component c = getBlockComponent().getComponent();
+            final Rectangle bounds = ShapeUtils.toParent(getButton(), c);
+            return new Point(c.getX() + c.getWidth(), c.getY() + bounds.y + bounds.height / 2);
         }
     }
 }

@@ -24,16 +24,13 @@ import org.marid.swing.MaridAction;
 import javax.swing.*;
 import java.awt.*;
 
-import static java.awt.BasicStroke.CAP_SQUARE;
-import static java.awt.BasicStroke.JOIN_MITER;
-
 /**
  * @author Dmitry Ovchinnikov
  */
 public abstract class LinkShape {
 
-    public static final Stroke NORMAL = new BasicStroke(1.0f);
-    public static final Stroke VECTOR = new BasicStroke(1.0f, CAP_SQUARE, JOIN_MITER, 5.0f, new float[]{5.0f}, 0.0f);
+    public static final BasicStroke NORMAL = new BasicStroke(1.0f);
+    public static final BasicStroke VECTOR = new BasicStroke(2.0f);
 
     public final BlockComponent.Output output;
     public final BlockComponent.Input input;

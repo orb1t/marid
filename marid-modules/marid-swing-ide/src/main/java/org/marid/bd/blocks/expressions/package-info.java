@@ -19,7 +19,8 @@
 /**
  * @author Dmitry Ovchinnikov
  */
-@MetaInfo(icon = "block/expression.png", name = "Expression blocks")
+@MetaInfo(icon = "block/expression.png", name = "Expression blocks", color = BlockColors.EXPRESSION_BLOCK_COLOR)
 package org.marid.bd.blocks.expressions;
 
+import org.marid.bd.BlockColors;
 import org.marid.dyn.MetaInfo;

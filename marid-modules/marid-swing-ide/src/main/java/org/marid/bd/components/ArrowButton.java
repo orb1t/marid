@@ -18,6 +18,8 @@
 
 package org.marid.bd.components;
 
+import org.marid.bd.shapes.LinkShape;
+
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
 import java.awt.*;
@@ -49,14 +51,18 @@ public class ArrowButton extends JToggleButton {
                 switch (arrowPosition) {
                     case SwingConstants.EAST:
                     case SwingConstants.WEST:
+                        g.setStroke(getStroke());
                         g.drawLine(0, ARROW_H, ARROW_SIZE * 2, ARROW_H);
+                        g.setStroke(LinkShape.NORMAL);
                         g.translate(ARROW_SIZE / 2, 0);
                         g.setColor(getArrowColor());
                         g.fillPolygon(new int[]{0, 0, ARROW_SIZE}, new int[]{0, ARROW_SIZE, ARROW_H}, 3);
                         break;
                     case SwingConstants.SOUTH:
                     case SwingConstants.NORTH:
+                        g.setStroke(getStroke());
                         g.drawLine(ARROW_H, 0, ARROW_H, ARROW_SIZE * 2);
+                        g.setStroke(LinkShape.NORMAL);
                         g.translate(0, ARROW_SIZE / 2);
                         g.setColor(getArrowColor());
                         g.fillPolygon(new int[]{0, ARROW_SIZE, ARROW_H}, new int[]{0, 0, ARROW_SIZE}, 3);
@@ -71,6 +77,10 @@ public class ArrowButton extends JToggleButton {
     protected Color getArrowColor() {
         final ButtonModel m = getModel();
         return m.isRollover() ? RED : m.isPressed() ? GREEN : m.isSelected() ? RED.darker() : controlDkShadow;
+    }
+
+    protected BasicStroke getStroke() {
+        return LinkShape.NORMAL;
     }
 
     @Override
