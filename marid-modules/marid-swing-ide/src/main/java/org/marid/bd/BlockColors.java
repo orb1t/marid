@@ -16,40 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.blocks.expressions;
-
-import org.codehaus.groovy.ast.expr.Expression;
-import org.codehaus.groovy.ast.expr.NotExpression;
-import org.marid.bd.IoBlock;
-import org.marid.bd.blocks.BdBlock;
-
-import javax.xml.bind.annotation.XmlRootElement;
+package org.marid.bd;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Not Expression", label = "!expr")
-@XmlRootElement
-public class NotExpBlock extends IoBlock {
+public interface BlockColors {
 
-    protected Expression expression;
-
-    public NotExpBlock() {
-        super(Expression.class, NotExpression.class);
-    }
-
-    @Override
-    public void set(Object value) {
-        expression = (Expression) value;
-    }
-
-    @Override
-    public void reset() {
-        expression = null;
-    }
-
-    @Override
-    public NotExpression get() {
-        return new NotExpression(expression);
-    }
+    int ANNOTATION_BLOCK_COLOR = 0x206090;
+    int EXPRESSION_BLOCK_COLOR = 0x0000FF;
+    int META_BLOCK_COLOR = 0x10AAAA;
+    int MULTIPLEXOR_BLOCK_COLOR = 0x101010;
+    int STATEMENT_BLOCK_COLOR = 0x005500;
 }

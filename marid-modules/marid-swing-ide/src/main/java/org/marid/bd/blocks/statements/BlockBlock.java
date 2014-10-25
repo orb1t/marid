@@ -25,21 +25,20 @@ import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Block Statement", label = "{...}")
 @XmlRootElement
 public class BlockBlock extends IoBlock {
 
     protected final List<Statement> statements = new ArrayList<>();
 
     public BlockBlock() {
-        super("Block Statement", "{...}", "{...}", Color.GREEN.darker(), Statement.class, BlockStatement.class);
+        super(Statement.class, BlockStatement.class);
     }
 
     @Override

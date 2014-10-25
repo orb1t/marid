@@ -41,7 +41,7 @@ import static groovyjarjarasm.asm.Opcodes.ACC_PUBLIC;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Method Block", label = "method")
 @XmlRootElement
 public class MethodBlock extends StandardBlock implements ConfigurableBlock {
 
@@ -59,10 +59,6 @@ public class MethodBlock extends StandardBlock implements ConfigurableBlock {
     protected final In annotationsInput = new In("annotations", AnnotationNode[].class, v -> annotationNodes = v);
 
     protected final Out out = new Out("out", MethodNode.class, this::methodNode);
-
-    public MethodBlock() {
-        super("Method Block", "method", "method", Color.CYAN.darker());
-    }
 
     public void setMethodName(String newMethodName) {
         fire(MethodBlockListener.class, () -> methodName, m -> methodName = m, newMethodName, MethodBlockListener::methodNameChanged);

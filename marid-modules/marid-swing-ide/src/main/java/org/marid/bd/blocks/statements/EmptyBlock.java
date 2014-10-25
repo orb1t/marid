@@ -23,22 +23,17 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Empty Block", label = "{}")
 @XmlRootElement
 public class EmptyBlock extends StandardBlock {
 
     protected final Out out = new Out("out", EmptyStatement.class, () -> EmptyStatement.INSTANCE);
-
-    public EmptyBlock() {
-        super("Empty block", "{}", "{}", Color.GREEN.darker());
-    }
 
     @Override
     public void reset() {

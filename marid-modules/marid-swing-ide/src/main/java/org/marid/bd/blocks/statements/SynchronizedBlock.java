@@ -26,7 +26,6 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +33,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Synchronized Statement", label = "sync")
 @XmlRootElement
 public class SynchronizedBlock extends StandardBlock {
 
@@ -44,10 +43,6 @@ public class SynchronizedBlock extends StandardBlock {
     protected final In exprInput = new In("mon", Expression.class, e -> expression = e);
     protected final In stmtInput = new In("body", Statement.class, s -> statement = s);
     protected final Out out = new Out("out", SynchronizedStatement.class, () -> new SynchronizedStatement(expression, statement));
-
-    public SynchronizedBlock() {
-        super("Synchronized Statement", "sync", "sync", Color.GREEN.darker());
-    }
 
     @Override
     public void reset() {

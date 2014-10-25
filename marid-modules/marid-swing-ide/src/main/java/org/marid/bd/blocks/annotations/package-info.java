@@ -19,7 +19,8 @@
 /**
  * @author Dmitry Ovchinnikov
  */
-@MetaInfo(icon = "block/annotation.png", name = "Annotation blocks")
+@MetaInfo(icon = "block/annotation.png", name = "Annotation blocks", color = BlockColors.ANNOTATION_BLOCK_COLOR)
 package org.marid.bd.blocks.annotations;
 
+import org.marid.bd.BlockColors;
 import org.marid.dyn.MetaInfo;

@@ -25,7 +25,6 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +34,7 @@ import static org.marid.bd.blocks.expressions.NamedExpressionBlock.NamedExpressi
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Annotation Block", label = " @ ")
 @XmlRootElement
 public class AnnotationBlock extends StandardBlock {
 
@@ -45,10 +44,6 @@ public class AnnotationBlock extends StandardBlock {
     protected final In classNodeInput = new In("class", ClassNode.class, n -> classNode = n);
     protected final In membersInput = new In("parameters", NamedExpression[].class, v -> members = v);
     protected final Out out = new Out("out", AnnotationNode.class, this::annotationNode);
-
-    public AnnotationBlock() {
-        super("Annotation Block", " @ ", "@", Color.CYAN.darker());
-    }
 
     @Override
     public void reset() {

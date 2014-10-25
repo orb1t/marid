@@ -25,7 +25,6 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +32,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Compare Identity Expression", label = "===")
 @XmlRootElement
 public class CompareIdentityBlock extends StandardBlock {
 
@@ -43,10 +42,6 @@ public class CompareIdentityBlock extends StandardBlock {
     protected final In leftInput = new In("expr1", Expression.class, e -> left = e);
     protected final In rightInput = new In("expr2", Expression.class, e -> right = e);
     protected final Out out = new Out("out", CompareIdentityExpression.class, () -> new CompareIdentityExpression(left, right));
-
-    public CompareIdentityBlock() {
-        super("Compare Identity Expression", "===", "===", Color.BLUE);
-    }
 
     @Override
     public void reset() {

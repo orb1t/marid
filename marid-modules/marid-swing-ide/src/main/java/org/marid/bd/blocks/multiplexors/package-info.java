@@ -19,7 +19,8 @@
 /**
  * @author Dmitry Ovchinnikov
  */
-@MetaInfo(icon = "block/multiplexor.png", name = "Multiplexors")
+@MetaInfo(icon = "block/multiplexor.png", name = "Multiplexors", color = BlockColors.MULTIPLEXOR_BLOCK_COLOR)
 package org.marid.bd.blocks.multiplexors;
 
+import org.marid.bd.BlockColors;
 import org.marid.dyn.MetaInfo;

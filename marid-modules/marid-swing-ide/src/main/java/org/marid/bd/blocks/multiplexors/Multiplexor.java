@@ -48,12 +48,21 @@ public class Multiplexor<E> extends StandardBlock implements ConfigurableBlock {
     protected final String iconText;
 
     public Multiplexor(String name, String iconText, String label, Class<E> type, int inputCount) {
-        super(name, iconText, label, Color.DARK_GRAY);
         this.type = type;
         this.out = new MultiplexorOutput();
         this.iconText = iconText;
         this.array = CollectionUtils.getArrayFunction(type).apply(0);
         setInputCount(inputCount);
+    }
+
+    @Override
+    public String getName() {
+        return type.getSimpleName();
+    }
+
+    @Override
+    public String getLabel() {
+        return getName();
     }
 
     @Override

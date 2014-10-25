@@ -24,19 +24,18 @@ import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Expression Statement", label = "stmt(expr)")
 @XmlRootElement
 public class ExpressionBlock extends IoBlock {
 
     protected Expression expression;
 
     public ExpressionBlock() {
-        super("Expression Statement", "e->s", "e -> s", Color.GREEN.darker(), Expression.class, ExpressionStatement.class);
+        super(Expression.class, ExpressionStatement.class);
     }
 
     @Override

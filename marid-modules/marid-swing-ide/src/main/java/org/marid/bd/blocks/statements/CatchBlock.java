@@ -27,7 +27,6 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +34,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Catch Block", label = "catch")
 @XmlRootElement
 public class CatchBlock extends StandardBlock {
 
@@ -45,10 +44,6 @@ public class CatchBlock extends StandardBlock {
     protected final In variableInput = new In("var", Parameter.class, p -> variable = p);
     protected final In bodyInput = new In("body", Statement.class, s -> body = s);
     protected final Out out = new Out("out", CatchStatement.class, () -> new CatchStatement(variable, body));
-
-    public CatchBlock() {
-        super("Catch Block", "catch", "catch", Color.GREEN.darker());
-    }
 
     @Override
     public void reset() {

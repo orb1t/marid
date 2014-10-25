@@ -24,9 +24,9 @@ import org.codehaus.groovy.ast.expr.EmptyExpression;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
-import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.ConfigurableBlock;
+import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.bd.components.BlockLabel;
@@ -46,9 +46,9 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Binary Expression", iconText = "expr(x, y)")
 @XmlRootElement
-public class BinExpBlock extends Block implements ConfigurableBlock {
+public class BinExpBlock extends StandardBlock implements ConfigurableBlock {
 
     @XmlAttribute
     protected TokenType tokenType;
@@ -56,8 +56,8 @@ public class BinExpBlock extends Block implements ConfigurableBlock {
     protected Expression left;
     protected Expression right;
 
-    protected final In leftInput = new In("arg1", Expression.class, e -> left = e);
-    protected final In rightInput = new In("arg2", Expression.class, e -> right = e);
+    protected final In leftInput = new In("x", Expression.class, e -> left = e);
+    protected final In rightInput = new In("y", Expression.class, e -> right = e);
     protected final Out output = new Out("out", Expression.class, this::binaryExpression);
 
     @Override
@@ -67,7 +67,7 @@ public class BinExpBlock extends Block implements ConfigurableBlock {
                 c.updateBlock();
                 c.getSchemaEditor().repaint();
             });
-            c.add(new BlockLabel(() -> tokenType.text, () -> Color.BLUE));
+            c.add(new BlockLabel(() -> tokenType.text, this::getColor));
         });
     }
 
@@ -91,16 +91,6 @@ public class BinExpBlock extends Block implements ConfigurableBlock {
     @Override
     public List<Output> getOutputs() {
         return Collections.singletonList(output);
-    }
-
-    @Override
-    public ImageIcon getVisualRepresentation() {
-        return Images.getIconFromText(" 2 ", 32, 32, Color.BLUE, Color.WHITE);
-    }
-
-    @Override
-    public String getName() {
-        return "Binary Expression";
     }
 
     public TokenType getTokenType() {

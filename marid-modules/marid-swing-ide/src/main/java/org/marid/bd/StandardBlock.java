@@ -19,8 +19,10 @@
 package org.marid.bd;
 
 import images.Images;
+import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.BlockLabel;
 import org.marid.bd.components.StandardBlockComponent;
+import org.marid.dyn.MetaInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,11 +37,45 @@ public abstract class StandardBlock extends Block {
     protected final String label;
     protected final Color color;
 
-    public StandardBlock(String name, String iconText, String label, Color color) {
-        this.name = name;
-        this.visualRepresentation = Images.getIconFromText(iconText, 32, 32, color, Color.WHITE);
-        this.label = label;
-        this.color = color;
+    public StandardBlock() {
+        this.name = name();
+        this.color = color();
+        this.visualRepresentation = visualRepresentation();
+        this.label = label();
+    }
+
+    protected String name() {
+        final BdBlock block = getClass().getAnnotation(BdBlock.class);
+        return block != null
+                ? (block.name().isEmpty() ? getClass().getSimpleName() : block.name())
+                : getClass().getSimpleName();
+    }
+
+    protected ImageIcon visualRepresentation() {
+        final BdBlock block = getClass().getAnnotation(BdBlock.class);
+        final String iconText = block != null ? (block.iconText().isEmpty() ? label() : block.iconText()) : label();
+        return Images.getIconFromText(iconText, 32, 32, color, Color.WHITE);
+    }
+
+    protected String label() {
+        final BdBlock block = getClass().getAnnotation(BdBlock.class);
+        return block != null ? (block.label().isEmpty() ? name() : block.label()) : name();
+    }
+
+    protected Color color() {
+        final BdBlock block = getClass().getAnnotation(BdBlock.class);
+        if (block != null && block.color() >= 0) {
+            return new Color(block.color());
+        } else {
+            final Package pkg = getClass().getPackage();
+            if (pkg != null) {
+                final MetaInfo metaInfo = pkg.getAnnotation(MetaInfo.class);
+                if (metaInfo != null) {
+                    return new Color(metaInfo.color());
+                }
+            }
+            return Color.BLACK;
+        }
     }
 
     @Override

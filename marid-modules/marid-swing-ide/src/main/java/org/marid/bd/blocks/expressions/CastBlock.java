@@ -27,7 +27,6 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +34,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Cast Expression", label = "(*)")
 @XmlRootElement
 public class CastBlock extends StandardBlock {
 
@@ -45,10 +44,6 @@ public class CastBlock extends StandardBlock {
     protected final In exprInput = new In("expr", Expression.class, e -> expression = e);
     protected final In classInput = new In("class", ClassNode.class, true, c -> classNode = c);
     protected final Out castExpr = new Out("out", CastExpression.class, () -> new CastExpression(classNode, expression));
-
-    public CastBlock() {
-        super("Cast Expression", "(*)", "(*)", Color.BLUE);
-    }
 
     @Override
     public void reset() {

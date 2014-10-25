@@ -27,7 +27,6 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,7 +36,7 @@ import static java.util.Collections.emptyList;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Switch Statement", label = "switch")
 @XmlRootElement
 public class SwitchBlock extends StandardBlock {
 
@@ -53,10 +52,6 @@ public class SwitchBlock extends StandardBlock {
         final Statement defaultStatement = defStatement == null ? EmptyStatement.INSTANCE : defStatement;
         return new SwitchStatement(expression, caseStatementList, defaultStatement);
     });
-
-    public SwitchBlock() {
-        super("Switch Statement", "switch", "switch", Color.GREEN.darker());
-    }
 
     @Override
     public void reset() {

@@ -32,4 +32,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Component
 public @interface BdBlock {
+
+    int color() default -1;
+
+    String name() default "";
+
+    String label() default "";
+
+    String iconText() default "";
 }

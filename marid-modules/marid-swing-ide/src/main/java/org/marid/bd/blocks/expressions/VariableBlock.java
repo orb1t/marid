@@ -25,12 +25,11 @@ import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Variable Expression", label = "var")
 @XmlRootElement
 public class VariableBlock extends IoBlock {
 
@@ -40,7 +39,7 @@ public class VariableBlock extends IoBlock {
     protected ClassNode type;
 
     public VariableBlock() {
-        super("Variable expression", "var", "var", Color.BLUE, ClassNode.class, VariableExpression.class);
+        super(ClassNode.class, VariableExpression.class);
     }
 
     @Override

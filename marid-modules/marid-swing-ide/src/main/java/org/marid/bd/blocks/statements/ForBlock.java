@@ -28,7 +28,6 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +35,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "For Statement", label = "for")
 @XmlRootElement
 public class ForBlock extends StandardBlock {
 
@@ -48,10 +47,6 @@ public class ForBlock extends StandardBlock {
     protected final In exprInput = new In("expr", Expression.class, e -> expression = e);
     protected final In bodyInput = new In("body", Statement.class, s -> body = s);
     protected final Out out = new Out("out", ForStatement.class, () -> new ForStatement(parameter, expression, body));
-
-    public ForBlock() {
-        super("For Statement", "for", "for", Color.GREEN.darker());
-    }
 
     @Override
     public void reset() {

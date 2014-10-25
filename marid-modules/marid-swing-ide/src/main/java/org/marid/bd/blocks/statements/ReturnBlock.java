@@ -24,19 +24,18 @@ import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Return Statement", label = "return")
 @XmlRootElement
 public class ReturnBlock extends IoBlock {
 
     protected Expression expression;
 
     public ReturnBlock() {
-        super("Return Statement", "ret", "return", Color.GREEN.darker(), Expression.class, ReturnStatement.class);
+        super(Expression.class, ReturnStatement.class);
     }
 
     @Override

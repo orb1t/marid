@@ -27,7 +27,6 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +34,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "If Statement", label = "if")
 @XmlRootElement
 public class IfBlock extends StandardBlock {
 
@@ -47,10 +46,6 @@ public class IfBlock extends StandardBlock {
     protected final In statementInput = new In("+", Statement.class, s -> statement = s);
     protected final In elseInput = new In("-", Statement.class, s -> elseStatement = s);
     protected final Out output = new Out("out", IfStatement.class, () -> new IfStatement(expression, statement, elseStatement));
-
-    public IfBlock() {
-        super("If Statement", " if ", "if", Color.GREEN.darker());
-    }
 
     @Override
     public void reset() {

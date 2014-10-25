@@ -24,19 +24,18 @@ import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Throw Statement", label = "throw")
 @XmlRootElement
 public class ThrowBlock extends IoBlock {
 
     protected Expression expression;
 
     public ThrowBlock() {
-        super("Throw Statement", "throw", "throw", Color.GREEN.darker(), Expression.class, ThrowStatement.class);
+        super(Expression.class, ThrowStatement.class);
     }
 
     @Override

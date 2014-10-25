@@ -18,7 +18,6 @@
 
 package org.marid.bd;
 
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 
@@ -79,8 +78,7 @@ public abstract class IoBlock extends StandardBlock {
         }
     };
 
-    public IoBlock(String name, String iconText, String label, Color color, Class<?> inputType, Class<?> outputType) {
-        super(name, iconText, label, color);
+    public IoBlock(Class<?> inputType, Class<?> outputType) {
         this.inputType = inputType;
         this.outputType = outputType;
     }

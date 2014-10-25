@@ -19,10 +19,7 @@
 package org.marid.bd.blocks.meta;
 
 import org.codehaus.groovy.ast.*;
-import org.marid.bd.Block;
-import org.marid.bd.ConfigurableBlock;
-import org.marid.bd.SingletonBlock;
-import org.marid.bd.StandardBlock;
+import org.marid.bd.*;
 import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.swing.input.StringInputControl;
@@ -30,9 +27,9 @@ import org.marid.swing.input.StringInputControl;
 import javax.swing.*;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.beans.ConstructorProperties;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EventListener;
@@ -43,8 +40,9 @@ import static groovyjarjarasm.asm.Opcodes.ACC_PUBLIC;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "User Class", label = "class")
 @XmlRootElement
+@XmlSeeAlso({UserClassBlock.LinkedClassBlock.class})
 public class UserClassBlock extends StandardBlock implements ConfigurableBlock, SingletonBlock {
 
     @XmlAttribute
@@ -66,10 +64,6 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
     protected final In annotationsInput = new In("annotations", AnnotationNode[].class, v -> annotations = v);
     protected final In constructorsInput = new In("constructors", ConstructorNode[].class, v -> constructors = v);
     protected final Out export = new Out("class", ClassNode.class, this::classNode);
-
-    public UserClassBlock() {
-        super("User class", "class", "class", Color.CYAN.darker());
-    }
 
     @Override
     public void reset() {
@@ -160,16 +154,31 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
         void onChange(String className);
     }
 
+    @XmlRootElement
     public static class LinkedClassBlock extends StandardBlock {
 
+        @XmlAttribute
         private final String className;
+
         private final Out out;
 
-        @ConstructorProperties({"className"})
         public LinkedClassBlock(String className) {
-            super("Linked class", "class", className, Color.CYAN.darker());
             this.className = className;
             this.out = new Out("class", ClassNode.class, () -> ClassHelper.make(className));
+        }
+
+        public LinkedClassBlock() {
+            this(null);
+        }
+
+        @Override
+        protected Color color() {
+            return new Color(BlockColors.META_BLOCK_COLOR);
+        }
+
+        @Override
+        public String getLabel() {
+            return getClassName();
         }
 
         public String getClassName() {

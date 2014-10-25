@@ -33,7 +33,7 @@ import java.util.EventListener;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Named Expression Block", label = "n.expr")
 @XmlRootElement
 public class NamedExpressionBlock extends IoBlock implements ConfigurableBlock {
 
@@ -43,7 +43,7 @@ public class NamedExpressionBlock extends IoBlock implements ConfigurableBlock {
     protected Expression expression;
 
     public NamedExpressionBlock() {
-        super("Named Expression Block", "n.expr", "e -> n.e", Color.BLUE, Expression.class, NamedExpression.class);
+        super(Expression.class, NamedExpression.class);
     }
 
     @Override

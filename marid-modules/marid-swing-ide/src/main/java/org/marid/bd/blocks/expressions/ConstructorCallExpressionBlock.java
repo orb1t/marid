@@ -27,7 +27,6 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +34,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Constructor Call Expression", label = "X(...)")
 @XmlRootElement
 public class ConstructorCallExpressionBlock extends StandardBlock {
 
@@ -46,10 +45,6 @@ public class ConstructorCallExpressionBlock extends StandardBlock {
     protected final In argsIn = new In("args", Expression.class, v -> args = v);
 
     protected final Out out = new Out("cc", ConstructorCallExpression.class, this::value);
-
-    public ConstructorCallExpressionBlock() {
-        super("Constructor Call Expression", "X(...)", "X(...)", Color.BLUE);
-    }
 
     protected ConstructorCallExpression value() {
         return new ConstructorCallExpression(classNode, args);

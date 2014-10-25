@@ -27,14 +27,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableMBeanExport;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Configuration", label = "@Configuration")
 @XmlRootElement
 public class ConfigurationBlock extends StandardBlock {
 
@@ -42,10 +41,6 @@ public class ConfigurationBlock extends StandardBlock {
     public static final ClassNode ENABLE_MBEAN_EXPORT_CLASS = ClassHelper.make(EnableMBeanExport.class);
 
     private final Out out = new Out("node", AnnotationNode[].class, this::value);
-
-    public ConfigurationBlock() {
-        super("Configuration", "@Configuration", "@Configuration", Color.magenta.brighter());
-    }
 
     public AnnotationNode[] value() {
         return new AnnotationNode[] {

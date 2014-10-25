@@ -26,7 +26,6 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +33,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Try/Catch Block", label = "try/catch")
 @XmlRootElement
 public class TryCatchBlock extends StandardBlock {
 
@@ -53,10 +52,6 @@ public class TryCatchBlock extends StandardBlock {
         }
         return statement;
     });
-
-    public TryCatchBlock() {
-        super("Try/Catch Block", "t/c", "try/catch", Color.GREEN.darker());
-    }
 
     @Override
     public void reset() {

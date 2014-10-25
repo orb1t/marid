@@ -27,7 +27,6 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +34,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "While Statement", label = "while")
 @XmlRootElement
 public class WhileBlock extends StandardBlock {
 
@@ -45,10 +44,6 @@ public class WhileBlock extends StandardBlock {
     protected final In exprInput = new In("test", BooleanExpression.class, e -> expression = e);
     protected final In bodyInput = new In("body", Statement.class, s -> body = s);
     protected final Out out = new Out("out", WhileStatement.class, () -> new WhileStatement(expression, body));
-
-    public WhileBlock() {
-        super("While Statement", "while", "while", Color.GREEN.darker());
-    }
 
     @Override
     public void reset() {

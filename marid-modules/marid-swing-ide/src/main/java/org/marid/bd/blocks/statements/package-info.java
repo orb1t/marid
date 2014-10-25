@@ -19,7 +19,8 @@
 /**
  * @author Dmitry Ovchinnikov
  */
-@MetaInfo(icon = "block/statement.png", name = "Statement blocks")
+@MetaInfo(icon = "block/statement.png", name = "Statement blocks", color = BlockColors.STATEMENT_BLOCK_COLOR)
 package org.marid.bd.blocks.statements;
 
+import org.marid.bd.BlockColors;
 import org.marid.dyn.MetaInfo;

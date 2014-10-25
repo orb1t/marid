@@ -26,24 +26,19 @@ import org.marid.bd.blocks.BdBlock;
 import org.springframework.context.annotation.Bean;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Bean", label = "@Bean")
 @XmlRootElement
 public class BeanBlock extends StandardBlock {
 
     public static final ClassNode BEAN_CLASS = ClassHelper.make(Bean.class);
 
     private final Out out = new Out("node", AnnotationNode.class, () -> new AnnotationNode(BEAN_CLASS));
-
-    public BeanBlock() {
-        super("Bean", "@Bean", "@Bean", Color.magenta.brighter());
-    }
 
     @Override
     public List<Input> getInputs() {

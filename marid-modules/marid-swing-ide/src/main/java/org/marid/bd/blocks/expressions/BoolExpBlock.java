@@ -24,19 +24,18 @@ import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Boolean Expression", label = "(bool)")
 @XmlRootElement
 public class BoolExpBlock extends IoBlock {
 
     protected Expression expression;
 
     public BoolExpBlock() {
-        super("Boolean Expression", "bool", "(bool)", Color.BLUE, Expression.class, BooleanExpression.class);
+        super(Expression.class, BooleanExpression.class);
     }
 
     @Override

@@ -23,7 +23,6 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +30,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Ternary Expression", label = "?:")
 @XmlRootElement
 public class TernaryBlock extends StandardBlock {
 
@@ -43,10 +42,6 @@ public class TernaryBlock extends StandardBlock {
     protected final In trueInput = new In("+", Expression.class, e -> trueExpr = e);
     protected final In falseInput = new In("-", Expression.class, e -> falseExpr = e);
     protected final Out out = new Out("out", TernaryExpression.class, () -> new TernaryExpression(expression, trueExpr, falseExpr));
-
-    public TernaryBlock() {
-        super("Ternary Expression", "?:", "?:", Color.BLUE);
-    }
 
     @Override
     public void reset() {

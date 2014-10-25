@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Class Block", label = "class")
 @XmlRootElement
 public class ClassBlock extends StandardBlock implements ConfigurableBlock {
 
@@ -45,10 +45,6 @@ public class ClassBlock extends StandardBlock implements ConfigurableBlock {
     protected Class<?> targetClass;
 
     protected final Out out = new Out("out", ClassNode.class, () -> new ClassNode(targetClass));
-
-    public ClassBlock() {
-        super("Class Block", "class", "class", Color.CYAN.darker());
-    }
 
     public Class<?> getTargetClass() {
         return targetClass;

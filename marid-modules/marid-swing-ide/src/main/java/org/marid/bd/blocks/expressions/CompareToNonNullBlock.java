@@ -24,19 +24,18 @@ import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock
+@BdBlock(name = "Compare To Not null Expression", label = "!= null")
 @XmlRootElement
 public class CompareToNonNullBlock extends IoBlock {
 
     protected Expression expression;
 
     public CompareToNonNullBlock() {
-        super("Compare To Not null Expression", "!= null", "!= null", Color.BLUE, Expression.class, CompareToNullExpression.class);
+        super(Expression.class, CompareToNullExpression.class);
     }
 
     @Override
