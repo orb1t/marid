@@ -182,4 +182,12 @@ public class StringUtils {
         }
         return String.join(" ", parts);
     }
+
+    public static String substitute(String text) {
+        String result = text;
+        for (final String key : System.getProperties().stringPropertyNames()) {
+            result = result.replace("${" + key + "}", System.getProperty(key));
+        }
+        return result;
+    }
 }

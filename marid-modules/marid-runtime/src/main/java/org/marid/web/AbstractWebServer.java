@@ -18,20 +18,25 @@
 
 package org.marid.web;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.marid.service.AbstractMaridService;
+import org.marid.util.StringUtils;
 
 import javax.activation.FileTypeMap;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.nio.file.StandardWatchEventKinds.*;
+import static java.util.Arrays.stream;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
@@ -43,16 +48,29 @@ public abstract class AbstractWebServer extends AbstractMaridService {
 
     protected final Map<String, Path> dirMap;
     protected final Map<String, Pattern> vhostPatternMap;
-    protected final Map<String, String> vhostMap;
     protected final List<String> defaultPages;
     protected final FileTypeMap fileTypeMap = FileTypeMap.getDefaultFileTypeMap();
 
-    public AbstractWebServer(AbstractWebServerParameters params) {
-        super(params);
-        dirMap = params.dirMap;
-        vhostPatternMap = params.vHostPatternMap;
-        vhostMap = params.vHostMap;
-        defaultPages = params.defaultPages;
+    public AbstractWebServer() {
+        dirMap = dirMap();
+        vhostPatternMap = vHostPatternMap();
+        defaultPages = defaultPages();
+    }
+
+    protected Map<String, Path> dirMap() {
+        return stream(getClass().getAnnotation(WebServerParameters.class).dirs())
+                .map(d -> Pair.of(d.name(), Paths.get(StringUtils.substitute(d.dir()))))
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+    }
+
+    protected Map<String, Pattern> vHostPatternMap() {
+        return stream(getClass().getAnnotation(WebServerParameters.class).vHosts())
+                .map(v -> Pair.of(v.name(), Pattern.compile(v.pattern())))
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+    }
+
+    protected List<String> defaultPages() {
+        return Arrays.asList(getClass().getAnnotation(WebServerParameters.class).defaultPages());
     }
 
     @Override

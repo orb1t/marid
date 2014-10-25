@@ -16,23 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.web;
+package org.marid.services;
 
-import java.lang.annotation.*;
+import org.marid.service.AbstractMaridService;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-public @interface SimpleWebServerParameters {
+public class DemoService extends AbstractMaridService {
 
-    int backlog() default 0;
 
-    String host() default "0.0.0.0";
-
-    int port() default 8080;
-
-    boolean secure() default false;
 }

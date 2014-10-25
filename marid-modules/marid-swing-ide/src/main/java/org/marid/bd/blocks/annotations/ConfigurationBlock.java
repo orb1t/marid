@@ -23,7 +23,7 @@ import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
@@ -35,14 +35,14 @@ import java.util.List;
  */
 @BdBlock
 @XmlRootElement
-public class BeanBlock extends StandardBlock {
+public class ConfigurationBlock extends StandardBlock {
 
-    public static final ClassNode BEAN_CLASS = ClassHelper.make(Bean.class);
+    public static final ClassNode CONFIGURATION_CLASS = ClassHelper.make(Configuration.class);
 
-    private final Out out = new Out("node", AnnotationNode.class, () -> new AnnotationNode(BEAN_CLASS));
+    private final Out out = new Out("node", AnnotationNode.class, () -> new AnnotationNode(CONFIGURATION_CLASS));
 
-    public BeanBlock() {
-        super("Bean", "@Bean", "@Bean", Color.magenta.brighter());
+    public ConfigurationBlock() {
+        super("Configuration", "@Configuration", "@Configuration", Color.magenta.brighter());
     }
 
     @Override

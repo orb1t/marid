@@ -18,8 +18,8 @@
 
 package org.marid.service;
 
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,20 +35,25 @@ public abstract class AbstractMaridService implements MaridService {
     protected final long timeGranularity;
     protected final long shutdownTimeout;
 
-    public AbstractMaridService(AbstractMaridServiceParameters params) {
-        threadStackSize = params.threadStackSize;
-        daemons = params.daemons;
-        poolDaemons = params.poolDaemons;
-        timeGranularity = params.timeGranularity;
-        shutdownTimeout = params.shutdownTimeout;
+    public AbstractMaridService() {
+        final ServiceParameters parameters = getClass().getAnnotation(ServiceParameters.class);
+        threadStackSize = parameters.stackSize();
+        daemons = parameters.daemons();
+        poolDaemons = parameters.poolDaemons();
+        timeGranularity = parameters.timeUnit().toMillis(parameters.timeGranularity());
+        shutdownTimeout = parameters.timeUnit().toMillis(parameters.shutdownTimeout());
         executor = new ThreadPoolExecutor(
-                params.threadPoolInitSize,
-                params.threadPoolMaxSize,
-                params.threadPoolKeepAliveTime,
-                TimeUnit.MILLISECONDS,
-                params.blockingQueueSupplier.get(),
-                params.poolThreadFactory.apply(this),
-                params.rejectedExecutionHandler.apply(this));
+                parameters.threads(),
+                parameters.maxThreads(),
+                parameters.keepAliveTime(),
+                parameters.timeUnit(),
+                parameters.queueType().apply(parameters.queueSize()),
+                poolThreadFactory(),
+                parameters.rejectionType().get());
+    }
+
+    protected ThreadFactory poolThreadFactory() {
+        return this;
     }
 
     @Override

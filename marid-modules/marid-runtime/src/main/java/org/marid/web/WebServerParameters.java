@@ -26,13 +26,27 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface SimpleWebServerParameters {
+public @interface WebServerParameters {
 
-    int backlog() default 0;
+    Dir[] dirs() default {@Dir()};
 
-    String host() default "0.0.0.0";
+    VHost[] vHosts() default {};
 
-    int port() default 8080;
+    String[] defaultPages() default {"index.html"};
 
-    boolean secure() default false;
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Dir {
+
+        String name() default "default";
+
+        String dir() default "${user.home}/marid/web";
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface VHost {
+
+        String name();
+
+        String pattern();
+    }
 }

@@ -21,10 +21,7 @@ package org.marid.service;
 import org.marid.logging.LogSupport;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadFactory;
-
-import static org.marid.service.MaridServices.SERVICES;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -34,7 +31,6 @@ public interface MaridService extends LogSupport, ThreadFactory, AutoCloseable, 
     ThreadGroup threadGroup();
 
     default void start() throws Exception {
-        SERVICES.computeIfAbsent(getClass(), c -> new ConcurrentLinkedQueue<>()).add(this);
     }
 
     @Override
@@ -72,5 +68,4 @@ public interface MaridService extends LogSupport, ThreadFactory, AutoCloseable, 
     default String getName() {
         return getClass().getSimpleName();
     }
-
 }

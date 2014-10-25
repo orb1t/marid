@@ -16,23 +16,43 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.web;
+package org.marid.service;
+
+import org.marid.enums.BlockingQueueType;
+import org.marid.enums.RejectionHandlerType;
 
 import java.lang.annotation.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface SimpleWebServerParameters {
+public @interface ServiceParameters {
 
-    int backlog() default 0;
+    int queueSize() default 0;
 
-    String host() default "0.0.0.0";
+    BlockingQueueType queueType() default BlockingQueueType.SYNCHRONOUS;
 
-    int port() default 8080;
+    int threads() default 0;
 
-    boolean secure() default false;
+    int maxThreads() default 8;
+
+    long keepAliveTime() default 0L;
+
+    TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
+
+    int stackSize() default 0;
+
+    boolean daemons() default false;
+
+    boolean poolDaemons() default false;
+
+    long timeGranularity() default 100L;
+
+    long shutdownTimeout() default 10_000L;
+
+    RejectionHandlerType rejectionType() default RejectionHandlerType.CALLER_RUNS;
 }

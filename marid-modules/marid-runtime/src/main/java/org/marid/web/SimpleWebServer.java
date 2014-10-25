@@ -21,12 +21,15 @@ package org.marid.web;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.spi.HttpServerProvider;
 import groovy.lang.Closure;
 import groovy.lang.GroovyCodeSource;
 import org.marid.dyn.MetaInfo;
 import org.marid.groovy.GroovyRuntime;
+import org.marid.service.ServiceParameters;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -40,7 +43,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static java.net.HttpURLConnection.*;
 import static org.marid.nio.FileUtils.extension;
@@ -50,27 +52,28 @@ import static org.marid.nio.FileUtils.fileNameWithoutExtension;
  * @author Dmitry Ovchinnikov
  */
 @MetaInfo(icon = "services/web.png", name = "Simple web server", description = "Simple threaded web server")
+@WebServerParameters(defaultPages = {"index.groovy", "index.html", "index.svg"})
+@ServiceParameters
+@SimpleWebServerParameters
 public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
 
-    public final ThreadGroup webPoolThreadGroup = new ThreadGroup(threadPoolGroup, "webPool");
     protected final HttpServer server;
     protected final Path webDir;
     protected final Map<Path, HttpHandler> handlerMap = new ConcurrentHashMap<>();
 
-    public SimpleWebServer(SimpleWebServerParameters params) throws IOException {
-        super(params);
-        server = params.httpServerProvider.createHttpServer(params.address, params.backlog);
-        server.setExecutor(new ThreadPoolExecutor(
-                params.webThreadPoolInitSize,
-                params.webThreadPoolMaxSize,
-                params.webThreadPoolKeepAliveTime,
-                TimeUnit.MILLISECONDS,
-                params.webBlockingQueueSupplier.get(),
-                params.webPoolThreadFactory.apply(this),
-                params.webRejectedExecutionHandler.apply(this))
-        );
+    public SimpleWebServer() throws IOException {
+        final SimpleWebServerParameters parameters = getClass().getAnnotation(SimpleWebServerParameters.class);
+        final InetSocketAddress address = new InetSocketAddress(parameters.host(), parameters.port());
+        server = parameters.secure()
+                ? HttpServerProvider.provider().createHttpsServer(address, parameters.backlog())
+                : HttpServerProvider.provider().createHttpServer(address, parameters.backlog());
+        server.setExecutor(webExecutor());
         webDir = dirMap.get("default");
         server.createContext("/", this);
+    }
+
+    protected ThreadPoolExecutor webExecutor() {
+        return executor;
     }
 
     @Override

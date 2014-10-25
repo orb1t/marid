@@ -20,7 +20,6 @@ package org.marid;
 
 import org.marid.groovy.GroovyRuntime;
 import org.marid.logging.Logging;
-import org.marid.service.MaridServices;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.TimeZone;
@@ -41,7 +40,6 @@ public class Marid implements UncaughtExceptionHandler {
         Logging.init("log.properties");
         Thread.setDefaultUncaughtExceptionHandler(new Marid());
         Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
-        MaridServices.start();
     }
 
     @Override

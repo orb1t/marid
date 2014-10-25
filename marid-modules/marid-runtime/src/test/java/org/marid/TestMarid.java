@@ -19,10 +19,13 @@
 package org.marid;
 
 import org.marid.web.SimpleWebServer;
-import org.marid.web.SimpleWebServerParameters;
 
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -30,10 +33,17 @@ import java.util.Collections;
 public class TestMarid {
 
     public static void main(String... args) throws Exception {
-        final SimpleWebServerParameters parameters = new SimpleWebServerParameters();
-        parameters.setDirMap(Collections.singletonMap("default",
-                Paths.get(SimpleWebServer.class.getResource("site/index.html").toURI()).getParent()));
-        final SimpleWebServer webServer = new SimpleWebServer(parameters);
+        final SimpleWebServer webServer = new SimpleWebServer() {
+            @Override
+            protected Map<String, Path> dirMap() {
+                final URL url = SimpleWebServer.class.getResource("site/index.html");
+                try {
+                    return Collections.singletonMap("default", Paths.get(url.toURI()).getParent());
+                } catch (URISyntaxException x) {
+                    throw new IllegalStateException(x);
+                }
+            }
+        };
         webServer.start();
     }
 }

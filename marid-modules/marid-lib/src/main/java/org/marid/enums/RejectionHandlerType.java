@@ -16,23 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.enums;
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.io.Serializable;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface MaridServiceParameters extends Serializable {
+public enum RejectionHandlerType implements Supplier<RejectedExecutionHandler> {
+    DISCARD(ThreadPoolExecutor.DiscardPolicy::new),
+    DISCARD_OLDEST(ThreadPoolExecutor.DiscardOldestPolicy::new),
+    ABORT(ThreadPoolExecutor.AbortPolicy::new),
+    CALLER_RUNS(ThreadPoolExecutor.CallerRunsPolicy::new);
 
-    default PropertyDescriptor[] propertyDescriptors() {
-        try {
-            return Introspector.getBeanInfo(getClass()).getPropertyDescriptors();
-        } catch (IntrospectionException x) {
-            throw new IllegalStateException(x);
-        }
+    private final Supplier<RejectedExecutionHandler> supplier;
+
+    private RejectionHandlerType(Supplier<RejectedExecutionHandler> supplier) {
+        this.supplier = supplier;
+    }
+
+    @Override
+    public RejectedExecutionHandler get() {
+        return supplier.get();
     }
 }
