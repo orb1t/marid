@@ -175,7 +175,7 @@ public class StandardBlockComponent<B extends Block> extends DefaultBlockCompone
         for (final Block.Output out : block.getOutputs()) {
             final DefaultOutput output = new DefaultOutput(out);
             outputs.add(output);
-            map.put(new JLabel(out.getName()), output);
+            map.put(output.getAssociatedLabel(), output);
         }
         v.addGap(0, 0, Integer.MAX_VALUE);
         map.forEach((l, o) -> {

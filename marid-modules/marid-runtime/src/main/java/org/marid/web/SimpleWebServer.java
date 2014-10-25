@@ -28,6 +28,7 @@ import org.marid.dyn.MetaInfo;
 import org.marid.groovy.GroovyRuntime;
 import org.marid.service.ServiceParameters;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
@@ -259,27 +260,22 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
     }
 
     @Override
+    @PostConstruct
     public void start() throws Exception {
         super.start();
-        executor.submit(() -> {
-            if (webDir == null) {
-                warning("{0} No default directory found", SimpleWebServer.this);
-                return null;
-            } else {
-                Files.createDirectories(webDir);
-            }
-            server.start();
-            return null;
-        }).get();
+        if (webDir == null) {
+            warning("{0} No default directory found", SimpleWebServer.this);
+            return;
+        } else {
+            Files.createDirectories(webDir);
+        }
+        server.start();
     }
 
     @Override
     public void close() throws Exception {
         try {
-            executor.submit(() -> {
-                server.stop((int) shutdownTimeout);
-                return null;
-            }).get();
+            server.stop((int) shutdownTimeout);
         } finally {
             super.close();
         }

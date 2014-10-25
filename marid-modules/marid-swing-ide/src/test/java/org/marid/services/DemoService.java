@@ -19,11 +19,23 @@
 package org.marid.services;
 
 import org.marid.service.AbstractMaridService;
+import org.marid.service.ServiceParameters;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DemoService extends AbstractMaridService {
+@ServiceParameters
+public class DemoService extends AbstractMaridService implements DemoServiceMXBean {
 
+    @Override
+    public double random() {
+        return ThreadLocalRandom.current().nextDouble();
+    }
 
+    @Override
+    public double sin() {
+        return Math.sin(System.currentTimeMillis() / 1000.0);
+    }
 }

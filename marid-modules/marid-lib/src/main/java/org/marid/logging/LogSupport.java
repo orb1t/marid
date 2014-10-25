@@ -23,6 +23,7 @@ import org.marid.methods.LogMethods;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static org.marid.logging.Logging.*;
 import static org.marid.util.MaridClassValue.getCaller;
 
 /**
@@ -30,12 +31,7 @@ import static org.marid.util.MaridClassValue.getCaller;
  */
 public interface LogSupport {
 
-    static final ClassValue<Logger> LOGGERS = new ClassValue<Logger>() {
-        @Override
-        protected Logger computeValue(Class<?> type) {
-            return Logger.getLogger(type.getName());
-        }
-    };
+    ClassValue<Logger> LOGGERS = LOGGING_DOMAIN_ENABLED ? new LoggingDomainClassValue() : new LoggingClassValue();
 
     default Logger logger() {
         return LOGGERS.get(getClass());

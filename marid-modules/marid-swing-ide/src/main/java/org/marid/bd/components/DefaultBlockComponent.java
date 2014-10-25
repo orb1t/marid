@@ -73,7 +73,7 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
             final Font font = UIManager.getFont("Label.font");
             final Map<TextAttribute, Object> map = new HashMap<>();
             if (input.getInputType().isArray()) {
-                map.put(UNDERLINE, UNDERLINE_LOW_DASHED);
+                map.put(UNDERLINE, UNDERLINE_LOW_ONE_PIXEL);
             }
             if (input.isRequired()) {
                 map.put(WEIGHT, WEIGHT_BOLD);
@@ -128,6 +128,12 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
             super(output.getName(), SwingConstants.EAST);
             this.label = new JLabel(getName());
             this.output = output;
+            final Font font = UIManager.getFont("Label.font");
+            final Map<TextAttribute, Object> map = new HashMap<>();
+            if (output.getOutputType().isArray()) {
+                map.put(UNDERLINE, UNDERLINE_LOW_ONE_PIXEL);
+            }
+            label.setFont(map.isEmpty() ? font : font.deriveFont(map));
         }
 
         @Override

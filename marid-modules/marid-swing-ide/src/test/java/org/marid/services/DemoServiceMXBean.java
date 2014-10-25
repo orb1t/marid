@@ -16,25 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dyn;
-
-import java.lang.annotation.*;
+package org.marid.services;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-@Inherited
-@Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.METHOD, ElementType.TYPE_USE, ElementType.PACKAGE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface MetaInfo {
+public interface DemoServiceMXBean {
 
-    String name() default "";
+    double random();
 
-    String description() default "";
-
-    String descriptionResource() default "";
-
-    String icon() default "";
-
-    int color() default 0;
+    double sin();
 }

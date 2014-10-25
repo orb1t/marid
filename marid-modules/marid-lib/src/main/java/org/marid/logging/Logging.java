@@ -23,15 +23,33 @@ import org.marid.management.JmxUtils;
 import javax.management.MBeanServer;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
+import java.util.Properties;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import static org.marid.util.Utils.currentClassLoader;
+
 /**
  * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
  */
 public class Logging {
+
+    static final boolean LOGGING_DOMAIN_ENABLED;
+    static final Properties LOGGING_DOMAIN_PROPERTIES = new Properties();
+    static final InheritableThreadLocal<String> PREFIX_ITL = new InheritableThreadLocal<>();
+
+    static {
+        try (final InputStream is = currentClassLoader().getResourceAsStream("META-INF/logging-domain.properties")) {
+            if (is != null) {
+                LOGGING_DOMAIN_PROPERTIES.load(is);
+            }
+        } catch (Exception x) {
+            x.printStackTrace();
+        }
+        LOGGING_DOMAIN_ENABLED = "true".equals(LOGGING_DOMAIN_PROPERTIES.getProperty("enabled"));
+    }
 
     public static final Level[] LEVELS = {
             Level.SEVERE,
@@ -71,6 +89,37 @@ public class Logging {
                     }
                 }
             }
+        }
+    }
+
+    static class LoggingClassValue extends ClassValue<Logger> {
+        @Override
+        protected Logger computeValue(Class<?> type) {
+            return Logger.getLogger(type.getName());
+        }
+    }
+
+    static class LoggingDomainClassValue extends ClassValue<Logger> {
+        @Override
+        public Logger get(Class<?> type) {
+            final String prefix = PREFIX_ITL.get();
+            if (prefix == null) {
+                return super.get(type);
+            } else {
+                final Logger logger = super.get(type);
+                if (logger.getName().startsWith(prefix)) {
+                    return logger;
+                } else {
+                    remove(type);
+                    return get(type);
+                }
+            }
+        }
+
+        @Override
+        protected Logger computeValue(Class<?> type) {
+            final String prefix = PREFIX_ITL.get();
+            return Logger.getLogger(prefix == null ? type.getName() : prefix + type.getName());
         }
     }
 }

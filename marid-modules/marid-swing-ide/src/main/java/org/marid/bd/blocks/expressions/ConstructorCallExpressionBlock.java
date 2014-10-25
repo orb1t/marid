@@ -16,18 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.blocks.annotations;
+package org.marid.bd.blocks.expressions;
 
-import org.codehaus.groovy.ast.AnnotationNode;
-import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.Parameter;
+import org.codehaus.groovy.ast.expr.ArgumentListExpression;
+import org.codehaus.groovy.ast.expr.ConstructorCallExpression;
+import org.codehaus.groovy.ast.expr.Expression;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableMBeanExport;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,27 +37,32 @@ import java.util.List;
  */
 @BdBlock
 @XmlRootElement
-public class ConfigurationBlock extends StandardBlock {
+public class ConstructorCallExpressionBlock extends StandardBlock {
 
-    public static final ClassNode CONFIGURATION_CLASS = ClassHelper.make(Configuration.class);
-    public static final ClassNode ENABLE_MBEAN_EXPORT_CLASS = ClassHelper.make(EnableMBeanExport.class);
+    protected ClassNode classNode;
+    protected Expression args;
 
-    private final Out out = new Out("node", AnnotationNode[].class, this::value);
+    protected final In classIn = new In("class", ClassNode.class, true, v -> classNode = v);
+    protected final In argsIn = new In("args", Expression.class, v -> args = v);
 
-    public ConfigurationBlock() {
-        super("Configuration", "@Configuration", "@Configuration", Color.magenta.brighter());
+    protected final Out out = new Out("cc", ConstructorCallExpression.class, this::value);
+
+    public ConstructorCallExpressionBlock() {
+        super("Constructor Call Expression", "X(...)", "X(...)", Color.BLUE);
     }
 
-    public AnnotationNode[] value() {
-        return new AnnotationNode[] {
-                new AnnotationNode(CONFIGURATION_CLASS),
-                new AnnotationNode(ENABLE_MBEAN_EXPORT_CLASS)
-        };
+    protected ConstructorCallExpression value() {
+        return new ConstructorCallExpression(classNode, args);
+    }
+
+    @Override
+    public void reset() {
+        args = new ArgumentListExpression(new Parameter[0]);
     }
 
     @Override
     public List<Input> getInputs() {
-        return Collections.emptyList();
+        return Arrays.asList(classIn, argsIn);
     }
 
     @Override
