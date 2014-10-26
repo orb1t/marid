@@ -42,7 +42,8 @@ public class GroovyRuntime {
     private static final CompilerConfiguration COMPILER_CONFIGURATION = newCompilerConfiguration(c -> {
     });
 
-    public static final GroovyShell SHELL = newShell(COMPILER_CONFIGURATION, (l, s) -> {});
+    public static final GroovyShell SHELL = newShell(COMPILER_CONFIGURATION, (l, s) -> {
+    });
     public static final GroovyClassLoader CLASS_LOADER = SHELL.getClassLoader();
 
     public static Closure getClosure(GroovyCodeSource source) throws IOException {
@@ -97,7 +98,8 @@ public class GroovyRuntime {
     }
 
     public static GroovyShell newShell() {
-        return newShell((l, s) -> {});
+        return newShell((l, s) -> {
+        });
     }
 
     public static GroovyClassLoader newClassLoader(CompilerConfiguration cc, SafeConsumer<GroovyClassLoader> configurer) {
@@ -105,6 +107,10 @@ public class GroovyRuntime {
         configureClassLoader(l);
         configurer.accept(l);
         return l;
+    }
+
+    public static GroovyClassLoader newClassLoader(SafeConsumer<GroovyClassLoader> configurer) {
+        return newClassLoader(COMPILER_CONFIGURATION, configurer);
     }
 
     private static void configureClassLoader(GroovyClassLoader loader) {

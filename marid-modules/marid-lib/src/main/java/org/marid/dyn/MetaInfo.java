@@ -24,7 +24,7 @@ import java.lang.annotation.*;
  * @author Dmitry Ovchinnikov.
  */
 @Inherited
-@Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.METHOD, ElementType.TYPE_USE, ElementType.PACKAGE})
+@Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.METHOD, ElementType.PACKAGE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MetaInfo {
 

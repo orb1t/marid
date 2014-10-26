@@ -18,6 +18,7 @@
 
 package org.marid.ide.widgets;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -26,15 +27,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
-
 /**
  * @author Dmitry Ovchinnikov
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Component
-@Scope(value = SCOPE_PROTOTYPE)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public @interface CloseableWidget {
 
     String value() default "";

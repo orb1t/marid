@@ -20,30 +20,29 @@ package org.marid.ide.profile;
 
 import groovy.lang.GroovyShell;
 import org.codehaus.groovy.control.CompilerConfiguration;
-import org.marid.bd.schema.SchemaModel;
-import org.marid.beans.MaridBeans;
 import org.marid.groovy.GroovyRuntime;
 import org.marid.io.SimpleWriter;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
-import org.marid.logging.SimpleHandler;
 import org.marid.nio.FileUtils;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.ContextStartedEvent;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
-import java.util.logging.LogRecord;
+import java.util.stream.Stream;
+
+import static java.time.Instant.ofEpochMilli;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -51,7 +50,7 @@ import java.util.logging.LogRecord;
 public class Profile implements Named, Closeable, LogSupport {
 
     protected final List<Consumer<String>> outputConsumers = new CopyOnWriteArrayList<>();
-    protected final List<Consumer<LogRecord>> logConsumers = new CopyOnWriteArrayList<>();
+    protected final List<ApplicationListener<ApplicationEvent>> applicationListeners = new CopyOnWriteArrayList<>();
     protected final CompilerConfiguration compilerConfiguration = GroovyRuntime.newCompilerConfiguration(c -> {
         c.setRecompileGroovySource(true);
         c.setOutput(new PrintWriter(new SimpleWriter((w, s) -> outputConsumers.forEach(cs -> cs.accept(s))), true));
@@ -59,8 +58,9 @@ public class Profile implements Named, Closeable, LogSupport {
     protected final Path path;
     protected final GroovyShell shell;
     protected final ThreadGroup threadGroup;
+    protected final ExecutorService executor;
 
-    protected volatile AnnotationConfigApplicationContext applicationContext;
+    protected AnnotationConfigApplicationContext applicationContext;
 
     public Profile(Path path) {
         this.path = path;
@@ -72,15 +72,12 @@ public class Profile implements Named, Closeable, LogSupport {
             Files.createDirectories(getContextPath());
             l.addURL(getClassesPath().toUri().toURL());
         });
-    }
-
-    public void saveContextClass(SchemaModel schemaModel) {
-        final Path metaPath = getContextPath().resolve(schemaModel.getSchema().getName() + ".xml");
-        try (final OutputStream outputStream = Files.newOutputStream(metaPath)) {
-            MaridBeans.write(outputStream, schemaModel);
-        } catch (IOException x) {
-            throw new IllegalStateException(x);
-        }
+        this.executor = Executors.newSingleThreadExecutor(r -> {
+            final Thread thread = new Thread(threadGroup, r);
+            thread.setDaemon(true);
+            thread.setContextClassLoader(shell.getClassLoader());
+            return thread;
+        });
     }
 
     public void addOutputConsumer(Consumer<String> outputConsumer) {
@@ -91,12 +88,12 @@ public class Profile implements Named, Closeable, LogSupport {
         outputConsumers.remove(outputConsumer);
     }
 
-    public void addLogConsumer(Consumer<LogRecord> logRecordConsumer) {
-        logConsumers.add(logRecordConsumer);
+    public void addApplicationListener(ApplicationListener<ApplicationEvent> applicationListener) {
+        applicationListeners.add(applicationListener);
     }
 
-    public void removeLogRecordConsumer(Consumer<LogRecord> logRecordConsumer) {
-        logConsumers.remove(logRecordConsumer);
+    public void removeApplicationListener(ApplicationListener<ApplicationEvent> applicationListener) {
+        applicationListeners.remove(applicationListener);
     }
 
     public Path getClassesPath() {
@@ -133,6 +130,7 @@ public class Profile implements Named, Closeable, LogSupport {
         try {
             shell.getClassLoader().close();
         } finally {
+            executor.shutdown();
             Files.walkFileTree(path, FileUtils.RECURSIVE_CLEANER);
         }
     }
@@ -141,44 +139,73 @@ public class Profile implements Named, Closeable, LogSupport {
         shell.resetLoadedClasses();
     }
 
-    public synchronized void start() {
-        if (applicationContext != null) {
-            return;
-        }
-        applicationContext = new AnnotationConfigApplicationContext();
-        applicationContext.setClassLoader(shell.getClassLoader());
-        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(getContextPath(), "*.groovy")) {
-            for (final Path file : stream) {
-                final String className = FileUtils.fileNameWithoutExtension(file.getFileName().toString());
-                try {
-                    applicationContext.register(shell.getClassLoader().loadClass(className, true, true, true));
+    public void start() {
+        try {
+            executor.submit(() -> {
+                if (applicationContext != null) {
+                    return;
+                }
+                applicationContext = new AnnotationConfigApplicationContext();
+                applicationContext.addApplicationListener(event -> {
+                    applicationListeners.forEach(l -> {
+                        try {
+                            l.onApplicationEvent(event);
+                        } catch (Exception x) {
+                            warning("Unable to process {0}", x, event);
+                        }
+                    });
+                    if (event instanceof ContextClosedEvent) {
+                        info("Context {0} closed at {1}", event.getSource(), ofEpochMilli(event.getTimestamp()));
+                        applicationContext = null;
+                    }
+                });
+                applicationContext.setClassLoader(shell.getClassLoader());
+                try (final Stream<Path> stream = Files.walk(getClassesPath())) {
+                    stream.filter(p -> p.getFileName().toString().endsWith(".groovy")).forEach(p -> {
+                        final String className = FileUtils.fileNameWithoutExtension(p.getFileName().toString());
+                        try {
+                            applicationContext.register(shell.getClassLoader().loadClass(className, true, true, true));
+                        } catch (Exception x) {
+                            warning("Unable to load {0}", x, className);
+                        }
+                    });
                 } catch (Exception x) {
-                    warning("Unable to load {0}", x, className);
+                    warning("Unable to stream {0}", x, path);
                 }
-            }
-        } catch (IOException x) {
-            warning("Unable to stream {0}", x, path);
+                applicationContext.refresh();
+                applicationContext.start();
+            }).get();
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
         }
-        applicationContext.addApplicationListener(event -> {
-            if (event instanceof ContextClosedEvent) {
-                info("Context {0} closed at {1}", event.getSource(), Instant.ofEpochMilli(event.getTimestamp()));
-                applicationContext = null;
-            } else if (event instanceof ContextStartedEvent) {
-                info("Context {0} started at {1}", event.getSource(), Instant.ofEpochMilli(event.getTimestamp()));
-                for (final LogSupport logSupport : applicationContext.getBeansOfType(LogSupport.class).values()) {
-                    logSupport.logger().addHandler(new SimpleHandler((h, r) -> logConsumers.forEach(c -> c.accept(r))));
-                }
-            }
-        });
-        applicationContext.refresh();
-        applicationContext.start();
     }
 
-    public synchronized void stop() {
-        if (applicationContext == null) {
-            return;
+    public void stop() {
+        try {
+            executor.submit(() -> {
+                if (applicationContext != null) {
+                    applicationContext.close();
+                }
+            }).get();
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
         }
-        applicationContext.close();
+    }
+
+    public boolean isStarted() {
+        try {
+            return executor.submit(() -> applicationContext != null).get();
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
+    public AnnotationConfigApplicationContext getApplicationContext() {
+        try {
+            return executor.submit(() -> applicationContext).get();
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
     }
 
     @Override

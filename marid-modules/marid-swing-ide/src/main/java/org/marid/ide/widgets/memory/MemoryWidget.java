@@ -58,6 +58,7 @@ public class MemoryWidget extends Widget implements MemoryWidgetConfiguration, S
     @Autowired
     public MemoryWidget(IdeFrameImpl owner) {
         super(owner, "Memory");
+        info("Initialized");
         final TimeSeriesCollection dataset = new TimeSeriesCollection();
         dataset.addSeries(totalMemorySeries);
         dataset.addSeries(freeMemorySeries);

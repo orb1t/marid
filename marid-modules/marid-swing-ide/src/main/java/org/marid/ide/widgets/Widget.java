@@ -27,6 +27,7 @@ import org.marid.swing.MaridAction;
 import org.marid.swing.forms.Configuration;
 import org.marid.swing.forms.StaticConfigurationDialog;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.swing.*;
 import java.awt.*;
@@ -43,8 +44,8 @@ public abstract class Widget extends JInternalFrame implements PrefSupport, L10n
     protected final IdeFrameImpl owner;
     protected final BorderLayout layout = new BorderLayout();
 
-    public Widget(IdeFrameImpl owner, String title) {
-        super(LS.s(title), true, true, true, true);
+    public Widget(IdeFrameImpl owner, String title, Object... args) {
+        super(LS.s(title, args), true, true, true, true);
         this.owner = owner;
         setLayout(layout);
         setName(title);
@@ -61,11 +62,10 @@ public abstract class Widget extends JInternalFrame implements PrefSupport, L10n
         return getClass().isAnnotationPresent(SingletonWidget.class);
     }
 
-    @Override
-    public void show() {
+    @PostConstruct
+    public void init() {
         setLocation(getPref("location", new Point()));
         setSize(getPref("size", getSize()));
-        super.show();
     }
 
     @PreDestroy

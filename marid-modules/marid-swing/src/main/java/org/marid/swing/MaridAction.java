@@ -77,6 +77,11 @@ public class MaridAction extends AbstractAction implements L10nSupport {
         return this;
     }
 
+    public MaridAction setEnabledState(boolean enabled) {
+        setEnabled(enabled);
+        return this;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         try {

@@ -18,10 +18,12 @@
 
 package org.marid.services;
 
+import org.marid.service.MaridServiceMXBean;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface DemoServiceMXBean {
+public interface DemoServiceMXBean extends MaridServiceMXBean {
 
     double random();
 
