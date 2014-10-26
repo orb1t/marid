@@ -18,6 +18,7 @@
 
 package org.marid.swing.pref;
 
+import org.marid.logging.LogSupport;
 import org.marid.pref.PrefCodecs;
 import org.marid.pref.PrefReader;
 import org.marid.pref.PrefWriter;
@@ -168,7 +169,13 @@ public class SwingPrefCodecs extends PrefCodecs {
 
             @Override
             public void internalFrameClosed(InternalFrameEvent e) {
-                prefs.removePreferenceChangeListener(l);
+                try {
+                    prefs.removePreferenceChangeListener(l);
+                } catch (IllegalArgumentException x) {
+                    if (frame instanceof LogSupport) {
+                        ((LogSupport) frame).warning("Preferences error", x);
+                    }
+                }
                 frame.removeInternalFrameListener(this);
             }
         });

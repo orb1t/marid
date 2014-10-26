@@ -16,16 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package org.marid.ide.widgets;
 
-import org.marid.bd.Block
-import org.marid.ide.components.ProfileManager
-import org.marid.ide.swing.context.GuiContext
-import org.marid.ide.swing.gui.IdeImpl
-import org.marid.ide.widgets.Widget
+import org.marid.dyn.MetaInfo;
+import org.springframework.beans.factory.annotation.Autowired;
 
-context.scan(
-        GuiContext.package.name,
-        IdeImpl.package.name,
-        ProfileManager.package.name,
-        Block.package.name,
-        Widget.package.name);
+import java.util.*;
+
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public class WidgetContainer {
+
+    private final Map<Widget, MetaInfo> widgetMap = new IdentityHashMap<>();
+
+    @Autowired
+    public WidgetContainer(List<Widget> widgets) {
+        widgets.forEach(w -> widgetMap.put(w, w.getClass().getAnnotation(MetaInfo.class)));
+    }
+
+    public Set<Widget> getWidgets() {
+        return Collections.unmodifiableSet(widgetMap.keySet());
+    }
+
+    public Map<Widget, MetaInfo> getWidgetMap() {
+        return Collections.unmodifiableMap(widgetMap);
+    }
+}

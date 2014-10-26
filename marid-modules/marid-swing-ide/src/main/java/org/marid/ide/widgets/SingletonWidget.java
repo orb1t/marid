@@ -18,23 +18,22 @@
 
 package org.marid.ide.widgets;
 
-import java.util.*;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface WidgetProviders {
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Component
+@Lazy(value = true)
+public @interface SingletonWidget {
 
-    Comparator<Class<? extends Widget>> COMPARATOR = (a, b) -> a.getClass().getName().compareTo(b.getClass().getName());
-
-    Collection<Class<? extends Widget>> getProviders();
-
-    static NavigableSet<Class<? extends Widget>> widgetProviders() {
-        final TreeSet<Class<? extends Widget>> widgetProviders = new TreeSet<>(COMPARATOR);
-        for (final WidgetProviders wps : ServiceLoader.load(WidgetProviders.class)) {
-            widgetProviders.addAll(wps.getProviders());
-        }
-        return widgetProviders;
-    }
+    String value() default "";
 }

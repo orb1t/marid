@@ -18,17 +18,24 @@
 
 package org.marid.ide.widgets;
 
-import org.marid.ide.widgets.memory.MemoryWidget;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-public class DefaultWidgetProviders implements WidgetProviders {
-    @Override
-    public Collection<Class<? extends Widget>> getProviders() {
-        return Arrays.asList(MemoryWidget.class);
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+@Component
+@Scope(value = SCOPE_PROTOTYPE)
+public @interface CloseableWidget {
+
+    String value() default "";
 }

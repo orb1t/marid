@@ -46,13 +46,17 @@ public abstract class Widget extends JInternalFrame implements PrefSupport, L10n
         this.owner = owner;
         setLayout(layout);
         setName(title);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(isSingleton() ? HIDE_ON_CLOSE : DISPOSE_ON_CLOSE);
         add(toolBar, getPref("pos", BorderLayout.NORTH, "toolbar"));
         if (this instanceof Configuration) {
             toolBar.add(new MaridAction("Configuration", "settings", e ->
                     new StaticConfigurationDialog(owner, Widget.this.getClass()).setVisible(true))).setFocusable(false);
             toolBar.addSeparator();
         }
+    }
+
+    public boolean isSingleton() {
+        return getClass().isAnnotationPresent(SingletonWidget.class);
     }
 
     @Override

@@ -26,10 +26,14 @@ import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.swing.gui.IdeFrameImpl;
+import org.marid.ide.widgets.SingletonWidget;
 import org.marid.ide.widgets.Widget;
 import org.marid.pref.PrefSupport;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.swing.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.Date;
 
 import static org.jfree.chart.ChartFactory.createTimeSeriesChart;
@@ -37,6 +41,7 @@ import static org.jfree.chart.ChartFactory.createTimeSeriesChart;
 /**
  * @author Dmitry Ovchinnikov.
  */
+@SingletonWidget
 @MetaInfo(name = "Memory consumption")
 public class MemoryWidget extends Widget implements PrefSupport, MemoryWidgetConfiguration {
 
@@ -51,6 +56,7 @@ public class MemoryWidget extends Widget implements PrefSupport, MemoryWidgetCon
         freeMemorySeries.add(second, freeMemory);
     });
 
+    @Autowired
     public MemoryWidget(IdeFrameImpl owner) {
         super(owner, "Memory");
         final TimeSeriesCollection dataset = new TimeSeriesCollection();
@@ -59,19 +65,18 @@ public class MemoryWidget extends Widget implements PrefSupport, MemoryWidgetCon
         final JFreeChart chart = createTimeSeriesChart(s("Memory"), s("Time"), s("Memory") + ", MiB", dataset);
         add(new ChartPanel(chart, USE_BUFFER.get(), SAVE.get(), PRINT.get(), ZOOM.get(), TOOLTIPS.get()));
         UPDATE_INTERVAL.addConsumer(this, n -> timer.setDelay(n * 1000));
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                timer.start();
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                timer.stop();
+            }
+        });
         pack();
-    }
-
-    @Override
-    public void show() {
-        super.show();
-        timer.start();
-    }
-
-    @Override
-    public void dispose() {
-        timer.stop();
-        super.dispose();
     }
 
     private TimeSeries createTimeSeries(String title) {

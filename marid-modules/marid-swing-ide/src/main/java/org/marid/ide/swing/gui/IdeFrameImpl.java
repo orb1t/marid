@@ -22,7 +22,6 @@ import org.marid.dyn.MetaInfo;
 import org.marid.ide.base.Ide;
 import org.marid.ide.base.IdeFrame;
 import org.marid.ide.widgets.Widget;
-import org.marid.ide.widgets.WidgetProviders;
 import org.marid.image.MaridIcons;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
@@ -35,6 +34,7 @@ import org.marid.swing.forms.StaticConfigurationDialog;
 import org.marid.swing.log.SwingHandler;
 import org.marid.swing.menu.ActionTreeElement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -42,7 +42,7 @@ import javax.annotation.PreDestroy;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
@@ -54,6 +54,7 @@ import static javax.swing.JOptionPane.*;
 @Component
 public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSupport, L10nSupport {
 
+    private final GenericApplicationContext applicationContext;
     private final IdeImpl ide;
 
     @Autowired
@@ -63,18 +64,19 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     private IdeStatusLineImpl statusLine;
 
     @Autowired
-    public IdeFrameImpl(IdeImpl ide, ActionTreeElement menuRoot) {
+    public IdeFrameImpl(GenericApplicationContext context) {
         super(LS.s("Marid IDE"), WindowPrefs.graphicsConfiguration("IDE"));
+        this.applicationContext = context;
         setName("IDE");
         setDefaultCloseOperation(HIDE_ON_CLOSE);
-        this.ide = ide;
+        this.ide = context.getBean(IdeImpl.class);
         setIconImages(MaridIcons.ICONS);
         setLocationRelativeTo(null);
         setJMenuBar(new JMenuBar());
         getJMenuBar().add(widgetsMenu());
         getJMenuBar().add(preferencesMenu());
         getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
-        menuRoot.fillJMenuBar(getJMenuBar());
+        context.getBean(ActionTreeElement.class).fillJMenuBar(getJMenuBar());
     }
 
     @PostConstruct
@@ -94,23 +96,14 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
 
     private JMenu widgetsMenu() {
         final JMenu menu = new JMenu(s("Widgets"));
-        for (final Class<? extends Widget> widgetType : WidgetProviders.widgetProviders()) {
-            final MetaInfo metaInfo = widgetType.getAnnotation(MetaInfo.class);
+        for (final String beanName : applicationContext.getBeanNamesForType(Widget.class)) {
+            final MetaInfo metaInfo = applicationContext.findAnnotationOnBean(beanName, MetaInfo.class);
             menu.add(new MaridAction(metaInfo.name(), metaInfo.icon(), e -> {
-                for (final JInternalFrame frame : desktop.getAllFrames()) {
-                    if (widgetType == frame.getClass()) {
-                        frame.show();
-                        return;
-                    }
-                }
-                try {
-                    final Constructor<? extends Widget> c = widgetType.getConstructor(IdeFrameImpl.class);
-                    final Widget widget = c.newInstance(this);
+                final Widget widget = applicationContext.getBean(beanName, Widget.class);
+                if (!widget.isSingleton() || Arrays.stream(desktop.getComponents()).noneMatch(c -> c == widget)) {
                     desktop.add(widget);
-                    widget.show();
-                } catch (Exception x) {
-                    warning("Unable to create widget: {0}", x, widgetType);
                 }
+                widget.show();
             }));
         }
         return menu;
