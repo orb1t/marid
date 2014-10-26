@@ -21,11 +21,13 @@ package org.marid.ide.widgets;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.swing.gui.IdeFrameImpl;
 import org.marid.l10n.L10nSupport;
+import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.MaridAction;
 import org.marid.swing.forms.Configuration;
 import org.marid.swing.forms.StaticConfigurationDialog;
 
+import javax.annotation.PreDestroy;
 import javax.swing.*;
 import java.awt.*;
 
@@ -35,7 +37,7 @@ import static javax.swing.SwingConstants.HORIZONTAL;
  * @author Dmitry Ovchinnikov.
  */
 @MetaInfo
-public abstract class Widget extends JInternalFrame implements PrefSupport, L10nSupport {
+public abstract class Widget extends JInternalFrame implements PrefSupport, L10nSupport, LogSupport {
 
     protected final JToolBar toolBar = new JToolBar(getPref("orientation", HORIZONTAL, "toolbar"));
     protected final IdeFrameImpl owner;
@@ -66,6 +68,7 @@ public abstract class Widget extends JInternalFrame implements PrefSupport, L10n
         super.show();
     }
 
+    @PreDestroy
     @Override
     public void dispose() {
         try {
