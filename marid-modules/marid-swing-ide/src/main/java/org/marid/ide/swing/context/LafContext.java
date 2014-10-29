@@ -18,8 +18,12 @@
 
 package org.marid.ide.swing.context;
 
+import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
+import com.jgoodies.looks.plastic.PlasticLookAndFeel;
+import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
+import org.marid.swing.StandardLookAndFeel;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
@@ -31,6 +35,14 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel;
  */
 @Configuration
 public class LafContext implements LogSupport, SysPrefSupport {
+
+    @PostConstruct
+    public void installLafs() {
+        UIManager.installLookAndFeel("Plastic 3D", Plastic3DLookAndFeel.class.getName());
+        UIManager.installLookAndFeel("Plastic", PlasticLookAndFeel.class.getName());
+        UIManager.installLookAndFeel("Plastic XP", PlasticXPLookAndFeel.class.getName());
+        UIManager.installLookAndFeel("Standard", StandardLookAndFeel.class.getName());
+    }
 
     @PostConstruct
     public void init() {

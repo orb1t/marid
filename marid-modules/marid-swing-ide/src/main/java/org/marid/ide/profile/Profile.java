@@ -24,6 +24,7 @@ import org.marid.groovy.GroovyRuntime;
 import org.marid.io.SimpleWriter;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
+import org.marid.logging.Logging;
 import org.marid.nio.FileUtils;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -40,6 +41,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.logging.Handler;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static java.time.Instant.ofEpochMilli;
@@ -94,6 +97,14 @@ public class Profile implements Named, Closeable, LogSupport {
 
     public void removeApplicationListener(ApplicationListener<ApplicationEvent> applicationListener) {
         applicationListeners.remove(applicationListener);
+    }
+
+    public void addLogHandler(Handler handler) {
+        Logger.getGlobal().getParent().addHandler(handler);
+    }
+
+    public void removeLogHandler(Handler handler) {
+        Logger.getGlobal().getParent().removeHandler(handler);
     }
 
     public Path getClassesPath() {
@@ -172,6 +183,7 @@ public class Profile implements Named, Closeable, LogSupport {
                 } catch (Exception x) {
                     warning("Unable to stream {0}", x, path);
                 }
+                Logging.setCurrentPrefix(getName());
                 applicationContext.refresh();
                 applicationContext.start();
             }).get();

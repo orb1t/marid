@@ -92,6 +92,15 @@ public class Logging {
         }
     }
 
+    public static void setCurrentPrefix(String prefix) {
+        PREFIX_ITL.set(prefix + "@");
+    }
+
+    public static String getPrefix(String loggerName) {
+        final int pos = loggerName.indexOf('@');
+        return pos < 0 ? "" : loggerName.substring(0, pos);
+    }
+
     static class LoggingClassValue extends ClassValue<Logger> {
         @Override
         protected Logger computeValue(Class<?> type) {

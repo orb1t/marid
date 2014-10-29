@@ -75,6 +75,14 @@ public class L10n {
         m(getBundle(MSGS, locale, Utils.currentClassLoader(), UTF8_CONTROL), buffer, k, func, v);
     }
 
+    public static ResourceBundle getMessagesBundle(Locale locale) {
+        return getBundle(MSGS, locale, Utils.currentClassLoader(), UTF8_CONTROL);
+    }
+
+    public static ResourceBundle getStringsBundle(Locale locale) {
+        return getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL);
+    }
+
     private static void m(ResourceBundle b, StringBuffer buf, String key, Function<String, String> func, Object... v) {
         if (key == null) {
             return;

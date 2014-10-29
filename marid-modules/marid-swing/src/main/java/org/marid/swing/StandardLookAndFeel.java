@@ -16,22 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.log;
+package org.marid.swing;
 
-import java.util.Locale;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
-
-import static java.util.function.Function.identity;
-import static org.marid.l10n.L10n.m;
+import javax.swing.plaf.metal.DefaultMetalTheme;
+import javax.swing.plaf.metal.MetalLookAndFeel;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SwingHandlerFormatter extends Formatter {
+public class StandardLookAndFeel extends MetalLookAndFeel {
 
-    @Override
-    public String format(LogRecord record) {
-        return m(Locale.getDefault(), record.getMessage(), identity(), record.getParameters());
+    public StandardLookAndFeel() {
+        setCurrentTheme(new DefaultMetalTheme());
     }
 }

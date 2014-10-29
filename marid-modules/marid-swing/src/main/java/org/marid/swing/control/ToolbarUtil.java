@@ -16,22 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.log;
+package org.marid.swing.control;
 
-import java.util.Locale;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
-
-import static java.util.function.Function.identity;
-import static org.marid.l10n.L10n.m;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SwingHandlerFormatter extends Formatter {
+public class ToolbarUtil {
 
-    @Override
-    public String format(LogRecord record) {
-        return m(Locale.getDefault(), record.getMessage(), identity(), record.getParameters());
+    public static int getToolbarOrientation(String borderLayoutOrientation) {
+        switch (borderLayoutOrientation) {
+            case BorderLayout.LINE_END:
+            case BorderLayout.LINE_START:
+            case BorderLayout.EAST:
+            case BorderLayout.WEST:
+                return JToolBar.VERTICAL;
+            default:
+                return JToolBar.HORIZONTAL;
+        }
     }
 }

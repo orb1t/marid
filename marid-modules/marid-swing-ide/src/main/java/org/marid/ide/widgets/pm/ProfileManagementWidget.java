@@ -21,6 +21,7 @@ package org.marid.ide.widgets.pm;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.components.ProfileManager;
 import org.marid.ide.profile.Profile;
+import org.marid.ide.profile.ProfileLogHandler;
 import org.marid.ide.swing.gui.IdeFrameImpl;
 import org.marid.ide.widgets.CloseableWidget;
 import org.marid.ide.widgets.Widget;
@@ -30,6 +31,9 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 
 import java.awt.*;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.SimpleFormatter;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,6 +45,7 @@ public class ProfileManagementWidget extends Widget {
     private final Profile profile;
     private final MaridAction runAction;
     private final MaridAction stopAction;
+    private final ProfileLogHandler logHandler;
 
     @Autowired
     public ProfileManagementWidget(IdeFrameImpl owner, ProfileManager profileManager) {
@@ -68,5 +73,34 @@ public class ProfileManagementWidget extends Widget {
                 });
             }
         });
+        this.logHandler = new ProfileLogHandler(profile, new LogHandler());
+        profile.addLogHandler(logHandler);
+    }
+
+    @Override
+    public void dispose() {
+        try {
+            profile.removeLogHandler(logHandler);
+        } finally {
+            super.dispose();
+        }
+    }
+
+    protected class LogHandler extends Handler {
+
+        @Override
+        public void publish(LogRecord record) {
+            System.out.print(new SimpleFormatter().format(record));
+        }
+
+        @Override
+        public void flush() {
+
+        }
+
+        @Override
+        public void close() throws SecurityException {
+
+        }
     }
 }

@@ -23,7 +23,6 @@ import org.marid.ide.base.Ide;
 import org.marid.ide.base.IdeFrame;
 import org.marid.ide.widgets.Widget;
 import org.marid.image.MaridIcons;
-import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.MaridAction;
@@ -33,6 +32,7 @@ import org.marid.swing.forms.Form;
 import org.marid.swing.forms.StaticConfigurationDialog;
 import org.marid.swing.log.SwingHandler;
 import org.marid.swing.menu.ActionTreeElement;
+import org.marid.swing.util.MessageSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
@@ -52,7 +52,7 @@ import static javax.swing.JOptionPane.*;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSupport, L10nSupport {
+public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSupport, MessageSupport {
 
     private final GenericApplicationContext applicationContext;
     private final IdeImpl ide;
@@ -94,6 +94,23 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         dispose();
     }
 
+    private JMenu lafMenu() {
+        final JMenu menu = new JMenu(s("Look and feel"));
+        for (final UIManager.LookAndFeelInfo lookAndFeelInfo : UIManager.getInstalledLookAndFeels()) {
+            menu.add(new MaridAction(lookAndFeelInfo.getName(), null, ev -> {
+                try {
+                    UIManager.setLookAndFeel(lookAndFeelInfo.getClassName());
+                    for (final Frame frame : Frame.getFrames()) {
+                        SwingUtilities.updateComponentTreeUI(frame);
+                    }
+                } catch (Exception x) {
+                    showMessage(WARNING_MESSAGE, "LAF", "Error", x);
+                }
+            }));
+        }
+        return menu;
+    }
+
     private JMenu widgetsMenu() {
         final JMenu menu = new JMenu(s("Widgets"));
         for (final String beanName : applicationContext.getBeanNamesForType(Widget.class)) {
@@ -126,6 +143,8 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
                     e -> new StaticConfigurationDialog(this, c).setVisible(true),
                     Action.SHORT_DESCRIPTION, description));
         });
+        menu.addSeparator();
+        menu.add(lafMenu());
         return menu;
     }
 
