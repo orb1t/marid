@@ -48,19 +48,19 @@ public class LogComponent extends JPanel implements L10nSupport {
     protected final JToolBar toolBar;
     protected final Model model;
     protected final JTable table;
-    protected final Filter filter;
+    protected final Filter recordFilter;
 
-    public LogComponent(Preferences preferences, Collection<LogRecord> logRecords, Filter filter) {
+    public LogComponent(Preferences prefs, Collection<LogRecord> logRecords, Filter filter) {
         super(new BorderLayout());
-        this.filter = filter;
-        this.preferences = preferences;
-        this.toolBar = addToolBar();
-        this.model = model(logRecords);
+        recordFilter = filter;
+        preferences = prefs;
+        toolBar = addToolBar();
+        model = model(logRecords);
         add(new JScrollPane(this.table = new JTable(model)));
-        this.table.setRowHeight(20);
-        this.table.setFont(new Font(Font.MONOSPACED, Font.PLAIN, UIManager.getFont("Label.font").getSize() - 2));
-        this.table.setShowVerticalLines(true);
-        this.table.setGridColor(SystemColor.control);
+        table.setRowHeight(20);
+        table.setFont(new Font(Font.MONOSPACED, Font.PLAIN, UIManager.getFont("Label.font").getSize() - 2));
+        table.setShowVerticalLines(true);
+        table.setGridColor(SystemColor.control);
         for (int i = 0; i < table.getColumnCount(); i++) {
             final int width = model.getColumnWidth(i);
             if (width > 0) {
@@ -68,6 +68,10 @@ public class LogComponent extends JPanel implements L10nSupport {
                 table.getColumnModel().getColumn(i).setPreferredWidth(width);
                 table.getColumnModel().getColumn(i).setMinWidth(width / 2);
             }
+        }
+        if (table.getRowCount() > 0) {
+            table.getSelectionModel().setSelectionInterval(table.getRowCount() - 1, table.getRowCount() - 1);
+            track();
         }
     }
 
@@ -82,9 +86,25 @@ public class LogComponent extends JPanel implements L10nSupport {
         return new Model(logRecords);
     }
 
+    protected boolean isTracking() {
+        return table.getSelectedRow() == table.getRowCount() - 1;
+    }
+
+    protected void track() {
+        table.scrollRectToVisible(table.getCellRect(table.getSelectedRow(), 0, true));
+    }
+
     public void publish(LogRecord record) {
-        if (record.getLoggerName() != null) {
-            EventQueue.invokeLater(() -> model.add(record));
+        if (recordFilter.isLoggable(record)) {
+            EventQueue.invokeLater(() -> {
+                final boolean tracking = isTracking();
+                model.add(record);
+                if (tracking) {
+                    final int index = table.getRowCount() - 1;
+                    table.getSelectionModel().setSelectionInterval(index, index);
+                    track();
+                }
+            });
         }
     }
 
@@ -125,13 +145,9 @@ public class LogComponent extends JPanel implements L10nSupport {
             }
         }
 
-        public boolean isLoggable(LogRecord record) {
-            return LogComponent.this.filter.isLoggable(record) && filter.isLoggable(record);
-        }
-
         @Override
         public int getRowCount() {
-            return (int) records.stream().filter(this::isLoggable).count();
+            return (int) records.stream().filter(filter::isLoggable).count();
         }
 
         @Override
@@ -186,7 +202,7 @@ public class LogComponent extends JPanel implements L10nSupport {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            final LogRecord r = records.stream().filter(this::isLoggable).skip(rowIndex).findFirst().orElse(null);
+            final LogRecord r = records.stream().filter(filter::isLoggable).skip(rowIndex).findFirst().orElse(null);
             if (r == null) {
                 return null;
             } else {

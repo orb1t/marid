@@ -23,16 +23,38 @@ import org.marid.swing.actions.GenericAction;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ResizablePanel<T extends JComponent> extends JPanel {
+public class BottomPanel<T extends JComponent> extends JPanel {
 
     protected final T component;
-    protected final Point point = new Point(-1, -1);
+    protected Point point = null;
+    protected final MouseAdapter mouseAdapter = new MouseAdapter() {
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            final int dy = point.y - e.getY();
+            setPreferredSize(new Dimension(getWidth(), getHeight() + dy));
+            getParent().doLayout();
+            getParent().revalidate();
+            point = new Point(e.getX(), e.getY() + dy);
+        }
 
-    public ResizablePanel(T component) {
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            point = null;
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            point = e.getPoint();
+        }
+    };
+
+    public BottomPanel(T component) {
         super(new BorderLayout());
         add(this.component = component);
         final JPanel buttonPanel = new JPanel();
@@ -43,16 +65,7 @@ public class ResizablePanel<T extends JComponent> extends JPanel {
         button.setFocusable(false);
         buttonPanel.add(button);
         add(buttonPanel, BorderLayout.NORTH);
-    }
-
-    protected String getOrientation() {
-        if (getParent() == null) {
-            return null;
-        }
-        if (!(getParent().getLayout() instanceof BorderLayout)) {
-            return null;
-        }
-        final Object constraints = ((BorderLayout) getParent().getLayout()).getConstraints(this);
-        return constraints == null ? null : constraints.toString();
+        buttonPanel.addMouseListener(mouseAdapter);
+        buttonPanel.addMouseMotionListener(mouseAdapter);
     }
 }

@@ -18,10 +18,12 @@
 
 package org.marid.swing;
 
+import images.Images;
 import org.marid.l10n.L10nSupport;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
+import java.awt.*;
 import java.util.function.Consumer;
 
 /**
@@ -44,5 +46,11 @@ public class MaridButtons implements L10nSupport {
         final JToggleButton button = new JToggleButton(action);
         consumer.accept(button);
         return button;
+    }
+
+    public static JLabel resizeButton(boolean vertical, Component component) {
+        final JLabel label = new JLabel(Images.getIcon(vertical ? "resizeV.png" : "resizeH.png"));
+        label.setBorder(BorderFactory.createRaisedBevelBorder());
+        return label;
     }
 }

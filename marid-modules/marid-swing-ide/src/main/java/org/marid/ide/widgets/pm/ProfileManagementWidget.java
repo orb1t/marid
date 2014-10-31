@@ -28,7 +28,7 @@ import org.marid.logging.Logging;
 import org.marid.logging.SimpleHandler;
 import org.marid.swing.MaridAction;
 import org.marid.swing.actions.ComponentAction;
-import org.marid.swing.component.ResizablePanel;
+import org.marid.swing.component.BottomPanel;
 import org.marid.swing.log.LogComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextClosedEvent;
@@ -63,7 +63,7 @@ public class ProfileManagementWidget extends Widget {
         info("Initialized");
         this.profile = profileManager.getCurrentProfile();
         logComponent = new LogComponent(preferences(), emptyList(), r -> true);
-        logComponent.setPreferredSize(new Dimension(logComponent.getPreferredSize().width, 100));
+        logComponent.setPreferredSize(new Dimension(logComponent.getPreferredSize().width, 150));
         this.logHandler = new SimpleHandler((h, r) -> {
             if (profile.getName().equals(itl.get())) {
                 logComponent.publish(r);
@@ -78,7 +78,7 @@ public class ProfileManagementWidget extends Widget {
         toolBar.add(stopAction = new MaridAction("Stop", "stop", (a, e) -> {
             profile.stop();
         }).setEnabledState(profile.isStarted())).setFocusable(false);
-        final ResizablePanel<LogComponent> p = new ResizablePanel<>(logComponent);
+        final BottomPanel<LogComponent> p = new BottomPanel<>(logComponent);
         toolBar.addSeparator();
         final MaridAction hideAction = new MaridAction("Log", "log", e -> p.setVisible(!p.isVisible()));
         toolBar.add(toggleButton(hideAction, b -> {
