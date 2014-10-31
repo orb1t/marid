@@ -38,6 +38,7 @@ import java.awt.*;
 import java.util.logging.Handler;
 
 import static java.util.Collections.emptyList;
+import static org.marid.swing.MaridButtons.toggleButton;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -60,6 +61,7 @@ public class ProfileManagementWidget extends Widget {
         info("Initialized");
         this.profile = profileManager.getCurrentProfile();
         logComponent = new LogComponent(preferences(), emptyList(), r -> true);
+        logComponent.setPreferredSize(new Dimension(logComponent.getPreferredSize().width, 100));
         this.logHandler = new SimpleHandler((h, r) -> {
             if (profile.getName().equals(itl.get())) {
                 logComponent.publish(r);
@@ -74,7 +76,13 @@ public class ProfileManagementWidget extends Widget {
         toolBar.add(stopAction = new MaridAction("Stop", "stop", (a, e) -> {
             profile.stop();
         }).setEnabledState(profile.isStarted())).setFocusable(false);
-        panel.add(new ResizablePanel<>(logComponent), BorderLayout.SOUTH);
+        final ResizablePanel<LogComponent> p = new ResizablePanel<>(logComponent);
+        toolBar.addSeparator();
+        toolBar.add(toggleButton(new MaridAction("Log", "log", e -> p.setVisible(!p.isVisible())), b -> {
+            b.getAction().putValue(Action.SELECTED_KEY, true);
+            b.setHideActionText(true);
+        })).setFocusable(false);
+        panel.add(p, BorderLayout.SOUTH);
         add(panel);
         pack();
         this.profile.addApplicationListener(event -> {

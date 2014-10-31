@@ -41,6 +41,11 @@ public class GenericAction extends AbstractAction implements L10nSupport {
         this.actionListener = actionListener;
     }
 
+    public GenericAction(ImageIcon icon, ActionListener actionListener) {
+        super(null, icon);
+        this.actionListener = actionListener;
+    }
+
     public GenericAction(ActionListener actionListener) {
         this.actionListener = actionListener;
     }

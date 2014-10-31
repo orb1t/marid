@@ -22,13 +22,14 @@ import org.marid.l10n.L10nSupport;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class MaridButtons implements L10nSupport {
 
-    public static JButton browseButton(final JTextComponent textField) {
+    public static JButton browseButton(JTextComponent textField) {
         return new JButton(new MaridAction("Browse", "browse.png", (a, e) -> {
             JFileChooser fileChooser = new JFileChooser(textField.getText());
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -37,5 +38,11 @@ public class MaridButtons implements L10nSupport {
                 textField.setText(fileChooser.getSelectedFile().toString());
             }
         }));
+    }
+
+    public static JToggleButton toggleButton(Action action, Consumer<JToggleButton> consumer) {
+        final JToggleButton button = new JToggleButton(action);
+        consumer.accept(button);
+        return button;
     }
 }

@@ -19,10 +19,10 @@
 package org.marid.swing.component;
 
 import images.Images;
+import org.marid.swing.actions.GenericAction;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,14 +35,11 @@ public class ResizablePanel<T extends JComponent> extends JPanel {
         super(new BorderLayout());
         add(this.component = component);
         final JPanel buttonPanel = new JPanel();
+        buttonPanel.setBorder(BorderFactory.createEtchedBorder());
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
         buttonPanel.add(Box.createHorizontalGlue());
-        buttonPanel.add(new JButton(new AbstractAction(null, Images.getIcon("clear.png")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
-        }));
+        final JButton button = new JButton(new GenericAction(Images.getIcon("close.png"), e -> setVisible(false)));
+        button.setFocusable(false);
         add(buttonPanel, BorderLayout.NORTH);
     }
 }
