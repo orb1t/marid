@@ -31,7 +31,6 @@ import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
-import java.util.logging.Logger;
 
 import static org.marid.groovy.GroovyRuntime.CLASS_LOADER;
 
@@ -42,7 +41,7 @@ public class MaridIde implements LogSupport {
 
     public static void main(String[] args) throws Exception {
         Logging.init("marid-ide-logging.properties");
-        Logger.getLogger("").addHandler(new SwingHandler());
+        Logging.rootLogger().addHandler(new SwingHandler());
         Thread.setDefaultUncaughtExceptionHandler((t, x) -> Log.warning("Uncaught exception in {0}", x, t));
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         context.setClassLoader(CLASS_LOADER);

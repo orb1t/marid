@@ -16,32 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.logging;
+package org.marid.swing.component;
 
-import org.marid.logging.formatters.DefaultFormatter;
+import images.Images;
 
-import java.util.logging.ConsoleHandler;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TestLogConfigurer {
+public class ResizablePanel<T extends JComponent> extends JPanel {
 
-    public TestLogConfigurer() {
-        configureTestLogging();
-    }
+    protected final T component;
 
-    public static void configureTestLogging() {
-        LogManager.getLogManager().reset();
-        final Logger logger = Logging.rootLogger();
-        try {
-            final ConsoleHandler consoleHandler = new ConsoleHandler();
-            consoleHandler.setFormatter(new DefaultFormatter());
-            logger.addHandler(consoleHandler);
-        } catch (Exception x) {
-            x.printStackTrace();
-        }
+    public ResizablePanel(T component) {
+        super(new BorderLayout());
+        add(this.component = component);
+        final JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+        buttonPanel.add(Box.createHorizontalGlue());
+        buttonPanel.add(new JButton(new AbstractAction(null, Images.getIcon("clear.png")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        }));
+        add(buttonPanel, BorderLayout.NORTH);
     }
 }

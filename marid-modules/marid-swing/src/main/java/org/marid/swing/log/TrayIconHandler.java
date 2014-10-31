@@ -19,6 +19,7 @@
 package org.marid.swing.log;
 
 import org.marid.l10n.L10nSupport;
+import org.marid.logging.Logging;
 
 import java.awt.*;
 import java.sql.Timestamp;
@@ -78,14 +79,14 @@ public class TrayIconHandler extends Handler implements L10nSupport {
 
     @Override
     public void close() throws SecurityException {
-        final Logger logger = Logger.getLogger("");
+        final Logger logger = Logging.rootLogger();
         if (logger != null) {
             logger.removeHandler(this);
         }
     }
 
     public static void setHandlerLevel(TrayIcon trayIcon, Level level) {
-        final Logger logger = Logger.getLogger("");
+        final Logger logger = Logging.rootLogger();
         if (logger != null) {
             for (final Handler handler : logger.getHandlers()) {
                 if (handler instanceof TrayIconHandler && ((TrayIconHandler) handler).trayIcon == trayIcon) {
@@ -97,7 +98,7 @@ public class TrayIconHandler extends Handler implements L10nSupport {
     }
 
     public static void addSystemHandler(TrayIcon trayIcon, Level level) {
-        final Logger logger = Logger.getLogger("");
+        final Logger logger = Logging.rootLogger();
         if (logger != null) {
             for (final Handler h : logger.getHandlers()) {
                 if (h instanceof TrayIconHandler && ((TrayIconHandler) h).trayIcon == trayIcon) {

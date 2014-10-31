@@ -58,7 +58,7 @@ public class SwingHandler extends AbstractHandler implements PrefSupport, L10nSu
         public LogFrame() {
             super(s("Marid log"));
             setAlwaysOnTop(getPref("alwaysOnTop", true));
-            add(this.logComponent = new LogComponent(preferences(), queue));
+            add(this.logComponent = new LogComponent(preferences(), queue, r -> true));
             setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             setIconImages(MaridIcons.ICONS);
             setPreferredSize(getPref("size", new Dimension(300, 400)));

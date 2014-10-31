@@ -48,16 +48,19 @@ public class LogComponent extends JPanel implements L10nSupport {
     protected final JToolBar toolBar;
     protected final Model model;
     protected final JTable table;
-    protected Filter filter = r -> true;
+    protected final Filter filter;
 
-    public LogComponent(Preferences preferences, Collection<LogRecord> logRecords) {
+    public LogComponent(Preferences preferences, Collection<LogRecord> logRecords, Filter filter) {
         super(new BorderLayout());
+        this.filter = filter;
         this.preferences = preferences;
         this.toolBar = addToolBar();
         this.model = model(logRecords);
         add(new JScrollPane(this.table = new JTable(model)));
         this.table.setRowHeight(20);
         this.table.setFont(new Font(Font.MONOSPACED, Font.PLAIN, UIManager.getFont("Label.font").getSize() - 2));
+        this.table.setShowVerticalLines(true);
+        this.table.setGridColor(SystemColor.control);
         for (int i = 0; i < table.getColumnCount(); i++) {
             final int width = model.getColumnWidth(i);
             if (width > 0) {
@@ -80,7 +83,9 @@ public class LogComponent extends JPanel implements L10nSupport {
     }
 
     public void publish(LogRecord record) {
-        EventQueue.invokeLater(() -> model.add(record));
+        if (record.getLoggerName() != null) {
+            EventQueue.invokeLater(() -> model.add(record));
+        }
     }
 
     protected class Model extends AbstractTableModel {
@@ -88,8 +93,10 @@ public class LogComponent extends JPanel implements L10nSupport {
         protected final Map<LogLevel, Color> colorMap = new EnumMap<>(LogLevel.class);
         protected final Map<Level, ImageIcon> iconMap = new HashMap<>();
         protected final SwingHandlerFormatter formatter = new SwingHandlerFormatter();
-        private final List<LogRecord> records;
+        protected final List<LogRecord> records;
+
         private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+        private Filter filter = r -> true;
 
         public Model(Collection<LogRecord> logRecords) {
             this.records = new ArrayList<>(logRecords);
@@ -118,9 +125,13 @@ public class LogComponent extends JPanel implements L10nSupport {
             }
         }
 
+        public boolean isLoggable(LogRecord record) {
+            return LogComponent.this.filter.isLoggable(record) && filter.isLoggable(record);
+        }
+
         @Override
         public int getRowCount() {
-            return (int) records.stream().filter(filter::isLoggable).count();
+            return (int) records.stream().filter(this::isLoggable).count();
         }
 
         @Override
@@ -175,7 +186,7 @@ public class LogComponent extends JPanel implements L10nSupport {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            final LogRecord r = records.stream().filter(filter::isLoggable).skip(rowIndex).findFirst().orElse(null);
+            final LogRecord r = records.stream().filter(this::isLoggable).skip(rowIndex).findFirst().orElse(null);
             if (r == null) {
                 return null;
             } else {
