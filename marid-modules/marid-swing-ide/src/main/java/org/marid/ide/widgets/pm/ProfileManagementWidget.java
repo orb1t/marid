@@ -27,6 +27,7 @@ import org.marid.ide.widgets.Widget;
 import org.marid.logging.Logging;
 import org.marid.logging.SimpleHandler;
 import org.marid.swing.MaridAction;
+import org.marid.swing.actions.ComponentAction;
 import org.marid.swing.component.ResizablePanel;
 import org.marid.swing.log.LogComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import org.springframework.context.event.ContextStartedEvent;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentEvent;
 import java.util.logging.Handler;
 
 import static java.util.Collections.emptyList;
@@ -78,10 +80,16 @@ public class ProfileManagementWidget extends Widget {
         }).setEnabledState(profile.isStarted())).setFocusable(false);
         final ResizablePanel<LogComponent> p = new ResizablePanel<>(logComponent);
         toolBar.addSeparator();
-        toolBar.add(toggleButton(new MaridAction("Log", "log", e -> p.setVisible(!p.isVisible())), b -> {
+        final MaridAction hideAction = new MaridAction("Log", "log", e -> p.setVisible(!p.isVisible()));
+        toolBar.add(toggleButton(hideAction, b -> {
             b.getAction().putValue(Action.SELECTED_KEY, true);
             b.setHideActionText(true);
         })).setFocusable(false);
+        p.addComponentListener(new ComponentAction(e -> {
+            if (e.getID() == ComponentEvent.COMPONENT_HIDDEN) {
+                hideAction.putValue(Action.SELECTED_KEY, false);
+            }
+        }));
         panel.add(p, BorderLayout.SOUTH);
         add(panel);
         pack();

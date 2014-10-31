@@ -30,6 +30,7 @@ import java.awt.*;
 public class ResizablePanel<T extends JComponent> extends JPanel {
 
     protected final T component;
+    protected final Point point = new Point(-1, -1);
 
     public ResizablePanel(T component) {
         super(new BorderLayout());
@@ -40,6 +41,18 @@ public class ResizablePanel<T extends JComponent> extends JPanel {
         buttonPanel.add(Box.createHorizontalGlue());
         final JButton button = new JButton(new GenericAction(Images.getIcon("close.png"), e -> setVisible(false)));
         button.setFocusable(false);
+        buttonPanel.add(button);
         add(buttonPanel, BorderLayout.NORTH);
+    }
+
+    protected String getOrientation() {
+        if (getParent() == null) {
+            return null;
+        }
+        if (!(getParent().getLayout() instanceof BorderLayout)) {
+            return null;
+        }
+        final Object constraints = ((BorderLayout) getParent().getLayout()).getConstraints(this);
+        return constraints == null ? null : constraints.toString();
     }
 }
