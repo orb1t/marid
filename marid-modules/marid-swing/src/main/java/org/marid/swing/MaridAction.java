@@ -3,20 +3,19 @@ package org.marid.swing;
 import images.Images;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
-import org.marid.methods.LogMethods;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.logging.Logger;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridAction extends AbstractAction implements L10nSupport {
+public class MaridAction extends AbstractAction implements L10nSupport, LogSupport {
 
-    private static final Logger LOG = Logger.getLogger(MaridAction.class.getName());
+    public static final String TOOLBAR_KEY = "toolbarKey";
+
     private final MaridActionListener actionListener;
 
     public MaridAction(String title, String icon, MaridActionListener actionListener, Object... args) {
@@ -94,7 +93,7 @@ public class MaridAction extends AbstractAction implements L10nSupport {
                     return;
                 }
             }
-            LogMethods.warning(LOG, "Action {0} error", x, getValue(NAME));
+            warning("Action {0} error", x, getValue(NAME));
         }
     }
 
