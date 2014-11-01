@@ -26,6 +26,10 @@ import javax.swing.*;
 public interface ActionKeySupport {
 
     default void addAction(String key, Action action) {
+        addAction(new ActionKey(key), action);
+    }
+
+    default void addAction(ActionKey key, Action action) {
         getActionMap().put(key, action);
     }
 

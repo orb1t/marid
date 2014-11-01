@@ -25,7 +25,7 @@ import org.marid.ide.widgets.Widget;
 import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
-import org.marid.swing.MaridAction;
+import org.marid.swing.actions.MaridAction;
 import org.marid.swing.WindowPrefs;
 import org.marid.swing.forms.ConfigurationProvider;
 import org.marid.swing.forms.Form;

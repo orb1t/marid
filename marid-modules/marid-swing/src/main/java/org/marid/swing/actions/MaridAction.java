@@ -1,4 +1,4 @@
-package org.marid.swing;
+package org.marid.swing.actions;
 
 import images.Images;
 import org.marid.l10n.L10nSupport;
@@ -13,8 +13,6 @@ import java.awt.event.ActionListener;
  * @author Dmitry Ovchinnikov
  */
 public class MaridAction extends AbstractAction implements L10nSupport, LogSupport {
-
-    public static final String TOOLBAR_KEY = "toolbarKey";
 
     private final MaridActionListener actionListener;
 
@@ -79,6 +77,18 @@ public class MaridAction extends AbstractAction implements L10nSupport, LogSuppo
     public MaridAction setEnabledState(boolean enabled) {
         setEnabled(enabled);
         return this;
+    }
+
+    public MaridAction enableToolbar() {
+        return setValue(MaridActions.TOOLBAR_ENABLED, true);
+    }
+
+    public MaridAction disableMenu() {
+        return setValue(MaridActions.MENUBAR_DISABLED, true);
+    }
+
+    public MaridAction setSelected(boolean state) {
+        return setValue(Action.SELECTED_KEY, state);
     }
 
     @Override

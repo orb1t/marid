@@ -19,7 +19,7 @@
 package org.marid.swing.input;
 
 import org.marid.logging.LogSupport;
-import org.marid.swing.MaridAction;
+import org.marid.swing.actions.MaridAction;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;

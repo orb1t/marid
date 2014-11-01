@@ -23,7 +23,7 @@ import org.marid.ide.swing.gui.IdeFrameImpl;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
-import org.marid.swing.MaridAction;
+import org.marid.swing.actions.MaridAction;
 import org.marid.swing.forms.Configuration;
 import org.marid.swing.forms.StaticConfigurationDialog;
 

@@ -19,7 +19,7 @@
 package org.marid.bd.schema;
 
 import org.marid.bd.Block;
-import org.marid.swing.MaridAction;
+import org.marid.swing.actions.MaridAction;
 import org.marid.swing.util.MessageSupport;
 
 import javax.swing.*;

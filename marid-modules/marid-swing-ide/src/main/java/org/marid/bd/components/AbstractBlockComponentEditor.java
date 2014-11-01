@@ -23,7 +23,7 @@ import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.GridBags;
-import org.marid.swing.MaridAction;
+import org.marid.swing.actions.MaridAction;
 
 import javax.swing.*;
 import java.awt.*;

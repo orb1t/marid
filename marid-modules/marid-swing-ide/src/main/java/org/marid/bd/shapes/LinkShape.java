@@ -19,7 +19,7 @@
 package org.marid.bd.shapes;
 
 import org.marid.bd.BlockComponent;
-import org.marid.swing.MaridAction;
+import org.marid.swing.actions.MaridAction;
 
 import javax.swing.*;
 import java.awt.*;

@@ -21,7 +21,7 @@ package org.marid.ide.swing.context;
 import org.marid.bd.schema.SchemaFrame;
 import org.marid.ide.components.BlockMenuProvider;
 import org.marid.logging.LogSupport;
-import org.marid.swing.MaridAction;
+import org.marid.swing.actions.MaridAction;
 import org.marid.swing.menu.ActionTreeElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;

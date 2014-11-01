@@ -20,6 +20,7 @@ package org.marid.swing;
 
 import images.Images;
 import org.marid.l10n.L10nSupport;
+import org.marid.swing.actions.MaridAction;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;

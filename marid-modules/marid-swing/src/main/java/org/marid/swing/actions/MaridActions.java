@@ -45,17 +45,20 @@ public class MaridActions implements L10nSupport {
                 .filter(e -> e.getValue() != null && !Boolean.TRUE.equals(e.getValue().getValue(MENUBAR_DISABLED)))
                 .collect(Collectors.toList());
         for (final ListIterator<Map.Entry<ActionKey, Action>> it = actions.listIterator(); it.hasNext(); ) {
+            if (it.hasPrevious() && it.hasNext()) {
+                final Map.Entry<ActionKey, Action> ne = actions.get(it.nextIndex());
+                final Map.Entry<ActionKey, Action> pe = actions.get(it.previousIndex());
+                final ActionKey nk = ne.getKey(), pk = pe.getKey();
+                final JMenu menu = getOrCreateMenu(new SwingMenuBarWrapper(menuBar), nk.getPath());
+                if (Arrays.equals(pk.getPath(), nk.getPath()) && !pk.getGroup().equals(nk.getGroup())) {
+                    menu.addSeparator();
+                }
+            }
             final Map.Entry<ActionKey, Action> e = it.next();
             final Action a = e.getValue();
             final ActionKey k = e.getKey();
             final String[] path = k.getPath();
             final JMenu menu = getOrCreateMenu(new SwingMenuBarWrapper(menuBar), path);
-            if (it.hasPrevious()) {
-                final Map.Entry<ActionKey, Action> pe = actions.get(it.previousIndex());
-                if (Arrays.equals(pe.getKey().getPath(), path) && !pe.getKey().getGroup().equals(k.getGroup())) {
-                    menu.addSeparator();
-                }
-            }
             if (a.getValue(Action.SELECTED_KEY) != null) {
                 final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(a);
                 menuItem.setName(k.getLastName());
@@ -76,19 +79,21 @@ public class MaridActions implements L10nSupport {
                 .filter(e -> e.getValue() != null && Boolean.TRUE.equals(e.getValue().getValue(TOOLBAR_ENABLED)))
                 .collect(Collectors.toList());
         for (final ListIterator<Map.Entry<ActionKey, Action>> it = actions.listIterator(); it.hasNext(); ) {
-            final Map.Entry<ActionKey, Action> e = it.next();
-            final Action a = e.getValue();
-            final ActionKey k = e.getKey();
-            if (it.hasPrevious()) {
+            if (it.hasPrevious() && it.hasNext()) {
+                final Map.Entry<ActionKey, Action> ne = actions.get(it.nextIndex());
                 final Map.Entry<ActionKey, Action> pe = actions.get(it.previousIndex());
-                if (!pe.getKey().getGroup().equals(k.getGroup())) {
+                if (!pe.getKey().getGroup().equals(ne.getKey().getGroup())) {
                     toolBar.addSeparator();
                 }
             }
+            final Map.Entry<ActionKey, Action> e = it.next();
+            final Action a = e.getValue();
+            final ActionKey k = e.getKey();
             if (a.getValue(Action.SELECTED_KEY) != null) {
                 final JToggleButton toggleButton = new JToggleButton(a);
                 toggleButton.setName(k.getLastName());
                 toggleButton.setFocusable(false);
+                toggleButton.setHideActionText(true);
                 toolBar.add(toggleButton);
             } else {
                 final JButton button = toolBar.add(a);

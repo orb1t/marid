@@ -26,7 +26,7 @@ import org.marid.ide.widgets.CloseableWidget;
 import org.marid.ide.widgets.Widget;
 import org.marid.logging.Logging;
 import org.marid.logging.SimpleHandler;
-import org.marid.swing.MaridAction;
+import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.ComponentAction;
 import org.marid.swing.component.BottomPanel;
 import org.marid.swing.log.LogComponent;

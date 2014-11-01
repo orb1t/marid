@@ -21,8 +21,9 @@ package org.marid.swing;
 import org.marid.image.MaridIcons;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.SysPrefSupport;
-import org.marid.swing.menu.ActionTreeElement;
-import org.marid.swing.menu.MenuActionList;
+import org.marid.swing.actions.ActionKeySupport;
+import org.marid.swing.actions.MaridAction;
+import org.marid.swing.actions.MaridActions;
 import org.marid.swing.util.MessageSupport;
 
 import javax.annotation.PostConstruct;
@@ -39,7 +40,7 @@ import static javax.swing.SwingConstants.HORIZONTAL;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPrefSupport, MessageSupport {
+public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPrefSupport, MessageSupport, ActionKeySupport {
 
     public static final Border CENTER_PANEL_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 
@@ -109,12 +110,17 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
 
     @Override
     public void pack() {
-        getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
-        final MenuActionList actions = new MenuActionList();
-        fillActions(actions);
-        final ActionTreeElement element = new ActionTreeElement(actions);
-        element.fillJMenuBar(getJMenuBar());
-        actions.fillToolbar(toolBar);
+        fillActions();
+        final JMenuBar menuBar = new JMenuBar();
+        final JToolBar toolBar = new JToolBar();
+        MaridActions.fillMenu(getActionMap(), menuBar);
+        MaridActions.fillToolbar(getActionMap(), toolBar);
+        for (int i = menuBar.getComponentCount() - 1; i >= 0; i--) {
+            getJMenuBar().add(menuBar.getComponent(i), 0);
+        }
+        for (int i = toolBar.getComponentCount() - 1; i >= 0; i--) {
+            this.toolBar.add(toolBar.getComponent(i), 0);
+        }
         super.pack();
         setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
     }
@@ -146,5 +152,5 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         return position == null ? BorderLayout.NORTH : position;
     }
 
-    protected abstract void fillActions(MenuActionList actionList);
+    protected abstract void fillActions();
 }

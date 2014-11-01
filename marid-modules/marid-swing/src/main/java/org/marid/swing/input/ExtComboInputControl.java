@@ -18,7 +18,7 @@
 
 package org.marid.swing.input;
 
-import org.marid.swing.MaridAction;
+import org.marid.swing.actions.MaridAction;
 import org.marid.swing.pref.Configurable;
 
 import javax.swing.*;

@@ -19,7 +19,7 @@
 package org.marid.bd;
 
 import org.marid.bd.schema.SchemaEditor;
-import org.marid.swing.MaridAction;
+import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.WindowAction;
 import org.marid.swing.geom.ShapeUtils;
 
