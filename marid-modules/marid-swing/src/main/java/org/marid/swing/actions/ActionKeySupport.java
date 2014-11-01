@@ -19,18 +19,30 @@
 package org.marid.swing.actions;
 
 import javax.swing.*;
+import java.awt.event.ActionListener;
+
+import static org.marid.swing.actions.MaridAction.MaridActionListener;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface ActionKeySupport {
 
-    default void addAction(String key, Action action) {
-        addAction(new ActionKey(key), action);
+    default <T extends Action> T addAction(String key, T action) {
+        return addAction(new ActionKey(key), action);
     }
 
-    default void addAction(ActionKey key, Action action) {
+    default MaridAction addAction(String key, String title, String icon, ActionListener listener, Object... args) {
+        return addAction(key, new MaridAction(title, icon, listener, args));
+    }
+
+    default MaridAction addAction(String key, String title, String icon, MaridActionListener listener, Object... args) {
+        return addAction(key, new MaridAction(title, icon, listener, args));
+    }
+
+    default <T extends Action> T addAction(ActionKey key, T action) {
         getActionMap().put(key, action);
+        return action;
     }
 
     default ActionMap getActionMap() {

@@ -30,7 +30,6 @@ import org.marid.ide.components.ProfileManager;
 import org.marid.ide.profile.Profile;
 import org.marid.swing.AbstractFrame;
 import org.marid.swing.SwingUtil;
-import org.marid.swing.actions.MaridAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
@@ -102,17 +101,17 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
 
     @Override
     protected void fillActions() {
-        addAction("/File/o/Open", new MaridAction("Open...", "open", this::open).setKey("control O").enableToolbar());
-        addAction("/File/s/Save", new MaridAction("Save", "save", this::save).setKey("control S").enableToolbar());
-        addAction("/File/s/SaveAs", new MaridAction("Save As...", "save", this::saveAs).setKey("control shift S"));
-        addAction("/Schema/z/ZoomIn", new MaridAction("Zoom In...", "zoomin", e -> schemaEditor.zoomIn()).setKey("control I").enableToolbar());
-        addAction("/Schema/z/ZoomOut", new MaridAction("Zoom Out...", "zoomout", e -> schemaEditor.zoomOut()).setKey("control B").enableToolbar());
-        addAction("/Schema/z/ZoomReset", new MaridAction("Reset zoom", "zoom", e -> schemaEditor.resetZoom()).setKey("control Z").enableToolbar());
-        addAction("/Schema/s/SelectionMode", new MaridAction("Selection mode", "selection", this::selectionMode).setKey("control J").setSelected(false).enableToolbar());
-        addAction("/Schema/r/Refresh", new MaridAction("Refresh", "refresh", e -> schemaEditor.repaint()).setKey("F5").enableToolbar());
-        addAction("/Schema/r/ResetInOut", new MaridAction("Reset input/output selection", "reset", schemaEditor::resetInputOutputSelection).setKey("control shift T").enableToolbar());
-        addAction("/Schema/a/AlignToLeft", new MaridAction("Align to left", "alignleft", schemaEditor::alignToLeft).setKey("control shift L").enableToolbar());
-        addAction("/Schema/a/AlignToRight", new MaridAction("Align to right", "alignright", schemaEditor::alignToRight).setKey("control shift R").enableToolbar());
+        addAction("/File/o/Open", "Open...", "open", this::open).setKey("control O").enableToolbar();
+        addAction("/File/s/Save", "Save", "save", this::save).setKey("control S").enableToolbar();
+        addAction("/File/s/SaveAs", "Save As...", "save", this::saveAs).setKey("control shift S");
+        addAction("/Schema/z/ZoomIn", "Zoom In...", "zoomin", e -> schemaEditor.zoomIn()).setKey("control I").enableToolbar();
+        addAction("/Schema/z/ZoomOut", "Zoom Out...", "zoomout", e -> schemaEditor.zoomOut()).setKey("control B").enableToolbar();
+        addAction("/Schema/z/ZoomReset", "Reset zoom", "zoom", e -> schemaEditor.resetZoom()).setKey("control Z").enableToolbar();
+        addAction("/Schema/s/SelectionMode", "Selection mode", "selection", this::selectionMode).setKey("control J").setSelected(false).enableToolbar();
+        addAction("/Schema/r/Refresh", "Refresh", "refresh", e -> schemaEditor.repaint()).setKey("F5").enableToolbar();
+        addAction("/Schema/r/ResetInOut", "Reset input/output selection", "reset", schemaEditor::resetInputOutputSelection).setKey("control shift T").enableToolbar();
+        addAction("/Schema/a/AlignToLeft", "Align to left", "alignleft", schemaEditor::alignToLeft).setKey("control shift L").enableToolbar();
+        addAction("/Schema/a/AlignToRight", "Align to right", "alignright", schemaEditor::alignToRight).setKey("control shift R").enableToolbar();
     }
 
     protected void open(ActionEvent actionEvent) {
