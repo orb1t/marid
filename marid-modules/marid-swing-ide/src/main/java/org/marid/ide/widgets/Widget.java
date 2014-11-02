@@ -23,7 +23,9 @@ import org.marid.ide.swing.gui.IdeFrameImpl;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
+import org.marid.swing.actions.ActionKeySupport;
 import org.marid.swing.actions.MaridAction;
+import org.marid.swing.actions.MaridActions;
 import org.marid.swing.forms.Configuration;
 import org.marid.swing.forms.StaticConfigurationDialog;
 
@@ -38,7 +40,7 @@ import static javax.swing.SwingConstants.HORIZONTAL;
  * @author Dmitry Ovchinnikov.
  */
 @MetaInfo
-public abstract class Widget extends JInternalFrame implements PrefSupport, L10nSupport, LogSupport {
+public abstract class Widget extends JInternalFrame implements PrefSupport, L10nSupport, LogSupport, ActionKeySupport {
 
     protected final JToolBar toolBar = new JToolBar(getPref("orientation", HORIZONTAL, "toolbar"));
     protected final IdeFrameImpl owner;
@@ -62,6 +64,13 @@ public abstract class Widget extends JInternalFrame implements PrefSupport, L10n
         return getClass().isAnnotationPresent(SingletonWidget.class);
     }
 
+    @Override
+    public void pack() {
+        fillActions();
+        MaridActions.fillToolbar(getActionMap(), toolBar);
+        super.pack();
+    }
+
     @PostConstruct
     public void init() {
         setLocation(getPref("location", new Point()));
@@ -81,6 +90,9 @@ public abstract class Widget extends JInternalFrame implements PrefSupport, L10n
         } finally {
             super.dispose();
         }
+    }
+
+    protected void fillActions() {
     }
 
     private String getToolbarPosition() {

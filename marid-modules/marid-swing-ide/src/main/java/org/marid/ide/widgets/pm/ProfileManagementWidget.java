@@ -26,7 +26,6 @@ import org.marid.ide.widgets.CloseableWidget;
 import org.marid.ide.widgets.Widget;
 import org.marid.logging.Logging;
 import org.marid.logging.SimpleHandler;
-import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.ComponentAction;
 import org.marid.swing.component.BottomPanel;
 import org.marid.swing.log.LogComponent;
@@ -36,11 +35,11 @@ import org.springframework.context.event.ContextStartedEvent;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.util.logging.Handler;
 
 import static java.util.Collections.emptyList;
-import static org.marid.swing.MaridButtons.toggleButton;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,18 +49,17 @@ import static org.marid.swing.MaridButtons.toggleButton;
 public class ProfileManagementWidget extends Widget {
 
     private final Profile profile;
-    private final MaridAction runAction;
-    private final MaridAction stopAction;
     private final Handler logHandler;
     private final JPanel panel = new JPanel(new BorderLayout());
     private final LogComponent logComponent;
+    private final BottomPanel<LogComponent> logPanel;
     private final InheritableThreadLocal<String> itl = new InheritableThreadLocal<>();
 
     @Autowired
     public ProfileManagementWidget(IdeFrameImpl owner, ProfileManager profileManager) {
         super(owner, "Profile Management: %s", profileManager.getCurrentProfile());
         info("Initialized");
-        this.profile = profileManager.getCurrentProfile();
+        profile = profileManager.getCurrentProfile();
         logComponent = new LogComponent(preferences(), emptyList(), r -> true);
         logComponent.setPreferredSize(new Dimension(logComponent.getPreferredSize().width, 150));
         this.logHandler = new SimpleHandler((h, r) -> {
@@ -69,44 +67,54 @@ public class ProfileManagementWidget extends Widget {
                 logComponent.publish(r);
             }
         });
-        toolBar.add(runAction = new MaridAction("Run", "start", (a, e) -> {
-            profile.start(() -> {
-                itl.set(profile.getName());
-                Logging.rootLogger().addHandler(logHandler);
-            });
-        }).setEnabledState(!profile.isStarted())).setFocusable(false);
-        toolBar.add(stopAction = new MaridAction("Stop", "stop", (a, e) -> {
-            profile.stop();
-        }).setEnabledState(profile.isStarted())).setFocusable(false);
-        final BottomPanel<LogComponent> p = new BottomPanel<>(logComponent);
+        logPanel = new BottomPanel<>(logComponent);
         toolBar.addSeparator();
-        final MaridAction hideAction = new MaridAction("Log", "log", e -> p.setVisible(!p.isVisible()));
-        toolBar.add(toggleButton(hideAction, b -> {
-            b.getAction().putValue(Action.SELECTED_KEY, true);
-            b.setHideActionText(true);
-        })).setFocusable(false);
-        p.addComponentListener(new ComponentAction(e -> {
+        logPanel.addComponentListener(new ComponentAction(e -> {
             if (e.getID() == ComponentEvent.COMPONENT_HIDDEN) {
-                hideAction.putValue(Action.SELECTED_KEY, false);
+                actionByKey("/Log/s/Log").putValue(Action.SELECTED_KEY, false);
             }
         }));
-        panel.add(p, BorderLayout.SOUTH);
+        panel.add(logPanel, BorderLayout.SOUTH);
         add(panel);
         pack();
-        this.profile.addApplicationListener(event -> {
+        profile.addApplicationListener(event -> {
             info("Event: {0}", event);
             if (event instanceof ContextStartedEvent) {
                 EventQueue.invokeLater(() -> {
-                    runAction.setEnabled(false);
-                    stopAction.setEnabled(true);
+                    actionByKey("/Control/c/Run").setEnabled(false);
+                    actionByKey("/Control/c/Stop").setEnabled(true);
                 });
             } else if (event instanceof ContextClosedEvent) {
                 EventQueue.invokeLater(() -> {
                     Logging.rootLogger().removeHandler(logHandler);
-                    runAction.setEnabled(true);
-                    stopAction.setEnabled(false);
+                    actionByKey("/Control/c/Run").setEnabled(true);
+                    actionByKey("/Control/c/Stop").setEnabled(false);
                 });
             }
         });
+    }
+
+    protected void startProfileTrigger() {
+        itl.set(profile.getName());
+        Logging.rootLogger().addHandler(logHandler);
+    }
+
+    protected void startProfile(Action action, ActionEvent event) {
+        profile.start(this::startProfileTrigger);
+    }
+
+    public void stopProfile(Action action, ActionEvent event) {
+        profile.stop();
+    }
+
+    public void showLog(Action action, ActionEvent event) {
+        logPanel.setVisible(Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY)));
+    }
+
+    @Override
+    protected void fillActions() {
+        addAction("/Control/c/Run", "Run", "start", this::startProfile).setEnabledState(!profile.isStarted()).enableToolbar();
+        addAction("/Control/c/Stop", "Stop", "stop", this::stopProfile).setEnabledState(profile.isStarted()).enableToolbar();
+        addAction("/Log/s/Log", "Log", "log", this::showLog).setSelected(true).enableToolbar();
     }
 }
