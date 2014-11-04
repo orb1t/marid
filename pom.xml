@@ -626,4 +626,9 @@
             </plugin>
         </plugins>
     </reporting>
+
+    <issueManagement>
+        <system>Tickets</system>
+        <url>http://sourceforge.net/p/marid/tickets</url>
+    </issueManagement>
 </project>
