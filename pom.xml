@@ -237,6 +237,7 @@
                         <showDeprecation>true</showDeprecation>
                         <compilerArgs>
                             <arg>-Xlint:unchecked</arg>
+                            <arg>-parameters</arg>
                         </compilerArgs>
                     </configuration>
                 </plugin>
