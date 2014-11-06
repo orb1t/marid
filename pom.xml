@@ -101,6 +101,8 @@
                             <failIfNoTests>false</failIfNoTests>
                             <groups>${benchmark.groups}</groups>
                             <excludedGroups>${excluded.benchmarks}</excludedGroups>
+                            <threadCount>1</threadCount>
+                            <parallel>classes</parallel>
                         </configuration>
                     </plugin>
 
@@ -249,8 +251,9 @@
                         <trimStackTrace>false</trimStackTrace>
                         <groups>${test.groups}</groups>
                         <excludedGroups>${excluded.tests}</excludedGroups>
-                        <reuseForks>false</reuseForks>
+                        <reuseForks>true</reuseForks>
                         <forkCount>1</forkCount>
+                        <threadCount>1</threadCount>
                     </configuration>
                 </plugin>
 
