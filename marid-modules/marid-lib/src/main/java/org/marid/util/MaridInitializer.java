@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,14 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide;
+package org.marid.util;
+
+import org.marid.functions.SafeConsumer;
+
+import java.util.ServiceLoader;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public class TestMaridIde {
+@FunctionalInterface
+public interface MaridInitializer {
 
-    public static void main(String... args) throws Exception {
-        MaridIde.main(args);
+    void init() throws Exception;
+
+    static void visitInitializers(SafeConsumer<MaridInitializer> maridInitializerConsumer) {
+        ServiceLoader.load(MaridInitializer.class).forEach(maridInitializerConsumer::accept);
     }
 }

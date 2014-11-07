@@ -19,11 +19,15 @@
 package org.marid.ide;
 
 import groovy.lang.Script;
+import org.marid.bd.Block;
 import org.marid.groovy.GroovyRuntime;
+import org.marid.ide.components.ProfileManager;
+import org.marid.ide.swing.context.GuiContext;
+import org.marid.ide.swing.gui.IdeImpl;
+import org.marid.ide.widgets.Widget;
 import org.marid.logging.LogSupport;
-import org.marid.logging.Logging;
 import org.marid.swing.SwingUtil;
-import org.marid.swing.log.SwingHandler;
+import org.marid.util.MaridInitializer;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.InputStreamReader;
@@ -40,20 +44,33 @@ import static org.marid.groovy.GroovyRuntime.CLASS_LOADER;
 public class MaridIde implements LogSupport {
 
     public static void main(String[] args) throws Exception {
-        Logging.init("marid-ide-logging.properties");
-        Logging.rootLogger().addHandler(new SwingHandler());
+        MaridInitializer.visitInitializers(MaridInitializer::init);
         Thread.setDefaultUncaughtExceptionHandler((t, x) -> Log.warning("Uncaught exception in {0}", x, t));
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         context.setClassLoader(CLASS_LOADER);
         context.addApplicationListener(event -> Log.info("{0}", event));
+        context.scan(
+                GuiContext.class.getPackage().getName(),
+                IdeImpl.class.getPackage().getName(),
+                ProfileManager.class.getPackage().getName(),
+                Block.class.getPackage().getName(),
+                Widget.class.getPackage().getName());
+        init(context);
+        context.refresh();
+        SwingUtil.execute(context::start);
+    }
+
+    private static void init(AnnotationConfigApplicationContext context) throws Exception {
         for (final Enumeration<URL> e = CLASS_LOADER.getResources("context/init.groovy"); e.hasMoreElements(); ) {
-            try (final Reader reader = new InputStreamReader(e.nextElement().openStream(), StandardCharsets.UTF_8)) {
+            final URL url = e.nextElement();
+            Log.info("Executing {0}", url);
+            try (final Reader reader = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8)) {
                 final Script script = GroovyRuntime.SHELL.parse(reader);
                 script.getBinding().setVariable("context", context);
                 script.run();
+            } catch (Exception x) {
+                Log.warning("Unable to execute {0}", x, url);
             }
         }
-        context.refresh();
-        SwingUtil.execute(context::start);
     }
 }

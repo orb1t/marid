@@ -16,16 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package org.marid.ide;
 
-import org.marid.bd.Block
-import org.marid.ide.components.ProfileManager
-import org.marid.ide.swing.context.GuiContext
-import org.marid.ide.swing.gui.IdeImpl
-import org.marid.ide.widgets.Widget
+import org.marid.logging.TestLogConfigurer;
+import org.marid.util.MaridInitializer;
 
-context.scan(
-        GuiContext.package.name,
-        IdeImpl.package.name,
-        ProfileManager.package.name,
-        Block.package.name,
-        Widget.package.name);
+/**
+ * @author Dmitry Ovchinnikov.
+ */
+public class MaridTestIdeInitializer implements MaridInitializer {
+    @Override
+    public void init() throws Exception {
+        TestLogConfigurer.configureTestLogging();
+    }
+}
