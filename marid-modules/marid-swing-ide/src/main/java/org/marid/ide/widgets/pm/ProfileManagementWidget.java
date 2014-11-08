@@ -21,7 +21,7 @@ package org.marid.ide.widgets.pm;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.components.ProfileManager;
 import org.marid.ide.profile.Profile;
-import org.marid.ide.swing.mbean.MBeanServerTree;
+import org.marid.ide.swing.mbean.MBeanServerTreeTable;
 import org.marid.ide.widgets.CloseableWidget;
 import org.marid.ide.widgets.Widget;
 import org.marid.logging.Logging;
@@ -52,7 +52,7 @@ public class ProfileManagementWidget extends Widget implements ApplicationListen
     private final Handler logHandler;
     private final JPanel panel = new JPanel(new BorderLayout());
     private final LogComponent logComponent;
-    private final MBeanServerTree beanTree;
+    private final MBeanServerTreeTable beanTree;
     private final JSplitPane splitPane;
     private final InheritableThreadLocal<String> itl = new InheritableThreadLocal<>();
 
@@ -63,7 +63,7 @@ public class ProfileManagementWidget extends Widget implements ApplicationListen
         profile = profileManager.getCurrentProfile();
         logComponent = new LogComponent(preferences(), emptyList(), r -> true);
         logComponent.setPreferredSize(new Dimension(logComponent.getPreferredSize().width, 150));
-        beanTree = new MBeanServerTree(profile);
+        beanTree = new MBeanServerTreeTable(profile);
         panel.add(new JScrollPane(beanTree));
         logHandler = new SimpleHandler((h, r) -> {
             if (profile.getName().equals(itl.get())) {
@@ -138,6 +138,6 @@ public class ProfileManagementWidget extends Widget implements ApplicationListen
                 actionByKey("/Control/c/Stop").setEnabled(false);
             });
         }
-        EventQueue.invokeLater(() -> beanTree.getModel().update());
+        EventQueue.invokeLater(() -> beanTree.getTreeTableModel().update());
     }
 }
