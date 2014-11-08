@@ -20,9 +20,9 @@ package org.marid.ide.profile;
 
 import groovy.lang.GroovyShell;
 import org.codehaus.groovy.control.CompilerConfiguration;
-import org.marid.functions.SafeConsumer;
 import org.marid.functions.SafeFunction;
 import org.marid.groovy.GroovyRuntime;
+import org.marid.ide.base.MBeanServerSupport;
 import org.marid.ide.log.LoggingPostProcessor;
 import org.marid.io.SimpleWriter;
 import org.marid.itf.Named;
@@ -36,6 +36,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
 
+import javax.management.MBeanServer;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -54,7 +55,7 @@ import static java.time.Instant.ofEpochMilli;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Profile implements Named, Closeable, LogSupport {
+public class Profile implements Named, Closeable, LogSupport, MBeanServerSupport {
 
     protected final List<Consumer<String>> outputConsumers = new CopyOnWriteArrayList<>();
     protected final List<ApplicationListener<ApplicationEvent>> applicationListeners = new CopyOnWriteArrayList<>();
@@ -222,17 +223,7 @@ public class Profile implements Named, Closeable, LogSupport {
         }
     }
 
-    public void doWithContext(SafeConsumer<AnnotationConfigApplicationContext> consumer) {
-        try {
-            executor.submit(() -> consumer.accept(applicationContext)).get();
-        } catch (ExecutionException x) {
-            throw new IllegalStateException(x.getCause());
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
-    }
-
-    public <T> T doWithContext(SafeFunction<AnnotationConfigApplicationContext, T> function) {
+    public <T> T contextResult(SafeFunction<AnnotationConfigApplicationContext, T> function) {
         try {
             return executor.submit(() -> function.apply(applicationContext)).get();
         } catch (ExecutionException x) {
@@ -255,5 +246,17 @@ public class Profile implements Named, Closeable, LogSupport {
         final MutablePropertyValues pvs = new MutablePropertyValues();
         final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(klass, constructorArgumentValues, pvs);
         applicationContext.registerBeanDefinition(klass.getSimpleName(), rootBeanDefinition);
+    }
+
+    @Override
+    public <T> T serverResult(SafeFunction<MBeanServer, T> function) {
+        return contextResult(applicationContext -> {
+            if (applicationContext == null) {
+                return null;
+            } else {
+                final MBeanServer server = applicationContext.getBean(MBeanServer.class);
+                return server != null ? function.apply(server) : null;
+            }
+        });
     }
 }

@@ -21,12 +21,15 @@ package org.marid.ide.widgets.pm;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.components.ProfileManager;
 import org.marid.ide.profile.Profile;
+import org.marid.ide.swing.mbean.MBeanServerTree;
 import org.marid.ide.widgets.CloseableWidget;
 import org.marid.ide.widgets.Widget;
 import org.marid.logging.Logging;
 import org.marid.logging.SimpleHandler;
 import org.marid.swing.log.LogComponent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.support.GenericApplicationContext;
@@ -43,12 +46,13 @@ import static java.util.Collections.emptyList;
  */
 @CloseableWidget
 @MetaInfo(name = "Profile Management")
-public class ProfileManagementWidget extends Widget {
+public class ProfileManagementWidget extends Widget implements ApplicationListener<ApplicationEvent> {
 
     private final Profile profile;
     private final Handler logHandler;
     private final JPanel panel = new JPanel(new BorderLayout());
     private final LogComponent logComponent;
+    private final MBeanServerTree beanTree;
     private final JSplitPane splitPane;
     private final InheritableThreadLocal<String> itl = new InheritableThreadLocal<>();
 
@@ -59,6 +63,8 @@ public class ProfileManagementWidget extends Widget {
         profile = profileManager.getCurrentProfile();
         logComponent = new LogComponent(preferences(), emptyList(), r -> true);
         logComponent.setPreferredSize(new Dimension(logComponent.getPreferredSize().width, 150));
+        beanTree = new MBeanServerTree(profile);
+        panel.add(new JScrollPane(beanTree));
         logHandler = new SimpleHandler((h, r) -> {
             if (profile.getName().equals(itl.get())) {
                 logComponent.publish(r);
@@ -97,26 +103,13 @@ public class ProfileManagementWidget extends Widget {
     @Override
     public void init() {
         super.init();
-        profile.addApplicationListener(event -> {
-            info("Event: {0}", event);
-            if (event instanceof ContextStartedEvent) {
-                EventQueue.invokeLater(() -> {
-                    actionByKey("/Control/c/Run").setEnabled(false);
-                    actionByKey("/Control/c/Stop").setEnabled(true);
-                });
-            } else if (event instanceof ContextClosedEvent) {
-                EventQueue.invokeLater(() -> {
-                    Logging.rootLogger().removeHandler(logHandler);
-                    actionByKey("/Control/c/Run").setEnabled(true);
-                    actionByKey("/Control/c/Stop").setEnabled(false);
-                });
-            }
-        });
+        profile.addApplicationListener(this);
     }
 
     @Override
     public void dispose() {
         try {
+            profile.removeApplicationListener(this);
             preferences().putInt("splitPos", splitPane.getDividerLocation());
         } finally {
             super.dispose();
@@ -128,5 +121,23 @@ public class ProfileManagementWidget extends Widget {
         addAction("/Control/c/Run", "Run", "start", this::startProfile).setEnabledState(!profile.isStarted()).enableToolbar();
         addAction("/Control/c/Stop", "Stop", "stop", this::stopProfile).setEnabledState(profile.isStarted()).enableToolbar();
         addAction("/Log/s/Log", "Log", "log", this::showLog).setSelected(true).enableToolbar();
+    }
+
+    @Override
+    public void onApplicationEvent(ApplicationEvent event) {
+        info("Event: {0}", event);
+        if (event instanceof ContextStartedEvent) {
+            EventQueue.invokeLater(() -> {
+                actionByKey("/Control/c/Run").setEnabled(false);
+                actionByKey("/Control/c/Stop").setEnabled(true);
+            });
+        } else if (event instanceof ContextClosedEvent) {
+            EventQueue.invokeLater(() -> {
+                Logging.rootLogger().removeHandler(logHandler);
+                actionByKey("/Control/c/Run").setEnabled(true);
+                actionByKey("/Control/c/Stop").setEnabled(false);
+            });
+        }
+        EventQueue.invokeLater(() -> beanTree.getModel().update());
     }
 }
