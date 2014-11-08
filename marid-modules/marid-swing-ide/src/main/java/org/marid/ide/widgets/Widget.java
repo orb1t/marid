@@ -28,10 +28,13 @@ import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
 import org.marid.swing.forms.Configuration;
 import org.marid.swing.forms.StaticConfigurationDialog;
+import org.springframework.context.support.GenericApplicationContext;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.swing.*;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import java.awt.*;
 
 import static javax.swing.SwingConstants.HORIZONTAL;
@@ -46,12 +49,21 @@ public abstract class Widget extends JInternalFrame implements PrefSupport, L10n
     protected final IdeFrameImpl owner;
     protected final BorderLayout layout = new BorderLayout();
 
-    public Widget(IdeFrameImpl owner, String title, Object... args) {
+    public Widget(GenericApplicationContext context, String title, Object... args) {
         super(LS.s(title, args), true, true, true, true);
-        this.owner = owner;
+        owner = context.getBean(IdeFrameImpl.class);
         setLayout(layout);
         setName(title);
-        setDefaultCloseOperation(isSingleton() ? HIDE_ON_CLOSE : DISPOSE_ON_CLOSE);
+        addInternalFrameListener(new InternalFrameAdapter() {
+            @Override
+            public void internalFrameClosing(InternalFrameEvent e) {
+                if (isSingleton()) {
+                    hide();
+                } else {
+                    context.getAutowireCapableBeanFactory().destroyBean(Widget.this);
+                }
+            }
+        });
         add(toolBar, getPref("pos", BorderLayout.NORTH, "toolbar"));
         if (this instanceof Configuration) {
             toolBar.add(new MaridAction("Configuration", "settings", e ->
@@ -73,6 +85,7 @@ public abstract class Widget extends JInternalFrame implements PrefSupport, L10n
 
     @PostConstruct
     public void init() {
+        pack();
         setLocation(getPref("location", new Point()));
         setSize(getPref("size", getSize()));
     }

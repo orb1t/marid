@@ -20,11 +20,17 @@ package org.marid.ide.profile;
 
 import groovy.lang.GroovyShell;
 import org.codehaus.groovy.control.CompilerConfiguration;
+import org.marid.functions.SafeConsumer;
+import org.marid.functions.SafeFunction;
 import org.marid.groovy.GroovyRuntime;
+import org.marid.ide.log.LoggingPostProcessor;
 import org.marid.io.SimpleWriter;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
 import org.marid.nio.FileUtils;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -37,6 +43,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -173,6 +180,8 @@ public class Profile implements Named, Closeable, LogSupport {
                 } catch (Exception x) {
                     warning("Unable to stream {0}", x, path);
                 }
+                registerBean(LoggingPostProcessor.class);
+                registerBean(ProfileMBeanServerFactoryBean.class, this);
                 applicationContext.refresh();
                 applicationContext.start();
             }).get();
@@ -213,8 +222,38 @@ public class Profile implements Named, Closeable, LogSupport {
         }
     }
 
+    public void doWithContext(SafeConsumer<AnnotationConfigApplicationContext> consumer) {
+        try {
+            executor.submit(() -> consumer.accept(applicationContext)).get();
+        } catch (ExecutionException x) {
+            throw new IllegalStateException(x.getCause());
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
+    public <T> T doWithContext(SafeFunction<AnnotationConfigApplicationContext, T> function) {
+        try {
+            return executor.submit(() -> function.apply(applicationContext)).get();
+        } catch (ExecutionException x) {
+            throw new IllegalStateException(x.getCause());
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
     @Override
     public String toString() {
         return getName();
+    }
+
+    private <T> void registerBean(Class<T> klass, Object... args) {
+        final ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+        for (final Object arg : args) {
+            constructorArgumentValues.addGenericArgumentValue(arg);
+        }
+        final MutablePropertyValues pvs = new MutablePropertyValues();
+        final RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(klass, constructorArgumentValues, pvs);
+        applicationContext.registerBeanDefinition(klass.getSimpleName(), rootBeanDefinition);
     }
 }

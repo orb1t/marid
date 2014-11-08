@@ -21,22 +21,19 @@ package org.marid.ide.widgets.pm;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.components.ProfileManager;
 import org.marid.ide.profile.Profile;
-import org.marid.ide.swing.gui.IdeFrameImpl;
 import org.marid.ide.widgets.CloseableWidget;
 import org.marid.ide.widgets.Widget;
 import org.marid.logging.Logging;
 import org.marid.logging.SimpleHandler;
-import org.marid.swing.actions.ComponentAction;
-import org.marid.swing.component.BottomPanel;
 import org.marid.swing.log.LogComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.support.GenericApplicationContext;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentEvent;
 import java.util.logging.Handler;
 
 import static java.util.Collections.emptyList;
@@ -52,31 +49,54 @@ public class ProfileManagementWidget extends Widget {
     private final Handler logHandler;
     private final JPanel panel = new JPanel(new BorderLayout());
     private final LogComponent logComponent;
-    private final BottomPanel<LogComponent> logPanel;
+    private final JSplitPane splitPane;
     private final InheritableThreadLocal<String> itl = new InheritableThreadLocal<>();
 
     @Autowired
-    public ProfileManagementWidget(IdeFrameImpl owner, ProfileManager profileManager) {
-        super(owner, "Profile Management: %s", profileManager.getCurrentProfile());
+    public ProfileManagementWidget(GenericApplicationContext context, ProfileManager profileManager) {
+        super(context, "Profile Management: %s", profileManager.getCurrentProfile());
         info("Initialized");
         profile = profileManager.getCurrentProfile();
         logComponent = new LogComponent(preferences(), emptyList(), r -> true);
         logComponent.setPreferredSize(new Dimension(logComponent.getPreferredSize().width, 150));
-        this.logHandler = new SimpleHandler((h, r) -> {
+        logHandler = new SimpleHandler((h, r) -> {
             if (profile.getName().equals(itl.get())) {
                 logComponent.publish(r);
             }
         });
-        logPanel = new BottomPanel<>(logComponent);
         toolBar.addSeparator();
-        logPanel.addComponentListener(new ComponentAction(e -> {
-            if (e.getID() == ComponentEvent.COMPONENT_HIDDEN) {
-                actionByKey("/Log/s/Log").putValue(Action.SELECTED_KEY, false);
-            }
-        }));
-        panel.add(logPanel, BorderLayout.SOUTH);
-        add(panel);
-        pack();
+        splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panel, logComponent);
+        restoreDividerLocation();
+        add(splitPane);
+    }
+
+    protected void startProfileTrigger() {
+        itl.set(profile.getName());
+        Logging.rootLogger().addHandler(logHandler);
+    }
+
+    protected void startProfile(Action action, ActionEvent event) {
+        profile.start(this::startProfileTrigger);
+    }
+
+    public void stopProfile(Action action, ActionEvent event) {
+        profile.stop();
+    }
+
+    public void showLog(Action action, ActionEvent event) {
+        logComponent.setVisible(Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY)));
+        if (logComponent.isVisible()) {
+            restoreDividerLocation();
+        }
+    }
+
+    protected void restoreDividerLocation() {
+        splitPane.setDividerLocation(preferences().getInt("splitPos", panel.getPreferredSize().height));
+    }
+
+    @Override
+    public void init() {
+        super.init();
         profile.addApplicationListener(event -> {
             info("Event: {0}", event);
             if (event instanceof ContextStartedEvent) {
@@ -94,21 +114,13 @@ public class ProfileManagementWidget extends Widget {
         });
     }
 
-    protected void startProfileTrigger() {
-        itl.set(profile.getName());
-        Logging.rootLogger().addHandler(logHandler);
-    }
-
-    protected void startProfile(Action action, ActionEvent event) {
-        profile.start(this::startProfileTrigger);
-    }
-
-    public void stopProfile(Action action, ActionEvent event) {
-        profile.stop();
-    }
-
-    public void showLog(Action action, ActionEvent event) {
-        logPanel.setVisible(Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY)));
+    @Override
+    public void dispose() {
+        try {
+            preferences().putInt("splitPos", splitPane.getDividerLocation());
+        } finally {
+            super.dispose();
+        }
     }
 
     @Override
