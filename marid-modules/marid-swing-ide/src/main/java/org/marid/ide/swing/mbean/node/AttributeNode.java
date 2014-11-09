@@ -78,4 +78,8 @@ public class AttributeNode implements TTerminalNode<AttributeNode, AttributeGrou
     public String toString() {
         return getName();
     }
+
+    public MBeanAttributeInfo getAttributeInfo() {
+        return attributeInfo;
+    }
 }

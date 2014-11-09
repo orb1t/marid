@@ -87,4 +87,8 @@ public class BeanNode implements TNode<BeanNode, RootNode, Group<?, ?>>, Node {
     public RootNode getRoot() {
         return parent;
     }
+
+    public ObjectInstance getInstance() {
+        return instance;
+    }
 }

@@ -111,6 +111,7 @@ public class ProfileManagementWidget extends Widget implements ApplicationListen
         try {
             profile.removeApplicationListener(this);
             preferences().putInt("splitPos", splitPane.getDividerLocation());
+            beanTree.savePreferences();
         } finally {
             super.dispose();
         }

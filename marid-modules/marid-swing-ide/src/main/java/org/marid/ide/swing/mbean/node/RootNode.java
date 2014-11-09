@@ -87,4 +87,8 @@ public class RootNode implements TRootNode<RootNode, BeanNode>, Node {
     public String getPath() {
         return "";
     }
+
+    public MBeanServerConnection getServer() {
+        return server;
+    }
 }

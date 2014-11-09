@@ -20,6 +20,7 @@ package org.marid.ide.swing.mbean;
 
 import org.jdesktop.swingx.JXTreeTable;
 import org.marid.ide.base.MBeanServerSupport;
+import org.marid.pref.PrefSupport;
 
 import javax.swing.table.TableColumn;
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class MBeanServerTreeTable extends JXTreeTable {
+public class MBeanServerTreeTable extends JXTreeTable implements PrefSupport {
 
     public MBeanServerTreeTable(MBeanServerSupport mBeanServerSupport) {
         super(new MBeanServerTreeModel(mBeanServerSupport));
@@ -38,8 +39,9 @@ public class MBeanServerTreeTable extends JXTreeTable {
     @Override
     protected void initializeColumnWidths() {
         final List<TableColumn> columns = getColumns(true);
-        final int[] widths = {450, 100, -1};
-        for (int i = 0; i < Math.min(widths.length, columns.size()); i++) {
+        final int[] widths = {getPref("nameWidth", 450), getPref("descriptionWidth", 600)};
+        final int n = Math.min(widths.length, columns.size());
+        for (int i = 0; i < n; i++) {
             final TableColumn column = columns.get(i);
             final int width = widths[i];
             if (width > 0) {
@@ -53,5 +55,10 @@ public class MBeanServerTreeTable extends JXTreeTable {
     @Override
     public MBeanServerTreeModel getTreeTableModel() {
         return (MBeanServerTreeModel) super.getTreeTableModel();
+    }
+
+    public void savePreferences() {
+        putPref("nameWidth", getColumn(0).getWidth());
+        putPref("descriptionWidth", getColumn(1).getWidth());
     }
 }

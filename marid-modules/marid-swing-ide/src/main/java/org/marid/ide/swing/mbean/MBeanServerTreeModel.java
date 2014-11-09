@@ -97,7 +97,7 @@ public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
         switch (columnIndex) {
             case 0:
                 return TNode.class;
-            case 2:
+            case 1:
                 return String.class;
             default:
                 return Object.class;
@@ -115,8 +115,6 @@ public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
             case 0:
                 return s("Name");
             case 1:
-                return s("Value");
-            case 2:
                 return s("Description");
             default:
                 return null;
@@ -134,8 +132,6 @@ public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
             case 0:
                 return node;
             case 1:
-                return null;
-            case 2:
                 return ((Node) node).getDescription();
             default:
                 return null;

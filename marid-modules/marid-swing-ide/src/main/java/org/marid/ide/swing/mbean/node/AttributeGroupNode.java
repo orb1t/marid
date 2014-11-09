@@ -41,8 +41,8 @@ public class AttributeGroupNode extends Group<AttributeGroupNode, AttributeNode>
     public AttributeGroupNode(BeanNode parent) {
         super(parent, "Attributes");
         try {
-            final MBeanServerConnection server = getRoot().server;
-            final ObjectInstance instance = getParent().instance;
+            final MBeanServerConnection server = getRoot().getServer();
+            final ObjectInstance instance = getParent().getInstance();
             final MBeanInfo beanInfo = server.getMBeanInfo(instance.getObjectName());
             children = Arrays.stream(beanInfo.getAttributes()).map(a -> new AttributeNode(this, a)).collect(toList());
         } catch (Exception x) {
