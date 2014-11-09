@@ -25,7 +25,6 @@ import org.marid.ide.swing.mbean.node.RootNode;
 import org.marid.l10n.L10nSupport;
 import org.marid.swing.tree.TNode;
 
-import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -97,7 +96,9 @@ public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
     public Class<?> getColumnClass(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return ImageIcon.class;
+                return TNode.class;
+            case 2:
+                return String.class;
             default:
                 return Object.class;
         }
@@ -112,11 +113,11 @@ public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
     public String getColumnName(int column) {
         switch (column) {
             case 0:
-                return s("Type");
-            case 1:
                 return s("Name");
-            case 2:
+            case 1:
                 return s("Value");
+            case 2:
+                return s("Description");
             default:
                 return null;
         }
@@ -124,22 +125,18 @@ public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
 
     @Override
     public int getHierarchicalColumn() {
-        return 1;
+        return 0;
     }
 
     @Override
     public Object getValueAt(Object node, int column) {
         switch (column) {
             case 0:
-                if (node instanceof Node) {
-                    return ((Node) node).getIcon();
-                } else {
-                    return null;
-                }
-            case 1:
                 return node;
-            case 2:
+            case 1:
                 return null;
+            case 2:
+                return ((Node) node).getDescription();
             default:
                 return null;
         }

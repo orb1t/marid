@@ -32,12 +32,13 @@ public class MBeanServerTreeTable extends JXTreeTable {
     public MBeanServerTreeTable(MBeanServerSupport mBeanServerSupport) {
         super(new MBeanServerTreeModel(mBeanServerSupport));
         setRootVisible(false);
+        setTreeCellRenderer(new MBeanTreeCellRenderer());
     }
 
     @Override
     protected void initializeColumnWidths() {
         final List<TableColumn> columns = getColumns(true);
-        final int[] widths = {40, -1, 100};
+        final int[] widths = {450, 100, -1};
         for (int i = 0; i < Math.min(widths.length, columns.size()); i++) {
             final TableColumn column = columns.get(i);
             final int width = widths[i];
