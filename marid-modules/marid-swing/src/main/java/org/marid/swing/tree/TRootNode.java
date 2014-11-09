@@ -16,16 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.base;
-
-import org.marid.functions.SafeFunction;
-
-import javax.management.MBeanServerConnection;
+package org.marid.swing.tree;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public interface MBeanServerSupport {
+public interface TRootNode<Q extends TRootNode<Q, C>, C extends TNode<?, Q, ?>> extends TNode<Q, TNode, C> {
 
-    <T> T serverResult(SafeFunction<MBeanServerConnection, T> function);
+    default TNode getParent() {
+        return null;
+    }
 }

@@ -16,16 +16,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.base;
+package org.marid.ide.swing.mbean.node;
 
-import org.marid.functions.SafeFunction;
-
-import javax.management.MBeanServerConnection;
+import org.marid.swing.tree.TNode;
+import org.marid.swing.tree.TTerminalNode;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public interface MBeanServerSupport {
+public abstract class Group<Q extends Group<Q, C>, C extends TTerminalNode<?, Q>> implements TNode<Q, BeanNode, C>, Node {
 
-    <T> T serverResult(SafeFunction<MBeanServerConnection, T> function);
+    protected final BeanNode parent;
+    protected final String name;
+
+    public Group(BeanNode parent, String name) {
+        this.parent = parent;
+        this.name = name;
+    }
+
+    @Override
+    public BeanNode getParent() {
+        return parent;
+    }
+
+    @Override
+    public String toString() {
+        return s(name);
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public RootNode getRoot() {
+        return getParent().getRoot();
+    }
 }

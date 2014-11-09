@@ -37,6 +37,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.event.ContextClosedEvent;
 
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -249,7 +250,7 @@ public class Profile implements Named, Closeable, LogSupport, MBeanServerSupport
     }
 
     @Override
-    public <T> T serverResult(SafeFunction<MBeanServer, T> function) {
+    public <T> T serverResult(SafeFunction<MBeanServerConnection, T> function) {
         return contextResult(applicationContext -> {
             if (applicationContext == null) {
                 return null;

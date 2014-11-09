@@ -16,16 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.base;
+package org.marid.ide.swing.mbean.node;
 
-import org.marid.functions.SafeFunction;
+import org.marid.l10n.L10nSupport;
+import org.marid.logging.LogSupport;
 
-import javax.management.MBeanServerConnection;
+import javax.swing.*;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public interface MBeanServerSupport {
+public interface Node extends L10nSupport, LogSupport {
 
-    <T> T serverResult(SafeFunction<MBeanServerConnection, T> function);
+    ImageIcon getIcon();
+
+    String getName();
+
+    String getDescription();
+
+    Class<?> getValueType();
+
+    String getPath();
 }

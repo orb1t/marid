@@ -16,16 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.base;
+package org.marid.swing.tree;
 
-import org.marid.functions.SafeFunction;
-
-import javax.management.MBeanServerConnection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public interface MBeanServerSupport {
+public interface TTerminalNode<Q extends TTerminalNode<Q, P>, P extends TNode> extends TNode<Q, P, TNode<?, Q, ?>> {
 
-    <T> T serverResult(SafeFunction<MBeanServerConnection, T> function);
+    default List<TNode<?, Q, ?>> getChildren() {
+        return Collections.emptyList();
+    }
+
+    default boolean getAllowsChildren() {
+        return false;
+    }
 }

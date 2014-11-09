@@ -18,20 +18,18 @@
 
 package org.marid.ide.swing.mbean;
 
-import images.Images;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 import org.marid.ide.base.MBeanServerSupport;
+import org.marid.ide.swing.mbean.node.Node;
+import org.marid.ide.swing.mbean.node.RootNode;
 import org.marid.l10n.L10nSupport;
+import org.marid.swing.tree.TNode;
 
-import javax.management.ObjectInstance;
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreePath;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -41,38 +39,31 @@ public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
     protected final MBeanServerSupport mBeanServerSupport;
     protected final EventListenerList listenerList = new EventListenerList();
 
+    protected RootNode root;
+
     public MBeanServerTreeModel(MBeanServerSupport mBeanServerSupport) {
         this.mBeanServerSupport = mBeanServerSupport;
+        this.root = mBeanServerSupport.serverResult(RootNode::new);
     }
 
     @Override
-    public MBeanServerSupport getRoot() {
-        return mBeanServerSupport;
-    }
-
-    protected List<?> getChildList(Object parent) {
-        if (parent instanceof MBeanServerSupport) {
-            final MBeanServerSupport support = (MBeanServerSupport) parent;
-            final List<ObjectInstance> list = support.serverResult(s -> new ArrayList<>(s.queryMBeans(null, null)));
-            return list == null ? Collections.emptyList() : list;
-        } else {
-            return Collections.emptyList();
-        }
+    public RootNode getRoot() {
+        return root;
     }
 
     @Override
     public Object getChild(Object parent, int index) {
-        return getChildList(parent).get(index);
+        return ((TNode) parent).getChildAt(index);
     }
 
     @Override
     public int getChildCount(Object parent) {
-        return getChildList(parent).size();
+        return ((TNode) parent).getChildCount();
     }
 
     @Override
     public boolean isLeaf(Object node) {
-        return getChildCount(node) == 0;
+        return ((TNode) node).isLeaf();
     }
 
     @Override
@@ -81,7 +72,7 @@ public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
 
     @Override
     public int getIndexOfChild(Object parent, Object child) {
-        return getChildList(parent).indexOf(child);
+        return ((TNode) parent).getIndex((TNode) child);
     }
 
     @Override
@@ -95,9 +86,10 @@ public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
     }
 
     public void update() {
+        root = mBeanServerSupport.serverResult(RootNode::new);
         final TreeModelListener[] listeners = listenerList.getListeners(TreeModelListener.class);
         for (int i = listeners.length - 1; i >= 0; i--) {
-            listeners[i].treeStructureChanged(new TreeModelEvent(this, new Object[]{getRoot()}));
+            listeners[i].treeStructureChanged(new TreeModelEvent(this, root == null ? null : new Object[]{getRoot()}));
         }
     }
 
@@ -139,8 +131,8 @@ public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
     public Object getValueAt(Object node, int column) {
         switch (column) {
             case 0:
-                if (node instanceof ObjectInstance) {
-                    return Images.getIcon("bean.png");
+                if (node instanceof Node) {
+                    return ((Node) node).getIcon();
                 } else {
                     return null;
                 }
