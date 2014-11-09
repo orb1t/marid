@@ -30,10 +30,18 @@ public class MBeanServerTree extends JTree {
     public MBeanServerTree(MBeanServerSupport mBeanServerSupport) {
         super(new MBeanServerTreeModel(mBeanServerSupport));
         setRootVisible(false);
+        setCellRenderer(new MBeanTreeCellRenderer());
     }
 
     @Override
     public MBeanServerTreeModel getModel() {
         return (MBeanServerTreeModel) super.getModel();
+    }
+
+    public void update() {
+        getModel().update();
+    }
+
+    public void savePreferences() {
     }
 }

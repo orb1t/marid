@@ -61,4 +61,8 @@ public class MBeanServerTreeTable extends JXTreeTable implements PrefSupport {
         putPref("nameWidth", getColumn(0).getWidth());
         putPref("descriptionWidth", getColumn(1).getWidth());
     }
+
+    public void update() {
+        getTreeTableModel().update();
+    }
 }

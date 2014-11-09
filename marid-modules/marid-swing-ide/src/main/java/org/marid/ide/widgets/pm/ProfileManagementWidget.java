@@ -109,10 +109,11 @@ public class ProfileManagementWidget extends Widget implements ApplicationListen
     @Override
     public void dispose() {
         try {
-            profile.removeApplicationListener(this);
+            profile.stop();
             preferences().putInt("splitPos", splitPane.getDividerLocation());
             beanTree.savePreferences();
         } finally {
+            profile.removeApplicationListener(this);
             super.dispose();
         }
     }
@@ -139,6 +140,6 @@ public class ProfileManagementWidget extends Widget implements ApplicationListen
                 actionByKey("/Control/c/Stop").setEnabled(false);
             });
         }
-        EventQueue.invokeLater(() -> beanTree.getTreeTableModel().update());
+        EventQueue.invokeLater(beanTree::update);
     }
 }
