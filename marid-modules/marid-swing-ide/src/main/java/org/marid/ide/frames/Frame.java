@@ -16,24 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.gui;
+package org.marid.ide.frames;
 
-import org.marid.ide.base.IdeDesktop;
-import org.springframework.stereotype.Component;
-
-import javax.swing.*;
-
-import static java.awt.SystemColor.desktop;
+import org.marid.dyn.MetaInfo;
+import org.marid.swing.AbstractFrame;
+import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Component
-public class IdeDesktopImpl extends JDesktopPane implements IdeDesktop {
+@MetaInfo
+public abstract class Frame extends AbstractFrame {
 
-    public IdeDesktopImpl() {
-        setOpaque(false);
-        setDoubleBuffered(true);
-        setBackground(desktop.darker());
+    public Frame(GenericApplicationContext context, String title, Object... args) {
+        super(LS.s(title, args));
     }
 }

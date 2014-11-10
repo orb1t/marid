@@ -82,6 +82,19 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
 
     @PostConstruct
     public void init() {
+        fillActions();
+        final JMenuBar menuBar = new JMenuBar();
+        final JToolBar toolBar = new JToolBar();
+        MaridActions.fillMenu(getActionMap(), menuBar);
+        MaridActions.fillToolbar(getActionMap(), toolBar);
+        for (int i = menuBar.getComponentCount() - 1; i >= 0; i--) {
+            getJMenuBar().add(menuBar.getComponent(i), 0);
+        }
+        for (int i = toolBar.getComponentCount() - 1; i >= 0; i--) {
+            this.toolBar.add(toolBar.getComponent(i), 0);
+        }
+        pack();
+        setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
         setVisible(true);
     }
 
@@ -106,23 +119,6 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         } else {
             showMessage(WARNING_MESSAGE, "Warning", "Full-screen mode is not supported");
         }
-    }
-
-    @Override
-    public void pack() {
-        fillActions();
-        final JMenuBar menuBar = new JMenuBar();
-        final JToolBar toolBar = new JToolBar();
-        MaridActions.fillMenu(getActionMap(), menuBar);
-        MaridActions.fillToolbar(getActionMap(), toolBar);
-        for (int i = menuBar.getComponentCount() - 1; i >= 0; i--) {
-            getJMenuBar().add(menuBar.getComponent(i), 0);
-        }
-        for (int i = toolBar.getComponentCount() - 1; i >= 0; i--) {
-            this.toolBar.add(toolBar.getComponent(i), 0);
-        }
-        super.pack();
-        setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
     }
 
     @Override

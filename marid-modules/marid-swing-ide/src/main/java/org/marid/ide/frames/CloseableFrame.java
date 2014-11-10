@@ -16,24 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.gui;
+package org.marid.ide.frames;
 
-import org.marid.ide.base.IdeDesktop;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.swing.*;
-
-import static java.awt.SystemColor.desktop;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
 @Component
-public class IdeDesktopImpl extends JDesktopPane implements IdeDesktop {
-
-    public IdeDesktopImpl() {
-        setOpaque(false);
-        setDoubleBuffered(true);
-        setBackground(desktop.darker());
-    }
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public @interface CloseableFrame {
 }
