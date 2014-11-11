@@ -83,6 +83,7 @@ public abstract class Widget extends JInternalFrame implements WidgetSupport, Ma
 
     @PostConstruct
     public void init() {
+        info("Initialized {0}", getTitle());
         pack();
         setLocation(getPref("location", new Point()));
         setSize(getPref("size", getSize()));

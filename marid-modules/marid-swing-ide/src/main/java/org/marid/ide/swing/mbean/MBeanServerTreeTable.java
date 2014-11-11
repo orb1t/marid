@@ -39,17 +39,10 @@ public class MBeanServerTreeTable extends JXTreeTable implements PrefSupport {
     @Override
     protected void initializeColumnWidths() {
         final List<TableColumn> columns = getColumns(true);
-        final int[] widths = {getPref("nameWidth", 450), getPref("descriptionWidth", 600)};
-        final int n = Math.min(widths.length, columns.size());
-        for (int i = 0; i < n; i++) {
-            final TableColumn column = columns.get(i);
-            final int width = widths[i];
-            if (width > 0) {
-                column.setMinWidth(width / 2);
-                column.setPreferredWidth(width);
-                column.setMaxWidth(width * 2);
-            }
-        }
+        columns.get(0).setMaxWidth(1000);
+        columns.get(1).setMaxWidth(1000);
+        columns.get(0).setPreferredWidth(getPref("nameWidth", 450));
+        columns.get(1).setPreferredWidth(getPref("valueWidth", 600));
     }
 
     @Override

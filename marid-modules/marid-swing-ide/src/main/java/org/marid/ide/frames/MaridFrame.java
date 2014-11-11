@@ -20,15 +20,27 @@ package org.marid.ide.frames;
 
 import org.marid.dyn.MetaInfo;
 import org.marid.swing.AbstractFrame;
+import org.marid.swing.listeners.MaridWindowListener;
 import org.springframework.context.support.GenericApplicationContext;
+
+import java.awt.event.WindowEvent;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 @MetaInfo
-public abstract class Frame extends AbstractFrame {
+public abstract class MaridFrame extends AbstractFrame implements MaridWindowListener {
 
-    public Frame(GenericApplicationContext context, String title, Object... args) {
+    protected final GenericApplicationContext context;
+
+    public MaridFrame(GenericApplicationContext context, String title, Object... args) {
         super(LS.s(title, args));
+        this.context = context;
+        addWindowListener(this);
+    }
+
+    @Override
+    public void windowClosing(WindowEvent e) {
+        context.getAutowireCapableBeanFactory().destroyBean(this);
     }
 }

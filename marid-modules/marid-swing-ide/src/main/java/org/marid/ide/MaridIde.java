@@ -22,6 +22,7 @@ import groovy.lang.Script;
 import org.marid.bd.Block;
 import org.marid.groovy.GroovyRuntime;
 import org.marid.ide.components.ProfileManager;
+import org.marid.ide.frames.MaridFrame;
 import org.marid.ide.swing.context.GuiContext;
 import org.marid.ide.swing.gui.IdeImpl;
 import org.marid.ide.widgets.Widget;
@@ -54,7 +55,8 @@ public class MaridIde implements LogSupport {
                 IdeImpl.class.getPackage().getName(),
                 ProfileManager.class.getPackage().getName(),
                 Block.class.getPackage().getName(),
-                Widget.class.getPackage().getName());
+                Widget.class.getPackage().getName(),
+                MaridFrame.class.getPackage().getName());
         init(context);
         context.refresh();
         SwingUtil.execute(context::start);

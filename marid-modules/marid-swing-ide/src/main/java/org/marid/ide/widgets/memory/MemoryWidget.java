@@ -58,7 +58,6 @@ public class MemoryWidget extends Widget implements MemoryWidgetConfiguration, S
     @Autowired
     public MemoryWidget(GenericApplicationContext context) {
         super(context, "Memory");
-        info("Initialized");
         final TimeSeriesCollection dataset = new TimeSeriesCollection();
         dataset.addSeries(totalMemorySeries);
         dataset.addSeries(freeMemorySeries);

@@ -30,9 +30,11 @@ import java.lang.annotation.Target;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public @interface CloseableFrame {
+
+    String value() default "";
 }

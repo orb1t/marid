@@ -16,14 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.widgets.pm;
+package org.marid.ide.frames.pm;
 
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.components.ProfileManager;
+import org.marid.ide.frames.CloseableFrame;
+import org.marid.ide.frames.MaridFrame;
 import org.marid.ide.profile.Profile;
 import org.marid.ide.swing.mbean.MBeanServerTreeTable;
-import org.marid.ide.widgets.CloseableWidget;
-import org.marid.ide.widgets.Widget;
 import org.marid.logging.Logging;
 import org.marid.logging.SimpleHandler;
 import org.marid.swing.log.LogComponent;
@@ -42,11 +42,11 @@ import java.util.logging.Handler;
 import static java.util.Collections.emptyList;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@CloseableWidget
+@CloseableFrame
 @MetaInfo(name = "Profile Management")
-public class ProfileManagementWidget extends Widget implements ApplicationListener<ApplicationEvent> {
+public class ProfileManagementMaridFrame extends MaridFrame {
 
     private final Profile profile;
     private final Handler logHandler;
@@ -55,11 +55,11 @@ public class ProfileManagementWidget extends Widget implements ApplicationListen
     private final MBeanServerTreeTable beanTree;
     private final JSplitPane splitPane;
     private final InheritableThreadLocal<String> itl = new InheritableThreadLocal<>();
+    private final ApplicationListener<ApplicationEvent> applicationListener;
 
     @Autowired
-    public ProfileManagementWidget(GenericApplicationContext context, ProfileManager profileManager) {
+    public ProfileManagementMaridFrame(GenericApplicationContext context, ProfileManager profileManager) {
         super(context, "Profile Management: %s", profileManager.getCurrentProfile());
-        info("Initialized");
         profile = profileManager.getCurrentProfile();
         logComponent = new LogComponent(preferences(), emptyList(), r -> true);
         logComponent.setPreferredSize(new Dimension(logComponent.getPreferredSize().width, 150));
@@ -73,7 +73,30 @@ public class ProfileManagementWidget extends Widget implements ApplicationListen
         toolBar.addSeparator();
         splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panel, logComponent);
         restoreDividerLocation();
-        add(splitPane);
+        centerPanel.add(splitPane);
+        applicationListener = event -> {
+            info("Event: {0}", event);
+            if (event instanceof ContextStartedEvent) {
+                EventQueue.invokeLater(() -> {
+                    actionByKey("/Control/c/Run").setEnabled(false);
+                    actionByKey("/Control/c/Stop").setEnabled(true);
+                });
+            } else if (event instanceof ContextClosedEvent) {
+                EventQueue.invokeLater(() -> {
+                    Logging.rootLogger().removeHandler(logHandler);
+                    actionByKey("/Control/c/Run").setEnabled(true);
+                    actionByKey("/Control/c/Stop").setEnabled(false);
+                });
+            }
+            EventQueue.invokeLater(beanTree::update);
+        };
+    }
+
+    @Override
+    protected void fillActions() {
+        addAction("/Control/c/Run", "Run", "start", this::startProfile).setEnabledState(!profile.isStarted()).enableToolbar();
+        addAction("/Control/c/Stop", "Stop", "stop", this::stopProfile).setEnabledState(profile.isStarted()).enableToolbar();
+        addAction("/Log/s/Log", "Log", "log", this::showLog).setSelected(true).enableToolbar();
     }
 
     protected void startProfileTrigger() {
@@ -103,7 +126,7 @@ public class ProfileManagementWidget extends Widget implements ApplicationListen
     @Override
     public void init() {
         super.init();
-        profile.addApplicationListener(this);
+        profile.addApplicationListener(applicationListener);
     }
 
     @Override
@@ -113,33 +136,8 @@ public class ProfileManagementWidget extends Widget implements ApplicationListen
             preferences().putInt("splitPos", splitPane.getDividerLocation());
             beanTree.savePreferences();
         } finally {
-            profile.removeApplicationListener(this);
+            profile.removeApplicationListener(applicationListener);
             super.dispose();
         }
-    }
-
-    @Override
-    protected void fillActions() {
-        addAction("/Control/c/Run", "Run", "start", this::startProfile).setEnabledState(!profile.isStarted()).enableToolbar();
-        addAction("/Control/c/Stop", "Stop", "stop", this::stopProfile).setEnabledState(profile.isStarted()).enableToolbar();
-        addAction("/Log/s/Log", "Log", "log", this::showLog).setSelected(true).enableToolbar();
-    }
-
-    @Override
-    public void onApplicationEvent(ApplicationEvent event) {
-        info("Event: {0}", event);
-        if (event instanceof ContextStartedEvent) {
-            EventQueue.invokeLater(() -> {
-                actionByKey("/Control/c/Run").setEnabled(false);
-                actionByKey("/Control/c/Stop").setEnabled(true);
-            });
-        } else if (event instanceof ContextClosedEvent) {
-            EventQueue.invokeLater(() -> {
-                Logging.rootLogger().removeHandler(logHandler);
-                actionByKey("/Control/c/Run").setEnabled(true);
-                actionByKey("/Control/c/Stop").setEnabled(false);
-            });
-        }
-        EventQueue.invokeLater(beanTree::update);
     }
 }

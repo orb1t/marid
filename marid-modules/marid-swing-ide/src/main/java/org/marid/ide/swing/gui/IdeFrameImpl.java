@@ -21,12 +21,13 @@ package org.marid.ide.swing.gui;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.base.Ide;
 import org.marid.ide.base.IdeFrame;
+import org.marid.ide.frames.MaridFrame;
 import org.marid.ide.widgets.Widget;
 import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
-import org.marid.swing.actions.MaridAction;
 import org.marid.swing.WindowPrefs;
+import org.marid.swing.actions.MaridAction;
 import org.marid.swing.forms.ConfigurationProvider;
 import org.marid.swing.forms.Form;
 import org.marid.swing.forms.StaticConfigurationDialog;
@@ -74,6 +75,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         setLocationRelativeTo(null);
         setJMenuBar(new JMenuBar());
         getJMenuBar().add(widgetsMenu());
+        getJMenuBar().add(framesMenu());
         getJMenuBar().add(preferencesMenu());
         getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
         context.getBean(ActionTreeElement.class).fillJMenuBar(getJMenuBar());
@@ -100,9 +102,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
             menu.add(new MaridAction(lookAndFeelInfo.getName(), null, ev -> {
                 try {
                     UIManager.setLookAndFeel(lookAndFeelInfo.getClassName());
-                    for (final Frame frame : Frame.getFrames()) {
-                        SwingUtilities.updateComponentTreeUI(frame);
-                    }
+                    Arrays.asList(JFrame.getFrames()).forEach(SwingUtilities::updateComponentTreeUI);
                 } catch (Exception x) {
                     showMessage(WARNING_MESSAGE, "LAF", "Error", x);
                 }
@@ -121,6 +121,17 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
                     desktop.add(widget);
                 }
                 widget.show();
+            }));
+        }
+        return menu;
+    }
+
+    private JMenu framesMenu() {
+        final JMenu menu = new JMenu(s("Frames"));
+        for (final String beanName : applicationContext.getBeanNamesForType(MaridFrame.class)) {
+            final MetaInfo metaInfo = applicationContext.findAnnotationOnBean(beanName, MetaInfo.class);
+            menu.add(new MaridAction(metaInfo.name(), metaInfo.icon(), e -> {
+                applicationContext.getBean(beanName, Frame.class);
             }));
         }
         return menu;
