@@ -20,7 +20,6 @@ package org.marid.bd.components;
 
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
-import org.marid.bd.shapes.LinkShape;
 
 import javax.swing.*;
 import java.awt.*;
@@ -101,11 +100,6 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
         }
 
         @Override
-        protected BasicStroke getStroke() {
-            return input.getInputType().isArray() ? LinkShape.VECTOR : LinkShape.NORMAL;
-        }
-
-        @Override
         public DefaultBlockComponent getBlockComponent() {
             return DefaultBlockComponent.this;
         }
@@ -140,11 +134,6 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
                 map.put(UNDERLINE, UNDERLINE_LOW_ONE_PIXEL);
             }
             label.setFont(map.isEmpty() ? font : font.deriveFont(map));
-        }
-
-        @Override
-        protected BasicStroke getStroke() {
-            return output.getOutputType().isArray() ? LinkShape.VECTOR : LinkShape.NORMAL;
         }
 
         @Override
