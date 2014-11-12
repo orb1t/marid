@@ -23,11 +23,11 @@ import org.marid.bd.Block;
 import org.marid.groovy.GroovyRuntime;
 import org.marid.ide.components.ProfileManager;
 import org.marid.ide.frames.MaridFrame;
+import org.marid.ide.swing.IdeSplashScreen;
 import org.marid.ide.swing.context.GuiContext;
 import org.marid.ide.swing.gui.IdeImpl;
 import org.marid.ide.widgets.Widget;
 import org.marid.logging.LogSupport;
-import org.marid.swing.SwingUtil;
 import org.marid.util.MaridInitializer;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -47,6 +47,7 @@ public class MaridIde implements LogSupport {
     public static void main(String[] args) throws Exception {
         MaridInitializer.visitInitializers(MaridInitializer::init);
         Thread.setDefaultUncaughtExceptionHandler((t, x) -> Log.warning("Uncaught exception in {0}", x, t));
+        IdeSplashScreen.start();
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         context.setClassLoader(CLASS_LOADER);
         context.addApplicationListener(event -> Log.info("{0}", event));
@@ -59,7 +60,7 @@ public class MaridIde implements LogSupport {
                 MaridFrame.class.getPackage().getName());
         init(context);
         context.refresh();
-        SwingUtil.execute(context::start);
+        context.start();
     }
 
     private static void init(AnnotationConfigApplicationContext context) throws Exception {

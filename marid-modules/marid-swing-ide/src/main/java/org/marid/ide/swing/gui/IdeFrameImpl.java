@@ -44,6 +44,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
@@ -57,6 +58,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
 
     private final GenericApplicationContext applicationContext;
     private final IdeImpl ide;
+    private final AtomicBoolean initialized = new AtomicBoolean();
 
     @Autowired
     private IdeDesktopImpl desktop;
@@ -131,7 +133,8 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         for (final String beanName : applicationContext.getBeanNamesForType(MaridFrame.class)) {
             final MetaInfo metaInfo = applicationContext.findAnnotationOnBean(beanName, MetaInfo.class);
             menu.add(new MaridAction(metaInfo.name(), metaInfo.icon(), e -> {
-                applicationContext.getBean(beanName, Frame.class);
+                final MaridFrame frame = applicationContext.getBean(beanName, MaridFrame.class);
+                frame.setVisible(true);
             }));
         }
         return menu;
@@ -140,6 +143,11 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     @Override
     public Ide getIde() {
         return ide;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized.get();
     }
 
     private JMenu preferencesMenu() {
@@ -173,6 +181,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
             case WindowEvent.WINDOW_OPENED:
                 setState(getPref("state", getState()));
                 setExtendedState(getPref("extendedState", getExtendedState()));
+                initialized.set(true);
                 break;
         }
         super.processWindowEvent(e);

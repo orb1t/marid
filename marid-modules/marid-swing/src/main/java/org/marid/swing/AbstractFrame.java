@@ -95,7 +95,6 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         }
         pack();
         setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
-        setVisible(true);
     }
 
     @PreDestroy

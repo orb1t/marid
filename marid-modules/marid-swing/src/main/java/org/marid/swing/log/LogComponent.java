@@ -18,7 +18,6 @@
 
 package org.marid.swing.log;
 
-import org.jdesktop.swingx.JXTable;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogLevel;
 import org.marid.swing.control.ToolbarUtil;
@@ -48,7 +47,7 @@ public class LogComponent extends JPanel implements L10nSupport {
     protected final Preferences preferences;
     protected final JToolBar toolBar;
     protected final Model model;
-    protected final JXTable table;
+    protected final JTable table;
     protected final Filter recordFilter;
 
     public LogComponent(Preferences prefs, Collection<LogRecord> logRecords, Filter filter) {
@@ -57,7 +56,7 @@ public class LogComponent extends JPanel implements L10nSupport {
         preferences = prefs;
         toolBar = addToolBar();
         model = model(logRecords);
-        add(new JScrollPane(table = new JXTable(model)));
+        add(new JScrollPane(table = new JTable(model)));
         table.setRowHeight(20);
         table.setFont(new Font(Font.MONOSPACED, Font.PLAIN, UIManager.getFont("Label.font").getSize() - 2));
         table.setShowVerticalLines(true);
@@ -107,6 +106,10 @@ public class LogComponent extends JPanel implements L10nSupport {
                 }
             });
         }
+    }
+
+    public JTable getTable() {
+        return table;
     }
 
     protected class Model extends AbstractTableModel {

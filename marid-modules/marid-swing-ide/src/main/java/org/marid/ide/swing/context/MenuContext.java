@@ -46,7 +46,7 @@ public class MenuContext implements LogSupport {
                 .add("Services", null, servicesMenu -> {
                     servicesMenu
                             .add("Schema frame", null, new MaridAction("Schema frame", null, e -> {
-                                autowireCapableBeanFactory.createBean(SchemaFrame.class);
+                                autowireCapableBeanFactory.createBean(SchemaFrame.class).setVisible(true);
                             }));
                 });
     }
