@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 
 import static java.awt.Frame.getFrames;
 import static java.util.Arrays.stream;
+import static javax.swing.BorderFactory.*;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -50,10 +51,11 @@ public class IdeSplashScreen extends JWindow implements PrefSupport, L10nSupport
     private final Timer timer;
 
     public IdeSplashScreen() {
+        getRootPane().setBorder(createLineBorder(SystemColor.controlHighlight, 3, true));
         setType(Type.POPUP);
         setAlwaysOnTop(true);
         final JPanel panel = new JPanel(new BorderLayout(15, 0));
-        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        panel.setBorder(createEmptyBorder(5, 5, 5, 5));
         panel.add(new JLabel(MaridIcon.getIcon(64, Color.GREEN)), BorderLayout.WEST);
         panel.add(new JLabel(String.format("<html><big><b>Marid</b>, %s</big></html>", s("the free data-acquisition software"))));
         add(panel, BorderLayout.NORTH);
