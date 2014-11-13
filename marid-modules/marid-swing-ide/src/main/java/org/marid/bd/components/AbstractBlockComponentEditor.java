@@ -120,8 +120,12 @@ public class AbstractBlockComponentEditor<B extends Block> extends JDialog imple
         }
 
         public void addLine(String label, JComponent component) {
+            addLine(label, component, 0.0);
+        }
+
+        public void addLine(String label, JComponent component, double wy) {
             add(new JLabel(LS.s(label)), GridBags.constraints(1, 1, 0.0, 0.0, BASELINE));
-            add(component, GridBags.constraints(REMAINDER, 1, 1.0, 0.0, BASELINE));
+            add(component, GridBags.constraints(REMAINDER, 1, 1.0, wy, BASELINE));
         }
 
         public void addSeparator() {
@@ -129,6 +133,9 @@ public class AbstractBlockComponentEditor<B extends Block> extends JDialog imple
         }
 
         public void finish() {
+            if (getComponentCount() == 2 && "resizable".equals(getComponent(1).getName())) {
+                return;
+            }
             add(Box.createGlue(), GridBags.constraints(REMAINDER, REMAINDER, 1.0, 1.0, BASELINE));
         }
     }
