@@ -28,6 +28,7 @@ import javax.xml.bind.annotation.*;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -72,6 +73,13 @@ public abstract class Block implements Named, DndObject {
             listeners.values().forEach(ls -> ls.stream()
                     .filter(t::isInstance)
                     .forEach(l -> ch.accept(t.cast(l), nv)));
+        }
+    }
+
+    public <L extends EventListener, T> void fire(Class<L> t, AtomicReference<T> ref, T nv, BiConsumer<L, T> ch) {
+        final T old = ref.getAndSet(nv);
+        if (!Objects.deepEquals(old, nv)) {
+            listeners.values().forEach(ls -> ls.stream().filter(t::isInstance).forEach(l -> ch.accept(t.cast(l), nv)));
         }
     }
 
