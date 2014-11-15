@@ -19,13 +19,16 @@
 package org.marid.swing.actions;
 
 import org.marid.l10n.L10nSupport;
-import org.marid.swing.menu.SwingMenuBarWrapper;
-import org.marid.swing.menu.SwingMenuContainer;
-import org.marid.swing.menu.SwingMenuWrapper;
+import org.marid.swing.menu.*;
+import org.marid.swing.menu.MenuContainer;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.stream.IntStream.range;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,8 +38,8 @@ public class MaridActions implements L10nSupport {
     public static final String TOOLBAR_ENABLED = "toolbarEnabled";
     public static final String MENUBAR_DISABLED = "menubarDisabled";
 
-    public static void fillMenu(ActionMap actionMap, JMenuBar menuBar) {
-        final List<Map.Entry<ActionKey, Action>> actions = Arrays.stream(actionMap.allKeys())
+    private static List<Map.Entry<ActionKey, Action>> actions(ActionMap actionMap) {
+        return Arrays.stream(actionMap.allKeys())
                 .filter(k -> k instanceof ActionKey)
                 .map(ActionKey.class::cast)
                 .filter(k -> k.size() >= 4)
@@ -44,6 +47,10 @@ public class MaridActions implements L10nSupport {
                 .map(k -> new AbstractMap.SimpleImmutableEntry<>(k, actionMap.get(k)))
                 .filter(e -> e.getValue() != null && !Boolean.TRUE.equals(e.getValue().getValue(MENUBAR_DISABLED)))
                 .collect(Collectors.toList());
+    }
+
+    public static void fillMenu(ActionMap actionMap, JMenuBar menuBar) {
+        final List<Map.Entry<ActionKey, Action>> actions = actions(actionMap);
         for (final ListIterator<Map.Entry<ActionKey, Action>> it = actions.listIterator(); it.hasNext(); ) {
             if (it.hasPrevious() && it.hasNext()) {
                 final Map.Entry<ActionKey, Action> ne = actions.get(it.nextIndex());
@@ -66,6 +73,35 @@ public class MaridActions implements L10nSupport {
             } else {
                 final JMenuItem menuItem = menu.add(a);
                 menuItem.setName(k.getLastName());
+            }
+        }
+    }
+
+    public static void fillMenu(ActionMap actionMap, PopupMenu popupMenu) {
+        final List<Map.Entry<ActionKey, Action>> actions = actions(actionMap);
+        for (final ListIterator<Map.Entry<ActionKey, Action>> it = actions.listIterator(); it.hasNext(); ) {
+            if (it.hasPrevious() && it.hasNext()) {
+                final Map.Entry<ActionKey, Action> ne = actions.get(it.nextIndex());
+                final Map.Entry<ActionKey, Action> pe = actions.get(it.previousIndex());
+                final ActionKey nk = ne.getKey(), pk = pe.getKey();
+                final Menu menu = getOrCreateMenu(new MenuContainer(popupMenu), nk.getPath());
+                if (Arrays.equals(pk.getPath(), nk.getPath()) && !pk.getGroup().equals(nk.getGroup())) {
+                    menu.addSeparator();
+                }
+            }
+            final Map.Entry<ActionKey, Action> e = it.next();
+            final Action a = e.getValue();
+            final ActionKey k = e.getKey();
+            final String[] path = k.getPath();
+            final Menu menu = getOrCreateMenu(new MenuContainer(popupMenu), path);
+            if (a.getValue(Action.SELECTED_KEY) != null) {
+                final CheckboxMenuItem menuItem = new CheckboxMenuItem((String) a.getValue(Action.NAME));
+                menuItem.setName(k.getLastName());
+                menu.add(menuItem);
+            } else {
+                final MenuItem menuItem = new MenuItem((String) a.getValue(Action.NAME));
+                menuItem.setName(k.getLastName());
+                menu.add(menuItem);
             }
         }
     }
@@ -115,23 +151,26 @@ public class MaridActions implements L10nSupport {
     }
 
     private static JMenu getOrCreateMenu(SwingMenuContainer wrapper, String[] path) {
-        JMenu topMenu = null;
-        for (int i = 0; i < wrapper.getMenuCount(); i++) {
-            final JMenu menu = wrapper.getMenu(i);
-            if (path[0].equals(menu.getName())) {
-                topMenu = menu;
-                break;
-            }
-        }
-        if (topMenu == null) {
-            topMenu = new JMenu(LS.s(path[0]));
-            topMenu.setName(path[0]);
-            wrapper.add(topMenu);
-        }
-        if (path.length == 1) {
-            return topMenu;
-        } else {
-            return getOrCreateMenu(new SwingMenuWrapper(topMenu), Arrays.copyOf(path, path.length - 1));
-        }
+        final JMenu topMenu = range(0, wrapper.getMenuCount()).mapToObj(wrapper::getMenu)
+                .filter(i -> i != null && path[0].equals(i.getName())).findFirst().orElseGet(() -> {
+                    final JMenu m = new JMenu(LS.s(path[0]));
+                    m.setName(path[0]);
+                    wrapper.add(m);
+                    return m;
+                });
+        final int n = path.length;
+        return n == 1 ? topMenu : getOrCreateMenu(new SwingMenuWrapper(topMenu), Arrays.copyOf(path, n - 1));
+    }
+
+    private static Menu getOrCreateMenu(AwtMenuContainer wrapper, String[] path) {
+        final Menu topMenu = range(0, wrapper.getMenuCount()).mapToObj(wrapper::getMenu)
+                .filter(i -> i != null && path[0].equals(i.getName())).findFirst().orElseGet(() -> {
+                    final Menu m = new Menu(LS.s(path[0]));
+                    m.setName(path[0]);
+                    wrapper.add(m);
+                    return m;
+                });
+        final int n = path.length;
+        return n == 1 ? topMenu : getOrCreateMenu(new MenuContainer(topMenu), Arrays.copyOf(path, n - 1));
     }
 }

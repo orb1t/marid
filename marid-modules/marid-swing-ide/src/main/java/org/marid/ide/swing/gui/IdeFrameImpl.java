@@ -28,11 +28,11 @@ import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.WindowPrefs;
 import org.marid.swing.actions.MaridAction;
+import org.marid.swing.actions.MaridActions;
 import org.marid.swing.forms.ConfigurationProvider;
 import org.marid.swing.forms.Form;
 import org.marid.swing.forms.StaticConfigurationDialog;
 import org.marid.swing.log.SwingHandler;
-import org.marid.swing.menu.ActionTreeElement;
 import org.marid.swing.util.MessageSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
@@ -67,6 +67,9 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     private IdeStatusLineImpl statusLine;
 
     @Autowired
+    private ActionMap ideActionMap;
+
+    @Autowired
     public IdeFrameImpl(GenericApplicationContext context) {
         super(LS.s("Marid IDE"), WindowPrefs.graphicsConfiguration("IDE"));
         this.applicationContext = context;
@@ -79,12 +82,11 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         getJMenuBar().add(widgetsMenu());
         getJMenuBar().add(framesMenu());
         getJMenuBar().add(preferencesMenu());
-        getJMenuBar().add(new JSeparator(JSeparator.VERTICAL));
-        context.getBean(ActionTreeElement.class).fillJMenuBar(getJMenuBar());
     }
 
     @PostConstruct
     private void init() {
+        MaridActions.fillMenu(ideActionMap, getJMenuBar());
         add(desktop);
         add(statusLine, BorderLayout.SOUTH);
         pack();

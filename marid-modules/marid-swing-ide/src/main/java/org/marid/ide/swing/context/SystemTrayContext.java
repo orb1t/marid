@@ -23,12 +23,13 @@ import org.marid.ide.base.IdeFrame;
 import org.marid.image.MaridIcon;
 import org.marid.l10n.L10nSupport;
 import org.marid.pref.SysPrefSupport;
+import org.marid.swing.actions.MaridActions;
 import org.marid.swing.log.TrayIconHandler;
-import org.marid.swing.menu.ActionTreeElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.logging.Level;
 
@@ -39,7 +40,7 @@ import java.util.logging.Level;
 public class SystemTrayContext implements SysPrefSupport, L10nSupport {
 
     @Autowired
-    ActionTreeElement ideActionTreeElement;
+    ActionMap ideActionMap;
 
     @Autowired
     IdeFrame ideFrame;
@@ -63,7 +64,7 @@ public class SystemTrayContext implements SysPrefSupport, L10nSupport {
         exitMenuItem.addActionListener(e -> ideFrame.exitWithConfirm());
         popupMenu.add(exitMenuItem);
         popupMenu.addSeparator();
-        ideActionTreeElement.fillMenu(popupMenu);
+        MaridActions.fillMenu(ideActionMap, popupMenu);
         final TrayIcon icon = new TrayIcon(image, s("Marid IDE"), popupMenu);
         icon.addActionListener(ev -> ideFrame.setVisible(!ideFrame.isVisible()));
         ideFrame.setVisible(true);

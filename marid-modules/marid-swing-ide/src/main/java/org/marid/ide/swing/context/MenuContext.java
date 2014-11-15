@@ -21,12 +21,15 @@ package org.marid.ide.swing.context;
 import org.marid.bd.schema.SchemaFrame;
 import org.marid.ide.components.BlockMenuProvider;
 import org.marid.logging.LogSupport;
+import org.marid.swing.actions.ActionKey;
 import org.marid.swing.actions.MaridAction;
-import org.marid.swing.menu.ActionTreeElement;
+import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.swing.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -40,14 +43,11 @@ public class MenuContext implements LogSupport {
     @Autowired
     AutowireCapableBeanFactory autowireCapableBeanFactory;
 
-    @Bean
-    public ActionTreeElement ideMenuActionTreeElement() {
-        return new ActionTreeElement()
-                .add("Services", null, servicesMenu -> {
-                    servicesMenu
-                            .add("Schema frame", null, new MaridAction("Schema frame", null, e -> {
-                                autowireCapableBeanFactory.createBean(SchemaFrame.class).setVisible(true);
-                            }));
-                });
+    @Bean(autowire = Autowire.BY_NAME)
+    public ActionMap ideActionMap() {
+        final ActionMap actionMap = new ActionMap();
+        actionMap.put(new ActionKey("/Services//Schema frame"), new MaridAction("Schema frame", null,
+                e -> autowireCapableBeanFactory.createBean(SchemaFrame.class).setVisible(true)));
+        return actionMap;
     }
 }
