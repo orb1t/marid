@@ -52,7 +52,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <groovy.version>2.4.0-beta-3</groovy.version>
-        <spring.version>4.1.1.RELEASE</spring.version>
+        <spring.version>4.1.2.RELEASE</spring.version>
         <rap.version>2.3.1</rap.version>
         <jetty.version>9.2.3.v20140905</jetty.version>
 
