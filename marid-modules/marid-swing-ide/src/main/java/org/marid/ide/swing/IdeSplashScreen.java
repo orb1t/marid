@@ -91,6 +91,8 @@ public class IdeSplashScreen extends JWindow implements PrefSupport, L10nSupport
         } catch (Exception x) {
             Log.warning("Unable to set LAF {0}", x, laf);
         }
-        //EventQueue.invokeLater(() -> new IdeSplashScreen().setVisible(true));
+        if (UIManager.getLookAndFeel() instanceof NimbusLookAndFeel) {
+            UIManager.put("Nimbus.keepAlternateRowColor", true);
+        }
     }
 }
