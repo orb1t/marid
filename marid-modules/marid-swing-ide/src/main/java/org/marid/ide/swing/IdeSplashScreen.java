@@ -18,9 +18,6 @@
 
 package org.marid.ide.swing;
 
-import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
-import com.jgoodies.looks.plastic.PlasticLookAndFeel;
-import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
 import org.marid.ide.base.IdeFrame;
 import org.marid.image.MaridIcon;
 import org.marid.l10n.L10nSupport;
@@ -41,7 +38,8 @@ import java.util.logging.Logger;
 
 import static java.awt.Frame.getFrames;
 import static java.util.Arrays.stream;
-import static javax.swing.BorderFactory.*;
+import static javax.swing.BorderFactory.createEmptyBorder;
+import static javax.swing.BorderFactory.createLineBorder;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -86,9 +84,6 @@ public class IdeSplashScreen extends JWindow implements PrefSupport, L10nSupport
     }
 
     public static void start() {
-        UIManager.installLookAndFeel("Plastic 3D", Plastic3DLookAndFeel.class.getName());
-        UIManager.installLookAndFeel("Plastic", PlasticLookAndFeel.class.getName());
-        UIManager.installLookAndFeel("Plastic XP", PlasticXPLookAndFeel.class.getName());
         UIManager.installLookAndFeel("Standard", StandardLookAndFeel.class.getName());
         final String laf = SYSPREFS.get("laf", NimbusLookAndFeel.class.getCanonicalName());
         try {

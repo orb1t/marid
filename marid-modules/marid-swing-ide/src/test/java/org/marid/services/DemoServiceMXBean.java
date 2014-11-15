@@ -25,7 +25,7 @@ import org.marid.service.MaridServiceMXBean;
  */
 public interface DemoServiceMXBean extends MaridServiceMXBean {
 
-    double random();
+    double getRandom();
 
-    double sin();
+    double getSin();
 }

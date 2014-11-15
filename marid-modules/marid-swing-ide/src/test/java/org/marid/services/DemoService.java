@@ -30,12 +30,12 @@ import java.util.concurrent.ThreadLocalRandom;
 public class DemoService extends AbstractMaridService implements DemoServiceMXBean {
 
     @Override
-    public double random() {
+    public double getRandom() {
         return ThreadLocalRandom.current().nextDouble();
     }
 
     @Override
-    public double sin() {
+    public double getSin() {
         return Math.sin(System.currentTimeMillis() / 1000.0);
     }
 }
