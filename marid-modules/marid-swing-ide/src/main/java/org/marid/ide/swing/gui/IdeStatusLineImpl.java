@@ -33,6 +33,8 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
+import static javax.swing.BorderFactory.createEtchedBorder;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -50,7 +52,7 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
     @Autowired
     public IdeStatusLineImpl(IdeFrameImpl ideFrame, ProfileManager profileManager) {
         this.ideFrame = ideFrame;
-        setBorder(BorderFactory.createRaisedSoftBevelBorder());
+        setBorder(createEtchedBorder());
         setLayout(new GridBagLayout());
         this.profileManager = profileManager;
         this.profileListModel = new ProfileManagerListModel();

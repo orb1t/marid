@@ -19,13 +19,14 @@
 package org.marid.swing.dnd;
 
 import java.awt.datatransfer.DataFlavor;
+import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public interface DndSource<T extends DndObject> extends DndConstants {
+public interface DndSource<T extends Serializable> extends DndConstants {
 
     default T getDndObject() {
         return null;

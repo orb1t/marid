@@ -18,16 +18,16 @@
 
 package org.marid.swing.dnd;
 
-import images.Images;
 import org.marid.logging.LogSupport;
 import org.marid.util.Utils;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.function.Function;
 
 import static java.util.Arrays.stream;
 
@@ -36,9 +36,14 @@ import static java.util.Arrays.stream;
  */
 public class MaridTransferHandler extends TransferHandler implements LogSupport {
 
+    protected final Function<Object, Icon> iconFunction;
+
     public MaridTransferHandler() {
-        setDragImage(Images.getImage("add.png", 16));
-        setDragImageOffset(new Point(0, 0));
+        this(o -> null);
+    }
+
+    public MaridTransferHandler(Function<Object, Icon> iconFunction) {
+        this.iconFunction = iconFunction;
     }
 
     @Override
@@ -50,10 +55,9 @@ public class MaridTransferHandler extends TransferHandler implements LogSupport 
     public Icon getVisualRepresentation(Transferable t) {
         for (final DataFlavor dataFlavor : t.getTransferDataFlavors()) {
             final Class<?> rc = dataFlavor.getRepresentationClass();
-            if (rc != null && DndObject.class.isAssignableFrom(rc)) {
+            if (rc != null) {
                 try {
-                    final DndObject dndObject = (DndObject) t.getTransferData(dataFlavor);
-                    return dndObject.getVisualRepresentation();
+                    return iconFunction.apply(t.getTransferData(dataFlavor));
                 } catch (UnsupportedFlavorException | IOException x) {
                     warning("Unable to get visual representation for {0}", x, t);
                 }
@@ -67,7 +71,7 @@ public class MaridTransferHandler extends TransferHandler implements LogSupport 
         if (c instanceof DndSource) {
             final DndSource dndSource = (DndSource) c;
             final DataFlavor[] dataFlavors = dndSource.getSourceDataFlavors();
-            final DndObject data = dndSource.getDndObject();
+            final Serializable data = dndSource.getDndObject();
             if (data == null) {
                 return null;
             } else {
@@ -110,10 +114,10 @@ public class MaridTransferHandler extends TransferHandler implements LogSupport 
         if (source instanceof DndSource) {
             for (final DataFlavor dataFlavor : data.getTransferDataFlavors()) {
                 final Class<?> rc = dataFlavor.getRepresentationClass();
-                if (rc != null && DndObject.class.isAssignableFrom(rc)) {
+                if (rc != null) {
                     try {
-                        final DndObject dndObject = (DndObject) data.getTransferData(dataFlavor);
-                        final DndSource<DndObject> dndSource = Utils.cast(source);
+                        final Serializable dndObject = (Serializable) data.getTransferData(dataFlavor);
+                        final DndSource<Serializable> dndSource = Utils.cast(source);
                         dndSource.dndObjectExportDone(dndObject, action);
                     } catch (UnsupportedFlavorException | IOException x) {
                         warning("Unable to get transfer data for {0}", x, data);
@@ -138,8 +142,8 @@ public class MaridTransferHandler extends TransferHandler implements LogSupport 
     @Override
     public boolean importData(TransferSupport support) {
         if (support.getComponent() instanceof DndTarget) {
-            final DndTarget<DndObject> dndTarget = Utils.cast(support.getComponent());
-            final DndObject dndObject = dndTarget.getImported(support.getTransferable());
+            final DndTarget<Serializable> dndTarget = Utils.cast(support.getComponent());
+            final Serializable dndObject = dndTarget.getImported(support.getTransferable());
             return dndObject != null && dndTarget.dropDndObject(dndObject, support);
         } else {
             return false;

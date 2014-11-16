@@ -19,12 +19,13 @@
 package org.marid.swing.jmx;
 
 import org.marid.jmx.JmxAttribute;
-import org.marid.swing.dnd.DndObject;
+
+import java.io.Serializable;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class SwingJmxAttribute implements DndObject {
+public class SwingJmxAttribute implements Serializable {
 
     private final JmxAttribute attribute;
 

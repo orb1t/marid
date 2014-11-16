@@ -16,31 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.dnd;
+package org.marid.ide.swing.context;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.marid.test.NormalTests;
-
-import java.awt.datatransfer.DataFlavor;
+import org.marid.jmx.MaridBeanConnectionManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Category({NormalTests.class})
-public class DndSourceTest {
+@Configuration
+public class ProfileContext {
 
-    @Test
-    public void testGenerics() {
-        final DndSource<?> dndSource = new DndSource<TestDndObject>() {
-        };
-        final DataFlavor[] dataFlavors = dndSource.getSourceDataFlavors();
-        Assert.assertEquals(1, dataFlavors.length);
-        Assert.assertEquals(new DataFlavor(TestDndObject.class, null), dataFlavors[0]);
-    }
-
-    class TestDndObject implements DndObject {
-
+    @Bean
+    public MaridBeanConnectionManager maridBeanConnectionManager() {
+        return new MaridBeanConnectionManager();
     }
 }

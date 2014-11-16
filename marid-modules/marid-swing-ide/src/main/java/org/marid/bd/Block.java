@@ -20,14 +20,16 @@ package org.marid.bd;
 
 import org.marid.ide.components.BlockPersister;
 import org.marid.itf.Named;
-import org.marid.swing.dnd.DndObject;
 import org.marid.util.CollectionUtils;
 import org.marid.util.Utils;
 
+import javax.swing.*;
 import javax.xml.bind.annotation.*;
 import javax.xml.transform.stream.StreamResult;
+import java.awt.*;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -38,7 +40,7 @@ import java.util.function.Supplier;
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
-public abstract class Block implements Named, DndObject {
+public abstract class Block implements Named, Serializable {
 
     @XmlAttribute
     @XmlID
@@ -106,6 +108,19 @@ public abstract class Block implements Named, DndObject {
                         .forEach(l -> l.getBlockInput().set(l.getBlockOutput().get()));
             }
         });
+    }
+
+    public ImageIcon getVisualRepresentation() {
+        return null;
+    }
+
+    public ImageIcon getVisualRepresentation(int width, int height) {
+        final ImageIcon icon = getVisualRepresentation();
+        if (icon == null || icon.getIconWidth() == width && icon.getIconHeight() == height) {
+            return icon;
+        } else {
+            return new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+        }
     }
 
     public abstract BlockComponent createComponent();

@@ -20,8 +20,9 @@ package org.marid.jmx;
 
 import org.marid.logging.LogSupport;
 
-import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -32,29 +33,23 @@ public class MaridBeanConnectionManager implements LogSupport {
     private final Map<String, MaridBeanConnection> connectionMap = new ConcurrentHashMap<>();
 
     public void registerConnection(String name, MaridBeanConnection connection) {
-        final MaridBeanConnection registered = connectionMap.computeIfPresent(name, (k, v) -> {
-            try (final MaridBeanConnection old = v) {
-                if (old != null) {
-                    info("Closing {0}", old);
-                }
-            } catch (IOException x) {
-                warning("Unable to close old connection for {0}", x, name);
-            }
-            return connection;
-        });
-        info("Registered bean connection {0} : {1}", name, registered);
+        connectionMap.put(name, connection);
     }
 
     public void unregisterConnection(String name) {
-        connectionMap.computeIfPresent(name, (k, v) -> {
-            try (final MaridBeanConnection c = v) {
-                if (c != null) {
-                    info("Closing {0}", c);
-                }
-            } catch (IOException x) {
-                warning("Unable to close {0}", x, v);
-            }
-            return null;
-        });
+        connectionMap.remove(name);
+    }
+
+    public MaridBeanConnection getConnection(String name) {
+        return connectionMap.get(name);
+    }
+
+    public Set<String> getConnectionNames() {
+        return Collections.unmodifiableSet(connectionMap.keySet());
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
     }
 }

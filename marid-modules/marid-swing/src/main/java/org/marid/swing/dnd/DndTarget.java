@@ -22,6 +22,7 @@ import org.marid.logging.LogSupport;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -30,7 +31,7 @@ import static javax.swing.TransferHandler.TransferSupport;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public interface DndTarget<T extends DndObject> extends DndConstants, LogSupport {
+public interface DndTarget<T extends Serializable> extends DndConstants, LogSupport {
 
     @SuppressWarnings("unchecked")
     default Class<T> getTargetDndType() {
