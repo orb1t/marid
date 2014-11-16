@@ -45,10 +45,12 @@ public class MaridIcon {
         }
     }
 
-    public static void draw(int size, Color color, Graphics2D g) {
+    public static void draw(int w, int h, Color color, Graphics2D g) {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setPaint(new LinearGradientPaint(0.0f, 0.0f, 0.0f, size - 1.0f, FRACTIONS, COLORS));
-        g.fillRect(0, 0, size, size);
+        g.setPaint(new LinearGradientPaint(0, 0, 0, h, FRACTIONS, COLORS));
+        g.fillRect(0, 0, w, h);
+        final int size = Math.min(w, h);
+        g.translate((w - size) / 2, (h - size) / 2);
         g.scale(size / 2.0, -size / 2.0);
         final BasicStroke stroke = new BasicStroke(0.15f);
         g.translate(1.0, -1.0);
@@ -80,7 +82,7 @@ public class MaridIcon {
     public static BufferedImage getImage(int size, Color color) {
         final BufferedImage img = new BufferedImage(size, size, TYPE_INT_ARGB);
         final Graphics2D g = img.createGraphics();
-        draw(size, color, g);
+        draw(size, size, color, g);
         return img;
     }
 

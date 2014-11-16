@@ -33,8 +33,6 @@ import static java.awt.SystemColor.desktop;
 @Component
 public class IdeDesktopImpl extends JDesktopPane implements IdeDesktop {
 
-    private final Color lc = new Color(77, 77, 77, 77);
-    private final Color hc = new Color(177, 177, 177, 77);
     private final AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.02f);
 
     public IdeDesktopImpl() {
@@ -45,20 +43,15 @@ public class IdeDesktopImpl extends JDesktopPane implements IdeDesktop {
 
     @Override
     protected void paintComponent(Graphics graphics) {
-        final Graphics2D g = (Graphics2D) graphics;
-        final Rectangle clip = g.getClipBounds();
-        g.setBackground(getBackground().darker());
-        g.clearRect(clip.x, clip.y, clip.width, clip.height);
-        final int cx = getWidth() / 2, cy = getHeight() / 2;
-        final int minSize = Math.min(getWidth(), getHeight()), size = minSize < 128 ? 64 : minSize - 64;
-        final Graphics2D cg = (Graphics2D) g.create(cx - size / 2, cy - size / 2, size, size);
+        final Graphics2D g = (Graphics2D) graphics.create();
         try {
-            cg.setComposite(composite);
-            MaridIcon.draw(size, Color.GREEN, cg);
+            final Rectangle clip = g.getClipBounds();
+            g.setBackground(getBackground().darker());
+            g.clearRect(clip.x, clip.y, clip.width, clip.height);
+            g.setComposite(composite);
+            MaridIcon.draw(getWidth(), getHeight(), Color.GREEN, g);
         } finally {
-            cg.dispose();
+            g.dispose();
         }
-        g.setPaint(new GradientPaint(cx, 0, hc, cx, getHeight(), lc, false));
-        g.fillRect(clip.x, clip.y, clip.width, clip.height);
     }
 }
