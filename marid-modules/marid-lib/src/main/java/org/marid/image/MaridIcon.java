@@ -28,23 +28,26 @@ import java.io.File;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
- * Marid icon.
- *
  * @author Dmitry Ovchinnikov
  */
 public class MaridIcon {
 
-    public static BufferedImage getImage(int size, Color color) {
-        final BufferedImage img = new BufferedImage(size, size, TYPE_INT_ARGB);
-        final Graphics2D g = img.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        final float[] fs = new float[16];
-        final Color[] cs = new Color[16];
-        for (int i = 0; i < fs.length; i++) {
-            fs[i] = (i + 1) / (float)fs.length;
-            cs[i] = new Color(150 - i * 10, 150 - i * 10, 255 - i * 10);
+    private static final int FRACTION_COUNT = 16;
+    private static final float[] FRACTIONS = new float[FRACTION_COUNT];
+    private static final Color[] COLORS = new Color[FRACTION_COUNT];
+    private static final Color[] BCOLORS = new Color[FRACTION_COUNT];
+
+    static {
+        for (int i = 0; i < FRACTION_COUNT; i++) {
+            FRACTIONS[i] = (i + 1) / (float) FRACTION_COUNT;
+            COLORS[i] = new Color(150 - i * 10, 150 - i * 10, 255 - i * 10);
+            BCOLORS[i] = new Color(255, 255, 255, 255 - i * 15);
         }
-        g.setPaint(new LinearGradientPaint(0.0f, 0.0f, 0.0f, size - 1.0f, fs, cs));
+    }
+
+    public static void draw(int size, Color color, Graphics2D g) {
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setPaint(new LinearGradientPaint(0.0f, 0.0f, 0.0f, size - 1.0f, FRACTIONS, COLORS));
         g.fillRect(0, 0, size, size);
         g.scale(size / 2.0, -size / 2.0);
         final BasicStroke stroke = new BasicStroke(0.15f);
@@ -60,9 +63,6 @@ public class MaridIcon {
         onda2.moveTo(+1.1f, +0.1f);
         onda2.quadTo(+0.8f, +0.3f, +0.4f, +0.15f);
         g.draw(onda2);
-        for (int i = 0; i < fs.length; i++) {
-            cs[i] = new Color(255, 255, 255, 255 - i * 15);
-        }
         final GeneralPath botella = new GeneralPath();
         botella.moveTo(-0.5f, -1.0f);
         botella.curveTo(-0.6f, +0.0f, -0.1f, +0.3f, -0.1f, +1.0f);
@@ -71,10 +71,16 @@ public class MaridIcon {
         botella.closePath();
         g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 210));
         g.fill(botella);
-        g.setPaint(new LinearGradientPaint(+0.0f, +1.0f, +0.0f, -1.0f, fs, cs));
+        g.setPaint(new LinearGradientPaint(+0.0f, +1.0f, +0.0f, -1.0f, FRACTIONS, BCOLORS));
         g.fill(botella);
         g.setColor(Color.WHITE);
         g.draw(botella);
+    }
+
+    public static BufferedImage getImage(int size, Color color) {
+        final BufferedImage img = new BufferedImage(size, size, TYPE_INT_ARGB);
+        final Graphics2D g = img.createGraphics();
+        draw(size, color, g);
         return img;
     }
 

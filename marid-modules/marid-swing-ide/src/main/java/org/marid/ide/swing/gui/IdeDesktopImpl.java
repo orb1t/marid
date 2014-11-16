@@ -19,6 +19,7 @@
 package org.marid.ide.swing.gui;
 
 import org.marid.ide.base.IdeDesktop;
+import org.marid.image.MaridIcon;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -34,8 +35,7 @@ public class IdeDesktopImpl extends JDesktopPane implements IdeDesktop {
 
     private final Color lc = new Color(77, 77, 77, 77);
     private final Color hc = new Color(177, 177, 177, 77);
-    private final float[] fractions = {0.0f, 1.0f};
-    private final Color[] colors = {lc, hc};
+    private final AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.02f);
 
     public IdeDesktopImpl() {
         setOpaque(true);
@@ -47,11 +47,18 @@ public class IdeDesktopImpl extends JDesktopPane implements IdeDesktop {
     protected void paintComponent(Graphics graphics) {
         final Graphics2D g = (Graphics2D) graphics;
         final Rectangle clip = g.getClipBounds();
-        g.setBackground(getBackground());
+        g.setBackground(getBackground().darker());
         g.clearRect(clip.x, clip.y, clip.width, clip.height);
-        final float cx = getWidth() / 2.0f, cy = getHeight() / 2.0f;
-        final float r = Math.max(getWidth(), getHeight());
-        g.setPaint(new RadialGradientPaint(cx, cy, r, fractions, colors));
+        final int cx = getWidth() / 2, cy = getHeight() / 2;
+        final int minSize = Math.min(getWidth(), getHeight()), size = minSize < 128 ? 64 : minSize - 64;
+        final Graphics2D cg = (Graphics2D) g.create(cx - size / 2, cy - size / 2, size, size);
+        try {
+            cg.setComposite(composite);
+            MaridIcon.draw(size, Color.GREEN, cg);
+        } finally {
+            cg.dispose();
+        }
+        g.setPaint(new GradientPaint(cx, 0, hc, cx, getHeight(), lc, false));
         g.fillRect(clip.x, clip.y, clip.width, clip.height);
     }
 }
