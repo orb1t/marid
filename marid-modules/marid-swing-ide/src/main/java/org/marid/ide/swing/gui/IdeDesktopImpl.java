@@ -22,6 +22,7 @@ import org.marid.ide.base.IdeDesktop;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
+import java.awt.*;
 
 import static java.awt.SystemColor.desktop;
 
@@ -31,9 +32,26 @@ import static java.awt.SystemColor.desktop;
 @Component
 public class IdeDesktopImpl extends JDesktopPane implements IdeDesktop {
 
+    private final Color lc = new Color(77, 77, 77, 77);
+    private final Color hc = new Color(177, 177, 177, 77);
+    private final float[] fractions = {0.0f, 1.0f};
+    private final Color[] colors = {lc, hc};
+
     public IdeDesktopImpl() {
-        setOpaque(false);
+        setOpaque(true);
         setDoubleBuffered(true);
-        setBackground(desktop.darker());
+        setBackground(desktop);
+    }
+
+    @Override
+    protected void paintComponent(Graphics graphics) {
+        final Graphics2D g = (Graphics2D) graphics;
+        final Rectangle clip = g.getClipBounds();
+        g.setBackground(getBackground());
+        g.clearRect(clip.x, clip.y, clip.width, clip.height);
+        final float cx = getWidth() / 2.0f, cy = getHeight() / 2.0f;
+        final float r = Math.max(getWidth(), getHeight());
+        g.setPaint(new RadialGradientPaint(cx, cy, r, fractions, colors));
+        g.fillRect(clip.x, clip.y, clip.width, clip.height);
     }
 }

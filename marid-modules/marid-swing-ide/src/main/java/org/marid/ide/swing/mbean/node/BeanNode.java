@@ -22,6 +22,7 @@ import images.Images;
 import org.marid.swing.tree.TNode;
 
 import javax.management.ObjectInstance;
+import javax.management.ObjectName;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,5 +91,9 @@ public class BeanNode implements TNode<BeanNode, RootNode, Group<?, ?>>, Node {
 
     public ObjectInstance getInstance() {
         return instance;
+    }
+
+    public ObjectName getObjectName() {
+        return instance.getObjectName();
     }
 }

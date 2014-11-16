@@ -50,6 +50,7 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
     @Autowired
     public IdeStatusLineImpl(IdeFrameImpl ideFrame, ProfileManager profileManager) {
         this.ideFrame = ideFrame;
+        setBorder(BorderFactory.createRaisedSoftBevelBorder());
         setLayout(new GridBagLayout());
         this.profileManager = profileManager;
         this.profileListModel = new ProfileManagerListModel();
