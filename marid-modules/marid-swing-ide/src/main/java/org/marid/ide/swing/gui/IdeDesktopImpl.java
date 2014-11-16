@@ -33,7 +33,7 @@ import static java.awt.SystemColor.desktop;
 @Component
 public class IdeDesktopImpl extends JDesktopPane implements IdeDesktop {
 
-    private final AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.02f);
+    private final AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.01f);
 
     public IdeDesktopImpl() {
         setOpaque(true);

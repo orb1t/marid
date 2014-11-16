@@ -26,6 +26,8 @@ import javax.management.ObjectName;
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -57,14 +59,16 @@ public class JmxAttribute implements Serializable {
         domain = name = null;
     }
 
-    @XmlElement
+    @XmlElementRef
     private Property[] getProperties() {
-        return properties.entrySet().stream().map(e -> new Property(e.getKey(), e.getValue())).toArray(Property[]::new);
+        return properties.isEmpty() ? null : properties.entrySet().stream().map(Property::new).toArray(Property[]::new);
     }
 
     private void setProperties(Property[] properties) {
-        for (final Property property : properties) {
-            this.properties.put(property.key, property.value);
+        if (properties != null) {
+            for (final Property property : properties) {
+                this.properties.put(property.key, property.value);
+            }
         }
     }
 
@@ -78,5 +82,18 @@ public class JmxAttribute implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    protected void visitToStringMap(Map<String, Object> map) {
+        map.put("name", name);
+        map.put("domain", domain);
+        map.put("properties", properties);
+    }
+
+    @Override
+    public String toString() {
+        final LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        visitToStringMap(map);
+        return getClass().getSimpleName() + map;
     }
 }

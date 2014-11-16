@@ -19,14 +19,12 @@
 package org.marid.ide.swing.mbean;
 
 import org.jdesktop.swingx.JXTreeTable;
-import org.marid.ide.base.MBeanServerSupport;
+import org.marid.ide.base.MaridBeanConnectionSupport;
 import org.marid.ide.swing.mbean.node.AttributeNode;
-import org.marid.ide.swing.mbean.node.BeanNode;
-import org.marid.jmx.JmxAttribute;
+import org.marid.jmx.IdeJmxAttribute;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.dnd.DndSource;
 import org.marid.swing.dnd.MaridTransferHandler;
-import org.marid.swing.jmx.SwingJmxAttribute;
 
 import javax.swing.table.TableColumn;
 import java.util.List;
@@ -34,10 +32,10 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class MBeanServerTreeTable extends JXTreeTable implements PrefSupport, DndSource<SwingJmxAttribute> {
+public class MBeanServerTreeTable extends JXTreeTable implements PrefSupport, DndSource<IdeJmxAttribute> {
 
-    public MBeanServerTreeTable(MBeanServerSupport mBeanServerSupport) {
-        super(new MBeanServerTreeModel(mBeanServerSupport));
+    public MBeanServerTreeTable(MaridBeanConnectionSupport maridBeanConnectionSupport) {
+        super(new MBeanServerTreeModel(maridBeanConnectionSupport));
         setRootVisible(false);
         setTreeCellRenderer(new MBeanTreeCellRenderer());
         setDragEnabled(true);
@@ -73,16 +71,14 @@ public class MBeanServerTreeTable extends JXTreeTable implements PrefSupport, Dn
     }
 
     @Override
-    public SwingJmxAttribute getDndObject() {
+    public IdeJmxAttribute getDndObject() {
         final int row = getSelectedRow();
         if (row < 0) {
             return null;
         }
         final Object object = getModel().getValueAt(row, getTreeTableModel().getHierarchicalColumn());
         if (object instanceof AttributeNode) {
-            final AttributeNode node = (AttributeNode) object;
-            final BeanNode beanNode = node.getParent().getParent();
-            return new SwingJmxAttribute(new JmxAttribute(beanNode.getObjectName(), node.getName()));
+            return new IdeJmxAttribute("", (AttributeNode) object);
         } else {
             return null;
         }

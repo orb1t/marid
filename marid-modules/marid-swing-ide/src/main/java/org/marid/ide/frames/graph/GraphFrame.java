@@ -25,7 +25,7 @@ import org.marid.ide.frames.MaridFrame;
 import org.marid.ide.profile.Profile;
 import org.marid.swing.dnd.DndTarget;
 import org.marid.swing.dnd.MaridTransferHandler;
-import org.marid.swing.jmx.SwingJmxAttribute;
+import org.marid.jmx.IdeJmxAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
 
@@ -34,7 +34,7 @@ import org.springframework.context.support.GenericApplicationContext;
  */
 @CloseableFrame
 @MetaInfo(name = "Graph")
-public class GraphFrame extends MaridFrame implements DndTarget<SwingJmxAttribute> {
+public class GraphFrame extends MaridFrame implements DndTarget<IdeJmxAttribute> {
 
     private final Profile profile;
 

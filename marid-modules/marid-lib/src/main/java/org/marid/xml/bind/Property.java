@@ -20,6 +20,7 @@ package org.marid.xml.bind;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -37,6 +38,10 @@ public class Property {
     public Property(String key, String value) {
         this.key = key;
         this.value = value;
+    }
+
+    public Property(Map.Entry<String, String> entry) {
+        this(entry.getKey(), entry.getValue());
     }
 
     public Property() {

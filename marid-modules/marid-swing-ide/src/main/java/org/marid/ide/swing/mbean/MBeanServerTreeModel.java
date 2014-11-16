@@ -19,7 +19,7 @@
 package org.marid.ide.swing.mbean;
 
 import org.jdesktop.swingx.treetable.TreeTableModel;
-import org.marid.ide.base.MBeanServerSupport;
+import org.marid.ide.base.MaridBeanConnectionSupport;
 import org.marid.ide.swing.mbean.node.Node;
 import org.marid.ide.swing.mbean.node.RootNode;
 import org.marid.l10n.L10nSupport;
@@ -35,14 +35,14 @@ import javax.swing.tree.TreePath;
  */
 public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
 
-    protected final MBeanServerSupport mBeanServerSupport;
+    protected final MaridBeanConnectionSupport maridBeanConnectionSupport;
     protected final EventListenerList listenerList = new EventListenerList();
 
     protected RootNode root;
 
-    public MBeanServerTreeModel(MBeanServerSupport mBeanServerSupport) {
-        this.mBeanServerSupport = mBeanServerSupport;
-        this.root = mBeanServerSupport.serverResult(RootNode::new);
+    public MBeanServerTreeModel(MaridBeanConnectionSupport maridBeanConnectionSupport) {
+        this.maridBeanConnectionSupport = maridBeanConnectionSupport;
+        this.root = maridBeanConnectionSupport.serverResult(RootNode::new);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
     }
 
     public void update() {
-        root = mBeanServerSupport.serverResult(RootNode::new);
+        root = maridBeanConnectionSupport.serverResult(RootNode::new);
         final TreeModelListener[] listeners = listenerList.getListeners(TreeModelListener.class);
         for (int i = listeners.length - 1; i >= 0; i--) {
             listeners[i].treeStructureChanged(new TreeModelEvent(this, root == null ? null : new Object[]{getRoot()}));

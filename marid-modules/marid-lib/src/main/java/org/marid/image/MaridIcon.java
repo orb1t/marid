@@ -59,11 +59,11 @@ public class MaridIcon {
         g.setColor(Color.WHITE);
         final GeneralPath onda1 = new GeneralPath();
         onda1.moveTo(-1.1f, +0.1f);
-        onda1.quadTo(-0.8f, +0.3f, -0.4f, +0.15f);
+        onda1.quadTo(-0.8f, +0.3f, -0.475f, +0.17f);
         g.draw(onda1);
         final GeneralPath onda2 = new GeneralPath();
         onda2.moveTo(+1.1f, +0.1f);
-        onda2.quadTo(+0.8f, +0.3f, +0.4f, +0.15f);
+        onda2.quadTo(+0.8f, +0.3f, +0.475f, +0.17f);
         g.draw(onda2);
         final GeneralPath botella = new GeneralPath();
         botella.moveTo(-0.5f, -1.0f);

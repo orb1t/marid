@@ -22,7 +22,7 @@ import groovy.lang.GroovyShell;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.marid.functions.SafeFunction;
 import org.marid.groovy.GroovyRuntime;
-import org.marid.ide.base.MBeanServerSupport;
+import org.marid.ide.base.MaridBeanConnectionSupport;
 import org.marid.ide.log.LoggingPostProcessor;
 import org.marid.io.SimpleWriter;
 import org.marid.itf.Named;
@@ -56,7 +56,7 @@ import static java.time.Instant.ofEpochMilli;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Profile implements Named, Closeable, LogSupport, MBeanServerSupport {
+public class Profile implements Named, Closeable, LogSupport, MaridBeanConnectionSupport {
 
     protected final List<Consumer<String>> outputConsumers = new CopyOnWriteArrayList<>();
     protected final List<ApplicationListener<ApplicationEvent>> applicationListeners = new CopyOnWriteArrayList<>();

@@ -25,7 +25,7 @@ import javax.management.MBeanServerConnection;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public interface MBeanServerSupport {
+public interface MaridBeanConnectionSupport {
 
     <T> T serverResult(SafeFunction<MBeanServerConnection, T> function);
 }
