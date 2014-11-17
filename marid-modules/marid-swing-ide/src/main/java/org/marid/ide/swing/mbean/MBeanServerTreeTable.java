@@ -63,6 +63,9 @@ public class MBeanServerTreeTable extends JXTreeTable implements PrefSupport, Dn
 
     public void update() {
         getTreeTableModel().update();
+        for (int i = getRowCount() - 1; i >= 0; i--) {
+            expandRow(i);
+        }
     }
 
     @Override

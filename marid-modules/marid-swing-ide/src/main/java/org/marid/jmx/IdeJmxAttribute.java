@@ -20,17 +20,19 @@ package org.marid.jmx;
 
 import org.marid.ide.swing.mbean.node.AttributeNode;
 
+import javax.annotation.Nonnull;
 import javax.management.MBeanAttributeInfo;
 import javax.management.ObjectName;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Comparator;
 import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 @XmlRootElement
-public class IdeJmxAttribute extends JmxAttribute {
+public class IdeJmxAttribute extends JmxAttribute implements Comparable<IdeJmxAttribute> {
 
     @XmlAttribute
     private final String connection;
@@ -62,5 +64,10 @@ public class IdeJmxAttribute extends JmxAttribute {
     protected void visitToStringMap(Map<String, Object> map) {
         map.put("connection", connection);
         super.visitToStringMap(map);
+    }
+
+    @Override
+    public int compareTo(@Nonnull IdeJmxAttribute o) {
+        return Comparator.comparing(IdeJmxAttribute::getObjectName).compare(this, o);
     }
 }
