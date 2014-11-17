@@ -42,7 +42,6 @@ public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
 
     public MBeanServerTreeModel(MaridBeanConnectionSupport maridBeanConnectionSupport) {
         this.maridBeanConnectionSupport = maridBeanConnectionSupport;
-        this.root = maridBeanConnectionSupport.serverResult(RootNode::new);
     }
 
     @Override
@@ -85,7 +84,7 @@ public class MBeanServerTreeModel implements TreeTableModel, L10nSupport {
     }
 
     public void update() {
-        root = maridBeanConnectionSupport.serverResult(RootNode::new);
+        root = new RootNode(maridBeanConnectionSupport.getConnection());
         final TreeModelListener[] listeners = listenerList.getListeners(TreeModelListener.class);
         for (int i = listeners.length - 1; i >= 0; i--) {
             listeners[i].treeStructureChanged(new TreeModelEvent(this, root == null ? null : new Object[]{getRoot()}));

@@ -18,6 +18,7 @@
 
 package org.marid.ide.swing.mbean.node;
 
+import org.marid.jmx.DummyMBeanServerConnection;
 import org.marid.swing.tree.TRootNode;
 
 import javax.management.MBeanServerConnection;
@@ -36,9 +37,9 @@ public class RootNode implements TRootNode<RootNode, BeanNode>, Node {
     protected final List<BeanNode> children;
 
     public RootNode(MBeanServerConnection server) {
-        this.server = server;
+        this.server = server == null ? DummyMBeanServerConnection.INSTANCE : server;
         try {
-            children = server.queryMBeans(null, null).stream().map(v -> new BeanNode(this, v)).collect(toList());
+            children = this.server.queryMBeans(null, null).stream().map(v -> new BeanNode(this, v)).collect(toList());
         } catch (IOException x) {
             throw new IllegalStateException(x);
         }

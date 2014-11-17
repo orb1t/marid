@@ -250,14 +250,12 @@ public class Profile implements Named, Closeable, LogSupport, MaridBeanConnectio
     }
 
     @Override
-    public <T> T serverResult(SafeFunction<MBeanServerConnection, T> function) {
-        return contextResult(applicationContext -> {
-            if (applicationContext == null) {
-                return null;
-            } else {
-                final MBeanServer server = applicationContext.getBean(MBeanServer.class);
-                return server != null ? function.apply(server) : null;
-            }
-        });
+    public MBeanServerConnection getConnection() {
+        return contextResult(c -> c != null ? c.getBean(MBeanServerConnection.class) : null);
+    }
+
+    @Override
+    public String getConnectionName() {
+        return getName();
     }
 }

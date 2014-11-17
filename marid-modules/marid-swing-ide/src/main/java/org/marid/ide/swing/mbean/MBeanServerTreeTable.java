@@ -78,7 +78,8 @@ public class MBeanServerTreeTable extends JXTreeTable implements PrefSupport, Dn
         }
         final Object object = getModel().getValueAt(row, getTreeTableModel().getHierarchicalColumn());
         if (object instanceof AttributeNode) {
-            return new IdeJmxAttribute("", (AttributeNode) object);
+            final String connectionName = getTreeTableModel().maridBeanConnectionSupport.getConnectionName();
+            return new IdeJmxAttribute(connectionName, (AttributeNode) object);
         } else {
             return null;
         }

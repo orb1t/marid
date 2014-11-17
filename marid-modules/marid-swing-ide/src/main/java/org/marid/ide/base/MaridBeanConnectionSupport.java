@@ -18,8 +18,6 @@
 
 package org.marid.ide.base;
 
-import org.marid.functions.SafeFunction;
-
 import javax.management.MBeanServerConnection;
 
 /**
@@ -27,5 +25,7 @@ import javax.management.MBeanServerConnection;
  */
 public interface MaridBeanConnectionSupport {
 
-    <T> T serverResult(SafeFunction<MBeanServerConnection, T> function);
+    MBeanServerConnection getConnection();
+
+    String getConnectionName();
 }
