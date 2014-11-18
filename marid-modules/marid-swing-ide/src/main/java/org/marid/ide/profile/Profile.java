@@ -22,7 +22,7 @@ import groovy.lang.GroovyShell;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.marid.functions.SafeFunction;
 import org.marid.groovy.GroovyRuntime;
-import org.marid.ide.base.MaridBeanConnectionSupport;
+import org.marid.ide.components.ProfileManager;
 import org.marid.ide.log.LoggingPostProcessor;
 import org.marid.io.SimpleWriter;
 import org.marid.itf.Named;
@@ -35,12 +35,13 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextStartedEvent;
 
-import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -48,7 +49,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.time.Instant.ofEpochMilli;
@@ -56,13 +56,14 @@ import static java.time.Instant.ofEpochMilli;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Profile implements Named, Closeable, LogSupport, MaridBeanConnectionSupport {
+public class Profile implements Named, Closeable, LogSupport {
 
-    protected final List<Consumer<String>> outputConsumers = new CopyOnWriteArrayList<>();
+    protected final ProfileManager profileManager;
     protected final List<ApplicationListener<ApplicationEvent>> applicationListeners = new CopyOnWriteArrayList<>();
+    protected final StringWriter compilerOutput = new StringWriter();
     protected final CompilerConfiguration compilerConfiguration = GroovyRuntime.newCompilerConfiguration(c -> {
         c.setRecompileGroovySource(true);
-        c.setOutput(new PrintWriter(new SimpleWriter((w, s) -> outputConsumers.forEach(cs -> cs.accept(s))), true));
+        c.setOutput(new PrintWriter(new SimpleWriter((w, s) -> compilerOutput.write(s)), true));
     });
     protected final Path path;
     protected final GroovyShell shell;
@@ -71,7 +72,8 @@ public class Profile implements Named, Closeable, LogSupport, MaridBeanConnectio
 
     protected AnnotationConfigApplicationContext applicationContext;
 
-    public Profile(Path path) {
+    public Profile(ProfileManager profileManager, Path path) {
+        this.profileManager = profileManager;
         this.path = path;
         this.threadGroup = new ThreadGroup(getName());
         this.shell = GroovyRuntime.newShell(compilerConfiguration, (l, s) -> {
@@ -89,12 +91,15 @@ public class Profile implements Named, Closeable, LogSupport, MaridBeanConnectio
         });
     }
 
-    public void addOutputConsumer(Consumer<String> outputConsumer) {
-        outputConsumers.add(outputConsumer);
+    public StringBuffer getCompilerOutputBuffer() {
+        return compilerOutput.getBuffer();
     }
 
-    public void removeOutputConsumer(Consumer<String> outputConsumer) {
-        outputConsumers.remove(outputConsumer);
+    public void clearCompilerOutputBuffer() {
+        synchronized (compilerOutput.getBuffer()) {
+            compilerOutput.getBuffer().setLength(0);
+            compilerOutput.getBuffer().trimToSize();
+        }
     }
 
     public void addApplicationListener(ApplicationListener<ApplicationEvent> applicationListener) {
@@ -167,6 +172,9 @@ public class Profile implements Named, Closeable, LogSupport, MaridBeanConnectio
                     if (event instanceof ContextClosedEvent) {
                         info("Context {0} closed at {1}", event.getSource(), ofEpochMilli(event.getTimestamp()));
                         applicationContext = null;
+                    } else if (event instanceof ContextStartedEvent) {
+                        final MBeanServerConnection connection = applicationContext.getBean(MBeanServerConnection.class);
+                        profileManager.getConnectionManager().registerConnection(getName(), connection);
                     }
                 });
                 applicationContext.setClassLoader(shell.getClassLoader());
@@ -200,6 +208,7 @@ public class Profile implements Named, Closeable, LogSupport, MaridBeanConnectio
         try {
             executor.submit(() -> {
                 if (applicationContext != null) {
+                    profileManager.getConnectionManager().unregisterConnection(getName());
                     applicationContext.close();
                 }
             }).get();
@@ -249,13 +258,7 @@ public class Profile implements Named, Closeable, LogSupport, MaridBeanConnectio
         applicationContext.registerBeanDefinition(klass.getSimpleName(), rootBeanDefinition);
     }
 
-    @Override
     public MBeanServerConnection getConnection() {
         return contextResult(c -> c != null ? c.getBean(MBeanServerConnection.class) : null);
-    }
-
-    @Override
-    public String getConnectionName() {
-        return getName();
     }
 }

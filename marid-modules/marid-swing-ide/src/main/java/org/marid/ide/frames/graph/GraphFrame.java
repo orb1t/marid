@@ -25,20 +25,19 @@ import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.marid.dyn.MetaInfo;
-import org.marid.ide.components.ProfileManager;
 import org.marid.ide.frames.CloseableFrame;
 import org.marid.ide.frames.MaridFrame;
-import org.marid.ide.profile.Profile;
 import org.marid.jmx.IdeJmxAttribute;
+import org.marid.jmx.MaridBeanConnectionManager;
 import org.marid.swing.dnd.DndTarget;
 import org.marid.swing.dnd.MaridTransferHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
 
+import javax.management.MBeanServerConnection;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.Date;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -47,20 +46,32 @@ import java.util.concurrent.ThreadLocalRandom;
 @MetaInfo(name = "Graph")
 public class GraphFrame extends MaridFrame implements DndTarget<IdeJmxAttribute> {
 
-    private final Profile profile;
+    private final MaridBeanConnectionManager connectionManager;
     private final TimeSeriesCollection timeSeriesCollection = new TimeSeriesCollection();
     private final JFreeChart chart;
     private final ChartPanel chartPanel;
     private final Timer timer;
 
     @Autowired
-    public GraphFrame(GenericApplicationContext context) {
+    public GraphFrame(GenericApplicationContext context, MaridBeanConnectionManager connectionManager) {
         super(context, LS.s("Graph"));
-        profile = context.getBean(ProfileManager.class).getCurrentProfile();
+        this.connectionManager = connectionManager;
         chart = ChartFactory.createTimeSeriesChart(s("Chart"), s("Time"), s("Value"), timeSeriesCollection);
         timer = new Timer(getPref("delay", 1_000), ev -> {
             for (int i = 0; i < timeSeriesCollection.getSeriesCount(); i++) {
-                timeSeriesCollection.getSeries(i).add(new Second(new Date()), ThreadLocalRandom.current().nextDouble());
+                final TimeSeries timeSeries = timeSeriesCollection.getSeries(i);
+                final IdeJmxAttribute attribute = (IdeJmxAttribute) timeSeries.getKey();
+                final MBeanServerConnection connection = connectionManager.getConnection(attribute.getConnection());
+                if (connection != null) {
+                    try {
+                        final Object value = connection.getAttribute(attribute.getObjectName(), attribute.getName());
+                        if (value instanceof Number) {
+                            timeSeries.add(new Second(new Date()), (Number) value);
+                        }
+                    } catch (Exception x) {
+                        warning("Unable to get value from {0}", x, attribute);
+                    }
+                }
             }
         });
         setTransferHandler(new MaridTransferHandler());

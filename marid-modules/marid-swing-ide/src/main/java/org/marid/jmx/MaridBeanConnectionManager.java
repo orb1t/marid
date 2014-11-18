@@ -20,6 +20,7 @@ package org.marid.jmx;
 
 import org.marid.logging.LogSupport;
 
+import javax.management.MBeanServerConnection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -30,9 +31,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MaridBeanConnectionManager implements LogSupport {
 
-    private final Map<String, MaridBeanConnection> connectionMap = new ConcurrentHashMap<>();
+    private final Map<String, MBeanServerConnection> connectionMap = new ConcurrentHashMap<>();
 
-    public void registerConnection(String name, MaridBeanConnection connection) {
+    public void registerConnection(String name, MBeanServerConnection connection) {
         connectionMap.put(name, connection);
     }
 
@@ -40,7 +41,7 @@ public class MaridBeanConnectionManager implements LogSupport {
         connectionMap.remove(name);
     }
 
-    public MaridBeanConnection getConnection(String name) {
+    public MBeanServerConnection getConnection(String name) {
         return connectionMap.get(name);
     }
 

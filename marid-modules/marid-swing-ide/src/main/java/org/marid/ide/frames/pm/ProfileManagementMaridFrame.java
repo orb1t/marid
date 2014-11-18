@@ -63,7 +63,7 @@ public class ProfileManagementMaridFrame extends MaridFrame {
         profile = profileManager.getCurrentProfile();
         logComponent = new LogComponent(preferences(), emptyList(), r -> true);
         logComponent.setPreferredSize(new Dimension(logComponent.getPreferredSize().width, 150));
-        beanTree = new MBeanServerTreeTable(profile);
+        beanTree = new MBeanServerTreeTable(profile.getName(), profile::getConnection);
         panel.add(new JScrollPane(beanTree));
         logHandler = new SimpleHandler((h, r) -> {
             if (profile.getName().equals(itl.get())) {

@@ -19,23 +19,27 @@
 package org.marid.ide.swing.mbean;
 
 import org.jdesktop.swingx.JXTreeTable;
-import org.marid.ide.base.MaridBeanConnectionSupport;
 import org.marid.ide.swing.mbean.node.AttributeNode;
 import org.marid.jmx.IdeJmxAttribute;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.dnd.DndSource;
 import org.marid.swing.dnd.MaridTransferHandler;
 
+import javax.management.MBeanServerConnection;
 import javax.swing.table.TableColumn;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 public class MBeanServerTreeTable extends JXTreeTable implements PrefSupport, DndSource<IdeJmxAttribute> {
 
-    public MBeanServerTreeTable(MaridBeanConnectionSupport maridBeanConnectionSupport) {
-        super(new MBeanServerTreeModel(maridBeanConnectionSupport));
+    protected final String connectionName;
+
+    public MBeanServerTreeTable(String connectionName, Supplier<MBeanServerConnection> connectionSupplier) {
+        super(new MBeanServerTreeModel(connectionSupplier));
+        this.connectionName = connectionName;
         setRootVisible(false);
         setTreeCellRenderer(new MBeanTreeCellRenderer());
         setDragEnabled(true);
@@ -81,7 +85,6 @@ public class MBeanServerTreeTable extends JXTreeTable implements PrefSupport, Dn
         }
         final Object object = getModel().getValueAt(row, getTreeTableModel().getHierarchicalColumn());
         if (object instanceof AttributeNode) {
-            final String connectionName = getTreeTableModel().maridBeanConnectionSupport.getConnectionName();
             return new IdeJmxAttribute(connectionName, (AttributeNode) object);
         } else {
             return null;

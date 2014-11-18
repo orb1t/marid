@@ -18,17 +18,17 @@
 
 package org.marid.ide.swing.mbean;
 
-import org.marid.ide.base.MaridBeanConnectionSupport;
-
+import javax.management.MBeanServerConnection;
 import javax.swing.*;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 public class MBeanServerTree extends JTree {
 
-    public MBeanServerTree(MaridBeanConnectionSupport maridBeanConnectionSupport) {
-        super(new MBeanServerTreeModel(maridBeanConnectionSupport));
+    public MBeanServerTree(Supplier<MBeanServerConnection> connectionSupplier) {
+        super(new MBeanServerTreeModel(connectionSupplier));
         setRootVisible(false);
         setCellRenderer(new MBeanTreeCellRenderer());
     }

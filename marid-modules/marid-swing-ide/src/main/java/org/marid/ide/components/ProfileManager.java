@@ -19,8 +19,10 @@
 package org.marid.ide.components;
 
 import org.marid.ide.profile.Profile;
+import org.marid.jmx.MaridBeanConnectionManager;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -43,14 +45,17 @@ import static java.util.Collections.synchronizedMap;
 @Component
 public class ProfileManager implements LogSupport, SysPrefSupport {
 
+    protected final MaridBeanConnectionManager connectionManager;
     protected final ConcurrentSkipListMap<String, Profile> profileMap = new ConcurrentSkipListMap<>();
     protected final Map<Object, Consumer<Profile>> addProfileConsumers = synchronizedMap(new WeakHashMap<>());
     protected final Map<Object, Consumer<Profile>> removeProfileConsumers = synchronizedMap(new WeakHashMap<>());
 
-    public ProfileManager() throws IOException {
+    @Autowired
+    public ProfileManager(MaridBeanConnectionManager connectionManager) throws IOException {
+        this.connectionManager = connectionManager;
         final Path profilesDir = getProfilesDir();
         try (final Stream<Path> stream = Files.list(profilesDir)) {
-            stream.filter(Files::isDirectory).map(Profile::new).forEach(p -> profileMap.put(p.getName(), p));
+            stream.filter(Files::isDirectory).map(this::newProfile).forEach(p -> profileMap.put(p.getName(), p));
         }
     }
 
@@ -60,6 +65,10 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
 
     public void addProfileRemoveConsumer(Object gcBase, Consumer<Profile> consumer) {
         removeProfileConsumers.put(gcBase, consumer);
+    }
+
+    public Profile newProfile(Path path) {
+        return new Profile(this, path);
     }
 
     protected Path defaultPath() {
@@ -79,7 +88,7 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
     }
 
     public Profile addProfile(String name) {
-        final Profile profile = new Profile(getProfilesDir().resolve(name));
+        final Profile profile = new Profile(this, getProfilesDir().resolve(name));
         addProfileConsumers.forEach((k, v) -> v.accept(profile));
         return profile;
     }
@@ -110,5 +119,9 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
 
     public List<Profile> getProfiles() {
         return new ArrayList<>(profileMap.values());
+    }
+
+    public MaridBeanConnectionManager getConnectionManager() {
+        return connectionManager;
     }
 }

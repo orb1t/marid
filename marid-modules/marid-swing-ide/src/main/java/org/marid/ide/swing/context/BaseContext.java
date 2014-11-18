@@ -20,9 +20,12 @@ package org.marid.ide.swing.context;
 
 import org.marid.ide.log.LoggingPostProcessor;
 import org.marid.logging.LogSupport;
+import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Timer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -33,5 +36,10 @@ public class BaseContext implements LogSupport {
     @Bean
     public static BeanPostProcessor beanPostProcessor() {
         return new LoggingPostProcessor();
+    }
+
+    @Bean(destroyMethod = "cancel", autowire = Autowire.BY_NAME)
+    public static Timer ideTimer() {
+        return new Timer("ideTimer");
     }
 }
