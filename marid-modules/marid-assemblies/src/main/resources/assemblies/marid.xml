@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2013 Dmitry Ovchinnikov
+  ~ Copyright (C) 2014 Dmitry Ovchinnikov
   ~ Marid, the free data acquisition and visualization software
   ~
   ~ This program is free software: you can redistribute it and/or modify
@@ -19,32 +19,39 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+
     <id>distr</id>
+
     <formats>
         <format>zip</format>
     </formats>
-    <baseDirectory>marid-runtime</baseDirectory>
+
+    <baseDirectory>${project.artifactId}</baseDirectory>
     <includeBaseDirectory>true</includeBaseDirectory>
+
     <fileSets>
         <fileSet>
             <directory>target/ext</directory>
             <outputDirectory>ext</outputDirectory>
         </fileSet>
     </fileSets>
+
     <dependencySets>
         <dependencySet>
-            <includes>
-                <include>org.marid:marid-runtime</include>
-            </includes>
-            <useProjectArtifact>true</useProjectArtifact>
-            <useProjectAttachments>false</useProjectAttachments>
-            <useTransitiveDependencies>false</useTransitiveDependencies>
-        </dependencySet>
-        <dependencySet>
             <outputDirectory>/lib</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveDependencies>true</useTransitiveDependencies>
             <excludes>
-                <exclude>org.marid:marid-runtime</exclude>
+                <exclude>${project.groupId}:${project.artifactId}</exclude>
             </excludes>
+        </dependencySet>
+
+        <dependencySet>
+            <useProjectArtifact>true</useProjectArtifact>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <includes>
+                <include>${project.groupId}:${project.artifactId}</include>
+            </includes>
         </dependencySet>
     </dependencySets>
 </assembly>
