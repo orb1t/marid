@@ -18,32 +18,59 @@
 
 package org.marid;
 
+import groovy.lang.GroovyCodeSource;
 import org.marid.groovy.GroovyRuntime;
-import org.marid.logging.Logging;
+import org.marid.methods.LogMethods;
+import org.marid.spring.CommandLinePropertySource;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.TimeZone;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.marid.groovy.GroovyRuntime.SHELL;
 import static org.marid.methods.LogMethods.warning;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Marid implements UncaughtExceptionHandler {
+public class Marid {
 
-    private static final Logger LOG = Logger.getLogger(Marid.class.getName());
-    public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+    public static final Logger LOGGER = Logger.getLogger("marid");
+    public static final AnnotationConfigApplicationContext CONTEXT = new AnnotationConfigApplicationContext();
 
-    public static void main(String... args) {
-        TimeZone.setDefault(UTC);
-        Logging.init("log.properties");
-        Thread.setDefaultUncaughtExceptionHandler(new Marid());
+    static {
         Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
+        CONTEXT.setClassLoader(Thread.currentThread().getContextClassLoader());
     }
 
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
-        warning(LOG, "Uncaught exception in {0}", e, t);
+    public static void main(String... args) throws Exception {
+        for (final Enumeration<URL> e = CONTEXT.getClassLoader().getResources("sys.properties"); e.hasMoreElements(); ) {
+            try (final InputStreamReader reader = new InputStreamReader(e.nextElement().openStream(), UTF_8)) {
+                final Properties properties = new Properties();
+                properties.load(reader);
+                for (final String name : properties.stringPropertyNames()) {
+                    System.setProperty(name, properties.getProperty(name));
+                }
+            }
+        }
+        LogManager.getLogManager().reset();
+        LogManager.getLogManager().readConfiguration();
+        LogMethods.info(LOGGER, "Logging initialized");
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> warning(LOGGER, "Uncaught exception in {0}", e, t));
+        CONTEXT.addApplicationListener(e -> LogMethods.info(LOGGER, "{0}", e));
+        final CommandLinePropertySource commandLinePropertySource = new CommandLinePropertySource(args);
+        CONTEXT.getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
+        for (final String file : commandLinePropertySource.getNonOptionArgs()) {
+            for (final Enumeration<URL> e = CONTEXT.getClassLoader().getResources(file); e.hasMoreElements(); ) {
+                SHELL.evaluate(new GroovyCodeSource(e.nextElement()));
+            }
+        }
+        CONTEXT.refresh();
+        CONTEXT.start();
     }
 }

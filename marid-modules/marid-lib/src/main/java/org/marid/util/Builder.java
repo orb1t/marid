@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2014 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,76 +18,39 @@
 
 package org.marid.util;
 
-import java.lang.reflect.Field;
-import java.util.LinkedList;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public class Builder {
+public class Builder<T> {
 
-    @Override
-    public boolean equals(Object that) {
-        if (getClass() != that.getClass()) {
-            return false;
-        } else {
-            LinkedList<Object> l1 = new LinkedList<>();
-            LinkedList<Object> l2 = new LinkedList<>();
-            for (Class<?> c = getClass(); c != null; c = c.getSuperclass()) {
-                for (Field f : c.getDeclaredFields()) {
-                    f.setAccessible(true);
-                    try {
-                        l1.add(f.get(this));
-                        l2.add(f.get(that));
-                    } catch (ReflectiveOperationException x) {
-                        throw new IllegalStateException(x);
-                    }
-                }
-            }
-            return l1.equals(l2);
-        }
+    protected final T target;
+
+    public Builder(T target) {
+        this.target = target;
     }
 
-    @Override
-    public int hashCode() {
-        int h = 1;
-        for (Class<?> c = getClass(); c != null; c = c.getSuperclass()) {
-            for (Field f : c.getDeclaredFields()) {
-                f.setAccessible(true);
-                try {
-                    Object o = f.get(this);
-                    h = h * 31 + (o == null ? 0 : o.hashCode());
-                } catch (ReflectiveOperationException x) {
-                    throw new IllegalStateException(x);
-                }
-            }
-        }
-        return h;
+    public <P> Builder<T> with(BiConsumer<T, P> consumer, P value) {
+        consumer.accept(target, value);
+        return this;
     }
 
-    @Override
-    public String toString() {
-        boolean first = true;
-        StringBuilder b = new StringBuilder(getClass().getSimpleName());
-        b.append('{');
-        for (Class<?> c = getClass(); c != null; c = c.getSuperclass()) {
-            for (Field f : c.getDeclaredFields()) {
-                f.setAccessible(true);
-                try {
-                    if (first) {
-                        first = false;
-                    } else {
-                        b.append(',');
-                    }
-                    b.append(f.getName());
-                    b.append('=');
-                    b.append(f.get(this));
-                } catch (ReflectiveOperationException x) {
-                    throw new IllegalStateException(x);
-                }
-            }
-        }
-        b.append('}');
-        return b.toString();
+    public Builder<T> apply(Consumer<T> consumer) {
+        consumer.accept(target);
+        return this;
+    }
+
+    public <P> Builder<T> $(BiConsumer<T, P> consumer, P value) {
+        return with(consumer, value);
+    }
+
+    public Builder<T> $(Consumer<T> consumer) {
+        return apply(consumer);
+    }
+
+    public T build() {
+        return target;
     }
 }

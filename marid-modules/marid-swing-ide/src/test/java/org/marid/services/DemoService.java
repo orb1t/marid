@@ -19,6 +19,7 @@
 package org.marid.services;
 
 import org.marid.service.AbstractMaridService;
+import org.marid.service.MaridServiceConfig;
 import org.marid.service.ServiceParameters;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -28,6 +29,10 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 @ServiceParameters
 public class DemoService extends AbstractMaridService implements DemoServiceMXBean {
+    
+    public DemoService() {
+        super(MaridServiceConfig.config());
+    }
 
     @Override
     public double getRandom() {

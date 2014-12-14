@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.marid.logging;
 
 import org.marid.methods.LogMethods;
@@ -24,7 +23,6 @@ import org.marid.util.MaridClassValue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.marid.logging.Logging.*;
 import static org.marid.util.MaridClassValue.getCaller;
 
 /**

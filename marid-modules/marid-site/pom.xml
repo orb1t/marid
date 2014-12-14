@@ -28,82 +28,34 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>marid-site</artifactId>
-    <packaging>war</packaging>
 
     <dependencies>
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-web-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.rap</groupId>
-            <artifactId>org.eclipse.rap.rwt</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.rap</groupId>
-            <artifactId>org.eclipse.rap.jface</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.core</groupId>
-            <artifactId>runtime</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.core</groupId>
-            <artifactId>commands</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.marid</groupId>
-            <artifactId>marid-lib</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.marid</groupId>
             <artifactId>marid-gres</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.jetty.aggregate</groupId>
-            <artifactId>jetty-all</artifactId>
-            <scope>provided</scope>
+            <groupId>org.marid</groupId>
+            <artifactId>marid-runtime</artifactId>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
+                <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <archive>
+                        <manifest>
+                            <mainClass>org.marid.site.Site</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
 
             <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <configuration>
-                    <reload>manual</reload>
-                    <stopKey>marid</stopKey>
-                    <stopPort>8088</stopPort>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.marid</groupId>
-                        <artifactId>marid-lib</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
+                <artifactId>maven-dependency-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

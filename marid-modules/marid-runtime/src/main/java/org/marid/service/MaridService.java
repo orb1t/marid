@@ -38,11 +38,6 @@ public interface MaridService extends LogSupport, ThreadFactory, AutoCloseable, 
     }
 
     @Override
-    default boolean isRunning() {
-        return threadGroup().activeCount() > 0;
-    }
-
-    @Override
     default int getThreadCount() {
         return threadGroup().activeCount();
     }

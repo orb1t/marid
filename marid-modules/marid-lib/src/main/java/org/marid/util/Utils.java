@@ -21,6 +21,8 @@ package org.marid.util;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Proxy;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -40,6 +42,20 @@ public class Utils {
 
     public static final ZoneId ZONE_ID = ZoneId.systemDefault();
     public static final SecureRandom RANDOM = new SecureRandom();
+
+    static final ClassValue<Object> INTERFACE_INSTANCES = new MaridClassValue<>(c -> Proxy.newProxyInstance(
+            currentClassLoader(), new Class<?>[]{c}, (proxy, method, args) -> {
+                final Object value = method.getDefaultValue();
+                if (value != null) {
+                    return value;
+                } else {
+                    return MethodHandles.lookup()
+                            .in(method.getDeclaringClass())
+                            .unreflectSpecial(method, method.getDeclaringClass())
+                            .bindTo(proxy)
+                            .invokeWithArguments(args);
+                }
+            }));
 
     public static <T> T newInstance(Class<T> type, String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -117,16 +133,30 @@ public class Utils {
 
     public static Class<?> wrapperType(Class<?> primitiveType) {
         switch (primitiveType.getName()) {
-            case "int":     return Integer.class;
-            case "boolean": return Boolean.class;
-            case "long":    return Long.class;
-            case "double":  return Double.class;
-            case "float":   return Float.class;
-            case "char":    return Character.class;
-            case "short":   return Short.class;
-            case "byte":    return Byte.class;
-            case "void":    return Void.class;
-            default:        throw new IllegalArgumentException(primitiveType.getName());
+            case "int":
+                return Integer.class;
+            case "boolean":
+                return Boolean.class;
+            case "long":
+                return Long.class;
+            case "double":
+                return Double.class;
+            case "float":
+                return Float.class;
+            case "char":
+                return Character.class;
+            case "short":
+                return Short.class;
+            case "byte":
+                return Byte.class;
+            case "void":
+                return Void.class;
+            default:
+                throw new IllegalArgumentException(primitiveType.getName());
         }
+    }
+
+    public static <T> T getInterfaceInstance(Class<T> type) {
+        return type.cast(INTERFACE_INSTANCES.get(type));
     }
 }

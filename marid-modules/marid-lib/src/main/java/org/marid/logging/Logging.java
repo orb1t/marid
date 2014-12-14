@@ -17,9 +17,7 @@
  */
 package org.marid.logging;
 
-import java.io.InputStream;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -36,24 +34,6 @@ public class Logging {
             Level.FINER,
             Level.FINEST
     };
-
-    public static void init(String res) {
-        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try (final InputStream is = cl.getResourceAsStream(res)) {
-            final LogManager lm = LogManager.getLogManager();
-            if (is != null) {
-                lm.readConfiguration(is);
-            } else {
-                try (final InputStream dis = cl.getResourceAsStream("marid-logging-default.properties")) {
-                    if (dis != null) {
-                        lm.readConfiguration(dis);
-                    }
-                }
-            }
-        } catch (Exception x) {
-            x.printStackTrace(System.err);
-        }
-    }
 
     public static Logger rootLogger() {
         final Logger logger = Logger.getGlobal().getParent();

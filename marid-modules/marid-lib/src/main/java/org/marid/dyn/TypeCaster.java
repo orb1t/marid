@@ -35,7 +35,7 @@ public abstract class TypeCaster {
     public static final TypeCaster TYPE_CASTER;
 
     static {
-        TypeCaster typeCaster = null;
+        TypeCaster typeCaster;
         try {
             final Iterator<TypeCaster> it = load(TypeCaster.class, currentThread().getContextClassLoader()).iterator();
             if (it.hasNext()) {
@@ -50,9 +50,6 @@ public abstract class TypeCaster {
             }
         } catch (Exception x) {
             LogMethods.warning(LOG, "Type caster initialize error", x);
-            typeCaster = getDefault();
-        }
-        if (typeCaster == null) {
             typeCaster = getDefault();
         }
         TYPE_CASTER = typeCaster;

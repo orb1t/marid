@@ -18,26 +18,27 @@
 
 package org.marid.web;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.marid.service.AbstractMaridService;
-import org.marid.util.StringUtils;
+import org.marid.web.WebServerParameters.Dir;
+import org.marid.web.WebServerParameters.VHost;
 
 import javax.activation.FileTypeMap;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static java.nio.file.StandardWatchEventKinds.*;
-import static java.util.Arrays.stream;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
+import static org.marid.util.StringUtils.substitute;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -51,26 +52,11 @@ public abstract class AbstractWebServer extends AbstractMaridService {
     protected final List<String> defaultPages;
     protected final FileTypeMap fileTypeMap = FileTypeMap.getDefaultFileTypeMap();
 
-    public AbstractWebServer() {
-        dirMap = dirMap();
-        vhostPatternMap = vHostPatternMap();
-        defaultPages = defaultPages();
-    }
-
-    protected Map<String, Path> dirMap() {
-        return stream(getClass().getAnnotation(WebServerParameters.class).dirs())
-                .map(d -> Pair.of(d.name(), Paths.get(StringUtils.substitute(d.dir()))))
-                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
-    }
-
-    protected Map<String, Pattern> vHostPatternMap() {
-        return stream(getClass().getAnnotation(WebServerParameters.class).vHosts())
-                .map(v -> Pair.of(v.name(), Pattern.compile(v.pattern())))
-                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
-    }
-
-    protected List<String> defaultPages() {
-        return Arrays.asList(getClass().getAnnotation(WebServerParameters.class).defaultPages());
+    public AbstractWebServer(WebServerConfig conf) {
+        super(conf);
+        dirMap = Arrays.stream(conf.dirs()).collect(toMap(Dir::name, d -> Paths.get(substitute(d.dir()))));
+        vhostPatternMap = Arrays.stream(conf.vHosts()).collect(toMap(VHost::name, v -> Pattern.compile(v.pattern())));
+        defaultPages = new ArrayList<>(Arrays.asList(conf.defaultPages()));
     }
 
     @Override
@@ -94,9 +80,8 @@ public abstract class AbstractWebServer extends AbstractMaridService {
         return f.startsWith(".") || f.endsWith(".bak") || f.endsWith(".new");
     }
 
-    @SuppressWarnings("unchecked")
     protected String toContextPath(Path path) {
-        return "/" + DefaultGroovyMethods.join((Iterator)path.iterator(), "/");
+        return StreamSupport.stream(path.spliterator(), false).map(Path::toString).collect(joining("/", "/", ""));
     }
 
     protected abstract void onAdd(Path dir, Path context);
@@ -105,21 +90,29 @@ public abstract class AbstractWebServer extends AbstractMaridService {
 
     protected abstract void onDelete(Path dir, Path context);
 
-    protected class DirectoryWatcher implements FileVisitor<Path>, Runnable {
+    protected class DirectoryWatcher implements Runnable, FileVisitor<Path> {
 
         protected final Path dir;
         protected final WatchService watchService;
 
         public DirectoryWatcher(Path dir) throws IOException {
             this.dir = dir;
-            this.watchService = FileSystems.getDefault().newWatchService();
+            this.watchService = watchService(dir);
             Files.walkFileTree(dir, this);
+        }
+
+        private WatchService watchService(Path dir) {
+            try {
+                return dir.getFileSystem().newWatchService();
+            } catch (Exception x) {
+                return null;
+            }
         }
 
         @Override
         public void run() {
             try {
-                while (isRunning()) {
+                while (watchService != null && isRunning()) {
                     final WatchKey key = watchService.poll(timeGranularity, MILLISECONDS);
                     if (key == null) {
                         continue;
@@ -158,7 +151,9 @@ public abstract class AbstractWebServer extends AbstractMaridService {
                 finest("{0} Skipped {1}", AbstractWebServer.this, d);
                 return FileVisitResult.SKIP_SUBTREE;
             } else {
-                d.register(watchService, ALL_KINDS);
+                if (watchService != null) {
+                    d.register(watchService, ALL_KINDS);
+                }
                 fine("{0} Registered {1}", AbstractWebServer.this, d);
                 return FileVisitResult.CONTINUE;
             }
@@ -171,7 +166,6 @@ public abstract class AbstractWebServer extends AbstractMaridService {
             } else {
                 try {
                     onAdd(dir, dir.relativize(file));
-                    info("{0} Added {1}", AbstractWebServer.this, file);
                 } catch (Exception x) {
                     warning("{0} Unable to add {1}", AbstractWebServer.this, file);
                 }

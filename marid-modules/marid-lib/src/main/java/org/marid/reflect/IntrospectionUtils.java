@@ -18,9 +18,14 @@
 
 package org.marid.reflect;
 
+import org.marid.util.Utils;
+
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -32,6 +37,22 @@ public class IntrospectionUtils {
             return Introspector.getBeanInfo(type).getPropertyDescriptors();
         } catch (IntrospectionException x) {
             throw new IllegalStateException(x);
+        }
+    }
+
+    public static List<Class<? extends Annotation>> getAnnotationClasses(Class<?> type) {
+        final List<Class<? extends Annotation>> classes = new ArrayList<>();
+        fillAnnotationClasses(type, classes);
+        return classes;
+    }
+
+    public static void fillAnnotationClasses(Class<?> type, List<Class<? extends Annotation>> classes) {
+        for (final Class<?> i : type.getInterfaces()) {
+            if (i.isAnnotation()) {
+                classes.add(Utils.cast(i));
+            } else {
+                fillAnnotationClasses(i, classes);
+            }
         }
     }
 }

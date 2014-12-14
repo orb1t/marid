@@ -22,11 +22,9 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.spi.HttpServerProvider;
-import groovy.lang.Closure;
 import groovy.lang.GroovyCodeSource;
 import org.marid.dyn.MetaInfo;
 import org.marid.groovy.GroovyRuntime;
-import org.marid.service.ServiceParameters;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -37,15 +35,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.BiFunction;
 
 import static java.net.HttpURLConnection.*;
+import static java.util.Collections.addAll;
 import static org.marid.nio.FileUtils.extension;
 import static org.marid.nio.FileUtils.fileNameWithoutExtension;
 
@@ -53,42 +51,35 @@ import static org.marid.nio.FileUtils.fileNameWithoutExtension;
  * @author Dmitry Ovchinnikov
  */
 @MetaInfo(icon = "services/web.png", name = "Simple web server", description = "Simple threaded web server")
-@WebServerParameters(defaultPages = {"index.groovy", "index.html", "index.svg"})
-@ServiceParameters
-@SimpleWebServerParameters
 public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
 
     protected final HttpServer server;
-    protected final Path webDir;
     protected final Map<Path, HttpHandler> handlerMap = new ConcurrentHashMap<>();
+    protected final int stopTimeout;
 
-    public SimpleWebServer() throws IOException {
-        final SimpleWebServerParameters parameters = getClass().getAnnotation(SimpleWebServerParameters.class);
-        final InetSocketAddress address = new InetSocketAddress(parameters.host(), parameters.port());
-        server = parameters.secure()
-                ? HttpServerProvider.provider().createHttpsServer(address, parameters.backlog())
-                : HttpServerProvider.provider().createHttpServer(address, parameters.backlog());
-        server.setExecutor(webExecutor());
-        webDir = dirMap.get("default");
+    public SimpleWebServer(SimpleWebServerConfig conf) throws IOException {
+        super(conf);
+        stopTimeout = conf.stopTimeout();
+        final InetSocketAddress address = new InetSocketAddress(conf.host(), conf.port());
+        server = conf.secure()
+                ? HttpServerProvider.provider().createHttpsServer(address, conf.backlog())
+                : HttpServerProvider.provider().createHttpServer(address, conf.backlog());
+        server.setExecutor(executor);
         server.createContext("/", this);
-    }
-
-    protected ThreadPoolExecutor webExecutor() {
-        return executor;
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
             final String[] parts = exchange.getRequestURI().getRawPath().substring(1).split("/");
-            Path path = webDir;
+            Path path = getWebDir();
             for (final String part : parts) {
                 path = path.resolve(URLDecoder.decode(part, "UTF-8"));
             }
             if (Files.isDirectory(path)) {
                 for (final String page : defaultPages) {
                     final Path pagePath = path.resolve(page);
-                    final HttpHandler handler = handlerMap.get(webDir.relativize(pagePath));
+                    final HttpHandler handler = handlerMap.get(getWebDir().relativize(pagePath));
                     if (handler != null) {
                         handler.handle(exchange);
                         return;
@@ -101,6 +92,10 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
         } finally {
             exchange.close();
         }
+    }
+
+    public InetSocketAddress getAddress() {
+        return server.getAddress();
     }
 
     @Override
@@ -164,55 +159,57 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
             scriptPaths.addFirst(file);
         }
         for (Path d = context.getParent(); d != null; d = d.getParent()) {
-            scriptPaths.addAll(Arrays.asList(
+            addAll(scriptPaths,
                     dir.resolve(d).resolve("_" + fname + ".groovy"),
                     dir.resolve(d).resolve("_." + extension(fname) + ".groovy"),
-                    dir.resolve(d).resolve("_.groovy")));
+                    dir.resolve(d).resolve("_.groovy"));
         }
-        final Map<Closure, Path> scripts = new LinkedHashMap<>();
-        for (final Path path : scriptPaths) {
-            if (Files.isRegularFile(path)) {
-                try {
-                    final GroovyCodeSource source = new GroovyCodeSource(path.toFile());
-                    scripts.put(GroovyRuntime.getClosure(source), path);
-                } catch (Exception x) {
-                    warning("{0} Unable to compile {1}", this, path);
-                }
+        final Map<BiFunction, Path> scripts = new LinkedHashMap<>();
+        scriptPaths.stream().filter(path -> Files.isRegularFile(path)).forEach(path -> {
+            try {
+                final GroovyCodeSource source = new GroovyCodeSource(path.toFile());
+                scripts.put((BiFunction) GroovyRuntime.SHELL.parse(source).run(), path);
+            } catch (Exception x) {
+                warning("{0} Unable to compile {1}", this, path);
             }
-        }
+        });
         final String contentType = mime.startsWith("text/") ? mime + ";charset=UTF-8" : mime;
         try {
             final String contextPath = toContextPath(context);
             final HttpHandler handler = exchange -> {
-                if (!script) {
-                    exchange.getResponseHeaders().set("Content-Type", contentType);
-                }
-                boolean filtered = false;
-                for (final Entry<Closure, Path> e : scripts.entrySet()) {
-                    try {
-                        final Object v = e.getKey().call(file, exchange);
-                        if (!filtered && Boolean.TRUE.equals(v)) {
-                            filtered = true;
+                try {
+                    if (!script) {
+                        exchange.getResponseHeaders().set("Content-Type", contentType);
+                    }
+                    boolean filtered = false;
+                    for (final Entry<BiFunction, Path> e : scripts.entrySet()) {
+                        try {
+                            @SuppressWarnings("unchecked")
+                            final Object v = e.getKey().apply(file, exchange);
+                            if (!filtered && Boolean.TRUE.equals(v)) {
+                                filtered = true;
+                            }
+                        } catch (Exception x) {
+                            warning("{0} Script {1}", x, SimpleWebServer.this, e.getValue());
+                            if (exchange.getResponseCode() < 0) {
+                                exchange.sendResponseHeaders(HTTP_INTERNAL_ERROR, -1);
+                                return;
+                            }
                         }
-                    } catch (Exception x) {
-                        warning("{0} Script {1}", SimpleWebServer.this, e.getValue());
+                    }
+                    if (!script) {
                         if (exchange.getResponseCode() < 0) {
-                            exchange.sendResponseHeaders(HTTP_INTERNAL_ERROR, -1);
-                            return;
+                            exchange.sendResponseHeaders(HTTP_OK, filtered ? 0L : Files.size(file));
+                        }
+                        try {
+                            Files.copy(file, exchange.getResponseBody());
+                        } catch (Exception x) {
+                            warning("{0} I/O error {1}", SimpleWebServer.this, file);
                         }
                     }
+                } finally {
+                    exchange.close();
                 }
-                if (!script) {
-                    if (exchange.getResponseCode() < 0) {
-                        exchange.sendResponseHeaders(HTTP_OK, filtered ? 0L : Files.size(file));
-                    }
-                    try {
-                        Files.copy(file, exchange.getResponseBody());
-                    } catch (Exception x) {
-                        warning("{0} I/O error {1}", SimpleWebServer.this, file);
-                    }
-                }
-                exchange.close();
             };
             server.createContext(contextPath, handler);
             handlerMap.put(context, handler);
@@ -259,15 +256,19 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
         }
     }
 
+    public Path getWebDir() {
+        return dirMap.get("default");
+    }
+
     @Override
     @PostConstruct
     public void start() throws Exception {
         super.start();
-        if (webDir == null) {
+        if (getWebDir() == null) {
             warning("{0} No default directory found", SimpleWebServer.this);
             return;
         } else {
-            Files.createDirectories(webDir);
+            Files.createDirectories(getWebDir());
         }
         server.start();
     }
@@ -275,7 +276,9 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
     @Override
     public void close() throws Exception {
         try {
-            server.stop((int) shutdownTimeout);
+            info("Stopping server in {0} s", stopTimeout);
+            server.stop(stopTimeout);
+            info("Server was stopped");
         } finally {
             super.close();
         }

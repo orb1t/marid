@@ -28,17 +28,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
-import java.util.logging.Logger;
 
 import static java.lang.Thread.currentThread;
-import static org.marid.methods.LogMethods.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class GroovyRuntime {
 
-    private static final Logger LOG = Logger.getLogger(GroovyRuntime.class.getName());
     private static final CompilerConfiguration COMPILER_CONFIGURATION = newCompilerConfiguration(c -> {
     });
 
@@ -54,18 +51,19 @@ public class GroovyRuntime {
         try {
             final CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
             compilerConfiguration.setSourceEncoding("UTF-8");
+            compilerConfiguration.setTargetBytecode(CompilerConfiguration.JDK8);
+            compilerConfiguration.setScriptBaseClass(MaridScript.class.getName());
             for (final CompilerCustomizer customizer : ServiceLoader.load(CompilerCustomizer.class)) {
                 try {
                     customizer.customize(compilerConfiguration);
-                    fine(LOG, "Compiler customizer {0} loaded", customizer);
                 } catch (Exception x) {
-                    warning(LOG, "Compiler customizer {0} error", x, customizer);
+                    x.printStackTrace();
                 }
             }
             configurer.accept(compilerConfiguration);
             return compilerConfiguration;
         } catch (Exception x) {
-            severe(LOG, "Unable to load compiler customizers", x);
+            x.printStackTrace();
             return CompilerConfiguration.DEFAULT;
         }
     }
@@ -81,11 +79,11 @@ public class GroovyRuntime {
                 try {
                     bindings.putAll(provider.getBinding());
                 } catch (Exception x) {
-                    warning(LOG, "Unable to import bindings from {0}", x, provider);
+                    x.printStackTrace();
                 }
             }
         } catch (Exception x) {
-            severe(LOG, "Unable to create groovy shell", x);
+            x.printStackTrace();
         }
         final GroovyShell shell = new GroovyShell(classLoader, new Binding(bindings), cc);
         configureClassLoader(shell.getClassLoader());
@@ -119,11 +117,11 @@ public class GroovyRuntime {
                 try {
                     provider.getUrls().forEach(loader::addURL);
                 } catch (Exception x) {
-                    warning(LOG, "Unable to import URLs from the url provider {0}", x, provider);
+                    x.printStackTrace();
                 }
             }
         } catch (Exception x) {
-            severe(LOG, "Unable to set class loader", x);
+            x.printStackTrace();
         }
     }
 }

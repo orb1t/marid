@@ -35,4 +35,6 @@ public @interface SimpleWebServerParameters {
     int port() default 8080;
 
     boolean secure() default false;
+
+    int stopTimeout() default 1;
 }

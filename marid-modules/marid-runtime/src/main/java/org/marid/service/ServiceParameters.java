@@ -55,4 +55,6 @@ public @interface ServiceParameters {
     long shutdownTimeout() default 10_000L;
 
     RejectionHandlerType rejectionType() default RejectionHandlerType.CALLER_RUNS;
+
+    String name() default "";
 }
