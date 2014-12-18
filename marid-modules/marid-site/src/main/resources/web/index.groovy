@@ -97,20 +97,6 @@ web({ f, e ->
                 }
 
                 div(id: "main") {
-                    section(id: "logo", class: "one dark cover") {
-                        div(class: "container") {
-                            header {
-                                h2(class: "alt") {
-                                    h2("Marid")
-                                    p("Free Data Acquisition Software")
-                                }
-                                footer {
-                                    a(href: "http://sf.net/projects/marid", class: "button scrolly", "SourceForge.net home")
-                                }
-                            }
-                        }
-                    }
-
                     sectionHeader(b, "top", "Project Summary", {
                         p {
                             mkp.yield("Marid is a cross-platform software intended to build complex and hierarchical data acquisition systems. ")
@@ -154,11 +140,21 @@ web({ f, e ->
                     })
 
                     sectionHeader(b, "download", "Download", {
-
+                        p {
+                            mkp.yield("At now, you can download the project here: ")
+                            a(href: "http://sf.net/projects/marid/files", "http://sf.net/projects/marid/files")
+                        }
                     })
 
                     sectionHeader(b, "contact", "Contact", {
-                        p("Hello")
+                        p {
+                            table {
+                                tr {
+                                    td("Author:")
+                                    td("Dmitry Ovchinnikov")
+                                }
+                            }
+                        }
                     })
                 }
 
