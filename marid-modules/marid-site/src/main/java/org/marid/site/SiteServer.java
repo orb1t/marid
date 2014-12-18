@@ -19,7 +19,6 @@
 package org.marid.site;
 
 import org.marid.service.MaridServiceConfig;
-import org.marid.util.Utils;
 import org.marid.web.SimpleWebServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -32,7 +31,9 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
+import static org.marid.util.Utils.currentClassLoader;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -46,14 +47,16 @@ public class SiteServer extends SimpleWebServer {
         super(MaridServiceConfig.config("webServer", environment));
         final URL baseUrl = getClass().getProtectionDomain().getCodeSource().getLocation();
         info("Base URL: {0}", baseUrl);
+        final Path basePath;
         if (baseUrl.toString().endsWith(".jar")) {
             final FileSystem fileSystem = FileSystems.newFileSystem(Paths.get(baseUrl.toURI()), null);
-            path = fileSystem.getRootDirectories().iterator().next();
+            basePath = fileSystem.getRootDirectories().iterator().next();
         } else {
-            path = Paths.get(Objects.requireNonNull(Utils.currentClassLoader().getResource("Init.groovy")).toURI())
-                    .getParent()
-                    .resolve("web");
+            basePath = Paths.get(requireNonNull(currentClassLoader().getResource("Init.groovy")).toURI()).getParent();
         }
+        path = basePath.resolve("web");
+        info("Path: {0}", path);
+        info("Filesystem: {0} of {1}", path.getFileSystem(), path.getFileSystem().getClass().getCanonicalName());
         dirMap.put("default", path);
         defaultPages.add(0, "index.groovy");
     }

@@ -31,7 +31,7 @@
 
     <fileSets>
         <fileSet>
-            <directory>target/ext</directory>
+            <directory>src/main/ext</directory>
             <outputDirectory>ext</outputDirectory>
         </fileSet>
     </fileSets>
@@ -41,17 +41,39 @@
             <outputDirectory>/lib</outputDirectory>
             <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveDependencies>true</useTransitiveDependencies>
-            <excludes>
-                <exclude>${project.groupId}:${project.artifactId}</exclude>
-            </excludes>
         </dependencySet>
 
         <dependencySet>
             <useProjectArtifact>true</useProjectArtifact>
             <useTransitiveDependencies>false</useTransitiveDependencies>
+            <outputFileNameMapping>${artifactId}.${project.packaging}</outputFileNameMapping>
             <includes>
                 <include>${project.groupId}:${project.artifactId}</include>
             </includes>
         </dependencySet>
     </dependencySets>
+
+    <moduleSets>
+        <moduleSet>
+            <useAllReactorProjects>true</useAllReactorProjects>
+            <includes>
+                <include>org.marid:marid-assemblies:jar</include>
+            </includes>
+            <sources>
+                <includeModuleDirectory>false</includeModuleDirectory>
+                <fileSets>
+                    <fileSet>
+                        <filtered>true</filtered>
+                        <fileMode>0777</fileMode>
+                        <directory>src/main/resources/marid</directory>
+                    </fileSet>
+
+                    <fileSet>
+                        <directory>src/main/resources/logs</directory>
+                        <outputDirectory>logs</outputDirectory>
+                    </fileSet>
+                </fileSets>
+            </sources>
+        </moduleSet>
+    </moduleSets>
 </assembly>

@@ -72,7 +72,8 @@ public abstract class AbstractWebServer extends AbstractMaridService {
     }
 
     protected boolean filterPath(Path path) {
-        return path.getFileName().toString().startsWith("_") || watchFilter(path);
+        final Path fileName = path.getFileName();
+        return fileName == null || fileName.toString().startsWith("_") || watchFilter(path);
     }
 
     protected boolean watchFilter(Path path) {

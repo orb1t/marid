@@ -18,17 +18,11 @@
 
 package org.marid.site.context;
 
-import org.marid.service.shutdown.ShutdownService;
 import org.marid.site.SiteServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-
-import javax.annotation.PostConstruct;
-import java.io.File;
-import java.nio.file.Files;
-import java.util.Arrays;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -42,19 +36,5 @@ public class SiteContext {
     @Bean
     public SiteServer siteServer() throws Exception {
         return new SiteServer(environment);
-    }
-
-    @Bean
-    public ShutdownService shutdownService() throws Exception {
-        return new ShutdownService("shutdownService", environment);
-    }
-
-    @PostConstruct
-    public void writeShutdownPort() throws Exception {
-        final File file = new File("maridSite.id");
-        file.deleteOnExit();
-        final String port = Integer.toString(shutdownService().getShutdownPort());
-        final String selector = shutdownService().getSelector();
-        Files.write(file.toPath(), Arrays.asList(port, selector));
     }
 }

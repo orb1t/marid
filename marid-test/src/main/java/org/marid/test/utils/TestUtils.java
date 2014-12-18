@@ -16,19 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.shutdown;
+package org.marid.test.utils;
 
-import java.lang.annotation.*;
+import java.io.File;
+import java.io.InputStream;
+import java.util.Properties;
+
+import static java.lang.Thread.currentThread;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-public @interface ShutdownServiceParameters {
+public class TestUtils {
 
-    int port() default 7777;
-
-    String selector() default "shutdown";
+    public static void changeWorkingDirectory() throws Exception {
+        try (final InputStream is = currentThread().getContextClassLoader().getResourceAsStream("module.properties")) {
+            if (is != null) {
+                final Properties properties = new Properties();
+                properties.load(is);
+                if (properties.containsKey("module.build.directory")) {
+                    final File moduleDirectory = new File(properties.getProperty("module.build.directory"));
+                    System.setProperty("user.dir", moduleDirectory.getAbsolutePath());
+                }
+            }
+        }
+    }
 }

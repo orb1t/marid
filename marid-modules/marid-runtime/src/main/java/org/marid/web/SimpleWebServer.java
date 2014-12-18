@@ -22,14 +22,15 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.spi.HttpServerProvider;
-import groovy.lang.GroovyCodeSource;
 import org.marid.dyn.MetaInfo;
 import org.marid.groovy.GroovyRuntime;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -167,8 +168,9 @@ public class SimpleWebServer extends AbstractWebServer implements HttpHandler {
         final Map<BiFunction, Path> scripts = new LinkedHashMap<>();
         scriptPaths.stream().filter(path -> Files.isRegularFile(path)).forEach(path -> {
             try {
-                final GroovyCodeSource source = new GroovyCodeSource(path.toFile());
-                scripts.put((BiFunction) GroovyRuntime.SHELL.parse(source).run(), path);
+                try (final Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+                    scripts.put((BiFunction) GroovyRuntime.SHELL.parse(reader).run(), path);
+                }
             } catch (Exception x) {
                 warning("{0} Unable to compile {1}", this, path);
             }

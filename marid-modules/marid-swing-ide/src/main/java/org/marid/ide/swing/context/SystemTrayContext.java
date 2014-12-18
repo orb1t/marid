@@ -18,7 +18,6 @@
 
 package org.marid.ide.swing.context;
 
-import images.Images;
 import org.marid.ide.base.IdeFrame;
 import org.marid.image.MaridIcon;
 import org.marid.l10n.L10nSupport;
@@ -28,6 +27,7 @@ import org.marid.swing.log.TrayIconHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import javax.swing.*;
 import java.awt.*;
@@ -46,30 +46,56 @@ public class SystemTrayContext implements SysPrefSupport, L10nSupport {
     IdeFrame ideFrame;
 
     @Bean
-    public TrayIcon ideTrayIcon() throws AWTException {
-        if (!SystemTray.isSupported()) {
-            return new TrayIcon(Images.getEmptyImage(16, 16));
+    public SystemTray systemTray() throws Exception {
+        return SystemTray.isSupported() ? SystemTray.getSystemTray() : null;
+    }
+
+    @Bean
+    @DependsOn("systemTray")
+    public MaridTrayIcon ideTrayIcon() throws Exception {
+        return new MaridTrayIcon();
+    }
+
+    public class MaridTrayIcon implements AutoCloseable {
+
+        private final TrayIcon trayIcon;
+
+        public MaridTrayIcon() throws Exception {
+            if (systemTray() != null) {
+                final Dimension traySize = systemTray().getTrayIconSize();
+                final int trayWidth = traySize.width;
+                final int trayHeight = traySize.height;
+                final Image image = MaridIcon.getImage(Math.min(trayWidth, trayHeight), Color.GREEN);
+                final PopupMenu popupMenu = new PopupMenu();
+                final MenuItem showLogMenuItem = new MenuItem(s("Show log..."));
+                showLogMenuItem.addActionListener(e -> ideFrame.showLog());
+                popupMenu.add(showLogMenuItem);
+                popupMenu.addSeparator();
+                final MenuItem exitMenuItem = new MenuItem(s("Exit"));
+                exitMenuItem.addActionListener(e -> ideFrame.exitWithConfirm());
+                popupMenu.add(exitMenuItem);
+                popupMenu.addSeparator();
+                MaridActions.fillMenu(ideActionMap, popupMenu);
+                final TrayIcon icon = new TrayIcon(image, s("Marid IDE"), popupMenu);
+                icon.addActionListener(ev -> ideFrame.setVisible(!ideFrame.isVisible()));
+                ideFrame.setVisible(true);
+                systemTray().add(icon);
+                TrayIconHandler.addSystemHandler(icon, Level.parse(getSysPref("trayLevel", Level.OFF.getName())));
+                trayIcon = icon;
+            } else {
+                trayIcon = null;
+            }
         }
-        final SystemTray tray = SystemTray.getSystemTray();
-        final Dimension traySize = tray.getTrayIconSize();
-        final int trayWidth = traySize.width;
-        final int trayHeight = traySize.height;
-        final Image image = MaridIcon.getImage(Math.min(trayWidth, trayHeight), Color.GREEN);
-        final PopupMenu popupMenu = new PopupMenu();
-        final MenuItem showLogMenuItem = new MenuItem(s("Show log..."));
-        showLogMenuItem.addActionListener(e -> ideFrame.showLog());
-        popupMenu.add(showLogMenuItem);
-        popupMenu.addSeparator();
-        final MenuItem exitMenuItem = new MenuItem(s("Exit"));
-        exitMenuItem.addActionListener(e -> ideFrame.exitWithConfirm());
-        popupMenu.add(exitMenuItem);
-        popupMenu.addSeparator();
-        MaridActions.fillMenu(ideActionMap, popupMenu);
-        final TrayIcon icon = new TrayIcon(image, s("Marid IDE"), popupMenu);
-        icon.addActionListener(ev -> ideFrame.setVisible(!ideFrame.isVisible()));
-        ideFrame.setVisible(true);
-        tray.add(icon);
-        TrayIconHandler.addSystemHandler(icon, Level.parse(getSysPref("trayLevel", Level.OFF.getName())));
-        return icon;
+
+        public TrayIcon getTrayIcon() {
+            return trayIcon;
+        }
+
+        @Override
+        public void close() throws Exception {
+            if (trayIcon != null) {
+                systemTray().remove(trayIcon);
+            }
+        }
     }
 }

@@ -21,13 +21,17 @@ package org.marid;
 import groovy.lang.GroovyCodeSource;
 import org.marid.groovy.GroovyRuntime;
 import org.marid.methods.LogMethods;
+import org.marid.shutdown.ShutdownThread;
 import org.marid.spring.CommandLinePropertySource;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextStartedEvent;
 
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -62,15 +66,37 @@ public class Marid {
         LogManager.getLogManager().readConfiguration();
         LogMethods.info(LOGGER, "Logging initialized");
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> warning(LOGGER, "Uncaught exception in {0}", e, t));
-        CONTEXT.addApplicationListener(e -> LogMethods.info(LOGGER, "{0}", e));
+        CONTEXT.addApplicationListener(e -> {
+            if (e instanceof ContextStartedEvent) {
+                new ShutdownThread(CONTEXT).start();
+            } else if (e instanceof ContextClosedEvent) {
+                try {
+                    System.in.close();
+                } catch (Exception x) {
+                    LogMethods.warning(LOGGER, "Unable to close stdin", x);
+                }
+            }
+            LogMethods.info(LOGGER, "{0}", e);
+        });
         final CommandLinePropertySource commandLinePropertySource = new CommandLinePropertySource(args);
         CONTEXT.getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
-        for (final String file : commandLinePropertySource.getNonOptionArgs()) {
+        for (final String cmd : commandLinePropertySource.getNonOptionArgs()) {
+            final String file = cmd + ".groovy";
             for (final Enumeration<URL> e = CONTEXT.getClassLoader().getResources(file); e.hasMoreElements(); ) {
                 SHELL.evaluate(new GroovyCodeSource(e.nextElement()));
             }
         }
         CONTEXT.refresh();
         CONTEXT.start();
+        try (final Scanner scanner = new Scanner(System.in)) {
+            while (scanner.hasNextLine()) {
+                final String line = scanner.nextLine().trim();
+                switch (line) {
+                    case "exit":
+                        CONTEXT.close();
+                        break;
+                }
+            }
+        }
     }
 }

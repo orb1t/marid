@@ -21,9 +21,9 @@ package org.marid.site;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class Stopper {
+public class TestSite {
 
     public static void main(String... args) throws Exception {
-        Site.main("Stop.groovy");
+        Site.main(args);
     }
 }

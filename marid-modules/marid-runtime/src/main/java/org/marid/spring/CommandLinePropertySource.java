@@ -45,6 +45,6 @@ public class CommandLinePropertySource extends SimpleCommandLinePropertySource {
     @Override
     public List<String> getNonOptionArgs() {
         final List<String> nonOptionArgs = super.getNonOptionArgs();
-        return nonOptionArgs.isEmpty() ? Collections.singletonList("Init.groovy") : nonOptionArgs;
+        return nonOptionArgs.isEmpty() ? Collections.singletonList("Init") : nonOptionArgs;
     }
 }
