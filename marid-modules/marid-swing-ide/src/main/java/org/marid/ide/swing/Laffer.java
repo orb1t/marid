@@ -16,33 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.context;
+package org.marid.ide.swing;
 
-import org.marid.bd.Block;
-import org.marid.ide.base.IdeFrame;
-import org.marid.ide.frames.MaridFrame;
-import org.marid.ide.swing.gui.IdeImpl;
-import org.marid.ide.widgets.Widget;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.marid.swing.StandardLookAndFeel;
 
-import javax.annotation.PostConstruct;
+import javax.swing.*;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@Configuration
-@ComponentScan(basePackageClasses = {IdeImpl.class, Widget.class, MaridFrame.class, Block.class})
-public class GuiContext implements LogSupport, SysPrefSupport {
+public class Laffer implements LogSupport, SysPrefSupport {
 
-    @Autowired
-    private IdeFrame ideFrame;
-
-    @PostConstruct
-    public void init() {
-        ideFrame.setVisible(true);
+    public static void start() {
+        UIManager.installLookAndFeel("Standard", StandardLookAndFeel.class.getName());
+        final String laf = SYSPREFS.get("laf", NimbusLookAndFeel.class.getCanonicalName());
+        try {
+            UIManager.setLookAndFeel(laf);
+        } catch (Exception x) {
+            Log.warning("Unable to set LAF {0}", x, laf);
+        }
+        if (UIManager.getLookAndFeel() instanceof NimbusLookAndFeel) {
+            UIManager.put("Nimbus.keepAlternateRowColor", true);
+        }
     }
 }

@@ -16,27 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.marid.bd.Block
-import org.marid.ide.components.ProfileManager
-import org.marid.ide.frames.MaridFrame
-import org.marid.ide.swing.IdeSplashScreen
-import org.marid.ide.swing.context.GuiContext
-import org.marid.ide.swing.gui.IdeImpl
-import org.marid.ide.widgets.Widget
+import org.marid.ide.IdeConfiguration
+import org.marid.ide.swing.Laffer
 import org.marid.logging.Logging
 import org.marid.swing.log.SwingHandler
 
-info("Adding swing handler");
 Logging.rootLogger().addHandler(new SwingHandler());
 
 info("Handling splash screen");
-IdeSplashScreen.start();
+Laffer.start();
 
 info("Scanning packages");
-maridContext.scan(
-        GuiContext.package.name,
-        IdeImpl.package.name,
-        ProfileManager.package.name,
-        Block.package.name,
-        Widget.package.name,
-        MaridFrame.package.name);
+maridContext.scan(IdeConfiguration.package.name);

@@ -32,6 +32,7 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.function.Consumer;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -52,7 +53,7 @@ public class Marid {
         CONTEXT.setClassLoader(Thread.currentThread().getContextClassLoader());
     }
 
-    public static void main(String... args) throws Exception {
+    public static void start(Consumer<Runnable> starter, String... args) throws Exception {
         for (final Enumeration<URL> e = CONTEXT.getClassLoader().getResources("sys.properties"); e.hasMoreElements(); ) {
             try (final InputStreamReader reader = new InputStreamReader(e.nextElement().openStream(), UTF_8)) {
                 final Properties properties = new Properties();
@@ -86,8 +87,10 @@ public class Marid {
                 SHELL.evaluate(new GroovyCodeSource(e.nextElement()));
             }
         }
-        CONTEXT.refresh();
-        CONTEXT.start();
+        starter.accept(() -> {
+            CONTEXT.refresh();
+            CONTEXT.start();
+        });
         try (final Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
                 final String line = scanner.nextLine().trim();
@@ -98,5 +101,9 @@ public class Marid {
                 }
             }
         }
+    }
+
+    public static void main(String... args) throws Exception {
+        start(Runnable::run, args);
     }
 }

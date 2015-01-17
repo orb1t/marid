@@ -18,10 +18,13 @@
 
 package org.marid.nio;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Properties;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -54,5 +57,15 @@ public class ClasspathUtils {
                 }
             }
         }
+    }
+
+    public static Properties loadProperties(String url) {
+        final Properties properties = new Properties();
+        try (final InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(url)) {
+            properties.load(inputStream);
+        } catch (IOException x) {
+            throw new IllegalStateException(x);
+        }
+        return properties;
     }
 }

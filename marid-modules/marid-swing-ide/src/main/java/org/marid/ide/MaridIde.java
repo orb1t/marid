@@ -20,12 +20,14 @@ package org.marid.ide;
 
 import org.marid.Marid;
 
+import java.awt.*;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public class MaridIde {
 
     public static void main(String[] args) throws Exception {
-        Marid.main(args);
+        Marid.start(EventQueue::invokeLater, args);
     }
 }

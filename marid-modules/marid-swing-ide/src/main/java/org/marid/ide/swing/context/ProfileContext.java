@@ -18,14 +18,17 @@
 
 package org.marid.ide.swing.context;
 
+import org.marid.ide.components.ProfileManager;
 import org.marid.jmx.MaridBeanConnectionManager;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 @Configuration
+@ComponentScan(basePackageClasses = {ProfileManager.class})
 public class ProfileContext {
 
     @Bean
