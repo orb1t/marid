@@ -49,10 +49,8 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
-        <groovy.version>2.4.0-rc-2</groovy.version>
+        <groovy.version>2.4.0</groovy.version>
         <spring.version>4.1.4.RELEASE</spring.version>
-        <rap.version>2.3.1</rap.version>
-        <jetty.version>9.2.5.v20141112</jetty.version>
 
         <excluded.benchmarks>org.marid.test.BrokenBenchmarks</excluded.benchmarks>
         <excluded.tests>org.marid.test.BrokenTests</excluded.tests>
@@ -281,12 +279,12 @@
 
                 <plugin>
                     <artifactId>maven-war-plugin</artifactId>
-                    <version>2.5</version>
+                    <version>2.6</version>
                 </plugin>
 
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>2.9</version>
+                    <version>2.10</version>
                     <configuration>
                         <outputDirectory>${project.build.directory}/lib</outputDirectory>
                     </configuration>
@@ -401,12 +399,6 @@
                         <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                         <autoReleaseAfterClose>true</autoReleaseAfterClose>
                     </configuration>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.eclipse.jetty</groupId>
-                    <artifactId>jetty-maven-plugin</artifactId>
-                    <version>${jetty.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -525,65 +517,6 @@
                 <version>2.3.2</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.eclipse.rap</groupId>
-                <artifactId>org.eclipse.rap.rwt</artifactId>
-                <version>${rap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.rap</groupId>
-                <artifactId>org.eclipse.rap.jface</artifactId>
-                <version>${rap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.core</groupId>
-                <artifactId>runtime</artifactId>
-                <version>3.10.0-v20140318-2214</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.core</groupId>
-                <artifactId>commands</artifactId>
-                <version>3.3.0-I20070605-0010</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jetty.aggregate</groupId>
-                <artifactId>jetty-all</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-jsp</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-annotations</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-plus</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-jaas</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>javax</groupId>
-                <artifactId>javaee-web-api</artifactId>
-                <version>7.0</version>
-            </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -641,7 +574,7 @@
         <dependency>
             <groupId>org.checkerframework</groupId>
             <artifactId>checker</artifactId>
-            <version>1.8.9</version>
+            <version>1.8.10</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -664,7 +597,7 @@
 
             <plugin>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.7</version>
+                <version>2.8</version>
             </plugin>
         </plugins>
     </reporting>
