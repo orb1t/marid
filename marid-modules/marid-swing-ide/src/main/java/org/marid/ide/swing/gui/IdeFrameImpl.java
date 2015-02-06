@@ -44,6 +44,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
@@ -57,6 +58,7 @@ import static javax.swing.JOptionPane.*;
 public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSupport, MessageSupport {
 
     private final GenericApplicationContext applicationContext;
+    private final Set<ConfigurationProvider> configurationProviders;
     private final IdeImpl ide;
     private final AtomicBoolean initialized = new AtomicBoolean();
 
@@ -70,9 +72,10 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     private ActionMap ideActionMap;
 
     @Autowired
-    public IdeFrameImpl(GenericApplicationContext context) {
+    public IdeFrameImpl(GenericApplicationContext context, Set<ConfigurationProvider> configurationProviders) {
         super(LS.s("Marid IDE"), WindowPrefs.graphicsConfiguration("IDE"));
         this.applicationContext = context;
+        this.configurationProviders = configurationProviders;
         setName("IDE");
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         this.ide = context.getBean(IdeImpl.class);
@@ -154,7 +157,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
 
     private JMenu preferencesMenu() {
         final JMenu menu = new JMenu(s("Preferences"));
-        ConfigurationProvider.visitConfigurations(c -> {
+        configurationProviders.forEach(cp -> cp.visitConfigurationClasses(c -> {
             final Form form = c.getAnnotation(Form.class);
             final String icon = form == null || form.icon().isEmpty() ? null : form.icon();
             final String description = form == null || form.description().isEmpty() ? null : s(form.description());
@@ -163,7 +166,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
                     icon,
                     e -> new StaticConfigurationDialog(this, c).setVisible(true),
                     Action.SHORT_DESCRIPTION, description));
-        });
+        }));
         menu.addSeparator();
         menu.add(lafMenu());
         return menu;

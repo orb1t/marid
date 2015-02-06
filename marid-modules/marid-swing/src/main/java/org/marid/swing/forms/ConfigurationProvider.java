@@ -18,7 +18,6 @@
 
 package org.marid.swing.forms;
 
-import java.util.ServiceLoader;
 import java.util.function.Consumer;
 
 /**
@@ -27,10 +26,4 @@ import java.util.function.Consumer;
 public interface ConfigurationProvider {
 
     void visitConfigurationClasses(Consumer<Class<? extends Configuration>> consumer);
-
-    static void visitConfigurations(Consumer<Class<? extends Configuration>> consumer) {
-        for (final ConfigurationProvider configurationProvider : ServiceLoader.load(ConfigurationProvider.class)) {
-            configurationProvider.visitConfigurationClasses(consumer);
-        }
-    }
 }
