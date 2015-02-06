@@ -517,7 +517,6 @@
                 <version>2.3.2</version>
             </dependency>
 
-
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>marid-lib</artifactId>
@@ -532,18 +531,6 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>marid-gui</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>marid-ide-lib</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>marid-runtime</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -551,13 +538,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>marid-gres</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>marid-site</artifactId>
-                <type>war</type>
                 <version>${project.version}</version>
             </dependency>
 
