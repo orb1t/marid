@@ -146,6 +146,14 @@
                 </snapshotRepository>
             </distributionManagement>
         </profile>
+
+        <profile>
+            <id>indy</id>
+
+            <properties>
+                <groovy.classifier>indy</groovy.classifier>
+            </properties>
+        </profile>
     </profiles>
 
     <distributionManagement>
