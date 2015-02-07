@@ -16,22 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.schema;
+package org.marid.ide.frames.schema;
 
 import groovy.inspect.swingui.AstNodeToScriptVisitor;
 import images.Images;
 import org.codehaus.groovy.ast.ClassNode;
 import org.marid.bd.BlockComponent;
+import org.marid.bd.schema.SchemaEditor;
+import org.marid.bd.schema.SchemaFrameConfiguration;
+import org.marid.bd.schema.SchemaModel;
 import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
 import org.marid.ide.components.BlockMenuProvider;
 import org.marid.ide.components.BlockPersister;
 import org.marid.ide.components.ProfileManager;
 import org.marid.ide.profile.Profile;
+import org.marid.spring.annotation.PrototypeComponent;
 import org.marid.swing.AbstractFrame;
 import org.marid.swing.SwingUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -53,6 +56,7 @@ import static javax.swing.BorderFactory.*;
 /**
  * @author Dmitry Ovchinnikov
  */
+@PrototypeComponent
 public class SchemaFrame extends AbstractFrame implements SchemaFrameConfiguration {
 
     protected final ProfileManager profileManager;
@@ -60,25 +64,23 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
     protected final SchemaEditor schemaEditor;
     protected final JLayer<SchemaEditor> layer;
     protected final JMenu blocksMenu = new JMenu(s("Blocks"));
+
     protected File file;
 
     @Autowired
-    public SchemaFrame(BlockMenuProvider blockMenuProvider,
-                       ProfileManager profileManager,
-                       BlockPersister persister,
-                       AutowireCapableBeanFactory bf) {
+    public SchemaFrame(BlockMenuProvider blockMenuProvider, ProfileManager profileManager, BlockPersister persister) {
         super("Schema");
         this.profileManager = profileManager;
         this.persister = persister;
         enableEvents(AWTEvent.COMPONENT_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
-        centerPanel.add(layer = new JLayer<>(schemaEditor = bf.createBean(SchemaEditor.class), new SchemaLayerUI()));
+        centerPanel.add(layer = new JLayer<>(schemaEditor = new SchemaEditor(), new SchemaLayerUI()));
         getContentPane().setBackground(getBackground());
         getJMenuBar().add(blocksMenu);
         blockMenuProvider.fillMenu(blocksMenu);
         pack();
     }
 
-    protected void fireEvent(AWTEvent event) {
+    public void fireEvent(AWTEvent event) {
         layer.getUI().eventDispatched(event, layer);
     }
 

@@ -27,6 +27,7 @@ import org.marid.bd.shapes.Link;
 import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
 import org.marid.concurrent.MaridTimerTask;
+import org.marid.ide.frames.schema.SchemaFrame;
 import org.marid.swing.InputMaskType;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.dnd.DndSource;
@@ -510,7 +511,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         return dropBlock(object, support.getDropLocation().getDropPoint());
     }
 
-    protected boolean dropBlock(Block object, Point dropPoint) {
+    public boolean dropBlock(Block object, Point dropPoint) {
         try {
             transform.inverseTransform(new Point(dropPoint), dropPoint);
             final BlockComponent blockComponent = object.createComponent();

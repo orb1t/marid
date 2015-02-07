@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,41 +16,46 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.log;
+package org.marid.spring;
 
 import org.marid.logging.LogSupport;
+import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.swing.actions.WindowAction;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+
+import java.awt.*;
+import java.awt.event.WindowEvent;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class LoggingPostProcessor implements DestructionAwareBeanPostProcessor, LogSupport {
+public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
 
     @Autowired
-    private GenericApplicationContext applicationContext;
+    private AutowireCapableBeanFactory autowireCapableBeanFactory;
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        try {
+            if (bean instanceof Window && bean.getClass().isAnnotationPresent(PrototypeComponent.class)) {
+                final Window window = (Window) bean;
+                window.addWindowListener(new WindowAction(e -> {
+                    if (e.getID() == WindowEvent.WINDOW_CLOSED) {
+                        autowireCapableBeanFactory.destroyBean(bean);
+                    }
+                }));
+            }
+        } catch (Exception x) {
+            warning("Unable to pre-init bean {0}", x, beanName);
+        }
         return bean;
     }
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        info("Bean {0} initialized: {1}", beanName, bean);
         return bean;
-    }
-
-    @Override
-    public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
-        if (beanName == null) {
-            final String[] names = applicationContext.getBeanNamesForType(bean.getClass(), true, false);
-            if (names.length == 1) {
-                beanName = names[0];
-            }
-        }
-        info("Bean {0} destroying", beanName);
     }
 }

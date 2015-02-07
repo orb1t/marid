@@ -18,16 +18,14 @@
 
 package org.marid.ide.swing.context;
 
-import org.marid.bd.schema.SchemaFrame;
-import org.marid.ide.components.BlockMenuProvider;
+import org.marid.ide.frames.schema.SchemaFrame;
 import org.marid.logging.LogSupport;
 import org.marid.swing.actions.ActionKey;
 import org.marid.swing.actions.MaridAction;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import javax.swing.*;
 
@@ -37,17 +35,16 @@ import javax.swing.*;
 @Configuration
 public class MenuContext implements LogSupport {
 
+    @Lazy
     @Autowired
-    BlockMenuProvider blockMenuProvider;
+    private SchemaFrame schemaFrame;
 
-    @Autowired
-    AutowireCapableBeanFactory autowireCapableBeanFactory;
-
-    @Bean(autowire = Autowire.BY_NAME)
+    @Bean
     public ActionMap ideActionMap() {
         final ActionMap actionMap = new ActionMap();
-        actionMap.put(new ActionKey("/Services//Schema frame"), new MaridAction("Schema frame", null,
-                e -> autowireCapableBeanFactory.createBean(SchemaFrame.class).setVisible(true)));
+        actionMap.put(
+                new ActionKey("/Services//Schema frame"),
+                new MaridAction("Schema frame", null, e -> schemaFrame.setVisible(true)));
         return actionMap;
     }
 }
