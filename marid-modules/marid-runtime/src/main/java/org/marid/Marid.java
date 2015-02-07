@@ -65,7 +65,6 @@ public class Marid {
         }
         LogManager.getLogManager().reset();
         LogManager.getLogManager().readConfiguration();
-        LogMethods.info(LOGGER, "Logging initialized");
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> warning(LOGGER, "Uncaught exception in {0}", e, t));
         CONTEXT.addApplicationListener(e -> {
             if (e instanceof ContextStartedEvent) {
