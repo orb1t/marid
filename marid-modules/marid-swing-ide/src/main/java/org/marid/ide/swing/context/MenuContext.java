@@ -19,7 +19,6 @@
 package org.marid.ide.swing.context;
 
 import org.marid.ide.frames.schema.SchemaFrame;
-import org.marid.logging.LogSupport;
 import org.marid.swing.actions.ActionKey;
 import org.marid.swing.actions.MaridAction;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,7 @@ import javax.swing.*;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-public class MenuContext implements LogSupport {
+public class MenuContext {
 
     @Lazy
     @Autowired

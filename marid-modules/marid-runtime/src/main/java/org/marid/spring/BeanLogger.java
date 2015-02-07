@@ -35,15 +35,12 @@ public class BeanLogger implements DestructionAwareBeanPostProcessor, LogSupport
         this.logger = logger;
     }
 
-    public BeanLogger(String logger) {
-        this(Logger.getLogger(logger));
-    }
-
     public BeanLogger() {
         this(LogSupport.LOGGERS.get(BeanLogger.class));
     }
 
-    public Logger getLogger() {
+    @Override
+    public Logger logger() {
         return logger;
     }
 

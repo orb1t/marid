@@ -18,14 +18,11 @@
 
 package org.marid.spring;
 
-import org.marid.spring.BeanLogger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertyResourceConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.env.Environment;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -40,9 +37,7 @@ public class AnnotationBaseContext {
     }
 
     @Bean
-    @Autowired
-    public static BeanLogger beanLogger(Environment environment) {
-        final String name = environment.getProperty("name");
-        return name == null ? new BeanLogger() : new BeanLogger(name);
+    public static BeanLogger beanLogger() {
+        return new BeanLogger();
     }
 }
