@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,37 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.web;
+package org.marid.jmx;
 
-import java.lang.annotation.*;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-public @interface WebServerParameters {
+public class OpenTypes {
 
-    Dir[] dirs() default {@Dir()};
-
-    VHost[] vHosts() default {};
-
-    String[] defaultPages() default {"index.html"};
-
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface Dir {
-
-        String name() default "default";
-
-        String dir() default "${user.home}/marid/web";
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface VHost {
-
-        String name();
-
-        String pattern();
+    public static CompositeType compositeType(String typeName,
+                                              String description,
+                                              String[] itemNames,
+                                              String[] itemDescriptions,
+                                              OpenType<?>... types) {
+        try {
+            return new CompositeType(typeName, description, itemNames, itemDescriptions, types);
+        } catch (OpenDataException x) {
+            throw new IllegalArgumentException(x);
+        }
     }
 }

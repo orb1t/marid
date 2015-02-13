@@ -25,7 +25,7 @@ import org.marid.l10n.L10nSupport;
 import org.marid.swing.dnd.DndSource;
 import org.marid.swing.dnd.MaridTransferHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -43,22 +43,27 @@ import static java.util.Comparator.comparing;
 @Component
 public class BlockMenuProvider implements L10nSupport {
 
-    private final GenericApplicationContext applicationContext;
+    private final Collection<Block> blocks;
+    private final Map<Package, Set<Block>> blockMap = new TreeMap<>(comparing(Package::getName));
 
+    @Lazy
     @Autowired
-    public BlockMenuProvider(GenericApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    public BlockMenuProvider(Collection<Block> blocks) {
+        this.blocks = blocks;
+    }
+
+    private void fillBlockMap() {
+        if (blockMap.isEmpty()) {
+            blocks.forEach(b -> blockMap.computeIfAbsent(
+                    b.getClass().getPackage(),
+                    v -> new TreeSet<>(comparing(Block::getName))
+            ).add(b));
+        }
     }
 
     public void fillMenu(JMenu menu) {
-        final Map<Package, Set<Block>> map = new TreeMap<>(comparing(Package::getName));
-        final Collection<Block> blocks = applicationContext.getBeansOfType(Block.class).values();
-        blocks.forEach(b ->
-                map.computeIfAbsent(b.getClass().getPackage(), v ->
-                        new TreeSet<>(comparing(Block::getName))
-                ).add(b)
-        );
-        map.forEach((group, blockSet) -> {
+        fillBlockMap();
+        blockMap.forEach((group, blockSet) -> {
             final MetaInfo metaInfo = group.getAnnotation(MetaInfo.class);
             final JMenu groupMenu = new JMenu(s(metaInfo != null ? metaInfo.name() : group.getName()));
             if (metaInfo != null && !metaInfo.icon().isEmpty()) {

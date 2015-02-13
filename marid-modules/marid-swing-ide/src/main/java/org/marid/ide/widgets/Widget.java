@@ -19,19 +19,16 @@
 package org.marid.ide.widgets;
 
 import org.marid.dyn.MetaInfo;
-import org.marid.ide.swing.gui.IdeFrameImpl;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
 import org.marid.swing.forms.Configuration;
 import org.marid.swing.forms.StaticConfigurationDialog;
-import org.marid.swing.listeners.MaridInternalFrameListener;
-import org.springframework.context.support.GenericApplicationContext;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.swing.*;
-import javax.swing.event.InternalFrameEvent;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 
 import static javax.swing.SwingConstants.HORIZONTAL;
 
@@ -39,39 +36,25 @@ import static javax.swing.SwingConstants.HORIZONTAL;
  * @author Dmitry Ovchinnikov.
  */
 @MetaInfo
-public abstract class Widget extends JInternalFrame implements WidgetSupport, MaridInternalFrameListener {
+public abstract class Widget extends JInternalFrame implements WidgetSupport {
 
     protected final JToolBar toolBar = new JToolBar(getPref("orientation", HORIZONTAL, "toolbar"));
-    protected final IdeFrameImpl owner;
     protected final BorderLayout layout = new BorderLayout();
-    protected final GenericApplicationContext context;
 
-    public Widget(GenericApplicationContext applicationContext, String title, Object... args) {
+    public Widget(String title, Object... args) {
         super(LS.s(title, args), true, true, true, true);
-        context = applicationContext;
-        owner = context.getBean(IdeFrameImpl.class);
         setLayout(layout);
         setName(title);
-        addInternalFrameListener(this);
         add(toolBar, getPref("pos", BorderLayout.NORTH, "toolbar"));
         if (this instanceof Configuration) {
-            toolBar.add(new MaridAction("Configuration", "settings", e ->
-                    new StaticConfigurationDialog(owner, Widget.this.getClass()).setVisible(true))).setFocusable(false);
+            toolBar.add(new MaridAction("Configuration", "settings", this::showConfigurationDialog)).setFocusable(false);
             toolBar.addSeparator();
         }
     }
 
-    @Override
-    public void internalFrameClosing(InternalFrameEvent e) {
-        if (isSingleton()) {
-            hide();
-        } else {
-            context.getAutowireCapableBeanFactory().destroyBean(Widget.this);
-        }
-    }
-
-    public boolean isSingleton() {
-        return getClass().isAnnotationPresent(SingletonWidget.class);
+    private void showConfigurationDialog(ActionEvent actionEvent) {
+        final Window window = SwingUtilities.windowForComponent(this);
+        new StaticConfigurationDialog(window, Widget.this.getClass()).setVisible(true);
     }
 
     @Override

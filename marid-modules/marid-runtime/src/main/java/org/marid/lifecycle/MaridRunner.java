@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,17 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring;
+package org.marid.lifecycle;
 
-import org.marid.Marid;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SpringMethods {
+public interface MaridRunner {
 
-    public static AnnotationConfigApplicationContext getMaridContext(Object object) {
-        return Marid.getCurrentContext();
+    void run(AnnotationConfigApplicationContext context, String... args) throws Exception;
+
+    static List<MaridRunner> maridRunners() {
+        return StreamSupport.stream(ServiceLoader.load(MaridRunner.class).spliterator(), false)
+                .sorted(Comparator.comparing(r -> r.getClass().isAnnotationPresent(Order.class)
+                        ? r.getClass().getAnnotation(Order.class).value()
+                        : (r instanceof Ordered) ? ((Ordered) r).getOrder() : 0))
+                .collect(Collectors.toList());
     }
 }

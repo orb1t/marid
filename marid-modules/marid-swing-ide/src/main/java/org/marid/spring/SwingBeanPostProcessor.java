@@ -26,6 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
+import javax.swing.*;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 
@@ -47,6 +50,14 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
                         autowireCapableBeanFactory.destroyBean(bean);
                     }
                 }));
+            } else if (bean instanceof JInternalFrame && bean.getClass().isAnnotationPresent(PrototypeComponent.class)) {
+                final JInternalFrame frame = (JInternalFrame) bean;
+                frame.addInternalFrameListener(new InternalFrameAdapter() {
+                    @Override
+                    public void internalFrameClosing(InternalFrameEvent e) {
+                        autowireCapableBeanFactory.destroyBean(bean);
+                    }
+                });
             }
         } catch (Exception x) {
             warning("Unable to pre-init bean {0}", x, beanName);

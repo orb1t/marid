@@ -82,10 +82,10 @@ public abstract class PrefCodecs {
         putWriter(long.class, Preferences::putLong);
         putWriter(Double.class, Preferences::putDouble);
         putWriter(double.class, Preferences::putDouble);
-        putWriter(Short.class, (p, k, v) -> p.putInt(k, v));
-        putWriter(short.class, (p, k, v) -> p.putInt(k, v));
-        putWriter(Byte.class, (p, k, v) -> p.putInt(k, v));
-        putWriter(byte.class, (p, k, v) -> p.putInt(k, v));
+        putWriter(Short.class, (PrefWriter<Short>)Preferences::putInt);
+        putWriter(short.class, (PrefWriter<Short>)Preferences::putInt);
+        putWriter(Byte.class, (PrefWriter<Byte>)Preferences::putInt);
+        putWriter(byte.class, (PrefWriter<Byte>)Preferences::putInt);
         putWriter(Float.class, Preferences::putFloat);
         putWriter(String.class, Preferences::put);
         putWriter(float.class, Preferences::putFloat);

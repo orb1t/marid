@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.shutdown;
+package org.marid.lifecycle;
 
 import org.marid.logging.LogSupport;
 import org.springframework.context.support.GenericApplicationContext;

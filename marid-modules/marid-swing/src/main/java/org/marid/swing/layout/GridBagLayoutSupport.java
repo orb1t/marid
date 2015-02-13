@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.services;
+package org.marid.swing.layout;
 
-import org.marid.service.MaridServiceMXBean;
+import java.awt.*;
+
+import static java.awt.GridBagConstraints.RELATIVE;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface DemoServiceMXBean extends MaridServiceMXBean {
+public interface GridBagLayoutSupport {
 
-    double getRandom();
+    default GridBagConstraints gbc(int x, int y, int w, int h, double wx, double wy, int a, int f, Insets i, int px, int py) {
+        return new GridBagConstraints(x, y, w, h, wx, wy, a, f, i, px, py);
+    }
 
-    double getSin();
+    default GridBagConstraints gbc(int w, int h, double wx, double wy, int a, int f, Insets i, int px, int py) {
+        return gbc(RELATIVE, RELATIVE, w, h, wx, wy, a, f, i, px, py);
+    }
 }

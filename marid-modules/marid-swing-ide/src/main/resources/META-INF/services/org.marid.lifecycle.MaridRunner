@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2013 Dmitry Ovchinnikov
+# Copyright (C) 2015 Dmitry Ovchinnikov
 # Marid, the free data acquisition and visualization software
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,4 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-moduleName=runtime-ext-module
-moduleVersion=1.0
-extensionClasses=org.marid.spring.SpringMethods,org.marid.groovy.RuntimeGroovyMethods
-staticExtensionClasses=
+org.marid.ide.MaridIde

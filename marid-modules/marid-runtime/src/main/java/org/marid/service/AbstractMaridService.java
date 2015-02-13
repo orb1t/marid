@@ -18,23 +18,26 @@
 
 package org.marid.service;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public abstract class AbstractMaridService implements MaridService {
 
+    protected final AtomicInteger threadCounter = new AtomicInteger();
     protected final int threadStackSize;
     protected final ThreadGroup threadGroup;
     protected final ThreadGroup threadPoolGroup;
-    protected final ThreadPoolExecutor executor;
+    protected final ExecutorService executor;
     protected final boolean poolDaemons;
     protected final boolean daemons;
-    protected final long timeGranularity;
     protected final long shutdownTimeout;
     protected final String name;
 
@@ -45,29 +48,13 @@ public abstract class AbstractMaridService implements MaridService {
         threadPoolGroup = new ThreadGroup(threadGroup, "pool");
         daemons = conf.daemons();
         poolDaemons = conf.poolDaemons();
-        timeGranularity = conf.timeUnit().toMillis(conf.timeGranularity());
         shutdownTimeout = conf.timeUnit().toMillis(conf.shutdownTimeout());
-        executor = new ThreadPoolExecutor(
-                conf.threads(),
-                conf.maxThreads(),
-                conf.keepAliveTime(),
-                conf.timeUnit(),
-                conf.queueType().apply(conf.queueSize()),
-                poolThreadFactory(),
-                conf.rejectionType().get());
-    }
-
-    protected ThreadFactory poolThreadFactory() {
-        return this;
+        executor = executorService(conf);
     }
 
     @Override
     public ThreadGroup threadGroup() {
         return threadGroup;
-    }
-
-    public ThreadGroup getThreadPoolGroup() {
-        return threadPoolGroup;
     }
 
     @Override
@@ -89,6 +76,32 @@ public abstract class AbstractMaridService implements MaridService {
     public void close() throws Exception {
         executor.shutdown();
         executor.awaitTermination(shutdownTimeout, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public Thread newThread(@Nonnull Runnable r) {
+        final Thread t = new Thread(threadGroup, r, "t-" + threadCounter.getAndIncrement(), threadStackSize);
+        t.setDaemon(daemons);
+        return t;
+    }
+
+    protected ThreadFactory threadFactory(MaridServiceConfig conf) {
+        return r -> {
+            final Thread t = new Thread(threadPoolGroup, r, "w-" + threadCounter.getAndIncrement(), conf.stackSize());
+            t.setDaemon(conf.poolDaemons());
+            return t;
+        };
+    }
+
+    protected ExecutorService executorService(MaridServiceConfig conf) {
+        return new ThreadPoolExecutor(
+                conf.threads(),
+                conf.maxThreads(),
+                conf.keepAliveTime(),
+                conf.timeUnit(),
+                conf.blockingQueue(),
+                threadFactory(conf),
+                conf.rejectedExecutionHandler());
     }
 
     @Override

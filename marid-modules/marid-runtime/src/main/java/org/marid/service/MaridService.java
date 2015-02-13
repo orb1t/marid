@@ -20,7 +20,6 @@ package org.marid.service;
 
 import org.marid.logging.LogSupport;
 
-import javax.annotation.Nonnull;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -40,23 +39,6 @@ public interface MaridService extends LogSupport, ThreadFactory, AutoCloseable, 
     @Override
     default int getThreadCount() {
         return threadGroup().activeCount();
-    }
-
-    @Override
-    default boolean isDaemons() {
-        return false;
-    }
-
-    @Override
-    default Thread newThread(@Nonnull Runnable r) {
-        final Thread thread = new Thread(threadGroup(), r, String.valueOf(r), getStackSize());
-        thread.setDaemon(isDaemons());
-        return thread;
-    }
-
-    @Override
-    default int getStackSize() {
-        return 0;
     }
 
     @Override

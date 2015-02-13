@@ -18,10 +18,9 @@
 
 package org.marid;
 
-import groovy.lang.GroovyCodeSource;
 import org.marid.groovy.GroovyRuntime;
-import org.marid.methods.LogMethods;
-import org.marid.shutdown.ShutdownThread;
+import org.marid.lifecycle.MaridRunner;
+import org.marid.lifecycle.ShutdownThread;
 import org.marid.spring.CommandLinePropertySource;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
@@ -37,8 +36,9 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.marid.groovy.GroovyRuntime.SHELL;
+import static org.marid.methods.LogMethods.info;
 import static org.marid.methods.LogMethods.warning;
+import static org.marid.util.Utils.currentClassLoader;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -46,15 +46,16 @@ import static org.marid.methods.LogMethods.warning;
 public class Marid {
 
     public static final Logger LOGGER = Logger.getLogger("marid");
-    public static final AnnotationConfigApplicationContext CONTEXT = new AnnotationConfigApplicationContext();
+    private static final ThreadLocal<AnnotationConfigApplicationContext> CONTEXT_ITL = new InheritableThreadLocal<>();
 
     static {
+        setCurrentContext(new AnnotationConfigApplicationContext());
+        getCurrentContext().setClassLoader(GroovyRuntime.CLASS_LOADER);
         Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
-        CONTEXT.setClassLoader(Thread.currentThread().getContextClassLoader());
     }
 
     public static void start(Consumer<Runnable> starter, String... args) throws Exception {
-        for (final Enumeration<URL> e = CONTEXT.getClassLoader().getResources("sys.properties"); e.hasMoreElements(); ) {
+        for (final Enumeration<URL> e = currentClassLoader().getResources("sys.properties"); e.hasMoreElements(); ) {
             try (final InputStreamReader reader = new InputStreamReader(e.nextElement().openStream(), UTF_8)) {
                 final Properties properties = new Properties();
                 properties.load(reader);
@@ -66,40 +67,45 @@ public class Marid {
         LogManager.getLogManager().reset();
         LogManager.getLogManager().readConfiguration();
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> warning(LOGGER, "Uncaught exception in {0}", e, t));
-        CONTEXT.addApplicationListener(e -> {
+        getCurrentContext().addApplicationListener(e -> {
             if (e instanceof ContextStartedEvent) {
-                new ShutdownThread(CONTEXT).start();
+                new ShutdownThread(getCurrentContext()).start();
             } else if (e instanceof ContextClosedEvent) {
                 try {
                     System.in.close();
                 } catch (Exception x) {
-                    LogMethods.warning(LOGGER, "Unable to close stdin", x);
+                    warning(LOGGER, "Unable to close stdin", x);
                 }
             }
-            LogMethods.info(LOGGER, "{0}", e);
+            info(LOGGER, "{0}", e);
         });
         final CommandLinePropertySource commandLinePropertySource = new CommandLinePropertySource(args);
-        CONTEXT.getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
-        for (final String cmd : commandLinePropertySource.getNonOptionArgs()) {
-            final String file = cmd + ".groovy";
-            for (final Enumeration<URL> e = CONTEXT.getClassLoader().getResources(file); e.hasMoreElements(); ) {
-                SHELL.evaluate(new GroovyCodeSource(e.nextElement()));
-            }
+        getCurrentContext().getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
+        for (final MaridRunner runner : MaridRunner.maridRunners()) {
+            runner.run(getCurrentContext(), args);
         }
         starter.accept(() -> {
-            CONTEXT.refresh();
-            CONTEXT.start();
+            getCurrentContext().refresh();
+            getCurrentContext().start();
         });
         try (final Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
                 final String line = scanner.nextLine().trim();
                 switch (line) {
                     case "exit":
-                        CONTEXT.close();
+                        getCurrentContext().close();
                         break;
                 }
             }
         }
+    }
+
+    public static void setCurrentContext(AnnotationConfigApplicationContext currentContext) {
+        CONTEXT_ITL.set(currentContext);
+    }
+
+    public static AnnotationConfigApplicationContext getCurrentContext() {
+        return CONTEXT_ITL.get();
     }
 
     public static void main(String... args) throws Exception {

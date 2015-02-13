@@ -21,10 +21,10 @@ package org.marid.ide.swing.context;
 import org.marid.ide.frames.schema.SchemaFrame;
 import org.marid.swing.actions.ActionKey;
 import org.marid.swing.actions.MaridAction;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 
 import javax.swing.*;
 
@@ -34,16 +34,15 @@ import javax.swing.*;
 @Configuration
 public class MenuContext {
 
-    @Lazy
     @Autowired
-    private SchemaFrame schemaFrame;
+    private ObjectFactory<SchemaFrame> schemaFrameRef;
 
     @Bean
     public ActionMap ideActionMap() {
         final ActionMap actionMap = new ActionMap();
         actionMap.put(
                 new ActionKey("/Services//Schema frame"),
-                new MaridAction("Schema frame", null, e -> schemaFrame.setVisible(true)));
+                new MaridAction("Schema frame", null, e -> schemaFrameRef.getObject().setVisible(true)));
         return actionMap;
     }
 }

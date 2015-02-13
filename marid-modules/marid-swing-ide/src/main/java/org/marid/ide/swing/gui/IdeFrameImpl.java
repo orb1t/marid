@@ -124,7 +124,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
             final MetaInfo metaInfo = applicationContext.findAnnotationOnBean(beanName, MetaInfo.class);
             menu.add(new MaridAction(metaInfo.name(), metaInfo.icon(), e -> {
                 final Widget widget = applicationContext.getBean(beanName, Widget.class);
-                if (!widget.isSingleton() || Arrays.stream(desktop.getComponents()).noneMatch(c -> c == widget)) {
+                if (!widget.isClosable() || Arrays.stream(desktop.getComponents()).noneMatch(c -> c == widget)) {
                     desktop.add(widget);
                 }
                 widget.show();

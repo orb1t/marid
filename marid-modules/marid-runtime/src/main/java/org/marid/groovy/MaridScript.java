@@ -29,9 +29,9 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 public abstract class MaridScript extends Script implements LogSupport {
 
     public MaridScript() {
-        if (Marid.CONTEXT.isActive()) {
+        if (Marid.getCurrentContext().isActive()) {
             try {
-                final AutowireCapableBeanFactory beanFactory = Marid.CONTEXT.getBeanFactory();
+                final AutowireCapableBeanFactory beanFactory = Marid.getCurrentContext().getBeanFactory();
                 beanFactory.autowireBean(this);
             } catch (Exception x) {
                 warning("Unable to inject fields", x);

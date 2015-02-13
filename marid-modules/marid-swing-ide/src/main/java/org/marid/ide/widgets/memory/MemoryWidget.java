@@ -25,11 +25,9 @@ import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.marid.dyn.MetaInfo;
-import org.marid.ide.widgets.SingletonWidget;
 import org.marid.ide.widgets.Widget;
+import org.marid.spring.annotation.PrototypeComponent;
 import org.marid.swing.actions.ShowHideListener;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.GenericApplicationContext;
 
 import javax.swing.*;
 import java.awt.event.ComponentEvent;
@@ -40,8 +38,8 @@ import static org.jfree.chart.ChartFactory.createTimeSeriesChart;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@SingletonWidget
 @MetaInfo(name = "Memory consumption")
+@PrototypeComponent
 public class MemoryWidget extends Widget implements MemoryWidgetConfiguration, ShowHideListener {
 
     private final Runtime runtime = Runtime.getRuntime();
@@ -55,9 +53,8 @@ public class MemoryWidget extends Widget implements MemoryWidgetConfiguration, S
         freeMemorySeries.add(second, freeMemory);
     });
 
-    @Autowired
-    public MemoryWidget(GenericApplicationContext context) {
-        super(context, "Memory");
+    public MemoryWidget() {
+        super("Memory");
         final TimeSeriesCollection dataset = new TimeSeriesCollection();
         dataset.addSeries(totalMemorySeries);
         dataset.addSeries(freeMemorySeries);
