@@ -125,6 +125,7 @@
 
         <profile>
             <id>slow-tests</id>
+
             <properties>
                 <test.groups>org.marid.test.SlowTests</test.groups>
             </properties>
@@ -293,21 +294,6 @@
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>2.10</version>
-                    <configuration>
-                        <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>copy-dependencies</id>
-                            <goals>
-                                <goal>copy-dependencies</goal>
-                            </goals>
-                            <phase>package</phase>
-                            <configuration>
-                                <includeScope>runtime</includeScope>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
 
                 <plugin>

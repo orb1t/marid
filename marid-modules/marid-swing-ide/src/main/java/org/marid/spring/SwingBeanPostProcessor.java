@@ -20,6 +20,7 @@ package org.marid.spring;
 
 import org.marid.logging.LogSupport;
 import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.swing.actions.InternalFrameAction;
 import org.marid.swing.actions.WindowAction;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +28,12 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import java.awt.*;
 import java.awt.event.WindowEvent;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -47,17 +50,18 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
                 final Window window = (Window) bean;
                 window.addWindowListener(new WindowAction(e -> {
                     if (e.getID() == WindowEvent.WINDOW_CLOSED) {
+                        destroyGraphicals(window);
                         autowireCapableBeanFactory.destroyBean(bean);
                     }
                 }));
             } else if (bean instanceof JInternalFrame && bean.getClass().isAnnotationPresent(PrototypeComponent.class)) {
                 final JInternalFrame frame = (JInternalFrame) bean;
-                frame.addInternalFrameListener(new InternalFrameAdapter() {
-                    @Override
-                    public void internalFrameClosing(InternalFrameEvent e) {
+                frame.addInternalFrameListener(new InternalFrameAction(e -> {
+                    if (e.getID() == InternalFrameEvent.INTERNAL_FRAME_CLOSING) {
+                        destroyGraphicals(frame);
                         autowireCapableBeanFactory.destroyBean(bean);
                     }
-                });
+                }));
             }
         } catch (Exception x) {
             warning("Unable to pre-init bean {0}", x, beanName);
@@ -68,5 +72,25 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         return bean;
+    }
+
+    private void destroyGraphicals(Container container) {
+        destroyGraphicals(container, Collections.newSetFromMap(new IdentityHashMap<>()));
+    }
+
+    private void destroyGraphicals(Container container, Set<Component> components) {
+        for (int i = 0; i < container.getComponentCount(); i++) {
+            final Component component = container.getComponent(i);
+            if (components.contains(component)) {
+                continue;
+            }
+            components.add(component);
+            if (component instanceof Container) {
+                destroyGraphicals((Container) component, components);
+            }
+            if (component.getClass().isAnnotationPresent(PrototypeComponent.class)) {
+                autowireCapableBeanFactory.destroyBean(component);
+            }
+        }
     }
 }

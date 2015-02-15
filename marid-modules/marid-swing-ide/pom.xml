@@ -121,26 +121,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-runtime-zip</id>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <phase>compile</phase>
-                        <configuration>
-                            <includeGroupIds>org.marid</includeGroupIds>
-                            <includeArtifactIds>marid-runtime</includeArtifactIds>
-                            <includeTypes>zip</includeTypes>
-                            <outputDirectory>${project.build.directory}/ext</outputDirectory>
-                            <stripVersion>true</stripVersion>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 </project>

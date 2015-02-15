@@ -18,9 +18,15 @@
 
 package org.marid.ide.widgets.cli;
 
+import groovy.lang.GroovyShell;
+import groovy.lang.MetaClass;
+import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.marid.groovy.GroovyRuntime;
+import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.swing.adapters.TextAreaWriter;
+import org.marid.swing.control.ConsoleArea;
 import org.marid.swing.layout.GridBagLayoutSupport;
 
 import javax.swing.*;
@@ -36,18 +42,30 @@ import static javax.swing.KeyStroke.getKeyStroke;
 /**
  * @author Dmitry Ovchinnikov
  */
+@PrototypeComponent
 public class CommandLine extends JPanel implements GridBagLayoutSupport {
 
+    private final GroovyShell shell = GroovyRuntime.newShell();
     private final Insets insets = new Insets(0, 0, 10, 0);
+    private final ConsoleArea consoleArea = new ConsoleArea();
 
     public CommandLine() {
         super(new GridBagLayout());
+        shell.setVariable("out", new PrintWriter(new TextAreaWriter(consoleArea)));
         add(createVerticalGlue(), gbc(REMAINDER, 1, 1, 1, PAGE_END, VERTICAL, insets, 0, 0));
         addLine(new InputArea());
     }
 
+    public ConsoleArea getConsoleArea() {
+        return consoleArea;
+    }
+
     private void addLine(Component component) {
         add(component, gbc(REMAINDER, 1, 1, 0, LINE_START, HORIZONTAL, insets, 0, 0), getComponentCount() - 1);
+        if (getParent() != null && getParent() instanceof JViewport) {
+            final JViewport viewport = (JViewport) getParent();
+            viewport.setViewPosition(new Point(0, Integer.MAX_VALUE));
+        }
         if (component instanceof InputArea) {
             component.requestFocus();
         }
@@ -60,18 +78,22 @@ public class CommandLine extends JPanel implements GridBagLayoutSupport {
             return;
         }
         try {
-            final Object o = GroovyRuntime.SHELL.evaluate(text);
-            area.setBracketMatchingEnabled(false);
-            area.setEditable(false);
-            setBackground(SystemColor.control);
-            addLine(new JLabel(String.valueOf(o)));
-            addLine(new InputArea());
+            final Object o = shell.evaluate(text);
+            if (o != null) {
+                final MetaClass metaClass = DefaultGroovyMethods.getMetaClass(o);
+                final Object toString = metaClass.invokeMethod(o, "toString", new Object[0]);
+                addLine(new JLabel(toString.toString()));
+            }
         } catch (Exception x) {
             final StringWriter w = new StringWriter();
             try (final PrintWriter pw = new PrintWriter(w)) {
                 x.printStackTrace(pw);
             }
-            addLine(new JLabel(w.toString()));
+            addLine(new JTextArea(w.toString()));
+        } finally {
+            area.setBracketMatchingEnabled(false);
+            area.setEditable(false);
+            addLine(new InputArea());
         }
     }
 

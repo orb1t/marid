@@ -21,8 +21,11 @@ package org.marid.ide.widgets.cli;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.widgets.Widget;
 import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.swing.actions.InternalFrameAction;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.swing.*;
+import javax.swing.event.InternalFrameEvent;
 import java.awt.*;
 
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
@@ -35,14 +38,28 @@ import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 @MetaInfo(name = "Command Line")
 public class CommandLineWidget extends Widget {
 
-    private final JScrollPane scrollPane;
-    private final CommandLine commandLine;
+    private final JSplitPane splitPane;
+    private final CommandLine cmdLine;
 
-    public CommandLineWidget() {
+    @Autowired
+    public CommandLineWidget(CommandLine cmdLine) {
         super("Command Line");
-        commandLine = new CommandLine();
-        scrollPane = new JScrollPane(commandLine, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_NEVER);
-        add(scrollPane);
+        this.cmdLine = new CommandLine();
+        this.splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                new JScrollPane(cmdLine, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_NEVER),
+                new JScrollPane(cmdLine.getConsoleArea(), VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_NEVER));
+        splitPane.setOneTouchExpandable(true);
+        add(splitPane);
         setPreferredSize(new Dimension(600, 400));
+        addInternalFrameListener(new InternalFrameAction(e -> {
+            switch (e.getID()) {
+                case InternalFrameEvent.INTERNAL_FRAME_OPENED:
+                    final double divider = getPref("divider", 0.7);
+                    splitPane.setDividerLocation(divider);
+                    splitPane.setResizeWeight(divider);
+                    break;
+            }
+        }));
+        pack();
     }
 }
