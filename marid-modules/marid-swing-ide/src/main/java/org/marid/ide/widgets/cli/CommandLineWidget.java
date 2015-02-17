@@ -21,15 +21,16 @@ package org.marid.ide.widgets.cli;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.widgets.Widget;
 import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.swing.actions.ActionKeySupport;
 import org.marid.swing.actions.InternalFrameAction;
+import org.marid.swing.actions.MaridActions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameEvent;
 import java.awt.*;
 
-import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
-import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
+import static javax.swing.ScrollPaneConstants.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -44,10 +45,10 @@ public class CommandLineWidget extends Widget {
     @Autowired
     public CommandLineWidget(CommandLine cmdLine) {
         super("Command Line");
-        this.cmdLine = new CommandLine();
+        this.cmdLine = cmdLine;
         this.splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 new JScrollPane(cmdLine, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_NEVER),
-                new JScrollPane(cmdLine.getConsoleArea(), VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_NEVER));
+                new ConsoleAreaPanel());
         splitPane.setOneTouchExpandable(true);
         add(splitPane);
         setPreferredSize(new Dimension(600, 400));
@@ -60,6 +61,29 @@ public class CommandLineWidget extends Widget {
                     break;
             }
         }));
-        pack();
+    }
+
+    private class ConsoleAreaPanel extends JPanel {
+
+        private ConsoleAreaPanel() {
+            super(new BorderLayout());
+            add(new JScrollPane(cmdLine.getConsoleArea(), VERTICAL_SCROLLBAR_ALWAYS, HORIZONTAL_SCROLLBAR_NEVER));
+            add(new ConsoleAreaToolbar(), BorderLayout.WEST);
+        }
+    }
+
+    private class ConsoleAreaToolbar extends JToolBar implements ActionKeySupport {
+
+        private ConsoleAreaToolbar() {
+            super(VERTICAL);
+            setFloatable(false);
+            addAction("/common/c/autoClean", "Auto-clean output", "purge", (a, e) -> {
+                cmdLine.setAutoClean((Boolean) a.getValue(Action.SELECTED_KEY));
+            }).setSelected(cmdLine.isAutoClean()).enableToolbar();
+            addAction("/common/c/clean", "Clear output", "clean", (a, e) -> {
+                cmdLine.getConsoleArea().setText("");
+            }).enableToolbar();
+            MaridActions.fillToolbar(getActionMap(), this);
+        }
     }
 }

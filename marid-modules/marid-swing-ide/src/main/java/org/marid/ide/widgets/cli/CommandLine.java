@@ -23,15 +23,18 @@ import groovy.lang.MetaClass;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.marid.collections.history.HistoryNavigator;
 import org.marid.groovy.GroovyRuntime;
+import org.marid.pref.PrefSupport;
 import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.swing.actions.ActionKeySupport;
 import org.marid.swing.adapters.TextAreaWriter;
 import org.marid.swing.control.ConsoleArea;
 import org.marid.swing.layout.GridBagLayoutSupport;
 
+import javax.annotation.PreDestroy;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -43,21 +46,42 @@ import static javax.swing.KeyStroke.getKeyStroke;
  * @author Dmitry Ovchinnikov
  */
 @PrototypeComponent
-public class CommandLine extends JPanel implements GridBagLayoutSupport {
+public class CommandLine extends JPanel implements GridBagLayoutSupport, PrefSupport, ActionKeySupport {
 
     private final GroovyShell shell = GroovyRuntime.newShell();
     private final Insets insets = new Insets(0, 0, 10, 0);
     private final ConsoleArea consoleArea = new ConsoleArea();
+    private final HistoryNavigator<String> history;
+
+    private boolean autoClean = getPref("autoClean", true);
 
     public CommandLine() {
         super(new GridBagLayout());
         shell.setVariable("out", new PrintWriter(new TextAreaWriter(consoleArea)));
         add(createVerticalGlue(), gbc(REMAINDER, 1, 1, 1, PAGE_END, VERTICAL, insets, 0, 0));
         addLine(new InputArea());
+        history = new HistoryNavigator<>(String.class, 1000, e -> {
+            final String v = e.trim();
+            return v.isEmpty() ? null : v;
+        });
+        history.getHistory().load(preferences());
+    }
+
+    @PreDestroy
+    protected void destroy() {
+        history.getHistory().save(preferences());
     }
 
     public ConsoleArea getConsoleArea() {
         return consoleArea;
+    }
+
+    public boolean isAutoClean() {
+        return autoClean;
+    }
+
+    public void setAutoClean(boolean autoClean) {
+        this.autoClean = autoClean;
     }
 
     private void addLine(Component component) {
@@ -71,19 +95,22 @@ public class CommandLine extends JPanel implements GridBagLayoutSupport {
         }
     }
 
-    private void evaluate(ActionEvent actionEvent) {
-        final InputArea area = (InputArea) actionEvent.getSource();
+    private void evaluate(InputArea area) {
         final String text = area.getText().trim();
         if (text.isEmpty()) {
             return;
         }
         try {
+            if (autoClean) {
+                consoleArea.setText("");
+            }
             final Object o = shell.evaluate(text);
             if (o != null) {
                 final MetaClass metaClass = DefaultGroovyMethods.getMetaClass(o);
                 final Object toString = metaClass.invokeMethod(o, "toString", new Object[0]);
                 addLine(new JLabel(toString.toString()));
             }
+            history.add(text);
         } catch (Exception x) {
             final StringWriter w = new StringWriter();
             try (final PrintWriter pw = new PrintWriter(w)) {
@@ -91,20 +118,64 @@ public class CommandLine extends JPanel implements GridBagLayoutSupport {
             }
             addLine(new JTextArea(w.toString()));
         } finally {
-            area.setBracketMatchingEnabled(false);
-            area.setEditable(false);
+            area.shutdown();
             addLine(new InputArea());
         }
     }
 
     private class InputArea extends RSyntaxTextArea {
 
+        private String selectedValue;
+
         private InputArea() {
             super(new RSyntaxDocument(SYNTAX_STYLE_GROOVY));
             setAnimateBracketMatching(true);
             setAntiAliasingEnabled(true);
             setHighlightCurrentLine(false);
-            registerKeyboardAction(CommandLine.this::evaluate, getKeyStroke("control ENTER"), WHEN_FOCUSED);
+            registerKeyboardAction(e -> evaluate(this), getKeyStroke("control ENTER"), WHEN_FOCUSED);
+            registerKeyboardAction(e -> previous(), getKeyStroke("control UP"), WHEN_FOCUSED);
+            registerKeyboardAction(e -> next(), getKeyStroke("control DOWN"), WHEN_FOCUSED);
+            registerKeyboardAction(e -> reset(), getKeyStroke("ESCAPE"), WHEN_FOCUSED);
+        }
+
+        private void processSelectedValue() {
+            if (selectedValue == null) {
+                final String v = history.getHistory().getAddOp().apply(getText());
+                if (v != null && !history.getHistory().containsItem(v)) {
+                    selectedValue = v;
+                }
+            }
+        }
+
+        private void previous() {
+            processSelectedValue();
+            final String value = history.getPrevious();
+            if (value != null) {
+                setText(value);
+            }
+        }
+
+        private void next() {
+            processSelectedValue();
+            final String value = history.getNext();
+            if (value != null) {
+                setText(value);
+            }
+        }
+
+        private void reset() {
+            setText(selectedValue != null ? selectedValue : "");
+            selectedValue = null;
+            history.reset();
+        }
+
+        private void shutdown() {
+            selectedValue = null;
+            setBracketMatchingEnabled(false);
+            setEditable(false);
+            getActionMap().clear();
+            getInputMap().clear();
+            history.reset();
         }
     }
 }

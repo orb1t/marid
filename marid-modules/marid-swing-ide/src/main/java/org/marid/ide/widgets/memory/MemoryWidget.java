@@ -62,7 +62,6 @@ public class MemoryWidget extends Widget implements MemoryWidgetConfiguration, S
         add(new ChartPanel(chart, USE_BUFFER.get(), SAVE.get(), PRINT.get(), ZOOM.get(), TOOLTIPS.get()));
         UPDATE_INTERVAL.addConsumer(this, n -> timer.setDelay(n * 1000));
         addComponentListener(this);
-        pack();
     }
 
     private TimeSeries createTimeSeries(String title) {
