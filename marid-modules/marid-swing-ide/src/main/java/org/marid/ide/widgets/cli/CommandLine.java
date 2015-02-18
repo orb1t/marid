@@ -20,6 +20,10 @@ package org.marid.ide.widgets.cli;
 
 import groovy.lang.GroovyShell;
 import groovy.lang.MetaClass;
+import groovy.lang.Script;
+import groovy.transform.Field;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -31,8 +35,12 @@ import org.marid.swing.actions.ActionKeySupport;
 import org.marid.swing.adapters.TextAreaWriter;
 import org.marid.swing.control.ConsoleArea;
 import org.marid.swing.layout.GridBagLayoutSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import javax.swing.*;
 import java.awt.*;
 import java.io.PrintWriter;
@@ -48,15 +56,20 @@ import static javax.swing.KeyStroke.getKeyStroke;
 @PrototypeComponent
 public class CommandLine extends JPanel implements GridBagLayoutSupport, PrefSupport, ActionKeySupport {
 
-    private final GroovyShell shell = GroovyRuntime.newShell();
+    private final GroovyShell shell;
     private final Insets insets = new Insets(0, 0, 10, 0);
     private final ConsoleArea consoleArea = new ConsoleArea();
     private final HistoryNavigator<String> history;
+    private final AutowireCapableBeanFactory beanFactory;
 
     private boolean autoClean = getPref("autoClean", true);
 
-    public CommandLine() {
+    @Autowired
+    public CommandLine(AutowireCapableBeanFactory beanFactory) {
         super(new GridBagLayout());
+        this.beanFactory = beanFactory;
+        shell = GroovyRuntime.newShell(compilerConfiguration(), (cl, sh) -> {
+        });
         shell.setVariable("out", new PrintWriter(new TextAreaWriter(consoleArea)));
         add(createVerticalGlue(), gbc(REMAINDER, 1, 1, 1, PAGE_END, VERTICAL, insets, 0, 0));
         addLine(new InputArea());
@@ -104,7 +117,9 @@ public class CommandLine extends JPanel implements GridBagLayoutSupport, PrefSup
             if (autoClean) {
                 consoleArea.setText("");
             }
-            final Object o = shell.evaluate(text);
+            final Script script = shell.parse(text);
+            beanFactory.autowireBean(script);
+            final Object o = script.run();
             if (o != null) {
                 final MetaClass metaClass = DefaultGroovyMethods.getMetaClass(o);
                 final Object toString = metaClass.invokeMethod(o, "toString", new Object[0]);
@@ -121,6 +136,17 @@ public class CommandLine extends JPanel implements GridBagLayoutSupport, PrefSup
             area.shutdown();
             addLine(new InputArea());
         }
+    }
+
+    private static CompilerConfiguration compilerConfiguration() {
+        return GroovyRuntime.newCompilerConfiguration(cc -> cc.addCompilationCustomizers(
+                new ImportCustomizer()
+                        .addImports(
+                                Autowired.class.getName(),
+                                Resource.class.getName(),
+                                Qualifier.class.getName())
+                        .addStarImports(Field.class.getPackage().getName())
+        ));
     }
 
     private class InputArea extends RSyntaxTextArea {

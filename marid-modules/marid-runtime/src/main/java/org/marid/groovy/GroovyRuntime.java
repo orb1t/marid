@@ -19,11 +19,17 @@
 package org.marid.groovy;
 
 import groovy.lang.*;
+import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
+import org.marid.Marid;
 import org.marid.functions.SafeBiConsumer;
 import org.marid.functions.SafeConsumer;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -85,7 +91,7 @@ public class GroovyRuntime {
         } catch (Exception x) {
             x.printStackTrace();
         }
-        final GroovyShell shell = new GroovyShell(classLoader, new Binding(bindings), cc);
+        final GroovyShell shell = new MaridGroovyShell(classLoader, new Binding(bindings), cc);
         configureClassLoader(shell.getClassLoader());
         configurer.accept(shell.getClassLoader(), shell);
         return shell;
@@ -122,6 +128,53 @@ public class GroovyRuntime {
             }
         } catch (Exception x) {
             x.printStackTrace();
+        }
+    }
+
+    private static class MaridGroovyShell extends GroovyShell {
+
+        private MaridGroovyShell(ClassLoader classLoader, Binding binding, CompilerConfiguration cc) {
+            super(classLoader, binding, cc);
+        }
+
+        @Override
+        public Script parse(GroovyCodeSource codeSource) throws CompilationFailedException {
+            final Script script = super.parse(codeSource);
+            final AnnotationConfigApplicationContext context = Marid.getCurrentContext();
+            if (context != null && context.isActive()) {
+                context.getAutowireCapableBeanFactory().autowireBean(script);
+            }
+            return script;
+        }
+
+        @Override
+        public Object run(GroovyCodeSource source, String[] args) throws CompilationFailedException {
+            final Class<?> scriptClass = getClassLoader().parseClass(source, false);
+            if (scriptClass == null) {
+                return null;
+            }
+            getContext().setProperty("args", args);
+            try {
+                final Constructor<?> constructor = scriptClass.getConstructor(Binding.class);
+                final Script script = (Script) constructor.newInstance(getContext());
+                final AnnotationConfigApplicationContext context = Marid.getCurrentContext();
+                if (context != null && context.isActive()) {
+                    context.getAutowireCapableBeanFactory().autowireBean(script);
+                }
+                return script.run();
+            } catch (Exception x) {
+                throw new IllegalStateException(x);
+            }
+        }
+
+        @Override
+        public Object run(File scriptFile, String[] args) throws CompilationFailedException, IOException {
+            return run(new GroovyCodeSource(scriptFile), args);
+        }
+
+        @Override
+        public Object run(Reader in, String fileName, String[] args) throws CompilationFailedException {
+            return run(new GroovyCodeSource(in, fileName, DEFAULT_CODE_BASE), args);
         }
     }
 }

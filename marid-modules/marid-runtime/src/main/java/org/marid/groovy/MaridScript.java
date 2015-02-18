@@ -18,10 +18,9 @@
 
 package org.marid.groovy;
 
+import groovy.lang.Binding;
 import groovy.lang.Script;
-import org.marid.Marid;
 import org.marid.logging.LogSupport;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -29,13 +28,10 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 public abstract class MaridScript extends Script implements LogSupport {
 
     public MaridScript() {
-        if (Marid.getCurrentContext().isActive()) {
-            try {
-                final AutowireCapableBeanFactory beanFactory = Marid.getCurrentContext().getBeanFactory();
-                beanFactory.autowireBean(this);
-            } catch (Exception x) {
-                warning("Unable to inject fields", x);
-            }
-        }
+        this(new Binding());
+    }
+
+    public MaridScript(Binding binding) {
+        super(binding);
     }
 }
