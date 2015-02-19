@@ -45,6 +45,7 @@ public class CommandLineWidget extends Widget {
     @Autowired
     public CommandLineWidget(CommandLine cmdLine) {
         super("Command Line");
+        setJMenuBar(new JMenuBar());
         this.cmdLine = cmdLine;
         this.splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 new JScrollPane(cmdLine, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_NEVER),
@@ -61,6 +62,13 @@ public class CommandLineWidget extends Widget {
                     break;
             }
         }));
+    }
+
+    @Override
+    protected void fillActions() {
+        addAction("/Console/c/clear", "Clear", "clean", (a, e) -> {
+            cmdLine.clear();
+        }).setKey("control N").enableToolbar();
     }
 
     private class ConsoleAreaPanel extends JPanel {

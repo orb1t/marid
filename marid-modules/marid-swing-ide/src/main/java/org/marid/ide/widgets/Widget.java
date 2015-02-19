@@ -61,6 +61,9 @@ public abstract class Widget extends JInternalFrame implements WidgetSupport {
     public void pack() {
         fillActions();
         MaridActions.fillToolbar(getActionMap(), toolBar);
+        if (getJMenuBar() != null) {
+            MaridActions.fillMenu(getActionMap(), getJMenuBar());
+        }
         super.pack();
     }
 

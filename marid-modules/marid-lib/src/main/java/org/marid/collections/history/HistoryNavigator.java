@@ -16,7 +16,7 @@ public class HistoryNavigator<T> {
     }
 
     public HistoryNavigator(Class<T> elementType, int maxItems, UnaryOperator<T> addOp) {
-        this(new History<T>(elementType, maxItems, addOp));
+        this(new History<>(elementType, maxItems, addOp));
     }
 
     public void add(T element) {
