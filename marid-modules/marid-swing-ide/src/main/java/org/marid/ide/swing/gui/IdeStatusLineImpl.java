@@ -69,6 +69,11 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
         add(timeLabel, c);
     }
 
+    @Autowired
+    private void prepare(IdeTimer ideTimer) {
+        ideTimer.addListener(e -> timeLabel.setText(currentTime()));
+    }
+
     private String currentTime() {
         return dateFormat.format(new Date());
     }

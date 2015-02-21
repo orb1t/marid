@@ -527,7 +527,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.4</version>
             </plugin>
 
             <plugin>

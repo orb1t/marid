@@ -57,19 +57,21 @@ public abstract class Widget extends JInternalFrame implements WidgetSupport {
         new StaticConfigurationDialog(window, Widget.this.getClass()).setVisible(true);
     }
 
-    @Override
-    public void pack() {
+    @PostConstruct
+    public void init() {
         fillActions();
         MaridActions.fillToolbar(getActionMap(), toolBar);
         if (getJMenuBar() != null) {
             MaridActions.fillMenu(getActionMap(), getJMenuBar());
+        } else {
+            for (final Object k : getActionMap().allKeys()) {
+                final Action action = getActionMap().get(k);
+                final KeyStroke stroke = (KeyStroke) action.getValue(Action.ACCELERATOR_KEY);
+                if (stroke != null && action instanceof MaridAction) {
+                    registerKeyboardAction(action, stroke, WHEN_IN_FOCUSED_WINDOW);
+                }
+            }
         }
-        super.pack();
-    }
-
-    @PostConstruct
-    public void init() {
-        info("Initialized {0}", getTitle());
         pack();
         setLocation(getPref("location", new Point()));
         setSize(getPref("size", getSize()));

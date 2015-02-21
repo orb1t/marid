@@ -94,7 +94,6 @@ public class CommandLine extends JPanel implements GridBagLayoutSupport, PrefSup
 
     private void addLine(Component component) {
         add(component, gbc(REMAINDER, 1, 1, 0, LINE_START, HORIZONTAL, insets, 0, 0), getComponentCount() - 1);
-        validate();
         if (getParent() != null && getParent() instanceof JViewport) {
             final JViewport viewport = (JViewport) getParent();
             viewport.setViewPosition(new Point(0, Integer.MAX_VALUE));
