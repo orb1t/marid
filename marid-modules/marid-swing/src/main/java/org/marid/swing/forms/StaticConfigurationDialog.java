@@ -30,7 +30,6 @@ import org.marid.swing.input.TitledInputControl;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -80,7 +79,7 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
         final JButton expBtn = new JButton(new MaridAction("Export preferences", "exportPrefs", this::exportPrefs));
         final JButton defBtn = new JButton(new MaridAction("Load defaults", "loadDefaults", this::loadDefaults));
         final JButton cclBtn = new JButton(new MaridAction("Cancel", "cancel.png", (a, e) -> dispose()));
-        final JButton okBtn = new JButton(new MaridAction("OK", "ok.png", (ActionListener) this::savePreferences));
+        final JButton okBtn = new JButton(new MaridAction("OK", "ok.png", this::savePreferences));
         add(groupedPanel(GroupLayout::createSequentialGroup, GroupLayout::createParallelGroup, (g, h, v) -> {
             h.addComponent(impBtn).addComponent(expBtn).addGap(20).addComponent(defBtn);
             h.addGap(10, 10, Integer.MAX_VALUE);

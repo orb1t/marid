@@ -18,14 +18,13 @@
 
 package org.marid.service;
 
+import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
-
-import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface MaridService extends LogSupport, ThreadFactory, AutoCloseable, MaridServiceMXBean {
+public interface MaridService extends LogSupport, AutoCloseable, MaridServiceMXBean, Named {
 
     ThreadGroup threadGroup();
 
@@ -39,10 +38,5 @@ public interface MaridService extends LogSupport, ThreadFactory, AutoCloseable, 
     @Override
     default int getThreadCount() {
         return threadGroup().activeCount();
-    }
-
-    @Override
-    default String getName() {
-        return getClass().getSimpleName();
     }
 }

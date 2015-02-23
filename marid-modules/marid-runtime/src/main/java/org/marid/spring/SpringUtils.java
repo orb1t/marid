@@ -18,15 +18,42 @@
 
 package org.marid.spring;
 
+import groovy.lang.Closure;
+import org.marid.Marid;
+import org.marid.itf.Named;
+import org.marid.pref.PrefCodecs;
+import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationBeanNameGenerator;
+import org.springframework.core.env.ConfigurableEnvironment;
+
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Field;
+import java.lang.reflect.Proxy;
+
+import static org.marid.util.Utils.cast;
+import static org.marid.util.Utils.currentClassLoader;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class SpringUtils {
+
+    private static final AnnotationBeanNameGenerator DEFAULT_BEAN_NAME_GENERATOR = new AnnotationBeanNameGenerator();
+    private static final MethodHandles.Lookup IMPL_LOOKUP;
+
+    static {
+        try {
+            final Field field = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
+            field.setAccessible(true);
+            IMPL_LOOKUP = (MethodHandles.Lookup) field.get(null);
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
+    }
 
     public static <T> T resolve(String value, Class<T> type, ConfigurableApplicationContext context) {
         final String resolvedValue = context.getEnvironment().resolvePlaceholders(value);
@@ -39,5 +66,40 @@ public class SpringUtils {
             final Object result = expressionResolver.evaluate(resolvedValue, expressionContext);
             return beanFactory.getTypeConverter().convertIfNecessary(result, type);
         }
+    }
+
+    public static <T> T parse(Class<?> target, Class<T> itf) {
+        final ConfigurableEnvironment env = Marid.getCurrentContext().getEnvironment();
+        return cast(Proxy.newProxyInstance(currentClassLoader(), new Class<?>[]{itf}, (proxy, method, args) -> {
+            if (!method.isDefault()) {
+                return null;
+            }
+            Object value = null;
+            if (args != null && args.length > 0 && args[0] instanceof Named) {
+                value = env.getProperty(((Named) args[0]).getName() + "." + method.getName(), Object.class);
+            }
+            if (value == null) {
+                value = env.getProperty(itf.getSimpleName() + "." + method.getName(), Object.class);
+            }
+            for (Class<?> c = target; c != null && value == null; c = c.getSuperclass()) {
+                value = env.getProperty(c.getSimpleName() + "." + method.getName(), Object.class);
+            }
+            if (value == null) {
+                return IMPL_LOOKUP
+                        .unreflectSpecial(method, method.getDeclaringClass())
+                        .bindTo(proxy)
+                        .invokeWithArguments(args);
+            } else {
+                if (value instanceof Closure) {
+                    value = ((Closure) value).call(args);
+                }
+                return PrefCodecs.castTo(value, method.getReturnType());
+            }
+        }));
+    }
+
+    public static String beanName(Class<?> target) {
+        final AnnotatedGenericBeanDefinition beanDefinition = new AnnotatedGenericBeanDefinition(target);
+        return DEFAULT_BEAN_NAME_GENERATOR.generateBeanName(beanDefinition, null);
     }
 }

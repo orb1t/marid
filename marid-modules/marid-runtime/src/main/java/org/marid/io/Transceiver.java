@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2013 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service;
+package org.marid.io;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface MaridServiceMXBean {
+public interface Transceiver extends Closeable {
 
-    int getThreadCount();
+    InputStream getInputStream() throws IOException;
 
-    boolean isRunning();
+    OutputStream getOutputStream() throws IOException;
 
-    String getName();
+    boolean isValid();
+
+    void setTimeout(int timeout) throws IOException;
+
+    int getTimeout() throws IOException;
 }
