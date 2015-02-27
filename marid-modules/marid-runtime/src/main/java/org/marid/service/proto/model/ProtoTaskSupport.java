@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,14 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.groovy;
+package org.marid.service.proto.model;
 
 import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface BindingProvider {
+public interface ProtoTaskSupport {
 
-    Map<String, Object> getBinding();
+    static void putProperties(Map<String, Object> map, AbstractProtoObject object) {
+        object.putProperty(map, "interruptTask", boolean.class);
+        object.putProperty(map, "delayMode", boolean.class);
+    }
+
+    default boolean isInterruptTask() {
+        return ((AbstractProtoObject) this).getProperty("interruptTask", () -> true);
+    }
+
+    default boolean isDelayMode() {
+        return ((AbstractProtoObject) this).getProperty("delayMode", () -> true);
+    }
 }

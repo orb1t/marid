@@ -24,8 +24,6 @@ import org.marid.functions.SafeBiConsumer;
 import org.marid.functions.SafeConsumer;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 
@@ -36,7 +34,7 @@ import static java.lang.Thread.currentThread;
  */
 public class GroovyRuntime {
 
-    private static final CompilerConfiguration COMPILER_CONFIGURATION = newCompilerConfiguration(c -> {
+    public static final CompilerConfiguration COMPILER_CONFIGURATION = newCompilerConfiguration(c -> {
     });
 
     public static final GroovyShell SHELL = newShell(COMPILER_CONFIGURATION, (l, s) -> {
@@ -69,26 +67,19 @@ public class GroovyRuntime {
     }
 
     public static GroovyShell newShell(CompilerConfiguration cc, SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
-        return newShell(Thread.currentThread().getContextClassLoader(), cc, configurer);
+        return newShell(Thread.currentThread().getContextClassLoader(), cc, new Binding(), configurer);
     }
 
-    public static GroovyShell newShell(ClassLoader classLoader, CompilerConfiguration cc, SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
-        final Map<String, Object> bindings = new HashMap<>();
-        try {
-            for (final BindingProvider provider : ServiceLoader.load(BindingProvider.class)) {
-                try {
-                    bindings.putAll(provider.getBinding());
-                } catch (Exception x) {
-                    x.printStackTrace();
-                }
-            }
-        } catch (Exception x) {
-            x.printStackTrace();
-        }
-        final GroovyShell shell = new MaridGroovyShell(classLoader, new Binding(bindings), cc);
+    public static GroovyShell newShell(ClassLoader classLoader, CompilerConfiguration cc, Binding binding, SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
+        final GroovyShell shell = new MaridGroovyShell(classLoader, binding, cc);
         configureClassLoader(shell.getClassLoader());
         configurer.accept(shell.getClassLoader(), shell);
         return shell;
+    }
+
+    public static GroovyShell newShell(Binding binding) {
+        return newShell(CLASS_LOADER, COMPILER_CONFIGURATION, binding, (l, s) -> {
+        });
     }
 
     public static GroovyShell newShell(SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
