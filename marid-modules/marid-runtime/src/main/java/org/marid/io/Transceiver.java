@@ -20,21 +20,19 @@ package org.marid.io;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface Transceiver extends Closeable {
 
-    InputStream getInputStream() throws IOException;
-
-    OutputStream getOutputStream() throws IOException;
-
     boolean isValid();
 
-    void setTimeout(int timeout) throws IOException;
+    void open() throws IOException;
 
-    int getTimeout() throws IOException;
+    void write(byte[] data, int offset, int len) throws IOException;
+
+    int read(byte[] data, int offset, int len) throws IOException;
+
+    int available() throws IOException;
 }
