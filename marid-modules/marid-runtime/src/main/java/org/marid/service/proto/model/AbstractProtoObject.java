@@ -67,7 +67,7 @@ public abstract class AbstractProtoObject implements Named, AutoCloseable {
 
     public abstract boolean isRunning();
 
-    public void restart() {
+    public synchronized void restart() {
         stop();
         while (isRunning()) {
             try {

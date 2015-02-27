@@ -18,13 +18,16 @@
 
 package org.marid.service.proto.model;
 
+import org.marid.io.DummyTransceiver;
 import org.marid.io.Transceiver;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,16 +38,28 @@ public class ProtoBus extends AbstractProtoObject implements ProtoTaskSupport, P
     protected final ScheduledThreadPoolExecutor timer;
     protected final TreeMap<String, ProtoNode> nodeMap = new TreeMap<>();
 
+    protected Transceiver transceiver;
+
     public ProtoBus(@Nonnull ProtoContext context, @Nonnull Object name, @Nonnull Map<String, Object> map) {
         super(name(name), context.getVariables(), map);
         parent = context;
         ProtoTaskSupport.putProperties(map, this);
         ProtoTimerSupport.putProperties(map, this);
         timer = new ScheduledThreadPoolExecutor(getThreads());
+        putProperty(map, "transceiverParameters", Map.class);
+        putProperty(map, "transceiverCreator", Function.class);
     }
 
-    public Transceiver getTransceiver() {
-        return null;
+    public synchronized Transceiver getTransceiver() {
+        return transceiver;
+    }
+
+    public Function<Map<String, Object>, Transceiver> getTransceiverCreator() {
+        return getProperty("transceiverCreator", () -> map -> DummyTransceiver.INSTANCE);
+    }
+
+    public Map<String, Object> getTransceiverParameters() {
+        return getProperty("transceiverParameters", Collections::emptyMap);
     }
 
     @Override
@@ -58,17 +73,34 @@ public class ProtoBus extends AbstractProtoObject implements ProtoTaskSupport, P
     }
 
     @Override
-    public void start() {
+    public synchronized void start() {
+        if (transceiver == null) {
+            transceiver = getTransceiverCreator().apply(getTransceiverParameters());
+        }
         nodeMap.values().stream().forEach(AbstractProtoObject::start);
     }
 
     @Override
-    public void stop() {
+    public synchronized void stop() {
         nodeMap.values().stream().forEach(AbstractProtoObject::stop);
+        while (isRunning()) {
+            try {
+                Thread.sleep(10L);
+            } catch (InterruptedException x) {
+                throw new IllegalStateException(x);
+            }
+        }
+        if (transceiver != null) {
+            try {
+                transceiver.close();
+            } catch (Exception x) {
+                throw new IllegalStateException(x);
+            }
+        }
     }
 
     @Override
-    public boolean isRunning() {
+    public synchronized boolean isRunning() {
         return nodeMap.values().stream().anyMatch(AbstractProtoObject::isRunning);
     }
 
