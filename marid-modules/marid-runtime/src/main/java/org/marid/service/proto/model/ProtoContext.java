@@ -18,6 +18,7 @@
 
 package org.marid.service.proto.model;
 
+import org.marid.service.proto.util.MapUtil;
 import org.marid.service.proto.util.NestedMap;
 
 import javax.annotation.Nonnull;
@@ -36,7 +37,7 @@ public class ProtoContext extends AbstractProtoObject implements ProtoTimerSuppo
 
     public ProtoContext(@Nonnull Map<String, Object> map) {
         super(map.get("name"), new NestedMap(), map);
-        children(map, "buses").forEach((k, v) -> busMap.put(name(k), new ProtoBus(this, k, v)));
+        MapUtil.children(map, "buses").forEach((k, v) -> busMap.put(MapUtil.name(k), new ProtoBus(this, k, v)));
         ProtoTimerSupport.putProperties(map, this);
         timer = new ScheduledThreadPoolExecutor(getThreads());
     }
@@ -64,6 +65,16 @@ public class ProtoContext extends AbstractProtoObject implements ProtoTimerSuppo
     @Override
     public boolean isRunning() {
         return busMap.values().stream().anyMatch(AbstractProtoObject::isRunning);
+    }
+
+    @Override
+    public boolean isStarted() {
+        return busMap.values().stream().allMatch(AbstractProtoObject::isStarted);
+    }
+
+    @Override
+    public boolean isStopped() {
+        return busMap.values().stream().noneMatch(AbstractProtoObject::isRunning);
     }
 
     @Override

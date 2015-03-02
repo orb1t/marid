@@ -20,13 +20,18 @@ package org.marid.service.proto.model;
 
 import org.marid.io.DummyTransceiver;
 import org.marid.io.Transceiver;
+import org.marid.io.TransceiverAction;
+import org.marid.service.proto.util.MapUtil;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.LockSupport;
 import java.util.function.Function;
 
 /**
@@ -41,7 +46,7 @@ public class ProtoBus extends AbstractProtoObject implements ProtoTaskSupport, P
     protected Transceiver transceiver;
 
     public ProtoBus(@Nonnull ProtoContext context, @Nonnull Object name, @Nonnull Map<String, Object> map) {
-        super(name(name), context.getVariables(), map);
+        super(MapUtil.name(name), context.getVariables(), map);
         parent = context;
         ProtoTaskSupport.putProperties(map, this);
         ProtoTimerSupport.putProperties(map, this);
@@ -50,12 +55,8 @@ public class ProtoBus extends AbstractProtoObject implements ProtoTaskSupport, P
         putProperty(map, "transceiverCreator", Function.class);
     }
 
-    public synchronized Transceiver getTransceiver() {
-        return transceiver;
-    }
-
     public Function<Map<String, Object>, Transceiver> getTransceiverCreator() {
-        return getProperty("transceiverCreator", () -> map -> DummyTransceiver.INSTANCE);
+        return getProperty("transceiverCreator", () -> DummyTransceiver.CREATOR);
     }
 
     public Map<String, Object> getTransceiverParameters() {
@@ -72,10 +73,26 @@ public class ProtoBus extends AbstractProtoObject implements ProtoTaskSupport, P
         return parent;
     }
 
+    public synchronized <T> T io(TransceiverAction<T> a) throws IOException, TimeoutException, InterruptedException {
+        return a.apply(transceiver);
+    }
+
     @Override
     public synchronized void start() {
         if (transceiver == null) {
             transceiver = getTransceiverCreator().apply(getTransceiverParameters());
+            try {
+                transceiver.open();
+            } catch (Exception x) {
+                try (final Transceiver t = transceiver) {
+                    assert t == transceiver;
+                } catch (Exception suppressed) {
+                    x.addSuppressed(suppressed);
+                } finally {
+                    transceiver = null;
+                }
+                throw new IllegalStateException(x);
+            }
         }
         nodeMap.values().stream().forEach(AbstractProtoObject::start);
     }
@@ -83,25 +100,33 @@ public class ProtoBus extends AbstractProtoObject implements ProtoTaskSupport, P
     @Override
     public synchronized void stop() {
         nodeMap.values().stream().forEach(AbstractProtoObject::stop);
-        while (isRunning()) {
-            try {
-                Thread.sleep(10L);
-            } catch (InterruptedException x) {
-                throw new IllegalStateException(x);
-            }
+        while (nodeMap.values().stream().anyMatch(AbstractProtoObject::isRunning)) {
+            LockSupport.parkNanos(1L);
         }
         if (transceiver != null) {
             try {
                 transceiver.close();
             } catch (Exception x) {
                 throw new IllegalStateException(x);
+            } finally {
+                transceiver = null;
             }
         }
     }
 
     @Override
     public synchronized boolean isRunning() {
-        return nodeMap.values().stream().anyMatch(AbstractProtoObject::isRunning);
+        return nodeMap.values().stream().anyMatch(AbstractProtoObject::isRunning) || transceiver != null;
+    }
+
+    @Override
+    public synchronized boolean isStarted() {
+        return nodeMap.values().stream().allMatch(AbstractProtoObject::isStarted);
+    }
+
+    @Override
+    public synchronized boolean isStopped() {
+        return nodeMap.values().stream().noneMatch(AbstractProtoObject::isRunning);
     }
 
     @Override

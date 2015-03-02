@@ -31,6 +31,7 @@ import java.net.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
@@ -273,5 +274,14 @@ public abstract class PrefCodecs {
         } else {
             return DefaultGroovyMethods.asType(object, type);
         }
+    }
+
+    public static <T> T mapv(Map map, Object key, Class<T> type) {
+        return castTo(map.get(key), type);
+    }
+
+    public static <T> T mapv(Map map, Object key, Class<T> type, Supplier<? extends T> supplier) {
+        final Object v = map.get(key);
+        return v == null ? supplier.get() : castTo(v, type);
     }
 }

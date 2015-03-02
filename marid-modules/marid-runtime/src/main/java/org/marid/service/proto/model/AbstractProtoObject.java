@@ -19,16 +19,16 @@
 package org.marid.service.proto.model;
 
 import groovy.lang.Binding;
+import groovy.lang.Closure;
 import groovy.lang.GroovyShell;
 import org.marid.itf.Named;
 import org.marid.pref.PrefCodecs;
+import org.marid.service.proto.util.MapUtil;
 import org.marid.service.proto.util.NestedMap;
 import org.marid.util.Utils;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 import static org.marid.groovy.GroovyRuntime.newShell;
@@ -43,9 +43,10 @@ public abstract class AbstractProtoObject implements Named, AutoCloseable {
     protected final TreeMap<String, Object> properties = new TreeMap<>();
 
     protected AbstractProtoObject(Object name, NestedMap parentMap, Map<String, Object> map) {
-        this.name = name(name);
+        this.name = MapUtil.name(name);
         this.shell = newShell(new Binding(new NestedMap(parentMap)));
-        getVariables().putAll(variables(map));
+        getVariables().putAll(MapUtil.variables(map));
+        getVariables().put("proto", this);
     }
 
     protected NestedMap getVariables() {
@@ -67,22 +68,29 @@ public abstract class AbstractProtoObject implements Named, AutoCloseable {
 
     public abstract boolean isRunning();
 
+    public abstract boolean isStarted();
+
+    public abstract boolean isStopped();
+
     public synchronized void restart() {
         stop();
-        while (isRunning()) {
-            try {
-                Thread.sleep(10L);
-            } catch (InterruptedException x) {
-                throw new IllegalStateException(x);
-            }
-        }
         start();
     }
 
     protected <T> void putProperty(Map<String, Object> map, String key, Class<T> type) {
         final Object v = map.get(key);
         if (v != null) {
-            properties.put(key, PrefCodecs.castTo(v, type));
+            if (type.isInstance(v)) {
+                properties.put(key, v);
+            } else if (v instanceof Closure) {
+                if (type.isInterface() && type.isAnnotationPresent(FunctionalInterface.class)) {
+                    properties.put(key, PrefCodecs.castTo(v, type));
+                } else {
+                    properties.put(key, PrefCodecs.castTo(((Closure) v).call(this), type));
+                }
+            } else {
+                properties.put(key, PrefCodecs.castTo(v, type));
+            }
         }
     }
 
@@ -97,17 +105,5 @@ public abstract class AbstractProtoObject implements Named, AutoCloseable {
                 return supplier.get();
             }
         }
-    }
-
-    protected static String name(Object name) {
-        return name == null ? UUID.randomUUID().toString() : PrefCodecs.castTo(name, String.class);
-    }
-
-    protected static Map<Object, Map<String, Object>> children(Map<String, Object> map, String key) {
-        return Utils.cast(map.getOrDefault(key, Collections.emptyMap()));
-    }
-
-    protected static Map<String, Object> variables(Map<String, Object> map) {
-        return Utils.cast(map.getOrDefault("variables", Collections.emptyMap()));
     }
 }

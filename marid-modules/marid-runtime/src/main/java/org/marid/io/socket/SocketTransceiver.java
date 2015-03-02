@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.channels.AlreadyConnectedException;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,6 +39,10 @@ public final class SocketTransceiver implements Transceiver {
 
     public SocketTransceiver(SocketTransceiverParameters parameters) {
         this.parameters = parameters;
+    }
+
+    public SocketTransceiver(Map<String, Object> parameters) {
+        this(new SocketTransceiverParameters(parameters));
     }
 
     @Override

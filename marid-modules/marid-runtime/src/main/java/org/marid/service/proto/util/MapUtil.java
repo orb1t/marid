@@ -16,47 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.service.proto.util;
 
-import java.io.IOException;
+import org.marid.pref.PrefCodecs;
+import org.marid.util.Utils;
+
+import java.util.Collections;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.UUID;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DummyTransceiver implements Transceiver {
+public class MapUtil {
 
-    public static final DummyTransceiver INSTANCE = new DummyTransceiver();
-    public static final Function<Map<String, Object>, Transceiver> CREATOR = map -> INSTANCE;
-
-    private DummyTransceiver() {
+    public static String name(Object name) {
+        return name == null ? UUID.randomUUID().toString() : PrefCodecs.castTo(name, String.class);
     }
 
-    @Override
-    public boolean isValid() {
-        return true;
+    public static Map<Object, Map<String, Object>> children(Map<String, Object> map, String key) {
+        return Utils.cast(map.getOrDefault(key, Collections.emptyMap()));
     }
 
-    @Override
-    public void open() throws IOException {
-    }
-
-    @Override
-    public void write(byte[] data, int offset, int len) throws IOException {
-    }
-
-    @Override
-    public int read(byte[] data, int offset, int len) throws IOException {
-        return 0;
-    }
-
-    @Override
-    public int available() throws IOException {
-        return 0;
-    }
-
-    @Override
-    public void close() throws IOException {
+    public static Map<String, Object> variables(Map<String, Object> map) {
+        return Utils.cast(map.getOrDefault("variables", Collections.emptyMap()));
     }
 }

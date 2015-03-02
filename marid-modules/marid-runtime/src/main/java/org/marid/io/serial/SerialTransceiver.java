@@ -25,6 +25,7 @@ import org.marid.io.Transceiver;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.Arrays;
+import java.util.Map;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -39,6 +40,10 @@ public final class SerialTransceiver implements Transceiver {
 
     public SerialTransceiver(SerialTransceiverParameters parameters) {
         this.parameters = parameters;
+    }
+
+    public SerialTransceiver(Map<String, Object> parameters) {
+        this(new SerialTransceiverParameters(parameters));
     }
 
     @Override

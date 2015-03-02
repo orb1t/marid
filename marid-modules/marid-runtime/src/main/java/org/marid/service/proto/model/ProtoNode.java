@@ -18,9 +18,15 @@
 
 package org.marid.service.proto.model;
 
+import org.marid.service.proto.util.EmptyScheduledFuture;
+
 import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -28,6 +34,7 @@ import java.util.concurrent.ScheduledFuture;
 public class ProtoNode extends AbstractProtoObject implements ProtoTaskSupport {
 
     protected final AbstractProtoObject parent;
+
     protected ScheduledFuture<?> task;
 
     public ProtoNode(@Nonnull ProtoBus bus, @Nonnull Object name, @Nonnull Map<String, Object> map) {
@@ -42,6 +49,31 @@ public class ProtoNode extends AbstractProtoObject implements ProtoTaskSupport {
         super(name, object.getVariables(), map);
         parent = object;
         ProtoTaskSupport.putProperties(map, this);
+        putProperty(map, "period", long.class);
+        putProperty(map, "realTime", boolean.class);
+        putProperty(map, "delay", long.class);
+        putProperty(map, "task", Consumer.class);
+        putProperty(map, "busTimer", boolean.class);
+    }
+
+    public Consumer<ProtoNode> getTaskConsumer() {
+        return getProperty("task", () -> node -> {});
+    }
+
+    public long getPeriod() {
+        return getProperty("period", () -> 0L);
+    }
+
+    public boolean isRealTime() {
+        return getProperty("realTime", () -> false);
+    }
+
+    public long getDelay() {
+        return getProperty("delay", () -> 0L);
+    }
+
+    public boolean isBusTimer() {
+        return getProperty("busTimer", () -> true);
     }
 
     @Nonnull
@@ -67,14 +99,41 @@ public class ProtoNode extends AbstractProtoObject implements ProtoTaskSupport {
     @Override
     public synchronized void start() {
         if (task == null) {
-
+            final long period = getPeriod();
+            final long delay = getDelay();
+            final boolean realTime = isRealTime();
+            final Consumer<ProtoNode> taskConsumer = getTaskConsumer();
+            final ScheduledThreadPoolExecutor timer = isBusTimer() ? getBus().timer : getContext().timer;
+            final Runnable t = () -> taskConsumer.accept(this);
+            if (period > 0L) {
+                if (realTime) {
+                    task = timer.scheduleAtFixedRate(t, delay, period, TimeUnit.SECONDS);
+                } else {
+                    task = timer.scheduleWithFixedDelay(t, delay, period, TimeUnit.SECONDS);
+                }
+            } else {
+                if (delay > 0L) {
+                    task = timer.schedule(t, delay, TimeUnit.SECONDS);
+                } else {
+                    task = EmptyScheduledFuture.getInstance();
+                }
+            }
         }
     }
 
     @Override
     public synchronized void stop() {
         if (task != null) {
-            task.cancel(isInterruptTask());
+            if (!task.isDone()) {
+                task.cancel(isInterruptTask());
+            }
+            try {
+                while (!task.isDone()) {
+                    LockSupport.parkNanos(1L);
+                }
+            } finally {
+                task = null;
+            }
         }
     }
 
@@ -84,6 +143,17 @@ public class ProtoNode extends AbstractProtoObject implements ProtoTaskSupport {
     }
 
     @Override
+    public synchronized boolean isStarted() {
+        return task != null;
+    }
+
+    @Override
+    public synchronized boolean isStopped() {
+        return task == null;
+    }
+
+    @Override
     public void close() {
+        stop();
     }
 }

@@ -18,45 +18,29 @@
 
 package org.marid.io;
 
-import java.io.IOException;
+import org.marid.io.serial.SerialTransceiver;
+import org.marid.io.socket.SocketTransceiver;
+
 import java.util.Map;
 import java.util.function.Function;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DummyTransceiver implements Transceiver {
+public enum StandardTransceiverCreator implements Function<Map<String, Object>, Transceiver> {
 
-    public static final DummyTransceiver INSTANCE = new DummyTransceiver();
-    public static final Function<Map<String, Object>, Transceiver> CREATOR = map -> INSTANCE;
+    DUMMY(DummyTransceiver.CREATOR),
+    SOCKET(SocketTransceiver::new),
+    SERIAL(SerialTransceiver::new);
 
-    private DummyTransceiver() {
+    private final Function<Map<String, Object>, Transceiver> function;
+
+    private StandardTransceiverCreator(Function<Map<String, Object>, Transceiver> function) {
+        this.function = function;
     }
 
     @Override
-    public boolean isValid() {
-        return true;
-    }
-
-    @Override
-    public void open() throws IOException {
-    }
-
-    @Override
-    public void write(byte[] data, int offset, int len) throws IOException {
-    }
-
-    @Override
-    public int read(byte[] data, int offset, int len) throws IOException {
-        return 0;
-    }
-
-    @Override
-    public int available() throws IOException {
-        return 0;
-    }
-
-    @Override
-    public void close() throws IOException {
+    public Transceiver apply(Map<String, Object> map) {
+        return function.apply(map);
     }
 }

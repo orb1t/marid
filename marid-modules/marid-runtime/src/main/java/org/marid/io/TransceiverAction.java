@@ -19,44 +19,13 @@
 package org.marid.io;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DummyTransceiver implements Transceiver {
+@FunctionalInterface
+public interface TransceiverAction<T> {
 
-    public static final DummyTransceiver INSTANCE = new DummyTransceiver();
-    public static final Function<Map<String, Object>, Transceiver> CREATOR = map -> INSTANCE;
-
-    private DummyTransceiver() {
-    }
-
-    @Override
-    public boolean isValid() {
-        return true;
-    }
-
-    @Override
-    public void open() throws IOException {
-    }
-
-    @Override
-    public void write(byte[] data, int offset, int len) throws IOException {
-    }
-
-    @Override
-    public int read(byte[] data, int offset, int len) throws IOException {
-        return 0;
-    }
-
-    @Override
-    public int available() throws IOException {
-        return 0;
-    }
-
-    @Override
-    public void close() throws IOException {
-    }
+    T apply(Transceiver transceiver) throws IOException, TimeoutException, InterruptedException;
 }

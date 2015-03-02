@@ -21,6 +21,10 @@ package org.marid.io.serial;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Map;
+
+import static org.marid.pref.PrefCodecs.mapv;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -28,6 +32,18 @@ public final class SerialTransceiverParameters {
 
     private String name = "/dev/ttyS0";
     private long timeout = 10_000L;
+
+    public SerialTransceiverParameters() {
+    }
+
+    public SerialTransceiverParameters(Map<String, Object> p) {
+        if (p.containsKey("name")) {
+            name = mapv(p, "name", String.class);
+        }
+        if (p.containsKey("timeout")) {
+            timeout = mapv(p, "timeout", long.class);
+        }
+    }
 
     public String getName() {
         return name;
