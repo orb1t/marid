@@ -21,8 +21,8 @@ package org.marid.service.pp.model;
 import groovy.lang.Binding;
 import groovy.lang.Closure;
 import groovy.lang.GroovyShell;
+import org.marid.dyn.Casting;
 import org.marid.itf.Named;
-import org.marid.pref.PrefCodecs;
 import org.marid.service.pp.util.MapUtil;
 import org.marid.service.pp.util.NestedMap;
 import org.marid.util.Utils;
@@ -86,12 +86,12 @@ public abstract class AbstractPpObject implements Named, AutoCloseable {
                 properties.put(key, v);
             } else if (v instanceof Closure) {
                 if (type.isInterface() && type.isAnnotationPresent(FunctionalInterface.class)) {
-                    properties.put(key, PrefCodecs.castTo(v, type));
+                    properties.put(key, Casting.castTo(type, v));
                 } else {
-                    properties.put(key, PrefCodecs.castTo(((Closure) v).call(this), type));
+                    properties.put(key, Casting.castTo(type, ((Closure) v).call(this)));
                 }
             } else {
-                properties.put(key, PrefCodecs.castTo(v, type));
+                properties.put(key, Casting.castTo(type, v));
             }
         }
     }

@@ -18,8 +18,8 @@
 
 package org.marid.swing.forms;
 
+import org.marid.dyn.Casting;
 import org.marid.logging.LogSupport;
-import org.marid.pref.PrefCodecs;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.PrefUtils;
 import org.marid.swing.input.InputControl;
@@ -127,7 +127,7 @@ public interface Configuration {
         }
 
         public <T> T get(Class<T> type) {
-            return PrefCodecs.castTo(get(), type);
+            return Casting.castTo(type, get());
         }
 
         public void addConsumer(JInternalFrame frame, Consumer<V> consumer) {

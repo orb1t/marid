@@ -21,9 +21,9 @@ package org.marid.groovy;
 import groovy.lang.*;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
+import org.marid.dyn.Casting;
 import org.marid.functions.SafeBiConsumer;
 import org.marid.functions.SafeConsumer;
-import org.marid.pref.PrefCodecs;
 
 import java.io.IOException;
 import java.net.URL;
@@ -116,7 +116,7 @@ public class GroovyRuntime {
             } else if (v instanceof Map) {
                 return MapProxies.newInstance(type, (Map) v);
             } else {
-                return PrefCodecs.castTo(v, type);
+                return Casting.castTo(type, v);
             }
         } catch (Exception x) {
             throw new IllegalStateException(x);

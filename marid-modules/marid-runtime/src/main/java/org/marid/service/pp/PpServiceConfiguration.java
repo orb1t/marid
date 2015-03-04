@@ -22,7 +22,6 @@ import org.marid.service.MaridServiceConfiguration;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -30,7 +29,7 @@ import java.util.UUID;
 public interface PpServiceConfiguration extends MaridServiceConfiguration {
 
     default String name(PpService service) {
-        return UUID.randomUUID().toString();
+        return service.getName();
     }
 
     default Map<String, Object> data(PpService service) {

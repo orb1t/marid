@@ -19,7 +19,7 @@
 package org.marid.groovy;
 
 import groovy.lang.Closure;
-import org.marid.pref.PrefCodecs;
+import org.marid.dyn.Casting;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
@@ -51,7 +51,7 @@ public class MapProxies {
             if (value instanceof Closure) {
                 return ((Closure) value).call(args);
             } else if (value != null) {
-                return PrefCodecs.castTo(value, method.getReturnType());
+                return Casting.castTo(method.getReturnType(), value);
             } else if (method.isDefault()) {
                 return LOOKUP.unreflectSpecial(method, method.getDeclaringClass())
                         .bindTo(proxy)

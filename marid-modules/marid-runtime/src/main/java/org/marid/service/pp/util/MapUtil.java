@@ -18,7 +18,7 @@
 
 package org.marid.service.pp.util;
 
-import org.marid.pref.PrefCodecs;
+import org.marid.dyn.Casting;
 import org.marid.util.Utils;
 
 import java.util.Collections;
@@ -31,7 +31,7 @@ import java.util.UUID;
 public class MapUtil {
 
     public static String name(Object name) {
-        return name == null ? UUID.randomUUID().toString() : PrefCodecs.castTo(name, String.class);
+        return name == null ? UUID.randomUUID().toString() : Casting.castTo(String.class, name);
     }
 
     public static Map<Object, Map<String, Object>> children(Map<String, Object> map, String key) {

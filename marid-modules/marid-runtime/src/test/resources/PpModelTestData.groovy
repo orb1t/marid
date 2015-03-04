@@ -17,21 +17,18 @@
  */
 
 [
-    name: "ctx",
-    data: { s ->
-        [
-            buses: [
-                bus1: [
-                    nodes: [
-                        node1: [
-                            period: 1,
-                            task  : {
-                                info("{0}", it);
-                            }
-                        ]
+    data: [
+        buses: [
+            bus1: [
+                nodes: [
+                    node1: [
+                        period: 1,
+                        task : {
+                            info("{0}", it);
+                        }
                     ]
                 ]
             ]
         ]
-    }
+    ]
 ]

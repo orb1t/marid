@@ -18,8 +18,8 @@
 
 package org.marid.pref;
 
-import groovy.lang.Closure;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
+import org.marid.dyn.Casting;
 import org.marid.functions.SafeBiConsumer;
 import org.marid.functions.SafeFunction;
 import org.marid.methods.LogMethods;
@@ -211,7 +211,7 @@ public abstract class PrefCodecs {
             return stringReader(s -> type.cast(Enum.valueOf(enumType, s)));
         } else {
             DefaultGroovyMethods.asType(1, Integer.class);
-            return stringReader(s -> castTo(s, type));
+            return stringReader(s -> Casting.castTo(type, s));
         }
     }
 
@@ -223,7 +223,7 @@ public abstract class PrefCodecs {
         } else if (type.isEnum()) {
             return (pref, key, val) -> pref.put(key, ((Enum) val).name());
         } else {
-            return (pref, key, val) -> pref.put(key, castTo(val, String.class));
+            return (pref, key, val) -> pref.put(key, Casting.castTo(String.class, val));
         }
     }
 
@@ -260,28 +260,12 @@ public abstract class PrefCodecs {
         }
     }
 
-    public static <T> T castTo(Object object, Class<T> type) {
-        if (object instanceof Number) {
-            return DefaultGroovyMethods.asType((Number) object, type);
-        } else if (object instanceof Map) {
-            return DefaultGroovyMethods.asType((Map) object, type);
-        } else if (object instanceof Closure) {
-            return DefaultGroovyMethods.asType((Closure) object, type);
-        } else if (object instanceof Collection) {
-            return DefaultGroovyMethods.asType((Collection) object, type);
-        } else if (object instanceof Object[]) {
-            return DefaultGroovyMethods.asType((Object[]) object, type);
-        } else {
-            return DefaultGroovyMethods.asType(object, type);
-        }
-    }
-
     public static <T> T mapv(Map map, Object key, Class<T> type) {
-        return castTo(map.get(key), type);
+        return Casting.castTo(type, map.get(key));
     }
 
     public static <T> T mapv(Map map, Object key, Class<T> type, Supplier<? extends T> supplier) {
         final Object v = map.get(key);
-        return v == null ? supplier.get() : castTo(v, type);
+        return v == null ? supplier.get() : Casting.castTo(type, v);
     }
 }
