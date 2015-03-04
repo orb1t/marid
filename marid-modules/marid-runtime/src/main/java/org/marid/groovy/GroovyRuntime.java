@@ -20,10 +20,14 @@ package org.marid.groovy;
 
 import groovy.lang.*;
 import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.marid.functions.SafeBiConsumer;
 import org.marid.functions.SafeConsumer;
+import org.marid.pref.PrefCodecs;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 
@@ -100,6 +104,31 @@ public class GroovyRuntime {
 
     public static GroovyClassLoader newClassLoader(SafeConsumer<GroovyClassLoader> configurer) {
         return newClassLoader(COMPILER_CONFIGURATION, configurer);
+    }
+
+    public static <T> T newInstance(Class<T> type, GroovyCodeSource codeSource) {
+        final GroovyClassLoader classLoader = newClassLoader(cl -> {});
+        try {
+            final Script script = (Script) classLoader.parseClass(codeSource, false).newInstance();
+            final Object v = script.run();
+            if (v instanceof Closure) {
+                return DefaultGroovyMethods.asType((Closure) v, type);
+            } else if (v instanceof Map) {
+                return MapProxies.newInstance(type, (Map) v);
+            } else {
+                return PrefCodecs.castTo(v, type);
+            }
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
+    public static <T> T newInstance(Class<T> type, URL url) {
+        try {
+            return newInstance(type, new GroovyCodeSource(url));
+        } catch (IOException x) {
+            throw new IllegalStateException(x);
+        }
     }
 
     private static void configureClassLoader(GroovyClassLoader loader) {

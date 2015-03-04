@@ -16,25 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.proto.model;
+package org.marid.service.pp.model;
 
-import java.util.Map;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.marid.service.pp.PpService;
+import org.marid.service.pp.PpServiceConfiguration;
+import org.marid.test.MaridContextLoader;
+import org.marid.test.MaridSpringTests;
+import org.marid.test.NormalTests;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ProtoTaskSupport {
+@Category({NormalTests.class})
+@ContextConfiguration(classes = {PpModelTestConfiguration.class}, loader = MaridContextLoader.class)
+public class PpModelTest extends MaridSpringTests {
 
-    static void putProperties(Map<String, Object> map, AbstractProtoObject object) {
-        object.putProperty(map, "interruptTask", boolean.class);
-        object.putProperty(map, "delayMode", boolean.class);
-    }
+    @Autowired
+    private PpServiceConfiguration configuration;
 
-    default boolean isInterruptTask() {
-        return ((AbstractProtoObject) this).getProperty("interruptTask", () -> true);
-    }
+    @Autowired
+    private PpService ppService;
 
-    default boolean isDelayMode() {
-        return ((AbstractProtoObject) this).getProperty("delayMode", () -> true);
+    @Test
+    public void test() throws Exception {
+        Thread.sleep(10_000L);
     }
 }

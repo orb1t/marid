@@ -16,20 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring;
+package org.marid.test;
 
-import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
-import org.springframework.context.annotation.AnnotationBeanNameGenerator;
+import org.marid.Marid;
+import org.springframework.test.context.TestContext;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SpringUtils {
+public class DestroyTestExecutionListener extends AbstractTestExecutionListener {
 
-    private static final AnnotationBeanNameGenerator DEFAULT_BEAN_NAME_GENERATOR = new AnnotationBeanNameGenerator();
-
-    public static String beanName(Class<?> target) {
-        final AnnotatedGenericBeanDefinition beanDefinition = new AnnotatedGenericBeanDefinition(target);
-        return DEFAULT_BEAN_NAME_GENERATOR.generateBeanName(beanDefinition, null);
+    @Override
+    public void afterTestClass(TestContext testContext) throws Exception {
+        Marid.getCurrentContext().close();
     }
 }

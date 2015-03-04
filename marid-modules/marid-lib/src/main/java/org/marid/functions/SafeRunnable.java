@@ -16,29 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.proto.util;
-
-import org.marid.pref.PrefCodecs;
-import org.marid.util.Utils;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
+package org.marid.functions;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MapUtil {
+public interface SafeRunnable extends Runnable {
 
-    public static String name(Object name) {
-        return name == null ? UUID.randomUUID().toString() : PrefCodecs.castTo(name, String.class);
+    void runUnsafe() throws Exception;
+
+    @Override
+    default void run() {
+        try {
+            runUnsafe();
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
     }
 
-    public static Map<Object, Map<String, Object>> children(Map<String, Object> map, String key) {
-        return Utils.cast(map.getOrDefault(key, Collections.emptyMap()));
-    }
-
-    public static Map<String, Object> variables(Map<String, Object> map) {
-        return Utils.cast(map.getOrDefault("variables", Collections.emptyMap()));
+    static Runnable runnable(SafeRunnable runnable) {
+        return runnable;
     }
 }

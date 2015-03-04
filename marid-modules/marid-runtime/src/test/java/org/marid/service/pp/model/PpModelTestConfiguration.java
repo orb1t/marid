@@ -16,25 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.proto.model;
+package org.marid.service.pp.model;
 
-import java.util.Map;
+import org.marid.service.pp.PpService;
+import org.marid.service.pp.PpServiceConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import static org.marid.groovy.GroovyRuntime.newInstance;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ProtoTimerSupport {
+@Configuration
+public class PpModelTestConfiguration {
 
-    static void putProperties(Map<String, Object> map, AbstractProtoObject object) {
-        object.putProperty(map, "threads", int.class);
-        object.putProperty(map, "shutdownTimeout", long.class);
+    @Bean
+    public PpServiceConfiguration ppServiceConfiguration() throws Exception {
+        return newInstance(PpServiceConfiguration.class, getClass().getResource("/PpModelTestData.groovy"));
     }
 
-    default int getThreads() {
-        return ((AbstractProtoObject) this).getProperty("threads", () -> 1);
-    }
-
-    default long getShutdownTimeout() {
-        return ((AbstractProtoObject) this).getProperty("shutdownTimeout", () -> 60L);
+    @Bean
+    public PpService protoContext() throws Exception {
+        return new PpService(ppServiceConfiguration());
     }
 }

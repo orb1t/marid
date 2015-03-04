@@ -18,16 +18,10 @@
 
 package org.marid.service;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.logging.LogSupport;
-import org.marid.spring.SpringUtils;
 import org.marid.test.NormalTests;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.stereotype.Service;
-
-import static org.marid.groovy.GroovyRuntime.SHELL;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -37,51 +31,6 @@ public class ServiceConfigurationTest implements LogSupport {
 
     @Test
     public void testConfiguration() {
-        System.getProperties().put("TestService.daemons", true);
-        try (final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext()) {
-            ctx.register(TestService.class);
-            ctx.refresh();
 
-            final TestService service = ctx.getBean(TestService.class);
-            info("Service: {0}", service);
-            Assert.assertTrue(service.threadFactory.newThread(() -> {
-            }).isDaemon());
-        }
-    }
-
-    @Test
-    public void testGroovyClosure() {
-        System.getProperties().put("TestService.threadFactory", SHELL.evaluate("{s -> {r -> new Thread(r)}}"));
-        System.getProperties().put("ts.x", 100);
-        try (final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
-            context.register(TestService.class);
-            context.refresh();
-
-            final TestService service = context.getBean(TestService.class);
-            Assert.assertFalse(service.threadFactory.newThread(() -> {}).isDaemon());
-            Assert.assertEquals(100, service.x);
-        }
-    }
-
-    @Service("ts")
-    static class TestService extends AbstractMaridService {
-
-        private final int x;
-
-        TestService(TestServiceConfiguration configuration) {
-            super(configuration);
-            this.x = configuration.x(this);
-        }
-
-        TestService() {
-            this(SpringUtils.parse(TestService.class, TestServiceConfiguration.class));
-        }
-    }
-
-    public static interface TestServiceConfiguration extends MaridServiceConfiguration {
-
-        default int x(TestService service) {
-            return 1;
-        }
     }
 }

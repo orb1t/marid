@@ -16,17 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.proto;
+package org.marid.service.pb;
 
-import org.marid.service.AbstractMaridService;
 import org.marid.service.MaridServiceConfiguration;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProtoService extends AbstractMaridService {
-
-    public ProtoService(MaridServiceConfiguration configuration) {
-        super(configuration);
-    }
+public interface PbServiceConfiguration extends MaridServiceConfiguration {
 }

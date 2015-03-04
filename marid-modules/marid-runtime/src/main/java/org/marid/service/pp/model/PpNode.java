@@ -16,14 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.proto.model;
+package org.marid.service.pp.model;
 
-import org.marid.service.proto.util.EmptyScheduledFuture;
+import org.marid.service.pp.util.EmptyScheduledFuture;
+import org.marid.service.pp.util.MapUtil;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
@@ -31,32 +32,37 @@ import java.util.function.Consumer;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProtoNode extends AbstractProtoObject implements ProtoTaskSupport {
+public class PpNode extends AbstractPpObject {
 
-    protected final AbstractProtoObject parent;
+    protected final AbstractPpObject parent;
+    protected final TreeMap<String, PpNode> nodeMap = new TreeMap<>();
 
     protected ScheduledFuture<?> task;
 
-    public ProtoNode(@Nonnull ProtoBus bus, @Nonnull Object name, @Nonnull Map<String, Object> map) {
-        this((AbstractProtoObject) bus, name, map);
+    public PpNode(@Nonnull PpBus bus, @Nonnull Object name, @Nonnull Map<String, Object> map) {
+        this((AbstractPpObject) bus, name, map);
     }
 
-    public ProtoNode(@Nonnull ProtoNode node, @Nonnull Object name, @Nonnull Map<String, Object> map) {
-        this((AbstractProtoObject) node, name, map);
+    public PpNode(@Nonnull PpNode node, @Nonnull Object name, @Nonnull Map<String, Object> map) {
+        this((AbstractPpObject) node, name, map);
     }
 
-    private ProtoNode(@Nonnull AbstractProtoObject object, @Nonnull Object name, @Nonnull Map<String, Object> map) {
+    private PpNode(@Nonnull AbstractPpObject object, @Nonnull Object name, @Nonnull Map<String, Object> map) {
         super(name, object.getVariables(), map);
         parent = object;
-        ProtoTaskSupport.putProperties(map, this);
+        putProperty(map, "interruptTask", boolean.class);
         putProperty(map, "period", long.class);
         putProperty(map, "realTime", boolean.class);
         putProperty(map, "delay", long.class);
         putProperty(map, "task", Consumer.class);
-        putProperty(map, "busTimer", boolean.class);
+        MapUtil.children(map, "nodes").forEach((k, v) -> nodeMap.put(MapUtil.name(k), new PpNode(this, k, v)));
     }
 
-    public Consumer<ProtoNode> getTaskConsumer() {
+    public boolean isInterruptTask() {
+        return getProperty("interruptTask", () -> true);
+    }
+
+    public Consumer<PpNode> getTaskConsumer() {
         return getProperty("task", () -> node -> {});
     }
 
@@ -72,27 +78,23 @@ public class ProtoNode extends AbstractProtoObject implements ProtoTaskSupport {
         return getProperty("delay", () -> 0L);
     }
 
-    public boolean isBusTimer() {
-        return getProperty("busTimer", () -> true);
-    }
-
     @Nonnull
-    public ProtoBus getBus() {
-        for (AbstractProtoObject object = parent; object != null; object = object.getParent()) {
-            if (object instanceof ProtoBus) {
-                return (ProtoBus) object;
+    public PpBus getBus() {
+        for (AbstractPpObject object = parent; object != null; object = object.getParent()) {
+            if (object instanceof PpBus) {
+                return (PpBus) object;
             }
         }
         throw new IllegalStateException();
     }
 
     @Override
-    public AbstractProtoObject getParent() {
+    public AbstractPpObject getParent() {
         return parent;
     }
 
     @Override
-    public ProtoContext getContext() {
+    public PpContext getContext() {
         return getBus().getContext();
     }
 
@@ -102,18 +104,17 @@ public class ProtoNode extends AbstractProtoObject implements ProtoTaskSupport {
             final long period = getPeriod();
             final long delay = getDelay();
             final boolean realTime = isRealTime();
-            final Consumer<ProtoNode> taskConsumer = getTaskConsumer();
-            final ScheduledThreadPoolExecutor timer = isBusTimer() ? getBus().timer : getContext().timer;
+            final Consumer<PpNode> taskConsumer = getTaskConsumer();
             final Runnable t = () -> taskConsumer.accept(this);
             if (period > 0L) {
                 if (realTime) {
-                    task = timer.scheduleAtFixedRate(t, delay, period, TimeUnit.SECONDS);
+                    task = getContext().timer.scheduleAtFixedRate(t, delay, period, TimeUnit.SECONDS);
                 } else {
-                    task = timer.scheduleWithFixedDelay(t, delay, period, TimeUnit.SECONDS);
+                    task = getContext().timer.scheduleWithFixedDelay(t, delay, period, TimeUnit.SECONDS);
                 }
             } else {
                 if (delay > 0L) {
-                    task = timer.schedule(t, delay, TimeUnit.SECONDS);
+                    task = getContext().timer.schedule(t, delay, TimeUnit.SECONDS);
                 } else {
                     task = EmptyScheduledFuture.getInstance();
                 }

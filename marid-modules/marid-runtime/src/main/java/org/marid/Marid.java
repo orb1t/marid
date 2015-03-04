@@ -50,11 +50,11 @@ public class Marid {
 
     static {
         setCurrentContext(new AnnotationConfigApplicationContext());
-        getCurrentContext().setClassLoader(GroovyRuntime.CLASS_LOADER);
-        Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
     }
 
     public static void start(Consumer<Runnable> starter, String... args) throws Exception {
+        getCurrentContext().setClassLoader(GroovyRuntime.CLASS_LOADER);
+        Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
         for (final Enumeration<URL> e = currentClassLoader().getResources("sys.properties"); e.hasMoreElements(); ) {
             try (final InputStreamReader reader = new InputStreamReader(e.nextElement().openStream(), UTF_8)) {
                 final Properties properties = new Properties();

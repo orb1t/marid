@@ -16,20 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.proto.model;
+package org.marid.service.pp.model;
 
 import org.marid.io.DummyTransceiver;
 import org.marid.io.Transceiver;
 import org.marid.io.TransceiverAction;
-import org.marid.service.proto.util.MapUtil;
+import org.marid.service.pp.util.MapUtil;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Function;
@@ -37,22 +35,19 @@ import java.util.function.Function;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProtoBus extends AbstractProtoObject implements ProtoTaskSupport, ProtoTimerSupport {
+public class PpBus extends AbstractPpObject {
 
-    protected final ProtoContext parent;
-    protected final ScheduledThreadPoolExecutor timer;
-    protected final TreeMap<String, ProtoNode> nodeMap = new TreeMap<>();
+    protected final PpContext parent;
+    protected final TreeMap<String, PpNode> nodeMap = new TreeMap<>();
 
     protected Transceiver transceiver;
 
-    public ProtoBus(@Nonnull ProtoContext context, @Nonnull Object name, @Nonnull Map<String, Object> map) {
+    public PpBus(@Nonnull PpContext context, @Nonnull Object name, @Nonnull Map<String, Object> map) {
         super(MapUtil.name(name), context.getVariables(), map);
         parent = context;
-        ProtoTaskSupport.putProperties(map, this);
-        ProtoTimerSupport.putProperties(map, this);
-        timer = new ScheduledThreadPoolExecutor(getThreads());
-        putProperty(map, "transceiverParameters", Map.class);
         putProperty(map, "transceiverCreator", Function.class);
+        putProperty(map, "transceiverParameters", Map.class);
+        MapUtil.children(map, "nodes").forEach((k, v) -> nodeMap.put(MapUtil.name(k), new PpNode(this, k, v)));
     }
 
     public Function<Map<String, Object>, Transceiver> getTransceiverCreator() {
@@ -64,12 +59,12 @@ public class ProtoBus extends AbstractProtoObject implements ProtoTaskSupport, P
     }
 
     @Override
-    public ProtoContext getParent() {
+    public PpContext getParent() {
         return parent;
     }
 
     @Override
-    public ProtoContext getContext() {
+    public PpContext getContext() {
         return parent;
     }
 
@@ -94,13 +89,13 @@ public class ProtoBus extends AbstractProtoObject implements ProtoTaskSupport, P
                 throw new IllegalStateException(x);
             }
         }
-        nodeMap.values().stream().forEach(AbstractProtoObject::start);
+        nodeMap.values().stream().forEach(AbstractPpObject::start);
     }
 
     @Override
     public synchronized void stop() {
-        nodeMap.values().stream().forEach(AbstractProtoObject::stop);
-        while (nodeMap.values().stream().anyMatch(AbstractProtoObject::isRunning)) {
+        nodeMap.values().stream().forEach(AbstractPpObject::stop);
+        while (nodeMap.values().stream().anyMatch(AbstractPpObject::isRunning)) {
             LockSupport.parkNanos(1L);
         }
         if (transceiver != null) {
@@ -116,23 +111,23 @@ public class ProtoBus extends AbstractProtoObject implements ProtoTaskSupport, P
 
     @Override
     public synchronized boolean isRunning() {
-        return nodeMap.values().stream().anyMatch(AbstractProtoObject::isRunning) || transceiver != null;
+        return nodeMap.values().stream().anyMatch(AbstractPpObject::isRunning) || transceiver != null;
     }
 
     @Override
     public synchronized boolean isStarted() {
-        return nodeMap.values().stream().allMatch(AbstractProtoObject::isStarted);
+        return nodeMap.values().stream().allMatch(AbstractPpObject::isStarted);
     }
 
     @Override
     public synchronized boolean isStopped() {
-        return nodeMap.values().stream().noneMatch(AbstractProtoObject::isRunning);
+        return nodeMap.values().stream().noneMatch(AbstractPpObject::isRunning);
     }
 
     @Override
     public void close() throws Exception {
-        stop();
-        timer.shutdown();
-        timer.awaitTermination(getShutdownTimeout(), TimeUnit.SECONDS);
+        for (final PpNode node : nodeMap.values()) {
+            node.close();
+        }
     }
 }

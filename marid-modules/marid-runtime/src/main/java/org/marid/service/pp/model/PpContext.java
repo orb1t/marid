@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.proto.model;
+package org.marid.service.pp.model;
 
-import org.marid.service.proto.util.MapUtil;
-import org.marid.service.proto.util.NestedMap;
+import org.marid.service.pp.util.MapUtil;
+import org.marid.service.pp.util.NestedMap;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -30,56 +30,67 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProtoContext extends AbstractProtoObject implements ProtoTimerSupport {
+public class PpContext extends AbstractPpObject {
 
-    protected final TreeMap<String, ProtoBus> busMap = new TreeMap<>();
+    protected final TreeMap<String, PpBus> busMap = new TreeMap<>();
     protected final ScheduledThreadPoolExecutor timer;
 
-    public ProtoContext(@Nonnull Map<String, Object> map) {
-        super(map.get("name"), new NestedMap(), map);
-        MapUtil.children(map, "buses").forEach((k, v) -> busMap.put(MapUtil.name(k), new ProtoBus(this, k, v)));
-        ProtoTimerSupport.putProperties(map, this);
+    public PpContext(String name, @Nonnull Map<String, Object> map) {
+        super(name, new NestedMap(), map);
+        MapUtil.children(map, "buses").forEach((k, v) -> busMap.put(MapUtil.name(k), new PpBus(this, k, v)));
+        putProperty(map, "threads", int.class);
+        putProperty(map, "shutdownTimeout", long.class);
         timer = new ScheduledThreadPoolExecutor(getThreads());
     }
 
     @Override
-    public AbstractProtoObject getParent() {
+    public AbstractPpObject getParent() {
         return null;
     }
 
     @Override
-    public ProtoContext getContext() {
+    public PpContext getContext() {
         return this;
     }
 
     @Override
     public void start() {
-        busMap.values().forEach(AbstractProtoObject::start);
+        busMap.values().forEach(AbstractPpObject::start);
     }
 
     @Override
     public void stop() {
-        busMap.values().forEach(AbstractProtoObject::stop);
+        busMap.values().forEach(AbstractPpObject::stop);
     }
 
     @Override
     public boolean isRunning() {
-        return busMap.values().stream().anyMatch(AbstractProtoObject::isRunning);
+        return busMap.values().stream().anyMatch(AbstractPpObject::isRunning);
     }
 
     @Override
     public boolean isStarted() {
-        return busMap.values().stream().allMatch(AbstractProtoObject::isStarted);
+        return busMap.values().stream().allMatch(AbstractPpObject::isStarted);
     }
 
     @Override
     public boolean isStopped() {
-        return busMap.values().stream().noneMatch(AbstractProtoObject::isRunning);
+        return busMap.values().stream().noneMatch(AbstractPpObject::isRunning);
+    }
+
+    public int getThreads() {
+        return getProperty("threads", () -> 1);
+    }
+
+    public long getShutdownTimeout() {
+        return getProperty("shutdownTimeout", () -> 60L);
     }
 
     @Override
     public void close() throws Exception {
-        stop();
+        for (final PpBus protoBus : busMap.values()) {
+            protoBus.close();
+        }
         timer.shutdown();
         timer.awaitTermination(getShutdownTimeout(), TimeUnit.SECONDS);
     }

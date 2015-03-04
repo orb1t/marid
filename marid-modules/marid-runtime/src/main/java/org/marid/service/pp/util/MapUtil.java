@@ -16,20 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring;
+package org.marid.service.pp.util;
 
-import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
-import org.springframework.context.annotation.AnnotationBeanNameGenerator;
+import org.marid.pref.PrefCodecs;
+import org.marid.util.Utils;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SpringUtils {
+public class MapUtil {
 
-    private static final AnnotationBeanNameGenerator DEFAULT_BEAN_NAME_GENERATOR = new AnnotationBeanNameGenerator();
+    public static String name(Object name) {
+        return name == null ? UUID.randomUUID().toString() : PrefCodecs.castTo(name, String.class);
+    }
 
-    public static String beanName(Class<?> target) {
-        final AnnotatedGenericBeanDefinition beanDefinition = new AnnotatedGenericBeanDefinition(target);
-        return DEFAULT_BEAN_NAME_GENERATOR.generateBeanName(beanDefinition, null);
+    public static Map<Object, Map<String, Object>> children(Map<String, Object> map, String key) {
+        return Utils.cast(map.getOrDefault(key, Collections.emptyMap()));
+    }
+
+    public static Map<String, Object> variables(Map<String, Object> map) {
+        return Utils.cast(map.getOrDefault("variables", Collections.emptyMap()));
     }
 }

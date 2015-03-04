@@ -16,14 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.proto;
+package org.marid.service.pp;
 
 import org.marid.service.MaridServiceConfiguration;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ProtoServiceConfiguration extends MaridServiceConfiguration {
+public interface PpServiceConfiguration extends MaridServiceConfiguration {
 
+    default String name(PpService service) {
+        return UUID.randomUUID().toString();
+    }
 
+    default Map<String, Object> data(PpService service) {
+        return Collections.emptyMap();
+    }
 }

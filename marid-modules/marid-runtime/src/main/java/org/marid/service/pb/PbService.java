@@ -16,20 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring;
+package org.marid.service.pb;
 
-import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
-import org.springframework.context.annotation.AnnotationBeanNameGenerator;
+import org.marid.service.AbstractMaridService;
+import org.marid.service.pp.PpServiceConfiguration;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SpringUtils {
+public class PbService extends AbstractMaridService {
 
-    private static final AnnotationBeanNameGenerator DEFAULT_BEAN_NAME_GENERATOR = new AnnotationBeanNameGenerator();
-
-    public static String beanName(Class<?> target) {
-        final AnnotatedGenericBeanDefinition beanDefinition = new AnnotatedGenericBeanDefinition(target);
-        return DEFAULT_BEAN_NAME_GENERATOR.generateBeanName(beanDefinition, null);
+    public PbService(PpServiceConfiguration configuration) {
+        super(configuration);
     }
 }

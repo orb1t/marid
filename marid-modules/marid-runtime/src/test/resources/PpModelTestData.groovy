@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,17 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.web.site
-
-import com.sun.net.httpserver.HttpExchange
-
-/**
- * @author Dmitry Ovchinnikov
- */
-{path, HttpExchange exchange ->
-    exchange.responseHeaders.put("Content-Type", ["text/plain", "charset=UTF-8"]);
-    exchange.sendResponseHeaders(200, 0);
-    exchange.responseBody.withWriter("UTF-8", {w ->
-        w.println("Q");
-    });
-}
+[
+    name: "ctx",
+    data: { s ->
+        [
+            buses: [
+                bus1: [
+                    nodes: [
+                        node1: [
+                            period: 1,
+                            task  : {
+                                info("{0}", it);
+                            }
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    }
+]
