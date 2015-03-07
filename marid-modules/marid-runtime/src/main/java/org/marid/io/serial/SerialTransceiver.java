@@ -21,6 +21,7 @@ package org.marid.io.serial;
 import jssc.SerialPort;
 import jssc.SerialPortException;
 import org.marid.io.Transceiver;
+import org.marid.io.TransceiverServer;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -32,7 +33,7 @@ import static java.lang.System.currentTimeMillis;
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class SerialTransceiver implements Transceiver {
+public final class SerialTransceiver implements Transceiver, TransceiverServer {
 
     private final SerialTransceiverParameters parameters;
 
@@ -58,8 +59,6 @@ public final class SerialTransceiver implements Transceiver {
                 serialPort = new SerialPort(parameters.getName());
             } catch (Exception x) {
                 throw new IOException(x);
-            } finally {
-                serialPort = null;
             }
         }
     }
@@ -100,6 +99,8 @@ public final class SerialTransceiver implements Transceiver {
                 serialPort.closePort();
             } catch (Exception x) {
                 throw new IOException(x);
+            } finally {
+                serialPort = null;
             }
         }
     }
@@ -113,6 +114,16 @@ public final class SerialTransceiver implements Transceiver {
             throw y;
         } catch (SerialPortException x) {
             throw new IOException(x);
+        }
+    }
+
+    @Override
+    public synchronized SerialTransceiver accept() throws IOException {
+        if (isValid()) {
+            return this;
+        } else {
+            open();
+            return this;
         }
     }
 

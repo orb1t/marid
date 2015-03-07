@@ -16,17 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.pb;
+package org.marid.service.proto.pb;
 
 import org.marid.service.AbstractMaridService;
-import org.marid.service.pp.PpServiceConfiguration;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class PbService extends AbstractMaridService {
 
-    public PbService(PpServiceConfiguration configuration) {
+    protected final PbContext context;
+
+    public PbService(PbServiceConfiguration configuration) {
         super(configuration);
+        context = new PbContext(this, configuration.name(this), configuration.data(this));
+        context.init();
+    }
+
+    @Override
+    public void start() throws Exception {
+        super.start();
+        context.start();
+    }
+
+    @Override
+    public void close() throws Exception {
+        context.close();
+        super.close();
     }
 }

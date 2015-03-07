@@ -16,12 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.pb;
+package org.marid.io;
 
-import org.marid.service.MaridServiceConfiguration;
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface PbServiceConfiguration extends MaridServiceConfiguration {
+public interface TransceiverServer extends Closeable {
+
+    Transceiver accept() throws IOException;
 }

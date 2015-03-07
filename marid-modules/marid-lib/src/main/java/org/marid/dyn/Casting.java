@@ -23,6 +23,7 @@ import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -43,5 +44,14 @@ public class Casting {
         } else {
             return DefaultGroovyMethods.asType(object, type);
         }
+    }
+
+    public static <T> T mapv(Map map, Object key, Class<T> type) {
+        return castTo(type, map.get(key));
+    }
+
+    public static <T> T mapv(Map map, Object key, Class<T> type, Supplier<? extends T> supplier) {
+        final Object v = map.get(key);
+        return v == null ? supplier.get() : castTo(type, v);
     }
 }

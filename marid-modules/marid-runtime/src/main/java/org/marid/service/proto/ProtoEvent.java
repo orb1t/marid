@@ -16,24 +16,40 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-[
-    data: [
-        buses: [
-            bus1: [
-                onInit: {
-                    info("Inited");
-                },
-                nodes: [
-                    node1: [
-                        descriptor: [
-                            period: 1,
-                            task: {
-                                info("{0}", it);
-                            }
-                        ]
-                    ]
-                ]
-            ]
-        ]
-    ]
-]
+package org.marid.service.proto;
+
+import java.util.Arrays;
+import java.util.EventObject;
+
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public class ProtoEvent extends EventObject {
+
+    private final String type;
+    private final Throwable cause;
+
+    public ProtoEvent(ProtoObject source, String type, Throwable cause) {
+        super(source);
+        this.type = type;
+        this.cause = cause;
+    }
+
+    @Override
+    public ProtoObject getSource() {
+        return (ProtoObject) super.getSource();
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public Throwable getCause() {
+        return cause;
+    }
+
+    @Override
+    public String toString() {
+        return getSource() + " " + Arrays.asList(type, cause);
+    }
+}

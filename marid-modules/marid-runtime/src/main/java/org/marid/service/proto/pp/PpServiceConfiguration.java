@@ -16,29 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.pp.util;
+package org.marid.service.proto.pp;
 
-import org.marid.dyn.Casting;
-import org.marid.util.Utils;
+import org.marid.service.MaridServiceConfiguration;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MapUtil {
+public interface PpServiceConfiguration extends MaridServiceConfiguration {
 
-    public static String name(Object name) {
-        return name == null ? UUID.randomUUID().toString() : Casting.castTo(String.class, name);
+    default String name(PpService service) {
+        return service.getName();
     }
 
-    public static Map<Object, Map<String, Object>> children(Map<String, Object> map, String key) {
-        return Utils.cast(map.getOrDefault(key, Collections.emptyMap()));
-    }
-
-    public static Map<String, Object> variables(Map<String, Object> map) {
-        return Utils.cast(map.getOrDefault("variables", Collections.emptyMap()));
+    default Map<String, Object> data(PpService service) {
+        return Collections.emptyMap();
     }
 }

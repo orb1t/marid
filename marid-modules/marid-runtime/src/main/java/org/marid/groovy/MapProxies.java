@@ -49,7 +49,11 @@ public class MapProxies {
         return type.cast(newProxyInstance(currentClassLoader(), new Class<?>[]{type}, (proxy, method, args) -> {
             final Object value = map.get(method.getName());
             if (value instanceof Closure) {
-                return ((Closure) value).call(args);
+                if (method.getReturnType().isAnnotationPresent(FunctionalInterface.class)) {
+                    return Casting.castTo(method.getReturnType(), value);
+                } else {
+                    return Casting.castTo(method.getReturnType(), ((Closure) value).call(args));
+                }
             } else if (value != null) {
                 return Casting.castTo(method.getReturnType(), value);
             } else if (method.isDefault()) {

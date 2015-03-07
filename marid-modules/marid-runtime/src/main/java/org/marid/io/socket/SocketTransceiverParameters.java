@@ -20,13 +20,12 @@ package org.marid.io.socket;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.marid.dyn.Casting;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Map;
-
-import static org.marid.pref.PrefCodecs.mapv;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -44,25 +43,25 @@ public final class SocketTransceiverParameters {
 
     public SocketTransceiverParameters(Map<String, Object> p) {
         if (p.containsKey("host") && p.containsKey("port")) {
-            socketAddress = new InetSocketAddress(mapv(p, "host", String.class), mapv(p, "port", int.class));
+            socketAddress = new InetSocketAddress(Casting.mapv(p, "host", String.class), Casting.mapv(p, "port", int.class));
         } else if (p.containsKey("address") && p.containsKey("port")) {
-            socketAddress = new InetSocketAddress(mapv(p, "address", InetAddress.class), mapv(p, "port", int.class));
+            socketAddress = new InetSocketAddress(Casting.mapv(p, "address", InetAddress.class), Casting.mapv(p, "port", int.class));
         } else if (p.containsKey("socketAddress")) {
-            socketAddress = mapv(p, "socketAddress", InetSocketAddress.class);
+            socketAddress = Casting.mapv(p, "socketAddress", InetSocketAddress.class);
         }
         if (p.containsKey("proxyType") && p.containsKey("proxyHost") && p.containsKey("proxyPort")) {
             proxy = new Proxy(
-                    mapv(p, "proxyType", Proxy.Type.class),
-                    new InetSocketAddress(mapv(p, "proxyHost", String.class), mapv(p, "proxyPort", int.class)));
+                    Casting.mapv(p, "proxyType", Proxy.Type.class),
+                    new InetSocketAddress(Casting.mapv(p, "proxyHost", String.class), Casting.mapv(p, "proxyPort", int.class)));
         }
         if (p.containsKey("connectTimeout")) {
-            connectTimeout = mapv(p, "connectTimeout", int.class);
+            connectTimeout = Casting.mapv(p, "connectTimeout", int.class);
         }
         if (p.containsKey("soTimeout")) {
-            soTimeout = mapv(p, "soTimeout", int.class);
+            soTimeout = Casting.mapv(p, "soTimeout", int.class);
         }
         if (p.containsKey("reuseAddress")) {
-            reuseAddress = mapv(p, "reuseAddress", boolean.class);
+            reuseAddress = Casting.mapv(p, "reuseAddress", boolean.class);
         }
     }
 

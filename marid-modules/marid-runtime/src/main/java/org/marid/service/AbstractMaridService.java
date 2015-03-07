@@ -43,6 +43,10 @@ public abstract class AbstractMaridService implements MaridService {
         return threadGroup;
     }
 
+    public ThreadFactory getThreadFactory() {
+        return threadFactory;
+    }
+
     @Override
     public String getName() {
         return name;

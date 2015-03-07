@@ -16,31 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.service.util;
 
-import org.marid.io.serial.SerialTransceiver;
-import org.marid.io.socket.SocketTransceiver;
+import org.marid.dyn.Casting;
+import org.marid.util.Utils;
 
+import java.util.Collections;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.UUID;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public enum StandardTransceiverCreator implements Function<Map<String, Object>, Transceiver> {
+public class MapUtil {
 
-    DUMMY(DummyTransceiver.CREATOR),
-    SOCKET(SocketTransceiver::new),
-    SERIAL(SerialTransceiver::new);
-
-    private final Function<Map<String, Object>, Transceiver> function;
-
-    private StandardTransceiverCreator(Function<Map<String, Object>, Transceiver> function) {
-        this.function = function;
+    public static String name(Object name) {
+        return name == null ? UUID.randomUUID().toString() : Casting.castTo(String.class, name);
     }
 
-    @Override
-    public Transceiver apply(Map<String, Object> map) {
-        return function.apply(map);
+    public static Map<Object, Map<String, Object>> children(Map<String, Object> map, String key) {
+        return Utils.cast(map.getOrDefault(key, Collections.emptyMap()));
+    }
+
+    public static Map<String, Object> variables(Map<String, Object> map) {
+        return Utils.cast(map.getOrDefault("variables", Collections.emptyMap()));
     }
 }

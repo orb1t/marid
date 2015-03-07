@@ -16,44 +16,70 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.service.proto.pb;
 
-import java.io.IOException;
+import org.marid.service.proto.ProtoObject;
+
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class DummyTransceiver implements Transceiver {
+public class PbContext extends ProtoObject {
 
-    public static final DummyTransceiver INSTANCE = new DummyTransceiver();
+    protected final PbService service;
 
-    private DummyTransceiver() {
+    protected PbContext(PbService service, String name, Map<String, Object> map) {
+        super(null, name, map);
+        this.service = service;
+    }
+
+    public PbService getService() {
+        return service;
     }
 
     @Override
-    public boolean isValid() {
-        return true;
+    protected void init() {
+        super.init();
     }
 
     @Override
-    public void open() throws IOException {
+    public ProtoObject getParent() {
+        return null;
     }
 
     @Override
-    public void write(byte[] data, int offset, int len) throws IOException {
+    public void start() {
+
     }
 
     @Override
-    public int read(byte[] data, int offset, int len) throws IOException {
-        return 0;
+    public void stop() {
+
     }
 
     @Override
-    public int available() throws IOException {
-        return 0;
+    public boolean isRunning() {
+        return false;
     }
 
     @Override
-    public void close() throws IOException {
+    public boolean isStarted() {
+        return false;
+    }
+
+    @Override
+    public boolean isStopped() {
+        return false;
+    }
+
+    @Override
+    public ProtoObject getContext() {
+        return null;
+    }
+
+    @Override
+    public void close() throws Exception {
+
     }
 }

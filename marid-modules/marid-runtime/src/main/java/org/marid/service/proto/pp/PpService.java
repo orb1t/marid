@@ -16,33 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.pp.model;
+package org.marid.service.proto.pp;
 
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.marid.service.pp.PpService;
-import org.marid.service.pp.PpServiceConfiguration;
-import org.marid.test.MaridContextLoader;
-import org.marid.test.MaridSpringTests;
-import org.marid.test.NormalTests;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
+import org.marid.service.AbstractMaridService;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Category({NormalTests.class})
-@ContextConfiguration(classes = {PpModelTestConfiguration.class}, loader = MaridContextLoader.class)
-public class PpModelTest extends MaridSpringTests {
+public class PpService extends AbstractMaridService {
 
-    @Autowired
-    private PpServiceConfiguration configuration;
+    protected final PpContext context;
 
-    @Autowired
-    private PpService ppService;
+    public PpService(PpServiceConfiguration configuration) {
+        super(configuration);
+        context = new PpContext(configuration.name(this), configuration.data(this));
+        context.init();
+    }
 
-    @Test
-    public void test() throws Exception {
-        Thread.sleep(10_000L);
+    @Override
+    public void start() throws Exception {
+        super.start();
+        context.start();
+    }
+
+    @Override
+    public void close() throws Exception {
+        context.close();
+        super.close();
     }
 }

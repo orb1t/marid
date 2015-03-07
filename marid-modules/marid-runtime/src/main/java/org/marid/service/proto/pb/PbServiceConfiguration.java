@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.pp;
+package org.marid.service.proto.pb;
 
 import org.marid.service.MaridServiceConfiguration;
 
@@ -26,13 +26,13 @@ import java.util.Map;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface PpServiceConfiguration extends MaridServiceConfiguration {
+public interface PbServiceConfiguration extends MaridServiceConfiguration {
 
-    default String name(PpService service) {
+    default String name(PbService service) {
         return service.getName();
     }
 
-    default Map<String, Object> data(PpService service) {
+    default Map<String, Object> data(PbService service) {
         return Collections.emptyMap();
     }
 }

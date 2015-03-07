@@ -16,30 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.pp;
+package org.marid.service.proto.pp.model;
 
-import org.marid.service.AbstractMaridService;
-import org.marid.service.pp.model.PpContext;
+import org.marid.service.proto.pp.PpService;
+import org.marid.service.proto.pp.PpServiceConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import static org.marid.groovy.GroovyRuntime.newInstance;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PpService extends AbstractMaridService {
+@Configuration
+public class PpModelTestConfiguration {
 
-    protected final PpContext context;
-
-    public PpService(PpServiceConfiguration configuration) {
-        super(configuration);
-        context = new PpContext(configuration.name(this), configuration.data(this));
+    @Bean
+    public PpServiceConfiguration ppServiceConfiguration() throws Exception {
+        return newInstance(PpServiceConfiguration.class, getClass().getResource("/PpModelTestData.groovy"));
     }
 
-    @Override
-    public void start() throws Exception {
-        context.start();
-    }
-
-    @Override
-    public void close() throws Exception {
-        context.close();
+    @Bean
+    public PpService protoContext() throws Exception {
+        return new PpService(ppServiceConfiguration());
     }
 }

@@ -16,50 +16,51 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io.serial;
+package org.marid.io.socket;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.marid.dyn.Casting;
 
+import java.net.InetSocketAddress;
 import java.util.Map;
+
+import static org.marid.dyn.Casting.mapv;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class SerialTransceiverParameters {
+public final class SocketTransceiverServerParameters {
 
-    private String name = "/dev/ttyS0";
-    private long timeout = 10_000L;
+    private InetSocketAddress socketAddress = new InetSocketAddress(0);
+    private int backlog = 50;
 
-    public SerialTransceiverParameters() {
+    public SocketTransceiverServerParameters() {
     }
 
-    public SerialTransceiverParameters(Map<String, Object> p) {
-        if (p.containsKey("name")) {
-            name = Casting.mapv(p, "name", String.class);
+    public SocketTransceiverServerParameters(Map<String, Object> p) {
+        if (p.containsKey("host") && p.containsKey("port")) {
+            socketAddress = new InetSocketAddress(mapv(p, "host", String.class), mapv(p, "port", int.class));
+        } else if (p.containsKey("port")) {
+            socketAddress = new InetSocketAddress(mapv(p, "port", int.class));
         }
-        if (p.containsKey("timeout")) {
-            timeout = Casting.mapv(p, "timeout", long.class);
-        }
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public long getTimeout() {
-        return timeout;
-    }
-
-    public SerialTransceiverParameters setName(String name) {
-        this.name = name;
+    public SocketTransceiverServerParameters setSocketAddress(InetSocketAddress socketAddress) {
+        this.socketAddress = socketAddress;
         return this;
     }
 
-    public SerialTransceiverParameters setTimeout(long timeout) {
-        this.timeout = timeout;
+    public SocketTransceiverServerParameters setBacklog(int backlog) {
+        this.backlog = backlog;
         return this;
+    }
+
+    public InetSocketAddress getSocketAddress() {
+        return socketAddress;
+    }
+
+    public int getBacklog() {
+        return backlog;
     }
 
     @Override

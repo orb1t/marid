@@ -16,28 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.pp.model;
+package org.marid.io;
 
-import org.marid.service.pp.PpService;
-import org.marid.service.pp.PpServiceConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import static org.marid.groovy.GroovyRuntime.newInstance;
+import java.io.IOException;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
-public class PpModelTestConfiguration {
+public final class DummyTransceiverServer implements TransceiverServer {
 
-    @Bean
-    public PpServiceConfiguration ppServiceConfiguration() throws Exception {
-        return newInstance(PpServiceConfiguration.class, getClass().getResource("/PpModelTestData.groovy"));
+    public static final DummyTransceiverServer INSTANCE = new DummyTransceiverServer();
+
+    private DummyTransceiverServer() {
     }
 
-    @Bean
-    public PpService protoContext() throws Exception {
-        return new PpService(ppServiceConfiguration());
+    @Override
+    public Transceiver accept() throws IOException {
+        return null;
+    }
+
+    @Override
+    public void close() throws IOException {
     }
 }
