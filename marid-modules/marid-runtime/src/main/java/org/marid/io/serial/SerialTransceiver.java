@@ -71,8 +71,11 @@ public final class SerialTransceiver implements Transceiver, TransceiverServer {
     @Override
     public synchronized int read(byte[] data, int offset, int len) throws IOException {
         final long timeout = parameters.getTimeout();
-        return apply(() -> {
-            for (long t = currentTimeMillis(); currentTimeMillis() - t < timeout && serialPort.isOpened(); ) {
+        final int result = apply(() -> {
+            for (long t = currentTimeMillis(); serialPort.isOpened(); ) {
+                if (currentTimeMillis() - t >= timeout) {
+                    return -2;
+                }
                 final int l = serialPort.getInputBufferBytesCount();
                 if (l > 0) {
                     final int n = Math.min(len, l);
@@ -85,6 +88,12 @@ public final class SerialTransceiver implements Transceiver, TransceiverServer {
             }
             return -1;
         });
+        switch (result) {
+            case -2:
+                throw new InterruptedIOException("Timeout exceeded");
+            default:
+                return result;
+        }
     }
 
     @Override

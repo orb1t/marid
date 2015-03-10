@@ -18,16 +18,13 @@
 
 package org.marid.service.proto.pb;
 
-import org.marid.io.DummyTransceiverServer;
-import org.marid.io.Transceiver;
-import org.marid.io.TransceiverServer;
 import org.marid.service.proto.ProtoEvent;
 import org.marid.service.proto.ProtoObject;
+import org.marid.service.util.MapUtil;
 
-import java.util.Collections;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,9 +33,7 @@ public class PbBus extends ProtoObject {
 
     protected final Descriptor descriptor;
     protected final ThreadPoolExecutor executor;
-
-    protected TransceiverServer transceiverServer;
-    protected Thread thread;
+    protected final TreeMap<String, PbNode> nodeMap = new TreeMap<>();
 
     protected PbBus(PbContext context, Object name, Map<String, Object> map) {
         super(context, name, map);
@@ -51,6 +46,7 @@ public class PbBus extends ProtoObject {
                 descriptor.queue(this),
                 context.getService().getThreadFactory(),
                 descriptor.rejectedExecutionHandler(this));
+        MapUtil.children(map, "nodes").forEach((k, v) -> nodeMap.put(MapUtil.name(k), new PbNode(this, k, v)));
     }
 
     @Override
@@ -60,81 +56,31 @@ public class PbBus extends ProtoObject {
 
     @Override
     public synchronized void start() {
-        if (transceiverServer == null) {
-            try {
-                transceiverServer = descriptor.transceiverServer(this, descriptor.transceiverServerParams(this));
-            } catch (Exception x) {
-                setChanged();
-                notifyObservers(new ProtoEvent(this, "start", x));
-            }
-        }
-        thread = getContext().getService().getThreadFactory().newThread(() -> {
-            Transceiver old = null;
-            while (isRunning()) {
-                try {
-                    final Transceiver transceiver = transceiverServer.accept();
-                    if (transceiver == old) {
-                        TimeUnit.SECONDS.sleep(descriptor.idleTimeout(this));
-                        continue;
-                    }
-                    old = transceiver;
-                    executor.execute(() -> {
-                        try (final Transceiver t = transceiver) {
-                            descriptor.processor(this, t);
-                        } catch (Exception x) {
-                            setChanged();
-                            notifyObservers(new ProtoEvent(this, "process", x));
-                        }
-                    });
-                } catch (Exception x) {
-                    setChanged();
-                    notifyObservers(new ProtoEvent(this, "run", x));
-                    LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(descriptor.errorTimeout(this)));
-                }
-            }
-        });
-        thread.start();
+        nodeMap.values().forEach(PbNode::start);
         setChanged();
         notifyObservers(new ProtoEvent(this, "start", null));
     }
 
     @Override
     public synchronized void stop() {
-        if (transceiverServer != null) {
-            try {
-                transceiverServer.close();
-            } catch (Exception x) {
-                setChanged();
-                notifyObservers(new ProtoEvent(this, "stop", x));
-            } finally {
-                transceiverServer = null;
-            }
-            try {
-                thread.join();
-            } catch (Exception x) {
-                setChanged();
-                notifyObservers(new ProtoEvent(this, "stop", x));
-            } finally {
-                thread = null;
-            }
-        }
+        nodeMap.values().forEach(PbNode::stop);
         setChanged();
         notifyObservers(new ProtoEvent(this, "stop", null));
     }
 
     @Override
     public synchronized boolean isRunning() {
-        return transceiverServer != null;
+        return nodeMap.values().stream().anyMatch(PbNode::isRunning);
     }
 
     @Override
     public synchronized boolean isStarted() {
-        return thread.isAlive();
+        return nodeMap.values().stream().allMatch(PbNode::isStarted);
     }
 
     @Override
     public synchronized boolean isStopped() {
-        return thread == null;
+        return nodeMap.values().stream().noneMatch(PbNode::isRunning);
     }
 
     @Override
@@ -180,25 +126,6 @@ public class PbBus extends ProtoObject {
 
         default long shutdownTimeout(PbBus bus) {
             return 60L;
-        }
-
-        default Map<String, Object> transceiverServerParams(PbBus bus) {
-            return Collections.emptyMap();
-        }
-
-        default TransceiverServer transceiverServer(PbBus bus, Map<String, Object> params) throws InterruptedException {
-            return DummyTransceiverServer.INSTANCE;
-        }
-
-        default void processor(PbBus bus, Transceiver transceiver) {
-        }
-
-        default long errorTimeout(PbBus bus) {
-            return 60L;
-        }
-
-        default long idleTimeout(PbBus bus) {
-            return 1L;
         }
     }
 }
