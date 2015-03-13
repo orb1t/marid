@@ -85,27 +85,27 @@ public final class SocketTransceiverParameters {
         return reuseAddress;
     }
 
-    public SocketTransceiverParameters setProxy(Proxy proxy) {
+    public SocketTransceiverParameters proxy(Proxy proxy) {
         this.proxy = proxy;
         return this;
     }
 
-    public SocketTransceiverParameters setSocketAddress(InetSocketAddress socketAddress) {
+    public SocketTransceiverParameters socketAddress(InetSocketAddress socketAddress) {
         this.socketAddress = socketAddress;
         return this;
     }
 
-    public SocketTransceiverParameters setConnectTimeout(int connectTimeout) {
+    public SocketTransceiverParameters connectTimeout(int connectTimeout) {
         this.connectTimeout = connectTimeout;
         return this;
     }
 
-    public SocketTransceiverParameters setSoTimeout(int soTimeout) {
+    public SocketTransceiverParameters soTimeout(int soTimeout) {
         this.soTimeout = soTimeout;
         return this;
     }
 
-    public SocketTransceiverParameters setReuseAddress(boolean reuseAddress) {
+    public SocketTransceiverParameters reuseAddress(boolean reuseAddress) {
         this.reuseAddress = reuseAddress;
         return this;
     }

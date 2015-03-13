@@ -90,11 +90,9 @@ public class PpNode extends ProtoObject {
                     }
                 }
             } catch (Exception x) {
-                setChanged();
-                notifyObservers(new ProtoEvent(this, "start", x));
+                fireEvent(new ProtoEvent(this, "start", x));
             }
-            setChanged();
-            notifyObservers(new ProtoEvent(this, "start", null));
+            fireEvent(new ProtoEvent(this, "start", null));
         }
     }
 
@@ -110,8 +108,7 @@ public class PpNode extends ProtoObject {
                 }
             } finally {
                 task = null;
-                setChanged();
-                notifyObservers(new ProtoEvent(this, "stop", null));
+                fireEvent(new ProtoEvent(this, "stop", null));
             }
         }
     }
@@ -134,14 +131,12 @@ public class PpNode extends ProtoObject {
     @Override
     public void close() {
         stop();
-        setChanged();
-        notifyObservers(new ProtoEvent(this, "close", null));
+        fireEvent(new ProtoEvent(this, "close", null));
     }
 
     protected interface Descriptor {
 
-        Descriptor DEFAULT = new Descriptor() {
-        };
+        Descriptor DEFAULT = new Descriptor() {};
 
         default boolean interruptTask(PpNode node) {
             return true;

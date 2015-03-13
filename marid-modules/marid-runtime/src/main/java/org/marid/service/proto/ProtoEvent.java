@@ -18,21 +18,33 @@
 
 package org.marid.service.proto;
 
+import org.marid.logging.LogSupport;
+import org.marid.logging.Loggable;
+
 import java.util.Arrays;
 import java.util.EventObject;
+import java.util.logging.Level;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProtoEvent extends EventObject {
+public class ProtoEvent extends EventObject implements Loggable {
 
-    private final String type;
+    private final String message;
+    private final Level level;
     private final Throwable cause;
+    private final Object[] args;
 
-    public ProtoEvent(ProtoObject source, String type, Throwable cause) {
+    public ProtoEvent(ProtoObject source, String message, Throwable cause, Object... args) {
+        this(source, cause != null ? Level.WARNING : Level.INFO, message, cause, args);
+    }
+
+    public ProtoEvent(ProtoObject source, Level level, String message, Throwable cause, Object... args) {
         super(source);
-        this.type = type;
+        this.message = message;
         this.cause = cause;
+        this.args = args;
+        this.level = level;
     }
 
     @Override
@@ -40,8 +52,8 @@ public class ProtoEvent extends EventObject {
         return (ProtoObject) super.getSource();
     }
 
-    public String getType() {
-        return type;
+    public String getMessage() {
+        return message;
     }
 
     public Throwable getCause() {
@@ -49,7 +61,12 @@ public class ProtoEvent extends EventObject {
     }
 
     @Override
+    public void log(LogSupport logSupport) {
+        logSupport.log(level, message, cause, args);
+    }
+
+    @Override
     public String toString() {
-        return getSource() + " " + Arrays.asList(type, cause);
+        return getSource() + " " + Arrays.asList(message, cause);
     }
 }

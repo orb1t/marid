@@ -18,30 +18,54 @@
 
 package org.marid.service.proto;
 
-import org.marid.Marid;
+import org.marid.concurrent.ConcurrentUtils;
 import org.marid.dyn.Casting;
 import org.marid.groovy.MapProxies;
 import org.marid.itf.Named;
-import org.marid.methods.LogMethods;
+import org.marid.logging.LogSupport;
 import org.marid.service.util.MapUtil;
 import org.marid.util.Utils;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class ProtoObject extends Observable implements Named, AutoCloseable {
+public abstract class ProtoObject implements Named, LogSupport, AutoCloseable {
 
+    protected final List<ProtoEventListener> eventListeners = new CopyOnWriteArrayList<>();
     protected final ProtoObject parent;
     protected final String name;
     protected final Consumer<ProtoObject> onInit;
+    protected final Boolean delegateLogging;
+    protected final Logger logger;
+    protected final Map<String, Object> parameters;
 
     protected ProtoObject(ProtoObject parent, Object name, Map<String, Object> map) {
         this.parent = parent;
         this.name = MapUtil.name(name);
         this.onInit = Utils.cast(f(map, "onInit", Consumer.class, v -> {}));
+        this.parameters = Collections.unmodifiableMap(new HashMap<>(MapUtil.parameters(map)));
+        final Logging logging = f(map, "logging", Logging.class, Logging.DEFAULT);
+        this.logger = logging.logger(this);
+        this.delegateLogging = logging.delegateLogging(this);
+        if (Boolean.TRUE.equals(getDelegateLogging())) {
+            addEventListener(event -> event.log(event.getSource()));
+        }
+    }
+
+    protected Boolean getDelegateLogging() {
+        return delegateLogging == null
+                ? getParent() != null ? getParent().getDelegateLogging() : null
+                : delegateLogging;
+    }
+
+    @Override
+    public Logger logger() {
+        return logger;
     }
 
     protected void init() {
@@ -57,13 +81,25 @@ public abstract class ProtoObject extends Observable implements Named, AutoClose
         return parent;
     }
 
+    public Map<String, Object> getParameters() {
+        return parameters;
+    }
+
     public abstract void start();
 
     public abstract void stop();
 
-    public synchronized void restart() {
-        stop();
-        start();
+    public void restart() {
+        synchronized (this) {
+            stop();
+        }
+        ConcurrentUtils.await(this::isRunning);
+        synchronized (this) {
+            if (isRunning()) {
+                return;
+            }
+            start();
+        }
     }
 
     public abstract boolean isRunning();
@@ -97,19 +133,39 @@ public abstract class ProtoObject extends Observable implements Named, AutoClose
         }
     }
 
-    @Override
-    public synchronized void addObserver(Observer o) {
-        super.addObserver((observable, arg) -> {
+    public void addEventListener(ProtoEventListener eventListener) {
+        eventListeners.add(eventListener);
+    }
+
+    public void removeEventListener(ProtoEventListener eventListener) {
+        eventListeners.remove(eventListener);
+    }
+
+    protected void fireEvent(ProtoEvent event) {
+        for (final ProtoEventListener listener : eventListeners) {
             try {
-                o.update(observable, arg);
+                listener.onEvent(event);
             } catch (Exception x) {
-                LogMethods.severe(Marid.LOGGER, "Observer error in {0} : {1}", x, observable, arg);
+                warning("Unable to fire {0}", x, event);
             }
-        });
+        }
     }
 
     @Override
     public String toString() {
         return String.join("/", getPath());
+    }
+
+    protected interface Logging {
+
+        Logging DEFAULT = new Logging() {};
+
+        default Logger logger(ProtoObject object) {
+            return Logger.getLogger(object.toString());
+        }
+
+        default Boolean delegateLogging(ProtoObject object) {
+            return null;
+        }
     }
 }

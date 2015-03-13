@@ -18,6 +18,9 @@
 
 [
     data: [
+        logging: [
+            delegateLogging: true,
+        ],
         buses: [
             bus1: [
                 onInit: {

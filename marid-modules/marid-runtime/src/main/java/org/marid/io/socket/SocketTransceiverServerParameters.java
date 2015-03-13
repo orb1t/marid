@@ -50,7 +50,7 @@ public final class SocketTransceiverServerParameters {
         return this;
     }
 
-    public SocketTransceiverServerParameters setBacklog(int backlog) {
+    public SocketTransceiverServerParameters backlog(int backlog) {
         this.backlog = backlog;
         return this;
     }

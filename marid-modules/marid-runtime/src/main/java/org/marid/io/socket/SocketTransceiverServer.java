@@ -23,10 +23,13 @@ import org.marid.io.TransceiverServer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -43,12 +46,27 @@ public final class SocketTransceiverServer implements TransceiverServer {
         backlog = parameters.getBacklog();
     }
 
+    public SocketTransceiverServer(Map<String, Object> map) {
+        this(new SocketTransceiverServerParameters(map));
+    }
+
     @Override
     public Transceiver accept() throws IOException {
         if (serverSocket == null) {
             serverSocket = new ServerSocket(address.getPort(), backlog, address.getAddress());
         }
-        return new Client(serverSocket.accept());
+        final ServerSocket ss = serverSocket;
+        try {
+            return new Client(ss.accept());
+        } catch (SocketException x) {
+            if (ss.isClosed()) {
+                final InterruptedIOException ix = new InterruptedIOException(x.getMessage());
+                ix.initCause(x);
+                throw ix;
+            } else {
+                throw x;
+            }
+        }
     }
 
     @Override

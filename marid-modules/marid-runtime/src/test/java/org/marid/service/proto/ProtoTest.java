@@ -16,13 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.proto.pp.model;
+package org.marid.service.proto;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.service.proto.pp.PpService;
 import org.marid.service.proto.pp.PpServiceConfiguration;
-import org.marid.test.MaridContextLoader;
 import org.marid.test.MaridSpringTests;
 import org.marid.test.NormalTests;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +31,8 @@ import org.springframework.test.context.ContextConfiguration;
  * @author Dmitry Ovchinnikov
  */
 @Category({NormalTests.class})
-@ContextConfiguration(classes = {PpModelTestConfiguration.class}, loader = MaridContextLoader.class)
-public class PpModelTest extends MaridSpringTests {
+@ContextConfiguration(classes = {ProtoTestConfiguration.class})
+public class ProtoTest extends MaridSpringTests {
 
     @Autowired
     private PpServiceConfiguration configuration;

@@ -24,7 +24,7 @@ import org.marid.io.TransceiverServer;
 import org.marid.service.proto.ProtoEvent;
 import org.marid.service.proto.ProtoObject;
 
-import java.util.Collections;
+import java.io.InterruptedIOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -45,13 +45,17 @@ public class PbNode extends ProtoObject {
     }
 
     @Override
+    protected void init() {
+        super.init();
+    }
+
+    @Override
     public synchronized void start() {
         if (transceiverServer == null) {
             try {
-                transceiverServer = descriptor.transceiverServer(this, descriptor.transceiverServerParams(this));
+                transceiverServer = descriptor.server(this);
             } catch (Exception x) {
-                setChanged();
-                notifyObservers(new ProtoEvent(this, "start", x));
+                fireEvent(new ProtoEvent(this, "start", x));
             }
         }
         if (transceiverServer != null) {
@@ -61,6 +65,7 @@ public class PbNode extends ProtoObject {
                     try {
                         final Transceiver transceiver = transceiverServer.accept();
                         if (transceiver == old) {
+                            fireEvent(new ProtoEvent(this, "sleep {0}", null, transceiverServer));
                             TimeUnit.SECONDS.sleep(descriptor.idleTimeout(this));
                             continue;
                         }
@@ -69,21 +74,21 @@ public class PbNode extends ProtoObject {
                             try (final Transceiver t = transceiver) {
                                 descriptor.processor(this, t);
                             } catch (Exception x) {
-                                setChanged();
-                                notifyObservers(new ProtoEvent(this, "process", x));
+                                fireEvent(new ProtoEvent(this, "process", x));
                             }
                         });
+                    } catch (InterruptedIOException | InterruptedException x) {
+                        fireEvent(new ProtoEvent(this, "interrupted", null));
+                        return;
                     } catch (Exception x) {
-                        setChanged();
-                        notifyObservers(new ProtoEvent(this, "run", x));
+                        fireEvent(new ProtoEvent(this, "run", x));
                         LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(descriptor.errorTimeout(this)));
                     }
                 }
             });
             thread.start();
         }
-        setChanged();
-        notifyObservers(new ProtoEvent(this, "start", null));
+        fireEvent(new ProtoEvent(this, "start", null));
     }
 
     @Override
@@ -92,24 +97,22 @@ public class PbNode extends ProtoObject {
             try {
                 transceiverServer.close();
             } catch (Exception x) {
-                setChanged();
-                notifyObservers(new ProtoEvent(this, "stop", x));
+                fireEvent(new ProtoEvent(this, "stop", x));
             } finally {
                 transceiverServer = null;
             }
         }
         if (thread != null) {
             try {
+                thread.interrupt();
                 thread.join();
             } catch (Exception x) {
-                setChanged();
-                notifyObservers(new ProtoEvent(this, "stop", x));
+                fireEvent(new ProtoEvent(this, "stop", x));
             } finally {
                 thread = null;
             }
         }
-        setChanged();
-        notifyObservers(new ProtoEvent(this, "stop", null));
+        fireEvent(new ProtoEvent(this, "stop", null));
     }
 
     @Override
@@ -142,22 +145,16 @@ public class PbNode extends ProtoObject {
     }
 
     @Override
-    public synchronized void close() throws Exception {
+    public synchronized void close() {
         stop();
-        setChanged();
-        notifyObservers(new ProtoEvent(this, "close", null));
+        fireEvent(new ProtoEvent(this, "close", null));
     }
 
     protected interface Descriptor {
 
-        Descriptor DEFAULT = new Descriptor() {
-        };
+        Descriptor DEFAULT = new Descriptor() {};
 
-        default Map<String, Object> transceiverServerParams(PbNode bus) {
-            return Collections.emptyMap();
-        }
-
-        default TransceiverServer transceiverServer(PbNode bus, Map<String, Object> params) throws InterruptedException {
+        default TransceiverServer server(PbNode bus) {
             return DummyTransceiverServer.INSTANCE;
         }
 

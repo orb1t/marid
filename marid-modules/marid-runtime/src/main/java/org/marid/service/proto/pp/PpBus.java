@@ -73,12 +73,10 @@ public class PpBus extends ProtoObject {
         try {
             transceiver.open();
         } catch (Exception x) {
-            setChanged();
-            notifyObservers(new ProtoEvent(this, "start", x));
+            fireEvent(new ProtoEvent(this, "start", x));
         }
         nodeMap.values().forEach(PpNode::start);
-        setChanged();
-        notifyObservers(new ProtoEvent(this, "start", null));
+        fireEvent(new ProtoEvent(this, "start", null));
     }
 
     @Override
@@ -87,10 +85,9 @@ public class PpBus extends ProtoObject {
         try {
             transceiver.close();
         } catch (Exception x) {
-            setChanged();
-            notifyObservers(new ProtoEvent(this, "stop", x));
+            fireEvent(new ProtoEvent(this, "stop", x));
         }
-        notifyObservers(new ProtoEvent(this, "stop", null));
+        fireEvent(new ProtoEvent(this, "stop", null));
     }
 
     @Override
@@ -110,15 +107,13 @@ public class PpBus extends ProtoObject {
 
     @Override
     public void close() {
-        stop();
-        setChanged();
-        notifyObservers(new ProtoEvent(this, "close", null));
+        nodeMap.values().forEach(PpNode::close);
+        fireEvent(new ProtoEvent(this, "close", null));
     }
 
     protected interface Descriptor {
 
-        Descriptor DEFAULT = new Descriptor() {
-        };
+        Descriptor DEFAULT = new Descriptor() {};
 
         default Map<String, Object> transceiverParams(PpBus bus) {
             return Collections.emptyMap();

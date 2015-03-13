@@ -18,6 +18,7 @@
 
 package org.marid.test;
 
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
@@ -29,6 +30,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
         DependencyInjectionTestExecutionListener.class,
         DestroyTestExecutionListener.class
 }, inheritListeners = false)
+@ContextConfiguration(loader = MaridContextLoader.class)
 public class MaridSpringTests extends AbstractJUnit4SpringContextTests {
 
 }

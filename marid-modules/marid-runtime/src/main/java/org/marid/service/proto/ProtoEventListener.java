@@ -16,29 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.util;
+package org.marid.service.proto;
 
-import org.marid.dyn.Casting;
-import org.marid.util.Utils;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
+import java.util.EventListener;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MapUtil {
+public interface ProtoEventListener extends EventListener {
 
-    public static String name(Object name) {
-        return name == null ? UUID.randomUUID().toString() : Casting.castTo(String.class, name);
-    }
-
-    public static Map<Object, Map<String, Object>> children(Map<String, Object> map, String key) {
-        return Utils.cast(map.getOrDefault(key, Collections.emptyMap()));
-    }
-
-    public static Map<String, Object> parameters(Map<String, Object> map) {
-        return Utils.cast(map.getOrDefault("parameters", Collections.emptyMap()));
-    }
+    void onEvent(ProtoEvent protoEvent);
 }

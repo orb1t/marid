@@ -18,9 +18,12 @@
 
 package org.marid.service.proto.pb;
 
+import org.marid.service.proto.ProtoEvent;
 import org.marid.service.proto.ProtoObject;
+import org.marid.service.util.MapUtil;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -28,10 +31,12 @@ import java.util.Map;
 public class PbContext extends ProtoObject {
 
     protected final PbService service;
+    protected final Map<String, PbBus> busMap = new TreeMap<>();
 
     protected PbContext(PbService service, String name, Map<String, Object> map) {
         super(null, name, map);
         this.service = service;
+        MapUtil.children(map, "buses").forEach((k, v) -> busMap.put(MapUtil.name(k), new PbBus(this, k, v)));
     }
 
     public PbService getService() {
@@ -41,45 +46,44 @@ public class PbContext extends ProtoObject {
     @Override
     protected void init() {
         super.init();
+        busMap.values().forEach(PbBus::init);
     }
 
     @Override
-    public ProtoObject getParent() {
-        return null;
+    public synchronized void start() {
+        busMap.values().forEach(PbBus::start);
+        fireEvent(new ProtoEvent(this, "start", null));
     }
 
     @Override
-    public void start() {
-
-    }
-
-    @Override
-    public void stop() {
-
+    public synchronized void stop() {
+        busMap.values().forEach(PbBus::stop);
+        fireEvent(new ProtoEvent(this, "stop", null));
     }
 
     @Override
     public boolean isRunning() {
-        return false;
+        return busMap.values().stream().anyMatch(PbBus::isRunning);
     }
 
     @Override
     public boolean isStarted() {
-        return false;
+        return busMap.values().stream().allMatch(PbBus::isStarted);
     }
 
     @Override
     public boolean isStopped() {
-        return false;
+        return busMap.values().stream().noneMatch(PbBus::isRunning);
     }
 
     @Override
-    public ProtoObject getContext() {
-        return null;
+    public PbContext getContext() {
+        return this;
     }
 
     @Override
-    public void close() throws Exception {
-
+    public synchronized void close() throws Exception {
+        busMap.values().forEach(PbBus::close);
+        fireEvent(new ProtoEvent(this, "close", null));
     }
 }

@@ -33,15 +33,21 @@ import java.util.concurrent.TimeUnit;
  */
 public class PpContext extends ProtoObject {
 
+    protected final PpService service;
     protected final TreeMap<String, PpBus> busMap = new TreeMap<>();
     protected final ScheduledThreadPoolExecutor timer;
     protected final Descriptor descriptor;
 
-    public PpContext(@Nonnull String name, @Nonnull Map<String, Object> map) {
+    public PpContext(@Nonnull PpService ppService, @Nonnull String name, @Nonnull Map<String, Object> map) {
         super(null, name, map);
+        service = ppService;
         MapUtil.children(map, "buses").forEach((k, v) -> busMap.put(MapUtil.name(k), new PpBus(this, k, v)));
         descriptor = f(map, "descriptor", Descriptor.class, Descriptor.DEFAULT);
         timer = new ScheduledThreadPoolExecutor(descriptor.threads(this));
+    }
+
+    public PpService getService() {
+        return service;
     }
 
     @Override
@@ -58,15 +64,13 @@ public class PpContext extends ProtoObject {
     @Override
     public void start() {
         busMap.values().forEach(PpBus::start);
-        setChanged();
-        notifyObservers(new ProtoEvent(this, "start", null));
+        fireEvent(new ProtoEvent(this, "start", null));
     }
 
     @Override
     public void stop() {
         busMap.values().forEach(PpBus::stop);
-        setChanged();
-        notifyObservers(new ProtoEvent(this, "stop", null));
+        fireEvent(new ProtoEvent(this, "stop", null));
     }
 
     @Override
@@ -91,17 +95,14 @@ public class PpContext extends ProtoObject {
         try {
             timer.awaitTermination(descriptor.shutdownTimeout(this), TimeUnit.SECONDS);
         } catch (Exception x) {
-            setChanged();
-            notifyObservers(new ProtoEvent(this, "close", x));
+            fireEvent(new ProtoEvent(this, "close", x));
         }
-        setChanged();
-        notifyObservers(new ProtoEvent(this, "close", null));
+        fireEvent(new ProtoEvent(this, "close", null));
     }
 
     protected interface Descriptor {
 
-        Descriptor DEFAULT = new Descriptor() {
-        };
+        Descriptor DEFAULT = new Descriptor() {};
 
         default int threads(PpContext context) {
             return 1;

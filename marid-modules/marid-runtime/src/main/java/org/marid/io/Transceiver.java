@@ -35,4 +35,8 @@ public interface Transceiver extends Closeable {
     int read(byte[] data, int offset, int len) throws IOException;
 
     int available() throws IOException;
+
+    default IoContext getData() {
+        return new IoContext(this);
+    }
 }

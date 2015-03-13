@@ -16,28 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.service.proto.pp.model;
+package org.marid.concurrent;
 
-import org.marid.service.proto.pp.PpService;
-import org.marid.service.proto.pp.PpServiceConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import static org.marid.groovy.GroovyRuntime.newInstance;
+import java.util.concurrent.locks.LockSupport;
+import java.util.function.BooleanSupplier;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
-public class PpModelTestConfiguration {
+public class ConcurrentUtils {
 
-    @Bean
-    public PpServiceConfiguration ppServiceConfiguration() throws Exception {
-        return newInstance(PpServiceConfiguration.class, getClass().getResource("/PpModelTestData.groovy"));
-    }
-
-    @Bean
-    public PpService protoContext() throws Exception {
-        return new PpService(ppServiceConfiguration());
+    public static void await(BooleanSupplier exitFlagSupplier) {
+        while (!exitFlagSupplier.getAsBoolean()) {
+            if (Thread.interrupted()) {
+                throw new IllegalStateException("Interrupted");
+            }
+            LockSupport.parkNanos(1L);
+        }
     }
 }

@@ -50,6 +50,12 @@ public class PbBus extends ProtoObject {
     }
 
     @Override
+    protected void init() {
+        super.init();
+        nodeMap.values().forEach(PbNode::init);
+    }
+
+    @Override
     public PbContext getParent() {
         return (PbContext) parent;
     }
@@ -57,15 +63,13 @@ public class PbBus extends ProtoObject {
     @Override
     public synchronized void start() {
         nodeMap.values().forEach(PbNode::start);
-        setChanged();
-        notifyObservers(new ProtoEvent(this, "start", null));
+        fireEvent(new ProtoEvent(this, "start", null));
     }
 
     @Override
     public synchronized void stop() {
         nodeMap.values().forEach(PbNode::stop);
-        setChanged();
-        notifyObservers(new ProtoEvent(this, "stop", null));
+        fireEvent(new ProtoEvent(this, "stop", null));
     }
 
     @Override
@@ -89,20 +93,20 @@ public class PbBus extends ProtoObject {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
+        nodeMap.values().forEach(PbNode::close);
         executor.shutdown();
         try {
             executor.awaitTermination(descriptor.shutdownTimeout(this), TimeUnit.SECONDS);
         } catch (Exception x) {
-            setChanged();
-            notifyObservers(new ProtoEvent(this, "close", x));
+            fireEvent(new ProtoEvent(this, "close", x));
         }
+        fireEvent(new ProtoEvent(this, "close", null));
     }
 
     protected interface Descriptor {
 
-        Descriptor DEFAULT = new Descriptor() {
-        };
+        Descriptor DEFAULT = new Descriptor() {};
 
         default RejectedExecutionHandler rejectedExecutionHandler(PbBus bus) {
             return new ThreadPoolExecutor.CallerRunsPolicy();
@@ -113,7 +117,7 @@ public class PbBus extends ProtoObject {
         }
 
         default int maxThreads(PbBus bus) {
-            return Runtime.getRuntime().availableProcessors();
+            return threads(bus);
         }
 
         default BlockingQueue<Runnable> queue(PbBus bus) {
