@@ -19,27 +19,14 @@
 package org.marid.io;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class DummyTransceiverServer implements TransceiverServer {
-
-    public static final DummyTransceiverServer INSTANCE = new DummyTransceiverServer();
-
-    private DummyTransceiverServer() {
-    }
+@FunctionalInterface
+public interface IoCallable<T> extends Callable<T> {
 
     @Override
-    public void open() throws IOException {
-    }
-
-    @Override
-    public Transceiver accept() throws IOException {
-        return null;
-    }
-
-    @Override
-    public void close() throws IOException {
-    }
+    T call() throws IOException;
 }

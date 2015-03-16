@@ -18,15 +18,13 @@
 
 package org.marid.io;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Function;
 
@@ -59,9 +57,12 @@ public final class IoContext {
         return this;
     }
 
-    @SafeVarargs
-    public final Object read(Function<ByteBuffer, Object>... rules) throws TimeoutException, IOException {
-        Collections.addAll(this.rules, rules);
+    public Object read(Function<ByteBuffer, Object> rule) throws IOException {
+        rules.add(rule);
+        return read();
+    }
+
+    public Object read() throws IOException {
         final FastArrayOutputStream os = new FastArrayOutputStream(1024);
         if (timeoutDriven) {
             final byte[] buf = new byte[1024];
@@ -69,7 +70,7 @@ public final class IoContext {
                 try {
                     final int n = transceiver.read(buf, 0, buf.length);
                     if (n < 0) {
-                        throw new EOFException();
+                        throw new ClosedChannelException();
                     }
                     if (n > 0) {
                         os.write(buf, 0, n);
@@ -89,7 +90,7 @@ public final class IoContext {
                     final byte[] data = new byte[size];
                     final int n = transceiver.read(data, 0, size);
                     if (n < 0) {
-                        throw new EOFException();
+                        throw new ClosedChannelException();
                     }
                     if (n > 0) {
                         os.write(data, 0, n);
@@ -102,7 +103,7 @@ public final class IoContext {
                 }
             }
         }
-        throw new TimeoutException();
+        throw new InterruptedIOException();
     }
 
     public void writeInt(int data) throws IOException {
@@ -136,6 +137,7 @@ public final class IoContext {
         for (final Function<ByteBuffer, Object> rule : rules) {
             final Object v = rule.apply(buffer);
             if (v != null) {
+                fos.reset();
                 return v;
             } else {
                 buffer.clear();

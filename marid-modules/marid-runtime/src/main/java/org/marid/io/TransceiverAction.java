@@ -19,7 +19,6 @@
 package org.marid.io;
 
 import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -27,5 +26,5 @@ import java.util.concurrent.TimeoutException;
 @FunctionalInterface
 public interface TransceiverAction<T> {
 
-    T apply(Transceiver transceiver) throws IOException, TimeoutException, InterruptedException;
+    T apply(Transceiver transceiver) throws IOException, InterruptedException;
 }

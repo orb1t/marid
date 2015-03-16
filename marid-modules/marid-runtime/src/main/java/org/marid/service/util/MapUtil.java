@@ -41,4 +41,8 @@ public class MapUtil {
     public static Map<String, Object> parameters(Map<String, Object> map) {
         return Utils.cast(map.getOrDefault("parameters", Collections.emptyMap()));
     }
+
+    public static Map<String, Object> variables(Map<String, Object> map) {
+        return Utils.cast(map.getOrDefault("variables", Collections.emptyMap()));
+    }
 }

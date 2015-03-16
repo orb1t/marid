@@ -48,6 +48,8 @@ public final class SocketTransceiverParameters {
             socketAddress = new InetSocketAddress(Casting.mapv(p, "address", InetAddress.class), Casting.mapv(p, "port", int.class));
         } else if (p.containsKey("socketAddress")) {
             socketAddress = Casting.mapv(p, "socketAddress", InetSocketAddress.class);
+        } else if (p.containsKey("port")) {
+            socketAddress = new InetSocketAddress(Casting.mapv(p, "port", int.class));
         }
         if (p.containsKey("proxyType") && p.containsKey("proxyHost") && p.containsKey("proxyPort")) {
             proxy = new Proxy(

@@ -21,11 +21,12 @@ package org.marid.service.proto.pb;
 import org.marid.io.DummyTransceiverServer;
 import org.marid.io.Transceiver;
 import org.marid.io.TransceiverServer;
-import org.marid.service.proto.ProtoEvent;
 import org.marid.service.proto.ProtoObject;
 
-import java.io.InterruptedIOException;
+import java.io.IOException;
+import java.nio.channels.ClosedChannelException;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
@@ -35,13 +36,15 @@ import java.util.concurrent.locks.LockSupport;
 public class PbNode extends ProtoObject {
 
     protected final Descriptor descriptor;
+    protected final ConcurrentLinkedQueue<Transceiver> transceivers = new ConcurrentLinkedQueue<>();
+    protected final TransceiverServer transceiverServer;
 
-    protected TransceiverServer transceiverServer;
     protected Thread thread;
 
     protected PbNode(ProtoObject parent, Object name, Map<String, Object> map) {
         super(parent, name, map);
         descriptor = f(map, "descriptor", Descriptor.class, Descriptor.DEFAULT);
+        transceiverServer = descriptor.server(this);
     }
 
     @Override
@@ -51,44 +54,43 @@ public class PbNode extends ProtoObject {
 
     @Override
     public synchronized void start() {
-        if (transceiverServer == null) {
-            try {
-                transceiverServer = descriptor.server(this);
-            } catch (Exception x) {
-                fireEvent(new ProtoEvent(this, "start", x));
-            }
+        try {
+            transceiverServer.open();
+        } catch (Exception x) {
+            fireEvent("start", x);
         }
-        if (transceiverServer != null) {
-            thread = getContext().getService().getThreadFactory().newThread(() -> {
-                Transceiver old = null;
-                while (isRunning()) {
-                    try {
-                        final Transceiver transceiver = transceiverServer.accept();
-                        if (transceiver == old) {
-                            fireEvent(new ProtoEvent(this, "sleep {0}", null, transceiverServer));
-                            TimeUnit.SECONDS.sleep(descriptor.idleTimeout(this));
-                            continue;
-                        }
-                        old = transceiver;
+        thread = getContext().getService().getThreadFactory().newThread(() -> {
+            while (isRunning()) {
+                try {
+                    final Transceiver transceiver = transceiverServer.accept();
+                    if (transceiver == null) {
+                        TimeUnit.SECONDS.sleep(descriptor.idleTimeout(this));
+                    } else {
+                        fireEvent("accept", transceiver);
                         getBus().executor.execute(() -> {
+                            transceivers.add(transceiver);
                             try (final Transceiver t = transceiver) {
                                 descriptor.processor(this, t);
+                            } catch (ClosedChannelException x) {
+                                fireEvent("destroyed");
                             } catch (Exception x) {
-                                fireEvent(new ProtoEvent(this, "process", x));
+                                fireEvent("process", x);
+                            } finally {
+                                transceivers.remove(transceiver);
                             }
                         });
-                    } catch (InterruptedIOException | InterruptedException x) {
-                        fireEvent(new ProtoEvent(this, "interrupted", null));
-                        return;
-                    } catch (Exception x) {
-                        fireEvent(new ProtoEvent(this, "run", x));
-                        LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(descriptor.errorTimeout(this)));
                     }
+                } catch (ClosedChannelException x) {
+                    fireEvent("destroyed");
+                    return;
+                } catch (Exception x) {
+                    fireEvent("run", x);
+                    LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(descriptor.errorTimeout(this)));
                 }
-            });
-            thread.start();
-        }
-        fireEvent(new ProtoEvent(this, "start", null));
+            }
+        });
+        thread.start();
+        fireEvent("start");
     }
 
     @Override
@@ -97,9 +99,7 @@ public class PbNode extends ProtoObject {
             try {
                 transceiverServer.close();
             } catch (Exception x) {
-                fireEvent(new ProtoEvent(this, "stop", x));
-            } finally {
-                transceiverServer = null;
+                fireEvent("stop", x);
             }
         }
         if (thread != null) {
@@ -107,12 +107,12 @@ public class PbNode extends ProtoObject {
                 thread.interrupt();
                 thread.join();
             } catch (Exception x) {
-                fireEvent(new ProtoEvent(this, "stop", x));
+                fireEvent("stop", x);
             } finally {
                 thread = null;
             }
         }
-        fireEvent(new ProtoEvent(this, "stop", null));
+        fireEvent("stop");
     }
 
     @Override
@@ -131,6 +131,11 @@ public class PbNode extends ProtoObject {
     }
 
     @Override
+    public PbNode getChild(String name) {
+        return null;
+    }
+
+    @Override
     public PbContext getContext() {
         return getBus().getContext();
     }
@@ -146,8 +151,15 @@ public class PbNode extends ProtoObject {
 
     @Override
     public synchronized void close() {
+        for (final Transceiver transceiver : transceivers) {
+            try {
+                transceiver.close();
+            } catch (Exception x) {
+                fireEvent("close", x, transceiver);
+            }
+        }
         stop();
-        fireEvent(new ProtoEvent(this, "close", null));
+        fireEvent("close");
     }
 
     protected interface Descriptor {
@@ -158,7 +170,7 @@ public class PbNode extends ProtoObject {
             return DummyTransceiverServer.INSTANCE;
         }
 
-        default void processor(PbNode bus, Transceiver transceiver) {
+        default void processor(PbNode bus, Transceiver transceiver) throws IOException {
         }
 
         default long errorTimeout(PbNode bus) {

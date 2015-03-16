@@ -26,5 +26,7 @@ import java.io.IOException;
  */
 public interface TransceiverServer extends Closeable {
 
-    Transceiver accept() throws IOException, InterruptedException;
+    void open() throws IOException;
+
+    Transceiver accept() throws IOException;
 }

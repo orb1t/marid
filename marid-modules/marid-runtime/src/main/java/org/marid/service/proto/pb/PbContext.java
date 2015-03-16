@@ -18,7 +18,6 @@
 
 package org.marid.service.proto.pb;
 
-import org.marid.service.proto.ProtoEvent;
 import org.marid.service.proto.ProtoObject;
 import org.marid.service.util.MapUtil;
 
@@ -52,13 +51,13 @@ public class PbContext extends ProtoObject {
     @Override
     public synchronized void start() {
         busMap.values().forEach(PbBus::start);
-        fireEvent(new ProtoEvent(this, "start", null));
+        fireEvent("start");
     }
 
     @Override
     public synchronized void stop() {
         busMap.values().forEach(PbBus::stop);
-        fireEvent(new ProtoEvent(this, "stop", null));
+        fireEvent("stop");
     }
 
     @Override
@@ -77,6 +76,11 @@ public class PbContext extends ProtoObject {
     }
 
     @Override
+    public PbBus getChild(String name) {
+        return busMap.get(name);
+    }
+
+    @Override
     public PbContext getContext() {
         return this;
     }
@@ -84,6 +88,6 @@ public class PbContext extends ProtoObject {
     @Override
     public synchronized void close() throws Exception {
         busMap.values().forEach(PbBus::close);
-        fireEvent(new ProtoEvent(this, "close", null));
+        fireEvent("close");
     }
 }

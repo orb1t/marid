@@ -24,6 +24,7 @@ import org.marid.service.proto.pp.PpService;
 import org.marid.service.proto.pp.PpServiceConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import static org.marid.groovy.GroovyRuntime.newInstance;
 
@@ -39,6 +40,7 @@ public class ProtoTestConfiguration {
     }
 
     @Bean
+    @DependsOn("pbService")
     public PpService ppService() throws Exception {
         return new PpService(ppServiceConfiguration());
     }

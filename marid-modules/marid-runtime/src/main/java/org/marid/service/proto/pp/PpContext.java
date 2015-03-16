@@ -18,7 +18,6 @@
 
 package org.marid.service.proto.pp;
 
-import org.marid.service.proto.ProtoEvent;
 import org.marid.service.proto.ProtoObject;
 import org.marid.service.util.MapUtil;
 
@@ -27,6 +26,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -64,13 +64,13 @@ public class PpContext extends ProtoObject {
     @Override
     public void start() {
         busMap.values().forEach(PpBus::start);
-        fireEvent(new ProtoEvent(this, "start", null));
+        fireEvent("start");
     }
 
     @Override
     public void stop() {
         busMap.values().forEach(PpBus::stop);
-        fireEvent(new ProtoEvent(this, "stop", null));
+        fireEvent("stop");
     }
 
     @Override
@@ -89,15 +89,22 @@ public class PpContext extends ProtoObject {
     }
 
     @Override
+    public PpBus getChild(String name) {
+        return busMap.get(name);
+    }
+
+    @Override
     public void close() throws Exception {
         busMap.values().forEach(PpBus::close);
         timer.shutdown();
         try {
-            timer.awaitTermination(descriptor.shutdownTimeout(this), TimeUnit.SECONDS);
+            if (!timer.awaitTermination(descriptor.shutdownTimeout(this), TimeUnit.SECONDS)) {
+                throw new TimeoutException();
+            }
         } catch (Exception x) {
-            fireEvent(new ProtoEvent(this, "close", x));
+            fireEvent("close", x);
         }
-        fireEvent(new ProtoEvent(this, "close", null));
+        fireEvent("close");
     }
 
     protected interface Descriptor {

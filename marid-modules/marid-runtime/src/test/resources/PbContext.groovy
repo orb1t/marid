@@ -16,10 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 import org.marid.io.Transceiver
 import org.marid.io.socket.SocketTransceiverServer
-import org.marid.service.proto.pb.PbBus
+import org.marid.service.proto.pb.PbNode
 
 def array = [10, 20, 30, 40];
 
@@ -30,17 +29,43 @@ def array = [10, 20, 30, 40];
         ],
         buses: [
             bus1: [
-                onInit: {
-
-                },
                 descriptor: [
-                    threads: 1
+                    threads: 2
                 ],
                 nodes: [
                     node1: [
+                        onInit: {PbNode node ->
+                            node << [
+                                start: {
+                                    node.context.vars.port = it.source.transceiverServer.serverSocket.localPort;
+                                    info("{0} running on port {1}", node, node.context.vars.port);
+                                }
+                            ];
+                        },
                         descriptor: [
                             server: {new SocketTransceiverServer([:])},
-                            processor: {PbBus b, Transceiver t ->
+                            processor: {PbNode b, Transceiver t ->
+                                while (b.running) {
+                                    def data = t.data.read({buf -> buf.remaining() != 4 ? null : array[buf.getInt(0)]});
+                                    if (data != null) {
+                                        t.data.writeInt(data as int);
+                                    }
+                                }
+                            }
+                        ]
+                    ],
+                    node2: [
+                        onInit: {PbNode node ->
+                            node << [
+                                start: {
+                                    node.context.vars.port2 = it.source.transceiverServer.serverSocket.localPort;
+                                    info("{0} running on port {1}", node, node.context.vars.port);
+                                }
+                            ];
+                        },
+                        descriptor: [
+                            server: {new SocketTransceiverServer([:])},
+                            processor: {PbNode b, Transceiver t ->
                                 while (b.running) {
                                     def data = t.data.read({buf -> buf.remaining() != 4 ? null : array[buf.getInt(0)]});
                                     if (data != null) {

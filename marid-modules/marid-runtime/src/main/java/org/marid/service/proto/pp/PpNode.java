@@ -18,7 +18,6 @@
 
 package org.marid.service.proto.pp;
 
-import org.marid.service.proto.ProtoEvent;
 import org.marid.service.proto.ProtoObject;
 import org.marid.service.util.EmptyScheduledFuture;
 import org.marid.service.util.MapUtil;
@@ -90,9 +89,9 @@ public class PpNode extends ProtoObject {
                     }
                 }
             } catch (Exception x) {
-                fireEvent(new ProtoEvent(this, "start", x));
+                fireEvent("start", x);
             }
-            fireEvent(new ProtoEvent(this, "start", null));
+            fireEvent("start");
         }
     }
 
@@ -108,7 +107,7 @@ public class PpNode extends ProtoObject {
                 }
             } finally {
                 task = null;
-                fireEvent(new ProtoEvent(this, "stop", null));
+                fireEvent("stop");
             }
         }
     }
@@ -129,9 +128,14 @@ public class PpNode extends ProtoObject {
     }
 
     @Override
+    public PpNode getChild(String name) {
+        return nodeMap.get(name);
+    }
+
+    @Override
     public void close() {
         stop();
-        fireEvent(new ProtoEvent(this, "close", null));
+        fireEvent("close");
     }
 
     protected interface Descriptor {

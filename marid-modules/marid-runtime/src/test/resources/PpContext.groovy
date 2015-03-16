@@ -16,6 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import groovy.transform.Field
+import org.marid.io.Transceiver
+import org.marid.io.socket.SocketTransceiver
+import org.marid.service.proto.pb.PbService
+import org.marid.service.proto.pp.PpNode
+import org.springframework.beans.factory.annotation.Autowired
+
+@Field @Autowired private PbService pbService;
+
 [
     data: [
         logging: [
@@ -23,15 +32,46 @@
         ],
         buses: [
             bus1: [
-                onInit: {
-                    info("Inited");
-                },
+                descriptor: [
+                    transceiver: {new SocketTransceiver([port: pbService.context.vars.port])}
+                ],
                 nodes: [
                     node1: [
                         descriptor: [
                             period: 1,
-                            task: {
-                                info("{0}", it);
+                            task: {PpNode node ->
+                                node.bus.io({Transceiver t ->
+                                    for (def i in 0..3) {
+                                        t.data.writeInt(i);
+                                        def data = t.data.read({buf -> buf.remaining() != 4 ? null : buf.getInt()});
+                                        if (data != null) {
+                                            node.context.vars[i.toString()] = data;
+                                        }
+                                    }
+                                })
+                            }
+                        ]
+                    ]
+                ]
+            ],
+            bus2: [
+                descriptor: [
+                    transceiver: {new SocketTransceiver([port: pbService.context.vars.port2])}
+                ],
+                nodes: [
+                    node1: [
+                        descriptor: [
+                            period: 1,
+                            task: {PpNode node ->
+                                node.bus.io({Transceiver t ->
+                                    for (def i in 4..9) {
+                                        t.data.writeInt(i);
+                                        def data = t.data.read({buf -> buf.remaining() != 4 ? null : buf.getInt()});
+                                        if (data != null) {
+                                            node.context.vars[i.toString()] = data;
+                                        }
+                                    }
+                                })
                             }
                         ]
                     ]

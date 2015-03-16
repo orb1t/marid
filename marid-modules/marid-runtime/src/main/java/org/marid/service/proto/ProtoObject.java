@@ -27,8 +27,11 @@ import org.marid.service.util.MapUtil;
 import org.marid.util.Utils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -44,11 +47,14 @@ public abstract class ProtoObject implements Named, LogSupport, AutoCloseable {
     protected final Logger logger;
     protected final Map<String, Object> parameters;
 
+    public final ConcurrentMap<String, Object> vars;
+
     protected ProtoObject(ProtoObject parent, Object name, Map<String, Object> map) {
         this.parent = parent;
         this.name = MapUtil.name(name);
         this.onInit = Utils.cast(f(map, "onInit", Consumer.class, v -> {}));
         this.parameters = Collections.unmodifiableMap(new HashMap<>(MapUtil.parameters(map)));
+        this.vars = new ConcurrentHashMap<>(MapUtil.variables(map));
         final Logging logging = f(map, "logging", Logging.class, Logging.DEFAULT);
         this.logger = logging.logger(this);
         this.delegateLogging = logging.delegateLogging(this);
@@ -108,6 +114,8 @@ public abstract class ProtoObject implements Named, LogSupport, AutoCloseable {
 
     public abstract boolean isStopped();
 
+    public abstract ProtoObject getChild(String name);
+
     public List<String> getPath() {
         final List<String> path = new ArrayList<>();
         for (ProtoObject o = this; o != null; o = o.getParent()) {
@@ -141,7 +149,8 @@ public abstract class ProtoObject implements Named, LogSupport, AutoCloseable {
         eventListeners.remove(eventListener);
     }
 
-    protected void fireEvent(ProtoEvent event) {
+    protected void fireEvent(Level level, String message, Throwable cause, Object... args) {
+        final ProtoEvent event = new ProtoEvent(this, level, message, cause, args);
         for (final ProtoEventListener listener : eventListeners) {
             try {
                 listener.onEvent(event);
@@ -149,6 +158,18 @@ public abstract class ProtoObject implements Named, LogSupport, AutoCloseable {
                 warning("Unable to fire {0}", x, event);
             }
         }
+    }
+
+    protected void fireEvent(String message, Object... args) {
+        fireEvent(Level.INFO, message, null, args);
+    }
+
+    protected void fireEvent(String message, Throwable cause, Object... args) {
+        fireEvent(Level.WARNING, message, cause, args);
+    }
+
+    protected void fireData(Object... args) {
+        fireEvent(Level.OFF, "data", null, args);
     }
 
     @Override

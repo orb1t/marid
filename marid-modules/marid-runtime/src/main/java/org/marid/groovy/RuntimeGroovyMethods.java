@@ -22,7 +22,10 @@ import groovy.lang.Closure;
 import org.marid.Marid;
 import org.marid.logging.LogSupport;
 import org.marid.methods.LogMethods;
+import org.marid.service.proto.ProtoEventListener;
+import org.marid.service.proto.ProtoObject;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -50,20 +53,31 @@ public class RuntimeGroovyMethods {
         LogMethods.severe(logger(object), message, args);
     }
 
-    public static void fine(Object object, String message, Object...args) {
+    public static void fine(Object object, String message, Object... args) {
         LogMethods.fine(logger(object), message, args);
     }
 
-    public static void finer(Object object, String message, Object...args) {
+    public static void finer(Object object, String message, Object... args) {
         LogMethods.finer(logger(object), message, args);
     }
 
-    public static void finest(Object object, String message, Object...args) {
+    public static void finest(Object object, String message, Object... args) {
         LogMethods.finest(logger(object), message, args);
     }
 
     public static void config(Object object, String message, Object... args) {
         LogMethods.config(logger(object), message, args);
+    }
+
+    public static ProtoEventListener leftShift(ProtoObject protoObject, Map<String, Closure<Void>> map) {
+        final ProtoEventListener eventListener = event -> {
+            final Closure<Void> closure = map.get(event.message);
+            if (closure != null) {
+                closure.call(event);
+            }
+        };
+        protoObject.addEventListener(eventListener);
+        return eventListener;
     }
 
     private static Logger logger(Object object) {

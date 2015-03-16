@@ -27,6 +27,11 @@ import org.marid.test.NormalTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.HashSet;
+
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -42,6 +47,13 @@ public class ProtoTest extends MaridSpringTests {
 
     @Test
     public void test() throws Exception {
-        Thread.sleep(10_000L);
+        while (true) {
+            if (ppService.getContext().vars.size() == 4) {
+                assertEquals(ppService.getContext().vars.keySet(), new HashSet<>(asList("0", "1", "2", "3")));
+                assertEquals(new HashSet<>(ppService.getContext().vars.values()), new HashSet<Object>(asList(10, 20, 30, 40)));
+                return;
+            }
+            Thread.sleep(100L);
+        }
     }
 }

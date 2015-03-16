@@ -18,7 +18,9 @@
 
 package org.marid.io.socket;
 
+import org.marid.Marid;
 import org.marid.io.Transceiver;
+import org.marid.methods.LogMethods;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,9 +35,9 @@ import java.util.Map;
 public final class SocketTransceiver implements Transceiver {
 
     private final SocketTransceiverParameters parameters;
-    private Socket socket;
-    private InputStream inputStream;
-    private OutputStream outputStream;
+    private volatile Socket socket;
+    private volatile InputStream inputStream;
+    private volatile OutputStream outputStream;
 
     public SocketTransceiver(SocketTransceiverParameters parameters) {
         this.parameters = parameters;
@@ -46,12 +48,12 @@ public final class SocketTransceiver implements Transceiver {
     }
 
     @Override
-    public synchronized boolean isValid() {
+    public boolean isValid() {
         return socket != null && !socket.isClosed() && socket.isConnected();
     }
 
     @Override
-    public synchronized void open() throws IOException {
+    public void open() throws IOException {
         if (socket == null) {
             socket = new Socket(parameters.getProxy());
             try {
@@ -78,24 +80,25 @@ public final class SocketTransceiver implements Transceiver {
     }
 
     @Override
-    public synchronized void write(byte[] data, int offset, int len) throws IOException {
+    public void write(byte[] data, int offset, int len) throws IOException {
         outputStream.write(data, offset, len);
+        outputStream.flush();
     }
 
     @Override
-    public synchronized int read(byte[] data, int offset, int len) throws IOException {
+    public int read(byte[] data, int offset, int len) throws IOException {
         return inputStream.read(data, offset, len);
     }
 
     @Override
-    public synchronized int available() throws IOException {
+    public int available() throws IOException {
         return inputStream.available();
     }
 
     @Override
-    public synchronized void close() throws IOException {
+    public void close() throws IOException {
         try (final InputStream is = inputStream; final OutputStream os = outputStream; final Socket s = socket) {
-            assert s != null && is != null && os == null || s == null && os == null && is == null;
+            LogMethods.finest(Marid.LOGGER, "close {0} {1} {2}", s, is, os);
         } finally {
             inputStream = null;
             outputStream = null;

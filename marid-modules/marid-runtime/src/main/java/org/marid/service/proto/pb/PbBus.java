@@ -18,7 +18,6 @@
 
 package org.marid.service.proto.pb;
 
-import org.marid.service.proto.ProtoEvent;
 import org.marid.service.proto.ProtoObject;
 import org.marid.service.util.MapUtil;
 
@@ -63,13 +62,13 @@ public class PbBus extends ProtoObject {
     @Override
     public synchronized void start() {
         nodeMap.values().forEach(PbNode::start);
-        fireEvent(new ProtoEvent(this, "start", null));
+        fireEvent("start");
     }
 
     @Override
     public synchronized void stop() {
         nodeMap.values().forEach(PbNode::stop);
-        fireEvent(new ProtoEvent(this, "stop", null));
+        fireEvent("stop");
     }
 
     @Override
@@ -88,6 +87,11 @@ public class PbBus extends ProtoObject {
     }
 
     @Override
+    public PbNode getChild(String name) {
+        return nodeMap.get(name);
+    }
+
+    @Override
     public PbContext getContext() {
         return getParent();
     }
@@ -97,11 +101,13 @@ public class PbBus extends ProtoObject {
         nodeMap.values().forEach(PbNode::close);
         executor.shutdown();
         try {
-            executor.awaitTermination(descriptor.shutdownTimeout(this), TimeUnit.SECONDS);
+            if (!executor.awaitTermination(descriptor.shutdownTimeout(this), TimeUnit.SECONDS)) {
+                throw new TimeoutException();
+            }
         } catch (Exception x) {
-            fireEvent(new ProtoEvent(this, "close", x));
+            fireEvent("close", x);
         }
-        fireEvent(new ProtoEvent(this, "close", null));
+        fireEvent("close");
     }
 
     protected interface Descriptor {

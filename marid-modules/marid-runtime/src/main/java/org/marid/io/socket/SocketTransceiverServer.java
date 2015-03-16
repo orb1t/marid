@@ -18,6 +18,7 @@
 
 package org.marid.io.socket;
 
+import org.marid.io.BinStreams;
 import org.marid.io.Transceiver;
 import org.marid.io.TransceiverServer;
 
@@ -29,6 +30,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.channels.ClosedChannelException;
 import java.util.Map;
 
 /**
@@ -51,18 +53,30 @@ public final class SocketTransceiverServer implements TransceiverServer {
     }
 
     @Override
-    public Transceiver accept() throws IOException {
+    public void open() throws IOException {
         if (serverSocket == null) {
             serverSocket = new ServerSocket(address.getPort(), backlog, address.getAddress());
         }
+    }
+
+    @Override
+    public Transceiver accept() throws IOException {
         final ServerSocket ss = serverSocket;
+        Socket socket = null;
+        InputStream inputStream = null;
         try {
-            return new Client(ss.accept());
-        } catch (SocketException x) {
+            socket = ss.accept();
+            inputStream = socket.getInputStream();
+            return new Client(socket, inputStream, socket.getOutputStream());
+        }  catch (SocketException x) {
+            try (final Socket s = socket; final InputStream is = inputStream) {
+                assert s != null && !s.isClosed() || s == null;
+                assert is != null && is.available() >= 0 || is == null;
+            }
             if (ss.isClosed()) {
-                final InterruptedIOException ix = new InterruptedIOException(x.getMessage());
-                ix.initCause(x);
-                throw ix;
+                final ClosedChannelException cx = new ClosedChannelException();
+                cx.initCause(x);
+                throw cx;
             } else {
                 throw x;
             }
@@ -83,49 +97,48 @@ public final class SocketTransceiverServer implements TransceiverServer {
     public class Client implements Transceiver {
 
         private final Socket socket;
-        private InputStream inputStream;
-        private OutputStream outputStream;
+        private final InputStream inputStream;
+        private final OutputStream outputStream;
 
-        public Client(Socket socket) throws IOException {
+        public Client(Socket socket, InputStream inputStream, OutputStream outputStream) {
             this.socket = socket;
+            this.inputStream = inputStream;
+            this.outputStream = outputStream;
         }
 
         @Override
-        public synchronized boolean isValid() {
+        public boolean isValid() {
             return !socket.isClosed();
         }
 
         @Override
-        public synchronized void open() throws IOException {
-            inputStream = socket.getInputStream();
-            outputStream = socket.getOutputStream();
+        public void open() throws IOException {
         }
 
         @Override
-        public synchronized void write(byte[] data, int offset, int len) throws IOException {
-            outputStream.write(data, offset, len);
+        public void write(byte[] data, int offset, int len) throws IOException {
+            BinStreams.invoke(socket, () -> {
+                outputStream.write(data, offset, len);
+                return null;
+            });
         }
 
         @Override
-        public synchronized int read(byte[] data, int offset, int len) throws IOException {
-            return inputStream.read(data, offset, len);
+        public int read(byte[] data, int offset, int len) throws IOException {
+            return BinStreams.invoke(socket, () -> inputStream.read(data, offset, len));
         }
 
         @Override
-        public synchronized int available() throws IOException {
-            return inputStream.available();
+        public int available() throws IOException {
+            return BinStreams.invoke(socket, inputStream::available);
         }
 
         @Override
-        public synchronized void close() throws IOException {
+        public void close() throws IOException {
             try (final Socket s = socket; final InputStream is = inputStream; final OutputStream os = outputStream) {
                 assert s != null;
                 assert is != null && os != null || is == null && os == null;
             }
-        }
-
-        public Socket getSocket() {
-            return socket;
         }
     }
 }

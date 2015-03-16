@@ -44,4 +44,8 @@ public class PpService extends AbstractMaridService {
         context.close();
         super.close();
     }
+
+    public PpContext getContext() {
+        return context;
+    }
 }

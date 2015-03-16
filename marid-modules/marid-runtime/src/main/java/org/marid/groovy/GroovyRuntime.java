@@ -107,9 +107,8 @@ public class GroovyRuntime {
     }
 
     public static <T> T newInstance(Class<T> type, GroovyCodeSource codeSource) {
-        final GroovyClassLoader classLoader = newClassLoader(cl -> {});
         try {
-            final Script script = (Script) classLoader.parseClass(codeSource, false).newInstance();
+            final Script script = SHELL.parse(codeSource);
             final Object v = script.run();
             if (v instanceof Closure) {
                 return DefaultGroovyMethods.asType((Closure) v, type);

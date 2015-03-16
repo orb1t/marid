@@ -21,13 +21,11 @@ package org.marid.service.proto.pp;
 import org.marid.io.DummyTransceiver;
 import org.marid.io.Transceiver;
 import org.marid.io.TransceiverAction;
-import org.marid.service.proto.ProtoEvent;
 import org.marid.service.proto.ProtoObject;
 import org.marid.service.util.MapUtil;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeoutException;
@@ -44,7 +42,7 @@ public class PpBus extends ProtoObject {
     protected PpBus(@Nonnull PpContext context, @Nonnull Object name, @Nonnull Map<String, Object> map) {
         super(context, MapUtil.name(name), map);
         descriptor = f(map, "descriptor", Descriptor.class, Descriptor.DEFAULT);
-        transceiver = descriptor.transceiver(this, descriptor.transceiverParams(this));
+        transceiver = descriptor.transceiver(this);
         MapUtil.children(map, "nodes").forEach((k, v) -> nodeMap.put(MapUtil.name(k), new PpNode(this, k, v)));
     }
 
@@ -64,8 +62,10 @@ public class PpBus extends ProtoObject {
         return getParent();
     }
 
-    public synchronized <T> T io(TransceiverAction<T> a) throws IOException, TimeoutException, InterruptedException {
-        return a.apply(transceiver);
+    public <T> T io(TransceiverAction<T> a) throws IOException, TimeoutException, InterruptedException {
+        synchronized (transceiver) {
+            return a.apply(transceiver);
+        }
     }
 
     @Override
@@ -73,10 +73,10 @@ public class PpBus extends ProtoObject {
         try {
             transceiver.open();
         } catch (Exception x) {
-            fireEvent(new ProtoEvent(this, "start", x));
+            fireEvent("start", x);
         }
         nodeMap.values().forEach(PpNode::start);
-        fireEvent(new ProtoEvent(this, "start", null));
+        fireEvent("start");
     }
 
     @Override
@@ -85,9 +85,9 @@ public class PpBus extends ProtoObject {
         try {
             transceiver.close();
         } catch (Exception x) {
-            fireEvent(new ProtoEvent(this, "stop", x));
+            fireEvent("stop", x);
         }
-        fireEvent(new ProtoEvent(this, "stop", null));
+        fireEvent("stop");
     }
 
     @Override
@@ -106,20 +106,22 @@ public class PpBus extends ProtoObject {
     }
 
     @Override
+    public PpNode getChild(String name) {
+        return nodeMap.get(name);
+    }
+
+    @Override
     public void close() {
+        stop();
         nodeMap.values().forEach(PpNode::close);
-        fireEvent(new ProtoEvent(this, "close", null));
+        fireEvent("close");
     }
 
     protected interface Descriptor {
 
         Descriptor DEFAULT = new Descriptor() {};
 
-        default Map<String, Object> transceiverParams(PpBus bus) {
-            return Collections.emptyMap();
-        }
-
-        default Transceiver transceiver(PpBus bus, Map<String, Object> params) {
+        default Transceiver transceiver(PpBus bus) {
             return DummyTransceiver.INSTANCE;
         }
     }

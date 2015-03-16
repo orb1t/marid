@@ -25,6 +25,7 @@ import org.marid.io.TransceiverServer;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.nio.channels.ClosedChannelException;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -37,7 +38,8 @@ public final class SerialTransceiver implements Transceiver, TransceiverServer {
 
     private final SerialTransceiverParameters parameters;
 
-    private SerialPort serialPort;
+    private volatile SerialPort serialPort;
+    private volatile boolean accepted;
 
     public SerialTransceiver(SerialTransceiverParameters parameters) {
         this.parameters = parameters;
@@ -48,12 +50,12 @@ public final class SerialTransceiver implements Transceiver, TransceiverServer {
     }
 
     @Override
-    public synchronized boolean isValid() {
+    public boolean isValid() {
         return serialPort != null;
     }
 
     @Override
-    public synchronized void open() throws IOException {
+    public void open() throws IOException {
         if (serialPort == null) {
             try {
                 serialPort = new SerialPort(parameters.getName());
@@ -64,17 +66,30 @@ public final class SerialTransceiver implements Transceiver, TransceiverServer {
     }
 
     @Override
-    public synchronized void write(byte[] data, int offset, int len) throws IOException {
+    public Transceiver accept() throws IOException {
+        if (accepted) {
+            return null;
+        } else {
+            open();
+            return this;
+        }
+    }
+
+    @Override
+    public void write(byte[] data, int offset, int len) throws IOException {
         apply(() -> serialPort.writeBytes(Arrays.copyOfRange(data, offset, offset + len)));
     }
 
     @Override
-    public synchronized int read(byte[] data, int offset, int len) throws IOException {
+    public int read(byte[] data, int offset, int len) throws IOException {
         final long timeout = parameters.getTimeout();
-        final int result = apply(() -> {
+        return apply(() -> {
+            if (serialPort == null || !serialPort.isOpened()) {
+                throw new ClosedChannelException();
+            }
             for (long t = currentTimeMillis(); serialPort.isOpened(); ) {
                 if (currentTimeMillis() - t >= timeout) {
-                    return -2;
+                    throw new InterruptedIOException("Timeout exceeded");
                 }
                 final int l = serialPort.getInputBufferBytesCount();
                 if (l > 0) {
@@ -88,21 +103,15 @@ public final class SerialTransceiver implements Transceiver, TransceiverServer {
             }
             return -1;
         });
-        switch (result) {
-            case -2:
-                throw new InterruptedIOException("Timeout exceeded");
-            default:
-                return result;
-        }
     }
 
     @Override
-    public synchronized int available() throws IOException {
+    public int available() throws IOException {
         return apply(serialPort::getInputBufferBytesCount);
     }
 
     @Override
-    public synchronized void close() throws IOException {
+    public void close() throws IOException {
         if (serialPort != null) {
             try {
                 serialPort.closePort();
@@ -110,11 +119,12 @@ public final class SerialTransceiver implements Transceiver, TransceiverServer {
                 throw new IOException(x);
             } finally {
                 serialPort = null;
+                accepted = false;
             }
         }
     }
 
-    synchronized <T> T apply(SerialPortAction<T> action) throws IOException {
+    <T> T apply(SerialPortAction<T> action) throws IOException {
         try {
             return action.apply();
         } catch (InterruptedException x) {
@@ -126,19 +136,9 @@ public final class SerialTransceiver implements Transceiver, TransceiverServer {
         }
     }
 
-    @Override
-    public synchronized SerialTransceiver accept() throws IOException {
-        if (isValid()) {
-            return this;
-        } else {
-            open();
-            return this;
-        }
-    }
-
     @FunctionalInterface
     interface SerialPortAction<T> {
 
-        T apply() throws SerialPortException, InterruptedException;
+        T apply() throws IOException, SerialPortException, InterruptedException;
     }
 }

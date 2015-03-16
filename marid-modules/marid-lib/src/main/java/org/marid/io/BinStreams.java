@@ -22,7 +22,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.SocketException;
 import java.net.URL;
+import java.nio.channels.ClosedChannelException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
@@ -68,5 +71,19 @@ public class BinStreams {
 
     public static Runnable consumeLinesTask(InputStream inputStream, Consumer<String> consumer) {
         return consumeLinesTask(inputStream, Charset.defaultCharset(), consumer);
+    }
+
+    public static <T> T invoke(Socket socket, IoCallable<T> callable) throws IOException {
+        try {
+            return callable.call();
+        } catch (SocketException x) {
+            if (socket.isClosed()) {
+                final ClosedChannelException cx = new ClosedChannelException();
+                cx.initCause(x);
+                throw cx;
+            } else {
+                throw x;
+            }
+        }
     }
 }

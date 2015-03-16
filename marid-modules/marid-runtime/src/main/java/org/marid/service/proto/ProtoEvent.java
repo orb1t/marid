@@ -30,14 +30,10 @@ import java.util.logging.Level;
  */
 public class ProtoEvent extends EventObject implements Loggable {
 
-    private final String message;
-    private final Level level;
-    private final Throwable cause;
-    private final Object[] args;
-
-    public ProtoEvent(ProtoObject source, String message, Throwable cause, Object... args) {
-        this(source, cause != null ? Level.WARNING : Level.INFO, message, cause, args);
-    }
+    public final String message;
+    public final Level level;
+    public final Throwable cause;
+    public final Object[] args;
 
     public ProtoEvent(ProtoObject source, Level level, String message, Throwable cause, Object... args) {
         super(source);
@@ -50,14 +46,6 @@ public class ProtoEvent extends EventObject implements Loggable {
     @Override
     public ProtoObject getSource() {
         return (ProtoObject) super.getSource();
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public Throwable getCause() {
-        return cause;
     }
 
     @Override
