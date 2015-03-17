@@ -95,12 +95,10 @@ public class PbNode extends ProtoObject {
 
     @Override
     public synchronized void stop() {
-        if (transceiverServer != null) {
-            try {
-                transceiverServer.close();
-            } catch (Exception x) {
-                fireEvent("stop", x);
-            }
+        try {
+            transceiverServer.close(); // allow to unfreeze the node's thread on a blocking io operation
+        } catch (Exception x) {
+            fireEvent("stop", x);
         }
         if (thread != null) {
             try {

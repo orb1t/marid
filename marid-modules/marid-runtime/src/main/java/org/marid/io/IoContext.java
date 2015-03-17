@@ -18,15 +18,18 @@
 
 package org.marid.io;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
 * @author Dmitry Ovchinnikov
@@ -69,7 +72,7 @@ public final class IoContext {
             for (long t = System.currentTimeMillis(); System.currentTimeMillis() - t < timeout; ) {
                 try {
                     final int n = transceiver.read(buf, 0, buf.length);
-                    if (n < 0) {
+                    if (n < 0 || Thread.interrupted()) {
                         throw new ClosedChannelException();
                     }
                     if (n > 0) {
@@ -89,7 +92,7 @@ public final class IoContext {
                 if (size > 0) {
                     final byte[] data = new byte[size];
                     final int n = transceiver.read(data, 0, size);
-                    if (n < 0) {
+                    if (n < 0 || Thread.interrupted()) {
                         throw new ClosedChannelException();
                     }
                     if (n > 0) {
@@ -106,20 +109,92 @@ public final class IoContext {
         throw new InterruptedIOException();
     }
 
-    public void writeInt(int data) throws IOException {
-        transceiver.write(ByteBuffer.allocate(4).putInt(0, data).array(), 0, 4);
+    private void write0(Collection<?> list, DataOutputStream dos) throws IOException {
+        for (final Object element : list) {
+            final Object e;
+            if (element instanceof Callable) {
+                try {
+                    e = ((Callable) element).call();
+                } catch (Exception x) {
+                    throw new IllegalArgumentException();
+                }
+            } else if (element instanceof Supplier) {
+                e = ((Supplier) element).get();
+            } else {
+                e = element;
+            }
+            if (e instanceof Integer) {
+                dos.writeInt((int) e);
+            } else if (e instanceof Long) {
+                dos.writeLong((long) e);
+            } else if (e instanceof Byte) {
+                dos.writeByte((byte) e);
+            } else if (e instanceof Short) {
+                dos.writeShort((short) e);
+            } else if (e instanceof Character) {
+                dos.writeChar((char) e);
+            } else if (e instanceof Float) {
+                dos.writeFloat((float) e);
+            } else if (e instanceof Double) {
+                dos.writeDouble((double) e);
+            } else if (e instanceof ByteBuffer) {
+                final byte[] buf = new byte[((ByteBuffer) e).remaining()];
+                ((ByteBuffer) e).mark();
+                ((ByteBuffer) e).get(buf);
+                ((ByteBuffer) e).reset();
+                dos.write(buf);
+            } else if (e instanceof byte[]) {
+                dos.write((byte[]) e);
+            } else if (e instanceof String) {
+                dos.write(((String) e).getBytes(StandardCharsets.US_ASCII));
+            } else if (e instanceof char[]) {
+                dos.writeChars(new String((char[]) e));
+            } else if (e instanceof int[]) {
+                for (final int v : (int[]) e) {
+                    dos.writeInt(v);
+                }
+            } else if (e instanceof double[]) {
+                for (final double v : (double[]) e) {
+                    dos.writeDouble(v);
+                }
+            } else if (e instanceof float[]) {
+                for (final float v : (float[]) e) {
+                    dos.writeFloat(v);
+                }
+            } else if (e instanceof long[]) {
+                for (final long v : (long[]) e) {
+                    dos.writeLong(v);
+                }
+            } else if (e instanceof short[]) {
+                for (final short v : (short[]) e) {
+                    dos.writeShort(v);
+                }
+            } else if (e instanceof Boolean) {
+                dos.writeBoolean((boolean) e);
+            } else if (e instanceof boolean[]) {
+                for (final boolean v : (boolean[]) e) {
+                    dos.writeBoolean(v);
+                }
+            } else if (e instanceof BitSet) {
+                dos.write(((BitSet) e).toByteArray());
+            } else if (e instanceof BigInteger) {
+                dos.write(((BigInteger) e).toByteArray());
+            } else if (e instanceof UUID) {
+                dos.writeLong(((UUID) e).getMostSignificantBits());
+                dos.writeLong(((UUID) e).getLeastSignificantBits());
+            } else if (e instanceof Collection) {
+                write0((Collection) e, dos);
+            }
+        }
     }
 
-    public void writeLong(long data) throws IOException {
-        transceiver.write(ByteBuffer.allocate(8).putLong(0, data).array(), 0, 8);
-    }
-
-    public void writeShort(short data) throws IOException {
-        transceiver.write(ByteBuffer.allocate(2).putShort(0, data).array(), 0, 2);
-    }
-
-    public void writeChar(char data) throws IOException {
-        transceiver.write(ByteBuffer.allocate(2).putChar(0, data).array(), 0, 2);
+    public void write(Collection<?> list) throws IOException {
+        final FastArrayOutputStream os = new FastArrayOutputStream();
+        final DataOutputStream dos = new DataOutputStream(os);
+        write0(list, dos);
+        if (os.size() > 0) {
+            transceiver.write(os.getSharedBuffer(), 0, os.size());
+        }
     }
 
     public void writeAscii(String data) throws IOException {

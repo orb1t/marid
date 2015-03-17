@@ -26,9 +26,9 @@ import org.marid.service.util.MapUtil;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -62,9 +62,15 @@ public class PpBus extends ProtoObject {
         return getParent();
     }
 
-    public <T> T io(TransceiverAction<T> a) throws IOException, TimeoutException, InterruptedException {
-        synchronized (transceiver) {
-            return a.apply(transceiver);
+    public <T> T io(TransceiverAction<T> a) throws IOException {
+        try {
+            synchronized (transceiver) {
+                return a.apply(transceiver);
+            }
+        } catch (InterruptedException x) {
+            final InterruptedIOException ix = new InterruptedIOException();
+            ix.initCause(x);
+            throw ix;
         }
     }
 

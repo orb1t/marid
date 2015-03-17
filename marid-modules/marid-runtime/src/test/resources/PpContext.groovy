@@ -42,8 +42,8 @@ import org.springframework.beans.factory.annotation.Autowired
                             task: {PpNode node ->
                                 node.bus.io({Transceiver t ->
                                     for (def i in 0..3) {
-                                        t.data.writeInt(i);
-                                        def data = t.data.read({buf -> buf.remaining() != 4 ? null : buf.getInt()});
+                                        t.data << [i as int];
+                                        def data = t.data.rule(4, {buf -> buf.getInt()}).read();
                                         if (data != null) {
                                             node.context.vars[i.toString()] = data;
                                         }
@@ -65,8 +65,8 @@ import org.springframework.beans.factory.annotation.Autowired
                             task: {PpNode node ->
                                 node.bus.io({Transceiver t ->
                                     for (def i in 4..9) {
-                                        t.data.writeInt(i);
-                                        def data = t.data.read({buf -> buf.remaining() != 4 ? null : buf.getInt()});
+                                        t.data << [i as int];
+                                        def data = t.data.rule(4, {buf -> buf.getInt()}).read();
                                         if (data != null) {
                                             node.context.vars[i.toString()] = data;
                                         }

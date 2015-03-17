@@ -96,16 +96,9 @@ public abstract class ProtoObject implements Named, LogSupport, AutoCloseable {
     public abstract void stop();
 
     public void restart() {
-        synchronized (this) {
-            stop();
-        }
-        ConcurrentUtils.await(this::isRunning);
-        synchronized (this) {
-            if (isRunning()) {
-                return;
-            }
-            start();
-        }
+        stop();
+        ConcurrentUtils.await(() -> !isRunning());
+        start();
     }
 
     public abstract boolean isRunning();

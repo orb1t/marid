@@ -19,13 +19,19 @@
 package org.marid.groovy;
 
 import groovy.lang.Closure;
+import groovy.lang.IntRange;
 import org.marid.Marid;
+import org.marid.io.IoContext;
 import org.marid.logging.LogSupport;
 import org.marid.methods.LogMethods;
 import org.marid.service.proto.ProtoEventListener;
 import org.marid.service.proto.ProtoObject;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 /**
@@ -78,6 +84,24 @@ public class RuntimeGroovyMethods {
         };
         protoObject.addEventListener(eventListener);
         return eventListener;
+    }
+
+    public static void leftShift(IoContext context, Collection<?> list) throws IOException {
+        context.write(list);
+    }
+
+    public static Object rightShift(IoContext context, Function<ByteBuffer, Object> function) throws IOException {
+        return context.read(function);
+    }
+
+    public static IoContext rule(IoContext context, IntRange range, Function<ByteBuffer, Object> f) throws IOException {
+        context.rule(buf -> range.contains(buf.capacity()) ? f.apply(buf) : null);
+        return context;
+    }
+
+    public static IoContext rule(IoContext context, int size, Function<ByteBuffer, Object> f) throws IOException {
+        context.rule(buf -> buf.capacity() == size ? f.apply(buf) : null);
+        return context;
     }
 
     private static Logger logger(Object object) {

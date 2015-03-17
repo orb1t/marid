@@ -21,10 +21,10 @@ package org.marid.io.socket;
 import org.marid.io.BinStreams;
 import org.marid.io.Transceiver;
 import org.marid.io.TransceiverServer;
+import org.marid.logging.LogSupport;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -36,7 +36,7 @@ import java.util.Map;
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class SocketTransceiverServer implements TransceiverServer {
+public final class SocketTransceiverServer implements TransceiverServer, LogSupport {
 
     private final InetSocketAddress address;
     private final int backlog;
@@ -136,8 +136,7 @@ public final class SocketTransceiverServer implements TransceiverServer {
         @Override
         public void close() throws IOException {
             try (final Socket s = socket; final InputStream is = inputStream; final OutputStream os = outputStream) {
-                assert s != null;
-                assert is != null && os != null || is == null && os == null;
+                finest("close {0} {1} {2}", s, is, os);
             }
         }
     }

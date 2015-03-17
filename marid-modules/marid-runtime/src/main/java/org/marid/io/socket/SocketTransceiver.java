@@ -18,9 +18,9 @@
 
 package org.marid.io.socket;
 
-import org.marid.Marid;
+import org.marid.io.BinStreams;
 import org.marid.io.Transceiver;
-import org.marid.methods.LogMethods;
+import org.marid.logging.LogSupport;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +32,7 @@ import java.util.Map;
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class SocketTransceiver implements Transceiver {
+public final class SocketTransceiver implements Transceiver, LogSupport {
 
     private final SocketTransceiverParameters parameters;
     private volatile Socket socket;
@@ -81,24 +81,27 @@ public final class SocketTransceiver implements Transceiver {
 
     @Override
     public void write(byte[] data, int offset, int len) throws IOException {
-        outputStream.write(data, offset, len);
-        outputStream.flush();
+        BinStreams.invoke(socket, () -> {
+            outputStream.write(data, offset, len);
+            outputStream.flush();
+            return null;
+        });
     }
 
     @Override
     public int read(byte[] data, int offset, int len) throws IOException {
-        return inputStream.read(data, offset, len);
+        return BinStreams.invoke(socket, () -> inputStream.read(data, offset, len));
     }
 
     @Override
     public int available() throws IOException {
-        return inputStream.available();
+        return BinStreams.invoke(socket, inputStream::available);
     }
 
     @Override
     public void close() throws IOException {
-        try (final InputStream is = inputStream; final OutputStream os = outputStream; final Socket s = socket) {
-            LogMethods.finest(Marid.LOGGER, "close {0} {1} {2}", s, is, os);
+        try (final Socket s = socket; final InputStream is = inputStream; final OutputStream os = outputStream) {
+            finest("close {0} {1} {2}", s, is, os);
         } finally {
             inputStream = null;
             outputStream = null;

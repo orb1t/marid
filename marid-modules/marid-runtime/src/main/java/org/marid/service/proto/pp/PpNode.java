@@ -23,12 +23,13 @@ import org.marid.service.util.EmptyScheduledFuture;
 import org.marid.service.util.MapUtil;
 
 import javax.annotation.Nonnull;
+import java.io.InterruptedIOException;
+import java.nio.channels.ClosedChannelException;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
-import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -73,8 +74,17 @@ public class PpNode extends ProtoObject {
                 final long period = descriptor.period(this);
                 final long delay = descriptor.delay(this);
                 final boolean realTime = descriptor.realTime(this);
-                final Consumer<PpNode> task = descriptor.task(this);
-                final Runnable t = () -> task.accept(this);
+                final Runnable t = () -> {
+                    try {
+                        descriptor.task(this);
+                    } catch (ClosedChannelException x) {
+                        fireEvent("io {0}", "closed", x);
+                    } catch (InterruptedIOException x) {
+                        fireEvent("io {0}", "interrupted", x);
+                    } catch (Exception x) {
+                        fireEvent("task", x);
+                    }
+                };
                 if (period > 0L) {
                     if (realTime) {
                         this.task = getContext().timer.scheduleAtFixedRate(t, delay, period, TimeUnit.SECONDS);
@@ -107,9 +117,9 @@ public class PpNode extends ProtoObject {
                 }
             } finally {
                 task = null;
-                fireEvent("stop");
             }
         }
+        fireEvent("stop");
     }
 
     @Override
@@ -158,8 +168,7 @@ public class PpNode extends ProtoObject {
             return false;
         }
 
-        default Consumer<PpNode> task(PpNode node) {
-            return n -> {};
+        default void task(PpNode node) throws Exception {
         }
     }
 }

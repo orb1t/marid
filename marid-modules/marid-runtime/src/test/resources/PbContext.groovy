@@ -43,12 +43,12 @@ def array = [10, 20, 30, 40];
                             ];
                         },
                         descriptor: [
-                            server: {new SocketTransceiverServer([:])},
+                            server: new SocketTransceiverServer([:]),
                             processor: {PbNode b, Transceiver t ->
                                 while (b.running) {
-                                    def data = t.data.read({buf -> buf.remaining() != 4 ? null : array[buf.getInt(0)]});
+                                    def data = t.data.rule(4, {buf -> array[buf.getInt()]}).read();
                                     if (data != null) {
-                                        t.data.writeInt(data as int);
+                                        t.data.write([data as int]);
                                     }
                                 }
                             }
@@ -59,17 +59,17 @@ def array = [10, 20, 30, 40];
                             node << [
                                 start: {
                                     node.context.vars.port2 = it.source.transceiverServer.serverSocket.localPort;
-                                    info("{0} running on port {1}", node, node.context.vars.port);
+                                    info("{0} running on port {1}", node, node.context.vars.port2);
                                 }
                             ];
                         },
                         descriptor: [
-                            server: {new SocketTransceiverServer([:])},
+                            server: new SocketTransceiverServer([:]),
                             processor: {PbNode b, Transceiver t ->
                                 while (b.running) {
-                                    def data = t.data.read({buf -> buf.remaining() != 4 ? null : array[buf.getInt(0)]});
+                                    def data = t.data.rule(4, {buf -> array[buf.getInt()]}).read();
                                     if (data != null) {
-                                        t.data.writeInt(data as int);
+                                        t.data << [data as int];
                                     }
                                 }
                             }
