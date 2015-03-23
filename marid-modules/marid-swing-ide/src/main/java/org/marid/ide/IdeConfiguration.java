@@ -1,16 +1,15 @@
 package org.marid.ide;
 
-import org.marid.ide.swing.DefaultConfigurationProvider;
-import org.marid.ide.swing.context.GuiContext;
+import org.marid.ide.context.*;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@ComponentScan(basePackageClasses = {GuiContext.class})
+@Import({BaseContext.class, ProfileContext.class, SystemTrayContext.class, MenuContext.class, GuiContext.class})
 public class IdeConfiguration {
 
     @Bean

@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.mbean;
+package org.marid.ide.mbean;
 
 import org.jdesktop.swingx.JXTreeTable;
-import org.marid.ide.swing.mbean.node.AttributeNode;
+import org.marid.ide.mbean.node.AttributeNode;
 import org.marid.jmx.IdeJmxAttribute;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.dnd.DndSource;

@@ -16,32 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.gui;
+package org.marid.ide.mbean;
 
-import org.marid.ide.base.Ide;
-import org.marid.logging.LogSupport;
-import org.marid.pref.SysPrefSupport;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.stereotype.Component;
+import org.marid.ide.mbean.node.Node;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultTreeCellRenderer;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@Component
-public class IdeImpl implements Ide, SysPrefSupport, LogSupport {
-
-    @Autowired
-    private GenericApplicationContext applicationContext;
+public class MBeanTreeCellRenderer extends DefaultTreeCellRenderer {
 
     @Override
-    public void exit() {
-        applicationContext.close();
-        System.exit(0);
-    }
-
-    @Override
-    public String getName() {
-        return "ide";
+    public JLabel getTreeCellRendererComponent(JTree t, Object v, boolean s, boolean e, boolean l, int r, boolean f) {
+        final JLabel label = (JLabel) super.getTreeCellRendererComponent(t, v, s, e, l, r, f);
+        final Node node = (Node) v;
+        label.setIcon(node.getIcon());
+        return label;
     }
 }

@@ -18,7 +18,7 @@
 
 package org.marid.jmx;
 
-import org.marid.ide.swing.mbean.node.AttributeNode;
+import org.marid.ide.mbean.node.AttributeNode;
 
 import javax.annotation.Nonnull;
 import javax.management.MBeanAttributeInfo;

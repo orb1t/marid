@@ -71,4 +71,16 @@ public abstract class MaridScript extends Script implements LogSupport {
         }
         return script.run();
     }
+
+    @Override
+    public Object getProperty(String property) {
+        if (property.startsWith("$")) {
+            final String name = property.substring(1);
+            final AnnotationConfigApplicationContext context = Marid.getCurrentContext();
+            if (context.containsBean(name)) {
+                return context.getBean(name);
+            }
+        }
+        return super.getProperty(property);
+    }
 }

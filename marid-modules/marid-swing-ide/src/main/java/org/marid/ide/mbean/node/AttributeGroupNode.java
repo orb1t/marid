@@ -16,14 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.mbean.node;
+package org.marid.ide.mbean.node;
 
-import org.marid.jmx.DummyMBeanServerConnection;
-import org.marid.swing.tree.TRootNode;
+import images.Images;
 
+import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
+import javax.management.ObjectInstance;
 import javax.swing.*;
-import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -31,52 +32,42 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class RootNode implements TRootNode<RootNode, BeanNode>, Node {
+public class AttributeGroupNode extends Group<AttributeGroupNode, AttributeNode> {
 
-    protected final MBeanServerConnection server;
-    protected final List<BeanNode> children;
+    protected static final ImageIcon ICON = Images.getIcon("attributes.png");
 
-    public RootNode(MBeanServerConnection server) {
-        this.server = server == null ? DummyMBeanServerConnection.INSTANCE : server;
+    protected final List<AttributeNode> children;
+
+    public AttributeGroupNode(BeanNode parent) {
+        super(parent, "Attributes");
         try {
-            children = this.server.queryMBeans(null, null).stream().map(v -> new BeanNode(this, v)).collect(toList());
-        } catch (IOException x) {
+            final MBeanServerConnection server = getRoot().getServer();
+            final ObjectInstance instance = getParent().getInstance();
+            final MBeanInfo beanInfo = server.getMBeanInfo(instance.getObjectName());
+            children = Arrays.stream(beanInfo.getAttributes()).map(a -> new AttributeNode(this, a)).collect(toList());
+        } catch (Exception x) {
             throw new IllegalStateException(x);
         }
     }
 
     @Override
-    public List<BeanNode> getChildren() {
+    public List<AttributeNode> getChildren() {
         return children;
     }
 
     @Override
     public RootNode getRoot() {
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        return getName();
+        return getParent().getRoot();
     }
 
     @Override
     public ImageIcon getIcon() {
-        return null;
-    }
-
-    @Override
-    public String getName() {
-        try {
-            return server.getDefaultDomain();
-        } catch (IOException x) {
-            return server.toString();
-        }
+        return ICON;
     }
 
     @Override
     public String getDescription() {
-        return server.toString();
+        return s("Bean attributes");
     }
 
     @Override
@@ -86,10 +77,6 @@ public class RootNode implements TRootNode<RootNode, BeanNode>, Node {
 
     @Override
     public String getPath() {
-        return "";
-    }
-
-    public MBeanServerConnection getServer() {
-        return server;
+        return getParent().getPath() + "/" + getName();
     }
 }

@@ -16,32 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.mbean;
-
-import javax.management.MBeanServerConnection;
-import javax.swing.*;
-import java.util.function.Supplier;
+package org.marid.ide.mbean.attribute;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class MBeanServerTree extends JTree {
-
-    public MBeanServerTree(Supplier<MBeanServerConnection> connectionSupplier) {
-        super(new MBeanServerTreeModel(connectionSupplier));
-        setRootVisible(false);
-        setCellRenderer(new MBeanTreeCellRenderer());
-    }
-
-    @Override
-    public MBeanServerTreeModel getModel() {
-        return (MBeanServerTreeModel) super.getModel();
-    }
-
-    public void update() {
-        getModel().update();
-    }
-
-    public void savePreferences() {
-    }
+public class AttributeValueExtractor {
 }

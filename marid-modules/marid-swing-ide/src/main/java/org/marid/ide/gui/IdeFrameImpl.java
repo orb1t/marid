@@ -16,8 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.gui;
+package org.marid.ide.gui;
 
+import org.marid.Marid;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.base.Ide;
 import org.marid.ide.base.IdeFrame;
@@ -35,7 +36,7 @@ import org.marid.swing.forms.StaticConfigurationDialog;
 import org.marid.swing.log.SwingHandler;
 import org.marid.swing.util.MessageSupport;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -54,10 +55,9 @@ import static javax.swing.JOptionPane.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@Component("ideFrame")
 public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSupport, MessageSupport {
 
-    private final GenericApplicationContext applicationContext;
     private final Set<ConfigurationProvider> configurationProviders;
     private final IdeImpl ide;
     private final AtomicBoolean initialized = new AtomicBoolean();
@@ -72,13 +72,12 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     private ActionMap ideActionMap;
 
     @Autowired
-    public IdeFrameImpl(GenericApplicationContext context, Set<ConfigurationProvider> configurationProviders) {
+    public IdeFrameImpl(IdeImpl ide, Set<ConfigurationProvider> configurationProviders) {
         super(LS.s("Marid IDE"), WindowPrefs.graphicsConfiguration("IDE"));
-        this.applicationContext = context;
         this.configurationProviders = configurationProviders;
         setName("IDE");
         setDefaultCloseOperation(HIDE_ON_CLOSE);
-        this.ide = context.getBean(IdeImpl.class);
+        this.ide = ide;
         setIconImages(MaridIcons.ICONS);
         setLocationRelativeTo(null);
         setJMenuBar(new JMenuBar());
@@ -119,21 +118,21 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     }
 
     private JMenu widgetsMenu() {
+        final AnnotationConfigApplicationContext applicationContext = Marid.getCurrentContext();
         final JMenu menu = new JMenu(s("Widgets"));
         for (final String beanName : applicationContext.getBeanNamesForType(Widget.class)) {
             final MetaInfo metaInfo = applicationContext.findAnnotationOnBean(beanName, MetaInfo.class);
             menu.add(new MaridAction(metaInfo.name(), metaInfo.icon(), e -> {
-                final Widget widget = applicationContext.getBean(beanName, Widget.class);
-                if (!widget.isClosable() || Arrays.stream(desktop.getComponents()).noneMatch(c -> c == widget)) {
-                    desktop.add(widget);
-                }
-                widget.show();
+                final Widget newWidget = applicationContext.getBean(beanName, Widget.class);
+                desktop.add(newWidget);
+                newWidget.show();
             }));
         }
         return menu;
     }
 
     private JMenu framesMenu() {
+        final AnnotationConfigApplicationContext applicationContext = Marid.getCurrentContext();
         final JMenu menu = new JMenu(s("Frames"));
         for (final String beanName : applicationContext.getBeanNamesForType(MaridFrame.class)) {
             final MetaInfo metaInfo = applicationContext.findAnnotationOnBean(beanName, MetaInfo.class);

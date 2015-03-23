@@ -16,23 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.context;
+package org.marid.ide;
 
-import org.marid.ide.components.ProfileManager;
-import org.marid.jmx.MaridBeanConnectionManager;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.marid.bd.schema.SchemaFrameConfiguration;
+import org.marid.swing.forms.Configuration;
+import org.marid.swing.forms.ConfigurationProvider;
+
+import java.util.function.Consumer;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-@Configuration
-@ComponentScan(basePackageClasses = {ProfileManager.class})
-public class ProfileContext {
-
-    @Bean
-    public MaridBeanConnectionManager maridBeanConnectionManager() {
-        return new MaridBeanConnectionManager();
+public class DefaultConfigurationProvider implements ConfigurationProvider {
+    @Override
+    public void visitConfigurationClasses(Consumer<Class<? extends Configuration>> consumer) {
+        consumer.accept(SchemaFrameConfiguration.class);
     }
 }

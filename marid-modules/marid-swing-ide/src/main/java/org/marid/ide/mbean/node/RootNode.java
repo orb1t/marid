@@ -16,15 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.mbean.node;
+package org.marid.ide.mbean.node;
 
-import images.Images;
+import org.marid.jmx.DummyMBeanServerConnection;
+import org.marid.swing.tree.TRootNode;
 
-import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectInstance;
 import javax.swing.*;
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -32,42 +31,52 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class AttributeGroupNode extends Group<AttributeGroupNode, AttributeNode> {
+public class RootNode implements TRootNode<RootNode, BeanNode>, Node {
 
-    protected static final ImageIcon ICON = Images.getIcon("attributes.png");
+    protected final MBeanServerConnection server;
+    protected final List<BeanNode> children;
 
-    protected final List<AttributeNode> children;
-
-    public AttributeGroupNode(BeanNode parent) {
-        super(parent, "Attributes");
+    public RootNode(MBeanServerConnection server) {
+        this.server = server == null ? DummyMBeanServerConnection.INSTANCE : server;
         try {
-            final MBeanServerConnection server = getRoot().getServer();
-            final ObjectInstance instance = getParent().getInstance();
-            final MBeanInfo beanInfo = server.getMBeanInfo(instance.getObjectName());
-            children = Arrays.stream(beanInfo.getAttributes()).map(a -> new AttributeNode(this, a)).collect(toList());
-        } catch (Exception x) {
+            children = this.server.queryMBeans(null, null).stream().map(v -> new BeanNode(this, v)).collect(toList());
+        } catch (IOException x) {
             throw new IllegalStateException(x);
         }
     }
 
     @Override
-    public List<AttributeNode> getChildren() {
+    public List<BeanNode> getChildren() {
         return children;
     }
 
     @Override
     public RootNode getRoot() {
-        return getParent().getRoot();
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 
     @Override
     public ImageIcon getIcon() {
-        return ICON;
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        try {
+            return server.getDefaultDomain();
+        } catch (IOException x) {
+            return server.toString();
+        }
     }
 
     @Override
     public String getDescription() {
-        return s("Bean attributes");
+        return server.toString();
     }
 
     @Override
@@ -77,6 +86,10 @@ public class AttributeGroupNode extends Group<AttributeGroupNode, AttributeNode>
 
     @Override
     public String getPath() {
-        return getParent().getPath() + "/" + getName();
+        return "";
+    }
+
+    public MBeanServerConnection getServer() {
+        return server;
     }
 }

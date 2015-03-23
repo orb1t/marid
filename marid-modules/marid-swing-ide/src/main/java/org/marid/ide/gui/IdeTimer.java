@@ -1,4 +1,4 @@
-package org.marid.ide.swing.gui;
+package org.marid.ide.gui;
 
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@Component("ideTimer")
 public class IdeTimer {
 
     private final List<ActionListener> listeners = new CopyOnWriteArrayList<>();

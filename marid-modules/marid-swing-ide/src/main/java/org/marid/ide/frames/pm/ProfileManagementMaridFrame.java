@@ -23,7 +23,7 @@ import org.marid.ide.components.ProfileManager;
 import org.marid.ide.frames.CloseableFrame;
 import org.marid.ide.frames.MaridFrame;
 import org.marid.ide.profile.Profile;
-import org.marid.ide.swing.mbean.MBeanServerTreeTable;
+import org.marid.ide.mbean.MBeanServerTreeTable;
 import org.marid.logging.Logging;
 import org.marid.logging.SimpleHandler;
 import org.marid.swing.log.LogComponent;
@@ -32,7 +32,6 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.support.GenericApplicationContext;
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,8 +57,8 @@ public class ProfileManagementMaridFrame extends MaridFrame {
     private final ApplicationListener<ApplicationEvent> applicationListener;
 
     @Autowired
-    public ProfileManagementMaridFrame(GenericApplicationContext context, ProfileManager profileManager) {
-        super(context, "Profile Management: %s", profileManager.getCurrentProfile());
+    public ProfileManagementMaridFrame(ProfileManager profileManager) {
+        super("Profile Management: %s", profileManager.getCurrentProfile());
         profile = profileManager.getCurrentProfile();
         logComponent = new LogComponent(preferences(), emptyList(), r -> true);
         logComponent.setPreferredSize(new Dimension(logComponent.getPreferredSize().width, 150));

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,28 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.frames;
+package org.marid.ide.widgets.servicebuilder;
 
-import org.marid.Marid;
 import org.marid.dyn.MetaInfo;
-import org.marid.swing.AbstractFrame;
-import org.marid.swing.listeners.MaridWindowListener;
-
-import java.awt.event.WindowEvent;
+import org.marid.ide.widgets.Widget;
+import org.marid.spring.annotation.PrototypeComponent;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-@MetaInfo
-public abstract class MaridFrame extends AbstractFrame implements MaridWindowListener {
+@MetaInfo(name = "Service builder")
+@PrototypeComponent
+public class ServiceBuilderWidget extends Widget {
 
-    public MaridFrame(String title, Object... args) {
-        super(LS.s(title, args));
-        addWindowListener(this);
-    }
-
-    @Override
-    public void windowClosing(WindowEvent e) {
-        Marid.getCurrentContext().getAutowireCapableBeanFactory().destroyBean(this);
+    public ServiceBuilderWidget() {
+        super("Service Builder");
     }
 }

@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.mbean;
+package org.marid.ide.mbean;
 
 import org.jdesktop.swingx.treetable.TreeTableModel;
-import org.marid.ide.swing.mbean.node.Node;
-import org.marid.ide.swing.mbean.node.RootNode;
+import org.marid.ide.mbean.node.Node;
+import org.marid.ide.mbean.node.RootNode;
 import org.marid.l10n.L10nSupport;
 import org.marid.swing.tree.TNode;
 

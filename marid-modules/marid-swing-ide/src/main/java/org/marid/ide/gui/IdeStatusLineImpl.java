@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.gui;
+package org.marid.ide.gui;
 
 import org.marid.ide.base.IdeStatusLine;
 import org.marid.ide.components.ProfileManager;
@@ -38,10 +38,9 @@ import static javax.swing.BorderFactory.createEtchedBorder;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@Component("ideStatusLine")
 public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefSupport, SysPropsSupport, LogSupport {
 
-    protected final IdeFrameImpl ideFrame;
     protected final ProfileManager profileManager;
     protected final JLabel status = new JLabel("Done");
     protected final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
@@ -50,8 +49,7 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
     protected final JComboBox<Profile> profilesCombo;
 
     @Autowired
-    public IdeStatusLineImpl(IdeFrameImpl ideFrame, ProfileManager profileManager) {
-        this.ideFrame = ideFrame;
+    public IdeStatusLineImpl(ProfileManager profileManager) {
         setBorder(createEtchedBorder());
         setLayout(new GridBagLayout());
         this.profileManager = profileManager;

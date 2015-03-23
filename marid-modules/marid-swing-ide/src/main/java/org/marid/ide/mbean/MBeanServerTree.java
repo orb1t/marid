@@ -16,25 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.mbean.node;
+package org.marid.ide.mbean;
 
-import org.marid.l10n.L10nSupport;
-import org.marid.logging.LogSupport;
-
+import javax.management.MBeanServerConnection;
 import javax.swing.*;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public interface Node extends L10nSupport, LogSupport {
+public class MBeanServerTree extends JTree {
 
-    ImageIcon getIcon();
+    public MBeanServerTree(Supplier<MBeanServerConnection> connectionSupplier) {
+        super(new MBeanServerTreeModel(connectionSupplier));
+        setRootVisible(false);
+        setCellRenderer(new MBeanTreeCellRenderer());
+    }
 
-    String getName();
+    @Override
+    public MBeanServerTreeModel getModel() {
+        return (MBeanServerTreeModel) super.getModel();
+    }
 
-    String getDescription();
+    public void update() {
+        getModel().update();
+    }
 
-    Class<?> getValueType();
-
-    String getPath();
+    public void savePreferences() {
+    }
 }

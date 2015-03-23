@@ -32,7 +32,6 @@ import org.marid.jmx.MaridBeanConnectionManager;
 import org.marid.swing.dnd.DndTarget;
 import org.marid.swing.dnd.MaridTransferHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.GenericApplicationContext;
 
 import javax.management.MBeanServerConnection;
 import javax.swing.*;
@@ -53,8 +52,8 @@ public class GraphFrame extends MaridFrame implements DndTarget<IdeJmxAttribute>
     private final Timer timer;
 
     @Autowired
-    public GraphFrame(GenericApplicationContext context, MaridBeanConnectionManager connectionManager) {
-        super(context, LS.s("Graph"));
+    public GraphFrame(MaridBeanConnectionManager connectionManager) {
+        super("Graph");
         this.connectionManager = connectionManager;
         chart = ChartFactory.createTimeSeriesChart(s("Chart"), s("Time"), s("Value"), timeSeriesCollection);
         timer = new Timer(getPref("delay", 1_000), ev -> {

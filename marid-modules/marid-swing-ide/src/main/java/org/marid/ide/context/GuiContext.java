@@ -16,10 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.profile;
+package org.marid.ide.context;
+
+import org.marid.bd.Block;
+import org.marid.ide.base.IdeFrame;
+import org.marid.ide.frames.MaridFrame;
+import org.marid.ide.gui.IdeImpl;
+import org.marid.ide.widgets.Widget;
+import org.marid.logging.LogSupport;
+import org.marid.pref.SysPrefSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProfileConfigDialog {
+@Configuration
+@ComponentScan(basePackageClasses = {IdeImpl.class, Widget.class, MaridFrame.class, Block.class})
+public class GuiContext implements LogSupport, SysPrefSupport {
+
+    @Autowired
+    private IdeFrame ideFrame;
+
+    @PostConstruct
+    public void init() {
+        ideFrame.setVisible(true);
+    }
 }

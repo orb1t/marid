@@ -44,7 +44,7 @@ public abstract class Widget extends JInternalFrame implements WidgetSupport {
     public Widget(String title, Object... args) {
         super(LS.s(title, args), true, true, true, true);
         setLayout(layout);
-        setName(title);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         add(toolBar, getPref("pos", BorderLayout.NORTH, "toolbar"));
         if (this instanceof Configuration) {
             toolBar.add(new MaridAction("Configuration", "settings", this::showConfigurationDialog)).setFocusable(false);

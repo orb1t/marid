@@ -16,23 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.mbean;
+package org.marid.ide.mbean.node;
 
-import org.marid.ide.swing.mbean.node.Node;
+import org.marid.l10n.L10nSupport;
+import org.marid.logging.LogSupport;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultTreeCellRenderer;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class MBeanTreeCellRenderer extends DefaultTreeCellRenderer {
+public interface Node extends L10nSupport, LogSupport {
 
-    @Override
-    public JLabel getTreeCellRendererComponent(JTree t, Object v, boolean s, boolean e, boolean l, int r, boolean f) {
-        final JLabel label = (JLabel) super.getTreeCellRendererComponent(t, v, s, e, l, r, f);
-        final Node node = (Node) v;
-        label.setIcon(node.getIcon());
-        return label;
-    }
+    ImageIcon getIcon();
+
+    String getName();
+
+    String getDescription();
+
+    Class<?> getValueType();
+
+    String getPath();
 }

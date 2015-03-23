@@ -16,30 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing;
+package org.marid.ide.context;
 
-import org.marid.logging.LogSupport;
-import org.marid.pref.SysPrefSupport;
-import org.marid.swing.StandardLookAndFeel;
-
-import javax.swing.*;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
+import org.marid.ide.components.ProfileManager;
+import org.marid.jmx.MaridBeanConnectionManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class Laffer implements LogSupport, SysPrefSupport {
+@Configuration
+@ComponentScan(basePackageClasses = {ProfileManager.class})
+public class ProfileContext {
 
-    public static void start() {
-        UIManager.installLookAndFeel("Standard", StandardLookAndFeel.class.getName());
-        final String laf = SYSPREFS.get("laf", NimbusLookAndFeel.class.getCanonicalName());
-        try {
-            UIManager.setLookAndFeel(laf);
-        } catch (Exception x) {
-            Log.warning("Unable to set LAF {0}", x, laf);
-        }
-        if (UIManager.getLookAndFeel() instanceof NimbusLookAndFeel) {
-            UIManager.put("Nimbus.keepAlternateRowColor", true);
-        }
+    @Bean
+    public MaridBeanConnectionManager maridBeanConnectionManager() {
+        return new MaridBeanConnectionManager();
     }
 }

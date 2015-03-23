@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.context;
+package org.marid.ide.context;
 
 import org.marid.ide.base.IdeFrame;
 import org.marid.image.MaridIcon;

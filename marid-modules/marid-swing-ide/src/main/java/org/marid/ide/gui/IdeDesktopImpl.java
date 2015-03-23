@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.gui;
+package org.marid.ide.gui;
 
 import org.marid.ide.base.IdeDesktop;
 import org.marid.image.MaridIcon;
@@ -30,7 +30,7 @@ import static java.awt.SystemColor.desktop;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Component
+@Component("ideDesktop")
 public class IdeDesktopImpl extends JDesktopPane implements IdeDesktop {
 
     private final AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.01f);

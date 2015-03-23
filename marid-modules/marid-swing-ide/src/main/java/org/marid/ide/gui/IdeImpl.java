@@ -16,20 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing;
+package org.marid.ide.gui;
 
-import org.marid.bd.schema.SchemaFrameConfiguration;
-import org.marid.swing.forms.Configuration;
-import org.marid.swing.forms.ConfigurationProvider;
-
-import java.util.function.Consumer;
+import org.marid.Marid;
+import org.marid.ide.base.Ide;
+import org.marid.logging.LogSupport;
+import org.marid.pref.SysPrefSupport;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DefaultConfigurationProvider implements ConfigurationProvider {
+@Component("ide")
+public class IdeImpl implements Ide, SysPrefSupport, LogSupport {
+
     @Override
-    public void visitConfigurationClasses(Consumer<Class<? extends Configuration>> consumer) {
-        consumer.accept(SchemaFrameConfiguration.class);
+    public void exit() {
+        Marid.getCurrentContext().close();
+        System.exit(0);
+    }
+
+    @Override
+    public String getName() {
+        return "ide";
     }
 }

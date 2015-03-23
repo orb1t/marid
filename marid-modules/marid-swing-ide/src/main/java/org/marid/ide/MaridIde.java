@@ -19,7 +19,6 @@
 package org.marid.ide;
 
 import org.marid.Marid;
-import org.marid.ide.swing.Laffer;
 import org.marid.lifecycle.MaridRunner;
 import org.marid.logging.LogSupport;
 import org.marid.logging.Logging;

@@ -16,10 +16,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.swing.mbean.attribute;
+package org.marid.ide.mbean.node;
+
+import org.marid.swing.tree.TNode;
+import org.marid.swing.tree.TTerminalNode;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class AttributeValueExtractor {
+public abstract class Group<Q extends Group<Q, C>, C extends TTerminalNode<?, Q>> implements TNode<Q, BeanNode, C>, Node {
+
+    protected final BeanNode parent;
+    protected final String name;
+
+    public Group(BeanNode parent, String name) {
+        this.parent = parent;
+        this.name = name;
+    }
+
+    @Override
+    public BeanNode getParent() {
+        return parent;
+    }
+
+    @Override
+    public String toString() {
+        return s(name);
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public RootNode getRoot() {
+        return getParent().getRoot();
+    }
 }
