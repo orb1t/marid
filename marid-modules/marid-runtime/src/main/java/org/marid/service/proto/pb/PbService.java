@@ -18,11 +18,13 @@
 
 package org.marid.service.proto.pb;
 
+import org.marid.dyn.MetaInfo;
 import org.marid.service.AbstractMaridService;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@MetaInfo(name = "Protocol Builder Service", description = "Protocol Builder Service")
 public class PbService extends AbstractMaridService {
 
     protected final PbContext context;

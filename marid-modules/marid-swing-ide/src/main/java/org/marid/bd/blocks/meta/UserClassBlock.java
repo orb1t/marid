@@ -30,9 +30,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EventListener;
+import java.util.*;
 import java.util.List;
 
 import static groovyjarjarasm.asm.Opcodes.ACC_PUBLIC;
@@ -108,7 +106,10 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
     }
 
     public void setClassName(String name) {
-        fire(ClassNameListener.class, () -> className, n -> className = n, name, ClassNameListener::onChange);
+        if (!Objects.equals(name, className)) {
+            className = name;
+            fireEvent(ClassNameListener.class, l -> l.onChange(name));
+        }
     }
 
     protected ClassNode classNode() {

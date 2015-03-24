@@ -37,4 +37,6 @@ public @interface MetaInfo {
     String icon() default "";
 
     int color() default 0;
+
+    int order() default 0;
 }

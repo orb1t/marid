@@ -18,11 +18,13 @@
 
 package org.marid.service.proto.pp;
 
+import org.marid.dyn.MetaInfo;
 import org.marid.service.AbstractMaridService;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@MetaInfo(name = "Protocol Parser Service", description = "Protocol Parser Service")
 public class PpService extends AbstractMaridService {
 
     protected final PpContext context;

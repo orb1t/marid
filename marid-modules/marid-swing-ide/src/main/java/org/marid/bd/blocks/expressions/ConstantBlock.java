@@ -39,6 +39,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Vector;
 
 /**
@@ -68,7 +69,7 @@ public class ConstantBlock extends Block implements NamedBlock, ConfigurableBloc
             panel.setOpaque(false);
             panel.add(titleLabel, BorderLayout.NORTH);
             panel.add(label);
-            addEventListener(c, new ConstantBlockListener() {
+            c.addBlockListener(new ConstantBlockListener() {
                 @Override
                 public void changedValue(String value) {
                     label.setText(value);
@@ -120,7 +121,10 @@ public class ConstantBlock extends Block implements NamedBlock, ConfigurableBloc
     }
 
     public void setValue(String newValue) {
-        fire(ConstantBlockListener.class, () -> value, v -> value = v, newValue, ConstantBlockListener::changedValue);
+        if (!Objects.equals(newValue, value)) {
+            value = newValue;
+            fireEvent(ConstantBlockListener.class, l -> l.changedValue(value));
+        }
     }
 
     public ConstantExpression constantExpression() {

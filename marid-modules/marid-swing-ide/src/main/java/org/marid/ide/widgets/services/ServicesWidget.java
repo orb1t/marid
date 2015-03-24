@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,28 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
+package org.marid.ide.widgets.services;
 
-import org.marid.itf.Named;
+import org.marid.dyn.MetaInfo;
+import org.marid.ide.widgets.Widget;
+import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.util.Utils;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.WeakHashMap;
+import javax.swing.*;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-public interface NamedBlock extends Named {
+@MetaInfo(name = "Services")
+@PrototypeComponent
+public class ServicesWidget extends Widget {
 
-    Map<NamedBlock, String> NAMED_BLOCK_NAME_MAP = new WeakHashMap<>();
+    protected final ServicesTable table;
 
-    default String getName() {
-        return NAMED_BLOCK_NAME_MAP.get(this);
-    }
-
-    default void setName(String newName) {
-        if (!Objects.equals(newName, NAMED_BLOCK_NAME_MAP.put(this, newName))) {
-            ((Block) this).fireEvent(NamedBlockListener.class, l -> l.nameChanged(newName));
-        }
+    public ServicesWidget() {
+        super("Services");
+        add(new JScrollPane(table = new ServicesTable(Utils.currentClassLoader())));
     }
 }

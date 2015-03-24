@@ -38,9 +38,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EventListener;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -63,7 +61,7 @@ public class BinExpBlock extends StandardBlock implements ConfigurableBlock {
     @Override
     public BlockComponent createComponent() {
         return new StandardBlockComponent<>(this, c -> {
-            addEventListener(c, (BinExpListener) type -> {
+            c.addBlockListener((BinExpListener) type -> {
                 c.updateBlock();
                 c.getSchemaEditor().repaint();
             });
@@ -98,7 +96,10 @@ public class BinExpBlock extends StandardBlock implements ConfigurableBlock {
     }
 
     public void setTokenType(TokenType token) {
-        fire(BinExpListener.class, () -> tokenType, t -> tokenType = t, token, BinExpListener::changedTokenType);
+        if (!Objects.equals(tokenType, token)) {
+            tokenType = token;
+            fireEvent(BinExpListener.class, l -> l.changedTokenType(token));
+        }
     }
 
     public BinaryExpression binaryExpression() {

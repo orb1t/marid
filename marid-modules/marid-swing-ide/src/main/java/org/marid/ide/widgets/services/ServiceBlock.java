@@ -16,20 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.widgets.servicebuilder;
+package org.marid.ide.widgets.services;
 
-import org.marid.dyn.MetaInfo;
-import org.marid.ide.widgets.Widget;
-import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.bd.Block;
+import org.marid.bd.BlockComponent;
+
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@MetaInfo(name = "Service builder")
-@PrototypeComponent
-public class ServiceBuilderWidget extends Widget {
+public class ServiceBlock extends Block {
 
-    public ServiceBuilderWidget() {
-        super("Service Builder");
+    @Override
+    public List<Input> getInputs() {
+        return null;
+    }
+
+    @Override
+    public List<Output> getOutputs() {
+        return null;
+    }
+
+    @Override
+    public BlockComponent createComponent() {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return null;
     }
 }

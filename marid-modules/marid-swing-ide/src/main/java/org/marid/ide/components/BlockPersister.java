@@ -18,10 +18,10 @@
 
 package org.marid.ide.components;
 
+import org.marid.Marid;
 import org.marid.bd.Block;
 import org.marid.bd.schema.SchemaModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBContext;
@@ -47,10 +47,9 @@ public class BlockPersister extends Unmarshaller.Listener {
 
     private final Class<?>[] classes;
     private final JAXBContext context;
-    private final AutowireCapableBeanFactory autowireCapableBeanFactory;
 
     @Autowired
-    public BlockPersister(Set<Block> blocks, AutowireCapableBeanFactory autowireCapableBeanFactory) {
+    public BlockPersister(Set<Block> blocks) {
         final List<Class<?>> classList = new ArrayList<>(blocks.size() + 1);
         classList.add(SchemaModel.class);
         classList.addAll(blocks.stream().map(Block::getClass).collect(Collectors.toSet()));
@@ -60,7 +59,6 @@ public class BlockPersister extends Unmarshaller.Listener {
         } catch (JAXBException x) {
             throw new IllegalStateException(x);
         }
-        this.autowireCapableBeanFactory = autowireCapableBeanFactory;
         instance = this;
     }
 
@@ -108,7 +106,7 @@ public class BlockPersister extends Unmarshaller.Listener {
 
     @Override
     public void afterUnmarshal(Object target, Object parent) {
-        autowireCapableBeanFactory.autowireBean(target);
+        Marid.getCurrentContext().getAutowireCapableBeanFactory().autowireBean(target);
         if (target instanceof Block) {
             ((Block) target).reset();
         }

@@ -30,19 +30,14 @@ import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.bd.components.StandardBlockComponent;
-import org.marid.xml.bind.adapter.AtomicStringXmlAdapter;
 
 import javax.swing.*;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EventListener;
+import java.util.*;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -53,8 +48,7 @@ import java.util.stream.Collectors;
 public class ScriptStatementBlock extends StandardBlock implements NamedBlock, ConfigurableBlock {
 
     @XmlElement
-    @XmlJavaTypeAdapter(AtomicStringXmlAdapter.class)
-    protected final AtomicReference<String> script = new AtomicReference<>("null");
+    protected String script = "null";
 
     protected final Out singleOut = new Out("out", Statement.class, this::statement);
     protected final Out multipleOut = new Out("vector", Statement[].class, this::statements);
@@ -63,9 +57,9 @@ public class ScriptStatementBlock extends StandardBlock implements NamedBlock, C
     public BlockComponent createComponent() {
         return new StandardBlockComponent<>(this, c -> {
             final ConsoleTextEditor consoleTextEditor = new ConsoleTextEditor();
-            consoleTextEditor.getTextEditor().setText(script.get());
+            consoleTextEditor.getTextEditor().setText(script);
             c.add(consoleTextEditor.getTextEditor());
-            addEventListener(c, (Listener) script -> {
+            c.addBlockListener((Listener) script -> {
                 if (script != null) {
                     consoleTextEditor.getTextEditor().setText(script);
                 }
@@ -76,7 +70,7 @@ public class ScriptStatementBlock extends StandardBlock implements NamedBlock, C
     }
 
     private Statement statement() {
-        final List<Statement> statements = new AstBuilder().buildFromString(script.get()).stream()
+        final List<Statement> statements = new AstBuilder().buildFromString(script).stream()
                 .filter(n -> n instanceof Statement)
                 .map(n -> (Statement) n)
                 .collect(Collectors.toList());
@@ -84,7 +78,7 @@ public class ScriptStatementBlock extends StandardBlock implements NamedBlock, C
     }
 
     private Statement[] statements() {
-        return new AstBuilder().buildFromString(script.get()).stream()
+        return new AstBuilder().buildFromString(script).stream()
                 .filter(n -> n instanceof Statement)
                 .map(n -> (Statement) n)
                 .toArray(Statement[]::new);
@@ -106,7 +100,7 @@ public class ScriptStatementBlock extends StandardBlock implements NamedBlock, C
         textEditor.setShowLineNumbers(true);
         textEditor.setEditable(true);
         textEditor.setName("resizable");
-        textEditor.getTextEditor().setText(script.get());
+        textEditor.getTextEditor().setText(script);
         return new AbstractBlockComponentEditor<ScriptStatementBlock>(parent, this) {
             {
                 tabPane("Script").addLine("Script", textEditor, 1.0);
@@ -115,7 +109,10 @@ public class ScriptStatementBlock extends StandardBlock implements NamedBlock, C
 
             @Override
             protected void onSubmit(Action action, ActionEvent actionEvent) throws Exception {
-                fire(Listener.class, script, textEditor.getTextEditor().getText(), Listener::scriptChanged);
+                if (!Objects.equals(textEditor.getTextEditor().getText(), script)) {
+                    script = textEditor.getTextEditor().getText();
+                    fireEvent(Listener.class, l -> l.scriptChanged(script));
+                }
             }
         };
     }

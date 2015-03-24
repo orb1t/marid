@@ -31,9 +31,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EventListener;
+import java.util.*;
 import java.util.List;
 
 import static groovyjarjarasm.asm.Opcodes.ACC_PUBLIC;
@@ -61,7 +59,10 @@ public class MethodBlock extends StandardBlock implements ConfigurableBlock {
     protected final Out out = new Out("out", MethodNode.class, this::methodNode);
 
     public void setMethodName(String newMethodName) {
-        fire(MethodBlockListener.class, () -> methodName, m -> methodName = m, newMethodName, MethodBlockListener::methodNameChanged);
+        if (!Objects.equals(newMethodName, methodName)) {
+            methodName = newMethodName;
+            fireEvent(MethodBlockListener.class, l -> l.methodNameChanged(newMethodName));
+        }
     }
 
     public String getMethodName() {

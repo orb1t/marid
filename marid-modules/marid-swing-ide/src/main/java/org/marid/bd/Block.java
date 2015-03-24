@@ -20,6 +20,8 @@ package org.marid.bd;
 
 import org.marid.ide.components.BlockPersister;
 import org.marid.itf.Named;
+import org.marid.logging.LogSupport;
+import org.marid.methods.LogMethods;
 import org.marid.util.CollectionUtils;
 import org.marid.util.Utils;
 
@@ -30,59 +32,41 @@ import java.awt.*;
 import java.io.*;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
-public abstract class Block implements Named, Serializable {
+public abstract class Block implements Named, Serializable, LogSupport {
 
     @XmlAttribute
     @XmlID
     protected String id = Utils.textUid();
 
-    protected final Map<Object, Set<EventListener>> listeners = new WeakHashMap<>();
+    protected final Set<EventListener> listeners = Collections.newSetFromMap(new IdentityHashMap<>());
 
     public String getId() {
         return id;
     }
 
-    public void addEventListener(Object source, EventListener listener) {
-        listeners.computeIfAbsent(source, o -> new HashSet<>()).add(listener);
+    public void addEventListener(EventListener listener) {
+        if (listeners.add(listener)) {
+            LogMethods.info(Logger.getLogger(id), "Added {0}", listener);
+        }
     }
 
-    public void removeListener(Object source, EventListener listener) {
-        listeners.computeIfAbsent(source, o -> new HashSet<>()).remove(listener);
-    }
-
-    public void removeEventListeners(Object source) {
-        listeners.remove(source);
+    public void removeListener(EventListener listener) {
+        if (listeners.remove(listener)) {
+            LogMethods.info(Logger.getLogger(id), "Removed {0}", listener);
+        }
     }
 
     public <L extends EventListener> void fireEvent(Class<L> t, Consumer<L> consumer) {
-        listeners.values().forEach(ls -> ls.stream().filter(t::isInstance).forEach(l -> consumer.accept(t.cast(l))));
-    }
-
-    public <L extends EventListener, T> void fire(Class<L> t, Supplier<T> s, Consumer<T> c, T nv, BiConsumer<L, T> ch) {
-        final T old = s.get();
-        if (!Objects.equals(old, nv)) {
-            c.accept(nv);
-            listeners.values().forEach(ls -> ls.stream()
-                    .filter(t::isInstance)
-                    .forEach(l -> ch.accept(t.cast(l), nv)));
-        }
-    }
-
-    public <L extends EventListener, T> void fire(Class<L> t, AtomicReference<T> ref, T nv, BiConsumer<L, T> ch) {
-        final T old = ref.getAndSet(nv);
-        if (!Objects.deepEquals(old, nv)) {
-            listeners.values().forEach(ls -> ls.stream().filter(t::isInstance).forEach(l -> ch.accept(t.cast(l), nv)));
-        }
+        listeners.stream().filter(t::isInstance).map(t::cast).forEach(consumer);
     }
 
     public abstract List<Input> getInputs();
@@ -100,7 +84,7 @@ public abstract class Block implements Named, Serializable {
                         .filter(l -> l.getBlockInput() == i)
                         .flatMap(l -> l.getBlockOutput().getOutputType().isArray()
                                 ? Arrays.stream((Object[]) l.getBlockOutput().get())
-                                : Arrays.asList(l.getBlockOutput().get()).stream())
+                                : Collections.singletonList(l.getBlockOutput().get()).stream())
                         .toArray(CollectionUtils.getArrayFunction(i.getInputType().getComponentType())));
             } else {
                 links.stream()

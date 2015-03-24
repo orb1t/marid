@@ -77,7 +77,6 @@ public class SchemaFrame extends AbstractFrame implements SchemaFrameConfigurati
         getContentPane().setBackground(getBackground());
         getJMenuBar().add(blocksMenu);
         blockMenuProvider.fillMenu(blocksMenu);
-        pack();
     }
 
     public void fireEvent(AWTEvent event) {

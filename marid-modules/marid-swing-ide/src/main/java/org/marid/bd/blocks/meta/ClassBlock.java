@@ -33,6 +33,7 @@ import java.awt.event.ActionEvent;
 import java.util.Collections;
 import java.util.EventListener;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -51,7 +52,10 @@ public class ClassBlock extends StandardBlock implements ConfigurableBlock {
     }
 
     public void setTargetClass(Class<?> newClass) {
-        fire(ClassBlockListener.class, () -> targetClass, c -> targetClass = c, newClass, ClassBlockListener::classChanged);
+        if (!Objects.equals(targetClass, newClass)) {
+            targetClass = newClass;
+            fireEvent(ClassBlockListener.class, l -> l.classChanged(targetClass));
+        }
     }
 
     @Override

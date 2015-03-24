@@ -25,7 +25,9 @@ import org.marid.swing.geom.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.HierarchyEvent;
 import java.awt.event.WindowEvent;
+import java.util.EventListener;
 import java.util.List;
 
 /**
@@ -35,6 +37,18 @@ public interface BlockComponent {
 
     default JComponent getComponent() {
         return (JComponent) this;
+    }
+
+    default void addBlockListener(EventListener eventListener) {
+        getComponent().addHierarchyListener(e -> {
+            if (e.getID() == HierarchyEvent.HIERARCHY_CHANGED) {
+                if (getComponent().isEnabled()) {
+                    getBlock().addEventListener(eventListener);
+                } else {
+                    getBlock().removeListener(eventListener);
+                }
+            }
+        });
     }
 
     Rectangle getBounds();
@@ -56,6 +70,7 @@ public interface BlockComponent {
     void update();
 
     default void remove() {
+        getComponent().setEnabled(false);
         final SchemaEditor schemaEditor = getSchemaEditor();
         schemaEditor.removeAllLinks(this);
         schemaEditor.remove(getComponent());

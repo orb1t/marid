@@ -91,7 +91,7 @@ public class Multiplexor<E> extends StandardBlock implements ConfigurableBlock {
     @Override
     public BlockComponent createComponent() {
         final BlockComponent component = super.createComponent();
-        addEventListener(component, (MultiplexorListener) v -> EventQueue.invokeLater(() -> {
+        component.addBlockListener((MultiplexorListener) v -> EventQueue.invokeLater(() -> {
             final List<Link> links = component.getSchemaEditor().removeAllLinks(component);
             setInputCount(v);
             component.updateBlock();
@@ -107,12 +107,13 @@ public class Multiplexor<E> extends StandardBlock implements ConfigurableBlock {
     }
 
     public void setInputCount(int newValue) {
-        fire(MultiplexorListener.class, () -> inputCount, n -> {
-            inputCount = n;
+        if (inputCount != newValue) {
+            inputCount = newValue;
             array = Arrays.copyOf(array, inputCount);
             inputs.clear();
-            IntStream.range(0, n).forEach(i -> inputs.add(new In(Integer.toString(i + 1), type, v -> array[i] = v)));
-        }, newValue, MultiplexorListener::inputCountChanged);
+            IntStream.range(0, inputCount).forEach(i -> inputs.add(new In(Integer.toString(i + 1), type, v -> array[i] = v)));
+            fireEvent(MultiplexorListener.class, l -> l.inputCountChanged(inputCount));
+        }
     }
 
     @Override

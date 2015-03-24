@@ -29,6 +29,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.util.EventListener;
+import java.util.Objects;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -63,7 +64,10 @@ public class NamedExpressionBlock extends IoBlock implements ConfigurableBlock {
     }
 
     public void setName(String newKey) {
-        fire(NamedExpressionBlockListener.class, () -> key, n -> key = n, newKey, NamedExpressionBlockListener::keyChanged);
+        if (!Objects.equals(newKey, key)) {
+            key = newKey;
+            fireEvent(NamedExpressionBlockListener.class, l -> l.keyChanged(key));
+        }
     }
 
     @Override

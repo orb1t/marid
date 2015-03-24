@@ -50,9 +50,9 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
         super.processHierarchyEvent(e);
         if (this instanceof EventListener && e.getID() == HierarchyEvent.HIERARCHY_CHANGED) {
             if (e.getChangedParent() != null) {
-                block.addEventListener(this, (EventListener) this);
+                block.addEventListener((EventListener) this);
             } else {
-                block.removeEventListeners(this);
+                block.removeListener((EventListener) this);
             }
         }
     }
