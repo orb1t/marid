@@ -24,18 +24,16 @@ import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.ForStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "For Statement", label = "for")
+@BdBlock(name = "For Statement", label = "for", color = BlockColors.STATEMENTS_BLOCK_COLOR)
 @XmlRootElement
 public class ForBlock extends StandardBlock {
 
@@ -43,25 +41,15 @@ public class ForBlock extends StandardBlock {
     protected Expression expression;
     protected Statement body;
 
-    protected final In paramInput = new In("i", Parameter.class, p -> parameter = p);
-    protected final In exprInput = new In("expr", Expression.class, e -> expression = e);
-    protected final In bodyInput = new In("body", Statement.class, s -> body = s);
-    protected final Out out = new Out("out", ForStatement.class, () -> new ForStatement(parameter, expression, body));
+    public final In paramInput = new In("i", Parameter.class, p -> parameter = p);
+    public final In exprInput = new In("expr", Expression.class, e -> expression = e);
+    public final In bodyInput = new In("body", Statement.class, s -> body = s);
+    public final Out out = new Out("out", ForStatement.class, () -> new ForStatement(parameter, expression, body));
 
     @Override
     public void reset() {
         parameter = null;
         expression = EmptyExpression.INSTANCE;
         body = EmptyStatement.INSTANCE;
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(paramInput, exprInput, bodyInput);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 }

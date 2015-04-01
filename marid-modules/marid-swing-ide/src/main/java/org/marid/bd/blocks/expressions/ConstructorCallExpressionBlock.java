@@ -23,28 +23,26 @@ import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.ast.expr.ArgumentListExpression;
 import org.codehaus.groovy.ast.expr.ConstructorCallExpression;
 import org.codehaus.groovy.ast.expr.Expression;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Constructor Call Expression", label = "X(...)")
+@BdBlock(name = "Constructor Call Expression", label = "X(...)", color = BlockColors.EXPRESSIONS_BLOCK_COLOR)
 @XmlRootElement
 public class ConstructorCallExpressionBlock extends StandardBlock {
 
     protected ClassNode classNode;
     protected Expression args;
 
-    protected final In classIn = new In("class", ClassNode.class, true, v -> classNode = v);
-    protected final In argsIn = new In("args", Expression.class, v -> args = v);
+    public final In classIn = new In("class", ClassNode.class, true, v -> classNode = v);
+    public final In argsIn = new In("args", Expression.class, v -> args = v);
 
-    protected final Out out = new Out("cc", ConstructorCallExpression.class, this::value);
+    public final Out out = new Out("cc", ConstructorCallExpression.class, this::value);
 
     protected ConstructorCallExpression value() {
         return new ConstructorCallExpression(classNode, args);
@@ -53,15 +51,5 @@ public class ConstructorCallExpressionBlock extends StandardBlock {
     @Override
     public void reset() {
         args = new ArgumentListExpression(new Parameter[0]);
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(classIn, argsIn);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 }

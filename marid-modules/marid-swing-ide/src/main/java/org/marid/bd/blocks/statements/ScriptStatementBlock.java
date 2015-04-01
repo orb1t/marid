@@ -23,10 +23,7 @@ import org.codehaus.groovy.ast.VariableScope;
 import org.codehaus.groovy.ast.builder.AstBuilder;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
-import org.marid.bd.BlockComponent;
-import org.marid.bd.ConfigurableBlock;
-import org.marid.bd.NamedBlock;
-import org.marid.bd.StandardBlock;
+import org.marid.bd.*;
 import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.bd.components.StandardBlockComponent;
@@ -36,22 +33,23 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.*;
+import java.util.EventListener;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@BdBlock(name = "Script Statement")
+@BdBlock(name = "Script Statement", color = BlockColors.STATEMENTS_BLOCK_COLOR)
 @XmlRootElement
 public class ScriptStatementBlock extends StandardBlock implements NamedBlock, ConfigurableBlock {
 
     @XmlElement
     protected String script = "null";
 
-    protected final Out singleOut = new Out("out", Statement.class, this::statement);
-    protected final Out multipleOut = new Out("vector", Statement[].class, this::statements);
+    public final Out singleOut = new Out("out", Statement.class, this::statement);
+    public final Out multipleOut = new Out("vector", Statement[].class, this::statements);
 
     @Override
     public BlockComponent createComponent() {
@@ -82,16 +80,6 @@ public class ScriptStatementBlock extends StandardBlock implements NamedBlock, C
                 .filter(n -> n instanceof Statement)
                 .map(n -> (Statement) n)
                 .toArray(Statement[]::new);
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Arrays.asList(singleOut, multipleOut);
     }
 
     @Override

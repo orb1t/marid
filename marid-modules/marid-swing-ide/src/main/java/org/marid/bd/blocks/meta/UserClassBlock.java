@@ -38,7 +38,7 @@ import static groovyjarjarasm.asm.Opcodes.ACC_PUBLIC;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "User Class", label = "class")
+@BdBlock(name = "User Class", label = "class", color = BlockColors.ANNOTATIONS_BLOCK_COLOR)
 @XmlRootElement
 @XmlSeeAlso({UserClassBlock.LinkedClassBlock.class})
 public class UserClassBlock extends StandardBlock implements ConfigurableBlock, SingletonBlock {
@@ -54,14 +54,14 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
     protected AnnotationNode[] annotations;
     protected ConstructorNode[] constructors;
 
-    protected final In interfacesInput = new In("interfaces", ClassNode[].class, v -> interfaces = v);
-    protected final In mixinsInput = new In("mixins", MixinNode[].class, v -> mixins = v);
-    protected final In superClassInput = new In("super", ClassNode.class, v -> superClass = v);
-    protected final In methodsInput = new In("methods", MethodNode[].class, v -> methods = v);
-    protected final In fieldsInput = new In("fields", FieldNode[].class, v -> fields = v);
-    protected final In annotationsInput = new In("annotations", AnnotationNode[].class, v -> annotations = v);
-    protected final In constructorsInput = new In("constructors", ConstructorNode[].class, v -> constructors = v);
-    protected final Out export = new Out("class", ClassNode.class, this::classNode);
+    public final In interfacesInput = new In("interfaces", ClassNode[].class, v -> interfaces = v);
+    public final In mixinsInput = new In("mixins", MixinNode[].class, v -> mixins = v);
+    public final In superClassInput = new In("super", ClassNode.class, v -> superClass = v);
+    public final In methodsInput = new In("methods", MethodNode[].class, v -> methods = v);
+    public final In fieldsInput = new In("fields", FieldNode[].class, v -> fields = v);
+    public final In annotationsInput = new In("annotations", AnnotationNode[].class, v -> annotations = v);
+    public final In constructorsInput = new In("constructors", ConstructorNode[].class, v -> constructors = v);
+    public final Out export = new Out("class", ClassNode.class, this::classNode);
 
     @Override
     public void reset() {
@@ -72,23 +72,6 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
         fields = new FieldNode[0];
         annotations = new AnnotationNode[0];
         constructors = new ConstructorNode[0];
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(
-                interfacesInput,
-                mixinsInput,
-                superClassInput,
-                methodsInput,
-                fieldsInput,
-                annotationsInput,
-                constructorsInput);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.emptyList();
     }
 
     @Override

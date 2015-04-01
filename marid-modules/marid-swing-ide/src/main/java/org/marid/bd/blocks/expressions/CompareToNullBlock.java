@@ -20,6 +20,7 @@ package org.marid.bd.blocks.expressions;
 
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.transform.sc.transformers.CompareToNullExpression;
+import org.marid.bd.BlockColors;
 import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
@@ -28,7 +29,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Compare to null Expression", label = "== null")
+@BdBlock(name = "Compare to null Expression", label = "== null", color = BlockColors.EXPRESSIONS_BLOCK_COLOR)
 @XmlRootElement
 public class CompareToNullBlock extends IoBlock {
 

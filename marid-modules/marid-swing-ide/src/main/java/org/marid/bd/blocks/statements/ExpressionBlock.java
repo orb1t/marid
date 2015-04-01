@@ -20,6 +20,7 @@ package org.marid.bd.blocks.statements;
 
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.ExpressionStatement;
+import org.marid.bd.BlockColors;
 import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
@@ -28,7 +29,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Expression Statement", label = "stmt(expr)")
+@BdBlock(name = "Expression Statement", label = "stmt(expr)", color = BlockColors.STATEMENTS_BLOCK_COLOR)
 @XmlRootElement
 public class ExpressionBlock extends IoBlock {
 

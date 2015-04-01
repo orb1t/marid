@@ -21,6 +21,7 @@ package org.marid.bd.blocks.statements;
 import org.codehaus.groovy.ast.VariableScope;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
+import org.marid.bd.BlockColors;
 import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
@@ -31,7 +32,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Block Statement", label = "{...}")
+@BdBlock(name = "Block Statement", label = "{...}", color = BlockColors.STATEMENTS_BLOCK_COLOR)
 @XmlRootElement
 public class BlockBlock extends IoBlock {
 

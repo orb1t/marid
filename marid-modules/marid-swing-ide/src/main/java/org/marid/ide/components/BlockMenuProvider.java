@@ -18,10 +18,11 @@
 
 package org.marid.ide.components;
 
-import images.Images;
 import org.marid.bd.Block;
-import org.marid.dyn.MetaInfo;
+import org.marid.bd.BlockGroups;
+import org.marid.bd.blocks.BdBlock;
 import org.marid.l10n.L10nSupport;
+import org.marid.logging.LogSupport;
 import org.marid.swing.dnd.DndSource;
 import org.marid.swing.dnd.MaridTransferHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,41 +35,42 @@ import javax.swing.event.MenuDragMouseListener;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.util.*;
-
-import static java.util.Comparator.comparing;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BlockMenuProvider implements L10nSupport {
+public class BlockMenuProvider implements L10nSupport, LogSupport {
 
-    private final Collection<Block> blocks;
-    private final Map<Package, Set<Block>> blockMap = new TreeMap<>(comparing(Package::getName));
+    private final List<Block> blocks;
 
-    @Lazy
     @Autowired
-    public BlockMenuProvider(Collection<Block> blocks) {
+    public BlockMenuProvider(@Lazy @BdBlock List<Block> blocks) {
         this.blocks = blocks;
     }
 
-    private void fillBlockMap() {
-        if (blockMap.isEmpty()) {
-            blocks.forEach(b -> blockMap.computeIfAbsent(
-                    b.getClass().getPackage(),
-                    v -> new TreeSet<>(comparing(Block::getName))
-            ).add(b));
-        }
-    }
-
     public void fillMenu(JMenu menu) {
-        fillBlockMap();
-        blockMap.forEach((group, blockSet) -> {
-            final MetaInfo metaInfo = group.getAnnotation(MetaInfo.class);
-            final JMenu groupMenu = new JMenu(s(metaInfo != null ? metaInfo.name() : group.getName()));
-            if (metaInfo != null && !metaInfo.icon().isEmpty()) {
-                groupMenu.setIcon(Images.getIcon(metaInfo.icon(), 22));
+        final Map<String, Set<Block>> blockMap = new TreeMap<>();
+        blocks.forEach(b -> {
+            final BdBlock bdBlock = b.getClass().getAnnotation(BdBlock.class);
+            final String g;
+            if (bdBlock.group().isEmpty()) {
+                if (b.getClass().getPackage() == null) {
+                    g = "common";
+                } else {
+                    final int index = b.getClass().getPackage().getName().lastIndexOf('.');
+                    g = b.getClass().getPackage().getName().substring(index + 1);
+                }
+            } else {
+                g = bdBlock.group();
             }
+            blockMap.computeIfAbsent(g, v -> new LinkedHashSet<>()).add(b);
+        });
+        blockMap.forEach((group, blockSet) -> {
+            final BlockGroups.BlockGroup blockGroup = BlockGroups.blockGroup(group);
+            final JMenu groupMenu = new JMenu(s(blockGroup.name));
+            groupMenu.setIcon(blockGroup.icon);
             menu.add(groupMenu);
             blockSet.forEach(block -> groupMenu.add(new BlockMenuItem(block)));
         });
@@ -116,7 +118,6 @@ public class BlockMenuProvider implements L10nSupport {
 
         @Override
         public void menuDragMouseReleased(MenuDragMouseEvent e) {
-
         }
     }
 }

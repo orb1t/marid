@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.swing.*;
 import java.util.Timer;
 
 /**
@@ -45,5 +46,10 @@ public class BaseContext {
     @Bean(destroyMethod = "cancel", autowire = Autowire.BY_NAME)
     public static Timer ideTimer() {
         return new Timer("ideTimer");
+    }
+
+    @Bean
+    public static ActionMap ideActionMap() {
+        return new ActionMap();
     }
 }

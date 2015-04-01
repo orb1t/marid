@@ -21,44 +21,32 @@ package org.marid.bd.blocks.meta;
 import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import static org.marid.bd.blocks.expressions.NamedExpressionBlock.NamedExpression;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Annotation Block", label = " @ ")
+@BdBlock(name = "Annotation Block", label = " @ ", color = BlockColors.ANNOTATIONS_BLOCK_COLOR)
 @XmlRootElement
 public class AnnotationBlock extends StandardBlock {
 
     protected ClassNode classNode;
     protected NamedExpression[] members;
 
-    protected final In classNodeInput = new In("class", ClassNode.class, n -> classNode = n);
-    protected final In membersInput = new In("parameters", NamedExpression[].class, v -> members = v);
-    protected final Out out = new Out("out", AnnotationNode.class, this::annotationNode);
+    public final In classNodeInput = new In("class", ClassNode.class, n -> classNode = n);
+    public final In membersInput = new In("parameters", NamedExpression[].class, v -> members = v);
+    public final Out out = new Out("out", AnnotationNode.class, this::annotationNode);
 
     @Override
     public void reset() {
         classNode = ClassHelper.STRING_TYPE;
         members = new NamedExpression[0];
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(classNodeInput, membersInput);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 
     public AnnotationNode annotationNode() {

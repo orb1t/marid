@@ -24,6 +24,7 @@ import org.codehaus.groovy.ast.expr.EmptyExpression;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
+import org.marid.bd.BlockColors;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.StandardBlock;
@@ -38,13 +39,13 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.*;
-import java.util.List;
+import java.util.EventListener;
+import java.util.Objects;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Binary Expression", iconText = "expr(x, y)")
+@BdBlock(name = "Binary Expression", iconText = "expr(x, y)", color = BlockColors.EXPRESSIONS_BLOCK_COLOR)
 @XmlRootElement
 public class BinExpBlock extends StandardBlock implements ConfigurableBlock {
 
@@ -54,9 +55,9 @@ public class BinExpBlock extends StandardBlock implements ConfigurableBlock {
     protected Expression left;
     protected Expression right;
 
-    protected final In leftInput = new In("x", Expression.class, e -> left = e);
-    protected final In rightInput = new In("y", Expression.class, e -> right = e);
-    protected final Out output = new Out("out", Expression.class, this::binaryExpression);
+    public final In leftInput = new In("x", Expression.class, e -> left = e);
+    public final In rightInput = new In("y", Expression.class, e -> right = e);
+    public final Out output = new Out("out", Expression.class, this::binaryExpression);
 
     @Override
     public BlockComponent createComponent() {
@@ -79,16 +80,6 @@ public class BinExpBlock extends StandardBlock implements ConfigurableBlock {
     @Override
     public BinExpEditor createWindow(Window parent) {
         return new BinExpEditor(parent);
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(leftInput, rightInput);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(output);
     }
 
     public TokenType getTokenType() {

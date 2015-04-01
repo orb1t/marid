@@ -37,8 +37,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Vector;
 
@@ -52,7 +50,7 @@ public class ConstantBlock extends Block implements NamedBlock, ConfigurableBloc
     @XmlElement
     protected String value = "null";
 
-    protected final Out output = new Out("", ConstantExpression.class, this::constantExpression);
+    public final Out output = new Out("", ConstantExpression.class, this::constantExpression);
 
     public ConstantBlock() {
         setName("Constant block");
@@ -104,16 +102,6 @@ public class ConstantBlock extends Block implements NamedBlock, ConfigurableBloc
     @Override
     public ConstantBlockEditor createWindow(Window parent) {
         return new ConstantBlockEditor(parent);
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(output);
     }
 
     public String getValue() {

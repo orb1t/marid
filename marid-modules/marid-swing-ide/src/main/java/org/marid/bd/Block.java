@@ -30,6 +30,7 @@ import javax.xml.bind.annotation.*;
 import javax.xml.transform.stream.StreamResult;
 import java.awt.*;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
@@ -69,9 +70,33 @@ public abstract class Block implements Named, Serializable, LogSupport {
         listeners.stream().filter(t::isInstance).map(t::cast).forEach(consumer);
     }
 
-    public abstract List<Input> getInputs();
+    public List<Input> getInputs() {
+        final List<Input> list = new ArrayList<>();
+        for (final Field field : getClass().getFields()) {
+            if (Input.class.isAssignableFrom(field.getType())) {
+                try {
+                    list.add((Input) field.get(this));
+                } catch (ReflectiveOperationException x) {
+                    throw new IllegalStateException(x);
+                }
+            }
+        }
+        return list.isEmpty() ? Collections.emptyList() : list;
+    }
 
-    public abstract List<Output> getOutputs();
+    public List<Output> getOutputs() {
+        final List<Output> list = new ArrayList<>();
+        for (final Field field : getClass().getFields()) {
+            if (Output.class.isAssignableFrom(field.getType())) {
+                try {
+                    list.add((Output) field.get(this));
+                } catch (ReflectiveOperationException x) {
+                    throw new IllegalStateException(x);
+                }
+            }
+        }
+        return list.isEmpty() ? Collections.emptyList() : list;
+    }
 
     public List<Output> getExports() {
         return Collections.emptyList();

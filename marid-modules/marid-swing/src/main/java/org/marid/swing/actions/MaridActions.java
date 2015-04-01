@@ -39,7 +39,8 @@ public class MaridActions implements L10nSupport {
     public static final String MENUBAR_DISABLED = "menubarDisabled";
 
     private static List<Map.Entry<ActionKey, Action>> actions(ActionMap actionMap) {
-        return Arrays.stream(actionMap.allKeys())
+        final Object[] keys = actionMap.allKeys();
+        return Arrays.stream(keys == null ? new Object[0] : keys)
                 .filter(k -> k instanceof ActionKey)
                 .map(ActionKey.class::cast)
                 .filter(k -> k.size() >= 4)

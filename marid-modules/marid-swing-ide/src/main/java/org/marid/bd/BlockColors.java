@@ -18,14 +18,28 @@
 
 package org.marid.bd;
 
+import java.awt.*;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface BlockColors {
 
-    int ANNOTATION_BLOCK_COLOR = 0x206090;
-    int EXPRESSION_BLOCK_COLOR = 0x0000FF;
+    int ANNOTATIONS_BLOCK_COLOR = 0x206090;
+    int EXPRESSIONS_BLOCK_COLOR = 0x0000FF;
     int META_BLOCK_COLOR = 0x10AAAA;
-    int MULTIPLEXOR_BLOCK_COLOR = 0x404040;
-    int STATEMENT_BLOCK_COLOR = 0x005500;
+    int MULTIPLEXORS_BLOCK_COLOR = 0x404040;
+    int STATEMENTS_BLOCK_COLOR = 0x005500;
+
+    int BLACK = 0x000000;
+    int BLUE = 0x0000FF;
+    int RED = 0xFF0000;
+
+    static Color getBlockColor(String id) {
+        try {
+            return new Color((int) BlockColors.class.getField(id.toUpperCase() + "_BLOCK_COLOR").get(null));
+        } catch (Exception x) {
+            return Color.BLACK;
+        }
+    }
 }

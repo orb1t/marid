@@ -21,41 +21,29 @@ package org.marid.bd.blocks.expressions;
 import org.codehaus.groovy.ast.expr.EmptyExpression;
 import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.transform.sc.transformers.CompareIdentityExpression;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Compare Identity Expression", label = "===")
+@BdBlock(name = "Compare Identity Expression", label = "===", color = BlockColors.EXPRESSIONS_BLOCK_COLOR)
 @XmlRootElement
 public class CompareIdentityBlock extends StandardBlock {
 
     protected Expression left;
     protected Expression right;
 
-    protected final In leftInput = new In("expr1", Expression.class, e -> left = e);
-    protected final In rightInput = new In("expr2", Expression.class, e -> right = e);
-    protected final Out out = new Out("out", CompareIdentityExpression.class, () -> new CompareIdentityExpression(left, right));
+    public final In leftInput = new In("expr1", Expression.class, e -> left = e);
+    public final In rightInput = new In("expr2", Expression.class, e -> right = e);
+    public final Out out = new Out("out", CompareIdentityExpression.class, () -> new CompareIdentityExpression(left, right));
 
     @Override
     public void reset() {
         left = EmptyExpression.INSTANCE;
         right = EmptyExpression.INSTANCE;
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(leftInput, rightInput);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 }

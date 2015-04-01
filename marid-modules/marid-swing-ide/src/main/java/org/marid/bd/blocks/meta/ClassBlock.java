@@ -19,6 +19,7 @@
 package org.marid.bd.blocks.meta;
 
 import org.codehaus.groovy.ast.ClassNode;
+import org.marid.bd.BlockColors;
 import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
@@ -30,22 +31,20 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.Collections;
 import java.util.EventListener;
-import java.util.List;
 import java.util.Objects;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Class Block", label = "class")
+@BdBlock(name = "Class Block", label = "class", color = BlockColors.ANNOTATIONS_BLOCK_COLOR)
 @XmlRootElement
 public class ClassBlock extends StandardBlock implements ConfigurableBlock {
 
     @XmlAttribute
     protected Class<?> targetClass;
 
-    protected final Out out = new Out("out", ClassNode.class, () -> new ClassNode(targetClass));
+    public final Out out = new Out("out", ClassNode.class, () -> new ClassNode(targetClass));
 
     public Class<?> getTargetClass() {
         return targetClass;
@@ -59,18 +58,8 @@ public class ClassBlock extends StandardBlock implements ConfigurableBlock {
     }
 
     @Override
-    public List<Input> getInputs() {
-        return Collections.emptyList();
-    }
-
-    @Override
     public String getLabel() {
         return targetClass == null ? "class" : targetClass.getCanonicalName();
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 
     @Override

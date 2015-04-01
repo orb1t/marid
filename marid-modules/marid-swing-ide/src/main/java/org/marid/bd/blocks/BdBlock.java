@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Component
 public @interface BdBlock {
@@ -40,4 +40,6 @@ public @interface BdBlock {
     String label() default "";
 
     String iconText() default "";
+
+    String group() default "";
 }

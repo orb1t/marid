@@ -21,6 +21,7 @@ package org.marid.bd.blocks.meta;
 import org.codehaus.groovy.ast.*;
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
+import org.marid.bd.BlockColors;
 import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
@@ -31,15 +32,16 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.*;
-import java.util.List;
+import java.util.Arrays;
+import java.util.EventListener;
+import java.util.Objects;
 
 import static groovyjarjarasm.asm.Opcodes.ACC_PUBLIC;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Method Block", label = "method")
+@BdBlock(name = "Method Block", label = "method", color = BlockColors.ANNOTATIONS_BLOCK_COLOR)
 @XmlRootElement
 public class MethodBlock extends StandardBlock implements ConfigurableBlock {
 
@@ -51,12 +53,11 @@ public class MethodBlock extends StandardBlock implements ConfigurableBlock {
     protected Statement body;
     protected AnnotationNode[] annotationNodes;
 
-    protected final In returnTypeInput = new In("returnType", ClassNode.class, v -> returnType = v);
-    protected final In parametersInput = new In("parameters", Parameter[].class, v -> parameters = v);
-    protected final In bodyInput = new In("body", Statement.class, true, v -> body = v);
-    protected final In annotationsInput = new In("annotations", AnnotationNode[].class, v -> annotationNodes = v);
-
-    protected final Out out = new Out("out", MethodNode.class, this::methodNode);
+    public final In returnTypeInput = new In("returnType", ClassNode.class, v -> returnType = v);
+    public final In parametersInput = new In("parameters", Parameter[].class, v -> parameters = v);
+    public final In bodyInput = new In("body", Statement.class, true, v -> body = v);
+    public final In annotationsInput = new In("annotations", AnnotationNode[].class, v -> annotationNodes = v);
+    public final Out out = new Out("out", MethodNode.class, this::methodNode);
 
     public void setMethodName(String newMethodName) {
         if (!Objects.equals(newMethodName, methodName)) {
@@ -81,11 +82,6 @@ public class MethodBlock extends StandardBlock implements ConfigurableBlock {
     }
 
     @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(returnTypeInput, parametersInput, bodyInput, annotationsInput);
-    }
-
-    @Override
     public void reset() {
         returnType = ClassHelper.OBJECT_TYPE;
         parameters = new Parameter[0];
@@ -107,11 +103,6 @@ public class MethodBlock extends StandardBlock implements ConfigurableBlock {
                 setMethodName(methodNameField.getText());
             }
         };
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 
     public interface MethodBlockListener extends EventListener {

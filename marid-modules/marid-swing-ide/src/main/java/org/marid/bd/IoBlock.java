@@ -18,9 +18,6 @@
 
 package org.marid.bd;
 
-import java.util.Collections;
-import java.util.List;
-
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -29,7 +26,7 @@ public abstract class IoBlock extends StandardBlock {
     protected final Class inputType;
     protected final Class outputType;
 
-    protected final Input input = new Input() {
+    public final Input input = new Input() {
         @Override
         public void set(Object value) {
             IoBlock.this.set(value);
@@ -56,7 +53,7 @@ public abstract class IoBlock extends StandardBlock {
         }
     };
 
-    protected final Output output = new Output() {
+    public final Output output = new Output() {
         @Override
         public Object get() {
             return IoBlock.this.get();
@@ -81,16 +78,6 @@ public abstract class IoBlock extends StandardBlock {
     public IoBlock(Class<?> inputType, Class<?> outputType) {
         this.inputType = inputType;
         this.outputType = outputType;
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Collections.singletonList(input);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(output);
     }
 
     protected abstract void set(Object value);

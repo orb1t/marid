@@ -27,12 +27,13 @@ import org.marid.bd.schema.SchemaFrameConfiguration;
 import org.marid.bd.schema.SchemaModel;
 import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
+import org.marid.dyn.MetaInfo;
 import org.marid.ide.components.BlockMenuProvider;
 import org.marid.ide.components.BlockPersister;
 import org.marid.ide.components.ProfileManager;
+import org.marid.ide.frames.MaridFrame;
 import org.marid.ide.profile.Profile;
 import org.marid.spring.annotation.PrototypeComponent;
-import org.marid.swing.AbstractFrame;
 import org.marid.swing.SwingUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -57,7 +58,8 @@ import static javax.swing.BorderFactory.*;
  * @author Dmitry Ovchinnikov
  */
 @PrototypeComponent
-public class SchemaFrame extends AbstractFrame implements SchemaFrameConfiguration {
+@MetaInfo(name = "Schema Editor")
+public class SchemaFrame extends MaridFrame implements SchemaFrameConfiguration {
 
     protected final ProfileManager profileManager;
     protected final BlockPersister persister;

@@ -19,18 +19,16 @@
 package org.marid.bd.blocks.expressions;
 
 import org.codehaus.groovy.ast.expr.*;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Ternary Expression", label = "?:")
+@BdBlock(name = "Ternary Expression", label = "?:", color = BlockColors.EXPRESSIONS_BLOCK_COLOR)
 @XmlRootElement
 public class TernaryBlock extends StandardBlock {
 
@@ -38,25 +36,15 @@ public class TernaryBlock extends StandardBlock {
     protected Expression trueExpr;
     protected Expression falseExpr;
 
-    protected final In expInput = new In("test", BooleanExpression.class, e -> expression = e);
-    protected final In trueInput = new In("+", Expression.class, e -> trueExpr = e);
-    protected final In falseInput = new In("-", Expression.class, e -> falseExpr = e);
-    protected final Out out = new Out("out", TernaryExpression.class, () -> new TernaryExpression(expression, trueExpr, falseExpr));
+    public final In expInput = new In("test", BooleanExpression.class, e -> expression = e);
+    public final In trueInput = new In("+", Expression.class, e -> trueExpr = e);
+    public final In falseInput = new In("-", Expression.class, e -> falseExpr = e);
+    public final Out out = new Out("out", TernaryExpression.class, () -> new TernaryExpression(expression, trueExpr, falseExpr));
 
     @Override
     public void reset() {
         expression = new BooleanExpression(ConstantExpression.TRUE);
         trueExpr = EmptyExpression.INSTANCE;
         falseExpr = EmptyExpression.INSTANCE;
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(expInput, trueInput, falseInput);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 }

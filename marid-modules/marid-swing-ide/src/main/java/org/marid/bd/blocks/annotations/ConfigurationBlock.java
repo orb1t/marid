@@ -21,41 +21,30 @@ package org.marid.bd.blocks.annotations;
 import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableMBeanExport;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Configuration", label = "@Configuration")
+@BdBlock(name = "Configuration", label = "@Configuration", color = BlockColors.ANNOTATIONS_BLOCK_COLOR)
 @XmlRootElement
 public class ConfigurationBlock extends StandardBlock {
 
     public static final ClassNode CONFIGURATION_CLASS = ClassHelper.make(Configuration.class);
     public static final ClassNode ENABLE_MBEAN_EXPORT_CLASS = ClassHelper.make(EnableMBeanExport.class);
 
-    private final Out out = new Out("node", AnnotationNode[].class, this::value);
+    public final Out out = new Out("node", AnnotationNode[].class, this::value);
 
     public AnnotationNode[] value() {
         return new AnnotationNode[] {
                 new AnnotationNode(CONFIGURATION_CLASS),
                 new AnnotationNode(ENABLE_MBEAN_EXPORT_CLASS)
         };
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 }

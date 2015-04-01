@@ -23,11 +23,11 @@ import org.codehaus.groovy.ast.stmt.CaseStatement;
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.SwitchStatement;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -36,7 +36,7 @@ import static java.util.Collections.emptyList;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Switch Statement", label = "switch")
+@BdBlock(name = "Switch Statement", label = "switch", color = BlockColors.STATEMENTS_BLOCK_COLOR)
 @XmlRootElement
 public class SwitchBlock extends StandardBlock {
 
@@ -44,10 +44,10 @@ public class SwitchBlock extends StandardBlock {
     protected Statement defStatement;
     protected Expression expression;
 
-    protected final Input expressionInput = new In("expr", Expression.class, e -> expression = e);
-    protected final Input caseInput = new In("cases", CaseStatement[].class, s -> caseStatements = s);
-    protected final Input defaultInput = new In("default", Statement.class, s -> defStatement = s);
-    protected final Output out = new Out("out", SwitchStatement.class, () -> {
+    public final Input expressionInput = new In("expr", Expression.class, e -> expression = e);
+    public final Input caseInput = new In("cases", CaseStatement[].class, s -> caseStatements = s);
+    public final Input defaultInput = new In("default", Statement.class, s -> defStatement = s);
+    public final Output out = new Out("out", SwitchStatement.class, () -> {
         final List<CaseStatement> caseStatementList = caseStatements == null ? emptyList() : asList(caseStatements);
         final Statement defaultStatement = defStatement == null ? EmptyStatement.INSTANCE : defStatement;
         return new SwitchStatement(expression, caseStatementList, defaultStatement);
@@ -58,15 +58,5 @@ public class SwitchBlock extends StandardBlock {
         caseStatements = null;
         defStatement = EmptyStatement.INSTANCE;
         expression = null;
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return asList(expressionInput, caseInput, defaultInput);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 }

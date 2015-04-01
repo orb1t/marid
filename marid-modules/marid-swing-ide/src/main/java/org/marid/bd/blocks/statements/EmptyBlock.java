@@ -19,33 +19,22 @@
 package org.marid.bd.blocks.statements;
 
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Empty Block", label = "{}")
+@BdBlock(name = "Empty Block", label = "{}", color = BlockColors.STATEMENTS_BLOCK_COLOR)
 @XmlRootElement
 public class EmptyBlock extends StandardBlock {
 
-    protected final Out out = new Out("out", EmptyStatement.class, () -> EmptyStatement.INSTANCE);
+    public final Out out = new Out("out", EmptyStatement.class, () -> EmptyStatement.INSTANCE);
 
     @Override
     public void reset() {
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 }

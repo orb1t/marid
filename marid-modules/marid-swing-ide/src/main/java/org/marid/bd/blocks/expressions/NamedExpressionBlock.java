@@ -19,6 +19,7 @@
 package org.marid.bd.blocks.expressions;
 
 import org.codehaus.groovy.ast.expr.Expression;
+import org.marid.bd.BlockColors;
 import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
@@ -34,7 +35,7 @@ import java.util.Objects;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Named Expression Block", label = "n.expr")
+@BdBlock(name = "Named Expression Block", label = "n.expr", color = BlockColors.EXPRESSIONS_BLOCK_COLOR)
 @XmlRootElement
 public class NamedExpressionBlock extends IoBlock implements ConfigurableBlock {
 

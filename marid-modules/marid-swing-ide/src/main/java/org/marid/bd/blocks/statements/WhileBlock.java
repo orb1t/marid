@@ -23,41 +23,29 @@ import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.WhileStatement;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "While Statement", label = "while")
+@BdBlock(name = "While Statement", label = "while", color = BlockColors.STATEMENTS_BLOCK_COLOR)
 @XmlRootElement
 public class WhileBlock extends StandardBlock {
 
     protected BooleanExpression expression;
     protected Statement body;
 
-    protected final In exprInput = new In("test", BooleanExpression.class, e -> expression = e);
-    protected final In bodyInput = new In("body", Statement.class, s -> body = s);
-    protected final Out out = new Out("out", WhileStatement.class, () -> new WhileStatement(expression, body));
+    public final In exprInput = new In("test", BooleanExpression.class, e -> expression = e);
+    public final In bodyInput = new In("body", Statement.class, s -> body = s);
+    public final Out out = new Out("out", WhileStatement.class, () -> new WhileStatement(expression, body));
 
     @Override
     public void reset() {
         expression = new BooleanExpression(ConstantExpression.PRIM_FALSE);
         body = EmptyStatement.INSTANCE;
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(exprInput, bodyInput);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 }

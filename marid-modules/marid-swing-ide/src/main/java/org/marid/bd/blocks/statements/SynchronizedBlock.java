@@ -22,41 +22,29 @@ import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.SynchronizedStatement;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Synchronized Statement", label = "sync")
+@BdBlock(name = "Synchronized Statement", label = "sync", color = BlockColors.STATEMENTS_BLOCK_COLOR)
 @XmlRootElement
 public class SynchronizedBlock extends StandardBlock {
 
     protected Expression expression;
     protected Statement statement;
 
-    protected final In exprInput = new In("mon", Expression.class, e -> expression = e);
-    protected final In stmtInput = new In("body", Statement.class, s -> statement = s);
-    protected final Out out = new Out("out", SynchronizedStatement.class, () -> new SynchronizedStatement(expression, statement));
+    public final In exprInput = new In("mon", Expression.class, e -> expression = e);
+    public final In stmtInput = new In("body", Statement.class, s -> statement = s);
+    public final Out out = new Out("out", SynchronizedStatement.class, () -> new SynchronizedStatement(expression, statement));
 
     @Override
     public void reset() {
         expression = null;
         statement = EmptyStatement.INSTANCE;
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(exprInput, stmtInput);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 }

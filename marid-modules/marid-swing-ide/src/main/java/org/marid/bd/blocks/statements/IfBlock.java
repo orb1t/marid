@@ -23,18 +23,16 @@ import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.IfStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "If Statement", label = "if")
+@BdBlock(name = "If Statement", label = "if", color = BlockColors.STATEMENTS_BLOCK_COLOR)
 @XmlRootElement
 public class IfBlock extends StandardBlock {
 
@@ -42,25 +40,15 @@ public class IfBlock extends StandardBlock {
     protected Statement statement;
     protected Statement elseStatement;
 
-    protected final In exprInput = new In("test", BooleanExpression.class, e -> expression = e);
-    protected final In statementInput = new In("+", Statement.class, s -> statement = s);
-    protected final In elseInput = new In("-", Statement.class, s -> elseStatement = s);
-    protected final Out output = new Out("out", IfStatement.class, () -> new IfStatement(expression, statement, elseStatement));
+    public final In exprInput = new In("test", BooleanExpression.class, e -> expression = e);
+    public final In statementInput = new In("+", Statement.class, s -> statement = s);
+    public final In elseInput = new In("-", Statement.class, s -> elseStatement = s);
+    public final Out output = new Out("out", IfStatement.class, () -> new IfStatement(expression, statement, elseStatement));
 
     @Override
     public void reset() {
         expression = new BooleanExpression(ConstantExpression.TRUE);
         statement = EmptyStatement.INSTANCE;
         elseStatement = EmptyStatement.INSTANCE;
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(exprInput, statementInput, elseInput);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(output);
     }
 }

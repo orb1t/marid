@@ -23,41 +23,29 @@ import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.expr.CastExpression;
 import org.codehaus.groovy.ast.expr.EmptyExpression;
 import org.codehaus.groovy.ast.expr.Expression;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Cast Expression", label = "(*)")
+@BdBlock(name = "Cast Expression", label = "(*)", color = BlockColors.EXPRESSIONS_BLOCK_COLOR)
 @XmlRootElement
 public class CastBlock extends StandardBlock {
 
     protected Expression expression;
     protected ClassNode classNode;
 
-    protected final In exprInput = new In("expr", Expression.class, e -> expression = e);
-    protected final In classInput = new In("class", ClassNode.class, true, c -> classNode = c);
-    protected final Out castExpr = new Out("out", CastExpression.class, () -> new CastExpression(classNode, expression));
+    public final In exprInput = new In("expr", Expression.class, e -> expression = e);
+    public final In classInput = new In("class", ClassNode.class, true, c -> classNode = c);
+    public final Out castExpr = new Out("out", CastExpression.class, () -> new CastExpression(classNode, expression));
 
     @Override
     public void reset() {
         expression = EmptyExpression.INSTANCE;
         classNode = ClassHelper.OBJECT_TYPE;
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(exprInput, classInput);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(castExpr);
     }
 }

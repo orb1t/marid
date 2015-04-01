@@ -21,32 +21,21 @@ package org.marid.bd.blocks.annotations;
 import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassHelper;
 import org.codehaus.groovy.ast.ClassNode;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 import org.springframework.context.annotation.Bean;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Bean", label = "@Bean")
+@BdBlock(name = "Bean", label = "@Bean", color = BlockColors.ANNOTATIONS_BLOCK_COLOR)
 @XmlRootElement
 public class BeanBlock extends StandardBlock {
 
     public static final ClassNode BEAN_CLASS = ClassHelper.make(Bean.class);
 
-    private final Out out = new Out("node", AnnotationNode.class, () -> new AnnotationNode(BEAN_CLASS));
-
-    @Override
-    public List<Input> getInputs() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
-    }
+    public final Out out = new Out("node", AnnotationNode.class, () -> new AnnotationNode(BEAN_CLASS));
 }

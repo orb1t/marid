@@ -157,6 +157,20 @@ public class SwingUtil {
         dispatchEvent((Component) event.getSource(), event);
     }
 
+    public static Color decodeColor(String color) {
+        if (color.startsWith("#")) {
+            return new Color(Integer.parseInt(color.substring(1), 16));
+        } else if (color.startsWith("@")) {
+            try {
+                return (Color) Color.class.getField(color.substring(1)).get(null);
+            } catch (ReflectiveOperationException x) {
+                throw new IllegalStateException(color, x);
+            }
+        } else {
+            return new Color(Integer.parseInt(color));
+        }
+    }
+
     @FunctionalInterface
     public static interface CoordinateTransformFunction {
 

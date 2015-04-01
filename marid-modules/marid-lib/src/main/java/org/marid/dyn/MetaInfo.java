@@ -39,4 +39,6 @@ public @interface MetaInfo {
     int color() default 0;
 
     int order() default 0;
+
+    String path() default "";
 }

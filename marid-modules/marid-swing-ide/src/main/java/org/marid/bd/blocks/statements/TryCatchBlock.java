@@ -22,18 +22,16 @@ import org.codehaus.groovy.ast.stmt.CatchStatement;
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
 import org.codehaus.groovy.ast.stmt.TryCatchStatement;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Try/Catch Block", label = "try/catch")
+@BdBlock(name = "Try/Catch Block", label = "try/catch", color = BlockColors.STATEMENTS_BLOCK_COLOR)
 @XmlRootElement
 public class TryCatchBlock extends StandardBlock {
 
@@ -41,9 +39,9 @@ public class TryCatchBlock extends StandardBlock {
     protected Statement finallyStatement;
     protected CatchStatement[] catchStatements;
 
-    protected final In tryInput = new In("try", Statement.class, s -> tryStatement = s);
-    protected final In catchInput = new In("catch", CatchStatement[].class, s -> catchStatements = s);
-    protected final In finallyInput = new In("finally", Statement.class, s -> finallyStatement = s);
+    public final In tryInput = new In("try", Statement.class, s -> tryStatement = s);
+    public final In catchInput = new In("catch", CatchStatement[].class, s -> catchStatements = s);
+    public final In finallyInput = new In("finally", Statement.class, s -> finallyStatement = s);
 
     protected final Out out = new Out("out", TryCatchStatement.class, () -> {
         final TryCatchStatement statement = new TryCatchStatement(tryStatement, finallyStatement);
@@ -58,15 +56,5 @@ public class TryCatchBlock extends StandardBlock {
         tryStatement = EmptyStatement.INSTANCE;
         finallyStatement = EmptyStatement.INSTANCE;
         catchStatements = new CatchStatement[0];
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(tryInput, catchInput, finallyInput);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 }

@@ -20,6 +20,7 @@ package org.marid.bd.blocks.expressions;
 
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.expr.VariableExpression;
+import org.marid.bd.BlockColors;
 import org.marid.bd.IoBlock;
 import org.marid.bd.blocks.BdBlock;
 
@@ -29,7 +30,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Variable Expression", label = "var")
+@BdBlock(name = "Variable Expression", label = "var", color = BlockColors.EXPRESSIONS_BLOCK_COLOR)
 @XmlRootElement
 public class VariableBlock extends IoBlock {
 

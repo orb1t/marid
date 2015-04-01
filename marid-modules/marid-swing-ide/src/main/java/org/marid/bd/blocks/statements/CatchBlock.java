@@ -23,41 +23,29 @@ import org.codehaus.groovy.ast.Parameter;
 import org.codehaus.groovy.ast.stmt.CatchStatement;
 import org.codehaus.groovy.ast.stmt.EmptyStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
+import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Catch Block", label = "catch")
+@BdBlock(name = "Catch Block", label = "catch", color = BlockColors.STATEMENTS_BLOCK_COLOR)
 @XmlRootElement
 public class CatchBlock extends StandardBlock {
 
     protected Parameter variable;
     protected Statement body;
 
-    protected final In variableInput = new In("var", Parameter.class, p -> variable = p);
-    protected final In bodyInput = new In("body", Statement.class, s -> body = s);
-    protected final Out out = new Out("out", CatchStatement.class, () -> new CatchStatement(variable, body));
+    public final In variableInput = new In("var", Parameter.class, p -> variable = p);
+    public final In bodyInput = new In("body", Statement.class, s -> body = s);
+    public final Out out = new Out("out", CatchStatement.class, () -> new CatchStatement(variable, body));
 
     @Override
     public void reset() {
         variable = new Parameter(ClassHelper.makeCached(Exception.class), "x");
         body = EmptyStatement.INSTANCE;
-    }
-
-    @Override
-    public List<Input> getInputs() {
-        return Arrays.asList(variableInput, bodyInput);
-    }
-
-    @Override
-    public List<Output> getOutputs() {
-        return Collections.singletonList(out);
     }
 }
