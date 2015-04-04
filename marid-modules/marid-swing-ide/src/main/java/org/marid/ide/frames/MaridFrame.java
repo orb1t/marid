@@ -18,26 +18,16 @@
 
 package org.marid.ide.frames;
 
-import org.marid.Marid;
 import org.marid.dyn.MetaInfo;
 import org.marid.swing.AbstractFrame;
-import org.marid.swing.listeners.MaridWindowListener;
-
-import java.awt.event.WindowEvent;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 @MetaInfo
-public abstract class MaridFrame extends AbstractFrame implements MaridWindowListener {
+public abstract class MaridFrame extends AbstractFrame {
 
     public MaridFrame(String title, Object... args) {
-        super(LS.s(title, args));
-        addWindowListener(this);
-    }
-
-    @Override
-    public void windowClosing(WindowEvent e) {
-        Marid.getCurrentContext().getAutowireCapableBeanFactory().destroyBean(this);
+        super(title, args);
     }
 }

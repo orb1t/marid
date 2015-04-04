@@ -70,12 +70,12 @@ public class SchemaFrame extends MaridFrame implements SchemaFrameConfiguration 
     protected File file;
 
     @Autowired
-    public SchemaFrame(BlockMenuProvider blockMenuProvider, ProfileManager profileManager, BlockPersister persister) {
+    public SchemaFrame(BlockMenuProvider blockMenuProvider, ProfileManager profileManager, BlockPersister persister, SchemaEditor schemaEditor) {
         super("Schema");
         this.profileManager = profileManager;
         this.persister = persister;
         enableEvents(AWTEvent.COMPONENT_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
-        centerPanel.add(layer = new JLayer<>(schemaEditor = new SchemaEditor(), new SchemaLayerUI()));
+        centerPanel.add(layer = new JLayer<>(this.schemaEditor = schemaEditor, new SchemaLayerUI()));
         getContentPane().setBackground(getBackground());
         getJMenuBar().add(blocksMenu);
         blockMenuProvider.fillMenu(blocksMenu);

@@ -49,7 +49,7 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
             if (bean instanceof Window && bean.getClass().isAnnotationPresent(PrototypeComponent.class)) {
                 final Window window = (Window) bean;
                 window.addWindowListener(new WindowAction(e -> {
-                    if (e.getID() == WindowEvent.WINDOW_CLOSED) {
+                    if (e.getID() == WindowEvent.WINDOW_CLOSING) {
                         destroyGraphicals(window);
                         autowireCapableBeanFactory.destroyBean(bean);
                     }

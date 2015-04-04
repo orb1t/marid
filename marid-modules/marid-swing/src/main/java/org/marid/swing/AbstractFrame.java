@@ -47,8 +47,8 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
     protected final JPanel centerPanel = new JPanel(new BorderLayout());
     protected final JToolBar toolBar = new JToolBar(getPref("orientation", HORIZONTAL, "toolbar"));
 
-    public AbstractFrame(String title) {
-        super(LS.s(title), WindowPrefs.graphicsConfiguration(title));
+    public AbstractFrame(String title, Object... args) {
+        super(LS.s(title, args), WindowPrefs.graphicsConfiguration(title));
         setName(title);
         setJMenuBar(new JMenuBar());
         setUndecorated(getPref("undecorated", getSysPref("undecorated", false, "windows")));

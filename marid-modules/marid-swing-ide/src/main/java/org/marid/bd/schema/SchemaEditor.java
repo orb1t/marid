@@ -28,6 +28,7 @@ import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
 import org.marid.concurrent.MaridTimerTask;
 import org.marid.ide.frames.schema.SchemaFrame;
+import org.marid.spring.annotation.PrototypeComponent;
 import org.marid.swing.InputMaskType;
 import org.marid.swing.SwingUtil;
 import org.marid.swing.dnd.DndSource;
@@ -72,6 +73,7 @@ import static org.marid.swing.geom.ShapeUtils.ptAdd;
 /**
  * @author Dmitry Ovchinnikov
  */
+@PrototypeComponent
 public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSource<Block>, SchemaFrameConfiguration {
 
     protected final AffineTransform transform = new AffineTransform();
