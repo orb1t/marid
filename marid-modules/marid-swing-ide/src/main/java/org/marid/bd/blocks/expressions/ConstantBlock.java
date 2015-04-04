@@ -129,7 +129,6 @@ public class ConstantBlock extends Block implements NamedBlock, ConfigurableBloc
             tabPane("Common").addLine("Value", valueCombo = new JComboBox<>(getExpressions()));
             valueCombo.setEditable(true);
             valueCombo.setSelectedItem(block.getValue());
-            afterInit();
         }
 
         @Override

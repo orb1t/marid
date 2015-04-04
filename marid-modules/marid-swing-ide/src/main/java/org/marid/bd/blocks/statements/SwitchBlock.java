@@ -44,10 +44,10 @@ public class SwitchBlock extends StandardBlock {
     protected Statement defStatement;
     protected Expression expression;
 
-    public final Input expressionInput = new In("expr", Expression.class, e -> expression = e);
-    public final Input caseInput = new In("cases", CaseStatement[].class, s -> caseStatements = s);
-    public final Input defaultInput = new In("default", Statement.class, s -> defStatement = s);
-    public final Output out = new Out("out", SwitchStatement.class, () -> {
+    public final In expressionInput = new In("expr", Expression.class, e -> expression = e);
+    public final In caseInput = new In("cases", CaseStatement[].class, s -> caseStatements = s);
+    public final In defaultInput = new In("default", Statement.class, s -> defStatement = s);
+    public final Out out = new Out("out", SwitchStatement.class, () -> {
         final List<CaseStatement> caseStatementList = caseStatements == null ? emptyList() : asList(caseStatements);
         final Statement defaultStatement = defStatement == null ? EmptyStatement.INSTANCE : defStatement;
         return new SwitchStatement(expression, caseStatementList, defaultStatement);

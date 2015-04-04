@@ -29,9 +29,6 @@ import java.awt.*;
  */
 public abstract class LinkShape {
 
-    public static final BasicStroke NORMAL = new BasicStroke(1.0f);
-    public static final BasicStroke VECTOR = new BasicStroke(2.0f);
-
     public final BlockComponent.Output output;
     public final BlockComponent.Input input;
 
@@ -47,11 +44,8 @@ public abstract class LinkShape {
     }
 
     public void paint(Graphics2D g, boolean isCurrent) {
-        final Stroke oldStroke = g.getStroke();
-        g.setStroke(getStroke());
         g.setColor(isCurrent ? SystemColor.activeCaption : getColor());
         paint(g);
-        g.setStroke(oldStroke);
     }
 
     public abstract Shape getShape();
@@ -79,10 +73,6 @@ public abstract class LinkShape {
         } else {
             return SystemColor.RED;
         }
-    }
-
-    public Stroke getStroke() {
-        return getOutputType().isArray() ? VECTOR : NORMAL;
     }
 
     public Class<?> getOutputType() {

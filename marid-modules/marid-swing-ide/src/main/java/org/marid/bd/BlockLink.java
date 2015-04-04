@@ -56,7 +56,7 @@ public class BlockLink {
         this.input = input;
     }
 
-    public BlockLink(Block.Output output, Block.Input input) {
+    public BlockLink(Block.Out output, Block.In input) {
         this(output.getBlock(), input.getBlock(), output.getName(), input.getName());
     }
 
@@ -64,23 +64,23 @@ public class BlockLink {
         this(null, null, null, null);
     }
 
-    public boolean matchesOutput(Block.Output output) {
+    public boolean matchesOutput(Block.Out output) {
         return output.getBlock() == source && output.getName().equals(this.output);
     }
 
-    public boolean matchesInput(Block.Input input) {
+    public boolean matchesInput(Block.In input) {
         return input.getBlock() == target && input.getName().equals(this.input);
     }
 
-    public boolean matches(Block.Output output, Block.Input input) {
+    public boolean matches(Block.Out output, Block.In input) {
         return matchesOutput(output) && matchesInput(input);
     }
 
-    public Block.Output getBlockOutput() {
+    public Block.Out getBlockOutput() {
         return source.getOutputs().stream().filter(o -> o.getName().equals(output)).findFirst().get();
     }
 
-    public Block.Input getBlockInput() {
+    public Block.In getBlockInput() {
         return target.getInputs().stream().filter(i -> i.getName().equals(input)).findFirst().get();
     }
 

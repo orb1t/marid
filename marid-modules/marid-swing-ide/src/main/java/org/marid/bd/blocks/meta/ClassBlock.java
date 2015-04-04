@@ -73,7 +73,6 @@ public class ClassBlock extends StandardBlock implements ConfigurableBlock {
         return new AbstractBlockComponentEditor<ClassBlock>(parent, this) {
             {
                 tabPane("Common").addLine("Class name", classInputControl);
-                afterInit();
             }
 
             @Override

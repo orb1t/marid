@@ -92,7 +92,6 @@ public class ScriptStatementBlock extends StandardBlock implements NamedBlock, C
         return new AbstractBlockComponentEditor<ScriptStatementBlock>(parent, this) {
             {
                 tabPane("Script").addLine("Script", textEditor, 1.0);
-                afterInit();
             }
 
             @Override

@@ -56,7 +56,7 @@ public class SchemaEditorPopupMenu extends JPopupMenu implements MessageSupport 
     }
 
     private void dropBlock(ActionEvent event) {
-        getInvoker().dropBlock(block, dropPoint);
+        getInvoker().dropBlock(block, dropPoint, TransferHandler.COPY);
     }
 
     private Block clipboardBlock() {

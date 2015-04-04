@@ -64,10 +64,10 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
 
     protected class DefaultInput extends ArrowButton implements Input {
 
-        protected final Block.Input input;
+        protected final Block.In input;
         protected final JLabel label;
 
-        public DefaultInput(Block.Input input) {
+        public DefaultInput(Block.In input) {
             super(input.getName(), SwingConstants.WEST);
             label = new JLabel(getName());
             final Font font = UIManager.getFont("Label.font");
@@ -95,7 +95,7 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
         }
 
         @Override
-        public Block.Input getInput() {
+        public Block.In getInput() {
             return input;
         }
 
@@ -121,10 +121,10 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
 
     protected class DefaultOutput extends ArrowButton implements Output {
 
-        protected final Block.Output output;
+        protected final Block.Out output;
         protected final JLabel label;
 
-        public DefaultOutput(Block.Output output) {
+        public DefaultOutput(Block.Out output) {
             super(output.getName(), SwingConstants.EAST);
             this.label = new JLabel(getName());
             this.output = output;
@@ -137,7 +137,7 @@ public abstract class DefaultBlockComponent<B extends Block> extends JPanel impl
         }
 
         @Override
-        public Block.Output getOutput() {
+        public Block.Out getOutput() {
             return output;
         }
 

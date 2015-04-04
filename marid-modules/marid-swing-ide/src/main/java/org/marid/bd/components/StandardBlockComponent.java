@@ -138,7 +138,7 @@ public class StandardBlockComponent<B extends Block> extends DefaultBlockCompone
         h.addGroup(hi).addGroup(hl);
         h.addGap(ARROW_SIZE);
         final Map<DefaultInput, JLabel> map = new LinkedHashMap<>();
-        for (final Block.Input in : block.getInputs()) {
+        for (final Block.In in : block.getInputs()) {
             final DefaultInput input = new DefaultInput(in);
             inputs.add(input);
             map.put(input, input.getAssociatedLabel());
@@ -172,7 +172,7 @@ public class StandardBlockComponent<B extends Block> extends DefaultBlockCompone
         h.addGap(ARROW_SIZE);
         h.addGroup(hl).addGroup(ho);
         final Map<JLabel, DefaultOutput> map = new LinkedHashMap<>();
-        for (final Block.Output out : block.getOutputs()) {
+        for (final Block.Out out : block.getOutputs()) {
             final DefaultOutput output = new DefaultOutput(out);
             outputs.add(output);
             map.put(output.getAssociatedLabel(), output);

@@ -31,6 +31,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
@@ -70,12 +71,15 @@ public abstract class Block implements Named, Serializable, LogSupport {
         listeners.stream().filter(t::isInstance).map(t::cast).forEach(consumer);
     }
 
-    public List<Input> getInputs() {
-        final List<Input> list = new ArrayList<>();
+    public List<In> getInputs() {
+        final List<In> list = new ArrayList<>();
         for (final Field field : getClass().getFields()) {
-            if (Input.class.isAssignableFrom(field.getType())) {
+            if (Modifier.isTransient(field.getModifiers())) {
+                continue;
+            }
+            if (In.class.isAssignableFrom(field.getType())) {
                 try {
-                    list.add((Input) field.get(this));
+                    list.add((In) field.get(this));
                 } catch (ReflectiveOperationException x) {
                     throw new IllegalStateException(x);
                 }
@@ -84,12 +88,15 @@ public abstract class Block implements Named, Serializable, LogSupport {
         return list.isEmpty() ? Collections.emptyList() : list;
     }
 
-    public List<Output> getOutputs() {
-        final List<Output> list = new ArrayList<>();
+    public List<Out> getOutputs() {
+        final List<Out> list = new ArrayList<>();
         for (final Field field : getClass().getFields()) {
-            if (Output.class.isAssignableFrom(field.getType())) {
+            if (Modifier.isTransient(field.getModifiers())) {
+                continue;
+            }
+            if (Out.class.isAssignableFrom(field.getType())) {
                 try {
-                    list.add((Output) field.get(this));
+                    list.add((Out) field.get(this));
                 } catch (ReflectiveOperationException x) {
                     throw new IllegalStateException(x);
                 }
@@ -98,7 +105,7 @@ public abstract class Block implements Named, Serializable, LogSupport {
         return list.isEmpty() ? Collections.emptyList() : list;
     }
 
-    public List<Output> getExports() {
+    public List<Out> getExports() {
         return Collections.emptyList();
     }
 
@@ -184,27 +191,7 @@ public abstract class Block implements Named, Serializable, LogSupport {
         }
     }
 
-    public interface Input extends Named {
-
-        void set(Object value);
-
-        Class<?> getInputType();
-
-        Block getBlock();
-
-        boolean isRequired();
-    }
-
-    public interface Output extends Named {
-
-        Object get();
-
-        Class<?> getOutputType();
-
-        Block getBlock();
-    }
-
-    public class In implements Input {
+    public class In {
 
         private final String name;
         private final Class<?> type;
@@ -222,34 +209,28 @@ public abstract class Block implements Named, Serializable, LogSupport {
             this(name, type, false, consumer);
         }
 
-        @Override
         public boolean isRequired() {
             return required;
         }
 
-        @Override
         public String getName() {
             return name;
         }
 
-        @Override
         public Class<?> getInputType() {
             return type;
         }
 
-        @SuppressWarnings("unchecked")
-        @Override
         public void set(Object value) {
-            ((Consumer) consumer).accept(value);
+            Utils.<Consumer<Object>>cast(consumer).accept(value);
         }
 
-        @Override
         public Block getBlock() {
             return Block.this;
         }
     }
 
-    public class Out implements Output {
+    public class Out {
 
         private final String name;
         private final Class<?> type;
@@ -261,7 +242,6 @@ public abstract class Block implements Named, Serializable, LogSupport {
             this.supplier = supplier;
         }
 
-        @Override
         public String getName() {
             return name;
         }
@@ -270,12 +250,10 @@ public abstract class Block implements Named, Serializable, LogSupport {
             return type;
         }
 
-        @Override
         public Block getBlock() {
             return Block.this;
         }
 
-        @Override
         public Object get() {
             return supplier.get();
         }

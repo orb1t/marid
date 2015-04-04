@@ -18,66 +18,24 @@
 
 package org.marid.bd;
 
+import org.marid.util.Utils;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public abstract class IoBlock extends StandardBlock {
 
-    protected final Class inputType;
-    protected final Class outputType;
+    protected final Class<?> inputType;
+    protected final Class<?> outputType;
 
-    public final Input input = new Input() {
-        @Override
-        public void set(Object value) {
-            IoBlock.this.set(value);
-        }
-
-        @Override
-        public Class<?> getInputType() {
-            return inputType;
-        }
-
-        @Override
-        public Block getBlock() {
-            return IoBlock.this;
-        }
-
-        @Override
-        public boolean isRequired() {
-            return true;
-        }
-
-        @Override
-        public String getName() {
-            return "in";
-        }
-    };
-
-    public final Output output = new Output() {
-        @Override
-        public Object get() {
-            return IoBlock.this.get();
-        }
-
-        @Override
-        public Class<?> getOutputType() {
-            return outputType;
-        }
-
-        @Override
-        public Block getBlock() {
-            return IoBlock.this;
-        }
-
-        @Override
-        public String getName() {
-            return "out";
-        }
-    };
+    public final In input;
+    public final Out output;
 
     public IoBlock(Class<?> inputType, Class<?> outputType) {
         this.inputType = inputType;
         this.outputType = outputType;
+        this.input = new In("in", inputType, true, this::set);
+        this.output = new Out("out", Utils.cast(outputType), this::get);
     }
 
     protected abstract void set(Object value);

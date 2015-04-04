@@ -95,7 +95,6 @@ public class MethodBlock extends StandardBlock implements ConfigurableBlock {
         return new AbstractBlockComponentEditor<MethodBlock>(parent, this) {
             {
                 tabPane("Common").addLine("Method name", methodNameField);
-                afterInit();
             }
 
             @Override

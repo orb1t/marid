@@ -75,7 +75,7 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
     }
 
     @Override
-    public List<Output> getExports() {
+    public List<Out> getExports() {
         return Collections.singletonList(export);
     }
 
@@ -124,7 +124,6 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
                 nameCtl.setInputValue(className);
             }
             tabPane("Common").addLine("Class name", nameCtl);
-            afterInit();
         }
 
         @Override
@@ -170,12 +169,12 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
         }
 
         @Override
-        public List<Input> getInputs() {
+        public List<In> getInputs() {
             return Collections.emptyList();
         }
 
         @Override
-        public List<Output> getOutputs() {
+        public List<Out> getOutputs() {
             return Collections.singletonList(out);
         }
     }

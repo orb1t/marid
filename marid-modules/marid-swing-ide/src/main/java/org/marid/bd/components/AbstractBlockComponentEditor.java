@@ -25,6 +25,7 @@ import org.marid.pref.PrefSupport;
 import org.marid.swing.GridBags;
 import org.marid.swing.actions.MaridAction;
 
+import javax.annotation.PostConstruct;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -52,6 +53,7 @@ public class AbstractBlockComponentEditor<B extends Block> extends JDialog imple
         add(tabbedPane);
     }
 
+    @PostConstruct
     protected void afterInit() {
         tabPaneMap.values().forEach(TabPane::finish);
         final JPanel buttonPanel = new JPanel(new BorderLayout());

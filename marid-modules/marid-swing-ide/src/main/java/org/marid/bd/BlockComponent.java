@@ -18,6 +18,7 @@
 
 package org.marid.bd;
 
+import org.marid.Marid;
 import org.marid.bd.schema.SchemaEditor;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.WindowAction;
@@ -94,6 +95,8 @@ public interface BlockComponent {
             final ConfigurableBlock b = (ConfigurableBlock) getBlock();
             popupMenu.add(new MaridAction("Settings", "settings", e -> {
                 final Window window = b.createWindow(SwingUtilities.windowForComponent(getSchemaEditor()));
+                Marid.getCurrentContext().getAutowireCapableBeanFactory().autowireBean(window);
+                Marid.getCurrentContext().getAutowireCapableBeanFactory().initializeBean(window, null);
                 window.addWindowListener(new WindowAction(we -> {
                     switch (we.getID()) {
                         case WindowEvent.WINDOW_CLOSED:
@@ -138,7 +141,7 @@ public interface BlockComponent {
 
     interface Input extends Port {
 
-        Block.Input getInput();
+        Block.In getInput();
 
         @Override
         default Point getConnectionPoint() {
@@ -150,7 +153,7 @@ public interface BlockComponent {
 
     interface Output extends Port {
 
-        Block.Output getOutput();
+        Block.Out getOutput();
 
         @Override
         default Point getConnectionPoint() {

@@ -135,7 +135,6 @@ public class BinExpBlock extends StandardBlock implements ConfigurableBlock {
                     return label;
                 }
             });
-            afterInit();
         }
 
         @Override

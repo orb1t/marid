@@ -508,11 +508,14 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
 
     @Override
     public boolean dropDndObject(Block object, TransferHandler.TransferSupport support) {
-        return dropBlock(object, support.getDropLocation().getDropPoint());
+        return dropBlock(object, support.getDropLocation().getDropPoint(), support.getDropAction());
     }
 
-    public boolean dropBlock(Block object, Point dropPoint) {
+    public boolean dropBlock(Block object, Point dropPoint, int action) {
         try {
+            if (object instanceof SingletonBlock && action == TransferHandler.LINK) {
+                object = ((SingletonBlock) object).blockPort();
+            }
             transform.inverseTransform(new Point(dropPoint), dropPoint);
             final BlockComponent blockComponent = object.createComponent();
             blockComponent.setBounds(new Rectangle(dropPoint, blockComponent.getPreferredSize()));
@@ -528,12 +531,12 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
 
     @Override
     public int getDndActions() {
-        return DND_COPY;
+        return DND_COPY | DND_LINK | DND_MOVE;
     }
 
     @Override
     public Block getDndObject() {
-        return selectedBlock instanceof SingletonBlock ? ((SingletonBlock) selectedBlock).blockPort() : selectedBlock;
+        return selectedBlock;
     }
 
     @Override

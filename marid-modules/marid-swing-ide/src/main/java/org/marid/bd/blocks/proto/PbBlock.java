@@ -21,6 +21,7 @@ package org.marid.bd.blocks.proto;
 import groovyjarjarasm.asm.Opcodes;
 import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassNode;
+import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.marid.bd.BlockColors;
 import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.StandardBlock;
@@ -44,14 +45,17 @@ import static org.codehaus.groovy.ast.ClassHelper.makeCached;
 public class PbBlock extends StandardBlock implements ConfigurableBlock {
 
     protected String className;
-    protected AnnotationNode[] annotationNodes = new AnnotationNode[0];
+    protected String beanName;
 
-    public final In annotations = new In("annotations", AnnotationNode[].class, v -> annotationNodes = v);
-    public final Out out = new Out("service", ClassNode.class, this::output);
+    public final Out serviceOut = new Out("service", ClassNode.class, this::output);
 
     protected ClassNode output() {
         final ClassNode classNode = new ClassNode(className, Opcodes.ACC_PUBLIC, makeCached(PbService.class));
-        classNode.addAnnotation(new AnnotationNode(makeCached(Service.class)));
+        final AnnotationNode serviceNode = new AnnotationNode(makeCached(Service.class));
+        if (!beanName.isEmpty()) {
+            serviceNode.addMember("value", new ConstantExpression(beanName));
+        }
+        classNode.addAnnotation(serviceNode);
         return classNode;
     }
 
@@ -67,18 +71,38 @@ public class PbBlock extends StandardBlock implements ConfigurableBlock {
         }
     }
 
+    @XmlAttribute
+    public String getBeanName() {
+        return beanName;
+    }
+
+    public void setBeanName(String beanName) {
+        if (!Objects.equals(beanName, this.beanName)) {
+            this.beanName = beanName;
+            fireEvent(PbBlockListener.class, l -> l.beanNameChanged(beanName));
+        }
+    }
+
     @Override
-    public Window createWindow(Window parent) {
-        return null;
+    public String getLabel() {
+        return beanName;
+    }
+
+    @Override
+    public PbBlockEditor createWindow(Window parent) {
+        return new PbBlockEditor(parent, this);
     }
 
     @Override
     public void reset() {
-        annotationNodes = new AnnotationNode[0];
+        className = "PBService";
+        beanName = "pbService";
     }
 
     public interface PbBlockListener extends EventListener {
 
         void classNameChanged(String className);
+
+        void beanNameChanged(String beanName);
     }
 }
