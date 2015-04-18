@@ -19,9 +19,16 @@
 package org.marid.bd.blocks.meta;
 
 import org.codehaus.groovy.ast.*;
-import org.marid.bd.*;
+import org.marid.Marid;
+import org.marid.bd.BlockColors;
+import org.marid.bd.ClassNodeBuildTrigger;
+import org.marid.bd.ConfigurableBlock;
+import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
+import org.marid.bd.common.ClassLinkBlock;
+import org.marid.bd.common.DndMenuItem;
 import org.marid.bd.components.AbstractBlockComponentEditor;
+import org.marid.bd.components.StandardBlockComponent;
 import org.marid.swing.input.StringInputControl;
 
 import javax.swing.*;
@@ -40,8 +47,8 @@ import static groovyjarjarasm.asm.Opcodes.ACC_PUBLIC;
  */
 @BdBlock(name = "User Class", label = "class", color = BlockColors.ANNOTATIONS_BLOCK_COLOR)
 @XmlRootElement
-@XmlSeeAlso({UserClassBlock.LinkedClassBlock.class})
-public class UserClassBlock extends StandardBlock implements ConfigurableBlock, SingletonBlock {
+@XmlSeeAlso({ClassLinkBlock.class})
+public class UserClassBlock extends StandardBlock implements ConfigurableBlock, ClassNodeBuildTrigger {
 
     @XmlAttribute
     protected String className = "UserClass";
@@ -54,6 +61,8 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
     protected AnnotationNode[] annotations;
     protected ConstructorNode[] constructors;
 
+    protected ClassNode classNode;
+
     public final In interfacesInput = new In("interfaces", ClassNode[].class, v -> interfaces = v);
     public final In mixinsInput = new In("mixins", MixinNode[].class, v -> mixins = v);
     public final In superClassInput = new In("super", ClassNode.class, v -> superClass = v);
@@ -61,7 +70,7 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
     public final In fieldsInput = new In("fields", FieldNode[].class, v -> fields = v);
     public final In annotationsInput = new In("annotations", AnnotationNode[].class, v -> annotations = v);
     public final In constructorsInput = new In("constructors", ConstructorNode[].class, v -> constructors = v);
-    public final Out export = new Out("class", ClassNode.class, this::classNode);
+    public final Out out = new Out("class", ClassNode.class, this::classNode);
 
     @Override
     public void reset() {
@@ -72,11 +81,7 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
         fields = new FieldNode[0];
         annotations = new AnnotationNode[0];
         constructors = new ConstructorNode[0];
-    }
-
-    @Override
-    public List<Out> getExports() {
-        return Collections.singletonList(export);
+        classNode = null;
     }
 
     @Override
@@ -96,7 +101,7 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
     }
 
     protected ClassNode classNode() {
-        final ClassNode classNode = new ClassNode(className, ACC_PUBLIC, superClass, interfaces, mixins);
+        classNode = new ClassNode(className, ACC_PUBLIC, superClass, interfaces, mixins);
         classNode.addAnnotations(Arrays.asList(annotations));
         Arrays.asList(fields).forEach(classNode::addField);
         Arrays.asList(methods).forEach(classNode::addMethod);
@@ -110,8 +115,21 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
     }
 
     @Override
-    public Block blockPort() {
-        return className == null ? null : new LinkedClassBlock(className);
+    public StandardBlockComponent<? extends StandardBlock> createComponent() {
+        return super.createComponent().addMenuConfigurer(m -> {
+            m.addSeparator();
+            m.add(new DndMenuItem(ClassLinkBlock.getMenuIcon(), "Class link", () -> {
+                final ClassLinkBlock classLinkBlock = new ClassLinkBlock(className);
+                Marid.getCurrentContext().getAutowireCapableBeanFactory().autowireBean(classLinkBlock);
+                Marid.getCurrentContext().getAutowireCapableBeanFactory().initializeBean(classLinkBlock, null);
+                return classLinkBlock;
+            }));
+        });
+    }
+
+    @Override
+    public List<ClassNode> getClassNodes() {
+        return Collections.singletonList(classNode);
     }
 
     private class UserClassBlockConfigurer extends AbstractBlockComponentEditor<UserClassBlock> {
@@ -135,47 +153,5 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
     interface ClassNameListener extends EventListener {
 
         void onChange(String className);
-    }
-
-    @XmlRootElement
-    public static class LinkedClassBlock extends StandardBlock {
-
-        @XmlAttribute
-        private final String className;
-
-        private final Out out;
-
-        public LinkedClassBlock(String className) {
-            this.className = className;
-            this.out = new Out("class", ClassNode.class, () -> ClassHelper.make(className));
-        }
-
-        public LinkedClassBlock() {
-            this(null);
-        }
-
-        @Override
-        protected Color color() {
-            return new Color(BlockColors.META_BLOCK_COLOR);
-        }
-
-        @Override
-        public String getLabel() {
-            return getClassName();
-        }
-
-        public String getClassName() {
-            return className;
-        }
-
-        @Override
-        public List<In> getInputs() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public List<Out> getOutputs() {
-            return Collections.singletonList(out);
-        }
     }
 }

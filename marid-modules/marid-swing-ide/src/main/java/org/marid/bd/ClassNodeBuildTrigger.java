@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,20 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide;
+package org.marid.bd;
 
-import org.marid.bd.schema.SchemaFrameConfiguration;
-import org.marid.swing.forms.Configuration;
-import org.marid.swing.forms.ConfigurationProvider;
+import org.codehaus.groovy.ast.ClassNode;
+import org.marid.Marid;
+import org.marid.ide.components.ProfileManager;
+import org.marid.logging.LogSupport;
 
-import java.util.function.Consumer;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DefaultConfigurationProvider implements ConfigurationProvider {
+public interface ClassNodeBuildTrigger extends BuildTrigger, LogSupport {
+
+    List<ClassNode> getClassNodes();
+
     @Override
-    public void visitConfigurationClasses(Consumer<Class<? extends Configuration>> consumer) {
-        consumer.accept(SchemaFrameConfiguration.class);
+    default void afterBuild() {
+        final ProfileManager profileManager = Marid.getCurrentContext().getBean(ProfileManager.class);
+        getClassNodes().stream().filter(n -> n != null).forEach(n -> {
+            try {
+                ClassHelper.saveClassNode(profileManager.getCurrentProfile().getClassesPath(), n);
+            } catch (Exception x) {
+                warning("Unable to save {0}", x, n.getName());
+            }
+        });
     }
 }

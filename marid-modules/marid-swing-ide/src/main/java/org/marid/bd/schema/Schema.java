@@ -18,20 +18,16 @@
 
 package org.marid.bd.schema;
 
-import org.codehaus.groovy.ast.ClassNode;
 import org.marid.bd.Block;
 import org.marid.bd.BlockLink;
 import org.marid.itf.Named;
 
 import javax.xml.bind.annotation.*;
 import java.rmi.server.UID;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import static org.marid.util.CollectionUtils.getArrayFunction;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -92,23 +88,44 @@ public class Schema implements Named {
         return name;
     }
 
-    public List<ClassNode> toCode() {
-        getBlocks().forEach(Block::reset);
-        final Predicate<Block> filter = b -> b.getOutputs().isEmpty() && !b.getExports().isEmpty();
-        final Set<Block> blocks = getBlocks().stream().filter(b -> !filter.test(b)).collect(toSet());
-        final Set<Block> terminalBlocks = getBlocks().stream().filter(filter).collect(toSet());
-        terminalBlocks.forEach(b -> pass(blocks, b));
-        return terminalBlocks.stream()
-                .flatMap(b -> b.getExports().stream().filter(o -> o.getOutputType() == ClassNode.class))
-                .map(o -> (ClassNode) o.get())
-                .collect(toList());
+    private boolean noOutputs(Block block) {
+        return block.getOutputs().isEmpty() || getLinks().stream().noneMatch(l -> l.getSource() == block);
     }
 
-    void pass(Set<Block> blocks, Block block) {
-        final Set<BlockLink> links = getLinks().stream().filter(l -> l.getTarget() == block).collect(toSet());
-        final Set<Block> sources = links.stream().map(BlockLink::getSource).collect(toSet());
-        final Set<Block> rest = blocks.stream().filter(b -> !sources.contains(b)).collect(toSet());
-        sources.forEach(b -> pass(rest, b));
-        block.transfer(links);
+    private boolean noInputs(Block block) {
+        return block.getInputs().isEmpty() || getLinks().stream().noneMatch(l -> l.getTarget() == block);
+    }
+
+    public void build() {
+        final Set<Block> blocks = Collections.newSetFromMap(new IdentityHashMap<>(getBlocks().size()));
+        blocks.addAll(getBlocks());
+        final Set<Block> passed = Collections.newSetFromMap(new IdentityHashMap<>(blocks.size()));
+        blocks.stream().filter(this::noOutputs).forEach(b -> build(passed, b));
+        blocks.removeAll(passed);
+        blocks.forEach(b -> b.getOutputs().forEach(Block.Out::get));
+        passed.forEach(Block::afterBuild);
+        blocks.forEach(Block::afterBuild);
+    }
+
+    void build(Set<Block> blocks, Block block) {
+        if (!blocks.add(block)) {
+            return;
+        }
+        final List<Block> linked = getBlocks().stream()
+                .filter(b -> getLinks().stream().anyMatch(l -> l.getSource() == b && l.getTarget() == block))
+                .collect(toList());
+        linked.forEach(b -> build(blocks, b));
+        block.getInputs().forEach(i -> {
+            final List<BlockLink> links = getLinks().stream().filter(l -> l.getTarget() == block).collect(toList());
+            if (links.isEmpty()) {
+                return;
+            }
+            if (i.getInputType().isArray()) {
+                i.set(links.stream().map(l -> l.getBlockOutput().get()).toArray(getArrayFunction(i.getInputType())));
+            } else {
+                i.set(links.iterator().next().getBlockOutput().get());
+            }
+        });
+        block.getOutputs().forEach(Block.Out::get);
     }
 }

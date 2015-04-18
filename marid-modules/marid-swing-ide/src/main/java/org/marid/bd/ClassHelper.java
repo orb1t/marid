@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,30 +18,25 @@
 
 package org.marid.bd;
 
-import java.awt.*;
+import groovy.inspect.swingui.AstNodeToScriptVisitor;
+import org.codehaus.groovy.ast.ClassNode;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Path;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.newBufferedWriter;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface BlockColors {
+public class ClassHelper {
 
-    int ANNOTATIONS_BLOCK_COLOR = 0x206090;
-    int EXPRESSIONS_BLOCK_COLOR = 0x0000FF;
-    int META_BLOCK_COLOR = 0x10AAAA;
-    int MULTIPLEXORS_BLOCK_COLOR = 0x404040;
-    int STATEMENTS_BLOCK_COLOR = 0x005500;
-
-    int BLACK = 0x000000;
-    int BLUE = 0x0000FF;
-    int RED = 0xFF0000;
-
-    int LINK = 0x316999;
-
-    static Color getBlockColor(String id) {
-        try {
-            return new Color((int) BlockColors.class.getField(id.toUpperCase() + "_BLOCK_COLOR").get(null));
-        } catch (Exception x) {
-            return Color.BLACK;
+    public static void saveClassNode(Path directory, ClassNode classNode) throws IOException {
+        try (final Writer writer = newBufferedWriter(directory.resolve(classNode.getName()), UTF_8)) {
+            final AstNodeToScriptVisitor visitor = new AstNodeToScriptVisitor(writer);
+            visitor.visitClass(classNode);
         }
     }
 }

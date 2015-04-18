@@ -41,6 +41,7 @@
         <dependency>
             <groupId>org.marid</groupId>
             <artifactId>marid-lib</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

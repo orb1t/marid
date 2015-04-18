@@ -107,6 +107,7 @@ public class BlockPersister extends Unmarshaller.Listener {
     @Override
     public void afterUnmarshal(Object target, Object parent) {
         Marid.getCurrentContext().getAutowireCapableBeanFactory().autowireBean(target);
+        Marid.getCurrentContext().getAutowireCapableBeanFactory().initializeBean(target, null);
         if (target instanceof Block) {
             ((Block) target).reset();
         }

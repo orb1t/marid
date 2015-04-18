@@ -45,6 +45,7 @@ public class StandardBlockComponent<B extends Block> extends DefaultBlockCompone
     protected final Insets insets = new Insets(5, 0, 5, 0);
     protected final List<Input> inputs = new ArrayList<>();
     protected final List<Output> outputs = new ArrayList<>();
+    protected final List<Consumer<JPopupMenu>> menuConfigurers = new ArrayList<>();
 
     public StandardBlockComponent(B block) {
         super(new BorderLayout(), block);
@@ -188,5 +189,17 @@ public class StandardBlockComponent<B extends Block> extends DefaultBlockCompone
         g.setHorizontalGroup(h);
         panel.setLayout(g);
         return panel;
+    }
+
+    public StandardBlockComponent<B> addMenuConfigurer(Consumer<JPopupMenu> consumer) {
+        menuConfigurers.add(consumer);
+        return this;
+    }
+
+    @Override
+    public JPopupMenu popupMenu() {
+        final JPopupMenu menu = super.popupMenu();
+        menuConfigurers.forEach(c -> c.accept(menu));
+        return menu;
     }
 }

@@ -37,19 +37,21 @@
         <dependency>
             <groupId>org.marid</groupId>
             <artifactId>marid-runtime</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.marid</groupId>
             <artifactId>marid-runtime</artifactId>
             <type>zip</type>
-            <version>${project.version}</version>
             <scope>provided</scope>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>marid-swing</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

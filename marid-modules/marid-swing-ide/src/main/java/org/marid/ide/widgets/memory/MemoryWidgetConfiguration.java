@@ -18,36 +18,38 @@
 
 package org.marid.ide.widgets.memory;
 
-import org.marid.swing.forms.Configuration;
-import org.marid.swing.forms.Input;
+import org.marid.dyn.MetaInfo;
+import org.marid.swing.ComponentConfiguration;
 import org.marid.swing.forms.Tab;
 import org.marid.swing.input.BooleanInputControl;
 import org.marid.swing.input.SpinIntInputControl;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
+@Component
 @Tab(node = "chart")
-public interface MemoryWidgetConfiguration extends Configuration {
+public class MemoryWidgetConfiguration extends ComponentConfiguration {
 
-    @Input(tab = "chart")
-    Pv<Boolean> USE_BUFFER = new Pv<>(BooleanInputControl::new, () -> true);
+    @MetaInfo(group = "chart")
+    public final P<Boolean> useBuffer = p("useBuffer", BooleanInputControl::new, () -> true);
 
-    @Input(tab = "chart")
-    Pv<Boolean> SAVE = new Pv<>(BooleanInputControl::new, () -> true);
+    @MetaInfo(group = "chart")
+    public final P<Boolean> save = p("save", BooleanInputControl::new, () -> true);
 
-    @Input(tab = "chart")
-    Pv<Boolean> PRINT = new Pv<>(BooleanInputControl::new, () -> true);
+    @MetaInfo(group = "chart")
+    public final P<Boolean> print = p("print", BooleanInputControl::new, () -> true);
 
-    @Input(tab = "chart")
-    Pv<Boolean> ZOOM = new Pv<>(BooleanInputControl::new, () -> true);
+    @MetaInfo(group = "chart")
+    public final P<Boolean> zoom = p("zoom", BooleanInputControl::new, () -> true);
 
-    @Input(tab = "chart")
-    Pv<Boolean> TOOLTIPS = new Pv<>(BooleanInputControl::new, () -> true);
+    @MetaInfo(group = "tooltips")
+    public final P<Boolean> tooltips = p("tooltips", BooleanInputControl::new, () -> true);
 
-    @Input(tab = "chart")
-    Pv<Integer> UPDATE_INTERVAL = new Pv<>(() -> new SpinIntInputControl(1, 10, 1), () -> 1);
+    @MetaInfo(group = "chart")
+    public final P<Integer> updateInterval = p("updateInterval", () -> new SpinIntInputControl(1, 10, 1), () -> 1);
 
-    @Input(tab = "chart")
-    Pv<Integer> HISTORY_SIZE = new Pv<>(() -> new SpinIntInputControl(1, 60, 1), () -> 3);
+    @MetaInfo(group = "chart")
+    public final P<Integer> historySize = p("historySize", () -> new SpinIntInputControl(1, 60, 1), () -> 3);
 }

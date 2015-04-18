@@ -3,7 +3,6 @@ package org.marid.ide;
 import org.marid.ide.context.BaseContext;
 import org.marid.ide.context.GuiContext;
 import org.marid.ide.context.ProfileContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -14,8 +13,4 @@ import org.springframework.context.annotation.Import;
 @Import({BaseContext.class, ProfileContext.class, GuiContext.class})
 public class IdeConfiguration {
 
-    @Bean
-    public DefaultConfigurationProvider defaultConfigurationProvider() {
-        return new DefaultConfigurationProvider();
-    }
 }

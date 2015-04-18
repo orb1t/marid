@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,21 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.forms;
+package org.marid.bd.common;
 
-import java.lang.annotation.*;
+import org.marid.bd.Block;
+import org.marid.swing.dnd.DndSource;
+
+import java.awt.datatransfer.DataFlavor;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-public @interface Form {
+public interface DndBlockSource extends DndSource<Block> {
 
-    String name() default "";
+    DataFlavor[] BLOCK_DATA_FLAVORS = {new DataFlavor(Block.class, null)};
 
-    String icon() default "";
+    @Override
+    default int getDndActions() {
+        return DND_COPY;
+    }
 
-    String description() default "";
+    @Override
+    default DataFlavor[] getSourceDataFlavors() {
+        return BLOCK_DATA_FLAVORS;
+    }
 }

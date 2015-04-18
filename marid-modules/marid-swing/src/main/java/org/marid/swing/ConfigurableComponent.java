@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,32 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd;
-
-import java.awt.*;
+package org.marid.swing;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface BlockColors {
+public interface ConfigurableComponent {
 
-    int ANNOTATIONS_BLOCK_COLOR = 0x206090;
-    int EXPRESSIONS_BLOCK_COLOR = 0x0000FF;
-    int META_BLOCK_COLOR = 0x10AAAA;
-    int MULTIPLEXORS_BLOCK_COLOR = 0x404040;
-    int STATEMENTS_BLOCK_COLOR = 0x005500;
-
-    int BLACK = 0x000000;
-    int BLUE = 0x0000FF;
-    int RED = 0xFF0000;
-
-    int LINK = 0x316999;
-
-    static Color getBlockColor(String id) {
-        try {
-            return new Color((int) BlockColors.class.getField(id.toUpperCase() + "_BLOCK_COLOR").get(null));
-        } catch (Exception x) {
-            return Color.BLACK;
-        }
-    }
+    ComponentConfiguration configuration();
 }

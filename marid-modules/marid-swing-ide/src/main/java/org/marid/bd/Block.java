@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
-public abstract class Block implements Named, Serializable, LogSupport {
+public abstract class Block implements Named, Serializable, LogSupport, BuildTrigger {
 
     @XmlAttribute
     @XmlID
@@ -103,10 +103,6 @@ public abstract class Block implements Named, Serializable, LogSupport {
             }
         }
         return list.isEmpty() ? Collections.emptyList() : list;
-    }
-
-    public List<Out> getExports() {
-        return Collections.emptyList();
     }
 
     public void transfer(Collection<BlockLink> links) {

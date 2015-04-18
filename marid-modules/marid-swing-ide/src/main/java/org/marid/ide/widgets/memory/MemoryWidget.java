@@ -27,7 +27,10 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.widgets.Widget;
 import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.swing.ComponentConfiguration;
+import org.marid.swing.ConfigurableComponent;
 import org.marid.swing.actions.ShowHideListener;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.swing.*;
 import java.awt.event.ComponentEvent;
@@ -40,33 +43,44 @@ import static org.jfree.chart.ChartFactory.createTimeSeriesChart;
  */
 @MetaInfo(name = "Memory consumption")
 @PrototypeComponent
-public class MemoryWidget extends Widget implements MemoryWidgetConfiguration, ShowHideListener {
+public class MemoryWidget extends Widget implements ShowHideListener, ConfigurableComponent {
 
+    private final MemoryWidgetConfiguration configuration;
     private final Runtime runtime = Runtime.getRuntime();
-    private final TimeSeries totalMemorySeries = createTimeSeries("Total");
-    private final TimeSeries freeMemorySeries = createTimeSeries("Free");
-    private final Timer timer = new Timer(UPDATE_INTERVAL.get() * 1000, e -> {
-        final double totalMemory = runtime.totalMemory() / 1e6;
-        final double freeMemory = runtime.freeMemory() / 1e6;
-        final Second second = new Second(new Date());
-        totalMemorySeries.add(second, totalMemory);
-        freeMemorySeries.add(second, freeMemory);
-    });
+    private final TimeSeries totalMemorySeries;
+    private final TimeSeries freeMemorySeries;
+    private final Timer timer;
 
-    public MemoryWidget() {
+    @Autowired
+    public MemoryWidget(MemoryWidgetConfiguration configuration) {
         super("Memory");
+        this.configuration = configuration;
+        totalMemorySeries = createTimeSeries("Total", configuration.historySize.get());
+        freeMemorySeries = createTimeSeries("Free", configuration.historySize.get());
+        timer = new Timer(configuration.updateInterval.get() * 1000, e -> {
+            final double totalMemory = runtime.totalMemory() / 1e6;
+            final double freeMemory = runtime.freeMemory() / 1e6;
+            final Second second = new Second(new Date());
+            totalMemorySeries.add(second, totalMemory);
+            freeMemorySeries.add(second, freeMemory);
+        });
         final TimeSeriesCollection dataset = new TimeSeriesCollection();
         dataset.addSeries(totalMemorySeries);
         dataset.addSeries(freeMemorySeries);
         final JFreeChart chart = createTimeSeriesChart(s("Memory"), s("Time"), s("Memory") + ", MiB", dataset);
-        add(new ChartPanel(chart, USE_BUFFER.get(), SAVE.get(), PRINT.get(), ZOOM.get(), TOOLTIPS.get()));
-        UPDATE_INTERVAL.addConsumer(this, n -> timer.setDelay(n * 1000));
+        add(new ChartPanel(chart,
+                configuration.useBuffer.get(),
+                configuration.save.get(),
+                configuration.print.get(),
+                configuration.zoom.get(),
+                configuration.tooltips.get()));
+        configuration.updateInterval.addListener(this, n -> timer.setDelay(n * 1000));
         addComponentListener(this);
     }
 
-    private TimeSeries createTimeSeries(String title) {
+    private TimeSeries createTimeSeries(String title, int historySize) {
         final TimeSeries series = new TimeSeries(s(title));
-        series.setMaximumItemCount(HISTORY_SIZE.get() * 60);
+        series.setMaximumItemCount(historySize * 60);
         RegularTimePeriod second = new Second(new Date()).previous();
         for (int i = 0; i < series.getMaximumItemCount(); i++) {
             second = second.previous();
@@ -86,5 +100,9 @@ public class MemoryWidget extends Widget implements MemoryWidgetConfiguration, S
     public void componentHidden(ComponentEvent e) {
         timer.stop();
     }
-}
 
+    @Override
+    public ComponentConfiguration configuration() {
+        return configuration;
+    }
+}

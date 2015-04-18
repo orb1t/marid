@@ -22,19 +22,20 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.marid.bd.Block;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.BlockLink;
-import org.marid.bd.SingletonBlock;
+import org.marid.bd.common.DndBlockSource;
 import org.marid.bd.shapes.Link;
 import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
 import org.marid.concurrent.MaridTimerTask;
+import org.marid.ide.components.SchemaFrameConfiguration;
 import org.marid.ide.frames.schema.SchemaFrame;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.marid.swing.InputMaskType;
 import org.marid.swing.SwingUtil;
-import org.marid.swing.dnd.DndSource;
 import org.marid.swing.dnd.DndTarget;
 import org.marid.swing.dnd.MaridTransferHandler;
 import org.marid.swing.geom.ShapeUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.swing.*;
 import java.awt.*;
@@ -74,7 +75,7 @@ import static org.marid.swing.geom.ShapeUtils.ptAdd;
  * @author Dmitry Ovchinnikov
  */
 @PrototypeComponent
-public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSource<Block>, SchemaFrameConfiguration {
+public class SchemaEditor extends JComponent implements DndTarget<Block>, DndBlockSource {
 
     protected final AffineTransform transform = new AffineTransform();
     private final Point mousePoint = new Point();
@@ -83,14 +84,19 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     private Component curComponent;
     private final ComponentGroup selection = new ComponentGroup();
     private LinkShape currentLink;
-    private volatile InputMaskType panType = PAN.get(), dragType = DRAG.get();
+    private volatile InputMaskType panType, dragType;
     private final AtomicBoolean dirty = new AtomicBoolean();
     private final Timer timer = new Timer(true);
     private Block selectedBlock;
     private final Set<LinkShape> links = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private boolean selectionMode;
+    private final SchemaFrameConfiguration configuration;
 
-    public SchemaEditor() {
+    @Autowired
+    public SchemaEditor(SchemaFrameConfiguration configuration) {
+        this.configuration = configuration;
+        panType = configuration.pan.get();
+        dragType = configuration.drag.get();
         setFont(UIManager.getFont("Label.font"));
         setBackground(SystemColor.controlLtHighlight);
         setDoubleBuffered(true);
@@ -98,9 +104,9 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
         setTransferHandler(new MaridTransferHandler());
         setForeground(SystemColor.controlDkShadow);
         enableEvents(MOUSE_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_WHEEL_EVENT_MASK);
-        PAN.addConsumer(this, n -> panType = n);
-        DRAG.addConsumer(this, n -> dragType = n);
-        LINK_SHAPE_TYPE.addConsumer(this, n -> EventQueue.invokeLater(() -> {
+        configuration.pan.addListener(this, n -> panType = n);
+        configuration.drag.addListener(this, n -> dragType = n);
+        configuration.link.addListener(this, n -> EventQueue.invokeLater(() -> {
             final List<Pair<Output, Input>> pairs = links.stream().map(l -> of(l.output, l.input)).collect(toList());
             links.clear();
             pairs.forEach(p -> addLink(p.getLeft(), p.getRight()));
@@ -186,7 +192,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
     }
 
     public LinkShape addLink(Output output, Input input) {
-        final LinkShape link = LINK_SHAPE_TYPE.get().linkShapeFor(output, input);
+        final LinkShape link = configuration.link.get().linkShapeFor(output, input);
         links.add(link);
         info("Added link: {0}", link);
         return link;
@@ -515,9 +521,6 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
 
     public boolean dropBlock(Block object, Point dropPoint, int action) {
         try {
-            if (object instanceof SingletonBlock && action == TransferHandler.LINK) {
-                object = ((SingletonBlock) object).blockPort();
-            }
             transform.inverseTransform(new Point(dropPoint), dropPoint);
             final BlockComponent blockComponent = object.createComponent();
             blockComponent.setBounds(new Rectangle(dropPoint, blockComponent.getPreferredSize()));
@@ -529,11 +532,6 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndSou
             warning("Unable to transform coordinates", x);
             return false;
         }
-    }
-
-    @Override
-    public int getDndActions() {
-        return DND_COPY | DND_LINK | DND_MOVE;
     }
 
     @Override

@@ -27,6 +27,7 @@ import org.marid.swing.dnd.MaridTransferHandler;
 
 import javax.management.MBeanServerConnection;
 import javax.swing.table.TableColumn;
+import java.awt.datatransfer.DataFlavor;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -75,6 +76,11 @@ public class MBeanServerTreeTable extends JXTreeTable implements PrefSupport, Dn
     @Override
     public int getDndActions() {
         return DND_LINK;
+    }
+
+    @Override
+    public DataFlavor[] getSourceDataFlavors() {
+        return new DataFlavor[] {new DataFlavor(IdeJmxAttribute.class, null)};
     }
 
     @Override

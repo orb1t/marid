@@ -23,7 +23,10 @@ import org.codehaus.groovy.ast.VariableScope;
 import org.codehaus.groovy.ast.builder.AstBuilder;
 import org.codehaus.groovy.ast.stmt.BlockStatement;
 import org.codehaus.groovy.ast.stmt.Statement;
-import org.marid.bd.*;
+import org.marid.bd.BlockColors;
+import org.marid.bd.ConfigurableBlock;
+import org.marid.bd.NamedBlock;
+import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.bd.components.StandardBlockComponent;
@@ -52,7 +55,7 @@ public class ScriptStatementBlock extends StandardBlock implements NamedBlock, C
     public final Out multipleOut = new Out("vector", Statement[].class, this::statements);
 
     @Override
-    public BlockComponent createComponent() {
+    public StandardBlockComponent<? extends ScriptStatementBlock> createComponent() {
         return new StandardBlockComponent<>(this, c -> {
             final ConsoleTextEditor consoleTextEditor = new ConsoleTextEditor();
             consoleTextEditor.getTextEditor().setText(script);

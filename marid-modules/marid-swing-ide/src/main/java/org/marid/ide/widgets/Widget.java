@@ -19,16 +19,16 @@
 package org.marid.ide.widgets;
 
 import org.marid.dyn.MetaInfo;
+import org.marid.swing.ComponentConfiguration;
+import org.marid.swing.ConfigurableComponent;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
-import org.marid.swing.forms.Configuration;
-import org.marid.swing.forms.StaticConfigurationDialog;
+import org.marid.swing.forms.ConfigurationDialog;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 
 import static javax.swing.SwingConstants.HORIZONTAL;
 
@@ -46,19 +46,18 @@ public abstract class Widget extends JInternalFrame implements WidgetSupport {
         setLayout(layout);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         add(toolBar, getPref("pos", BorderLayout.NORTH, "toolbar"));
-        if (this instanceof Configuration) {
-            toolBar.add(new MaridAction("Configuration", "settings", this::showConfigurationDialog)).setFocusable(false);
-            toolBar.addSeparator();
-        }
-    }
-
-    private void showConfigurationDialog(ActionEvent actionEvent) {
-        final Window window = SwingUtilities.windowForComponent(this);
-        new StaticConfigurationDialog(window, Widget.this.getClass()).setVisible(true);
     }
 
     @PostConstruct
     public void init() {
+        if (this instanceof ConfigurableComponent) {
+            final ComponentConfiguration configuration = ((ConfigurableComponent) this).configuration();
+            toolBar.add(new MaridAction("Configuration", "settings", e -> {
+                final Window window = SwingUtilities.windowForComponent(this);
+                new ConfigurationDialog(window, getTitle(), configuration).setVisible(true);
+            })).setFocusable(false);
+            toolBar.addSeparator();
+        }
         fillActions();
         MaridActions.fillToolbar(getActionMap(), toolBar);
         if (getJMenuBar() != null) {

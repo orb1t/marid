@@ -27,16 +27,17 @@ import org.marid.ide.widgets.Widget;
 import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
+import org.marid.spring.Form;
+import org.marid.swing.ComponentConfiguration;
 import org.marid.swing.WindowPrefs;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
-import org.marid.swing.forms.ConfigurationProvider;
-import org.marid.swing.forms.Form;
-import org.marid.swing.forms.StaticConfigurationDialog;
+import org.marid.swing.forms.ConfigurationDialog;
 import org.marid.swing.log.SwingHandler;
 import org.marid.swing.util.MessageSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -58,7 +59,6 @@ import static javax.swing.JOptionPane.*;
 @Component("ideFrame")
 public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSupport, MessageSupport {
 
-    private final Set<ConfigurationProvider> configurationProviders;
     private final IdeImpl ide;
     private final AtomicBoolean initialized = new AtomicBoolean();
 
@@ -72,18 +72,14 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     private ActionMap ideActionMap;
 
     @Autowired
-    public IdeFrameImpl(IdeImpl ide, Set<ConfigurationProvider> configurationProviders) {
+    public IdeFrameImpl(IdeImpl ide) {
         super(LS.s("Marid IDE"), WindowPrefs.graphicsConfiguration("IDE"));
-        this.configurationProviders = configurationProviders;
         setName("IDE");
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         this.ide = ide;
         setIconImages(MaridIcons.ICONS);
         setLocationRelativeTo(null);
         setJMenuBar(new JMenuBar());
-        getJMenuBar().add(widgetsMenu());
-        getJMenuBar().add(framesMenu());
-        getJMenuBar().add(preferencesMenu());
     }
 
     @PostConstruct
@@ -117,7 +113,9 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         return menu;
     }
 
-    private JMenu widgetsMenu() {
+    @Order(1)
+    @Autowired
+    protected void initWidgetsMenu() {
         final AnnotationConfigApplicationContext applicationContext = Marid.getCurrentContext();
         final JMenu menu = new JMenu(s("Widgets"));
         for (final String beanName : applicationContext.getBeanNamesForType(Widget.class)) {
@@ -128,10 +126,12 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
                 newWidget.show();
             }));
         }
-        return menu;
+        getJMenuBar().add(menu);
     }
 
-    private JMenu framesMenu() {
+    @Order(2)
+    @Autowired
+    protected void initFramesMenu() {
         final AnnotationConfigApplicationContext applicationContext = Marid.getCurrentContext();
         final JMenu menu = new JMenu(s("Frames"));
         for (final String beanName : applicationContext.getBeanNamesForType(MaridFrame.class)) {
@@ -141,7 +141,30 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
                 frame.setVisible(true);
             }));
         }
-        return menu;
+        getJMenuBar().add(menu);
+    }
+
+    @Order(3)
+    @Autowired
+    protected void initPreferencesMenu(Set<ComponentConfiguration> componentConfigurations) {
+        final JMenu menu = new JMenu(s("Preferences"));
+        for (final ComponentConfiguration componentConfiguration : componentConfigurations) {
+            final Form form = componentConfiguration.getClass().getAnnotation(Form.class);
+            if (form == null) {
+                continue;
+            }
+            final String icon = form.icon().isEmpty() ? null : form.icon();
+            final String description = form.description().isEmpty() ? null : s(form.description());
+            menu.add(new MaridAction(
+                    s(form.name()),
+                    icon,
+                    e -> new ConfigurationDialog(this, s(form.name()), componentConfiguration).setVisible(true),
+                    Action.SHORT_DESCRIPTION, description
+            ));
+        }
+        menu.addSeparator();
+        menu.add(lafMenu());
+        getJMenuBar().add(menu);
     }
 
     @Override
@@ -152,23 +175,6 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     @Override
     public boolean isInitialized() {
         return initialized.get();
-    }
-
-    private JMenu preferencesMenu() {
-        final JMenu menu = new JMenu(s("Preferences"));
-        configurationProviders.forEach(cp -> cp.visitConfigurationClasses(c -> {
-            final Form form = c.getAnnotation(Form.class);
-            final String icon = form == null || form.icon().isEmpty() ? null : form.icon();
-            final String description = form == null || form.description().isEmpty() ? null : s(form.description());
-            menu.add(new MaridAction(
-                    StaticConfigurationDialog.nameFor(c),
-                    icon,
-                    e -> new StaticConfigurationDialog(this, c).setVisible(true),
-                    Action.SHORT_DESCRIPTION, description));
-        }));
-        menu.addSeparator();
-        menu.add(lafMenu());
-        return menu;
     }
 
     @Override

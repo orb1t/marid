@@ -20,8 +20,6 @@ package org.marid.swing.dnd;
 
 import java.awt.datatransfer.DataFlavor;
 import java.io.Serializable;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -36,17 +34,7 @@ public interface DndSource<T extends Serializable> extends DndConstants {
         return DND_NONE;
     }
 
-    default DataFlavor[] getSourceDataFlavors() {
-        for (final Type type : getClass().getGenericInterfaces()) {
-            if (type instanceof ParameterizedType) {
-                final ParameterizedType pt = (ParameterizedType) type;
-                if (pt.getRawType() == DndSource.class) {
-                    return new DataFlavor[]{new DataFlavor((Class<?>) pt.getActualTypeArguments()[0], null)};
-                }
-            }
-        }
-        return new DataFlavor[0];
-    }
+    DataFlavor[] getSourceDataFlavors();
 
     default Object encodeDndSource(DataFlavor dataFlavor, T dndObject) {
         return dataFlavor.getRepresentationClass().isInstance(dndObject) ? dndObject : null;

@@ -24,7 +24,7 @@ import java.lang.annotation.*;
  * @author Dmitry Ovchinnikov.
  */
 @Inherited
-@Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.METHOD, ElementType.PACKAGE})
+@Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.METHOD, ElementType.PACKAGE, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MetaInfo {
 
@@ -41,4 +41,6 @@ public @interface MetaInfo {
     int order() default 0;
 
     String path() default "";
+
+    String group() default "";
 }

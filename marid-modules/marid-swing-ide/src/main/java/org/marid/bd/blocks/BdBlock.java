@@ -42,4 +42,6 @@ public @interface BdBlock {
     String iconText() default "";
 
     String group() default "";
+
+    String value() default "";
 }

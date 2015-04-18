@@ -18,12 +18,9 @@
 
 package org.marid.ide.frames.schema;
 
-import groovy.inspect.swingui.AstNodeToScriptVisitor;
 import images.Images;
-import org.codehaus.groovy.ast.ClassNode;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.schema.SchemaEditor;
-import org.marid.bd.schema.SchemaFrameConfiguration;
 import org.marid.bd.schema.SchemaModel;
 import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
@@ -45,9 +42,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.Writer;
-import java.nio.file.Files;
-import java.util.List;
 
 import static java.awt.Color.RED;
 import static java.awt.SystemColor.infoText;
@@ -59,7 +53,7 @@ import static javax.swing.BorderFactory.*;
  */
 @PrototypeComponent
 @MetaInfo(name = "Schema Editor")
-public class SchemaFrame extends MaridFrame implements SchemaFrameConfiguration {
+public class SchemaFrame extends MaridFrame {
 
     protected final ProfileManager profileManager;
     protected final BlockPersister persister;
@@ -115,6 +109,7 @@ public class SchemaFrame extends MaridFrame implements SchemaFrameConfiguration 
         addAction("/Schema/r/ResetInOut", "Reset input/output selection", "reset", schemaEditor::resetInputOutputSelection).setKey("control shift T").enableToolbar();
         addAction("/Schema/a/AlignToLeft", "Align to left", "alignleft", schemaEditor::alignToLeft).setKey("control shift L").enableToolbar();
         addAction("/Schema/a/AlignToRight", "Align to right", "alignright", schemaEditor::alignToRight).setKey("control shift R").enableToolbar();
+        addAction("b/Build/r/Build", "Build", "hammer", e -> new SchemaModel(schemaEditor).getSchema().build()).setKey("F7").enableToolbar();
     }
 
     protected void open(ActionEvent actionEvent) {
@@ -145,15 +140,6 @@ public class SchemaFrame extends MaridFrame implements SchemaFrameConfiguration 
         try {
             final SchemaModel model = new SchemaModel(schemaEditor);
             persister.save(model, file.toPath());
-            final List<ClassNode> classNodes = model.getSchema().toCode();
-            final Profile profile = profileManager.getCurrentProfile();
-            for (final ClassNode classNode : classNodes) {
-                final String name = classNode.getNameWithoutPackage() + ".groovy";
-                try (final Writer writer = Files.newBufferedWriter(profile.getClassesPath().resolve(name))) {
-                    final AstNodeToScriptVisitor astNodeToScriptVisitor = new AstNodeToScriptVisitor(writer);
-                    astNodeToScriptVisitor.visitClass(classNode);
-                }
-            }
         } catch (Exception x) {
             showMessage(ERROR_MESSAGE, "Save error", "Save {0} error", x, file);
         }

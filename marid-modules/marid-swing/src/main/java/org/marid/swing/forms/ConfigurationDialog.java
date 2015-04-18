@@ -22,17 +22,17 @@ import images.Images;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
-import org.marid.pref.PrefUtils;
+import org.marid.swing.ComponentConfiguration;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.input.InputControl;
 import org.marid.swing.input.TitledInputControl;
+import org.marid.util.StringUtils;
+import org.marid.util.Utils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.prefs.Preferences;
 
@@ -49,32 +49,25 @@ import static javax.swing.KeyStroke.getKeyStroke;
 import static javax.swing.SwingConstants.HORIZONTAL;
 import static javax.swing.SwingConstants.*;
 import static javax.swing.SwingConstants.VERTICAL;
-import static org.marid.functions.Functions.safeConsumer;
-import static org.marid.reflect.ReflectionUtils.annotations;
-import static org.marid.swing.forms.FormUtils.tabComparator;
 import static org.marid.swing.util.PanelUtils.groupedPanel;
-import static org.marid.util.StringUtils.capitalize;
-import static org.marid.util.StringUtils.constantToText;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class StaticConfigurationDialog extends JDialog implements LogSupport, PrefSupport, L10nSupport {
+public class ConfigurationDialog extends JDialog implements LogSupport, PrefSupport, L10nSupport {
 
-    protected final Class<?> conf;
     protected final Preferences preferences;
     protected final JTabbedPane tabbedPane;
     private final Map<Component, ComponentHolder> containerMap = new IdentityHashMap<>();
     private final Map<String, String> tabLabelMap = new HashMap<>();
-    private final Map<String, Map<String, String>> keyLabelMap = new HashMap<>();
+    private final Map<String, String> keyLabelMap = new HashMap<>();
 
-    public StaticConfigurationDialog(Window window, Class<?> conf) {
-        super(window, nameFor(conf), ModalityType.MODELESS);
-        this.conf = conf;
-        this.preferences = PrefUtils.preferences(conf, conf.getCanonicalName().split("."));
+    public ConfigurationDialog(Window window, String title, ComponentConfiguration configuration) {
+        super(window, title, ModalityType.MODELESS);
+        this.preferences = configuration.preferences().node("$dialog");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         add(tabbedPane = new JTabbedPane(getPref("tabPlacement", TOP), getPref("tabLayoutPolicy", WRAP_TAB_LAYOUT)));
-        annotations(conf, Tab.class, tabComparator()).forEach(safeConsumer(this::addTab, x -> warning("Tab error", x)));
+        fill(configuration);
         final JButton impBtn = new JButton(new MaridAction("Import preferences", "importPrefs", this::importPrefs));
         final JButton expBtn = new JButton(new MaridAction("Export preferences", "exportPrefs", this::exportPrefs));
         final JButton defBtn = new JButton(new MaridAction("Load defaults", "loadDefaults", this::loadDefaults));
@@ -91,11 +84,6 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
         getRootPane().registerKeyboardAction(cclBtn.getAction(), getKeyStroke("ESCAPE"), WHEN_IN_FOCUSED_WINDOW);
         pack();
         setLocationRelativeTo(window);
-    }
-
-    public static String nameFor(Class<?> conf) {
-        final Form f = conf.getAnnotation(Form.class);
-        return f == null || f.name().isEmpty() ? LS.s(StaticConfigurationDialog.class.getSimpleName()) : LS.s(f.name());
     }
 
     @Override
@@ -117,17 +105,17 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
                 final Object oldValue = ch.initialValue;
                 final Object newValue = ch.control.getInputValue();
                 if (!Objects.equals(oldValue, newValue)) {
-                    if (Objects.equals(ch.getDefaultValue(), newValue) && ch.pv.contains()) {
-                        ch.pv.remove();
-                        fine("Restored {0}.{1}", ch.node, ch.key);
+                    if (Objects.equals(ch.p.defaultValueSupplier.get(), newValue) && ch.p.isPresent()) {
+                        ch.p.remove();
+                        fine("Restored {0}", ch.p.key);
                     } else {
-                        ch.pv.save(ch.control);
-                        fine("Saved {0}.{1}: {2}", ch.node, ch.key, newValue);
+                        ch.save();
+                        fine("Saved {0}: {1}", ch.p.key, newValue);
                     }
                 }
             } catch (Exception x) {
                 exceptionMap.put(e.getValue(), x);
-                warning("Unable to save {0}.{1}", x, e.getValue().node, e.getValue().key);
+                warning("Unable to save {0}", x, e.getValue().p.key);
             }
         }
         if (exceptionMap.isEmpty()) {
@@ -146,13 +134,13 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
                 panel.add(new JLabel(format("<html><b>%s</b></html>", s("Tab") + ":")), c);
                 c.weightx = 1.0;
                 c.gridwidth = REMAINDER;
-                panel.add(new JLabel(tabLabelMap.get(e.getKey().node)), c);
+                panel.add(new JLabel(tabLabelMap.get(e.getKey().p.key)), c);
                 c.weightx = 0.0;
                 c.gridwidth = RELATIVE;
                 panel.add(new JLabel(format("<html><b>%s</b></html>", s("Label") + ":")), c);
                 c.weightx = 1.0;
                 c.gridwidth = REMAINDER;
-                panel.add(new JLabel(keyLabelMap.get(e.getKey().node).get(e.getKey().key)), c);
+                panel.add(new JLabel(keyLabelMap.get(e.getKey().p.key)), c);
                 c.weightx = 0.0;
                 c.gridwidth = RELATIVE;
                 panel.add(new JLabel(format("<html><b>%s</b></html>", s("Message") + ": ")), c);
@@ -175,8 +163,8 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
     }
 
     protected void loadDefaults(ActionEvent actionEvent) {
-        containerMap.forEach((c, ch) -> ch.pv.remove());
-        containerMap.forEach((c, ch) -> ch.control.setInputValue(ch.getDefaultValue()));
+        containerMap.forEach((c, ch) -> ch.p.remove());
+        containerMap.forEach((c, ch) -> ch.set(ch.p.defaultValueSupplier.get()));
     }
 
     protected void exportPrefs(ActionEvent actionEvent) {
@@ -186,42 +174,37 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
 
     }
 
-    private void addTab(Tab tab) throws Exception {
-        final String tabTitle = tab.label().isEmpty() ? s(capitalize(tab.node())) : s(tab.label());
-        tabLabelMap.put(tab.node(), tabTitle);
-        keyLabelMap.put(tab.node(), new HashMap<>());
-        final Icon tabIcon = tab.icon().isEmpty() ? null : Images.getIcon(tab.icon(), 16);
-        final String tabTip = tab.tip().isEmpty() ? null : s(tab.tip());
-        final JPanel panel = new JPanel(new GridBagLayout());
-        final GridBagConstraints c = new GridBagConstraints();
-        c.fill = BOTH;
-        c.anchor = GridBagConstraints.CENTER;
-        c.insets = new Insets(5, 5, 5, 5);
-        Arrays.stream(conf.getFields())
-                .filter(f -> Modifier.isStatic(f.getModifiers()) &&
-                        f.isAnnotationPresent(Input.class) &&
-                        f.getAnnotation(Input.class).tab().equals(tab.node()))
-                .sorted((f1, f2) -> {
-                    final Input a1 = f1.getAnnotation(Input.class);
-                    final Input a2 = f2.getAnnotation(Input.class);
-                    return a1.order() != a2.order()
-                            ? a1.order() - a2.order()
-                            : a1.name().compareTo(a2.name());
-                })
-                .forEachOrdered(field -> {
-                    final Input input = field.getAnnotation(Input.class);
-                    try {
-                        final ComponentHolder ch = new ComponentHolder(input, field);
-                        ch.control.setInputValue(ch.initialValue);
-                        addTabCc(panel, c, input, ch);
-                        containerMap.put(ch.control.getComponent(), ch);
-                    } catch (Exception x) {
-                        warning("Unable to create input {0}.{1}", x, tab.node(), input.name());
-                    }
-                });
-        c.weighty = 1.0;
-        panel.add(Box.createVerticalBox(), c);
-        tabbedPane.addTab(tabTitle, tabIcon, new JScrollPane(panel), tabTip);
+    private void fill(ComponentConfiguration configuration) {
+        final Map<String, JPanel> panelMap = new LinkedHashMap<>();
+        final Map<String, GridBagConstraints> cmap = new HashMap<>();
+        final Map<String, Tab> tabMap = new HashMap<>();
+        for (final Tab tab : configuration.getClass().getAnnotationsByType(Tab.class)) {
+            tabMap.put(tab.node(), tab);
+        }
+        for (final ComponentConfiguration.P<?> p : configuration.getPreferences()) {
+            final String tab = p.tab == null ? "common" : p.tab;
+            final JPanel panel = panelMap.computeIfAbsent(tab, n -> new JPanel(new GridBagLayout()));
+            final GridBagConstraints c = cmap.computeIfAbsent(tab, n -> {
+                final GridBagConstraints cs = new GridBagConstraints();
+                cs.fill = BOTH;
+                cs.anchor = GridBagConstraints.CENTER;
+                cs.insets = new Insets(5, 5, 5, 5);
+                return cs;
+            });
+            final ComponentHolder ch = new ComponentHolder(p);
+            addTabCc(panel, c, ch);
+            containerMap.put(ch.control.getComponent(), ch);
+        }
+        panelMap.forEach((k, v) -> {
+            final GridBagConstraints c = cmap.get(k);
+            c.weighty = 1.0;
+            v.add(Box.createVerticalBox(), c);
+            final Tab tab = tabMap.get(k);
+            final String tabTitle = tab != null && !tab.label().isEmpty() ? s(tab.label()) : s(StringUtils.capitalize(k));
+            final String tabTip = tab != null && !tab.tip().isEmpty() ? s(tab.tip()) : null;
+            final ImageIcon tabIcon = tab != null ? Images.getIcon(tab.icon(), 16) : null;
+            tabbedPane.addTab(tabTitle, tabIcon, new JScrollPane(v), tabTip);
+        });
     }
 
     @Override
@@ -237,14 +220,14 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
         super.processWindowEvent(e);
     }
 
-    private void addTabCc(JPanel p, GridBagConstraints c, Input in, ComponentHolder ch) throws Exception {
+    private void addTabCc(JPanel p, GridBagConstraints c, ComponentHolder ch) {
         c.gridwidth = 1;
         c.weightx = 0.0;
         c.fill = NONE;
         p.add(new JButton(ch.getAction()), c);
         c.fill = BOTH;
         p.add(new JSeparator(VERTICAL), c);
-        final String labelText = s(in.label().isEmpty() ? s(constantToText(ch.key)) : in.label());
+        final String labelText = s(ch.p.name);
         if (ch.control instanceof TitledInputControl) {
             ((TitledInputControl) ch.control).setTitle(labelText + ":");
         } else {
@@ -255,40 +238,36 @@ public class StaticConfigurationDialog extends JDialog implements LogSupport, Pr
         c.gridwidth = REMAINDER;
         c.weightx = 1.0;
         p.add(ch.control.getComponent(), c);
-        keyLabelMap.get(in.tab()).put(ch.key, labelText);
+        keyLabelMap.put(ch.p.key, labelText);
     }
 
     private static class ComponentHolder {
 
-        private final String node;
-        private final String key;
-        private final InputControl<Object> control;
-        private final Configuration.Pv<Object> pv;
+        private final ComponentConfiguration.P<?> p;
+        private final InputControl<?> control;
         private final Object initialValue;
 
-        @SuppressWarnings("unchecked")
-        public ComponentHolder(Input input, Field field) {
-            key = input.name().isEmpty() ? field.getName() : input.name();
-            node = input.tab();
-            try {
-                pv = (Configuration.Pv<Object>) field.get(null);
-                control = pv.getControl();
-                initialValue = pv.get();
-            } catch (ReflectiveOperationException x) {
-                throw new IllegalStateException(x);
-            }
-        }
-
-        public Object getDefaultValue() {
-            return pv.getDefaultValueSupplier().get();
+        public ComponentHolder(ComponentConfiguration.P<?> p) {
+            this.p = p;
+            this.control = p.inputControlSupplier.get();
+            this.initialValue = p.get();
+            set(initialValue);
         }
 
         public MaridAction.MaridActionListener getActionListener() {
-            return (a, e) -> control.setInputValue(getDefaultValue());
+            return (a, e) -> set(p.defaultValueSupplier.get());
         }
 
         public MaridAction getAction() {
             return new MaridAction("", "defaultValue", getActionListener(), SHORT_DESCRIPTION, LS.s("Set default value"));
+        }
+
+        public void set(Object v) {
+            Utils.<InputControl<Object>>cast(control).setInputValue(v);
+        }
+
+        public void save() {
+            Utils.<ComponentConfiguration.P<Object>>cast(p).accept(control.getInputValue());
         }
     }
 }

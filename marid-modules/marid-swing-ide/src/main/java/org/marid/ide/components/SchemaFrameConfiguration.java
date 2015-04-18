@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,14 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.schema;
+package org.marid.ide.components;
 
 import org.marid.bd.shapes.LinkShapeType;
+import org.marid.dyn.MetaInfo;
+import org.marid.spring.Form;
+import org.marid.swing.ComponentConfiguration;
 import org.marid.swing.InputMaskType;
-import org.marid.swing.forms.Configuration;
-import org.marid.swing.forms.Form;
-import org.marid.swing.forms.Input;
-import org.marid.swing.forms.Tab;
 import org.marid.swing.input.ComboInputControl;
 import org.marid.swing.input.ExtComboInputControl;
 
@@ -34,17 +33,15 @@ import static org.marid.swing.InputMaskType.SHIFT;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Form(name = "BD configuration")
-@Tab(node = "mouse")
-@Tab(node = "links")
-public interface SchemaFrameConfiguration extends Configuration {
+@Form(name = "Schema Frame Configuration")
+public class SchemaFrameConfiguration extends ComponentConfiguration {
 
-    @Input(tab = "mouse")
-    Pv<InputMaskType> PAN = new Pv<>(() -> new ComboInputControl<>(InputMaskType.class), () -> SHIFT);
+    @MetaInfo(order = 1)
+    public final P<InputMaskType> pan = p("pan", () -> new ComboInputControl<>(InputMaskType.class), () -> SHIFT);
 
-    @Input(tab = "mouse")
-    Pv<InputMaskType> DRAG = new Pv<>(() -> new ComboInputControl<>(InputMaskType.class), () -> CONTROL);
+    @MetaInfo(order = 2)
+    public final P<InputMaskType> drag = p("drag", () -> new ComboInputControl<>(InputMaskType.class), () -> CONTROL);
 
-    @Input(tab = "links")
-    Pv<LinkShapeType> LINK_SHAPE_TYPE = new Pv<>(() -> new ExtComboInputControl<>(LinkShapeType.class), () -> LINE);
+    @MetaInfo(order = 3)
+    public final P<LinkShapeType> link = p("link", () -> new ExtComboInputControl<>(LinkShapeType.class), () -> LINE);
 }

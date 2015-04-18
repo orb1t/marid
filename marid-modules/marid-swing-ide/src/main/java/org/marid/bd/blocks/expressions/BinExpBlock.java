@@ -25,7 +25,6 @@ import org.codehaus.groovy.ast.expr.Expression;
 import org.codehaus.groovy.syntax.Token;
 import org.codehaus.groovy.syntax.Types;
 import org.marid.bd.BlockColors;
-import org.marid.bd.BlockComponent;
 import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
@@ -60,7 +59,7 @@ public class BinExpBlock extends StandardBlock implements ConfigurableBlock {
     public final Out output = new Out("out", Expression.class, this::binaryExpression);
 
     @Override
-    public BlockComponent createComponent() {
+    public StandardBlockComponent<? extends BinExpBlock> createComponent() {
         return new StandardBlockComponent<>(this, c -> {
             c.addBlockListener((BinExpListener) type -> {
                 c.updateBlock();
@@ -97,7 +96,7 @@ public class BinExpBlock extends StandardBlock implements ConfigurableBlock {
         return new BinaryExpression(left, tokenType.token, right);
     }
 
-    public static enum TokenType {
+    public enum TokenType {
 
         PLUS(Token.newPlaceholder(Types.PLUS), " + "),
         MINUS(Token.newPlaceholder(Types.MINUS), " - "),
@@ -112,7 +111,7 @@ public class BinExpBlock extends StandardBlock implements ConfigurableBlock {
         public final ImageIcon icon;
         public final String text;
 
-        private TokenType(Token token, String text) {
+        TokenType(Token token, String text) {
             this.token = token;
             this.icon = Images.getIconFromText(text, 32, 32, Color.BLUE, Color.WHITE);
             this.text = text;

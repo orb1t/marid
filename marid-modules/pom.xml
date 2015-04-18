@@ -46,6 +46,7 @@
             <groupId>org.marid</groupId>
             <artifactId>marid-test</artifactId>
             <scope>test</scope>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

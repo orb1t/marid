@@ -16,14 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.forms;
+package org.marid.spring;
 
-import java.util.function.Consumer;
+import org.springframework.stereotype.Component;
+
+import java.lang.annotation.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ConfigurationProvider {
+@Target({ElementType.TYPE, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Component
+public @interface Form {
 
-    void visitConfigurationClasses(Consumer<Class<? extends Configuration>> consumer);
+    String name() default "";
+
+    String icon() default "";
+
+    String description() default "";
 }

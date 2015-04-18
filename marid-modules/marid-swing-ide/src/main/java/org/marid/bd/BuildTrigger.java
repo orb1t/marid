@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,25 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing.input;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.marid.swing.forms.Configuration;
-import org.marid.swing.forms.Input;
-import org.marid.swing.forms.Tab;
+package org.marid.bd;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Tab(node = "tab1")
-public class ConfigurationTest implements Configuration {
+public interface BuildTrigger {
 
-    @Input(tab = "tab1")
-    private static final Pv<Integer> p = new Pv<>(IntInputControl::new, () -> 1);
-
-    @Test
-    public void test() {
-        Assert.assertSame(ConfigurationTest.class, p.caller);
+    default void afterBuild() {
     }
 }
