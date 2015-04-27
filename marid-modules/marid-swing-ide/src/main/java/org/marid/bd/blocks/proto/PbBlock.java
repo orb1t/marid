@@ -23,6 +23,7 @@ import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.marid.bd.BlockColors;
+import org.marid.bd.ClassNodeBuildTrigger;
 import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
@@ -32,7 +33,9 @@ import org.springframework.stereotype.Service;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
+import java.util.Collections;
 import java.util.EventListener;
+import java.util.List;
 import java.util.Objects;
 
 import static org.codehaus.groovy.ast.ClassHelper.makeCached;
@@ -42,15 +45,20 @@ import static org.codehaus.groovy.ast.ClassHelper.makeCached;
  */
 @BdBlock(name = "Proto Builder", iconText = "PB", color = BlockColors.RED)
 @XmlRootElement
-public class PbBlock extends StandardBlock implements ConfigurableBlock {
+public class PbBlock extends StandardBlock implements ConfigurableBlock, ClassNodeBuildTrigger {
 
     protected String className;
     protected String beanName;
 
+    protected ClassNode classNode;
+
+    protected PbBusExpression[] buses;
+
+    public final In busesInput = new In("buses", PbBusExpression[].class, v -> buses = v);
     public final Out serviceOut = new Out("service", ClassNode.class, this::output);
 
     protected ClassNode output() {
-        final ClassNode classNode = new ClassNode(className, Opcodes.ACC_PUBLIC, makeCached(PbService.class));
+        classNode = new ClassNode(className, Opcodes.ACC_PUBLIC, makeCached(PbService.class));
         final AnnotationNode serviceNode = new AnnotationNode(makeCached(Service.class));
         if (!beanName.isEmpty()) {
             serviceNode.addMember("value", new ConstantExpression(beanName));
@@ -97,6 +105,13 @@ public class PbBlock extends StandardBlock implements ConfigurableBlock {
     public void reset() {
         className = "PBService";
         beanName = "pbService";
+        buses = new PbBusExpression[0];
+        classNode = null;
+    }
+
+    @Override
+    public List<ClassNode> getClassNodes() {
+        return Collections.singletonList(classNode);
     }
 
     public interface PbBlockListener extends EventListener {

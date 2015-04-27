@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,26 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.blocks.annotations;
+package org.marid.bd.blocks.proto;
 
-import org.codehaus.groovy.ast.AnnotationNode;
-import org.codehaus.groovy.ast.ClassHelper;
-import org.codehaus.groovy.ast.ClassNode;
 import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
-import org.springframework.context.annotation.Configuration;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Configuration", label = "@Configuration", color = BlockColors.ANNOTATIONS_BLOCK_COLOR)
+@BdBlock(name = "Proto Bus", iconText = "PBus", color = BlockColors.RED)
 @XmlRootElement
-public class ConfigurationBlock extends StandardBlock {
+public class PbBus extends StandardBlock {
 
-    public static final ClassNode CONFIGURATION_CLASS = ClassHelper.make(Configuration.class);
-
-    public final Out out = new Out("node", AnnotationNode.class, () -> new AnnotationNode(CONFIGURATION_CLASS));
+    public final Out out = new Out("bus", PbBusExpression.class, PbBusExpression::new);
 }

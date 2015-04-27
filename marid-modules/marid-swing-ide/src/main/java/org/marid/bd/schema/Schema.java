@@ -88,19 +88,13 @@ public class Schema implements Named {
         return name;
     }
 
-    private boolean noOutputs(Block block) {
-        return block.getOutputs().isEmpty() || getLinks().stream().noneMatch(l -> l.getSource() == block);
-    }
-
-    private boolean noInputs(Block block) {
-        return block.getInputs().isEmpty() || getLinks().stream().noneMatch(l -> l.getTarget() == block);
-    }
-
     public void build() {
         final Set<Block> blocks = Collections.newSetFromMap(new IdentityHashMap<>(getBlocks().size()));
         blocks.addAll(getBlocks());
         final Set<Block> passed = Collections.newSetFromMap(new IdentityHashMap<>(blocks.size()));
-        blocks.stream().filter(this::noOutputs).forEach(b -> build(passed, b));
+        blocks.stream()
+                .filter(b -> b.getOutputs().isEmpty() || getLinks().stream().noneMatch(l -> l.getSource() == b))
+                .forEach(b -> build(passed, b));
         blocks.removeAll(passed);
         blocks.forEach(b -> b.getOutputs().forEach(Block.Out::get));
         passed.forEach(Block::afterBuild);
@@ -116,12 +110,13 @@ public class Schema implements Named {
                 .collect(toList());
         linked.forEach(b -> build(blocks, b));
         block.getInputs().forEach(i -> {
-            final List<BlockLink> links = getLinks().stream().filter(l -> l.getTarget() == block).collect(toList());
+            final List<BlockLink> links = getLinks().stream().filter(l -> l.getBlockInput() == i).collect(toList());
             if (links.isEmpty()) {
                 return;
             }
             if (i.getInputType().isArray()) {
-                i.set(links.stream().map(l -> l.getBlockOutput().get()).toArray(getArrayFunction(i.getInputType())));
+                final Class<?> elementType = i.getInputType().getComponentType();
+                i.set(links.stream().map(l -> l.getBlockOutput().get()).toArray(getArrayFunction(elementType)));
             } else {
                 i.set(links.iterator().next().getBlockOutput().get());
             }
