@@ -45,7 +45,7 @@ import static org.codehaus.groovy.ast.ClassHelper.makeCached;
  */
 @BdBlock(name = "Proto Builder", iconText = "PB", color = BlockColors.RED)
 @XmlRootElement
-public class PbBlock extends StandardBlock implements ConfigurableBlock, ClassNodeBuildTrigger {
+public class PbServiceBlock extends StandardBlock implements ConfigurableBlock, ClassNodeBuildTrigger {
 
     protected String className;
     protected String beanName;
@@ -97,8 +97,8 @@ public class PbBlock extends StandardBlock implements ConfigurableBlock, ClassNo
     }
 
     @Override
-    public PbBlockEditor createWindow(Window parent) {
-        return new PbBlockEditor(parent, this);
+    public PbServiceBlockEditor createWindow(Window parent) {
+        return new PbServiceBlockEditor(parent, this);
     }
 
     @Override

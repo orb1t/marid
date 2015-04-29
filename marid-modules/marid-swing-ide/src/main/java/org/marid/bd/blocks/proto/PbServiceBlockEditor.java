@@ -27,12 +27,12 @@ import java.awt.event.ActionEvent;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PbBlockEditor extends AbstractBlockComponentEditor<PbBlock> {
+public class PbServiceBlockEditor extends AbstractBlockComponentEditor<PbServiceBlock> {
 
     private final JTextField classNameField;
     private final JTextField beanNameField;
 
-    public PbBlockEditor(Window window, PbBlock block) {
+    public PbServiceBlockEditor(Window window, PbServiceBlock block) {
         super(window, block);
         tabPane("Common").addLine("Class name", classNameField = new JTextField(block.getClassName()));
         tabPane("Common").addLine("Bean name", beanNameField = new JTextField(block.getBeanName()));

@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @BdBlock(name = "Proto Bus", iconText = "PBus", color = BlockColors.RED)
 @XmlRootElement
-public class PbBus extends StandardBlock {
+public class PbBusBlock extends StandardBlock {
 
     public final Out out = new Out("bus", PbBusExpression.class, PbBusExpression::new);
 }
