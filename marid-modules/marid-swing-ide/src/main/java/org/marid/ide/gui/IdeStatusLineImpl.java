@@ -23,15 +23,18 @@ import org.marid.ide.components.ProfileManager;
 import org.marid.ide.profile.Profile;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
+import org.marid.swing.actions.WindowAction;
 import org.marid.util.SysPropsSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowEvent;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static javax.swing.BorderFactory.createEtchedBorder;
 
@@ -68,8 +71,9 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
     }
 
     @Autowired
-    private void prepare(IdeTimer ideTimer) {
+    private void prepare(IdeTimer ideTimer, IdeFrameImpl ideFrame) {
         ideTimer.addListener(e -> timeLabel.setText(currentTime()));
+        profileListModel.configureConsumers(ideFrame);
     }
 
     private String currentTime() {
@@ -82,21 +86,36 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
 
         public ProfileManagerListModel() {
             profiles = profileManager.getProfiles();
-            profileManager.addProfileAddConsumer(this, p -> {
+        }
+
+        public void configureConsumers(IdeFrameImpl ideFrame) {
+            final Consumer<Profile> addProfileConsumer = p -> {
                 profiles.clear();
                 profiles.addAll(profileManager.getProfiles());
                 final int index = profiles.indexOf(p);
                 if (index >= 0) {
                     fireIntervalAdded(this, index, index);
                 }
-            });
-            profileManager.addProfileRemoveConsumer(this, p -> {
+            };
+            final Consumer<Profile> removeProfileConsumer = p -> {
                 final int index = profiles.indexOf(p);
                 if (index >= 0) {
                     profiles.remove(p);
                     fireIntervalRemoved(this, index, index);
                 }
-            });
+            };
+            ideFrame.addWindowListener(new WindowAction(e -> {
+                switch (e.getID()) {
+                    case WindowEvent.WINDOW_OPENED:
+                        profileManager.addProfileAddConsumer(addProfileConsumer);
+                        profileManager.addProfileRemoveConsumer(removeProfileConsumer);
+                        break;
+                    case WindowEvent.WINDOW_CLOSED:
+                        profileManager.removeProfileAddConsumer(addProfileConsumer);
+                        profileManager.removeProfileRemoveConsumer(removeProfileConsumer);
+                        break;
+                }
+            }));
         }
 
         @Override

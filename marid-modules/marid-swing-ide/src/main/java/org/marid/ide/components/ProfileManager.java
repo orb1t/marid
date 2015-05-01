@@ -31,13 +31,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-
-import static java.util.Collections.synchronizedMap;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -47,28 +44,43 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
 
     protected final MaridBeanConnectionManager connectionManager;
     protected final ConcurrentSkipListMap<String, Profile> profileMap = new ConcurrentSkipListMap<>();
-    protected final Map<Object, Consumer<Profile>> addProfileConsumers = synchronizedMap(new WeakHashMap<>());
-    protected final Map<Object, Consumer<Profile>> removeProfileConsumers = synchronizedMap(new WeakHashMap<>());
+    protected final List<Consumer<Profile>> addProfileConsumers = new CopyOnWriteArrayList<>();
+    protected final List<Consumer<Profile>> removeProfileConsumers = new CopyOnWriteArrayList<>();
 
     @Autowired
     public ProfileManager(MaridBeanConnectionManager connectionManager) throws IOException {
         this.connectionManager = connectionManager;
         final Path profilesDir = getProfilesDir();
         try (final Stream<Path> stream = Files.list(profilesDir)) {
-            stream.filter(Files::isDirectory).map(this::newProfile).forEach(p -> profileMap.put(p.getName(), p));
+            stream.filter(Files::isDirectory).map(this::newProfile).forEach(p -> info("Added profile {0}", p));
+        }
+        if (profileMap.isEmpty()) {
+            addProfile("default");
         }
     }
 
-    public void addProfileAddConsumer(Object gcBase, Consumer<Profile> consumer) {
-        addProfileConsumers.put(gcBase, consumer);
+    public void addProfileAddConsumer(Consumer<Profile> consumer) {
+        addProfileConsumers.add(consumer);
     }
 
-    public void addProfileRemoveConsumer(Object gcBase, Consumer<Profile> consumer) {
-        removeProfileConsumers.put(gcBase, consumer);
+    public void removeProfileAddConsumer(Consumer<Profile> consumer) {
+        addProfileConsumers.remove(consumer);
     }
 
-    public Profile newProfile(Path path) {
-        return new Profile(this, path);
+    public void addProfileRemoveConsumer(Consumer<Profile> consumer) {
+        removeProfileConsumers.add(consumer);
+    }
+
+    public void removeProfileRemoveConsumer(Consumer<Profile> consumer) {
+        removeProfileConsumers.remove(consumer);
+    }
+
+    private Profile newProfile(Path path) {
+        return profileMap.computeIfAbsent(path.getFileName().toString(), n -> {
+            final Profile profile = new Profile(this, path);
+            addProfileConsumers.forEach(c -> c.accept(profile));
+            return profile;
+        });
     }
 
     protected Path defaultPath() {
@@ -80,6 +92,7 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
         if (!Files.isDirectory(path)) {
             try {
                 Files.createDirectories(path);
+
             } catch (IOException x) {
                 throw new IllegalStateException(x);
             }
@@ -88,17 +101,14 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
     }
 
     public Profile addProfile(String name) {
-        final Profile profile = new Profile(this, getProfilesDir().resolve(name));
-        addProfileConsumers.forEach((k, v) -> v.accept(profile));
-        return profile;
+        return newProfile(getProfilesDir().resolve(name));
     }
 
     public void removeProfile(String name) {
-        try (final Profile profile = profileMap.remove(name)) {
-            removeProfileConsumers.forEach((k, v) -> v.accept(profile));
-        } catch (IOException x) {
-            throw new IllegalStateException(x);
-        }
+        profileMap.computeIfPresent(name, (n, v) -> {
+            removeProfileConsumers.forEach(c -> c.accept(v));
+            return null;
+        });
     }
 
     public Profile getProfileByName(String name) {
