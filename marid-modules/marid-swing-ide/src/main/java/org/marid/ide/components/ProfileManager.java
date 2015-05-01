@@ -116,7 +116,7 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
     }
 
     public Profile getCurrentProfile() {
-        return profileMap.get(getSysPref("currentProfile", "default"));
+        return newProfile(getProfilesDir().resolve(getSysPref("currentProfile", "default")));
     }
 
     public void setCurrentProfile(Profile profile) {
