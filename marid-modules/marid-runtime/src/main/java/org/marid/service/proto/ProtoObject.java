@@ -23,10 +23,13 @@ import org.marid.dyn.Casting;
 import org.marid.groovy.MapProxies;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
-import org.marid.service.util.MapUtil;
+import org.marid.methods.LogMethods;
 import org.marid.util.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -37,36 +40,26 @@ import java.util.logging.Logger;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class ProtoObject implements Named, LogSupport, AutoCloseable {
+public abstract class ProtoObject<O extends ProtoObject<O>> implements Named, LogSupport, AutoCloseable {
 
     protected final List<ProtoEventListener> eventListeners = new CopyOnWriteArrayList<>();
     protected final ProtoObject parent;
     protected final String name;
-    protected final Consumer<ProtoObject> onInit;
-    protected final Boolean delegateLogging;
+    protected final Consumer<O> onInit;
     protected final Logger logger;
-    protected final Map<String, Object> parameters;
+    protected final boolean loggingEnabled;
 
+    public final Map<String, Object> parameters;
     public final ConcurrentMap<String, Object> vars;
 
-    protected ProtoObject(ProtoObject parent, Object name, Map<String, Object> map) {
+    protected ProtoObject(ProtoObject parent, String name, Descriptor<O> descriptor) {
         this.parent = parent;
-        this.name = MapUtil.name(name);
-        this.onInit = Utils.cast(f(map, "onInit", Consumer.class, v -> {}));
-        this.parameters = Collections.unmodifiableMap(new HashMap<>(MapUtil.parameters(map)));
-        this.vars = new ConcurrentHashMap<>(MapUtil.variables(map));
-        final Logging logging = f(map, "logging", Logging.class, Logging.DEFAULT);
-        this.logger = logging.logger(this);
-        this.delegateLogging = logging.delegateLogging(this);
-        if (Boolean.TRUE.equals(getDelegateLogging())) {
-            addEventListener(event -> event.log(event.getSource()));
-        }
-    }
-
-    protected Boolean getDelegateLogging() {
-        return delegateLogging == null
-                ? getParent() != null ? getParent().getDelegateLogging() : null
-                : delegateLogging;
+        this.name = name;
+        this.onInit = descriptor::onInit;
+        this.parameters = Collections.unmodifiableMap(descriptor.parameters());
+        this.vars = new ConcurrentHashMap<>(descriptor.vars());
+        this.logger = descriptor.logger(this);
+        this.loggingEnabled = descriptor.loggingEnabled();
     }
 
     @Override
@@ -75,7 +68,7 @@ public abstract class ProtoObject implements Named, LogSupport, AutoCloseable {
     }
 
     protected void init() {
-        onInit.accept(this);
+        onInit.accept(Utils.cast(this));
     }
 
     @Override
@@ -85,10 +78,6 @@ public abstract class ProtoObject implements Named, LogSupport, AutoCloseable {
 
     public ProtoObject getParent() {
         return parent;
-    }
-
-    public Map<String, Object> getParameters() {
-        return parameters;
     }
 
     public abstract void start();
@@ -151,6 +140,9 @@ public abstract class ProtoObject implements Named, LogSupport, AutoCloseable {
                 warning("Unable to fire {0}", x, event);
             }
         }
+        if (loggingEnabled) {
+            LogMethods.log(logger, level, message, cause, args);
+        }
     }
 
     protected void fireEvent(String message, Object... args) {
@@ -170,16 +162,25 @@ public abstract class ProtoObject implements Named, LogSupport, AutoCloseable {
         return String.join("/", getPath());
     }
 
-    protected interface Logging {
+    public interface Descriptor<O extends ProtoObject> {
 
-        Logging DEFAULT = new Logging() {};
+        default void onInit(O object) {
+        }
+
+        default Map<String, Object> parameters() {
+            return Collections.emptyMap();
+        }
+
+        default Map<String, Object> vars() {
+            return Collections.emptyMap();
+        }
 
         default Logger logger(ProtoObject object) {
             return Logger.getLogger(object.toString());
         }
 
-        default Boolean delegateLogging(ProtoObject object) {
-            return null;
+        default boolean loggingEnabled() {
+            return true;
         }
     }
 }

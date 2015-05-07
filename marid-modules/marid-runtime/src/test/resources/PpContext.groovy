@@ -27,53 +27,42 @@ import org.springframework.beans.factory.annotation.Autowired
 
 [
     data: [
-        logging: [
-            delegateLogging: true,
-        ],
-        buses: [
+        buses  : [
             bus1: [
-                descriptor: [
-                    transceiver: {new SocketTransceiver([port: pbService.context.vars.port])}
-                ],
-                nodes: [
+                transceiver: { new SocketTransceiver([port: pbService.context.vars.port]) },
+                nodes      : [
                     node1: [
-                        descriptor: [
-                            period: 1,
-                            task: {PpNode node ->
-                                node.bus.io({Transceiver t ->
-                                    for (def i in 0..3) {
-                                        t.data << [i as int];
-                                        def data = t.data.rule(4, {buf -> buf.getInt()}).read();
-                                        if (data != null) {
-                                            node.context.vars[i.toString()] = data;
-                                        }
+                        period: 1,
+                        task  : { PpNode node ->
+                            node.bus.io({ Transceiver t ->
+                                for (def i in 0..3) {
+                                    t.data << [i as int];
+                                    def data = t.data.rule(4, { buf -> buf.getInt() }).read();
+                                    if (data != null) {
+                                        node.context.vars[i.toString()] = data;
                                     }
-                                })
-                            }
-                        ]
+                                }
+                            })
+                        }
                     ]
                 ]
             ],
             bus2: [
-                descriptor: [
-                    transceiver: {new SocketTransceiver([port: pbService.context.vars.port2])}
-                ],
-                nodes: [
+                transceiver: { new SocketTransceiver([port: pbService.context.vars.port2]) },
+                nodes      : [
                     node1: [
-                        descriptor: [
-                            period: 1,
-                            task: {PpNode node ->
-                                node.bus.io({Transceiver t ->
-                                    for (def i in 4..9) {
-                                        t.data << [i as int];
-                                        def data = t.data.rule(4, {buf -> buf.getInt()}).read();
-                                        if (data != null) {
-                                            node.context.vars[i.toString()] = data;
-                                        }
+                        period: 1,
+                        task  : { PpNode node ->
+                            node.bus.io({ Transceiver t ->
+                                for (def i in 4..9) {
+                                    t.data << [i as int];
+                                    def data = t.data.rule(4, { buf -> buf.getInt() }).read();
+                                    if (data != null) {
+                                        node.context.vars[i.toString()] = data;
                                     }
-                                })
-                            }
-                        ]
+                                }
+                            })
+                        }
                     ]
                 ]
             ]

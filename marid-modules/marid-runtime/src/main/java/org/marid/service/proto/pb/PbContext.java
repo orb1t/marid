@@ -19,23 +19,23 @@
 package org.marid.service.proto.pb;
 
 import org.marid.service.proto.ProtoObject;
-import org.marid.service.util.MapUtil;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PbContext extends ProtoObject {
+public class PbContext extends ProtoObject<PbContext> {
 
     protected final PbService service;
     protected final Map<String, PbBus> busMap = new TreeMap<>();
 
-    protected PbContext(PbService service, String name, Map<String, Object> map) {
-        super(null, name, map);
+    protected PbContext(PbService service, String name, Descriptor descriptor) {
+        super(null, name, descriptor);
         this.service = service;
-        MapUtil.children(map, "buses").forEach((k, v) -> busMap.put(MapUtil.name(k), new PbBus(this, k, v)));
+        descriptor.buses().forEach((k, v) -> busMap.put(k, new PbBus(this, k, v)));
     }
 
     public PbService getService() {
@@ -89,5 +89,12 @@ public class PbContext extends ProtoObject {
     public synchronized void close() throws Exception {
         busMap.values().forEach(PbBus::close);
         fireEvent("close");
+    }
+
+    public interface Descriptor extends ProtoObject.Descriptor<PbContext> {
+
+        default Map<String, PbBus.Descriptor> buses() {
+            return Collections.emptyMap();
+        }
     }
 }

@@ -24,17 +24,12 @@ def array = [10, 20, 30, 40];
 
 [
     data: [
-        logging: [
-            delegateLogging: true
-        ],
         buses: [
             bus1: [
-                descriptor: [
-                    threads: 2
-                ],
-                nodes: [
+                threads: 2,
+                nodes  : [
                     node1: [
-                        onInit: {PbNode node ->
+                        onInit   : { PbNode node ->
                             node << [
                                 start: {
                                     node.context.vars.port = it.source.transceiverServer.serverSocket.localPort;
@@ -42,20 +37,18 @@ def array = [10, 20, 30, 40];
                                 }
                             ];
                         },
-                        descriptor: [
-                            server: new SocketTransceiverServer([:]),
-                            processor: {PbNode b, Transceiver t ->
-                                while (b.running) {
-                                    def data = t.data.rule(4, {buf -> array[buf.getInt()]}).read();
-                                    if (data != null) {
-                                        t.data.write([data as int]);
-                                    }
+                        server   : new SocketTransceiverServer([:]),
+                        processor: { PbNode b, Transceiver t ->
+                            while (b.running) {
+                                def data = t.data.rule(4, { buf -> array[buf.getInt()] }).read();
+                                if (data != null) {
+                                    t.data.write([data as int]);
                                 }
                             }
-                        ]
+                        }
                     ],
                     node2: [
-                        onInit: {PbNode node ->
+                        onInit   : { PbNode node ->
                             node << [
                                 start: {
                                     node.context.vars.port2 = it.source.transceiverServer.serverSocket.localPort;
@@ -63,17 +56,15 @@ def array = [10, 20, 30, 40];
                                 }
                             ];
                         },
-                        descriptor: [
-                            server: new SocketTransceiverServer([:]),
-                            processor: {PbNode b, Transceiver t ->
-                                while (b.running) {
-                                    def data = t.data.rule(4, {buf -> array[buf.getInt()]}).read();
-                                    if (data != null) {
-                                        t.data << [data as int];
-                                    }
+                        server   : new SocketTransceiverServer([:]),
+                        processor: { PbNode b, Transceiver t ->
+                            while (b.running) {
+                                def data = t.data.rule(4, { buf -> array[buf.getInt()] }).read();
+                                if (data != null) {
+                                    t.data << [data as int];
                                 }
                             }
-                        ]
+                        }
                     ]
                 ]
             ]

@@ -31,7 +31,7 @@ public class PpService extends AbstractMaridService {
 
     public PpService(PpServiceConfiguration configuration) {
         super(configuration);
-        context = new PpContext(this, configuration.name(this), configuration.data(this));
+        context = new PpContext(this, configuration.name(this), configuration.data());
         context.init();
     }
 

@@ -31,7 +31,7 @@ public class PbService extends AbstractMaridService {
 
     public PbService(PbServiceConfiguration configuration) {
         super(configuration);
-        context = new PbContext(this, configuration.name(this), configuration.data(this));
+        context = new PbContext(this, configuration.name(this), configuration.data());
         context.init();
     }
 

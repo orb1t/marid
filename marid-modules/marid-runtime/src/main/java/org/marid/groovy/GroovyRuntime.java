@@ -112,7 +112,7 @@ public class GroovyRuntime {
             final Object v = script.run();
             if (v instanceof Closure) {
                 return DefaultGroovyMethods.asType((Closure) v, type);
-            } else if (v instanceof Map) {
+            } else if (v instanceof Map && type.isInterface()) {
                 return MapProxies.newInstance(type, (Map) v);
             } else {
                 return Casting.castTo(type, v);

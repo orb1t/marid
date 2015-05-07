@@ -34,7 +34,7 @@ import java.awt.event.WindowEvent;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Observer;
 
 import static javax.swing.BorderFactory.createEtchedBorder;
 
@@ -82,37 +82,45 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
 
     protected class ProfileManagerListModel extends AbstractListModel<Profile> implements ComboBoxModel<Profile> {
 
-        protected final List<Profile> profiles;
-
-        public ProfileManagerListModel() {
-            profiles = profileManager.getProfiles();
-        }
+        protected final List<Profile> profiles = profileManager.getProfiles();
+        protected final Observer observer = (o, e) -> {
+            final Object[] data = (Object[]) e;
+            switch ((String) data[0]) {
+                case "addProfile": {
+                    profiles.clear();
+                    profiles.addAll(profileManager.getProfiles());
+                    final int index = profiles.indexOf((Profile) data[1]);
+                    if (index >= 0) {
+                        fireIntervalAdded(this, index, index);
+                    }
+                    break;
+                }
+                case "removeProfile": {
+                    final int index = profiles.indexOf((Profile) data[1]);
+                    if (index >= 0) {
+                        profiles.remove((Profile) data[1]);
+                        fireIntervalRemoved(this, index, index);
+                    }
+                    break;
+                }
+                case "setCurrentProfile": {
+                    final int index = profiles.indexOf((Profile) data[1]);
+                    if (index >= 0) {
+                        setSelectedItem(data[1]);
+                    }
+                    break;
+                }
+            }
+        };
 
         public void configureConsumers(IdeFrameImpl ideFrame) {
-            final Consumer<Profile> addProfileConsumer = p -> {
-                profiles.clear();
-                profiles.addAll(profileManager.getProfiles());
-                final int index = profiles.indexOf(p);
-                if (index >= 0) {
-                    fireIntervalAdded(this, index, index);
-                }
-            };
-            final Consumer<Profile> removeProfileConsumer = p -> {
-                final int index = profiles.indexOf(p);
-                if (index >= 0) {
-                    profiles.remove(p);
-                    fireIntervalRemoved(this, index, index);
-                }
-            };
             ideFrame.addWindowListener(new WindowAction(e -> {
                 switch (e.getID()) {
                     case WindowEvent.WINDOW_OPENED:
-                        profileManager.addProfileAddConsumer(addProfileConsumer);
-                        profileManager.addProfileRemoveConsumer(removeProfileConsumer);
+                        profileManager.addObserver(observer);
                         break;
                     case WindowEvent.WINDOW_CLOSED:
-                        profileManager.removeProfileAddConsumer(addProfileConsumer);
-                        profileManager.removeProfileRemoveConsumer(removeProfileConsumer);
+                        profileManager.deleteObserver(observer);
                         break;
                 }
             }));
@@ -120,7 +128,10 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
 
         @Override
         public void setSelectedItem(Object anItem) {
-            profileManager.setCurrentProfile((Profile) anItem);
+            if (anItem != profileManager.getCurrentProfile()) {
+                profileManager.setCurrentProfile((Profile) anItem);
+                fireContentsChanged(this, -1, -1);
+            }
         }
 
         @Override

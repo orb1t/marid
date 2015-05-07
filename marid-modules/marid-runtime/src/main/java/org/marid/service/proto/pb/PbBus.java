@@ -19,24 +19,24 @@
 package org.marid.service.proto.pb;
 
 import org.marid.service.proto.ProtoObject;
-import org.marid.service.util.MapUtil;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.*;
+import java.util.function.ToLongFunction;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PbBus extends ProtoObject {
+public class PbBus extends ProtoObject<PbBus> {
 
-    protected final Descriptor descriptor;
     protected final ThreadPoolExecutor executor;
     protected final TreeMap<String, PbNode> nodeMap = new TreeMap<>();
+    protected final ToLongFunction<PbBus> shutdownTimeout;
 
-    protected PbBus(PbContext context, Object name, Map<String, Object> map) {
-        super(context, name, map);
-        descriptor = f(map, "descriptor", Descriptor.class, Descriptor.DEFAULT);
+    protected PbBus(PbContext context, String name, Descriptor descriptor) {
+        super(context, name, descriptor);
         executor = new ThreadPoolExecutor(
                 descriptor.threads(this),
                 descriptor.maxThreads(this),
@@ -45,7 +45,8 @@ public class PbBus extends ProtoObject {
                 descriptor.queue(this),
                 context.getService().getThreadFactory(),
                 descriptor.rejectedExecutionHandler(this));
-        MapUtil.children(map, "nodes").forEach((k, v) -> nodeMap.put(MapUtil.name(k), new PbNode(this, k, v)));
+        shutdownTimeout = descriptor::shutdownTimeout;
+        descriptor.nodes().forEach((k, v) -> nodeMap.put(k, new PbNode(this, k, v)));
     }
 
     @Override
@@ -60,14 +61,18 @@ public class PbBus extends ProtoObject {
     }
 
     @Override
-    public synchronized void start() {
-        nodeMap.values().forEach(PbNode::start);
+    public void start() {
+        synchronized (this) {
+            nodeMap.values().forEach(PbNode::start);
+        }
         fireEvent("start");
     }
 
     @Override
-    public synchronized void stop() {
-        nodeMap.values().forEach(PbNode::stop);
+    public void stop() {
+        synchronized (this) {
+            nodeMap.values().forEach(PbNode::stop);
+        }
         fireEvent("stop");
     }
 
@@ -101,7 +106,7 @@ public class PbBus extends ProtoObject {
         nodeMap.values().forEach(PbNode::close);
         executor.shutdown();
         try {
-            if (!executor.awaitTermination(descriptor.shutdownTimeout(this), TimeUnit.SECONDS)) {
+            if (!executor.awaitTermination(shutdownTimeout.applyAsLong(this), TimeUnit.SECONDS)) {
                 throw new TimeoutException();
             }
         } catch (Exception x) {
@@ -110,9 +115,7 @@ public class PbBus extends ProtoObject {
         fireEvent("close");
     }
 
-    protected interface Descriptor {
-
-        Descriptor DEFAULT = new Descriptor() {};
+    public interface Descriptor extends ProtoObject.Descriptor<PbBus> {
 
         default RejectedExecutionHandler rejectedExecutionHandler(PbBus bus) {
             return new ThreadPoolExecutor.CallerRunsPolicy();
@@ -136,6 +139,10 @@ public class PbBus extends ProtoObject {
 
         default long shutdownTimeout(PbBus bus) {
             return 60L;
+        }
+
+        default Map<String, PbNode.Descriptor> nodes() {
+            return Collections.emptyMap();
         }
     }
 }

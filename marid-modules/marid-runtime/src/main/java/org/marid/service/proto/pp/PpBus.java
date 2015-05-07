@@ -22,28 +22,26 @@ import org.marid.io.DummyTransceiver;
 import org.marid.io.Transceiver;
 import org.marid.io.TransceiverAction;
 import org.marid.service.proto.ProtoObject;
-import org.marid.service.util.MapUtil;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PpBus extends ProtoObject {
+public class PpBus extends ProtoObject<PpBus> {
 
     protected final TreeMap<String, PpNode> nodeMap = new TreeMap<>();
-    protected final Descriptor descriptor;
     protected final Transceiver transceiver;
 
-    protected PpBus(@Nonnull PpContext context, @Nonnull Object name, @Nonnull Map<String, Object> map) {
-        super(context, MapUtil.name(name), map);
-        descriptor = f(map, "descriptor", Descriptor.class, Descriptor.DEFAULT);
+    protected PpBus(@Nonnull PpContext context, @Nonnull String name, @Nonnull Descriptor descriptor) {
+        super(context, name, descriptor);
         transceiver = descriptor.transceiver(this);
-        MapUtil.children(map, "nodes").forEach((k, v) -> nodeMap.put(MapUtil.name(k), new PpNode(this, k, v)));
+        descriptor.nodes().forEach((k, v) -> nodeMap.put(k, new PpNode(this, k, v)));
     }
 
     @Override
@@ -123,12 +121,14 @@ public class PpBus extends ProtoObject {
         fireEvent("close");
     }
 
-    protected interface Descriptor {
-
-        Descriptor DEFAULT = new Descriptor() {};
+    public interface Descriptor extends ProtoObject.Descriptor<PpBus> {
 
         default Transceiver transceiver(PpBus bus) {
             return DummyTransceiver.INSTANCE;
+        }
+
+        default Map<String, PpNode.Descriptor> nodes() {
+            return Collections.emptyMap();
         }
     }
 }

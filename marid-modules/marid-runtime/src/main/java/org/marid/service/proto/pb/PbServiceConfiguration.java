@@ -20,9 +20,6 @@ package org.marid.service.proto.pb;
 
 import org.marid.service.MaridServiceConfiguration;
 
-import java.util.Collections;
-import java.util.Map;
-
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -32,7 +29,7 @@ public interface PbServiceConfiguration extends MaridServiceConfiguration {
         return service.getName();
     }
 
-    default Map<String, Object> data(PbService service) {
-        return Collections.emptyMap();
+    default PbContext.Descriptor data() {
+        return new PbContext.Descriptor() {};
     }
 }

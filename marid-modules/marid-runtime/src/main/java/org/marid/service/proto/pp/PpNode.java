@@ -18,33 +18,44 @@
 
 package org.marid.service.proto.pp;
 
+import org.marid.functions.SafeConsumer;
 import org.marid.service.proto.ProtoObject;
 import org.marid.service.util.EmptyScheduledFuture;
-import org.marid.service.util.MapUtil;
 
 import javax.annotation.Nonnull;
 import java.io.InterruptedIOException;
 import java.nio.channels.ClosedChannelException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import java.util.function.Predicate;
+import java.util.function.ToLongFunction;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PpNode extends ProtoObject {
+public class PpNode extends ProtoObject<PpNode> {
 
     protected final TreeMap<String, PpNode> nodeMap = new TreeMap<>();
-    protected final Descriptor descriptor;
+    protected final ToLongFunction<PpNode> period;
+    protected final ToLongFunction<PpNode> delay;
+    protected final Predicate<PpNode> realTime;
+    protected final Predicate<PpNode> interruptTask;
+    protected final SafeConsumer<PpNode> callable;
 
     protected ScheduledFuture<?> task;
 
-    protected PpNode(@Nonnull ProtoObject object, @Nonnull Object name, @Nonnull Map<String, Object> map) {
-        super(object, name, map);
-        descriptor = f(map, "descriptor", Descriptor.class, Descriptor.DEFAULT);
-        MapUtil.children(map, "nodes").forEach((k, v) -> nodeMap.put(MapUtil.name(k), new PpNode(this, k, v)));
+    protected PpNode(@Nonnull ProtoObject object, @Nonnull String name, @Nonnull Descriptor descriptor) {
+        super(object, name, descriptor);
+        period = descriptor::period;
+        delay = descriptor::delay;
+        realTime = descriptor::realTime;
+        callable = descriptor::task;
+        interruptTask = descriptor::interruptTask;
+        descriptor.nodes().forEach((k, v) -> nodeMap.put(k, new PpNode(this, k, v)));
     }
 
     @Override
@@ -71,12 +82,9 @@ public class PpNode extends ProtoObject {
     public synchronized void start() {
         if (task == null) {
             try {
-                final long period = descriptor.period(this);
-                final long delay = descriptor.delay(this);
-                final boolean realTime = descriptor.realTime(this);
                 final Runnable t = () -> {
                     try {
-                        descriptor.task(this);
+                        callable.acceptUnsafe(this);
                     } catch (ClosedChannelException x) {
                         fireEvent("io {0}", "closed", x);
                     } catch (InterruptedIOException x) {
@@ -85,8 +93,10 @@ public class PpNode extends ProtoObject {
                         fireEvent("task", x);
                     }
                 };
+                final long period = this.period.applyAsLong(this);
+                final long delay = this.delay.applyAsLong(this);
                 if (period > 0L) {
-                    if (realTime) {
+                    if (this.realTime.test(this)) {
                         this.task = getContext().timer.scheduleAtFixedRate(t, delay, period, TimeUnit.SECONDS);
                     } else {
                         this.task = getContext().timer.scheduleWithFixedDelay(t, delay, period, TimeUnit.SECONDS);
@@ -109,7 +119,7 @@ public class PpNode extends ProtoObject {
     public synchronized void stop() {
         if (task != null) {
             if (!task.isDone()) {
-                task.cancel(descriptor.interruptTask(this));
+                task.cancel(interruptTask.test(this));
             }
             try {
                 while (!task.isDone()) {
@@ -148,9 +158,7 @@ public class PpNode extends ProtoObject {
         fireEvent("close");
     }
 
-    protected interface Descriptor {
-
-        Descriptor DEFAULT = new Descriptor() {};
+    public interface Descriptor extends ProtoObject.Descriptor<PpNode> {
 
         default boolean interruptTask(PpNode node) {
             return true;
@@ -169,6 +177,10 @@ public class PpNode extends ProtoObject {
         }
 
         default void task(PpNode node) throws Exception {
+        }
+
+        default Map<String, PpNode.Descriptor> nodes() {
+            return Collections.emptyMap();
         }
     }
 }

@@ -31,21 +31,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ProfileManager implements LogSupport, SysPrefSupport {
+public class ProfileManager extends Observable implements LogSupport, SysPrefSupport {
 
     protected final MaridBeanConnectionManager connectionManager;
     protected final ConcurrentSkipListMap<String, Profile> profileMap = new ConcurrentSkipListMap<>();
-    protected final List<Consumer<Profile>> addProfileConsumers = new CopyOnWriteArrayList<>();
-    protected final List<Consumer<Profile>> removeProfileConsumers = new CopyOnWriteArrayList<>();
 
     @Autowired
     public ProfileManager(MaridBeanConnectionManager connectionManager) throws IOException {
@@ -59,26 +56,11 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
         }
     }
 
-    public void addProfileAddConsumer(Consumer<Profile> consumer) {
-        addProfileConsumers.add(consumer);
-    }
-
-    public void removeProfileAddConsumer(Consumer<Profile> consumer) {
-        addProfileConsumers.remove(consumer);
-    }
-
-    public void addProfileRemoveConsumer(Consumer<Profile> consumer) {
-        removeProfileConsumers.add(consumer);
-    }
-
-    public void removeProfileRemoveConsumer(Consumer<Profile> consumer) {
-        removeProfileConsumers.remove(consumer);
-    }
-
     private Profile newProfile(Path path) {
         return profileMap.computeIfAbsent(path.getFileName().toString(), n -> {
             final Profile profile = new Profile(this, path);
-            addProfileConsumers.forEach(c -> c.accept(profile));
+            setChanged();
+            notifyObservers(new Object[] {"addProfile", profile});
             return profile;
         });
     }
@@ -92,7 +74,6 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
         if (!Files.isDirectory(path)) {
             try {
                 Files.createDirectories(path);
-
             } catch (IOException x) {
                 throw new IllegalStateException(x);
             }
@@ -106,7 +87,8 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
 
     public void removeProfile(String name) {
         profileMap.computeIfPresent(name, (n, v) -> {
-            removeProfileConsumers.forEach(c -> c.accept(v));
+            setChanged();
+            notifyObservers(new Object[] {"removeProfile", v});
             return null;
         });
     }
@@ -124,6 +106,8 @@ public class ProfileManager implements LogSupport, SysPrefSupport {
             SYSPREFS.remove("currentProfile");
         } else {
             putSysPref("currentProfile", profile.getName());
+            setChanged();
+            notifyObservers(new Object[] {"setCurrentProfile", profile});
         }
     }
 

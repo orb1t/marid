@@ -19,30 +19,31 @@
 package org.marid.service.proto.pp;
 
 import org.marid.service.proto.ProtoObject;
-import org.marid.service.util.MapUtil;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.ToLongFunction;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PpContext extends ProtoObject {
+public class PpContext extends ProtoObject<PpContext> {
 
     protected final PpService service;
     protected final TreeMap<String, PpBus> busMap = new TreeMap<>();
     protected final ScheduledThreadPoolExecutor timer;
-    protected final Descriptor descriptor;
+    protected final ToLongFunction<PpContext> shutdownTimeout;
 
-    public PpContext(@Nonnull PpService ppService, @Nonnull String name, @Nonnull Map<String, Object> map) {
-        super(null, name, map);
+    public PpContext(@Nonnull PpService ppService, @Nonnull String name, @Nonnull Descriptor descriptor) {
+        super(null, name, descriptor);
         service = ppService;
-        MapUtil.children(map, "buses").forEach((k, v) -> busMap.put(MapUtil.name(k), new PpBus(this, k, v)));
-        descriptor = f(map, "descriptor", Descriptor.class, Descriptor.DEFAULT);
+        shutdownTimeout = descriptor::shutdownTimeout;
+        descriptor.buses().forEach((k, v) -> busMap.put(k, new PpBus(this, k, v)));
         timer = new ScheduledThreadPoolExecutor(descriptor.threads(this));
     }
 
@@ -98,7 +99,7 @@ public class PpContext extends ProtoObject {
         busMap.values().forEach(PpBus::close);
         timer.shutdown();
         try {
-            if (!timer.awaitTermination(descriptor.shutdownTimeout(this), TimeUnit.SECONDS)) {
+            if (!timer.awaitTermination(shutdownTimeout.applyAsLong(this), TimeUnit.SECONDS)) {
                 throw new TimeoutException();
             }
         } catch (Exception x) {
@@ -107,9 +108,7 @@ public class PpContext extends ProtoObject {
         fireEvent("close");
     }
 
-    protected interface Descriptor {
-
-        Descriptor DEFAULT = new Descriptor() {};
+    public interface Descriptor extends ProtoObject.Descriptor<PpContext> {
 
         default int threads(PpContext context) {
             return 1;
@@ -117,6 +116,10 @@ public class PpContext extends ProtoObject {
 
         default long shutdownTimeout(PpContext context) {
             return 60L;
+        }
+
+        default Map<String, PpBus.Descriptor> buses() {
+            return Collections.emptyMap();
         }
     }
 }
