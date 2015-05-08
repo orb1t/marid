@@ -22,7 +22,7 @@
 
     <groupId>org.marid</groupId>
     <artifactId>marid</artifactId>
-    <version>0.9.4-SNAPSHOT</version>
+    <version>0.8.8-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>marid</name>
