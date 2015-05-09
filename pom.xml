@@ -57,8 +57,6 @@
         <test.groups>org.marid.test.NormalTests</test.groups>
         <benchmark.groups>org.marid.test.NormalBenchmarks</benchmark.groups>
 
-        <groovy.classifier/>
-
         <repo-id>sourceforge</repo-id>
         <repo-name>sourceforge</repo-name>
         <repo-url>sftp://frs.sf.net/home/frs/project/marid/repo</repo-url>
@@ -195,14 +193,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-
-        <profile>
-            <id>indy</id>
-
-            <properties>
-                <groovy.classifier>indy</groovy.classifier>
-            </properties>
         </profile>
     </profiles>
 
@@ -488,7 +478,7 @@
             <dependency>
                 <groupId>org.codehaus.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
-                <classifier>${groovy.classifier}</classifier>
+                <classifier>indy</classifier>
                 <version>2.4.3</version>
             </dependency>
 
