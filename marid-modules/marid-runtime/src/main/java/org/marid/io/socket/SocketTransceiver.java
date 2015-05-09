@@ -18,6 +18,7 @@
 
 package org.marid.io.socket;
 
+import org.marid.groovy.MapProxies;
 import org.marid.io.BinStreams;
 import org.marid.io.Transceiver;
 import org.marid.logging.LogSupport;
@@ -43,8 +44,8 @@ public final class SocketTransceiver implements Transceiver, LogSupport {
         this.parameters = parameters;
     }
 
-    public SocketTransceiver(Map<String, Object> parameters) {
-        this(new SocketTransceiverParameters(parameters));
+    public SocketTransceiver(Map map) {
+        this(MapProxies.newInstance(SocketTransceiverParameters.class, map));
     }
 
     @Override
@@ -55,11 +56,11 @@ public final class SocketTransceiver implements Transceiver, LogSupport {
     @Override
     public void open() throws IOException {
         if (socket == null) {
-            socket = new Socket(parameters.getProxy());
+            socket = new Socket(parameters.proxy());
             try {
-                socket.setSoTimeout(parameters.getSoTimeout());
-                socket.setReuseAddress(parameters.isReuseAddress());
-                socket.connect(parameters.getSocketAddress(), parameters.getConnectTimeout());
+                socket.setSoTimeout(parameters.soTimeout());
+                socket.setReuseAddress(parameters.reuseAddress());
+                socket.connect(parameters.socketAddress(), parameters.connectTimeout());
                 inputStream = socket.getInputStream();
                 outputStream = socket.getOutputStream();
             } catch (IOException x) {

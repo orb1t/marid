@@ -19,8 +19,6 @@
 package org.marid.service.proto;
 
 import org.marid.concurrent.ConcurrentUtils;
-import org.marid.dyn.Casting;
-import org.marid.groovy.MapProxies;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
 import org.marid.methods.LogMethods;
@@ -108,21 +106,6 @@ public abstract class ProtoObject<O extends ProtoObject<O>> implements Named, Lo
 
     public abstract ProtoObject getContext();
 
-    protected <T> T f(Map<String, Object> map, String key, Class<T> type, T defaultValue) {
-        final Object v = map.get(key);
-        if (v != null) {
-            if (type.isInstance(v)) {
-                return type.cast(v);
-            } else if (type.isInterface() && v instanceof Map) {
-                return MapProxies.newInstance(type, (Map) v);
-            } else {
-                return Casting.castTo(type, v);
-            }
-        } else {
-            return defaultValue;
-        }
-    }
-
     public void addEventListener(ProtoEventListener eventListener) {
         eventListeners.add(eventListener);
     }
@@ -162,7 +145,7 @@ public abstract class ProtoObject<O extends ProtoObject<O>> implements Named, Lo
         return String.join("/", getPath());
     }
 
-    public interface Descriptor<O extends ProtoObject> {
+    public interface Descriptor<O extends ProtoObject<O>> {
 
         default void onInit(O object) {
         }

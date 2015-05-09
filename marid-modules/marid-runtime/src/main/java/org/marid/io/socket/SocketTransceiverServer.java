@@ -18,6 +18,7 @@
 
 package org.marid.io.socket;
 
+import org.marid.groovy.MapProxies;
 import org.marid.io.BinStreams;
 import org.marid.io.Transceiver;
 import org.marid.io.TransceiverServer;
@@ -44,12 +45,12 @@ public final class SocketTransceiverServer implements TransceiverServer, LogSupp
     private ServerSocket serverSocket;
 
     public SocketTransceiverServer(SocketTransceiverServerParameters parameters) {
-        address = parameters.getSocketAddress();
-        backlog = parameters.getBacklog();
+        address = parameters.socketAddress();
+        backlog = parameters.backlog();
     }
 
-    public SocketTransceiverServer(Map<String, Object> map) {
-        this(new SocketTransceiverServerParameters(map));
+    public SocketTransceiverServer(Map map) {
+        this(MapProxies.newInstance(SocketTransceiverServerParameters.class, map));
     }
 
     @Override

@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired
     data: [
         buses  : [
             bus1: [
-                transceiver: { new SocketTransceiver([port: pbService.context.vars.port]) },
+                transceiver: { new SocketTransceiver([socketAddress: new InetSocketAddress(pbService.context.vars.port)]) },
                 nodes      : [
                     node1: [
                         period: 1,
@@ -48,7 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired
                 ]
             ],
             bus2: [
-                transceiver: { new SocketTransceiver([port: pbService.context.vars.port2]) },
+                transceiver: { new SocketTransceiver([socketAddress: new InetSocketAddress(pbService.context.vars.port2)]) },
                 nodes      : [
                     node1: [
                         period: 1,

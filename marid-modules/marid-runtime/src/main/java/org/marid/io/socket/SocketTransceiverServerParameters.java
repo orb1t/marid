@@ -18,53 +18,18 @@
 
 package org.marid.io.socket;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import java.net.InetSocketAddress;
-import java.util.Map;
-
-import static org.marid.dyn.Casting.mapv;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class SocketTransceiverServerParameters {
+public interface SocketTransceiverServerParameters {
 
-    private InetSocketAddress socketAddress = new InetSocketAddress(0);
-    private int backlog = 50;
-
-    public SocketTransceiverServerParameters() {
+    default InetSocketAddress socketAddress() {
+        return new InetSocketAddress(0);
     }
 
-    public SocketTransceiverServerParameters(Map<String, Object> p) {
-        if (p.containsKey("host") && p.containsKey("port")) {
-            socketAddress = new InetSocketAddress(mapv(p, "host", String.class), mapv(p, "port", int.class));
-        } else if (p.containsKey("port")) {
-            socketAddress = new InetSocketAddress(mapv(p, "port", int.class));
-        }
-    }
-
-    public SocketTransceiverServerParameters setSocketAddress(InetSocketAddress socketAddress) {
-        this.socketAddress = socketAddress;
-        return this;
-    }
-
-    public SocketTransceiverServerParameters backlog(int backlog) {
-        this.backlog = backlog;
-        return this;
-    }
-
-    public InetSocketAddress getSocketAddress() {
-        return socketAddress;
-    }
-
-    public int getBacklog() {
-        return backlog;
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    default int backlog() {
+        return 50;
     }
 }
