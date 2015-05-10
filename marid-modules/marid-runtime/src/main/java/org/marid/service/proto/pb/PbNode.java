@@ -18,12 +18,12 @@
 
 package org.marid.service.proto.pb;
 
+import org.marid.functions.SafeBiConsumer;
 import org.marid.io.DummyTransceiverServer;
 import org.marid.io.Transceiver;
 import org.marid.io.TransceiverServer;
 import org.marid.service.proto.ProtoObject;
 
-import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +39,7 @@ public class PbNode extends ProtoObject<PbNode> {
     protected final TransceiverServer transceiverServer;
     protected final ToLongFunction<PbNode> idleTimeout;
     protected final ToLongFunction<PbNode> errorTimeout;
-    protected final Processor processor;
+    protected final SafeBiConsumer<PbNode, Transceiver> processor;
 
     protected Thread thread;
 
@@ -74,7 +74,7 @@ public class PbNode extends ProtoObject<PbNode> {
                         getBus().executor.execute(() -> {
                             transceivers.add(transceiver);
                             try (final Transceiver t = transceiver) {
-                                processor.process(this, t);
+                                processor.acceptUnsafe(this, t);
                             } catch (ClosedChannelException x) {
                                 fireEvent("destroyed");
                             } catch (Exception x) {
@@ -153,6 +153,7 @@ public class PbNode extends ProtoObject<PbNode> {
 
     @Override
     public synchronized void close() {
+        stop();
         for (final Transceiver transceiver : transceivers) {
             try {
                 transceiver.close();
@@ -160,7 +161,6 @@ public class PbNode extends ProtoObject<PbNode> {
                 fireEvent("close", x, transceiver);
             }
         }
-        stop();
         fireEvent("close");
     }
 
@@ -170,7 +170,7 @@ public class PbNode extends ProtoObject<PbNode> {
             return DummyTransceiverServer.INSTANCE;
         }
 
-        default void processor(PbNode bus, Transceiver transceiver) throws IOException {
+        default void processor(PbNode bus, Transceiver transceiver) throws Exception {
         }
 
         default long errorTimeout(PbNode bus) {
@@ -180,11 +180,5 @@ public class PbNode extends ProtoObject<PbNode> {
         default long idleTimeout(PbNode bus) {
             return 1L;
         }
-    }
-
-    @FunctionalInterface
-    public interface Processor {
-
-        void process(PbNode bus, Transceiver transceiver) throws IOException;
     }
 }

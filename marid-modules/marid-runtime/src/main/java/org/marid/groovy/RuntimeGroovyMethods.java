@@ -104,6 +104,10 @@ public class RuntimeGroovyMethods {
         return context;
     }
 
+    public static ProtoObject getAt(ProtoObject object, String child) {
+        return object.getChild(child);
+    }
+
     private static Logger logger(Object object) {
         if (object instanceof LogSupport) {
             return ((LogSupport) object).logger();

@@ -29,14 +29,6 @@ def array = [10, 20, 30, 40];
                 threads: 2,
                 nodes  : [
                     node1: [
-                        onInit   : { PbNode node ->
-                            node << [
-                                start: {
-                                    node.context.vars.port = it.source.transceiverServer.serverSocket.localPort;
-                                    info("{0} running on port {1}", node, node.context.vars.port);
-                                }
-                            ];
-                        },
                         server   : new SocketTransceiverServer([:]),
                         processor: { PbNode b, Transceiver t ->
                             while (b.running) {
@@ -48,14 +40,6 @@ def array = [10, 20, 30, 40];
                         }
                     ],
                     node2: [
-                        onInit   : { PbNode node ->
-                            node << [
-                                start: {
-                                    node.context.vars.port2 = it.source.transceiverServer.serverSocket.localPort;
-                                    info("{0} running on port {1}", node, node.context.vars.port2);
-                                }
-                            ];
-                        },
                         server   : new SocketTransceiverServer([:]),
                         processor: { PbNode b, Transceiver t ->
                             while (b.running) {
