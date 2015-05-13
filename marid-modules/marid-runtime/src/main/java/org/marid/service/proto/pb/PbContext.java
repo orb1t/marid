@@ -76,7 +76,7 @@ public class PbContext extends ProtoObject<PbContext> {
     }
 
     @Override
-    public PbBus getChild(String name) {
+    public PbBus getAt(String name) {
         return busMap.get(name);
     }
 

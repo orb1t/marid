@@ -36,10 +36,11 @@ import java.util.function.ToLongFunction;
 public class PbNode extends ProtoObject<PbNode> {
 
     protected final ConcurrentLinkedQueue<Transceiver> transceivers = new ConcurrentLinkedQueue<>();
-    protected final TransceiverServer transceiverServer;
     protected final ToLongFunction<PbNode> idleTimeout;
     protected final ToLongFunction<PbNode> errorTimeout;
     protected final SafeBiConsumer<PbNode, Transceiver> processor;
+
+    public final TransceiverServer transceiverServer;
 
     protected Thread thread;
 
@@ -133,7 +134,7 @@ public class PbNode extends ProtoObject<PbNode> {
     }
 
     @Override
-    public PbNode getChild(String name) {
+    public PbNode getAt(String name) {
         return null;
     }
 

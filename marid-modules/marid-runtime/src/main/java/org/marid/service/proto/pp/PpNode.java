@@ -148,7 +148,7 @@ public class PpNode extends ProtoObject<PpNode> {
     }
 
     @Override
-    public PpNode getChild(String name) {
+    public PpNode getAt(String name) {
         return nodeMap.get(name);
     }
 

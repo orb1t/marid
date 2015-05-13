@@ -84,6 +84,10 @@ public final class SocketTransceiverServer implements TransceiverServer, LogSupp
         }
     }
 
+    public int getPort() {
+        return serverSocket != null ? serverSocket.getLocalPort() : address.getPort();
+    }
+
     @Override
     public void close() throws IOException {
         try {

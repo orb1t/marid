@@ -25,14 +25,14 @@ import org.marid.io.IoContext;
 import org.marid.logging.LogSupport;
 import org.marid.methods.LogMethods;
 import org.marid.service.proto.ProtoEventListener;
-import org.marid.service.proto.ProtoObject;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
+
+import org.marid.service.proto.ProtoObject;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -102,10 +102,6 @@ public class RuntimeGroovyMethods {
     public static IoContext rule(IoContext context, int size, Function<ByteBuffer, Object> f) throws IOException {
         context.rule(buf -> buf.capacity() == size ? f.apply(buf) : null);
         return context;
-    }
-
-    public static ProtoObject getAt(ProtoObject object, String child) {
-        return object.getChild(child);
     }
 
     private static Logger logger(Object object) {

@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired
     data: [
         buses  : [
             bus1: [
-                transceiver: { new SocketTransceiver([socketAddress: new InetSocketAddress(pbService.context["bus1"]["node1"].transceiverServer.serverSocket.localPort)]) },
+                transceiver: new SocketTransceiver([socketAddress: new InetSocketAddress(pbService.context["bus1"]["node1"].transceiverServer.port)]),
                 nodes      : [
                     node1: [
                         period: 1,
@@ -48,13 +48,13 @@ import org.springframework.beans.factory.annotation.Autowired
                 ]
             ],
             bus2: [
-                transceiver: { new SocketTransceiver([socketAddress: new InetSocketAddress(pbService.context["bus1"]["node2"].transceiverServer.serverSocket.localPort)]) },
+                transceiver: new SocketTransceiver([socketAddress: new InetSocketAddress(pbService.context["bus1"]["node2"].transceiverServer.port)]),
                 nodes      : [
                     node1: [
                         period: 1,
                         task  : { PpNode node ->
                             node.bus.io({ Transceiver t ->
-                                for (def i in 4..9) {
+                                for (def i in 4..7) {
                                     t.data << [i as int];
                                     def data = t.data.rule(4, { buf -> buf.getInt() }).read();
                                     if (data != null) {

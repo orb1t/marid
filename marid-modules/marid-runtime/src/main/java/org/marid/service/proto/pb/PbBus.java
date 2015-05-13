@@ -92,7 +92,7 @@ public class PbBus extends ProtoObject<PbBus> {
     }
 
     @Override
-    public PbNode getChild(String name) {
+    public PbNode getAt(String name) {
         return nodeMap.get(name);
     }
 

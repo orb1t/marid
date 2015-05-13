@@ -94,7 +94,7 @@ public abstract class ProtoObject<O extends ProtoObject<O>> implements Named, Lo
 
     public abstract boolean isStopped();
 
-    public abstract ProtoObject getChild(String name);
+    public abstract ProtoObject getAt(String name);
 
     public List<String> getPath() {
         final List<String> path = new ArrayList<>();
