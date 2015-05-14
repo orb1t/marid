@@ -38,6 +38,4 @@ public interface IdeFrame {
     Ide getIde();
 
     void dispose();
-
-    boolean isInitialized();
 }

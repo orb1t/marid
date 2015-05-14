@@ -18,25 +18,17 @@
 
 package org.marid.ide.gui;
 
-import org.marid.Marid;
-import org.marid.dyn.MetaInfo;
 import org.marid.ide.base.Ide;
 import org.marid.ide.base.IdeFrame;
-import org.marid.ide.frames.MaridFrame;
-import org.marid.ide.widgets.Widget;
 import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
-import org.marid.spring.Form;
-import org.marid.swing.ComponentConfiguration;
 import org.marid.swing.WindowPrefs;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
-import org.marid.swing.forms.ConfigurationDialog;
 import org.marid.swing.log.SwingHandler;
 import org.marid.swing.util.MessageSupport;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -46,8 +38,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
@@ -60,7 +50,6 @@ import static javax.swing.JOptionPane.*;
 public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSupport, MessageSupport {
 
     private final IdeImpl ide;
-    private final AtomicBoolean initialized = new AtomicBoolean();
 
     @Autowired
     private IdeDesktopImpl desktop;
@@ -82,9 +71,9 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         setJMenuBar(new JMenuBar());
     }
 
+    @Order(0)
     @PostConstruct
     private void init() {
-        MaridActions.fillMenu(ideActionMap, getJMenuBar());
         add(desktop);
         add(statusLine, BorderLayout.SOUTH);
         pack();
@@ -113,68 +102,9 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         return menu;
     }
 
-    @Order(1)
-    @Autowired
-    protected void initWidgetsMenu() {
-        final AnnotationConfigApplicationContext applicationContext = Marid.getCurrentContext();
-        final JMenu menu = new JMenu(s("Widgets"));
-        for (final String beanName : applicationContext.getBeanNamesForType(Widget.class)) {
-            final MetaInfo metaInfo = applicationContext.findAnnotationOnBean(beanName, MetaInfo.class);
-            menu.add(new MaridAction(metaInfo.name(), metaInfo.icon(), e -> {
-                final Widget newWidget = applicationContext.getBean(beanName, Widget.class);
-                desktop.add(newWidget);
-                newWidget.show();
-            }));
-        }
-        getJMenuBar().add(menu);
-    }
-
-    @Order(2)
-    @Autowired
-    protected void initFramesMenu() {
-        final AnnotationConfigApplicationContext applicationContext = Marid.getCurrentContext();
-        final JMenu menu = new JMenu(s("Frames"));
-        for (final String beanName : applicationContext.getBeanNamesForType(MaridFrame.class)) {
-            final MetaInfo metaInfo = applicationContext.findAnnotationOnBean(beanName, MetaInfo.class);
-            menu.add(new MaridAction(metaInfo.name(), metaInfo.icon(), e -> {
-                final MaridFrame frame = applicationContext.getBean(beanName, MaridFrame.class);
-                frame.setVisible(true);
-            }));
-        }
-        getJMenuBar().add(menu);
-    }
-
-    @Order(3)
-    @Autowired
-    protected void initPreferencesMenu(Set<ComponentConfiguration> componentConfigurations) {
-        final JMenu menu = new JMenu(s("Preferences"));
-        for (final ComponentConfiguration componentConfiguration : componentConfigurations) {
-            final Form form = componentConfiguration.getClass().getAnnotation(Form.class);
-            if (form == null) {
-                continue;
-            }
-            final String icon = form.icon().isEmpty() ? null : form.icon();
-            final String description = form.description().isEmpty() ? null : s(form.description());
-            menu.add(new MaridAction(
-                    s(form.name()),
-                    icon,
-                    e -> new ConfigurationDialog(this, s(form.name()), componentConfiguration).setVisible(true),
-                    Action.SHORT_DESCRIPTION, description
-            ));
-        }
-        menu.addSeparator();
-        menu.add(lafMenu());
-        getJMenuBar().add(menu);
-    }
-
     @Override
     public Ide getIde() {
         return ide;
-    }
-
-    @Override
-    public boolean isInitialized() {
-        return initialized.get();
     }
 
     @Override
@@ -189,9 +119,9 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
                 }
                 break;
             case WindowEvent.WINDOW_OPENED:
+                MaridActions.fillMenu(ideActionMap, getJMenuBar());
                 setState(getPref("state", getState()));
                 setExtendedState(getPref("extendedState", getExtendedState()));
-                initialized.set(true);
                 break;
         }
         super.processWindowEvent(e);

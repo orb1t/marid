@@ -20,11 +20,11 @@ package org.marid.ide.components;
 
 import org.marid.bd.shapes.LinkShapeType;
 import org.marid.dyn.MetaInfo;
-import org.marid.spring.Form;
 import org.marid.swing.ComponentConfiguration;
 import org.marid.swing.InputMaskType;
 import org.marid.swing.input.ComboInputControl;
 import org.marid.swing.input.ExtComboInputControl;
+import org.springframework.stereotype.Component;
 
 import static org.marid.bd.shapes.LinkShapeType.LINE;
 import static org.marid.swing.InputMaskType.CONTROL;
@@ -33,7 +33,8 @@ import static org.marid.swing.InputMaskType.SHIFT;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Form(name = "Schema Frame Configuration")
+@MetaInfo(name = "Schema Frame Configuration")
+@Component
 public class SchemaFrameConfiguration extends ComponentConfiguration {
 
     @MetaInfo(order = 1)

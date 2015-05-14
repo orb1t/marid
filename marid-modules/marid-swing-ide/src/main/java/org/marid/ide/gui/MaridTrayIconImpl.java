@@ -22,12 +22,14 @@ import org.marid.image.MaridIcon;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
+import org.marid.swing.actions.WindowAction;
 import org.marid.swing.log.TrayIconHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowEvent;
 import java.util.logging.Level;
 
 import static java.util.logging.Level.OFF;
@@ -56,9 +58,15 @@ public class MaridTrayIconImpl implements AutoCloseable, LogSupport, L10nSupport
             exitMenuItem.addActionListener(e -> ideFrame.exitWithConfirm());
             popupMenu.add(exitMenuItem);
             popupMenu.addSeparator();
-            for (int i = 0; i < ideFrame.getJMenuBar().getMenuCount(); i++) {
-                popupMenu.add(menu(ideFrame.getJMenuBar().getMenu(i)));
-            }
+            ideFrame.addWindowListener(new WindowAction(e -> {
+                switch (e.getID()) {
+                    case WindowEvent.WINDOW_OPENED:
+                        for (int i = 0; i < ideFrame.getJMenuBar().getMenuCount(); i++) {
+                            popupMenu.add(menu(ideFrame.getJMenuBar().getMenu(i)));
+                        }
+                        break;
+                }
+            }));
             final TrayIcon icon = new TrayIcon(image, s("Marid IDE"), popupMenu);
             icon.addActionListener(ev -> ideFrame.setVisible(!ideFrame.isVisible()));
             ideFrame.setVisible(true);
