@@ -218,6 +218,7 @@
     </licenses>
 
     <modules>
+        <module>marid-gres</module>
         <module>marid-modules</module>
         <module>marid-test</module>
     </modules>
