@@ -19,10 +19,13 @@
 package org.marid.ide;
 
 import org.marid.Marid;
+import org.marid.ide.context.BaseContext;
+import org.marid.ide.context.GuiContext;
+import org.marid.ide.context.ProfileContext;
 import org.marid.lifecycle.MaridRunner;
-import org.marid.logging.LogSupport;
 import org.marid.logging.Logging;
 import org.marid.swing.log.SwingHandler;
+import org.marid.xml.XmlPersister;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.awt.*;
@@ -30,7 +33,7 @@ import java.awt.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridIde implements MaridRunner, LogSupport {
+public class MaridIde implements MaridRunner {
 
     public static void main(String[] args) throws Exception {
         Marid.start(EventQueue::invokeLater, args);
@@ -39,8 +42,6 @@ public class MaridIde implements MaridRunner, LogSupport {
     @Override
     public void run(AnnotationConfigApplicationContext context, String... args) throws Exception {
         Logging.rootLogger().addHandler(new SwingHandler());
-        Laffer.start();
-        info("Scanning packages");
-        context.register(IdeConfiguration.class);
+        context.register(XmlPersister.class, BaseContext.class, ProfileContext.class, GuiContext.class);
     }
 }

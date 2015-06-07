@@ -24,8 +24,13 @@ import org.marid.itf.Named;
 
 import javax.xml.bind.annotation.*;
 import java.rmi.server.UID;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Set;
 
+import static java.util.Collections.newSetFromMap;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static org.marid.util.CollectionUtils.getArrayFunction;
 
@@ -89,9 +94,9 @@ public class Schema implements Named {
     }
 
     public void build() {
-        final Set<Block> blocks = Collections.newSetFromMap(new IdentityHashMap<>(getBlocks().size()));
-        blocks.addAll(getBlocks());
-        final Set<Block> passed = Collections.newSetFromMap(new IdentityHashMap<>(blocks.size()));
+        final Set<Block> blocks = getBlocks().stream()
+                .collect(toCollection(() -> newSetFromMap(new IdentityHashMap<>(getBlocks().size()))));
+        final Set<Block> passed = newSetFromMap(new IdentityHashMap<>(blocks.size()));
         blocks.stream()
                 .filter(b -> b.getOutputs().isEmpty() || getLinks().stream().noneMatch(l -> l.getSource() == b))
                 .forEach(b -> build(passed, b));

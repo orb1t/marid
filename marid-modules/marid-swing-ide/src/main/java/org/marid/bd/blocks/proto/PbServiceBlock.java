@@ -52,9 +52,9 @@ public class PbServiceBlock extends StandardBlock implements ConfigurableBlock, 
 
     protected ClassNode classNode;
 
-    protected PbBusExpression[] buses;
+    protected PbBusDescriptor[] buses;
 
-    public final In busesInput = new In("buses", PbBusExpression[].class, v -> buses = v);
+    public final In busesInput = new In("buses", PbBusDescriptor[].class, v -> buses = v);
     public final Out serviceOut = new Out("service", ClassNode.class, this::output);
 
     protected ClassNode output() {
@@ -105,7 +105,7 @@ public class PbServiceBlock extends StandardBlock implements ConfigurableBlock, 
     public void reset() {
         className = "PBService";
         beanName = "pbService";
-        buses = new PbBusExpression[0];
+        buses = new PbBusDescriptor[0];
         classNode = null;
     }
 

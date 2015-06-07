@@ -16,28 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.blocks.proto;
+package org.marid.swing.geom;
 
-import org.codehaus.groovy.ast.expr.MapExpression;
-import org.marid.bd.BlockColors;
-import org.marid.bd.StandardBlock;
-import org.marid.bd.blocks.BdBlock;
-
-import javax.xml.bind.annotation.XmlRootElement;
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Proto Bus", iconText = "PBus", color = BlockColors.RED)
-@XmlRootElement
-public class PbBusBlock extends StandardBlock {
+public interface Dimensions {
 
-    private String name = "bus0";
-    private final MapExpression map = new MapExpression();
+    static Dimension atLeast(int minWidth, int minHeight, Dimension dimension) {
+        if (dimension.width >= minWidth && dimension.height >= minHeight) {
+            return dimension;
+        } else {
+            return new Dimension(Math.max(minWidth, dimension.width), Math.max(minHeight, dimension.height));
+        }
+    }
 
-    public final Out out = new Out("bus", PbBusDescriptor.class, () -> new PbBusDescriptor(name, map));
-
-    public void setName(String name) {
-        this.name = name;
+    static Rectangle atLeast(int minWidth, int minHeight, Rectangle r) {
+        if (r.width >= minWidth && r.height >= minHeight) {
+            return r;
+        } else {
+            return new Rectangle(r.x, r.y, Math.max(minWidth, r.width), Math.max(minHeight, r.height));
+        }
     }
 }

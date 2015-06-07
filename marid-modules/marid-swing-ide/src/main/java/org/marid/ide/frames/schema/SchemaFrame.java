@@ -19,6 +19,7 @@
 package org.marid.ide.frames.schema;
 
 import images.Images;
+import org.marid.Marid;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.schema.SchemaEditor;
 import org.marid.bd.schema.SchemaModel;
@@ -26,17 +27,19 @@ import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.components.BlockMenuProvider;
-import org.marid.ide.components.BlockPersister;
 import org.marid.ide.components.ProfileManager;
 import org.marid.ide.frames.MaridFrame;
 import org.marid.ide.profile.Profile;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.marid.swing.SwingUtil;
+import org.marid.xml.XmlPersister;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.LayerUI;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
@@ -56,7 +59,6 @@ import static javax.swing.BorderFactory.*;
 public class SchemaFrame extends MaridFrame {
 
     protected final ProfileManager profileManager;
-    protected final BlockPersister persister;
     protected final SchemaEditor schemaEditor;
     protected final JLayer<SchemaEditor> layer;
     protected final JMenu blocksMenu = new JMenu(s("Blocks"));
@@ -64,10 +66,9 @@ public class SchemaFrame extends MaridFrame {
     protected File file;
 
     @Autowired
-    public SchemaFrame(BlockMenuProvider blockMenuProvider, ProfileManager profileManager, BlockPersister persister, SchemaEditor schemaEditor) {
+    public SchemaFrame(BlockMenuProvider blockMenuProvider, ProfileManager profileManager, SchemaEditor schemaEditor) {
         super("Schema");
         this.profileManager = profileManager;
-        this.persister = persister;
         enableEvents(AWTEvent.COMPONENT_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
         centerPanel.add(layer = new JLayer<>(this.schemaEditor = schemaEditor, new SchemaLayerUI()));
         getContentPane().setBackground(getBackground());
@@ -122,7 +123,7 @@ public class SchemaFrame extends MaridFrame {
         switch (chooser.showOpenDialog(this)) {
             case JFileChooser.APPROVE_OPTION:
                 try {
-                    final SchemaModel model = persister.load(chooser.getSelectedFile().toPath());
+                    final SchemaModel model = XmlPersister.get().load(SchemaModel.class, new StreamSource(chooser.getSelectedFile()));
                     schemaEditor.load(model);
                     file = chooser.getSelectedFile();
                 } catch (Exception x) {
@@ -138,8 +139,8 @@ public class SchemaFrame extends MaridFrame {
             return;
         }
         try {
-            final SchemaModel model = new SchemaModel(schemaEditor);
-            persister.save(model, file.toPath());
+            final SchemaModel model = Marid.getCurrentContext().getBean(SchemaModel.class, schemaEditor);
+            XmlPersister.get().save(model, new StreamResult(file));
         } catch (Exception x) {
             showMessage(ERROR_MESSAGE, "Save error", "Save {0} error", x, file);
         }

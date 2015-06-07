@@ -16,11 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide;
+package org.marid.ide.components;
 
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
 import org.marid.swing.StandardLookAndFeel;
+import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
@@ -28,9 +29,12 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class Laffer implements LogSupport, SysPrefSupport {
+@Component(MaridLaf.NAME)
+public class MaridLaf implements LogSupport, SysPrefSupport {
 
-    public static void start() {
+    public static final String NAME = "laf";
+
+    public MaridLaf() {
         UIManager.installLookAndFeel("Standard", StandardLookAndFeel.class.getName());
         final String laf = SYSPREFS.get("laf", NimbusLookAndFeel.class.getCanonicalName());
         try {

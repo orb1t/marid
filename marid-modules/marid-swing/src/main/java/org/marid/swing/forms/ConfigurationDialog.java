@@ -24,6 +24,7 @@ import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.ComponentConfiguration;
 import org.marid.swing.actions.MaridAction;
+import org.marid.swing.geom.Dimensions;
 import org.marid.swing.input.InputControl;
 import org.marid.swing.input.TitledInputControl;
 import org.marid.util.StringUtils;
@@ -59,7 +60,6 @@ public class ConfigurationDialog extends JDialog implements LogSupport, PrefSupp
     protected final Preferences preferences;
     protected final JTabbedPane tabbedPane;
     private final Map<Component, ComponentHolder> containerMap = new IdentityHashMap<>();
-    private final Map<String, String> tabLabelMap = new HashMap<>();
     private final Map<String, String> keyLabelMap = new HashMap<>();
 
     public ConfigurationDialog(Window window, String title, ComponentConfiguration configuration) {
@@ -79,7 +79,7 @@ public class ConfigurationDialog extends JDialog implements LogSupport, PrefSupp
             h.addComponent(cclBtn).addComponent(okBtn);
             v.addComponent(impBtn).addComponent(expBtn).addComponent(defBtn).addComponent(cclBtn).addComponent(okBtn);
         }), SOUTH);
-        setPreferredSize(getPref("size", getPreferredSize()));
+        setPreferredSize(getPref("size", Dimensions.atLeast(800, 600, getPreferredSize())));
         getRootPane().setDefaultButton(okBtn);
         getRootPane().registerKeyboardAction(cclBtn.getAction(), getKeyStroke("ESCAPE"), WHEN_IN_FOCUSED_WINDOW);
         pack();
@@ -134,7 +134,7 @@ public class ConfigurationDialog extends JDialog implements LogSupport, PrefSupp
                 panel.add(new JLabel(format("<html><b>%s</b></html>", s("Tab") + ":")), c);
                 c.weightx = 1.0;
                 c.gridwidth = REMAINDER;
-                panel.add(new JLabel(tabLabelMap.get(e.getKey().p.key)), c);
+                panel.add(new JLabel(e.getKey().p.key), c);
                 c.weightx = 0.0;
                 c.gridwidth = RELATIVE;
                 panel.add(new JLabel(format("<html><b>%s</b></html>", s("Label") + ":")), c);

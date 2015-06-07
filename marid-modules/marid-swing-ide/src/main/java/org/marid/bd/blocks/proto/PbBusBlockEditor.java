@@ -18,26 +18,16 @@
 
 package org.marid.bd.blocks.proto;
 
-import org.codehaus.groovy.ast.expr.MapExpression;
-import org.marid.bd.BlockColors;
-import org.marid.bd.StandardBlock;
-import org.marid.bd.blocks.BdBlock;
+import org.marid.bd.components.AbstractBlockComponentEditor;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Proto Bus", iconText = "PBus", color = BlockColors.RED)
-@XmlRootElement
-public class PbBusBlock extends StandardBlock {
+public class PbBusBlockEditor extends AbstractBlockComponentEditor<PbBusBlock> {
 
-    private String name = "bus0";
-    private final MapExpression map = new MapExpression();
-
-    public final Out out = new Out("bus", PbBusDescriptor.class, () -> new PbBusDescriptor(name, map));
-
-    public void setName(String name) {
-        this.name = name;
+    public PbBusBlockEditor(Window window, PbBusBlock block) {
+        super(window, block);
     }
 }

@@ -20,12 +20,10 @@ package org.marid.ide.context;
 
 import org.marid.ide.log.LoggingPostProcessor;
 import org.marid.spring.SwingBeanPostProcessor;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.swing.*;
-import java.util.Timer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,11 +39,6 @@ public class BaseContext {
     @Bean
     public static SwingBeanPostProcessor swingBeanPostProcessor() {
         return new SwingBeanPostProcessor();
-    }
-
-    @Bean(destroyMethod = "cancel", autowire = Autowire.BY_NAME)
-    public static Timer ideTimer() {
-        return new Timer("ideTimer");
     }
 
     @Bean

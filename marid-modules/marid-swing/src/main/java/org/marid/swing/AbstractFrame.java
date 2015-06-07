@@ -24,6 +24,7 @@ import org.marid.pref.SysPrefSupport;
 import org.marid.swing.actions.ActionKeySupport;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
+import org.marid.swing.menu.SwingMenuBarWrapper;
 import org.marid.swing.util.MessageSupport;
 
 import javax.annotation.PostConstruct;
@@ -85,7 +86,7 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         fillActions();
         final JMenuBar menuBar = new JMenuBar();
         final JToolBar toolBar = new JToolBar();
-        MaridActions.fillMenu(getActionMap(), menuBar);
+        MaridActions.fillMenu(getActionMap(), new SwingMenuBarWrapper(menuBar));
         MaridActions.fillToolbar(getActionMap(), toolBar);
         for (int i = menuBar.getComponentCount() - 1; i >= 0; i--) {
             getJMenuBar().add(menuBar.getComponent(i), 0);

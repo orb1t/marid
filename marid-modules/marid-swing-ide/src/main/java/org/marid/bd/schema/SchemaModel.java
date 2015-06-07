@@ -20,6 +20,8 @@ package org.marid.bd.schema;
 
 import org.marid.bd.Block;
 import org.marid.bd.BlockLink;
+import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.xml.XmlBindable;
 
 import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
@@ -30,6 +32,8 @@ import java.util.List;
  */
 @XmlRootElement
 @XmlSeeAlso({Schema.class, BlockLayoutInfo.class, BlockLinkLayoutInfo.class})
+@XmlBindable
+@PrototypeComponent
 public class SchemaModel {
 
     @XmlElement

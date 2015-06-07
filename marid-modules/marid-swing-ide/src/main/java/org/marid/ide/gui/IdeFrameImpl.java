@@ -27,9 +27,9 @@ import org.marid.swing.WindowPrefs;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
 import org.marid.swing.log.SwingHandler;
+import org.marid.swing.menu.SwingMenuBarWrapper;
 import org.marid.swing.util.MessageSupport;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -71,7 +71,6 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         setJMenuBar(new JMenuBar());
     }
 
-    @Order(0)
     @PostConstruct
     private void init() {
         add(desktop);
@@ -80,6 +79,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
         setState(getPref("state", getState()));
         setExtendedState(getPref("extendedState", getExtendedState()));
+        setVisible(true);
     }
 
     @PreDestroy
@@ -119,7 +119,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
                 }
                 break;
             case WindowEvent.WINDOW_OPENED:
-                MaridActions.fillMenu(ideActionMap, getJMenuBar());
+                MaridActions.fillMenu(ideActionMap, new SwingMenuBarWrapper(getJMenuBar()));
                 setState(getPref("state", getState()));
                 setExtendedState(getPref("extendedState", getExtendedState()));
                 break;

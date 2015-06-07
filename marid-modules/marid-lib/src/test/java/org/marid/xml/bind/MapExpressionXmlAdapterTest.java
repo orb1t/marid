@@ -16,28 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.blocks.proto;
+package org.marid.xml.bind;
 
+import groovy.lang.GroovyShell;
 import org.codehaus.groovy.ast.expr.MapExpression;
-import org.marid.bd.BlockColors;
-import org.marid.bd.StandardBlock;
-import org.marid.bd.blocks.BdBlock;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.marid.test.NormalTests;
+import org.marid.xml.bind.adapter.MapExpressionXmlAdapter;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Proto Bus", iconText = "PBus", color = BlockColors.RED)
-@XmlRootElement
-public class PbBusBlock extends StandardBlock {
+@Category({NormalTests.class})
+public class MapExpressionXmlAdapterTest {
 
-    private String name = "bus0";
-    private final MapExpression map = new MapExpression();
-
-    public final Out out = new Out("bus", PbBusDescriptor.class, () -> new PbBusDescriptor(name, map));
-
-    public void setName(String name) {
-        this.name = name;
+    @Test
+    public void testMapExpressionCodec() throws Exception {
+        final MapExpressionXmlAdapter adapter = new MapExpressionXmlAdapter();
+        final MapExpression mapExpression = adapter.unmarshal("[x: 1, z : 2 * 10 + Math.sin(1)]");
+        final String code = adapter.marshal(mapExpression);
+        final GroovyShell shell = new GroovyShell();
+        final Map map = (Map) shell.evaluate(code);
+        Assert.assertEquals(1, map.get("x"));
+        Assert.assertEquals(2 * 10 + Math.sin(1), map.get("z"));
     }
 }

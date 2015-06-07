@@ -18,6 +18,7 @@
 
 package org.marid.bd.blocks;
 
+import org.marid.xml.XmlBindable;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
@@ -30,6 +31,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
+@XmlBindable
 @Component
 public @interface BdBlock {
 

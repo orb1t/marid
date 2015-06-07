@@ -18,16 +18,18 @@
 
 package org.marid.bd;
 
-import org.marid.ide.components.BlockPersister;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
 import org.marid.methods.LogMethods;
 import org.marid.util.CollectionUtils;
 import org.marid.util.Utils;
+import org.marid.xml.XmlPersister;
+import org.springframework.context.annotation.DependsOn;
 
 import javax.swing.*;
 import javax.xml.bind.annotation.*;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Field;
@@ -43,6 +45,7 @@ import java.util.logging.Logger;
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
+@DependsOn({"xmlPersister"})
 public abstract class Block implements Named, Serializable, LogSupport, BuildTrigger {
 
     @XmlAttribute
@@ -140,7 +143,7 @@ public abstract class Block implements Named, Serializable, LogSupport, BuildTri
     protected Object writeReplace() throws ObjectStreamException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
-            BlockPersister.instance.save(this, new StreamResult(bos));
+            XmlPersister.get().save(this, new StreamResult(bos));
             return new BlockProxy(bos.toByteArray());
         } catch (IOException x) {
             throw new WriteAbortedException("Replace error", x);
@@ -149,17 +152,12 @@ public abstract class Block implements Named, Serializable, LogSupport, BuildTri
 
     @Override
     public String toString() {
-        final BlockPersister persister = BlockPersister.instance;
-        if (persister == null) {
-            return super.toString();
-        } else {
-            final StringWriter writer = new StringWriter();
-            try {
-                persister.save(this, new StreamResult(writer));
-                return writer.toString();
-            } catch (Exception x) {
-                throw new IllegalStateException(x);
-            }
+        final StringWriter writer = new StringWriter();
+        try {
+            XmlPersister.get().save(this, new StreamResult(writer));
+            return writer.toString();
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
         }
     }
 
@@ -176,7 +174,7 @@ public abstract class Block implements Named, Serializable, LogSupport, BuildTri
 
         public Object readResolve() throws ObjectStreamException {
             try {
-                final Block block = BlockPersister.instance.load(new ByteArrayInputStream(data));
+                final Block block = XmlPersister.get().load(Block.class, new StreamSource(new ByteArrayInputStream(data)));
                 block.id = Utils.textUid();
                 return block;
             } catch (Exception x) {

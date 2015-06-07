@@ -24,6 +24,7 @@ import org.marid.swing.ConfigurableComponent;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
 import org.marid.swing.forms.ConfigurationDialog;
+import org.marid.swing.menu.SwingMenuBarWrapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -61,7 +62,7 @@ public abstract class Widget extends JInternalFrame implements WidgetSupport {
         fillActions();
         MaridActions.fillToolbar(getActionMap(), toolBar);
         if (getJMenuBar() != null) {
-            MaridActions.fillMenu(getActionMap(), getJMenuBar());
+            MaridActions.fillMenu(getActionMap(), new SwingMenuBarWrapper(getJMenuBar()));
         } else {
             for (final Object k : getActionMap().allKeys()) {
                 final Action action = getActionMap().get(k);
