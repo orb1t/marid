@@ -34,7 +34,7 @@ import static java.nio.file.Files.newBufferedWriter;
 public class ClassHelper {
 
     public static void saveClassNode(Path directory, ClassNode classNode) throws IOException {
-        try (final Writer writer = newBufferedWriter(directory.resolve(classNode.getName()), UTF_8)) {
+        try (final Writer writer = newBufferedWriter(directory.resolve(classNode.getName() + ".groovy"), UTF_8)) {
             final AstNodeToScriptVisitor visitor = new AstNodeToScriptVisitor(writer);
             visitor.visitClass(classNode);
         }

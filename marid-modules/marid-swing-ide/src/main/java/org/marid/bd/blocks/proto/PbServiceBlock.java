@@ -21,40 +21,45 @@ package org.marid.bd.blocks.proto;
 import groovyjarjarasm.asm.Opcodes;
 import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassNode;
-import org.codehaus.groovy.ast.expr.ConstantExpression;
+import org.codehaus.groovy.ast.Parameter;
+import org.codehaus.groovy.ast.expr.*;
+import org.codehaus.groovy.ast.stmt.ExpressionStatement;
 import org.marid.bd.BlockColors;
 import org.marid.bd.ClassNodeBuildTrigger;
 import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
+import org.marid.groovy.MapProxies;
 import org.marid.service.proto.pb.PbService;
+import org.marid.service.proto.pb.PbServiceConfiguration;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.awt.*;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.EventListener;
 import java.util.List;
 import java.util.Objects;
 
+import static java.util.Collections.singletonList;
 import static org.codehaus.groovy.ast.ClassHelper.makeCached;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@BdBlock(name = "Proto Builder", iconText = "PB", color = BlockColors.RED)
+@BdBlock(name = "Proto Service", iconText = "PB", color = BlockColors.RED)
 @XmlRootElement
 public class PbServiceBlock extends StandardBlock implements ConfigurableBlock, ClassNodeBuildTrigger {
 
-    protected String className;
-    protected String beanName;
+    protected String className = "PBService";
+    protected String beanName = "pbService";
 
     protected ClassNode classNode;
 
-    protected PbBusDescriptor[] buses;
+    protected MapEntryExpression[] buses;
 
-    public final In busesInput = new In("buses", PbBusDescriptor[].class, v -> buses = v);
+    public final In busesInput = new In("buses", MapEntryExpression[].class, v -> buses = v);
     public final Out serviceOut = new Out("service", ClassNode.class, this::output);
 
     protected ClassNode output() {
@@ -64,7 +69,25 @@ public class PbServiceBlock extends StandardBlock implements ConfigurableBlock, 
             serviceNode.addMember("value", new ConstantExpression(beanName));
         }
         classNode.addAnnotation(serviceNode);
+        addConstructor();
         return classNode;
+    }
+
+    private void addConstructor() {
+        final ClassExpression mapProxies = new ClassExpression(makeCached(MapProxies.class));
+        final ArgumentListExpression proxyArgs = new ArgumentListExpression(
+                new ClassExpression(makeCached(PbServiceConfiguration.class)),
+                new MapExpression(singletonList(new MapEntryExpression(
+                        new ConstantExpression("data"),
+                        new MapExpression(singletonList(new MapEntryExpression(
+                                new ConstantExpression("buses"),
+                                new MapExpression(Arrays.asList(buses))
+                        )))))
+                )
+        );
+        final MethodCallExpression mapProxyCall = new MethodCallExpression(mapProxies, "newInstance", proxyArgs);
+        final ConstructorCallExpression superCall = new ConstructorCallExpression(ClassNode.SUPER, new ArgumentListExpression(mapProxyCall));
+        classNode.addConstructor(Opcodes.ACC_PUBLIC, new Parameter[0], new ClassNode[0], new ExpressionStatement(superCall));
     }
 
     @XmlAttribute
@@ -103,15 +126,13 @@ public class PbServiceBlock extends StandardBlock implements ConfigurableBlock, 
 
     @Override
     public void reset() {
-        className = "PBService";
-        beanName = "pbService";
-        buses = new PbBusDescriptor[0];
+        buses = new MapEntryExpression[0];
         classNode = null;
     }
 
     @Override
     public List<ClassNode> getClassNodes() {
-        return Collections.singletonList(classNode);
+        return singletonList(classNode);
     }
 
     public interface PbBlockListener extends EventListener {

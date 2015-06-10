@@ -19,11 +19,8 @@
 package org.marid.ide.widgets;
 
 import org.marid.dyn.MetaInfo;
-import org.marid.swing.ComponentConfiguration;
-import org.marid.swing.ConfigurableComponent;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
-import org.marid.swing.forms.ConfigurationDialog;
 import org.marid.swing.menu.SwingMenuBarWrapper;
 
 import javax.annotation.PostConstruct;
@@ -51,14 +48,6 @@ public abstract class Widget extends JInternalFrame implements WidgetSupport {
 
     @PostConstruct
     public void init() {
-        if (this instanceof ConfigurableComponent) {
-            final ComponentConfiguration configuration = ((ConfigurableComponent) this).configuration();
-            toolBar.add(new MaridAction("Configuration", "settings", e -> {
-                final Window window = SwingUtilities.windowForComponent(this);
-                new ConfigurationDialog(window, getTitle(), configuration).setVisible(true);
-            })).setFocusable(false);
-            toolBar.addSeparator();
-        }
         fillActions();
         MaridActions.fillToolbar(getActionMap(), toolBar);
         if (getJMenuBar() != null) {

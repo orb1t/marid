@@ -16,35 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.bd.blocks.proto;
+package org.marid.ide.widgets;
 
-import org.codehaus.groovy.ast.expr.MapExpression;
-import org.marid.xml.bind.adapter.MapExpressionXmlAdapter;
+import org.marid.swing.ConfigurableComponent;
+import org.marid.swing.actions.MaridAction;
+import org.marid.swing.forms.ConfigurationDialog;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement
-public final class PbBusDescriptor {
+public abstract class ConfigurableWidget extends Widget implements ConfigurableComponent {
 
-    @XmlAttribute
-    public final String name;
-
-    @XmlElement
-    @XmlJavaTypeAdapter(MapExpressionXmlAdapter.class)
-    public final MapExpression map;
-
-    public PbBusDescriptor(String name, MapExpression map) {
-        this.name = name;
-        this.map = map;
+    public ConfigurableWidget(String title, Object... args) {
+        super(title, args);
     }
 
-    public PbBusDescriptor() {
-        this(null, null);
+    @Override
+    public void init() {
+        toolBar.add(new MaridAction("Configuration", "settings", e -> {
+            final Window window = SwingUtilities.windowForComponent(this);
+            new ConfigurationDialog(window, getTitle(), configuration()).setVisible(true);
+        })).setFocusable(false);
+        toolBar.addSeparator();
+        super.init();
     }
 }

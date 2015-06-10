@@ -18,12 +18,21 @@
 
 package org.marid.bd.blocks.proto;
 
+import org.codehaus.groovy.ast.expr.ConstantExpression;
+import org.codehaus.groovy.ast.expr.MapEntryExpression;
 import org.codehaus.groovy.ast.expr.MapExpression;
 import org.marid.bd.BlockColors;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
+import org.marid.xml.bind.adapter.MapExpressionXmlAdapter;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.EventListener;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -32,12 +41,31 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class PbBusBlock extends StandardBlock {
 
-    private String name = "bus0";
-    private final MapExpression map = new MapExpression();
+    @XmlAttribute
+    String busName = "bus0";
 
-    public final Out out = new Out("bus", PbBusDescriptor.class, () -> new PbBusDescriptor(name, map));
+    @XmlElement
+    @XmlJavaTypeAdapter(MapExpressionXmlAdapter.class)
+    final MapExpression map = new MapExpression();
 
-    public void setName(String name) {
-        this.name = name;
+    public final Out out = new Out("bus", MapEntryExpression.class, () -> new MapEntryExpression(new ConstantExpression(busName), map));
+
+    public void setBusName(String busName) {
+        if (!Objects.equals(busName, this.busName)) {
+            this.busName = busName;
+            fireEvent(PbBusBlockListener.class, l -> l.busNameChanged(busName));
+        }
+    }
+
+    public void changeMap(Consumer<MapExpression> mapExpressionConsumer) {
+        mapExpressionConsumer.accept(map);
+        fireEvent(PbBusBlockListener.class, l -> l.mapChanged(map));
+    }
+
+    public interface PbBusBlockListener extends EventListener {
+
+        void busNameChanged(String name);
+
+        void mapChanged(MapExpression map);
     }
 }
