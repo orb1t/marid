@@ -20,14 +20,24 @@ package org.marid.bd.blocks.proto;
 
 import org.marid.bd.components.AbstractBlockComponentEditor;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class PbBusBlockEditor extends AbstractBlockComponentEditor<PbBusBlock> {
 
+    private final JTextField busNameField;
+
     public PbBusBlockEditor(Window window, PbBusBlock block) {
         super(window, block);
+        tabPane("Common").addLine("Bus name", busNameField = new JTextField(block.busName));
+    }
+
+    @Override
+    protected void onSubmit(Action action, ActionEvent actionEvent) throws Exception {
+        block.setBusName(busNameField.getText());
     }
 }

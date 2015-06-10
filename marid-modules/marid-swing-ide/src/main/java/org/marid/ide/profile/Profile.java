@@ -42,8 +42,10 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
@@ -116,6 +118,18 @@ public class Profile implements Named, Closeable, LogSupport {
 
     public Path getContextPath() {
         return path.resolve("context");
+    }
+
+    public void clean() {
+        for (final Path dir : Arrays.asList(getClassesPath(), getContextPath())) {
+            try (final DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+                for (final Path path : stream) {
+                    FileUtils.remove(path);
+                }
+            } catch (IOException x) {
+                warning("Unable to clean {0}", x, dir);
+            }
+        }
     }
 
     public String getName() {

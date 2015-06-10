@@ -22,8 +22,8 @@ import org.marid.dyn.MetaInfo;
 import org.marid.ide.components.ProfileManager;
 import org.marid.ide.frames.CloseableFrame;
 import org.marid.ide.frames.MaridFrame;
-import org.marid.ide.profile.Profile;
 import org.marid.ide.mbean.MBeanServerTreeTable;
+import org.marid.ide.profile.Profile;
 import org.marid.logging.Logging;
 import org.marid.logging.SimpleHandler;
 import org.marid.swing.log.LogComponent;
@@ -69,7 +69,6 @@ public class ProfileManagementMaridFrame extends MaridFrame {
                 logComponent.publish(r);
             }
         });
-        toolBar.addSeparator();
         splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panel, logComponent);
         restoreDividerLocation();
         centerPanel.add(splitPane);
@@ -79,12 +78,14 @@ public class ProfileManagementMaridFrame extends MaridFrame {
                 EventQueue.invokeLater(() -> {
                     actionByKey("/Control/c/Run").setEnabled(false);
                     actionByKey("/Control/c/Stop").setEnabled(true);
+                    actionByKey("/Utilities//Clean").setEnabled(false);
                 });
             } else if (event instanceof ContextClosedEvent) {
                 EventQueue.invokeLater(() -> {
                     Logging.rootLogger().removeHandler(logHandler);
                     actionByKey("/Control/c/Run").setEnabled(true);
                     actionByKey("/Control/c/Stop").setEnabled(false);
+                    actionByKey("/Utilities//Clean").setEnabled(true);
                 });
             }
             EventQueue.invokeLater(beanTree::update);
@@ -96,6 +97,7 @@ public class ProfileManagementMaridFrame extends MaridFrame {
         addAction("/Control/c/Run", "Run", "start", this::startProfile).setEnabledState(!profile.isStarted()).enableToolbar();
         addAction("/Control/c/Stop", "Stop", "stop", this::stopProfile).setEnabledState(profile.isStarted()).enableToolbar();
         addAction("/Log/s/Log", "Log", "log", this::showLog).setSelected(true).enableToolbar();
+        addAction("/Utilities//Clean", "Clean", "clean", e -> profile.clean()).setEnabledState(!profile.isStarted()).enableToolbar();
     }
 
     protected void startProfileTrigger() {

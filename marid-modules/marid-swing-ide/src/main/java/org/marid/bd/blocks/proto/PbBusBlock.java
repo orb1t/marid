@@ -22,6 +22,7 @@ import org.codehaus.groovy.ast.expr.ConstantExpression;
 import org.codehaus.groovy.ast.expr.MapEntryExpression;
 import org.codehaus.groovy.ast.expr.MapExpression;
 import org.marid.bd.BlockColors;
+import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.StandardBlock;
 import org.marid.bd.blocks.BdBlock;
 import org.marid.xml.bind.adapter.MapExpressionXmlAdapter;
@@ -30,6 +31,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.awt.*;
 import java.util.EventListener;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -39,7 +41,7 @@ import java.util.function.Consumer;
  */
 @BdBlock(name = "Proto Bus", iconText = "PBus", color = BlockColors.RED)
 @XmlRootElement
-public class PbBusBlock extends StandardBlock {
+public class PbBusBlock extends StandardBlock implements ConfigurableBlock {
 
     @XmlAttribute
     String busName = "bus0";
@@ -60,6 +62,11 @@ public class PbBusBlock extends StandardBlock {
     public void changeMap(Consumer<MapExpression> mapExpressionConsumer) {
         mapExpressionConsumer.accept(map);
         fireEvent(PbBusBlockListener.class, l -> l.mapChanged(map));
+    }
+
+    @Override
+    public Window createWindow(Window parent) {
+        return new PbBusBlockEditor(parent, this);
     }
 
     public interface PbBusBlockListener extends EventListener {
