@@ -29,6 +29,7 @@ import org.marid.ide.frames.CloseableFrame;
 import org.marid.ide.frames.MaridFrame;
 import org.marid.jmx.IdeJmxAttribute;
 import org.marid.jmx.MaridBeanConnectionManager;
+import org.marid.swing.actions.MaridAction;
 import org.marid.swing.dnd.DndTarget;
 import org.marid.swing.dnd.MaridTransferHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,12 @@ public class GraphFrame extends MaridFrame implements DndTarget<IdeJmxAttribute>
     private final JFreeChart chart;
     private final ChartPanel chartPanel;
     private final Timer timer;
+
+    @MetaInfo(path = "/Control//Start")
+    public final Action startAction = new MaridAction("Start", "start", this::start).enableToolbar();
+
+    @MetaInfo(path = "/Control//Stop")
+    public final Action stopAction = new MaridAction("Stop", "stop", this::stop).setEnabledState(false).enableToolbar();
 
     @Autowired
     public GraphFrame(MaridBeanConnectionManager connectionManager) {
@@ -82,22 +89,16 @@ public class GraphFrame extends MaridFrame implements DndTarget<IdeJmxAttribute>
         return DND_LINK;
     }
 
-    @Override
-    protected void fillActions() {
-        addAction("/Control//Start", "Start", "start", this::start).enableToolbar();
-        addAction("/Control//Stop", "Stop", "stop", this::stop).setEnabledState(false).enableToolbar();
-    }
-
     public void start(ActionEvent event) {
         timer.start();
-        actionByKey("/Control//Start").setEnabled(false);
-        actionByKey("/Control//Stop").setEnabled(true);
+        startAction.setEnabled(false);
+        stopAction.setEnabled(true);
     }
 
     public void stop(ActionEvent event) {
         timer.stop();
-        actionByKey("/Control//Start").setEnabled(true);
-        actionByKey("/Control//Stop").setEnabled(false);
+        startAction.setEnabled(true);
+        stopAction.setEnabled(false);
     }
 
     @Override

@@ -30,8 +30,6 @@ import java.beans.PropertyVetoException;
 import java.lang.reflect.ParameterizedType;
 import java.util.function.Supplier;
 
-import static org.marid.l10n.L10n.s;
-
 /**
  * @author Dmitry Ovchinnikov
  */

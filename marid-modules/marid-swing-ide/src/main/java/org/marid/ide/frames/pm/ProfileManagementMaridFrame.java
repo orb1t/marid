@@ -26,6 +26,7 @@ import org.marid.ide.mbean.MBeanServerTreeTable;
 import org.marid.ide.profile.Profile;
 import org.marid.logging.Logging;
 import org.marid.logging.SimpleHandler;
+import org.marid.swing.actions.MaridAction;
 import org.marid.swing.log.LogComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
@@ -56,10 +57,25 @@ public class ProfileManagementMaridFrame extends MaridFrame {
     private final InheritableThreadLocal<String> itl = new InheritableThreadLocal<>();
     private final ApplicationListener<ApplicationEvent> applicationListener;
 
+    @MetaInfo(path = "/Control/c/Run")
+    public final Action startAction;
+
+    @MetaInfo(path = "/Control/c/Stop")
+    public final Action stopAction;
+
+    @MetaInfo(path = "/Log/s/Log")
+    public final Action logAction = new MaridAction("Log", "log", this::showLog).setSelected(true).enableToolbar();
+
+    @MetaInfo(path = "/Utilities//Clean")
+    public final Action cleanAction;
+
     @Autowired
     public ProfileManagementMaridFrame(ProfileManager profileManager) {
         super("Profile Management: %s", profileManager.getCurrentProfile());
         profile = profileManager.getCurrentProfile();
+        startAction = new MaridAction("Run", "start", this::startProfile).setEnabledState(!profile.isStarted()).enableToolbar();
+        stopAction = new MaridAction("Stop", "stop", this::stopProfile).setEnabledState(profile.isStarted()).enableToolbar();
+        cleanAction = new MaridAction("Clean", "clean", e -> profile.clean()).setEnabledState(!profile.isStarted()).enableToolbar();
         logComponent = new LogComponent(preferences(), emptyList(), r -> true);
         logComponent.setPreferredSize(new Dimension(logComponent.getPreferredSize().width, 150));
         beanTree = new MBeanServerTreeTable(profile.getName(), profile::getConnection);
@@ -76,28 +92,20 @@ public class ProfileManagementMaridFrame extends MaridFrame {
             info("Event: {0}", event);
             if (event instanceof ContextStartedEvent) {
                 EventQueue.invokeLater(() -> {
-                    actionByKey("/Control/c/Run").setEnabled(false);
-                    actionByKey("/Control/c/Stop").setEnabled(true);
-                    actionByKey("/Utilities//Clean").setEnabled(false);
+                    startAction.setEnabled(false);
+                    stopAction.setEnabled(true);
+                    cleanAction.setEnabled(false);
                 });
             } else if (event instanceof ContextClosedEvent) {
                 EventQueue.invokeLater(() -> {
                     Logging.rootLogger().removeHandler(logHandler);
-                    actionByKey("/Control/c/Run").setEnabled(true);
-                    actionByKey("/Control/c/Stop").setEnabled(false);
-                    actionByKey("/Utilities//Clean").setEnabled(true);
+                    startAction.setEnabled(true);
+                    stopAction.setEnabled(false);
+                    cleanAction.setEnabled(true);
                 });
             }
             EventQueue.invokeLater(beanTree::update);
         };
-    }
-
-    @Override
-    protected void fillActions() {
-        addAction("/Control/c/Run", "Run", "start", this::startProfile).setEnabledState(!profile.isStarted()).enableToolbar();
-        addAction("/Control/c/Stop", "Stop", "stop", this::stopProfile).setEnabledState(profile.isStarted()).enableToolbar();
-        addAction("/Log/s/Log", "Log", "log", this::showLog).setSelected(true).enableToolbar();
-        addAction("/Utilities//Clean", "Clean", "clean", e -> profile.clean()).setEnabledState(!profile.isStarted()).enableToolbar();
     }
 
     protected void startProfileTrigger() {

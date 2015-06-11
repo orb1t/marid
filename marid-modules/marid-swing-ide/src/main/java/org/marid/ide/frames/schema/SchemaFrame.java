@@ -32,6 +32,7 @@ import org.marid.ide.frames.MaridFrame;
 import org.marid.ide.profile.Profile;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.marid.swing.SwingUtil;
+import org.marid.swing.actions.MaridAction;
 import org.marid.xml.XmlPersister;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -65,6 +66,42 @@ public class SchemaFrame extends MaridFrame {
 
     protected File file;
 
+    @MetaInfo(path = "/File/o/Open")
+    public final Action openAction;
+
+    @MetaInfo(path = "/File/s/Save")
+    public final Action saveAction;
+
+    @MetaInfo(path = "/File/s/SaveAs")
+    public final Action saveAsAction;
+
+    @MetaInfo(path = "/Schema/z/ZoomIn")
+    public final Action zoomInAction;
+
+    @MetaInfo(path = "/Schema/z/ZoomOut")
+    public final Action zoomOutAction;
+
+    @MetaInfo(path = "/Schema/z/ZoomReset")
+    public final Action resetZoomAction;
+
+    @MetaInfo(path = "/Schema/s/SelectionMode")
+    public final Action selectionModeAction;
+
+    @MetaInfo(path = "/Schema/r/Refresh")
+    public final Action refreshAction;
+
+    @MetaInfo(path = "/Schema/r/ResetInOut")
+    public final Action resetIoAction;
+
+    @MetaInfo(path = "/Schema/a/AlignToLeft")
+    public final Action alignToLeftAction;
+
+    @MetaInfo(path = "/Schema/a/AlignToRight")
+    public final Action alignToRightAction;
+
+    @MetaInfo(path = "b/Build/r/Build")
+    public final Action buildAction;
+
     @Autowired
     public SchemaFrame(BlockMenuProvider blockMenuProvider, ProfileManager profileManager, SchemaEditor schemaEditor) {
         super("Schema");
@@ -74,6 +111,19 @@ public class SchemaFrame extends MaridFrame {
         getContentPane().setBackground(getBackground());
         getJMenuBar().add(blocksMenu);
         blockMenuProvider.fillMenu(blocksMenu);
+
+        openAction = new MaridAction("Open...", "open", this::open).setKey("control O").enableToolbar();
+        saveAction = new MaridAction("Save", "save", this::save).setKey("control S").enableToolbar();
+        saveAsAction = new MaridAction("Save As...", "save", this::saveAs).setKey("control shift S").enableToolbar();
+        zoomInAction = new MaridAction("Zoom In", "zoomin", e -> schemaEditor.zoomIn()).setKey("control I").enableToolbar();
+        zoomOutAction = new MaridAction("Zoom Out", "zoomout", e -> schemaEditor.zoomOut()).setKey("control B").enableToolbar();
+        resetZoomAction = new MaridAction("Reset zoom", "zoom", e -> schemaEditor.resetZoom()).setKey("control Z").enableToolbar();
+        selectionModeAction = new MaridAction("Selection mode", "selection", this::selectionMode).setKey("control J").enableToolbar();
+        refreshAction = new MaridAction("Refresh", "refresh", e -> schemaEditor.repaint()).setKey("F5").enableToolbar();
+        resetIoAction = new MaridAction("Reset input/output selection", "reset", schemaEditor::resetInputOutputSelection).setKey("control shift T").enableToolbar();
+        alignToLeftAction = new MaridAction("Align to left", "alignleft", schemaEditor::alignToLeft).setKey("control shift L").enableToolbar();
+        alignToRightAction = new MaridAction("Align top right", "alignright", schemaEditor::alignToRight).setKey("control shift R").enableToolbar();
+        buildAction = new MaridAction("Build", "hammer", e -> new SchemaModel(schemaEditor).getSchema().build()).setKey("F7").enableToolbar();
     }
 
     public void fireEvent(AWTEvent event) {
@@ -95,22 +145,6 @@ public class SchemaFrame extends MaridFrame {
 
     public void selectionMode(Action action, ActionEvent event) {
         schemaEditor.setSelectionMode((boolean) action.getValue(Action.SELECTED_KEY));
-    }
-
-    @Override
-    protected void fillActions() {
-        addAction("/File/o/Open", "Open...", "open", this::open).setKey("control O").enableToolbar();
-        addAction("/File/s/Save", "Save", "save", this::save).setKey("control S").enableToolbar();
-        addAction("/File/s/SaveAs", "Save As...", "save", this::saveAs).setKey("control shift S");
-        addAction("/Schema/z/ZoomIn", "Zoom In...", "zoomin", e -> schemaEditor.zoomIn()).setKey("control I").enableToolbar();
-        addAction("/Schema/z/ZoomOut", "Zoom Out...", "zoomout", e -> schemaEditor.zoomOut()).setKey("control B").enableToolbar();
-        addAction("/Schema/z/ZoomReset", "Reset zoom", "zoom", e -> schemaEditor.resetZoom()).setKey("control Z").enableToolbar();
-        addAction("/Schema/s/SelectionMode", "Selection mode", "selection", this::selectionMode).setKey("control J").setSelected(false).enableToolbar();
-        addAction("/Schema/r/Refresh", "Refresh", "refresh", e -> schemaEditor.repaint()).setKey("F5").enableToolbar();
-        addAction("/Schema/r/ResetInOut", "Reset input/output selection", "reset", schemaEditor::resetInputOutputSelection).setKey("control shift T").enableToolbar();
-        addAction("/Schema/a/AlignToLeft", "Align to left", "alignleft", schemaEditor::alignToLeft).setKey("control shift L").enableToolbar();
-        addAction("/Schema/a/AlignToRight", "Align to right", "alignright", schemaEditor::alignToRight).setKey("control shift R").enableToolbar();
-        addAction("b/Build/r/Build", "Build", "hammer", e -> new SchemaModel(schemaEditor).getSchema().build()).setKey("F7").enableToolbar();
     }
 
     protected void open(ActionEvent actionEvent) {

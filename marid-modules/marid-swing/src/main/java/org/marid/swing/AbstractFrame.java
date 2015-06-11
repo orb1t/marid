@@ -18,9 +18,13 @@
 
 package org.marid.swing;
 
+import org.codehaus.groovy.reflection.ReflectionUtils;
+import org.marid.dyn.MetaInfo;
 import org.marid.image.MaridIcons;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.SysPrefSupport;
+import org.marid.reflect.IntrospectionUtils;
+import org.marid.swing.actions.ActionKey;
 import org.marid.swing.actions.ActionKeySupport;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
@@ -34,6 +38,8 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 import static java.awt.BorderLayout.NORTH;
 import static javax.swing.SwingConstants.HORIZONTAL;
@@ -47,6 +53,19 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
 
     protected final JPanel centerPanel = new JPanel(new BorderLayout());
     protected final JToolBar toolBar = new JToolBar(getPref("orientation", HORIZONTAL, "toolbar"));
+
+    @MetaInfo(path = "/Window/1/Always-on-top")
+    public final Action alwaysOnTopSwitchAction = new MaridAction("Switch always-on-top mode", null, this::switchAlwaysOnTop)
+            .setValue(Action.SELECTED_KEY, false)
+            .setKey(getSysPref("alwaysOnTopKey", "control alt O"));
+
+    @MetaInfo(path = "/Window/2/Fullscreen")
+    public final Action fullScreenAction = new MaridAction("Switch fullscreen mode", null, this::switchFullScreen)
+            .setKey(getSysPref("fullScreenKey", "control alt F"));
+
+    @MetaInfo(path = "/Window/3/Close")
+    public final Action closeAction = new MaridAction("Close", null, e -> dispose())
+            .setKey(getSysPref("closeWindowKey", "control alt Q"));
 
     public AbstractFrame(String title, Object... args) {
         super(LS.s(title, args), WindowPrefs.graphicsConfiguration(title));
@@ -63,22 +82,6 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setState(getPref("state", getState()));
         setExtendedState(getPref("extendedState", getExtendedState()));
-        getJMenuBar().add(windowMenu());
-    }
-
-    private JMenu windowMenu() {
-        final JMenu menu = new JMenu(s("Window"));
-        menu.add(new JCheckBoxMenuItem(new MaridAction("Switch always-on-top mode", null, this::switchAlwaysOnTop)
-                .setValue(Action.SELECTED_KEY, false)
-                .setKey(getSysPref("alwaysOnTopKey", "control alt O"))));
-        menu.addSeparator();
-        menu.add(new MaridAction("Switch full screen mode", null, this::switchFullScreen)
-                .setKey(getSysPref("fullScreenKey", "control alt F")));
-        menu.addSeparator();
-        menu.add(new JCheckBoxMenuItem(new MaridAction("Close", null, e -> dispose())
-                .setValue(Action.SELECTED_KEY, false)
-                .setKey(getSysPref("closeWindowKey", "control alt Q"))));
-        return menu;
     }
 
     @PostConstruct
@@ -148,5 +151,20 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
         return position == null ? BorderLayout.NORTH : position;
     }
 
-    protected abstract void fillActions();
+    protected void fillActions() {
+        for (final Field field : getClass().getFields()) {
+            if (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers())) {
+                continue;
+            }
+            if (Action.class.isAssignableFrom(field.getType()) && field.isAnnotationPresent(MetaInfo.class)) {
+                try {
+                    final Action action = (Action) field.get(this);
+                    final MetaInfo metaInfo = field.getAnnotation(MetaInfo.class);
+                    addAction(new ActionKey(metaInfo.path()), action);
+                } catch (ReflectiveOperationException x) {
+                    throw new IllegalStateException(x);
+                }
+            }
+        }
+    }
 }
