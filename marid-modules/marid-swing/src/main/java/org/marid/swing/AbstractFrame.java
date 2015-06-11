@@ -18,13 +18,10 @@
 
 package org.marid.swing;
 
-import org.codehaus.groovy.reflection.ReflectionUtils;
 import org.marid.dyn.MetaInfo;
 import org.marid.image.MaridIcons;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.SysPrefSupport;
-import org.marid.reflect.IntrospectionUtils;
-import org.marid.swing.actions.ActionKey;
 import org.marid.swing.actions.ActionKeySupport;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
@@ -38,8 +35,6 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 
 import static java.awt.BorderLayout.NORTH;
 import static javax.swing.SwingConstants.HORIZONTAL;
@@ -149,22 +144,5 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
     private String getToolbarPosition() {
         final String position = (String) ((BorderLayout) centerPanel.getLayout()).getConstraints(toolBar);
         return position == null ? BorderLayout.NORTH : position;
-    }
-
-    protected void fillActions() {
-        for (final Field field : getClass().getFields()) {
-            if (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers())) {
-                continue;
-            }
-            if (Action.class.isAssignableFrom(field.getType()) && field.isAnnotationPresent(MetaInfo.class)) {
-                try {
-                    final Action action = (Action) field.get(this);
-                    final MetaInfo metaInfo = field.getAnnotation(MetaInfo.class);
-                    addAction(new ActionKey(metaInfo.path()), action);
-                } catch (ReflectiveOperationException x) {
-                    throw new IllegalStateException(x);
-                }
-            }
-        }
     }
 }

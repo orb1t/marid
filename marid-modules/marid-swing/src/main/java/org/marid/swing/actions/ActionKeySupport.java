@@ -18,15 +18,20 @@
 
 package org.marid.swing.actions;
 
+import org.marid.dyn.MetaInfo;
+import org.marid.logging.LogSupport;
+
 import javax.swing.*;
 import java.awt.event.ActionListener;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 import static org.marid.swing.actions.MaridAction.MaridActionListener;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ActionKeySupport {
+public interface ActionKeySupport extends LogSupport {
 
     default <T extends Action> T addAction(String key, T action) {
         return addAction(new ActionKey(key), action);
@@ -60,5 +65,23 @@ public interface ActionKeySupport {
 
     default Action actionByKey(String actionKey) {
         return actionByKey(new ActionKey(actionKey));
+    }
+
+    default void fillActions() {
+        for (final Field field : getClass().getFields()) {
+            if (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers())) {
+                continue;
+            }
+            if (!field.isAnnotationPresent(MetaInfo.class) || !Action.class.isAssignableFrom(field.getType())) {
+                continue;
+            }
+            try {
+                final Action action = (Action) field.get(this);
+                final MetaInfo metaInfo = field.getAnnotation(MetaInfo.class);
+                addAction(new ActionKey(metaInfo.path()), action);
+            } catch (ReflectiveOperationException x) {
+                warning("Unable to get action from {0}", x, field);
+            }
+        }
     }
 }

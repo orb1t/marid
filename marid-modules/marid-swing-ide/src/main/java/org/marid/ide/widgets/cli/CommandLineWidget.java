@@ -23,6 +23,7 @@ import org.marid.ide.widgets.Widget;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.marid.swing.actions.ActionKeySupport;
 import org.marid.swing.actions.InternalFrameAction;
+import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -41,6 +42,9 @@ public class CommandLineWidget extends Widget {
 
     private final JSplitPane splitPane;
     private final CommandLine cmdLine;
+
+    @MetaInfo(path = "/Console/c/clear")
+    public final Action clearAction;
 
     @Autowired
     public CommandLineWidget(CommandLine cmdLine) {
@@ -61,11 +65,8 @@ public class CommandLineWidget extends Widget {
                     break;
             }
         }));
-    }
 
-    @Override
-    protected void fillActions() {
-        addAction("/Console/c/clear", "Clear", "clean", e -> cmdLine.clear()).setKey("control N").enableToolbar();
+        clearAction = new MaridAction("Clear", "clean", e -> cmdLine.clear()).setKey("control N").enableToolbar();
     }
 
     private class ConsoleAreaPanel extends JPanel {

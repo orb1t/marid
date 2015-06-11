@@ -81,9 +81,6 @@ public abstract class Widget extends JInternalFrame implements WidgetSupport {
         }
     }
 
-    protected void fillActions() {
-    }
-
     private String getToolbarPosition() {
         final String position = (String) layout.getConstraints(toolBar);
         return position == null ? BorderLayout.NORTH : position;
