@@ -24,7 +24,6 @@ import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.WindowPrefs;
-import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
 import org.marid.swing.log.SwingHandler;
 import org.marid.swing.menu.SwingMenuBarWrapper;
@@ -37,7 +36,6 @@ import javax.annotation.PreDestroy;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
-import java.util.Arrays;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
@@ -67,7 +65,6 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         this.ide = ide;
         setIconImages(MaridIcons.ICONS);
-        setLocationRelativeTo(null);
         setJMenuBar(new JMenuBar());
     }
 
@@ -85,21 +82,6 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     @PreDestroy
     private void destroy() {
         dispose();
-    }
-
-    private JMenu lafMenu() {
-        final JMenu menu = new JMenu(s("Look and feel"));
-        for (final UIManager.LookAndFeelInfo lookAndFeelInfo : UIManager.getInstalledLookAndFeels()) {
-            menu.add(new MaridAction(lookAndFeelInfo.getName(), null, ev -> {
-                try {
-                    UIManager.setLookAndFeel(lookAndFeelInfo.getClassName());
-                    Arrays.asList(JFrame.getFrames()).forEach(SwingUtilities::updateComponentTreeUI);
-                } catch (Exception x) {
-                    showMessage(WARNING_MESSAGE, "LAF", "Error", x);
-                }
-            }));
-        }
-        return menu;
     }
 
     @Override

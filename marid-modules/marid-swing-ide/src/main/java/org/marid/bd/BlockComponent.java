@@ -100,9 +100,13 @@ public interface BlockComponent {
                 window.addWindowListener(new WindowAction(we -> {
                     switch (we.getID()) {
                         case WindowEvent.WINDOW_CLOSED:
-                            updateBlock();
-                            getSchemaEditor().validate();
-                            getSchemaEditor().repaint();
+                            try {
+                                updateBlock();
+                                getSchemaEditor().validate();
+                                getSchemaEditor().repaint();
+                            } finally {
+                                Marid.getCurrentContext().getAutowireCapableBeanFactory().destroyBean(window);
+                            }
                             break;
                     }
                 }));

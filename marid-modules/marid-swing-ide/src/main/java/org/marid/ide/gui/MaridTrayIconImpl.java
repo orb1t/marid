@@ -63,6 +63,7 @@ public class MaridTrayIconImpl implements AutoCloseable, LogSupport, L10nSupport
             popupMenu.addSeparator();
             final TrayIcon icon = new TrayIcon(image, s("Marid IDE"), null);
             icon.addActionListener(ev -> ideFrame.setVisible(!ideFrame.isVisible()));
+            final Color transparentColor = new Color(0, 0, 0, 0);
             icon.addMouseListener(new MouseAction(e -> {
                 switch (e.getID()) {
                     case MouseEvent.MOUSE_RELEASED:
@@ -77,15 +78,22 @@ public class MaridTrayIconImpl implements AutoCloseable, LogSupport, L10nSupport
                             }
                             final Frame frame = new Frame();
                             frame.setUndecorated(true);
-                            frame.setBackground(new Color(0, 0, 0, 0));
+                            frame.setType(Window.Type.POPUP);
+                            frame.setBackground(transparentColor);
                             frame.setExtendedState(Frame.MAXIMIZED_BOTH);
                             final WindowAdapter windowAdapter = new WindowAdapter() {
                                 @Override
                                 public void windowLostFocus(WindowEvent e) {
                                     frame.dispose();
                                 }
+
+                                @Override
+                                public void windowClosed(WindowEvent e) {
+                                    info("Internal popup window closed");
+                                }
                             };
                             frame.addWindowFocusListener(windowAdapter);
+                            frame.addWindowListener(windowAdapter);
                             popupMenu.addPopupMenuListener(new PopupMenuListener() {
                                 @Override
                                 public void popupMenuWillBecomeVisible(PopupMenuEvent e) {

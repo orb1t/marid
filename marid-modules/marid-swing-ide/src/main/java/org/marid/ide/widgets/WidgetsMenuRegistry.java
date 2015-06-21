@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -70,7 +69,7 @@ public class WidgetsMenuRegistry implements L10nSupport {
     }
 
     @Autowired
-    public void setPreferences(IdeFrameImpl frame, ActionMap ideActionMap, List<ComponentConfiguration> configurations) {
+    public void setPreferences(IdeFrameImpl frame, ActionMap ideActionMap, ComponentConfiguration[] configurations) {
         for (final ComponentConfiguration configuration : configurations) {
             if (configuration.getClass().isAnnotationPresent(MetaInfo.class)) {
                 final MetaInfo metaInfo = configuration.getClass().getAnnotation(MetaInfo.class);
