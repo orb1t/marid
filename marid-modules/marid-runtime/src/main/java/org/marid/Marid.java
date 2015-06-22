@@ -22,15 +22,14 @@ import org.marid.groovy.GroovyRuntime;
 import org.marid.lifecycle.MaridRunner;
 import org.marid.lifecycle.ShutdownThread;
 import org.marid.spring.CommandLinePropertySource;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Properties;
-import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -52,9 +51,14 @@ public class Marid {
         setCurrentContext(new AnnotationConfigApplicationContext());
     }
 
-    public static void start(Consumer<Runnable> starter, String... args) throws Exception {
-        getCurrentContext().setClassLoader(GroovyRuntime.CLASS_LOADER);
-        Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
+    private static void applicationEventListener(ApplicationEvent event) {
+        if (event instanceof ContextStartedEvent) {
+            new ShutdownThread(getCurrentContext()).start();
+        }
+        info(LOGGER, "{0}", event);
+    }
+
+    private static void loadSysProperties() throws Exception {
         for (final Enumeration<URL> e = currentClassLoader().getResources("sys.properties"); e.hasMoreElements(); ) {
             try (final InputStreamReader reader = new InputStreamReader(e.nextElement().openStream(), UTF_8)) {
                 final Properties properties = new Properties();
@@ -64,40 +68,23 @@ public class Marid {
                 }
             }
         }
+    }
+
+    public static void start(Consumer<Runnable> starter, String... args) throws Exception {
+        getCurrentContext().setClassLoader(GroovyRuntime.CLASS_LOADER);
+        Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
+        loadSysProperties();
         LogManager.getLogManager().reset();
         LogManager.getLogManager().readConfiguration();
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> warning(LOGGER, "Uncaught exception in {0}", e, t));
-        getCurrentContext().addApplicationListener(e -> {
-            if (e instanceof ContextStartedEvent) {
-                new ShutdownThread(getCurrentContext()).start();
-            } else if (e instanceof ContextClosedEvent) {
-                try {
-                    System.in.close();
-                } catch (Exception x) {
-                    warning(LOGGER, "Unable to close stdin", x);
-                }
-            }
-            info(LOGGER, "{0}", e);
-        });
+        getCurrentContext().addApplicationListener(Marid::applicationEventListener);
         final CommandLinePropertySource commandLinePropertySource = new CommandLinePropertySource(args);
         getCurrentContext().getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
-        for (final MaridRunner runner : MaridRunner.maridRunners()) {
-            runner.run(getCurrentContext(), args);
-        }
+        MaridRunner.runMaridRunners(getCurrentContext(), args);
         starter.accept(() -> {
             getCurrentContext().refresh();
             getCurrentContext().start();
         });
-        try (final Scanner scanner = new Scanner(System.in)) {
-            while (scanner.hasNextLine()) {
-                final String line = scanner.nextLine().trim();
-                switch (line) {
-                    case "exit":
-                        getCurrentContext().close();
-                        break;
-                }
-            }
-        }
     }
 
     public static void setCurrentContext(AnnotationConfigApplicationContext currentContext) {

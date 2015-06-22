@@ -22,7 +22,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -39,5 +41,11 @@ public interface MaridRunner {
                         ? r.getClass().getAnnotation(Order.class).value()
                         : (r instanceof Ordered) ? ((Ordered) r).getOrder() : 0))
                 .collect(Collectors.toList());
+    }
+
+    static void runMaridRunners(AnnotationConfigApplicationContext context, String... args) throws Exception {
+        for (final MaridRunner runner : maridRunners()) {
+            runner.run(context, args);
+        }
     }
 }
