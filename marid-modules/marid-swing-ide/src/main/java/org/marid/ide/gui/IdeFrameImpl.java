@@ -18,12 +18,17 @@
 
 package org.marid.ide.gui;
 
+import org.marid.Marid;
+import org.marid.dyn.MetaInfo;
 import org.marid.ide.base.Ide;
 import org.marid.ide.base.IdeFrame;
+import org.marid.ide.widgets.Widget;
 import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.WindowPrefs;
+import org.marid.swing.actions.ActionKey;
+import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
 import org.marid.swing.log.SwingHandler;
 import org.marid.swing.menu.SwingMenuBarWrapper;
@@ -87,6 +92,23 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     @Override
     public Ide getIde() {
         return ide;
+    }
+
+    @Autowired
+    public void setWidgetsMenu(IdeDesktopImpl ideDesktop) {
+        final ActionMap map = new ActionMap();
+        for (final String beanName : Marid.getCurrentContext().getBeanNamesForType(Widget.class)) {
+            final MetaInfo metaInfo = Marid.getCurrentContext().findAnnotationOnBean(beanName, MetaInfo.class);
+            final String path = metaInfo.path().isEmpty()
+                    ? "/Widgets//" + beanName
+                    : metaInfo.path() + "/" + metaInfo.group() + "/" + beanName;
+            map.put(new ActionKey(path), new MaridAction(metaInfo.name(), metaInfo.icon(), ev -> {
+                final Widget widget = Marid.getCurrentContext().getBean(beanName, Widget.class);
+                ideDesktop.add(widget);
+                widget.show();
+            }));
+        }
+        MaridActions.fillMenu(map, new SwingMenuBarWrapper(getJMenuBar()));
     }
 
     @Override

@@ -16,12 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.widgets;
+package org.marid.ide.components;
 
 import org.marid.Marid;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.frames.MaridFrame;
-import org.marid.ide.gui.IdeDesktopImpl;
 import org.marid.ide.gui.IdeFrameImpl;
 import org.marid.l10n.L10nSupport;
 import org.marid.swing.ComponentConfiguration;
@@ -38,21 +37,6 @@ import javax.swing.*;
  */
 @Component
 public class WidgetsMenuRegistry implements L10nSupport {
-
-    @Autowired
-    public void setWidgets(IdeDesktopImpl ideDesktop, ActionMap ideActionMap) {
-        for (final String beanName : Marid.getCurrentContext().getBeanNamesForType(Widget.class)) {
-            final MetaInfo metaInfo = Marid.getCurrentContext().findAnnotationOnBean(beanName, MetaInfo.class);
-            final String path = metaInfo.path().isEmpty()
-                    ? "/Widgets//" + beanName
-                    : metaInfo.path() + "/" + metaInfo.group() + "/" + beanName;
-            ideActionMap.put(new ActionKey(path), new MaridAction(metaInfo.name(), metaInfo.icon(), ev -> {
-                final Widget widget = Marid.getCurrentContext().getBean(beanName, Widget.class);
-                ideDesktop.add(widget);
-                widget.show();
-            }));
-        }
-    }
 
     @Autowired
     public void setFrames(ActionMap ideActionMap) {
