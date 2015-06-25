@@ -52,7 +52,7 @@ public interface MessageSupport extends L10nSupport, LogSupport {
             error.printStackTrace(pw);
         }
         JOptionPane.showMessageDialog(component(this), sw.toString(), s(title), messageType);
-        warning(message, error, args);
+        log(WARNING, message, error, args);
     }
 
     static Component component(Object object) {

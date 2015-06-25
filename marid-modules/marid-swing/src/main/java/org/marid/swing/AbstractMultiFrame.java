@@ -93,12 +93,12 @@ public abstract class AbstractMultiFrame extends AbstractFrame {
                                 setVisible(true);
                             }
                         } else {
-                            warning("Fullscreen mode is not supported on {0}", gd);
+                            log(WARNING, "Fullscreen mode is not supported on {0}", gd);
                         }
                         break;
                 }
             } catch (Exception x) {
-                warning("{0} error", x, e.getActionCommand());
+                log(WARNING, "{0} error", x, e.getActionCommand());
             }
         };
         widgetsMenu.add(menuItem("Cascade", "cascade16.png", "cascade", widgetsListener));

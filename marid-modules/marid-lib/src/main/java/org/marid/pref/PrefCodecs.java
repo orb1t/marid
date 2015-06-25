@@ -22,7 +22,6 @@ import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.marid.dyn.Casting;
 import org.marid.functions.SafeBiConsumer;
 import org.marid.functions.SafeFunction;
-import org.marid.methods.LogMethods;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -35,6 +34,8 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import static java.util.ServiceLoader.load;
+import static org.marid.logging.LogSupport.Log.log;
+import static org.marid.logging.LogSupport.WARNING;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -111,7 +112,7 @@ public abstract class PrefCodecs {
                 WRITERS.putAll(prefCodecs.writers());
             }
         } catch (Exception x) {
-            LogMethods.warning(LOG, "Unable to enumerate pref codecs", x);
+            log(LOG, WARNING, "Unable to enumerate pref codecs", x);
         }
     }
 

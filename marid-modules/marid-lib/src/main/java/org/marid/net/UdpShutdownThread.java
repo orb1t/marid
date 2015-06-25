@@ -53,7 +53,7 @@ public class UdpShutdownThread extends Thread implements LogSupport {
     public void run() {
         try {
             try (final DatagramSocket socket = new DatagramSocket(bindAddress)) {
-                info("Starting {0} on {1}", getName(), bindAddress);
+                log(INFO, "Starting {0} on {1}", getName(), bindAddress);
                 final DatagramPacket packet = new DatagramPacket(new byte[PACKET_SIZE], PACKET_SIZE);
                 super.run();
                 while (true) {
@@ -62,17 +62,17 @@ public class UdpShutdownThread extends Thread implements LogSupport {
                     if (peer.getAddress().equals(bindAddress.getAddress()) && peer.getPort() != bindAddress.getPort()) {
                         final String name = new String(packet.getData(), packet.getOffset(), packet.getLength(), UTF_8);
                         if (name.trim().equals(getName())) {
-                            info("Shutdown {0} by {1}", getName(), peer);
+                            log(INFO, "Shutdown {0} by {1}", getName(), peer);
                             exitCode = 0;
                             break;
                         }
                     } else {
-                        warning("Bad peer {0}", peer);
+                        log(INFO, "Bad peer {0}", peer);
                     }
                 }
             }
         } catch (Exception x) {
-            warning("UDP error: {0}", x, getName());
+            log(WARNING, "UDP error: {0}", x, getName());
         }
     }
 

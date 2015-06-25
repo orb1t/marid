@@ -23,8 +23,9 @@ import groovy.lang.IntRange;
 import org.marid.Marid;
 import org.marid.io.IoContext;
 import org.marid.logging.LogSupport;
-import org.marid.methods.LogMethods;
 import org.marid.service.proto.ProtoEventListener;
+import org.marid.service.proto.ProtoObject;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -32,7 +33,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-import org.marid.service.proto.ProtoObject;
+import static java.util.logging.Level.*;
+import static org.marid.logging.LogSupport.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -40,39 +42,39 @@ import org.marid.service.proto.ProtoObject;
 public class RuntimeGroovyMethods {
 
     public static void warning(Object object, String message, Throwable thrown, Object... args) {
-        LogMethods.warning(logger(object), message, thrown, args);
+        log(logger(object), WARNING, message, thrown, args);
     }
 
     public static void warning(Object object, String message, Object... args) {
-        LogMethods.warning(logger(object), message, args);
+        log(logger(object), WARNING, message, null, args);
     }
 
     public static void info(Object object, String message, Object... args) {
-        LogMethods.info(logger(object), message, args);
+        log(logger(object), INFO, message, null, args);
     }
 
     public static void severe(Object object, String message, Throwable thrown, Object... args) {
-        LogMethods.severe(logger(object), message, thrown, args);
+        log(logger(object), SEVERE, message, thrown, args);
     }
 
     public static void severe(Object object, String message, Object... args) {
-        LogMethods.severe(logger(object), message, args);
+        log(logger(object), SEVERE, message, null, args);
     }
 
     public static void fine(Object object, String message, Object... args) {
-        LogMethods.fine(logger(object), message, args);
+        log(logger(object), FINE, message, null, args);
     }
 
     public static void finer(Object object, String message, Object... args) {
-        LogMethods.finer(logger(object), message, args);
+        log(logger(object), FINER, message, null, args);
     }
 
     public static void finest(Object object, String message, Object... args) {
-        LogMethods.finest(logger(object), message, args);
+        log(logger(object), FINEST, message, null, args);
     }
 
     public static void config(Object object, String message, Object... args) {
-        LogMethods.config(logger(object), message, args);
+        log(logger(object), CONFIG, message, null, args);
     }
 
     public static ProtoEventListener leftShift(ProtoObject protoObject, Map<String, Closure<Void>> map) {

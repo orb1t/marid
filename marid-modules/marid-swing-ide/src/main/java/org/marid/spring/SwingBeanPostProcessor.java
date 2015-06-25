@@ -64,7 +64,7 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
                 }));
             }
         } catch (Exception x) {
-            warning("Unable to pre-init bean {0}", x, beanName);
+            log(WARNING, "Unable to pre-init bean {0}", x, beanName);
         }
         return bean;
     }

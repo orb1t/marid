@@ -20,10 +20,9 @@ package org.marid.pref;
 
 import org.marid.logging.LogSupport;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
-
-import static org.marid.methods.LogMethods.warning;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -42,9 +41,9 @@ public interface PrefSupport {
         final String fmt = load ? "Unable to load {0} of {1}" : "Unable to save {0} of {1}";
         final String k = nodes == null || nodes.length == 0 ? key : String.join(".", nodes) + "." + key;
         if (this instanceof LogSupport) {
-            ((LogSupport) this).warning(fmt, error.getCause(), k, type);
+            ((LogSupport) this).log(Level.WARNING, fmt, error.getCause(), k, type);
         } else {
-            warning(Logger.getLogger(getClass().getName()), fmt, error.getCause(), k, type);
+            LogSupport.Log.log(Logger.getLogger(getClass().getName()), Level.WARNING, fmt, error.getCause(), k, type);
         }
     }
 

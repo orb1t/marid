@@ -89,7 +89,7 @@ public class ProfileManagementMaridFrame extends MaridFrame {
         restoreDividerLocation();
         centerPanel.add(splitPane);
         applicationListener = event -> {
-            info("Event: {0}", event);
+            log(INFO, "Event: {0}", event);
             if (event instanceof ContextStartedEvent) {
                 EventQueue.invokeLater(() -> {
                     startAction.setEnabled(false);

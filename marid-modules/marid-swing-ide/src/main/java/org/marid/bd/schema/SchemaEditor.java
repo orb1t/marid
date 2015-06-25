@@ -194,7 +194,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndBlo
     public LinkShape addLink(Output output, Input input) {
         final LinkShape link = configuration.link.get().linkShapeFor(output, input);
         links.add(link);
-        info("Added link: {0}", link);
+        log(INFO, "Added link: {0}", link);
         return link;
     }
 
@@ -529,7 +529,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndBlo
             repaint();
             return true;
         } catch (Exception x) {
-            warning("Unable to transform coordinates", x);
+            log(WARNING, "Unable to transform coordinates", x);
             return false;
         }
     }

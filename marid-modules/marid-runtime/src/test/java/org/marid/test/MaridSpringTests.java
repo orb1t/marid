@@ -54,13 +54,13 @@ public class MaridSpringTests implements LogSupport {
         countDownLatch.await();
         Marid.getCurrentContext().getAutowireCapableBeanFactory().autowireBean(this);
         Marid.getCurrentContext().getAutowireCapableBeanFactory().initializeBean(this, getClass().getSimpleName());
-        info("Initialized");
+        log(INFO, "Initialized");
     }
 
     @After
     public void destroy0() throws Exception {
         Marid.getCurrentContext().getAutowireCapableBeanFactory().destroyBean(this);
         Marid.getCurrentContext().close();
-        info("Destroyed");
+        log(INFO, "Destroyed");
     }
 }

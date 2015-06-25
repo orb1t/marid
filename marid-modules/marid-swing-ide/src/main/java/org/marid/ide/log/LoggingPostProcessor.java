@@ -39,7 +39,7 @@ public class LoggingPostProcessor implements DestructionAwareBeanPostProcessor, 
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        info("Bean {0} initialized: {1}", beanName, bean);
+        log(INFO, "Bean {0} initialized: {1}", beanName, bean);
         return bean;
     }
 
@@ -51,6 +51,6 @@ public class LoggingPostProcessor implements DestructionAwareBeanPostProcessor, 
                 beanName = names[0];
             }
         }
-        info("Bean {0} destroying", beanName);
+        log(INFO, "Bean {0} destroying", beanName);
     }
 }

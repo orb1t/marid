@@ -17,10 +17,10 @@
  */
 package org.marid.logging;
 
-import org.marid.methods.LogMethods;
 import org.marid.util.MaridClassValue;
 
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import static org.marid.util.MaridClassValue.getCaller;
@@ -32,98 +32,47 @@ public interface LogSupport {
 
     ClassValue<Logger> LOGGERS = new MaridClassValue<>(c -> Logger.getLogger(c.getName()));
 
+    Level INFO = Level.INFO;
+    Level WARNING = Level.WARNING;
+    Level SEVERE = Level.SEVERE;
+    Level CONFIG = Level.CONFIG;
+    Level FINE = Level.FINE;
+    Level FINER = Level.FINER;
+    Level FINEST = Level.FINEST;
+    Level ALL = Level.ALL;
+    Level OFF = Level.OFF;
+
     default Logger logger() {
         return LOGGERS.get(getClass());
     }
 
-    default void info(String message, Object... args) {
-        LogMethods.info(logger(), message, args);
-    }
-
-    default void warning(String message, Object... args) {
-        LogMethods.warning(logger(), message, args);
-    }
-
-    default void warning(String message, Throwable throwable, Object... args) {
-        LogMethods.warning(logger(), message, throwable, args);
-    }
-
-    default void severe(String message, Object... args) {
-        LogMethods.severe(logger(), message, args);
-    }
-
-    default void severe(String message, Throwable throwable, Object... args) {
-        LogMethods.severe(logger(), message, throwable, args);
-    }
-
-    default void config(String message, Object... args) {
-        LogMethods.config(logger(), message, args);
-    }
-
-    default void fine(String message, Object... args) {
-        LogMethods.fine(logger(), message, args);
-    }
-
-    default void finer(String message, Object... args) {
-        LogMethods.finer(logger(), message, args);
-    }
-
-    default void finest(String message, Object... args) {
-        LogMethods.finest(logger(), message, args);
-    }
-
     default void log(Level level, String message, Object... args) {
-        LogMethods.log(logger(), level, message, null, args);
+        Log.log(logger(), level, message, null, args);
     }
 
     default void log(Level level, String message, Throwable throwable, Object... args) {
-        LogMethods.log(logger(), level, message, throwable, args);
+        Log.log(logger(), level, message, throwable, args);
     }
 
-    static class Log {
-
-        public static void info(String message, Object... args) {
-            LogMethods.info(LOGGERS.get(getCaller(3)), message, args);
-        }
-
-        public static void warning(String message, Object... args) {
-            LogMethods.warning(LOGGERS.get(getCaller(3)), message, args);
-        }
-
-        public static void warning(String message, Throwable throwable, Object... args) {
-            LogMethods.warning(LOGGERS.get(getCaller(3)), message, throwable, args);
-        }
-
-        public static void severe(String message, Object... args) {
-            LogMethods.warning(LOGGERS.get(getCaller(3)), message, args);
-        }
-
-        public static void severe(String message, Throwable throwable, Object... args) {
-            LogMethods.severe(LOGGERS.get(getCaller(3)), message, throwable, args);
-        }
-
-        public static void config(String message, Object... args) {
-            LogMethods.config(LOGGERS.get(getCaller(3)), message, args);
-        }
-
-        public static void fine(String message, Object... args) {
-            LogMethods.fine(LOGGERS.get(getCaller(3)), message, args);
-        }
-
-        public static void finer(String message, Object... args) {
-            LogMethods.finer(LOGGERS.get(getCaller(3)), message, args);
-        }
-
-        public static void finest(String message, Object... args) {
-            LogMethods.finest(LOGGERS.get(getCaller(3)), message, args);
-        }
+    class Log {
 
         public static void log(Level level, String message, Object... args) {
-            LogMethods.log(LOGGERS.get(getCaller(3)), level, message, null, args);
+            log(LOGGERS.get(getCaller(3)), level, message, null, args);
         }
 
         public static void log(Level level, String message, Throwable throwable, Object... args) {
-            LogMethods.log(LOGGERS.get(getCaller(3)), level, message, throwable, args);
+            log(LOGGERS.get(getCaller(3)), level, message, throwable, args);
+        }
+
+        public static void log(Logger logger, Level level, String msg, Throwable throwable, Object... args) {
+            if (logger.isLoggable(level)) {
+                final LogRecord r = new LogRecord(level, msg);
+                r.setParameters(args);
+                r.setSourceClassName(null);
+                r.setLoggerName(logger.getName());
+                r.setThrown(throwable);
+                logger.log(r);
+            }
         }
     }
 }

@@ -107,15 +107,15 @@ public class ConfigurationDialog extends JDialog implements LogSupport, PrefSupp
                 if (!Objects.equals(oldValue, newValue)) {
                     if (Objects.equals(ch.p.defaultValueSupplier.get(), newValue) && ch.p.isPresent()) {
                         ch.p.remove();
-                        fine("Restored {0}", ch.p.key);
+                        log(FINE, "Restored {0}", ch.p.key);
                     } else {
                         ch.save();
-                        fine("Saved {0}: {1}", ch.p.key, newValue);
+                        log(FINE, "Saved {0}: {1}", ch.p.key, newValue);
                     }
                 }
             } catch (Exception x) {
                 exceptionMap.put(e.getValue(), x);
-                warning("Unable to save {0}", x, e.getValue().p.key);
+                log(WARNING, "Unable to save {0}", x, e.getValue().p.key);
             }
         }
         if (exceptionMap.isEmpty()) {

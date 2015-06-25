@@ -127,7 +127,7 @@ public class Profile implements Named, Closeable, LogSupport {
                     FileUtils.remove(path);
                 }
             } catch (IOException x) {
-                warning("Unable to clean {0}", x, dir);
+                log(WARNING, "Unable to clean {0}", x, dir);
             }
         }
     }
@@ -180,11 +180,11 @@ public class Profile implements Named, Closeable, LogSupport {
                         try {
                             l.onApplicationEvent(event);
                         } catch (Exception x) {
-                            warning("Unable to process {0}", x, event);
+                            log(WARNING, "Unable to process {0}", x, event);
                         }
                     });
                     if (event instanceof ContextClosedEvent) {
-                        info("Context {0} closed at {1}", event.getSource(), ofEpochMilli(event.getTimestamp()));
+                        log(INFO, "Context {0} closed at {1}", event.getSource(), ofEpochMilli(event.getTimestamp()));
                         applicationContext = null;
                     } else if (event instanceof ContextStartedEvent) {
                         final MBeanServerConnection connection = applicationContext.getBean(MBeanServerConnection.class);
@@ -198,11 +198,11 @@ public class Profile implements Named, Closeable, LogSupport {
                         try {
                             applicationContext.register(shell.getClassLoader().loadClass(className, true, true, true));
                         } catch (Exception x) {
-                            warning("Unable to load {0}", x, className);
+                            log(WARNING, "Unable to load {0}", x, className);
                         }
                     });
                 } catch (Exception x) {
-                    warning("Unable to stream {0}", x, path);
+                    log(WARNING, "Unable to stream {0}", x, path);
                 }
                 registerBean(LoggingPostProcessor.class);
                 registerBean(ProfileMBeanServerFactoryBean.class, this);

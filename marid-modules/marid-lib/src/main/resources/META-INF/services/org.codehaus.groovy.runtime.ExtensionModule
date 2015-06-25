@@ -18,5 +18,5 @@
 
 moduleName=runtime-lib-module
 moduleVersion=1.0
-extensionClasses=org.marid.methods.LogMethods,org.marid.methods.I10nMethods
+extensionClasses=org.marid.methods.I10nMethods
 staticExtensionClasses=

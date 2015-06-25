@@ -64,7 +64,7 @@ public class ProcessWorker extends SwingWorker<Integer, ProcessLine> implements 
                 Thread.sleep(100L);
             }
         } catch (InterruptedException x) {
-            warning("Interrupted {0}", x, processBuilder);
+            log(WARNING, "Interrupted {0}", x, processBuilder);
         }
         terminate();
         for (final long startTime = currentTimeMillis(); currentTimeMillis() - startTime <= timeout; ) {
@@ -84,7 +84,7 @@ public class ProcessWorker extends SwingWorker<Integer, ProcessLine> implements 
                     publish(new ProcessLine(error, scanner.nextLine()));
                     final IOException ioException = scanner.ioException();
                     if (ioException != null) {
-                        warning("I/O exception {0}", ioException, processBuilder);
+                        log(WARNING, "I/O exception {0}", ioException, processBuilder);
                     }
                 }
             }

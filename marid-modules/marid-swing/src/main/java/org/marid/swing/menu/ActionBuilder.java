@@ -48,11 +48,11 @@ public class ActionBuilder extends AbstractAction implements L10nSupport, LogSup
                 if (e.getSource() instanceof Component) {
                     final Window window = SwingUtilities.windowForComponent((Component) e.getSource());
                     if (window instanceof LogSupport) {
-                        ((LogSupport) window).warning("Action {0} error", x, getValue(NAME));
+                        ((LogSupport) window).log(WARNING, "Action {0} error", x, getValue(NAME));
                         return;
                     }
                 }
-                warning("Action {0} error", x, getValue(NAME));
+                log(WARNING, "Action {0} error", x, getValue(NAME));
             }
         }
     }

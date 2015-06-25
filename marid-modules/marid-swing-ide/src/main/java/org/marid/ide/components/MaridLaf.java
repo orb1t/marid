@@ -40,7 +40,7 @@ public class MaridLaf implements LogSupport, SysPrefSupport {
         try {
             UIManager.setLookAndFeel(laf);
         } catch (Exception x) {
-            Log.warning("Unable to set LAF {0}", x, laf);
+            Log.log(WARNING, "Unable to set LAF {0}", x, laf);
         }
         if (UIManager.getLookAndFeel() instanceof NimbusLookAndFeel) {
             UIManager.put("Nimbus.keepAlternateRowColor", true);

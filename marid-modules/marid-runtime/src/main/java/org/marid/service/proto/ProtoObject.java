@@ -21,7 +21,6 @@ package org.marid.service.proto;
 import org.marid.concurrent.ConcurrentUtils;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
-import org.marid.methods.LogMethods;
 import org.marid.util.Utils;
 
 import java.util.ArrayList;
@@ -120,11 +119,11 @@ public abstract class ProtoObject<O extends ProtoObject<O>> implements Named, Lo
             try {
                 listener.onEvent(event);
             } catch (Exception x) {
-                warning("Unable to fire {0}", x, event);
+                log(WARNING, "Unable to fire {0}", x, event);
             }
         }
         if (loggingEnabled) {
-            LogMethods.log(logger, level, message, cause, args);
+            Log.log(logger, level, message, cause, args);
         }
     }
 

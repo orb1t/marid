@@ -99,11 +99,11 @@ public class MaridAction extends AbstractAction implements L10nSupport, LogSuppo
             if (e.getSource() instanceof Component) {
                 final Window window = SwingUtilities.windowForComponent((Component) e.getSource());
                 if (window instanceof LogSupport) {
-                    ((LogSupport) window).warning("Action {0} error", x, getValue(NAME));
+                    ((LogSupport) window).log(WARNING, "Action {0} error", x, getValue(NAME));
                     return;
                 }
             }
-            warning("Action {0} error", x, getValue(NAME));
+            log(WARNING, "Action {0} error", x, getValue(NAME));
         }
     }
 

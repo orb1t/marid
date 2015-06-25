@@ -69,13 +69,13 @@ public class ShutdownThread extends Thread implements LogSupport {
                         }
                     }
                 } catch (Exception x) {
-                    warning("Unable to process {0}", x, watchKey);
+                    log(WARNING, "Unable to process {0}", x, watchKey);
                 } finally {
                     watchKey.reset();
                 }
             }
         } catch (Exception x) {
-            warning("Unable to watch events", x);
+            log(WARNING, "Unable to watch events", x);
         }
     }
 }

@@ -19,6 +19,7 @@
 package org.marid.swing;
 
 import org.marid.l10n.L10nSupport;
+import org.marid.logging.LogSupport;
 import org.marid.swing.actions.MaridAction;
 
 import javax.swing.*;
@@ -28,17 +29,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.logging.Logger;
 
 import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW;
-import static org.marid.methods.LogMethods.warning;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractDialog extends JDialog implements WindowListener, L10nSupport {
-
-    protected final Logger log = Logger.getLogger(getClass().getName());
+public abstract class AbstractDialog extends JDialog implements WindowListener, L10nSupport, LogSupport {
 
     public AbstractDialog(Window window, String title, ModalityType modalityType) {
         super(window, LS.s(title), modalityType);
@@ -49,7 +46,7 @@ public abstract class AbstractDialog extends JDialog implements WindowListener, 
         try {
             accept();
         } catch (Exception x) {
-            warning(log, "Accepting error", x);
+            log(WARNING, "Accepting error", x);
         } finally {
             dispose();
         }
@@ -59,7 +56,7 @@ public abstract class AbstractDialog extends JDialog implements WindowListener, 
         try {
             reject();
         } catch (Exception x) {
-            warning(log, "Rejecting error", x);
+            log(WARNING, "Rejecting error", x);
         } finally {
             dispose();
         }

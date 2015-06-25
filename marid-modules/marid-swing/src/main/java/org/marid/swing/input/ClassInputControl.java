@@ -80,7 +80,7 @@ public class ClassInputControl extends JPanel implements InputControl<Class<?>>,
         try {
             return className.isEmpty() ? null : Class.forName(className, false, currentThread().getContextClassLoader());
         } catch (Exception x) {
-            warning("Unable to load class {0}", x, className);
+            log(WARNING, "Unable to load class {0}", x, className);
             return null;
         }
     }
@@ -120,7 +120,7 @@ public class ClassInputControl extends JPanel implements InputControl<Class<?>>,
             try {
                 task.join();
             } catch (Exception x) {
-                warning("Unable to process task", x);
+                log(WARNING, "Unable to process task", x);
             }
         }
         return map;
@@ -147,7 +147,7 @@ public class ClassInputControl extends JPanel implements InputControl<Class<?>>,
                     });
 
         } catch (Exception x) {
-            warning("Unable to process {0}", x, path);
+            log(WARNING, "Unable to process {0}", x, path);
         }
     }
 

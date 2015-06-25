@@ -62,7 +62,7 @@ public interface DndTarget<T extends Serializable> extends DndConstants, LogSupp
                 try {
                     return (T) transferable.getTransferData(dataFlavor);
                 } catch (Exception x) {
-                    warning("Unable to get transferable from {0}", x, transferable);
+                    log(WARNING, "Unable to get transferable from {0}", x, transferable);
                 }
             }
         }

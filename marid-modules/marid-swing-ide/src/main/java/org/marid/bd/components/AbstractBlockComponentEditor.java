@@ -90,7 +90,7 @@ public class AbstractBlockComponentEditor<B extends Block> extends JDialog imple
         try {
             onSubmit(action, actionEvent);
         } catch (Exception x) {
-            warning("Submit error", x);
+            log(WARNING, "Submit error", x);
         } finally {
             dispose();
         }
@@ -100,7 +100,7 @@ public class AbstractBlockComponentEditor<B extends Block> extends JDialog imple
         try {
             onReject(action, actionEvent);
         } catch (Exception x) {
-            warning("Reject error", x);
+            log(WARNING, "Reject error", x);
         } finally {
             dispose();
         }

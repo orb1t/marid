@@ -141,7 +141,7 @@ public final class SocketTransceiverServer implements TransceiverServer, LogSupp
         @Override
         public void close() throws IOException {
             try (final Socket s = socket; final InputStream is = inputStream; final OutputStream os = outputStream) {
-                finest("close {0} {1} {2}", s, is, os);
+                log(FINEST, "close {0} {1} {2}", s, is, os);
             }
         }
     }

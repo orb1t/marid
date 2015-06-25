@@ -60,7 +60,7 @@ public class XmlPersister implements LogSupport {
             try {
                 classes.add(Class.forName(definition.getBeanClassName(), false, Utils.currentClassLoader()));
             } catch (Exception x) {
-                severe("Unable to load class {0}", definition.getBeanClassName());
+                log(SEVERE, "Unable to load class {0}", definition.getBeanClassName());
             }
         }
         try {
@@ -68,7 +68,7 @@ public class XmlPersister implements LogSupport {
         } catch (JAXBException x) {
             throw new IllegalStateException(x);
         }
-        info("XML classes: {0}", classes.stream().map(Class::getSimpleName).sorted().collect(Collectors.toList()));
+        log(INFO, "XML classes: {0}", classes.stream().map(Class::getSimpleName).sorted().collect(Collectors.toList()));
     }
 
     public void save(Object object, StreamResult stream) throws IOException {

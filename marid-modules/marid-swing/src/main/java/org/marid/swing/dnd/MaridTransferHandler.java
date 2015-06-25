@@ -59,7 +59,7 @@ public class MaridTransferHandler extends TransferHandler implements LogSupport 
                 try {
                     return iconFunction.apply(t.getTransferData(dataFlavor));
                 } catch (UnsupportedFlavorException | IOException x) {
-                    warning("Unable to get visual representation for {0}", x, t);
+                    log(WARNING, "Unable to get visual representation for {0}", x, t);
                 }
             }
         }
@@ -120,7 +120,7 @@ public class MaridTransferHandler extends TransferHandler implements LogSupport 
                         final DndSource<Serializable> dndSource = Utils.cast(source);
                         dndSource.dndObjectExportDone(dndObject, action);
                     } catch (UnsupportedFlavorException | IOException x) {
-                        warning("Unable to get transfer data for {0}", x, data);
+                        log(WARNING, "Unable to get transfer data for {0}", x, data);
                     }
                 }
             }

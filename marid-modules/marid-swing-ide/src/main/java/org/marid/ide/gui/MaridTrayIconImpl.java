@@ -39,8 +39,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.logging.Level;
 
-import static java.util.logging.Level.OFF;
-
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -89,7 +87,7 @@ public class MaridTrayIconImpl implements AutoCloseable, LogSupport, L10nSupport
 
                                 @Override
                                 public void windowClosed(WindowEvent e) {
-                                    info("Internal popup window closed");
+                                    log(INFO, "Internal popup window closed");
                                 }
                             };
                             frame.addWindowFocusListener(windowAdapter);

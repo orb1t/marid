@@ -105,7 +105,7 @@ public abstract class AbstractLiveLinkShape<T> extends LinkShape implements Clon
                 list.set(i, it.next());
             }
         } catch (Exception x) {
-            warning("GA error", x);
+            log(WARNING, "GA error", x);
         }
     }
 }

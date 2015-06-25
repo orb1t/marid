@@ -35,8 +35,9 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.marid.methods.LogMethods.info;
-import static org.marid.methods.LogMethods.warning;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.LogSupport.Log.log;
 import static org.marid.util.Utils.currentClassLoader;
 
 /**
@@ -55,7 +56,7 @@ public class Marid {
         if (event instanceof ContextStartedEvent) {
             new ShutdownThread(getCurrentContext()).start();
         }
-        info(LOGGER, "{0}", event);
+        log(LOGGER, INFO, "{0}", null, event);
     }
 
     private static void loadSysProperties() throws Exception {
@@ -76,7 +77,7 @@ public class Marid {
         loadSysProperties();
         LogManager.getLogManager().reset();
         LogManager.getLogManager().readConfiguration();
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> warning(LOGGER, "Uncaught exception in {0}", e, t));
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(LOGGER, WARNING, "Uncaught exception in {0}", e, t));
         getCurrentContext().addApplicationListener(Marid::applicationEventListener);
         final CommandLinePropertySource commandLinePropertySource = new CommandLinePropertySource(args);
         getCurrentContext().getEnvironment().getPropertySources().addFirst(commandLinePropertySource);

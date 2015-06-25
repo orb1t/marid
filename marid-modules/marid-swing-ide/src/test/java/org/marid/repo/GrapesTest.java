@@ -49,10 +49,10 @@ public class GrapesTest implements LogSupport {
     @BeforeClass
     public static void beforeClass() throws Exception {
         if (repoDir.mkdirs()) {
-            Log.info("Directory {0} was created", repoDir);
+            Log.log(INFO, "Directory {0} was created", repoDir);
         }
         if (cacheDir.mkdirs()) {
-            Log.info("Directory {0} was created", cacheDir);
+            Log.log(INFO, "Directory {0} was created", cacheDir);
         }
         Thread.currentThread().setContextClassLoader(shell.getClassLoader());
     }

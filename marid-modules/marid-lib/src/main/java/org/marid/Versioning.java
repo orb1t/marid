@@ -29,7 +29,8 @@ import java.security.ProtectionDomain;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import static org.marid.methods.LogMethods.warning;
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.LogSupport.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -45,7 +46,7 @@ public class Versioning {
             try (final Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
                 GLOBALS.load(reader);
             } catch (Exception x) {
-                warning(LOG, "Unable to read global meta.properties", x);
+                log(LOG, WARNING, "Unable to read global meta.properties", x);
             }
         }
     }
@@ -73,7 +74,7 @@ public class Versioning {
                             return GLOBALS;
                         }
                     } catch (Exception x) {
-                        warning(LOG, "Unable to read meta.properties");
+                        log(LOG, WARNING, "Unable to read meta.properties", x);
                         return GLOBALS;
                     }
                 }

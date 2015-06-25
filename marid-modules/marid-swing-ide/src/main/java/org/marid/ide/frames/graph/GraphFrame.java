@@ -75,7 +75,7 @@ public class GraphFrame extends MaridFrame implements DndTarget<IdeJmxAttribute>
                             timeSeries.add(new Second(new Date()), (Number) value);
                         }
                     } catch (Exception x) {
-                        warning("Unable to get value from {0}", x, attribute);
+                        log(WARNING, "Unable to get value from {0}", x, attribute);
                     }
                 }
             }

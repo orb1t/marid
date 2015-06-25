@@ -29,7 +29,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import static javax.swing.Action.SHORT_DESCRIPTION;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -69,7 +68,7 @@ public class UrlInputControl extends JPanel implements InputControl<URL>, LogSup
                         break;
                 }
             } catch (Exception x) {
-                warning("Unable to show file chooser", x);
+                log(WARNING, "Unable to show file chooser", x);
             }
         }, SHORT_DESCRIPTION, s("Browse")));
         g.setVerticalGroup(g.createParallelGroup().addComponent(textField).addComponent(browseButton));

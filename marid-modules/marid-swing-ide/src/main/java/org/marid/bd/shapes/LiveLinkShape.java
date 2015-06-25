@@ -103,7 +103,7 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
             }
             return distFactor + isectFactor;
         } catch (Exception x) {
-            warning("GA fitness error on {0}", x, this);
+            log(WARNING, "GA fitness error on {0}", x, this);
             return 0.0;
         }
     }

@@ -80,7 +80,7 @@ public interface ActionKeySupport extends LogSupport {
                 final MetaInfo metaInfo = field.getAnnotation(MetaInfo.class);
                 addAction(new ActionKey(metaInfo.path()), action);
             } catch (ReflectiveOperationException x) {
-                warning("Unable to get action from {0}", x, field);
+                log(WARNING, "Unable to get action from {0}", x, field);
             }
         }
     }

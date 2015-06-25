@@ -39,7 +39,7 @@ public interface ClassNodeBuildTrigger extends BuildTrigger, LogSupport {
             try {
                 ClassHelper.saveClassNode(profileManager.getCurrentProfile().getClassesPath(), n);
             } catch (Exception x) {
-                warning("Unable to save {0}", x, n.getName());
+                log(WARNING, "Unable to save {0}", x, n.getName());
             }
         });
     }

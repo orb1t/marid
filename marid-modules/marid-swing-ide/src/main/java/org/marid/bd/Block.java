@@ -20,7 +20,6 @@ package org.marid.bd;
 
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
-import org.marid.methods.LogMethods;
 import org.marid.util.CollectionUtils;
 import org.marid.util.Utils;
 import org.marid.xml.XmlPersister;
@@ -60,13 +59,13 @@ public abstract class Block implements Named, Serializable, LogSupport, BuildTri
 
     public void addEventListener(EventListener listener) {
         if (listeners.add(listener)) {
-            LogMethods.info(Logger.getLogger(id), "Added {0}", listener);
+            Log.log(Logger.getLogger(id), INFO, "Added {0}", null, listener);
         }
     }
 
     public void removeListener(EventListener listener) {
         if (listeners.remove(listener)) {
-            LogMethods.info(Logger.getLogger(id), "Removed {0}", listener);
+            Log.log(Logger.getLogger(id), INFO, "Removed {0}", null, listener);
         }
     }
 

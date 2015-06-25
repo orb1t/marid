@@ -49,7 +49,7 @@ public class ProfileManager extends Observable implements LogSupport, SysPrefSup
         this.connectionManager = connectionManager;
         final Path profilesDir = getProfilesDir();
         try (final Stream<Path> stream = Files.list(profilesDir)) {
-            stream.filter(Files::isDirectory).map(this::newProfile).forEach(p -> info("Added profile {0}", p));
+            stream.filter(Files::isDirectory).map(this::newProfile).forEach(p -> log(INFO, "Added profile {0}", p));
         }
         if (profileMap.isEmpty()) {
             addProfile("default");

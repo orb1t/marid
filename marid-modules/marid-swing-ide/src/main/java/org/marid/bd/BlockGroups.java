@@ -59,7 +59,7 @@ public class BlockGroups {
                         properties.load(r);
                     }
                 } catch (Exception x) {
-                    info("Unable to load properties for {0}", x, id);
+                    log(INFO, "Unable to load properties for {0}", x, id);
                 }
             }
             this.icon = Images.getIcon(properties.getProperty("icon", "block/" + id + ".png"), 22);
