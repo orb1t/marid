@@ -19,7 +19,6 @@
 package org.marid.ide.frames.schema;
 
 import images.Images;
-import org.marid.Marid;
 import org.marid.bd.BlockComponent;
 import org.marid.bd.schema.SchemaEditor;
 import org.marid.bd.schema.SchemaModel;
@@ -35,6 +34,7 @@ import org.marid.swing.SwingUtil;
 import org.marid.swing.actions.MaridAction;
 import org.marid.xml.XmlPersister;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.GenericApplicationContext;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -102,10 +102,19 @@ public class SchemaFrame extends MaridFrame {
     @MetaInfo(path = "b/Build/r/Build")
     public final Action buildAction;
 
+    private final XmlPersister xmlPersister;
+    private final GenericApplicationContext applicationContext;
+
     @Autowired
-    public SchemaFrame(BlockMenuProvider blockMenuProvider, ProfileManager profileManager, SchemaEditor schemaEditor) {
+    public SchemaFrame(BlockMenuProvider blockMenuProvider,
+                       ProfileManager profileManager,
+                       SchemaEditor schemaEditor,
+                       XmlPersister xmlPersister,
+                       GenericApplicationContext applicationContext) {
         super("Schema");
         this.profileManager = profileManager;
+        this.xmlPersister = xmlPersister;
+        this.applicationContext = applicationContext;
         enableEvents(AWTEvent.COMPONENT_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
         centerPanel.add(layer = new JLayer<>(this.schemaEditor = schemaEditor, new SchemaLayerUI()));
         getContentPane().setBackground(getBackground());
@@ -157,7 +166,7 @@ public class SchemaFrame extends MaridFrame {
         switch (chooser.showOpenDialog(this)) {
             case JFileChooser.APPROVE_OPTION:
                 try {
-                    final SchemaModel model = XmlPersister.get().load(SchemaModel.class, new StreamSource(chooser.getSelectedFile()));
+                    final SchemaModel model = xmlPersister.load(SchemaModel.class, new StreamSource(chooser.getSelectedFile()));
                     schemaEditor.load(model);
                     file = chooser.getSelectedFile();
                 } catch (Exception x) {
@@ -173,8 +182,8 @@ public class SchemaFrame extends MaridFrame {
             return;
         }
         try {
-            final SchemaModel model = Marid.getCurrentContext().getBean(SchemaModel.class, schemaEditor);
-            XmlPersister.get().save(model, new StreamResult(file));
+            final SchemaModel model = applicationContext.getBean(SchemaModel.class, schemaEditor);
+            xmlPersister.save(model, new StreamResult(file));
         } catch (Exception x) {
             showMessage(ERROR_MESSAGE, "Save error", "Save {0} error", x, file);
         }

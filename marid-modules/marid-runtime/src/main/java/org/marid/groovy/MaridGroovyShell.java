@@ -6,8 +6,7 @@ import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
-import org.marid.Marid;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,16 +15,18 @@ import java.io.Reader;
 /**
 * @author Dmitry Ovchinnikov
 */
-class MaridGroovyShell extends GroovyShell {
+public class MaridGroovyShell extends GroovyShell {
 
-    MaridGroovyShell(ClassLoader classLoader, Binding binding, CompilerConfiguration cc) {
+    private final GenericApplicationContext context;
+
+    public MaridGroovyShell(ClassLoader classLoader, Binding binding, CompilerConfiguration cc, GenericApplicationContext context) {
         super(classLoader, binding, cc);
+        this.context = context;
     }
 
     @Override
     public Script parse(GroovyCodeSource codeSource) throws CompilationFailedException {
         final Script script = super.parse(codeSource);
-        final AnnotationConfigApplicationContext context = Marid.getCurrentContext();
         if (context != null && context.isActive()) {
             context.getAutowireCapableBeanFactory().autowireBean(script);
         }

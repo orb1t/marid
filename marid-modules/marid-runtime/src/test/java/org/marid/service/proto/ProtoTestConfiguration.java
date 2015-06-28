@@ -18,15 +18,15 @@
 
 package org.marid.service.proto;
 
+import org.marid.groovy.GroovyRuntime;
 import org.marid.service.proto.pb.PbService;
 import org.marid.service.proto.pb.PbServiceConfiguration;
 import org.marid.service.proto.pp.PpService;
 import org.marid.service.proto.pp.PpServiceConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-
-import static org.marid.groovy.GroovyRuntime.newInstance;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -34,9 +34,12 @@ import static org.marid.groovy.GroovyRuntime.newInstance;
 @Configuration
 public class ProtoTestConfiguration {
 
+    @Autowired
+    private GroovyRuntime groovyRuntime;
+
     @Bean
     public PpServiceConfiguration ppServiceConfiguration() throws Exception {
-        return newInstance(PpServiceConfiguration.class, getClass().getResource("/PpContext.groovy"));
+        return groovyRuntime.newInstance(PpServiceConfiguration.class, getClass().getResource("/PpContext.groovy"));
     }
 
     @Bean
@@ -47,7 +50,7 @@ public class ProtoTestConfiguration {
 
     @Bean
     public PbServiceConfiguration pbServiceConfiguration() throws Exception {
-        return newInstance(PbServiceConfiguration.class, getClass().getResource("/PbContext.groovy"));
+        return groovyRuntime.newInstance(PbServiceConfiguration.class, getClass().getResource("/PbContext.groovy"));
     }
 
     @Bean

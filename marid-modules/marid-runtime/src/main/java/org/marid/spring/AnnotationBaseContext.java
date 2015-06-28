@@ -18,10 +18,12 @@
 
 package org.marid.spring;
 
+import org.marid.groovy.GroovyRuntime;
 import org.springframework.beans.factory.config.PropertyResourceConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 /**
@@ -39,5 +41,10 @@ public class AnnotationBaseContext {
     @Bean
     public static BeanLogger beanLogger() {
         return new BeanLogger();
+    }
+
+    @Bean
+    public GroovyRuntime groovyRuntime(GenericApplicationContext context) {
+        return new GroovyRuntime(context);
     }
 }

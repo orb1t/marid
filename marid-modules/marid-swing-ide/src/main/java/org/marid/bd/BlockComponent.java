@@ -18,11 +18,12 @@
 
 package org.marid.bd;
 
-import org.marid.Marid;
 import org.marid.bd.schema.SchemaEditor;
+import org.marid.ide.context.BaseContext;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.WindowAction;
 import org.marid.swing.geom.ShapeUtils;
+import org.springframework.context.support.GenericApplicationContext;
 
 import javax.swing.*;
 import java.awt.*;
@@ -75,8 +76,11 @@ public interface BlockComponent {
         final SchemaEditor schemaEditor = getSchemaEditor();
         schemaEditor.removeAllLinks(this);
         schemaEditor.remove(getComponent());
-        schemaEditor.validate();
-        schemaEditor.repaint();
+        BaseContext.context.getAutowireCapableBeanFactory().destroyBean(getBlock());
+        if (schemaEditor.isVisible()) {
+            schemaEditor.validate();
+            schemaEditor.repaint();
+        }
     }
 
     default SchemaEditor getSchemaEditor() {
@@ -94,9 +98,10 @@ public interface BlockComponent {
         if (getBlock() instanceof ConfigurableBlock) {
             final ConfigurableBlock b = (ConfigurableBlock) getBlock();
             popupMenu.add(new MaridAction("Settings", "settings", e -> {
+                final GenericApplicationContext context = BaseContext.context;
                 final Window window = b.createWindow(SwingUtilities.windowForComponent(getSchemaEditor()));
-                Marid.getCurrentContext().getAutowireCapableBeanFactory().autowireBean(window);
-                Marid.getCurrentContext().getAutowireCapableBeanFactory().initializeBean(window, null);
+                context.getAutowireCapableBeanFactory().autowireBean(window);
+                context.getAutowireCapableBeanFactory().initializeBean(window, null);
                 window.addWindowListener(new WindowAction(we -> {
                     switch (we.getID()) {
                         case WindowEvent.WINDOW_CLOSED:
@@ -105,7 +110,7 @@ public interface BlockComponent {
                                 getSchemaEditor().validate();
                                 getSchemaEditor().repaint();
                             } finally {
-                                Marid.getCurrentContext().getAutowireCapableBeanFactory().destroyBean(window);
+                                context.getAutowireCapableBeanFactory().destroyBean(window);
                             }
                             break;
                     }

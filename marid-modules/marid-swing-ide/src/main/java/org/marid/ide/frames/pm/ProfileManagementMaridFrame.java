@@ -133,19 +133,12 @@ public class ProfileManagementMaridFrame extends MaridFrame {
     }
 
     @Override
-    public void init() {
-        super.init();
-        profile.addApplicationListener(applicationListener);
-    }
-
-    @Override
     public void dispose() {
         try {
             profile.stop();
             preferences().putInt("splitPos", splitPane.getDividerLocation());
             beanTree.savePreferences();
         } finally {
-            profile.removeApplicationListener(applicationListener);
             super.dispose();
         }
     }

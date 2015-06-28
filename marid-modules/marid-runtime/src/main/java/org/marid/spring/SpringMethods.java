@@ -18,7 +18,7 @@
 
 package org.marid.spring;
 
-import org.marid.Marid;
+import groovy.lang.GroovyObject;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
@@ -26,7 +26,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
 public class SpringMethods {
 
-    public static AnnotationConfigApplicationContext getMaridContext(Object object) {
-        return Marid.getCurrentContext();
+    public static AnnotationConfigApplicationContext getMaridContext(GroovyObject object) {
+        return (AnnotationConfigApplicationContext) object.getProperty("maridContext");
     }
 }

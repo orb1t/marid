@@ -18,6 +18,7 @@
 
 package org.marid.bd;
 
+import org.marid.ide.context.BaseContext;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
 import org.marid.util.CollectionUtils;
@@ -142,7 +143,7 @@ public abstract class Block implements Named, Serializable, LogSupport, BuildTri
     protected Object writeReplace() throws ObjectStreamException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
-            XmlPersister.get().save(this, new StreamResult(bos));
+            BaseContext.context.getBean(XmlPersister.class).save(this, new StreamResult(bos));
             return new BlockProxy(bos.toByteArray());
         } catch (IOException x) {
             throw new WriteAbortedException("Replace error", x);
@@ -153,7 +154,7 @@ public abstract class Block implements Named, Serializable, LogSupport, BuildTri
     public String toString() {
         final StringWriter writer = new StringWriter();
         try {
-            XmlPersister.get().save(this, new StreamResult(writer));
+            BaseContext.context.getBean(XmlPersister.class).save(this, new StreamResult(writer));
             return writer.toString();
         } catch (Exception x) {
             throw new IllegalStateException(x);
@@ -173,7 +174,7 @@ public abstract class Block implements Named, Serializable, LogSupport, BuildTri
 
         public Object readResolve() throws ObjectStreamException {
             try {
-                final Block block = XmlPersister.get().load(Block.class, new StreamSource(new ByteArrayInputStream(data)));
+                final Block block = BaseContext.context.getBean(XmlPersister.class).load(Block.class, new StreamSource(new ByteArrayInputStream(data)));
                 block.id = Utils.textUid();
                 return block;
             } catch (Exception x) {

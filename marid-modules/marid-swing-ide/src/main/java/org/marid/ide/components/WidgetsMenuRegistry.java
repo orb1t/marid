@@ -18,7 +18,6 @@
 
 package org.marid.ide.components;
 
-import org.marid.Marid;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.frames.MaridFrame;
 import org.marid.ide.gui.IdeFrameImpl;
@@ -28,6 +27,7 @@ import org.marid.swing.actions.ActionKey;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.forms.ConfigurationDialog;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -38,15 +38,22 @@ import javax.swing.*;
 @Component
 public class WidgetsMenuRegistry implements L10nSupport {
 
+    private final GenericApplicationContext context;
+
+    @Autowired
+    public WidgetsMenuRegistry(GenericApplicationContext context) {
+        this.context = context;
+    }
+
     @Autowired
     public void setFrames(ActionMap ideActionMap) {
-        for (final String beanName : Marid.getCurrentContext().getBeanNamesForType(MaridFrame.class)) {
-            final MetaInfo metaInfo = Marid.getCurrentContext().findAnnotationOnBean(beanName, MetaInfo.class);
+        for (final String beanName : context.getBeanNamesForType(MaridFrame.class)) {
+            final MetaInfo metaInfo = context.findAnnotationOnBean(beanName, MetaInfo.class);
             final String path = metaInfo.path().isEmpty()
                     ? "/Frames//" + beanName
                     : metaInfo.path() + "/" + metaInfo.group() + "/" + beanName;
             ideActionMap.put(new ActionKey(path), new MaridAction(metaInfo.name(), metaInfo.icon(), ev -> {
-                final MaridFrame frame = Marid.getCurrentContext().getBean(beanName, MaridFrame.class);
+                final MaridFrame frame = context.getBean(beanName, MaridFrame.class);
                 frame.setVisible(true);
             }));
         }

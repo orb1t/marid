@@ -18,8 +18,8 @@
 
 package org.marid.ide.gui;
 
-import org.marid.Marid;
 import org.marid.ide.base.Ide;
+import org.marid.ide.context.BaseContext;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
 import org.springframework.stereotype.Component;
@@ -32,7 +32,7 @@ public class IdeImpl implements Ide, SysPrefSupport, LogSupport {
 
     @Override
     public void exit() {
-        Marid.getCurrentContext().close();
+        BaseContext.context.close();
         System.exit(0);
     }
 

@@ -22,7 +22,6 @@ import org.marid.groovy.GroovyRuntime;
 import org.marid.lifecycle.MaridRunner;
 import org.marid.lifecycle.ShutdownThread;
 import org.marid.spring.CommandLinePropertySource;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextStartedEvent;
 
@@ -46,18 +45,6 @@ import static org.marid.util.Utils.currentClassLoader;
 public class Marid {
 
     public static final Logger LOGGER = Logger.getLogger("marid");
-    private static final ThreadLocal<AnnotationConfigApplicationContext> CONTEXT_ITL = new InheritableThreadLocal<>();
-
-    static {
-        setCurrentContext(new AnnotationConfigApplicationContext());
-    }
-
-    private static void applicationEventListener(ApplicationEvent event) {
-        if (event instanceof ContextStartedEvent) {
-            new ShutdownThread(getCurrentContext()).start();
-        }
-        log(LOGGER, INFO, "{0}", null, event);
-    }
 
     private static void loadSysProperties() throws Exception {
         for (final Enumeration<URL> e = currentClassLoader().getResources("sys.properties"); e.hasMoreElements(); ) {
@@ -71,29 +58,32 @@ public class Marid {
         }
     }
 
-    public static void start(Consumer<Runnable> starter, String... args) throws Exception {
-        getCurrentContext().setClassLoader(GroovyRuntime.CLASS_LOADER);
+    public static void start(Consumer<Runnable> starter, Consumer<AnnotationConfigApplicationContext> cc, String... args) throws Exception {
+        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.setClassLoader(GroovyRuntime.CLASS_LOADER);
         Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
         loadSysProperties();
         LogManager.getLogManager().reset();
         LogManager.getLogManager().readConfiguration();
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(LOGGER, WARNING, "Uncaught exception in {0}", e, t));
-        getCurrentContext().addApplicationListener(Marid::applicationEventListener);
+        context.addApplicationListener(event -> {
+            if (event instanceof ContextStartedEvent) {
+                new ShutdownThread(context).start();
+            }
+            log(LOGGER, INFO, "{0}", null, event);
+        });
         final CommandLinePropertySource commandLinePropertySource = new CommandLinePropertySource(args);
-        getCurrentContext().getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
-        MaridRunner.runMaridRunners(getCurrentContext(), args);
+        context.getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
+        MaridRunner.runMaridRunners(context, args);
+        cc.accept(context);
         starter.accept(() -> {
-            getCurrentContext().refresh();
-            getCurrentContext().start();
+            context.refresh();
+            context.start();
         });
     }
 
-    public static void setCurrentContext(AnnotationConfigApplicationContext currentContext) {
-        CONTEXT_ITL.set(currentContext);
-    }
-
-    public static AnnotationConfigApplicationContext getCurrentContext() {
-        return CONTEXT_ITL.get();
+    public static void start(Consumer<Runnable> starter, String... args) throws Exception {
+        start(starter, c -> {}, args);
     }
 
     public static void main(String... args) throws Exception {

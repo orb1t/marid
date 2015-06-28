@@ -18,7 +18,6 @@
 
 package org.marid.ide.gui;
 
-import org.marid.Marid;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.base.Ide;
 import org.marid.ide.base.IdeFrame;
@@ -34,6 +33,7 @@ import org.marid.swing.log.SwingHandler;
 import org.marid.swing.menu.SwingMenuBarWrapper;
 import org.marid.swing.util.MessageSupport;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -95,15 +95,15 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     }
 
     @Autowired
-    public void setWidgetsMenu(IdeDesktopImpl ideDesktop) {
+    public void setWidgetsMenu(IdeDesktopImpl ideDesktop, GenericApplicationContext context) {
         final ActionMap map = new ActionMap();
-        for (final String beanName : Marid.getCurrentContext().getBeanNamesForType(Widget.class)) {
-            final MetaInfo metaInfo = Marid.getCurrentContext().findAnnotationOnBean(beanName, MetaInfo.class);
+        for (final String beanName : context.getBeanNamesForType(Widget.class)) {
+            final MetaInfo metaInfo = context.findAnnotationOnBean(beanName, MetaInfo.class);
             final String path = metaInfo.path().isEmpty()
                     ? "/Widgets//" + beanName
                     : metaInfo.path() + "/" + metaInfo.group() + "/" + beanName;
             map.put(new ActionKey(path), new MaridAction(metaInfo.name(), metaInfo.icon(), ev -> {
-                final Widget widget = Marid.getCurrentContext().getBean(beanName, Widget.class);
+                final Widget widget = context.getBean(beanName, Widget.class);
                 ideDesktop.add(widget);
                 widget.show();
             }));

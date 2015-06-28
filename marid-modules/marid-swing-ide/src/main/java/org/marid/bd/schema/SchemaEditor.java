@@ -37,6 +37,7 @@ import org.marid.swing.dnd.MaridTransferHandler;
 import org.marid.swing.geom.ShapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PreDestroy;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -112,6 +113,14 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndBlo
             pairs.forEach(p -> addLink(p.getLeft(), p.getRight()));
             repaint();
         }));
+    }
+
+    @PreDestroy
+    private void onDestroy() {
+        Arrays.stream(getComponents())
+                .filter(BlockComponent.class::isInstance)
+                .map(c -> (BlockComponent) c)
+                .forEach(BlockComponent::remove);
     }
 
     public void load(SchemaModel schemaModel) {

@@ -24,6 +24,9 @@ import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.marid.dyn.Casting;
 import org.marid.functions.SafeBiConsumer;
 import org.marid.functions.SafeConsumer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URL;
@@ -36,17 +39,19 @@ import static java.lang.Thread.currentThread;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component
 public class GroovyRuntime {
 
-    public static final CompilerConfiguration COMPILER_CONFIGURATION = newCompilerConfiguration(c -> {
-    });
+    public static final CompilerConfiguration COMPILER_CONFIGURATION = newCompilerConfiguration(c -> {});
+    public static final GroovyClassLoader CLASS_LOADER = newClassLoader(COMPILER_CONFIGURATION, l -> {});
 
-    public static final GroovyShell SHELL = newShell(COMPILER_CONFIGURATION, (l, s) -> {
-    });
-    public static final GroovyClassLoader CLASS_LOADER = SHELL.getClassLoader();
+    private final GenericApplicationContext context;
+    private final MaridGroovyShell shell;
 
-    public static Closure getClosure(GroovyCodeSource source) throws IOException {
-        return (Closure) SHELL.parse(source).run();
+    @Autowired
+    public GroovyRuntime(GenericApplicationContext context) {
+        this.context = context;
+        this.shell = newShell();
     }
 
     public static CompilerConfiguration newCompilerConfiguration(Consumer<CompilerConfiguration> configurer) {
@@ -70,29 +75,27 @@ public class GroovyRuntime {
         }
     }
 
-    public static GroovyShell newShell(CompilerConfiguration cc, SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
+    public MaridGroovyShell newShell(CompilerConfiguration cc, SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
         return newShell(Thread.currentThread().getContextClassLoader(), cc, new Binding(), configurer);
     }
 
-    public static GroovyShell newShell(ClassLoader classLoader, CompilerConfiguration cc, Binding binding, SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
-        final GroovyShell shell = new MaridGroovyShell(classLoader, binding, cc);
+    public MaridGroovyShell newShell(ClassLoader classLoader, CompilerConfiguration cc, Binding binding, SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
+        final MaridGroovyShell shell = new MaridGroovyShell(classLoader, binding, cc, context);
         configureClassLoader(shell.getClassLoader());
         configurer.accept(shell.getClassLoader(), shell);
         return shell;
     }
 
-    public static GroovyShell newShell(Binding binding) {
-        return newShell(CLASS_LOADER, COMPILER_CONFIGURATION, binding, (l, s) -> {
-        });
+    public MaridGroovyShell newShell(Binding binding) {
+        return newShell(CLASS_LOADER, COMPILER_CONFIGURATION, binding, (l, s) -> {});
     }
 
-    public static GroovyShell newShell(SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
+    public MaridGroovyShell newShell(SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
         return newShell(COMPILER_CONFIGURATION, configurer);
     }
 
-    public static GroovyShell newShell() {
-        return newShell((l, s) -> {
-        });
+    public MaridGroovyShell newShell() {
+        return newShell((l, s) -> {});
     }
 
     public static GroovyClassLoader newClassLoader(CompilerConfiguration cc, SafeConsumer<GroovyClassLoader> configurer) {
@@ -106,9 +109,11 @@ public class GroovyRuntime {
         return newClassLoader(COMPILER_CONFIGURATION, configurer);
     }
 
-    public static <T> T newInstance(Class<T> type, GroovyCodeSource codeSource) {
+    public <T> T newInstance(Class<T> type, GroovyCodeSource codeSource) {
         try {
-            final Script script = SHELL.parse(codeSource);
+            final Script script = (Script) CLASS_LOADER.parseClass(codeSource).newInstance();
+            context.getAutowireCapableBeanFactory().autowireBean(script);
+            context.getAutowireCapableBeanFactory().initializeBean(script, codeSource.getName());
             final Object v = script.run();
             if (v instanceof Closure) {
                 return DefaultGroovyMethods.asType((Closure) v, type);
@@ -122,12 +127,16 @@ public class GroovyRuntime {
         }
     }
 
-    public static <T> T newInstance(Class<T> type, URL url) {
+    public <T> T newInstance(Class<T> type, URL url) {
         try {
             return newInstance(type, new GroovyCodeSource(url));
         } catch (IOException x) {
             throw new IllegalStateException(x);
         }
+    }
+
+    public MaridGroovyShell getShell() {
+        return shell;
     }
 
     private static void configureClassLoader(GroovyClassLoader loader) {

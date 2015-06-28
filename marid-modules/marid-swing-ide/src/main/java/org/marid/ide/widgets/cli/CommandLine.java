@@ -31,6 +31,7 @@ import org.marid.swing.actions.ActionKeySupport;
 import org.marid.swing.adapters.TextAreaWriter;
 import org.marid.swing.control.ConsoleArea;
 import org.marid.swing.layout.GridBagLayoutSupport;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PreDestroy;
 import javax.swing.*;
@@ -48,15 +49,17 @@ import static javax.swing.KeyStroke.getKeyStroke;
 @PrototypeComponent
 public class CommandLine extends JPanel implements GridBagLayoutSupport, PrefSupport, ActionKeySupport {
 
-    private final GroovyShell shell = GroovyRuntime.newShell();
+    private final GroovyShell shell;
     private final Insets insets = new Insets(0, 0, 10, 0);
     private final ConsoleArea consoleArea = new ConsoleArea();
     private final HistoryNavigator<String> history;
 
     private boolean autoClean = getPref("autoClean", true);
 
-    public CommandLine() {
+    @Autowired
+    public CommandLine(GroovyRuntime groovyRuntime) {
         super(new GridBagLayout());
+        shell = groovyRuntime.newShell();
         shell.setVariable("out", new PrintWriter(new TextAreaWriter(consoleArea)));
         add(createVerticalGlue(), gbc(REMAINDER, 1, 1, 1, PAGE_END, VERTICAL, insets, 0, 0));
         addLine(new InputArea());

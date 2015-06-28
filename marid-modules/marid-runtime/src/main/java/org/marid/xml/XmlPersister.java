@@ -18,10 +18,11 @@
 
 package org.marid.xml;
 
-import org.marid.Marid;
 import org.marid.logging.LogSupport;
 import org.marid.util.Utils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBContext;
@@ -43,20 +44,12 @@ public class XmlPersister implements LogSupport {
 
     private final Set<Class<?>> classes = new HashSet<>();
     private final JAXBContext context;
+    private final Unmarshaller.Listener listener;
 
-    private final Unmarshaller.Listener listener = new Unmarshaller.Listener() {
-        @Override
-        public void afterUnmarshal(Object target, Object parent) {
-            if (classes.contains(target.getClass())) {
-                Marid.getCurrentContext().getAutowireCapableBeanFactory().autowireBean(target);
-                Marid.getCurrentContext().getAutowireCapableBeanFactory().initializeBean(target, null);
-            }
-        }
-    };
-
-    public XmlPersister() {
-        for (final String beanName : Marid.getCurrentContext().getBeanNamesForAnnotation(XmlBindable.class)) {
-            final BeanDefinition definition = Marid.getCurrentContext().getBeanDefinition(beanName);
+    @Autowired
+    public XmlPersister(GenericApplicationContext applicationContext) {
+        for (final String beanName : applicationContext.getBeanNamesForAnnotation(XmlBindable.class)) {
+            final BeanDefinition definition = applicationContext.getBeanDefinition(beanName);
             try {
                 classes.add(Class.forName(definition.getBeanClassName(), false, Utils.currentClassLoader()));
             } catch (Exception x) {
@@ -69,6 +62,15 @@ public class XmlPersister implements LogSupport {
             throw new IllegalStateException(x);
         }
         log(INFO, "XML classes: {0}", classes.stream().map(Class::getSimpleName).sorted().collect(Collectors.toList()));
+        this.listener = new Unmarshaller.Listener() {
+            @Override
+            public void afterUnmarshal(Object target, Object parent) {
+                if (classes.contains(target.getClass())) {
+                    applicationContext.getAutowireCapableBeanFactory().autowireBean(target);
+                    applicationContext.getAutowireCapableBeanFactory().initializeBean(target, null);
+                }
+            }
+        };
     }
 
     public void save(Object object, StreamResult stream) throws IOException {
@@ -107,9 +109,5 @@ public class XmlPersister implements LogSupport {
     @Override
     public String toString() {
         return "XmlPersister(" + classes.size() + ")";
-    }
-
-    public static XmlPersister get() {
-        return Marid.getCurrentContext().getBean(XmlPersister.class);
     }
 }

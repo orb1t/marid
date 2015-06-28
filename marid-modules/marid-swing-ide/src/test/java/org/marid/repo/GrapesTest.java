@@ -24,7 +24,6 @@ import groovy.lang.GroovyShell;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.marid.groovy.GroovyRuntime;
 import org.marid.ide.profile.GrapeEngineImpl;
 import org.marid.logging.LogSupport;
 import org.marid.test.ManualTests;
@@ -32,6 +31,9 @@ import org.marid.test.ManualTests;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.marid.groovy.GroovyRuntime.CLASS_LOADER;
+import static org.marid.groovy.GroovyRuntime.COMPILER_CONFIGURATION;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -44,7 +46,7 @@ public class GrapesTest implements LogSupport {
     private static final File testProfileDir = new File(profilesDir, "grapesProfile");
     private static final File repoDir = new File(testProfileDir, "repo");
     private static final File cacheDir = new File(testProfileDir, "repo");
-    private static final GroovyShell shell = GroovyRuntime.newShell();
+    private static final GroovyShell shell = new GroovyShell(CLASS_LOADER, COMPILER_CONFIGURATION);
 
     @BeforeClass
     public static void beforeClass() throws Exception {
