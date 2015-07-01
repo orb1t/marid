@@ -307,13 +307,7 @@
                     <version>2.6</version>
                     <configuration>
                         <archive>
-                            <compress>true</compress>
-                            <manifest>
-                                <addClasspath>true</addClasspath>
-                                <classpathPrefix>lib</classpathPrefix>
-                            </manifest>
                             <manifestEntries>
-                                <Class-Path>ext/</Class-Path>
                                 <Built-By>${project.organization.name}</Built-By>
                                 <Implementation-Version>${project.version}</Implementation-Version>
                                 <Implementation-Title>${project.description}</Implementation-Title>
@@ -487,7 +481,7 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
                 <type>pom</type>
-                <version>4.1.6.RELEASE</version>
+                <version>4.1.7.RELEASE</version>
                 <scope>import</scope>
             </dependency>
 

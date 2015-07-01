@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,28 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.gui;
-
-import org.marid.Marid;
-import org.marid.ide.base.Ide;
-import org.marid.logging.LogSupport;
-import org.marid.pref.SysPrefSupport;
-import org.springframework.stereotype.Component;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component("ide")
-public class IdeImpl implements Ide, SysPrefSupport, LogSupport {
 
-    @Override
-    public void exit() {
-        Marid.CONTEXT.close();
-        System.exit(0);
-    }
+beans {
+    bean1(InetSocketAddress, 10000)
 
-    @Override
-    public String getName() {
-        return "ide";
+    bean2(String, "aaa") {
+        it.factoryMethod = "valueOf";
     }
 }

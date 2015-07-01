@@ -45,6 +45,7 @@ import static org.marid.util.Utils.currentClassLoader;
 public class Marid {
 
     public static final Logger LOGGER = Logger.getLogger("marid");
+    public static final AnnotationConfigApplicationContext CONTEXT = new AnnotationConfigApplicationContext();
 
     private static void loadSysProperties() throws Exception {
         for (final Enumeration<URL> e = currentClassLoader().getResources("sys.properties"); e.hasMoreElements(); ) {
@@ -58,32 +59,26 @@ public class Marid {
         }
     }
 
-    public static void start(Consumer<Runnable> starter, Consumer<AnnotationConfigApplicationContext> cc, String... args) throws Exception {
-        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        context.setClassLoader(GroovyRuntime.CLASS_LOADER);
+    public static void start(Consumer<Runnable> starter, String... args) throws Exception {
+        CONTEXT.setClassLoader(GroovyRuntime.CLASS_LOADER);
         Thread.currentThread().setContextClassLoader(GroovyRuntime.CLASS_LOADER);
         loadSysProperties();
         LogManager.getLogManager().reset();
         LogManager.getLogManager().readConfiguration();
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(LOGGER, WARNING, "Uncaught exception in {0}", e, t));
-        context.addApplicationListener(event -> {
+        CONTEXT.addApplicationListener(event -> {
             if (event instanceof ContextStartedEvent) {
-                new ShutdownThread(context).start();
+                new ShutdownThread(CONTEXT).start();
             }
             log(LOGGER, INFO, "{0}", null, event);
         });
         final CommandLinePropertySource commandLinePropertySource = new CommandLinePropertySource(args);
-        context.getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
-        MaridRunner.runMaridRunners(context, args);
-        cc.accept(context);
+        CONTEXT.getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
+        MaridRunner.runMaridRunners(CONTEXT, args);
         starter.accept(() -> {
-            context.refresh();
-            context.start();
+            CONTEXT.refresh();
+            CONTEXT.start();
         });
-    }
-
-    public static void start(Consumer<Runnable> starter, String... args) throws Exception {
-        start(starter, c -> {}, args);
     }
 
     public static void main(String... args) throws Exception {

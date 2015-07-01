@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.marid.Marid;
 import org.marid.logging.LogSupport;
 import org.marid.spring.AnnotationBaseContext;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -31,33 +30,28 @@ import org.springframework.test.context.ContextConfiguration;
  */
 public class MaridSpringTests implements LogSupport {
 
-    protected GenericApplicationContext context;
-
     @Before
     public void init0() throws Exception {
         final ContextConfiguration contextConfiguration = getClass().getAnnotation(ContextConfiguration.class);
-        Marid.start(Runnable::run, context -> {
-            this.context = context;
-            context.register(AnnotationBaseContext.class);
-            if (contextConfiguration.classes().length > 0) {
-                context.register(contextConfiguration.classes());
-            }
-            if (contextConfiguration.locations().length > 0) {
-                context.scan(contextConfiguration.locations());
-            }
-        });
-        context.getAutowireCapableBeanFactory().autowireBean(this);
-        context.getAutowireCapableBeanFactory().initializeBean(this, getClass().getSimpleName());
+        Marid.CONTEXT.register(AnnotationBaseContext.class);
+        if (contextConfiguration.classes().length > 0) {
+            Marid.CONTEXT.register(contextConfiguration.classes());
+        }
+        if (contextConfiguration.locations().length > 0) {
+            Marid.CONTEXT.scan(contextConfiguration.locations());
+        }
+        Marid.start(Runnable::run);
+        Marid.CONTEXT.getAutowireCapableBeanFactory().autowireBean(this);
+        Marid.CONTEXT.getAutowireCapableBeanFactory().initializeBean(this, getClass().getSimpleName());
         log(INFO, "Initialized");
     }
 
     @After
     public void destroy0() throws Exception {
         try {
-            context.getAutowireCapableBeanFactory().destroyBean(this);
-            context.close();
+            Marid.CONTEXT.getAutowireCapableBeanFactory().destroyBean(this);
+            Marid.CONTEXT.close();
         } finally {
-            context = null;
             log(INFO, "Destroyed");
         }
     }

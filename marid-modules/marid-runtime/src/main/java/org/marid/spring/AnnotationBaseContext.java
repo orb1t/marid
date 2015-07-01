@@ -45,6 +45,6 @@ public class AnnotationBaseContext {
 
     @Bean
     public GroovyRuntime groovyRuntime(GenericApplicationContext context) {
-        return new GroovyRuntime(context);
+        return new GroovyRuntime();
     }
 }

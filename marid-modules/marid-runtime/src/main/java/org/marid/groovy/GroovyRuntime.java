@@ -21,11 +21,11 @@ package org.marid.groovy;
 import groovy.lang.*;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
+import org.marid.Marid;
 import org.marid.dyn.Casting;
 import org.marid.functions.SafeBiConsumer;
 import org.marid.functions.SafeConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -45,12 +45,10 @@ public class GroovyRuntime {
     public static final CompilerConfiguration COMPILER_CONFIGURATION = newCompilerConfiguration(c -> {});
     public static final GroovyClassLoader CLASS_LOADER = newClassLoader(COMPILER_CONFIGURATION, l -> {});
 
-    private final GenericApplicationContext context;
     private final MaridGroovyShell shell;
 
     @Autowired
-    public GroovyRuntime(GenericApplicationContext context) {
-        this.context = context;
+    public GroovyRuntime() {
         this.shell = newShell();
     }
 
@@ -80,7 +78,7 @@ public class GroovyRuntime {
     }
 
     public MaridGroovyShell newShell(ClassLoader classLoader, CompilerConfiguration cc, Binding binding, SafeBiConsumer<GroovyClassLoader, GroovyShell> configurer) {
-        final MaridGroovyShell shell = new MaridGroovyShell(classLoader, binding, cc, context);
+        final MaridGroovyShell shell = new MaridGroovyShell(classLoader, binding, cc, Marid.CONTEXT);
         configureClassLoader(shell.getClassLoader());
         configurer.accept(shell.getClassLoader(), shell);
         return shell;
@@ -112,8 +110,8 @@ public class GroovyRuntime {
     public <T> T newInstance(Class<T> type, GroovyCodeSource codeSource) {
         try {
             final Script script = (Script) CLASS_LOADER.parseClass(codeSource).newInstance();
-            context.getAutowireCapableBeanFactory().autowireBean(script);
-            context.getAutowireCapableBeanFactory().initializeBean(script, codeSource.getName());
+            Marid.CONTEXT.getAutowireCapableBeanFactory().autowireBean(script);
+            Marid.CONTEXT.getAutowireCapableBeanFactory().initializeBean(script, codeSource.getName());
             final Object v = script.run();
             if (v instanceof Closure) {
                 return DefaultGroovyMethods.asType((Closure) v, type);

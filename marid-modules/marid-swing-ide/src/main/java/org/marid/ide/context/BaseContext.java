@@ -18,15 +18,12 @@
 
 package org.marid.ide.context;
 
+import org.marid.Marid;
 import org.marid.ide.log.LoggingPostProcessor;
 import org.marid.spring.SwingBeanPostProcessor;
 import org.marid.xml.XmlPersister;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.GenericApplicationContext;
 
 import javax.swing.*;
 
@@ -34,9 +31,7 @@ import javax.swing.*;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-public class BaseContext implements ApplicationContextAware {
-
-    public static GenericApplicationContext context;
+public class BaseContext {
 
     @Bean
     public static LoggingPostProcessor beanPostProcessor() {
@@ -55,11 +50,6 @@ public class BaseContext implements ApplicationContextAware {
 
     @Bean
     public static XmlPersister xmlPersister() {
-        return new XmlPersister(context);
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        context = (GenericApplicationContext) applicationContext;
+        return new XmlPersister(Marid.CONTEXT);
     }
 }

@@ -20,6 +20,7 @@ package org.marid.bd.blocks.expressions;
 
 import images.Images;
 import org.codehaus.groovy.ast.expr.ConstantExpression;
+import org.marid.Marid;
 import org.marid.bd.Block;
 import org.marid.bd.ConfigurableBlock;
 import org.marid.bd.NamedBlock;
@@ -28,7 +29,6 @@ import org.marid.bd.blocks.BdBlock;
 import org.marid.bd.components.NamedBlockComponentEditor;
 import org.marid.bd.components.StandardBlockComponent;
 import org.marid.groovy.GroovyRuntime;
-import org.marid.ide.context.BaseContext;
 import org.marid.logging.LogSupport;
 
 import javax.swing.*;
@@ -117,7 +117,7 @@ public class ConstantBlock extends Block implements NamedBlock, ConfigurableBloc
     }
 
     public ConstantExpression constantExpression() {
-        final GroovyRuntime runtime = BaseContext.context.getBean(GroovyRuntime.class);
+        final GroovyRuntime runtime = Marid.CONTEXT.getBean(GroovyRuntime.class);
         final Object o = runtime.getShell().evaluate(value, "expression.groovy");
         return new ConstantExpression(o);
     }
