@@ -18,15 +18,32 @@
 
 package org.marid.spring;
 
-import groovy.lang.GroovyObject;
+import org.marid.Marid;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class SpringMethods {
 
-    public static AnnotationConfigApplicationContext getMaridContext(GroovyObject object) {
-        return (AnnotationConfigApplicationContext) object.getProperty("maridContext");
+    public static AnnotationConfigApplicationContext getMaridContext(Object object) {
+        return Marid.CONTEXT;
+    }
+
+    public static AnnotationConfigApplicationContext getBeans(Object object) {
+        return Marid.CONTEXT;
+    }
+
+    public static <T> T getAt(GenericApplicationContext context, Class<T> type) {
+        return context.getBean(type);
+    }
+
+    public static <T> T getAt(GenericApplicationContext context, Class<T> type, String name) {
+        return context.getBean(name, type);
+    }
+
+    public static Object getAt(GenericApplicationContext context, String name) {
+        return context.getBean(name);
     }
 }

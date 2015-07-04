@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.components;
+package org.marid.ide.components.conf;
 
 import org.marid.bd.shapes.LinkShapeType;
 import org.marid.dyn.MetaInfo;

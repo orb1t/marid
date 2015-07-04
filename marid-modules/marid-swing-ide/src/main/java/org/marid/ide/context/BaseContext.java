@@ -24,6 +24,8 @@ import org.marid.spring.SwingBeanPostProcessor;
 import org.marid.xml.XmlPersister;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 import javax.swing.*;
 
@@ -31,6 +33,7 @@ import javax.swing.*;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
+@PropertySource(ignoreResourceNotFound = true, value = {"classpath:module.properties"})
 public class BaseContext {
 
     @Bean
@@ -51,5 +54,10 @@ public class BaseContext {
     @Bean
     public static XmlPersister xmlPersister() {
         return new XmlPersister(Marid.CONTEXT);
+    }
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+        return new PropertySourcesPlaceholderConfigurer();
     }
 }

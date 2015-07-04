@@ -23,7 +23,6 @@ import org.marid.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -39,7 +38,6 @@ import java.util.stream.Collectors;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
 public class XmlPersister implements LogSupport {
 
     private final Set<Class<?>> classes = new HashSet<>();

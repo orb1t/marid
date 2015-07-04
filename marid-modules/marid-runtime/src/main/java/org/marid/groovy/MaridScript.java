@@ -21,9 +21,8 @@ package org.marid.groovy;
 import groovy.lang.*;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.runtime.InvokerHelper;
+import org.marid.Marid;
 import org.marid.logging.LogSupport;
-import org.marid.spring.SpringMethods;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,9 +61,8 @@ public abstract class MaridScript extends Script implements LogSupport {
                 : GroovyRuntime.CLASS_LOADER;
         final Class<?> scriptClass = classLoader.parseClass(codeSource, false);
         final Script script = InvokerHelper.createScript(scriptClass, new Binding(getBinding().getVariables()));
-        final AnnotationConfigApplicationContext context = SpringMethods.getMaridContext(this);
-        if (context != null && context.isActive()) {
-            context.getAutowireCapableBeanFactory().autowireBean(script);
+        if (Marid.CONTEXT.isActive()) {
+            Marid.CONTEXT.getAutowireCapableBeanFactory().autowireBean(script);
         }
         if (arguments != null) {
             script.setProperty("args", arguments);
@@ -76,9 +74,8 @@ public abstract class MaridScript extends Script implements LogSupport {
     public Object getProperty(String property) {
         if (property.startsWith("$")) {
             final String name = property.substring(1);
-            final AnnotationConfigApplicationContext context = SpringMethods.getMaridContext(this);
-            if (context.containsBean(name)) {
-                return context.getBean(name);
+            if (Marid.CONTEXT.isActive() && Marid.CONTEXT.containsBean(name)) {
+                return Marid.CONTEXT.getBean(name);
             }
         }
         return super.getProperty(property);

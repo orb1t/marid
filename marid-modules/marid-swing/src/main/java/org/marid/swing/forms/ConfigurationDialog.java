@@ -50,7 +50,6 @@ import static javax.swing.KeyStroke.getKeyStroke;
 import static javax.swing.SwingConstants.HORIZONTAL;
 import static javax.swing.SwingConstants.*;
 import static javax.swing.SwingConstants.VERTICAL;
-import static org.marid.swing.util.PanelUtils.groupedPanel;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -68,17 +67,19 @@ public class ConfigurationDialog extends JDialog implements LogSupport, PrefSupp
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         add(tabbedPane = new JTabbedPane(getPref("tabPlacement", TOP), getPref("tabLayoutPolicy", WRAP_TAB_LAYOUT)));
         fill(configuration);
-        final JButton impBtn = new JButton(new MaridAction("Import preferences", "importPrefs", this::importPrefs));
-        final JButton expBtn = new JButton(new MaridAction("Export preferences", "exportPrefs", this::exportPrefs));
-        final JButton defBtn = new JButton(new MaridAction("Load defaults", "loadDefaults", this::loadDefaults));
         final JButton cclBtn = new JButton(new MaridAction("Cancel", "cancel.png", (a, e) -> dispose()));
         final JButton okBtn = new JButton(new MaridAction("OK", "ok.png", this::savePreferences));
-        add(groupedPanel(GroupLayout::createSequentialGroup, GroupLayout::createParallelGroup, (g, h, v) -> {
-            h.addComponent(impBtn).addComponent(expBtn).addGap(20).addComponent(defBtn);
-            h.addGap(10, 10, Integer.MAX_VALUE);
-            h.addComponent(cclBtn).addComponent(okBtn);
-            v.addComponent(impBtn).addComponent(expBtn).addComponent(defBtn).addComponent(cclBtn).addComponent(okBtn);
-        }), SOUTH);
+        final JPanel buttonPanel = new JPanel();
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
+        buttonPanel.add(new JButton(new MaridAction("Import preferences", "importPrefs", this::importPrefs)));
+        buttonPanel.add(new JButton(new MaridAction("Export preferences", "exportPrefs", this::exportPrefs)));
+        buttonPanel.add(Box.createHorizontalStrut(20));
+        buttonPanel.add(new JButton(new MaridAction("Load defaults", "loadDefaults", this::loadDefaults)));
+        buttonPanel.add(Box.createHorizontalGlue());
+        buttonPanel.add(cclBtn);
+        buttonPanel.add(okBtn);
+        add(buttonPanel, SOUTH);
         setPreferredSize(getPref("size", Dimensions.atLeast(800, 600, getPreferredSize())));
         getRootPane().setDefaultButton(okBtn);
         getRootPane().registerKeyboardAction(cclBtn.getAction(), getKeyStroke("ESCAPE"), WHEN_IN_FOCUSED_WINDOW);

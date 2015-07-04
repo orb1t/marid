@@ -18,41 +18,17 @@
 
 package org.marid.test;
 
-import org.junit.After;
-import org.junit.Before;
-import org.marid.Marid;
+import org.junit.runner.RunWith;
+import org.marid.groovy.GroovyRuntime;
 import org.marid.logging.LogSupport;
-import org.marid.spring.AnnotationBaseContext;
+import org.marid.spring.BeanLogger;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@ContextConfiguration(classes = {GroovyRuntime.class, BeanLogger.class})
+@RunWith(MaridTestRunner.class)
 public class MaridSpringTests implements LogSupport {
 
-    @Before
-    public void init0() throws Exception {
-        final ContextConfiguration contextConfiguration = getClass().getAnnotation(ContextConfiguration.class);
-        Marid.CONTEXT.register(AnnotationBaseContext.class);
-        if (contextConfiguration.classes().length > 0) {
-            Marid.CONTEXT.register(contextConfiguration.classes());
-        }
-        if (contextConfiguration.locations().length > 0) {
-            Marid.CONTEXT.scan(contextConfiguration.locations());
-        }
-        Marid.start(Runnable::run);
-        Marid.CONTEXT.getAutowireCapableBeanFactory().autowireBean(this);
-        Marid.CONTEXT.getAutowireCapableBeanFactory().initializeBean(this, getClass().getSimpleName());
-        log(INFO, "Initialized");
-    }
-
-    @After
-    public void destroy0() throws Exception {
-        try {
-            Marid.CONTEXT.getAutowireCapableBeanFactory().destroyBean(this);
-            Marid.CONTEXT.close();
-        } finally {
-            log(INFO, "Destroyed");
-        }
-    }
 }

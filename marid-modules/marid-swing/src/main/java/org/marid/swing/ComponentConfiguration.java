@@ -21,6 +21,7 @@ package org.marid.swing;
 import org.marid.dyn.MetaInfo;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
+import org.marid.swing.forms.ConfigurationDialog;
 import org.marid.swing.input.InputControl;
 import org.marid.swing.pref.SwingPrefCodecs;
 import org.marid.util.StringUtils;
@@ -31,21 +32,51 @@ import java.awt.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.prefs.BackingStoreException;
+import java.util.stream.Collectors;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public abstract class ComponentConfiguration implements PrefSupport, LogSupport {
 
-    public List<P<?>> getPreferences() {
-        final List<P<?>> list = new ArrayList<>();
-        Arrays.stream(getClass().getFields())
+    public JDialog configurationDialog(Window window, String title) {
+        return new ConfigurationDialog(window, title, this);
+    }
+
+    private P<?> pFromField(Field field, ComponentConfiguration cc) {
+        try {
+            final P<?> p = (P<?>) field.get(cc);
+            final MetaInfo metaInfo = field.getAnnotation(MetaInfo.class);
+            if (metaInfo != null) {
+                if (p.tab == null && !metaInfo.group().isEmpty()) {
+                    p.tab = metaInfo.group();
+                }
+                if (p.icon == null && !metaInfo.icon().isEmpty()) {
+                    p.icon = metaInfo.icon();
+                }
+                if (p.description == null && !metaInfo.description().isEmpty()) {
+                    p.description = metaInfo.description();
+                }
+                if (p.name == null && !metaInfo.name().isEmpty()) {
+                    p.name = metaInfo.name();
+                }
+            }
+            if (p.name == null) {
+                p.name = StringUtils.capitalize(field.getName());
+            }
+            return p;
+        } catch (ReflectiveOperationException x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
+    private List<P<?>> getPreferences(ComponentConfiguration cc) {
+        return Arrays.stream(cc.getClass().getFields())
                 .filter(f -> f.getType() == P.class)
                 .sorted((f1, f2) -> {
                     final MetaInfo m1 = f1.getAnnotation(MetaInfo.class), m2 = f2.getAnnotation(MetaInfo.class);
@@ -59,33 +90,12 @@ public abstract class ComponentConfiguration implements PrefSupport, LogSupport 
                         return n1.compareTo(n2);
                     }
                 })
-                .forEach(field -> {
-                    try {
-                        final P<?> p = (P<?>) field.get(this);
-                        final MetaInfo metaInfo = field.getAnnotation(MetaInfo.class);
-                        if (metaInfo != null) {
-                            if (p.tab == null && !metaInfo.group().isEmpty()) {
-                                p.tab = metaInfo.group();
-                            }
-                            if (p.icon == null && !metaInfo.icon().isEmpty()) {
-                                p.icon = metaInfo.icon();
-                            }
-                            if (p.description == null && !metaInfo.description().isEmpty()) {
-                                p.description = metaInfo.description();
-                            }
-                            if (p.name == null && !metaInfo.name().isEmpty()) {
-                                p.name = metaInfo.name();
-                            }
-                        }
-                        if (p.name == null) {
-                            p.name = StringUtils.capitalize(field.getName());
-                        }
-                        list.add(p);
-                    } catch (ReflectiveOperationException x) {
-                        throw new IllegalStateException(x);
-                    }
-                });
-        return list;
+                .map(field -> pFromField(field, cc))
+                .collect(Collectors.toList());
+    }
+
+    public List<P<?>> getPreferences() {
+        return getPreferences(this);
     }
 
     protected <V> P<V> p(String key, Supplier<? extends InputControl<? extends V>> ics, Supplier<V> dvs) {

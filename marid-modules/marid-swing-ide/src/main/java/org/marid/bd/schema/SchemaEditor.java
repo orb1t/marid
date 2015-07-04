@@ -27,7 +27,7 @@ import org.marid.bd.shapes.Link;
 import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
 import org.marid.concurrent.MaridTimerTask;
-import org.marid.ide.components.SchemaFrameConfiguration;
+import org.marid.ide.components.conf.SchemaFrameConfiguration;
 import org.marid.ide.frames.schema.SchemaFrame;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.marid.swing.InputMaskType;

@@ -25,8 +25,6 @@ import org.marid.Marid;
 import org.marid.dyn.Casting;
 import org.marid.functions.SafeBiConsumer;
 import org.marid.functions.SafeConsumer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URL;
@@ -39,7 +37,6 @@ import static java.lang.Thread.currentThread;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
 public class GroovyRuntime {
 
     public static final CompilerConfiguration COMPILER_CONFIGURATION = newCompilerConfiguration(c -> {});
@@ -47,7 +44,6 @@ public class GroovyRuntime {
 
     private final MaridGroovyShell shell;
 
-    @Autowired
     public GroovyRuntime() {
         this.shell = newShell();
     }

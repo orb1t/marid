@@ -25,7 +25,6 @@ import org.marid.l10n.L10nSupport;
 import org.marid.swing.ComponentConfiguration;
 import org.marid.swing.actions.ActionKey;
 import org.marid.swing.actions.MaridAction;
-import org.marid.swing.forms.ConfigurationDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
@@ -69,7 +68,7 @@ public class WidgetsMenuRegistry implements L10nSupport {
                         ? "/Preferences//" + id
                         : metaInfo.path() + "/" + metaInfo.group() + "/" + id;
                 ideActionMap.put(new ActionKey(path), new MaridAction(metaInfo.name(), metaInfo.icon(), ev -> {
-                    new ConfigurationDialog(frame, s(metaInfo.name()), configuration).setVisible(true);
+                    configuration.configurationDialog(frame, s(metaInfo.name())).setVisible(true);
                 }));
             }
         }
