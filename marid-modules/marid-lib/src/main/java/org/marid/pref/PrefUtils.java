@@ -29,7 +29,7 @@ public class PrefUtils {
 
     public static Preferences preferences(Class<?> klass, String... nodes) {
         final String version = Versioning.getImplementationVersion(klass);
-        Preferences prefs = Preferences.userRoot().node("marid").node(version);
+        Preferences prefs = Preferences.userRoot().node("marid").node(version).node(klass.getCanonicalName());
         for (String n : nodes) {
             prefs = prefs.node(n);
         }
