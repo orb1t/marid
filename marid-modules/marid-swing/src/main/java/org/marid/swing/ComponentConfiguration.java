@@ -98,14 +98,14 @@ public abstract class ComponentConfiguration implements PrefSupport, LogSupport 
         return getPreferences(this);
     }
 
-    protected <V> P<V> p(String key, Supplier<? extends InputControl<? extends V>> ics, Supplier<V> dvs) {
-        return new P<>(key, ics, dvs);
+    protected <V> P<V> p(Supplier<? extends InputControl<? extends V>> ics, Supplier<V> dvs) {
+        return new P<>(ics, dvs);
     }
 
     public final class P<V> implements Supplier<V>, Consumer<V> {
 
         public final Supplier<Class<V>> type;
-        public final String key;
+        public final Supplier<String> key;
         public final Supplier<? extends InputControl<V>> inputControlSupplier;
         public final Supplier<V> defaultValueSupplier;
 
@@ -114,14 +114,14 @@ public abstract class ComponentConfiguration implements PrefSupport, LogSupport 
         public String icon;
         public String name;
 
-        public P(Supplier<Class<V>> t, String k, Supplier<? extends InputControl<? extends V>> ics, Supplier<V> dvs) {
-            this.type = t;
-            this.key = k;
+        public P(Class<V> type, String key, Supplier<? extends InputControl<? extends V>> ics, Supplier<V> dvs) {
+            this.type = () -> type;
+            this.key = () -> key;
             this.inputControlSupplier = Utils.cast(ics);
             this.defaultValueSupplier = dvs;
         }
 
-        private P(String k, Supplier<? extends InputControl<? extends V>> ics, Supplier<V> dvs) {
+        private P(Supplier<? extends InputControl<? extends V>> ics, Supplier<V> dvs) {
             this.type = () -> {
                 for (final Field field : ComponentConfiguration.this.getClass().getFields()) {
                     if (field.getType() == P.class) {
@@ -141,19 +141,33 @@ public abstract class ComponentConfiguration implements PrefSupport, LogSupport 
                 }
                 throw new IllegalStateException("No such field");
             };
-            this.key = k;
+            this.key = () -> {
+                for (final Field field : ComponentConfiguration.this.getClass().getFields()) {
+                    if (field.getType() == P.class) {
+                        try {
+                            final Object o = field.get(ComponentConfiguration.this);
+                            if (o == this) {
+                                return field.getName();
+                            }
+                        } catch (ReflectiveOperationException x) {
+                            throw new IllegalStateException(x);
+                        }
+                    }
+                }
+                throw new IllegalStateException("No such field");
+            };
             this.inputControlSupplier = Utils.cast(ics);
             this.defaultValueSupplier = dvs;
         }
 
         @Override
         public void accept(V v) {
-            putPref(type.get(), key, v);
+            putPref(type.get(), key.get(), v);
         }
 
         @Override
         public V get() {
-            return getPref(type.get(), key, defaultValueSupplier.get());
+            return getPref(type.get(), key.get(), defaultValueSupplier.get());
         }
 
         public boolean isPresent() {
@@ -165,21 +179,21 @@ public abstract class ComponentConfiguration implements PrefSupport, LogSupport 
         }
 
         public void remove() {
-            preferences().remove(key);
+            preferences().remove(key.get());
         }
 
         public P<V> addListener(JInternalFrame frame, Consumer<V> consumer) {
-            SwingPrefCodecs.addConsumer(frame, type.get(), preferences(), key, consumer);
+            SwingPrefCodecs.addConsumer(frame, type.get(), preferences(), key.get(), consumer);
             return this;
         }
 
         public P<V> addListener(Window window, Consumer<V> consumer) {
-            SwingPrefCodecs.addConsumer(window, type.get(), preferences(), key, consumer);
+            SwingPrefCodecs.addConsumer(window, type.get(), preferences(), key.get(), consumer);
             return this;
         }
 
         public P<V> addListener(Component component, Consumer<V> consumer) {
-            SwingPrefCodecs.addConsumer(component, type.get(), preferences(), key, consumer);
+            SwingPrefCodecs.addConsumer(component, type.get(), preferences(), key.get(), consumer);
             return this;
         }
 

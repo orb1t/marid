@@ -38,11 +38,11 @@ import static org.marid.swing.InputMaskType.SHIFT;
 public class SchemaFrameConfiguration extends ComponentConfiguration {
 
     @MetaInfo(order = 1)
-    public final P<InputMaskType> pan = p("pan", () -> new ComboInputControl<>(InputMaskType.class), () -> SHIFT);
+    public final P<InputMaskType> pan = p(() -> new ComboInputControl<>(InputMaskType.class), () -> SHIFT);
 
     @MetaInfo(order = 2)
-    public final P<InputMaskType> drag = p("drag", () -> new ComboInputControl<>(InputMaskType.class), () -> CONTROL);
+    public final P<InputMaskType> drag = p(() -> new ComboInputControl<>(InputMaskType.class), () -> CONTROL);
 
     @MetaInfo(order = 3)
-    public final P<LinkShapeType> link = p("link", () -> new ExtComboInputControl<>(LinkShapeType.class), () -> LINE);
+    public final P<LinkShapeType> link = p(() -> new ExtComboInputControl<>(LinkShapeType.class), () -> LINE);
 }

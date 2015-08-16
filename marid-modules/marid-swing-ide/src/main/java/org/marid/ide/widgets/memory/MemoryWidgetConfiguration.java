@@ -33,23 +33,23 @@ import org.springframework.stereotype.Component;
 public class MemoryWidgetConfiguration extends ComponentConfiguration {
 
     @MetaInfo(group = "chart")
-    public final P<Boolean> useBuffer = p("useBuffer", BooleanInputControl::new, () -> true);
+    public final P<Boolean> useBuffer = p(BooleanInputControl::new, () -> true);
 
     @MetaInfo(group = "chart")
-    public final P<Boolean> save = p("save", BooleanInputControl::new, () -> true);
+    public final P<Boolean> save = p(BooleanInputControl::new, () -> true);
 
     @MetaInfo(group = "chart")
-    public final P<Boolean> print = p("print", BooleanInputControl::new, () -> true);
+    public final P<Boolean> print = p(BooleanInputControl::new, () -> true);
 
     @MetaInfo(group = "chart")
-    public final P<Boolean> zoom = p("zoom", BooleanInputControl::new, () -> true);
+    public final P<Boolean> zoom = p(BooleanInputControl::new, () -> true);
 
     @MetaInfo(group = "tooltips")
-    public final P<Boolean> tooltips = p("tooltips", BooleanInputControl::new, () -> true);
+    public final P<Boolean> tooltips = p(BooleanInputControl::new, () -> true);
 
     @MetaInfo(group = "chart")
-    public final P<Integer> updateInterval = p("updateInterval", () -> new SpinIntInputControl(1, 10, 1), () -> 1);
+    public final P<Integer> updateInterval = p(() -> new SpinIntInputControl(1, 10, 1), () -> 1);
 
     @MetaInfo(group = "chart")
-    public final P<Integer> historySize = p("historySize", () -> new SpinIntInputControl(1, 60, 1), () -> 3);
+    public final P<Integer> historySize = p(() -> new SpinIntInputControl(1, 60, 1), () -> 3);
 }

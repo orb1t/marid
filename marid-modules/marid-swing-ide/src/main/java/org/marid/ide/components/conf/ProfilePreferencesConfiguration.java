@@ -40,30 +40,30 @@ public class ProfilePreferencesConfiguration extends ComponentConfiguration {
      */
 
     @MetaInfo(order = 1, group = "common", name = "Group ID")
-    public final P<String> groupId = p("groupId", StringInputControl::new, () -> "mygroup");
+    public final P<String> groupId = p(StringInputControl::new, () -> "mygroup");
 
     @MetaInfo(order = 2, group = "common", name = "Artifact ID")
-    public final P<String> artifactId = p("artifactId", StringInputControl::new, () -> "myartifact");
+    public final P<String> artifactId = p(StringInputControl::new, () -> "myartifact");
 
     @MetaInfo(order = 3, group = "common", name = "Version")
-    public final P<String> version = p("version", StringInputControl::new, () -> "1.0");
+    public final P<String> version = p(StringInputControl::new, () -> "1.0");
 
     @MetaInfo(order = 4, group = "common", name = "Name")
-    public final P<String> name = p("name", StringInputControl::new, () -> "My Artifact");
+    public final P<String> name = p(StringInputControl::new, () -> "My Artifact");
 
     @MetaInfo(order = 5, group = "common", name = "Description")
-    public final P<String> description = p("description", StringInputControl::new, () -> "");
+    public final P<String> description = p(StringInputControl::new, () -> "");
 
     @MetaInfo(order = 6, group = "common", name = "URL")
-    public final P<String> url = p("url", StringInputControl::new, () -> "");
+    public final P<String> url = p(StringInputControl::new, () -> "");
 
     /*
      * Organization Tab
      */
 
     @MetaInfo(order = 1, group = "org", name = "Organization")
-    public final P<String> orgName = p("org", StringInputControl::new, () -> "My organization");
+    public final P<String> orgName = p(StringInputControl::new, () -> "My organization");
 
     @MetaInfo(order = 2, group = "org", name = "Organization site")
-    public final P<String> orgUrl = p("orgUrl", StringInputControl::new, () -> "");
+    public final P<String> orgUrl = p(StringInputControl::new, () -> "");
 }
