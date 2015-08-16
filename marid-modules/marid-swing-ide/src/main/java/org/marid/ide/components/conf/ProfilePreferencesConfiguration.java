@@ -19,21 +19,34 @@
 package org.marid.ide.components.conf;
 
 import org.marid.dyn.MetaInfo;
+import org.marid.ide.profile.Profile;
+import org.marid.pref.SysPrefSupport;
 import org.marid.swing.ComponentConfiguration;
 import org.marid.swing.forms.Tab;
 import org.marid.swing.input.StringInputControl;
-import org.springframework.stereotype.Component;
+
+import java.util.prefs.Preferences;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @MetaInfo(name = "Profile Preferences")
-@Component
 @Tab(node = "common", label = "Common", order = 1)
 @Tab(node = "org", label = "Organization", order = 2)
 @Tab(node = "deps", label = "Dependencies", order = 3)
 @Tab(node = "build", label = "Build", order = 4)
-public class ProfilePreferencesConfiguration extends ComponentConfiguration {
+public class ProfilePreferencesConfiguration extends ComponentConfiguration implements SysPrefSupport {
+
+    private final Preferences preferences;
+
+    public ProfilePreferencesConfiguration(Profile profile) {
+        preferences = SYSPREFS.node("profiles").node(profile.getName());
+    }
+
+    @Override
+    public Preferences preferences() {
+        return preferences;
+    }
 
     /*
      * Common Tab

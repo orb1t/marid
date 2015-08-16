@@ -19,6 +19,7 @@
 package org.marid.ide.profile;
 
 import org.marid.ide.components.ProfileManager;
+import org.marid.ide.components.conf.ProfilePreferencesConfiguration;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
 import org.marid.nio.FileUtils;
@@ -39,10 +40,12 @@ public class Profile implements Named, Closeable, LogSupport {
 
     protected final ProfileManager profileManager;
     protected final Path path;
+    protected final ProfilePreferencesConfiguration configuration;
 
     public Profile(ProfileManager profileManager, Path path) {
         this.profileManager = profileManager;
         this.path = path;
+        this.configuration = new ProfilePreferencesConfiguration(this);
     }
 
     public Path getClassesPath() {
@@ -99,6 +102,10 @@ public class Profile implements Named, Closeable, LogSupport {
     @Override
     public String toString() {
         return getName();
+    }
+
+    public ProfilePreferencesConfiguration getConfiguration() {
+        return configuration;
     }
 
     public MBeanServerConnection getConnection() {

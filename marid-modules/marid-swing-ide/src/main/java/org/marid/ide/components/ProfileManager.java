@@ -18,13 +18,20 @@
 
 package org.marid.ide.components;
 
+import org.marid.dyn.MetaInfo;
+import org.marid.ide.components.conf.ProfilePreferencesConfiguration;
+import org.marid.ide.gui.IdeFrameImpl;
 import org.marid.ide.profile.Profile;
 import org.marid.jmx.MaridBeanConnectionManager;
+import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
+import org.marid.swing.actions.ActionKey;
+import org.marid.swing.actions.MaridAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,7 +46,7 @@ import java.util.stream.Stream;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ProfileManager extends Observable implements LogSupport, SysPrefSupport {
+public class ProfileManager extends Observable implements LogSupport, SysPrefSupport, L10nSupport {
 
     protected final MaridBeanConnectionManager connectionManager;
     protected final ConcurrentSkipListMap<String, Profile> profileMap = new ConcurrentSkipListMap<>();
@@ -117,5 +124,16 @@ public class ProfileManager extends Observable implements LogSupport, SysPrefSup
 
     public MaridBeanConnectionManager getConnectionManager() {
         return connectionManager;
+    }
+
+    @Autowired
+    public void setPreferences(IdeFrameImpl ideFrame, ActionMap ideActionMap) {
+        final MetaInfo metaInfo = ProfilePreferencesConfiguration.class.getAnnotation(MetaInfo.class);
+        final String path = metaInfo.path().isEmpty()
+                ? "/Preferences//profile"
+                : metaInfo.path() + "/" + metaInfo.group() + "/profile";
+        ideActionMap.put(new ActionKey(path), new MaridAction(metaInfo.name(), metaInfo.icon(), ev -> {
+            getCurrentProfile().getConfiguration().configurationDialog(ideFrame, s(metaInfo.name())).setVisible(true);
+        }));
     }
 }
