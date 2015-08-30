@@ -223,7 +223,7 @@ public class ConfigurationDialog extends JDialog implements LogSupport, PrefSupp
                     panel.add(new JLabel(format("<html><b>%s</b></html>", s("Label") + ":")), c);
                     c.weightx = 1.0;
                     c.gridwidth = REMAINDER;
-                    panel.add(new JLabel(keyLabelMap.get(e.getKey().p.key)), c);
+                    panel.add(new JLabel(keyLabelMap.get(e.getKey().p.key.get())), c);
                     c.weightx = 0.0;
                     c.gridwidth = RELATIVE;
                     panel.add(new JLabel(format("<html><b>%s</b></html>", s("Message") + ": ")), c);
