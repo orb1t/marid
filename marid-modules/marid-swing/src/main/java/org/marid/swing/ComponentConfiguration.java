@@ -114,13 +114,6 @@ public abstract class ComponentConfiguration implements PrefSupport, LogSupport 
         public String icon;
         public String name;
 
-        public P(Class<V> type, String key, Supplier<? extends InputControl<? extends V>> ics, Supplier<V> dvs) {
-            this.type = () -> type;
-            this.key = () -> key;
-            this.inputControlSupplier = Utils.cast(ics);
-            this.defaultValueSupplier = dvs;
-        }
-
         private P(Supplier<? extends InputControl<? extends V>> ics, Supplier<V> dvs) {
             this.type = () -> {
                 for (final Field field : ComponentConfiguration.this.getClass().getFields()) {
