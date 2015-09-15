@@ -19,7 +19,7 @@
 package org.marid.ide.widgets.memory;
 
 import org.marid.dyn.MetaInfo;
-import org.marid.swing.ComponentConfiguration;
+import org.marid.swing.forms.ComponentConfiguration;
 import org.marid.swing.forms.Tab;
 import org.marid.swing.input.BooleanInputControl;
 import org.marid.swing.input.SpinIntInputControl;

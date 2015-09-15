@@ -21,7 +21,6 @@ package org.marid.swing.forms;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
-import org.marid.swing.ComponentConfiguration;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.geom.Dimensions;
 

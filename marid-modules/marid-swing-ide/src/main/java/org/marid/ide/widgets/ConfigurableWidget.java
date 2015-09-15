@@ -18,7 +18,7 @@
 
 package org.marid.ide.widgets;
 
-import org.marid.swing.ConfigurableComponent;
+import org.marid.swing.forms.ConfigurableComponent;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.forms.ConfigurationDialog;
 

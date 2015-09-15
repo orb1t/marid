@@ -27,7 +27,7 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.widgets.ConfigurableWidget;
 import org.marid.spring.annotation.PrototypeComponent;
-import org.marid.swing.ComponentConfiguration;
+import org.marid.swing.forms.ComponentConfiguration;
 import org.marid.swing.actions.ShowHideListener;
 import org.springframework.beans.factory.annotation.Autowired;
 

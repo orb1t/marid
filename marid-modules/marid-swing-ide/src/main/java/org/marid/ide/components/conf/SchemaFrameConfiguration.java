@@ -20,7 +20,7 @@ package org.marid.ide.components.conf;
 
 import org.marid.bd.shapes.LinkShapeType;
 import org.marid.dyn.MetaInfo;
-import org.marid.swing.ComponentConfiguration;
+import org.marid.swing.forms.ComponentConfiguration;
 import org.marid.swing.InputMaskType;
 import org.marid.swing.input.ComboInputControl;
 import org.marid.swing.input.ExtComboInputControl;

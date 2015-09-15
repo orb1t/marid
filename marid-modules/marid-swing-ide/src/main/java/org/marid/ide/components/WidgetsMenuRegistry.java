@@ -22,7 +22,7 @@ import org.marid.dyn.MetaInfo;
 import org.marid.ide.frames.MaridFrame;
 import org.marid.ide.gui.IdeFrameImpl;
 import org.marid.l10n.L10nSupport;
-import org.marid.swing.ComponentConfiguration;
+import org.marid.swing.forms.ComponentConfiguration;
 import org.marid.swing.actions.ActionKey;
 import org.marid.swing.actions.MaridAction;
 import org.springframework.beans.factory.annotation.Autowired;

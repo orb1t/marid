@@ -21,7 +21,6 @@ package org.marid.swing.forms;
 import images.Images;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
-import org.marid.swing.ComponentConfiguration;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.input.InputControl;
 import org.marid.swing.input.TitledInputControl;

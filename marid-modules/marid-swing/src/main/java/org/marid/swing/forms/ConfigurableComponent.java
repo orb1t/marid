@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing;
+package org.marid.swing.forms;
 
 /**
  * @author Dmitry Ovchinnikov

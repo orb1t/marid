@@ -16,12 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.swing;
+package org.marid.swing.forms;
 
 import org.marid.dyn.MetaInfo;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
-import org.marid.swing.forms.ConfigurationDialog;
 import org.marid.swing.input.InputControl;
 import org.marid.swing.pref.SwingPrefCodecs;
 import org.marid.util.StringUtils;

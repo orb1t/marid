@@ -21,7 +21,7 @@ package org.marid.ide.components.conf;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.profile.Profile;
 import org.marid.pref.SysPrefSupport;
-import org.marid.swing.ComponentConfiguration;
+import org.marid.swing.forms.ComponentConfiguration;
 import org.marid.swing.forms.Tab;
 import org.marid.swing.input.StringInputControl;
 
