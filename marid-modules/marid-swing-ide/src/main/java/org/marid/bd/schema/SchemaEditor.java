@@ -27,7 +27,7 @@ import org.marid.bd.shapes.Link;
 import org.marid.bd.shapes.LinkShape;
 import org.marid.bd.shapes.LinkShapeEvent;
 import org.marid.concurrent.MaridTimerTask;
-import org.marid.ide.components.conf.SchemaFrameConfiguration;
+import org.marid.ide.components.conf.Conf;
 import org.marid.ide.frames.schema.SchemaFrame;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.marid.swing.InputMaskType;
@@ -91,10 +91,10 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndBlo
     private Block selectedBlock;
     private final Set<LinkShape> links = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private boolean selectionMode;
-    private final SchemaFrameConfiguration configuration;
+    private final Conf configuration;
 
     @Autowired
-    public SchemaEditor(SchemaFrameConfiguration configuration) {
+    public SchemaEditor(Conf configuration) {
         this.configuration = configuration;
         panType = configuration.pan.get();
         dragType = configuration.drag.get();

@@ -44,7 +44,7 @@ public class ConfigurationDialog extends JDialog implements LogSupport, PrefSupp
     protected final Preferences preferences;
     protected final ConfigurationTabbedPane tabPane;
 
-    public ConfigurationDialog(Window window, String title, ComponentConfiguration configuration) {
+    public ConfigurationDialog(Window window, String title, ConfData configuration) {
         super(window, title, ModalityType.MODELESS);
         this.preferences = configuration.preferences().node("$dialog");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);

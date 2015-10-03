@@ -46,9 +46,9 @@ class ConfigurationTabbedPane extends JTabbedPane implements LogSupport, L10nSup
     final Map<Component, ComponentHolder> containerMap = new IdentityHashMap<>();
     final Map<String, String> keyLabelMap = new HashMap<>();
 
-    public ConfigurationTabbedPane(ComponentConfiguration componentConfiguration, int tabPlacement, int wrapPolicy) {
+    public ConfigurationTabbedPane(ConfData confData, int tabPlacement, int wrapPolicy) {
         super(tabPlacement, wrapPolicy);
-        fill(componentConfiguration);
+        fill(confData);
     }
 
     protected void loadDefaults(ActionEvent actionEvent) {
@@ -83,14 +83,14 @@ class ConfigurationTabbedPane extends JTabbedPane implements LogSupport, L10nSup
     protected void importPrefs(ActionEvent actionEvent) {
     }
 
-    private void fill(ComponentConfiguration configuration) {
+    private void fill(ConfData configuration) {
         final Map<String, JPanel> panelMap = new LinkedHashMap<>();
         final Map<String, GridBagConstraints> cmap = new HashMap<>();
         final Map<String, Tab> tabMap = new HashMap<>();
         for (final Tab tab : configuration.getClass().getAnnotationsByType(Tab.class)) {
             tabMap.put(tab.node(), tab);
         }
-        for (final ComponentConfiguration.P<?> p : configuration.getPreferences()) {
+        for (final ConfData.P<?> p : configuration.getPreferences()) {
             final String tab = p.tab == null ? "common" : p.tab;
             final JPanel panel = panelMap.computeIfAbsent(tab, n -> new JPanel(new GridBagLayout()));
             final GridBagConstraints c = cmap.computeIfAbsent(tab, n -> {
@@ -183,11 +183,11 @@ class ConfigurationTabbedPane extends JTabbedPane implements LogSupport, L10nSup
 
     private static class ComponentHolder {
 
-        private final ComponentConfiguration.P<?> p;
+        private final ConfData.P<?> p;
         private final InputControl<?> control;
         private final Object initialValue;
 
-        public ComponentHolder(ComponentConfiguration.P<?> p) {
+        public ComponentHolder(ConfData.P<?> p) {
             this.p = p;
             this.control = p.inputControlSupplier.get();
             this.initialValue = p.get();
@@ -207,7 +207,7 @@ class ConfigurationTabbedPane extends JTabbedPane implements LogSupport, L10nSup
         }
 
         public void save() {
-            Utils.<ComponentConfiguration.P<Object>>cast(p).accept(control.getInputValue());
+            Utils.<ConfData.P<Object>>cast(p).accept(control.getInputValue());
         }
     }
 }

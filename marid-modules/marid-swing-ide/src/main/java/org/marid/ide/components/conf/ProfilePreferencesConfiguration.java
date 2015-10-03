@@ -21,7 +21,7 @@ package org.marid.ide.components.conf;
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.profile.Profile;
 import org.marid.pref.SysPrefSupport;
-import org.marid.swing.forms.ComponentConfiguration;
+import org.marid.swing.forms.ConfData;
 import org.marid.swing.forms.Tab;
 import org.marid.swing.input.StringInputControl;
 
@@ -35,7 +35,7 @@ import java.util.prefs.Preferences;
 @Tab(node = "org", label = "Organization", order = 2)
 @Tab(node = "deps", label = "Dependencies", order = 3)
 @Tab(node = "build", label = "Build", order = 4)
-public class ProfilePreferencesConfiguration extends ComponentConfiguration implements SysPrefSupport {
+public class ProfilePreferencesConfiguration extends ConfData implements SysPrefSupport {
 
     private final Preferences preferences;
 

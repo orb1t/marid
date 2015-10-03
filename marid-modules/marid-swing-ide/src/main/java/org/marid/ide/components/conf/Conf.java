@@ -20,8 +20,8 @@ package org.marid.ide.components.conf;
 
 import org.marid.bd.shapes.LinkShapeType;
 import org.marid.dyn.MetaInfo;
-import org.marid.swing.forms.ComponentConfiguration;
 import org.marid.swing.InputMaskType;
+import org.marid.swing.forms.ConfData;
 import org.marid.swing.input.ComboInputControl;
 import org.marid.swing.input.ExtComboInputControl;
 import org.springframework.stereotype.Component;
@@ -35,7 +35,7 @@ import static org.marid.swing.InputMaskType.SHIFT;
  */
 @MetaInfo(name = "Schema Frame Configuration")
 @Component
-public class SchemaFrameConfiguration extends ComponentConfiguration {
+public class Conf extends ConfData {
 
     @MetaInfo(order = 1)
     public final P<InputMaskType> pan = p(() -> new ComboInputControl<>(InputMaskType.class), () -> SHIFT);

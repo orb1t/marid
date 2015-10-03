@@ -41,13 +41,13 @@ import java.util.stream.Collectors;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class ComponentConfiguration implements PrefSupport, LogSupport {
+public abstract class ConfData implements PrefSupport {
 
     public JDialog configurationDialog(Window window, String title) {
         return new ConfigurationDialog(window, title, this);
     }
 
-    private P<?> pFromField(Field field, ComponentConfiguration cc) {
+    private P<?> pFromField(Field field, ConfData cc) {
         try {
             final P<?> p = (P<?>) field.get(cc);
             final MetaInfo metaInfo = field.getAnnotation(MetaInfo.class);
@@ -74,7 +74,7 @@ public abstract class ComponentConfiguration implements PrefSupport, LogSupport 
         }
     }
 
-    private List<P<?>> getPreferences(ComponentConfiguration cc) {
+    private List<P<?>> getPreferences(ConfData cc) {
         return Arrays.stream(cc.getClass().getFields())
                 .filter(f -> f.getType() == P.class)
                 .sorted((f1, f2) -> {
@@ -115,10 +115,10 @@ public abstract class ComponentConfiguration implements PrefSupport, LogSupport 
 
         private P(Supplier<? extends InputControl<? extends V>> ics, Supplier<V> dvs) {
             this.type = () -> {
-                for (final Field field : ComponentConfiguration.this.getClass().getFields()) {
+                for (final Field field : ConfData.this.getClass().getFields()) {
                     if (field.getType() == P.class) {
                         try {
-                            final Object o = field.get(ComponentConfiguration.this);
+                            final Object o = field.get(ConfData.this);
                             if (o == this) {
                                 final ParameterizedType type = (ParameterizedType) field.getGenericType();
                                 final Type t = type.getActualTypeArguments()[0];
@@ -134,10 +134,10 @@ public abstract class ComponentConfiguration implements PrefSupport, LogSupport 
                 throw new IllegalStateException("No such field");
             };
             this.key = () -> {
-                for (final Field field : ComponentConfiguration.this.getClass().getFields()) {
+                for (final Field field : ConfData.this.getClass().getFields()) {
                     if (field.getType() == P.class) {
                         try {
-                            final Object o = field.get(ComponentConfiguration.this);
+                            final Object o = field.get(ConfData.this);
                             if (o == this) {
                                 return field.getName();
                             }

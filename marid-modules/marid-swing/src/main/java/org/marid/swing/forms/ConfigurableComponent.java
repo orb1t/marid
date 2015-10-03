@@ -23,5 +23,5 @@ package org.marid.swing.forms;
  */
 public interface ConfigurableComponent {
 
-    ComponentConfiguration configuration();
+    ConfData configuration();
 }

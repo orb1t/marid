@@ -22,7 +22,7 @@ import org.marid.dyn.MetaInfo;
 import org.marid.ide.frames.MaridFrame;
 import org.marid.ide.gui.IdeFrameImpl;
 import org.marid.l10n.L10nSupport;
-import org.marid.swing.forms.ComponentConfiguration;
+import org.marid.swing.forms.ConfData;
 import org.marid.swing.actions.ActionKey;
 import org.marid.swing.actions.MaridAction;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,8 +59,8 @@ public class WidgetsMenuRegistry implements L10nSupport {
     }
 
     @Autowired
-    public void setPreferences(IdeFrameImpl frame, ActionMap ideActionMap, ComponentConfiguration[] configurations) {
-        for (final ComponentConfiguration configuration : configurations) {
+    public void setPreferences(IdeFrameImpl frame, ActionMap ideActionMap, ConfData[] configurations) {
+        for (final ConfData configuration : configurations) {
             if (configuration.getClass().isAnnotationPresent(MetaInfo.class)) {
                 final MetaInfo metaInfo = configuration.getClass().getAnnotation(MetaInfo.class);
                 final String id = String.valueOf(configuration.hashCode());

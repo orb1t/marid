@@ -19,7 +19,7 @@
 package org.marid.ide.widgets.memory;
 
 import org.marid.dyn.MetaInfo;
-import org.marid.swing.forms.ComponentConfiguration;
+import org.marid.swing.forms.ConfData;
 import org.marid.swing.forms.Tab;
 import org.marid.swing.input.BooleanInputControl;
 import org.marid.swing.input.SpinIntInputControl;
@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Tab(node = "chart")
-public class MemoryWidgetConfiguration extends ComponentConfiguration {
+public class MemoryWidgetConfiguration extends ConfData {
 
     @MetaInfo(group = "chart")
     public final P<Boolean> useBuffer = p(BooleanInputControl::new, () -> true);

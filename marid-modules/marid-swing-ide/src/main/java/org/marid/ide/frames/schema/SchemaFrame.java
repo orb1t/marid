@@ -127,7 +127,7 @@ public class SchemaFrame extends MaridFrame {
         zoomInAction = new MaridAction("Zoom In", "zoomin", e -> schemaEditor.zoomIn()).setKey("control I").enableToolbar();
         zoomOutAction = new MaridAction("Zoom Out", "zoomout", e -> schemaEditor.zoomOut()).setKey("control B").enableToolbar();
         resetZoomAction = new MaridAction("Reset zoom", "zoom", e -> schemaEditor.resetZoom()).setKey("control Z").enableToolbar();
-        selectionModeAction = new MaridAction("Selection mode", "selection", this::selectionMode).setKey("control J").enableToolbar();
+        selectionModeAction = new MaridAction("Selection mode", "selection", this::selectionMode).setKey("control J").setSelected(false).enableToolbar();
         refreshAction = new MaridAction("Refresh", "refresh", e -> schemaEditor.repaint()).setKey("F5").enableToolbar();
         resetIoAction = new MaridAction("Reset input/output selection", "reset", schemaEditor::resetInputOutputSelection).setKey("control shift T").enableToolbar();
         alignToLeftAction = new MaridAction("Align to left", "alignleft", schemaEditor::alignToLeft).setKey("control shift L").enableToolbar();

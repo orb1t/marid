@@ -43,7 +43,7 @@ public class LoggingBenchmark extends AbstractBenchmark implements LogSupport {
     private final LogSupport logSupport;
 
     public LoggingBenchmark(LogSupport logSupport) {
-        info("Testing {0} ...", logSupport.getClass().getCanonicalName());
+        log(INFO, "Testing {0} ...", logSupport.getClass().getCanonicalName());
         this.logSupport = logSupport;
         this.logSupport.logger().setUseParentHandlers(false);
         this.logSupport.logger().addHandler(new MemoryHandler(new Handler() {
@@ -69,7 +69,7 @@ public class LoggingBenchmark extends AbstractBenchmark implements LogSupport {
     @BenchmarkOptions(warmupRounds = 1_000, benchmarkRounds = 1_000)
     public void logInfoWithoutParameters() {
         for (int i = 0; i < 1_000; i++) {
-            logSupport.info("test");
+            logSupport.log(INFO, "test");
         }
     }
 
@@ -77,7 +77,7 @@ public class LoggingBenchmark extends AbstractBenchmark implements LogSupport {
     @BenchmarkOptions(warmupRounds = 1_000, benchmarkRounds = 1_000)
     public void logInfoWithParameters() {
         for (int i = 0; i < 1_000; i++) {
-            logSupport.info("test {0} {1}", current().nextDouble(), current().nextDouble());
+            logSupport.log(INFO, "test {0} {1}", current().nextDouble(), current().nextDouble());
         }
     }
 
