@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (C) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,10 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.logging;
+package org.marid.swing.math;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TestBenchmark {
+public class Geometry {
+
+    public static int distance(int x1, int y1, int x2, int y2) {
+        x1 -= x2;
+        y1 -= y2;
+        return (int) StrictMath.sqrt(x1 * x1 + y1 * y1);
+    }
 }

@@ -25,6 +25,7 @@ import java.awt.geom.Path2D;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.marid.bd.shapes.LinkShapeType.LiveLinkConfigurationEditor.mutationProbability;
+import static org.marid.swing.math.Geometry.distance;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -69,37 +70,54 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
         }
     }
 
-    private double length(LiveLinkShapeData data) {
-        double length = Point.distance(out.x, out.y, data.xs[0], data.ys[0]);
+    private int length(LiveLinkShapeData data) {
+        int length = distance(out.x, out.y, data.xs[0], data.ys[0]);
         for (int i = 0; i < COUNT - 1; i++) {
-            length += Point.distance(data.xs[i], data.ys[i], data.xs[i + 1], data.ys[i + 1]);
+            length += distance(data.xs[i], data.ys[i], data.xs[i + 1], data.ys[i + 1]);
         }
-        length += Point.distance(data.xs[COUNT - 1], data.ys[COUNT - 1], in.x, in.y);
+        length += distance(data.xs[COUNT - 1], data.ys[COUNT - 1], in.x, in.y);
         return length;
     }
 
-    private int isectF(Rectangle r, int x1, int y1, int x2, int y2) {
-        final Rectangle rect = new Rectangle(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
-        final int dx = rect.width < 5 ? 5 : 0, dy = rect.height < 5 ? 5 : 0;
-        if (dx != 0 || dy != 0) {
-            rect.grow(dx, dy);
+    static int isect(Rectangle r, int x1, int y1, int x2, int y2) {
+        if (x1 > x2) {
+            final int x = x2;
+            x2 = x1;
+            x1 = x;
         }
-        final Rectangle isect = rect.intersection(r);
-        return isect.isEmpty() ? 0 : isect.width * isect.width + isect.height * isect.height;
+        if (y1 > y2) {
+            final int y = y2;
+            y2 = y1;
+            y1 = y;
+        }
+        while (x2 - x1 < 4) {
+            x1--;
+            x2++;
+        }
+        while (y2 - y1 < 4) {
+            y1--;
+            y2++;
+        }
+        final int ix1 = Math.max(x1, r.x), iy1 = Math.max(y1, r.y);
+        final int ix2 = Math.min(x2, r.x + r.width), iy2 = Math.min(y2, r.y + r.height);
+        if (ix2 < ix1 || iy2 < iy1) {
+            return 0;
+        }
+        return (ix2 - ix1) * (iy2 - iy1);
     }
 
     @Override
     protected double fitness(LiveLinkShapeData specie) {
         final Point out = this.out, in = this.in;
         try {
-            final double distFactor = length(specie);
+            final int distFactor = length(specie);
             int isectFactor = 0;
             for (final Rectangle r : rectangles) {
-                isectFactor += isectF(r, out.x + 1, out.y, specie.xs[0], specie.ys[0]);
+                isectFactor += isect(r, out.x + 1, out.y, specie.xs[0], specie.ys[0]);
                 for (int i = 0; i < COUNT - 1; i++) {
-                    isectFactor += isectF(r, specie.xs[i], specie.ys[i], specie.xs[i + 1], specie.ys[i + 1]);
+                    isectFactor += isect(r, specie.xs[i], specie.ys[i], specie.xs[i + 1], specie.ys[i + 1]);
                 }
-                isectFactor += isectF(r, specie.xs[COUNT - 1], specie.ys[COUNT - 1], in.x - 1, in.y);
+                isectFactor += isect(r, specie.xs[COUNT - 1], specie.ys[COUNT - 1], in.x - 1, in.y);
             }
             return distFactor + isectFactor;
         } catch (Exception x) {

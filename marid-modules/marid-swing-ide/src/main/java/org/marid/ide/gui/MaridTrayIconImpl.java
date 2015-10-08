@@ -76,7 +76,6 @@ public class MaridTrayIconImpl implements AutoCloseable, LogSupport, L10nSupport
                             }
                             final Frame frame = new Frame();
                             frame.setUndecorated(true);
-                            frame.setType(Window.Type.POPUP);
                             frame.setBackground(transparentColor);
                             frame.setExtendedState(Frame.MAXIMIZED_BOTH);
                             final WindowAdapter windowAdapter = new WindowAdapter() {
