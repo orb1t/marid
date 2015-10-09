@@ -19,15 +19,18 @@
 package org.marid.bd.shapes;
 
 import org.marid.bd.BlockComponent;
+import org.marid.bd.schema.SchemaEditor;
 import org.marid.logging.LogSupport;
 
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicLong;
 
+import static java.util.Arrays.stream;
 import static java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import static org.marid.concurrent.ThreadPools.getPoolSize;
 import static org.marid.concurrent.ThreadPools.newArrayThreadPool;
@@ -40,22 +43,20 @@ public abstract class AbstractLiveLinkShape<T> extends LinkShape implements Clon
     private static final ThreadPoolExecutor EXECUTOR = newArrayThreadPool(getPoolSize(4), 8192, new DiscardPolicy());
 
     protected final List<T> list = new ArrayList<>();
-    protected volatile Point out;
-    protected volatile Point in;
-    protected volatile Rectangle[] rectangles = new Rectangle[0];
-    protected static final AtomicLong COUNTER = new AtomicLong();
+    protected final SchemaEditor editor;
+    protected volatile LiveData liveData;
 
     public AbstractLiveLinkShape(BlockComponent.Output output, BlockComponent.Input input) {
         super(output, input);
+        editor = output.getBlockComponent().getSchemaEditor();
         init(LinkShapeType.LiveLinkConfigurationEditor.species);
     }
 
     protected void init(int species) {
-        out = output.getConnectionPoint();
-        in = input.getConnectionPoint();
-        rectangles = Arrays.stream(output.getBlockComponent().getSchemaEditor().getComponents())
-                .map(Component::getBounds)
-                .toArray(Rectangle[]::new);
+        liveData = new LiveData(
+                output.getConnectionPoint(),
+                input.getConnectionPoint(),
+                stream(editor.getComponents()).map(Component::getBounds).toArray(Rectangle[]::new));
         while (list.size() < species) {
             list.add(defaultSpecie());
         }
@@ -106,6 +107,19 @@ public abstract class AbstractLiveLinkShape<T> extends LinkShape implements Clon
             }
         } catch (Exception x) {
             log(WARNING, "GA error", x);
+        }
+    }
+
+    public static class LiveData {
+
+        final Point out;
+        final Point in;
+        final Rectangle[] rectangles;
+
+        public LiveData(Point out, Point in, Rectangle[] rectangles) {
+            this.out = out;
+            this.in = in;
+            this.rectangles = rectangles;
         }
     }
 }

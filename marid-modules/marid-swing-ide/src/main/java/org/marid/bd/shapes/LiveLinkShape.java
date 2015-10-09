@@ -71,53 +71,69 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
     }
 
     private int length(LiveLinkShapeData data) {
-        int length = distance(out.x, out.y, data.xs[0], data.ys[0]);
+        final LiveData ld = liveData;
+        int length = distance(ld.out.x, ld.out.y, data.xs[0], data.ys[0]);
         for (int i = 0; i < COUNT - 1; i++) {
             length += distance(data.xs[i], data.ys[i], data.xs[i + 1], data.ys[i + 1]);
         }
-        length += distance(data.xs[COUNT - 1], data.ys[COUNT - 1], in.x, in.y);
+        length += distance(data.xs[COUNT - 1], data.ys[COUNT - 1], ld.in.x, ld.in.y);
         return length;
     }
 
     static int isect(Rectangle r, int x1, int y1, int x2, int y2) {
-        if (x1 > x2) {
-            final int x = x2;
-            x2 = x1;
-            x1 = x;
+        if (x1 == x2) {
+            if (y1 == y2) {
+                return r.contains(x1, y1) ? 100 : 0;
+            } else {
+                if (y1 > y2) {
+                    final int yt = y2;
+                    y2 = y1;
+                    y1 = yt;
+                }
+                y1 = Math.max(y1, r.y);
+                y2 = Math.min(y2, r.y + r.height);
+                return y2 > y1 ? (y2 - y1) * 100 : 0;
+            }
+        } else if (y1 == y2) {
+            if (x1 > x2) {
+                final int xt = x2;
+                x2 = x1;
+                x1 = xt;
+            }
+            x1 = Math.max(x1, r.x);
+            x2 = Math.min(x2, r.x + r.width);
+            return x2 > x1 ? (x2 - x1) * 100 : 0;
+        } else {
+            if (x1 > x2) {
+                final int xt = x2;
+                x2 = x1;
+                x1 = xt;
+            }
+            if (y1 > y2) {
+                final int yt = y2;
+                y2 = y1;
+                y1 = yt;
+            }
+            x1 = Math.max(r.x, x1);
+            x2 = Math.min(r.x + r.width, x2);
+            y1 = Math.max(r.y, y1);
+            y2 = Math.min(r.y + r.height, y2);
+            return y2 > y1 && x2 > x1 ? (x2 - x1) * (y2 - y1) * 100 : 0;
         }
-        if (y1 > y2) {
-            final int y = y2;
-            y2 = y1;
-            y1 = y;
-        }
-        while (x2 - x1 < 4) {
-            x1--;
-            x2++;
-        }
-        while (y2 - y1 < 4) {
-            y1--;
-            y2++;
-        }
-        final int ix1 = Math.max(x1, r.x), iy1 = Math.max(y1, r.y);
-        final int ix2 = Math.min(x2, r.x + r.width), iy2 = Math.min(y2, r.y + r.height);
-        if (ix2 < ix1 || iy2 < iy1) {
-            return 0;
-        }
-        return (ix2 - ix1) * (iy2 - iy1);
     }
 
     @Override
     protected double fitness(LiveLinkShapeData specie) {
-        final Point out = this.out, in = this.in;
+        final LiveData ld = liveData;
         try {
             final int distFactor = length(specie);
             int isectFactor = 0;
-            for (final Rectangle r : rectangles) {
-                isectFactor += isect(r, out.x + 1, out.y, specie.xs[0], specie.ys[0]);
+            for (final Rectangle r : ld.rectangles) {
+                isectFactor += isect(r, ld.out.x + 1, ld.out.y, specie.xs[0], specie.ys[0]);
                 for (int i = 0; i < COUNT - 1; i++) {
                     isectFactor += isect(r, specie.xs[i], specie.ys[i], specie.xs[i + 1], specie.ys[i + 1]);
                 }
-                isectFactor += isect(r, specie.xs[COUNT - 1], specie.ys[COUNT - 1], in.x - 1, in.y);
+                isectFactor += isect(r, specie.xs[COUNT - 1], specie.ys[COUNT - 1], ld.in.x - 1, ld.in.y);
             }
             return distFactor + isectFactor;
         } catch (Exception x) {

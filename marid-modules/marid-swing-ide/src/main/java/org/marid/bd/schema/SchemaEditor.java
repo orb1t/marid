@@ -67,7 +67,6 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.tuple.Pair.of;
 import static org.marid.bd.BlockComponent.Input;
 import static org.marid.bd.BlockComponent.Output;
-import static org.marid.concurrent.AtomicUtils.processDirty;
 import static org.marid.swing.SwingUtil.componentStream;
 import static org.marid.swing.geom.ShapeUtils.mouseEvent;
 import static org.marid.swing.geom.ShapeUtils.ptAdd;
@@ -147,7 +146,10 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndBlo
 
     public void start() {
         timer.schedule(new MaridTimerTask(() -> {
-            if (!dirty.get()) {
+            if (dirty.compareAndSet(true, false)) {
+                links.forEach(LinkShape::update);
+                invokeLater(super::repaint);
+            } else {
                 final Point mousePoint = MouseInfo.getPointerInfo().getLocation();
                 final Point topLeft = new Point(0, 0);
                 SwingUtilities.convertPointToScreen(topLeft, this);
@@ -167,22 +169,12 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndBlo
                         dirty.compareAndSet(false, true);
                     }
                 }
-                if (dirty.getAndSet(false)) {
-                    super.repaint();
-                }
-            } else {
-                processDirty(dirty, this::update);
             }
         }), 50L, 50L);
     }
 
     public void stop() {
         timer.cancel();
-    }
-
-    public void update() {
-        links.forEach(LinkShape::update);
-        invokeLater(super::repaint);
     }
 
     public void setSelectionMode(boolean selectionMode) {
@@ -452,7 +444,7 @@ public class SchemaEditor extends JComponent implements DndTarget<Block>, DndBlo
 
     @Override
     public void repaint() {
-        dirty.set(true);
+        dirty.compareAndSet(false, true);
     }
 
     public void alignToLeft(ActionEvent actionEvent) {

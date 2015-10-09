@@ -53,7 +53,7 @@ public enum LinkShapeType implements Configurable, PrefSupport, L10nSupport {
     private final Preferences preferences = PrefUtils.preferences("bd", "links");
     private final Map<SchemaEditor, Void> registry = new WeakHashMap<>();
 
-    private LinkShapeType(String name, BiFunction<Output, Input, LinkShape> lsf, Function<Window, JDialog> cwf) {
+    LinkShapeType(String name, BiFunction<Output, Input, LinkShape> lsf, Function<Window, JDialog> cwf) {
         this.name = name;
         this.linkShapeFunction = lsf;
         this.configurationWindowFunction = cwf;
