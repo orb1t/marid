@@ -20,18 +20,20 @@ package org.marid.bd.shapes;
 
 import org.marid.bd.BlockComponent;
 import org.marid.bd.schema.SchemaEditor;
+import org.marid.bd.shapes.LinkShapeType.LiveLinkConfigurationEditor;
 import org.marid.logging.LogSupport;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.NavigableMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 
 import static java.util.Arrays.stream;
-import static java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import static org.marid.concurrent.ThreadPools.getPoolSize;
 import static org.marid.concurrent.ThreadPools.newArrayThreadPool;
 
@@ -40,23 +42,20 @@ import static org.marid.concurrent.ThreadPools.newArrayThreadPool;
  */
 public abstract class AbstractLiveLinkShape<T> extends LinkShape implements Cloneable, LogSupport {
 
-    private static final ThreadPoolExecutor EXECUTOR = newArrayThreadPool(getPoolSize(4), 8192, new DiscardPolicy());
+    private static final ThreadPoolExecutor EXECUTOR = newArrayThreadPool(getPoolSize(4), 1024, new DiscardPolicy());
 
-    protected final List<T> list = new ArrayList<>();
     protected final SchemaEditor editor;
+    protected final List<T> list = new ArrayList<>();
     protected volatile LiveData liveData;
 
     public AbstractLiveLinkShape(BlockComponent.Output output, BlockComponent.Input input) {
         super(output, input);
         editor = output.getBlockComponent().getSchemaEditor();
-        init(LinkShapeType.LiveLinkConfigurationEditor.species);
+        init(LiveLinkConfigurationEditor.species);
     }
 
     protected void init(int species) {
-        liveData = new LiveData(
-                output.getConnectionPoint(),
-                input.getConnectionPoint(),
-                stream(editor.getComponents()).map(Component::getBounds).toArray(Rectangle[]::new));
+        liveData = new LiveData();
         while (list.size() < species) {
             list.add(defaultSpecie());
         }
@@ -71,56 +70,55 @@ public abstract class AbstractLiveLinkShape<T> extends LinkShape implements Clon
 
     @Override
     public void update() {
-        final int species = LinkShapeType.LiveLinkConfigurationEditor.species;
-        final int incubatorSize = LinkShapeType.LiveLinkConfigurationEditor.incubatorSize * species;
+        final int species = LiveLinkConfigurationEditor.species;
+        final int incubatorSize = LiveLinkConfigurationEditor.incubatorSize * species;
         init(species);
+        final ConcurrentSkipListMap<Double, T> incubator = new ConcurrentSkipListMap<>();
+        list.forEach(s -> incubator.put(fitness(s), s));
         for (int i = 0; i < 64; i++) {
-            EXECUTOR.execute(() -> doGA(incubatorSize));
+            EXECUTOR.execute(() -> {
+                try {
+                    doGA(incubatorSize, incubator);
+                } catch (IndexOutOfBoundsException x) {
+                    log(WARNING, "GA waiting task after shrinking exception");
+                } catch (Exception x) {
+                    log(WARNING, "GA error", x);
+                }
+            });
         }
     }
 
     protected abstract T defaultSpecie();
 
-    protected abstract T crossover(T male, T female, ThreadLocalRandom random);
-
-    protected abstract void mutate(T specie, ThreadLocalRandom random);
+    protected abstract T crossoverAndMutate(T male, T female, ThreadLocalRandom random);
 
     protected abstract double fitness(T specie);
 
-    protected void doGA(int incubatorSize) {
+    protected void doGA(int incubatorSize, NavigableMap<Double, T> incubator) {
         final ThreadLocalRandom random = ThreadLocalRandom.current();
-        final TreeMap<Double, T> incubator = new TreeMap<>();
-        try {
-            list.forEach(s -> incubator.put(fitness(s), s));
-            for (int i = 0; i < incubatorSize; i++) {
-                final int mi = random.nextInt(list.size() - 1);
-                final int fi = random.nextInt(list.size());
-                final T male = list.get(mi);
-                final T female = list.get(fi == mi ? mi + 1 : fi);
-                final T child = crossover(male, female, random);
-                mutate(child, random);
-                incubator.put(fitness(child), child);
-            }
-            final Iterator<T> it = incubator.values().iterator();
-            for (int i = 0; i < list.size() && it.hasNext(); i++) {
-                list.set(i, it.next());
-                Thread.yield();
-            }
-        } catch (Exception x) {
-            log(WARNING, "GA error", x);
+        final int n = list.size();
+        for (int i = 0; i < incubatorSize; i++) {
+            final T male = list.get(random.nextInt(n));
+            final T female = list.get(random.nextInt(n));
+            final T child = crossoverAndMutate(male, female, random);
+            incubator.put(fitness(child), child);
+        }
+        final Iterator<T> it = incubator.values().iterator();
+        for (int i = 0; i < list.size() && it.hasNext(); i++) {
+            list.set(i, it.next());
         }
     }
 
-    public static class LiveData {
+    public class LiveData {
 
         final Point out;
         final Point in;
         final Rectangle[] rectangles;
 
-        public LiveData(Point out, Point in, Rectangle[] rectangles) {
-            this.out = out;
-            this.in = in;
-            this.rectangles = rectangles;
+        public LiveData() {
+            out = output.getConnectionPoint();
+            in = input.getConnectionPoint();
+            rectangles = stream(editor.getComponents()).map(Component::getBounds).toArray(Rectangle[]::new);
         }
     }
 }
