@@ -25,7 +25,6 @@ import java.awt.geom.Path2D;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.marid.bd.shapes.LinkShapeType.LiveLinkConfigurationEditor.mutationProbability;
-import static org.marid.swing.math.Geometry.distance;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -70,13 +69,13 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
         }
     }
 
-    private int length(LiveLinkShapeData data) {
+    private double length(LiveLinkShapeData data) {
         final LiveData ld = liveData;
-        int length = distance(ld.out.x, ld.out.y, data.xs[0], data.ys[0]);
+        double length = Point.distance(ld.out.x, ld.out.y, data.xs[0], data.ys[0]);
         for (int i = 0; i < COUNT - 1; i++) {
-            length += distance(data.xs[i], data.ys[i], data.xs[i + 1], data.ys[i + 1]);
+            length += Point.distance(data.xs[i], data.ys[i], data.xs[i + 1], data.ys[i + 1]);
         }
-        length += distance(data.xs[COUNT - 1], data.ys[COUNT - 1], ld.in.x, ld.in.y);
+        length += Point.distance(data.xs[COUNT - 1], data.ys[COUNT - 1], ld.in.x, ld.in.y);
         return length;
     }
 
@@ -126,7 +125,8 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
     protected double fitness(LiveLinkShapeData specie) {
         final LiveData ld = liveData;
         try {
-            final int distFactor = length(specie);
+            final double len = Point.distance(ld.out.x, ld.out.y, ld.in.x, ld.in.y);
+            final double distFactor = len == 0.0 ? length(specie) : length(specie) / len;
             int isectFactor = 0;
             for (final Rectangle r : ld.rectangles) {
                 isectFactor += isect(r, ld.out.x + 1, ld.out.y, specie.xs[0], specie.ys[0]);

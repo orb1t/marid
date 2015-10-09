@@ -104,6 +104,7 @@ public abstract class AbstractLiveLinkShape<T> extends LinkShape implements Clon
             final Iterator<T> it = incubator.values().iterator();
             for (int i = 0; i < list.size() && it.hasNext(); i++) {
                 list.set(i, it.next());
+                Thread.yield();
             }
         } catch (Exception x) {
             log(WARNING, "GA error", x);

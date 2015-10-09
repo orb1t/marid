@@ -109,7 +109,7 @@ public enum LinkShapeType implements Configurable, PrefSupport, L10nSupport {
             });
         }
 
-        private final JSpinner mpSpinner = new JSpinner(new SpinnerNumberModel(mutationProbability, 30, 100, 1));
+        private final JSpinner mpSpinner = new JSpinner(new SpinnerNumberModel(mutationProbability, 10, 100, 1));
         private final JSpinner isSpinner = new JSpinner(new SpinnerNumberModel(incubatorSize, 5, 100, 1));
         private final JSpinner scSpinner = new JSpinner(new SpinnerNumberModel(species, 5, 100, 1));
 
