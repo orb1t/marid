@@ -19,7 +19,7 @@
 package org.marid.bd;
 
 import org.codehaus.groovy.ast.ClassNode;
-import org.marid.Marid;
+import org.marid.ide.MaridIde;
 import org.marid.ide.components.ProfileManager;
 import org.marid.logging.LogSupport;
 
@@ -34,7 +34,7 @@ public interface ClassNodeBuildTrigger extends BuildTrigger, LogSupport {
 
     @Override
     default void afterBuild() {
-        final ProfileManager profileManager = Marid.CONTEXT.getBean(ProfileManager.class);
+        final ProfileManager profileManager = MaridIde.CONTEXT.getBean(ProfileManager.class);
         getClassNodes().stream().filter(n -> n != null).forEach(n -> {
             try {
                 ClassHelper.saveClassNode(profileManager.getCurrentProfile().getClassesPath(), n);

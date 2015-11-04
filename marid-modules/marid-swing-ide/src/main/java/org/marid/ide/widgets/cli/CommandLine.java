@@ -24,7 +24,6 @@ import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.marid.collections.history.HistoryNavigator;
-import org.marid.groovy.GroovyRuntime;
 import org.marid.pref.PrefSupport;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.marid.swing.actions.ActionKeySupport;
@@ -57,9 +56,9 @@ public class CommandLine extends JPanel implements GridBagLayoutSupport, PrefSup
     private boolean autoClean = getPref("autoClean", true);
 
     @Autowired
-    public CommandLine(GroovyRuntime groovyRuntime) {
+    public CommandLine() {
         super(new GridBagLayout());
-        shell = groovyRuntime.newShell();
+        shell = new GroovyShell();
         shell.setVariable("out", new PrintWriter(new TextAreaWriter(consoleArea)));
         add(createVerticalGlue(), gbc(REMAINDER, 1, 1, 1, PAGE_END, VERTICAL, insets, 0, 0));
         addLine(new InputArea());

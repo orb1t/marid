@@ -30,7 +30,7 @@ import java.awt.event.WindowEvent;
 import java.util.EventListener;
 import java.util.List;
 
-import static org.marid.Marid.CONTEXT;
+import static org.marid.ide.MaridIde.CONTEXT;
 
 /**
  * @author Dmitry Ovchinnikov

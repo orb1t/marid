@@ -18,8 +18,6 @@
 
 package org.marid.service;
 
-import org.marid.spring.SpringUtils;
-
 import javax.annotation.PostConstruct;
 import java.util.concurrent.ThreadFactory;
 
@@ -33,7 +31,7 @@ public abstract class AbstractMaridService implements MaridService {
     protected final String name;
 
     public AbstractMaridService(MaridServiceConfiguration configuration) {
-        name = SpringUtils.beanName(getClass());
+        name = getClass().getSimpleName();
         threadGroup = new ThreadGroup(getName());
         threadFactory = configuration.threadFactory(this);
     }

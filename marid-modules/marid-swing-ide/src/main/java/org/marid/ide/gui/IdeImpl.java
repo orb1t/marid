@@ -18,7 +18,7 @@
 
 package org.marid.ide.gui;
 
-import org.marid.Marid;
+import org.marid.ide.MaridIde;
 import org.marid.ide.base.Ide;
 import org.marid.logging.LogSupport;
 import org.marid.pref.SysPrefSupport;
@@ -32,7 +32,7 @@ public class IdeImpl implements Ide, SysPrefSupport, LogSupport {
 
     @Override
     public void exit() {
-        Marid.CONTEXT.close();
+        MaridIde.CONTEXT.close();
         System.exit(0);
     }
 

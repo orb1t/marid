@@ -18,17 +18,32 @@
 
 package org.marid.ide;
 
-import org.marid.Marid;
 import org.marid.ide.context.BaseContext;
 import org.marid.ide.context.GuiContext;
 import org.marid.ide.context.ProfileContext;
 import org.marid.lifecycle.MaridRunner;
+import org.marid.lifecycle.ShutdownThread;
 import org.marid.logging.Logging;
+import org.marid.spring.CommandLinePropertySource;
 import org.marid.swing.log.SwingHandler;
 import org.marid.xml.XmlPersister;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.event.ContextStartedEvent;
 
 import java.awt.*;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.function.Consumer;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.LogSupport.Log.log;
+import static org.marid.util.Utils.currentClassLoader;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,7 +51,42 @@ import java.awt.*;
 public class MaridIde implements MaridRunner {
 
     public static void main(String[] args) throws Exception {
-        Marid.start(EventQueue::invokeLater, args);
+        start(EventQueue::invokeLater, args);
+    }
+
+    public static final Logger LOGGER = Logger.getLogger("marid");
+    public static final AnnotationConfigApplicationContext CONTEXT = new AnnotationConfigApplicationContext();
+
+    private static void loadSysProperties() throws Exception {
+        for (final Enumeration<URL> e = currentClassLoader().getResources("sys.properties"); e.hasMoreElements(); ) {
+            try (final InputStreamReader reader = new InputStreamReader(e.nextElement().openStream(), UTF_8)) {
+                final Properties properties = new Properties();
+                properties.load(reader);
+                for (final String name : properties.stringPropertyNames()) {
+                    System.setProperty(name, properties.getProperty(name));
+                }
+            }
+        }
+    }
+
+    public static void start(Consumer<Runnable> starter, String... args) throws Exception {
+        loadSysProperties();
+        LogManager.getLogManager().reset();
+        LogManager.getLogManager().readConfiguration();
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(LOGGER, WARNING, "Uncaught exception in {0}", e, t));
+        CONTEXT.addApplicationListener(event -> {
+            if (event instanceof ContextStartedEvent) {
+                new ShutdownThread(CONTEXT).start();
+            }
+            log(LOGGER, INFO, "{0}", null, event);
+        });
+        final CommandLinePropertySource commandLinePropertySource = new CommandLinePropertySource(args);
+        CONTEXT.getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
+        MaridRunner.runMaridRunners(CONTEXT, args);
+        starter.accept(() -> {
+            CONTEXT.refresh();
+            CONTEXT.start();
+        });
     }
 
     @Override

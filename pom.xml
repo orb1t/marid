@@ -248,7 +248,7 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.18.1</version>
+                    <version>2.19</version>
                     <configuration>
                         <trimStackTrace>false</trimStackTrace>
                         <groups>${test.groups}</groups>
@@ -262,7 +262,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.18.1</version>
+                    <version>2.19</version>
                     <configuration>
                         <forkCount>1</forkCount>
                         <reuseForks>false</reuseForks>
@@ -327,7 +327,7 @@
 
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.2</version>
+                    <version>2.5.3</version>
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <goals>deploy</goals>
@@ -342,7 +342,7 @@
 
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.5.5</version>
+                    <version>2.6</version>
                     <configuration>
                         <useJvmChmod>true</useJvmChmod>
                         <appendAssemblyId>false</appendAssemblyId>
@@ -440,14 +440,14 @@
                 <groupId>org.codehaus.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
                 <classifier>indy</classifier>
-                <version>2.4.4</version>
+                <version>2.4.5</version>
             </dependency>
 
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
                 <type>pom</type>
-                <version>4.2.1.RELEASE</version>
+                <version>4.2.2.RELEASE</version>
                 <scope>import</scope>
             </dependency>
 
@@ -466,7 +466,7 @@
             <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
-                <version>1.4.189</version>
+                <version>1.4.190</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -476,7 +476,7 @@
             <groupId>org.checkerframework</groupId>
             <artifactId>checker</artifactId>
             <scope>provided</scope>
-            <version>1.9.5</version>
+            <version>1.9.7</version>
         </dependency>
     </dependencies>
 

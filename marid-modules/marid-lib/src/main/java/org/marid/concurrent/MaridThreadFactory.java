@@ -22,6 +22,9 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 
+import static java.lang.Character.MAX_RADIX;
+import static java.lang.System.identityHashCode;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -39,13 +42,13 @@ public class MaridThreadFactory implements ThreadFactory, Consumer<Runnable> {
         this.stackSize = stackSize;
     }
 
-    public MaridThreadFactory(String name) {
-        this(Thread.currentThread().getThreadGroup(), name, false, 0L);
+    public MaridThreadFactory(String name, boolean daemon, long stackSize) {
+        this(Thread.currentThread().getThreadGroup(), name, daemon, stackSize);
     }
 
     @Override
     public Thread newThread(@Nonnull Runnable r) {
-        final Thread thread = new Thread(group, r, name, stackSize);
+        final Thread thread = new Thread(group, r, name + Integer.toString(identityHashCode(r), MAX_RADIX), stackSize);
         thread.setDaemon(daemon);
         return thread;
     }

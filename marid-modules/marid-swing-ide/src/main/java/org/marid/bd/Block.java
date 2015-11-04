@@ -18,7 +18,6 @@
 
 package org.marid.bd;
 
-import org.marid.Marid;
 import org.marid.itf.Named;
 import org.marid.logging.LogSupport;
 import org.marid.util.CollectionUtils;
@@ -39,6 +38,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
+
+import static org.marid.ide.MaridIde.CONTEXT;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -143,7 +144,7 @@ public abstract class Block implements Named, Serializable, LogSupport, BuildTri
     protected Object writeReplace() throws ObjectStreamException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
-            Marid.CONTEXT.getBean(XmlPersister.class).save(this, new StreamResult(bos));
+            CONTEXT.getBean(XmlPersister.class).save(this, new StreamResult(bos));
             return new BlockProxy(bos.toByteArray());
         } catch (IOException x) {
             throw new WriteAbortedException("Replace error", x);
@@ -154,7 +155,7 @@ public abstract class Block implements Named, Serializable, LogSupport, BuildTri
     public String toString() {
         final StringWriter writer = new StringWriter();
         try {
-            Marid.CONTEXT.getBean(XmlPersister.class).save(this, new StreamResult(writer));
+            CONTEXT.getBean(XmlPersister.class).save(this, new StreamResult(writer));
             return writer.toString();
         } catch (Exception x) {
             throw new IllegalStateException(x);
@@ -174,7 +175,7 @@ public abstract class Block implements Named, Serializable, LogSupport, BuildTri
 
         public Object readResolve() throws ObjectStreamException {
             try {
-                final Block block = Marid.CONTEXT.getBean(XmlPersister.class).load(Block.class, new StreamSource(new ByteArrayInputStream(data)));
+                final Block block = CONTEXT.getBean(XmlPersister.class).load(Block.class, new StreamSource(new ByteArrayInputStream(data)));
                 block.id = Utils.textUid();
                 return block;
             } catch (Exception x) {

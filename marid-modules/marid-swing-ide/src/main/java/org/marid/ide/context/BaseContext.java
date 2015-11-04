@@ -18,7 +18,7 @@
 
 package org.marid.ide.context;
 
-import org.marid.Marid;
+import org.marid.ide.MaridIde;
 import org.marid.ide.log.LoggingPostProcessor;
 import org.marid.spring.SwingBeanPostProcessor;
 import org.marid.xml.XmlPersister;
@@ -53,7 +53,7 @@ public class BaseContext {
 
     @Bean
     public static XmlPersister xmlPersister() {
-        return new XmlPersister(Marid.CONTEXT);
+        return new XmlPersister(MaridIde.CONTEXT);
     }
 
     @Bean

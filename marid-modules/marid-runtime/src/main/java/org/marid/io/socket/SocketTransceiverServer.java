@@ -18,7 +18,6 @@
 
 package org.marid.io.socket;
 
-import org.marid.groovy.MapProxies;
 import org.marid.io.BinStreams;
 import org.marid.io.Transceiver;
 import org.marid.io.TransceiverServer;
@@ -32,7 +31,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.channels.ClosedChannelException;
-import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -47,10 +45,6 @@ public final class SocketTransceiverServer implements TransceiverServer, LogSupp
     public SocketTransceiverServer(SocketTransceiverServerParameters parameters) {
         address = parameters.socketAddress();
         backlog = parameters.backlog();
-    }
-
-    public SocketTransceiverServer(Map map) {
-        this(MapProxies.newInstance(SocketTransceiverServerParameters.class, map));
     }
 
     @Override

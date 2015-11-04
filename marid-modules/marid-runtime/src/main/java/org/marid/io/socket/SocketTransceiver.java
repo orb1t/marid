@@ -18,7 +18,6 @@
 
 package org.marid.io.socket;
 
-import org.marid.groovy.MapProxies;
 import org.marid.io.BinStreams;
 import org.marid.io.Transceiver;
 import org.marid.logging.LogSupport;
@@ -28,7 +27,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.channels.AlreadyConnectedException;
-import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -42,10 +40,6 @@ public final class SocketTransceiver implements Transceiver, LogSupport {
 
     public SocketTransceiver(SocketTransceiverParameters parameters) {
         this.parameters = parameters;
-    }
-
-    public SocketTransceiver(Map map) {
-        this(MapProxies.newInstance(SocketTransceiverParameters.class, map));
     }
 
     @Override

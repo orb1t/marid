@@ -34,6 +34,7 @@ import java.security.SecureRandom;
 import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -158,5 +159,21 @@ public class Utils {
 
     public static <T> T getInterfaceInstance(Class<T> type) {
         return type.cast(INTERFACE_INSTANCES.get(type));
+    }
+
+    public static <T> T call(Callable<T> callable) throws IllegalStateException {
+        try {
+            return callable.call();
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
+    public static <T> T call(String exceptionMessage, Callable<T> callable) throws IllegalStateException {
+        try {
+            return callable.call();
+        } catch (Exception x) {
+            throw new IllegalStateException(exceptionMessage, x);
+        }
     }
 }

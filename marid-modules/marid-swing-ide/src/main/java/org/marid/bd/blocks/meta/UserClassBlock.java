@@ -19,7 +19,6 @@
 package org.marid.bd.blocks.meta;
 
 import org.codehaus.groovy.ast.*;
-import org.marid.Marid;
 import org.marid.bd.BlockColors;
 import org.marid.bd.ClassNodeBuildTrigger;
 import org.marid.bd.ConfigurableBlock;
@@ -29,6 +28,7 @@ import org.marid.bd.common.ClassLinkBlock;
 import org.marid.bd.common.DndMenuItem;
 import org.marid.bd.components.AbstractBlockComponentEditor;
 import org.marid.bd.components.StandardBlockComponent;
+import org.marid.ide.MaridIde;
 import org.marid.swing.input.StringInputControl;
 
 import javax.swing.*;
@@ -120,8 +120,8 @@ public class UserClassBlock extends StandardBlock implements ConfigurableBlock, 
             m.addSeparator();
             m.add(new DndMenuItem(ClassLinkBlock.getMenuIcon(), "Class link", () -> {
                 final ClassLinkBlock classLinkBlock = new ClassLinkBlock(className);
-                Marid.CONTEXT.getAutowireCapableBeanFactory().autowireBean(classLinkBlock);
-                Marid.CONTEXT.getAutowireCapableBeanFactory().initializeBean(classLinkBlock, null);
+                MaridIde.CONTEXT.getAutowireCapableBeanFactory().autowireBean(classLinkBlock);
+                MaridIde.CONTEXT.getAutowireCapableBeanFactory().initializeBean(classLinkBlock, null);
                 return classLinkBlock;
             }));
         });

@@ -44,7 +44,7 @@ import static org.marid.bd.BlockComponent.Output;
 public enum LinkShapeType implements Configurable, PrefSupport, L10nSupport {
 
     LINE("Simple line link", LineLinkShape::new, w -> null),
-    ORTHO("Othogonal link", OrthoLinkShape::new, OrthoLinkConfigurationEditor::new),
+    ORTHO("Orthogonal link", OrthoLinkShape::new, OrthoLinkConfigurationEditor::new),
     LIVE("Live link", LiveLinkShape::new, LiveLinkConfigurationEditor::new);
 
     private final String name;
@@ -86,9 +86,9 @@ public enum LinkShapeType implements Configurable, PrefSupport, L10nSupport {
         private static final String INCUBATOR_SIZE_KEY = "incubatorSize";
         private static final String SPECIES_KEY = "species";
 
-        public static volatile int mutationProbability = LIVE.getPref(MUTATION_PROBABILITY_KEY, 30);
-        public static volatile int incubatorSize = LIVE.getPref(INCUBATOR_SIZE_KEY, 10);
-        public static volatile int species = LIVE.getPref(SPECIES_KEY, 10);
+        public static int mutationProbability = LIVE.getPref(MUTATION_PROBABILITY_KEY, 30);
+        public static int incubatorSize = LIVE.getPref(INCUBATOR_SIZE_KEY, 10);
+        public static int species = LIVE.getPref(SPECIES_KEY, 10);
 
         static {
             LIVE.preferences().addPreferenceChangeListener(ev -> {
@@ -110,7 +110,7 @@ public enum LinkShapeType implements Configurable, PrefSupport, L10nSupport {
         }
 
         private final JSpinner mpSpinner = new JSpinner(new SpinnerNumberModel(mutationProbability, 10, 100, 1));
-        private final JSpinner isSpinner = new JSpinner(new SpinnerNumberModel(incubatorSize, 5, 100, 1));
+        private final JSpinner isSpinner = new JSpinner(new SpinnerNumberModel(incubatorSize, 1, 16, 1));
         private final JSpinner scSpinner = new JSpinner(new SpinnerNumberModel(species, 5, 100, 1));
 
         public LiveLinkConfigurationEditor(Window window) {

@@ -45,14 +45,17 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
     @Override
     protected LiveLinkShapeData crossoverAndMutate(LiveLinkShapeData male, LiveLinkShapeData female, ThreadLocalRandom random) {
         final int[] xs = new int[COUNT], ys = new int[COUNT];
-        final int rand = random.nextInt();
-        for (int i = 0; i < COUNT; i++) {
-            if ((rand & (1 << i)) == 0) {
-                xs[i] = male.xs[i];
-                ys[i] = male.ys[i];
-            } else {
-                xs[i] = female.xs[i];
-                ys[i] = female.ys[i];
+        final LiveLinkShapeData data = new LiveLinkShapeData(xs, ys);
+        final int rand = System.identityHashCode(data);
+        if (male != female) {
+            for (int i = 0; i < COUNT; i++) {
+                if ((rand & (1 << i)) == 0) {
+                    xs[i] = male.xs[i];
+                    ys[i] = male.ys[i];
+                } else {
+                    xs[i] = female.xs[i];
+                    ys[i] = female.ys[i];
+                }
             }
         }
         if (random.nextInt(100) < mutationProbability) {
@@ -62,17 +65,7 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
                 ys[i] += random.nextInt(-r, r + 1);
             }
         }
-        return new LiveLinkShapeData(xs, ys);
-    }
-
-    private double length(LiveLinkShapeData data) {
-        final LiveData ld = liveData;
-        double length = Point.distance(ld.out.x, ld.out.y, data.xs[0], data.ys[0]);
-        for (int i = 0; i < COUNT - 1; i++) {
-            length += Point.distance(data.xs[i], data.ys[i], data.xs[i + 1], data.ys[i + 1]);
-        }
-        length += Point.distance(data.xs[COUNT - 1], data.ys[COUNT - 1], ld.in.x, ld.in.y);
-        return length;
+        return data;
     }
 
     static int isect(Rectangle r, int x1, int y1, int x2, int y2) {
@@ -118,10 +111,13 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
     }
 
     @Override
-    protected double fitness(LiveLinkShapeData specie) {
-        final LiveData ld = liveData;
+    protected double fitness(LiveLinkShapeData specie, LiveData ld) {
         try {
-            final double distFactor = length(specie);
+            double distFactor = Point.distance(ld.out.x, ld.out.y, specie.xs[0], specie.ys[0]);
+            for (int i = 0; i < COUNT - 1; i++) {
+                distFactor += Point.distance(specie.xs[i], specie.ys[i], specie.xs[i + 1], specie.ys[i + 1]);
+            }
+            distFactor += Point.distance(specie.xs[COUNT - 1], specie.ys[COUNT - 1], ld.in.x, ld.in.y);
             int isectFactor = 0;
             for (final Rectangle r : ld.rectangles) {
                 isectFactor += isect(r, ld.out.x + 1, ld.out.y, specie.xs[0], specie.ys[0]);
@@ -151,7 +147,7 @@ public class LiveLinkShape extends AbstractLiveLinkShape<LiveLinkShape.LiveLinkS
         return shape;
     }
 
-    protected static class LiveLinkShapeData {
+    protected static final class LiveLinkShapeData {
 
         protected final int[] xs;
         protected final int[] ys;
