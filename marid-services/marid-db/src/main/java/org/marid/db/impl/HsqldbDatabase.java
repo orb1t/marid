@@ -20,9 +20,9 @@ package org.marid.db.impl;
 
 import org.hsqldb.Database;
 import org.hsqldb.DatabaseManager;
-import org.hsqldb.jdbc.*;
-import org.hsqldb.jdbc.pool.JDBCPooledConnection;
-import org.hsqldb.jdbc.pool.JDBCPooledDataSource;
+import org.hsqldb.jdbc.JDBCSessionConnection;
+import org.hsqldb.jdbc.JDBCSessionDataSource;
+import org.hsqldb.jdbc.JDBCSessionPool;
 import org.hsqldb.server.Server;
 import org.hsqldb.server.ServerConstants;
 import org.marid.db.dao.NumericWriter;
@@ -31,7 +31,6 @@ import org.marid.log.LogSupport;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
-import javax.sql.PooledConnection;
 import java.io.*;
 import java.net.URI;
 import java.sql.Connection;
@@ -151,26 +150,10 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
 
     private DataSource getDataSource(String name) {
         final int dbIndex = databaseNameToIndex.get(name);
-        if (connectionPoolSize == 0) {
-            return new JDBCDataSource() {
-                @Override
-                public Connection getConnection() throws SQLException {
-                    final Database database = DatabaseManager.getDatabase(dbIndex);
-                    return new JDBCSessionConnection(database, name.toUpperCase());
-                }
-            };
-        } else {
-            final JDBCPool pool = new JDBCPool(connectionPoolSize);
-            JDBCPoolFriend.setPooledDataSource(pool, new JDBCPooledDataSource() {
-                @Override
-                public PooledConnection getPooledConnection() throws SQLException {
-                    final Database database = DatabaseManager.getDatabase(dbIndex);
-                    final JDBCConnection connection = new JDBCSessionConnection(database, name.toUpperCase());
-                    return new JDBCPooledConnection(connection);
-                }
-            });
-            return pool;
-        }
+        final Database database = DatabaseManager.getDatabase(dbIndex);
+        return connectionPoolSize == 0
+                ? new JDBCSessionDataSource(database, name.toUpperCase())
+                : new JDBCSessionPool(connectionPoolSize, database, name.toUpperCase());
     }
 
     public NumericWriter numericWriter() {

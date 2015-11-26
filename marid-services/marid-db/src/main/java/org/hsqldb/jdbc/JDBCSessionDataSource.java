@@ -19,30 +19,25 @@
 package org.hsqldb.jdbc;
 
 import org.hsqldb.Database;
-import org.marid.log.LogSupport;
 
-import javax.annotation.Nonnull;
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.logging.Level;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class JDBCSessionConnection extends JDBCConnection implements LogSupport {
+public class JDBCSessionDataSource extends JDBCDataSource {
 
-    public JDBCSessionConnection(@Nonnull Database database, @Nonnull String schema) throws SQLException {
-        super(database.getSessionManager().newSysSession());
-        setSchema(schema);
+    private final Database database;
+    private final String schema;
+
+    public JDBCSessionDataSource(Database database, String schema) {
+        this.database = database;
+        this.schema = schema;
     }
 
     @Override
-    public synchronized void close() throws SQLException {
-        try {
-            sessionProxy.close();
-        } catch (Throwable x) {
-            log(Level.SEVERE, "Unable to close session id={0}", x, sessionProxy.getId());
-        } finally {
-            sessionProxy = null;
-        }
+    public Connection getConnection() throws SQLException {
+        return new JDBCSessionConnection(database, schema);
     }
 }
