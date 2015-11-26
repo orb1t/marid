@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2013 Dmitry Ovchinnikov
+  ~ Copyright (C) 2015 Dmitry Ovchinnikov
   ~ Marid, the free data acquisition and visualization software
   ~
   ~ This program is free software: you can redistribute it and/or modify
@@ -14,70 +14,60 @@
   ~ GNU Affero General Public License for more details.
   ~
   ~ You should have received a copy of the GNU Affero General Public License
-  ~ along with this program.  If not, see <http://www.gnu.org/licenses />.
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.marid</groupId>
         <artifactId>marid</artifactId>
+        <groupId>org.marid</groupId>
         <version>0.8.8.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>marid-modules</artifactId>
+    <artifactId>marid-services</artifactId>
     <packaging>pom</packaging>
 
-    <properties>
-        <log.configurer>org.marid.test.logging.AllLogs</log.configurer>
-    </properties>
-
     <modules>
-        <module>marid-lib</module>
-        <module>marid-swing</module>
-        <module>marid-runtime</module>
-        <module>marid-swing-ide</module>
-        <module>marid-assemblies</module>
-        <module>marid-ide</module>
+        <module>marid-proto</module>
+        <module>marid-db</module>
     </modules>
 
     <dependencies>
         <dependency>
             <groupId>org.marid</groupId>
-            <artifactId>marid-test</artifactId>
-            <scope>test</scope>
+            <artifactId>marid-util</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.marid</groupId>
+            <artifactId>marid-test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                        <java.util.logging.config.class>${log.configurer}</java.util.logging.config.class>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Class-Path>ext/</Class-Path>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-        </plugins>
-
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <systemPropertyVariables>
+                            <java.util.logging.config.class>org.marid.test.logging.AllLogs</java.util.logging.config.class>
+                        </systemPropertyVariables>
+                    </configuration>
+                </plugin>
+
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <dependencies>
@@ -93,9 +83,10 @@
                             <goals>
                                 <goal>single</goal>
                             </goals>
+                            <phase>package</phase>
                             <configuration>
                                 <descriptorRefs>
-                                    <descriptorRef>marid</descriptorRef>
+                                    <descriptorRef>marid-service</descriptorRef>
                                 </descriptorRefs>
                             </configuration>
                         </execution>

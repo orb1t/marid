@@ -178,6 +178,9 @@
         <module>marid-gres</module>
         <module>marid-modules</module>
         <module>marid-test</module>
+        <module>marid-services-api</module>
+        <module>marid-services</module>
+        <module>marid-util</module>
     </modules>
 
     <build>
@@ -293,11 +296,6 @@
                 </plugin>
 
                 <plugin>
-                    <artifactId>maven-war-plugin</artifactId>
-                    <version>2.6</version>
-                </plugin>
-
-                <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>2.10</version>
                 </plugin>
@@ -356,7 +354,7 @@
 
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>2.4.1</version>
+                    <version>2.4.2</version>
                 </plugin>
 
                 <plugin>
@@ -438,6 +436,13 @@
 
             <dependency>
                 <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy</artifactId>
+                <classifier>indy</classifier>
+                <version>2.4.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
                 <classifier>indy</classifier>
                 <version>2.4.5</version>
@@ -447,7 +452,7 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
                 <type>pom</type>
-                <version>4.2.2.RELEASE</version>
+                <version>4.2.3.RELEASE</version>
                 <scope>import</scope>
             </dependency>
 
@@ -462,12 +467,6 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.4</version>
             </dependency>
-
-            <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>1.4.190</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -476,7 +475,7 @@
             <groupId>org.checkerframework</groupId>
             <artifactId>checker</artifactId>
             <scope>provided</scope>
-            <version>1.9.7</version>
+            <version>1.9.8</version>
         </dependency>
     </dependencies>
 
