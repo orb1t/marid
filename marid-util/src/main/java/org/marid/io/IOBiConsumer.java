@@ -20,20 +20,20 @@ package org.marid.io;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 @FunctionalInterface
-public interface IOFunction<T, R> extends Function<T, R> {
+public interface IOBiConsumer<T, U> extends BiConsumer<T, U> {
 
-    R ioApply(T arg) throws IOException;
+    void ioAccept(T t, U u) throws IOException;
 
     @Override
-    default R apply(T arg) {
+    default void accept(T t, U u) {
         try {
-            return ioApply(arg);
+            ioAccept(t, u);
         } catch (IOException x) {
             throw new UncheckedIOException(x);
         }

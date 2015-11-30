@@ -19,6 +19,7 @@
 package org.marid.io;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.function.BiFunction;
 
 /**
@@ -34,7 +35,7 @@ public interface IOBiFunction<T, U, R> extends BiFunction<T, U, R> {
         try {
             return ioApply(t, u);
         } catch (IOException x) {
-            throw new IllegalStateException(x);
+            throw new UncheckedIOException(x);
         }
     }
 }

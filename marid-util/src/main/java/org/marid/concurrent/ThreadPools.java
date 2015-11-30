@@ -16,30 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.timer;
+package org.marid.concurrent;
 
-import org.marid.log.LogSupport;
-
-import java.util.TimerTask;
-import java.util.function.Consumer;
+import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
+import java.util.concurrent.ThreadPoolExecutor.DiscardOldestPolicy;
+import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class MaridTimerTask extends TimerTask implements LogSupport {
+public interface ThreadPools {
 
-    private final Consumer<MaridTimerTask> task;
-
-    public MaridTimerTask(Consumer<MaridTimerTask> task) {
-        this.task = task;
-    }
-
-    @Override
-    public void run() {
-        try {
-            task.accept(this);
-        } catch (RuntimeException x) {
-            log(WARNING, "Timer task error", x);
-        }
-    }
+    CallerRunsPolicy CALLER_RUNS_POLICY = new CallerRunsPolicy();
+    AbortPolicy ABORT_POLICY = new AbortPolicy();
+    DiscardPolicy DISCARD_POLICY = new DiscardPolicy();
+    DiscardOldestPolicy DISCARD_OLDEST_POLICY = new DiscardOldestPolicy();
 }

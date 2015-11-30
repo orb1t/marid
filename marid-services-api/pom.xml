@@ -33,5 +33,6 @@
     <modules>
         <module>marid-proto-api</module>
         <module>marid-db-api</module>
+        <module>marid-web-api</module>
     </modules>
 </project>

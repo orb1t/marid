@@ -17,7 +17,6 @@
  */
 package org.marid.logging;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -25,18 +24,7 @@ import java.util.logging.Logger;
  */
 public class Logging {
 
-    public static final Level[] LEVELS = {
-            Level.SEVERE,
-            Level.WARNING,
-            Level.CONFIG,
-            Level.INFO,
-            Level.FINE,
-            Level.FINER,
-            Level.FINEST
-    };
-
     public static Logger rootLogger() {
-        final Logger logger = Logger.getGlobal().getParent();
-        return logger == null ? Logger.getLogger("") : logger;
+        return Logger.getLogger("");
     }
 }

@@ -22,7 +22,7 @@ import org.marid.db.dao.NumericWriter;
 import org.marid.db.data.DataRecord;
 import org.marid.db.data.DataRecordKey;
 import org.marid.log.LogSupport;
-import org.marid.timer.MaridTimerTask;
+import org.marid.concurrent.MaridTimerTask;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

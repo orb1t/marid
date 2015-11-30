@@ -33,6 +33,7 @@
     <modules>
         <module>marid-proto</module>
         <module>marid-db</module>
+        <module>marid-web</module>
     </modules>
 
     <dependencies>
@@ -63,7 +64,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
                         <systemPropertyVariables>
-                            <java.util.logging.config.class>org.marid.test.logging.AllLogs</java.util.logging.config.class>
+                            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>

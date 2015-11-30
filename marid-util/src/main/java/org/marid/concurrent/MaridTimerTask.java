@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (c) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,28 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.logging;
+package org.marid.concurrent;
 
-import org.marid.logging.formatters.DefaultFormatter;
+import org.jmlspecs.annotation.Immutable;
+import org.marid.log.LogSupport;
 
-import java.util.logging.ConsoleHandler;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
+import javax.annotation.Nonnull;
+import java.util.TimerTask;
+import java.util.function.Consumer;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public class DefaultTestConfigurer {
+@Immutable
+public final class MaridTimerTask extends TimerTask implements LogSupport {
 
-    public DefaultTestConfigurer() {
-        configureTestLogging();
+    private final Consumer<MaridTimerTask> task;
+
+    public MaridTimerTask(@Nonnull Consumer<MaridTimerTask> task) {
+        this.task = task;
     }
 
-    public static void configureTestLogging() {
-        LogManager.getLogManager().reset();
-        final Logger logger = Logging.rootLogger();
-        final ConsoleHandler consoleHandler = new ConsoleHandler();
-        consoleHandler.setFormatter(new DefaultFormatter());
-        logger.addHandler(consoleHandler);
+    @Override
+    public void run() {
+        try {
+            task.accept(this);
+        } catch (RuntimeException x) {
+            log(WARNING, "Timer task error", x);
+        }
     }
 }

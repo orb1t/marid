@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2015 Dmitry Ovchinnikov
+  ~ Copyright (c) 2015 Dmitry Ovchinnikov
   ~ Marid, the free data acquisition and visualization software
   ~
   ~ This program is free software: you can redistribute it and/or modify
@@ -21,40 +21,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>marid-services</artifactId>
+        <artifactId>marid-services-api</artifactId>
         <groupId>org.marid</groupId>
         <version>0.8.8.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>marid-db</artifactId>
+    <artifactId>marid-web-api</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.marid</groupId>
-            <artifactId>marid-db-api</artifactId>
+            <artifactId>marid-util</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>2.3.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.marid</groupId>
-            <artifactId>marid-web</artifactId>
-            <version>${project.version}</version>
-            <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>

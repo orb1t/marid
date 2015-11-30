@@ -16,26 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.web;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.function.Function;
+import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.HttpHandler;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@FunctionalInterface
-public interface IOFunction<T, R> extends Function<T, R> {
+public interface HttpInterceptor extends HttpHandler {
 
-    R ioApply(T arg) throws IOException;
-
-    @Override
-    default R apply(T arg) {
-        try {
-            return ioApply(arg);
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
+    default void configure(HttpContext context) {
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (c) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.test.logging;
+package org.marid.web;
 
-import java.util.logging.Level;
+import com.sun.net.httpserver.Authenticator;
+import com.sun.net.httpserver.HttpExchange;
+import org.jmlspecs.annotation.Immutable;
+
+import javax.annotation.Nonnull;
+import java.util.function.Function;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public class AllLogs extends AbstractLoggingConfigurer {
+@Immutable
+public final class HttpAuthenticator extends Authenticator {
 
-    public AllLogs() {
-        super(Level.INFO);
+    private final Function<HttpExchange, Authenticator.Result> authFunction;
+
+    public HttpAuthenticator(@Nonnull Function<HttpExchange, Authenticator.Result> authFunction) {
+        this.authFunction = authFunction;
+    }
+
+    @Override
+    public Result authenticate(HttpExchange httpExchange) {
+        return authFunction.apply(httpExchange);
     }
 }

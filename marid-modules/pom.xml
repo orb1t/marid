@@ -31,17 +31,12 @@
     <artifactId>marid-modules</artifactId>
     <packaging>pom</packaging>
 
-    <properties>
-        <log.configurer>org.marid.test.logging.AllLogs</log.configurer>
-    </properties>
-
     <modules>
         <module>marid-lib</module>
         <module>marid-swing</module>
         <module>marid-runtime</module>
         <module>marid-swing-ide</module>
         <module>marid-assemblies</module>
-        <module>marid-ide</module>
     </modules>
 
     <dependencies>
@@ -59,7 +54,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <systemPropertyVariables>
-                        <java.util.logging.config.class>${log.configurer}</java.util.logging.config.class>
+                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

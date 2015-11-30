@@ -65,14 +65,12 @@ public interface LogSupport {
         }
 
         public static void log(Logger logger, Level level, String msg, Throwable throwable, Object... args) {
-            if (logger.isLoggable(level)) {
-                final LogRecord r = new LogRecord(level, msg);
-                r.setParameters(args);
-                r.setSourceClassName(null);
-                r.setLoggerName(logger.getName());
-                r.setThrown(throwable);
-                logger.log(r);
-            }
+            final LogRecord r = new LogRecord(level, msg);
+            r.setParameters(args);
+            r.setSourceClassName(null);
+            r.setLoggerName(logger.getName());
+            r.setThrown(throwable);
+            logger.log(r);
         }
     }
 }

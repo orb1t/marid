@@ -20,6 +20,7 @@ package org.marid.log;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.invoke.MethodHandles;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -61,5 +62,27 @@ public interface LogSupport {
         record.setSourceClassName(null);
         record.setParameters(args);
         logger.log(record);
+    }
+
+    class Log {
+
+        public static void log(@Nonnull Level level, @Nonnull String message, @Nullable Throwable thrown, @Nonnull Object... args) {
+            final Logger logger = Logging.LOGGER_CLASS_VALUE.get(MethodHandles.lookup().lookupClass());
+            final LogRecord record = new LogRecord(level, message);
+            record.setLoggerName(logger.getName());
+            record.setSourceClassName(null);
+            record.setThrown(thrown);
+            record.setParameters(args);
+            logger.log(record);
+        }
+
+        public static void log(@Nonnull Level level, @Nonnull String message, @Nonnull Object... args) {
+            final Logger logger = Logging.LOGGER_CLASS_VALUE.get(MethodHandles.lookup().lookupClass());
+            final LogRecord record = new LogRecord(level, message);
+            record.setLoggerName(logger.getName());
+            record.setSourceClassName(null);
+            record.setParameters(args);
+            logger.log(record);
+        }
     }
 }
