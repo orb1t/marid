@@ -24,6 +24,7 @@ import org.marid.ide.base.IdeFrame;
 import org.marid.ide.widgets.Widget;
 import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
+import org.marid.logging.Logging;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.WindowPrefs;
 import org.marid.swing.actions.ActionKey;
@@ -42,7 +43,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.util.logging.Handler;
-import java.util.logging.Logger;
 
 import static javax.swing.JOptionPane.*;
 
@@ -142,7 +142,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     }
 
     public void showLog() {
-        for (final Handler handler : Logger.getGlobal().getParent().getHandlers()) {
+        for (final Handler handler : Logging.rootLogger().getHandlers()) {
             if (handler instanceof SwingHandler) {
                 ((SwingHandler) handler).show();
             }
