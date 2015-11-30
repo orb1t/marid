@@ -19,7 +19,7 @@
 package org.marid.lifecycle;
 
 import org.marid.logging.LogSupport;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -31,11 +31,11 @@ import java.nio.file.*;
  */
 public class ShutdownThread extends Thread implements LogSupport {
 
-    private final GenericApplicationContext context;
+    private final ConfigurableApplicationContext context;
     private final String pidFileName;
     private final WatchService watchService;
 
-    public ShutdownThread(GenericApplicationContext context) {
+    public ShutdownThread(ConfigurableApplicationContext context) {
         super(Thread.currentThread().getThreadGroup(), null, "shutdownThread", 64 * 1024);
         this.context = context;
         setDaemon(true);

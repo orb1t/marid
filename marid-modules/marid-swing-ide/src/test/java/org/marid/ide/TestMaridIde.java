@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (c) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,23 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.context;
-
-import org.marid.ide.components.ProfileManager;
-import org.marid.jmx.MaridBeanConnectionManager;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+package org.marid.ide;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Configuration
-@ComponentScan(basePackageClasses = {ProfileManager.class})
-public class ProfileContext {
-
-    @Bean
-    public MaridBeanConnectionManager maridBeanConnectionManager() {
-        return new MaridBeanConnectionManager();
-    }
+public class TestMaridIde extends MaridIde {
 }

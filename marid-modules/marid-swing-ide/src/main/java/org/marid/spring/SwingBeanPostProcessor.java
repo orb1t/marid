@@ -26,6 +26,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.stereotype.Service;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameEvent;
@@ -38,15 +39,20 @@ import java.util.Set;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Service
 public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
 
     @Autowired
     private AutowireCapableBeanFactory autowireCapableBeanFactory;
 
+    boolean isPrototype(String beanName) {
+        return beanName == null || autowireCapableBeanFactory.isPrototype(beanName);
+    }
+
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         try {
-            if (bean instanceof Window && bean.getClass().isAnnotationPresent(PrototypeComponent.class)) {
+            if (bean instanceof Window && isPrototype(beanName)) {
                 final Window window = (Window) bean;
                 window.addWindowListener(new WindowAction(e -> {
                     if (e.getID() == WindowEvent.WINDOW_CLOSING) {
@@ -54,7 +60,7 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
                         autowireCapableBeanFactory.destroyBean(bean);
                     }
                 }));
-            } else if (bean instanceof JInternalFrame && bean.getClass().isAnnotationPresent(PrototypeComponent.class)) {
+            } else if (bean instanceof JInternalFrame && isPrototype(beanName)) {
                 final JInternalFrame frame = (JInternalFrame) bean;
                 frame.addInternalFrameListener(new InternalFrameAction(e -> {
                     if (e.getID() == InternalFrameEvent.INTERNAL_FRAME_CLOSING) {

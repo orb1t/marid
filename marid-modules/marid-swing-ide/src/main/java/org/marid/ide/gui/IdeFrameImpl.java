@@ -33,7 +33,7 @@ import org.marid.swing.log.SwingHandler;
 import org.marid.swing.menu.SwingMenuBarWrapper;
 import org.marid.swing.util.MessageSupport;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -95,7 +95,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     }
 
     @Autowired
-    public void setWidgetsMenu(IdeDesktopImpl ideDesktop, GenericApplicationContext context) {
+    public void setWidgetsMenu(IdeDesktopImpl ideDesktop, ConfigurableApplicationContext context) {
         final ActionMap map = new ActionMap();
         for (final String beanName : context.getBeanNamesForType(Widget.class)) {
             final MetaInfo metaInfo = context.findAnnotationOnBean(beanName, MetaInfo.class);

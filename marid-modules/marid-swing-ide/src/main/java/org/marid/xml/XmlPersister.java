@@ -22,7 +22,8 @@ import org.marid.logging.LogSupport;
 import org.marid.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component
 public class XmlPersister implements LogSupport {
 
     private final Set<Class<?>> classes = new HashSet<>();
@@ -45,9 +47,9 @@ public class XmlPersister implements LogSupport {
     private final Unmarshaller.Listener listener;
 
     @Autowired
-    public XmlPersister(GenericApplicationContext applicationContext) {
+    public XmlPersister(ConfigurableApplicationContext applicationContext) {
         for (final String beanName : applicationContext.getBeanNamesForAnnotation(XmlBindable.class)) {
-            final BeanDefinition definition = applicationContext.getBeanDefinition(beanName);
+            final BeanDefinition definition = applicationContext.getBeanFactory().getBeanDefinition(beanName);
             try {
                 classes.add(Class.forName(definition.getBeanClassName(), false, Utils.currentClassLoader()));
             } catch (Exception x) {

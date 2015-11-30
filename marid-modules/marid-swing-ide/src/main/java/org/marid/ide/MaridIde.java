@@ -18,17 +18,13 @@
 
 package org.marid.ide;
 
-import org.marid.ide.context.BaseContext;
-import org.marid.ide.context.GuiContext;
-import org.marid.ide.context.ProfileContext;
-import org.marid.lifecycle.MaridRunner;
+import org.jboss.logmanager.LogManager;
 import org.marid.lifecycle.ShutdownThread;
 import org.marid.logging.Logging;
 import org.marid.spring.CommandLinePropertySource;
 import org.marid.swing.log.SwingHandler;
-import org.marid.xml.XmlPersister;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.awt.*;
 import java.util.function.Consumer;
@@ -41,16 +37,22 @@ import static org.marid.logging.LogSupport.Log.log;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridIde implements MaridRunner {
+public class MaridIde {
+
+    static {
+        System.setProperty("java.util.logging.manager", LogManager.class.getName());
+        LogManager.getLogManager().reset();
+    }
 
     public static void main(String[] args) throws Exception {
         start(EventQueue::invokeLater, args);
     }
 
     public static final Logger LOGGER = Logger.getLogger("marid");
-    public static final AnnotationConfigApplicationContext CONTEXT = new AnnotationConfigApplicationContext();
+    public static final ClassPathXmlApplicationContext CONTEXT = new ClassPathXmlApplicationContext();
 
     public static void start(Consumer<Runnable> starter, String... args) throws Exception {
+        Logging.rootLogger().addHandler(new SwingHandler());
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(LOGGER, WARNING, "Uncaught exception in {0}", e, t));
         CONTEXT.addApplicationListener(event -> {
             if (event instanceof ContextStartedEvent) {
@@ -60,16 +62,10 @@ public class MaridIde implements MaridRunner {
         });
         final CommandLinePropertySource commandLinePropertySource = new CommandLinePropertySource(args);
         CONTEXT.getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
-        MaridRunner.runMaridRunners(CONTEXT, args);
+        CONTEXT.setConfigLocation("classpath*:/META-INF/marid/*.xml");
         starter.accept(() -> {
             CONTEXT.refresh();
             CONTEXT.start();
         });
-    }
-
-    @Override
-    public void run(AnnotationConfigApplicationContext context, String... args) throws Exception {
-        Logging.rootLogger().addHandler(new SwingHandler());
-        context.register(XmlPersister.class, BaseContext.class, ProfileContext.class, GuiContext.class);
     }
 }

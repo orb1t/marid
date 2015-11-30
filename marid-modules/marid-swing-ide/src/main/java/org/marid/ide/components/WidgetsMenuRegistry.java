@@ -22,11 +22,11 @@ import org.marid.dyn.MetaInfo;
 import org.marid.ide.frames.MaridFrame;
 import org.marid.ide.gui.IdeFrameImpl;
 import org.marid.l10n.L10nSupport;
-import org.marid.swing.forms.ConfData;
 import org.marid.swing.actions.ActionKey;
 import org.marid.swing.actions.MaridAction;
+import org.marid.swing.forms.ConfData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -37,15 +37,8 @@ import javax.swing.*;
 @Component
 public class WidgetsMenuRegistry implements L10nSupport {
 
-    private final GenericApplicationContext context;
-
     @Autowired
-    public WidgetsMenuRegistry(GenericApplicationContext context) {
-        this.context = context;
-    }
-
-    @Autowired
-    public void setFrames(ActionMap ideActionMap) {
+    public void setFrames(ActionMap ideActionMap, ConfigurableApplicationContext context) {
         for (final String beanName : context.getBeanNamesForType(MaridFrame.class)) {
             final MetaInfo metaInfo = context.findAnnotationOnBean(beanName, MetaInfo.class);
             final String path = metaInfo.path().isEmpty()

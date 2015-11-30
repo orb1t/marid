@@ -54,18 +54,6 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>test-jar</id>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <reuseForks>false</reuseForks>

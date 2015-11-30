@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (c) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,25 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.context;
+package org.marid.ide;
 
-import org.marid.bd.Block;
-import org.marid.ide.components.MaridLaf;
-import org.marid.ide.frames.MaridFrame;
-import org.marid.ide.gui.IdeImpl;
-import org.marid.ide.widgets.Widget;
-import org.marid.logging.LogSupport;
-import org.marid.pref.SysPrefSupport;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
+
+import javax.swing.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@ComponentScan(basePackageClasses = {IdeImpl.class, Widget.class, MaridFrame.class, Block.class})
-@DependsOn(MaridLaf.NAME)
-public class GuiContext implements LogSupport, SysPrefSupport {
+public class IdeConfiguration {
 
+    @Bean
+    public static ActionMap ideActionMap() {
+        return new ActionMap();
+    }
 }

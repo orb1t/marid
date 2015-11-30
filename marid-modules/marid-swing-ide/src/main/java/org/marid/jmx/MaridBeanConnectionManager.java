@@ -19,6 +19,7 @@
 package org.marid.jmx;
 
 import org.marid.logging.LogSupport;
+import org.springframework.stereotype.Component;
 
 import javax.management.MBeanServerConnection;
 import java.util.Collections;
@@ -29,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Dmitry Ovchinnikov.
  */
+@Component
 public class MaridBeanConnectionManager implements LogSupport {
 
     private final Map<String, MBeanServerConnection> connectionMap = new ConcurrentHashMap<>();

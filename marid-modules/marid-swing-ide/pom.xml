@@ -61,11 +61,8 @@
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>marid-runtime</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
+            <groupId>org.jboss.logmanager</groupId>
+            <artifactId>jboss-logmanager</artifactId>
         </dependency>
     </dependencies>
 

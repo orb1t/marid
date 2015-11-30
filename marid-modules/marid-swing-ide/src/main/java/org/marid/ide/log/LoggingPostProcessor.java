@@ -22,15 +22,17 @@ import org.marid.logging.LogSupport;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@Service
 public class LoggingPostProcessor implements DestructionAwareBeanPostProcessor, LogSupport {
 
     @Autowired
-    private GenericApplicationContext applicationContext;
+    private ConfigurableApplicationContext applicationContext;
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -39,7 +41,7 @@ public class LoggingPostProcessor implements DestructionAwareBeanPostProcessor, 
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        log(INFO, "Bean {0} initialized: {1}", beanName, bean);
+        log(INFO, "I[ {0} ]: {1}", beanName, bean);
         return bean;
     }
 
@@ -51,6 +53,6 @@ public class LoggingPostProcessor implements DestructionAwareBeanPostProcessor, 
                 beanName = names[0];
             }
         }
-        log(INFO, "Bean {0} destroying", beanName);
+        log(INFO, "D[ {0} ]", beanName);
     }
 }

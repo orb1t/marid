@@ -34,7 +34,7 @@ import org.marid.swing.SwingUtil;
 import org.marid.swing.actions.MaridAction;
 import org.marid.xml.XmlPersister;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -103,14 +103,14 @@ public class SchemaFrame extends MaridFrame {
     public final Action buildAction;
 
     private final XmlPersister xmlPersister;
-    private final GenericApplicationContext applicationContext;
+    private final ConfigurableApplicationContext applicationContext;
 
     @Autowired
     public SchemaFrame(BlockMenuProvider blockMenuProvider,
                        ProfileManager profileManager,
                        SchemaEditor schemaEditor,
                        XmlPersister xmlPersister,
-                       GenericApplicationContext applicationContext) {
+                       ConfigurableApplicationContext applicationContext) {
         super("Schema");
         this.profileManager = profileManager;
         this.xmlPersister = xmlPersister;
