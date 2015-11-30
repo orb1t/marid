@@ -21,11 +21,9 @@ package org.marid.ide.gui;
 import org.marid.image.MaridIcon;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
-import org.marid.pref.SysPrefSupport;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
 import org.marid.swing.actions.MouseAction;
-import org.marid.swing.log.TrayIconHandler;
 import org.marid.swing.menu.SwingPopupMenuWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,13 +35,12 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.logging.Level;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class MaridTrayIconImpl implements AutoCloseable, LogSupport, L10nSupport, SysPrefSupport {
+public class MaridTrayIconImpl implements AutoCloseable, LogSupport, L10nSupport {
 
     private final TrayIcon trayIcon;
 
@@ -116,7 +113,6 @@ public class MaridTrayIconImpl implements AutoCloseable, LogSupport, L10nSupport
             }));
             ideFrame.setVisible(true);
             SystemTray.getSystemTray().add(icon);
-            TrayIconHandler.addSystemHandler(icon, Level.parse(getSysPref("trayLevel", OFF.getName())));
             trayIcon = icon;
         } else {
             trayIcon = null;
