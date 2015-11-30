@@ -19,7 +19,6 @@
 package org.marid.spring;
 
 import org.marid.logging.LogSupport;
-import org.marid.spring.annotation.PrototypeComponent;
 import org.marid.swing.actions.InternalFrameAction;
 import org.marid.swing.actions.WindowAction;
 import org.springframework.beans.BeansException;
@@ -45,6 +44,8 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
     @Autowired
     private AutowireCapableBeanFactory autowireCapableBeanFactory;
 
+    private final Set<Component> prototypeComponents = Collections.newSetFromMap(new IdentityHashMap<>());
+
     boolean isPrototype(String beanName) {
         return beanName == null || autowireCapableBeanFactory.isPrototype(beanName);
     }
@@ -68,6 +69,8 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
                         autowireCapableBeanFactory.destroyBean(bean);
                     }
                 }));
+            } else if (bean instanceof Component && isPrototype(beanName)) {
+                prototypeComponents.add((Component) bean);
             }
         } catch (Exception x) {
             log(WARNING, "Unable to pre-init bean {0}", x, beanName);
@@ -94,7 +97,7 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
             if (component instanceof Container) {
                 destroyGraphicals((Container) component, components);
             }
-            if (component.getClass().isAnnotationPresent(PrototypeComponent.class)) {
+            if (prototypeComponents.remove(component)) {
                 autowireCapableBeanFactory.destroyBean(component);
             }
         }

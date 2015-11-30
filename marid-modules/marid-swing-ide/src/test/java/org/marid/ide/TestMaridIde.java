@@ -22,4 +22,5 @@ package org.marid.ide;
  * @author Dmitry Ovchinnikov.
  */
 public class TestMaridIde extends MaridIde {
+
 }
