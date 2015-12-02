@@ -56,7 +56,7 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
             if (bean instanceof Window && isPrototype(beanName)) {
                 final Window window = (Window) bean;
                 window.addWindowListener(new WindowAction(e -> {
-                    if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+                    if (e.getID() == WindowEvent.WINDOW_CLOSED) {
                         destroyGraphicals(window);
                         autowireCapableBeanFactory.destroyBean(bean);
                     }
@@ -64,7 +64,7 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
             } else if (bean instanceof JInternalFrame && isPrototype(beanName)) {
                 final JInternalFrame frame = (JInternalFrame) bean;
                 frame.addInternalFrameListener(new InternalFrameAction(e -> {
-                    if (e.getID() == InternalFrameEvent.INTERNAL_FRAME_CLOSING) {
+                    if (e.getID() == InternalFrameEvent.INTERNAL_FRAME_CLOSED) {
                         destroyGraphicals(frame);
                         autowireCapableBeanFactory.destroyBean(bean);
                     }
@@ -88,17 +88,19 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
     }
 
     private void destroyGraphicals(Container container, Set<Component> components) {
-        for (int i = 0; i < container.getComponentCount(); i++) {
-            final Component component = container.getComponent(i);
-            if (components.contains(component)) {
-                continue;
-            }
-            components.add(component);
-            if (component instanceof Container) {
-                destroyGraphicals((Container) component, components);
-            }
-            if (prototypeComponents.remove(component)) {
-                autowireCapableBeanFactory.destroyBean(component);
+        synchronized (container.getTreeLock()) {
+            for (int i = 0; i < container.getComponentCount(); i++) {
+                final Component component = container.getComponent(i);
+                if (components.contains(component)) {
+                    continue;
+                }
+                components.add(component);
+                if (component instanceof Container) {
+                    destroyGraphicals((Container) component, components);
+                }
+                if (prototypeComponents.remove(component)) {
+                    autowireCapableBeanFactory.destroyBean(component);
+                }
             }
         }
     }

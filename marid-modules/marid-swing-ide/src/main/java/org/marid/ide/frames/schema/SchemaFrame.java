@@ -181,12 +181,8 @@ public class SchemaFrame extends MaridFrame {
             saveAs(actionEvent);
             return;
         }
-        try {
-            final SchemaModel model = applicationContext.getBean(SchemaModel.class, schemaEditor);
-            xmlPersister.save(model, new StreamResult(file));
-        } catch (Exception x) {
-            showMessage(ERROR_MESSAGE, "Save error", "Save {0} error", x, file);
-        }
+        final SchemaModel model = applicationContext.getBean(SchemaModel.class, schemaEditor);
+        xmlPersister.save(model, new StreamResult(file));
     }
 
     protected void saveAs(ActionEvent actionEvent) {

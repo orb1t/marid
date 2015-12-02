@@ -31,24 +31,31 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.IOException;
+import java.beans.Introspector;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.lang.Character.MAX_RADIX;
+import static java.lang.Integer.toUnsignedString;
+import static java.lang.System.identityHashCode;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class XmlPersister implements LogSupport {
+public class XmlPersister extends Unmarshaller.Listener implements LogSupport {
 
-    private final Set<Class<?>> classes = new HashSet<>();
+    private final ConfigurableApplicationContext applicationContext;
+    private final Set<Class<?>> classes;
     private final JAXBContext context;
-    private final Unmarshaller.Listener listener;
 
     @Autowired
-    public XmlPersister(ConfigurableApplicationContext applicationContext) {
-        for (final String beanName : applicationContext.getBeanNamesForAnnotation(XmlBindable.class)) {
+    public XmlPersister(ConfigurableApplicationContext applicationContext) throws JAXBException {
+        this.applicationContext = applicationContext;
+        final String[] beanNames = applicationContext.getBeanNamesForAnnotation(XmlBindable.class);
+        classes = new HashSet<>(beanNames.length);
+        for (final String beanName : beanNames) {
             final BeanDefinition definition = applicationContext.getBeanFactory().getBeanDefinition(beanName);
             try {
                 classes.add(Class.forName(definition.getBeanClassName(), false, Utils.currentClassLoader()));
@@ -56,49 +63,38 @@ public class XmlPersister implements LogSupport {
                 log(SEVERE, "Unable to load class {0}", definition.getBeanClassName());
             }
         }
-        try {
-            context = JAXBContext.newInstance(classes.toArray(new Class<?>[classes.size()]));
-        } catch (JAXBException x) {
-            throw new IllegalStateException(x);
-        }
+        context = JAXBContext.newInstance(classes.toArray(new Class<?>[classes.size()]));
         log(INFO, "XML classes: {0}", classes.stream().map(Class::getSimpleName).sorted().collect(Collectors.toList()));
-        this.listener = new Unmarshaller.Listener() {
-            @Override
-            public void afterUnmarshal(Object target, Object parent) {
-                if (classes.contains(target.getClass())) {
-                    applicationContext.getAutowireCapableBeanFactory().autowireBean(target);
-                    applicationContext.getAutowireCapableBeanFactory().initializeBean(target, null);
-                }
-            }
-        };
     }
 
-    public void save(Object object, StreamResult stream) throws IOException {
+    @Override
+    public void afterUnmarshal(Object target, Object parent) {
+        if (classes.contains(target.getClass())) {
+            applicationContext.getAutowireCapableBeanFactory().autowireBean(target);
+            final String beanName = Introspector.decapitalize(target.getClass().getSimpleName());
+            final String name = beanName + "@" + toUnsignedString(identityHashCode(target), MAX_RADIX);
+            applicationContext.getAutowireCapableBeanFactory().initializeBean(target, name);
+        }
+    }
+
+    public void save(Object object, StreamResult stream) {
         try {
             final Marshaller marshaller = context.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, false);
             marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
             marshaller.marshal(object, stream);
         } catch (JAXBException x) {
-            if (x.getCause() instanceof IOException) {
-                throw (IOException) x.getCause();
-            } else {
-                throw new IllegalStateException(x);
-            }
+            throw new IllegalStateException(x);
         }
     }
 
-    public <T> T load(Class<T> type, StreamSource source) throws IOException {
+    public <T> T load(Class<T> type, StreamSource source) {
         try {
             final Unmarshaller unmarshaller = context.createUnmarshaller();
-            unmarshaller.setListener(listener);
+            unmarshaller.setListener(this);
             return type.cast(unmarshaller.unmarshal(source));
         } catch (JAXBException x) {
-            if (x.getCause() instanceof IOException) {
-                throw (IOException) x.getCause();
-            } else {
-                throw new IllegalStateException(x);
-            }
+            throw new IllegalStateException(x);
         }
     }
 

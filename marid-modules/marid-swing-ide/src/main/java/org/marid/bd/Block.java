@@ -23,7 +23,6 @@ import org.marid.logging.LogSupport;
 import org.marid.util.CollectionUtils;
 import org.marid.util.Utils;
 import org.marid.xml.XmlPersister;
-import org.springframework.context.annotation.DependsOn;
 
 import javax.swing.*;
 import javax.xml.bind.annotation.*;
@@ -46,7 +45,6 @@ import static org.marid.ide.MaridIde.CONTEXT;
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
-@DependsOn({"xmlPersister"})
 public abstract class Block implements Named, Serializable, LogSupport, BuildTrigger {
 
     @XmlAttribute
@@ -143,23 +141,15 @@ public abstract class Block implements Named, Serializable, LogSupport, BuildTri
 
     protected Object writeReplace() throws ObjectStreamException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
-            CONTEXT.getBean(XmlPersister.class).save(this, new StreamResult(bos));
-            return new BlockProxy(bos.toByteArray());
-        } catch (IOException x) {
-            throw new WriteAbortedException("Replace error", x);
-        }
+        CONTEXT.getBean(XmlPersister.class).save(this, new StreamResult(bos));
+        return new BlockProxy(bos.toByteArray());
     }
 
     @Override
     public String toString() {
         final StringWriter writer = new StringWriter();
-        try {
-            CONTEXT.getBean(XmlPersister.class).save(this, new StreamResult(writer));
-            return writer.toString();
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
+        CONTEXT.getBean(XmlPersister.class).save(this, new StreamResult(writer));
+        return writer.toString();
     }
 
     public void reset() {

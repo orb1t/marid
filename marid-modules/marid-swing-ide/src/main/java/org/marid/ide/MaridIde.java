@@ -19,18 +19,15 @@
 package org.marid.ide;
 
 import org.jboss.logmanager.LogManager;
-import org.marid.lifecycle.ShutdownThread;
 import org.marid.logging.Logging;
 import org.marid.spring.CommandLinePropertySource;
 import org.marid.swing.log.SwingHandler;
-import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.awt.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static org.marid.logging.LogSupport.Log.log;
 
@@ -54,12 +51,6 @@ public class MaridIde {
     public static void start(Consumer<Runnable> starter, String... args) throws Exception {
         Logging.rootLogger().addHandler(new SwingHandler());
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(LOGGER, WARNING, "Uncaught exception in {0}", e, t));
-        CONTEXT.addApplicationListener(event -> {
-            if (event instanceof ContextStartedEvent) {
-                new ShutdownThread(CONTEXT).start();
-            }
-            log(LOGGER, INFO, "{0}", null, event);
-        });
         final CommandLinePropertySource commandLinePropertySource = new CommandLinePropertySource(args);
         CONTEXT.getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
         CONTEXT.setConfigLocation("classpath*:/META-INF/marid/*.xml");
