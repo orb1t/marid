@@ -18,10 +18,10 @@
 
 package org.marid.xml;
 
+import org.marid.functions.SafeFunction;
 import org.marid.logging.LogSupport;
-import org.marid.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -32,13 +32,14 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.beans.Introspector;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.Character.MAX_RADIX;
 import static java.lang.Integer.toUnsignedString;
 import static java.lang.System.identityHashCode;
+import static org.marid.util.Utils.currentClassLoader;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -53,16 +54,10 @@ public class XmlPersister extends Unmarshaller.Listener implements LogSupport {
     @Autowired
     public XmlPersister(ConfigurableApplicationContext applicationContext) throws JAXBException {
         this.applicationContext = applicationContext;
-        final String[] beanNames = applicationContext.getBeanNamesForAnnotation(XmlBindable.class);
-        classes = new HashSet<>(beanNames.length);
-        for (final String beanName : beanNames) {
-            final BeanDefinition definition = applicationContext.getBeanFactory().getBeanDefinition(beanName);
-            try {
-                classes.add(Class.forName(definition.getBeanClassName(), false, Utils.currentClassLoader()));
-            } catch (Exception x) {
-                log(SEVERE, "Unable to load class {0}", definition.getBeanClassName());
-            }
-        }
+        classes = Arrays.stream(applicationContext.getBeanNamesForAnnotation(XmlBindable.class))
+                .map(name -> (AbstractBeanDefinition) applicationContext.getBeanFactory().getBeanDefinition(name))
+                .map((SafeFunction<AbstractBeanDefinition, Class<?>>) d -> d.resolveBeanClass(currentClassLoader()))
+                .collect(Collectors.toSet());
         context = JAXBContext.newInstance(classes.toArray(new Class<?>[classes.size()]));
         log(INFO, "XML classes: {0}", classes.stream().map(Class::getSimpleName).sorted().collect(Collectors.toList()));
     }
