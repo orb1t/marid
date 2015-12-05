@@ -19,7 +19,6 @@
 package org.marid.ide.widgets;
 
 import org.marid.dyn.MetaInfo;
-import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
 import org.marid.swing.menu.SwingMenuBarWrapper;
 
@@ -48,18 +47,10 @@ public abstract class Widget extends JInternalFrame implements WidgetSupport {
 
     @PostConstruct
     public void init() {
-        fillActions();
-        MaridActions.fillToolbar(getActionMap(), toolBar);
+        getRootPane().setActionMap(actions());
+        MaridActions.fillToolbar(getRootPane(), toolBar);
         if (getJMenuBar() != null) {
-            MaridActions.fillMenu(getActionMap(), new SwingMenuBarWrapper(getJMenuBar()));
-        } else {
-            for (final Object k : getActionMap().allKeys()) {
-                final Action action = getActionMap().get(k);
-                final KeyStroke stroke = (KeyStroke) action.getValue(Action.ACCELERATOR_KEY);
-                if (stroke != null && action instanceof MaridAction) {
-                    registerKeyboardAction(action, stroke, WHEN_IN_FOCUSED_WINDOW);
-                }
-            }
+            MaridActions.fillMenu(getRootPane(), new SwingMenuBarWrapper(getJMenuBar()));
         }
         pack();
         setLocation(getPref("location", new Point()));

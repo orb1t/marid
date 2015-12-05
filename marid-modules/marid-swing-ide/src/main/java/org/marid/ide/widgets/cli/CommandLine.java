@@ -30,7 +30,6 @@ import org.marid.swing.actions.ActionKeySupport;
 import org.marid.swing.adapters.TextAreaWriter;
 import org.marid.swing.control.ConsoleArea;
 import org.marid.swing.layout.GridBagLayoutSupport;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PreDestroy;
 import javax.swing.*;
@@ -55,7 +54,6 @@ public class CommandLine extends JPanel implements GridBagLayoutSupport, PrefSup
 
     private boolean autoClean = getPref("autoClean", true);
 
-    @Autowired
     public CommandLine() {
         super(new GridBagLayout());
         shell = new GroovyShell();

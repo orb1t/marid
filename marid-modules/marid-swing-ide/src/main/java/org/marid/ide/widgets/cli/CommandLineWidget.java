@@ -65,7 +65,6 @@ public class CommandLineWidget extends Widget {
                     break;
             }
         }));
-
         clearAction = new MaridAction("Clear", "clean", e -> cmdLine.clear()).setKey("control N").enableToolbar();
     }
 
@@ -78,18 +77,25 @@ public class CommandLineWidget extends Widget {
         }
     }
 
-    private class ConsoleAreaToolbar extends JToolBar implements ActionKeySupport {
+    public class ConsoleAreaToolbar extends JToolBar implements ActionKeySupport {
+
+        @MetaInfo(path = "/common/c/autoClean")
+        public final Action autoCleanAction;
+
+        @MetaInfo(path = "/common/c/clear")
+        public final Action clear;
 
         private ConsoleAreaToolbar() {
             super(VERTICAL);
             setFloatable(false);
-            addAction("/common/c/autoClean", "Auto-clean output", "purge", (a, e) -> {
+            autoCleanAction = new MaridAction("Auto-clean output", "purge", (a, e) -> {
                 cmdLine.setAutoClean((Boolean) a.getValue(Action.SELECTED_KEY));
             }).setSelected(cmdLine.isAutoClean()).enableToolbar();
-            addAction("/common/c/clean", "Clear output", "clean", (a, e) -> {
+            clear = new MaridAction("Clear output", "clean", (a, e) -> {
                 cmdLine.getConsoleArea().setText("");
             }).enableToolbar();
-            MaridActions.fillToolbar(getActionMap(), this);
+            setActionMap(actions());
+            MaridActions.fillToolbar(this, this);
         }
     }
 }

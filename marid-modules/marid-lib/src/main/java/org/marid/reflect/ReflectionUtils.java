@@ -53,7 +53,9 @@ public class ReflectionUtils {
                 if (isStatic(mods) || isTransient(mods) || isVolatile(mods)) {
                     continue;
                 }
-                field.setAccessible(true);
+                if (!field.isAccessible()) {
+                    field.setAccessible(true);
+                }
                 fields.add(field);
             }
         }

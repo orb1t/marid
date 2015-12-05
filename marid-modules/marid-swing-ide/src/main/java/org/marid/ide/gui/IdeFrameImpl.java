@@ -27,7 +27,6 @@ import org.marid.logging.LogSupport;
 import org.marid.logging.Logging;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.WindowPrefs;
-import org.marid.swing.actions.ActionKey;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
 import org.marid.swing.log.SwingHandler;
@@ -42,6 +41,7 @@ import javax.annotation.PreDestroy;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
+import java.util.*;
 import java.util.logging.Handler;
 
 import static javax.swing.JOptionPane.*;
@@ -61,16 +61,14 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     private IdeStatusLineImpl statusLine;
 
     @Autowired
-    private ActionMap ideActionMap;
-
-    @Autowired
-    public IdeFrameImpl(IdeImpl ide) {
+    public IdeFrameImpl(IdeImpl ide, ActionMap ideActionMap) {
         super(LS.s("Marid IDE"), WindowPrefs.graphicsConfiguration("IDE"));
         setName("IDE");
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         this.ide = ide;
         setIconImages(MaridIcons.ICONS);
         setJMenuBar(new JMenuBar());
+        getRootPane().setActionMap(ideActionMap);
     }
 
     @PostConstruct
@@ -96,19 +94,27 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
 
     @Autowired
     public void setWidgetsMenu(IdeDesktopImpl ideDesktop, ConfigurableApplicationContext context) {
-        final ActionMap map = new ActionMap();
+        final Map<String, Set<Action>> actions = new TreeMap<>();
         for (final String beanName : context.getBeanNamesForType(Widget.class)) {
             final MetaInfo metaInfo = context.findAnnotationOnBean(beanName, MetaInfo.class);
-            final String path = metaInfo.path().isEmpty()
-                    ? "/Widgets//" + beanName
-                    : metaInfo.path() + "/" + metaInfo.group() + "/" + beanName;
-            map.put(new ActionKey(path), new MaridAction(metaInfo.name(), metaInfo.icon(), ev -> {
-                final Widget widget = context.getBean(beanName, Widget.class);
-                ideDesktop.add(widget);
-                widget.show();
-            }));
+            final Comparator<Action> actionComparator = Comparator.comparing(a -> (String) a.getValue(Action.NAME));
+            actions.computeIfAbsent(metaInfo.group(), g -> new TreeSet<>(actionComparator)).add(
+                    new MaridAction(metaInfo.name(), metaInfo.icon(), ev -> {
+                        final Widget widget = context.getBean(beanName, Widget.class);
+                        ideDesktop.add(widget);
+                        widget.show();
+                    }));
         }
-        MaridActions.fillMenu(map, new SwingMenuBarWrapper(getJMenuBar()));
+        if (!actions.isEmpty()) {
+            final JMenu menu = new JMenu(s("Widgets"));
+            actions.values().forEach(as -> {
+                if (menu.getMenuComponentCount() > 0) {
+                    menu.addSeparator();
+                }
+                as.forEach(menu::add);
+            });
+            getJMenuBar().add(menu);
+        }
     }
 
     @Override
@@ -123,7 +129,7 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
                 }
                 break;
             case WindowEvent.WINDOW_OPENED:
-                MaridActions.fillMenu(ideActionMap, new SwingMenuBarWrapper(getJMenuBar()));
+                MaridActions.fillMenu(getRootPane(), new SwingMenuBarWrapper(getJMenuBar()));
                 setState(getPref("state", getState()));
                 setExtendedState(getPref("extendedState", getExtendedState()));
                 break;

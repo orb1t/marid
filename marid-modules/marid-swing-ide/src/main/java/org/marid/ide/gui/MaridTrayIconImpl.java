@@ -45,7 +45,7 @@ public class MaridTrayIconImpl implements AutoCloseable, LogSupport, L10nSupport
     private final TrayIcon trayIcon;
 
     @Autowired
-    public MaridTrayIconImpl(IdeFrameImpl ideFrame, ActionMap ideActionMap) throws Exception {
+    public MaridTrayIconImpl(IdeFrameImpl ideFrame) throws Exception {
         if (SystemTray.getSystemTray() != null) {
             final Dimension traySize = SystemTray.getSystemTray().getTrayIconSize();
             final int trayWidth = traySize.width;
@@ -66,7 +66,7 @@ public class MaridTrayIconImpl implements AutoCloseable, LogSupport, L10nSupport
                         if (e.isPopupTrigger()) {
                             if (icon.getActionCommand() == null) {
                                 try {
-                                    MaridActions.fillMenu(ideActionMap, new SwingPopupMenuWrapper(popupMenu));
+                                    MaridActions.fillMenu(ideFrame.getRootPane(), new SwingPopupMenuWrapper(popupMenu));
                                 } finally {
                                     icon.setActionCommand("maridTray");
                                 }

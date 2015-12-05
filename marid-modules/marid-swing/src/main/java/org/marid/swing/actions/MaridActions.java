@@ -23,9 +23,15 @@ import org.marid.swing.menu.SwingMenuContainer;
 import org.marid.swing.menu.SwingMenuWrapper;
 
 import javax.swing.*;
-import java.util.*;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.stream.IntStream.range;
 
 /**
@@ -36,31 +42,33 @@ public class MaridActions implements L10nSupport {
     public static final String TOOLBAR_ENABLED = "toolbarEnabled";
     public static final String MENUBAR_DISABLED = "menubarDisabled";
 
-    private static List<Map.Entry<ActionKey, Action>> actions(ActionMap actionMap) {
-        final Object[] keys = actionMap.allKeys();
-        return Arrays.stream(keys == null ? new Object[0] : keys)
+    private static List<Entry<ActionKey, Action>> actions(JComponent comp, Predicate<Entry<ActionKey, Action>> filter) {
+        final ActionMap actionMap = comp.getActionMap();
+        final Object[] keys = actionMap.allKeys() == null ? new Object[0] : actionMap.allKeys();
+        return Arrays.stream(keys)
                 .filter(k -> k instanceof ActionKey)
                 .map(ActionKey.class::cast)
-                .filter(k -> k.size() >= 4)
                 .sorted()
-                .map(k -> new AbstractMap.SimpleImmutableEntry<>(k, actionMap.get(k)))
-                .filter(e -> e.getValue() != null && !Boolean.TRUE.equals(e.getValue().getValue(MENUBAR_DISABLED)))
+                .map(k -> new SimpleImmutableEntry<>(k, actionMap.get(k)))
+                .filter(e -> e.getValue() != null)
+                .filter(filter)
                 .collect(Collectors.toList());
     }
 
-    public static void fillMenu(ActionMap actionMap, SwingMenuContainer swingMenuContainer) {
-        final List<Map.Entry<ActionKey, Action>> actions = actions(actionMap);
-        for (final ListIterator<Map.Entry<ActionKey, Action>> it = actions.listIterator(); it.hasNext(); ) {
+    public static void fillMenu(JComponent pane, SwingMenuContainer swingMenuContainer) {
+        final List<Entry<ActionKey, Action>> actions = actions(pane,
+                e -> e.getKey().size() >= 4 && !TRUE.equals(e.getValue().getValue(MENUBAR_DISABLED)));
+        for (final ListIterator<Entry<ActionKey, Action>> it = actions.listIterator(); it.hasNext(); ) {
             if (it.hasPrevious() && it.hasNext()) {
-                final Map.Entry<ActionKey, Action> ne = actions.get(it.nextIndex());
-                final Map.Entry<ActionKey, Action> pe = actions.get(it.previousIndex());
+                final Entry<ActionKey, Action> ne = actions.get(it.nextIndex());
+                final Entry<ActionKey, Action> pe = actions.get(it.previousIndex());
                 final ActionKey nk = ne.getKey(), pk = pe.getKey();
                 final JMenu menu = getOrCreateMenu(swingMenuContainer, nk.getPath());
                 if (Arrays.equals(pk.getPath(), nk.getPath()) && !pk.getGroup().equals(nk.getGroup())) {
                     menu.addSeparator();
                 }
             }
-            final Map.Entry<ActionKey, Action> e = it.next();
+            final Entry<ActionKey, Action> e = it.next();
             final Action a = e.getValue();
             final ActionKey k = e.getKey();
             final String[] path = k.getPath();
@@ -74,25 +82,21 @@ public class MaridActions implements L10nSupport {
                 menuItem.setName(k.getLastName());
             }
         }
+        fillInputMap(pane, actions);
     }
 
-    public static void fillToolbar(ActionMap actionMap, JToolBar toolBar) {
-        final List<Map.Entry<ActionKey, Action>> actions = Arrays.stream(actionMap.allKeys())
-                .filter(k -> k instanceof ActionKey)
-                .map(ActionKey.class::cast)
-                .sorted()
-                .map(k -> new AbstractMap.SimpleImmutableEntry<>(k, actionMap.get(k)))
-                .filter(e -> e.getValue() != null && Boolean.TRUE.equals(e.getValue().getValue(TOOLBAR_ENABLED)))
-                .collect(Collectors.toList());
-        for (final ListIterator<Map.Entry<ActionKey, Action>> it = actions.listIterator(); it.hasNext(); ) {
+    public static void fillToolbar(JComponent comp, JToolBar toolBar) {
+        final List<Entry<ActionKey, Action>> actions = actions(comp,
+                e -> TRUE.equals(e.getValue().getValue(TOOLBAR_ENABLED)));
+        for (final ListIterator<Entry<ActionKey, Action>> it = actions.listIterator(); it.hasNext(); ) {
             if (it.hasPrevious() && it.hasNext()) {
-                final Map.Entry<ActionKey, Action> ne = actions.get(it.nextIndex());
-                final Map.Entry<ActionKey, Action> pe = actions.get(it.previousIndex());
+                final Entry<ActionKey, Action> ne = actions.get(it.nextIndex());
+                final Entry<ActionKey, Action> pe = actions.get(it.previousIndex());
                 if (!pe.getKey().getGroup().equals(ne.getKey().getGroup())) {
                     toolBar.addSeparator();
                 }
             }
-            final Map.Entry<ActionKey, Action> e = it.next();
+            final Entry<ActionKey, Action> e = it.next();
             final Action a = e.getValue();
             final ActionKey k = e.getKey();
             if (a.getValue(Action.SELECTED_KEY) != null) {
@@ -107,17 +111,17 @@ public class MaridActions implements L10nSupport {
                 button.setFocusable(false);
             }
         }
+        fillInputMap(comp, actions);
     }
 
-    public static void fillInputMap(InputMap inputMap, ActionMap actionMap) {
-        for (final Object key : actionMap.allKeys()) {
-            final Action a = actionMap.get(key);
-            final Object keyStrokeObject = a.getValue(Action.ACCELERATOR_KEY);
+    private static void fillInputMap(JComponent pane, List<Entry<ActionKey, Action>> actions) {
+        actions.forEach(e -> {
+            final Object keyStrokeObject = e.getValue().getValue(Action.ACCELERATOR_KEY);
             if (keyStrokeObject instanceof KeyStroke) {
                 final KeyStroke keyStroke = (KeyStroke) keyStrokeObject;
-                inputMap.put(keyStroke, key);
+                pane.getInputMap().put(keyStroke, e.getKey());
             }
-        }
+        });
     }
 
     private static JMenu getOrCreateMenu(SwingMenuContainer wrapper, String[] path) {

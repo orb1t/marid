@@ -97,6 +97,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.jgoodies</groupId>
+            <artifactId>jgoodies-looks</artifactId>
+            <version>2.7.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.japura</groupId>
             <artifactId>japura-framework</artifactId>
             <version>7.0.0</version>

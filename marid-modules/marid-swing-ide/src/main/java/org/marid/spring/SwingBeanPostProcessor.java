@@ -56,7 +56,7 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
             if (bean instanceof Window && isPrototype(beanName)) {
                 final Window window = (Window) bean;
                 window.addWindowListener(new WindowAction(e -> {
-                    if (e.getID() == WindowEvent.WINDOW_CLOSED) {
+                    if (e.getID() == WindowEvent.WINDOW_CLOSING) {
                         destroyGraphicals(window);
                         autowireCapableBeanFactory.destroyBean(bean);
                     }
@@ -64,7 +64,7 @@ public class SwingBeanPostProcessor implements BeanPostProcessor, LogSupport {
             } else if (bean instanceof JInternalFrame && isPrototype(beanName)) {
                 final JInternalFrame frame = (JInternalFrame) bean;
                 frame.addInternalFrameListener(new InternalFrameAction(e -> {
-                    if (e.getID() == InternalFrameEvent.INTERNAL_FRAME_CLOSED) {
+                    if (e.getID() == InternalFrameEvent.INTERNAL_FRAME_CLOSING) {
                         destroyGraphicals(frame);
                         autowireCapableBeanFactory.destroyBean(bean);
                     }

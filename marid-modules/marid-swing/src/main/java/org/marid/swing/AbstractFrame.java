@@ -81,11 +81,11 @@ public abstract class AbstractFrame extends JFrame implements PrefSupport, SysPr
 
     @PostConstruct
     public void init() {
-        fillActions();
+        getRootPane().setActionMap(actions());
         final JMenuBar menuBar = new JMenuBar();
         final JToolBar toolBar = new JToolBar();
-        MaridActions.fillMenu(getActionMap(), new SwingMenuBarWrapper(menuBar));
-        MaridActions.fillToolbar(getActionMap(), toolBar);
+        MaridActions.fillMenu(getRootPane(), new SwingMenuBarWrapper(menuBar));
+        MaridActions.fillToolbar(getRootPane(), toolBar);
         for (int i = menuBar.getComponentCount() - 1; i >= 0; i--) {
             getJMenuBar().add(menuBar.getComponent(i), 0);
         }

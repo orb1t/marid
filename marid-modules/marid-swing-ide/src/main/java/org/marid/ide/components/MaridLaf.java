@@ -29,14 +29,12 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Component(MaridLaf.NAME)
+@Component
 public class MaridLaf implements LogSupport, SysPrefSupport {
-
-    public static final String NAME = "laf";
 
     public MaridLaf() {
         UIManager.installLookAndFeel("Standard", StandardLookAndFeel.class.getName());
-        final String laf = SYSPREFS.get("laf", NimbusLookAndFeel.class.getCanonicalName());
+        final String laf = SYSPREFS.get("laf", NimbusLookAndFeel.class.getName());
         try {
             UIManager.setLookAndFeel(laf);
         } catch (Exception x) {

@@ -20,68 +20,30 @@ package org.marid.swing.actions;
 
 import org.marid.dyn.MetaInfo;
 import org.marid.logging.LogSupport;
+import org.marid.reflect.ReflectionUtils;
 
 import javax.swing.*;
-import java.awt.event.ActionListener;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
-import static org.marid.swing.actions.MaridAction.MaridActionListener;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface ActionKeySupport extends LogSupport {
 
-    default <T extends Action> T addAction(String key, T action) {
-        return addAction(new ActionKey(key), action);
-    }
-
-    default MaridAction addAction(String key, String title, String icon, ActionListener listener, Object... args) {
-        return addAction(key, new MaridAction(title, icon, listener, args));
-    }
-
-    default MaridAction addAction(String key, String title, String icon, MaridActionListener listener, Object... args) {
-        return addAction(key, new MaridAction(title, icon, listener, args));
-    }
-
-    default <T extends Action> T addAction(ActionKey key, T action) {
-        getActionMap().put(key, action);
-        return action;
-    }
-
-    default ActionMap getActionMap() {
-        if (this instanceof RootPaneContainer) {
-            return ((RootPaneContainer) this).getRootPane().getActionMap();
-        } else {
-            return null;
-        }
-    }
-
-    default Action actionByKey(ActionKey actionKey) {
-        final ActionMap actionMap = getActionMap();
-        return actionMap != null ? actionMap.get(actionKey) : null;
-    }
-
-    default Action actionByKey(String actionKey) {
-        return actionByKey(new ActionKey(actionKey));
-    }
-
-    default void fillActions() {
-        for (final Field field : getClass().getFields()) {
-            if (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers())) {
-                continue;
-            }
+    default ActionMap actions() {
+        final ActionMap actionMap = new ActionMap();
+        for (final Field field : ReflectionUtils.getFields(getClass())) {
             if (!field.isAnnotationPresent(MetaInfo.class) || !Action.class.isAssignableFrom(field.getType())) {
                 continue;
             }
             try {
                 final Action action = (Action) field.get(this);
                 final MetaInfo metaInfo = field.getAnnotation(MetaInfo.class);
-                addAction(new ActionKey(metaInfo.path()), action);
+                actionMap.put(new ActionKey(metaInfo.path()), action);
             } catch (ReflectiveOperationException x) {
                 log(WARNING, "Unable to get action from {0}", x, field);
             }
         }
+        return actionMap;
     }
 }
