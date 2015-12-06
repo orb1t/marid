@@ -34,12 +34,12 @@ public class SmallButton extends JLabel {
     private final Action action;
     private boolean hover;
 
-    public SmallButton(@Nonnull Action action) {
+    public SmallButton(@Nonnull Action action, boolean textEnabled) {
         this.action = action;
         if (action.getValue(Action.SMALL_ICON) != null) {
             setIcon((Icon) action.getValue(Action.SMALL_ICON));
         }
-        if (action.getValue(Action.NAME) != null) {
+        if (textEnabled && action.getValue(Action.NAME) != null) {
             setText(action.getValue(Action.NAME).toString());
         }
         if (action.getValue(Action.SHORT_DESCRIPTION) != null) {

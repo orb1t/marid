@@ -1,5 +1,6 @@
 package org.marid.collections.history;
 
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
@@ -10,6 +11,7 @@ public class HistoryNavigator<T> {
     final History<T> history;
 
     private int currentIndex = -1;
+    private T current;
 
     public HistoryNavigator(History<T> history) {
         this.history = history;
@@ -24,12 +26,18 @@ public class HistoryNavigator<T> {
         reset();
     }
 
-    public T getPrevious() {
+    public T getPrevious(Supplier<T> currentSupplier) {
         if (history.getSize() == 0) {
             return null;
         } else if (currentIndex < 0 || currentIndex >= history.getSize() - 1) {
+            if (this.current == null) {
+                this.current = currentSupplier.get();
+            }
             return history.getHistoryItem(currentIndex = 0);
         } else {
+            if (this.current == null) {
+                this.current = currentSupplier.get();
+            }
             return history.getHistoryItem(++currentIndex);
         }
     }
@@ -44,8 +52,11 @@ public class HistoryNavigator<T> {
         }
     }
 
-    public void reset() {
+    public T reset() {
         currentIndex = -1;
+        final T current = this.current;
+        this.current = null;
+        return current;
     }
 
     public History<T> getHistory() {

@@ -16,31 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.cli;
-
-import org.marid.swing.actions.MaridAction;
-import org.marid.swing.component.SmallButton;
+package org.marid.swing;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class CommandLineResult extends JPanel {
+public interface ComponentWrapper {
 
-    private final Action removeAction = new MaridAction("Remove", "remove", e -> {
-        final Container container = getParent();
-        container.remove(this);
-        container.validate();
-    });
-
-    public CommandLineResult(JComponent component) {
-        super(new BorderLayout(10, 0));
-        setOpaque(false);
-        final SmallButton removeButton = new SmallButton(removeAction, false);
-        removeButton.setVerticalAlignment(SwingConstants.TOP);
-        add(removeButton, BorderLayout.WEST);
-        add(component);
-    }
+    JComponent getWrappedComponent();
 }

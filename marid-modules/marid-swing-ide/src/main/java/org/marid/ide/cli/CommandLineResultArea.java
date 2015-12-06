@@ -18,29 +18,23 @@
 
 package org.marid.ide.cli;
 
-import org.marid.swing.actions.MaridAction;
-import org.marid.swing.component.SmallButton;
-
 import javax.swing.*;
 import java.awt.*;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class CommandLineResult extends JPanel {
+public class CommandLineResultArea extends JTextArea {
 
-    private final Action removeAction = new MaridAction("Remove", "remove", e -> {
-        final Container container = getParent();
-        container.remove(this);
-        container.validate();
-    });
+    private static final Color BACKGROUND = new Color(0, 0, 0, 0);
 
-    public CommandLineResult(JComponent component) {
-        super(new BorderLayout(10, 0));
+    public CommandLineResultArea(String text) {
+        super(text);
+        setBorder(BorderFactory.createEmptyBorder());
+        setBackground(BACKGROUND);
+        setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        setForeground(SystemColor.controlLtHighlight);
+        setEditable(false);
         setOpaque(false);
-        final SmallButton removeButton = new SmallButton(removeAction, false);
-        removeButton.setVerticalAlignment(SwingConstants.TOP);
-        add(removeButton, BorderLayout.WEST);
-        add(component);
     }
 }
