@@ -17,7 +17,9 @@ public class MaridAction extends AbstractAction implements L10nSupport, LogSuppo
     private final MaridActionListener actionListener;
 
     public MaridAction(String title, String icon, MaridActionListener actionListener, Object... args) {
-        super(LS.s(title));
+        if (title != null) {
+            putValue(NAME, title);
+        }
         this.actionListener = actionListener;
         if (icon != null && icon.indexOf('.') < 0) {
             final ImageIcon smallIcon = Images.getIcon(icon + "16.png");
@@ -45,8 +47,8 @@ public class MaridAction extends AbstractAction implements L10nSupport, LogSuppo
                 putValue(args[i].toString(), args[i + 1]);
             }
         }
-        if (getValue(Action.SHORT_DESCRIPTION) == null) {
-            putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));
+        if (getValue(SHORT_DESCRIPTION) == null && getValue(NAME) != null) {
+            putValue(SHORT_DESCRIPTION, getValue(Action.NAME));
         }
     }
 

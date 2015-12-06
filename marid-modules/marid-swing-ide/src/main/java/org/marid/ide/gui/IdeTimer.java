@@ -12,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component("ideTimer")
+@Component
 public class IdeTimer {
 
     private final List<ActionListener> listeners = new CopyOnWriteArrayList<>();

@@ -16,10 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.base;
+package org.marid.ide.gui;
+
+import org.marid.ide.MaridIde;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface IdeDesktop {
+@Component
+public class Ide {
+
+    public void exit() {
+        MaridIde.CONTEXT.close();
+        System.exit(0);
+    }
+
+    public String getName() {
+        return "ide";
+    }
 }

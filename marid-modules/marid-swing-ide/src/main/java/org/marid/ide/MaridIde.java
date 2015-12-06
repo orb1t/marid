@@ -20,12 +20,14 @@ package org.marid.ide;
 
 import org.jboss.logmanager.LogManager;
 import org.marid.logging.Logging;
+import org.marid.pref.SysPrefSupport;
 import org.marid.spring.CommandLinePropertySource;
 import org.marid.swing.log.SwingHandler;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import javax.swing.*;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
-import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import static java.util.logging.Level.WARNING;
@@ -41,20 +43,25 @@ public class MaridIde {
         LogManager.getLogManager().reset();
     }
 
-    public static void main(String[] args) throws Exception {
-        start(EventQueue::invokeLater, args);
-    }
-
     public static final Logger LOGGER = Logger.getLogger("marid");
     public static final ClassPathXmlApplicationContext CONTEXT = new ClassPathXmlApplicationContext();
 
-    public static void start(Consumer<Runnable> starter, String... args) throws Exception {
+    public static void main(String[] args) throws Exception {
         Logging.rootLogger().addHandler(new SwingHandler());
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(LOGGER, WARNING, "Uncaught exception in {0}", e, t));
         final CommandLinePropertySource commandLinePropertySource = new CommandLinePropertySource(args);
         CONTEXT.getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
         CONTEXT.setConfigLocation("classpath*:/META-INF/marid/*.xml");
-        starter.accept(() -> {
+        EventQueue.invokeLater(() -> {
+            final String lafName = SysPrefSupport.SYSPREFS.get("laf", NimbusLookAndFeel.class.getName());
+            try {
+                UIManager.setLookAndFeel(lafName);
+            } catch (Exception x) {
+                LOGGER.log(WARNING, x, () -> "LookAndFeel setting error: " + lafName);
+            }
+            if (UIManager.getLookAndFeel() instanceof NimbusLookAndFeel) {
+                UIManager.put("Nimbus.keepAlternateRowColor", true);
+            }
             CONTEXT.refresh();
             CONTEXT.start();
         });

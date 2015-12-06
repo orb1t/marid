@@ -21,6 +21,7 @@ package org.marid.image;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -36,6 +37,13 @@ public class MaridIcon {
     private static final float[] FRACTIONS = new float[FRACTION_COUNT];
     private static final Color[] COLORS = new Color[FRACTION_COUNT];
     private static final Color[] BCOLORS = new Color[FRACTION_COUNT];
+    private static final GeneralPath ONDA1 = new GeneralPath();
+    private static final GeneralPath ONDA2 = new GeneralPath();
+    private static final GeneralPath BOTELLA = new GeneralPath();
+    private static final BasicStroke STROKE = new BasicStroke(0.15f);
+    private static final double SCALE_X = 2.0 / (2.0 + STROKE.getLineWidth());
+    private static final double SCALE_Y = 2.0 / (2.0 + STROKE.getLineWidth());
+    private static final LinearGradientPaint BOTELLA_GRADIENT;
 
     static {
         for (int i = 0; i < FRACTION_COUNT; i++) {
@@ -43,6 +51,16 @@ public class MaridIcon {
             COLORS[i] = new Color(150 - i * 10, 150 - i * 10, 255 - i * 10);
             BCOLORS[i] = new Color(255, 255, 255, 255 - i * 15);
         }
+        ONDA1.moveTo(-1.1f, +0.1f);
+        ONDA1.quadTo(-0.8f, +0.3f, -0.475f, +0.17f);
+        ONDA2.moveTo(+1.1f, +0.1f);
+        ONDA2.quadTo(+0.8f, +0.3f, +0.475f, +0.17f);
+        BOTELLA.moveTo(-0.5f, -1.0f);
+        BOTELLA.curveTo(-0.6f, +0.0f, -0.1f, +0.3f, -0.1f, +1.0f);
+        BOTELLA.lineTo(+0.1f, +1.0f);
+        BOTELLA.curveTo(+0.1f, +0.3f, +0.6f, +0.0f, +0.5f, -1.0f);
+        BOTELLA.closePath();
+        BOTELLA_GRADIENT = new LinearGradientPaint(+0.0f, +1.0f, +0.0f, -1.0f, FRACTIONS, BCOLORS);
     }
 
     public static void draw(int w, int h, Color color, Graphics2D g) {
@@ -51,32 +69,21 @@ public class MaridIcon {
         g.fillRect(0, 0, w, h);
         final int size = Math.min(w, h);
         g.translate((w - size) / 2, (h - size) / 2);
-        g.scale(size / 2.0, -size / 2.0);
-        final BasicStroke stroke = new BasicStroke(0.15f);
+        final double s = size / 2.0;
+        g.scale(s, -s);
         g.translate(1.0, -1.0);
-        g.setStroke(stroke);
-        g.scale(2.0 / (2.0 + stroke.getLineWidth()), 2.0 / (2.0 + stroke.getLineWidth()));
+        g.setStroke(STROKE);
+        g.scale(SCALE_X, SCALE_Y);
+        AffineTransform affineTransform;
         g.setColor(Color.WHITE);
-        final GeneralPath onda1 = new GeneralPath();
-        onda1.moveTo(-1.1f, +0.1f);
-        onda1.quadTo(-0.8f, +0.3f, -0.475f, +0.17f);
-        g.draw(onda1);
-        final GeneralPath onda2 = new GeneralPath();
-        onda2.moveTo(+1.1f, +0.1f);
-        onda2.quadTo(+0.8f, +0.3f, +0.475f, +0.17f);
-        g.draw(onda2);
-        final GeneralPath botella = new GeneralPath();
-        botella.moveTo(-0.5f, -1.0f);
-        botella.curveTo(-0.6f, +0.0f, -0.1f, +0.3f, -0.1f, +1.0f);
-        botella.lineTo(+0.1f, +1.0f);
-        botella.curveTo(+0.1f, +0.3f, +0.6f, +0.0f, +0.5f, -1.0f);
-        botella.closePath();
+        g.draw(ONDA1);
+        g.draw(ONDA2);
         g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 210));
-        g.fill(botella);
-        g.setPaint(new LinearGradientPaint(+0.0f, +1.0f, +0.0f, -1.0f, FRACTIONS, BCOLORS));
-        g.fill(botella);
+        g.fill(BOTELLA);
+        g.setPaint(BOTELLA_GRADIENT);
+        g.fill(BOTELLA);
         g.setColor(Color.WHITE);
-        g.draw(botella);
+        g.draw(BOTELLA);
     }
 
     public static BufferedImage getImage(int size, Color color) {

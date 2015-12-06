@@ -40,12 +40,12 @@ import java.awt.event.WindowEvent;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class MaridTrayIconImpl implements AutoCloseable, LogSupport, L10nSupport {
+public class MaridTrayIcon implements AutoCloseable, LogSupport, L10nSupport {
 
     private final TrayIcon trayIcon;
 
     @Autowired
-    public MaridTrayIconImpl(IdeFrameImpl ideFrame) throws Exception {
+    public MaridTrayIcon(IdeFrame ideFrame) throws Exception {
         if (SystemTray.getSystemTray() != null) {
             final Dimension traySize = SystemTray.getSystemTray().getTrayIconSize();
             final int trayWidth = traySize.width;

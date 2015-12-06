@@ -20,7 +20,7 @@ package org.marid.ide.components;
 
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.components.conf.ProfilePreferencesConfiguration;
-import org.marid.ide.gui.IdeFrameImpl;
+import org.marid.ide.gui.IdeFrame;
 import org.marid.ide.profile.Profile;
 import org.marid.jmx.MaridBeanConnectionManager;
 import org.marid.l10n.L10nSupport;
@@ -127,7 +127,7 @@ public class ProfileManager extends Observable implements LogSupport, SysPrefSup
     }
 
     @Autowired
-    public void setPreferences(IdeFrameImpl ideFrame, ActionMap ideActionMap) {
+    public void setPreferences(IdeFrame ideFrame, ActionMap ideActionMap) {
         final MetaInfo metaInfo = ProfilePreferencesConfiguration.class.getAnnotation(MetaInfo.class);
         final String path = metaInfo.path().isEmpty()
                 ? "/Preferences//profile"

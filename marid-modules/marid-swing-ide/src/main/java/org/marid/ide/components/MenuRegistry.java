@@ -20,7 +20,7 @@ package org.marid.ide.components;
 
 import org.marid.dyn.MetaInfo;
 import org.marid.ide.frames.MaridFrame;
-import org.marid.ide.gui.IdeFrameImpl;
+import org.marid.ide.gui.IdeFrame;
 import org.marid.l10n.L10nSupport;
 import org.marid.swing.actions.ActionKey;
 import org.marid.swing.actions.MaridAction;
@@ -35,7 +35,7 @@ import javax.swing.*;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class WidgetsMenuRegistry implements L10nSupport {
+public class MenuRegistry implements L10nSupport {
 
     @Autowired
     public void setFrames(ActionMap ideActionMap, ConfigurableApplicationContext context) {
@@ -52,7 +52,7 @@ public class WidgetsMenuRegistry implements L10nSupport {
     }
 
     @Autowired
-    public void setPreferences(IdeFrameImpl frame, ActionMap ideActionMap, ConfData[] configurations) {
+    public void setPreferences(IdeFrame frame, ActionMap ideActionMap, ConfData[] configurations) {
         for (final ConfData configuration : configurations) {
             if (configuration.getClass().isAnnotationPresent(MetaInfo.class)) {
                 final MetaInfo metaInfo = configuration.getClass().getAnnotation(MetaInfo.class);

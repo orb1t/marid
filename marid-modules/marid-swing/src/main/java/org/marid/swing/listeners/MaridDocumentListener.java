@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (c) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,26 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.base;
+package org.marid.swing.listeners;
+
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public interface IdeFrame {
+@FunctionalInterface
+public interface MaridDocumentListener extends DocumentListener {
 
-    IdeStatusLine getStatusLine();
+    void update(DocumentEvent documentEvent);
 
-    IdeDesktop getDesktop();
+    @Override
+    default void changedUpdate(DocumentEvent e) {
+        update(e);
+    }
 
-    boolean isVisible();
+    @Override
+    default void insertUpdate(DocumentEvent e) {
+        update(e);
+    }
 
-    void setVisible(boolean visible);
-
-    void showLog();
-
-    void exitWithConfirm();
-
-    Ide getIde();
-
-    void dispose();
+    @Override
+    default void removeUpdate(DocumentEvent e) {
+        update(e);
+    }
 }

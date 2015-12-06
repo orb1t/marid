@@ -18,22 +18,17 @@
 
 package org.marid.ide.gui;
 
-import org.marid.dyn.MetaInfo;
-import org.marid.ide.base.Ide;
-import org.marid.ide.base.IdeFrame;
-import org.marid.ide.widgets.Widget;
+import org.marid.ide.cli.IdeCommandLine;
 import org.marid.image.MaridIcons;
 import org.marid.logging.LogSupport;
 import org.marid.logging.Logging;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.WindowPrefs;
-import org.marid.swing.actions.MaridAction;
 import org.marid.swing.actions.MaridActions;
 import org.marid.swing.log.SwingHandler;
 import org.marid.swing.menu.SwingMenuBarWrapper;
 import org.marid.swing.util.MessageSupport;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -41,7 +36,6 @@ import javax.annotation.PreDestroy;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
-import java.util.*;
 import java.util.logging.Handler;
 
 import static javax.swing.JOptionPane.*;
@@ -49,23 +43,23 @@ import static javax.swing.JOptionPane.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component("ideFrame")
-public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSupport, MessageSupport {
-
-    private final IdeImpl ide;
+@Component
+public class IdeFrame extends JFrame implements PrefSupport, LogSupport, MessageSupport {
 
     @Autowired
-    private IdeDesktopImpl desktop;
+    private Ide ide;
 
     @Autowired
-    private IdeStatusLineImpl statusLine;
+    private IdeStatusLine ideStatusLine;
 
     @Autowired
-    public IdeFrameImpl(IdeImpl ide, ActionMap ideActionMap) {
+    private IdeCommandLine ideCommandLine;
+
+    @Autowired
+    public IdeFrame(ActionMap ideActionMap) {
         super(LS.s("Marid IDE"), WindowPrefs.graphicsConfiguration("IDE"));
         setName("IDE");
         setDefaultCloseOperation(HIDE_ON_CLOSE);
-        this.ide = ide;
         setIconImages(MaridIcons.ICONS);
         setJMenuBar(new JMenuBar());
         getRootPane().setActionMap(ideActionMap);
@@ -73,8 +67,8 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
 
     @PostConstruct
     private void init() {
-        add(desktop);
-        add(statusLine, BorderLayout.SOUTH);
+        add(ideCommandLine.getScrollPane());
+        add(ideStatusLine, BorderLayout.SOUTH);
         pack();
         setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
         setState(getPref("state", getState()));
@@ -85,36 +79,6 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
     @PreDestroy
     private void destroy() {
         dispose();
-    }
-
-    @Override
-    public Ide getIde() {
-        return ide;
-    }
-
-    @Autowired
-    public void setWidgetsMenu(IdeDesktopImpl ideDesktop, ConfigurableApplicationContext context) {
-        final Map<String, Set<Action>> actions = new TreeMap<>();
-        for (final String beanName : context.getBeanNamesForType(Widget.class)) {
-            final MetaInfo metaInfo = context.findAnnotationOnBean(beanName, MetaInfo.class);
-            final Comparator<Action> actionComparator = Comparator.comparing(a -> (String) a.getValue(Action.NAME));
-            actions.computeIfAbsent(metaInfo.group(), g -> new TreeSet<>(actionComparator)).add(
-                    new MaridAction(metaInfo.name(), metaInfo.icon(), ev -> {
-                        final Widget widget = context.getBean(beanName, Widget.class);
-                        ideDesktop.add(widget);
-                        widget.show();
-                    }));
-        }
-        if (!actions.isEmpty()) {
-            final JMenu menu = new JMenu(s("Widgets"));
-            actions.values().forEach(as -> {
-                if (menu.getMenuComponentCount() > 0) {
-                    menu.addSeparator();
-                }
-                as.forEach(menu::add);
-            });
-            getJMenuBar().add(menu);
-        }
     }
 
     @Override
@@ -135,16 +99,6 @@ public class IdeFrameImpl extends JFrame implements IdeFrame, PrefSupport, LogSu
                 break;
         }
         super.processWindowEvent(e);
-    }
-
-    @Override
-    public IdeStatusLineImpl getStatusLine() {
-        return statusLine;
-    }
-
-    @Override
-    public IdeDesktopImpl getDesktop() {
-        return desktop;
     }
 
     public void showLog() {

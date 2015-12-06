@@ -18,7 +18,6 @@
 
 package org.marid.ide.gui;
 
-import org.marid.ide.base.IdeStatusLine;
 import org.marid.ide.components.ProfileManager;
 import org.marid.ide.profile.Profile;
 import org.marid.logging.LogSupport;
@@ -41,8 +40,8 @@ import static javax.swing.BorderFactory.createEtchedBorder;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component("ideStatusLine")
-public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefSupport, SysPropsSupport, LogSupport {
+@Component
+public class IdeStatusLine extends JPanel implements SysPrefSupport, SysPropsSupport, LogSupport {
 
     protected final ProfileManager profileManager;
     protected final JLabel status = new JLabel("Done");
@@ -52,7 +51,7 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
     protected final JComboBox<Profile> profilesCombo;
 
     @Autowired
-    public IdeStatusLineImpl(ProfileManager profileManager) {
+    public IdeStatusLine(ProfileManager profileManager) {
         setBorder(createEtchedBorder());
         setLayout(new GridBagLayout());
         this.profileManager = profileManager;
@@ -71,7 +70,7 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
     }
 
     @Autowired
-    private void prepare(IdeTimer ideTimer, IdeFrameImpl ideFrame) {
+    private void prepare(IdeTimer ideTimer, IdeFrame ideFrame) {
         ideTimer.addListener(e -> timeLabel.setText(currentTime()));
         profileListModel.configureConsumers(ideFrame);
     }
@@ -113,7 +112,7 @@ public class IdeStatusLineImpl extends JPanel implements IdeStatusLine, SysPrefS
             }
         };
 
-        public void configureConsumers(IdeFrameImpl ideFrame) {
+        public void configureConsumers(IdeFrame ideFrame) {
             ideFrame.addWindowListener(new WindowAction(e -> {
                 switch (e.getID()) {
                     case WindowEvent.WINDOW_OPENED:
