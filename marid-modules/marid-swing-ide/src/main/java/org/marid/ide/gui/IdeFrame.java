@@ -39,6 +39,8 @@ import java.awt.event.WindowEvent;
 import java.util.logging.Handler;
 
 import static javax.swing.JOptionPane.*;
+import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
+import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -67,7 +69,7 @@ public class IdeFrame extends JFrame implements PrefSupport, LogSupport, Message
 
     @PostConstruct
     private void init() {
-        add(ideCommandLine.getScrollPane());
+        add(new JScrollPane(ideCommandLine, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_NEVER));
         add(ideStatusLine, BorderLayout.SOUTH);
         pack();
         setBounds(getPref("bounds", new Rectangle(0, 0, 700, 500)));
