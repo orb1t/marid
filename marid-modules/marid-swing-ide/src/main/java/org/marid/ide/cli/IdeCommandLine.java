@@ -19,6 +19,7 @@
 package org.marid.ide.cli;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jdesktop.swingx.JXPanel;
 import org.marid.collections.history.HistoryNavigator;
 import org.marid.image.MaridIcon;
 import org.marid.l10n.L10nSupport;
@@ -44,7 +45,7 @@ import java.io.StringWriter;
 import java.util.Arrays;
 
 import static java.awt.GridBagConstraints.*;
-import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
+import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -52,13 +53,13 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * @author Dmitry Ovchinnikov.
  */
 @Component
-public class IdeCommandLine extends JPanel implements GridBagLayoutSupport, PrefSupport, LogSupport, L10nSupport {
+public class IdeCommandLine extends JXPanel implements GridBagLayoutSupport, PrefSupport, LogSupport, L10nSupport {
 
     private final SpelExpressionParser spelExpressionParser;
     private final StandardEvaluationContext evalContext;
     private final CommandLineArea commandLine;
     private final Insets insets = new Insets(5, 10, 5, 10);
-    private final JScrollPane scrollPane = new JScrollPane(this, VERTICAL_SCROLLBAR_ALWAYS, HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    private final JScrollPane scrollPane = new JScrollPane(this, VERTICAL_SCROLLBAR_ALWAYS, HORIZONTAL_SCROLLBAR_NEVER);
     private final HistoryNavigator<String> history = new HistoryNavigator<>(String.class, 1000, s -> isBlank(s) ? null : s.trim());
     private final AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.01f);
 
@@ -105,7 +106,7 @@ public class IdeCommandLine extends JPanel implements GridBagLayoutSupport, Pref
     }
 
     protected void addLine(JComponent component) {
-        add(component, gbc(REMAINDER, 1, 0, 0, LINE_START, HORIZONTAL, insets, 0, 0), getComponentCount() - 2);
+        add(component, gbc(REMAINDER, 1, 1, 0, LINE_START, HORIZONTAL, insets, 0, 0), getComponentCount() - 2);
         scrollPane.getViewport().setViewPosition(new Point(0, Integer.MAX_VALUE));
         commandLine.requestFocus();
     }

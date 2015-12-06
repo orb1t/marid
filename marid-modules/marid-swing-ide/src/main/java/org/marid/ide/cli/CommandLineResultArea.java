@@ -30,11 +30,11 @@ public class CommandLineResultArea extends JTextArea {
 
     public CommandLineResultArea(String text) {
         super(text);
+        setLineWrap(true);
         setBorder(BorderFactory.createEmptyBorder());
         setBackground(BACKGROUND);
         setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         setForeground(SystemColor.controlLtHighlight);
         setEditable(false);
-        setOpaque(false);
     }
 }

@@ -18,9 +18,7 @@
 
 package org.marid.ide.cli;
 
-import org.apache.commons.lang3.StringUtils;
 import org.marid.logging.LogSupport;
-import org.marid.swing.listeners.MaridDocumentListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,17 +30,11 @@ public class CommandLineArea extends JTextArea implements LogSupport {
 
     public CommandLineArea() {
         super(1, 0);
+        setLineWrap(true);
         setForeground(SystemColor.controlLtHighlight);
         setBackground(SystemColor.controlShadow);
         setCaretColor(SystemColor.controlLtHighlight);
         setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        getDocument().addDocumentListener((MaridDocumentListener) ev -> {
-            final int rows = StringUtils.countMatches(getText(), '\n') + 1;
-            if (rows != getRows()) {
-                setRows(rows);
-                getParent().validate();
-            }
-        });
     }
 
     public void reset() {

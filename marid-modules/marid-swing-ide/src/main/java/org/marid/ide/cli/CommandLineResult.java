@@ -18,6 +18,7 @@
 
 package org.marid.ide.cli;
 
+import org.jdesktop.swingx.JXPanel;
 import org.marid.swing.actions.MaridAction;
 import org.marid.swing.component.SmallButton;
 
@@ -27,20 +28,18 @@ import java.awt.*;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class CommandLineResult extends JPanel {
-
-    private final Action removeAction = new MaridAction("Remove", "remove", e -> {
-        final Container container = getParent();
-        container.remove(this);
-        container.validate();
-    });
+public class CommandLineResult extends JXPanel {
 
     public CommandLineResult(JComponent component) {
         super(new BorderLayout(10, 0));
         setOpaque(false);
-        final SmallButton removeButton = new SmallButton(removeAction, false);
-        removeButton.setVerticalAlignment(SwingConstants.TOP);
-        add(removeButton, BorderLayout.WEST);
+        final SmallButton smallButton = new SmallButton(new MaridAction(null, "remove", e -> {
+            final Container container = getParent();
+            container.remove(this);
+            container.validate();
+        }), false);
+        smallButton.setVerticalAlignment(SwingConstants.TOP);
+        add(smallButton, BorderLayout.WEST);
         add(component);
     }
 }
