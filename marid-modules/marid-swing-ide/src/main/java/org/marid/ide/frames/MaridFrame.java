@@ -21,6 +21,8 @@ package org.marid.ide.frames;
 import org.marid.dyn.MetaInfo;
 import org.marid.swing.AbstractFrame;
 
+import javax.annotation.PostConstruct;
+
 /**
  * @author Dmitry Ovchinnikov.
  */
@@ -29,5 +31,10 @@ public abstract class MaridFrame extends AbstractFrame {
 
     public MaridFrame(String title, Object... args) {
         super(title, args);
+    }
+
+    @PostConstruct
+    private void showFrame() {
+        setVisible(true);
     }
 }

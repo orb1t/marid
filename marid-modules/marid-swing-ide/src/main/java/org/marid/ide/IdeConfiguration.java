@@ -18,16 +18,10 @@
 
 package org.marid.ide;
 
-import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.expression.*;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.spel.SpelParserConfiguration;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.expression.spel.support.StandardTypeConverter;
-import org.springframework.expression.spel.support.StandardTypeLocator;
 
 import javax.swing.*;
 
@@ -47,23 +41,5 @@ public class IdeConfiguration {
     @Bean
     public static SpelParserConfiguration spelParserConfiguration(ConfigurableApplicationContext context) {
         return new SpelParserConfiguration(MIXED, context.getClassLoader());
-    }
-
-    @Bean
-    public static StandardEvaluationContext evaluationContext(ConfigurableApplicationContext context) {
-        final BeanExpressionContext expressionContext = new BeanExpressionContext(context.getBeanFactory(), null);
-        final StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
-        evaluationContext.setRootObject(expressionContext);
-        evaluationContext.addPropertyAccessor(new BeanExpressionContextAccessor());
-        evaluationContext.addPropertyAccessor(new BeanFactoryAccessor());
-        evaluationContext.addPropertyAccessor(new MapAccessor());
-        evaluationContext.addPropertyAccessor(new EnvironmentAccessor());
-        evaluationContext.setBeanResolver(new BeanFactoryResolver(context.getBeanFactory()));
-        evaluationContext.setTypeLocator(new StandardTypeLocator(context.getBeanFactory().getBeanClassLoader()));
-        final ConversionService conversionService = context.getBeanFactory().getConversionService();
-        if (conversionService != null) {
-            evaluationContext.setTypeConverter(new StandardTypeConverter(conversionService));
-        }
-        return evaluationContext;
     }
 }

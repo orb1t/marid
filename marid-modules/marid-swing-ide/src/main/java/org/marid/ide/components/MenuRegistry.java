@@ -45,8 +45,7 @@ public class MenuRegistry implements L10nSupport {
                     ? "/Frames//" + beanName
                     : metaInfo.path() + "/" + metaInfo.group() + "/" + beanName;
             ideActionMap.put(new ActionKey(path), new MaridAction(metaInfo.name(), metaInfo.icon(), ev -> {
-                final MaridFrame frame = context.getBean(beanName, MaridFrame.class);
-                frame.setVisible(true);
+                context.getBean(beanName, MaridFrame.class);
             }));
         }
     }
