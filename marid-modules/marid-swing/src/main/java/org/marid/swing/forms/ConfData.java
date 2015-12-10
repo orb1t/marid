@@ -19,7 +19,6 @@
 package org.marid.swing.forms;
 
 import org.marid.dyn.MetaInfo;
-import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.swing.input.InputControl;
 import org.marid.swing.pref.SwingPrefCodecs;

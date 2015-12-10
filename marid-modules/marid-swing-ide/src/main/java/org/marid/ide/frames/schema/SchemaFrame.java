@@ -56,7 +56,7 @@ import static javax.swing.BorderFactory.*;
  * @author Dmitry Ovchinnikov
  */
 @PrototypeComponent
-@MetaInfo(name = "Schema Editor")
+@MetaInfo(name = "Schema Editor", path = "/Schemas")
 public class SchemaFrame extends MaridFrame {
 
     protected final ProfileManager profileManager;

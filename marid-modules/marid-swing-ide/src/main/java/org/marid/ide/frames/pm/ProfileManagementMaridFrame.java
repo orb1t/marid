@@ -45,7 +45,7 @@ import static java.util.Collections.emptyList;
  * @author Dmitry Ovchinnikov.
  */
 @CloseableFrame
-@MetaInfo(name = "Profile Management")
+@MetaInfo(name = "Profile Management", path = "/Profile")
 public class ProfileManagementMaridFrame extends MaridFrame {
 
     private final Profile profile;

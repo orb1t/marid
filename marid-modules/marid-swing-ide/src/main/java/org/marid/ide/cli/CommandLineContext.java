@@ -44,6 +44,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
 /**
@@ -55,11 +57,13 @@ public class CommandLineContext extends StandardEvaluationContext implements Log
     private final SpelExpressionParser spelExpressionParser;
     private final List<Object> beans = new ArrayList<>();
     private final List<String> beanNames = new ArrayList<>();
+    private final ConcurrentMap<String, Object> rootObject = new ConcurrentHashMap<>();
 
     public CommandLineContext(SpelParserConfiguration spelParserConfiguration, ConfigurableApplicationContext context) {
         autowireCapableBeanFactory = context.getAutowireCapableBeanFactory();
         spelExpressionParser = new SpelExpressionParser(spelParserConfiguration);
         context.getBeanFactory().addBeanPostProcessor(new DestructionListener());
+        setRootObject(rootObject);
         addPropertyAccessor(new MapAccessor());
         addPropertyAccessor(new EnvironmentAccessor());
         setBeanResolver((ctx, beanName) -> {
@@ -83,6 +87,7 @@ public class CommandLineContext extends StandardEvaluationContext implements Log
     }
 
     public void clean() {
+        rootObject.clear();
         for (int i = beans.size() - 1; i >= 0; i--) {
             final Object bean = beans.get(i);
             final String beanName = beanNames.get(i);
@@ -140,6 +145,7 @@ public class CommandLineContext extends StandardEvaluationContext implements Log
                     beanName = beanNames.get(i);
                     beans.remove(i);
                     beanNames.remove(i);
+                    rootObject.values().remove(bean);
                     log(INFO, "Removed prototype bean {0}", beanName);
                     break;
                 }
