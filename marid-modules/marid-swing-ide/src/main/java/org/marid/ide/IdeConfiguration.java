@@ -21,6 +21,8 @@ package org.marid.ide;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.spel.SpelParserConfiguration;
 
 import javax.swing.*;
@@ -41,5 +43,10 @@ public class IdeConfiguration {
     @Bean
     public static SpelParserConfiguration spelParserConfiguration(ConfigurableApplicationContext context) {
         return new SpelParserConfiguration(MIXED, context.getClassLoader());
+    }
+
+    @Bean
+    public static ConversionService conversionService() {
+        return new DefaultConversionService();
     }
 }

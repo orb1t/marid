@@ -26,8 +26,11 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.context.expression.EnvironmentAccessor;
 import org.springframework.context.expression.MapAccessor;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -62,7 +65,6 @@ public class CommandLineContext extends StandardEvaluationContext implements Log
     public CommandLineContext(SpelParserConfiguration spelParserConfiguration, ConfigurableApplicationContext context) {
         autowireCapableBeanFactory = context.getAutowireCapableBeanFactory();
         spelExpressionParser = new SpelExpressionParser(spelParserConfiguration);
-        context.getBeanFactory().addBeanPostProcessor(new DestructionListener());
         setRootObject(rootObject);
         addPropertyAccessor(new MapAccessor());
         addPropertyAccessor(new EnvironmentAccessor());
@@ -81,9 +83,13 @@ public class CommandLineContext extends StandardEvaluationContext implements Log
         });
         setTypeLocator(new StandardTypeLocator(context.getBeanFactory().getBeanClassLoader()));
         final ConversionService conversionService = context.getBeanFactory().getConversionService();
-        if (conversionService != null) {
-            setTypeConverter(new StandardTypeConverter(conversionService));
-        }
+        setTypeConverter(new StandardTypeConverter(conversionService));
+    }
+
+    @EventListener
+    public void onApplicationStart(ContextStartedEvent event) {
+        final GenericApplicationContext context = (GenericApplicationContext) event.getApplicationContext();
+        context.getBeanFactory().addBeanPostProcessor(new DestructionListener());
     }
 
     public void clean() {

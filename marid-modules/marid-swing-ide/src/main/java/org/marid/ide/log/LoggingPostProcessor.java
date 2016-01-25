@@ -18,6 +18,7 @@
 
 package org.marid.ide.log;
 
+import org.apache.commons.lang3.StringUtils;
 import org.marid.ide.MaridIde;
 import org.marid.logging.LogSupport;
 import org.springframework.beans.BeansException;
@@ -49,7 +50,9 @@ public class LoggingPostProcessor implements DestructionAwareBeanPostProcessor, 
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        log(INFO, "I[{0}]: {1}", beanName, bean);
+        final String beanToString = bean.toString();
+        final String beanText = StringUtils.substringBefore(beanToString, "\n");
+        log(INFO, "I[{0}]: {1}", beanName, beanText.length() < beanToString.length() ? beanText + "..." : beanText);
         return bean;
     }
 

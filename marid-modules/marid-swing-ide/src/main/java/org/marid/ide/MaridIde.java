@@ -21,9 +21,8 @@ package org.marid.ide;
 import org.jboss.logmanager.LogManager;
 import org.marid.logging.Logging;
 import org.marid.pref.SysPrefSupport;
-import org.marid.spring.CommandLinePropertySource;
 import org.marid.swing.log.SwingHandler;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
 
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
@@ -44,24 +43,22 @@ public class MaridIde {
     }
 
     public static final Logger LOGGER = Logger.getLogger("marid");
-    public static final ClassPathXmlApplicationContext CONTEXT = new ClassPathXmlApplicationContext();
+    public static final GenericXmlApplicationContext CONTEXT = new GenericXmlApplicationContext();
 
     public static void main(String[] args) throws Exception {
         Logging.rootLogger().addHandler(new SwingHandler());
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(LOGGER, WARNING, "Uncaught exception in {0}", e, t));
-        final CommandLinePropertySource commandLinePropertySource = new CommandLinePropertySource(args);
-        CONTEXT.getEnvironment().getPropertySources().addFirst(commandLinePropertySource);
-        CONTEXT.setConfigLocation("classpath*:/META-INF/marid/*.xml");
+        final String lafName = SysPrefSupport.SYSPREFS.get("laf", NimbusLookAndFeel.class.getName());
+        try {
+            UIManager.setLookAndFeel(lafName);
+        } catch (Exception x) {
+            LOGGER.log(WARNING, x, () -> "LookAndFeel setting error: " + lafName);
+        }
+        if (UIManager.getLookAndFeel() instanceof NimbusLookAndFeel) {
+            UIManager.put("Nimbus.keepAlternateRowColor", true);
+        }
         EventQueue.invokeLater(() -> {
-            final String lafName = SysPrefSupport.SYSPREFS.get("laf", NimbusLookAndFeel.class.getName());
-            try {
-                UIManager.setLookAndFeel(lafName);
-            } catch (Exception x) {
-                LOGGER.log(WARNING, x, () -> "LookAndFeel setting error: " + lafName);
-            }
-            if (UIManager.getLookAndFeel() instanceof NimbusLookAndFeel) {
-                UIManager.put("Nimbus.keepAlternateRowColor", true);
-            }
+            CONTEXT.load("classpath*:/META-INF/marid/*.xml");
             CONTEXT.refresh();
             CONTEXT.start();
         });

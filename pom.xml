@@ -251,7 +251,7 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.19</version>
+                    <version>2.19.1</version>
                     <configuration>
                         <trimStackTrace>false</trimStackTrace>
                         <groups>${test.groups}</groups>
@@ -265,7 +265,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.19</version>
+                    <version>2.19.1</version>
                     <configuration>
                         <forkCount>1</forkCount>
                         <reuseForks>false</reuseForks>
@@ -445,7 +445,7 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
                 <type>pom</type>
-                <version>4.2.3.RELEASE</version>
+                <version>4.2.4.RELEASE</version>
                 <scope>import</scope>
             </dependency>
 
@@ -474,7 +474,7 @@
             <groupId>org.checkerframework</groupId>
             <artifactId>checker</artifactId>
             <scope>provided</scope>
-            <version>1.9.9</version>
+            <version>1.9.10</version>
         </dependency>
     </dependencies>
 
@@ -482,7 +482,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.5</version>
+                <version>3.6</version>
             </plugin>
 
             <plugin>
