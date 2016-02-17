@@ -238,7 +238,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.3</version>
+                    <version>3.5</version>
                     <configuration>
                         <showWarnings>true</showWarnings>
                         <showDeprecation>true</showDeprecation>
@@ -354,7 +354,7 @@
 
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>2.4.2</version>
+                    <version>2.4.3</version>
                 </plugin>
 
                 <plugin>
@@ -452,7 +452,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>18.0</version>
+                <version>19.0</version>
             </dependency>
 
             <dependency>

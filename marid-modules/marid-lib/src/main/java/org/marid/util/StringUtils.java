@@ -18,6 +18,9 @@
 
 package org.marid.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -189,5 +192,21 @@ public class StringUtils {
             result = result.replace("${" + key + "}", System.getProperty(key));
         }
         return result;
+    }
+
+    public static String urlEncode(String text) {
+        try {
+            return URLEncoder.encode(text, "UTF-8");
+        } catch (UnsupportedEncodingException x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
+    public static String urlDecode(String text) {
+        try {
+            return URLDecoder.decode(text, "UTF-8");
+        } catch (UnsupportedEncodingException x) {
+            throw new IllegalStateException(x);
+        }
     }
 }

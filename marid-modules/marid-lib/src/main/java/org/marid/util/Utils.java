@@ -35,6 +35,9 @@ import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
+import java.util.function.LongConsumer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -175,5 +178,34 @@ public class Utils {
         } catch (Exception x) {
             throw new IllegalStateException(exceptionMessage, x);
         }
+    }
+
+    public static void callWithTime(TimeUnit timeUnit, Runnable task, LongConsumer timeConsumer) {
+        final long startTime = System.nanoTime();
+        task.run();
+        final long time = System.nanoTime() - startTime;
+        timeConsumer.accept(timeUnit.convert(time, TimeUnit.NANOSECONDS));
+    }
+
+    public static void callWithTime(Runnable task, LongConsumer timeConsumer) {
+        callWithTime(TimeUnit.MILLISECONDS, task, timeConsumer);
+    }
+
+    public static <T> T callWithTime(TimeUnit timeUnit, Callable<T> task, BiConsumer<Long, Exception> timeConsumer) {
+        final long startTime = System.nanoTime();
+        Exception exception = null;
+        T result = null;
+        try {
+            result = task.call();
+        } catch (Exception x) {
+            exception = x;
+        }
+        final long time = System.nanoTime() - startTime;
+        timeConsumer.accept(timeUnit.convert(time, TimeUnit.NANOSECONDS), exception);
+        return result;
+    }
+
+    public static <T> T callWithTime(Callable<T> task, BiConsumer<Long, Exception> timeConsumer) {
+        return callWithTime(TimeUnit.MILLISECONDS, task, timeConsumer);
     }
 }

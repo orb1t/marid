@@ -21,7 +21,6 @@ package org.marid.image;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -74,7 +73,6 @@ public class MaridIcon {
         g.translate(1.0, -1.0);
         g.setStroke(STROKE);
         g.scale(SCALE_X, SCALE_Y);
-        AffineTransform affineTransform;
         g.setColor(Color.WHITE);
         g.draw(ONDA1);
         g.draw(ONDA2);

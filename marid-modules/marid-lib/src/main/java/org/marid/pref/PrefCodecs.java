@@ -18,15 +18,17 @@
 
 package org.marid.pref;
 
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
-import org.marid.dyn.Casting;
-import org.marid.functions.SafeBiConsumer;
 import org.marid.functions.SafeFunction;
+import org.marid.util.StringUtils;
+import org.marid.util.Utils;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -34,6 +36,8 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import static java.util.ServiceLoader.load;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Stream.of;
 import static org.marid.logging.LogSupport.Log.log;
 import static org.marid.logging.LogSupport.WARNING;
 
@@ -75,6 +79,7 @@ public abstract class PrefCodecs {
         putReader(Path.class, stringReader(Paths::get));
         putReader(InetSocketAddress.class, stringReader(PrefCodecs::parseInetSocketAddress));
         putReader(InetAddress.class, stringReader(InetAddress::getByName));
+        putReader(String[].class, stringReader(s -> of(s.split(",")).map(StringUtils::urlDecode).toArray(String[]::new)));
 
         // Primitive writers
         putWriter(Integer.class, Preferences::putInt);
@@ -104,6 +109,7 @@ public abstract class PrefCodecs {
         putWriter(Path.class, stringWriter(Path::toString));
         putWriter(InetSocketAddress.class, stringWriter(InetSocketAddress::toString));
         putWriter(InetAddress.class, stringWriter(InetAddress::toString));
+        putWriter(String[].class, stringWriter(s -> of(s).map(StringUtils::urlEncode).collect(joining(","))));
 
         // Custom readers and writers
         try {
@@ -135,63 +141,8 @@ public abstract class PrefCodecs {
         };
     }
 
-    protected static <T> PrefReader<T> splitReader(String separator, SafeFunction<String[], T> function) {
-        return (pref, key) -> {
-            final String v = pref.get(key, null);
-            return v == null ? null : function.applyUnsafe(v.split(separator));
-        };
-    }
-
     protected static <T> PrefWriter<T> stringWriter(SafeFunction<T, String> function) {
         return (pref, key, value) -> pref.put(key, function.apply(value));
-    }
-
-    protected static <T> PrefWriter<T> formattedWriter(String format, SafeFunction<T, Object[]> function) {
-        return (pref, key, value) -> pref.put(key, String.format(format, function.apply(value)));
-    }
-
-    protected static <T, K, V> PrefWriter<T> mapWriter(Class<K> keyType, Class<V> valueType, SafeBiConsumer<T, Map<K, V>> consumer) {
-        return (pref, key, value) -> {
-            final Map<K, V> map = new LinkedHashMap<>();
-            consumer.accept(value, map);
-            final String[] entries = map.entrySet().stream().map(e -> {
-                final PrefWriter<K> keyWriter = getWriter(keyType);
-                final PrefWriter<V> valueWriter = getWriter(valueType);
-                final MapBasedPreferences preferences = new MapBasedPreferences();
-                final String k, v;
-                try {
-                    keyWriter.save(preferences, "key", e.getKey());
-                    valueWriter.save(preferences, "value", e.getValue());
-                    k = URLEncoder.encode(preferences.getSpi("key"), "UTF-8");
-                    v = URLEncoder.encode(preferences.getSpi("value"), "UTF-8");
-                } catch (Exception x) {
-                    throw new IllegalStateException(x);
-                }
-                return k + "=" + v;
-            }).toArray(String[]::new);
-            pref.put(key, String.join("|", entries));
-        };
-    }
-
-    protected static <T, K, V> PrefReader<T> mapReader(Class<K> keyType, Class<V> valueType, SafeFunction<Map<K, V>, T> function) {
-        return (prefs, key) -> {
-            final String entriesText = prefs.get(key, null);
-            if (entriesText == null) {
-                return null;
-            }
-            final String[] entries = entriesText.split("[|]");
-            final Map<K, V> map = new LinkedHashMap<>();
-            final PrefReader<K> keyReader = getReader(keyType);
-            final PrefReader<V> valueReader = getReader(valueType);
-            final MapBasedPreferences preferences = new MapBasedPreferences();
-            for (final String entry : entries) {
-                final String[] kv = entry.split("=");
-                preferences.putSpi("key", kv[0]);
-                preferences.putSpi("value", kv[1]);
-                map.put(keyReader.load(preferences, "key"), valueReader.load(preferences, "value"));
-            }
-            return function.apply(map);
-        };
     }
 
     protected static <T> PrefReader<T> byteArrayReader(SafeFunction<byte[], T> function) {
@@ -203,60 +154,30 @@ public abstract class PrefCodecs {
 
     @SuppressWarnings("unchecked")
     public static <T> PrefReader<T> getReader(Class<T> type) {
-        final PrefReader<T> reader = (PrefReader<T>) READERS.get(type);
+        final PrefReader<T> reader = Utils.cast(READERS.get(type));
         if (reader != null) {
             return reader;
         } else if (type.isEnum()) {
-            final Class<? extends Enum> enumType = type.asSubclass(Enum.class);
+            final Class<Enum> enumType = Utils.cast(type);
             return stringReader(s -> type.cast(Enum.valueOf(enumType, s)));
         } else {
-            DefaultGroovyMethods.asType(1, Integer.class);
-            return stringReader(s -> Casting.castTo(type, s));
+            throw new IllegalArgumentException("Preference reader for " + type + " is not found");
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> PrefWriter<T> getWriter(Class<T> type) {
-        final PrefWriter<T> writer = (PrefWriter<T>) WRITERS.get(type);
+        final PrefWriter<T> writer = Utils.cast(WRITERS.get(type));
         if (writer != null) {
             return writer;
         } else if (type.isEnum()) {
             return (pref, key, val) -> pref.put(key, ((Enum) val).name());
         } else {
-            return (pref, key, val) -> pref.put(key, Casting.castTo(String.class, val));
+            throw new IllegalArgumentException("Preference writer for " + type + " is not found");
         }
     }
 
     public static InetSocketAddress parseInetSocketAddress(String value) throws Exception {
         final URI uri = new URI("proto://" + value);
         return InetSocketAddress.createUnresolved(uri.getHost(), uri.getPort());
-    }
-
-    public static class ReaderMapBuilder {
-
-        private final Map<Class<?>, PrefReader<?>> readerMap = new IdentityHashMap<>();
-
-        public <T> ReaderMapBuilder add(Class<T> type, PrefReader<T> reader) {
-            readerMap.put(type, reader);
-            return this;
-        }
-
-        public Map<Class<?>, PrefReader<?>> build() {
-            return readerMap;
-        }
-    }
-
-    public static class WriterMapBuilder {
-
-        private final Map<Class<?>, PrefWriter<?>> writerMap = new IdentityHashMap<>();
-
-        public <T> WriterMapBuilder add(Class<T> type, PrefWriter<T> writer) {
-            writerMap.put(type, writer);
-            return this;
-        }
-
-        public Map<Class<?>, PrefWriter<?>> build() {
-            return writerMap;
-        }
     }
 }
