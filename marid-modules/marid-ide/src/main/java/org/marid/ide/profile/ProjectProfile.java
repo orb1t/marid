@@ -19,11 +19,13 @@
 package org.marid.ide.profile;
 
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Prerequisites;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.jmlspecs.annotation.Immutable;
 import org.marid.logging.LogSupport;
+import org.marid.util.Builder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -105,6 +107,9 @@ public class ProjectProfile implements LogSupport {
     }
 
     private void savePomFile() {
+        model.setPrerequisites(new Builder<>(new Prerequisites()).$(Prerequisites::setMaven, "3.3").build());
+        model.getProperties().setProperty("project.build.sourceEncoding", "UTF-8");
+        model.getProperties().setProperty("project.reporting.outputEncoding", "UTF-8");
         try (final OutputStream os = Files.newOutputStream(pomFile)) {
             final MavenXpp3Writer writer = new MavenXpp3Writer();
             writer.write(os, model);

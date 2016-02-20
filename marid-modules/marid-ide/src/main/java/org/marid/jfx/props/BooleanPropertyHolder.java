@@ -16,27 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.profile;
+package org.marid.jfx.props;
 
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.DialogPane;
-import org.apache.maven.model.Model;
-
-import javax.enterprise.context.Dependent;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
-public class ProjectDataEditorPane extends DialogPane {
+public class BooleanPropertyHolder {
 
-    private final Model model = new Model();
+    private final BooleanSupplier supplier;
+    private final Consumer<Boolean> consumer;
 
-    public ProjectDataEditorPane() {
-        getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
+    public BooleanPropertyHolder(BooleanSupplier supplier, Consumer<Boolean> consumer) {
+        this.supplier = supplier;
+        this.consumer = consumer;
     }
 
-    public Model getModel() {
-        return model;
+    public boolean isProperty() {
+        return supplier.getAsBoolean();
+    }
+
+    public void setProperty(boolean value) {
+        consumer.accept(value);
     }
 }

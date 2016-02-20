@@ -19,6 +19,7 @@
 package org.marid.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.invoke.MethodHandles;
@@ -207,5 +208,15 @@ public class Utils {
 
     public static <T> T callWithTime(Callable<T> task, BiConsumer<Long, Exception> timeConsumer) {
         return callWithTime(TimeUnit.MILLISECONDS, task, timeConsumer);
+    }
+
+    public static void merge(Properties properties, String... resources) throws IOException {
+        for (final String resource : resources) {
+            try (final InputStream inputStream = currentClassLoader().getResourceAsStream(resource)) {
+                if (inputStream != null) {
+                    properties.load(inputStream);
+                }
+            }
+        }
     }
 }

@@ -24,20 +24,22 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.maven.model.Model;
+import org.apache.maven.model.merge.MavenModelMerger;
+import org.apache.maven.model.merge.ModelMerger;
 import org.marid.ide.menu.IdeMenuItem;
+import org.marid.ide.profile.editors.ProjectDataDialog;
 import org.marid.ide.toolbar.IdeToolbarItem;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -49,6 +51,7 @@ import static org.marid.util.Utils.callWithTime;
 @ApplicationScoped
 public class ProjectManager implements PrefSupport, LogSupport {
 
+    private final ModelMerger modelMerger = new MavenModelMerger();
     private ProjectProfile profile;
 
     public ProjectManager() {
@@ -67,6 +70,8 @@ public class ProjectManager implements PrefSupport, LogSupport {
         return Files.isDirectory(profile.getPath());
     }
 
+    @Produces
+    @Dependent
     public ProjectProfile getProfile() {
         return profile;
     }
@@ -91,16 +96,15 @@ public class ProjectManager implements PrefSupport, LogSupport {
     }
 
     @Produces
-    @IdeMenuItem(menu = "Project", text = "Project setup...", group = "ps", oIcons = {OctIcon.SETTINGS})
+    @IdeMenuItem(menu = "Project", text = "Project setup...", group = "ps", oIcons = {OctIcon.TOOLS})
     @IdeToolbarItem(group = "project")
-    public EventHandler<ActionEvent> projectSetup(Provider<ProjectDataEditor> editorProvider) {
+    public EventHandler<ActionEvent> projectSetup(Provider<ProjectDataDialog> editorProvider) {
         return event -> {
-            final ProjectDataEditor editor = editorProvider.get();
-            final Optional<Model> result = editor.showAndWait();
-            if (result.isPresent()) {
-                final Model model = result.get();
-
-            }
+            final ProjectDataDialog editor = editorProvider.get();
+            editor.showAndWait().ifPresent(model -> {
+                getProfile().getModel().setOrganization(null);
+                modelMerger.merge(getProfile().getModel(), model, true, null);
+            });
         };
     }
 

@@ -30,6 +30,7 @@ import org.marid.ide.scenes.IdeScene;
 import org.marid.jfx.Configurable;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
+import org.marid.util.Utils;
 
 import java.util.TimeZone;
 import java.util.stream.IntStream;
@@ -73,6 +74,7 @@ public class Ide extends Application implements L10nSupport, LogSupport, Configu
     public static void main(String... args) throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
+        Utils.merge(System.getProperties(), "meta.properties", "ide.properties");
         Application.launch(Ide.class, args);
     }
 }

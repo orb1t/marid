@@ -16,29 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.profile;
+package org.marid.jfx.props;
 
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.stage.Modality;
-import org.apache.maven.model.Model;
-import org.marid.ide.scenes.IdeScene;
-import org.marid.pref.PrefSupport;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
-public class ProjectDataEditor extends Dialog<Model> implements PrefSupport {
+public class PropertyHolder<T> {
 
-    @Inject
-    public ProjectDataEditor(IdeScene ideScene, ProjectDataEditorPane editorPane) {
-        initModality(Modality.WINDOW_MODAL);
-        initOwner(ideScene.getWindow());
-        setDialogPane(editorPane);
-        setResultConverter(type -> type == ButtonType.APPLY ? editorPane.getModel() : null);
+    private final Supplier<T> supplier;
+    private final Consumer<T> consumer;
+
+    public PropertyHolder(Supplier<T> supplier, Consumer<T> consumer) {
+        this.supplier = supplier;
+        this.consumer = consumer;
+    }
+
+    public T getProperty() {
+        return supplier.get();
+    }
+
+    public void setProperty(T value) {
+        consumer.accept(value);
     }
 }
