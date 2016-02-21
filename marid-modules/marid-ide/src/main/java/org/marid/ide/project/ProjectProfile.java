@@ -18,13 +18,12 @@
 
 package org.marid.ide.project;
 
-import org.apache.maven.model.*;
+import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.jmlspecs.annotation.Immutable;
 import org.marid.logging.LogSupport;
-import org.marid.util.Builder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,9 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 
@@ -107,42 +104,7 @@ public class ProjectProfile implements LogSupport {
         }
     }
 
-    private void initModelPrerequisites() {
-        model.setPrerequisites(new Builder<>(new Prerequisites()).$(Prerequisites::setMaven, "3.3").build());
-        model.getProperties().setProperty("project.build.sourceEncoding", "UTF-8");
-        model.getProperties().setProperty("project.reporting.outputEncoding", "UTF-8");
-        if (model.getBuild() == null) {
-            model.setBuild(new Build());
-        }
-        {
-            final Plugin execMavenPlugin = model.getBuild().getPlugins().stream()
-                    .filter(p -> "org.codehaus.mojo".equals(p.getGroupId()))
-                    .filter(p -> "exec-maven-plugin".equals(p.getArtifactId()))
-                    .findAny()
-                    .orElseGet(() -> {
-                        final Plugin plugin = new Plugin();
-                        plugin.setGroupId("org.codehaus.mojo");
-                        plugin.setArtifactId("exec-maven-plugin");
-                        plugin.setVersion("1.4.0");
-                        model.getBuild().getPlugins().add(plugin);
-                        return plugin;
-                    });
-            final PluginExecution runInIdeExecution = execMavenPlugin.getExecutions().stream()
-                    .filter(e -> "run-in-ide".equals(e.getId()))
-                    .findAny()
-                    .orElseGet(() -> {
-                        final PluginExecution execution = new PluginExecution();
-                        execution.setId("run-in-ide");
-                        execMavenPlugin.getExecutions().add(execution);
-                        return execution;
-                    });
-            runInIdeExecution.setPhase(null);
-            runInIdeExecution.setGoals(new ArrayList<>(Collections.singletonList("exec")));
-        }
-    }
-
     private void savePomFile() {
-        initModelPrerequisites();
         try (final OutputStream os = Files.newOutputStream(pomFile)) {
             final MavenXpp3Writer writer = new MavenXpp3Writer();
             writer.write(os, model);

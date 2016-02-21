@@ -35,7 +35,9 @@ import org.marid.pref.PrefSupport;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Provider;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,7 +64,7 @@ public class ProjectManager implements PrefSupport, LogSupport {
     }
 
     @PreDestroy
-    private void save() {
+    private void savePrefs() {
         putPref("profile", profile.getName());
     }
 
@@ -95,6 +97,13 @@ public class ProjectManager implements PrefSupport, LogSupport {
         return profiles;
     }
 
+    public void onSave(@Observes ProjectSaveEvent saveEvent, ProjectPrerequisites projectPrerequisites) {
+        callWithTime(() -> {
+            projectPrerequisites.apply(saveEvent.getProfile());
+            saveEvent.getProfile().save();
+        }, time -> log(INFO, "Profile [{0}] saved in {1} ms by {2}", profile, time, saveEvent));
+    }
+
     @Produces
     @IdeMenuItem(menu = "Project", text = "Project setup...", group = "ps", oIcons = {OctIcon.TOOLS})
     @IdeToolbarItem(group = "project")
@@ -111,8 +120,8 @@ public class ProjectManager implements PrefSupport, LogSupport {
     @Produces
     @IdeMenuItem(menu = "Project", text = "Save", group = "ps", faIcons = {FontAwesomeIcon.SAVE}, key = "Ctrl+S")
     @IdeToolbarItem(group = "project")
-    public EventHandler<ActionEvent> projectSave() {
-        return event -> callWithTime(profile::save, time -> log(INFO, "Profile {0} saved in {1} ms", profile, time));
+    public EventHandler<ActionEvent> projectSave(BeanManager beanManager) {
+        return event -> beanManager.fireEvent(new ProjectSaveEvent(event, profile));
     }
 
     @Override

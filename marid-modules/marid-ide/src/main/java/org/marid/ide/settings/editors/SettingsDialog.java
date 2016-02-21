@@ -24,8 +24,8 @@ import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.ide.settings.SettingsHolder;
+import org.marid.ide.settings.SettingsManager;
 import org.marid.l10n.L10nSupport;
-import org.marid.pref.PrefSupport;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -34,11 +34,11 @@ import javax.inject.Inject;
  * @author Dmitry Ovchinnikov
  */
 @Dependent
-public class SettingsDialog extends Dialog<SettingsHolder> implements PrefSupport, L10nSupport {
+public class SettingsDialog extends Dialog<SettingsHolder> implements L10nSupport {
 
     @Inject
-    public SettingsDialog(IdeScene ideScene) {
-        final SettingsHolder settingsHolder = new SettingsHolder(preferences());
+    public SettingsDialog(IdeScene ideScene, SettingsManager settingsManager) {
+        final SettingsHolder settingsHolder = new SettingsHolder(settingsManager.preferences());
         final DialogPane dialogPane = getDialogPane();
         dialogPane.setPrefSize(800, 600);
         dialogPane.setContent(tabPane(settingsHolder));

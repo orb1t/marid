@@ -42,7 +42,7 @@ public class SettingsManager implements PrefSupport {
     public EventHandler<ActionEvent> settingsItem(Provider<SettingsDialog> settingsDialogProvider) {
         return event -> {
             final SettingsDialog settingsDialog = settingsDialogProvider.get();
-            settingsDialog.showAndWait().ifPresent(holder -> holder.save(settingsDialog.preferences()));
+            settingsDialog.showAndWait().ifPresent(holder -> holder.save(preferences()));
         };
     }
 }
