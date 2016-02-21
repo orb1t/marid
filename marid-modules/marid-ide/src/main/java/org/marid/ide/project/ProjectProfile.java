@@ -32,8 +32,8 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
+import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 
 /**
@@ -53,6 +53,7 @@ public class ProjectProfile implements LogSupport {
     private final Path srcMainResources;
     private final Path srcTestJava;
     private final Path srcTestResources;
+    private final Path repository;
 
     public ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -65,7 +66,9 @@ public class ProjectProfile implements LogSupport {
         srcMainResources = srcMain.resolve("resources");
         srcTestJava = srcTest.resolve("java");
         srcTestResources = srcTest.resolve("resources");
+        repository = path.resolve(".repo");
         model = loadModel();
+        model.setModelVersion("4.0.0");
     }
 
     private Model loadModel() {
@@ -90,13 +93,21 @@ public class ProjectProfile implements LogSupport {
         return path;
     }
 
+    public Path getPomFile() {
+        return pomFile;
+    }
+
+    public Path getRepository() {
+        return repository;
+    }
+
     public String getName() {
         return path.getFileName().toString();
     }
 
     private void createFileStructure() {
         try {
-            for (final Path dir : Arrays.asList(srcMainJava, srcMainResources, srcTestJava, srcTestResources)) {
+            for (final Path dir : asList(srcMainJava, srcMainResources, srcTestJava, srcTestResources)) {
                 Files.createDirectories(dir);
             }
         } catch (Exception x) {

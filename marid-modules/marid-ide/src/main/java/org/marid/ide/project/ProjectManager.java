@@ -107,12 +107,14 @@ public class ProjectManager implements PrefSupport, LogSupport {
     @Produces
     @IdeMenuItem(menu = "Project", text = "Project setup...", group = "ps", oIcons = {OctIcon.TOOLS})
     @IdeToolbarItem(group = "project")
-    public EventHandler<ActionEvent> projectSetup(Provider<ProjectDataDialog> editorProvider) {
+    public EventHandler<ActionEvent> projectSetup(Provider<ProjectDataDialog> editorProvider,
+                                                  Provider<IdeModelMerger> ideModelMergerProvider) {
         return event -> {
             final ProjectDataDialog editor = editorProvider.get();
             editor.showAndWait().ifPresent(model -> {
-                getProfile().getModel().setOrganization(null);
                 modelMerger.merge(getProfile().getModel(), model, true, null);
+                final IdeModelMerger ideModelMerger = ideModelMergerProvider.get();
+                ideModelMerger.merge(getProfile().getModel(), model);
             });
         };
     }
@@ -122,6 +124,20 @@ public class ProjectManager implements PrefSupport, LogSupport {
     @IdeToolbarItem(group = "project")
     public EventHandler<ActionEvent> projectSave(BeanManager beanManager) {
         return event -> beanManager.fireEvent(new ProjectSaveEvent(event, profile));
+    }
+
+    @Produces
+    @IdeMenuItem(menu = "Project", text = "Build", group = "ps", faIcons = {FontAwesomeIcon.BUILDING}, key = "Ctrl+B")
+    @IdeToolbarItem(group = "project")
+    public EventHandler<ActionEvent> projectBuild(ProjectProfile profile) {
+        return event -> {
+            final ProjectBuilder projectBuilder = new ProjectBuilder(profile, logger()::log);
+            try {
+                projectBuilder.build();
+            } catch (Exception x) {
+                log(WARNING, "Unable to build", x);
+            }
+        };
     }
 
     @Override
