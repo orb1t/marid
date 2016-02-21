@@ -20,7 +20,6 @@ package org.marid.ide.project;
 
 import com.google.inject.AbstractModule;
 import org.apache.maven.Maven;
-import org.apache.maven.cli.transfer.QuietMavenTransferListener;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionRequestPopulator;
@@ -116,7 +115,7 @@ public class ProjectBuilder implements LogSupport {
                 .setGlobalChecksumPolicy(MavenExecutionRequest.CHECKSUM_POLICY_WARN)
                 .setPom(profile.getPomFile().toFile())
                 .setBaseDirectory(profile.getPath().toFile())
-                .setTransferListener(new QuietMavenTransferListener())
+                .setTransferListener(new ProjectMavenTransferListener(profile))
                 .setCacheNotFound(true)
                 .setInteractiveMode(true)
                 .setCacheTransferError(false);

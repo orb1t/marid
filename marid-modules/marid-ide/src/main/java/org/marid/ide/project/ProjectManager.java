@@ -130,9 +130,10 @@ public class ProjectManager implements PrefSupport, LogSupport {
     @Produces
     @IdeMenuItem(menu = "Project", text = "Build", group = "pb", mdIcons = {MaterialDesignIcon.CLOCK_FAST}, key = "Ctrl+B")
     @IdeToolbarItem(group = "projectBuild")
-    public EventHandler<ActionEvent> projectBuild(ProjectProfile profile) {
+    public EventHandler<ActionEvent> projectBuild(Provider<ProjectProfile> profileProvider) {
         return event -> {
-            final ProjectBuilder projectBuilder = new ProjectBuilder(profile, logger()::log);
+            final ProjectProfile profile = profileProvider.get();
+            final ProjectBuilder projectBuilder = new ProjectBuilder(profile, profile.logger()::log);
             try {
                 projectBuilder.build();
             } catch (Exception x) {

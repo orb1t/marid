@@ -25,6 +25,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.jmlspecs.annotation.Immutable;
 import org.marid.logging.LogSupport;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -32,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.SystemUtils.USER_HOME;
@@ -54,6 +56,7 @@ public class ProjectProfile implements LogSupport {
     private final Path srcTestJava;
     private final Path srcTestResources;
     private final Path repository;
+    private final Logger logger;
 
     public ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -69,6 +72,7 @@ public class ProjectProfile implements LogSupport {
         repository = path.resolve(".repo");
         model = loadModel();
         model.setModelVersion("4.0.0");
+        logger = Logger.getLogger(getName());
     }
 
     private Model loadModel() {
@@ -103,6 +107,12 @@ public class ProjectProfile implements LogSupport {
 
     public String getName() {
         return path.getFileName().toString();
+    }
+
+    @Nonnull
+    @Override
+    public Logger logger() {
+        return logger;
     }
 
     private void createFileStructure() {
