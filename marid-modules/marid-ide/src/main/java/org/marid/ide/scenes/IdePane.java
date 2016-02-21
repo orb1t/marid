@@ -21,7 +21,7 @@ package org.marid.ide.scenes;
 import javafx.scene.layout.BorderPane;
 import org.marid.ee.IdeSingleton;
 import org.marid.ide.menu.IdeMenuToolbarPane;
-import org.marid.ide.panes.cmd.CmdPane;
+import org.marid.ide.panes.logging.LoggingPane;
 import org.marid.ide.status.IdeStatusBar;
 
 import javax.inject.Inject;
@@ -33,7 +33,7 @@ import javax.inject.Inject;
 public class IdePane extends BorderPane {
 
     @Inject
-    public IdePane(CmdPane cmdPane, IdeMenuToolbarPane ideMenuToolbarPane, IdeStatusBar ideStatusBar) {
-        super(cmdPane, ideMenuToolbarPane, null, ideStatusBar, null);
+    public IdePane(LoggingPane loggingPane, IdeMenuToolbarPane ideMenuToolbarPane, IdeStatusBar ideStatusBar) {
+        super(loggingPane, ideMenuToolbarPane, null, ideStatusBar, null);
     }
 }

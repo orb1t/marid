@@ -16,18 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.cmd;
+package org.marid.ee.logging;
 
-import javafx.scene.control.TextArea;
+import org.apache.maven.cli.logging.Slf4jConfiguration;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class CmdInputArea extends TextArea {
+public class Jdk14LoggingConfiguration implements Slf4jConfiguration {
+    @Override
+    public void setRootLoggerLevel(Level level) {
 
-    private final CmdPane cmdPane;
+    }
 
-    public CmdInputArea(CmdPane cmdPane) {
-        this.cmdPane = cmdPane;
+    @Override
+    public void activate() {
+
     }
 }

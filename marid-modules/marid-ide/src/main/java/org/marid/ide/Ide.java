@@ -26,6 +26,7 @@ import org.jboss.logmanager.LogManager;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.marid.ide.extensions.TemporaryExtension;
+import org.marid.ide.panes.logging.IdeLogHandler;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.jfx.Configurable;
 import org.marid.l10n.L10nSupport;
@@ -33,6 +34,7 @@ import org.marid.logging.LogSupport;
 import org.marid.util.Utils;
 
 import java.util.TimeZone;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import static javafx.scene.paint.Color.GREEN;
@@ -74,6 +76,7 @@ public class Ide extends Application implements L10nSupport, LogSupport, Configu
     public static void main(String... args) throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
+        Logger.getLogger("").addHandler(new IdeLogHandler());
         Utils.merge(System.getProperties(), "meta.properties", "ide.properties");
         Application.launch(Ide.class, args);
     }

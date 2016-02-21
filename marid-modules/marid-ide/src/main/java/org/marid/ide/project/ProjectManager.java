@@ -19,6 +19,7 @@
 package org.marid.ide.project;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -85,7 +86,7 @@ public class ProjectManager implements PrefSupport, LogSupport {
     public Set<ProjectProfile> getProfiles() {
         final Set<ProjectProfile> profiles = new LinkedHashSet<>();
         final Path profilesDir = profile.getPath().getParent();
-        try (final Stream<Path> stream = Files.walk(profilesDir)) {
+        try (final Stream<Path> stream = Files.list(profilesDir)) {
             stream
                     .filter(p -> Files.isDirectory(p) && !profilesDir.equals(p))
                     .map(p -> new ProjectProfile(p.getFileName().toString()))
@@ -105,8 +106,8 @@ public class ProjectManager implements PrefSupport, LogSupport {
     }
 
     @Produces
-    @IdeMenuItem(menu = "Project", text = "Project setup...", group = "ps", oIcons = {OctIcon.TOOLS})
-    @IdeToolbarItem(group = "project")
+    @IdeMenuItem(menu = "Project", text = "Project setup...", group = "setup", oIcons = {OctIcon.TOOLS})
+    @IdeToolbarItem(group = "projectSetup")
     public EventHandler<ActionEvent> projectSetup(Provider<ProjectDataDialog> editorProvider,
                                                   Provider<IdeModelMerger> ideModelMergerProvider) {
         return event -> {
@@ -120,15 +121,15 @@ public class ProjectManager implements PrefSupport, LogSupport {
     }
 
     @Produces
-    @IdeMenuItem(menu = "Project", text = "Save", group = "ps", faIcons = {FontAwesomeIcon.SAVE}, key = "Ctrl+S")
-    @IdeToolbarItem(group = "project")
+    @IdeMenuItem(menu = "Project", text = "Save", group = "io", faIcons = {FontAwesomeIcon.SAVE}, key = "Ctrl+S")
+    @IdeToolbarItem(group = "projectIO")
     public EventHandler<ActionEvent> projectSave(BeanManager beanManager) {
         return event -> beanManager.fireEvent(new ProjectSaveEvent(event, profile));
     }
 
     @Produces
-    @IdeMenuItem(menu = "Project", text = "Build", group = "ps", faIcons = {FontAwesomeIcon.BUILDING}, key = "Ctrl+B")
-    @IdeToolbarItem(group = "project")
+    @IdeMenuItem(menu = "Project", text = "Build", group = "pb", mdIcons = {MaterialDesignIcon.CLOCK_FAST}, key = "Ctrl+B")
+    @IdeToolbarItem(group = "projectBuild")
     public EventHandler<ActionEvent> projectBuild(ProjectProfile profile) {
         return event -> {
             final ProjectBuilder projectBuilder = new ProjectBuilder(profile, logger()::log);
@@ -137,6 +138,15 @@ public class ProjectManager implements PrefSupport, LogSupport {
             } catch (Exception x) {
                 log(WARNING, "Unable to build", x);
             }
+        };
+    }
+
+    @Produces
+    @IdeMenuItem(menu = "Project", text = "Run", group = "pb", faIcons = {FontAwesomeIcon.PLAY}, key = "F5")
+    @IdeToolbarItem(group = "projectBuild")
+    public EventHandler<ActionEvent> projectRun(ProjectProfile profile) {
+        return event -> {
+
         };
     }
 

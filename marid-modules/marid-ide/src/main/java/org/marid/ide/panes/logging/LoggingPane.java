@@ -16,15 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.cmd;
+package org.marid.ide.panes.logging;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.TilePane;
+import javafx.scene.control.ScrollPane;
 import org.marid.ee.IdeSingleton;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.toolbar.IdeToolbarItem;
@@ -35,21 +32,21 @@ import javax.enterprise.inject.Produces;
  * @author Dmitry Ovchinnikov
  */
 @IdeSingleton
-public class CmdPane extends TilePane {
+public class LoggingPane extends ScrollPane {
 
-    public CmdPane() {
-        super(Orientation.VERTICAL, 10.0, 10.0);
-        setPadding(new Insets(10.0, 10.0, 10.0, 10.0));
-        setPrefTileWidth(Double.MAX_VALUE);
-        setMinWidth(0.0);
-        setMaxWidth(Double.MAX_VALUE);
-        setStyle("-fx-background-color: -fx-mid-text-color");
+    private final LoggingTable loggingTable;
+
+    public LoggingPane() {
+        super(new LoggingTable());
+        this.loggingTable = (LoggingTable) getContent();
+        setFitToHeight(true);
+        setFitToWidth(true);
     }
 
     @Produces
-    @IdeToolbarItem(group = "cmd")
-    @IdeMenuItem(menu = "Commands", text = "Clear result area", group = "cmd", faIcons = {FontAwesomeIcon.REMOVE})
-    public EventHandler<ActionEvent> clearResultAreaCommand() {
-        return event -> getChildren().removeIf(n -> !(n instanceof TextArea));
+    @IdeMenuItem(menu = "Log", text = "Clear all log records", group = "clear", mIcons = {MaterialIcon.CLEAR_ALL}, key = "F7")
+    @IdeToolbarItem(group = "log")
+    public EventHandler<ActionEvent> clearLog() {
+        return event -> loggingTable.getItems().clear();
     }
 }
