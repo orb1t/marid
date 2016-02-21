@@ -30,6 +30,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -112,6 +113,21 @@ public class ProjectPrerequisites {
             final Xpp3Dom workingDirectory = new Xpp3Dom("workingDirectory");
             workingDirectory.setValue(profile.getPath().toString());
             configuration.addChild(workingDirectory);
+        }
+        {
+            final Xpp3Dom arguments = new Xpp3Dom("arguments");
+            final Consumer<String> argGenerator = v -> {
+                final Xpp3Dom argument = new Xpp3Dom("argument");
+                argument.setValue(v);
+                arguments.addChild(argument);
+            };
+            for (final String arg : settingsHolder.javaArguments.getValue()) {
+                argGenerator.accept(arg);
+            }
+            argGenerator.accept("-jar");
+            argGenerator.accept("${project.build.finalName}");
+            argGenerator.accept("${project.run.args}");
+            configuration.addChild(arguments);
         }
     }
 }

@@ -18,6 +18,8 @@
 
 package org.marid.ide.settings;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.pref.PrefSupport;
@@ -32,28 +34,51 @@ public class SettingsHolder implements PrefSupport {
     public final StringProperty snapshotUpdatePolicy;
     public final StringProperty releaseUpdatePolicy;
     public final StringProperty javaExecutable;
+    public final ObjectProperty<String[]> javaArguments;
+
+    private final Preferences preferences;
 
     public SettingsHolder(Preferences node) {
-        snapshotUpdatePolicy = stringProperty("snapshotUpdatePolicy", node, null);
-        releaseUpdatePolicy = stringProperty("releaseUpdatePolicy", node, null);
-        javaExecutable = stringProperty("javaExecutable", node, "java");
+        preferences = node;
+        snapshotUpdatePolicy = stringProperty("snapshotUpdatePolicy", null);
+        releaseUpdatePolicy = stringProperty("releaseUpdatePolicy", null);
+        javaExecutable = stringProperty("javaExecutable", "java");
+        javaArguments = stringArrayProperty("javaArguments");
     }
 
-    private StringProperty stringProperty(String name, Preferences node, String defaultValue) {
-        return new SimpleStringProperty(this, name, node.get(name, defaultValue));
+    @Override
+    public Preferences preferences() {
+        return preferences;
     }
 
-    private void save(StringProperty property, Preferences node) {
+    private StringProperty stringProperty(String name, String defaultValue) {
+        return new SimpleStringProperty(this, name, preferences.get(name, defaultValue));
+    }
+
+    private ObjectProperty<String[]> stringArrayProperty(String name, String... defaultValue) {
+        return new SimpleObjectProperty<>(this, name, getPref(name, defaultValue));
+    }
+
+    private void save(StringProperty property) {
         if (property.getValue() != null && !property.getValue().isEmpty()) {
-            node.put(property.getName(), property.getValue());
+            preferences.put(property.getName(), property.getValue());
         } else {
-            node.remove(property.getName());
+            preferences.remove(property.getName());
         }
     }
 
-    public void save(Preferences node) {
-        save(snapshotUpdatePolicy, node);
-        save(releaseUpdatePolicy, node);
-        save(javaExecutable, node);
+    private void saveStringArray(ObjectProperty<String[]> property) {
+        if (property.getValue() != null && property.getValue().length > 0) {
+            putPref(property.getName(), property.getValue());
+        } else {
+            preferences.remove(property.getName());
+        }
+    }
+
+    public void save() {
+        save(snapshotUpdatePolicy);
+        save(releaseUpdatePolicy);
+        save(javaExecutable);
+        saveStringArray(javaArguments);
     }
 }
