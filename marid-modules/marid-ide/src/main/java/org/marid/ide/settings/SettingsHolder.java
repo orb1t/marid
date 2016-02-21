@@ -31,10 +31,12 @@ public class SettingsHolder implements PrefSupport {
 
     public final StringProperty snapshotUpdatePolicy;
     public final StringProperty releaseUpdatePolicy;
+    public final StringProperty javaExecutable;
 
     public SettingsHolder(Preferences node) {
         snapshotUpdatePolicy = stringProperty("snapshotUpdatePolicy", node, null);
         releaseUpdatePolicy = stringProperty("releaseUpdatePolicy", node, null);
+        javaExecutable = stringProperty("javaExecutable", node, "java");
     }
 
     private StringProperty stringProperty(String name, Preferences node, String defaultValue) {
@@ -52,5 +54,6 @@ public class SettingsHolder implements PrefSupport {
     public void save(Preferences node) {
         save(snapshotUpdatePolicy, node);
         save(releaseUpdatePolicy, node);
+        save(javaExecutable, node);
     }
 }

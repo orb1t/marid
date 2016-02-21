@@ -19,9 +19,9 @@
 package org.marid.pref;
 
 import org.marid.logging.LogSupport;
+import org.marid.logging.LogSupport.Log;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 /**
@@ -43,7 +43,7 @@ public interface PrefSupport {
         if (this instanceof LogSupport) {
             ((LogSupport) this).log(Level.WARNING, fmt, error.getCause(), k, type);
         } else {
-            LogSupport.Log.log(Logger.getLogger(getClass().getName()), Level.WARNING, fmt, error.getCause(), k, type);
+            Log.log(Level.WARNING, fmt, error.getCause(), k, type);
         }
     }
 

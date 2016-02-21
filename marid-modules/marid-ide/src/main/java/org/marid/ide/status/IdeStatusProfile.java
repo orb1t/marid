@@ -21,8 +21,8 @@ package org.marid.ide.status;
 import javafx.collections.FXCollections;
 import javafx.scene.control.ComboBox;
 import org.marid.ee.IdeSingleton;
-import org.marid.ide.profile.ProjectManager;
-import org.marid.ide.profile.ProjectProfile;
+import org.marid.ide.project.ProjectManager;
+import org.marid.ide.project.ProjectProfile;
 
 import javax.inject.Inject;
 import java.util.Set;

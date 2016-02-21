@@ -19,7 +19,7 @@
 package org.hsqldb.jdbc;
 
 import org.hsqldb.Database;
-import org.marid.log.LogSupport;
+import org.marid.logging.LogSupport;
 
 import javax.annotation.Nonnull;
 import java.sql.SQLException;

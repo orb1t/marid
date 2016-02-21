@@ -26,7 +26,7 @@ import org.hsqldb.jdbc.JDBCSessionPool;
 import org.hsqldb.server.Server;
 import org.hsqldb.server.ServerConstants;
 import org.marid.db.dao.NumericWriter;
-import org.marid.log.LogSupport;
+import org.marid.logging.LogSupport;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

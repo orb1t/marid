@@ -30,7 +30,7 @@ import de.jensd.fx.glyphs.octicons.OctIcon;
 import de.jensd.fx.glyphs.octicons.OctIconView;
 import de.jensd.fx.glyphs.weathericons.WeatherIcon;
 import de.jensd.fx.glyphs.weathericons.WeatherIconView;
-import org.marid.util.MaridClassValue;
+import org.marid.cache.MaridClassValue;
 import org.marid.util.Utils;
 
 import java.util.function.Function;

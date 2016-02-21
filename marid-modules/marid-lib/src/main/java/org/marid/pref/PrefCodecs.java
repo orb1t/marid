@@ -19,6 +19,7 @@
 package org.marid.pref;
 
 import org.marid.functions.SafeFunction;
+import org.marid.logging.LogSupport;
 import org.marid.util.StringUtils;
 import org.marid.util.Utils;
 
@@ -32,21 +33,17 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import static java.util.ServiceLoader.load;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.of;
-import static org.marid.logging.LogSupport.Log.log;
-import static org.marid.logging.LogSupport.WARNING;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class PrefCodecs {
+public abstract class PrefCodecs implements LogSupport {
 
-    private static final Logger LOG = Logger.getLogger(PrefCodecs.class.getName());
     private static final Map<Class<?>, PrefReader<?>> READERS = new IdentityHashMap<>(256);
     private static final Map<Class<?>, PrefWriter<?>> WRITERS = new IdentityHashMap<>(256);
 
@@ -118,7 +115,7 @@ public abstract class PrefCodecs {
                 WRITERS.putAll(prefCodecs.writers());
             }
         } catch (Exception x) {
-            log(LOG, WARNING, "Unable to enumerate pref codecs", x);
+            Log.log(WARNING, "Unable to enumerate pref codecs", x);
         }
     }
 

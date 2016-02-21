@@ -56,5 +56,10 @@
             <artifactId>maven-embedder</artifactId>
             <version>${maven.embedder.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+        </dependency>
     </dependencies>
 </project>

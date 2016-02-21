@@ -175,7 +175,6 @@
     </licenses>
 
     <modules>
-        <module>marid-gres</module>
         <module>marid-modules</module>
         <module>marid-test</module>
         <module>marid-services-api</module>
@@ -459,6 +458,12 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>3.4</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-math3</artifactId>
+                <version>3.6</version>
             </dependency>
 
             <dependency>

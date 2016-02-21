@@ -16,14 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.settings.editors;
+package org.marid.ide.project.editors;
 
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Organization;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.scenes.IdeScene;
-import org.marid.ide.settings.SettingsHolder;
 import org.marid.l10n.L10nSupport;
 import org.marid.pref.PrefSupport;
 
@@ -34,26 +37,38 @@ import javax.inject.Inject;
  * @author Dmitry Ovchinnikov
  */
 @Dependent
-public class SettingsDialog extends Dialog<SettingsHolder> implements PrefSupport, L10nSupport {
+public class ProjectDataDialog extends Dialog<Model> implements PrefSupport, L10nSupport {
 
     @Inject
-    public SettingsDialog(IdeScene ideScene) {
-        final SettingsHolder settingsHolder = new SettingsHolder(preferences());
+    public ProjectDataDialog(IdeScene ideScene, ProjectProfile profile) {
+        final Model model = initModel(profile);
         final DialogPane dialogPane = getDialogPane();
         dialogPane.setPrefSize(800, 600);
-        dialogPane.setContent(tabPane(settingsHolder));
-        dialogPane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.APPLY);
-        setTitle(s("IDE settings"));
+        dialogPane.setContent(tabPane(model));
+        dialogPane.getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
+        setTitle("Project preferences");
         initModality(Modality.WINDOW_MODAL);
         initOwner(ideScene.getWindow());
         setResizable(true);
-        setResultConverter(type -> type == ButtonType.APPLY ? settingsHolder : null);
+        setResultConverter(type -> type == ButtonType.APPLY ? model : null);
     }
 
-    private TabPane tabPane(SettingsHolder settingsHolder) {
+    private Model initModel(ProjectProfile profile) {
+        final Model model = profile.getModel().clone();
+        if (model.getOrganization() == null) {
+            model.setOrganization(new Organization());
+        }
+        if (model.getDependencies().isEmpty()) {
+            DependenciesTab.useDefaultDependencies(model.getDependencies());
+        }
+        return model;
+    }
+
+    private TabPane tabPane(Model model) {
         final TabPane tabPane = new TabPane(
-                new Tab(s("Common"), new CommonTab(settingsHolder)),
-                new Tab("Java", new JavaTab(settingsHolder))
+                new Tab(s("Common"), new CommonTab(model)),
+                new Tab(s("Dependencies"), scrollPane(new DependenciesTab(model))),
+                new Tab(s("Repositories"), scrollPane(new RepositoriesTab(model)))
         );
         for (final Tab tab : tabPane.getTabs()) {
             ((Region) tab.getContent()).setPadding(new Insets(10, 0, 10, 0));
@@ -61,5 +76,12 @@ public class SettingsDialog extends Dialog<SettingsHolder> implements PrefSuppor
         }
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         return tabPane;
+    }
+
+    private ScrollPane scrollPane(Node node) {
+        final ScrollPane scrollPane = new ScrollPane(node);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        return scrollPane;
     }
 }

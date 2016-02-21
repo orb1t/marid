@@ -22,7 +22,7 @@ import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
-import org.marid.log.LogSupport;
+import org.marid.logging.LogSupport;
 
 import javax.annotation.PostConstruct;
 import java.io.Closeable;

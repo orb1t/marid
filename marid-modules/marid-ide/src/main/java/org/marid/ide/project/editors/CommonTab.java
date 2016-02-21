@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.settings.editors;
+package org.marid.ide.project.editors;
 
-import org.marid.ide.settings.SettingsHolder;
+import org.apache.maven.model.Model;
 import org.marid.jfx.panes.AbstractGridPane;
 
 /**
@@ -26,8 +26,15 @@ import org.marid.jfx.panes.AbstractGridPane;
  */
 public class CommonTab extends AbstractGridPane {
 
-    public CommonTab(SettingsHolder holder) {
-        addTextField("Releases update policy by default", holder.releaseUpdatePolicy);
-        addTextField("Snapshots update policy by default", holder.snapshotUpdatePolicy);
+    public CommonTab(Model model) {
+        addTextField("Name", model, "name");
+        addTextField("GroupId", model, "groupId");
+        addTextField("ArtifactId", model, "artifactId");
+        addTextField("Version", model, "version");
+        addTextField("Description", model, "description");
+        addTextField("URL", model, "url");
+        addTextField("Inception year", model, "inceptionYear");
+        addTextField("Organization name", model.getOrganization(), "name");
+        addTextField("Organization URL", model.getOrganization(), "url");
     }
 }

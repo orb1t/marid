@@ -22,7 +22,7 @@ import com.google.common.io.ByteStreams;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.marid.log.LogSupport;
+import org.marid.logging.LogSupport;
 import org.marid.test.NormalTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;

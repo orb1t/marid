@@ -18,8 +18,6 @@
 
 package org.marid.pref;
 
-import org.marid.Versioning;
-
 import java.util.prefs.Preferences;
 
 /**
@@ -27,8 +25,17 @@ import java.util.prefs.Preferences;
  */
 public class PrefUtils {
 
+    private static String classVersion(Class<?> klass) {
+        final Package pkg = klass.getPackage();
+        if (pkg != null && pkg.getImplementationVersion() != null) {
+            return pkg.getImplementationVersion();
+        } else {
+            return System.getProperties().getProperty("implementation.version", "DEV");
+        }
+    }
+
     public static Preferences preferences(Class<?> klass, String... nodes) {
-        final String version = Versioning.getImplementationVersion(klass);
+        final String version = classVersion(klass);
         Preferences prefs = Preferences.userRoot().node("marid").node(version).node(klass.getCanonicalName());
         for (String n : nodes) {
             prefs = prefs.node(n);
@@ -37,7 +44,7 @@ public class PrefUtils {
     }
 
     public static Preferences preferences(String... nodes) {
-        return preferences(Versioning.class, nodes);
+        return preferences(PrefUtils.class, nodes);
     }
 
     public static <T> T getPref(Preferences preferences, Class<T> type, String key, T def, String... nodes) {

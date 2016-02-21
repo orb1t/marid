@@ -31,4 +31,12 @@
     <artifactId>marid-lib</artifactId>
     <name>marid-lib</name>
     <description>Marid class library</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.marid</groupId>
+            <artifactId>marid-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

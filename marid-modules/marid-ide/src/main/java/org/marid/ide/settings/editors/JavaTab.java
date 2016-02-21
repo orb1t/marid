@@ -24,10 +24,9 @@ import org.marid.jfx.panes.AbstractGridPane;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class CommonTab extends AbstractGridPane {
+public class JavaTab extends AbstractGridPane {
 
-    public CommonTab(SettingsHolder holder) {
-        addTextField("Releases update policy by default", holder.releaseUpdatePolicy);
-        addTextField("Snapshots update policy by default", holder.snapshotUpdatePolicy);
+    public JavaTab(SettingsHolder holder) {
+        addTextField("Java executable", holder.javaExecutable);
     }
 }

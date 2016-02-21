@@ -19,7 +19,7 @@
 package org.marid.concurrent;
 
 import org.jmlspecs.annotation.Immutable;
-import org.marid.log.LogSupport;
+import org.marid.logging.LogSupport;
 
 import javax.annotation.Nonnull;
 import java.util.TimerTask;

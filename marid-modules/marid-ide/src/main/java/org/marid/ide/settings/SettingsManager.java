@@ -38,7 +38,7 @@ public class SettingsManager implements PrefSupport {
 
     @Produces
     @IdeToolbarItem(group = "settings")
-    @IdeMenuItem(menu = "Tools", text = "Settings", group = "settings", oIcons = {OctIcon.SETTINGS})
+    @IdeMenuItem(menu = "Tools", text = "Settings...", group = "settings", oIcons = {OctIcon.SETTINGS})
     public EventHandler<ActionEvent> settingsItem(Provider<SettingsDialog> settingsDialogProvider) {
         return event -> {
             final SettingsDialog settingsDialog = settingsDialogProvider.get();

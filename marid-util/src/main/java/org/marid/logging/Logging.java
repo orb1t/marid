@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Dmitry Ovchinnikov
+ * Copyright (c) 2015 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,18 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.settings.editors;
+package org.marid.logging;
 
-import org.marid.ide.settings.SettingsHolder;
-import org.marid.jfx.panes.AbstractGridPane;
+import org.marid.cache.MaridClassValue;
+
+import java.util.logging.Logger;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public class CommonTab extends AbstractGridPane {
+class Logging {
 
-    public CommonTab(SettingsHolder holder) {
-        addTextField("Releases update policy by default", holder.releaseUpdatePolicy);
-        addTextField("Snapshots update policy by default", holder.snapshotUpdatePolicy);
-    }
+    static final ClassValue<Logger> LOGGER_CLASS_VALUE = new MaridClassValue<>(c -> Logger.getLogger(c.getName()));
 }

@@ -18,6 +18,8 @@
 
 package org.marid.util;
 
+import org.marid.cache.MaridClassValue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

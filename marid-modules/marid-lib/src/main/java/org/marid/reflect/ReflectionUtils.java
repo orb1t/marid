@@ -18,7 +18,7 @@
 
 package org.marid.reflect;
 
-import org.marid.util.MaridClassValue;
+import org.marid.cache.MaridClassValue;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
