@@ -18,6 +18,8 @@
 
 package org.marid.web;
 
+import org.marid.beans.MaridBean;
+
 import javax.net.ssl.SSLContext;
 import java.util.Collections;
 import java.util.Map;
@@ -26,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author Dmitry Ovchinnikov.
  */
+@MaridBean
 public final class SimpleWebServerProperties {
 
     private String host = "0.0.0.0";
