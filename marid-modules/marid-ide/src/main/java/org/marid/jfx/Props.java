@@ -26,6 +26,7 @@ import javafx.beans.property.adapter.JavaBeanObjectPropertyBuilder;
 import javafx.beans.property.adapter.JavaBeanStringPropertyBuilder;
 import org.marid.jfx.props.BooleanPropertyHolder;
 import org.marid.jfx.props.PropertyHolder;
+import org.marid.jfx.props.StringPropertyHolder;
 import org.marid.util.Utils;
 
 import java.util.function.BooleanSupplier;
@@ -40,6 +41,17 @@ public class Props {
     public static StringProperty stringProperty(Object bean, String name) {
         try {
             return JavaBeanStringPropertyBuilder.create().bean(bean).name(name).build();
+        } catch (NoSuchMethodException x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
+    public static StringProperty stringProperty(Supplier<String> supplier, Consumer<String> consumer) {
+        try {
+            return JavaBeanStringPropertyBuilder.create()
+                    .bean(new StringPropertyHolder(supplier, consumer))
+                    .name("property")
+                    .build();
         } catch (NoSuchMethodException x) {
             throw new IllegalStateException(x);
         }

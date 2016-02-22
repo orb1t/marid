@@ -18,10 +18,7 @@
 
 package org.marid.ide.project;
 
-import org.apache.maven.model.Build;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.model.PluginExecution;
-import org.apache.maven.model.Prerequisites;
+import org.apache.maven.model.*;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.marid.ide.settings.JavaSettings;
 
@@ -29,6 +26,8 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 import java.util.function.Consumer;
 
 /**
@@ -49,6 +48,7 @@ public class ProjectPrerequisites {
         applyProperties(profile);
         applyBuild(profile);
         applyPlugins(profile);
+        applyRuntimeDependency(profile);
     }
 
     void applyPrerequisites(ProjectProfile profile) {
@@ -58,8 +58,12 @@ public class ProjectPrerequisites {
     }
 
     void applyProperties(ProjectProfile profile) {
-        profile.getModel().getProperties().setProperty("project.build.sourceEncoding", "UTF-8");
-        profile.getModel().getProperties().setProperty("project.reporting.outputEncoding", "UTF-8");
+        final Properties properties = profile.getModel().getProperties();
+        properties.setProperty("project.build.sourceEncoding", "UTF-8");
+        properties.setProperty("project.reporting.outputEncoding", "UTF-8");
+        if (!properties.containsKey("marid.runtime.version")) {
+            properties.setProperty("marid.runtime.version", System.getProperty("implementation.version"));
+        }
     }
 
     void applyBuild(ProjectProfile profile) {
@@ -123,10 +127,21 @@ public class ProjectPrerequisites {
             for (final String arg : javaSettings.getJavaArguments()) {
                 argGenerator.accept(arg);
             }
-            argGenerator.accept("-jar");
-            argGenerator.accept("${project.build.finalName}");
+            argGenerator.accept("-cp");
+            arguments.addChild(new Xpp3Dom("classpath"));
+            argGenerator.accept("org.marid.runtime.MaridLauncher");
             argGenerator.accept("${project.run.args}");
             configuration.addChild(arguments);
         }
+    }
+
+    void applyRuntimeDependency(ProjectProfile profile) {
+        final List<Dependency> dependencies = profile.getModel().getDependencies();
+        dependencies.removeIf(d -> "org.marid".equals(d.getGroupId()) && "marid-runtime".equals(d.getArtifactId()));
+        final Dependency dependency = new Dependency();
+        dependency.setGroupId("org.marid");
+        dependency.setArtifactId("marid-runtime");
+        dependency.setVersion("${marid.runtime.version}");
+        dependencies.add(dependency);
     }
 }

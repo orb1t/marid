@@ -28,7 +28,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.maven.model.merge.MavenModelMerger;
 import org.apache.maven.model.merge.ModelMerger;
 import org.marid.ide.menu.IdeMenuItem;
-import org.marid.ide.project.editors.ProjectDataDialog;
+import org.marid.ide.project.editors.ProjectDialog;
 import org.marid.ide.toolbar.IdeToolbarItem;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
@@ -99,10 +99,10 @@ public class ProjectManager implements PrefSupport, LogSupport {
     @Produces
     @IdeMenuItem(menu = "Project", text = "Project setup...", group = "setup", oIcons = {OctIcon.TOOLS})
     @IdeToolbarItem(group = "projectSetup")
-    public EventHandler<ActionEvent> projectSetup(Provider<ProjectDataDialog> editorProvider,
+    public EventHandler<ActionEvent> projectSetup(Provider<ProjectDialog> editorProvider,
                                                   Provider<IdeModelMerger> ideModelMergerProvider) {
         return event -> {
-            final ProjectDataDialog editor = editorProvider.get();
+            final ProjectDialog editor = editorProvider.get();
             editor.showAndWait().ifPresent(model -> {
                 modelMerger.merge(getProfile().getModel(), model, true, null);
                 final IdeModelMerger ideModelMerger = ideModelMergerProvider.get();

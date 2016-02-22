@@ -37,10 +37,10 @@ import javax.inject.Inject;
  * @author Dmitry Ovchinnikov
  */
 @Dependent
-public class ProjectDataDialog extends Dialog<Model> implements PrefSupport, L10nSupport {
+public class ProjectDialog extends Dialog<Model> implements PrefSupport, L10nSupport {
 
     @Inject
-    public ProjectDataDialog(IdeScene ideScene, ProjectProfile profile) {
+    public ProjectDialog(IdeScene ideScene, ProjectProfile profile) {
         final Model model = initModel(profile);
         final DialogPane dialogPane = getDialogPane();
         dialogPane.setPrefSize(800, 600);
@@ -68,7 +68,8 @@ public class ProjectDataDialog extends Dialog<Model> implements PrefSupport, L10
         final TabPane tabPane = new TabPane(
                 new Tab(s("Common"), new CommonTab(model)),
                 new Tab(s("Dependencies"), scrollPane(new DependenciesTab(model))),
-                new Tab(s("Repositories"), scrollPane(new RepositoriesTab(model)))
+                new Tab(s("Repositories"), scrollPane(new RepositoriesTab(model))),
+                new Tab(s("Properties"), scrollPane(new PropertiesTab(model)))
         );
         for (final Tab tab : tabPane.getTabs()) {
             ((Region) tab.getContent()).setPadding(new Insets(10, 0, 10, 0));
