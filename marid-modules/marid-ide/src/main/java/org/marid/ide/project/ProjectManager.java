@@ -126,7 +126,8 @@ public class ProjectManager implements PrefSupport, LogSupport {
     public EventHandler<ActionEvent> projectBuild(Provider<ProjectProfile> profileProvider) {
         return event -> {
             final ProjectProfile profile = profileProvider.get();
-            final ProjectBuilder projectBuilder = new ProjectBuilder(profile, profile.logger()::log);
+            final ProjectBuilder projectBuilder = new ProjectBuilder(profile)
+                    .goals("clean", "install");
             try {
                 projectBuilder.build();
             } catch (Exception x) {
@@ -138,9 +139,16 @@ public class ProjectManager implements PrefSupport, LogSupport {
     @Produces
     @IdeMenuItem(menu = "Project", text = "Run", group = "pb", faIcons = {FontAwesomeIcon.PLAY}, key = "F5")
     @IdeToolbarItem(group = "projectBuild")
-    public EventHandler<ActionEvent> projectRun(ProjectProfile profile) {
+    public EventHandler<ActionEvent> projectRun(Provider<ProjectProfile> profileProvider) {
         return event -> {
-
+            final ProjectProfile profile = profileProvider.get();
+            final ProjectBuilder projectBuilder = new ProjectBuilder(profile)
+                    .goals("clean", "compile", "exec:exec@run-in-ide");
+            try {
+                projectBuilder.build();
+            } catch (Exception x) {
+                log(WARNING, "Unable to run", x);
+            }
         };
     }
 

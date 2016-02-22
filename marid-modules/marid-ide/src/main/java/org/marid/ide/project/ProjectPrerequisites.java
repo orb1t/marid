@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -47,6 +46,7 @@ public class ProjectPrerequisites {
         applyPrerequisites(profile);
         applyProperties(profile);
         applyBuild(profile);
+        applyPluginManagement(profile);
         applyPlugins(profile);
         applyRuntimeDependency(profile);
     }
@@ -72,6 +72,24 @@ public class ProjectPrerequisites {
         }
     }
 
+    void applyPluginManagement(ProjectProfile profile) {
+        if (profile.getModel().getBuild().getPluginManagement() == null) {
+            profile.getModel().getBuild().setPluginManagement(new PluginManagement());
+        }
+        applyExecMavenPluginManagement(profile);
+    }
+
+    void applyExecMavenPluginManagement(ProjectProfile profile) {
+        final PluginManagement pluginManagement = profile.getModel().getBuild().getPluginManagement();
+        pluginManagement.getPlugins().removeIf(p ->
+                "org.codehaus.mojo".equals(p.getGroupId()) && "exec-maven-plugin".equals(p.getArtifactId()));
+        final Plugin plugin = new Plugin();
+        plugin.setGroupId("org.codehaus.mojo");
+        plugin.setArtifactId("exec-maven-plugin");
+        plugin.setVersion("1.4.0");
+        pluginManagement.addPlugin(plugin);
+    }
+
     void applyPlugins(ProjectProfile profile) {
         applyExecMavenPlugin(profile);
     }
@@ -85,7 +103,6 @@ public class ProjectPrerequisites {
                     final Plugin plugin = new Plugin();
                     plugin.setGroupId("org.codehaus.mojo");
                     plugin.setArtifactId("exec-maven-plugin");
-                    plugin.setVersion("1.4.0");
                     profile.getModel().getBuild().getPlugins().add(plugin);
                     return plugin;
                 });
@@ -102,37 +119,18 @@ public class ProjectPrerequisites {
         runInIdeExecution.setGoals(new ArrayList<>(Collections.singletonList("exec")));
         final Xpp3Dom configuration = new Xpp3Dom("configuration");
         runInIdeExecution.setConfiguration(configuration);
-        {
-            final Xpp3Dom executable = new Xpp3Dom("executable");
-            executable.setValue(javaSettings.getJavaExecutable());
-            configuration.addChild(executable);
+        addChild(configuration, "executable", javaSettings.getJavaExecutable());
+        addChild(configuration, "longClasspath", "true");
+        addChild(configuration, "workingDirectory", "${project.build.directory}");
+        addChild(configuration, "outputFile", "${project.build.directory}/output.log");
+        final Xpp3Dom arguments = new Xpp3Dom("arguments");
+        for (final String arg : javaSettings.getJavaArguments()) {
+            addChild(arguments, "argument", arg);
         }
-        {
-            final Xpp3Dom longClasspath = new Xpp3Dom("longClasspath");
-            longClasspath.setValue("true");
-            configuration.addChild(longClasspath);
-        }
-        {
-            final Xpp3Dom workingDirectory = new Xpp3Dom("workingDirectory");
-            workingDirectory.setValue(profile.getPath().toString());
-            configuration.addChild(workingDirectory);
-        }
-        {
-            final Xpp3Dom arguments = new Xpp3Dom("arguments");
-            final Consumer<String> argGenerator = v -> {
-                final Xpp3Dom argument = new Xpp3Dom("argument");
-                argument.setValue(v);
-                arguments.addChild(argument);
-            };
-            for (final String arg : javaSettings.getJavaArguments()) {
-                argGenerator.accept(arg);
-            }
-            argGenerator.accept("-cp");
-            arguments.addChild(new Xpp3Dom("classpath"));
-            argGenerator.accept("org.marid.runtime.MaridLauncher");
-            argGenerator.accept("${project.run.args}");
-            configuration.addChild(arguments);
-        }
+        addChild(arguments, "argument", "-cp");
+        addChild(arguments, "classpath", null);
+        addChild(arguments, "argument", "org.marid.runtime.MaridLauncher");
+        configuration.addChild(arguments);
     }
 
     void applyRuntimeDependency(ProjectProfile profile) {
@@ -143,5 +141,13 @@ public class ProjectPrerequisites {
         dependency.setArtifactId("marid-runtime");
         dependency.setVersion("${marid.runtime.version}");
         dependencies.add(dependency);
+    }
+
+    private void addChild(Xpp3Dom parent, String tag, String value) {
+        final Xpp3Dom node = new Xpp3Dom(tag);
+        if (value != null) {
+            node.setValue(value);
+        }
+        parent.addChild(node);
     }
 }

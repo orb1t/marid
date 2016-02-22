@@ -42,9 +42,7 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.aether.transport.wagon.WagonTransporterFactory;
 import org.marid.logging.LogSupport;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.logging.LogRecord;
@@ -57,14 +55,24 @@ public class ProjectBuilder implements LogSupport {
     private final ProjectProfile profile;
     private final Consumer<LogRecord> logRecordConsumer;
     private final Map<String, ProjectPlexusLogger> loggerMap = new ConcurrentHashMap<>();
+    private final List<String> goals = new ArrayList<>();
 
     public ProjectBuilder(ProjectProfile profile, Consumer<LogRecord> logRecordConsumer) {
         this.profile = profile;
         this.logRecordConsumer = logRecordConsumer;
     }
 
+    public ProjectBuilder(ProjectProfile profile) {
+        this(profile, profile.logger()::log);
+    }
+
     private ProjectPlexusLogger logger(String name) {
         return loggerMap.computeIfAbsent(name, k -> new ProjectPlexusLogger(k, logRecordConsumer));
+    }
+
+    public ProjectBuilder goals(String... goals) {
+        Collections.addAll(this.goals, goals);
+        return this;
     }
 
     private PlexusContainer buildPlexusContainer() throws Exception {
@@ -107,7 +115,7 @@ public class ProjectBuilder implements LogSupport {
         request.setMultiModuleProjectDirectory(profile.getPath().toFile());
         return request
                 .setOffline(false)
-                .setGoals(Arrays.asList("clean", "install"))
+                .setGoals(goals)
                 .setSystemProperties(System.getProperties())
                 .setUserProperties(new Properties())
                 .setReactorFailureBehavior(MavenExecutionRequest.REACTOR_FAIL_AT_END)
@@ -123,24 +131,22 @@ public class ProjectBuilder implements LogSupport {
 
     public void build() throws Exception {
         final PlexusContainer plexusContainer = buildPlexusContainer();
-        try {
-            final MavenExecutionRequest mavenExecutionRequest = mavenExecutionRequest(plexusContainer);
-            final Maven maven = plexusContainer.lookup(Maven.class);
-            final Thread thread = new Thread(() -> {
-                Thread.currentThread().setContextClassLoader(plexusContainer.getContainerRealm());
-                try {
-                    final MavenExecutionResult result = maven.execute(mavenExecutionRequest);
-                    for (final Throwable exception : result.getExceptions()) {
-                        log(WARNING, "Build exception", exception);
-                    }
-                } catch (Exception x) {
-                    log(WARNING, "Unable to execute maven", x);
+        final MavenExecutionRequest mavenExecutionRequest = mavenExecutionRequest(plexusContainer);
+        final Maven maven = plexusContainer.lookup(Maven.class);
+        final Thread thread = new Thread(() -> {
+            Thread.currentThread().setContextClassLoader(plexusContainer.getContainerRealm());
+            try {
+                final MavenExecutionResult result = maven.execute(mavenExecutionRequest);
+                for (final Throwable exception : result.getExceptions()) {
+                    log(WARNING, "Build exception", exception);
                 }
-            });
-            thread.start();
-            thread.join();
-        } finally {
-            plexusContainer.dispose();
-        }
+            } catch (Exception x) {
+                log(WARNING, "Unable to execute maven", x);
+            } finally {
+                plexusContainer.dispose();
+                loggerMap.clear();
+            }
+        });
+        thread.start();
     }
 }

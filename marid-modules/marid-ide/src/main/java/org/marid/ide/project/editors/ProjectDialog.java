@@ -61,6 +61,7 @@ public class ProjectDialog extends Dialog<Model> implements PrefSupport, L10nSup
         if (model.getDependencies().isEmpty()) {
             DependenciesTab.useDefaultDependencies(model.getDependencies());
         }
+        model.getDependencies().removeIf(d -> "marid-runtime".equals(d.getArtifactId()) && "org.marid".equals(d.getGroupId()));
         return model;
     }
 
