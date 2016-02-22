@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2015 Dmitry Ovchinnikov
+  ~ Copyright (c) 2016 Dmitry Ovchinnikov
   ~ Marid, the free data acquisition and visualization software
   ~
   ~ This program is free software: you can redistribute it and/or modify
@@ -27,5 +27,17 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>marid-proto</artifactId>
+    <artifactId>marid-runtime</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.logmanager</groupId>
+            <artifactId>jboss-logmanager</artifactId>
+        </dependency>
+    </dependencies>
 </project>

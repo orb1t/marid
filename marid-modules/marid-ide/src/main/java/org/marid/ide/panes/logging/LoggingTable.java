@@ -25,6 +25,7 @@ import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -58,12 +59,18 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
 
     public LoggingTable() {
         super(ideLogHandler().getLogRecords());
+        final String columnDefaultStyle = "-fx-font-size: smaller";
         getColumns().add(levelColumn());
         getColumns().add(timestampColumn());
         getColumns().add(loggerColumn());
         getColumns().add(messageColumn());
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
-        setStyle("-fx-font-size: small");
+        setStyle("-fx-font-size: smaller");
+        getColumns().forEach(c -> {
+            final String oldStyle = c.getStyle();
+            c.setStyle(oldStyle != null ? oldStyle + columnDefaultStyle : columnDefaultStyle);
+        });
+        getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
     private static IdeLogHandler ideLogHandler() {
@@ -83,7 +90,7 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
         final TableColumn<LogRecord, GlyphIcons> col = new TableColumn<>();
         col.setGraphic(IdeIcons.glyphIcon(FontAwesomeIcon.SHIELD));
         col.setCellValueFactory(param -> new SimpleObjectProperty<>(iconByLevel(param.getValue().getLevel())));
-        col.setStyle("-fx-font-size: small; -fx-alignment: center");
+        col.setStyle("-fx-alignment: center;");
         col.setCellFactory(c -> new TableCell<LogRecord, GlyphIcons>() {
             @Override
             protected void updateItem(GlyphIcons item, boolean empty) {
@@ -108,7 +115,6 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
             final String time = format.format(new Date(param.getValue().getMillis()));
             return new SimpleStringProperty(time);
         });
-        col.setStyle("-fx-font-size: small");
         col.setMinWidth(60);
         col.setPrefWidth(60);
         col.setMaxWidth(100);
@@ -127,7 +133,7 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
             }
             return new SimpleStringProperty(String.join(".", parts));
         });
-        col.setStyle("-fx-font-size: small; -fx-alignment: center-right");
+        col.setStyle("-fx-alignment: center-right;");
         col.setMinWidth(150);
         col.setPrefWidth(200);
         col.setMaxWidth(250);
@@ -148,7 +154,6 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
             }
             return new SimpleStringProperty(message);
         });
-        col.setStyle("-fx-font-size: small");
         col.setMinWidth(300);
         col.setPrefWidth(400);
         col.setMaxWidth(Double.MAX_VALUE);

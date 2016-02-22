@@ -16,24 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.scenes;
+package org.marid.ide.settings.editors;
 
-import javafx.scene.layout.BorderPane;
-import org.marid.ee.IdeSingleton;
-import org.marid.ide.menu.IdeMenuToolbarPane;
-import org.marid.ide.panes.logging.LoggingPane;
-import org.marid.ide.status.IdeStatusBar;
-
-import javax.inject.Inject;
+import javafx.scene.Node;
+import org.marid.ide.settings.AbstractSettings;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
-public class IdePane extends BorderPane {
+public interface SettingsEditor {
 
-    @Inject
-    public IdePane(LoggingPane loggingPane, IdeMenuToolbarPane ideMenuToolbarPane, IdeStatusBar ideStatusBar) {
-        super(loggingPane, ideMenuToolbarPane, null, ideStatusBar, null);
+    AbstractSettings getSettings();
+
+    default Node getNode() {
+        return (Node) this;
     }
 }

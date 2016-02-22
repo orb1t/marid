@@ -18,16 +18,31 @@
 
 package org.marid.ide.settings.editors;
 
-import org.marid.ide.settings.SettingsHolder;
+import org.marid.ide.settings.MavenSettings;
 import org.marid.jfx.panes.AbstractGridPane;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
+import static org.marid.jfx.Props.stringProperty;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class CommonTab extends AbstractGridPane {
+@Dependent
+public class MavenTab extends AbstractGridPane implements SettingsEditor {
 
-    public CommonTab(SettingsHolder holder) {
-        addTextField("Releases update policy by default", holder.releaseUpdatePolicy);
-        addTextField("Snapshots update policy by default", holder.snapshotUpdatePolicy);
+    private final MavenSettings mavenSettings;
+
+    @Inject
+    public MavenTab(MavenSettings mavenSettings) {
+        this.mavenSettings = mavenSettings;
+        addTextField("Releases update policy by default", stringProperty(mavenSettings, "releaseUpdatePolicy"));
+        addTextField("Snapshots update policy by default", stringProperty(mavenSettings, "snapshotUpdatePolicy"));
+    }
+
+    @Override
+    public MavenSettings getSettings() {
+        return mavenSettings;
     }
 }

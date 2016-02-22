@@ -18,15 +18,30 @@
 
 package org.marid.ide.settings.editors;
 
-import org.marid.ide.settings.SettingsHolder;
+import org.marid.ide.settings.JavaSettings;
 import org.marid.jfx.panes.AbstractGridPane;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
+import static org.marid.jfx.Props.stringProperty;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class JavaTab extends AbstractGridPane {
+@Dependent
+public class JavaTab extends AbstractGridPane implements SettingsEditor {
 
-    public JavaTab(SettingsHolder holder) {
-        addTextField("Java executable", holder.javaExecutable);
+    private final JavaSettings javaSettings;
+
+    @Inject
+    public JavaTab(JavaSettings javaSettings) throws Exception {
+        this.javaSettings = javaSettings;
+        addTextField("Java executable", stringProperty(javaSettings, "javaExecutable"));
+    }
+
+    @Override
+    public JavaSettings getSettings() {
+        return javaSettings;
     }
 }

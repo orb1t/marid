@@ -16,11 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.scenes;
+package org.marid.ide.panes.main;
 
-import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
 import org.marid.ee.IdeSingleton;
-import org.marid.ide.panes.main.IdePane;
+import org.marid.ide.menu.IdeMenuToolbarPane;
+import org.marid.ide.panes.logging.LoggingPane;
+import org.marid.ide.status.IdeStatusBar;
 
 import javax.inject.Inject;
 
@@ -28,10 +30,10 @@ import javax.inject.Inject;
  * @author Dmitry Ovchinnikov
  */
 @IdeSingleton
-public class IdeScene extends Scene {
+public class IdePane extends BorderPane {
 
     @Inject
-    public IdeScene(IdePane idePane) {
-        super(idePane);
+    public IdePane(LoggingPane loggingPane, IdeMenuToolbarPane ideMenuToolbarPane, IdeStatusBar ideStatusBar) {
+        super(loggingPane, ideMenuToolbarPane, null, ideStatusBar, null);
     }
 }

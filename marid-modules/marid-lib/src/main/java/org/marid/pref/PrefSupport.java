@@ -41,9 +41,9 @@ public interface PrefSupport {
         final String fmt = load ? "Unable to load {0} of {1}" : "Unable to save {0} of {1}";
         final String k = nodes == null || nodes.length == 0 ? key : String.join(".", nodes) + "." + key;
         if (this instanceof LogSupport) {
-            ((LogSupport) this).log(Level.WARNING, fmt, error.getCause(), k, type);
+            ((LogSupport) this).log(Level.WARNING, fmt, error, k, type);
         } else {
-            Log.log(Level.WARNING, fmt, error.getCause(), k, type);
+            Log.log(Level.WARNING, fmt, error, k, type);
         }
     }
 

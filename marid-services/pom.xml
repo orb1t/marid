@@ -34,6 +34,7 @@
         <module>marid-proto</module>
         <module>marid-db</module>
         <module>marid-web</module>
+        <module>marid-runtime</module>
     </modules>
 
     <dependencies>
@@ -72,31 +73,6 @@
                             <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         </systemPropertyVariables>
                     </configuration>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <dependencies>
-                        <dependency>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>marid-assemblies</artifactId>
-                            <version>${project.version}</version>
-                        </dependency>
-                    </dependencies>
-                    <executions>
-                        <execution>
-                            <id>make-dist</id>
-                            <goals>
-                                <goal>single</goal>
-                            </goals>
-                            <phase>package</phase>
-                            <configuration>
-                                <descriptorRefs>
-                                    <descriptorRef>marid-service</descriptorRef>
-                                </descriptorRefs>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

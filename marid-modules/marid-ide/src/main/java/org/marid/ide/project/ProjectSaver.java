@@ -16,22 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.scenes;
+package org.marid.ide.project;
 
-import javafx.scene.Scene;
-import org.marid.ee.IdeSingleton;
-import org.marid.ide.panes.main.IdePane;
-
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
-public class IdeScene extends Scene {
+@Dependent
+public class ProjectSaver {
+
+    private final ProjectPrerequisites projectPrerequisites;
 
     @Inject
-    public IdeScene(IdePane idePane) {
-        super(idePane);
+    public ProjectSaver(ProjectPrerequisites projectPrerequisites) {
+        this.projectPrerequisites = projectPrerequisites;
+    }
+
+    public void save(ProjectProfile profile) {
+        projectPrerequisites.apply(profile);
+        profile.save();
     }
 }

@@ -23,38 +23,49 @@ import javafx.scene.control.*;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import org.marid.ide.scenes.IdeScene;
-import org.marid.ide.settings.SettingsHolder;
-import org.marid.ide.settings.SettingsManager;
+import org.marid.ide.settings.AbstractSettings;
 import org.marid.l10n.L10nSupport;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Dependent
-public class SettingsDialog extends Dialog<SettingsHolder> implements L10nSupport {
+public class SettingsDialog extends Dialog<ButtonType> implements L10nSupport {
 
     @Inject
-    public SettingsDialog(IdeScene ideScene, SettingsManager settingsManager) {
-        final SettingsHolder settingsHolder = new SettingsHolder(settingsManager.preferences());
+    public SettingsDialog(IdeScene ideScene, Instance<SettingsEditor> editors) {
         final DialogPane dialogPane = getDialogPane();
         dialogPane.setPrefSize(800, 600);
-        dialogPane.setContent(tabPane(settingsHolder));
+        dialogPane.setContent(tabPane(editors));
         dialogPane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.APPLY);
         setTitle(s("IDE settings"));
         initModality(Modality.WINDOW_MODAL);
         initOwner(ideScene.getWindow());
         setResizable(true);
-        setResultConverter(type -> type == ButtonType.APPLY ? settingsHolder : null);
+        final Map<AbstractSettings, byte[]> snapshot = StreamSupport.stream(editors.spliterator(), false)
+                .collect(Collectors.toMap(SettingsEditor::getSettings, e -> e.getSettings().save()));
+        setResultConverter(param -> {
+            switch (param.getButtonData()) {
+                case CANCEL_CLOSE:
+                    snapshot.forEach(AbstractSettings::load);
+                    return null;
+                default:
+                    return param;
+            }
+        });
     }
 
-    private TabPane tabPane(SettingsHolder settingsHolder) {
-        final TabPane tabPane = new TabPane(
-                new Tab(s("Common"), new CommonTab(settingsHolder)),
-                new Tab("Java", new JavaTab(settingsHolder))
-        );
+    private TabPane tabPane(Instance<? extends SettingsEditor> editors) {
+        final TabPane tabPane = new TabPane(StreamSupport.stream(editors.spliterator(), false)
+                .map(editor -> new Tab(s(editor.getSettings().getName()), editor.getNode()))
+                .toArray(Tab[]::new));
         for (final Tab tab : tabPane.getTabs()) {
             ((Region) tab.getContent()).setPadding(new Insets(10, 0, 10, 0));
             tab.getContent().setStyle("-fx-background-color: -fx-background");

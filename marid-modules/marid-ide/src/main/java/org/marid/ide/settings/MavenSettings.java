@@ -18,30 +18,31 @@
 
 package org.marid.ide.settings;
 
-import de.jensd.fx.glyphs.octicons.OctIcon;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import org.marid.ide.menu.IdeMenuItem;
-import org.marid.ide.settings.editors.SettingsDialog;
-import org.marid.ide.toolbar.IdeToolbarItem;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Provider;
+import org.marid.ee.IdeSingleton;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@ApplicationScoped
-public class SettingsManager {
+@IdeSingleton
+public class MavenSettings extends AbstractSettings {
 
-    @Produces
-    @IdeToolbarItem(group = "settings")
-    @IdeMenuItem(menu = "Tools", text = "Settings...", group = "settings", oIcons = {OctIcon.SETTINGS})
-    public EventHandler<ActionEvent> settingsItem(Provider<SettingsDialog> settingsDialogProvider) {
-        return event -> {
-            final SettingsDialog settingsDialog = settingsDialogProvider.get();
-            settingsDialog.showAndWait();
-        };
+    public MavenSettings() {
+        super("Maven");
+    }
+
+    public String getSnapshotUpdatePolicy() {
+        return getPref(String.class, "snapshotUpdatePolicy", null);
+    }
+
+    public void setSnapshotUpdatePolicy(String value) {
+        putPref(String.class, "snapshotUpdatePolicy", value);
+    }
+
+    public String getReleaseUpdatePolicy() {
+        return getPref(String.class, "releaseUpdatePolicy", null);
+    }
+
+    public void setReleaseUpdatePolicy(String value) {
+        putPref(String.class, "releaseUpdatePolicy", value);
     }
 }

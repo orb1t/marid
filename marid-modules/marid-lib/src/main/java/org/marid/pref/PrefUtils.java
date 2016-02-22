@@ -18,6 +18,8 @@
 
 package org.marid.pref;
 
+import org.marid.util.Utils;
+
 import java.util.prefs.Preferences;
 
 /**
@@ -43,10 +45,6 @@ public class PrefUtils {
         return prefs;
     }
 
-    public static Preferences preferences(String... nodes) {
-        return preferences(PrefUtils.class, nodes);
-    }
-
     public static <T> T getPref(Preferences preferences, Class<T> type, String key, T def, String... nodes) {
         Preferences p = preferences;
         for (final String node : nodes) {
@@ -59,20 +57,15 @@ public class PrefUtils {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> T getPref(Preferences preferences, String key, T def, String... nodes) {
-        Preferences p = preferences;
-        for (final String node : nodes) {
-            p = p.node(node);
-        }
-        try {
-            return PrefCodecs.getReader((Class<T>)def.getClass()).load(p, key, def);
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
+        return getPref(preferences, Utils.cast(def.getClass()), key, def, nodes);
     }
 
     public static <T> void putPref(Preferences preferences, Class<T> type, String key, T value, String... nodes) {
+        if (value == null) {
+            preferences.remove(key);
+            return;
+        }
         Preferences p = preferences;
         for (final String node : nodes) {
             p = p.node(node);
@@ -84,16 +77,7 @@ public class PrefUtils {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static void putPref(Preferences preferences, String key, Object value, String... nodes) {
-        Preferences p = preferences;
-        for (final String node : nodes) {
-            p = p.node(node);
-        }
-        try {
-            PrefCodecs.getWriter((Class) value.getClass()).save(p, key, value);
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
+        putPref(preferences, Utils.cast(value.getClass()), key, value, nodes);
     }
 }

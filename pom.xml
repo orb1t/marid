@@ -237,7 +237,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.5</version>
+                    <version>3.5.1</version>
                     <configuration>
                         <showWarnings>true</showWarnings>
                         <showDeprecation>true</showDeprecation>

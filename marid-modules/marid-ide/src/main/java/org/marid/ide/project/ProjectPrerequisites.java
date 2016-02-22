@@ -23,8 +23,7 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.Prerequisites;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.marid.ide.settings.SettingsHolder;
-import org.marid.ide.settings.SettingsManager;
+import org.marid.ide.settings.JavaSettings;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -38,11 +37,11 @@ import java.util.function.Consumer;
 @Dependent
 public class ProjectPrerequisites {
 
-    private final SettingsHolder settingsHolder;
+    private final JavaSettings javaSettings;
 
     @Inject
-    public ProjectPrerequisites(SettingsManager settingsManager) {
-        settingsHolder = new SettingsHolder(settingsManager.preferences());
+    public ProjectPrerequisites(JavaSettings javaSettings) {
+        this.javaSettings = javaSettings;
     }
 
     void apply(ProjectProfile profile) {
@@ -101,7 +100,7 @@ public class ProjectPrerequisites {
         runInIdeExecution.setConfiguration(configuration);
         {
             final Xpp3Dom executable = new Xpp3Dom("executable");
-            executable.setValue(settingsHolder.javaExecutable.getValue());
+            executable.setValue(javaSettings.getJavaExecutable());
             configuration.addChild(executable);
         }
         {
@@ -121,7 +120,7 @@ public class ProjectPrerequisites {
                 argument.setValue(v);
                 arguments.addChild(argument);
             };
-            for (final String arg : settingsHolder.javaArguments.getValue()) {
+            for (final String arg : javaSettings.getJavaArguments()) {
                 argGenerator.accept(arg);
             }
             argGenerator.accept("-jar");
