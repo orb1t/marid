@@ -45,4 +45,36 @@ public class MavenSettings extends AbstractSettings {
     public void setReleaseUpdatePolicy(String value) {
         putPref(String.class, "releaseUpdatePolicy", value);
     }
+
+    public String getDependencyPluginVersion() {
+        return getPref("dependencyPluginVersion", "2.10");
+    }
+
+    public void setDependencyPluginVersion(String value) {
+        putPref("dependencyPluginVersion", value);
+    }
+
+    public String getCompilerPluginVersion() {
+        return getPref("compilerPluginVersion", "3.5.1");
+    }
+
+    public void setCompilerPluginVersion(String value) {
+        putPref("compilerPluginVersion", value);
+    }
+
+    public String getEclipseCompilerVersion() {
+        return getPref("eclipseCompilerVersion", "2.7");
+    }
+
+    public void setEclipseCompilerVersion(String value) {
+        putPref("eclipseCompilerVersion", value);
+    }
+
+    public String getJarPluginVersion() {
+        return getPref("jarPluginVersion", "2.6");
+    }
+
+    public void setJarPluginVersion(String value) {
+        putPref("jarPluginVersion", value);
+    }
 }

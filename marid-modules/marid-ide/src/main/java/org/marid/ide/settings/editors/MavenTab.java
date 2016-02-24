@@ -39,6 +39,11 @@ public class MavenTab extends AbstractGridPane implements SettingsEditor {
         this.mavenSettings = mavenSettings;
         addTextField("Releases update policy by default", stringProperty(mavenSettings, "releaseUpdatePolicy"));
         addTextField("Snapshots update policy by default", stringProperty(mavenSettings, "snapshotUpdatePolicy"));
+        addSeparator();
+        addTextField("Dependency plugin version", stringProperty(mavenSettings, "dependencyPluginVersion"));
+        addTextField("Compiler plugin version", stringProperty(mavenSettings, "compilerPluginVersion"));
+        addTextField("Eclipse compiler version", stringProperty(mavenSettings, "eclipseCompilerVersion"));
+        addTextField("JAR plugin version", stringProperty(mavenSettings, "jarPluginVersion"));
     }
 
     @Override

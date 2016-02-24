@@ -18,19 +18,24 @@
 
 package org.marid.runtime;
 
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.support.GenericApplicationContext;
 
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 class MaridInputHandler {
 
-    static void handleInput(GenericApplicationContext applicationContext) {
+    static void handleInput(ConfigurableApplicationContext applicationContext) {
+        final Logger logger = Logger.getLogger("marid");
         applicationContext.addApplicationListener(event -> {
+            logger.log(Level.INFO, "{0}", event);
             if (event instanceof ContextClosedEvent) {
+                System.out.println("###Closed###");
                 try {
                     System.in.close();
                 } catch (Exception x) {

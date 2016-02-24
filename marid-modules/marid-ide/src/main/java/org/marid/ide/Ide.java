@@ -25,7 +25,6 @@ import javafx.stage.Stage;
 import org.jboss.logmanager.LogManager;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
-import org.marid.ide.extensions.TemporaryExtension;
 import org.marid.ide.panes.logging.IdeLogHandler;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.jfx.Configurable;
@@ -69,7 +68,6 @@ public class Ide extends Application implements L10nSupport, LogSupport, Configu
         primaryStage.getIcons().addAll(IntStream.of(16, 24, 32)
                 .mapToObj(n -> maridIcon(n, GREEN))
                 .toArray(Image[]::new));
-        container.getBeanManager().fireEvent(new TemporaryExtension.TemporaryClean());
         primaryStage.show();
     }
 

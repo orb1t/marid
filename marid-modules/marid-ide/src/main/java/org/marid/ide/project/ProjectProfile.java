@@ -70,9 +70,9 @@ public class ProjectProfile implements LogSupport {
         srcTestJava = srcTest.resolve("java");
         srcTestResources = srcTest.resolve("resources");
         repository = path.resolve(".repo");
+        logger = Logger.getLogger(getName());
         model = loadModel();
         model.setModelVersion("4.0.0");
-        logger = Logger.getLogger(getName());
     }
 
     private Model loadModel() {
@@ -103,6 +103,10 @@ public class ProjectProfile implements LogSupport {
 
     public Path getRepository() {
         return repository;
+    }
+
+    public Path getTarget() {
+        return target;
     }
 
     public String getName() {

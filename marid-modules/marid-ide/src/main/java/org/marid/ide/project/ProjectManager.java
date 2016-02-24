@@ -29,6 +29,7 @@ import org.apache.maven.model.merge.MavenModelMerger;
 import org.apache.maven.model.merge.ModelMerger;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.project.editors.ProjectDialog;
+import org.marid.ide.project.runner.ProjectRunner;
 import org.marid.ide.toolbar.IdeToolbarItem;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
@@ -116,7 +117,7 @@ public class ProjectManager implements PrefSupport, LogSupport {
     @IdeToolbarItem(group = "projectIO")
     public EventHandler<ActionEvent> projectSave(Provider<ProjectSaver> projectSaverProvider) {
         return event -> callWithTime(
-                () -> projectSaverProvider.get().save(profile),
+                () -> projectSaverProvider.get().save(),
                 time -> log(INFO, "Profile [{0}] saved in {1} ms", profile, time));
     }
 
@@ -126,10 +127,10 @@ public class ProjectManager implements PrefSupport, LogSupport {
     public EventHandler<ActionEvent> projectBuild(Provider<ProjectProfile> profileProvider) {
         return event -> {
             final ProjectProfile profile = profileProvider.get();
-            final ProjectBuilder projectBuilder = new ProjectBuilder(profile)
+            final MavenProjectBuilder mavenProjectBuilder = new MavenProjectBuilder(profile)
                     .goals("clean", "install");
             try {
-                projectBuilder.build();
+                mavenProjectBuilder.build();
             } catch (Exception x) {
                 log(WARNING, "Unable to build", x);
             }
@@ -139,16 +140,10 @@ public class ProjectManager implements PrefSupport, LogSupport {
     @Produces
     @IdeMenuItem(menu = "Project", text = "Run", group = "pb", faIcons = {FontAwesomeIcon.PLAY}, key = "F5")
     @IdeToolbarItem(group = "projectBuild")
-    public EventHandler<ActionEvent> projectRun(Provider<ProjectProfile> profileProvider) {
+    public EventHandler<ActionEvent> projectRun(Provider<ProjectRunner> projectRunnerProvider) {
         return event -> {
-            final ProjectProfile profile = profileProvider.get();
-            final ProjectBuilder projectBuilder = new ProjectBuilder(profile)
-                    .goals("clean", "compile", "exec:exec@run-in-ide");
-            try {
-                projectBuilder.build();
-            } catch (Exception x) {
-                log(WARNING, "Unable to run", x);
-            }
+            final ProjectRunner projectRunner = projectRunnerProvider.get();
+            projectRunner.show();
         };
     }
 

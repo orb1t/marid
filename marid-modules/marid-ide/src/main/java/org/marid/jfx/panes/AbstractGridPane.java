@@ -20,6 +20,7 @@ package org.marid.jfx.panes;
 
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -43,17 +44,27 @@ public class AbstractGridPane extends GridPane implements L10nSupport {
         setHgap(10);
     }
 
+    protected int getNextRowIndex() {
+        return getChildren().stream().mapToInt(c -> c instanceof Separator ? 2 : 1).sum() / 2;
+    }
+
     protected void addTextField(String text, StringProperty stringProperty) {
         final TextField textField = new TextField();
         textField.textProperty().bindBidirectional(stringProperty);
         final Label label = new Label(s(text) + ": ");
-        addRow(getChildren().size() / 2, label, textField);
+        addRow(getNextRowIndex(), label, textField);
     }
 
     protected void addTextField(String text, Object bean, String property) {
         final TextField textField = new TextField();
         textField.textProperty().bindBidirectional(stringProperty(bean, property));
         final Label label = new Label(s(text) + ": ");
-        addRow(getChildren().size() / 2, label, textField);
+        addRow(getNextRowIndex(), label, textField);
+    }
+
+    protected void addSeparator() {
+        final Separator separator = new Separator();
+        separator.setPrefWidth(Double.MAX_VALUE);
+        add(separator, 0, getNextRowIndex(), 2, 1);
     }
 }

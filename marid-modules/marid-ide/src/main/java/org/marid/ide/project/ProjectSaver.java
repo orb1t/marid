@@ -34,8 +34,8 @@ public class ProjectSaver {
         this.projectPrerequisites = projectPrerequisites;
     }
 
-    public void save(ProjectProfile profile) {
-        projectPrerequisites.apply(profile);
-        profile.save();
+    public void save() {
+        projectPrerequisites.apply();
+        projectPrerequisites.getProfile().save();
     }
 }

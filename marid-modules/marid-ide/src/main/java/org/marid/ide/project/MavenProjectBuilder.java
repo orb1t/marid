@@ -50,19 +50,19 @@ import java.util.logging.LogRecord;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProjectBuilder implements LogSupport {
+public class MavenProjectBuilder implements LogSupport {
 
     private final ProjectProfile profile;
     private final Consumer<LogRecord> logRecordConsumer;
     private final Map<String, ProjectPlexusLogger> loggerMap = new ConcurrentHashMap<>();
     private final List<String> goals = new ArrayList<>();
 
-    public ProjectBuilder(ProjectProfile profile, Consumer<LogRecord> logRecordConsumer) {
+    public MavenProjectBuilder(ProjectProfile profile, Consumer<LogRecord> logRecordConsumer) {
         this.profile = profile;
         this.logRecordConsumer = logRecordConsumer;
     }
 
-    public ProjectBuilder(ProjectProfile profile) {
+    public MavenProjectBuilder(ProjectProfile profile) {
         this(profile, profile.logger()::log);
     }
 
@@ -70,7 +70,7 @@ public class ProjectBuilder implements LogSupport {
         return loggerMap.computeIfAbsent(name, k -> new ProjectPlexusLogger(k, logRecordConsumer));
     }
 
-    public ProjectBuilder goals(String... goals) {
+    public MavenProjectBuilder goals(String... goals) {
         Collections.addAll(this.goals, goals);
         return this;
     }
@@ -129,7 +129,7 @@ public class ProjectBuilder implements LogSupport {
                 .setCacheTransferError(false);
     }
 
-    public void build() throws Exception {
+    public Thread build() throws Exception {
         final PlexusContainer plexusContainer = buildPlexusContainer();
         final MavenExecutionRequest mavenExecutionRequest = mavenExecutionRequest(plexusContainer);
         final Maven maven = plexusContainer.lookup(Maven.class);
@@ -144,9 +144,9 @@ public class ProjectBuilder implements LogSupport {
                 log(WARNING, "Unable to execute maven", x);
             } finally {
                 plexusContainer.dispose();
-                loggerMap.clear();
             }
         });
         thread.start();
+        return thread;
     }
 }

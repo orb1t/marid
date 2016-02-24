@@ -19,7 +19,7 @@
 package org.marid.runtime;
 
 import org.jboss.logmanager.LogManager;
-import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 
 import java.util.TimeZone;
@@ -29,18 +29,22 @@ import java.util.TimeZone;
  */
 public class MaridLauncher {
 
-    public static void main(String... args) {
+    public static void main(String... args) throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
-        final GenericXmlApplicationContext context = new GenericXmlApplicationContext();
-        context.load("classpath:*/META-INF/marid/**/*.xml");
+        final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext();
+        context.setConfigLocation("classpath*:/META-INF/marid/**/*.xml");
         context.setClassLoader(Thread.currentThread().getContextClassLoader());
         context.setAllowCircularReferences(false);
         context.getEnvironment().getPropertySources().addFirst(new SimpleCommandLinePropertySource(args));
         Runtime.getRuntime().addShutdownHook(new Thread(context::close));
         MaridSignalHandler.install(context::close);
-        context.refresh();
-        context.start();
         MaridInputHandler.handleInput(context);
+        try {
+            context.refresh();
+            context.start();
+        } catch (Exception x) {
+            System.in.close();
+        }
     }
 }

@@ -20,14 +20,14 @@ package org.marid.ide.project;
 
 import org.apache.maven.model.*;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.marid.ide.settings.JavaSettings;
+import org.marid.ide.settings.MavenSettings;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+
+import static java.util.Collections.singletonList;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,52 +35,62 @@ import java.util.Properties;
 @Dependent
 public class ProjectPrerequisites {
 
-    private final JavaSettings javaSettings;
+    private final MavenSettings mavenSettings;
+    private final ProjectProfile profile;
+    private final Model model;
 
     @Inject
-    public ProjectPrerequisites(JavaSettings javaSettings) {
-        this.javaSettings = javaSettings;
+    public ProjectPrerequisites(MavenSettings mavenSettings, ProjectProfile profile) {
+        this.mavenSettings = mavenSettings;
+        this.profile = profile;
+        this.model = profile.getModel();
     }
 
-    void apply(ProjectProfile profile) {
-        applyPrerequisites(profile);
-        applyProperties(profile);
-        applyBuild(profile);
-        applyPluginManagement(profile);
-        applyPlugins(profile);
-        applyRuntimeDependency(profile);
+    public ProjectProfile getProfile() {
+        return profile;
     }
 
-    void applyPrerequisites(ProjectProfile profile) {
+    public void apply() {
+        applyPrerequisites();
+        applyProperties();
+        applyBuild();
+        applyPluginManagement();
+        applyPlugins();
+        applyRuntimeDependency();
+    }
+
+    void applyPrerequisites() {
         final Prerequisites prerequisites = new Prerequisites();
         prerequisites.setMaven("3.3");
-        profile.getModel().setPrerequisites(prerequisites);
+        model.setPrerequisites(prerequisites);
     }
 
-    void applyProperties(ProjectProfile profile) {
+    void applyProperties() {
         final Properties properties = profile.getModel().getProperties();
         properties.setProperty("project.build.sourceEncoding", "UTF-8");
         properties.setProperty("project.reporting.outputEncoding", "UTF-8");
+        properties.setProperty("maven.compiler.source", "1.8");
+        properties.setProperty("maven.compiler.target", "1.8");
         if (!properties.containsKey("marid.runtime.version")) {
             properties.setProperty("marid.runtime.version", System.getProperty("implementation.version"));
         }
     }
 
-    void applyBuild(ProjectProfile profile) {
-        if (profile.getModel().getBuild() == null) {
-            profile.getModel().setBuild(new Build());
+    void applyBuild() {
+        if (model.getBuild() == null) {
+            model.setBuild(new Build());
         }
     }
 
-    void applyPluginManagement(ProjectProfile profile) {
-        if (profile.getModel().getBuild().getPluginManagement() == null) {
-            profile.getModel().getBuild().setPluginManagement(new PluginManagement());
+    void applyPluginManagement() {
+        if (model.getBuild().getPluginManagement() == null) {
+            model.getBuild().setPluginManagement(new PluginManagement());
         }
-        applyExecMavenPluginManagement(profile);
+        applyExecMavenPluginManagement();
     }
 
-    void applyExecMavenPluginManagement(ProjectProfile profile) {
-        final PluginManagement pluginManagement = profile.getModel().getBuild().getPluginManagement();
+    void applyExecMavenPluginManagement() {
+        final PluginManagement pluginManagement = model.getBuild().getPluginManagement();
         pluginManagement.getPlugins().removeIf(p ->
                 "org.codehaus.mojo".equals(p.getGroupId()) && "exec-maven-plugin".equals(p.getArtifactId()));
         final Plugin plugin = new Plugin();
@@ -90,51 +100,78 @@ public class ProjectPrerequisites {
         pluginManagement.addPlugin(plugin);
     }
 
-    void applyPlugins(ProjectProfile profile) {
-        applyExecMavenPlugin(profile);
+    void applyPlugins() {
+        applyCompilerPlugin();
+        applyJarPlugin();
+        applyDependencyMavenPlugin();
     }
 
-    void applyExecMavenPlugin(ProjectProfile profile) {
-        final Plugin execMavenPlugin = profile.getModel().getBuild().getPlugins().stream()
-                .filter(p -> "org.codehaus.mojo".equals(p.getGroupId()))
-                .filter(p -> "exec-maven-plugin".equals(p.getArtifactId()))
+    void applyCompilerPlugin() {
+        model.getBuild().getPlugins().removeIf(p -> "maven-compiler-plugin".equals(p.getArtifactId()));
+        final Plugin plugin = new Plugin();
+        model.getBuild().getPlugins().add(plugin);
+        plugin.setArtifactId("maven-compiler-plugin");
+        plugin.setVersion(mavenSettings.getCompilerPluginVersion());
+        final Dependency dependency = new Dependency();
+        dependency.setGroupId("org.codehaus.plexus");
+        dependency.setArtifactId("plexus-compiler-eclipse");
+        dependency.setVersion(mavenSettings.getEclipseCompilerVersion());
+        plugin.getDependencies().add(dependency);
+        final Xpp3Dom configuration = new Xpp3Dom("configuration");
+        plugin.setConfiguration(configuration);
+        addChild(configuration, "compilerId", "eclipse");
+    }
+
+    void applyJarPlugin() {
+        model.getBuild().getPlugins().removeIf(p -> "maven-jar-plugin".equals(p.getArtifactId()));
+        final Plugin plugin = new Plugin();
+        plugin.setArtifactId("maven-jar-plugin");
+        plugin.setVersion(mavenSettings.getJarPluginVersion());
+        model.getBuild().getPlugins().add(plugin);
+        final Xpp3Dom configuration = new Xpp3Dom("configuration");
+        plugin.setConfiguration(configuration);
+        final Xpp3Dom archive = new Xpp3Dom("archive");
+        configuration.addChild(archive);
+        final Xpp3Dom manifest = new Xpp3Dom("manifest");
+        archive.addChild(manifest);
+        addChild(manifest, "addClasspath", "true");
+        addChild(manifest, "mainClass", "org.marid.runtime.MaridLauncher");
+        addChild(manifest, "classpathPrefix", "lib");
+        final Xpp3Dom manifestEntries = new Xpp3Dom("manifestEntries");
+        archive.addChild(manifestEntries);
+        addChild(manifestEntries, "Class-Path", "ext/");
+    }
+
+    void applyDependencyMavenPlugin() {
+        final Plugin dependencyPlugin = model.getBuild().getPlugins().stream()
+                .filter(p -> "maven-dependency-plugin".equals(p.getArtifactId()))
                 .findAny()
                 .orElseGet(() -> {
                     final Plugin plugin = new Plugin();
-                    plugin.setGroupId("org.codehaus.mojo");
-                    plugin.setArtifactId("exec-maven-plugin");
-                    profile.getModel().getBuild().getPlugins().add(plugin);
+                    plugin.setArtifactId("maven-dependency-plugin");
+                    model.getBuild().getPlugins().add(plugin);
                     return plugin;
                 });
-        final PluginExecution runInIdeExecution = execMavenPlugin.getExecutions().stream()
-                .filter(e -> "run-in-ide".equals(e.getId()))
+        final PluginExecution copyDependenciesExecution = dependencyPlugin.getExecutions().stream()
+                .filter(e -> "copy-deps".equals(e.getId()))
                 .findAny()
                 .orElseGet(() -> {
                     final PluginExecution execution = new PluginExecution();
-                    execution.setId("run-in-ide");
-                    execMavenPlugin.getExecutions().add(execution);
+                    execution.setId("copy-deps");
+                    dependencyPlugin.getExecutions().add(execution);
                     return execution;
                 });
-        runInIdeExecution.setPhase(null);
-        runInIdeExecution.setGoals(new ArrayList<>(Collections.singletonList("exec")));
+        copyDependenciesExecution.setPhase("package");
+        copyDependenciesExecution.setGoals(singletonList("copy-dependencies"));
         final Xpp3Dom configuration = new Xpp3Dom("configuration");
-        runInIdeExecution.setConfiguration(configuration);
-        addChild(configuration, "executable", javaSettings.getJavaExecutable());
-        addChild(configuration, "longClasspath", "true");
-        addChild(configuration, "workingDirectory", "${project.build.directory}");
-        addChild(configuration, "outputFile", "${project.build.directory}/output.log");
-        final Xpp3Dom arguments = new Xpp3Dom("arguments");
-        for (final String arg : javaSettings.getJavaArguments()) {
-            addChild(arguments, "argument", arg);
-        }
-        addChild(arguments, "argument", "-cp");
-        addChild(arguments, "classpath", null);
-        addChild(arguments, "argument", "org.marid.runtime.MaridLauncher");
-        configuration.addChild(arguments);
+        copyDependenciesExecution.setConfiguration(configuration);
+        addChild(configuration, "outputDirectory", "${project.build.directory}/lib");
+        addChild(configuration, "overWriteReleases", "true");
+        addChild(configuration, "overWriteSnapshots", "true");
     }
 
-    void applyRuntimeDependency(ProjectProfile profile) {
-        final List<Dependency> dependencies = profile.getModel().getDependencies();
+    void applyRuntimeDependency() {
+        final List<Dependency> dependencies = model.getDependencies();
         dependencies.removeIf(d -> "org.marid".equals(d.getGroupId()) && "marid-runtime".equals(d.getArtifactId()));
         final Dependency dependency = new Dependency();
         dependency.setGroupId("org.marid");
