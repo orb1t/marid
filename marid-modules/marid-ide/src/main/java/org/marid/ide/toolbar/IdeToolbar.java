@@ -102,12 +102,14 @@ public class IdeToolbar extends ToolBar implements LogSupport {
                 }
                 final CreationalContext<EventHandler<ActionEvent>> context = beanManager.createCreationalContext(bean);
                 button.setOnAction(bean.create(context));
+                button.setFocusTraversable(false);
                 buttonMap.computeIfAbsent(group, k -> new LinkedHashSet<>()).add(button);
             } catch (Exception x) {
                 log(WARNING, "Unable to create a toolbar item {0}", x, bean);
             }
         }
         nodes.forEach(node -> {
+            node.setFocusTraversable(false);
             final String group = Optional.ofNullable(node.getProperties().get("group")).map(String::valueOf).orElse("");
             buttonMap.computeIfAbsent(group, k -> new LinkedHashSet<>()).add(node);
         });

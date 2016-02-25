@@ -86,6 +86,7 @@ public class RepositoriesTab extends BorderPane {
         );
         setBottom(toolBar);
         setMargin(toolBar, new Insets(10, 0, 0, 0));
+        toolBar.getItems().forEach(item -> item.setFocusTraversable(false));
     }
 
     private static class RepositoryTable extends TableView<Repository> {

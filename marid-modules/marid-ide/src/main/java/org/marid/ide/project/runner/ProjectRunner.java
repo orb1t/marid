@@ -20,7 +20,6 @@ package org.marid.ide.project.runner;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.marid.ide.scenes.IdeScene;
 import org.marid.logging.LogSupport;
 
 import javax.enterprise.context.Dependent;
@@ -34,13 +33,13 @@ import java.util.concurrent.TimeUnit;
 public class ProjectRunner extends Stage implements LogSupport {
 
     @Inject
-    public ProjectRunner(IdeScene ideScene, ProjectRunnerPane runnerPane) {
-        initOwner(ideScene.getWindow());
+    public ProjectRunner(ProjectRunnerPane runnerPane) {
         setOnCloseRequest(event -> {
             setIconified(true);
             event.consume();
         });
         setScene(new Scene(runnerPane, 800, 600));
+        setMaximized(true);
         setTitle("[" + runnerPane.getProfile() + "]");
         setOnCloseRequest(event -> {
             boolean stopped = false;

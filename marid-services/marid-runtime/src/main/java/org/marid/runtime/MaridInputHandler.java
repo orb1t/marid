@@ -18,6 +18,7 @@
 
 package org.marid.runtime;
 
+import org.marid.io.IOConstants;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
 
@@ -35,7 +36,7 @@ class MaridInputHandler {
         applicationContext.addApplicationListener(event -> {
             logger.log(Level.INFO, "{0}", event);
             if (event instanceof ContextClosedEvent) {
-                System.out.println("###Closed###");
+                System.out.println(IOConstants.MARID_EXIT_LINE);
                 try {
                     System.in.close();
                 } catch (Exception x) {

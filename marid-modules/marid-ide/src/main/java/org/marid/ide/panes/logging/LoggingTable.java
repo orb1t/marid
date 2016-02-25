@@ -30,6 +30,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.marid.ide.icons.IdeIcons;
+import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10nSupport;
 
 import java.text.MessageFormat;
@@ -60,6 +61,7 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
             c.setStyle(oldStyle != null ? oldStyle + columnDefaultStyle : columnDefaultStyle);
         });
         getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        Tracks.track(this, getItems(), getSelectionModel());
     }
 
     private static IconDescriptor icon(Level level) {

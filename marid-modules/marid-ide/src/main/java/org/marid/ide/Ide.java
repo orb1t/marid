@@ -57,6 +57,10 @@ public class Ide extends Application implements L10nSupport, LogSupport, Configu
         }
     }
 
+    private Image[] maridIcons() {
+        return IntStream.of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new);
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         initBounds(primaryStage);
@@ -65,9 +69,7 @@ public class Ide extends Application implements L10nSupport, LogSupport, Configu
         primaryStage.setTitle(s("Marid IDE"));
         primaryStage.setScene(container.select(IdeScene.class).get());
         primaryStage.addEventHandler(WINDOW_CLOSE_REQUEST, e -> weld.shutdown());
-        primaryStage.getIcons().addAll(IntStream.of(16, 24, 32)
-                .mapToObj(n -> maridIcon(n, GREEN))
-                .toArray(Image[]::new));
+        primaryStage.getIcons().addAll(maridIcons());
         primaryStage.show();
     }
 

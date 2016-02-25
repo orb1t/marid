@@ -23,10 +23,12 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.settings.JavaSettings;
 import org.marid.io.ProcessManager;
+import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10nSupport;
 
 import javax.enterprise.context.Dependent;
@@ -37,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -63,21 +66,23 @@ public class ProjectRunnerPane extends BorderPane implements L10nSupport {
         final TabPane tabPane = new TabPane(
                 new Tab(s("Standard output"), outPane),
                 new Tab(s("Error output"), errPane));
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
+        tabPane.setFocusTraversable(false);
         process = process(profile, javaSettings);
         printStream = new PrintStream(process.getOutputStream(), true);
-        processManager = new ProcessManager(
-                profile.getName(),
-                process,
-                line -> Platform.runLater(() -> out.getItems().add(line)),
-                line -> Platform.runLater(() -> err.getItems().add(line)));
+        processManager = new ProcessManager(profile.getName(), process, consumer(out), consumer(err));
         setTop(new ProjectRunnerToolbar(this));
         setCenter(tabPane);
+    }
+
+    private Consumer<String> consumer(ListView<String> listView) {
+        return line -> Platform.runLater(() -> listView.getItems().add(line));
     }
 
     private static ListView<String> listView() {
         final ListView<String> listView = new ListView<>();
         listView.setStyle("-fx-font-family: monospace; -fx-font-size: small");
+        Tracks.track(listView, listView.getItems(), listView.getSelectionModel());
         return listView;
     }
 

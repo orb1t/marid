@@ -82,6 +82,7 @@ public class DependenciesTab extends BorderPane {
         );
         setBottom(toolBar);
         setMargin(toolBar, new Insets(10, 0, 0, 0));
+        toolBar.getItems().forEach(item -> item.setFocusTraversable(false));
     }
 
     public static void useDefaultDependencies(List<Dependency> dependencies) {
