@@ -80,7 +80,7 @@ public class IdeToolbar extends ToolBar implements LogSupport {
                 final GlyphIcon<?> toolbarIcon = Stream.of(ti.faIcons(), ti.mdIcons(), ti.mIcons(), ti.oIcons(), ti.wIcons())
                         .flatMap(Stream::of)
                         .findAny()
-                        .map(e -> IdeIcons.glyphIcon(e, 16))
+                        .map(e -> IdeIcons.glyphIcon(e, 20))
                         .orElse(null);
                 final GlyphIcon<?> menuIcon;
                 if (mi == null || toolbarIcon != null) {
@@ -89,7 +89,7 @@ public class IdeToolbar extends ToolBar implements LogSupport {
                     menuIcon = Stream.of(mi.faIcons(), mi.mdIcons(), mi.mIcons(), mi.oIcons(), mi.wIcons())
                             .flatMap(Stream::of)
                             .findAny()
-                            .map(e -> IdeIcons.glyphIcon(e, 16))
+                            .map(e -> IdeIcons.glyphIcon(e, 20))
                             .orElse(null);
                 }
                 final GlyphIcon<?> icon = toolbarIcon == null ? menuIcon : toolbarIcon;

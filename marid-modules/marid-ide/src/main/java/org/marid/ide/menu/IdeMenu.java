@@ -35,14 +35,11 @@ import org.marid.logging.LogSupport;
 import org.marid.util.Utils;
 
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.TransientReference;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
@@ -58,7 +55,7 @@ public class IdeMenu extends MenuBar implements L10nSupport, LogSupport {
     }
 
     @Inject
-    private void init(BeanManager beanManager, @TransientReference @IdeMenuItem Instance<MenuItem> items) {
+    private void init(BeanManager beanManager) {
         final Type type = new ParameterizedTypeImpl(EventHandler.class, ActionEvent.class);
         final Set<Bean<EventHandler<ActionEvent>>> beans = Utils.cast(beanManager.getBeans(type, AnyLiteral.INSTANCE));
         final Map<String, Map<String, Map<String, MenuItem>>> itemMap = new TreeMap<>();
@@ -93,16 +90,24 @@ public class IdeMenu extends MenuBar implements L10nSupport, LogSupport {
                 log(WARNING, "Unable to create menu item {0}", x, bean);
             }
         }
-        items.forEach(item -> {
-            final String group = Optional.ofNullable(item.getProperties().get("group")).map(String::valueOf).orElse("");
-            final String menu = Optional.ofNullable(item.getProperties().get("menu")).map(String::valueOf).orElse(null);
-            if (menu != null) {
-                itemMap
-                        .computeIfAbsent(menu, k -> new TreeMap<>())
-                        .computeIfAbsent(group, k -> new TreeMap<>())
-                        .put(Optional.ofNullable(item.getText()).orElse(""), item);
+        final Set<Bean<MenuItem>> itemBeans = Utils.cast(beanManager.getBeans(MenuItem.class, AnyLiteral.INSTANCE));
+        for (final Bean<MenuItem> bean : itemBeans) {
+            final IdeMenuItem mi = bean.getQualifiers().stream()
+                    .filter(IdeMenuItem.class::isInstance)
+                    .map(IdeMenuItem.class::cast)
+                    .findAny()
+                    .orElse(null);
+            if (mi == null || mi.menu().isEmpty()) {
+                continue;
             }
-        });
+            final CreationalContext<MenuItem> context = beanManager.createCreationalContext(bean);
+            final MenuItem menuItem = bean.create(context);
+            final String text = mi.text().isEmpty() && menuItem.getText() != null ? menuItem.getText() : mi.text();
+            itemMap
+                    .computeIfAbsent(mi.menu(), k -> new TreeMap<>())
+                    .computeIfAbsent(mi.group(), k -> new TreeMap<>())
+                    .put(text, menuItem);
+        }
         itemMap.forEach((menu, groupMap) -> {
             final Menu m = new Menu(s(menu));
             groupMap.forEach((group, menuItems) -> {

@@ -30,9 +30,12 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.marid.ide.icons.IdeIcons;
+import org.marid.ide.timers.IdeTimers;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10nSupport;
 
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -45,10 +48,12 @@ import java.util.logging.Logger;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Dependent
 public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
 
-    public LoggingTable() {
-        super(ideLogHandler().getLogRecords());
+    @Inject
+    public LoggingTable(IdeTimers timers, LoggingFilter loggingFilter) {
+        super(loggingFilter.filteredList(ideLogHandler(timers).getLogRecords()));
         final String columnDefaultStyle = "-fx-font-size: smaller";
         getColumns().add(levelColumn());
         getColumns().add(timestampColumn());
@@ -64,8 +69,12 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
         Tracks.track(this, getItems(), getSelectionModel());
     }
 
-    private static IconDescriptor icon(Level level) {
+    public static IconDescriptor icon(Level level) {
         switch (level.intValue()) {
+            case Integer.MAX_VALUE:
+                return new IconDescriptor(MaterialDesignIcon.SELECT_OFF, "red");
+            case Integer.MIN_VALUE:
+                return new IconDescriptor(MaterialDesignIcon.ARROW_ALL, "green");
             case 1000:
                 return new IconDescriptor(MaterialIcon.ERROR, "red");
             case 900:
@@ -73,7 +82,7 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
             case 800:
                 return new IconDescriptor(FontAwesomeIcon.INFO_CIRCLE, "blue");
             case 700:
-                return new IconDescriptor(MaterialIcon.CHECK, "green");
+                return new IconDescriptor(MaterialIcon.CONTROL_POINT, "green");
             case 500:
                 return new IconDescriptor(MaterialDesignIcon.BATTERY_60, "green");
             case 400:
@@ -85,10 +94,12 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
         }
     }
 
-    private static IdeLogHandler ideLogHandler() {
+    private static IdeLogHandler ideLogHandler(IdeTimers timers) {
         for (final Handler handler : Logger.getLogger("").getHandlers()) {
             if (handler instanceof IdeLogHandler) {
-                return (IdeLogHandler) handler;
+                final IdeLogHandler ideLogHandler = (IdeLogHandler) handler;
+                timers.schedule(100L, task -> ideLogHandler.flush());
+                return ideLogHandler;
             }
         }
         throw new NoSuchElementException(IdeLogHandler.class.getSimpleName());
@@ -170,10 +181,10 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
         return col;
     }
 
-    private static class IconDescriptor {
+    public static class IconDescriptor {
 
-        private final GlyphIcons icon;
-        private final String css;
+        public final GlyphIcons icon;
+        public final String css;
 
         private IconDescriptor(GlyphIcons icon, String css) {
             this.icon = icon;

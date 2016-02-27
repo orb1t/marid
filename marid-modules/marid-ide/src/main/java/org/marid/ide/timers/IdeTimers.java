@@ -18,6 +18,7 @@
 
 package org.marid.ide.timers;
 
+import org.marid.concurrent.MaridTimerTask;
 import org.marid.logging.LogSupport;
 
 import javax.annotation.PreDestroy;
@@ -35,43 +36,30 @@ public class IdeTimers implements LogSupport {
 
     private final Timer timer = new Timer();
 
-    private TimerTask timerTask(Consumer<TimerTask> task) {
-        return new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    task.accept(this);
-                } catch (Exception x) {
-                    log(WARNING, "Unable to execute {0}", x, task);
-                }
-            }
-        };
-    }
-
-    public TimerTask schedule(long delayMillis, long periodMillis, Consumer<TimerTask> task) {
-        final TimerTask timerTask = timerTask(task);
+    public TimerTask schedule(long delayMillis, long periodMillis, Consumer<MaridTimerTask> task) {
+        final TimerTask timerTask = new MaridTimerTask(task);
         timer.schedule(timerTask, delayMillis, periodMillis);
         return timerTask;
     }
 
-    public TimerTask schedule(long periodMillis, Consumer<TimerTask> task) {
+    public TimerTask schedule(long periodMillis, Consumer<MaridTimerTask> task) {
         return schedule(0L, periodMillis, task);
     }
 
-    public TimerTask delayed(long delayMillis, Consumer<TimerTask> task) {
-        final TimerTask timerTask = timerTask(task);
+    public TimerTask delayed(long delayMillis, Consumer<MaridTimerTask> task) {
+        final TimerTask timerTask = new MaridTimerTask(task);
         timer.schedule(timerTask, delayMillis);
         return timerTask;
     }
 
-    public TimerTask schedule(Date date, Consumer<TimerTask> task) {
-        final TimerTask timerTask = timerTask(task);
+    public TimerTask schedule(Date date, Consumer<MaridTimerTask> task) {
+        final TimerTask timerTask = new MaridTimerTask(task);
         timer.schedule(timerTask, date);
         return timerTask;
     }
 
-    public TimerTask schedule(Date date, long periodMillis, Consumer<TimerTask> task) {
-        final TimerTask timerTask = timerTask(task);
+    public TimerTask schedule(Date date, long periodMillis, Consumer<MaridTimerTask> task) {
+        final TimerTask timerTask = new MaridTimerTask(task);
         timer.schedule(timerTask, date, periodMillis);
         return timerTask;
     }

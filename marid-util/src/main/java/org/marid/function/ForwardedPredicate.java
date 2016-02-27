@@ -16,21 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.jfx;
+package org.marid.function;
 
-import javafx.scene.Node;
-import javafx.scene.control.ScrollPane;
+import java.util.function.Predicate;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ScrollPanes {
+public class ForwardedPredicate<T> implements Predicate<T> {
 
-    static ScrollPane scrollPane(Node node) {
-        final ScrollPane scrollPane = new ScrollPane(node);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
-        scrollPane.setStyle("-fx-background-color: transparent");
-        return scrollPane;
+    private final Predicate<T> delegate;
+
+    public ForwardedPredicate(Predicate<T> delegate) {
+        this.delegate = delegate;
+    }
+
+    @Override
+    public boolean test(T t) {
+        return delegate.test(t);
     }
 }

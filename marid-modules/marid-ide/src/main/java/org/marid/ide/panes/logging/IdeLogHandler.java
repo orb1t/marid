@@ -19,21 +19,27 @@
 package org.marid.ide.panes.logging;
 
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.pref.PrefSupport;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.prefs.PreferenceChangeListener;
+
+import static javafx.collections.FXCollections.observableArrayList;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class IdeLogHandler extends Handler implements PrefSupport {
 
-    private final ObservableList<LogRecord> logRecords = FXCollections.observableArrayList();
+    private final BlockingQueue<LogRecord> buffer = new LinkedBlockingQueue<>();
+    private final ObservableList<LogRecord> logRecords = observableArrayList();
     private final AtomicInteger maxLogRecords = new AtomicInteger(getPref("maxLogRecords", 10_000));
     private final PreferenceChangeListener preferenceChangeListener = evt -> {
         switch (evt.getKey()) {
@@ -49,18 +55,7 @@ public class IdeLogHandler extends Handler implements PrefSupport {
 
     @Override
     public void publish(LogRecord record) {
-        if (isLoggable(record)) {
-            if (Platform.isFxApplicationThread()) {
-                add(record);
-            } else {
-                Platform.runLater(() -> add(record));
-            }
-        }
-    }
-
-    private void add(LogRecord logRecord) {
-        logRecords.removeIf(r -> logRecords.size() >= maxLogRecords.get());
-        logRecords.add(logRecord);
+        buffer.add(record);
     }
 
     public ObservableList<LogRecord> getLogRecords() {
@@ -69,6 +64,18 @@ public class IdeLogHandler extends Handler implements PrefSupport {
 
     @Override
     public void flush() {
+        Platform.runLater(() -> {
+            final List<LogRecord> logRecords = new ArrayList<>();
+            buffer.drainTo(logRecords);
+            if (!logRecords.isEmpty()) {
+                this.logRecords.addAll(logRecords);
+                final int size = this.logRecords.size();
+                final int toRemove = size - maxLogRecords.get();
+                if (toRemove > 0) {
+                    this.logRecords.remove(0, toRemove);
+                }
+            }
+        });
     }
 
     @Override

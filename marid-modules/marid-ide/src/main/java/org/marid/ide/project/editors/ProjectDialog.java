@@ -19,7 +19,6 @@
 package org.marid.ide.project.editors;
 
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
@@ -32,6 +31,8 @@ import org.marid.pref.PrefSupport;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+
+import static org.marid.jfx.ScrollPanes.scrollPane;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -78,12 +79,5 @@ public class ProjectDialog extends Dialog<Model> implements PrefSupport, L10nSup
         }
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         return tabPane;
-    }
-
-    private ScrollPane scrollPane(Node node) {
-        final ScrollPane scrollPane = new ScrollPane(node);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
-        return scrollPane;
     }
 }
