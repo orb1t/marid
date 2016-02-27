@@ -18,7 +18,7 @@
 
 package org.marid.pref;
 
-import org.marid.functions.SafeFunction;
+import org.marid.function.SafeFunction;
 import org.marid.logging.LogSupport;
 import org.marid.util.StringUtils;
 import org.marid.util.Utils;

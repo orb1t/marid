@@ -33,6 +33,7 @@ public class MaridLauncher {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
         final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext();
+        context.addBeanFactoryPostProcessor(new MaridBeanFactoryPostProcessor());
         context.setConfigLocation("classpath*:/META-INF/marid/**/*.xml");
         context.setClassLoader(Thread.currentThread().getContextClassLoader());
         context.setAllowCircularReferences(false);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,26 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.xml;
 
-import java.util.function.Function;
+import javax.xml.bind.JAXBException;
+import java.util.function.BiConsumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @FunctionalInterface
-public interface SafeFunction<T, R> extends Function<T, R> {
+public interface JaxbBiConsumer<T, U> extends BiConsumer<T, U> {
 
     @Override
-    default R apply(T t) {
+    default void accept(T t, U u) {
         try {
-            return applyUnsafe(t);
-        } catch (RuntimeException x) {
-            throw x;
-        } catch (Exception x) {
+            jaxbAccept(t, u);
+        } catch (JAXBException x) {
             throw new IllegalStateException(x);
         }
     }
 
-    R applyUnsafe(T arg) throws Exception;
+    void jaxbAccept(T t, U u) throws JAXBException;
 }

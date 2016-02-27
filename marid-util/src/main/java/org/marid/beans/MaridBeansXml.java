@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,25 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.beans;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface SafeRunnable extends Runnable {
+@XmlRootElement(name = "beans")
+@XmlSeeAlso({MaridBeansXml.class})
+public class MaridBeansXml {
 
-    void runUnsafe() throws Exception;
+    @XmlElement(name = "bean")
+    public final List<MaridBeanXml> beans = new ArrayList<>();
 
     @Override
-    default void run() {
-        try {
-            runUnsafe();
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
-    }
-
-    static Runnable runnable(SafeRunnable runnable) {
-        return runnable;
+    public String toString() {
+        return getClass().getSimpleName() + beans;
     }
 }

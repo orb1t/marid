@@ -16,11 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.function;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface IOConstants {
+@FunctionalInterface
+public interface TriFunction<A1, A2, A3, R> {
 
+    R apply(A1 arg1, A2 arg2, A3 arg3);
 }

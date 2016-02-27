@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,20 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.function;
+
+import java.util.function.Predicate;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ReturnStringException extends ReturnException {
+@FunctionalInterface
+public interface SafePredicate<T> extends Predicate<T> {
 
-    public ReturnStringException(String value) {
-        super(value);
-    }
+    boolean testUnsafe(T arg) throws Exception;
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T getResult() {
-        return (T) getMessage();
+    default boolean test(T arg) {
+        try {
+            return testUnsafe(arg);
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
     }
 }

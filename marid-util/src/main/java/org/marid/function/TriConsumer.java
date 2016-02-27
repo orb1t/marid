@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,22 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.function;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ReturnObjectException extends ReturnException {
+@FunctionalInterface
+public interface TriConsumer<A1, A2, A3> {
 
-    private final Object result;
-
-    public ReturnObjectException(Object result) {
-        this.result = result;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T getResult() {
-        return (T) result;
-    }
+    void accept(A1 arg1, A2 arg2, A3 arg3);
 }

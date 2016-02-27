@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,23 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
-
-import java.util.function.BiFunction;
+package org.marid.function;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface SafeBiFunction<A1, A2, R> extends BiFunction<A1, A2, R> {
+public interface SafeRunnable extends Runnable {
 
-    R applyUnsafe(A1 a1, A2 a2) throws Exception;
+    void runUnsafe() throws Exception;
 
-    default R apply(A1 a1, A2 a2) {
+    @Override
+    default void run() {
         try {
-            return applyUnsafe(a1, a2);
+            runUnsafe();
         } catch (Exception x) {
             throw new IllegalStateException(x);
         }
+    }
+
+    static Runnable runnable(SafeRunnable runnable) {
+        return runnable;
     }
 }

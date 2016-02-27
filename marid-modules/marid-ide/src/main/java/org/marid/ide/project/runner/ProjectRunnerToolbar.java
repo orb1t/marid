@@ -19,12 +19,10 @@
 package org.marid.ide.project.runner;
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon;
-import javafx.collections.ListChangeListener.Change;
+import javafx.application.Platform;
 import javafx.scene.control.ToolBar;
 import org.marid.jfx.Buttons;
 import org.marid.logging.LogSupport;
-
-import static org.marid.io.IOConstants.MARID_EXIT_LINE;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,14 +34,16 @@ public class ProjectRunnerToolbar extends ToolBar implements LogSupport {
     public ProjectRunnerToolbar(ProjectRunnerPane pane) {
         this.pane = pane;
         getItems().add(Buttons.toolButton(null, "Exit", MaterialIcon.STOP, e -> pane.printStream.println("exit")));
-        pane.out.getItems().addListener((Change<? extends String> c) -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    if (c.getAddedSubList().stream().filter(MARID_EXIT_LINE::equals).findAny().isPresent()) {
-                        getItems().forEach(n -> n.setDisable(true));
-                    }
-                }
+        final Process process = pane.process;
+        final Thread watchThread = new Thread(null, () -> {
+            try {
+                final int result = process.waitFor();
+                log(INFO, "[{0}] exited with code {1}", pane.profile, result);
+                Platform.runLater(() -> getItems().forEach(e -> e.setDisable(true)));
+            } catch (InterruptedException x) {
+                log(WARNING, "Interrupted");
             }
-        });
+        }, "watchThread", 96L * 1024L);
+        watchThread.start();
     }
 }

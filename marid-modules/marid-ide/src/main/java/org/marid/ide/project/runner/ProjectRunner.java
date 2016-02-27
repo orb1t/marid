@@ -34,10 +34,6 @@ public class ProjectRunner extends Stage implements LogSupport {
 
     @Inject
     public ProjectRunner(ProjectRunnerPane runnerPane) {
-        setOnCloseRequest(event -> {
-            setIconified(true);
-            event.consume();
-        });
         setScene(new Scene(runnerPane, 800, 600));
         setMaximized(true);
         setTitle("[" + runnerPane.getProfile() + "]");
@@ -57,7 +53,6 @@ public class ProjectRunner extends Stage implements LogSupport {
                     }
                 }
             }
-            log(INFO, "[{0}] stopped: {1}", runnerPane.profile, stopped);
         });
     }
 }

@@ -16,11 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.spring.xml;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface IOConstants {
+@XmlRootElement(name = "constructor-arg")
+public class ConstructorArg {
 
+    @XmlAttribute(name = "name")
+    public String name;
+
+    @XmlAttribute(name = "type")
+    public String type;
+
+    @XmlAttribute(name = "index")
+    public int index;
+
+    @XmlAttribute(name = "value")
+    public String value;
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
 }

@@ -19,6 +19,7 @@
 package org.marid.misc;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -38,5 +39,10 @@ public class Builder<T> {
 
     public T build() {
         return builder;
+    }
+
+    public static <T> T build(T arg, Consumer<T> consumer) {
+        consumer.accept(arg);
+        return arg;
     }
 }

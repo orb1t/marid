@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,22 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.xml;
+
+import javax.xml.bind.JAXBException;
+import java.util.function.BiFunction;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ReturnException extends RuntimeException {
+@FunctionalInterface
+public interface JaxbBiFunction<T, U, R> extends BiFunction<T, U, R> {
 
-    public ReturnException(String message) {
-        super(message, null, false, false);
+    @Override
+    default R apply(T t, U u) {
+        try {
+            return jaxbApply(t, u);
+        } catch (JAXBException x) {
+            throw new IllegalStateException(x);
+        }
     }
 
-    public ReturnException() {
-        this(null);
-    }
-
-    public <T> T getResult() {
-        return null;
-    }
+    R jaxbApply(T t, U u) throws JAXBException;
 }

@@ -16,11 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.function;
+
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface IOConstants {
+@FunctionalInterface
+public interface SafeSupplier<T> extends Supplier<T> {
 
+    T getUnsafe() throws Exception;
+
+    @Override
+    default T get() {
+        try {
+            return getUnsafe();
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
+    }
 }

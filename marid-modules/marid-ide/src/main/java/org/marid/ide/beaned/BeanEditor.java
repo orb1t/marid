@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,24 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
+package org.marid.ide.beaned;
 
-import java.util.function.Supplier;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import org.marid.l10n.L10nSupport;
+import org.marid.logging.LogSupport;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface SafeSupplier<T> extends Supplier<T> {
+@Dependent
+public class BeanEditor extends Stage implements L10nSupport, LogSupport {
 
-    T getUnsafe() throws Exception;
-
-    @Override
-    default T get() {
-        try {
-            return getUnsafe();
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
+    @Inject
+    public BeanEditor(BeanEditorPane beanEditorPane) {
+        setScene(new Scene(beanEditorPane, 800, 600));
+        setTitle("[" + beanEditorPane.profile + "] " + s("New"));
+        setOnCloseRequest(event -> {
+            try {
+                beanEditorPane.classLoader.close();
+            } catch (Exception x) {
+                log(WARNING, "Unable to free resources", x);
+            }
+        });
     }
 }

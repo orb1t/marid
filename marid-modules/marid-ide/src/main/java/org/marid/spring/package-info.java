@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,13 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.functions;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface TriFunction<A1, A2, A3, R> {
+@XmlSchema(xmlns = {
+        @XmlNs(prefix = "context", namespaceURI = "http://www.springframework.org/schema/context"),
+        @XmlNs(prefix = "util", namespaceURI = "http://www.springframework.org/schema/util")
+})
+package org.marid.spring;
 
-    R apply(A1 arg1, A2 arg2, A3 arg3);
-}
+import javax.xml.bind.annotation.XmlNs;
+import javax.xml.bind.annotation.XmlSchema;

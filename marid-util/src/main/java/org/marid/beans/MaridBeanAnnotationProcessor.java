@@ -18,18 +18,21 @@
 
 package org.marid.beans;
 
+import org.marid.xml.XmlBind;
+
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
+import javax.xml.bind.Marshaller;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Formatter;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
+import static javax.tools.Diagnostic.Kind.NOTE;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 
 /**
@@ -51,20 +54,22 @@ public class MaridBeanAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        final AtomicBoolean first = new AtomicBoolean(true);
-        Formatter formatter = null;
         try {
+            final MaridBeansXml beansXml = new MaridBeansXml();
             for (final TypeElement te : annotations) {
                 for (final Element e : roundEnv.getElementsAnnotatedWith(te)) {
-                    if (formatter == null) {
-                        final FileObject beans = filer.createResource(CLASS_OUTPUT, "", "maridBeans.xml");
-                        formatter = new Formatter(new PrintWriter(beans.openWriter()));
-                    }
-                    if (first.compareAndSet(true, false)) {
-                        formatter.format("%s", e);
-                    } else {
-                        formatter.format("%n%s", e);
-                    }
+                    final MaridBean maridBean = e.getAnnotation(MaridBean.class);
+                    final MaridBeanXml maridBeanXml = new MaridBeanXml(maridBean);
+                    maridBeanXml.type = e.toString();
+                    beansXml.beans.add(maridBeanXml);
+                    messager.printMessage(NOTE, "Added bean " + maridBeanXml);
+                }
+            }
+            if (!beansXml.beans.isEmpty()) {
+                final FileObject beans = filer.createResource(CLASS_OUTPUT, "", "maridBeans.xml");
+                try (final OutputStream outputStream = beans.openOutputStream()) {
+                    XmlBind.save(beansXml, outputStream, Marshaller::marshal);
+                    messager.printMessage(NOTE, "Beans saved");
                 }
             }
             return true;
@@ -75,10 +80,6 @@ public class MaridBeanAnnotationProcessor extends AbstractProcessor {
             }
             messager.printMessage(ERROR, writer.getBuffer());
             return false;
-        } finally {
-            if (formatter != null) {
-                formatter.close();
-            }
         }
     }
 }
