@@ -37,6 +37,7 @@ public class IdeStatusProfile extends ComboBox<ProjectProfile> {
     public IdeStatusProfile(ProjectManager projectManager) {
         super(FXCollections.observableArrayList(projectManager.getProfiles()));
         getSelectionModel().select(projectManager.getProfile());
+        setFocusTraversable(false);
         setOnShowing(e -> {
             final Set<ProjectProfile> profiles = projectManager.getProfiles();
             getItems().retainAll(profiles);

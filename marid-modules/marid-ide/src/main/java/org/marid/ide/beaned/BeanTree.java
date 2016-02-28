@@ -16,22 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.root {
-    -fx-base: rgb(155, 220, 170);
-    -fx-background: rgb(160, 200, 170);
-    -fx-control-inner-background: derive(-fx-base, 70%);
-    -fx-control-inner-background-alt: derive(-fx-control-inner-background, 30%);
-    -fx-accent: rgb(50, 100, 80);
-    -fx-default-button: rgb(90, 120, 100);
-    -fx-focus-color: rgb(20, 90, 70);
-    -fx-faint-focus-color: derive(-fx-focus-color, 10%);
-    -fx-color: rgb(155, 199, 170);
-}
+package org.marid.ide.beaned;
 
-.table-row-cell {
-    -fx-background-color: -fx-background;
-}
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 
-.scroll-pane {
-    -fx-border-style: none;
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public class BeanTree extends TreeView<Object> {
+
+    public BeanTree() {
+        super(new TreeItem<>());
+        setShowRoot(false);
+    }
 }

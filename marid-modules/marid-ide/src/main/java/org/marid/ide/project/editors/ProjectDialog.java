@@ -68,7 +68,7 @@ public class ProjectDialog extends Dialog<Model> implements PrefSupport, L10nSup
 
     private TabPane tabPane(Model model) {
         final TabPane tabPane = new TabPane(
-                new Tab(s("Common"), new CommonTab(model)),
+                new Tab(s("Common"), scrollPane(new CommonTab(model))),
                 new Tab(s("Dependencies"), scrollPane(new DependenciesTab(model))),
                 new Tab(s("Repositories"), scrollPane(new RepositoriesTab(model))),
                 new Tab(s("Properties"), scrollPane(new PropertiesTab(model)))

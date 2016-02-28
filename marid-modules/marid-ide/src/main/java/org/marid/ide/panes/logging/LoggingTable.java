@@ -60,7 +60,7 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
         getColumns().add(messageColumn());
         getColumns().add(loggerColumn());
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
-        setStyle("-fx-font-size: small;");
+        setStyle("-fx-font-size: small; -fx-focus-color: transparent;");
         getColumns().forEach(c -> {
             final String oldStyle = c.getStyle();
             c.setStyle(oldStyle != null ? oldStyle + columnDefaultStyle : columnDefaultStyle);
