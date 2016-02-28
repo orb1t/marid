@@ -122,7 +122,7 @@ public class ProjectManager implements PrefSupport, LogSupport {
     }
 
     @Produces
-    @IdeMenuItem(menu = "Project", text = "Build", group = "pb", mdIcons = {MaterialDesignIcon.CLOCK_FAST}, key = "Ctrl+B")
+    @IdeMenuItem(menu = "Project", text = "Build", group = "pb", mdIcons = {MaterialDesignIcon.CLOCK_FAST}, key = "F9")
     @IdeToolbarItem(group = "projectBuild")
     public EventHandler<ActionEvent> projectBuild(Provider<ProjectProfile> profileProvider) {
         return event -> {

@@ -18,30 +18,26 @@
 
 package org.marid.ide.beaned;
 
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import de.jensd.fx.glyphs.octicons.OctIcon;
+import javafx.scene.layout.BorderPane;
+import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import static org.marid.jfx.ScrollPanes.scrollPane;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
-public class BeanEditor extends Stage implements L10nSupport, LogSupport {
+public class BeanBrowserPane extends BorderPane implements LogSupport, L10nSupport {
 
-    @Inject
-    public BeanEditor(BeanEditorPane beanEditorPane) {
-        setScene(new Scene(beanEditorPane, 1024, 768));
-        setTitle("[" + beanEditorPane.profile + "] " + s("New"));
-        setOnCloseRequest(event -> {
-            try {
-                beanEditorPane.classLoader.close();
-            } catch (Exception x) {
-                log(WARNING, "Unable to free resources", x);
-            }
-        });
+    public BeanBrowserPane(BeanEditorPane editorPane) {
+        final BeanBrowser beanBrowser = new BeanBrowser(editorPane);
+        setCenter(scrollPane(beanBrowser));
+        setTop(new ToolbarBuilder()
+                .add("Add bean", OctIcon.FILE_DIRECTORY_CREATE,
+                        event -> {},
+                        b -> b.disableProperty().bind(beanBrowser.getSelectionModel().selectedItemProperty().isNull()))
+                .build());
     }
 }

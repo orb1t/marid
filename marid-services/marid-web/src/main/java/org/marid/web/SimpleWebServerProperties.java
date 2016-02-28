@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean
+@MaridBean(icon = "M.WEB")
 public final class SimpleWebServerProperties {
 
     private String host = "0.0.0.0";

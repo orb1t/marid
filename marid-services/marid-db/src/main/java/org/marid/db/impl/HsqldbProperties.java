@@ -18,6 +18,7 @@
 
 package org.marid.db.impl;
 
+import org.marid.beans.MaridBean;
 import org.marid.misc.Calls;
 
 import java.io.File;
@@ -26,6 +27,7 @@ import java.net.URI;
 /**
  * @author Dmitry Ovchinnikov.
  */
+@MaridBean(icon = "M.DATA_USAGE")
 public final class HsqldbProperties {
 
     private File directory = new File("daqDatabase");

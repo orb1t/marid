@@ -18,7 +18,6 @@
 
 package org.marid.ide.beaned;
 
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import org.marid.ide.project.ProjectProfile;
@@ -34,8 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-import static org.marid.jfx.ScrollPanes.scrollPane;
-
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -44,16 +41,16 @@ public class BeanEditorPane extends BorderPane implements LogSupport {
 
     final ProjectProfile profile;
     final URLClassLoader classLoader;
-    final BeanBrowser beanBrowser;
-    final BeanTree beanTree;
+    final BeanBrowserPane beanBrowserPane;
+    final BeanTreePane beanTreePane;
 
     @Inject
     public BeanEditorPane(ProjectProfile projectProfile) {
         profile = projectProfile;
         classLoader = classLoader(projectProfile);
-        final ScrollPane beanBrowserPane = scrollPane(beanBrowser = new BeanBrowser(classLoader));
-        final ScrollPane beanTreePane = scrollPane(beanTree = new BeanTree());
-        final SplitPane splitPane = new SplitPane(beanTreePane, beanBrowserPane);
+        final SplitPane splitPane = new SplitPane(
+                beanTreePane = new BeanTreePane(this),
+                beanBrowserPane = new BeanBrowserPane(this));
         splitPane.setDividerPositions(0.6, 0.4);
         setCenter(splitPane);
     }

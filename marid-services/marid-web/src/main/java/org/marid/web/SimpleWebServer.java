@@ -41,7 +41,7 @@ import static org.marid.concurrent.ThreadPools.CALLER_RUNS_POLICY;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean
+@MaridBean(icon = "MD.WEB")
 public class SimpleWebServer implements Closeable, LogSupport {
 
     private final HttpServer httpServer;

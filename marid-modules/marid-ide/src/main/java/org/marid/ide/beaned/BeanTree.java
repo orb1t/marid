@@ -26,8 +26,11 @@ import javafx.scene.control.TreeView;
  */
 public class BeanTree extends TreeView<Object> {
 
-    public BeanTree() {
+    private final BeanEditorPane editorPane;
+
+    public BeanTree(BeanEditorPane editorPane) {
         super(new TreeItem<>());
+        this.editorPane = editorPane;
         setShowRoot(false);
     }
 }

@@ -18,11 +18,12 @@
 
 package org.marid.db.generator;
 
+import org.marid.beans.MaridBean;
+import org.marid.concurrent.MaridTimerTask;
 import org.marid.db.dao.NumericWriter;
 import org.marid.db.data.DataRecord;
 import org.marid.db.data.DataRecordKey;
 import org.marid.logging.LogSupport;
-import org.marid.concurrent.MaridTimerTask;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -38,6 +39,7 @@ import static java.util.Collections.singletonList;
 /**
  * @author Dmitry Ovchinnikov.
  */
+@MaridBean(icon = "MD.DATABASE_PLUS")
 public class RandomNumericDaqGenerator implements LogSupport {
 
     private final NumericWriter numericWriter;

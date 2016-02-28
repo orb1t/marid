@@ -22,13 +22,14 @@ import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
-import javafx.scene.control.*;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.BorderPane;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
-import org.marid.ide.icons.IdeIcons;
 import org.marid.jfx.Props;
+import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.util.Builder;
 
 import java.util.Collections;
@@ -42,47 +43,23 @@ public class DependenciesTab extends BorderPane {
     public DependenciesTab(Model model) {
         final DependencyTable dependencyTable = new DependencyTable(model);
         setCenter(dependencyTable);
-        final ToolBar toolBar = new ToolBar(
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.ADD, 20)))
-                        .$(Button::setTooltip, new Tooltip("Add item"))
-                        .$(Button::setOnAction, event -> {
-                            final Dependency dependency = new Dependency();
-                            dependencyTable.getItems().add(dependency);
-                        })
-                        .build(),
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.REMOVE, 20)))
-                        .$(Button::setTooltip, new Tooltip("Remove item"))
-                        .$(Button::setOnAction, event -> {
-                            final int index = dependencyTable.getSelectionModel().getSelectedIndex();
-                            if (index >= 0) {
-                                dependencyTable.getItems().remove(index);
-                            }
-                        })
-                        .build(),
-                new Separator(),
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.CLEAR_ALL, 20)))
-                        .$(Button::setTooltip, new Tooltip("Clear all items"))
-                        .$(Button::setOnAction, event -> dependencyTable.getItems().clear())
-                        .build(),
-                new Separator(),
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.BOOKMARK, 20)))
-                        .$(Button::setTooltip, new Tooltip("Use defaults"))
-                        .$(Button::setOnAction, event -> useDefaultDependencies(dependencyTable.getItems()))
-                        .build(),
-                new Separator(),
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.CONTENT_CUT, 20)))
-                        .$(Button::setTooltip, new Tooltip("Cut"))
-                        .build(),
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.CONTENT_COPY, 20)))
-                        .$(Button::setTooltip, new Tooltip("Copy"))
-                        .build(),
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.CONTENT_PASTE, 20)))
-                        .$(Button::setTooltip, new Tooltip("Paste"))
-                        .build()
-        );
-        setBottom(toolBar);
-        setMargin(toolBar, new Insets(10, 0, 0, 0));
-        toolBar.getItems().forEach(item -> item.setFocusTraversable(false));
+        setBottom(new ToolbarBuilder()
+                .add("Add item", MaterialIcon.ADD, event -> dependencyTable.getItems().add(new Dependency()))
+                .add("Remove item", MaterialIcon.REMOVE, event -> {
+                    final int index = dependencyTable.getSelectionModel().getSelectedIndex();
+                    if (index >= 0) {
+                        dependencyTable.getItems().remove(index);
+                    }
+                })
+                .addSeparator()
+                .add("Clear all items", MaterialIcon.CLEAR_ALL, event -> dependencyTable.getItems().clear())
+                .addSeparator()
+                .add("Use defaults", MaterialIcon.BOOKMARK, event -> useDefaultDependencies(dependencyTable.getItems()))
+                .addSeparator()
+                .add("Cut", MaterialIcon.CONTENT_CUT, event -> {})
+                .add("Copy", MaterialIcon.CONTENT_COPY, event -> {})
+                .add("Paste", MaterialIcon.CONTENT_PASTE, event -> {})
+                .build(t -> setMargin(t,  new Insets(10, 0, 0, 0))));
     }
 
     public static void useDefaultDependencies(List<Dependency> dependencies) {

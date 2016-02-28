@@ -25,6 +25,7 @@ import org.hsqldb.jdbc.JDBCSessionDataSource;
 import org.hsqldb.jdbc.JDBCSessionPool;
 import org.hsqldb.server.Server;
 import org.hsqldb.server.ServerConstants;
+import org.marid.beans.MaridBean;
 import org.marid.db.dao.NumericWriter;
 import org.marid.logging.LogSupport;
 
@@ -49,6 +50,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 /**
  * @author Dmitry Ovchinnikov.
  */
+@MaridBean(icon = "O.DATABASE")
 public final class HsqldbDatabase implements Closeable, LogSupport {
 
     private final Server server;

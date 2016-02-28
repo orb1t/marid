@@ -18,22 +18,29 @@
 
 package org.marid.ide.beaned;
 
+import de.jensd.fx.glyphs.GlyphIcon;
+import de.jensd.fx.glyphs.GlyphIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
+import de.jensd.fx.glyphs.materialicons.MaterialIcon;
+import de.jensd.fx.glyphs.octicons.OctIcon;
+import de.jensd.fx.glyphs.weathericons.WeatherIcon;
 import javafx.collections.FXCollections;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import org.marid.beans.MaridBeanXml;
 import org.marid.beans.MaridBeansXml;
+import org.marid.ide.icons.IdeIcons;
 import org.marid.logging.LogSupport;
+import org.marid.misc.Builder;
 import org.marid.xml.XmlBind;
 
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Enumeration;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.function.Function;
 
 import static java.util.Comparator.comparing;
 
@@ -42,10 +49,22 @@ import static java.util.Comparator.comparing;
  */
 public class BeanBrowser extends ListView<MaridBeanXml> implements LogSupport {
 
-    public BeanBrowser(URLClassLoader classLoader) {
+    private static final Map<String, Function<String, GlyphIcons>> ICONS = Builder.build(new HashMap<>(), map -> {
+        map.put("FA", FontAwesomeIcon::valueOf);
+        map.put("O", OctIcon::valueOf);
+        map.put("MD", MaterialDesignIcon::valueOf);
+        map.put("M", MaterialIcon::valueOf);
+        map.put("W", WeatherIcon::valueOf);
+    });
+
+    private final BeanEditorPane editorPane;
+    private final Map<String, String> classIconMap = new HashMap<>();
+
+    public BeanBrowser(BeanEditorPane editorPane) {
+        this.editorPane = editorPane;
         final Set<MaridBeanXml> beansXmls = new TreeSet<>(comparing(b -> b.text != null ? b.text : b.type));
         try {
-            for (final Enumeration<URL> e = classLoader.findResources("maridBeans.xml"); e.hasMoreElements(); ) {
+            for (final Enumeration<URL> e = editorPane.classLoader.findResources("maridBeans.xml"); e.hasMoreElements(); ) {
                 final URL url = e.nextElement();
                 try {
                     final Source inputSource = new StreamSource(url.toExternalForm());
@@ -58,6 +77,7 @@ public class BeanBrowser extends ListView<MaridBeanXml> implements LogSupport {
         } catch (Exception x) {
             log(WARNING, "Unable to enumerate marid beans", x);
         }
+        beansXmls.forEach(b -> classIconMap.put(b.type, b.icon));
         setItems(FXCollections.unmodifiableObservableList(FXCollections.observableArrayList(beansXmls)));
         setCellFactory(param -> new ListCell<MaridBeanXml>() {
             @Override
@@ -65,8 +85,28 @@ public class BeanBrowser extends ListView<MaridBeanXml> implements LogSupport {
                 super.updateItem(item, empty);
                 if (item != null && !empty) {
                     setText(item.text != null ? item.text : item.type);
+                    setGraphic(icon(item.icon, 16, OctIcon.BOOK));
                 }
             }
         });
+    }
+
+    public String icon(String type) {
+        return classIconMap.get(type);
+    }
+
+    public static GlyphIcon<?> icon(String text, int size, GlyphIcons defaultIcon) {
+        if (text != null) {
+            final String[] parts = text.split("[.]");
+            if (parts.length == 2) {
+                final Function<String, GlyphIcons> func = ICONS.getOrDefault(parts[0], FontAwesomeIcon::valueOf);
+                try {
+                    return IdeIcons.glyphIcon(func.apply(parts[1]), size);
+                } catch (IllegalArgumentException x) {
+                    // ignore
+                }
+            }
+        }
+        return IdeIcons.glyphIcon(defaultIcon, size);
     }
 }
