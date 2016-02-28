@@ -32,6 +32,8 @@ import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.util.Utils;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
@@ -50,19 +52,33 @@ public class Ide extends Application implements L10nSupport, LogSupport, Configu
 
     @Override
     public void init() throws Exception {
-        Application.setUserAgentStylesheet(getPref("style", STYLESHEET_CASPIAN));
-        final String css = getPref(String.class, "css", null);
-        if (css != null) {
-            StyleManager.getInstance().addUserAgentStylesheet(css);
-        }
+        Application.setUserAgentStylesheet(getPref("style", STYLESHEET_MODENA));
     }
 
     private Image[] maridIcons() {
         return IntStream.of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new);
     }
 
+    private void applyCss() throws Exception {
+        final String css = getPref(String.class, "css", "green.css");
+        if (css != null) {
+            final URI uri = new URI(css);
+            final String url;
+            if (uri.isAbsolute()) {
+                url = css;
+            } else {
+                final URL resourceUrl = getClass().getResource(css);
+                url = resourceUrl == null ? null : resourceUrl.toExternalForm();
+            }
+            if (url != null) {
+                StyleManager.getInstance().addUserAgentStylesheet(url);
+            }
+        }
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
+        applyCss();
         initBounds(primaryStage);
         primaryStage.setMinWidth(750.0);
         primaryStage.setMinHeight(550.0);
