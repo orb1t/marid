@@ -40,7 +40,7 @@ public class IdePaneManager {
 
     @Produces
     @IdeMenuItem(menu = "Window", text = "Always on top", group = "ops", mdIcons = {BORDER_TOP}, type = CHECK)
-    public EventHandler<ActionEvent> warningMenuItem(Provider<IdePane> idePaneProvider) {
+    public EventHandler<ActionEvent> alwaysOnTop(Provider<IdePane> idePaneProvider) {
         return event -> {
             final Stage stage = (Stage) idePaneProvider.get().getScene().getWindow();
             final CheckMenuItem menuItem = (CheckMenuItem) event.getSource();
