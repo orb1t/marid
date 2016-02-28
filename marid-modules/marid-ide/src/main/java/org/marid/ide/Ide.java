@@ -27,9 +27,10 @@ import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.marid.ide.panes.logging.IdeLogHandler;
 import org.marid.ide.scenes.IdeScene;
-import org.marid.jfx.Configurable;
+import org.marid.jfx.Windows;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
+import org.marid.pref.PrefSupport;
 import org.marid.util.Utils;
 
 import java.net.URI;
@@ -45,7 +46,7 @@ import static org.marid.jfx.FxMaridIcon.maridIcon;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Ide extends Application implements L10nSupport, LogSupport, Configurable {
+public class Ide extends Application implements L10nSupport, LogSupport, PrefSupport {
 
     private final Weld weld = new Weld(getClass().getName());
     private final WeldContainer container = weld.initialize();
@@ -79,13 +80,14 @@ public class Ide extends Application implements L10nSupport, LogSupport, Configu
     @Override
     public void start(Stage primaryStage) throws Exception {
         applyCss();
-        initBounds(primaryStage);
+        Windows.persistState(primaryStage, preferences());
         primaryStage.setMinWidth(750.0);
         primaryStage.setMinHeight(550.0);
         primaryStage.setTitle(s("Marid IDE"));
         primaryStage.setScene(container.select(IdeScene.class).get());
         primaryStage.addEventHandler(WINDOW_CLOSE_REQUEST, e -> weld.shutdown());
         primaryStage.getIcons().addAll(maridIcons());
+        primaryStage.getProperties().put("exitTask", (Runnable) weld::shutdown);
         primaryStage.show();
     }
 

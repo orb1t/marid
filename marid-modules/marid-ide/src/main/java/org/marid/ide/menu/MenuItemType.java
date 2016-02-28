@@ -16,13 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.root {
-    -fx-base: rgb(155, 220, 170);
-    -fx-background: rgb(160, 200, 170);
-    -fx-control-inner-background: derive(-fx-base, 70%);
-    -fx-control-inner-background-alt: derive(-fx-control-inner-background, 30%);
-    -fx-accent: rgb(50, 100, 80);
-    -fx-default-button: rgb(90, 120, 100);
-    -fx-focus-color: rgb(20, 90, 70);
-    -fx-color: rgb(155, 199, 170);
+package org.marid.ide.menu;
+
+import javafx.scene.Node;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.MenuItem;
+
+import java.util.function.BiFunction;
+
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public enum MenuItemType {
+
+    NORMAL(MenuItem::new),
+    CHECK(CheckMenuItem::new);
+
+    private final BiFunction<String, Node, ? extends MenuItem> menuItemProvider;
+
+    MenuItemType(BiFunction<String, Node, ? extends MenuItem> menuItemProvider) {
+        this.menuItemProvider = menuItemProvider;
+    }
+
+    public MenuItem createItem(String text, Node graphic) {
+        return menuItemProvider.apply(text, graphic);
+    }
 }

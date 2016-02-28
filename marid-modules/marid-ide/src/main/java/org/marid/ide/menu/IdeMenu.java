@@ -76,7 +76,7 @@ public class IdeMenu extends MenuBar implements L10nSupport, LogSupport {
                         .orElse(null);
                 final String key = mi.key().isEmpty() ? null : mi.key();
                 final String text = mi.text();
-                final MenuItem menuItem = new MenuItem(s(text), icon);
+                final MenuItem menuItem = mi.type().createItem(s(text), icon);
                 if (key != null) {
                     menuItem.setAccelerator(KeyCombination.valueOf(key));
                 }

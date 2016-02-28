@@ -55,4 +55,6 @@ public @interface IdeMenuItem {
     @Nonbinding String group() default "";
 
     @Nonbinding String key() default "";
+
+    @Nonbinding MenuItemType type() default MenuItemType.NORMAL;
 }

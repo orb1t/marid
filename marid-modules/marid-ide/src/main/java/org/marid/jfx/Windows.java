@@ -20,28 +20,29 @@ package org.marid.jfx;
 
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.marid.pref.PrefSupport;
+
+import java.util.prefs.Preferences;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Configurable extends PrefSupport {
+public interface Windows {
 
-    default void initBounds(Stage stage) {
-        stage.setMaximized(preferences().getBoolean("max", false));
+    static void persistState(Stage stage, Preferences preferences) {
+        stage.setMaximized(preferences.getBoolean("max", false));
         if (!stage.isMaximized()) {
-            stage.setWidth(preferences().getDouble("w", Math.min(stage.getMinWidth(), 800d)));
-            stage.setHeight(preferences().getDouble("h", Math.min(stage.getMinHeight(), 600d)));
-            stage.setX(preferences().getDouble("x", 0));
-            stage.setY(preferences().getDouble("y", 0));
+            stage.setWidth(preferences.getDouble("w", Math.min(stage.getMinWidth(), 800)));
+            stage.setHeight(preferences.getDouble("h", Math.min(stage.getMinHeight(), 600)));
+            stage.setX(preferences.getDouble("x", 0));
+            stage.setY(preferences.getDouble("y", 0));
         }
-        stage.addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> {
-            preferences().putBoolean("max", stage.isMaximized());
+        stage.addEventHandler(WindowEvent.WINDOW_HIDING, event -> {
+            preferences.putBoolean("max", stage.isMaximized());
             if (!stage.isMaximized()) {
-                preferences().putDouble("w", stage.getWidth());
-                preferences().putDouble("h", stage.getHeight());
-                preferences().putDouble("x", stage.getX());
-                preferences().putDouble("y", stage.getY());
+                preferences.putDouble("w", stage.getWidth());
+                preferences.putDouble("h", stage.getHeight());
+                preferences.putDouble("x", stage.getX());
+                preferences.putDouble("y", stage.getY());
             }
         });
     }
