@@ -19,9 +19,11 @@
 package org.marid.ide.project.editors;
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -34,6 +36,7 @@ import org.marid.util.Builder;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -43,6 +46,10 @@ public class DependenciesTab extends BorderPane {
     public DependenciesTab(Model model) {
         final DependencyTable dependencyTable = new DependencyTable(model);
         setCenter(dependencyTable);
+        final Consumer<Button> itemSelectionTrigger = b -> b.disableProperty().bind(dependencyTable
+                .getSelectionModel()
+                .selectedItemProperty()
+                .isNull());
         setBottom(new ToolbarBuilder()
                 .add("Add item", MaterialIcon.ADD, event -> dependencyTable.getItems().add(new Dependency()))
                 .add("Remove item", MaterialIcon.REMOVE, event -> {
@@ -50,15 +57,17 @@ public class DependenciesTab extends BorderPane {
                     if (index >= 0) {
                         dependencyTable.getItems().remove(index);
                     }
-                })
+                }, itemSelectionTrigger)
                 .addSeparator()
-                .add("Clear all items", MaterialIcon.CLEAR_ALL, event -> dependencyTable.getItems().clear())
+                .add("Clear all items", MaterialIcon.CLEAR_ALL,
+                        event -> dependencyTable.getItems().clear(),
+                        b -> b.disableProperty().bind(Bindings.size(dependencyTable.getItems()).isEqualTo(0)))
                 .addSeparator()
                 .add("Use defaults", MaterialIcon.BOOKMARK, event -> useDefaultDependencies(dependencyTable.getItems()))
                 .addSeparator()
-                .add("Cut", MaterialIcon.CONTENT_CUT, event -> {})
-                .add("Copy", MaterialIcon.CONTENT_COPY, event -> {})
-                .add("Paste", MaterialIcon.CONTENT_PASTE, event -> {})
+                .add("Cut", MaterialIcon.CONTENT_CUT, event -> {}, itemSelectionTrigger)
+                .add("Copy", MaterialIcon.CONTENT_COPY, event -> {}, itemSelectionTrigger)
+                .add("Paste", MaterialIcon.CONTENT_PASTE, event -> {}, itemSelectionTrigger)
                 .build(t -> setMargin(t,  new Insets(10, 0, 0, 0))));
     }
 

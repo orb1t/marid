@@ -17,6 +17,7 @@
   -->
 
 <beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
@@ -28,11 +29,15 @@
           primary="false"
           parent="s"
           depends-on="ss"
-          name=""
+          name="p"
           factory-bean="ss" init-method="s">
         <constructor-arg>
             <array value-type="java.lang.Integer">
             </array>
         </constructor-arg>
     </bean>
+
+    <util:list id="kk" value-type="java.util.ArrayList">
+        <ref bean="p"/>
+    </util:list>
 </beans>

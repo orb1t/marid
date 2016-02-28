@@ -18,19 +18,67 @@
 
 package org.marid.ide.beaned;
 
+import de.jensd.fx.glyphs.GlyphIcon;
+import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
+import org.marid.l10n.L10nSupport;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanTree extends TreeView<Object> {
-
-    private final BeanEditorPane editorPane;
+public class BeanTree extends TreeTableView<BeanTreeItem> implements L10nSupport {
 
     public BeanTree(BeanEditorPane editorPane) {
-        super(new TreeItem<>());
-        this.editorPane = editorPane;
+        super(new TreeItem<>(new BeanTreeItem(BeanTreeItemType.ROOT)));
         setShowRoot(false);
+        setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
+        final TreeTableColumn<BeanTreeItem, String> nameColumn = nameColumn();
+        getColumns().add(nameColumn);
+        getColumns().add(typeColumn(editorPane));
+        getColumns().add(valueColumn());
+        setTreeColumn(nameColumn());
+    }
+
+    private TreeTableColumn<BeanTreeItem, String> nameColumn() {
+        final TreeTableColumn<BeanTreeItem, String> column = new TreeTableColumn<>(s("Name"));
+        column.setEditable(true);
+        column.setMinWidth(70);
+        column.setPrefWidth(70);
+        column.setMaxWidth(150);
+        column.setCellValueFactory(param -> param.getValue().getValue().nameProperty);
+        return column;
+    }
+
+    private TreeTableColumn<BeanTreeItem, BeanTreeItem> typeColumn(BeanEditorPane editorPane) {
+        final TreeTableColumn<BeanTreeItem, BeanTreeItem> column = new TreeTableColumn<>(s("Type"));
+        column.setEditable(false);
+        column.setMinWidth(100);
+        column.setPrefWidth(150);
+        column.setMaxWidth(400);
+        column.setCellFactory(param -> new TreeTableCell<BeanTreeItem, BeanTreeItem>() {
+            @Override
+            protected void updateItem(BeanTreeItem item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item != null && !empty) {
+                    final String iconName = editorPane.beanBrowserPane.beanBrowser.icon(item.getType());
+                    final GlyphIcon<?> icon = BeanBrowser.icon(iconName, 16, OctIcon.BOOK);
+                    setGraphic(icon);
+                }
+            }
+        });
+        return column;
+    }
+
+    private TreeTableColumn<BeanTreeItem, String> valueColumn() {
+        final TreeTableColumn<BeanTreeItem, String> column = new TreeTableColumn<>(s("Value"));
+        column.setEditable(false);
+        column.setMinWidth(200);
+        column.setPrefWidth(300);
+        column.setMaxWidth(900);
+        column.setCellValueFactory(param -> param.getValue().getValue().valueProperty);
+        return column;
     }
 }

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.root {
+.root, .menu-bar {
     -fx-base: rgb(155, 220, 170);
     -fx-background: rgb(160, 200, 170);
     -fx-control-inner-background: derive(-fx-base, 70%);

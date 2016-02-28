@@ -19,11 +19,14 @@
 package org.marid.ide.project.editors;
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -31,9 +34,9 @@ import javafx.scene.layout.BorderPane;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Repository;
 import org.apache.maven.model.RepositoryPolicy;
-import org.marid.ide.icons.IdeIcons;
-import org.marid.util.Builder;
+import org.marid.jfx.toolbar.ToolbarBuilder;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static org.marid.jfx.Props.booleanProperty;
@@ -47,46 +50,27 @@ public class RepositoriesTab extends BorderPane {
     public RepositoriesTab(Model model) {
         final RepositoryTable repositoryTable = new RepositoryTable(model);
         setCenter(repositoryTable);
-        final ToolBar toolBar = new ToolBar(
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.ADD, 20)))
-                        .$(Button::setTooltip, new Tooltip("Add item"))
-                        .$(Button::setOnAction, event -> {
-                            final Repository repository = new Repository();
-                            repositoryTable.getItems().add(repository);
-                        })
-                        .build(),
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.REMOVE, 20)))
-                        .$(Button::setTooltip, new Tooltip("Remove item"))
-                        .$(Button::setOnAction, event -> {
-                            final int index = repositoryTable.getSelectionModel().getSelectedIndex();
-                            if (index >= 0) {
-                                repositoryTable.getItems().remove(index);
-                            }
-                        })
-                        .build(),
-                new Separator(),
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.CLEAR_ALL, 20)))
-                        .$(Button::setTooltip, new Tooltip("Clear all items"))
-                        .$(Button::setOnAction, event -> repositoryTable.getItems().clear())
-                        .build(),
-                new Separator(),
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.BOOKMARK, 20)))
-                        .$(Button::setTooltip, new Tooltip("Use defaults"))
-                        .build(),
-                new Separator(),
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.CONTENT_CUT, 20)))
-                        .$(Button::setTooltip, new Tooltip("Cut"))
-                        .build(),
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.CONTENT_COPY, 20)))
-                        .$(Button::setTooltip, new Tooltip("Copy"))
-                        .build(),
-                new Builder<>(new Button(null, IdeIcons.glyphIcon(MaterialIcon.CONTENT_PASTE, 20)))
-                        .$(Button::setTooltip, new Tooltip("Paste"))
-                        .build()
-        );
-        setBottom(toolBar);
-        setMargin(toolBar, new Insets(10, 0, 0, 0));
-        toolBar.getItems().forEach(item -> item.setFocusTraversable(false));
+        final Consumer<Button> itemSelectionTrigger = b -> b.disableProperty().bind(repositoryTable
+                .getSelectionModel()
+                .selectedItemProperty()
+                .isNull());
+        setBottom(new ToolbarBuilder()
+                .add("Add item", MaterialIcon.ADD, event -> repositoryTable.getItems().add(new Repository()))
+                .add("Remove item", MaterialIcon.REMOVE, event -> {
+                    final int index = repositoryTable.getSelectionModel().getSelectedIndex();
+                    if (index >= 0) {
+                        repositoryTable.getItems().remove(index);
+                    }
+                }, itemSelectionTrigger)
+                .addSeparator()
+                .add("Clear all items", MaterialIcon.CLEAR_ALL,
+                        event -> repositoryTable.getItems().clear(),
+                        b -> b.disableProperty().bind(Bindings.size(repositoryTable.getItems()).isEqualTo(0)))
+                .addSeparator()
+                .add("Cut", MaterialIcon.CONTENT_CUT, event -> {}, itemSelectionTrigger)
+                .add("Copy", MaterialIcon.CONTENT_COPY, event -> {}, itemSelectionTrigger)
+                .add("Paste", MaterialIcon.CONTENT_PASTE, event -> {}, itemSelectionTrigger)
+                .build(t -> setMargin(t,  new Insets(10, 0, 0, 0))));
     }
 
     private static class RepositoryTable extends TableView<Repository> {

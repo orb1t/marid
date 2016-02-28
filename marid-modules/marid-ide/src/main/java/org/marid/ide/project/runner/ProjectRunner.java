@@ -20,6 +20,7 @@ package org.marid.ide.project.runner;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.marid.ide.Ide;
 import org.marid.logging.LogSupport;
 
 import javax.enterprise.context.Dependent;
@@ -34,6 +35,7 @@ public class ProjectRunner extends Stage implements LogSupport {
 
     @Inject
     public ProjectRunner(ProjectRunnerPane runnerPane) {
+        getIcons().addAll(Ide.IMAGES);
         setScene(new Scene(runnerPane, 800, 600));
         setMaximized(true);
         setTitle("[" + runnerPane.getProfile() + "]");

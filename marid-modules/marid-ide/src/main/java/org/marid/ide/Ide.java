@@ -37,8 +37,8 @@ import java.net.URI;
 import java.net.URL;
 import java.util.TimeZone;
 import java.util.logging.Logger;
-import java.util.stream.IntStream;
 
+import static java.util.stream.IntStream.of;
 import static javafx.scene.paint.Color.GREEN;
 import static javafx.stage.WindowEvent.WINDOW_CLOSE_REQUEST;
 import static org.marid.jfx.FxMaridIcon.maridIcon;
@@ -51,17 +51,15 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
     private final Weld weld = new Weld(getClass().getName());
     private final WeldContainer container = weld.initialize();
 
+    public static final Image[] IMAGES = of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new);
+
     @Override
     public void init() throws Exception {
         Application.setUserAgentStylesheet(getPref("style", STYLESHEET_MODENA));
     }
 
-    private Image[] maridIcons() {
-        return IntStream.of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new);
-    }
-
     private void applyCss() throws Exception {
-        final String css = getPref(String.class, "css", "green.css");
+        final String css = getPref(String.class, "css", "marid.css");
         if (css != null) {
             final URI uri = new URI(css);
             final String url;
@@ -86,7 +84,7 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
         primaryStage.setTitle(s("Marid IDE"));
         primaryStage.setScene(container.select(IdeScene.class).get());
         primaryStage.addEventHandler(WINDOW_CLOSE_REQUEST, e -> weld.shutdown());
-        primaryStage.getIcons().addAll(maridIcons());
+        primaryStage.getIcons().addAll(IMAGES);
         primaryStage.getProperties().put("exitTask", (Runnable) weld::shutdown);
         primaryStage.show();
     }

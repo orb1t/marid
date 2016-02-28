@@ -20,6 +20,7 @@ package org.marid.ide.beaned;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.marid.ide.Ide;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 
@@ -34,6 +35,8 @@ public class BeanEditor extends Stage implements L10nSupport, LogSupport {
 
     @Inject
     public BeanEditor(BeanEditorPane beanEditorPane) {
+        setMaximized(true);
+        getIcons().addAll(Ide.IMAGES);
         setScene(new Scene(beanEditorPane, 1024, 768));
         setTitle("[" + beanEditorPane.profile + "] " + s("New"));
         setOnCloseRequest(event -> {

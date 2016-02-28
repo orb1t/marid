@@ -25,6 +25,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.marid.ide.scenes.IdeScene;
 import org.marid.jfx.ScrollPanes;
 import org.marid.l10n.L10nSupport;
 
@@ -38,8 +39,9 @@ import javax.inject.Inject;
 public class IconViewer extends Stage implements L10nSupport {
 
     @Inject
-    public IconViewer(IconViewerTable table) {
+    public IconViewer(IconViewerTable table, IdeScene ideScene) {
         super(StageStyle.UTILITY);
+        initOwner(ideScene.getWindow());
         setTitle(s("Icon viewer"));
         final ScrollPane scrollPane = ScrollPanes.scrollPane(table);
         final BorderPane pane = new BorderPane(scrollPane);

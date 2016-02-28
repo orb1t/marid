@@ -18,19 +18,25 @@
 
 package org.marid.ide.beaned;
 
-import javafx.scene.layout.BorderPane;
-import org.marid.jfx.ScrollPanes;
-import org.marid.l10n.L10nSupport;
-import org.marid.logging.LogSupport;
+import de.jensd.fx.glyphs.GlyphIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanTreePane extends BorderPane implements LogSupport, L10nSupport {
+public enum BeanTreeItemType {
 
-    final BeanTree beanTree;
+    ROOT(FontAwesomeIcon.ADN),
+    BEAN(FontAwesomeIcon.INSTITUTION),
+    CONSTRUCTOR_ARG(FontAwesomeIcon.ANCHOR);
 
-    public BeanTreePane(BeanEditorPane editorPane) {
-        setCenter(ScrollPanes.scrollPane(beanTree = new BeanTree(editorPane)));
+    private final GlyphIcons icon;
+
+    BeanTreeItemType(GlyphIcons icon) {
+        this.icon = icon;
+    }
+
+    public GlyphIcons getIcon() {
+        return icon;
     }
 }

@@ -19,10 +19,13 @@
 package org.marid.ide.beaned;
 
 import de.jensd.fx.glyphs.octicons.OctIcon;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.BorderPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
+
+import java.util.Optional;
 
 import static org.marid.jfx.ScrollPanes.scrollPane;
 
@@ -31,13 +34,26 @@ import static org.marid.jfx.ScrollPanes.scrollPane;
  */
 public class BeanBrowserPane extends BorderPane implements LogSupport, L10nSupport {
 
+    final BeanBrowser beanBrowser;
+
     public BeanBrowserPane(BeanEditorPane editorPane) {
-        final BeanBrowser beanBrowser = new BeanBrowser(editorPane);
-        setCenter(scrollPane(beanBrowser));
+        setCenter(scrollPane(beanBrowser = new BeanBrowser(editorPane)));
         setTop(new ToolbarBuilder()
                 .add("Add bean", OctIcon.FILE_DIRECTORY_CREATE,
-                        event -> {},
+                        event -> addBeanEvent(editorPane),
                         b -> b.disableProperty().bind(beanBrowser.getSelectionModel().selectedItemProperty().isNull()))
                 .build());
+    }
+
+    private void addBeanEvent(BeanEditorPane editorPane) {
+        final TextInputDialog nameDialog = new TextInputDialog("bean");
+        nameDialog.setTitle(s("Bean name"));
+        nameDialog.setHeaderText(m("Enter a bean name") + ":");
+        final Optional<String> nameOptional = nameDialog.showAndWait();
+        if (!nameOptional.isPresent()) {
+            return;
+        }
+        final BeanTree beanTree = editorPane.beanTreePane.beanTree;
+
     }
 }
