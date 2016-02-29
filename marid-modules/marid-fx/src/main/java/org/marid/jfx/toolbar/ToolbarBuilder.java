@@ -27,7 +27,7 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.util.Builder;
-import org.marid.ide.icons.IdeIcons;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.l10n.L10nSupport;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public final class ToolbarBuilder implements Builder<ToolBar>, L10nSupport {
     private final List<Node> nodes = new ArrayList<>();
 
     public ToolbarBuilder add(String tooltip, GlyphIcons icon, EventHandler<ActionEvent> eventHandler, Consumer<Button> buttonConsumer) {
-        final Button button = new Button(null, IdeIcons.glyphIcon(icon, 20));
+        final Button button = new Button(null, FontIcons.glyphIcon(icon, 20));
         button.setFocusTraversable(false);
         button.setTooltip(new Tooltip(s(tooltip)));
         button.setOnAction(eventHandler);

@@ -32,7 +32,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import org.marid.ide.icons.IdeIcons;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.l10n.L10nSupport;
 
 import javax.enterprise.context.Dependent;
@@ -72,7 +72,7 @@ public class IconViewerTable extends TableView<GlyphIcons> implements L10nSuppor
             column.setMaxWidth(128);
             column.setPrefWidth(128);
             column.setMaxWidth(128);
-            column.setCellValueFactory(param -> new SimpleObjectProperty<>(IdeIcons.glyphIcon(param.getValue(), 32)));
+            column.setCellValueFactory(param -> new SimpleObjectProperty<>(FontIcons.glyphIcon(param.getValue(), 32)));
             column.setCellFactory(param -> new TableCell<GlyphIcons, GlyphIcon<?>>() {
                 @Override
                 protected void updateItem(GlyphIcon<?> item, boolean empty) {

@@ -29,7 +29,7 @@ import javafx.scene.input.KeyCombination;
 import org.jboss.weld.literal.AnyLiteral;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.marid.ee.IdeSingleton;
-import org.marid.ide.icons.IdeIcons;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.util.Utils;
@@ -72,7 +72,7 @@ public class IdeMenu extends MenuBar implements L10nSupport, LogSupport {
                 final GlyphIcon<?> icon = Stream.of(mi.faIcons(), mi.mdIcons(), mi.mIcons(), mi.oIcons(), mi.wIcons())
                         .flatMap(Stream::of)
                         .findAny()
-                        .map(e -> IdeIcons.glyphIcon(e, 16))
+                        .map(e -> FontIcons.glyphIcon(e, 16))
                         .orElse(null);
                 final String key = mi.key().isEmpty() ? null : mi.key();
                 final String text = mi.text();

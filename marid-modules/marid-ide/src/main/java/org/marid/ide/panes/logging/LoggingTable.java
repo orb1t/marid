@@ -29,7 +29,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import org.marid.ide.icons.IdeIcons;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.ide.timers.IdeTimers;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10nSupport;
@@ -107,7 +107,7 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
 
     private TableColumn<LogRecord, IconDescriptor> levelColumn() {
         final TableColumn<LogRecord, IconDescriptor> col = new TableColumn<>();
-        col.setGraphic(IdeIcons.glyphIcon(FontAwesomeIcon.SHIELD));
+        col.setGraphic(FontIcons.glyphIcon(FontAwesomeIcon.SHIELD));
         col.setCellValueFactory(param -> new SimpleObjectProperty<>(icon(param.getValue().getLevel())));
         col.setStyle("-fx-alignment: center;");
         col.setCellFactory(c -> new TableCell<LogRecord, IconDescriptor>() {
@@ -192,7 +192,7 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
         }
 
         private GlyphIcon<?> getGlyphIcon() {
-            final GlyphIcon<?> glyphIcon = IdeIcons.glyphIcon(icon);
+            final GlyphIcon<?> glyphIcon = FontIcons.glyphIcon(icon);
             glyphIcon.setStyle("-fx-fill: " + css);
             glyphIcon.setGlyphSize(16);
             return glyphIcon;

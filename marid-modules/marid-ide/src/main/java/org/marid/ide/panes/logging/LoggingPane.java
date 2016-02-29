@@ -25,7 +25,7 @@ import javafx.event.EventHandler;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ScrollPane;
 import org.marid.ee.IdeSingleton;
-import org.marid.ide.icons.IdeIcons;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.toolbar.IdeToolbarItem;
 
@@ -59,7 +59,7 @@ public class LoggingPane extends ScrollPane {
 
     private CheckMenuItem menuItem(Level level) {
         final LoggingTable.IconDescriptor iconDescriptor = LoggingTable.icon(level);
-        final GlyphIcon<?> glyphIcon = IdeIcons.glyphIcon(iconDescriptor.icon, 16);
+        final GlyphIcon<?> glyphIcon = FontIcons.glyphIcon(iconDescriptor.icon, 16);
         final CheckMenuItem menuItem = new CheckMenuItem(level.getLocalizedName(), glyphIcon);
         menuItem.selectedProperty().bindBidirectional(loggingFilter.getProperty(level));
         return menuItem;

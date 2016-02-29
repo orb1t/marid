@@ -29,7 +29,7 @@ import javafx.scene.control.Tooltip;
 import org.jboss.weld.literal.AnyLiteral;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.marid.ee.IdeSingleton;
-import org.marid.ide.icons.IdeIcons;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.logging.LogSupport;
 import org.marid.util.Utils;
@@ -80,7 +80,7 @@ public class IdeToolbar extends ToolBar implements LogSupport {
                 final GlyphIcon<?> toolbarIcon = Stream.of(ti.faIcons(), ti.mdIcons(), ti.mIcons(), ti.oIcons(), ti.wIcons())
                         .flatMap(Stream::of)
                         .findAny()
-                        .map(e -> IdeIcons.glyphIcon(e, 20))
+                        .map(e -> FontIcons.glyphIcon(e, 20))
                         .orElse(null);
                 final GlyphIcon<?> menuIcon;
                 if (mi == null || toolbarIcon != null) {
@@ -89,7 +89,7 @@ public class IdeToolbar extends ToolBar implements LogSupport {
                     menuIcon = Stream.of(mi.faIcons(), mi.mdIcons(), mi.mIcons(), mi.oIcons(), mi.wIcons())
                             .flatMap(Stream::of)
                             .findAny()
-                            .map(e -> IdeIcons.glyphIcon(e, 20))
+                            .map(e -> FontIcons.glyphIcon(e, 20))
                             .orElse(null);
                 }
                 final GlyphIcon<?> icon = toolbarIcon == null ? menuIcon : toolbarIcon;

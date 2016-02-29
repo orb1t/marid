@@ -23,7 +23,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
-import org.marid.ide.icons.IdeIcons;
+import org.marid.jfx.icons.FontIcons;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -31,7 +31,7 @@ import org.marid.ide.icons.IdeIcons;
 public interface Buttons {
 
     static Button toolButton(String text, String tooltip, GlyphIcons icon, EventHandler<ActionEvent> eventHandler) {
-        final Button button = new Button(text, icon != null ? IdeIcons.glyphIcon(icon) : null);
+        final Button button = new Button(text, icon != null ? FontIcons.glyphIcon(icon) : null);
         if (tooltip != null) {
             button.setTooltip(new Tooltip(tooltip));
         }

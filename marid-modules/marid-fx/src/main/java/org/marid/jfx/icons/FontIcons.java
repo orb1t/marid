@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.icons;
+package org.marid.jfx.icons;
 
 import de.jensd.fx.glyphs.GlyphIcon;
 import de.jensd.fx.glyphs.GlyphIcons;
@@ -38,7 +38,7 @@ import java.util.function.Function;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class IdeIcons {
+public class FontIcons {
 
     private static final ClassValue<Function<GlyphIcons, GlyphIcon<?>>> ICV = new MaridClassValue<>(c -> {
         if (c == FontAwesomeIcon.class) {

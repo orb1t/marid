@@ -30,7 +30,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import org.marid.beans.MaridBeanXml;
 import org.marid.beans.MaridBeansXml;
-import org.marid.ide.icons.IdeIcons;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.logging.LogSupport;
 import org.marid.misc.Builder;
 import org.marid.xml.XmlBind;
@@ -101,12 +101,12 @@ public class BeanBrowser extends ListView<MaridBeanXml> implements LogSupport {
             if (parts.length == 2) {
                 final Function<String, GlyphIcons> func = ICONS.getOrDefault(parts[0], FontAwesomeIcon::valueOf);
                 try {
-                    return IdeIcons.glyphIcon(func.apply(parts[1]), size);
+                    return FontIcons.glyphIcon(func.apply(parts[1]), size);
                 } catch (IllegalArgumentException x) {
                     // ignore
                 }
             }
         }
-        return IdeIcons.glyphIcon(defaultIcon, size);
+        return FontIcons.glyphIcon(defaultIcon, size);
     }
 }
