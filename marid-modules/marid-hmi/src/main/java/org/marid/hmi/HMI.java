@@ -20,17 +20,28 @@ package org.marid.hmi;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import org.jboss.logmanager.LogManager;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class HMI extends Application {
+
+    private static final ClassPathXmlApplicationContext CONTEXT = new ClassPathXmlApplicationContext();
+
+    @Override
+    public void init() throws Exception {
+        CONTEXT.setConfigLocations("classpath*:/META-INF/marid/beans.xml");
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
 
     }
 
     public static void main(String... args) throws Exception {
+        System.setProperty("java.util.logging.manager", LogManager.class.getName());
         launch(args);
     }
 }
