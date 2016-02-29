@@ -16,10 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide;
+package org.marid.hmi;
+
+import javafx.application.Application;
+import javafx.stage.Stage;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TestIde extends Ide {
+public class HMI extends Application {
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+
+    }
+
+    public static void main(String... args) throws Exception {
+        launch(args);
+    }
 }

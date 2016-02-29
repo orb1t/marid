@@ -75,6 +75,6 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
         Logger.getLogger("").addHandler(new IdeLogHandler());
         Utils.merge(System.getProperties(), "meta.properties", "ide.properties");
-        Application.launch(Ide.class, args);
+        launch(args);
     }
 }

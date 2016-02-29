@@ -34,6 +34,7 @@
         <module>marid-assemblies</module>
         <module>marid-ide</module>
         <module>marid-fx</module>
+        <module>marid-hmi</module>
     </modules>
 
     <dependencies>

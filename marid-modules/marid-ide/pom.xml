@@ -90,6 +90,31 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <classpathScope>test</classpathScope>
+                            <executable>java</executable>
+                            <longClasspath>true</longClasspath>
+                            <workingDirectory>${project.build.outputDirectory}</workingDirectory>
+                            <arguments>
+                                <argument>-Xrunjdwp:transport=dt_socket,address=8888,server=y,suspend=n</argument>
+                                <argument>-cp</argument>
+                                <classpath/>
+                                <argument>org.marid.ide.Ide</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
