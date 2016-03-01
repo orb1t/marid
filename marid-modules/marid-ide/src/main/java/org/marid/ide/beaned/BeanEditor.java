@@ -35,7 +35,6 @@ public class BeanEditor extends Stage implements L10nSupport, LogSupport {
 
     @Inject
     public BeanEditor(BeanEditorPane beanEditorPane) {
-        setMaximized(true);
         getIcons().addAll(Ide.IMAGES);
         setScene(new Scene(beanEditorPane, 1024, 768));
         setTitle("[" + beanEditorPane.profile + "] " + s("New"));

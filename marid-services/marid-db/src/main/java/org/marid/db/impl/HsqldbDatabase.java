@@ -158,6 +158,7 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
                 : new JDBCSessionPool(connectionPoolSize, database, name.toUpperCase());
     }
 
+    @MaridBean(icon = "O.DATABASE")
     public NumericWriter numericWriter() {
         return new HsqldbDaqNumericWriter(getDataSource("numerics"), "NUMERICS");
     }

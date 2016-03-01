@@ -18,19 +18,111 @@
 
 package org.marid.ide.beaned;
 
+import de.jensd.fx.glyphs.GlyphIcon;
+import de.jensd.fx.glyphs.GlyphIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
+import de.jensd.fx.glyphs.materialicons.MaterialIcon;
+import de.jensd.fx.glyphs.octicons.OctIcon;
+import de.jensd.fx.glyphs.weathericons.WeatherIcon;
+import javafx.beans.binding.Bindings;
+import javafx.geometry.Side;
+import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
+import org.marid.beans.MaridBeanXml;
+import org.marid.beans.MaridBeansXml;
 import org.marid.jfx.ScrollPanes;
+import org.marid.jfx.icons.FontIcons;
+import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
+import org.marid.misc.Builder;
+import org.marid.xml.XmlBind;
+
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import java.net.URL;
+import java.util.*;
+import java.util.function.Function;
+
+import static java.util.Comparator.comparing;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class BeanTreePane extends BorderPane implements LogSupport, L10nSupport {
 
+    private static final Map<String, Function<String, GlyphIcons>> ICONS = Builder.build(new HashMap<>(), map -> {
+        map.put("FA", FontAwesomeIcon::valueOf);
+        map.put("O", OctIcon::valueOf);
+        map.put("MD", MaterialDesignIcon::valueOf);
+        map.put("M", MaterialIcon::valueOf);
+        map.put("W", WeatherIcon::valueOf);
+    });
+    final Map<String, String> classIconMap = new HashMap<>();
+    final Set<MaridBeanXml> beansXmls = new TreeSet<>(comparing(b -> b.text != null ? b.text : b.type));
+
     final BeanTree beanTree;
 
     public BeanTreePane(BeanEditorPane editorPane) {
+        try {
+            for (final Enumeration<URL> e = editorPane.classLoader.findResources("maridBeans.xml"); e.hasMoreElements(); ) {
+                final URL url = e.nextElement();
+                try {
+                    final Source inputSource = new StreamSource(url.toExternalForm());
+                    final MaridBeansXml beans = XmlBind.load(MaridBeansXml.class, inputSource, Unmarshaller::unmarshal);
+                    beansXmls.addAll(beans.beans);
+                } catch (Exception x) {
+                    log(WARNING, "Unable to process {0}", x, url);
+                }
+            }
+        } catch (Exception x) {
+            log(WARNING, "Unable to enumerate marid beans", x);
+        }
+        beansXmls.forEach(b -> classIconMap.put(b.type, b.icon));
         setCenter(ScrollPanes.scrollPane(beanTree = new BeanTree(editorPane)));
+        setTop(new ToolbarBuilder()
+                .add("Add bean", MaterialIcon.ADD_BOX, event -> {
+                    final Node node = (Node) event.getSource();
+                    contextMenu().show(node, Side.BOTTOM, 0, 0);
+                })
+                .add("Clear all", MaterialIcon.CLEAR_ALL,
+                        event -> beanTree.getRoot().getChildren().clear(),
+                        b -> b.disableProperty().bind(Bindings.isEmpty(beanTree.getRoot().getChildren())))
+                .build());
+    }
+
+    private ContextMenu contextMenu() {
+        final ContextMenu contextMenu = new ContextMenu();
+        for (final MaridBeanXml beanXml : beansXmls) {
+            final GlyphIcon<?> icon = icon(beanXml.icon, 16, BeanTreeItemType.BEAN.getIcon());
+            final String text = beanXml.text == null ? beanXml.type : beanXml.text + ": " + beanXml.type;
+            final MenuItem menuItem = new MenuItem(text, icon);
+            menuItem.setOnAction(event -> beanTree.addBean("bean1", beanXml.type, beanXml.icon));
+            contextMenu.getItems().add(menuItem);
+        }
+        return contextMenu;
+    }
+
+    public String icon(String type) {
+        return classIconMap.get(type);
+    }
+
+    public static GlyphIcon<?> icon(String text, int size, GlyphIcons defaultIcon) {
+        if (text != null) {
+            final String[] parts = text.split("[.]");
+            if (parts.length == 2) {
+                final Function<String, GlyphIcons> func = ICONS.getOrDefault(parts[0], FontAwesomeIcon::valueOf);
+                try {
+                    return FontIcons.glyphIcon(func.apply(parts[1]), size);
+                } catch (IllegalArgumentException x) {
+                    // ignore
+                }
+            }
+        }
+        return FontIcons.glyphIcon(defaultIcon, size);
     }
 }

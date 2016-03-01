@@ -18,7 +18,6 @@
 
 package org.marid.ide.beaned;
 
-import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.logging.LogSupport;
@@ -41,18 +40,13 @@ public class BeanEditorPane extends BorderPane implements LogSupport {
 
     final ProjectProfile profile;
     final URLClassLoader classLoader;
-    final BeanBrowserPane beanBrowserPane;
     final BeanTreePane beanTreePane;
 
     @Inject
     public BeanEditorPane(ProjectProfile projectProfile) {
         profile = projectProfile;
         classLoader = classLoader(projectProfile);
-        final SplitPane splitPane = new SplitPane(
-                beanTreePane = new BeanTreePane(this),
-                beanBrowserPane = new BeanBrowserPane(this));
-        splitPane.setDividerPositions(0.6, 0.4);
-        setCenter(splitPane);
+        setCenter(beanTreePane = new BeanTreePane(this));
     }
 
     private URLClassLoader classLoader(ProjectProfile profile) {

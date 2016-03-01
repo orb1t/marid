@@ -26,17 +26,30 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
  */
 public enum BeanTreeItemType {
 
-    ROOT(FontAwesomeIcon.ADN),
-    BEAN(FontAwesomeIcon.INSTITUTION),
-    CONSTRUCTOR_ARG(FontAwesomeIcon.ANCHOR);
+    ROOT(FontAwesomeIcon.ADN, false, false),
+    BEAN(FontAwesomeIcon.INSTITUTION, true, false),
+    CONSTRUCTOR_ARG(FontAwesomeIcon.ANCHOR, false, true),
+    PROPERTY(FontAwesomeIcon.ANGELLIST, false, true);
 
     private final GlyphIcons icon;
+    private final boolean nameEditable;
+    private final boolean valueEditable;
 
-    BeanTreeItemType(GlyphIcons icon) {
+    BeanTreeItemType(GlyphIcons icon, boolean nameEditable, boolean valueEditable) {
         this.icon = icon;
+        this.nameEditable = nameEditable;
+        this.valueEditable = valueEditable;
     }
 
     public GlyphIcons getIcon() {
         return icon;
+    }
+
+    public boolean isNameEditable() {
+        return nameEditable;
+    }
+
+    public boolean isValueEditable() {
+        return valueEditable;
     }
 }
