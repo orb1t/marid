@@ -22,6 +22,7 @@ import de.jensd.fx.glyphs.GlyphIcon;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.util.converter.DefaultStringConverter;
+import org.marid.ide.beaned.data.BeanContext;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 
@@ -41,18 +42,18 @@ import static org.marid.ide.beaned.BeanTreeItemType.*;
  */
 public class BeanTree extends TreeTableView<BeanTreeItem> implements L10nSupport, LogSupport {
 
-    public BeanTree(BeanEditorPane editorPane) {
+    public BeanTree(BeanContext beanContext) {
         super(new TreeItem<>(new BeanTreeItem(BeanTreeItemType.ROOT)));
         setShowRoot(false);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
-        final TreeTableColumn<BeanTreeItem, String> nameColumn = nameColumn(editorPane);
+        final TreeTableColumn<BeanTreeItem, String> nameColumn = nameColumn(beanContext);
         getColumns().add(nameColumn);
         getColumns().add(valueColumn());
         setTreeColumn(nameColumn);
         setEditable(true);
     }
 
-    private TreeTableColumn<BeanTreeItem, String> nameColumn(BeanEditorPane editorPane) {
+    private TreeTableColumn<BeanTreeItem, String> nameColumn(BeanContext beanContext) {
         final TreeTableColumn<BeanTreeItem, String> column = new TreeTableColumn<>(s("Name"));
         column.setMinWidth(200);
         column.setPrefWidth(270);
@@ -70,7 +71,7 @@ public class BeanTree extends TreeTableView<BeanTreeItem> implements L10nSupport
                     return;
                 }
                 setText(item + ": " + treeItem.getValue().getType());
-                setContextMenu(contextMenu(treeItem, editorPane));
+                setContextMenu(contextMenu(treeItem, beanContext));
                 setEditable(treeItem.getValue().itemType.isNameEditable());
             }
         });
@@ -102,17 +103,17 @@ public class BeanTree extends TreeTableView<BeanTreeItem> implements L10nSupport
 
     TreeItem<BeanTreeItem> addBean(String name, String type, String icon) {
         final BeanTreeItem beanTreeItem = new BeanTreeItem(BEAN, name, type);
-        final TreeItem<BeanTreeItem> treeItem = new TreeItem<>(beanTreeItem, BeanTreePane.icon(icon, 16, BEAN.getIcon()));
+        final TreeItem<BeanTreeItem> treeItem = new TreeItem<>(beanTreeItem, BeanContext.icon(icon, 16, BEAN.getIcon()));
         getRoot().getChildren().add(treeItem);
         return treeItem;
     }
 
-    ContextMenu contextMenu(TreeItem<BeanTreeItem> treeItem, BeanEditorPane editorPane) {
+    ContextMenu contextMenu(TreeItem<BeanTreeItem> treeItem, BeanContext beanContext) {
         final ContextMenu contextMenu = new ContextMenu();
         try {
             switch (treeItem.getValue().itemType) {
                 case BEAN:
-                    fillBeanMenu(treeItem, editorPane, contextMenu);
+                    fillBeanMenu(treeItem, beanContext, contextMenu);
                     break;
             }
         } catch (Exception x) {
@@ -121,15 +122,15 @@ public class BeanTree extends TreeTableView<BeanTreeItem> implements L10nSupport
         return contextMenu;
     }
 
-    void fillBeanMenu(TreeItem<BeanTreeItem> item, BeanEditorPane editorPane, ContextMenu menu) throws Exception {
+    void fillBeanMenu(TreeItem<BeanTreeItem> item, BeanContext beanContext, ContextMenu menu) throws Exception {
         final BeanTreeItem beanTreeItem = item.getValue();
-        final Class<?> beanClass = Class.forName(beanTreeItem.getType(), false, editorPane.classLoader);
+        final Class<?> beanClass = Class.forName(beanTreeItem.getType(), false, beanContext.classLoader);
         final Optional<Constructor<?>> constructorOptional = Stream.of(beanClass.getConstructors()).findAny();
         if (constructorOptional.isPresent()) {
             for (final Parameter p : constructorOptional.get().getParameters()) {
                 final BeanTreeItem arg = new BeanTreeItem(CONSTRUCTOR_ARG, p.getName(), p.getType().getName());
-                final String iconName = editorPane.beanTreePane.icon(p.getType().getName());
-                final GlyphIcon<?> icon = BeanTreePane.icon(iconName, 16, CONSTRUCTOR_ARG.getIcon());
+                final String iconName = beanContext.icon(p.getType().getName());
+                final GlyphIcon<?> icon = BeanContext.icon(iconName, 16, CONSTRUCTOR_ARG.getIcon());
                 final MenuItem menuItem = new MenuItem(p.getName(), icon);
                 menuItem.setOnAction(event -> {
                     final TreeItem<BeanTreeItem> child = new TreeItem<>(arg, icon);
@@ -150,8 +151,8 @@ public class BeanTree extends TreeTableView<BeanTreeItem> implements L10nSupport
             }
             for (final PropertyDescriptor p : propertyDescriptors) {
                 final BeanTreeItem arg = new BeanTreeItem(PROPERTY, p.getName(), p.getPropertyType().getName());
-                final String iconName = editorPane.beanTreePane.icon(p.getPropertyType().getName());
-                final GlyphIcon<?> icon = BeanTreePane.icon(iconName, 16, PROPERTY.getIcon());
+                final String iconName = beanContext.icon(p.getPropertyType().getName());
+                final GlyphIcon<?> icon = BeanContext.icon(iconName, 16, PROPERTY.getIcon());
                 final MenuItem menuItem = new MenuItem(p.getName(), icon);
                 menuItem.setOnAction(event -> {
                     final TreeItem<BeanTreeItem> child = new TreeItem<>(arg, icon);
@@ -171,8 +172,8 @@ public class BeanTree extends TreeTableView<BeanTreeItem> implements L10nSupport
                 menu.getItems().add(new SeparatorMenuItem());
             }
             for (final Method m : methods) {
-                final String iconName = editorPane.beanTreePane.icon(m.getReturnType().getName());
-                final GlyphIcon<?> icon = BeanTreePane.icon(iconName, 16, PROPERTY.getIcon());
+                final String iconName = beanContext.icon(m.getReturnType().getName());
+                final GlyphIcon<?> icon = BeanContext.icon(iconName, 16, PROPERTY.getIcon());
                 final MenuItem menuItem = new MenuItem(s("Add bean from %s", m.getName()), icon);
                 menuItem.setOnAction(event -> {
                     addBean(m.getName(), m.getReturnType().getName(), iconName);

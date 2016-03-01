@@ -19,18 +19,12 @@
 package org.marid.ide.beaned;
 
 import javafx.scene.layout.BorderPane;
+import org.marid.ide.beaned.data.BeanContext;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.logging.LogSupport;
-import org.marid.misc.Calls;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,26 +32,12 @@ import java.util.stream.Stream;
 @Dependent
 public class BeanEditorPane extends BorderPane implements LogSupport {
 
-    final ProjectProfile profile;
-    final URLClassLoader classLoader;
     final BeanTreePane beanTreePane;
+    final BeanContext beanContext;
 
     @Inject
     public BeanEditorPane(ProjectProfile projectProfile) {
-        profile = projectProfile;
-        classLoader = classLoader(projectProfile);
-        setCenter(beanTreePane = new BeanTreePane(this));
-    }
-
-    private URLClassLoader classLoader(ProjectProfile profile) {
-        final Path lib = profile.getTarget().resolve("lib");
-        final URL[] urls;
-        if (Files.isDirectory(lib)) {
-            final File[] files = lib.toFile().listFiles((dir, name) -> name.endsWith(".jar"));
-            urls = Stream.of(files).map(f -> Calls.call(() -> f.toURI().toURL())).toArray(URL[]::new);
-        } else {
-            urls = new URL[0];
-        }
-        return new URLClassLoader(urls);
+        beanContext = new BeanContext(projectProfile);
+        setCenter(beanTreePane = new BeanTreePane(beanContext));
     }
 }

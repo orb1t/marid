@@ -24,16 +24,21 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.jmlspecs.annotation.Immutable;
 import org.marid.logging.LogSupport;
+import org.marid.misc.Calls;
 
 import javax.annotation.Nonnull;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.SystemUtils.USER_HOME;
@@ -117,6 +122,18 @@ public class ProjectProfile implements LogSupport {
     @Override
     public Logger logger() {
         return logger;
+    }
+
+    public URLClassLoader classLoader() {
+        final Path lib = target.resolve("lib");
+        final URL[] urls;
+        if (Files.isDirectory(lib)) {
+            final File[] files = lib.toFile().listFiles((dir, name) -> name.endsWith(".jar"));
+            urls = Stream.of(files).map(f -> Calls.call(() -> f.toURI().toURL())).toArray(URL[]::new);
+        } else {
+            urls = new URL[0];
+        }
+        return new URLClassLoader(urls);
     }
 
     private void createFileStructure() {

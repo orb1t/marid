@@ -16,34 +16,40 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.beaned;
-
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import org.marid.ide.Ide;
-import org.marid.l10n.L10nSupport;
-import org.marid.logging.LogSupport;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+package org.marid.ide.beaned.data;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
-public class BeanEditor extends Stage implements L10nSupport, LogSupport {
+public class RootData implements Data {
 
-    @Inject
-    public BeanEditor(BeanEditorPane beanEditorPane) {
-        getIcons().addAll(Ide.IMAGES);
-        setScene(new Scene(beanEditorPane, 1024, 768));
-        setTitle("[" + beanEditorPane.beanContext.profile + "] " + s("New"));
-        setOnCloseRequest(event -> {
-            try {
-                beanEditorPane.beanContext.close();
-            } catch (Exception x) {
-                log(WARNING, "Unable to free resources", x);
-            }
-        });
+    public static final RootData ROOT_DATA = new RootData();
+
+    private RootData() {
+    }
+
+    @Override
+    public String getName() {
+        return "root";
+    }
+
+    @Override
+    public String getValue() {
+        return "";
+    }
+
+    @Override
+    public boolean isNameEditable() {
+        return false;
+    }
+
+    @Override
+    public boolean isValueEditable() {
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }
