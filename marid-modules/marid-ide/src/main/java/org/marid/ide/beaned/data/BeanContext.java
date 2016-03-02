@@ -61,7 +61,7 @@ public class BeanContext implements LogSupport, Closeable {
 
     public final ProjectProfile profile;
     public final URLClassLoader classLoader;
-    public final TreeItem<RootData> root = new TreeItem<>(RootData.ROOT_DATA);
+    public final TreeItem<Data> root = new TreeItem<>(RootData.ROOT_DATA);
     public final Set<MaridBeanXml> beansXmls = new TreeSet<>(comparing(b -> b.text != null ? b.text : b.type));
 
     private final Map<String, String> classIconMap = new HashMap<>();

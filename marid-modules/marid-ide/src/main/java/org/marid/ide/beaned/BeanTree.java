@@ -18,168 +18,116 @@
 
 package org.marid.ide.beaned;
 
-import de.jensd.fx.glyphs.GlyphIcon;
-import javafx.scene.control.*;
+import de.jensd.fx.glyphs.octicons.OctIcon;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.beaned.data.BeanContext;
+import org.marid.ide.beaned.data.BeanData;
+import org.marid.ide.beaned.data.Data;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
-
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import static org.marid.ide.beaned.BeanTreeItemType.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanTree extends TreeTableView<BeanTreeItem> implements L10nSupport, LogSupport {
+public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSupport {
 
     public BeanTree(BeanContext beanContext) {
-        super(new TreeItem<>(new BeanTreeItem(BeanTreeItemType.ROOT)));
+        super(beanContext.root);
         setShowRoot(false);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
-        final TreeTableColumn<BeanTreeItem, String> nameColumn = nameColumn(beanContext);
+        final TreeTableColumn<Data, String> nameColumn = nameColumn(beanContext);
         getColumns().add(nameColumn);
+        getColumns().add(typeColumn(beanContext));
         getColumns().add(valueColumn());
         setTreeColumn(nameColumn);
         setEditable(true);
     }
 
-    private TreeTableColumn<BeanTreeItem, String> nameColumn(BeanContext beanContext) {
-        final TreeTableColumn<BeanTreeItem, String> column = new TreeTableColumn<>(s("Name"));
+    private TreeTableColumn<Data, String> nameColumn(BeanContext beanContext) {
+        final TreeTableColumn<Data, String> column = new TreeTableColumn<>(s("Name"));
+        column.setMinWidth(100);
+        column.setPrefWidth(120);
+        column.setMaxWidth(300);
+        column.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
+        column.setCellFactory(param -> new TextFieldTreeTableCell<Data, String>(new DefaultStringConverter()) {
+            @Override
+            public void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    return;
+                }
+                final TreeItem<Data> treeItem = getTreeTableRow().getTreeItem();
+                if (treeItem == null) {
+                    return;
+                }
+                setText(item);
+                setEditable(treeItem.getValue().isNameEditable());
+                setGraphic(FontIcons.glyphIcon(treeItem.getValue().getIcon(), 16));
+            }
+        });
+        return column;
+    }
+
+    private TreeTableColumn<Data, String> typeColumn(BeanContext context) {
+        final TreeTableColumn<Data, String> column = new TreeTableColumn<>(s("Type"));
         column.setMinWidth(200);
         column.setPrefWidth(270);
         column.setMaxWidth(550);
-        column.setCellValueFactory(param -> param.getValue().getValue().nameProperty);
-        column.setCellFactory(param -> new TextFieldTreeTableCell<BeanTreeItem, String>(new DefaultStringConverter()) {
+        column.setEditable(false);
+        column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getValue().getType()));
+        column.setCellFactory(param -> new TreeTableCell<Data, String>() {
             @Override
             public void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (item == null || empty) {
                     return;
                 }
-                final TreeItem<BeanTreeItem> treeItem = getTreeTableRow().getTreeItem();
+                final TreeItem<Data> treeItem = getTreeTableRow().getTreeItem();
                 if (treeItem == null) {
                     return;
                 }
-                setText(item + ": " + treeItem.getValue().getType());
-                setContextMenu(contextMenu(treeItem, beanContext));
-                setEditable(treeItem.getValue().itemType.isNameEditable());
+                setText(item);
+                final String iconName = context.icon(item);
+                setGraphic(BeanContext.icon(iconName, 16, OctIcon.PRIMITIVE_SQUARE));
             }
         });
         return column;
     }
 
-    private TreeTableColumn<BeanTreeItem, String> valueColumn() {
-        final TreeTableColumn<BeanTreeItem, String> column = new TreeTableColumn<>(s("Value"));
+    private TreeTableColumn<Data, String> valueColumn() {
+        final TreeTableColumn<Data, String> column = new TreeTableColumn<>(s("Value"));
         column.setMinWidth(250);
         column.setPrefWidth(390);
         column.setMaxWidth(1000);
-        column.setCellValueFactory(param -> param.getValue().getValue().valueProperty);
-        column.setCellFactory(param -> new TextFieldTreeTableCell<BeanTreeItem, String>(new DefaultStringConverter()) {
+        column.setCellValueFactory(param -> param.getValue().getValue().valueProperty());
+        column.setEditable(false);
+        column.setCellFactory(param -> new TreeTableCell<Data, String>() {
             @Override
             public void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (item == null || empty) {
                     return;
                 }
-                final TreeItem<BeanTreeItem> treeItem = getTreeTableRow().getTreeItem();
+                final TreeItem<Data> treeItem = getTreeTableRow().getTreeItem();
                 if (treeItem == null) {
                     return;
                 }
-                setEditable(treeItem.getValue().itemType.isValueEditable());
             }
         });
         return column;
     }
 
-    TreeItem<BeanTreeItem> addBean(String name, String type, String icon) {
-        final BeanTreeItem beanTreeItem = new BeanTreeItem(BEAN, name, type);
-        final TreeItem<BeanTreeItem> treeItem = new TreeItem<>(beanTreeItem, BeanContext.icon(icon, 16, BEAN.getIcon()));
+    TreeItem<Data> addBean(String name, String type) {
+        final BeanData beanData = new BeanData(type, name);
+        final TreeItem<Data> treeItem = new TreeItem<>(beanData);
         getRoot().getChildren().add(treeItem);
         return treeItem;
-    }
-
-    ContextMenu contextMenu(TreeItem<BeanTreeItem> treeItem, BeanContext beanContext) {
-        final ContextMenu contextMenu = new ContextMenu();
-        try {
-            switch (treeItem.getValue().itemType) {
-                case BEAN:
-                    fillBeanMenu(treeItem, beanContext, contextMenu);
-                    break;
-            }
-        } catch (Exception x) {
-            log(WARNING, "Context menu creation error", x);
-        }
-        return contextMenu;
-    }
-
-    void fillBeanMenu(TreeItem<BeanTreeItem> item, BeanContext beanContext, ContextMenu menu) throws Exception {
-        final BeanTreeItem beanTreeItem = item.getValue();
-        final Class<?> beanClass = Class.forName(beanTreeItem.getType(), false, beanContext.classLoader);
-        final Optional<Constructor<?>> constructorOptional = Stream.of(beanClass.getConstructors()).findAny();
-        if (constructorOptional.isPresent()) {
-            for (final Parameter p : constructorOptional.get().getParameters()) {
-                final BeanTreeItem arg = new BeanTreeItem(CONSTRUCTOR_ARG, p.getName(), p.getType().getName());
-                final String iconName = beanContext.icon(p.getType().getName());
-                final GlyphIcon<?> icon = BeanContext.icon(iconName, 16, CONSTRUCTOR_ARG.getIcon());
-                final MenuItem menuItem = new MenuItem(p.getName(), icon);
-                menuItem.setOnAction(event -> {
-                    final TreeItem<BeanTreeItem> child = new TreeItem<>(arg, icon);
-                    item.getChildren().add(child);
-                    item.setExpanded(true);
-                });
-                menu.getItems().add(menuItem);
-            }
-        }
-        Introspector.flushCaches();
-        final BeanInfo beanInfo = Introspector.getBeanInfo(beanClass);
-        final PropertyDescriptor[] propertyDescriptors = Stream.of(beanInfo.getPropertyDescriptors())
-                .filter(p -> p.getWriteMethod() != null)
-                .toArray(PropertyDescriptor[]::new);
-        if (propertyDescriptors.length > 0) {
-            if (!menu.getItems().isEmpty()) {
-                menu.getItems().add(new SeparatorMenuItem());
-            }
-            for (final PropertyDescriptor p : propertyDescriptors) {
-                final BeanTreeItem arg = new BeanTreeItem(PROPERTY, p.getName(), p.getPropertyType().getName());
-                final String iconName = beanContext.icon(p.getPropertyType().getName());
-                final GlyphIcon<?> icon = BeanContext.icon(iconName, 16, PROPERTY.getIcon());
-                final MenuItem menuItem = new MenuItem(p.getName(), icon);
-                menuItem.setOnAction(event -> {
-                    final TreeItem<BeanTreeItem> child = new TreeItem<>(arg, icon);
-                    item.getChildren().add(child);
-                    item.setExpanded(true);
-                });
-                menu.getItems().add(menuItem);
-            }
-        }
-        final Method[] methods = Stream.of(beanClass.getMethods())
-                .filter(m -> !m.getReturnType().isPrimitive())
-                .filter(m -> !"getClass".equals(m.getName()))
-                .filter(m -> !"toString".equals(m.getName()))
-                .toArray(Method[]::new);
-        if (methods.length > 0) {
-            if (!menu.getItems().isEmpty()) {
-                menu.getItems().add(new SeparatorMenuItem());
-            }
-            for (final Method m : methods) {
-                final String iconName = beanContext.icon(m.getReturnType().getName());
-                final GlyphIcon<?> icon = BeanContext.icon(iconName, 16, PROPERTY.getIcon());
-                final MenuItem menuItem = new MenuItem(s("Add bean from %s", m.getName()), icon);
-                menuItem.setOnAction(event -> {
-                    addBean(m.getName(), m.getReturnType().getName(), iconName);
-                });
-                menu.getItems().add(menuItem);
-            }
-        }
     }
 }

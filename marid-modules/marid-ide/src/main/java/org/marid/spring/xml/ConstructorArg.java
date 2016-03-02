@@ -42,6 +42,9 @@ public class ConstructorArg {
     @XmlAttribute(name = "value")
     public String value;
 
+    @XmlAttribute(name = "ref")
+    public String ref;
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);

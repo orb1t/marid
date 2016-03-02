@@ -16,29 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.beaned.data;
+package org.marid.spring.xml;
 
-import de.jensd.fx.glyphs.GlyphIcons;
-import javafx.beans.property.StringProperty;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Data {
+@XmlRootElement(name = "property")
+public class PropertyArg {
 
-    String getType();
+    @XmlAttribute(name = "name")
+    public String name;
 
-    String getName();
+    @XmlAttribute(name = "value")
+    public String value;
 
-    String getValue();
+    @XmlAttribute(name = "ref")
+    public String ref;
 
-    StringProperty nameProperty();
-
-    StringProperty valueProperty();
-
-    boolean isNameEditable();
-
-    boolean isValueEditable();
-
-    GlyphIcons getIcon();
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
 }

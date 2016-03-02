@@ -16,29 +16,40 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.beaned.data;
+package org.marid.beans.meta;
 
-import de.jensd.fx.glyphs.GlyphIcons;
-import javafx.beans.property.StringProperty;
+import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Data {
+public class BeanInfo {
 
-    String getType();
+    private final String name;
+    private final String type;
+    private final String description;
+    private final Set<String> dependsOn;
 
-    String getName();
+    public BeanInfo(String type, String name, String description, Set<String> dependsOn) {
+        this.type = type;
+        this.name = name;
+        this.description = description;
+        this.dependsOn = dependsOn;
+    }
 
-    String getValue();
+    public String getType() {
+        return type;
+    }
 
-    StringProperty nameProperty();
+    public String getName() {
+        return name;
+    }
 
-    StringProperty valueProperty();
+    public Set<String> getDependsOn() {
+        return dependsOn;
+    }
 
-    boolean isNameEditable();
-
-    boolean isValueEditable();
-
-    GlyphIcons getIcon();
+    public String getDescription() {
+        return description;
+    }
 }

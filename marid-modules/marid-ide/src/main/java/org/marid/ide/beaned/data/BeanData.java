@@ -18,6 +18,8 @@
 
 package org.marid.ide.beaned.data;
 
+import de.jensd.fx.glyphs.GlyphIcons;
+import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -100,6 +102,16 @@ public class BeanData implements Data {
     }
 
     @Override
+    public StringProperty nameProperty() {
+        return name;
+    }
+
+    @Override
+    public StringProperty valueProperty() {
+        return new SimpleStringProperty(getValue());
+    }
+
+    @Override
     public boolean isNameEditable() {
         return true;
     }
@@ -117,6 +129,11 @@ public class BeanData implements Data {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof BeanData && Objects.equals(((BeanData) obj).getName(), getName());
+    }
+
+    @Override
+    public GlyphIcons getIcon() {
+        return MaterialDesignIcon.PIG;
     }
 
     @Override

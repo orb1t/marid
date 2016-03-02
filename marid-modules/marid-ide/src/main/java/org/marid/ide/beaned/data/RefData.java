@@ -18,27 +18,14 @@
 
 package org.marid.ide.beaned.data;
 
-import de.jensd.fx.glyphs.GlyphIcons;
 import javafx.beans.property.StringProperty;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Data {
+public interface RefData extends Data {
 
-    String getType();
+    String getRef();
 
-    String getName();
-
-    String getValue();
-
-    StringProperty nameProperty();
-
-    StringProperty valueProperty();
-
-    boolean isNameEditable();
-
-    boolean isValueEditable();
-
-    GlyphIcons getIcon();
+    StringProperty refProperty();
 }

@@ -16,29 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.beaned.data;
-
-import de.jensd.fx.glyphs.GlyphIcons;
-import javafx.beans.property.StringProperty;
+package org.marid.beans.meta;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Data {
+public interface BeanIntrospector {
 
-    String getType();
-
-    String getName();
-
-    String getValue();
-
-    StringProperty nameProperty();
-
-    StringProperty valueProperty();
-
-    boolean isNameEditable();
-
-    boolean isValueEditable();
-
-    GlyphIcons getIcon();
+    BeanInfo[] getBeans();
 }

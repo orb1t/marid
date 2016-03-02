@@ -26,36 +26,41 @@ import javafx.beans.property.StringProperty;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class RootData implements Data {
+public class ConstructorArgData implements RefData {
 
-    public static final RootData ROOT_DATA = new RootData();
+    private final String name;
+    private final String type;
+    private final StringProperty value = new SimpleStringProperty();
+    private final StringProperty ref = new SimpleStringProperty();
 
-    private RootData() {
+    public ConstructorArgData(String type, String name) {
+        this.type = type;
+        this.name = name;
+    }
+
+    @Override
+    public String getRef() {
+        return ref.get();
     }
 
     @Override
     public String getType() {
-        return Void.class.getName();
+        return type;
     }
 
     @Override
     public String getName() {
-        return "root";
+        return name;
     }
 
     @Override
     public String getValue() {
-        return "";
+        return value.get();
     }
 
     @Override
     public StringProperty nameProperty() {
-        return new SimpleStringProperty("");
-    }
-
-    @Override
-    public StringProperty valueProperty() {
-        return new SimpleStringProperty("");
+        return new SimpleStringProperty(name);
     }
 
     @Override
@@ -65,16 +70,26 @@ public class RootData implements Data {
 
     @Override
     public boolean isValueEditable() {
-        return false;
+        return true;
+    }
+
+    @Override
+    public StringProperty valueProperty() {
+        return value;
+    }
+
+    @Override
+    public StringProperty refProperty() {
+        return ref;
     }
 
     @Override
     public GlyphIcons getIcon() {
-        return OctIcon.BROWSER;
+        return OctIcon.LIGHT_BULB;
     }
 
     @Override
     public String toString() {
-        return getName();
+        return name;
     }
 }
