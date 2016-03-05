@@ -20,18 +20,19 @@ package org.marid.ide.beaned;
 
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
+import javafx.scene.input.KeyCombination;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.beaned.data.BeanContext;
 import org.marid.ide.beaned.data.BeanData;
 import org.marid.ide.beaned.data.Data;
+import org.marid.ide.beaned.data.DataMenuFactory;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
+
+import static org.marid.ide.beaned.data.DataEditorFactory.newDialog;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -42,12 +43,16 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
         super(beanContext.root);
         setShowRoot(false);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
-        final TreeTableColumn<Data, String> nameColumn = nameColumn(beanContext);
-        getColumns().add(nameColumn);
+        setTreeColumn(nameColumn(beanContext));
+        getColumns().add(getTreeColumn());
         getColumns().add(typeColumn(beanContext));
-        getColumns().add(valueColumn());
-        setTreeColumn(nameColumn);
-        setEditable(true);
+        getColumns().add(valueColumn(beanContext));
+        setEditable(false);
+        setOnKeyPressed(event -> {
+            if (KeyCombination.valueOf("F4").match(event)) {
+                editItem(beanContext);
+            }
+        });
     }
 
     private TreeTableColumn<Data, String> nameColumn(BeanContext beanContext) {
@@ -68,8 +73,8 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
                     return;
                 }
                 setText(item);
-                setEditable(treeItem.getValue().isNameEditable());
                 setGraphic(FontIcons.glyphIcon(treeItem.getValue().getIcon(), 16));
+                setContextMenu(DataMenuFactory.contextMenu(this, beanContext));
             }
         });
         return column;
@@ -101,7 +106,7 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
         return column;
     }
 
-    private TreeTableColumn<Data, String> valueColumn() {
+    private TreeTableColumn<Data, String> valueColumn(BeanContext beanContext) {
         final TreeTableColumn<Data, String> column = new TreeTableColumn<>(s("Value"));
         column.setMinWidth(250);
         column.setPrefWidth(390);
@@ -129,5 +134,13 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
         final TreeItem<Data> treeItem = new TreeItem<>(beanData);
         getRoot().getChildren().add(treeItem);
         return treeItem;
+    }
+
+    public void editItem(BeanContext beanContext) {
+        final TreeItem<Data> treeItem = getSelectionModel().getSelectedItem();
+        final Dialog<Runnable> dialog = newDialog(this, beanContext, treeItem.getValue());
+        if (dialog != null) {
+            dialog.showAndWait().ifPresent(Runnable::run);
+        }
     }
 }

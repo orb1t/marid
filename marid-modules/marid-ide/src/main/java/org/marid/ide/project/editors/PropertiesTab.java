@@ -21,14 +21,14 @@ package org.marid.ide.project.editors;
 import javafx.beans.property.StringProperty;
 import org.apache.maven.model.Model;
 import org.marid.jfx.Props;
-import org.marid.jfx.panes.AbstractGridPane;
+import org.marid.jfx.panes.GenericGridPane;
 
 import java.util.Properties;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PropertiesTab extends AbstractGridPane {
+public class PropertiesTab extends GenericGridPane {
 
     public PropertiesTab(Model model) {
         final Properties properties = model.getProperties();

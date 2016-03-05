@@ -39,6 +39,7 @@ public class BeanData implements Data {
     private final StringProperty factoryBean = new SimpleStringProperty();
     private final StringProperty factoryMethod = new SimpleStringProperty();
     private final StringProperty initMethod = new SimpleStringProperty();
+    private final StringProperty destroyMethod = new SimpleStringProperty();
     private final ObservableList<String> dependsOn = FXCollections.observableArrayList();
 
     public BeanData(String type, String name) {
@@ -67,6 +68,10 @@ public class BeanData implements Data {
         return initMethod.get();
     }
 
+    public String getDestroyMethod() {
+        return destroyMethod.get();
+    }
+
     public ObservableList<String> getDependsOn() {
         return dependsOn;
     }
@@ -83,6 +88,10 @@ public class BeanData implements Data {
         return initMethod;
     }
 
+    public StringProperty destroyMethodProperty() {
+        return destroyMethod;
+    }
+
     @Override
     public String getValue() {
         final Map<String, Object> map = new LinkedHashMap<>();
@@ -94,6 +103,9 @@ public class BeanData implements Data {
         }
         if (getInitMethod() != null) {
             map.put("initMethod", getInitMethod());
+        }
+        if (getDestroyMethod() != null) {
+            map.put("destroyMethod", getDestroyMethod());
         }
         if (!getDependsOn().isEmpty()) {
             map.put("dependsOn", getDependsOn());
@@ -109,16 +121,6 @@ public class BeanData implements Data {
     @Override
     public StringProperty valueProperty() {
         return new SimpleStringProperty(getValue());
-    }
-
-    @Override
-    public boolean isNameEditable() {
-        return true;
-    }
-
-    @Override
-    public boolean isValueEditable() {
-        return true;
     }
 
     @Override

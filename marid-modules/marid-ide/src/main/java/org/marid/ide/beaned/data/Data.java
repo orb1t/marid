@@ -36,9 +36,5 @@ public interface Data {
 
     StringProperty valueProperty();
 
-    boolean isNameEditable();
-
-    boolean isValueEditable();
-
     GlyphIcons getIcon();
 }

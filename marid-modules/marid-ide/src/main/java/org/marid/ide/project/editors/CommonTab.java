@@ -19,12 +19,12 @@
 package org.marid.ide.project.editors;
 
 import org.apache.maven.model.Model;
-import org.marid.jfx.panes.AbstractGridPane;
+import org.marid.jfx.panes.GenericGridPane;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class CommonTab extends AbstractGridPane {
+public class CommonTab extends GenericGridPane {
 
     public CommonTab(Model model) {
         addTextField("Name", model, "name");

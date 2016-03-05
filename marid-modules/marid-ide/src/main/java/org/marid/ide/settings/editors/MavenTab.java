@@ -19,7 +19,7 @@
 package org.marid.ide.settings.editors;
 
 import org.marid.ide.settings.MavenSettings;
-import org.marid.jfx.panes.AbstractGridPane;
+import org.marid.jfx.panes.GenericGridPane;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -30,7 +30,7 @@ import static org.marid.jfx.Props.stringProperty;
  * @author Dmitry Ovchinnikov
  */
 @Dependent
-public class MavenTab extends AbstractGridPane implements SettingsEditor {
+public class MavenTab extends GenericGridPane implements SettingsEditor {
 
     private final MavenSettings mavenSettings;
 

@@ -59,16 +59,6 @@ public class RootData implements Data {
     }
 
     @Override
-    public boolean isNameEditable() {
-        return false;
-    }
-
-    @Override
-    public boolean isValueEditable() {
-        return false;
-    }
-
-    @Override
     public GlyphIcons getIcon() {
         return OctIcon.BROWSER;
     }

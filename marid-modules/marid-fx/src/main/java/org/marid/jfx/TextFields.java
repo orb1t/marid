@@ -16,32 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.settings.editors;
+package org.marid.jfx;
 
-import org.marid.ide.settings.JavaSettings;
-import org.marid.jfx.panes.GenericGridPane;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-
-import static org.marid.jfx.Props.stringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.scene.control.TextField;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
-public class JavaTab extends GenericGridPane implements SettingsEditor {
+public interface TextFields {
 
-    private final JavaSettings javaSettings;
-
-    @Inject
-    public JavaTab(JavaSettings javaSettings) throws Exception {
-        this.javaSettings = javaSettings;
-        addTextField("Java executable", stringProperty(javaSettings, "javaExecutable"));
-    }
-
-    @Override
-    public JavaSettings getSettings() {
-        return javaSettings;
+    static TextField textField(StringProperty property) {
+        final TextField textField = new TextField();
+        textField.textProperty().bindBidirectional(property);
+        textField.setMaxWidth(Double.MAX_VALUE);
+        return textField;
     }
 }

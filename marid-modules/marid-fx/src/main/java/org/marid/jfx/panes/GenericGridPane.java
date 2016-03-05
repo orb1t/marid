@@ -35,9 +35,9 @@ import static org.marid.jfx.Props.stringProperty;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class AbstractGridPane extends GridPane implements L10nSupport {
+public class GenericGridPane extends GridPane implements L10nSupport {
 
-    public AbstractGridPane() {
+    public GenericGridPane() {
         getColumnConstraints().add(new ColumnConstraints(0, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, NEVER, LEFT, false));
         getColumnConstraints().add(new ColumnConstraints(0, USE_COMPUTED_SIZE, MAX_VALUE, SOMETIMES, LEFT, true));
         setVgap(10);

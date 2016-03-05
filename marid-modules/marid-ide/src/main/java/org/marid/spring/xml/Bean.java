@@ -22,13 +22,16 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @XmlRootElement(name = "bean")
+@XmlSeeAlso({ConstructorArg.class, PropertyArg.class})
 public class Bean {
 
     @XmlAttribute(name = "abstract")
@@ -75,6 +78,12 @@ public class Bean {
 
     @XmlAttribute(name = "factory-method")
     public String factoryMethod;
+
+    @XmlElement(name = "constructor-arg")
+    public List<ConstructorArg> constructorArgs;
+
+    @XmlElement(name = "property")
+    public List<PropertyArg> propertyArgs;
 
     @Override
     public String toString() {

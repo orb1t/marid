@@ -19,8 +19,11 @@
 package org.marid.ide.beaned;
 
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import org.marid.ide.Ide;
+import org.marid.ide.beaned.data.BeanContext;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 
@@ -34,13 +37,15 @@ import javax.inject.Inject;
 public class BeanEditor extends Stage implements L10nSupport, LogSupport {
 
     @Inject
-    public BeanEditor(BeanEditorPane beanEditorPane) {
+    public BeanEditor(ProjectProfile profile) {
+        final BeanContext context = new BeanContext(profile);
         getIcons().addAll(Ide.IMAGES);
-        setScene(new Scene(beanEditorPane, 1024, 768));
-        setTitle("[" + beanEditorPane.beanContext.profile + "] " + s("New"));
+        final BeanTreePane treePane = new BeanTreePane(context);
+        setScene(new Scene(treePane, 1024, 768));
+        setTitle("[" + profile + "] " + s("New"));
         setOnCloseRequest(event -> {
             try {
-                beanEditorPane.beanContext.close();
+                context.close();
             } catch (Exception x) {
                 log(WARNING, "Unable to free resources", x);
             }

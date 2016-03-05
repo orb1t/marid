@@ -64,6 +64,7 @@ public class BeanContext implements LogSupport, Closeable {
     public final TreeItem<Data> root = new TreeItem<>(RootData.ROOT_DATA);
     public final Set<MaridBeanXml> beansXmls = new TreeSet<>(comparing(b -> b.text != null ? b.text : b.type));
 
+    private final Map<String, BeanInfo> classBeanInfo = new HashMap<>();
     private final Map<String, String> classIconMap = new HashMap<>();
 
     public BeanContext(ProjectProfile profile) {
@@ -93,6 +94,18 @@ public class BeanContext implements LogSupport, Closeable {
 
     public String icon(String type) {
         return classIconMap.get(type);
+    }
+
+    public BeanInfo beanInfo(String type) {
+        return classBeanInfo.computeIfAbsent(type, t -> {
+            try {
+                final Class<?> c = Class.forName(t, false, classLoader);
+                return new BeanInfo(c);
+            } catch (Exception x) {
+                log(WARNING, "BeanInfo obtaining error for {0}", x, t);
+                return new BeanInfo();
+            }
+        });
     }
 
     public static GlyphIcon<?> icon(String text, int size, GlyphIcons defaultIcon) {

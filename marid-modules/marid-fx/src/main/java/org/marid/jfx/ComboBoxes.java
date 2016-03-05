@@ -16,28 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.beaned;
+package org.marid.jfx;
 
-import javafx.scene.layout.BorderPane;
-import org.marid.ide.beaned.data.BeanContext;
-import org.marid.ide.project.ProjectProfile;
-import org.marid.logging.LogSupport;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import javafx.beans.property.StringProperty;
+import javafx.collections.ObservableList;
+import javafx.scene.control.ComboBox;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
-public class BeanEditorPane extends BorderPane implements LogSupport {
+public interface ComboBoxes {
 
-    final BeanTreePane beanTreePane;
-    final BeanContext beanContext;
-
-    @Inject
-    public BeanEditorPane(ProjectProfile projectProfile) {
-        beanContext = new BeanContext(projectProfile);
-        setCenter(beanTreePane = new BeanTreePane(beanContext));
+    static <T> ComboBox<T> comboBox(ObservableList<T> list, StringProperty textProperty) {
+        final ComboBox<T> comboBox = new ComboBox<>(list);
+        comboBox.setEditable(true);
+        comboBox.getEditor().textProperty().bindBidirectional(textProperty);
+        comboBox.setMaxWidth(Double.MAX_VALUE);
+        return comboBox;
     }
 }

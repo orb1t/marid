@@ -65,16 +65,6 @@ public class PropertyArgData implements RefData {
     }
 
     @Override
-    public boolean isNameEditable() {
-        return false;
-    }
-
-    @Override
-    public boolean isValueEditable() {
-        return true;
-    }
-
-    @Override
     public StringProperty valueProperty() {
         return value;
     }
