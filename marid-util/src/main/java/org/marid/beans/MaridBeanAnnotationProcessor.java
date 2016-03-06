@@ -23,6 +23,7 @@ import org.marid.xml.XmlBind;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
 import javax.xml.bind.Marshaller;
@@ -60,7 +61,18 @@ public class MaridBeanAnnotationProcessor extends AbstractProcessor {
                 for (final Element e : roundEnv.getElementsAnnotatedWith(te)) {
                     final MaridBean maridBean = e.getAnnotation(MaridBean.class);
                     final MaridBeanXml maridBeanXml = new MaridBeanXml(maridBean);
-                    maridBeanXml.type = e.toString();
+                    maridBeanXml.kind = e.getKind();
+                    if (e.getEnclosingElement() != null) {
+                        maridBeanXml.parent = e.getEnclosingElement().toString();
+                    }
+                    switch (e.getKind()) {
+                        case METHOD:
+                            maridBeanXml.type = ((ExecutableElement) e).getReturnType().toString();
+                            break;
+                        default:
+                            maridBeanXml.type = e.toString();
+                            break;
+                    }
                     beansXml.beans.add(maridBeanXml);
                     messager.printMessage(NOTE, "Added bean " + maridBeanXml);
                 }

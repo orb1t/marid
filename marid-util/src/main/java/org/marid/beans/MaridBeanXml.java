@@ -18,6 +18,7 @@
 
 package org.marid.beans;
 
+import javax.lang.model.element.ElementKind;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.LinkedHashMap;
@@ -44,6 +45,12 @@ public class MaridBeanXml {
     @XmlAttribute(name = "type", required = true)
     public String type;
 
+    @XmlAttribute(name = "kind", required = true)
+    public ElementKind kind;
+
+    @XmlAttribute(name = "parent")
+    public String parent;
+
     public MaridBeanXml() {
     }
 
@@ -59,6 +66,12 @@ public class MaridBeanXml {
         final Map<String, Object> map = new LinkedHashMap<>();
         if (type != null) {
             map.put("type", type);
+        }
+        if (parent != null) {
+            map.put("parent", parent);
+        }
+        if (kind != null) {
+            map.put("kind", kind);
         }
         if (text != null) {
             map.put("text", text);

@@ -23,22 +23,19 @@ import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.beans.binding.Bindings;
-import javafx.geometry.Side;
-import javafx.scene.Node;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TreeItem;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import org.marid.beans.MaridBeanXml;
 import org.marid.ide.beaned.data.BeanContext;
 import org.marid.ide.beaned.data.BeanData;
 import org.marid.ide.beaned.data.Data;
 import org.marid.jfx.ScrollPanes;
-import org.marid.jfx.toolbar.ToolbarBuilder;
+import org.marid.jfx.menu.MenuContainerBuilder;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 
+import javax.lang.model.element.ElementKind;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,32 +51,36 @@ public class BeanTreePane extends BorderPane implements LogSupport, L10nSupport 
     public BeanTreePane(BeanContext beanContext) {
         setFocusTraversable(false);
         setCenter(ScrollPanes.scrollPane(beanTree = new BeanTree(beanContext)));
-        setTop(new ToolbarBuilder()
-                .add("Add bean", MaterialIcon.ADD_BOX, event -> {
-                    final Node node = (Node) event.getSource();
-                    contextMenu(beanContext).show(node, Side.BOTTOM, 0, 0);
-                })
-                .add("Clear all", MaterialIcon.CLEAR_ALL,
-                        event -> beanTree.getRoot().getChildren().clear(),
-                        b -> b.disableProperty().bind(Bindings.isEmpty(beanTree.getRoot().getChildren())))
-                .addSeparator()
-                .add("Edit value", MaterialDesignIcon.TABLE_EDIT,
-                        event -> beanTree.editItem(beanContext),
-                        b -> b.disableProperty().bind(Bindings.createBooleanBinding(() -> {
+        final ToolBar toolBar = new ToolBar();
+        final MenuBar menuBar = new MenuBar();
+        final VBox vBox = new VBox(menuBar, toolBar);
+        setTop(vBox);
+        new MenuContainerBuilder()
+                .menu("Beans", b -> b
+                        .item("*Beans", MaterialIcon.ADD_BOX, contextMenu(beanContext))
+                        .last(a -> a.getProperties().put("menu", contextMenu(beanContext)))
+                        .item("*Clear all", MaterialIcon.CLEAR_ALL, event -> beanTree.getRoot().getChildren().clear())
+                        .last(a -> a.disabledProperty().bind(Bindings.isEmpty(beanTree.getRoot().getChildren())))
+                        .separator()
+                        .item("*Edit...", MaterialDesignIcon.TABLE_EDIT, "F2", event -> beanTree.editItem(beanContext))
+                        .last(a -> a.disabledProperty().bind(Bindings.createBooleanBinding(() -> {
                             final TreeItem<Data> treeItem = beanTree.getSelectionModel().getSelectedItem();
                             if (treeItem == null) {
                                 return true;
                             }
-                            final Dialog<Runnable> dialog = newDialog(this, beanContext, treeItem.getValue());
+                            final Dialog<Runnable> dialog = newDialog(beanTree, beanContext, treeItem.getValue());
                             return dialog == null;
-                        }, beanTree.getSelectionModel().selectedIndexProperty())))
-                .build());
+                        }, beanTree.getSelectionModel().selectedIndexProperty()))))
+                .build(menuBar.getMenus()::add, toolBar.getItems());
     }
 
     private ContextMenu contextMenu(BeanContext beanContext) {
         final ContextMenu contextMenu = new ContextMenu();
         final Pattern beanNamePattern = Pattern.compile("bean(\\d+)");
         for (final MaridBeanXml beanXml : beanContext.beansXmls) {
+            if (beanXml.kind != ElementKind.CLASS) {
+                continue;
+            }
             final GlyphIcon<?> icon = BeanContext.icon(beanXml.icon, 16, OctIcon.CODE);
             final String text = beanXml.text == null ? beanXml.type : beanXml.text + ": " + beanXml.type;
             final MenuItem menuItem = new MenuItem(text, icon);

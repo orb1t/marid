@@ -18,19 +18,24 @@
 
 package org.marid.ide.beaned.data;
 
+import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCombination;
+import org.marid.ide.beaned.BeanTree;
+import org.marid.l10n.L10nSupport;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
+import static org.marid.ide.beaned.data.DataEditorFactory.newDialog;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DataMenuFactory {
+public class DataMenuFactory implements L10nSupport {
 
     public static ContextMenu contextMenu(TreeTableCell<Data, String> cell, BeanContext beanContext) {
         final TreeItem<Data> item = cell.getTreeTableRow().getTreeItem();
@@ -87,6 +92,12 @@ public class DataMenuFactory {
             });
             menuItemMap.computeIfAbsent('p', k -> new LinkedHashSet<>()).add(menuItem);
         });
+        if (newDialog((BeanTree) cell.getTreeTableView(), beanContext, cell.getTreeTableRow().getItem()) != null) {
+            final MenuItem editMenuItem = new MenuItem(LS.s("Edit..."), glyphIcon(MaterialDesignIcon.TABLE_EDIT));
+            editMenuItem.setAccelerator(KeyCombination.valueOf("F2"));
+            editMenuItem.setOnAction(event -> ((BeanTree) cell.getTreeTableView()).editItem(beanContext));
+            menuItemMap.computeIfAbsent('e', k -> new LinkedHashSet<>()).add(editMenuItem);
+        }
         menuItemMap.forEach((g, items) -> {
             if (!contextMenu.getItems().isEmpty()) {
                 contextMenu.getItems().add(new SeparatorMenuItem());

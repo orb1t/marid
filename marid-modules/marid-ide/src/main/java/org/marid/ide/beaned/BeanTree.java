@@ -19,16 +19,15 @@
 package org.marid.ide.beaned;
 
 import de.jensd.fx.glyphs.octicons.OctIcon;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.TextFieldTreeTableCell;
-import javafx.scene.input.KeyCombination;
-import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.beaned.data.BeanContext;
 import org.marid.ide.beaned.data.BeanData;
 import org.marid.ide.beaned.data.Data;
 import org.marid.ide.beaned.data.DataMenuFactory;
 import org.marid.jfx.icons.FontIcons;
+import org.marid.jfx.table.MaridTreeTableViewSkin;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 
@@ -42,26 +41,31 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
     public BeanTree(BeanContext beanContext) {
         super(beanContext.root);
         setShowRoot(false);
-        setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
+        setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
         setTreeColumn(nameColumn(beanContext));
+        final MaridTreeTableViewSkin<Data> skin = new MaridTreeTableViewSkin<>(this);
+        setSkin(skin);
         getColumns().add(getTreeColumn());
         getColumns().add(typeColumn(beanContext));
         getColumns().add(valueColumn(beanContext));
         setEditable(false);
-        setOnKeyPressed(event -> {
-            if (KeyCombination.valueOf("F4").match(event)) {
-                editItem(beanContext);
+        needsLayoutProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                for (final TreeTableColumn<Data, ?> c : getColumns()) {
+                    skin.resizeColumnToFitContent(c, 65536);
+                }
+                refresh();
             }
         });
     }
 
     private TreeTableColumn<Data, String> nameColumn(BeanContext beanContext) {
         final TreeTableColumn<Data, String> column = new TreeTableColumn<>(s("Name"));
-        column.setMinWidth(100);
-        column.setPrefWidth(120);
-        column.setMaxWidth(300);
+        column.setPrefWidth(150);
+        column.setResizable(false);
+        column.prefWidthProperty().bind(new SimpleDoubleProperty(80.0));
         column.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
-        column.setCellFactory(param -> new TextFieldTreeTableCell<Data, String>(new DefaultStringConverter()) {
+        column.setCellFactory(param -> new TreeTableCell<Data, String>() {
             @Override
             public void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -82,10 +86,8 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
 
     private TreeTableColumn<Data, String> typeColumn(BeanContext context) {
         final TreeTableColumn<Data, String> column = new TreeTableColumn<>(s("Type"));
-        column.setMinWidth(200);
-        column.setPrefWidth(270);
-        column.setMaxWidth(550);
-        column.setEditable(false);
+        column.setPrefWidth(200);
+        column.setResizable(false);
         column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getValue().getType()));
         column.setCellFactory(param -> new TreeTableCell<Data, String>() {
             @Override
@@ -108,11 +110,9 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
 
     private TreeTableColumn<Data, String> valueColumn(BeanContext beanContext) {
         final TreeTableColumn<Data, String> column = new TreeTableColumn<>(s("Value"));
-        column.setMinWidth(250);
-        column.setPrefWidth(390);
-        column.setMaxWidth(1000);
+        column.setPrefWidth(500);
+        column.setResizable(false);
         column.setCellValueFactory(param -> param.getValue().getValue().valueProperty());
-        column.setEditable(false);
         column.setCellFactory(param -> new TreeTableCell<Data, String>() {
             @Override
             public void updateItem(String item, boolean empty) {

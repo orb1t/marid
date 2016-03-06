@@ -22,18 +22,23 @@ import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.stage.FileChooser;
 import org.marid.ide.menu.IdeMenuItem;
+import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.scenes.IdeScene;
 import org.marid.ide.toolbar.IdeToolbarItem;
+import org.marid.l10n.L10nSupport;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
+import java.io.File;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @ApplicationScoped
-public class BeanEditorManager {
+public class BeanEditorManager implements L10nSupport {
 
     @Produces
     @IdeMenuItem(menu = "File", text = "New", group = "fileNew", oIcons = {OctIcon.FILE_DIRECTORY_CREATE})
@@ -48,8 +53,20 @@ public class BeanEditorManager {
     @Produces
     @IdeMenuItem(menu = "File", text = "Open...", group = "fileOpen", mdIcons = {MaterialDesignIcon.OPEN_IN_NEW})
     @IdeToolbarItem(group = "file")
-    public EventHandler<ActionEvent> projectSave() {
+    public EventHandler<ActionEvent> projectSave(Provider<IdeScene> ideSceneProvider,
+                                                 ProjectProfile profile,
+                                                 Provider<BeanEditor> beanEditorProvider) {
         return event -> {
+            final FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle(m("Select a bean file"));
+            fileChooser.setInitialDirectory(profile.getBeansDirectory().toFile());
+            fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Beans", ".xml"));
+            final IdeScene ideScene = ideSceneProvider.get();
+            final File file = fileChooser.showOpenDialog(ideScene.getWindow());
+            if (file != null) {
+                final BeanEditor beanEditor = beanEditorProvider.get();
+                beanEditor.show();
+            }
         };
     }
 }

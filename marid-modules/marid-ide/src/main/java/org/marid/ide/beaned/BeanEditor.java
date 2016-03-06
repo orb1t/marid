@@ -19,7 +19,6 @@
 package org.marid.ide.beaned;
 
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import org.marid.ide.Ide;
 import org.marid.ide.beaned.data.BeanContext;
@@ -50,5 +49,9 @@ public class BeanEditor extends Stage implements L10nSupport, LogSupport {
                 log(WARNING, "Unable to free resources", x);
             }
         });
+    }
+
+    public BeanTreePane getTreePane() {
+        return (BeanTreePane) getScene().getRoot();
     }
 }

@@ -28,6 +28,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
+import org.marid.ide.beaned.BeanTree;
 import org.marid.jfx.Dialogs;
 import org.marid.jfx.ScrollPanes;
 import org.marid.jfx.TextFields;
@@ -45,7 +46,7 @@ import static org.marid.jfx.ComboBoxes.comboBox;
  */
 public class DataEditorFactory implements L10nSupport {
 
-    public static Dialog<Runnable> newDialog(Node node, BeanContext beanContext, Data data) {
+    public static Dialog<Runnable> newDialog(BeanTree node, BeanContext beanContext, Data data) {
         if (data instanceof RefData) {
             return newEditor(node, beanContext, (RefData) data);
         } else if (data instanceof BeanData) {
@@ -55,7 +56,7 @@ public class DataEditorFactory implements L10nSupport {
         }
     }
 
-    public static Dialog<Runnable> newEditor(Node node, BeanContext beanContext, BeanData beanData) {
+    public static Dialog<Runnable> newEditor(BeanTree node, BeanContext beanContext, BeanData beanData) {
         final StringProperty nameProperty = new SimpleStringProperty(beanData.getName());
         final StringProperty initMethodProperty = new SimpleStringProperty(beanData.getInitMethod());
         final StringProperty destroyMethodProperty = new SimpleStringProperty(beanData.getDestroyMethod());
@@ -77,7 +78,7 @@ public class DataEditorFactory implements L10nSupport {
         });
     }
 
-    public static Dialog<Runnable> newEditor(Node node, BeanContext beanContext, RefData refData) {
+    public static Dialog<Runnable> newEditor(BeanTree node, BeanContext beanContext, RefData refData) {
         final StringProperty valueProperty = new SimpleStringProperty(refData.getValue());
         return Dialogs.dialog(node, refData.getName(), () -> () -> {
             refData.valueProperty().set(valueProperty.get());

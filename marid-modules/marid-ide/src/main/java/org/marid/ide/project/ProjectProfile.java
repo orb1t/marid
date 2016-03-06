@@ -110,6 +110,10 @@ public class ProjectProfile implements LogSupport {
         return repository;
     }
 
+    public Path getBeansDirectory() {
+        return srcMainResources.resolve("META-INF").resolve("marid");
+    }
+
     public Path getTarget() {
         return target;
     }
