@@ -19,9 +19,11 @@
 package org.marid.runtime;
 
 import org.jboss.logmanager.LogManager;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 
+import java.util.Scanner;
 import java.util.TimeZone;
 
 /**
@@ -40,18 +42,42 @@ public class MaridLauncher {
         context.setValidating(false);
         context.getEnvironment().getPropertySources().addFirst(new SimpleCommandLinePropertySource(args));
         Runtime.getRuntime().addShutdownHook(new Thread(context::close));
-        MaridInputHandler.handleInput(context);
-        try {
-            context.refresh();
-            context.start();
-        } catch (Exception x) {
-            x.printStackTrace();
-            try {
-                System.in.close();
-            }  catch (Exception ix) {
-                ix.printStackTrace();
+        context.addApplicationListener(event -> {
+            if (event instanceof ContextClosedEvent) {
+                try {
+                    System.in.close();
+                } catch (Exception x) {
+                    x.printStackTrace();
+                }
             }
-            System.exit(1);
+        });
+        context.refresh();
+        context.start();
+        try (final Scanner scanner = new Scanner(System.in)) {
+            while (scanner.hasNextLine()) {
+                final String line = scanner.nextLine().trim();
+                switch (line) {
+                    case "dump":
+                        Thread.getAllStackTraces().forEach((t, stes) -> {
+                            System.err.println(t);
+                            if (stes != null) {
+                                for (final StackTraceElement e : stes) {
+                                    System.err.format("%s %s.%s:%d%n",
+                                            e.getFileName(),
+                                            e.getClassName(),
+                                            e.getMethodName(),
+                                            e.getLineNumber());
+                                }
+                            }
+                            System.err.println();
+                        });
+                        break;
+                    case "exit":
+                    case "quit":
+                        context.close();
+                        break;
+                }
+            }
         }
     }
 }

@@ -37,16 +37,16 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
  */
 public class DataMenuFactory implements L10nSupport {
 
-    public static ContextMenu contextMenu(TreeTableCell<Data, String> cell, BeanContext beanContext) {
+    public static ContextMenu contextMenu(BeanTree beanTree, TreeTableCell<Data, String> cell, BeanContext beanContext) {
         final TreeItem<Data> item = cell.getTreeTableRow().getTreeItem();
         if (item.getValue() instanceof BeanData) {
-            return contextMenuBean(cell, beanContext);
+            return contextMenuBean(beanTree, cell, beanContext);
         } else {
             return null;
         }
     }
 
-    public static ContextMenu contextMenuBean(TreeTableCell<Data, String> cell, BeanContext beanContext) {
+    static ContextMenu contextMenuBean(BeanTree beanTree, TreeTableCell<Data, String> cell, BeanContext beanContext) {
         final TreeItem<Data> item = cell.getTreeTableRow().getTreeItem();
         final BeanData beanData = (BeanData) item.getValue();
         final BeanInfo beanInfo = beanContext.beanInfo(beanData.getType());
@@ -69,6 +69,7 @@ public class DataMenuFactory implements L10nSupport {
                     final TreeItem<Data> treeItem = new TreeItem<>(data);
                     item.getChildren().add(treeItem);
                     item.setExpanded(true);
+                    beanTree.getSelectionModel().select(treeItem);
                 });
                 menuItemMap.computeIfAbsent('c', k -> new LinkedHashSet<>()).add(menuItem);
             }
@@ -89,6 +90,7 @@ public class DataMenuFactory implements L10nSupport {
                 final TreeItem<Data> treeItem = new TreeItem<>(data);
                 item.getChildren().add(treeItem);
                 item.setExpanded(true);
+                beanTree.getSelectionModel().select(treeItem);
             });
             menuItemMap.computeIfAbsent('p', k -> new LinkedHashSet<>()).add(menuItem);
         });

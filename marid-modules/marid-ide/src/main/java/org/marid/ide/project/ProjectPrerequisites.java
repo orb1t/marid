@@ -71,9 +71,7 @@ public class ProjectPrerequisites {
         properties.setProperty("project.reporting.outputEncoding", "UTF-8");
         properties.setProperty("maven.compiler.source", "1.8");
         properties.setProperty("maven.compiler.target", "1.8");
-        if (!properties.containsKey("marid.runtime.version")) {
-            properties.setProperty("marid.runtime.version", System.getProperty("implementation.version"));
-        }
+        properties.setProperty("marid.runtime.version", System.getProperty("implementation.version"));
     }
 
     void applyBuild() {

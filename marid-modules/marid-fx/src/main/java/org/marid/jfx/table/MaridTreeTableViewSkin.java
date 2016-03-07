@@ -36,7 +36,10 @@ public class MaridTreeTableViewSkin<S> extends TreeTableViewSkin<S> {
         super.resizeColumnToFitContent(tc, maxRows);
     }
 
-    public void resizeColumnToFitContent(int maxRows) {
-        resizeColumnToFitContent(getSkinnable().getTreeColumn(), maxRows);
+    public void refresh() {
+        rowCountDirty = true;
+        if (getSkinnable() != null) {
+            getSkinnable().requestLayout();
+        }
     }
 }

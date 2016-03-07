@@ -19,17 +19,20 @@
 package org.marid.ide.beaned;
 
 import de.jensd.fx.glyphs.octicons.OctIcon;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.*;
 import org.marid.ide.beaned.data.BeanContext;
 import org.marid.ide.beaned.data.BeanData;
 import org.marid.ide.beaned.data.Data;
 import org.marid.ide.beaned.data.DataMenuFactory;
+import org.marid.ide.timers.IdeTimers;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.table.MaridTreeTableViewSkin;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.marid.ide.beaned.data.DataEditorFactory.newDialog;
 
@@ -38,37 +41,50 @@ import static org.marid.ide.beaned.data.DataEditorFactory.newDialog;
  */
 public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSupport {
 
-    public BeanTree(BeanContext beanContext) {
+    public BeanTree(BeanContext beanContext, IdeTimers ideTimers) {
         super(beanContext.root);
         setShowRoot(false);
         setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
-        setTreeColumn(nameColumn(beanContext));
         final MaridTreeTableViewSkin<Data> skin = new MaridTreeTableViewSkin<>(this);
         setSkin(skin);
-        getColumns().add(getTreeColumn());
+        getColumns().add(nameColumn(beanContext));
         getColumns().add(typeColumn(beanContext));
         getColumns().add(valueColumn(beanContext));
         setEditable(false);
+        setSortMode(TreeSortMode.ONLY_FIRST_LEVEL);
+        final AtomicBoolean dirty = new AtomicBoolean();
+        ideTimers.schedule(300L, task -> {
+            if (beanContext.closed) {
+                task.cancel();
+                return;
+            }
+            if (dirty.get()) {
+                Platform.runLater(() -> {
+                    for (final TreeTableColumn<Data, ?> c : getColumns()) {
+                        skin.resizeColumnToFitContent(c, -1);
+                    }
+                    skin.refresh();
+                    dirty.set(false);
+                });
+            }
+        });
         needsLayoutProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                for (final TreeTableColumn<Data, ?> c : getColumns()) {
-                    skin.resizeColumnToFitContent(c, 65536);
-                }
-                refresh();
+                dirty.compareAndSet(false, true);
             }
         });
     }
 
     private TreeTableColumn<Data, String> nameColumn(BeanContext beanContext) {
         final TreeTableColumn<Data, String> column = new TreeTableColumn<>(s("Name"));
-        column.setPrefWidth(150);
         column.setResizable(false);
-        column.prefWidthProperty().bind(new SimpleDoubleProperty(80.0));
         column.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
         column.setCellFactory(param -> new TreeTableCell<Data, String>() {
             @Override
             public void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
+                setText(null);
+                setGraphic(null);
                 if (item == null || empty) {
                     return;
                 }
@@ -78,7 +94,7 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
                 }
                 setText(item);
                 setGraphic(FontIcons.glyphIcon(treeItem.getValue().getIcon(), 16));
-                setContextMenu(DataMenuFactory.contextMenu(this, beanContext));
+                setContextMenu(DataMenuFactory.contextMenu(BeanTree.this, this, beanContext));
             }
         });
         return column;
@@ -86,13 +102,14 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
 
     private TreeTableColumn<Data, String> typeColumn(BeanContext context) {
         final TreeTableColumn<Data, String> column = new TreeTableColumn<>(s("Type"));
-        column.setPrefWidth(200);
         column.setResizable(false);
         column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getValue().getType()));
         column.setCellFactory(param -> new TreeTableCell<Data, String>() {
             @Override
             public void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
+                setText(null);
+                setGraphic(null);
                 if (item == null || empty) {
                     return;
                 }
@@ -110,13 +127,14 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
 
     private TreeTableColumn<Data, String> valueColumn(BeanContext beanContext) {
         final TreeTableColumn<Data, String> column = new TreeTableColumn<>(s("Value"));
-        column.setPrefWidth(500);
         column.setResizable(false);
         column.setCellValueFactory(param -> param.getValue().getValue().valueProperty());
         column.setCellFactory(param -> new TreeTableCell<Data, String>() {
             @Override
             public void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
+                setText(null);
+                setGraphic(null);
                 if (item == null || empty) {
                     return;
                 }

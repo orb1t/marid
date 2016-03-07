@@ -38,6 +38,7 @@ import org.marid.ide.beaned.data.BeanContext;
 import org.marid.ide.beaned.data.BeanData;
 import org.marid.ide.beaned.data.Data;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.timers.IdeTimers;
 import org.marid.jfx.ScrollPanes;
 import org.marid.jfx.menu.MenuContainerBuilder;
 import org.marid.l10n.L10nSupport;
@@ -68,9 +69,9 @@ public class BeanEditor extends Stage implements L10nSupport, LogSupport {
     private final ObjectProperty<File> file = new SimpleObjectProperty<>();
 
     @Inject
-    public BeanEditor(ProjectProfile profile) {
+    public BeanEditor(ProjectProfile profile, IdeTimers ideTimers) {
         beanContext = new BeanContext(profile);
-        beanTree = new BeanTree(beanContext);
+        beanTree = new BeanTree(beanContext, ideTimers);
         getIcons().addAll(Ide.IMAGES);
         setScene(new Scene(getTreePane(), 1024, 768));
         titleProperty().bind(createStringBinding(this::title, file));
@@ -101,6 +102,8 @@ public class BeanEditor extends Stage implements L10nSupport, LogSupport {
                         .separator()
                         .item("*Edit...", MaterialDesignIcon.TABLE_EDIT, "F2", event -> beanTree.editItem(beanContext))
                         .last(a -> a.disabledProperty().bind(noSelection())))
+                .menu("Window", b -> b
+                        .item("*Refresh", MaterialDesignIcon.REFRESH, "F5", event -> beanTree.refresh()))
                 .build(menuBar.getMenus()::add, toolBar.getItems());
         final VBox vBox = new VBox(menuBar, toolBar);
         final BorderPane pane = new BorderPane(ScrollPanes.scrollPane(beanTree), vBox, null, null, null);

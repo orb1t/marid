@@ -67,6 +67,8 @@ public class BeanContext implements LogSupport, Closeable {
     private final Map<String, BeanInfo> classBeanInfo = new HashMap<>();
     private final Map<String, String> classIconMap = new HashMap<>();
 
+    public volatile boolean closed;
+
     public BeanContext(ProjectProfile profile) {
         this.profile = profile;
         this.classLoader = profile.classLoader();
@@ -89,6 +91,7 @@ public class BeanContext implements LogSupport, Closeable {
 
     @Override
     public void close() throws IOException {
+        closed = true;
         classLoader.close();
     }
 

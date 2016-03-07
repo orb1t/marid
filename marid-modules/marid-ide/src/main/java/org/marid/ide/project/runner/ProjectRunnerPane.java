@@ -20,10 +20,7 @@ package org.marid.ide.project.runner;
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.application.Platform;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
 import org.marid.ide.project.ProjectProfile;
@@ -83,7 +80,10 @@ public class ProjectRunnerPane extends BorderPane implements L10nSupport, LogSup
             try {
                 final int result = process.waitFor();
                 log(INFO, "[{0}] exited with code {1}", profile, result);
-                Platform.runLater(() -> getTop().setDisable(true));
+                Platform.runLater(() -> {
+                    final ToolBar toolBar = (ToolBar) getTop();
+                    toolBar.getItems().forEach(e -> e.setDisable(true));
+                });
             } catch (InterruptedException x) {
                 log(WARNING, "Interrupted");
             }
