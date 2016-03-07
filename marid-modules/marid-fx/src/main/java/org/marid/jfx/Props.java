@@ -19,9 +19,11 @@
 package org.marid.jfx;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.adapter.JavaBeanBooleanPropertyBuilder;
+import javafx.beans.property.adapter.JavaBeanIntegerPropertyBuilder;
 import javafx.beans.property.adapter.JavaBeanObjectPropertyBuilder;
 import javafx.beans.property.adapter.JavaBeanStringPropertyBuilder;
 import org.marid.jfx.props.BooleanPropertyHolder;
@@ -71,6 +73,14 @@ public class Props {
                     .bean(new BooleanPropertyHolder(supplier, consumer))
                     .name("property")
                     .build();
+        } catch (NoSuchMethodException x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
+    public static IntegerProperty integerProperty(Object bean, String property) {
+        try {
+            return JavaBeanIntegerPropertyBuilder.create().bean(bean).name(property).build();
         } catch (NoSuchMethodException x) {
             throw new IllegalStateException(x);
         }

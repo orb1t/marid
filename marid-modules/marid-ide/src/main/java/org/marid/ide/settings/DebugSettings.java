@@ -16,14 +16,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package org.marid.ide.settings;
+
+import org.marid.ee.IdeSingleton;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlSchema(xmlns = {
-        @XmlNs(prefix = "context", namespaceURI = "http://www.springframework.org/schema/context"),
-        @XmlNs(prefix = "util", namespaceURI = "http://www.springframework.org/schema/util")
-})
-package org.marid.spring;
+@IdeSingleton
+public class DebugSettings extends AbstractSettings {
 
-import javax.xml.bind.annotation.XmlNs;
-import javax.xml.bind.annotation.XmlSchema;
+    public DebugSettings() {
+        super("Debug");
+    }
+
+    public boolean isDebug() {
+        return getPref("debug", false);
+    }
+
+    public void setDebug(boolean debug) {
+        putPref("debug", debug);
+    }
+
+    public int getPort() {
+        return getPref("port", 5005);
+    }
+
+    public void setPort(int port) {
+        putPref("port", port);
+    }
+
+    public boolean isSuspend() {
+        return getPref("suspend", false);
+    }
+
+    public void setSuspend(boolean suspend) {
+        putPref("suspend", suspend);
+    }
+}

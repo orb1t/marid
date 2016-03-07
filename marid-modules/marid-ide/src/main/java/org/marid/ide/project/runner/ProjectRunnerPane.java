@@ -18,6 +18,7 @@
 
 package org.marid.ide.project.runner;
 
+import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.application.Platform;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
@@ -26,10 +27,13 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.settings.DebugSettings;
 import org.marid.ide.settings.JavaSettings;
 import org.marid.io.ProcessManager;
+import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10nSupport;
+import org.marid.logging.LogSupport;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -41,11 +45,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static java.lang.String.format;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 @Dependent
-public class ProjectRunnerPane extends BorderPane implements L10nSupport {
+public class ProjectRunnerPane extends BorderPane implements L10nSupport, LogSupport {
 
     final ProjectProfile profile;
     final ListView<String> out = listView();
@@ -55,7 +61,9 @@ public class ProjectRunnerPane extends BorderPane implements L10nSupport {
     final PrintStream printStream;
 
     @Inject
-    public ProjectRunnerPane(ProjectProfile profile, JavaSettings javaSettings) throws IOException {
+    public ProjectRunnerPane(ProjectProfile profile,
+                             JavaSettings javaSettings,
+                             DebugSettings debugSettings) throws IOException {
         this.profile = profile;
         final ScrollPane outPane = new ScrollPane(out);
         final ScrollPane errPane = new ScrollPane(err);
@@ -68,10 +76,24 @@ public class ProjectRunnerPane extends BorderPane implements L10nSupport {
                 new Tab(s("Error output"), errPane));
         tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
         tabPane.setFocusTraversable(false);
-        process = process(profile, javaSettings);
+        process = process(profile, javaSettings, debugSettings);
         printStream = new PrintStream(process.getOutputStream(), true);
         processManager = new ProcessManager(profile.getName(), process, consumer(out), consumer(err));
-        setTop(new ProjectRunnerToolbar(this));
+        final Thread watchThread = new Thread(null, () -> {
+            try {
+                final int result = process.waitFor();
+                log(INFO, "[{0}] exited with code {1}", profile, result);
+                Platform.runLater(() -> getTop().setDisable(true));
+            } catch (InterruptedException x) {
+                log(WARNING, "Interrupted");
+            }
+        }, "watchThread", 96L * 1024L);
+        watchThread.start();
+        setTop(new ToolbarBuilder()
+                .add("Exit", MaterialIcon.STOP, e -> printStream.println("exit"))
+                .addSeparator()
+                .add("Dump", MaterialIcon.LIST, e -> printStream.println("dump"))
+                .build());
         setCenter(tabPane);
     }
 
@@ -86,12 +108,19 @@ public class ProjectRunnerPane extends BorderPane implements L10nSupport {
         return listView;
     }
 
-    private static Process process(ProjectProfile profile, JavaSettings javaSettings) throws IOException {
+    private static Process process(ProjectProfile profile,
+                                   JavaSettings javaSettings,
+                                   DebugSettings debugSettings) throws IOException {
         final List<String> args = new ArrayList<>();
         args.add(javaSettings.getJavaExecutable());
         Collections.addAll(args, javaSettings.getJavaArguments());
+        if (debugSettings.isDebug()) {
+            final char suspend = debugSettings.isSuspend() ? 'y' : 'n';
+            final int port = debugSettings.getPort();
+            args.add(format("-Xrunjdwp:transport=dt_socket,server=y,suspend=%s,address=%d", suspend, port));
+        }
         args.add("-jar");
-        args.add(String.format("%s-%s.jar", profile.getModel().getArtifactId(), profile.getModel().getVersion()));
+        args.add(format("%s-%s.jar", profile.getModel().getArtifactId(), profile.getModel().getVersion()));
         return new ProcessBuilder(args)
                 .directory(profile.getTarget().toFile())
                 .start();

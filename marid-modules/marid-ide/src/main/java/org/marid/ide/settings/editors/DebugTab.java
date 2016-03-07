@@ -16,25 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.xml;
+package org.marid.ide.settings.editors;
 
-import javax.xml.bind.JAXBException;
-import java.util.function.BiFunction;
+import org.marid.ide.settings.AbstractSettings;
+import org.marid.ide.settings.DebugSettings;
+import org.marid.jfx.panes.GenericGridPane;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface JaxbBiFunction<T, U, R> extends BiFunction<T, U, R> {
+@Dependent
+public class DebugTab extends GenericGridPane implements SettingsEditor {
 
-    @Override
-    default R apply(T t, U u) {
-        try {
-            return jaxbApply(t, u);
-        } catch (JAXBException x) {
-            throw new IllegalStateException(x);
-        }
+    private final DebugSettings debugSettings;
+
+    @Inject
+    public DebugTab(DebugSettings debugSettings) {
+        this.debugSettings = debugSettings;
+        addBooleanField("Debug", debugSettings, "debug");
+        addIntField("Port", debugSettings, "port", 1000, 65535, 1);
+        addBooleanField("Suspend", debugSettings, "suspend");
     }
 
-    R jaxbApply(T t, U u) throws JAXBException;
+    @Override
+    public AbstractSettings getSettings() {
+        return debugSettings;
+    }
 }

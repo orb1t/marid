@@ -18,72 +18,77 @@
 
 package org.marid.spring;
 
-import org.marid.misc.Calls;
+import org.marid.spring.xml.Bean;
 import org.marid.spring.xml.Beans;
-import org.marid.xml.JaxbBiConsumer;
-import org.marid.xml.JaxbBiFunction;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.lang.String.format;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class BeansSerializer {
 
-    private static final String SPRING_SCHEMA_PREFIX = "http://www.springframework.org/schema/";
-    private static final JAXBContext CONTEXT = Calls.call(() -> JAXBContext.newInstance(Beans.class));
+    public static final String SPRING_SCHEMA_PREFIX = "http://www.springframework.org/schema/";
 
-    private static String springSchemaLocation(String... schemas) {
-        return Stream.of(schemas)
-                .map(s -> format("%s%s %s%s/spring-%s.xsd", SPRING_SCHEMA_PREFIX, s, SPRING_SCHEMA_PREFIX, s, s))
-                .collect(Collectors.joining(" "));
+    private static String xsdLocation(String schema) {
+        return String.format("%s%s/spring-%s.xsd", SPRING_SCHEMA_PREFIX, schema, schema);
+    }
+
+    private static String xsdPath(String schema) {
+        return SPRING_SCHEMA_PREFIX + schema;
     }
 
     public static void serialize(Beans beans, OutputStream outputStream) throws IOException {
-        serialize(outputStream, (m, o) -> m.marshal(beans, o));
+        serialize(beans, new StreamResult(outputStream));
     }
 
     public static void serialize(Beans beans, File file) throws IOException {
-        serialize(file, (m, f) -> m.marshal(beans, f));
+        serialize(beans, new StreamResult(file));
     }
 
     public static Beans deserialize(InputStream inputStream) throws IOException {
-        return deserialize(inputStream, Unmarshaller::unmarshal);
+        return null;
     }
 
     public static Beans deserialize(File file) throws IOException {
-        return deserialize(file, Unmarshaller::unmarshal);
+        return null;
     }
 
-    private static <T> void serialize(T output, JaxbBiConsumer<Marshaller, T> task) throws IOException {
+    private static void serialize(Beans beans, Result result) throws IOException {
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
         try {
-            final Marshaller marshaller = CONTEXT.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, springSchemaLocation("context", "util"));
-            marshaller.setProperty(Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION, springSchemaLocation("beans"));
-            task.jaxbAccept(marshaller, output);
-        } catch (JAXBException x) {
-            throw new IOException(x);
-        }
-    }
-
-    private static <T> Beans deserialize(T input, JaxbBiFunction<Unmarshaller, T, Object> task) throws IOException {
-        try {
-            final Unmarshaller unmarshaller = CONTEXT.createUnmarshaller();
-            return (Beans) task.jaxbApply(unmarshaller, input);
-        } catch (JAXBException x) {
+            final DocumentBuilder builder = factory.newDocumentBuilder();
+            final Document document = builder.newDocument();
+            final Element beansElement = document.createElement("beans");
+            beansElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:context", xsdPath("context"));
+            beansElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:util", xsdPath("util"));
+            beansElement.setAttribute("xmlns", xsdPath("beans"));
+            document.appendChild(beansElement);
+            for (final Bean bean : beans.beans) {
+                final Element beanElement = document.createElement("bean");
+                beanElement.setAttribute("class", bean.beanClass);
+                beanElement.setAttribute("name", bean.name);
+                beansElement.appendChild(beanElement);
+            }
+            final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            final Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+            transformer.transform(new DOMSource(document), result);
+        } catch (ParserConfigurationException | TransformerException x) {
             throw new IOException(x);
         }
     }

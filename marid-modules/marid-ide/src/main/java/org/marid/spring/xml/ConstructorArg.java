@@ -21,28 +21,19 @@ package org.marid.spring.xml;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "constructor-arg")
 public class ConstructorArg {
 
-    @XmlAttribute(name = "name")
     public String name;
 
-    @XmlAttribute(name = "type")
     public String type;
 
-    @XmlAttribute(name = "index")
     public int index;
 
-    @XmlAttribute(name = "value")
     public String value;
 
-    @XmlAttribute(name = "ref")
     public String ref;
 
     @Override

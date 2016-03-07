@@ -18,18 +18,13 @@
 
 package org.marid.spring.xml;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "beans")
-@XmlSeeAlso({Bean.class})
 public class Beans {
 
-    @XmlElement(name = "bean")
-    public List<Bean> beans;
+    public List<Bean> beans = new ArrayList<>();
 }

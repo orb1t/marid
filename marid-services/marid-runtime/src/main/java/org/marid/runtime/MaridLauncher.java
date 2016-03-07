@@ -29,7 +29,7 @@ import java.util.TimeZone;
  */
 public class MaridLauncher {
 
-    public static void main(String... args) throws Exception {
+    public static void main(String... args) {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
         final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext();
@@ -37,15 +37,21 @@ public class MaridLauncher {
         context.setConfigLocation("classpath*:/META-INF/marid/**/*.xml");
         context.setClassLoader(Thread.currentThread().getContextClassLoader());
         context.setAllowCircularReferences(false);
+        context.setValidating(false);
         context.getEnvironment().getPropertySources().addFirst(new SimpleCommandLinePropertySource(args));
         Runtime.getRuntime().addShutdownHook(new Thread(context::close));
-        MaridSignalHandler.install(context::close);
         MaridInputHandler.handleInput(context);
         try {
             context.refresh();
             context.start();
         } catch (Exception x) {
-            System.in.close();
+            x.printStackTrace();
+            try {
+                System.in.close();
+            }  catch (Exception ix) {
+                ix.printStackTrace();
+            }
+            System.exit(1);
         }
     }
 }

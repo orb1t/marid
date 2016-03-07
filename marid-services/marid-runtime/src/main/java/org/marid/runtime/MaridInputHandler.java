@@ -47,6 +47,22 @@ class MaridInputHandler {
                 while (scanner.hasNextLine()) {
                     final String line = scanner.nextLine().trim();
                     switch (line) {
+                        case "dump":
+                            synchronized (System.err) {
+                                Thread.getAllStackTraces().forEach((thread, stes) -> {
+                                    System.err.println(thread);
+                                    if (stes != null) {
+                                        for (final StackTraceElement e : stes) {
+                                            System.err.format("%s.%s(%d)%n",
+                                                    e.getClassName(),
+                                                    e.getMethodName(),
+                                                    e.getLineNumber());
+                                        }
+                                    }
+                                    System.err.println();
+                                });
+                            }
+                            break;
                         case "exit":
                         case "quit":
                             applicationContext.close();

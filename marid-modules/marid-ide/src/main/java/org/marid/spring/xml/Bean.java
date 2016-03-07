@@ -21,69 +21,47 @@ package org.marid.spring.xml;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "bean")
-@XmlSeeAlso({ConstructorArg.class, PropertyArg.class})
 public class Bean {
 
-    @XmlAttribute(name = "abstract")
     public Boolean abstractBean;
 
-    @XmlAttribute(name = "scope")
     public String scope;
 
-    @XmlAttribute(name = "autowire")
     public String autowire;
 
-    @XmlAttribute(name = "autowire-candidate")
     public String autowireCandidate;
 
-    @XmlAttribute(name = "class")
     public String beanClass;
 
-    @XmlAttribute(name = "lazy-init")
     public String lazyInit;
 
-    @XmlAttribute(name = "primary")
     public Boolean primary;
 
-    @XmlAttribute(name = "parent")
     public String parent;
 
-    @XmlAttribute(name = "depends-on")
-    public List<String> dependsOn;
+    public List<String> dependsOn = new ArrayList<>();
 
-    @XmlAttribute(name = "name")
     public String name;
 
-    @XmlAttribute(name = "id")
     public String id;
 
-    @XmlAttribute(name = "init-method")
     public String initMethod;
 
-    @XmlAttribute(name = "destroy-method")
     public String destroyMethod;
 
-    @XmlAttribute(name = "factory-bean")
     public String factoryBean;
 
-    @XmlAttribute(name = "factory-method")
     public String factoryMethod;
 
-    @XmlElement(name = "constructor-arg")
-    public List<ConstructorArg> constructorArgs;
+    public List<ConstructorArg> constructorArgs = new ArrayList<>();
 
-    @XmlElement(name = "property")
-    public List<PropertyArg> propertyArgs;
+    public List<PropertyArg> propertyArgs = new ArrayList<>();
 
     @Override
     public String toString() {
