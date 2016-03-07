@@ -18,6 +18,8 @@
 
 package org.marid.ide.timers;
 
+import javafx.scene.Node;
+import javafx.stage.WindowEvent;
 import org.marid.concurrent.MaridTimerTask;
 import org.marid.logging.LogSupport;
 
@@ -27,6 +29,7 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -62,6 +65,24 @@ public class IdeTimers implements LogSupport {
         final TimerTask timerTask = new MaridTimerTask(task);
         timer.schedule(timerTask, date, periodMillis);
         return timerTask;
+    }
+
+    public void with(Node node, Supplier<TimerTask> taskSupplier) {
+        node.sceneProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                if (newValue.getWindow() != null) {
+                    final TimerTask task = taskSupplier.get();
+                    newValue.getWindow().addEventHandler(WindowEvent.WINDOW_HIDDEN, e -> task.cancel());
+                } else {
+                    newValue.windowProperty().addListener((observable1, oldValue1, newValue1) -> {
+                        if (newValue1 != null) {
+                            final TimerTask task = taskSupplier.get();
+                            newValue1.addEventHandler(WindowEvent.WINDOW_HIDDEN, e -> task.cancel());
+                        }
+                    });
+                }
+            }
+        });
     }
 
     @PreDestroy

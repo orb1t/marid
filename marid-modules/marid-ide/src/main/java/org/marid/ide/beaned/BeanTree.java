@@ -53,11 +53,7 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
         setEditable(false);
         setSortMode(TreeSortMode.ONLY_FIRST_LEVEL);
         final AtomicBoolean dirty = new AtomicBoolean();
-        ideTimers.schedule(300L, task -> {
-            if (beanContext.closed) {
-                task.cancel();
-                return;
-            }
+        ideTimers.with(this, () -> ideTimers.schedule(300L, task -> {
             if (dirty.get()) {
                 Platform.runLater(() -> {
                     for (final TreeTableColumn<Data, ?> c : getColumns()) {
@@ -67,7 +63,7 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
                     dirty.set(false);
                 });
             }
-        });
+        }));
         needsLayoutProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 dirty.compareAndSet(false, true);
@@ -160,5 +156,11 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
         if (dialog != null) {
             dialog.showAndWait().ifPresent(Runnable::run);
         }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        System.out.println(1);
+        super.finalize();
     }
 }
