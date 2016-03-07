@@ -62,6 +62,7 @@ public class MaridBeanAnnotationProcessor extends AbstractProcessor {
                     final MaridBean maridBean = e.getAnnotation(MaridBean.class);
                     final MaridBeanXml maridBeanXml = new MaridBeanXml(maridBean);
                     maridBeanXml.kind = e.getKind();
+                    maridBeanXml.text = e.getSimpleName().toString();
                     if (e.getEnclosingElement() != null) {
                         maridBeanXml.parent = e.getEnclosingElement().toString();
                     }

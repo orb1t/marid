@@ -21,11 +21,9 @@ package org.marid.ide.beaned;
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.Node;
 import javafx.scene.control.*;
-import org.marid.ide.beaned.data.BeanContext;
-import org.marid.ide.beaned.data.BeanData;
-import org.marid.ide.beaned.data.Data;
-import org.marid.ide.beaned.data.DataMenuFactory;
+import org.marid.ide.beaned.data.*;
 import org.marid.ide.timers.IdeTimers;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.table.MaridTreeTableViewSkin;
@@ -33,6 +31,8 @@ import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.marid.ide.beaned.data.DataEditorFactory.newDialog;
 
@@ -138,13 +138,39 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
                 if (treeItem == null) {
                     return;
                 }
+                final Node graphic = DataGraphicFactory.getGraphic(BeanTree.this, beanContext, treeItem.getValue());
+                setGraphic(graphic);
             }
         });
         return column;
     }
 
-    TreeItem<Data> addBean(String name, String type) {
+    public String newBeanName(BeanContext beanContext) {
+        final Pattern beanNamePattern = Pattern.compile("bean(\\d+)");
+        final int beanNum = beanContext.root.getChildren().stream()
+                .map(TreeItem::getValue)
+                .filter(BeanData.class::isInstance)
+                .map(BeanData.class::cast)
+                .map(bd -> beanNamePattern.matcher(bd.getName()))
+                .filter(Matcher::matches)
+                .map(m -> m.group(1))
+                .mapToInt(Integer::parseInt)
+                .max()
+                .orElse(0) + 1;
+        return "bean" + beanNum;
+    }
+
+    public TreeItem<Data> addBean(String name, String type) {
         final BeanData beanData = new BeanData(type, name);
+        final TreeItem<Data> treeItem = new TreeItem<>(beanData);
+        getRoot().getChildren().add(treeItem);
+        return treeItem;
+    }
+
+    public TreeItem<Data> addBean(String name, String type, String factoryBean, String factoryMethod) {
+        final BeanData beanData = new BeanData(type, name);
+        beanData.factoryBeanProperty().set(factoryBean);
+        beanData.factoryMethodProperty().set(factoryMethod);
         final TreeItem<Data> treeItem = new TreeItem<>(beanData);
         getRoot().getChildren().add(treeItem);
         return treeItem;
@@ -156,11 +182,5 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
         if (dialog != null) {
             dialog.showAndWait().ifPresent(Runnable::run);
         }
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        System.out.println(1);
-        super.finalize();
     }
 }

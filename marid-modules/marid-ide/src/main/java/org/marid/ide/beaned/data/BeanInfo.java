@@ -38,11 +38,13 @@ public class BeanInfo {
 
     private static final Set<Method> OBJECT_METHODS = Stream.of(Object.class.getMethods()).collect(toSet());
 
+    private final Class<?> type;
     private final List<Method> methods;
     private final List<Constructor<?>> constructors;
     private final List<PropertyDescriptor> propertyDescriptors;
 
     public BeanInfo(Class<?> type) throws Exception {
+        this.type = type;
         methods = Stream.of(type.getMethods())
                 .filter(m -> m.getParameterCount() == 0)
                 .filter(m -> !OBJECT_METHODS.contains(m))
@@ -55,9 +57,14 @@ public class BeanInfo {
     }
 
     public BeanInfo() {
+        type = Void.class;
         methods = Collections.emptyList();
         constructors = Collections.emptyList();
         propertyDescriptors = Collections.emptyList();
+    }
+
+    public Class<?> getType() {
+        return type;
     }
 
     public List<Method> getMethods() {

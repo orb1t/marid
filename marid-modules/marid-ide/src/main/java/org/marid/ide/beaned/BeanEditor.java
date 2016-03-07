@@ -51,8 +51,6 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
 import java.io.File;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static javafx.beans.binding.Bindings.createStringBinding;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -176,7 +174,6 @@ public class BeanEditor extends Stage implements L10nSupport, LogSupport {
 
     private ContextMenu contextMenu() {
         final ContextMenu contextMenu = new ContextMenu();
-        final Pattern beanNamePattern = Pattern.compile("bean(\\d+)");
         for (final MaridBeanXml beanXml : beanContext.beansXmls) {
             if (beanXml.kind != ElementKind.CLASS) {
                 continue;
@@ -184,19 +181,7 @@ public class BeanEditor extends Stage implements L10nSupport, LogSupport {
             final GlyphIcon<?> icon = BeanContext.icon(beanXml.icon, 16, OctIcon.CODE);
             final String text = beanXml.text == null ? beanXml.type : beanXml.text + ": " + beanXml.type;
             final MenuItem menuItem = new MenuItem(text, icon);
-            menuItem.setOnAction(event -> {
-                final int beanNum = beanContext.root.getChildren().stream()
-                        .map(TreeItem::getValue)
-                        .filter(BeanData.class::isInstance)
-                        .map(BeanData.class::cast)
-                        .map(bd -> beanNamePattern.matcher(bd.getName()))
-                        .filter(Matcher::matches)
-                        .map(m -> m.group(1))
-                        .mapToInt(Integer::parseInt)
-                        .max()
-                        .orElse(0) + 1;
-                    beanTree.addBean("bean" + beanNum, beanXml.type);
-            });
+            menuItem.setOnAction(event -> beanTree.addBean(beanTree.newBeanName(beanContext), beanXml.type));
             contextMenu.getItems().add(menuItem);
         }
         return contextMenu;

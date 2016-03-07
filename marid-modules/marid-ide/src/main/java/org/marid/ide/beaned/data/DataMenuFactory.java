@@ -25,6 +25,7 @@ import javafx.scene.input.KeyCombination;
 import org.marid.ide.beaned.BeanTree;
 import org.marid.l10n.L10nSupport;
 
+import javax.lang.model.element.ElementKind;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.util.*;
@@ -46,6 +47,15 @@ public class DataMenuFactory implements L10nSupport {
         }
     }
 
+    public static boolean isPresent(String name, Class<? extends Data> dataClass, TreeItem<Data> item) {
+        return item.getChildren().stream()
+                .map(TreeItem::getValue)
+                .filter(dataClass::isInstance)
+                .filter(e -> name.equals(e.getName()))
+                .findAny()
+                .isPresent();
+    }
+
     static ContextMenu contextMenuBean(BeanTree beanTree, TreeTableCell<Data, String> cell, BeanContext beanContext) {
         final TreeItem<Data> item = cell.getTreeTableRow().getTreeItem();
         final BeanData beanData = (BeanData) item.getValue();
@@ -56,13 +66,7 @@ public class DataMenuFactory implements L10nSupport {
             for (final Parameter parameter : c.getParameters()) {
                 final MenuItem menuItem = new MenuItem(parameter.getName(), glyphIcon(OctIcon.PACKAGE));
                 menuItem.setOnAction(event -> {
-                    if (item.getChildren().stream()
-                            .map(TreeItem::getValue)
-                            .filter(ConstructorArgData.class::isInstance)
-                            .map(ConstructorArgData.class::cast)
-                            .filter(ca -> parameter.getName().equals(ca.getName()))
-                            .findAny()
-                            .isPresent()) {
+                    if (isPresent(parameter.getName(), ConstructorArgData.class, item)) {
                         return;
                     }
                     final ConstructorArgData data = new ConstructorArgData(parameter.getType().getName(), parameter.getName());
@@ -77,13 +81,7 @@ public class DataMenuFactory implements L10nSupport {
         beanInfo.getPropertyDescriptors().stream().filter(pd -> pd.getWriteMethod() != null).forEach(pd -> {
             final MenuItem menuItem = new MenuItem(pd.getName(), glyphIcon(OctIcon.STAR));
             menuItem.setOnAction(event -> {
-                if (item.getChildren().stream()
-                        .map(TreeItem::getValue)
-                        .filter(PropertyArgData.class::isInstance)
-                        .map(PropertyArgData.class::cast)
-                        .filter(pa -> pd.getName().equals(pa.getName()))
-                        .findAny()
-                        .isPresent()) {
+                if (isPresent(pd.getName(), PropertyArgData.class, item)) {
                     return;
                 }
                 final PropertyArgData data = new PropertyArgData(pd.getPropertyType().getName(), pd.getName());
@@ -100,6 +98,14 @@ public class DataMenuFactory implements L10nSupport {
             editMenuItem.setOnAction(event -> ((BeanTree) cell.getTreeTableView()).editItem(beanContext));
             menuItemMap.computeIfAbsent('e', k -> new LinkedHashSet<>()).add(editMenuItem);
         }
+        beanContext.beansXmls.stream().filter(xml -> xml.kind == ElementKind.METHOD).forEach(xml -> {
+            final BeanInfo parentBeanInfo = beanContext.beanInfo(xml.parent);
+            if (parentBeanInfo.getType().isAssignableFrom(beanInfo.getType())) {
+                final MenuItem menuItem = new MenuItem(xml.text, glyphIcon(OctIcon.BELL));
+                menuItem.setOnAction(event -> beanTree.addBean(beanTree.newBeanName(beanContext), xml.type, beanData.getName(), xml.text));
+                menuItemMap.computeIfAbsent('n', k -> new LinkedHashSet<>()).add(menuItem);
+            }
+        });
         menuItemMap.forEach((g, items) -> {
             if (!contextMenu.getItems().isEmpty()) {
                 contextMenu.getItems().add(new SeparatorMenuItem());
