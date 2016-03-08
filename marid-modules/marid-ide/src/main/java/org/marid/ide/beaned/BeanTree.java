@@ -30,7 +30,6 @@ import org.marid.jfx.table.MaridTreeTableViewSkin;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,40 +41,37 @@ import static org.marid.ide.beaned.data.DataEditorFactory.newDialog;
 public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSupport {
 
     private final BeanContext beanContext;
+    private final MaridTreeTableViewSkin<Data> skin;
+    private final IdeTimers ideTimers;
 
     public BeanTree(BeanContext beanContext, IdeTimers ideTimers) {
         super(beanContext.root);
         this.beanContext = beanContext;
+        this.ideTimers = ideTimers;
         setShowRoot(false);
         setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
-        final MaridTreeTableViewSkin<Data> skin = new MaridTreeTableViewSkin<>(this);
-        setSkin(skin);
+        setSkin(skin = new MaridTreeTableViewSkin<>(this));
         getColumns().add(nameColumn());
         getColumns().add(typeColumn());
         getColumns().add(valueColumn());
         setEditable(false);
         setSortMode(TreeSortMode.ONLY_FIRST_LEVEL);
-        final AtomicBoolean dirty = new AtomicBoolean();
-        ideTimers.with(this, () -> ideTimers.schedule(300L, task -> {
-            if (dirty.get()) {
-                Platform.runLater(() -> {
-                    for (final TreeTableColumn<Data, ?> c : getColumns()) {
-                        skin.resizeColumnToFitContent(c, -1);
-                    }
-                    skin.refresh();
-                    dirty.set(false);
-                });
-            }
-        }));
-        needsLayoutProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                dirty.compareAndSet(false, true);
-            }
-        });
+        setCache(false);
     }
 
     public BeanContext getBeanContext() {
         return beanContext;
+    }
+
+    @Override
+    protected void layoutChildren() {
+        super.layoutChildren();
+        ideTimers.delayed(300L, task -> Platform.runLater(() -> {
+            for (final TreeTableColumn<Data, ?> c : getColumns()) {
+                skin.resizeColumnToFitContent(c, -1);
+            }
+            skin.refresh();
+        }));
     }
 
     private TreeTableColumn<Data, String> nameColumn() {

@@ -23,7 +23,6 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.jboss.logmanager.LogManager;
 import org.jboss.weld.environment.se.Weld;
-import org.jboss.weld.environment.se.WeldContainer;
 import org.marid.ide.panes.logging.IdeLogHandler;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.jfx.Windows;
@@ -37,7 +36,6 @@ import java.util.logging.Logger;
 
 import static java.util.stream.IntStream.of;
 import static javafx.scene.paint.Color.GREEN;
-import static javafx.stage.WindowEvent.WINDOW_CLOSE_REQUEST;
 import static org.marid.jfx.FxMaridIcon.maridIcon;
 
 /**
@@ -48,26 +46,23 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
     public static final Image[] IMAGES = of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new);
 
     private final Weld weld = new Weld(getClass().getName());
-    private WeldContainer container;
-
-    @Override
-    public void init() throws Exception {
-        container = weld.initialize();
-    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         Application.setUserAgentStylesheet(getPref("style", STYLESHEET_MODENA));
-        final IdeScene ideScene = container.select(IdeScene.class).get();
+        final IdeScene ideScene = weld.initialize().select(IdeScene.class).get();
         Windows.persistState(primaryStage, preferences());
         primaryStage.setMinWidth(750.0);
         primaryStage.setMinHeight(550.0);
         primaryStage.setTitle(s("Marid IDE"));
         primaryStage.setScene(ideScene);
-        primaryStage.addEventHandler(WINDOW_CLOSE_REQUEST, e -> weld.shutdown());
         primaryStage.getIcons().addAll(IMAGES);
-        primaryStage.getProperties().put("exitTask", (Runnable) weld::shutdown);
         primaryStage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        weld.shutdown();
     }
 
     public static void main(String... args) throws Exception {

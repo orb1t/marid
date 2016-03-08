@@ -51,11 +51,12 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static javafx.beans.binding.Bindings.createStringBinding;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.marid.ide.beaned.data.DataEditorFactory.newDialog;
@@ -178,10 +179,9 @@ public class BeanEditor extends Stage implements L10nSupport, LogSupport {
 
     private ContextMenu contextMenu() {
         final ContextMenu contextMenu = new ContextMenu();
-        final Map<String, List<MaridBeanXml>> xmls = new TreeMap<>();
-        beanContext.beansXmls.stream()
+        final Map<String, List<MaridBeanXml>> xmls = beanContext.beansXmls.stream()
                 .filter(x -> x.kind == ElementKind.CLASS)
-                .forEach(x -> xmls.computeIfAbsent(x.parent == null ? "" : x.parent, k -> new ArrayList<>()).add(x));
+                .collect(groupingBy(x -> x.parent == null ? "" : x.parent, TreeMap::new, toList()));
         xmls.forEach((pkg, list) -> {
             final List<MenuItem> l;
             if (pkg.isEmpty()) {

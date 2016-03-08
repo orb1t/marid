@@ -18,6 +18,7 @@
 
 package org.marid.ide.panes.main;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckMenuItem;
@@ -50,12 +51,7 @@ public class IdePaneManager {
 
     @Produces
     @IdeMenuItem(menu = "File", text = "Exit", group = "x", key = "F12", mdIcons = {EXIT_TO_APP})
-    public EventHandler<ActionEvent> exitItem(Provider<IdePane> idePaneProvider) {
-        return event -> {
-            final Stage stage = (Stage) idePaneProvider.get().getScene().getWindow();
-            final Runnable exitTask = (Runnable) stage.getProperties().get("exitTask");
-            stage.close();
-            exitTask.run();
-        };
+    public EventHandler<ActionEvent> exitItem() {
+        return event -> Platform.exit();
     }
 }
