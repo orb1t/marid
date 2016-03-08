@@ -51,6 +51,10 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static javafx.beans.binding.Bindings.createStringBinding;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -98,7 +102,7 @@ public class BeanEditor extends Stage implements L10nSupport, LogSupport {
                         .item("*Clear all", MaterialIcon.CLEAR_ALL, event -> beanTree.getRoot().getChildren().clear())
                         .last(a -> a.disabledProperty().bind(Bindings.isEmpty(beanTree.getRoot().getChildren())))
                         .separator()
-                        .item("*Edit...", MaterialDesignIcon.TABLE_EDIT, "F2", event -> beanTree.editItem(beanContext))
+                        .item("*Edit...", MaterialDesignIcon.TABLE_EDIT, "F2", event -> beanTree.editItem())
                         .last(a -> a.disabledProperty().bind(noSelection())))
                 .menu("Window", b -> b
                         .item("*Refresh", MaterialDesignIcon.REFRESH, "F5", event -> beanTree.refresh()))
@@ -174,16 +178,33 @@ public class BeanEditor extends Stage implements L10nSupport, LogSupport {
 
     private ContextMenu contextMenu() {
         final ContextMenu contextMenu = new ContextMenu();
-        for (final MaridBeanXml beanXml : beanContext.beansXmls) {
-            if (beanXml.kind != ElementKind.CLASS) {
-                continue;
+        final Map<String, List<MaridBeanXml>> xmls = new TreeMap<>();
+        beanContext.beansXmls.stream()
+                .filter(x -> x.kind == ElementKind.CLASS)
+                .forEach(x -> xmls.computeIfAbsent(x.parent == null ? "" : x.parent, k -> new ArrayList<>()).add(x));
+        xmls.forEach((pkg, list) -> {
+            final List<MenuItem> l;
+            if (pkg.isEmpty()) {
+                l = contextMenu.getItems();
+            } else {
+                l = contextMenu.getItems().stream()
+                        .filter(Menu.class::isInstance)
+                        .map(Menu.class::cast)
+                        .filter(m -> m.getText().startsWith(pkg))
+                        .findAny()
+                        .orElseGet(() -> {
+                            final Menu m = new Menu(pkg);
+                            contextMenu.getItems().add(m);
+                            return m;
+                        }).getItems();
             }
-            final GlyphIcon<?> icon = BeanContext.icon(beanXml.icon, 16, OctIcon.CODE);
-            final String text = beanXml.text == null ? beanXml.type : beanXml.text + ": " + beanXml.type;
-            final MenuItem menuItem = new MenuItem(text, icon);
-            menuItem.setOnAction(event -> beanTree.addBean(beanTree.newBeanName(beanContext), beanXml.type));
-            contextMenu.getItems().add(menuItem);
-        }
+            for (final MaridBeanXml xml : list) {
+                final GlyphIcon<?> icon = BeanContext.icon(xml.icon, 16, OctIcon.CODE);
+                final MenuItem menuItem = new MenuItem(xml.text == null ? xml.type : xml.text, icon);
+                menuItem.setOnAction(event -> beanTree.addBean(beanTree.newBeanName(), xml.type));
+                l.add(menuItem);
+            }
+        });
         return contextMenu;
     }
 }

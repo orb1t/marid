@@ -38,13 +38,12 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
  */
 public class DataMenuFactory implements L10nSupport {
 
-    public static ContextMenu contextMenu(BeanTree beanTree, TreeTableCell<Data, String> cell, BeanContext beanContext) {
+    public static ContextMenu contextMenu(BeanTree beanTree, TreeTableCell<Data, String> cell) {
         final TreeItem<Data> item = cell.getTreeTableRow().getTreeItem();
         if (item.getValue() instanceof BeanData) {
-            return contextMenuBean(beanTree, cell, beanContext);
-        } else {
-            return null;
+            return contextMenuBean(beanTree, cell);
         }
+        return null;
     }
 
     public static boolean isPresent(String name, Class<? extends Data> dataClass, TreeItem<Data> item) {
@@ -56,9 +55,10 @@ public class DataMenuFactory implements L10nSupport {
                 .isPresent();
     }
 
-    static ContextMenu contextMenuBean(BeanTree beanTree, TreeTableCell<Data, String> cell, BeanContext beanContext) {
+    static ContextMenu contextMenuBean(BeanTree beanTree, TreeTableCell<Data, String> cell) {
         final TreeItem<Data> item = cell.getTreeTableRow().getTreeItem();
         final BeanData beanData = (BeanData) item.getValue();
+        final BeanContext beanContext = beanTree.getBeanContext();
         final BeanInfo beanInfo = beanContext.beanInfo(beanData.getType());
         final ContextMenu contextMenu = new ContextMenu();
         final Map<Character, Set<MenuItem>> menuItemMap = new TreeMap<>();
@@ -95,14 +95,14 @@ public class DataMenuFactory implements L10nSupport {
         if (newDialog((BeanTree) cell.getTreeTableView(), beanContext, cell.getTreeTableRow().getItem()) != null) {
             final MenuItem editMenuItem = new MenuItem(LS.s("Edit..."), glyphIcon(MaterialDesignIcon.TABLE_EDIT));
             editMenuItem.setAccelerator(KeyCombination.valueOf("F2"));
-            editMenuItem.setOnAction(event -> ((BeanTree) cell.getTreeTableView()).editItem(beanContext));
+            editMenuItem.setOnAction(event -> ((BeanTree) cell.getTreeTableView()).editItem());
             menuItemMap.computeIfAbsent('e', k -> new LinkedHashSet<>()).add(editMenuItem);
         }
         beanContext.beansXmls.stream().filter(xml -> xml.kind == ElementKind.METHOD).forEach(xml -> {
             final BeanInfo parentBeanInfo = beanContext.beanInfo(xml.parent);
             if (parentBeanInfo.getType().isAssignableFrom(beanInfo.getType())) {
                 final MenuItem menuItem = new MenuItem(xml.text, glyphIcon(OctIcon.BELL));
-                menuItem.setOnAction(event -> beanTree.addBean(beanTree.newBeanName(beanContext), xml.type, beanData.getName(), xml.text));
+                menuItem.setOnAction(event -> beanTree.addBean(beanTree.newBeanName(), xml.type, beanData.getName(), xml.text));
                 menuItemMap.computeIfAbsent('n', k -> new LinkedHashSet<>()).add(menuItem);
             }
         });

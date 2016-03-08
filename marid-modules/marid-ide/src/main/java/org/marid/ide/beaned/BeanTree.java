@@ -41,15 +41,18 @@ import static org.marid.ide.beaned.data.DataEditorFactory.newDialog;
  */
 public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSupport {
 
+    private final BeanContext beanContext;
+
     public BeanTree(BeanContext beanContext, IdeTimers ideTimers) {
         super(beanContext.root);
+        this.beanContext = beanContext;
         setShowRoot(false);
         setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
         final MaridTreeTableViewSkin<Data> skin = new MaridTreeTableViewSkin<>(this);
         setSkin(skin);
-        getColumns().add(nameColumn(beanContext));
-        getColumns().add(typeColumn(beanContext));
-        getColumns().add(valueColumn(beanContext));
+        getColumns().add(nameColumn());
+        getColumns().add(typeColumn());
+        getColumns().add(valueColumn());
         setEditable(false);
         setSortMode(TreeSortMode.ONLY_FIRST_LEVEL);
         final AtomicBoolean dirty = new AtomicBoolean();
@@ -71,7 +74,11 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
         });
     }
 
-    private TreeTableColumn<Data, String> nameColumn(BeanContext beanContext) {
+    public BeanContext getBeanContext() {
+        return beanContext;
+    }
+
+    private TreeTableColumn<Data, String> nameColumn() {
         final TreeTableColumn<Data, String> column = new TreeTableColumn<>(s("Name"));
         column.setResizable(false);
         column.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
@@ -90,13 +97,13 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
                 }
                 setText(item);
                 setGraphic(FontIcons.glyphIcon(treeItem.getValue().getIcon(), 16));
-                setContextMenu(DataMenuFactory.contextMenu(BeanTree.this, this, beanContext));
+                setContextMenu(DataMenuFactory.contextMenu(BeanTree.this, this));
             }
         });
         return column;
     }
 
-    private TreeTableColumn<Data, String> typeColumn(BeanContext context) {
+    private TreeTableColumn<Data, String> typeColumn() {
         final TreeTableColumn<Data, String> column = new TreeTableColumn<>(s("Type"));
         column.setResizable(false);
         column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getValue().getType()));
@@ -114,14 +121,14 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
                     return;
                 }
                 setText(item);
-                final String iconName = context.icon(item);
+                final String iconName = beanContext.icon(item);
                 setGraphic(BeanContext.icon(iconName, 16, OctIcon.PRIMITIVE_SQUARE));
             }
         });
         return column;
     }
 
-    private TreeTableColumn<Data, String> valueColumn(BeanContext beanContext) {
+    private TreeTableColumn<Data, String> valueColumn() {
         final TreeTableColumn<Data, String> column = new TreeTableColumn<>(s("Value"));
         column.setResizable(false);
         column.setCellValueFactory(param -> param.getValue().getValue().valueProperty());
@@ -138,14 +145,14 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
                 if (treeItem == null) {
                     return;
                 }
-                final Node graphic = DataGraphicFactory.getGraphic(BeanTree.this, beanContext, treeItem.getValue());
+                final Node graphic = DataGraphicFactory.getGraphic(BeanTree.this, treeItem.getValue());
                 setGraphic(graphic);
             }
         });
         return column;
     }
 
-    public String newBeanName(BeanContext beanContext) {
+    public String newBeanName() {
         final Pattern beanNamePattern = Pattern.compile("bean(\\d+)");
         final int beanNum = beanContext.root.getChildren().stream()
                 .map(TreeItem::getValue)
@@ -176,7 +183,7 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
         return treeItem;
     }
 
-    public void editItem(BeanContext beanContext) {
+    public void editItem() {
         final TreeItem<Data> treeItem = getSelectionModel().getSelectedItem();
         final Dialog<Runnable> dialog = newDialog(this, beanContext, treeItem.getValue());
         if (dialog != null) {

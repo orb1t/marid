@@ -22,7 +22,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.Node;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -51,9 +50,8 @@ public class DataEditorFactory implements L10nSupport {
             return newEditor(node, beanContext, (RefData) data);
         } else if (data instanceof BeanData) {
             return newEditor(node, beanContext, (BeanData) data);
-        } else {
-            return null;
         }
+        return null;
     }
 
     public static Dialog<Runnable> newEditor(BeanTree node, BeanContext beanContext, BeanData beanData) {

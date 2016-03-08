@@ -24,28 +24,20 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.HBox;
 import org.marid.ide.beaned.BeanTree;
-import org.marid.logging.LogSupport;
-
-import java.lang.reflect.Method;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DataGraphicFactory implements LogSupport {
+public class DataGraphicFactory {
 
-    public static Node getGraphic(BeanTree beanTree, BeanContext beanContext, Data data) {
-        try {
-            final Method method = DataGraphicFactory.class.getDeclaredMethod("graphic",
-                    BeanTree.class, BeanContext.class, data.getClass());
-            return (Node) method.invoke(null, beanTree, beanContext, data);
-        } catch (NoSuchMethodException x) {
-            return null;
-        } catch (ReflectiveOperationException x) {
-            throw new IllegalStateException(x);
+    public static Node getGraphic(BeanTree beanTree, Data data) {
+        if (data instanceof BeanData) {
+            return graphic(beanTree, (BeanData) data);
         }
+        return null;
     }
 
-    static Node graphic(BeanTree beanTree, BeanContext beanContext, BeanData data) {
+    static Node graphic(BeanTree beanTree, BeanData data) {
         final HBox hBox = new HBox(5);
         if (data.getFactoryBean() != null) {
             final Label label = new Label("factoryBean: ");
