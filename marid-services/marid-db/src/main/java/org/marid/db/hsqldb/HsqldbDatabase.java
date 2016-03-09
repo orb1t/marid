@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.db.impl;
+package org.marid.db.hsqldb;
 
 import org.hsqldb.Database;
 import org.hsqldb.DatabaseManager;

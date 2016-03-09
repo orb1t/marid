@@ -31,6 +31,8 @@ import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.util.Utils;
 
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
@@ -70,6 +72,15 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
         Logger.getLogger("").addHandler(new IdeLogHandler());
         Utils.merge(System.getProperties(), "meta.properties", "ide.properties");
+        disableUrlCaching();
         launch(args);
+    }
+
+    private static void disableUrlCaching() throws Exception {
+        final URL url = Thread.currentThread().getContextClassLoader().getResource("ide.properties");
+        if (url != null) {
+            final URLConnection connection = url.openConnection();
+            connection.setDefaultUseCaches(false);
+        }
     }
 }

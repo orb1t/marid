@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.db.impl;
+package org.marid.db.hsqldb;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;

@@ -32,19 +32,20 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.logging.LogSupport;
 import org.marid.misc.Builder;
-import org.marid.xml.XmlBind;
 
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 import java.util.function.Function;
 
 import static java.util.Comparator.comparing;
+import static org.marid.xml.XmlBind.load;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -73,9 +74,9 @@ public class BeanContext implements LogSupport, Closeable {
         try {
             for (final Enumeration<URL> e = classLoader.findResources("maridBeans.xml"); e.hasMoreElements(); ) {
                 final URL url = e.nextElement();
-                try {
-                    final Source inputSource = new StreamSource(url.toExternalForm());
-                    final MaridBeansXml beans = XmlBind.load(MaridBeansXml.class, inputSource, Unmarshaller::unmarshal);
+                try (final InputStream inputStream = url.openStream()) {
+                    final Source inputSource = new StreamSource(inputStream);
+                    final MaridBeansXml beans = load(MaridBeansXml.class, inputSource, Unmarshaller::unmarshal);
                     beansXmls.addAll(beans.beans);
                 } catch (Exception x) {
                     log(WARNING, "Unable to process {0}", x, url);

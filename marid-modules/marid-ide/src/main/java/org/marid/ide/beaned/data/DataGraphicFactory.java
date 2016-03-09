@@ -18,12 +18,13 @@
 
 package org.marid.ide.beaned.data;
 
-import javafx.geometry.Orientation;
+import de.jensd.fx.glyphs.GlyphIcon;
+import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
 import javafx.scene.layout.HBox;
 import org.marid.ide.beaned.BeanTree;
+import org.marid.jfx.icons.FontIcons;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -39,20 +40,13 @@ public class DataGraphicFactory {
 
     static Node graphic(BeanTree beanTree, BeanData data) {
         final HBox hBox = new HBox(5);
-        if (data.getFactoryBean() != null) {
-            final Label label = new Label("factoryBean: ");
-            label.setStyle("-fx-font-weight: bold");
-            hBox.getChildren().add(label);
-            hBox.getChildren().add(new Label(data.getFactoryBean()));
-        }
         if (data.getFactoryMethod() != null) {
-            if (!hBox.getChildren().isEmpty()) {
-                hBox.getChildren().add(new Separator(Orientation.VERTICAL));
-            }
-            final Label label = new Label("factoryMethod: ");
-            label.setStyle("-fx-font-weight: bold");
+            final String text = data.getFactoryBean() != null ?
+                    data.getFactoryBean() + "." + data.getFactoryMethod()
+                    : data.getFactoryMethod();
+            final GlyphIcon<?> linkIcon = FontIcons.glyphIcon(OctIcon.LINK_EXTERNAL, 16);
+            final Label label = new Label(text, linkIcon);
             hBox.getChildren().add(label);
-            hBox.getChildren().add(new Label(data.getFactoryMethod()));
         }
         return hBox;
     }
