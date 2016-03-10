@@ -21,6 +21,7 @@ package org.marid.ide.beaned;
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import org.marid.ide.beaned.data.*;
@@ -170,9 +171,9 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
         return treeItem;
     }
 
-    public TreeItem<Data> addBean(String name, String type, String factoryBean, String factoryMethod) {
+    public TreeItem<Data> addBean(String name, String type, StringProperty factoryBean, String factoryMethod) {
         final BeanData beanData = new BeanData(type, name);
-        beanData.factoryBeanProperty().set(factoryBean);
+        beanData.factoryBeanProperty().bind(factoryBean);
         beanData.factoryMethodProperty().set(factoryMethod);
         final TreeItem<Data> treeItem = new TreeItem<>(beanData);
         getRoot().getChildren().add(treeItem);

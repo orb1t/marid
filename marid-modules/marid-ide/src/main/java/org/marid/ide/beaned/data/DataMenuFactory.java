@@ -102,7 +102,7 @@ public class DataMenuFactory implements L10nSupport {
             final BeanInfo parentBeanInfo = beanContext.beanInfo(xml.parent);
             if (parentBeanInfo.getType().isAssignableFrom(beanInfo.getType())) {
                 final MenuItem menuItem = new MenuItem(xml.text, glyphIcon(OctIcon.BELL));
-                menuItem.setOnAction(event -> beanTree.addBean(beanTree.newBeanName(), xml.type, beanData.getName(), xml.text));
+                menuItem.setOnAction(event -> beanTree.addBean(beanTree.newBeanName(), xml.type, beanData.nameProperty(), xml.text));
                 menuItemMap.computeIfAbsent('n', k -> new LinkedHashSet<>()).add(menuItem);
             }
         });

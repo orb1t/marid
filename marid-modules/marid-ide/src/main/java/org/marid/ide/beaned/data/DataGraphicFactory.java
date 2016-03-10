@@ -26,6 +26,8 @@ import javafx.scene.layout.HBox;
 import org.marid.ide.beaned.BeanTree;
 import org.marid.jfx.icons.FontIcons;
 
+import static javafx.beans.binding.Bindings.format;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -41,11 +43,9 @@ public class DataGraphicFactory {
     static Node graphic(BeanTree beanTree, BeanData data) {
         final HBox hBox = new HBox(5);
         if (data.getFactoryMethod() != null) {
-            final String text = data.getFactoryBean() != null ?
-                    data.getFactoryBean() + "." + data.getFactoryMethod()
-                    : data.getFactoryMethod();
             final GlyphIcon<?> linkIcon = FontIcons.glyphIcon(OctIcon.LINK_EXTERNAL, 16);
-            final Label label = new Label(text, linkIcon);
+            final Label label = new Label(null, linkIcon);
+            label.textProperty().bind(format("%s.%s", data.factoryBeanProperty(), data.factoryMethodProperty()));
             hBox.getChildren().add(label);
         }
         return hBox;
