@@ -78,6 +78,7 @@ public class ProjectProfile implements LogSupport {
         logger = Logger.getLogger(getName());
         model = loadModel();
         model.setModelVersion("4.0.0");
+        createFileStructure();
     }
 
     private Model loadModel() {

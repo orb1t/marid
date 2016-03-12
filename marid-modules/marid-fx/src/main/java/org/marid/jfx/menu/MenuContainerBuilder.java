@@ -66,6 +66,7 @@ public class MenuContainerBuilder implements L10nSupport {
                 }
                 menuItem.disableProperty().bindBidirectional(action.disabledProperty());
                 menuItem.acceleratorProperty().bindBidirectional(action.acceleratorProperty());
+                menuItem.setOnAction(action);
                 menu.getItems().add(menuItem);
             });
         });

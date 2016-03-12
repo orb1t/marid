@@ -19,7 +19,9 @@
 package org.marid.ide.beaned.data;
 
 import de.jensd.fx.glyphs.GlyphIcon;
+import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import de.jensd.fx.glyphs.octicons.OctIcon;
+import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -36,18 +38,52 @@ public class DataGraphicFactory {
     public static Node getGraphic(BeanTree beanTree, Data data) {
         if (data instanceof BeanData) {
             return graphic(beanTree, (BeanData) data);
+        } else if (data instanceof RefData) {
+            return graphic(beanTree, (RefData) data);
         }
         return null;
     }
 
     static Node graphic(BeanTree beanTree, BeanData data) {
-        final HBox hBox = new HBox(5);
+        final HBox hBox = new HBox(10);
         if (data.getFactoryMethod() != null) {
-            final GlyphIcon<?> linkIcon = FontIcons.glyphIcon(OctIcon.LINK_EXTERNAL, 16);
-            final Label label = new Label(null, linkIcon);
+            final GlyphIcon<?> icon = FontIcons.glyphIcon(OctIcon.LINK_EXTERNAL, 16);
+            final Label label = new Label(null, icon);
             label.textProperty().bind(format("%s.%s", data.factoryBeanProperty(), data.factoryMethodProperty()));
             hBox.getChildren().add(label);
         }
+        {
+            final GlyphIcon<?> icon = FontIcons.glyphIcon(MaterialIcon.DIRECTIONS_RUN, 16);
+            final Label label = new Label(null, icon);
+            label.visibleProperty().bind(Bindings.isNotNull(data.initMethodProperty()));
+            label.textProperty().bind(data.initMethodProperty());
+            hBox.getChildren().add(label);
+        }
+        {
+            final GlyphIcon<?> icon = FontIcons.glyphIcon(MaterialIcon.CLOSE, 16);
+            final Label label = new Label(null, icon);
+            label.visibleProperty().bind(Bindings.isNotNull(data.destroyMethodProperty()));
+            label.textProperty().bind(data.destroyMethodProperty());
+            hBox.getChildren().add(label);
+        }
         return hBox;
+    }
+
+    static Node graphic(BeanTree beanTree, RefData data) {
+        final HBox box = new HBox(10);
+        {
+            final Label label = new Label();
+            label.textProperty().bind(data.valueProperty());
+            label.visibleProperty().bind(Bindings.isNotNull(data.valueProperty()));
+            box.getChildren().add(label);
+        }
+        {
+            final GlyphIcon<?> icon = FontIcons.glyphIcon(OctIcon.LINK_EXTERNAL, 16);
+            final Label label = new Label(null, icon);
+            label.textProperty().bind(data.refProperty());
+            label.visibleProperty().bind(Bindings.isNotNull(data.refProperty()));
+            box.getChildren().add(label);
+        }
+        return box;
     }
 }

@@ -103,7 +103,7 @@ public class BeanEditor extends Stage implements L10nSupport, LogSupport {
                         .item("*Clear all", MaterialIcon.CLEAR_ALL, event -> beanTree.getRoot().getChildren().clear())
                         .last(a -> a.disabledProperty().bind(Bindings.isEmpty(beanTree.getRoot().getChildren())))
                         .separator()
-                        .item("*Edit...", MaterialDesignIcon.TABLE_EDIT, "F2", event -> beanTree.editItem())
+                        .item("*Edit...", MaterialDesignIcon.TABLE_EDIT, "F4", event -> beanTree.editItem())
                         .last(a -> a.disabledProperty().bind(noSelection())))
                 .menu("Window", b -> b
                         .item("*Refresh", MaterialDesignIcon.REFRESH, "F5", event -> beanTree.refresh()))

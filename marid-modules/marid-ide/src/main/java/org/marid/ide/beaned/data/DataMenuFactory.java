@@ -18,10 +18,9 @@
 
 package org.marid.ide.beaned.data;
 
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.HBox;
 import org.marid.ide.beaned.BeanTree;
 import org.marid.l10n.L10nSupport;
 
@@ -30,7 +29,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
-import static org.marid.ide.beaned.data.DataEditorFactory.newDialog;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -38,12 +36,13 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
  */
 public class DataMenuFactory implements L10nSupport {
 
-    public static ContextMenu contextMenu(BeanTree beanTree, TreeTableCell<Data, String> cell) {
+    public static void contextMenu(BeanTree beanTree, TreeTableCell<Data, String> cell, ContextMenu contextMenu) {
         final TreeItem<Data> item = cell.getTreeTableRow().getTreeItem();
         if (item.getValue() instanceof BeanData) {
-            return contextMenuBean(beanTree, cell);
+            menu(beanTree, (BeanData) item.getValue(), cell, contextMenu);
+        } else if (item.getValue() instanceof RefData) {
+            menu(beanTree, (RefData) item.getValue(), cell, contextMenu);
         }
-        return null;
     }
 
     public static boolean isPresent(String name, Class<? extends Data> dataClass, TreeItem<Data> item) {
@@ -55,12 +54,10 @@ public class DataMenuFactory implements L10nSupport {
                 .isPresent();
     }
 
-    static ContextMenu contextMenuBean(BeanTree beanTree, TreeTableCell<Data, String> cell) {
+    static void menu(BeanTree beanTree, BeanData beanData, TreeTableCell<Data, String> cell, ContextMenu contextMenu) {
         final TreeItem<Data> item = cell.getTreeTableRow().getTreeItem();
-        final BeanData beanData = (BeanData) item.getValue();
         final BeanContext beanContext = beanTree.getBeanContext();
         final BeanInfo beanInfo = beanContext.beanInfo(beanData.getType());
-        final ContextMenu contextMenu = new ContextMenu();
         final Map<Character, Set<MenuItem>> menuItemMap = new TreeMap<>();
         beanInfo.getConstructors().stream().min(Comparator.comparing(Constructor::getParameterCount)).ifPresent(c -> {
             for (final Parameter parameter : c.getParameters()) {
@@ -92,12 +89,6 @@ public class DataMenuFactory implements L10nSupport {
             });
             menuItemMap.computeIfAbsent('p', k -> new LinkedHashSet<>()).add(menuItem);
         });
-        if (newDialog((BeanTree) cell.getTreeTableView(), beanContext, cell.getTreeTableRow().getItem()) != null) {
-            final MenuItem editMenuItem = new MenuItem(LS.s("Edit..."), glyphIcon(MaterialDesignIcon.TABLE_EDIT));
-            editMenuItem.setAccelerator(KeyCombination.valueOf("F2"));
-            editMenuItem.setOnAction(event -> ((BeanTree) cell.getTreeTableView()).editItem());
-            menuItemMap.computeIfAbsent('e', k -> new LinkedHashSet<>()).add(editMenuItem);
-        }
         beanContext.beansXmls.stream().filter(xml -> xml.kind == ElementKind.METHOD).forEach(xml -> {
             final BeanInfo parentBeanInfo = beanContext.beanInfo(xml.parent);
             if (parentBeanInfo.getType().isAssignableFrom(beanInfo.getType())) {
@@ -107,11 +98,20 @@ public class DataMenuFactory implements L10nSupport {
             }
         });
         menuItemMap.forEach((g, items) -> {
-            if (!contextMenu.getItems().isEmpty()) {
-                contextMenu.getItems().add(new SeparatorMenuItem());
-            }
+            contextMenu.getItems().add(new SeparatorMenuItem());
             contextMenu.getItems().addAll(items);
         });
-        return contextMenu;
+    }
+
+    static void menu(BeanTree beanTree, RefData refData, TreeTableCell<Data, String> cell, ContextMenu contextMenu) {
+        contextMenu.getItems().add(new SeparatorMenuItem());
+        final TreeItem<Data> item = cell.getTreeTableRow().getTreeItem();
+        final BeanContext beanContext = beanTree.getBeanContext();
+        {
+            final HBox box = new HBox(10);
+            final TextField beanNameField = new TextField();
+            box.getChildren().addAll(new Label(LS.s("Name") + ":"), beanNameField);
+            contextMenu.getItems().add(new CustomMenuItem(box, false));
+        }
     }
 }

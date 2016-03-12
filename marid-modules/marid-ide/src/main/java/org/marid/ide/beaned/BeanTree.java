@@ -18,12 +18,14 @@
 
 package org.marid.ide.beaned;
 
+import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCombination;
 import org.marid.ide.beaned.data.*;
 import org.marid.ide.timers.IdeTimers;
 import org.marid.jfx.icons.FontIcons;
@@ -35,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.marid.ide.beaned.data.DataEditorFactory.newDialog;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -94,7 +97,15 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
                 }
                 setText(item);
                 setGraphic(FontIcons.glyphIcon(treeItem.getValue().getIcon(), 16));
-                setContextMenu(DataMenuFactory.contextMenu(BeanTree.this, this));
+                final ContextMenu contextMenu = new ContextMenu();
+                if (newDialog(BeanTree.this, beanContext, getTreeTableRow().getItem()) != null) {
+                    final MenuItem editMenuItem = new MenuItem(LS.s("Edit..."), glyphIcon(MaterialDesignIcon.TABLE_EDIT));
+                    editMenuItem.setAccelerator(KeyCombination.valueOf("F2"));
+                    editMenuItem.setOnAction(event -> editItem());
+                    contextMenu.getItems().add(editMenuItem);
+                }
+                DataMenuFactory.contextMenu(BeanTree.this, this, contextMenu);
+                setContextMenu(contextMenu);
             }
         });
         return column;
