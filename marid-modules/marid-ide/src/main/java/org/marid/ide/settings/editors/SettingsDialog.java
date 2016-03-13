@@ -29,6 +29,7 @@ import org.marid.l10n.L10nSupport;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -64,6 +65,7 @@ public class SettingsDialog extends Dialog<ButtonType> implements L10nSupport {
 
     private TabPane tabPane(Instance<? extends SettingsEditor> editors) {
         final TabPane tabPane = new TabPane(StreamSupport.stream(editors.spliterator(), false)
+                .sorted(Comparator.comparing(e -> e.getSettings().getName()))
                 .map(editor -> new Tab(s(editor.getSettings().getName()), editor.getNode()))
                 .toArray(Tab[]::new));
         for (final Tab tab : tabPane.getTabs()) {

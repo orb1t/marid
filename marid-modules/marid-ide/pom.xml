@@ -98,7 +98,6 @@
                             <configuration>
                                 <executable>java</executable>
                                 <arguments>
-                                    <argument>-Duser.language=ru</argument>
                                     <argument>-cp</argument>
                                     <classpath/>
                                     <argument>org.marid.ide.Ide</argument>

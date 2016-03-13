@@ -29,12 +29,15 @@ import org.marid.jfx.Windows;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
+import org.marid.pref.PrefUtils;
 import org.marid.util.Utils;
 
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 
 import static java.util.stream.IntStream.of;
 import static javafx.scene.paint.Color.GREEN;
@@ -45,6 +48,7 @@ import static org.marid.jfx.FxMaridIcon.maridIcon;
  */
 public class Ide extends Application implements L10nSupport, LogSupport, PrefSupport {
 
+    public static final Preferences PREFERENCES = PrefUtils.preferences(Ide.class);
     public static final Image[] IMAGES = of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new);
 
     private final Weld weld = new Weld(getClass().getName());
@@ -72,6 +76,10 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
         Logger.getLogger("").addHandler(new IdeLogHandler());
         Utils.merge(System.getProperties(), "meta.properties", "ide.properties");
+        final String localeString = PREFERENCES.get("locale", "");
+        if (!localeString.isEmpty()) {
+            Locale.setDefault(Locale.forLanguageTag(localeString));
+        }
         disableUrlCaching();
         launch(args);
     }
