@@ -18,24 +18,16 @@
 
 package org.marid.util;
 
-import org.marid.cache.MaridClassValue;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Proxy;
-import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.security.SecureRandom;
-import java.time.ZoneId;
-import java.util.Base64;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -46,23 +38,6 @@ import java.util.function.LongConsumer;
  * @author Dmitry Ovchinnikov
  */
 public class Utils {
-
-    public static final ZoneId ZONE_ID = ZoneId.systemDefault();
-    public static final SecureRandom RANDOM = new SecureRandom();
-
-    static final ClassValue<Object> INTERFACE_INSTANCES = new MaridClassValue<>(c -> Proxy.newProxyInstance(
-            currentClassLoader(), new Class<?>[]{c}, (proxy, method, args) -> {
-                final Object value = method.getDefaultValue();
-                if (value != null) {
-                    return value;
-                } else {
-                    return MethodHandles.lookup()
-                            .in(method.getDeclaringClass())
-                            .unreflectSpecial(method, method.getDeclaringClass())
-                            .bindTo(proxy)
-                            .invokeWithArguments(args);
-                }
-            }));
 
     public static <T> T newInstance(Class<T> type, String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -109,30 +84,6 @@ public class Utils {
         }
     }
 
-    public static void sleep(long timeout) {
-        try {
-            Thread.sleep(timeout);
-        } catch (InterruptedException x) {
-            throw new IllegalStateException(x);
-        }
-    }
-
-    public static BigInteger getUid(int len) {
-        final byte[] num = new byte[len];
-        RANDOM.nextBytes(num);
-        return new BigInteger(1, num);
-    }
-
-    public static BigInteger getUid() {
-        return getUid(16);
-    }
-
-    public static String textUid() {
-        final byte[] data = new byte[8];
-        RANDOM.nextBytes(data);
-        return Base64.getEncoder().encodeToString(data);
-    }
-
     @SuppressWarnings("unchecked")
     public static <T> T cast(Object x) {
         return (T) x;
@@ -161,10 +112,6 @@ public class Utils {
             default:
                 throw new IllegalArgumentException(primitiveType.getName());
         }
-    }
-
-    public static <T> T getInterfaceInstance(Class<T> type) {
-        return type.cast(INTERFACE_INSTANCES.get(type));
     }
 
     public static <T> T call(Callable<T> callable) throws IllegalStateException {

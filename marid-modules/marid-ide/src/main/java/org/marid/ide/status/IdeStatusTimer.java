@@ -24,6 +24,7 @@ import org.marid.ide.timers.IdeTimers;
 import org.marid.pref.PrefSupport;
 
 import javax.inject.Inject;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.SignStyle;
@@ -31,7 +32,6 @@ import java.time.format.SignStyle;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoField.*;
 import static javafx.application.Platform.runLater;
-import static org.marid.util.Utils.ZONE_ID;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -61,6 +61,6 @@ public class IdeStatusTimer extends Label implements PrefSupport {
 
     @Inject
     public void init(IdeTimers ideTimers) {
-        ideTimers.schedule(1000L, t -> runLater(() -> setText(FORMATTER.format(now().atZone(ZONE_ID)))));
+        ideTimers.schedule(1000L, t -> runLater(() -> setText(FORMATTER.format(now().atZone(ZoneId.systemDefault())))));
     }
 }
