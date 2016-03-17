@@ -98,12 +98,10 @@ public class BeanTree extends TreeTableView<Data> implements L10nSupport, LogSup
                 setText(item);
                 setGraphic(FontIcons.glyphIcon(treeItem.getValue().getIcon(), 16));
                 final ContextMenu contextMenu = new ContextMenu();
-                if (newDialog(BeanTree.this, beanContext, getTreeTableRow().getItem()) != null) {
-                    final MenuItem editMenuItem = new MenuItem(LS.s("Edit..."), glyphIcon(MaterialDesignIcon.TABLE_EDIT));
-                    editMenuItem.setAccelerator(KeyCombination.valueOf("F2"));
-                    editMenuItem.setOnAction(event -> editItem());
-                    contextMenu.getItems().add(editMenuItem);
-                }
+                final MenuItem editMenuItem = new MenuItem(LS.s("Edit..."), glyphIcon(MaterialDesignIcon.TABLE_EDIT));
+                editMenuItem.setAccelerator(KeyCombination.valueOf("F4"));
+                editMenuItem.setOnAction(event -> editItem());
+                contextMenu.getItems().add(editMenuItem);
                 DataMenuFactory.contextMenu(BeanTree.this, this, contextMenu);
                 setContextMenu(contextMenu);
             }

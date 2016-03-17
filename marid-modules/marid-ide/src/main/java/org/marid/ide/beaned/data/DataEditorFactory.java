@@ -23,27 +23,29 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import org.marid.beans.meta.BeanIntrospector;
 import org.marid.ide.beaned.BeanTree;
-import org.marid.jfx.Dialogs;
 import org.marid.jfx.ScrollPanes;
-import org.marid.jfx.TextFields;
+import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.panes.GenericGridPane;
-import org.marid.l10n.L10nSupport;
 
 import java.lang.reflect.Method;
+import java.util.ServiceLoader;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static java.util.ServiceLoader.load;
 import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.jfx.ComboBoxes.comboBox;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DataEditorFactory implements L10nSupport {
+public class DataEditorFactory {
 
     public static Dialog<Runnable> newDialog(BeanTree node, BeanContext beanContext, Data data) {
         if (data instanceof RefData) {
@@ -54,40 +56,63 @@ public class DataEditorFactory implements L10nSupport {
         return null;
     }
 
-    public static Dialog<Runnable> newEditor(BeanTree node, BeanContext beanContext, BeanData beanData) {
+    public static Dialog<Runnable> newEditor(BeanTree tree, BeanContext beanContext, BeanData beanData) {
         final StringProperty nameProperty = new SimpleStringProperty(beanData.getName());
         final StringProperty initMethodProperty = new SimpleStringProperty(beanData.getInitMethod());
         final StringProperty destroyMethodProperty = new SimpleStringProperty(beanData.getDestroyMethod());
-        return Dialogs.dialog(node, beanData.getName(), () -> () -> {
-            beanData.destroyMethodProperty().set(destroyMethodProperty.get());
-            beanData.initMethodProperty().set(initMethodProperty.get());
-            beanData.nameProperty().set(nameProperty.get());
-        }, d -> {
-            final GridPane gridPane = new GenericGridPane();
-            d.getDialogPane().setContent(gridPane);
-            final ObservableList<String> methods = beanContext.beanInfo(beanData.getType()).getMethods().stream()
-                    .filter(m -> m.getReturnType() == void.class)
-                    .map(Method::getName)
-                    .sorted()
-                    .collect(Collectors.toCollection(FXCollections::observableArrayList));
-            gridPane.addRow(0, new Label("name"), TextFields.textField(nameProperty));
-            gridPane.addRow(1, new Label("initMethod"), comboBox(observableArrayList(methods), initMethodProperty));
-            gridPane.addRow(2, new Label("destroyMethod"), comboBox(observableArrayList(methods), destroyMethodProperty));
-        });
+        final ObservableList<String> methods = beanContext.beanInfo(beanData.getType()).getMethods().stream()
+                .filter(m -> m.getReturnType() == void.class)
+                .map(Method::getName)
+                .sorted()
+                .collect(Collectors.toCollection(FXCollections::observableArrayList));
+        return new MaridDialog<Runnable>(tree)
+                .title(beanData.getName())
+                .with(GenericGridPane::new, (d, p) -> {
+                    p.addTextField("Name", nameProperty);
+                    p.addControl("Initialize method", () -> comboBox(observableArrayList(methods), initMethodProperty));
+                    p.addControl("Destroy method", () -> comboBox(observableArrayList(methods), destroyMethodProperty));
+                })
+                .result(() -> () -> {
+                    beanData.destroyMethodProperty().set(destroyMethodProperty.get());
+                    beanData.initMethodProperty().set(initMethodProperty.get());
+                    beanData.nameProperty().set(nameProperty.get());
+                });
     }
 
-    public static Dialog<Runnable> newEditor(BeanTree node, BeanContext beanContext, RefData refData) {
+    public static Dialog<Runnable> newEditor(BeanTree tree, BeanContext beanContext, RefData refData) {
         final StringProperty valueProperty = new SimpleStringProperty(refData.getValue());
-        return Dialogs.dialog(node, refData.getName(), () -> () -> {
-            refData.valueProperty().set(valueProperty.get());
-        }, d -> {
-            final TextArea value = new TextArea();
-            value.textProperty().bindBidirectional(valueProperty);
-            final GridPane gridPane = new GenericGridPane();
-            d.getDialogPane().setContent(gridPane);
-            final ScrollPane scrollPane = ScrollPanes.scrollPane(value);
-            scrollPane.setPrefSize(1000, 1000);
-            gridPane.add(scrollPane, 0, 1, 2, 1);
+        final StringProperty refProperty = new SimpleStringProperty(refData.getRef());
+        final ServiceLoader<BeanIntrospector> introspectors = load(BeanIntrospector.class, beanContext.classLoader);
+        final ObservableList<String> refs = FXCollections.observableArrayList();
+        final BeanInfo curBean = beanContext.beanInfo(refData.getType());
+        introspectors.forEach(introspector ->
+                Stream.of(introspector.getBeans(beanContext.classLoader)).forEach(beanInfo -> {
+                    final BeanInfo refBean = beanContext.beanInfo(beanInfo.getType());
+                    if (curBean.getType().isAssignableFrom(refBean.getType())) {
+                        refs.add(beanInfo.getName());
+                    }
+                }));
+        valueProperty.addListener((observable, oldValue, newValue) -> {
+            refProperty.set("");
         });
+        refProperty.addListener((observable, oldValue, newValue) -> {
+            valueProperty.set("");
+        });
+        return new MaridDialog<Runnable>(tree)
+                .title(refData.getName())
+                .with(GenericGridPane::new, (d, p) -> {
+                    d.setResizable(true);
+                    p.addControl("Reference", () -> comboBox(refs, refProperty));
+                    final ScrollPane valueScrollPane = p.addControl("Value", () -> {
+                        final TextArea valueArea = new TextArea();
+                        valueArea.textProperty().bindBidirectional(valueProperty);
+                        return ScrollPanes.scrollPane(valueArea);
+                    });
+                    GridPane.setVgrow(valueScrollPane, Priority.ALWAYS);
+                })
+                .result(() -> () -> {
+                    refData.valueProperty().set(valueProperty.get());
+                    refData.refProperty().set(refProperty.get());
+                });
     }
 }

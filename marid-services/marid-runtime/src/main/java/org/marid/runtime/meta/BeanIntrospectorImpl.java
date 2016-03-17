@@ -20,10 +20,9 @@ package org.marid.runtime.meta;
 
 import org.marid.beans.meta.BeanInfo;
 import org.marid.beans.meta.BeanIntrospector;
-import org.springframework.beans.BeansException;
+import org.marid.runtime.MaridContextInitializer;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,33 +33,19 @@ import java.util.stream.Stream;
  */
 public class BeanIntrospectorImpl implements BeanIntrospector {
     @Override
-    public BeanInfo[] getBeans() {
-        class Context extends ClassPathXmlApplicationContext {
-            @Override
-            public void refresh() throws BeansException, IllegalStateException {
-                super.refresh();
+    public BeanInfo[] getBeans(ClassLoader classLoader) {
+        try (final GenericApplicationContext context = MaridContextInitializer.applicationContext(classLoader)) {
+            final List<BeanInfo> beans = new ArrayList<>();
+            for (final String beanName : context.getBeanDefinitionNames()) {
+                final BeanDefinition beanDefinition = context.getBeanDefinition(beanName);
+                final Set<String> dependsOn = beanDefinition.getDependsOn() != null
+                        ? Stream.of(beanDefinition.getDependsOn()).collect(Collectors.toCollection(LinkedHashSet::new))
+                        : Collections.emptySet();
+                final String type = beanDefinition.getBeanClassName();
+                final String description = beanDefinition.getDescription() == null ? "" : beanDefinition.getDescription();
+                beans.add(new BeanInfo(type, beanName, description, dependsOn));
             }
-
-            public DefaultListableBeanFactory init() {
-                prepareRefresh();
-                final DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) obtainFreshBeanFactory();
-                prepareBeanFactory(beanFactory);
-                return beanFactory;
-            }
+            return beans.toArray(new BeanInfo[beans.size()]);
         }
-        final Context context = new Context();
-        context.setConfigLocations("classpath*:/META-INF/marid/**/*.xml");
-        final DefaultListableBeanFactory beanFactory = context.init();
-        final List<BeanInfo> beans = new ArrayList<>();
-        for (final String beanName : beanFactory.getBeanDefinitionNames()) {
-            final BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-            final Set<String> dependsOn = beanDefinition.getDependsOn() != null
-                    ? Stream.of(beanDefinition.getDependsOn()).collect(Collectors.toCollection(LinkedHashSet::new))
-                    : Collections.emptySet();
-            final String type = beanDefinition.getBeanClassName();
-            final String description = beanDefinition.getDescription() == null ? "" : beanDefinition.getDescription();
-            beans.add(new BeanInfo(type, beanName, description, dependsOn));
-        }
-        return beans.toArray(new BeanInfo[beans.size()]);
     }
 }

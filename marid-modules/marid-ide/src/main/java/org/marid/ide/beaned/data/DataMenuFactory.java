@@ -20,7 +20,6 @@ package org.marid.ide.beaned.data;
 
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
 import org.marid.ide.beaned.BeanTree;
 import org.marid.l10n.L10nSupport;
 
@@ -40,8 +39,6 @@ public class DataMenuFactory implements L10nSupport {
         final TreeItem<Data> item = cell.getTreeTableRow().getTreeItem();
         if (item.getValue() instanceof BeanData) {
             menu(beanTree, (BeanData) item.getValue(), cell, contextMenu);
-        } else if (item.getValue() instanceof RefData) {
-            menu(beanTree, (RefData) item.getValue(), cell, contextMenu);
         }
     }
 
@@ -101,17 +98,5 @@ public class DataMenuFactory implements L10nSupport {
             contextMenu.getItems().add(new SeparatorMenuItem());
             contextMenu.getItems().addAll(items);
         });
-    }
-
-    static void menu(BeanTree beanTree, RefData refData, TreeTableCell<Data, String> cell, ContextMenu contextMenu) {
-        contextMenu.getItems().add(new SeparatorMenuItem());
-        final TreeItem<Data> item = cell.getTreeTableRow().getTreeItem();
-        final BeanContext beanContext = beanTree.getBeanContext();
-        {
-            final HBox box = new HBox(10);
-            final TextField beanNameField = new TextField();
-            box.getChildren().addAll(new Label(LS.s("Name") + ":"), beanNameField);
-            contextMenu.getItems().add(new CustomMenuItem(box, false));
-        }
     }
 }

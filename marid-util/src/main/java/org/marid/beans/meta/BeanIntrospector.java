@@ -23,5 +23,5 @@ package org.marid.beans.meta;
  */
 public interface BeanIntrospector {
 
-    BeanInfo[] getBeans();
+    BeanInfo[] getBeans(ClassLoader classLoader);
 }

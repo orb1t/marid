@@ -19,7 +19,6 @@
 package org.marid.l10n;
 
 import java.util.Locale;
-import java.util.function.Function;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -27,29 +26,25 @@ import java.util.function.Function;
 public interface L10nSupport {
 
     default String s(String format, Object... args) {
-        return L10n.s(getDefaultL10nLocale(), format, getDefaultLFunc(), args);
+        return L10n.s(getDefaultL10nLocale(), format, args);
     }
 
     default String m(String format, Object... args) {
-        return L10n.m(getDefaultL10nLocale(), format, getDefaultLFunc(), args);
+        return L10n.m(getDefaultL10nLocale(), format, args);
     }
 
     default Locale getDefaultL10nLocale() {
         return Locale.getDefault();
     }
 
-    default Function<String, String> getDefaultLFunc() {
-        return Function.identity();
-    }
-
     class LS {
 
         public static String s(String format, Object... args) {
-            return L10n.s(Locale.getDefault(), format, Function.identity(), args);
+            return L10n.s(Locale.getDefault(), format, args);
         }
 
         public static String m(String format, Object... args) {
-            return L10n.m(Locale.getDefault(), format, Function.identity(), args);
+            return L10n.m(Locale.getDefault(), format, args);
         }
     }
 }

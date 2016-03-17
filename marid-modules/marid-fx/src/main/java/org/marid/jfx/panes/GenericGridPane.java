@@ -20,10 +20,13 @@ package org.marid.jfx.panes;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.StringProperty;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import org.marid.l10n.L10nSupport;
+
+import java.util.function.Supplier;
 
 import static java.lang.Double.MAX_VALUE;
 import static javafx.geometry.HPos.LEFT;
@@ -47,28 +50,31 @@ public class GenericGridPane extends GridPane implements L10nSupport {
         return getChildren().stream().mapToInt(c -> c instanceof Separator ? 2 : 1).sum() / 2;
     }
 
-    protected void addTextField(String text, StringProperty stringProperty) {
+    public TextField addTextField(String text, StringProperty stringProperty) {
         final TextField textField = new TextField();
         textField.textProperty().bindBidirectional(stringProperty);
         final Label label = new Label(s(text) + ": ");
         addRow(getNextRowIndex(), label, textField);
+        return textField;
     }
 
-    protected void addTextField(String text, Object bean, String property) {
+    public TextField addTextField(String text, Object bean, String property) {
         final TextField textField = new TextField();
         textField.textProperty().bindBidirectional(stringProperty(bean, property));
         final Label label = new Label(s(text) + ": ");
         addRow(getNextRowIndex(), label, textField);
+        return textField;
     }
 
-    protected void addBooleanField(String text, Object bean, String property) {
+    public CheckBox addBooleanField(String text, Object bean, String property) {
         final CheckBox checkBox = new CheckBox();
         checkBox.selectedProperty().bindBidirectional(booleanProperty(bean, property));
         final Label label = new Label(s(text) + ": ");
         addRow(getNextRowIndex(), label, checkBox);
+        return checkBox;
     }
 
-    protected void addIntField(String text, Object bean, String property, int low, int high, int step) {
+    public Spinner addIntField(String text, Object bean, String property, int low, int high, int step) {
         final IntegerProperty p = integerProperty(bean, property);
         final Spinner<Integer> spinner = new Spinner<>(low, high, p.get(), step);
         spinner.setEditable(true);
@@ -77,11 +83,20 @@ public class GenericGridPane extends GridPane implements L10nSupport {
         });
         final Label label = new Label(s(text) + ": ");
         addRow(getNextRowIndex(), label, spinner);
+        return spinner;
     }
 
-    protected void addSeparator() {
+    public <T extends Node> T addControl(String text, Supplier<T> nodeSupplier) {
+        final Label label = new Label(s(text) + ": ");
+        final T node = nodeSupplier.get();
+        addRow(getNextRowIndex(), label, node);
+        return node;
+    }
+
+    public Separator addSeparator() {
         final Separator separator = new Separator();
         separator.setPrefWidth(Double.MAX_VALUE);
         add(separator, 0, getNextRowIndex(), 2, 1);
+        return separator;
     }
 }

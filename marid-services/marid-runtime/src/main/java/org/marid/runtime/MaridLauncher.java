@@ -20,11 +20,14 @@ package org.marid.runtime;
 
 import org.jboss.logmanager.LogManager;
 import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 
 import java.util.Scanner;
 import java.util.TimeZone;
+
+import static java.lang.Thread.currentThread;
+import static org.marid.runtime.MaridContextInitializer.applicationContext;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -34,12 +37,7 @@ public class MaridLauncher {
     public static void main(String... args) {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
-        final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext();
-        context.addBeanFactoryPostProcessor(new MaridBeanFactoryPostProcessor());
-        context.setConfigLocation("classpath*:/META-INF/marid/**/*.xml");
-        context.setClassLoader(Thread.currentThread().getContextClassLoader());
-        context.setAllowCircularReferences(false);
-        context.setValidating(false);
+        final GenericApplicationContext context = applicationContext(currentThread().getContextClassLoader());
         context.getEnvironment().getPropertySources().addFirst(new SimpleCommandLinePropertySource(args));
         Runtime.getRuntime().addShutdownHook(new Thread(context::close));
         context.addApplicationListener(event -> {

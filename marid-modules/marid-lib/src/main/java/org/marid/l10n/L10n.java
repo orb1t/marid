@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.function.Function;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -55,24 +54,24 @@ public class L10n {
         }
     };
 
-    public static String s(Locale locale, String key, Function<String, String> func, Object... ps) {
-        return s(getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL), key, func, ps);
+    public static String s(Locale locale, String key, Object... ps) {
+        return s(getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL), key, ps);
     }
 
-    public static void s(Locale locale, String key, Appendable out, Function<String, String> func, Object... ps) {
-        s(getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL), out, key, func, ps);
+    public static void s(Locale locale, String key, Appendable out, Object... ps) {
+        s(getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL), out, key, ps);
     }
 
-    public static void s(Locale locale, String key, Formatter formatter, Function<String, String> func, Object... ps) {
-        s(getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL), formatter, key, func, ps);
+    public static void s(Locale locale, String key, Formatter formatter, Object... ps) {
+        s(getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL), formatter, key, ps);
     }
 
-    public static String m(Locale locale, String k, Function<String, String> func, Object... v) {
-        return m(getBundle(MSGS, locale, Utils.currentClassLoader(), UTF8_CONTROL), k, func, v);
+    public static String m(Locale locale, String k, Object... v) {
+        return m(getBundle(MSGS, locale, Utils.currentClassLoader(), UTF8_CONTROL), k, v);
     }
 
-    public static void m(Locale locale, String k, StringBuffer buffer, Function<String, String> func, Object... v) {
-        m(getBundle(MSGS, locale, Utils.currentClassLoader(), UTF8_CONTROL), buffer, k, func, v);
+    public static void m(Locale locale, String k, StringBuffer buffer, Object... v) {
+        m(getBundle(MSGS, locale, Utils.currentClassLoader(), UTF8_CONTROL), buffer, k, v);
     }
 
     public static ResourceBundle getMessagesBundle(Locale locale) {
@@ -83,11 +82,11 @@ public class L10n {
         return getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL);
     }
 
-    private static void m(ResourceBundle b, StringBuffer buf, String key, Function<String, String> func, Object... v) {
+    private static void m(ResourceBundle b, StringBuffer buf, String key, Object... v) {
         if (key == null) {
             return;
         }
-        final String r = b.containsKey(key) ? b.getString(key) : func.apply(key);
+        final String r = b.containsKey(key) ? b.getString(key) : key;
         if (v == null || v.length == 0) {
             buf.append(r);
         } else {
@@ -99,17 +98,17 @@ public class L10n {
         }
     }
 
-    private static String m(ResourceBundle b, String key, Function<String, String> func, Object... v) {
+    private static String m(ResourceBundle b, String key, Object... v) {
         final StringBuffer buffer = new StringBuffer(key.length());
-        m(b, buffer, key, func, v);
+        m(b, buffer, key, v);
         return buffer.toString();
     }
 
-    private static void s(ResourceBundle b, Formatter fmt, String key, Function<String, String> func, Object... v) {
+    private static void s(ResourceBundle b, Formatter fmt, String key, Object... v) {
         if (key == null) {
             return;
         }
-        final String r = b.containsKey(key) ? b.getString(key) : func.apply(key);
+        final String r = b.containsKey(key) ? b.getString(key) : key;
         if (v == null || v.length == 0) {
             fmt.format("%s", r);
         } else {
@@ -121,14 +120,14 @@ public class L10n {
         }
     }
 
-    private static void s(ResourceBundle b, Appendable buf, String key, Function<String, String> func, Object... v) {
+    private static void s(ResourceBundle b, Appendable buf, String key, Object... v) {
         final Formatter formatter = new Formatter(buf);
-        s(b, formatter, key, func, v);
+        s(b, formatter, key, v);
     }
 
-    private static String s(ResourceBundle b, String key, Function<String, String> func, Object... v) {
+    private static String s(ResourceBundle b, String key, Object... v) {
         final StringBuilder builder = new StringBuilder(key.length());
-        s(b, builder, key, func, v);
+        s(b, builder, key, v);
         return builder.toString();
     }
 }

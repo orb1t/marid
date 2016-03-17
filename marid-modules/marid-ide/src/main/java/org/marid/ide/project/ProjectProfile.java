@@ -37,7 +37,10 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -131,14 +134,17 @@ public class ProjectProfile implements LogSupport {
 
     public URLClassLoader classLoader() {
         final Path lib = target.resolve("lib");
-        final URL[] urls;
+        final List<URL> urls;
         if (Files.isDirectory(lib)) {
             final File[] files = lib.toFile().listFiles((dir, name) -> name.endsWith(".jar"));
-            urls = Stream.of(files).map(f -> Calls.call(() -> f.toURI().toURL())).toArray(URL[]::new);
+            urls = Stream.of(files).map(f -> Calls.call(() -> f.toURI().toURL())).collect(Collectors.toList());
         } else {
-            urls = new URL[0];
+            urls = new ArrayList<>();
         }
-        return new URLClassLoader(urls);
+        if (Files.isDirectory(target.resolve("classes"))) {
+            urls.add(Calls.call(() -> target.resolve("classes").toUri().toURL()));
+        }
+        return new URLClassLoader(urls.toArray(new URL[urls.size()]));
     }
 
     private void createFileStructure() {
