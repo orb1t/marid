@@ -523,7 +523,7 @@
             <groupId>org.checkerframework</groupId>
             <artifactId>checker</artifactId>
             <scope>provided</scope>
-            <version>1.9.11</version>
+            <version>1.9.12</version>
         </dependency>
     </dependencies>
 
