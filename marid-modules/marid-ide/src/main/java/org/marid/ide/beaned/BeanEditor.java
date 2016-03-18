@@ -65,7 +65,7 @@ import static org.marid.ide.beaned.data.DataEditorFactory.newDialog;
  * @author Dmitry Ovchinnikov
  */
 @Dependent
-public class BeanEditor extends Stage implements L10nSupport, LogSupport {
+class BeanEditor extends Stage implements L10nSupport, LogSupport {
 
     private final BeanContext beanContext;
     private final BeanTree beanTree;
@@ -87,7 +87,7 @@ public class BeanEditor extends Stage implements L10nSupport, LogSupport {
         });
     }
 
-    public BorderPane getTreePane() {
+    private BorderPane getTreePane() {
         final ToolBar toolBar = new ToolBar();
         final MenuBar menuBar = new MenuBar();
         new MenuContainerBuilder()
