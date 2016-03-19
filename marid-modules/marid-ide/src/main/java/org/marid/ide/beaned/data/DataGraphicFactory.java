@@ -21,10 +21,14 @@ package org.marid.ide.beaned.data;
 import de.jensd.fx.glyphs.GlyphIcon;
 import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import de.jensd.fx.glyphs.octicons.OctIcon;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import org.apache.commons.lang3.StringUtils;
 import org.marid.ide.beaned.BeanTree;
 import org.marid.jfx.icons.FontIcons;
 
@@ -46,7 +50,7 @@ public class DataGraphicFactory {
 
     static Node graphic(BeanTree beanTree, BeanData data) {
         final HBox hBox = new HBox(10);
-        if (data.getFactoryMethod() != null) {
+        if (StringUtils.isNotEmpty(data.getFactoryBean())) {
             final GlyphIcon<?> icon = FontIcons.glyphIcon(OctIcon.LINK_EXTERNAL, 16);
             final Label label = new Label(null, icon);
             label.textProperty().bind(format("%s.%s", data.factoryBeanProperty(), data.factoryMethodProperty()));

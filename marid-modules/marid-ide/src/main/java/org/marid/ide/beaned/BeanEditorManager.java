@@ -19,8 +19,16 @@
 package org.marid.ide.beaned;
 
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.TreeItem;
+import javafx.stage.WindowEvent;
+import org.marid.ide.beaned.data.BeanData;
+import org.marid.ide.beaned.data.Data;
+import org.marid.ide.beaned.data.RefData;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.toolbar.IdeToolbarItem;
 import org.marid.l10n.L10nSupport;
@@ -28,6 +36,7 @@ import org.marid.l10n.L10nSupport;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
+import java.util.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,13 +44,56 @@ import javax.inject.Provider;
 @ApplicationScoped
 public class BeanEditorManager implements L10nSupport {
 
+    final Set<BeanEditor> beanEditors = new LinkedHashSet<>();
+
     @Produces
     @IdeMenuItem(menu = "File", text = "Bean editor", group = "fileBeanEditor", mdIcons = {MaterialDesignIcon.PUZZLE})
     @IdeToolbarItem(group = "file")
     public EventHandler<ActionEvent> beanEditor(Provider<BeanEditor> beanEditorProvider) {
         return event -> {
             final BeanEditor beanEditor = beanEditorProvider.get();
+            beanEditors.add(beanEditor);
+            beanEditor.addEventHandler(WindowEvent.WINDOW_HIDING, e -> beanEditors.remove(beanEditor));
+            setUpListeners(beanEditor);
             beanEditor.show();
         };
+    }
+
+    private void setUpListeners(BeanEditor beanEditor) {
+        beanEditor.beanTree.getRoot().getChildren().addListener(new ListChangeListener<TreeItem<Data>>() {
+            @Override
+            public void onChanged(Change<? extends TreeItem<Data>> c) {
+                while (c.next()) {
+                    c.getAddedSubList().forEach(item -> {
+                        item.getChildren().addListener(this);
+                        final ChangeListener<String> changeListener = (observable, oldValue, newValue) -> {
+                            for (final BeanEditor e : beanEditors) {
+                                processBeanRename(oldValue, newValue, e.beanTree.getRoot().getChildren());
+                            }
+                        };
+                        if (item.getValue() instanceof BeanData) {
+                            item.getValue().nameProperty().addListener(changeListener);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void processBeanRename(String oldName, String newName, Collection<TreeItem<Data>> list) {
+        list.forEach(item -> {
+            final List<StringProperty> references = new ArrayList<>();
+            if (item.getValue() instanceof BeanData) {
+                references.add(((BeanData) item.getValue()).factoryBeanProperty());
+            } else if (item.getValue() instanceof RefData) {
+                references.add(((RefData) item.getValue()).refProperty());
+            }
+            references.forEach(reference -> {
+                if (oldName.equals(reference.get())) {
+                    reference.set(newName);
+                }
+            });
+            processBeanRename(oldName, newName, item.getChildren());
+        });
     }
 }

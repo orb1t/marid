@@ -37,7 +37,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.Closeable;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -89,8 +88,12 @@ public class BeanContext implements LogSupport, Closeable {
     }
 
     @Override
-    public void close() throws IOException {
-        classLoader.close();
+    public void close() {
+        try {
+            classLoader.close();
+        } catch (Exception x) {
+            log(WARNING, "Unable to close class loader", x);
+        }
     }
 
     public String icon(String type) {

@@ -67,9 +67,9 @@ import static org.marid.ide.beaned.data.DataEditorFactory.newDialog;
 @Dependent
 class BeanEditor extends Stage implements L10nSupport, LogSupport {
 
-    private final BeanContext beanContext;
-    private final BeanTree beanTree;
-    private final ObjectProperty<File> file = new SimpleObjectProperty<>();
+    final BeanContext beanContext;
+    final BeanTree beanTree;
+    final ObjectProperty<File> file = new SimpleObjectProperty<>();
 
     @Inject
     public BeanEditor(ProjectProfile profile, IdeTimers ideTimers) {
@@ -78,13 +78,7 @@ class BeanEditor extends Stage implements L10nSupport, LogSupport {
         getIcons().addAll(Ide.IMAGES);
         setScene(new Scene(getTreePane(), 1024, 768));
         titleProperty().bind(createStringBinding(this::title, file));
-        setOnCloseRequest(event -> {
-            try {
-                beanContext.close();
-            } catch (Exception x) {
-                log(WARNING, "Unable to free resources", x);
-            }
-        });
+        setOnCloseRequest(event -> beanContext.close());
     }
 
     private BorderPane getTreePane() {
@@ -173,7 +167,7 @@ class BeanEditor extends Stage implements L10nSupport, LogSupport {
         fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Beans", ".xml"));
         final File file = fileChooser.showOpenDialog(this);
         if (file != null) {
-            show();
+            this.file.set(file);
         }
     }
 
