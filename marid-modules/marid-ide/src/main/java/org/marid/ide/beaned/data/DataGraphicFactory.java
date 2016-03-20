@@ -21,18 +21,14 @@ package org.marid.ide.beaned.data;
 import de.jensd.fx.glyphs.GlyphIcon;
 import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import de.jensd.fx.glyphs.octicons.OctIcon;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import org.apache.commons.lang3.StringUtils;
 import org.marid.ide.beaned.BeanTree;
 import org.marid.jfx.icons.FontIcons;
-
-import static javafx.beans.binding.Bindings.format;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -49,45 +45,43 @@ public class DataGraphicFactory {
     }
 
     static Node graphic(BeanTree beanTree, BeanData data) {
-        final HBox hBox = new HBox(10);
-        if (StringUtils.isNotEmpty(data.getFactoryBean())) {
-            final GlyphIcon<?> icon = FontIcons.glyphIcon(OctIcon.LINK_EXTERNAL, 16);
-            final Label label = new Label(null, icon);
-            label.textProperty().bind(format("%s.%s", data.factoryBeanProperty(), data.factoryMethodProperty()));
-            hBox.getChildren().add(label);
-        }
-        {
-            final GlyphIcon<?> icon = FontIcons.glyphIcon(MaterialIcon.DIRECTIONS_RUN, 16);
-            final Label label = new Label(null, icon);
-            label.visibleProperty().bind(Bindings.isNotNull(data.initMethodProperty()));
-            label.textProperty().bind(data.initMethodProperty());
-            hBox.getChildren().add(label);
-        }
-        {
-            final GlyphIcon<?> icon = FontIcons.glyphIcon(MaterialIcon.CLOSE, 16);
-            final Label label = new Label(null, icon);
-            label.visibleProperty().bind(Bindings.isNotNull(data.destroyMethodProperty()));
-            label.textProperty().bind(data.destroyMethodProperty());
-            hBox.getChildren().add(label);
-        }
-        return hBox;
+        final BorderPane pane = new BorderPane();
+        pane.centerProperty().bind(Bindings.createObjectBinding(() -> {
+            final HBox box = new HBox(10);
+            if (StringUtils.isNotEmpty(data.getFactoryBean())) {
+                final GlyphIcon<?> icon = FontIcons.glyphIcon(OctIcon.LINK_EXTERNAL, 16);
+                final Label label = new Label(data.getFactoryBean(), icon);
+                box.getChildren().add(label);
+            }
+            if (StringUtils.isNotEmpty(data.getInitMethod())) {
+                final GlyphIcon<?> icon = FontIcons.glyphIcon(MaterialIcon.DIRECTIONS_RUN, 16);
+                final Label label = new Label(data.getInitMethod(), icon);
+                box.getChildren().add(label);
+            }
+            if (StringUtils.isNotEmpty(data.getDestroyMethod())) {
+                final GlyphIcon<?> icon = FontIcons.glyphIcon(MaterialIcon.CLOSE, 16);
+                final Label label = new Label(data.getDestroyMethod(), icon);
+                box.getChildren().add(label);
+            }
+            return box;
+        }, data.destroyMethodProperty(), data.initMethodProperty(), data.factoryBeanProperty()));
+        return pane;
     }
 
     static Node graphic(BeanTree beanTree, RefData data) {
-        final HBox box = new HBox(10);
-        {
+        final BorderPane pane = new BorderPane();
+        pane.centerProperty().bind(Bindings.createObjectBinding(() -> {
             final Label label = new Label();
-            label.textProperty().bind(data.valueProperty());
-            label.visibleProperty().bind(Bindings.isNotNull(data.valueProperty()));
-            box.getChildren().add(label);
-        }
-        {
-            final GlyphIcon<?> icon = FontIcons.glyphIcon(OctIcon.LINK_EXTERNAL, 16);
-            final Label label = new Label(null, icon);
-            label.textProperty().bind(data.refProperty());
-            label.visibleProperty().bind(Bindings.isNotNull(data.refProperty()));
-            box.getChildren().add(label);
-        }
-        return box;
+            if (StringUtils.isNotEmpty(data.getRef())) {
+                final GlyphIcon<?> icon = FontIcons.glyphIcon(OctIcon.LINK_EXTERNAL, 16);
+                label.setGraphic(icon);
+                label.setText(data.getRef());
+            }
+            if (StringUtils.isNotEmpty(data.getValue())) {
+                label.setText(data.getValue());
+            }
+            return label;
+        }, data.refProperty(), data.valueProperty()));
+        return pane;
     }
 }

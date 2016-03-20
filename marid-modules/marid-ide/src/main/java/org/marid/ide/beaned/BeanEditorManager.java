@@ -45,6 +45,21 @@ import java.util.*;
 public class BeanEditorManager implements L10nSupport {
 
     final Set<BeanEditor> beanEditors = new LinkedHashSet<>();
+    private final ListChangeListener<TreeItem<Data>> changeListener = c -> {
+        while (c.next()) {
+            c.getAddedSubList().forEach(item -> {
+                item.getChildren().addListener(this.changeListener);
+                final ChangeListener<String> changeListener = (observable, oldValue, newValue) -> {
+                    for (final BeanEditor e : beanEditors) {
+                        processBeanRename(oldValue, newValue, e.beanTree.getRoot().getChildren());
+                    }
+                };
+                if (item.getValue() instanceof BeanData) {
+                    item.getValue().nameProperty().addListener(changeListener);
+                }
+            });
+        }
+    };
 
     @Produces
     @IdeMenuItem(menu = "File", text = "Bean editor", group = "fileBeanEditor", mdIcons = {MaterialDesignIcon.PUZZLE})
@@ -60,24 +75,7 @@ public class BeanEditorManager implements L10nSupport {
     }
 
     private void setUpListeners(BeanEditor beanEditor) {
-        beanEditor.beanTree.getRoot().getChildren().addListener(new ListChangeListener<TreeItem<Data>>() {
-            @Override
-            public void onChanged(Change<? extends TreeItem<Data>> c) {
-                while (c.next()) {
-                    c.getAddedSubList().forEach(item -> {
-                        item.getChildren().addListener(this);
-                        final ChangeListener<String> changeListener = (observable, oldValue, newValue) -> {
-                            for (final BeanEditor e : beanEditors) {
-                                processBeanRename(oldValue, newValue, e.beanTree.getRoot().getChildren());
-                            }
-                        };
-                        if (item.getValue() instanceof BeanData) {
-                            item.getValue().nameProperty().addListener(changeListener);
-                        }
-                    });
-                }
-            }
-        });
+        beanEditor.beanTree.getRoot().getChildren().addListener(changeListener);
     }
 
     private void processBeanRename(String oldName, String newName, Collection<TreeItem<Data>> list) {

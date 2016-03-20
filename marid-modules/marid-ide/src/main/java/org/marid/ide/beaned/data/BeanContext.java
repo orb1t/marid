@@ -28,6 +28,7 @@ import de.jensd.fx.glyphs.weathericons.WeatherIcon;
 import javafx.scene.control.TreeItem;
 import org.marid.beans.MaridBeanXml;
 import org.marid.beans.MaridBeansXml;
+import org.marid.ide.beaned.BeanEditorManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.logging.LogSupport;
@@ -63,13 +64,15 @@ public class BeanContext implements LogSupport, Closeable {
     public final URLClassLoader classLoader;
     public final TreeItem<Data> root = new TreeItem<>(RootData.ROOT_DATA);
     public final Set<MaridBeanXml> beansXmls = new TreeSet<>(comparing(b -> b.text != null ? b.text : b.type));
+    public final BeanEditorManager beanEditorManager;
 
     private final Map<String, BeanInfo> classBeanInfo = new HashMap<>();
     private final Map<String, String> classIconMap = new HashMap<>();
 
-    public BeanContext(ProjectProfile profile) {
+    public BeanContext(ProjectProfile profile, BeanEditorManager beanEditorManager) {
         this.profile = profile;
         this.classLoader = profile.classLoader();
+        this.beanEditorManager = beanEditorManager;
         try {
             for (final Enumeration<URL> e = classLoader.findResources("maridBeans.xml"); e.hasMoreElements(); ) {
                 final URL url = e.nextElement();

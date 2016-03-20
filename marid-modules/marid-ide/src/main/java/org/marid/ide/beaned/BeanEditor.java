@@ -72,9 +72,9 @@ class BeanEditor extends Stage implements L10nSupport, LogSupport {
     final ObjectProperty<File> file = new SimpleObjectProperty<>();
 
     @Inject
-    public BeanEditor(ProjectProfile profile, IdeTimers ideTimers) {
-        beanContext = new BeanContext(profile);
-        beanTree = new BeanTree(beanContext, ideTimers);
+    public BeanEditor(ProjectProfile profile, IdeTimers ideTimers, BeanEditorManager beanEditorManager) {
+        this.beanContext = new BeanContext(profile, beanEditorManager);
+        this.beanTree = new BeanTree(beanContext, ideTimers);
         getIcons().addAll(Ide.IMAGES);
         setScene(new Scene(getTreePane(), 1024, 768));
         titleProperty().bind(createStringBinding(this::title, file));
@@ -160,6 +160,33 @@ class BeanEditor extends Stage implements L10nSupport, LogSupport {
     private void print() {
     }
 
+    private void openFile(File file) {
+        final Beans beans;
+        try {
+            beans = BeansSerializer.deserialize(file);
+        } catch (Exception x) {
+            log(WARNING, "Unable to load {0}", x, file);
+            return;
+        }
+        beanTree.getRoot().getChildren().clear();
+        for (final Bean bean : beans.beans) {
+            final BeanData beanData = new BeanData(bean.beanClass, bean.name);
+            if (bean.destroyMethod != null) {
+                beanData.destroyMethodProperty().set(bean.destroyMethod);
+            }
+            if (bean.initMethod != null) {
+                beanData.initMethodProperty().set(bean.initMethod);
+            }
+            if (bean.factoryBean != null) {
+                beanData.factoryBeanProperty().set(bean.factoryBean);
+            }
+            if (bean.factoryMethod != null) {
+                beanData.factoryMethodProperty().set(bean.factoryMethod);
+            }
+
+        }
+    }
+
     private void open() {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(m("Select a file with beans"));
@@ -167,6 +194,13 @@ class BeanEditor extends Stage implements L10nSupport, LogSupport {
         fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Beans", ".xml"));
         final File file = fileChooser.showOpenDialog(this);
         if (file != null) {
+            for (final BeanEditor editor : beanContext.beanEditorManager.beanEditors) {
+                if (file.equals(editor.file.get())) {
+                    close();
+                    editor.requestFocus();
+                    return;
+                }
+            }
             this.file.set(file);
         }
     }
