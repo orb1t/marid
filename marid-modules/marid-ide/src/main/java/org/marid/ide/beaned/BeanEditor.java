@@ -200,6 +200,20 @@ class BeanEditor extends Stage implements L10nSupport, LogSupport {
             beanData.factoryMethodProperty().set(bean.factoryMethod);
             final TreeItem<Data> beanItem = new TreeItem<>(beanData);
             beanTree.getRoot().getChildren().add(beanItem);
+            bean.constructorArgs.forEach(arg -> {
+                final ConstructorArgData cdata = new ConstructorArgData(arg.type, arg.name);
+                cdata.refProperty().set(arg.ref);
+                cdata.valueProperty().set(arg.value);
+                final TreeItem<Data> child = new TreeItem<>(cdata);
+                beanItem.getChildren().add(child);
+            });
+            bean.propertyArgs.forEach(arg -> {
+                final PropertyArgData pdata = new PropertyArgData(null, arg.name);
+                pdata.refProperty().set(arg.ref);
+                pdata.valueProperty().set(arg.value);
+                final TreeItem<Data> child = new TreeItem<>(pdata);
+                beanItem.getChildren().add(child);
+            });
         }
     }
 

@@ -27,7 +27,6 @@ import org.marid.spring.xml.PropertyArg;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -75,10 +74,13 @@ public class BeansSerializer {
         try {
             final DocumentBuilder builder = factory.newDocumentBuilder();
             final Document document = builder.parse(inputSource);
-            final NodeList beansList = document.getElementsByTagName("beans");
+            final Element docElement = document.getDocumentElement();
             final Beans beans = new Beans();
-            for (int bi = 0; bi < beansList.getLength(); bi++) {
-                final Node beanNode = beansList.item(bi);
+            if (docElement == null) {
+                return beans;
+            }
+            for (int bi = 0; bi < docElement.getChildNodes().getLength(); bi++) {
+                final Node beanNode = docElement.getChildNodes().item(bi);
                 if (beanNode.getNodeName() == null) {
                     continue;
                 }
