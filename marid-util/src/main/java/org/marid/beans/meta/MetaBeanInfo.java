@@ -23,14 +23,14 @@ import java.util.Set;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanInfo {
+public class MetaBeanInfo {
 
     private final String name;
     private final String type;
     private final String description;
     private final Set<String> dependsOn;
 
-    public BeanInfo(String type, String name, String description, Set<String> dependsOn) {
+    public MetaBeanInfo(String type, String name, String description, Set<String> dependsOn) {
         this.type = type;
         this.name = name;
         this.description = description;

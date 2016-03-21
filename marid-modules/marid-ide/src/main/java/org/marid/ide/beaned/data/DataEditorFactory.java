@@ -27,18 +27,14 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import org.marid.beans.meta.BeanIntrospector;
 import org.marid.ide.beaned.BeanTree;
 import org.marid.jfx.ScrollPanes;
 import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.panes.GenericGridPane;
 
 import java.lang.reflect.Method;
-import java.util.ServiceLoader;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static java.util.ServiceLoader.load;
 import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.jfx.ComboBoxes.comboBox;
 
@@ -82,16 +78,13 @@ public class DataEditorFactory {
     public static Dialog<Runnable> newEditor(BeanTree tree, BeanContext beanContext, RefData refData) {
         final StringProperty valueProperty = new SimpleStringProperty(refData.getValue());
         final StringProperty refProperty = new SimpleStringProperty(refData.getRef());
-        final ServiceLoader<BeanIntrospector> introspectors = load(BeanIntrospector.class, beanContext.classLoader);
         final ObservableList<String> refs = FXCollections.observableArrayList();
         final BeanInfo curBean = beanContext.beanInfo(refData.getType());
-        introspectors.forEach(introspector ->
-                Stream.of(introspector.getBeans(beanContext.classLoader)).forEach(beanInfo -> {
-                    final BeanInfo refBean = beanContext.beanInfo(beanInfo.getType());
-                    if (curBean.getType().isAssignableFrom(refBean.getType())) {
-                        refs.add(beanInfo.getName());
-                    }
-                }));
+        beanContext.beanInfos.forEach(metaBeanInfo -> {
+            if (curBean.getType().isAssignableFrom(beanContext.beanInfo(metaBeanInfo.getType()).getType())) {
+                refs.add(metaBeanInfo.getName());
+            }
+        });
         valueProperty.addListener((observable, oldValue, newValue) -> {
             refProperty.set("");
         });

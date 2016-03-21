@@ -34,9 +34,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.marid.beans.MaridBeanXml;
 import org.marid.ide.Ide;
-import org.marid.ide.beaned.data.BeanContext;
-import org.marid.ide.beaned.data.BeanData;
-import org.marid.ide.beaned.data.Data;
+import org.marid.ide.beaned.data.*;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.timers.IdeTimers;
 import org.marid.jfx.ScrollPanes;
@@ -46,6 +44,8 @@ import org.marid.logging.LogSupport;
 import org.marid.spring.BeansSerializer;
 import org.marid.spring.xml.Bean;
 import org.marid.spring.xml.Beans;
+import org.marid.spring.xml.ConstructorArg;
+import org.marid.spring.xml.PropertyArg;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -135,6 +135,29 @@ class BeanEditor extends Stage implements L10nSupport, LogSupport {
                 bean.beanClass = data.getType();
                 bean.initMethod = isBlank(data.getInitMethod()) ? null : data.getInitMethod();
                 bean.destroyMethod = isBlank(data.getDestroyMethod()) ? null : data.getDestroyMethod();
+                beanItem.getChildren().stream()
+                        .map(TreeItem::getValue)
+                        .filter(ConstructorArgData.class::isInstance)
+                        .map(ConstructorArgData.class::cast)
+                        .forEach(d -> {
+                            final ConstructorArg arg = new ConstructorArg();
+                            arg.name = d.getName();
+                            arg.type = d.getType();
+                            arg.value = d.getValue();
+                            arg.ref = d.getRef();
+                            bean.constructorArgs.add(arg);
+                        });
+                beanItem.getChildren().stream()
+                        .map(TreeItem::getValue)
+                        .filter(PropertyArgData.class::isInstance)
+                        .map(PropertyArgData.class::cast)
+                        .forEach(d -> {
+                            final PropertyArg arg = new PropertyArg();
+                            arg.name = d.getName();
+                            arg.value = d.getValue();
+                            arg.ref = d.getRef();
+                            bean.propertyArgs.add(arg);
+                        });
                 beans.beans.add(bean);
             }
         }
@@ -171,19 +194,12 @@ class BeanEditor extends Stage implements L10nSupport, LogSupport {
         beanTree.getRoot().getChildren().clear();
         for (final Bean bean : beans.beans) {
             final BeanData beanData = new BeanData(bean.beanClass, bean.name);
-            if (bean.destroyMethod != null) {
-                beanData.destroyMethodProperty().set(bean.destroyMethod);
-            }
-            if (bean.initMethod != null) {
-                beanData.initMethodProperty().set(bean.initMethod);
-            }
-            if (bean.factoryBean != null) {
-                beanData.factoryBeanProperty().set(bean.factoryBean);
-            }
-            if (bean.factoryMethod != null) {
-                beanData.factoryMethodProperty().set(bean.factoryMethod);
-            }
-
+            beanData.destroyMethodProperty().set(bean.destroyMethod);
+            beanData.initMethodProperty().set(bean.initMethod);
+            beanData.factoryBeanProperty().set(bean.factoryBean);
+            beanData.factoryMethodProperty().set(bean.factoryMethod);
+            final TreeItem<Data> beanItem = new TreeItem<>(beanData);
+            beanTree.getRoot().getChildren().add(beanItem);
         }
     }
 
@@ -201,6 +217,7 @@ class BeanEditor extends Stage implements L10nSupport, LogSupport {
                     return;
                 }
             }
+            openFile(file);
             this.file.set(file);
         }
     }

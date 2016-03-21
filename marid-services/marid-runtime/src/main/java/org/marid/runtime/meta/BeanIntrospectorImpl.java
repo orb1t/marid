@@ -18,7 +18,7 @@
 
 package org.marid.runtime.meta;
 
-import org.marid.beans.meta.BeanInfo;
+import org.marid.beans.meta.MetaBeanInfo;
 import org.marid.beans.meta.BeanIntrospector;
 import org.marid.runtime.MaridContextInitializer;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -33,9 +33,9 @@ import java.util.stream.Stream;
  */
 public class BeanIntrospectorImpl implements BeanIntrospector {
     @Override
-    public BeanInfo[] getBeans(ClassLoader classLoader) {
+    public MetaBeanInfo[] getBeans(ClassLoader classLoader) {
         try (final GenericApplicationContext context = MaridContextInitializer.applicationContext(classLoader)) {
-            final List<BeanInfo> beans = new ArrayList<>();
+            final List<MetaBeanInfo> beans = new ArrayList<>();
             for (final String beanName : context.getBeanDefinitionNames()) {
                 final BeanDefinition beanDefinition = context.getBeanDefinition(beanName);
                 final Set<String> dependsOn = beanDefinition.getDependsOn() != null
@@ -43,9 +43,9 @@ public class BeanIntrospectorImpl implements BeanIntrospector {
                         : Collections.emptySet();
                 final String type = beanDefinition.getBeanClassName();
                 final String description = beanDefinition.getDescription() == null ? "" : beanDefinition.getDescription();
-                beans.add(new BeanInfo(type, beanName, description, dependsOn));
+                beans.add(new MetaBeanInfo(type, beanName, description, dependsOn));
             }
-            return beans.toArray(new BeanInfo[beans.size()]);
+            return beans.toArray(new MetaBeanInfo[beans.size()]);
         }
     }
 }

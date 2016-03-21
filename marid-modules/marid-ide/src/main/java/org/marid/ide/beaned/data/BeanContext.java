@@ -28,6 +28,8 @@ import de.jensd.fx.glyphs.weathericons.WeatherIcon;
 import javafx.scene.control.TreeItem;
 import org.marid.beans.MaridBeanXml;
 import org.marid.beans.MaridBeansXml;
+import org.marid.beans.meta.BeanIntrospector;
+import org.marid.beans.meta.MetaBeanInfo;
 import org.marid.ide.beaned.BeanEditorManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
@@ -45,6 +47,8 @@ import java.util.*;
 import java.util.function.Function;
 
 import static java.util.Comparator.comparing;
+import static java.util.ServiceLoader.load;
+import static java.util.stream.Stream.of;
 import static org.marid.xml.XmlBind.load;
 
 /**
@@ -65,6 +69,7 @@ public class BeanContext implements LogSupport, Closeable {
     public final TreeItem<Data> root = new TreeItem<>(RootData.ROOT_DATA);
     public final Set<MaridBeanXml> beansXmls = new TreeSet<>(comparing(b -> b.text != null ? b.text : b.type));
     public final BeanEditorManager beanEditorManager;
+    public final Set<MetaBeanInfo> beanInfos = new LinkedHashSet<>();
 
     private final Map<String, BeanInfo> classBeanInfo = new HashMap<>();
     private final Map<String, String> classIconMap = new HashMap<>();
@@ -88,6 +93,7 @@ public class BeanContext implements LogSupport, Closeable {
             log(WARNING, "Unable to enumerate marid beans", x);
         }
         beansXmls.forEach(b -> classIconMap.put(b.type, b.icon));
+        load(BeanIntrospector.class, classLoader).forEach(i -> of(i.getBeans(classLoader)).forEach(beanInfos::add));
     }
 
     @Override
@@ -106,6 +112,24 @@ public class BeanContext implements LogSupport, Closeable {
     public BeanInfo beanInfo(String type) {
         return classBeanInfo.computeIfAbsent(type, t -> {
             try {
+                switch (type) {
+                    case "double":
+                        return new BeanInfo(Double.class);
+                    case "float":
+                        return new BeanInfo(Float.class);
+                    case "int":
+                        return new BeanInfo(Integer.class);
+                    case "short":
+                        return new BeanInfo(Short.class);
+                    case "char":
+                        return new BeanInfo(Character.class);
+                    case "long":
+                        return new BeanInfo(Long.class);
+                    case "byte":
+                        return new BeanInfo(Byte.class);
+                    case "void":
+                        return new BeanInfo(Void.class);
+                }
                 final Class<?> c = Class.forName(t, false, classLoader);
                 return new BeanInfo(c);
             } catch (Exception x) {

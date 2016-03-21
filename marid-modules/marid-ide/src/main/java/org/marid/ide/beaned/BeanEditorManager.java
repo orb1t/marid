@@ -26,6 +26,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.TreeItem;
 import javafx.stage.WindowEvent;
+import org.marid.ee.IdeSingleton;
 import org.marid.ide.beaned.data.BeanData;
 import org.marid.ide.beaned.data.Data;
 import org.marid.ide.beaned.data.RefData;
@@ -33,7 +34,6 @@ import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.toolbar.IdeToolbarItem;
 import org.marid.l10n.L10nSupport;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
 import java.util.*;
@@ -41,7 +41,7 @@ import java.util.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-@ApplicationScoped
+@IdeSingleton
 public class BeanEditorManager implements L10nSupport {
 
     final Set<BeanEditor> beanEditors = new LinkedHashSet<>();
