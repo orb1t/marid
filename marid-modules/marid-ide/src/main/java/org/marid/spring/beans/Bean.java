@@ -16,21 +16,52 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml;
+package org.marid.spring.beans;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PropertyArg {
+public class Bean {
+
+    public Boolean abstractBean;
+
+    public String scope;
+
+    public String autowire;
+
+    public String autowireCandidate;
+
+    public String beanClass;
+
+    public String lazyInit;
+
+    public Boolean primary;
+
+    public String parent;
+
+    public List<String> dependsOn = new ArrayList<>();
 
     public String name;
 
-    public String value;
+    public String id;
 
-    public String ref;
+    public String initMethod;
+
+    public String destroyMethod;
+
+    public String factoryBean;
+
+    public String factoryMethod;
+
+    public List<ConstructorArg> constructorArgs = new ArrayList<>();
+
+    public List<PropertyArg> propertyArgs = new ArrayList<>();
 
     @Override
     public String toString() {

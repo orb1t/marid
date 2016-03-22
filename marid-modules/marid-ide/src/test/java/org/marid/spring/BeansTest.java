@@ -21,8 +21,9 @@ package org.marid.spring;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.misc.Builder;
-import org.marid.spring.xml.Bean;
-import org.marid.spring.xml.Beans;
+import org.marid.spring.beans.Bean;
+import org.marid.spring.beans.Beans;
+import org.marid.spring.beans.BeansSerializer;
 import org.marid.test.NormalTests;
 
 import java.util.Arrays;

@@ -41,11 +41,11 @@ import org.marid.jfx.ScrollPanes;
 import org.marid.jfx.menu.MenuContainerBuilder;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
-import org.marid.spring.BeansSerializer;
-import org.marid.spring.xml.Bean;
-import org.marid.spring.xml.Beans;
-import org.marid.spring.xml.ConstructorArg;
-import org.marid.spring.xml.PropertyArg;
+import org.marid.spring.beans.BeansSerializer;
+import org.marid.spring.beans.Bean;
+import org.marid.spring.beans.Beans;
+import org.marid.spring.beans.ConstructorArg;
+import org.marid.spring.beans.PropertyArg;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;

@@ -27,26 +27,27 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridBeanFactoryPostProcessor implements BeanFactoryPostProcessor, LogSupport {
+class MaridBeanFactoryPostProcessor implements BeanFactoryPostProcessor, LogSupport, DestructionAwareBeanPostProcessor {
+
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        beanFactory.addBeanPostProcessor(new DestructionAwareBeanPostProcessor() {
-            @Override
-            public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
-                log(INFO, "Destroying {0}", beanName);
-            }
+        beanFactory.addBeanPostProcessor(this);
+    }
 
-            @Override
-            public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-                log(INFO, "Initializing {0}", beanName);
-                return bean;
-            }
+    @Override
+    public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
+        log(INFO, "Destroying {0}", beanName);
+    }
 
-            @Override
-            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                log(INFO, "Initialized {0}", beanName);
-                return bean;
-            }
-        });
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        log(INFO, "Initializing {0}", beanName);
+        return bean;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        log(INFO, "Initialized {0}", beanName);
+        return bean;
     }
 }

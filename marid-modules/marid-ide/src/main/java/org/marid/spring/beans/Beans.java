@@ -16,28 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml;
+package org.marid.spring.beans;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ConstructorArg {
+public class Beans {
 
-    public String name;
-
-    public String type;
-
-    public int index;
-
-    public String value;
-
-    public String ref;
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-    }
+    public List<Bean> beans = new ArrayList<>();
 }

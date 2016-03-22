@@ -71,7 +71,7 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
         server = new Server();
         server.setNoSystemExit(true);
         server.setRestartOnShutdown(false);
-        server.setDaemon(false);
+        server.setDaemon(true);
         setDatabase("numerics");
     }
 

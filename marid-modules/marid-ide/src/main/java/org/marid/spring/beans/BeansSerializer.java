@@ -16,14 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring;
+package org.marid.spring.beans;
 
 import org.apache.commons.lang3.StringUtils;
 import org.marid.misc.Builder;
-import org.marid.spring.xml.Bean;
-import org.marid.spring.xml.Beans;
-import org.marid.spring.xml.ConstructorArg;
-import org.marid.spring.xml.PropertyArg;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -137,6 +133,7 @@ public class BeansSerializer {
             beansElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:util", xsdPath("util"));
             beansElement.setAttribute("xmlns", xsdPath("beans"));
             document.appendChild(beansElement);
+            beansElement.appendChild(document.createElementNS(xsdPath("context"), "context:annotation-config"));
             for (final Bean bean : beans.beans) {
                 final Element beanElement = document.createElement("bean");
                 attr(beanElement, "class", bean.beanClass);
