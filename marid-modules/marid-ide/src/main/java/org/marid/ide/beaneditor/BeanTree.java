@@ -23,6 +23,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.marid.ide.beaneditor.data.BeanData;
@@ -30,6 +31,7 @@ import org.marid.ide.beaneditor.data.ConstructorArg;
 import org.marid.ide.beaneditor.data.Property;
 import org.marid.ide.beaneditor.ui.NameCell;
 import org.marid.ide.beaneditor.ui.NameFactory;
+import org.marid.ide.beaneditor.ui.ValueFactory;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
@@ -69,6 +71,7 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport 
         this.beanEditor = beanEditor;
         setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
         getColumns().add(nameColumn());
+        getColumns().add(valueColumn());
         setTreeColumn(getColumns().get(0));
         setEditable(true);
         setRowFactory(param -> {
@@ -87,6 +90,15 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport 
         column.setCellValueFactory(new NameFactory());
         column.setCellFactory(NameCell::new);
         column.setPrefWidth(300);
+        column.setEditable(true);
+        return column;
+    }
+
+    private TreeTableColumn<Object, String> valueColumn() {
+        final TreeTableColumn<Object, String> column = new TreeTableColumn<>(s("Value"));
+        column.setCellValueFactory(new ValueFactory());
+        column.setCellFactory(param -> new TextFieldTreeTableCell<>());
+        column.setPrefWidth(700);
         column.setEditable(true);
         return column;
     }

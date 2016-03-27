@@ -24,7 +24,10 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.util.converter.DefaultStringConverter;
+import org.apache.commons.lang3.StringUtils;
 import org.marid.ide.beaneditor.data.BeanData;
+
+import java.nio.file.Path;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -43,13 +46,23 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> {
     public void startEdit() {
         final TreeTableRow<Object> row = getTreeTableRow();
         final TreeItem<Object> item = row.getTreeItem();
-        if (item.getValue() instanceof BeanData) {
+        if (item.getValue() instanceof BeanData || item.getValue() instanceof Path) {
             super.startEdit();
         }
     }
 
     @Override
     public void commitEdit(String newValue) {
-        super.commitEdit(newValue);
+        if (StringUtils.isBlank(newValue)) {
+            cancelEdit();
+            return;
+        }
+        final TreeTableRow<Object> row = getTreeTableRow();
+        final TreeItem<Object> item = row.getTreeItem();
+        if (item.getValue() instanceof BeanData) {
+            super.commitEdit(newValue);
+        } else {
+            cancelEdit();
+        }
     }
 }

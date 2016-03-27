@@ -33,21 +33,20 @@ import java.nio.file.Path;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class NameFactory implements Callback<TreeTableColumn.CellDataFeatures<Object, String>, ObservableValue<String>> {
-
+public class ValueFactory implements Callback<TreeTableColumn.CellDataFeatures<Object, String>, ObservableValue<String>> {
     @Override
     public ObservableValue<String> call(TreeTableColumn.CellDataFeatures<Object, String> param) {
         final TreeItem<Object> item = param.getValue();
         if (item.getValue() instanceof ProjectProfile) {
-            return new SimpleStringProperty(((ProjectProfile) item.getValue()).getName());
+            return new SimpleStringProperty(((ProjectProfile) item.getValue()).getPath().toString());
         } else if (item.getValue() instanceof Path) {
-            return new SimpleStringProperty(((Path) item.getValue()).getFileName().toString());
+            return new SimpleStringProperty(item.getValue().toString());
         } else if (item.getValue() instanceof BeanData) {
-            return ((BeanData) item.getValue()).name;
+            return ((BeanData) item.getValue()).type;
         } else if (item.getValue() instanceof ConstructorArg) {
-            return ((ConstructorArg) item.getValue()).name;
+            return ((ConstructorArg) item.getValue()).value;
         } else if (item.getValue() instanceof Property) {
-            return ((Property) item.getValue()).name;
+            return ((Property) item.getValue()).value;
         } else {
             return new SimpleStringProperty("");
         }
