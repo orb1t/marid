@@ -21,6 +21,8 @@ package org.marid.ide.project;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.octicons.OctIcon;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -54,37 +56,37 @@ import static org.marid.util.Utils.callWithTime;
 public class ProjectManager implements PrefSupport, LogSupport {
 
     private final ModelMerger modelMerger = new MavenModelMerger();
-    private ProjectProfile profile;
+    private final ObjectProperty<ProjectProfile> profile = new SimpleObjectProperty<>();
 
     public ProjectManager() {
-        profile = new ProjectProfile(getPref("profile", "default"));
+        profile.set(new ProjectProfile(getPref("profile", "default")));
         if (!isPresent()) {
-            profile = new ProjectProfile("default");
+            profile.set(new ProjectProfile("default"));
         }
     }
 
     @PreDestroy
     private void savePrefs() {
-        putPref("profile", profile.getName());
+        putPref("profile", getProfile().getName());
     }
 
-    public boolean isPresent() {
-        return Files.isDirectory(profile.getPath());
+    boolean isPresent() {
+        return Files.isDirectory(getProfile().getPath());
     }
 
     @Produces
     @Dependent
     public ProjectProfile getProfile() {
-        return profile;
+        return profile.get();
     }
 
-    public void setProfile(ProjectProfile profile) {
-        this.profile = profile;
+    public ObjectProperty<ProjectProfile> profileProperty() {
+        return profile;
     }
 
     public Set<ProjectProfile> getProfiles() {
         final Set<ProjectProfile> profiles = new LinkedHashSet<>();
-        final Path profilesDir = profile.getPath().getParent();
+        final Path profilesDir = getProfile().getPath().getParent();
         try (final Stream<Path> stream = Files.list(profilesDir)) {
             stream
                     .filter(p -> Files.isDirectory(p) && !profilesDir.equals(p))
@@ -93,7 +95,7 @@ public class ProjectManager implements PrefSupport, LogSupport {
         } catch (Exception x) {
             log(WARNING, "Unable to enumerate profiles", x);
         }
-        profiles.add(profile);
+        profiles.add(getProfile());
         return profiles;
     }
 

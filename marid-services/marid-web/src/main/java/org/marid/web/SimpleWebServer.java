@@ -41,7 +41,7 @@ import static org.marid.concurrent.ThreadPools.CALLER_RUNS_POLICY;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(icon = "MD.WEB")
+@MaridBean(icon = "http://icons.iconarchive.com/icons/chromatix/aerial/24/web-icon.png")
 public class SimpleWebServer implements Closeable, LogSupport {
 
     private final HttpServer httpServer;

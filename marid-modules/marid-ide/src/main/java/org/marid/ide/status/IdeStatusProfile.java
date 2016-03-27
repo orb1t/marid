@@ -44,6 +44,8 @@ public class IdeStatusProfile extends ComboBox<ProjectProfile> {
             profiles.removeAll(getItems());
             getItems().addAll(profiles);
         });
-        setOnAction(e -> projectManager.setProfile(getSelectionModel().getSelectedItem()));
+        getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            projectManager.profileProperty().set(newValue);
+        });
     }
 }

@@ -39,7 +39,7 @@ import static java.util.Collections.singletonList;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(icon = "MD.DATABASE_PLUS")
+@MaridBean(icon = "http://icons.iconarchive.com/icons/double-j-design/super-mono-3d/24/button-round-random-icon.png")
 public class RandomNumericDaqGenerator implements LogSupport {
 
     private final NumericWriter numericWriter;

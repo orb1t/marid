@@ -118,6 +118,14 @@ public class ProjectProfile implements LogSupport {
         return srcMainResources.resolve("META-INF").resolve("marid");
     }
 
+    public Path getSrc() {
+        return src;
+    }
+
+    public Path getSrcMainResources() {
+        return srcMainResources;
+    }
+
     public Path getTarget() {
         return target;
     }

@@ -27,7 +27,7 @@ import java.net.URI;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(icon = "M.DATA_USAGE")
+@MaridBean(icon = "http://icons.iconarchive.com/icons/icojam/blue-bits/24/database-settings-icon.png")
 public final class HsqldbProperties {
 
     private File directory = new File("daqDatabase");

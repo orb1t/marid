@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(icon = "M.WEB")
+@MaridBean(icon = "http://icons.iconarchive.com/icons/wallpaperfx/3d-bluefx-desktop/24/Web-icon.png")
 public final class SimpleWebServerProperties {
 
     private String host = "0.0.0.0";

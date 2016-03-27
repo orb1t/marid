@@ -50,7 +50,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(icon = "O.DATABASE")
+@MaridBean(icon = "http://icons.iconarchive.com/icons/icojam/blue-bits/24/database-icon.png")
 public final class HsqldbDatabase implements Closeable, LogSupport {
 
     private final Server server;
@@ -158,7 +158,7 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
                 : new JDBCSessionPool(connectionPoolSize, database, name.toUpperCase());
     }
 
-    @MaridBean(icon = "O.DATABASE")
+    @MaridBean(icon = "http://icons.iconarchive.com/icons/double-j-design/ravenna-3d/24/Database-Table-icon.png")
     public NumericWriter numericWriter() {
         return new HsqldbDaqNumericWriter(getDataSource("numerics"), "NUMERICS");
     }
