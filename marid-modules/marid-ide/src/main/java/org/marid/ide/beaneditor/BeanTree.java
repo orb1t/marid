@@ -23,7 +23,6 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.marid.ide.beaneditor.data.BeanData;
@@ -31,6 +30,7 @@ import org.marid.ide.beaneditor.data.ConstructorArg;
 import org.marid.ide.beaneditor.data.Property;
 import org.marid.ide.beaneditor.ui.NameCell;
 import org.marid.ide.beaneditor.ui.NameFactory;
+import org.marid.ide.beaneditor.ui.ValueCell;
 import org.marid.ide.beaneditor.ui.ValueFactory;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
@@ -44,10 +44,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,13 +55,7 @@ import static java.util.stream.StreamSupport.stream;
 /**
  * @author Dmitry Ovchinnikov
  */
-class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport {
-
-    static final Image ROOT = new Image("http://icons.iconarchive.com/icons/martz90/circle-addon1/24/root-explorer-icon.png", true);
-    static final Image DIR = new Image("http://icons.iconarchive.com/icons/hopstarter/mac-folders-2/24/Folder-Download-icon.png", true);
-    static final Image BEAN = new Image("http://icons.iconarchive.com/icons/oxygen-icons.org/oxygen/24/Apps-java-icon.png", true);
-    static final Image PROP = new Image("http://icons.iconarchive.com/icons/icons8/windows-8/24/Programming-Edit-Property-icon.png", true);
-    static final Image CPARAM = new Image("http://icons.iconarchive.com/icons/custom-icon-design/flatastic-6/24/Circle-icon.png", true);
+public class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport, BeanTreeConstants {
 
     private final BeanEditor beanEditor;
 
@@ -85,21 +78,23 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport 
         return (ProjectProfile) getRoot().getValue();
     }
 
+    public BeanEditor getBeanEditor() {
+        return beanEditor;
+    }
+
     private TreeTableColumn<Object, String> nameColumn() {
         final TreeTableColumn<Object, String> column = new TreeTableColumn<>(s("Name"));
         column.setCellValueFactory(new NameFactory());
         column.setCellFactory(NameCell::new);
         column.setPrefWidth(300);
-        column.setEditable(true);
         return column;
     }
 
-    private TreeTableColumn<Object, String> valueColumn() {
-        final TreeTableColumn<Object, String> column = new TreeTableColumn<>(s("Value"));
+    private TreeTableColumn<Object, Node> valueColumn() {
+        final TreeTableColumn<Object, Node> column = new TreeTableColumn<>(s("Value"));
         column.setCellValueFactory(new ValueFactory());
-        column.setCellFactory(param -> new TextFieldTreeTableCell<>());
+        column.setCellFactory(ValueCell::new);
         column.setPrefWidth(700);
-        column.setEditable(true);
         return column;
     }
 
@@ -117,6 +112,7 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport 
                                 final Path parentPath = a == getRoot() ? beansDirectory : (Path) a.getValue();
                                 final Path currentPath = parentPath.resolve(p);
                                 final TreeItem<Object> child = new TreeItem<>(currentPath, new ImageView(DIR));
+                                child.setExpanded(true);
                                 a.getChildren().add(child);
                                 return child;
                             }, (i1, i2) -> i2);
@@ -126,9 +122,10 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport 
         } catch (Exception x) {
             log(WARNING, "Unable to load beans", x);
         }
+        getRoot().setExpanded(true);
     }
 
-    void loadBeans(TreeItem<Object> parent, Path xmlFile) throws Exception {
+    private void loadBeans(TreeItem<Object> parent, Path xmlFile) throws Exception {
         final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setCoalescing(true);
         documentBuilderFactory.setNamespaceAware(true);
@@ -161,6 +158,7 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport 
                         final Node icon = img != null ? new ImageView(img) : new ImageView(PROP);
                         final Property property = new Property();
                         property.name.set(name);
+                        property.type.set(type);
                         final TreeItem<Property> item = new TreeItem<>(property, icon);
                         propertyMap.put(name, item);
                     });
@@ -170,6 +168,7 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport 
                         final Node icon = img != null ? new ImageView(img) : new ImageView(CPARAM);
                         final ConstructorArg constructorArg = new ConstructorArg();
                         constructorArg.name.set(name);
+                        constructorArg.type.set(type);
                         final TreeItem<ConstructorArg> item = new TreeItem<>(constructorArg, icon);
                         constructorArgMap.put(name, item);
                     });
@@ -198,5 +197,44 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport 
                     constructorArgMap.forEach((name, item) -> beanItem.getChildren().add(Casts.cast(item)));
                     propertyMap.forEach((name, item) -> beanItem.getChildren().add(Casts.cast(item)));
                 });
+        bindReferences();
+    }
+
+    private void bindReferences() {
+        final Map<String, BeanData> beanDataMap = new HashMap<>();
+        final List<ConstructorArg> constructorArgs = new ArrayList<>();
+        final List<Property> properties = new ArrayList<>();
+        final AtomicReference<Consumer<TreeItem<Object>>> ref = new AtomicReference<>();
+        ref.set(item -> {
+            final Consumer<TreeItem<Object>> self = ref.get();
+            if (item.getValue() instanceof BeanData) {
+                final BeanData data = (BeanData) item.getValue();
+                beanDataMap.put(data.name.get(), data);
+            } else if (item.getValue() instanceof ConstructorArg) {
+                constructorArgs.add((ConstructorArg) item.getValue());
+            } else if (item.getValue() instanceof Property) {
+                properties.add((Property) item.getValue());
+            }
+            item.getChildren().forEach(self);
+        });
+        ref.get().accept(getRoot());
+        constructorArgs.forEach(constructorArg -> {
+            final BeanData beanData = beanDataMap.get(constructorArg.ref.get());
+            if (beanData != null) {
+                constructorArg.ref.bind(beanData.name);
+            }
+        });
+        properties.forEach(property -> {
+            final BeanData beanData = beanDataMap.get(property.ref.get());
+            if (beanData != null) {
+                property.ref.bind(beanData.name);
+            }
+        });
+        beanDataMap.values().forEach(data -> {
+            final BeanData beanData = beanDataMap.get(data.factoryBean.get());
+            if (beanData != null) {
+                data.factoryBean.bind(beanData.name);
+            }
+        });
     }
 }

@@ -16,18 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.beaneditor.data;
+package org.marid.ide.beaneditor;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.scene.image.Image;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Property {
+interface BeanTreeConstants {
 
-    public final StringProperty name = new SimpleStringProperty(this, "name");
-    public final StringProperty ref = new SimpleStringProperty(this, "ref");
-    public final StringProperty value = new SimpleStringProperty(this, "value");
-    public final StringProperty type = new SimpleStringProperty(this, "type");
+    Image ROOT = new Image("http://icons.iconarchive.com/icons/martz90/circle-addon1/24/root-explorer-icon.png", true);
+    Image DIR = new Image("http://icons.iconarchive.com/icons/hopstarter/mac-folders-2/24/Folder-Download-icon.png", true);
+    Image BEAN = new Image("http://icons.iconarchive.com/icons/oxygen-icons.org/oxygen/24/Apps-java-icon.png", true);
+    Image PROP = new Image("http://icons.iconarchive.com/icons/icons8/windows-8/24/Programming-Edit-Property-icon.png", true);
+    Image CPARAM = new Image("http://icons.iconarchive.com/icons/custom-icon-design/flatastic-6/24/Circle-icon.png", true);
 }

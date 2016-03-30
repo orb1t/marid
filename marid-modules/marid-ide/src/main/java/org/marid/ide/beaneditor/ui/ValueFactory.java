@@ -18,37 +18,84 @@
 
 package org.marid.ide.beaneditor.ui;
 
-import javafx.beans.property.SimpleStringProperty;
+import de.jensd.fx.glyphs.octicons.OctIcon;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.beaneditor.data.ConstructorArg;
 import org.marid.ide.beaneditor.data.Property;
-import org.marid.ide.project.ProjectProfile;
 
 import java.nio.file.Path;
+
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ValueFactory implements Callback<TreeTableColumn.CellDataFeatures<Object, String>, ObservableValue<String>> {
+public class ValueFactory implements Callback<TreeTableColumn.CellDataFeatures<Object, Node>, ObservableValue<Node>> {
+
     @Override
-    public ObservableValue<String> call(TreeTableColumn.CellDataFeatures<Object, String> param) {
-        final TreeItem<Object> item = param.getValue();
-        if (item.getValue() instanceof ProjectProfile) {
-            return new SimpleStringProperty(((ProjectProfile) item.getValue()).getPath().toString());
-        } else if (item.getValue() instanceof Path) {
-            return new SimpleStringProperty(item.getValue().toString());
-        } else if (item.getValue() instanceof BeanData) {
-            return ((BeanData) item.getValue()).type;
-        } else if (item.getValue() instanceof ConstructorArg) {
-            return ((ConstructorArg) item.getValue()).value;
-        } else if (item.getValue() instanceof Property) {
-            return ((Property) item.getValue()).value;
+    public ObservableValue<Node> call(TreeTableColumn.CellDataFeatures<Object, Node> param) {
+        final TreeItem<Object> treeItem = param.getValue();
+        final Object data = treeItem.getValue();
+        if (data instanceof BeanData) {
+            final BeanData d = (BeanData) data;
+            return Bindings.createObjectBinding(() -> {
+                final HBox box = new HBox(10);
+                box.setAlignment(Pos.CENTER_LEFT);
+                box.getChildren().add(new Label(d.type.get()));
+                if (d.factoryBean.isNotEmpty().get()) {
+                    box.getChildren().add(new Separator(Orientation.VERTICAL));
+                    final String text = d.factoryBean.get() + "." + d.factoryMethod.get();
+                    box.getChildren().add(new Label(text, glyphIcon(OctIcon.LINK_EXTERNAL, 16)));
+                }
+                if (d.initMethod.isNotEmpty().get()) {
+                    box.getChildren().add(new Separator(Orientation.VERTICAL));
+                    box.getChildren().add(new Label(d.initMethod.get(), glyphIcon(OctIcon.TRIANGLE_RIGHT)));
+                }
+                if (d.destroyMethod.isNotEmpty().get()) {
+                    box.getChildren().add(new Separator(Orientation.VERTICAL));
+                    box.getChildren().add(new Label(d.destroyMethod.get(), glyphIcon(OctIcon.STOP)));
+                }
+                return box;
+            }, d.factoryBean, d.factoryMethod, d.initMethod, d.destroyMethod, d.lazyInit);
+        } else if (data instanceof ConstructorArg) {
+            final ConstructorArg d = (ConstructorArg) data;
+            return Bindings.createObjectBinding(() -> box(d.type, d.ref, d.value), d.ref, d.value);
+        } else if (data instanceof Property) {
+            final Property d = (Property) data;
+            return Bindings.createObjectBinding(() -> box(d.type, d.ref, d.value), d.ref, d.value);
+        } else if (data instanceof Path) {
+            final Path d = (Path) data;
+            return new SimpleObjectProperty<>(new Label(d.toUri().toString()));
         } else {
-            return new SimpleStringProperty("");
+            return new SimpleObjectProperty<>(new Label());
         }
+    }
+
+    private static HBox box(StringProperty type, StringProperty ref, StringProperty value) {
+        final HBox box = new HBox(10);
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.getChildren().add(new Label(type.get()));
+        if (ref.isNotEmpty().get()) {
+            box.getChildren().add(new Separator(Orientation.VERTICAL));
+            box.getChildren().add(new Label(ref.get(), glyphIcon(OctIcon.LINK)));
+        }
+        if (value.isNotEmpty().get()) {
+            box.getChildren().add(new Separator(Orientation.VERTICAL));
+            box.getChildren().add(new Label(value.get()));
+        }
+        return box;
     }
 }

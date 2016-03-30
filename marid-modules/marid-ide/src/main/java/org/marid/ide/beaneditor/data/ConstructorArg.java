@@ -29,4 +29,5 @@ public class ConstructorArg {
     public final StringProperty name = new SimpleStringProperty(this, "name");
     public final StringProperty ref = new SimpleStringProperty(this, "ref");
     public final StringProperty value = new SimpleStringProperty(this, "value");
+    public final StringProperty type = new SimpleStringProperty(this, "type");
 }

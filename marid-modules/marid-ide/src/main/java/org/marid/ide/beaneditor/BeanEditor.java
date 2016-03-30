@@ -152,7 +152,7 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
         });
     }
 
-    ClassData classData(String type) {
+    public ClassData classData(String type) {
         return classDataMap.computeIfAbsent(type, t -> {
             switch (t) {
                 case "boolean":
