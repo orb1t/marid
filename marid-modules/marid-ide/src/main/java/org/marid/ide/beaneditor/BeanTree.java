@@ -18,6 +18,7 @@
 
 package org.marid.ide.beaneditor;
 
+import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
@@ -25,13 +26,11 @@ import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import org.apache.commons.lang3.StringUtils;
 import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.beaneditor.data.ConstructorArg;
 import org.marid.ide.beaneditor.data.Property;
-import org.marid.ide.beaneditor.ui.NameCell;
-import org.marid.ide.beaneditor.ui.NameFactory;
-import org.marid.ide.beaneditor.ui.ValueCell;
-import org.marid.ide.beaneditor.ui.ValueFactory;
+import org.marid.ide.beaneditor.ui.*;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
@@ -64,6 +63,7 @@ public class BeanTree extends TreeTableView<Object> implements LogSupport, L10nS
         this.beanEditor = beanEditor;
         setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
         getColumns().add(nameColumn());
+        getColumns().add(typeColumn());
         getColumns().add(valueColumn());
         setTreeColumn(getColumns().get(0));
         setEditable(true);
@@ -86,15 +86,23 @@ public class BeanTree extends TreeTableView<Object> implements LogSupport, L10nS
         final TreeTableColumn<Object, String> column = new TreeTableColumn<>(s("Name"));
         column.setCellValueFactory(new NameFactory());
         column.setCellFactory(NameCell::new);
-        column.setPrefWidth(300);
+        column.setPrefWidth(200);
         return column;
     }
 
-    private TreeTableColumn<Object, Node> valueColumn() {
-        final TreeTableColumn<Object, Node> column = new TreeTableColumn<>(s("Value"));
+    private TreeTableColumn<Object, String> typeColumn() {
+        final TreeTableColumn<Object, String> column = new TreeTableColumn<>(s("Type"));
+        column.setCellValueFactory(new TypeFactory());
+        column.setCellFactory(TypeCell::new);
+        column.setPrefWidth(400);
+        return column;
+    }
+
+    private TreeTableColumn<Object, String> valueColumn() {
+        final TreeTableColumn<Object, String> column = new TreeTableColumn<>(s("Value"));
         column.setCellValueFactory(new ValueFactory());
         column.setCellFactory(ValueCell::new);
-        column.setPrefWidth(700);
+        column.setPrefWidth(500);
         return column;
     }
 
@@ -159,6 +167,7 @@ public class BeanTree extends TreeTableView<Object> implements LogSupport, L10nS
                         final Property property = new Property();
                         property.name.set(name);
                         property.type.set(type);
+                        mutuallyExcludeProperties(property.ref, property.value);
                         final TreeItem<Property> item = new TreeItem<>(property, icon);
                         propertyMap.put(name, item);
                     });
@@ -169,6 +178,7 @@ public class BeanTree extends TreeTableView<Object> implements LogSupport, L10nS
                         final ConstructorArg constructorArg = new ConstructorArg();
                         constructorArg.name.set(name);
                         constructorArg.type.set(type);
+                        mutuallyExcludeProperties(constructorArg.ref, constructorArg.value);
                         final TreeItem<ConstructorArg> item = new TreeItem<>(constructorArg, icon);
                         constructorArgMap.put(name, item);
                     });
@@ -198,6 +208,19 @@ public class BeanTree extends TreeTableView<Object> implements LogSupport, L10nS
                     propertyMap.forEach((name, item) -> beanItem.getChildren().add(Casts.cast(item)));
                 });
         bindReferences();
+    }
+
+    private void mutuallyExcludeProperties(StringProperty p1, StringProperty p2) {
+        p1.addListener((observable, oldValue, newValue) -> {
+            if (StringUtils.isNotBlank(newValue)) {
+                p2.set(null);
+            }
+        });
+        p2.addListener((observable, oldValue, newValue) -> {
+            if (StringUtils.isNotBlank(newValue)) {
+                p1.set(null);
+            }
+        });
     }
 
     private void bindReferences() {

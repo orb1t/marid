@@ -18,57 +18,60 @@
 
 package org.marid.ide.beaneditor.ui;
 
+import de.jensd.fx.glyphs.octicons.OctIcon;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.control.*;
-import javafx.scene.control.TreeTableColumn.CellDataFeatures;
+import javafx.scene.control.Label;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableColumn;
+import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.beaneditor.data.ConstructorArg;
-import org.marid.ide.beaneditor.data.Property;
 
-import java.util.Optional;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ValueCell extends TreeTableCell<Object, Node> {
+public class ValueCell extends TreeTableCell<Object, String> {
 
-    private final TreeTableColumn<Object, Node> column;
+    private final TreeTableColumn<Object, String> column;
 
-    public ValueCell(TreeTableColumn<Object, Node> column) {
+    public ValueCell(TreeTableColumn<Object, String> column) {
         this.column = column;
         setAlignment(Pos.CENTER_LEFT);
-        setContentDisplay(ContentDisplay.RIGHT);
-        setGraphicTextGap(10);
     }
 
     @Override
-    public void updateItem(Node val, boolean empty) {
+    public void updateItem(String val, boolean empty) {
         super.updateItem(val, empty);
-        setGraphic(val);
-    }
-
-    @Override
-    public void startEdit() {
-        final TreeItem<Object> item = getTreeTableRow().getTreeItem();
-        final TreeTableColumn<Object, Node> column = getTableColumn();
-        final TextInputDialog dialog = new TextInputDialog("A");
-        final Optional<String> value = dialog.showAndWait();
-        final ValueFactory valueFactory = (ValueFactory) column.getCellValueFactory();
-        if (value.isPresent()) {
-            final String val = value.get();
-            if (item.getValue() instanceof Property) {
-                final Property d = (Property) item.getValue();
-                d.value.set(val);
-                d.ref.set(null);
+        graphicProperty().unbind();
+        if (empty || getTreeTableRow() == null || getTreeTableRow().getTreeItem() == null) {
+            setText(null);
+            setGraphic(null);
+        } else {
+            setText(val);
+            final TreeItem<Object> item = getTreeTableRow().getTreeItem();
+            if (item.getValue() instanceof BeanData) {
+                final BeanData d = (BeanData) item.getValue();
+                graphicProperty().bind(Bindings.createObjectBinding(() -> {
+                    if (d.factoryBean.isNotEmpty().get()) {
+                        final String text = d.factoryBean.get() + "." + d.factoryMethod.get();
+                        return new Label(text, glyphIcon(OctIcon.LINK_EXTERNAL, 20));
+                    } else {
+                        return new Label("");
+                    }
+                }, d.factoryBean));
             } else if (item.getValue() instanceof ConstructorArg) {
                 final ConstructorArg d = (ConstructorArg) item.getValue();
-                d.value.set(val);
-                d.ref.unbind();
-                d.ref.set(null);
+                graphicProperty().bind(Bindings.createObjectBinding(() -> {
+                    if (d.ref.isNotEmpty().get()) {
+                        return new Label(d.ref.get(), glyphIcon(OctIcon.LINK, 20));
+                    } else {
+                        return new Label("");
+                    }
+                }, d.ref));
             }
-            commitEdit(valueFactory.call(new CellDataFeatures<>(getTreeTableView(), column, item)).getValue());
-        } else {
-            cancelEdit();
         }
     }
 }

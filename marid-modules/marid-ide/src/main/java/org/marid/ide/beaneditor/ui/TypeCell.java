@@ -18,27 +18,29 @@
 
 package org.marid.ide.beaneditor.ui;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn.CellDataFeatures;
-import javafx.util.Callback;
-import org.marid.ide.beaneditor.data.ConstructorArg;
-import org.marid.ide.beaneditor.data.Property;
+import javafx.geometry.Pos;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableColumn;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ValueFactory implements Callback<CellDataFeatures<Object, String>, ObservableValue<String>> {
+public class TypeCell extends TreeTableCell<Object, String> {
+
+    private final TreeTableColumn<Object, String> column;
+
+    public TypeCell(TreeTableColumn<Object, String> column) {
+        this.column = column;
+        setAlignment(Pos.CENTER_LEFT);
+    }
 
     @Override
-    public ObservableValue<String> call(CellDataFeatures<Object, String> param) {
-        final TreeItem<Object> item = param.getValue();
-        if (item.getValue() instanceof ConstructorArg) {
-            return ((ConstructorArg) item.getValue()).value;
-        } else if (item.getValue() instanceof Property) {
-            return ((Property) item.getValue()).value;
+    protected void updateItem(String item, boolean empty) {
+        super.updateItem(item, empty);
+        if (empty) {
+            setText(null);
+        } else {
+            setText(item);
         }
-        return new SimpleStringProperty("");
     }
 }

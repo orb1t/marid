@@ -23,21 +23,24 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn.CellDataFeatures;
 import javafx.util.Callback;
+import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.beaneditor.data.ConstructorArg;
 import org.marid.ide.beaneditor.data.Property;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ValueFactory implements Callback<CellDataFeatures<Object, String>, ObservableValue<String>> {
+public class TypeFactory implements Callback<CellDataFeatures<Object, String>, ObservableValue<String>> {
 
     @Override
     public ObservableValue<String> call(CellDataFeatures<Object, String> param) {
         final TreeItem<Object> item = param.getValue();
-        if (item.getValue() instanceof ConstructorArg) {
-            return ((ConstructorArg) item.getValue()).value;
+        if (item.getValue() instanceof BeanData) {
+            return ((BeanData) item.getValue()).type;
+        } else if (item.getValue() instanceof ConstructorArg) {
+            return ((ConstructorArg) item.getValue()).type;
         } else if (item.getValue() instanceof Property) {
-            return ((Property) item.getValue()).value;
+            return ((Property) item.getValue()).type;
         }
         return new SimpleStringProperty("");
     }
