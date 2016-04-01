@@ -27,6 +27,7 @@ import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.beaneditor.data.ConstructorArg;
+import org.marid.ide.beaneditor.data.Property;
 
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
@@ -64,6 +65,15 @@ public class ValueCell extends TreeTableCell<Object, String> {
                 }, d.factoryBean));
             } else if (item.getValue() instanceof ConstructorArg) {
                 final ConstructorArg d = (ConstructorArg) item.getValue();
+                graphicProperty().bind(Bindings.createObjectBinding(() -> {
+                    if (d.ref.isNotEmpty().get()) {
+                        return new Label(d.ref.get(), glyphIcon(OctIcon.LINK, 20));
+                    } else {
+                        return new Label("");
+                    }
+                }, d.ref));
+            } else if (item.getValue() instanceof Property) {
+                final Property d = (Property) item.getValue();
                 graphicProperty().bind(Bindings.createObjectBinding(() -> {
                     if (d.ref.isNotEmpty().get()) {
                         return new Label(d.ref.get(), glyphIcon(OctIcon.LINK, 20));

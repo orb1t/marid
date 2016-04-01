@@ -34,7 +34,6 @@ import org.marid.ide.beaneditor.ui.*;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
-import org.marid.misc.Casts;
 import org.marid.xml.IterableNodeList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -144,70 +143,68 @@ public class BeanTree extends TreeTableView<Object> implements LogSupport, L10nS
                 .filter(Element.class::isInstance)
                 .map(Element.class::cast)
                 .filter(e -> e.getNodeName().equals("bean"))
-                .forEach(bean -> {
-                    final BeanData beanData = new BeanData();
-                    beanData.name.set(bean.getAttribute("name"));
-                    beanData.type.set(bean.getAttribute("class"));
-                    beanData.destroyMethod.set(bean.getAttribute("destroy-method"));
-                    beanData.initMethod.set(bean.getAttribute("init-method"));
-                    beanData.factoryBean.set(bean.getAttribute("factory-bean"));
-                    beanData.factoryMethod.set(bean.getAttribute("factory-method"));
-                    beanData.lazyInit.set(bean.getAttribute("lazy-init"));
-                    final Image image = beanEditor.image(beanData.type.get());
-                    final Node beanIcon = image != null ? new ImageView(image) : new ImageView(BEAN);
-                    final TreeItem<Object> beanItem = new TreeItem<>(beanData, beanIcon);
-                    parent.getChildren().add(beanItem);
-                    final Map<String, TreeItem<Property>> propertyMap = new TreeMap<>();
-                    final Map<String, TreeItem<ConstructorArg>> constructorArgMap = new TreeMap<>();
-                    final ClassData classData = beanEditor.classData(beanData.type.get());
-                    classData.getSetters().forEach((name, method) -> {
-                        final String type = method.getParameterTypes()[0].getName();
-                        final Image img = beanEditor.image(type);
-                        final Node icon = img != null ? new ImageView(img) : new ImageView(PROP);
-                        final Property property = new Property();
-                        property.name.set(name);
-                        property.type.set(type);
-                        mutuallyExcludeProperties(property.ref, property.value);
-                        final TreeItem<Property> item = new TreeItem<>(property, icon);
-                        propertyMap.put(name, item);
-                    });
-                    classData.getParameters().forEach((name, parameter) -> {
-                        final String type = parameter.getType().getName();
-                        final Image img = beanEditor.image(type);
-                        final Node icon = img != null ? new ImageView(img) : new ImageView(CPARAM);
-                        final ConstructorArg constructorArg = new ConstructorArg();
-                        constructorArg.name.set(name);
-                        constructorArg.type.set(type);
-                        mutuallyExcludeProperties(constructorArg.ref, constructorArg.value);
-                        final TreeItem<ConstructorArg> item = new TreeItem<>(constructorArg, icon);
-                        constructorArgMap.put(name, item);
-                    });
-                    new IterableNodeList(bean.getChildNodes()).stream()
-                            .filter(Element.class::isInstance)
-                            .map(Element.class::cast)
-                            .filter(e -> "constructor-arg".equals(e.getNodeName()))
-                            .filter(e -> e.hasAttribute("name"))
-                            .filter(e -> constructorArgMap.containsKey(e.getAttribute("name")))
-                            .forEach(e -> {
-                                final TreeItem<ConstructorArg> item = constructorArgMap.get(e.getAttribute("name"));
-                                item.getValue().value.set(e.getAttribute("value"));
-                                item.getValue().ref.set(e.getAttribute("ref"));
-                            });
-                    new IterableNodeList(bean.getChildNodes()).stream()
-                            .filter(Element.class::isInstance)
-                            .map(Element.class::cast)
-                            .filter(e -> "property".equals(e.getNodeName()))
-                            .filter(e -> e.hasAttribute("name"))
-                            .filter(e -> propertyMap.containsKey(e.getAttribute("name")))
-                            .forEach(e -> {
-                                final TreeItem<Property> item = propertyMap.get(e.getAttribute("name"));
-                                item.getValue().value.set(e.getAttribute("value"));
-                                item.getValue().ref.set(e.getAttribute("ref"));
-                            });
-                    constructorArgMap.forEach((name, item) -> beanItem.getChildren().add(Casts.cast(item)));
-                    propertyMap.forEach((name, item) -> beanItem.getChildren().add(Casts.cast(item)));
-                });
+                .forEach(bean -> loadBean(parent, bean));
         bindReferences();
+    }
+
+    private void loadBean(TreeItem<Object> parent, Element bean) {
+        final BeanData beanData = new BeanData();
+        beanData.name.set(bean.getAttribute("name"));
+        beanData.type.set(bean.getAttribute("class"));
+        beanData.destroyMethod.set(bean.getAttribute("destroy-method"));
+        beanData.initMethod.set(bean.getAttribute("init-method"));
+        beanData.factoryBean.set(bean.getAttribute("factory-bean"));
+        beanData.factoryMethod.set(bean.getAttribute("factory-method"));
+        beanData.lazyInit.set(bean.getAttribute("lazy-init"));
+        final Image image = beanEditor.image(beanData.type.get());
+        final Node beanIcon = image != null ? new ImageView(image) : new ImageView(BEAN);
+        final TreeItem<Object> beanItem = new TreeItem<>(beanData, beanIcon);
+        parent.getChildren().add(beanItem);
+        final ClassData classData = beanEditor.classData(beanData.type.get());
+        fillProperties(classData, beanItem, bean);
+        fillConstructorArg(classData, beanItem, bean);
+    }
+
+    private void setProperties(String name, Element element, String elementName, StringProperty... properties) {
+        new IterableNodeList(element.getChildNodes()).stream()
+                .filter(Element.class::isInstance)
+                .map(Element.class::cast)
+                .filter(e -> elementName.equals(e.getNodeName()) && name.equals(e.getAttribute("name")))
+                .forEach(e -> {
+                    for (final StringProperty property : properties) {
+                        if (e.hasAttribute(property.getName())) {
+                            property.set(e.getAttribute(property.getName()));
+                        }
+                    }
+                });
+    }
+
+    private void fillProperties(ClassData classData, TreeItem<Object> treeItem, Element bean) {
+        classData.getSetters().forEach((name, method) -> {
+            final String type = method.getParameterTypes()[0].getName();
+            final Image img = beanEditor.image(type);
+            final Node icon = img != null ? new ImageView(img) : new ImageView(PROP);
+            final Property property = new Property();
+            property.name.set(name);
+            property.type.set(type);
+            setProperties(name, bean, "property", property.ref, property.value);
+            mutuallyExcludeProperties(property.ref, property.value);
+            treeItem.getChildren().add(new TreeItem<>(property, icon));
+        });
+    }
+
+    private void fillConstructorArg(ClassData classData, TreeItem<Object> treeItem, Element bean) {
+        classData.getParameters().forEach((name, parameter) -> {
+            final String type = parameter.getType().getName();
+            final Image img = beanEditor.image(type);
+            final Node icon = img != null ? new ImageView(img) : new ImageView(CPARAM);
+            final ConstructorArg constructorArg = new ConstructorArg();
+            constructorArg.name.set(name);
+            constructorArg.type.set(type);
+            setProperties(name, bean, "constructor-arg", constructorArg.ref, constructorArg.value);
+            mutuallyExcludeProperties(constructorArg.ref, constructorArg.value);
+            treeItem.getChildren().add(new TreeItem<>(constructorArg, icon));
+        });
     }
 
     private void mutuallyExcludeProperties(StringProperty p1, StringProperty p2) {
