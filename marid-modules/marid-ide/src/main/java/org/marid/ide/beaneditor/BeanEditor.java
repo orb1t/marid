@@ -18,9 +18,15 @@
 
 package org.marid.ide.beaneditor;
 
+import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
+import de.jensd.fx.glyphs.materialicons.MaterialIcon;
+import javafx.beans.binding.Bindings;
 import javafx.scene.Scene;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.marid.beans.MaridBeanXml;
 import org.marid.beans.MaridBeansXml;
@@ -28,6 +34,8 @@ import org.marid.ee.IdeSingleton;
 import org.marid.ide.Ide;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.ScrollPanes;
+import org.marid.jfx.menu.MenuContainerBuilder;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 
@@ -64,10 +72,37 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
         getIcons().addAll(Ide.IMAGES);
         projectManager.profileProperty().addListener((observable, oldValue, newValue) -> update(newValue));
         this.beanTree = new BeanTree(profile, this);
-        final BorderPane pane = new BorderPane();
-        pane.setCenter(beanTree);
+        final BorderPane pane = getTreePane();
         setScene(new Scene(pane, 1024, 768));
         update(profile);
+    }
+
+    private BorderPane getTreePane() {
+        final ToolBar toolBar = new ToolBar();
+        final MenuBar menuBar = new MenuBar();
+        new MenuContainerBuilder()
+                .menu("File", b -> b
+                        .item("*Reload", MaterialIcon.RESTORE, "Ctrl+R", event -> {
+                            beanTree.getRoot().getChildren().clear();
+                            beanTree.load();
+                        })
+                        .item("*Save", MaterialIcon.SAVE, "Ctrl+S", event -> beanTree.save())
+                        .separator()
+                        .item("*Print", MaterialIcon.PRINT, "Ctrl+P", event -> {
+                        })
+                )
+                .menu("Beans", b -> b
+                        .item("*Clear all", MaterialIcon.CLEAR_ALL, event -> beanTree.getRoot().getChildren().clear())
+                        .last(a -> a.disabledProperty().bind(Bindings.isEmpty(beanTree.getRoot().getChildren())))
+                )
+                .menu("Window", b -> b
+                        .item("*Refresh", MaterialDesignIcon.REFRESH, "F5", event -> beanTree.refresh())
+                )
+                .build(menuBar.getMenus()::add, toolBar.getItems());
+        final VBox vBox = new VBox(menuBar, toolBar);
+        final BorderPane pane = new BorderPane(ScrollPanes.scrollPane(beanTree), vBox, null, null, null);
+        pane.setFocusTraversable(false);
+        return pane;
     }
 
     void update(ProjectProfile profile) {
@@ -133,7 +168,7 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
         }
     }
 
-    Image image(@Nonnull String type) {
+    public Image image(@Nonnull String type) {
         return iconMap.compute(type, (k, img) -> {
             if (img != null) {
                 return img;

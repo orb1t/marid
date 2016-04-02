@@ -23,7 +23,7 @@ import javafx.scene.image.Image;
 /**
  * @author Dmitry Ovchinnikov
  */
-interface BeanTreeConstants {
+public interface BeanTreeConstants {
 
     Image ROOT = new Image("http://icons.iconarchive.com/icons/martz90/circle-addon1/24/root-explorer-icon.png", true);
     Image DIR = new Image("http://icons.iconarchive.com/icons/hopstarter/mac-folders-2/24/Folder-Download-icon.png", true);
