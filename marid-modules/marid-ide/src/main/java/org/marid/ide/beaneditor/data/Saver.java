@@ -84,8 +84,8 @@ public class Saver {
             attr(beanElement, beanData.factoryBean);
             attr(beanElement, beanData.factoryMethod);
             attr(beanElement, beanData.lazyInit);
-            beanItem.getChildren().filtered(e -> e.getValue() instanceof ConstructorArg).forEach(constructorArgItem -> {
-                final ConstructorArg d = (ConstructorArg) constructorArgItem.getValue();
+            beanItem.getChildren().filtered(e -> e.getValue() instanceof ConstructorArg).forEach(item -> {
+                final ConstructorArg d = (ConstructorArg) item.getValue();
                 if (d.ref.isNotEmpty().get() || d.value.isNotEmpty().get()) {
                     final Element element = document.createElement("constructor-arg");
                     beanElement.appendChild(element);
@@ -94,8 +94,8 @@ public class Saver {
                     attr(element, d.value);
                 }
             });
-            beanItem.getChildren().filtered(e -> e.getValue() instanceof Property).forEach(propertyItem -> {
-                final Property d = (Property) propertyItem.getValue();
+            beanItem.getChildren().filtered(e -> e.getValue() instanceof Property).forEach(item -> {
+                final Property d = (Property) item.getValue();
                 if (d.ref.isNotEmpty().get() || d.value.isNotEmpty().get()) {
                     final Element element = document.createElement("property");
                     beanElement.appendChild(element);

@@ -20,10 +20,11 @@ package org.marid.ide.beaneditor;
 
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.materialicons.MaterialIcon;
-import javafx.beans.binding.Bindings;
+import javafx.collections.ListChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ToolBar;
+import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -93,7 +94,11 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
                 )
                 .menu("Beans", b -> b
                         .item("*Clear all", MaterialIcon.CLEAR_ALL, event -> beanTree.getRoot().getChildren().clear())
-                        .last(a -> a.disabledProperty().bind(Bindings.isEmpty(beanTree.getRoot().getChildren())))
+                        .last(a -> beanTree.rootProperty().addListener((observable, oldValue, newValue) -> {
+                            newValue.getChildren().addListener((ListChangeListener<TreeItem<Object>>) c -> {
+                                a.setDisabled(beanTree.getRoot().getChildren().isEmpty());
+                            });
+                        }))
                 )
                 .menu("Window", b -> b
                         .item("*Refresh", MaterialDesignIcon.REFRESH, "F5", event -> beanTree.refresh())
