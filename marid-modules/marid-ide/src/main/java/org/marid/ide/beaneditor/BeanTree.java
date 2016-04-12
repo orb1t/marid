@@ -18,10 +18,7 @@
 
 package org.marid.ide.beaneditor;
 
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableRow;
-import javafx.scene.control.TreeTableView;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import org.codehaus.plexus.util.FileUtils;
 import org.marid.ide.beaneditor.data.Loader;
@@ -96,8 +93,8 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport,
         return column;
     }
 
-    private TreeTableColumn<Object, String> valueColumn() {
-        final TreeTableColumn<Object, String> column = new TreeTableColumn<>(s("Value"));
+    private TreeTableColumn<Object, Label> valueColumn() {
+        final TreeTableColumn<Object, Label> column = new TreeTableColumn<>(s("Value"));
         column.setCellValueFactory(new ValueFactory());
         column.setCellFactory(ValueCell::new);
         column.setPrefWidth(400);

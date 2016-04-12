@@ -18,70 +18,72 @@
 
 package org.marid.ide.beaneditor.ui;
 
-import de.jensd.fx.glyphs.octicons.OctIcon;
-import javafx.beans.binding.Bindings;
+import javafx.beans.property.StringProperty;
 import javafx.geometry.Pos;
-import javafx.scene.control.Label;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableColumn;
-import org.marid.ide.beaneditor.data.BeanData;
+import javafx.scene.control.*;
+import javafx.scene.control.TreeTableColumn.CellDataFeatures;
+import javafx.scene.input.KeyCode;
 import org.marid.ide.beaneditor.data.ConstructorArg;
 import org.marid.ide.beaneditor.data.Property;
-
-import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ValueCell extends TreeTableCell<Object, String> {
+public class ValueCell extends TreeTableCell<Object, Label> {
 
-    private final TreeTableColumn<Object, String> column;
+    private final TreeTableColumn<Object, Label> column;
 
-    public ValueCell(TreeTableColumn<Object, String> column) {
+    public ValueCell(TreeTableColumn<Object, Label> column) {
         this.column = column;
         setAlignment(Pos.CENTER_LEFT);
     }
 
     @Override
-    public void updateItem(String val, boolean empty) {
+    public void updateItem(Label val, boolean empty) {
         super.updateItem(val, empty);
-        graphicProperty().unbind();
-        if (empty || getTreeTableRow() == null || getTreeTableRow().getTreeItem() == null) {
-            setText(null);
+        if (empty) {
             setGraphic(null);
         } else {
-            setText(val);
-            final TreeItem<Object> item = getTreeTableRow().getTreeItem();
-            if (item.getValue() instanceof BeanData) {
-                final BeanData d = (BeanData) item.getValue();
-                graphicProperty().bind(Bindings.createObjectBinding(() -> {
-                    if (d.factoryBean.isNotEmpty().get()) {
-                        final String text = d.factoryBean.get() + "." + d.factoryMethod.get();
-                        return new Label(text, glyphIcon(OctIcon.LINK_EXTERNAL, 20));
-                    } else {
-                        return new Label("");
-                    }
-                }, d.factoryBean));
-            } else if (item.getValue() instanceof ConstructorArg) {
-                final ConstructorArg d = (ConstructorArg) item.getValue();
-                graphicProperty().bind(Bindings.createObjectBinding(() -> {
-                    if (d.ref.isNotEmpty().get()) {
-                        return new Label(d.ref.get(), glyphIcon(OctIcon.LINK, 20));
-                    } else {
-                        return new Label("");
-                    }
-                }, d.ref));
-            } else if (item.getValue() instanceof Property) {
-                final Property d = (Property) item.getValue();
-                graphicProperty().bind(Bindings.createObjectBinding(() -> {
-                    if (d.ref.isNotEmpty().get()) {
-                        return new Label(d.ref.get(), glyphIcon(OctIcon.LINK, 20));
-                    } else {
-                        return new Label("");
-                    }
-                }, d.ref));
-            }
+            setGraphic(val);
         }
+    }
+
+    @Override
+    public void startEdit() {
+        final TreeTableRow<Object> row = getTreeTableRow();
+        final TreeItem<Object> item = row.getTreeItem();
+        final StringProperty textProperty;
+        if (item.getValue() instanceof ConstructorArg) {
+            textProperty = ((ConstructorArg) item.getValue()).value;
+        } else if (item.getValue() instanceof Property) {
+            textProperty = ((Property) item.getValue()).value;
+        } else {
+            return;
+        }
+        final TextField textField = new TextField(textProperty.get());
+        textField.setOnAction(event -> {
+            textProperty.set(textField.getText());
+            final CellDataFeatures<Object, Label> f = new CellDataFeatures<>(getTreeTableView(), getTableColumn(), item);
+            final Label label = getTableColumn().getCellValueFactory().call(f).getValue();
+            commitEdit(label);
+        });
+        final Runnable cancel = () -> {
+            cancelEdit();
+            final CellDataFeatures<Object, Label> f = new CellDataFeatures<>(getTreeTableView(), getTableColumn(), item);
+            final Label label = getTableColumn().getCellValueFactory().call(f).getValue();
+            setGraphic(label);
+        };
+        textField.setOnKeyReleased(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                cancel.run();
+            }
+        });
+        textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                cancel.run();
+            }
+        });
+        setGraphic(textField);
+        textField.requestFocus();
     }
 }
