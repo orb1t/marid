@@ -19,20 +19,28 @@
 package org.marid.ide.beaneditor.ui;
 
 import javafx.geometry.Pos;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableRow;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
+import javafx.scene.image.ImageView;
 import javafx.util.converter.DefaultStringConverter;
 import org.apache.commons.lang3.StringUtils;
+import org.marid.ide.beaneditor.BeanTreeConstants;
 import org.marid.ide.beaneditor.data.BeanData;
+import org.marid.ide.project.ProjectProfile;
+import org.marid.l10n.L10nSupport;
+import org.marid.logging.LogSupport;
 
 import java.nio.file.Path;
+
+import static de.jensd.fx.glyphs.octicons.OctIcon.FILE_ADD;
+import static de.jensd.fx.glyphs.octicons.OctIcon.FILE_DIRECTORY_CREATE;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
+import static org.marid.misc.Builder.build;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class NameCell extends TextFieldTreeTableCell<Object, String> {
+public class NameCell extends TextFieldTreeTableCell<Object, String> implements L10nSupport, LogSupport, BeanTreeConstants {
 
     private final TreeTableColumn<Object, String> column;
 
@@ -40,6 +48,30 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> {
         this.column = column;
         setAlignment(Pos.CENTER_LEFT);
         setConverter(new DefaultStringConverter());
+    }
+
+    @Override
+    public void updateItem(String item, boolean empty) {
+        super.updateItem(item, empty);
+        final TreeItem<Object> treeItem = getTreeTableRow() == null ? null : getTreeTableRow().getTreeItem();
+        if (empty || item == null || treeItem == null) {
+            setContextMenu(null);
+        } else {
+            final Object value = treeItem.getValue();
+            final ContextMenu contextMenu = new ContextMenu();
+            if (value instanceof Path) {
+                final Path path = (Path) value;
+                if (!path.getFileName().toString().endsWith(".xml")) {
+                    itemAddSubdirectory(contextMenu, path, treeItem);
+                    itemAddBeanFile(contextMenu, path, treeItem);
+                }
+            } else if (value instanceof ProjectProfile) {
+                final ProjectProfile profile = (ProjectProfile) value;
+                itemAddSubdirectory(contextMenu, profile.getBeansDirectory(), treeItem);
+                itemAddBeanFile(contextMenu, profile.getBeansDirectory(), treeItem);
+            }
+            setContextMenu(contextMenu);
+        }
     }
 
     @Override
@@ -51,6 +83,26 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> {
         }
     }
 
+    private void itemAddSubdirectory(ContextMenu menu, Path parent, TreeItem<Object> parentItem) {
+        menu.getItems().add(build(new MenuItem(s("Add subdirectory"), glyphIcon(FILE_DIRECTORY_CREATE)), i -> {
+            i.setOnAction(event -> {
+                final Path newPath = parent.resolve("newFolder");
+                final TreeItem<Object> newFolderItem = new TreeItem<>(newPath, new ImageView(DIR));
+                parentItem.getChildren().add(newFolderItem);
+            });
+        }));
+    }
+
+    private void itemAddBeanFile(ContextMenu menu, Path parent, TreeItem<Object> parentItem) {
+        menu.getItems().add(build(new MenuItem(s("Add beans file"), glyphIcon(FILE_ADD)), i -> {
+            i.setOnAction(event -> {
+                final Path newPath = parent.resolve("newBeansFile.xml");
+                final TreeItem<Object> newItem = new TreeItem<>(newPath, new ImageView(DIR));
+                parentItem.getChildren().add(newItem);
+            });
+        }));
+    }
+
     @Override
     public void commitEdit(String newValue) {
         if (StringUtils.isBlank(newValue)) {
@@ -60,6 +112,11 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> {
         final TreeTableRow<Object> row = getTreeTableRow();
         final TreeItem<Object> item = row.getTreeItem();
         if (item.getValue() instanceof BeanData) {
+            super.commitEdit(newValue);
+        } else if (item.getValue() instanceof Path) {
+            final Path path = (Path) item.getValue();
+            final Path newPath = path.getParent().resolve(newValue);
+            item.setValue(newPath);
             super.commitEdit(newValue);
         } else {
             cancelEdit();

@@ -20,20 +20,17 @@ package org.marid.ide.beaneditor.ui;
 
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeTableColumn.CellDataFeatures;
 import javafx.util.Callback;
 import org.marid.ide.beaneditor.data.BeanData;
-import org.marid.ide.beaneditor.data.ConstructorArg;
-import org.marid.ide.beaneditor.data.Property;
+import org.marid.ide.beaneditor.data.RefValue;
 import org.marid.jfx.icons.FontIcons;
 
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -42,22 +39,18 @@ public class ValueFactory implements Callback<CellDataFeatures<Object, Label>, O
 
     @Override
     public ObservableValue<Label> call(CellDataFeatures<Object, Label> param) {
-        final BiFunction<StringProperty, StringProperty, Label> argConsumer = (ref, value) -> {
-            final Label label = new Label();
-            if (ref.isNotEmpty().get()) {
-                label.setGraphic(FontIcons.glyphIcon(OctIcon.LINK_EXTERNAL));
-                label.setText(ref.get());
-            } else {
-                label.setText(value.get());
-            }
-            return label;
-        };
-        if (param.getValue().getValue() instanceof ConstructorArg) {
-            final ConstructorArg d = (ConstructorArg) param.getValue().getValue();
-            return Bindings.createObjectBinding(() -> argConsumer.apply(d.ref, d.value), d.value, d.ref);
-        } else if (param.getValue().getValue() instanceof Property) {
-            final Property d = (Property) param.getValue().getValue();
-            return Bindings.createObjectBinding(() -> argConsumer.apply(d.ref, d.value), d.value, d.ref);
+        if (param.getValue().getValue() instanceof RefValue) {
+            final RefValue d = (RefValue) param.getValue().getValue();
+            return Bindings.createObjectBinding(() -> {
+                final Label label = new Label();
+                if (d.ref().isNotEmpty().get()) {
+                    label.setGraphic(FontIcons.glyphIcon(OctIcon.LINK_EXTERNAL));
+                    label.setText(d.ref().get());
+                } else {
+                    label.setText(d.value().get());
+                }
+                return label;
+            }, d.value(), d.ref());
         } else if (param.getValue().getValue() instanceof Path) {
             final Path d = (Path) param.getValue().getValue();
             return Bindings.createObjectBinding(() -> new Label(d.toString()));
@@ -92,4 +85,5 @@ public class ValueFactory implements Callback<CellDataFeatures<Object, Label>, O
         }
         return Bindings.createObjectBinding(Label::new);
     }
+
 }

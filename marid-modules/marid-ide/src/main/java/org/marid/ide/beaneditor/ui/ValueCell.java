@@ -23,8 +23,10 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.TreeTableColumn.CellDataFeatures;
 import javafx.scene.input.KeyCode;
+import org.marid.ide.beaneditor.BeanEditor;
 import org.marid.ide.beaneditor.data.ConstructorArg;
 import org.marid.ide.beaneditor.data.Property;
+import org.marid.ide.beaneditor.data.RefValue;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -32,9 +34,11 @@ import org.marid.ide.beaneditor.data.Property;
 public class ValueCell extends TreeTableCell<Object, Label> {
 
     private final TreeTableColumn<Object, Label> column;
+    private final BeanEditor beanEditor;
 
-    public ValueCell(TreeTableColumn<Object, Label> column) {
+    public ValueCell(TreeTableColumn<Object, Label> column, BeanEditor beanEditor) {
         this.column = column;
+        this.beanEditor = beanEditor;
         setAlignment(Pos.CENTER_LEFT);
     }
 
@@ -46,6 +50,12 @@ public class ValueCell extends TreeTableCell<Object, Label> {
         } else {
             setGraphic(val);
         }
+        final TreeItem<Object> item = getTreeTableRow() == null ? null : getTreeTableRow().getTreeItem();
+        if (item != null) {
+            if (item.getValue() instanceof RefValue) {
+                setContextMenu(ValueContextMenuFactory.menu(beanEditor, item, (RefValue) item.getValue()));
+            }
+        }
     }
 
     @Override
@@ -54,9 +64,17 @@ public class ValueCell extends TreeTableCell<Object, Label> {
         final TreeItem<Object> item = row.getTreeItem();
         final StringProperty textProperty;
         if (item.getValue() instanceof ConstructorArg) {
-            textProperty = ((ConstructorArg) item.getValue()).value;
+            final ConstructorArg d = (ConstructorArg) item.getValue();
+            if (d.ref.isBound()) {
+                return;
+            }
+            textProperty = d.value;
         } else if (item.getValue() instanceof Property) {
-            textProperty = ((Property) item.getValue()).value;
+            final Property d = (Property) item.getValue();
+            if (d.ref.isBound()) {
+                return;
+            }
+            textProperty = d.value;
         } else {
             return;
         }

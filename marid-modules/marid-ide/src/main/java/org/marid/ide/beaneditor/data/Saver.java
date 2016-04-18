@@ -30,6 +30,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -41,7 +42,7 @@ public class Saver {
 
     public void save(TreeItem<Object> it) throws Exception {
         if (it.getValue() instanceof Path) {
-            if (it.getChildren().stream().noneMatch(e -> e.getValue() instanceof Path)) {
+            if (((Path) it.getValue()).getFileName().toString().endsWith(".xml")) {
                 final Path path = (Path) it.getValue();
                 save(path, it);
                 return;
@@ -69,6 +70,7 @@ public class Saver {
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+        Files.createDirectories(path.getParent());
         transformer.transform(new DOMSource(document), new StreamResult(path.toFile()));
     }
 

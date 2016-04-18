@@ -18,31 +18,16 @@
 
 package org.marid.ide.beaneditor.data;
 
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Property implements RefValue {
+public interface RefValue {
 
-    public final StringProperty name = new SimpleStringProperty(this, "name");
-    public final StringProperty ref = new SimpleStringProperty(this, "ref");
-    public final StringProperty value = new SimpleStringProperty(this, "value");
-    public final StringProperty type = new SimpleStringProperty(this, "type");
+    StringProperty ref();
 
-    @Override
-    public StringProperty ref() {
-        return ref;
-    }
+    StringProperty value();
 
-    @Override
-    public StringProperty value() {
-        return value;
-    }
-
-    @Override
-    public StringProperty type() {
-        return type;
-    }
+    StringProperty type();
 }
