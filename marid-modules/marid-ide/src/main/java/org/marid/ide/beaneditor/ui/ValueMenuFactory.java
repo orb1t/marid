@@ -26,6 +26,7 @@ import org.marid.ide.beaneditor.BeanEditor;
 import org.marid.ide.beaneditor.ClassData;
 import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.beaneditor.data.RefValue;
+import org.marid.jfx.dialog.MaridDialog;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -39,7 +40,7 @@ import static org.marid.l10n.L10nSupport.LS.s;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ValueContextMenuFactory {
+public class ValueMenuFactory {
 
     public static ContextMenu menu(BeanEditor editor, TreeItem<Object> item, RefValue rv) {
         final ContextMenu contextMenu = new ContextMenu();
@@ -73,7 +74,16 @@ public class ValueContextMenuFactory {
             }
             final MenuItem menuItem = new MenuItem(s("Edit value as an expression..."), glyphIcon(FontAwesomeIcon.SCRIBD, 16));
             menuItem.setOnAction(event -> {
-
+                final ValueExpressionEditor expressionEditor = new ValueExpressionEditor(rv.value());
+                final Optional<String> value = new MaridDialog<String>(editor, ButtonType.APPLY, ButtonType.CANCEL)
+                        .title(s("Expression editor"))
+                        .preferredSize(800, 600)
+                        .with((d, p) -> p.setContent(expressionEditor))
+                        .result(expressionEditor::accept)
+                        .showAndWait();
+                if (value.isPresent()) {
+                    rv.value().set(value.get());
+                }
             });
             contextMenu.getItems().add(menuItem);
         }

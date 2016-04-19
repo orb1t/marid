@@ -67,7 +67,8 @@ public class Loader implements BeanTreeConstants {
                         .reduce(root, (a, p) -> {
                             final Path parentPath = a == root ? beansDirectory : (Path) a.getValue();
                             final Path currentPath = parentPath.resolve(p);
-                            final TreeItem<Object> child = new TreeItem<>(currentPath, new ImageView(DIR));
+                            final Image image = Files.isDirectory(currentPath) ? DIR : FILE;
+                            final TreeItem<Object> child = new TreeItem<>(currentPath, new ImageView(image));
                             child.setExpanded(true);
                             a.getChildren().add(child);
                             return child;

@@ -33,11 +33,10 @@ import org.marid.ide.beaneditor.data.RefValue;
  */
 public class ValueCell extends TreeTableCell<Object, Label> {
 
-    private final TreeTableColumn<Object, Label> column;
     private final BeanEditor beanEditor;
 
     public ValueCell(TreeTableColumn<Object, Label> column, BeanEditor beanEditor) {
-        this.column = column;
+        updateTreeTableColumn(column);
         this.beanEditor = beanEditor;
         setAlignment(Pos.CENTER_LEFT);
     }
@@ -45,6 +44,7 @@ public class ValueCell extends TreeTableCell<Object, Label> {
     @Override
     public void updateItem(Label val, boolean empty) {
         super.updateItem(val, empty);
+        setContextMenu(null);
         if (empty) {
             setGraphic(null);
         } else {
@@ -53,7 +53,7 @@ public class ValueCell extends TreeTableCell<Object, Label> {
         final TreeItem<Object> item = getTreeTableRow() == null ? null : getTreeTableRow().getTreeItem();
         if (item != null) {
             if (item.getValue() instanceof RefValue) {
-                setContextMenu(ValueContextMenuFactory.menu(beanEditor, item, (RefValue) item.getValue()));
+                setContextMenu(ValueMenuFactory.menu(beanEditor, item, (RefValue) item.getValue()));
             }
         }
     }

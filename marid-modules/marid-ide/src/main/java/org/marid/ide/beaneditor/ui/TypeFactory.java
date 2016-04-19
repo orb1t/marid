@@ -26,11 +26,15 @@ import javafx.util.Callback;
 import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.beaneditor.data.ConstructorArg;
 import org.marid.ide.beaneditor.data.Property;
+import org.marid.ide.project.ProjectProfile;
+import org.marid.l10n.L10nSupport;
+
+import java.nio.file.Path;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TypeFactory implements Callback<CellDataFeatures<Object, String>, ObservableValue<String>> {
+public class TypeFactory implements Callback<CellDataFeatures<Object, String>, ObservableValue<String>>, L10nSupport {
 
     @Override
     public ObservableValue<String> call(CellDataFeatures<Object, String> param) {
@@ -41,6 +45,12 @@ public class TypeFactory implements Callback<CellDataFeatures<Object, String>, O
             return ((ConstructorArg) item.getValue()).type;
         } else if (item.getValue() instanceof Property) {
             return ((Property) item.getValue()).type;
+        } else if (item.getValue() instanceof Path) {
+            final Path path = (Path) item.getValue();
+            final String text = s(path.getFileName().toString().endsWith(".xml") ? "beans file" : "directory");
+            return new SimpleStringProperty("<" + text + ">");
+        } else if (item.getValue() instanceof ProjectProfile) {
+            return new SimpleStringProperty("<" + s("profile") + ">");
         }
         return new SimpleStringProperty("");
     }

@@ -224,4 +224,8 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
             }
         });
     }
+
+    public List<MaridBeanXml> getMetaBeans() {
+        return metaBeans;
+    }
 }

@@ -27,6 +27,7 @@ public interface BeanTreeConstants {
 
     Image ROOT = new Image("http://icons.iconarchive.com/icons/martz90/circle-addon1/24/root-explorer-icon.png", true);
     Image DIR = new Image("http://icons.iconarchive.com/icons/hopstarter/mac-folders-2/24/Folder-Download-icon.png", true);
+    Image FILE = new Image("http://icons.iconarchive.com/icons/graphicloads/colorful-long-shadow/24/Files-2-icon.png", true);
     Image BEAN = new Image("http://icons.iconarchive.com/icons/oxygen-icons.org/oxygen/24/Apps-java-icon.png", true);
     Image PROP = new Image("http://icons.iconarchive.com/icons/icons8/windows-8/24/Programming-Edit-Property-icon.png", true);
     Image CPARAM = new Image("http://icons.iconarchive.com/icons/custom-icon-design/flatastic-6/24/Circle-icon.png", true);
