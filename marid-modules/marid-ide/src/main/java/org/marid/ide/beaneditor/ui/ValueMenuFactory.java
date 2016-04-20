@@ -23,17 +23,17 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.marid.ide.beaneditor.BeanEditor;
+import org.marid.ide.beaneditor.BeanTreeUtils;
 import org.marid.ide.beaneditor.ClassData;
 import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.beaneditor.data.RefValue;
 import org.marid.jfx.dialog.MaridDialog;
 
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toCollection;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10nSupport.LS.s;
 
@@ -52,7 +52,7 @@ public class ValueMenuFactory {
             });
             contextMenu.getItems().add(menuItem);
         }
-        final Set<BeanData> beans = beans(item);
+        final Set<BeanData> beans = BeanTreeUtils.beans(item);
         final List<BeanData> assignableBeans = beans.stream().filter(e -> {
             final ClassData beanClassData = editor.classData(e.type.get());
             final ClassData targetClassData = editor.classData(rv.type().get());
@@ -88,27 +88,5 @@ public class ValueMenuFactory {
             contextMenu.getItems().add(menuItem);
         }
         return contextMenu;
-    }
-
-    private static Set<BeanData> beans(TreeItem<Object> item) {
-        for (TreeItem<Object> i = item.getParent(); i != null; i = i.getParent()) {
-            if (i.getParent() == null) {
-                final List<TreeItem<Object>> list = new ArrayList<>();
-                items(i, e -> e.getValue() instanceof BeanData, list);
-                return list.stream()
-                        .map(e -> (BeanData) e.getValue())
-                        .collect(toCollection(() -> new TreeSet<>(comparing(e -> e.name.get()))));
-            }
-        }
-        return Collections.emptySet();
-    }
-
-    private static void items(TreeItem<Object> item, Predicate<TreeItem<Object>> filter, List<TreeItem<Object>> list) {
-        for (final TreeItem<Object> i : item.getChildren()) {
-            if (filter.test(i)) {
-                list.add(i);
-            }
-            items(i, filter, list);
-        }
     }
 }

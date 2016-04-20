@@ -20,6 +20,7 @@ package org.marid.ide.beaneditor;
 
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.materialicons.MaterialIcon;
+import javafx.beans.binding.Bindings;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.control.MenuBar;
@@ -50,6 +51,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 
+import static org.marid.ide.beaneditor.BeanTreeUtils.isRemovable;
 import static org.marid.xml.XmlBind.load;
 
 /**
@@ -92,8 +94,23 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
                         .item("*Print", MaterialIcon.PRINT, "Ctrl+P", event -> {
                         })
                 )
+                .menu("Edit", b -> b
+                        .item("*Cut", MaterialDesignIcon.CONTENT_CUT, "Ctrl+X", event -> {
+
+                        })
+                        .item("*Copy", MaterialDesignIcon.CONTENT_COPY, "Ctrl+C", event -> {
+
+                        })
+                        .item("*Paste", MaterialDesignIcon.CONTENT_PASTE, "Ctrl+V", event -> {
+
+                        })
+                )
                 .menu("Beans", b -> b
-                        .item("*Clear all", MaterialIcon.CLEAR_ALL, event -> beanTree.getRoot().getChildren().clear())
+                        .item("*Remove", MaterialIcon.REMOVE, "F8", event -> BeanTreeUtils.remove(beanTree))
+                        .last(a -> a.disabledProperty().bind(Bindings.createBooleanBinding(() -> !isRemovable(beanTree),
+                                beanTree.getSelectionModel().selectedItemProperty())))
+                        .separator()
+                        .item("*Clear all", MaterialIcon.CLEAR_ALL, "F9", event -> beanTree.getRoot().getChildren().clear())
                         .last(a -> beanTree.rootProperty().addListener((observable, oldValue, newValue) -> {
                             newValue.getChildren().addListener((ListChangeListener<TreeItem<Object>>) c -> {
                                 a.setDisabled(beanTree.getRoot().getChildren().isEmpty());

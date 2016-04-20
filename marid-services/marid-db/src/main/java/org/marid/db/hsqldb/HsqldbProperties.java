@@ -18,6 +18,8 @@
 
 package org.marid.db.hsqldb;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.beans.MaridBean;
 import org.marid.misc.Calls;
 
@@ -32,7 +34,7 @@ public final class HsqldbProperties {
 
     private File directory = new File("daqDatabase");
     private long shutdownTimeoutSeconds = 60L;
-    private URI sqlDirectoryUri = Calls.call(() -> getClass().getResource("numerics.sql").toURI().resolve("."));
+    private URI sqlDirectoryUri = Calls.call(() -> getClass().getResource("numerics.sql").toURI());
     private int connectionPoolSize = 10;
 
     public File getDirectory() {
@@ -65,5 +67,10 @@ public final class HsqldbProperties {
 
     public void setConnectionPoolSize(int connectionPoolSize) {
         this.connectionPoolSize = connectionPoolSize;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

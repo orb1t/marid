@@ -117,4 +117,8 @@ public class ClassData {
     public boolean isAssignableFrom(ClassData classData) {
         return type.isAssignableFrom(classData.type);
     }
+
+    public Class<?> getType() {
+        return type;
+    }
 }

@@ -35,7 +35,7 @@ import javax.inject.Provider;
 public class BeanEditorManager {
 
     @Produces
-    @IdeMenuItem(menu = "File", text = "Bean editor 2", group = "fileBeanEditor2", mdIcons = {MaterialDesignIcon.PUZZLE})
+    @IdeMenuItem(menu = "File", text = "Bean editor", group = "fileBeanEditor2", mdIcons = {MaterialDesignIcon.PUZZLE})
     @IdeToolbarItem(group = "file")
     public EventHandler<ActionEvent> beanEditor(Provider<BeanEditor> beanEditorProvider) {
         return event -> {

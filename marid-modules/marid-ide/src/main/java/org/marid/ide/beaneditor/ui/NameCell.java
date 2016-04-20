@@ -18,21 +18,27 @@
 
 package org.marid.ide.beaneditor.ui;
 
+import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.util.converter.DefaultStringConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.marid.ide.beaneditor.BeanEditor;
 import org.marid.ide.beaneditor.BeanTreeConstants;
 import org.marid.ide.beaneditor.data.BeanData;
+import org.marid.ide.beaneditor.data.Property;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 
 import java.nio.file.Path;
+
+import static org.marid.ide.beaneditor.BeanTreeUtils.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -59,7 +65,29 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
             } else if (treeItem.getValue() instanceof ProjectProfile) {
                 setContextMenu(NameMenuFactory.menu(beanEditor, treeItem, (ProjectProfile) treeItem.getValue()));
             }
+            setOnDragDetected(event -> startCopy(currentItem(event), (i, m) -> {
+                final Dragboard dragboard = getTreeTableView().startDragAndDrop(m);
+                final ClipboardContent content = new ClipboardContent();
+                content.putString(item);
+                dragboard.setContent(content);
+            }));
+            setOnDragOver(event -> progressCopy(beanEditor, currentItem(event), (i, m) -> event.acceptTransferModes(m)));
+            setOnDragDropped(event -> event.setDropCompleted(finishCopy(event.getTransferMode(), currentItem(event))));
+            if (treeItem.getValue() instanceof Property) {
+                setStyle("-fx-underline: true");
+            } else {
+                setStyle(null);
+            }
+        } else {
+            setOnDragDetected(null);
+            setOnDragOver(null);
+            setOnDragDropped(null);
+            setStyle(null);
         }
+    }
+
+    private TreeItem<Object> currentItem(Event event) {
+        return ((NameCell) event.getSource()).getTreeTableRow().getTreeItem();
     }
 
     @Override

@@ -64,6 +64,7 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
     private PrintWriter errWriter;
 
     public HsqldbDatabase(HsqldbProperties properties) {
+        log(INFO, "{0}", properties);
         directory = properties.getDirectory();
         sqlDirectoryUri = properties.getSqlDirectoryUri();
         shutdownTimeout = SECONDS.toMillis(properties.getShutdownTimeoutSeconds());

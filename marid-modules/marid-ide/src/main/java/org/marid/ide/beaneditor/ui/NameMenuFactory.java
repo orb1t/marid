@@ -22,12 +22,16 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.marid.beans.MaridBeanXml;
 import org.marid.ide.beaneditor.BeanEditor;
 import org.marid.ide.beaneditor.BeanTreeConstants;
+import org.marid.ide.beaneditor.BeanTreeUtils;
+import org.marid.ide.beaneditor.ClassData;
 import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.project.ProjectProfile;
 
+import java.beans.Introspector;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -63,7 +67,17 @@ public class NameMenuFactory implements BeanTreeConstants {
             final MenuItem menuItem = new MenuItem(xml.type, new ImageView(image));
             menuItem.setOnAction(event -> {
                 final BeanData beanData = new BeanData();
-                beanData.name.set("name1");
+                final ClassData classData = editor.classData(xml.type);
+                final String beanPrefix = Introspector.decapitalize(classData.getType().getSimpleName());
+                final int maxBeanIndex = BeanTreeUtils.beans(parentItem)
+                        .stream()
+                        .map(b -> b.name.get())
+                        .filter(n -> n.startsWith(beanPrefix))
+                        .map(n -> n.substring(beanPrefix.length()))
+                        .mapToInt(n -> NumberUtils.isDigits(n) ? Integer.parseInt(n) : 0)
+                        .max()
+                        .orElse(0) + 1;
+                beanData.name.set(beanPrefix + maxBeanIndex);
                 beanData.type.set(xml.type);
                 final TreeItem<Object> item = new TreeItem<>(beanData, new ImageView(image));
                 parentItem.getChildren().add(item);
