@@ -96,13 +96,10 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
                 )
                 .menu("Edit", b -> b
                         .item("*Cut", MaterialDesignIcon.CONTENT_CUT, "Ctrl+X", event -> {
-
                         })
                         .item("*Copy", MaterialDesignIcon.CONTENT_COPY, "Ctrl+C", event -> {
-
                         })
                         .item("*Paste", MaterialDesignIcon.CONTENT_PASTE, "Ctrl+V", event -> {
-
                         })
                 )
                 .menu("Beans", b -> b

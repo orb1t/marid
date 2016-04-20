@@ -25,11 +25,10 @@ import org.marid.ide.beaneditor.data.ConstructorArg;
 import org.marid.ide.beaneditor.data.Property;
 import org.marid.ide.beaneditor.data.RefValue;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.copy.CopyData;
 
-import java.lang.ref.WeakReference;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 import static java.util.Comparator.comparing;
@@ -39,8 +38,6 @@ import static java.util.stream.Collectors.toCollection;
  * @author Dmitry Ovchinnikov
  */
 public class BeanTreeUtils {
-
-    private static WeakReference<TreeItem<Object>> sourceRef;
 
     public static Set<BeanData> beans(TreeItem<Object> item) {
         for (TreeItem<Object> i = item.getParent(); i != null; i = i.getParent()) {
@@ -93,15 +90,24 @@ public class BeanTreeUtils {
         }
     }
 
-    public static TransferMode[] transferModes(BeanEditor editor, TreeItem<Object> source, TreeItem<Object> target) {
+    public static TransferMode[] transferModes(CopyData<BeanEditor, TreeItem<Object>> sourceData, CopyData<BeanEditor, TreeItem<Object>> targetData) {
+        final TreeItem<Object> source = sourceData.element;
+        final TreeItem<Object> target = targetData.element;
+        final BeanEditor editor = sourceData.node;
         if (source.getValue() instanceof BeanData) {
             if (target.getValue() instanceof BeanData) {
+                if (targetData.transferMode == TransferMode.COPY) {
+                    return new TransferMode[] {TransferMode.COPY};
+                }
                 final Path sourcePath = (Path) source.getParent().getValue();
                 final Path targetPath = (Path) target.getParent().getValue();
                 if (!sourcePath.equals(targetPath)) {
                     return TransferMode.COPY_OR_MOVE;
                 }
             } else if (target.getValue() instanceof Path && target.getValue().toString().endsWith(".xml")) {
+                if (targetData.transferMode == TransferMode.COPY) {
+                    return new TransferMode[] {TransferMode.COPY};
+                }
                 final Path sourcePath = (Path) source.getParent().getValue();
                 final Path targetPath = (Path) target.getValue();
                 if (!sourcePath.equals(targetPath)) {
@@ -133,9 +139,10 @@ public class BeanTreeUtils {
                 break;
             case MOVE:
                 if (source.getValue() instanceof BeanData) {
+                    final TreeItem<Object> parent = target.getValue() instanceof Path ? target : target.getParent();
                     if (target.getValue() instanceof Path) {
                         remove(source);
-                        target.getChildren().add(source);
+                        parent.getChildren().add(source);
                     }
                 }
                 if (source.getValue() instanceof Path) {
@@ -145,25 +152,17 @@ public class BeanTreeUtils {
                     }
                 }
                 break;
+            case COPY:
+                if (source.getValue() instanceof BeanData) {
+
+                }
+                break;
         }
     }
 
-    public static void startCopy(TreeItem<Object> item, BiConsumer<TreeItem<Object>, TransferMode[]> task) {
-        final TransferMode[] transferModes = transferModes(item);
-        if (transferModes.length > 0) {
-            sourceRef = new WeakReference<>(item);
-            task.accept(item, transferModes);
-        }
-    }
-
-    public static void progressCopy(BeanEditor editor, TreeItem<Object> target, BiConsumer<TreeItem<Object>, TransferMode[]> task) {
-        final TransferMode[] transferModes = transferModes(editor, sourceRef.get(), target);
-        task.accept(target, transferModes);
-    }
-
-    public static boolean finishCopy(TransferMode transferMode, TreeItem<Object> target) {
+    public static boolean finishCopy(CopyData<BeanEditor, TreeItem<Object>> sourceData, CopyData<BeanEditor, TreeItem<Object>> targetData) {
         try {
-            copy(transferMode, sourceRef.get(), target);
+            copy(targetData.transferMode, sourceData.element, targetData.element);
             return true;
         } catch (Exception x) {
             return false;
