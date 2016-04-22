@@ -18,7 +18,9 @@
 
 package org.marid.ide.beaneditor;
 
+import javafx.beans.property.StringProperty;
 import javafx.scene.control.TreeItem;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.TransferMode;
 import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.beaneditor.data.ConstructorArg;
@@ -29,15 +31,17 @@ import org.marid.jfx.copy.CopyData;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.*;
+import static org.marid.l10n.L10nSupport.LS.s;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanTreeUtils {
+public class BeanTreeUtils implements BeanTreeConstants {
 
     public static Set<BeanData> beans(TreeItem<Object> item) {
         for (TreeItem<Object> i = item.getParent(); i != null; i = i.getParent()) {
@@ -97,7 +101,7 @@ public class BeanTreeUtils {
         if (source.getValue() instanceof BeanData) {
             if (target.getValue() instanceof BeanData) {
                 if (targetData.transferMode == TransferMode.COPY) {
-                    return new TransferMode[] {TransferMode.COPY};
+                    return new TransferMode[]{TransferMode.COPY};
                 }
                 final Path sourcePath = (Path) source.getParent().getValue();
                 final Path targetPath = (Path) target.getParent().getValue();
@@ -106,7 +110,7 @@ public class BeanTreeUtils {
                 }
             } else if (target.getValue() instanceof Path && target.getValue().toString().endsWith(".xml")) {
                 if (targetData.transferMode == TransferMode.COPY) {
-                    return new TransferMode[] {TransferMode.COPY};
+                    return new TransferMode[]{TransferMode.COPY};
                 }
                 final Path sourcePath = (Path) source.getParent().getValue();
                 final Path targetPath = (Path) target.getValue();
@@ -117,18 +121,19 @@ public class BeanTreeUtils {
                 final ClassData sourceClassData = editor.classData(((BeanData) source.getValue()).type.get());
                 final ClassData targetClassData = editor.classData(((RefValue) target.getValue()).type().get());
                 if (targetClassData.isAssignableFrom(sourceClassData)) {
-                    return new TransferMode[] {TransferMode.LINK};
+                    return new TransferMode[]{TransferMode.LINK};
                 }
             }
         } else if (source.getValue() instanceof Path) {
-            if (target.getValue() instanceof Path || target.getValue() instanceof ProjectProfile) {
+            if (target.getValue() instanceof Path && !target.getValue().toString().endsWith(".xml")
+                    || target.getValue() instanceof ProjectProfile) {
                 return TransferMode.COPY_OR_MOVE;
             }
         }
         return TransferMode.NONE;
     }
 
-    public static void copy(TransferMode transferMode, TreeItem<Object> source, TreeItem<Object> target) {
+    public static void copy(BeanEditor editor, TransferMode transferMode, TreeItem<Object> source, TreeItem<Object> target) {
         switch (transferMode) {
             case LINK:
                 if (target.getValue() instanceof RefValue && source.getValue() instanceof BeanData) {
@@ -139,13 +144,14 @@ public class BeanTreeUtils {
                 break;
             case MOVE:
                 if (source.getValue() instanceof BeanData) {
-                    final TreeItem<Object> parent = target.getValue() instanceof Path ? target : target.getParent();
+                    remove(source);
                     if (target.getValue() instanceof Path) {
-                        remove(source);
-                        parent.getChildren().add(source);
+                        target.getChildren().add(source);
+                    } else {
+                        final int index = target.getParent().getChildren().indexOf(target);
+                        target.getParent().getChildren().add(index, source);
                     }
-                }
-                if (source.getValue() instanceof Path) {
+                } else if (source.getValue() instanceof Path) {
                     if (target.getValue() instanceof Path || target.getValue() instanceof ProjectProfile) {
                         remove(source);
                         target.getChildren().add(source);
@@ -154,15 +160,114 @@ public class BeanTreeUtils {
                 break;
             case COPY:
                 if (source.getValue() instanceof BeanData) {
-
+                    final TreeItem<Object> item = copy(editor, (BeanData) source.getValue(), source);
+                    if (target.getValue() instanceof Path) {
+                        target.getChildren().add(item);
+                    } else {
+                        final int index = target.getParent().getChildren().indexOf(target);
+                        target.getParent().getChildren().add(index, item);
+                    }
+                } else if (source.getValue() instanceof Path) {
+                    target.getChildren().add(copy(editor, source, target));
                 }
                 break;
         }
     }
 
+    private static TreeItem<Object> copy(BeanEditor editor, TreeItem<Object> source, TreeItem<Object> target) {
+        final boolean sourceXml = source.getValue().toString().endsWith(".xml");
+        final Set<String> names = target.getChildren().stream()
+                .map(e -> ((Path) e.getValue()).getFileName().toString())
+                .collect(toSet());
+        final Path parent = target.getValue() instanceof ProjectProfile
+                ? ((ProjectProfile) target.getValue()).getBeansDirectory()
+                : ((Path) target.getValue());
+        final String name;
+        {
+            final StringBuilder builder = new StringBuilder(((Path) source.getValue()).getFileName().toString());
+            if (sourceXml) {
+                builder.delete(builder.length() - 4, builder.length());
+            }
+            while (names.contains(sourceXml ? builder + ".xml" : builder.toString())) {
+                builder.append('_').append(s("copy"));
+            }
+            if (sourceXml) {
+                builder.append(".xml");
+            }
+            name = builder.toString();
+        }
+        final Path path = parent.resolve(name);
+        final TreeItem<Object> item = new TreeItem<>(path, new ImageView(sourceXml ? FILE : DIR));
+        for (final TreeItem<Object> child : source.getChildren()) {
+            if (child.getValue() instanceof Path) {
+                item.getChildren().add(copy(editor, child, item));
+            } else if (child.getValue() instanceof BeanData) {
+                item.getChildren().add(copy(editor, (BeanData) child.getValue(), child));
+            }
+        }
+        return item;
+    }
+
+    private static TreeItem<Object> copy(BeanEditor editor, BeanData sourceBeanData, TreeItem<Object> source) {
+        final Map<String, StringProperty> nameMap = beans(source).stream().collect(toMap(b -> b.name.get(), b -> b.name));
+        final BiConsumer<StringProperty, StringProperty> nameConsumer = (src, tgt) -> {
+            final StringProperty bound = nameMap.get(src.get());
+            if (bound == null) {
+                tgt.set(src.get());
+            } else {
+                tgt.bind(bound);
+            }
+        };
+        final String sourceName = sourceBeanData.name.get();
+        final String targetName;
+        {
+            final String copyString = s("copy");
+            final StringBuilder builder = new StringBuilder(sourceName).append('_').append(copyString);
+            while (nameMap.containsKey(builder.toString())) {
+                builder.append('_').append(copyString);
+            }
+            targetName = builder.toString();
+        }
+        final BeanData td = new BeanData();
+        td.name.set(targetName);
+        td.type.set(sourceBeanData.type.get());
+        td.destroyMethod.set(sourceBeanData.destroyMethod.get());
+        td.initMethod.set(sourceBeanData.initMethod.get());
+        td.lazyInit.set(sourceBeanData.lazyInit.get());
+        td.factoryMethod.set(sourceBeanData.factoryMethod.get());
+        nameConsumer.accept(sourceBeanData.factoryBean, td.factoryBean);
+        final TreeItem<Object> targetItem = new TreeItem<>(td, new ImageView(editor.image(td.type.get())));
+        for (final TreeItem<Object> child : source.getChildren()) {
+            if (child.getValue() instanceof ConstructorArg) {
+                final ConstructorArg s = (ConstructorArg) child.getValue();
+                final ConstructorArg d = new ConstructorArg();
+                d.type.set(s.type.get());
+                d.name.set(s.name.get());
+                if (s.value.isNotEmpty().get()) {
+                    d.value.set(s.value.get());
+                } else if (s.ref.isBound()) {
+                    nameConsumer.accept(s.ref, d.ref);
+                }
+                targetItem.getChildren().add(new TreeItem<>(d, new ImageView(editor.image(d.type.get()))));
+            } else if (child.getValue() instanceof Property) {
+                final Property s = (Property) child.getValue();
+                final Property d = new Property();
+                d.type.set(s.type.get());
+                d.name.set(s.name.get());
+                if (s.value.isNotEmpty().get()) {
+                    d.value.set(s.value.get());
+                } else if (s.ref.isBound()) {
+                    nameConsumer.accept(s.ref, d.ref);
+                }
+                targetItem.getChildren().add(new TreeItem<>(d, new ImageView(editor.image(d.type.get()))));
+            }
+        }
+        return targetItem;
+    }
+
     public static boolean finishCopy(CopyData<BeanEditor, TreeItem<Object>> sourceData, CopyData<BeanEditor, TreeItem<Object>> targetData) {
         try {
-            copy(targetData.transferMode, sourceData.element, targetData.element);
+            copy(sourceData.node, targetData.transferMode, sourceData.element, targetData.element);
             return true;
         } catch (Exception x) {
             return false;

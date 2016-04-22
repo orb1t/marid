@@ -51,9 +51,7 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
 
     public NameCell(TreeTableColumn<Object, String> column, BeanEditor beanEditor) {
         this.beanEditor = beanEditor;
-        if (copies == null) {
-            copies = new Copies<>(beanEditor);
-        }
+        copies = new Copies<>(beanEditor);
         updateTreeTableColumn(column);
         setAlignment(Pos.CENTER_LEFT);
         setConverter(new DefaultStringConverter());

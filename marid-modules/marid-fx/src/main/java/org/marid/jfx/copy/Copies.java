@@ -36,8 +36,8 @@ public class Copies<N, E> {
 
     public void start(E element, Function<E, TransferMode[]> modesFunc, Consumer<CopyData<N, E>> task) {
         final TransferMode[] modes = modesFunc.apply(element);
+        originalData = new CopyData<>(null, node, element, modes);
         if (modes.length > 0) {
-            originalData = new CopyData<>(null, node, element, modes);
             task.accept(originalData);
         }
     }
@@ -55,9 +55,10 @@ public class Copies<N, E> {
     public boolean finish(E element,
                           TransferMode transferMode,
                           BiPredicate<CopyData<N, E>, CopyData<N, E>> task) {
+        final CopyData<N, E> original = originalData;
         final CopyData<N, E> target = new CopyData<>(transferMode, originalData.node, element, originalData.transferModes);
-        final boolean result = task.test(originalData, target);
         originalData = null;
-        return result;
+        System.out.printf("%s, %s%n", original.element, target.element);
+        return task.test(original, target);
     }
 }
