@@ -18,14 +18,17 @@
 
 package org.marid.ide.beaneditor;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.beans.Introspector.decapitalize;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,6 +39,8 @@ public class ClassData {
     private final Map<String, Parameter> parameters;
     private final Map<String, Method> getters;
     private final Map<String, Method> setters;
+    private final Map<String, Method> procedures;
+    private final Map<String, Method> factoryMethods;
 
     public ClassData(Class<?> type) {
         this.type = type;
@@ -53,7 +58,7 @@ public class ClassData {
                 .filter(m -> m.getParameterCount() == 0)
                 .filter(m -> isGetter(m.getName()))
                 .filter(m -> isAllowed(m.getReturnType()))
-                .collect(Collectors.toMap(m -> {
+                .collect(toMap(m -> {
                     if (m.getName().startsWith("get")) {
                         return decapitalize(m.getName().substring(3));
                     } else {
@@ -65,7 +70,26 @@ public class ClassData {
                 .filter(m -> m.getReturnType().getName().equals("void"))
                 .filter(m -> isAllowed(m.getParameterTypes()[0]))
                 .filter(m -> isSetter(m.getName()))
-                .collect(Collectors.toMap(e -> decapitalize(e.getName().substring(3)), e -> e, (m1, m2) -> m2, TreeMap::new));
+                .collect(toMap(e -> decapitalize(e.getName().substring(3)), e -> e, (m1, m2) -> m2, TreeMap::new));
+        this.factoryMethods = Stream.of(type.getMethods())
+                .filter(m -> m.getParameterCount() == 0)
+                .filter(m -> m.getReturnType() != void.class)
+                .collect(toMap(Method::getName, e -> e, (m1, m2) -> m2, TreeMap::new));
+        this.procedures = new TreeMap<>();
+        final Predicate<Method> closePredicate = AutoCloseable.class.isAssignableFrom(type)
+                ? m -> !"close".equals(m.getName())
+                : m -> true;
+        for (Class<?> c = type; c.getSuperclass() != null; c = c.getSuperclass()) {
+            for (final Method m : c.getDeclaredMethods()) {
+                if (m.getReturnType() == void.class
+                        && m.getParameterCount() == 0
+                        && !m.isAnnotationPresent(PreDestroy.class)
+                        && !m.isAnnotationPresent(PostConstruct.class)
+                        && closePredicate.test(m)) {
+                    procedures.put(m.getName(), m);
+                }
+            }
+        }
     }
 
     private static boolean isGetter(String name) {
@@ -110,8 +134,16 @@ public class ClassData {
         return getters;
     }
 
+    public Map<String, Method> getFactoryMethods() {
+        return factoryMethods;
+    }
+
     public Map<String, Method> getSetters() {
         return setters;
+    }
+
+    public Map<String, Method> getProcedures() {
+        return procedures;
     }
 
     public boolean isAssignableFrom(ClassData classData) {

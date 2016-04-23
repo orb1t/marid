@@ -18,11 +18,15 @@
 
 package org.marid.ide.beaneditor.ui;
 
+import de.jensd.fx.glyphs.materialicons.MaterialIcon;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.WritableObjectValue;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.marid.beans.MaridBeanXml;
 import org.marid.ide.beaneditor.BeanEditor;
 import org.marid.ide.beaneditor.BeanTreeConstants;
@@ -32,9 +36,13 @@ import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.project.ProjectProfile;
 
 import java.beans.Introspector;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
-import java.util.Optional;
+import java.util.*;
 
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.*;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10nSupport.LS.s;
 
 /**
@@ -57,6 +65,79 @@ public class NameMenuFactory implements BeanTreeConstants {
         final ContextMenu menu = new ContextMenu();
         menu.getItems().add(subDir(beanEditor, profile.getBeansDirectory(), item));
         menu.getItems().add(beanFile(beanEditor, profile.getBeansDirectory(), item));
+        return menu;
+    }
+
+    public static ContextMenu menu(BeanEditor beanEditor, TreeItem<Object> item, BeanData beanData) {
+        final ContextMenu menu = new ContextMenu();
+        final Set<BeanData> beans = BeanTreeUtils.beans(item);
+        final ClassData classData = beanEditor.classData(beanData.type.get());
+        final Map<String, Method> procedures = classData.getProcedures();
+        if (!procedures.isEmpty()) {
+            final Menu initMenu = new Menu(s("Initialize methods"));
+            procedures.forEach((k, v) -> {
+                final MenuItem menuItem = new MenuItem(k, glyphIcon(beanEditor.accessorIcon(v.getModifiers()), 16));
+                menuItem.setOnAction(event -> {
+                    beanData.initMethod.set(k);
+                    if (beanData.destroyMethod.isEqualTo(k).get()) {
+                        beanData.destroyMethod.set(null);
+                    }
+                });
+                initMenu.getItems().add(menuItem);
+            });
+            menu.getItems().add(initMenu);
+            final Menu destroyMenu = new Menu(s("Destroy methods"));
+            procedures.forEach((k, v) -> {
+                final MenuItem menuItem = new MenuItem(k, glyphIcon(beanEditor.accessorIcon(v.getModifiers()), 16));
+                menuItem.setOnAction(event -> {
+                    beanData.destroyMethod.set(k);
+                    if (beanData.initMethod.isEqualTo(k).get()) {
+                        beanData.initMethod.set(null);
+                    }
+                });
+                destroyMenu.getItems().add(menuItem);
+            });
+            menu.getItems().add(destroyMenu);
+        }
+        final Map<StringProperty, Set<Method>> factoryMethods = beans.stream()
+                .filter(b -> b != beanData)
+                .flatMap(b -> beanEditor.classData(b.type.get()).getFactoryMethods().values().stream()
+                        .filter(m -> classData.isAssignableFrom(beanEditor.classData(m.getReturnType().getName())))
+                        .map(m -> Pair.of(b, m)))
+                .collect(groupingBy(
+                        p -> p.getKey().name,
+                        () -> new TreeMap<>(comparing(WritableObjectValue::get)),
+                        mapping(Pair::getValue, toCollection(() -> new TreeSet<>(comparing(Method::getName))))));
+        if (!factoryMethods.isEmpty()) {
+            if (!menu.getItems().isEmpty()) {
+                menu.getItems().add(new SeparatorMenuItem());
+            }
+            factoryMethods.forEach((nameProperty, methods) -> {
+                final Menu m = new Menu(nameProperty.get(), glyphIcon(MaterialIcon.LINK, 16));
+                methods.forEach(method -> {
+                    final Image image = beanEditor.image(method.getReturnType().getName());
+                    final MenuItem menuItem = new MenuItem(method.getName(), new ImageView(image));
+                    menuItem.setOnAction(event -> {
+                        beanData.factoryBean.bind(nameProperty);
+                        beanData.factoryMethod.set(method.getName());
+                    });
+                    m.getItems().add(menuItem);
+                });
+                menu.getItems().add(m);
+            });
+        }
+        if (beanData.factoryBean.isNotEmpty().get()) {
+            if (!menu.getItems().isEmpty()) {
+                menu.getItems().add(new SeparatorMenuItem());
+            }
+            final MenuItem menuItem = new MenuItem(s("Unbound"), glyphIcon(MaterialIcon.PHONELINK_ERASE, 16));
+            menuItem.setOnAction(event -> {
+                beanData.factoryBean.unbind();
+                beanData.factoryBean.set(null);
+                beanData.factoryMethod.set(null);
+            });
+            menu.getItems().add(menuItem);
+        }
         return menu;
     }
 

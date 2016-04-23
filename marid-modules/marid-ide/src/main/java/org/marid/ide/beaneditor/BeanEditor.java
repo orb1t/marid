@@ -18,8 +18,10 @@
 
 package org.marid.ide.beaneditor;
 
+import de.jensd.fx.glyphs.GlyphIcons;
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.materialicons.MaterialIcon;
+import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Scene;
@@ -37,6 +39,7 @@ import org.marid.ide.Ide;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.ScrollPanes;
+import org.marid.jfx.copy.Copies;
 import org.marid.jfx.menu.MenuContainerBuilder;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
@@ -47,6 +50,8 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -67,6 +72,7 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
     final Map<String, String> typeUrlMap = new HashMap<>();
     final Map<String, Image> iconMap = new HashMap<>();
     final Map<String, ClassData> classDataMap = new HashMap<>();
+    final Copies<BeanEditor, TreeItem<Object>> copies;
 
     @Inject
     public BeanEditor(ProjectManager projectManager) {
@@ -78,6 +84,11 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
         final BorderPane pane = getTreePane();
         setScene(new Scene(pane, 1024, 768));
         update(profile);
+        this.copies = new Copies<>(this);
+    }
+
+    public Copies<BeanEditor, TreeItem<Object>> getCopies() {
+        return copies;
     }
 
     private BorderPane getTreePane() {
@@ -96,6 +107,7 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
                 )
                 .menu("Edit", b -> b
                         .item("*Cut", MaterialDesignIcon.CONTENT_CUT, "Ctrl+X", event -> {
+
                         })
                         .item("*Copy", MaterialDesignIcon.CONTENT_COPY, "Ctrl+C", event -> {
                         })
@@ -237,6 +249,18 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
                     }
             }
         });
+    }
+
+    public GlyphIcons accessorIcon(int modifiers) {
+        if (Modifier.isPublic(modifiers)) {
+            return OctIcon.MIRROR_PUBLIC;
+        } else if (Modifier.isProtected(modifiers)) {
+            return MaterialDesignIcon.NEST_PROTECT;
+        } else if (Modifier.isPrivate(modifiers)) {
+            return OctIcon.MIRROR_PRIVATE;
+        } else {
+            return OctIcon.PACKAGE;
+        }
     }
 
     public List<MaridBeanXml> getMetaBeans() {

@@ -45,13 +45,10 @@ import java.nio.file.Path;
  */
 public class NameCell extends TextFieldTreeTableCell<Object, String> implements L10nSupport, LogSupport, BeanTreeConstants {
 
-    private static Copies<BeanEditor, TreeItem<Object>> copies;
-
     private final BeanEditor beanEditor;
 
     public NameCell(TreeTableColumn<Object, String> column, BeanEditor beanEditor) {
         this.beanEditor = beanEditor;
-        copies = new Copies<>(beanEditor);
         updateTreeTableColumn(column);
         setAlignment(Pos.CENTER_LEFT);
         setConverter(new DefaultStringConverter());
@@ -61,13 +58,17 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
     public void updateItem(String item, boolean empty) {
         super.updateItem(item, empty);
         final TreeItem<Object> treeItem = getTreeTableRow() == null ? null : getTreeTableRow().getTreeItem();
-        setContextMenu(null);
         if (!empty && treeItem != null) {
             if (treeItem.getValue() instanceof Path) {
                 setContextMenu(NameMenuFactory.menu(beanEditor, treeItem, (Path) treeItem.getValue()));
             } else if (treeItem.getValue() instanceof ProjectProfile) {
                 setContextMenu(NameMenuFactory.menu(beanEditor, treeItem, (ProjectProfile) treeItem.getValue()));
+            } else if (treeItem.getValue() instanceof BeanData) {
+                setContextMenu(NameMenuFactory.menu(beanEditor, treeItem, (BeanData) treeItem.getValue()));
+            } else {
+                setContextMenu(null);
             }
+            final Copies<BeanEditor, TreeItem<Object>> copies = beanEditor.getCopies();
             setOnDragDetected(event -> copies.start(currentItem(event), BeanTreeUtils::transferModes, data -> {
                 final Dragboard dragboard = getTreeTableView().startDragAndDrop(data.transferModes);
                 final ClipboardContent content = new ClipboardContent();
@@ -88,6 +89,7 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
             setOnDragOver(null);
             setOnDragDropped(null);
             setStyle(null);
+            setContextMenu(null);
         }
     }
 

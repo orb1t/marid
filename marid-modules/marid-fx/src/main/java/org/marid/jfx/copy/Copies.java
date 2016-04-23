@@ -58,7 +58,6 @@ public class Copies<N, E> {
         final CopyData<N, E> original = originalData;
         final CopyData<N, E> target = new CopyData<>(transferMode, originalData.node, element, originalData.transferModes);
         originalData = null;
-        System.out.printf("%s, %s%n", original.element, target.element);
         return task.test(original, target);
     }
 }
