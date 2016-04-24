@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableSet;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.marid.db.dao.NumericWriter;
 import org.marid.db.data.DataRecord;
@@ -31,9 +30,7 @@ import org.marid.db.data.DataRecordKey;
 import org.marid.test.NormalTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -46,12 +43,10 @@ import static org.junit.Assert.*;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
 @Category({NormalTests.class})
 @ContextConfiguration(classes = {HsqldbDatabaseTestConf.class})
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class})
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class HsqldbDatabaseTest {
+public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
 
     private final Instant from = Instant.parse("2000-01-01T00:00:00Z");
     private final Instant to = Instant.parse("2000-01-01T00:10:00Z");

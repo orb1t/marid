@@ -34,7 +34,7 @@ public final class HsqldbProperties {
     private File directory = new File("daqDatabase");
     private long shutdownTimeoutSeconds = 60L;
     private URL numericsSql = getClass().getResource("numerics.sql");
-    private int connectionPoolSize = 10;
+    private int connectionPoolSize = 0;
 
     public File getDirectory() {
         return directory;

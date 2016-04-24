@@ -20,7 +20,6 @@ package org.marid.db.hsqldb;
 
 import org.hsqldb.Database;
 import org.hsqldb.DatabaseManager;
-import org.hsqldb.jdbc.JDBCSessionConnection;
 import org.hsqldb.jdbc.JDBCSessionDataSource;
 import org.hsqldb.jdbc.JDBCSessionPool;
 import org.hsqldb.server.Server;
@@ -101,16 +100,14 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
     }
 
     private void initDatabase(String name, URL url) throws SQLException, IOException {
-        final int index = databaseNameToIndex.keySet().stream().collect(Collectors.toList()).indexOf(name);
-        final Database database = DatabaseManager.getDatabase(index);
-        try (final Connection c = new JDBCSessionConnection(database, "PUBLIC")) {
+        try (final Connection c = getDataSource(name).getConnection()) {
             c.setAutoCommit(true);
             final boolean tableExists;
-            try (final ResultSet rs = c.getMetaData().getTables(null, null, name.toUpperCase(), new String[]{"TABLE"})) {
+            try (final ResultSet rs = c.getMetaData().getTables(null, null, name, new String[]{"TABLE"})) {
                 tableExists = rs.next();
             }
             if (tableExists) {
-                log(INFO, "Table {0} already exists in DB {1}", name.toUpperCase(), name);
+                log(INFO, "Table {0} already exists", name);
                 return;
             }
             try (final Statement s = c.createStatement()) {
@@ -150,8 +147,8 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
         final int dbIndex = databaseNameToIndex.keySet().stream().collect(Collectors.toList()).indexOf(name);
         final Database database = DatabaseManager.getDatabase(dbIndex);
         return connectionPoolSize == 0
-                ? new JDBCSessionDataSource(database, name.toUpperCase())
-                : new JDBCSessionPool(connectionPoolSize, database, name.toUpperCase());
+                ? new JDBCSessionDataSource(database, "PUBLIC")
+                : new JDBCSessionPool(connectionPoolSize, database, "PUBLIC");
     }
 
     @MaridBean(icon = "http://icons.iconarchive.com/icons/double-j-design/ravenna-3d/24/Database-Table-icon.png")
