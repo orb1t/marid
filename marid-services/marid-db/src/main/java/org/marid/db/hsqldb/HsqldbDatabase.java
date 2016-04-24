@@ -33,15 +33,16 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 import java.io.*;
-import java.net.URI;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.TreeMap;
 import java.util.concurrent.locks.LockSupport;
+import java.util.stream.Collectors;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -55,10 +56,9 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
 
     private final Server server;
     private final File directory;
-    private final URI sqlDirectoryUri;
     private final long shutdownTimeout;
     private final int connectionPoolSize;
-    private final Map<String, Integer> databaseNameToIndex = new TreeMap<>();
+    private final Map<String, URL> databaseNameToIndex = new LinkedHashMap<>();
 
     private PrintWriter outWriter;
     private PrintWriter errWriter;
@@ -66,21 +66,19 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
     public HsqldbDatabase(HsqldbProperties properties) {
         log(INFO, "{0}", properties);
         directory = properties.getDirectory();
-        sqlDirectoryUri = properties.getSqlDirectoryUri();
         shutdownTimeout = SECONDS.toMillis(properties.getShutdownTimeoutSeconds());
         connectionPoolSize = properties.getConnectionPoolSize();
         server = new Server();
         server.setNoSystemExit(true);
         server.setRestartOnShutdown(false);
-        server.setDaemon(true);
-        setDatabase("numerics");
+        setDatabase("NUMERICS", properties.getNumericsSql());
     }
 
-    private void setDatabase(String name) {
+    private void setDatabase(String name, URL url) {
         final int index = databaseNameToIndex.size();
         server.setDatabaseName(index, name);
         server.setDatabasePath(index, new File(directory, name).getAbsolutePath());
-        databaseNameToIndex.put(name, index);
+        databaseNameToIndex.put(name, url);
     }
 
     @PostConstruct
@@ -88,11 +86,11 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
         outWriter = new PrintWriter(new File(directory, "output.log"));
         errWriter = new PrintWriter(new File(directory, "errors.log"));
         server.start();
-        for (final String db : databaseNameToIndex.keySet()) {
+        for (final Map.Entry<String, URL> e : databaseNameToIndex.entrySet()) {
             try {
-                initDatabase(db);
+                initDatabase(e.getKey(), e.getValue());
             } catch (IOException | SQLException x) {
-                log(WARNING, "Unable to init DB {0}", x, db);
+                log(WARNING, "Unable to init DB {0}", x, e.getKey());
             }
         }
     }
@@ -102,13 +100,13 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
         close();
     }
 
-    private void initDatabase(String name) throws SQLException, IOException {
-        final int index = databaseNameToIndex.get(name);
+    private void initDatabase(String name, URL url) throws SQLException, IOException {
+        final int index = databaseNameToIndex.keySet().stream().collect(Collectors.toList()).indexOf(name);
         final Database database = DatabaseManager.getDatabase(index);
         try (final Connection c = new JDBCSessionConnection(database, "PUBLIC")) {
             c.setAutoCommit(true);
             final boolean tableExists;
-            try (final ResultSet rs = c.getMetaData().getTables(null, null, name.toUpperCase(), new String[] {"TABLE"})) {
+            try (final ResultSet rs = c.getMetaData().getTables(null, null, name.toUpperCase(), new String[]{"TABLE"})) {
                 tableExists = rs.next();
             }
             if (tableExists) {
@@ -116,20 +114,17 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
                 return;
             }
             try (final Statement s = c.createStatement()) {
-                final File sqlFile = new File(sqlDirectoryUri.resolve(name + ".sql"));
-                if (sqlFile.length() > 0L) {
-                    try (final Scanner scanner = new Scanner(sqlFile)) {
-                        while (scanner.hasNextLine()) {
-                            final String sql = scanner.nextLine().trim();
-                            if (sql.startsWith("--") || sql.isEmpty()) {
-                                continue;
-                            }
-                            try {
-                                log(INFO, "Executing {0}", sql);
-                                s.execute(sql);
-                            } catch (SQLException x) {
-                                log(WARNING, "Unable to execute '{0}'", x, sql);
-                            }
+                try (final Scanner scanner = new Scanner(url.openStream())) {
+                    while (scanner.hasNextLine()) {
+                        final String sql = scanner.nextLine().trim();
+                        if (sql.startsWith("--") || sql.isEmpty()) {
+                            continue;
+                        }
+                        try {
+                            log(INFO, "Executing {0}", sql);
+                            s.execute(sql);
+                        } catch (SQLException x) {
+                            log(WARNING, "Unable to execute '{0}'", x, sql);
                         }
                     }
                 }
@@ -152,7 +147,7 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
     }
 
     private DataSource getDataSource(String name) {
-        final int dbIndex = databaseNameToIndex.get(name);
+        final int dbIndex = databaseNameToIndex.keySet().stream().collect(Collectors.toList()).indexOf(name);
         final Database database = DatabaseManager.getDatabase(dbIndex);
         return connectionPoolSize == 0
                 ? new JDBCSessionDataSource(database, name.toUpperCase())
@@ -161,6 +156,6 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
 
     @MaridBean(icon = "http://icons.iconarchive.com/icons/double-j-design/ravenna-3d/24/Database-Table-icon.png")
     public NumericWriter numericWriter() {
-        return new HsqldbDaqNumericWriter(getDataSource("numerics"), "NUMERICS");
+        return new HsqldbDaqNumericWriter(getDataSource("NUMERICS"), "NUMERICS");
     }
 }

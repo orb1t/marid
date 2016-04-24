@@ -33,6 +33,7 @@ import java.sql.*;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.UnaryOperator;
+import java.util.stream.LongStream;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -61,11 +62,11 @@ abstract class HsqldbDaqAbstractWriter<T extends Serializable> implements DaqWri
     }
 
     @Override
-    public long delete(Set<String> tags, Instant from, Instant to) {
+    public long delete(long[] tags, Instant from, Instant to) {
         final String sql = "delete from " + table + " where TAG in (unnest(?)) and TS >= ? and TS < ?";
         try (final Connection c = dataSource.getConnection(); final PreparedStatement s = c.prepareStatement(sql)) {
             c.setAutoCommit(true);
-            s.setObject(1, tags.toArray(new String[tags.size()]));
+            s.setObject(1, tags);
             s.setTimestamp(2, new Timestamp(from.toEpochMilli()));
             s.setTimestamp(3, new Timestamp(to.toEpochMilli()));
             return s.executeUpdate();
@@ -77,7 +78,7 @@ abstract class HsqldbDaqAbstractWriter<T extends Serializable> implements DaqWri
     void merge(Connection c, List<DataRecord<T>> dataRecords, String sql, Set<DataRecordKey> result) throws SQLException {
         try (final PreparedStatement s = c.prepareStatement(sql)) {
             for (final DataRecord<T> dataRecord : dataRecords) {
-                s.setString(1, dataRecord.getTag());
+                s.setLong(1, dataRecord.getTag());
                 s.setTimestamp(2, new Timestamp(dataRecord.getTimestamp().toEpochMilli()));
                 setValue(s, 3, dataRecord.getValue());
                 s.addBatch();
@@ -129,18 +130,18 @@ abstract class HsqldbDaqAbstractWriter<T extends Serializable> implements DaqWri
     }
 
     @Override
-    public Set<String> tags(Instant from, Instant to) {
+    public long[] tags(Instant from, Instant to) {
         final String sql = "select distinct TAG from " + table + " where TS >= ? and TS < ?";
         try (final Connection c = dataSource.getConnection(); final PreparedStatement s = c.prepareStatement(sql)) {
             s.setTimestamp(1, new Timestamp(from.toEpochMilli()));
             s.setTimestamp(2, new Timestamp(to.toEpochMilli()));
-            final Set<String> set = new TreeSet<>();
+            final LongStream.Builder builder = LongStream.builder();
             try (final ResultSet rs = s.executeQuery()) {
                 while (rs.next()) {
-                    set.add(rs.getString(1));
+                    builder.add(rs.getLong(1));
                 }
             }
-            return set;
+            return builder.build().toArray();
         } catch (SQLException x) {
             throw new IllegalStateException(x);
         }
@@ -163,16 +164,6 @@ abstract class HsqldbDaqAbstractWriter<T extends Serializable> implements DaqWri
     }
 
     @Override
-    public Set<String> tagsWithPrefix(String prefix) {
-        return tags(prefix, p -> p + "%");
-    }
-
-    @Override
-    public Set<String> tagsWithSuffix(String suffix) {
-        return tags(suffix, s -> "%" + s);
-    }
-
-    @Override
     public long tagCount(Instant from, Instant to) {
         final String sql = "select count(distinct TAG) from " + table + " where TS >= ? and TS < ?";
         try (final Connection c = dataSource.getConnection(); final PreparedStatement s = c.prepareStatement(sql)) {
@@ -187,10 +178,10 @@ abstract class HsqldbDaqAbstractWriter<T extends Serializable> implements DaqWri
     }
 
     @Override
-    public DataRecord<T> fetchRecord(String tag, Instant instant) {
+    public DataRecord<T> fetchRecord(long tag, Instant instant) {
         final String sql = "select * from " + table + " where TAG = ? and TS = ?";
         try (final Connection c = dataSource.getConnection(); final PreparedStatement s = c.prepareStatement(sql)) {
-            s.setString(1, tag);
+            s.setLong(1, tag);
             s.setTimestamp(2, new Timestamp(instant.toEpochMilli()));
             try (final ResultSet rs = s.executeQuery()) {
                 if (rs.next()) {
@@ -207,16 +198,16 @@ abstract class HsqldbDaqAbstractWriter<T extends Serializable> implements DaqWri
     }
 
     @Override
-    public List<DataRecord<T>> fetchRecords(Set<String> tags, Instant from, Instant to) {
+    public List<DataRecord<T>> fetchRecords(long[] tags, Instant from, Instant to) {
         final String sql = "select * from " + table + " where TAG in (unnest(?)) and TS >= ? and TS < ?";
         try (final Connection c = dataSource.getConnection(); final PreparedStatement s = c.prepareStatement(sql)) {
             final List<DataRecord<T>> result = new ArrayList<>();
-            s.setObject(1, tags.toArray(new String[tags.size()]));
+            s.setObject(1, LongStream.of(tags).boxed().toArray(Long[]::new));
             s.setTimestamp(2, new Timestamp(from.toEpochMilli()));
             s.setTimestamp(3, new Timestamp(to.toEpochMilli()));
             try (final ResultSet rs = s.executeQuery()) {
                 while (rs.next()) {
-                    final String tag = rs.getString(1);
+                    final long tag = rs.getLong(1);
                     final Instant ts = Instant.ofEpochMilli(rs.getTimestamp(2).getTime());
                     final T value = getValue(rs, 3);
                     result.add(new DataRecord<>(tag, ts, value));
@@ -229,15 +220,15 @@ abstract class HsqldbDaqAbstractWriter<T extends Serializable> implements DaqWri
     }
 
     @Override
-    public Map<String, String> hash(Instant from, Instant to, boolean includeData, String algorithm) {
+    public Map<Long, String> hash(Instant from, Instant to, boolean includeData, String algorithm) {
         final String sql = "select * from " + table + " where TS >= ? and TS < ? order by TAG, TS";
         try (final Connection c = dataSource.getConnection(); final PreparedStatement s = c.prepareStatement(sql)) {
-            final Map<String, MessageDigest> digestMap = new TreeMap<>();
+            final Map<Long, MessageDigest> digestMap = new TreeMap<>();
             s.setTimestamp(1, new Timestamp(from.toEpochMilli()));
             s.setTimestamp(2, new Timestamp(to.toEpochMilli()));
             try (final ResultSet rs = s.executeQuery()) {
                 while (rs.next()) {
-                    final String tag = rs.getString(1);
+                    final Long tag = rs.getLong(1);
                     final Timestamp ts = rs.getTimestamp(2);
                     final MessageDigest digest = digestMap.computeIfAbsent(tag, t -> Digests.digest(algorithm));
                     digest.update(ByteBuffer.allocate(8).putLong(0, ts.getTime()));
@@ -246,7 +237,7 @@ abstract class HsqldbDaqAbstractWriter<T extends Serializable> implements DaqWri
                     }
                 }
             }
-            final Map<String, String> result = new TreeMap<>();
+            final Map<Long, String> result = new TreeMap<>();
             digestMap.forEach((k, v) -> result.put(k, Base64.getEncoder().encodeToString(v.digest())));
             return result;
         } catch (SQLException x) {

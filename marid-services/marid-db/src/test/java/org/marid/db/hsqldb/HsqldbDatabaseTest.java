@@ -41,8 +41,7 @@ import java.util.*;
 
 import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.toSet;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -65,17 +64,17 @@ public class HsqldbDatabaseTest {
         final List<DataRecord<Double>> expected = new ArrayList<>();
         for (long t = from.getEpochSecond(); t < to.getEpochSecond(); t += 10L) {
             final Instant instant = Instant.ofEpochSecond(t);
-            final DataRecord<Double> record = new DataRecord<>("a/b", instant, 3.3);
+            final DataRecord<Double> record = new DataRecord<>(0, instant, 3.3);
             expected.add(record);
         }
         final Set<DataRecordKey> insertResult = numericWriter.merge(expected, true);
         assertEquals(
                 expected.stream().map(DataRecord::getTimestamp).collect(toSet()),
                 insertResult.stream().map(DataRecordKey::getTimestamp).collect(toSet()));
-        final List<DataRecord<Double>> actual = numericWriter.fetchRecords(ImmutableSet.of("a/b"), from, to);
+        final List<DataRecord<Double>> actual = numericWriter.fetchRecords(new long[] {0L}, from, to);
         assertEquals(actual, expected);
         final Instant max = expected.stream().map(DataRecord::getTimestamp).max(naturalOrder()).get();
-        final List<DataRecord<Double>> actualMinus1 = numericWriter.fetchRecords(ImmutableSet.of("a/b"), from, max);
+        final List<DataRecord<Double>> actualMinus1 = numericWriter.fetchRecords(new long[] {0L}, from, max);
         assertEquals(expected.size() - 1, actualMinus1.size());
     }
 
@@ -85,14 +84,14 @@ public class HsqldbDatabaseTest {
         final Instant t2 = Instant.parse("2000-01-01T00:00:40Z");
         final Instant t3 = Instant.parse("2000-01-01T00:00:50Z");
         final List<DataRecord<Double>> records = ImmutableList.of(
-                new DataRecord<>("a/b", t1, 2.3),
-                new DataRecord<>("a/b", t2, 3.4),
-                new DataRecord<>("a/b", t3, 3.3));
+                new DataRecord<>(0, t1, 2.3),
+                new DataRecord<>(0, t2, 3.4),
+                new DataRecord<>(0, t3, 3.3));
         final Set<DataRecordKey> mergeResult = numericWriter.merge(records, false);
         assertEquals(ImmutableSet.of(t1, t2), mergeResult.stream().map(DataRecordKey::getTimestamp).collect(toSet()));
-        assertEquals(2.3, numericWriter.fetchRecord("a/b", t1).getValue(), 1e-3);
-        assertEquals(3.4, numericWriter.fetchRecord("a/b", t2).getValue(), 1e-3);
-        assertEquals(3.3, numericWriter.fetchRecord("a/b", t3).getValue(), 1e-3);
+        assertEquals(2.3, numericWriter.fetchRecord(0, t1).getValue(), 1e-3);
+        assertEquals(3.4, numericWriter.fetchRecord(0, t2).getValue(), 1e-3);
+        assertEquals(3.3, numericWriter.fetchRecord(0, t3).getValue(), 1e-3);
     }
 
     @Test
@@ -109,10 +108,10 @@ public class HsqldbDatabaseTest {
 
     @Test
     public void test_05_HashCodesNotIncludingData() {
-        final Map<String, String> hashBefore = numericWriter.hash(from, to, false, "MD5");
+        final Map<Long, String> hashBefore = numericWriter.hash(from, to, false, "MD5");
         final Instant t = Instant.parse("2000-01-01T00:00:50Z");
         assertEquals(1L, numericWriter.delete(t, t.plusSeconds(1L)));
-        final Map<String, String> hashAfter = numericWriter.hash(from, to, false, "MD5");
+        final Map<Long, String> hashAfter = numericWriter.hash(from, to, false, "MD5");
         assertNotEquals(hashBefore, hashAfter);
     }
 
@@ -121,27 +120,23 @@ public class HsqldbDatabaseTest {
         final List<DataRecord<Double>> expected = new ArrayList<>();
         for (long t = from.getEpochSecond(); t < to.getEpochSecond(); t += 10L) {
             final Instant instant = Instant.ofEpochSecond(t);
-            final DataRecord<Double> record = new DataRecord<>("d/e", instant, 3.3);
+            final DataRecord<Double> record = new DataRecord<>(1, instant, 3.3);
             expected.add(record);
         }
         final Set<DataRecordKey> insertResult = numericWriter.merge(expected, true);
         assertEquals(
                 expected.stream().map(DataRecord::getTimestamp).collect(toSet()),
                 insertResult.stream().map(DataRecordKey::getTimestamp).collect(toSet()));
-        final List<DataRecord<Double>> actual = numericWriter.fetchRecords(ImmutableSet.of("d/e"), from, to);
+        final List<DataRecord<Double>> actual = numericWriter.fetchRecords(new long[] {1L}, from, to);
         assertEquals(actual, expected);
-        assertEquals(ImmutableSet.of("a/b", "d/e"), numericWriter.tags(from, to));
+        assertArrayEquals(new long[] {0L, 1L}, numericWriter.tags(from, to));
         assertEquals(2, numericWriter.tagCount(from, to));
-        assertEquals(Collections.singleton("a/b"), numericWriter.tagsWithPrefix("a/"));
-        assertEquals(Collections.singleton("d/e"), numericWriter.tagsWithPrefix("d/"));
-        assertEquals(Collections.singleton("d/e"), numericWriter.tagsWithSuffix("e"));
-        assertEquals(Collections.singleton("a/b"), numericWriter.tagsWithSuffix("a/b"));
     }
 
     @Test
     public void test_07_DeleteAll() {
         assertEquals(56L + 60L, numericWriter.delete(from, from.plus(1L, ChronoUnit.DAYS)));
-        assertEquals(Collections.emptyList(), numericWriter.fetchRecords(ImmutableSet.of("a/b", "d/e"), from, to));
+        assertEquals(Collections.emptyList(), numericWriter.fetchRecords(new long[] {0L, 1L}, from, to));
         assertEquals(0L, numericWriter.getRecordCount());
     }
 }

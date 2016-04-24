@@ -126,7 +126,7 @@ public class Loader implements BeanTreeConstants {
                 });
     }
 
-    private void fillProperties(ClassData classData, TreeItem<Object> treeItem, Element bean) {
+    public void fillProperties(ClassData classData, TreeItem<Object> treeItem, Element bean) {
         classData.getSetters().forEach((name, method) -> {
             final String type = method.getParameterTypes()[0].getName();
             final Image img = beanEditor.image(type);
@@ -134,13 +134,15 @@ public class Loader implements BeanTreeConstants {
             final Property property = new Property();
             property.name.set(name);
             property.type.set(type);
-            setProperties(name, bean, "property", property.ref, property.value);
+            if (bean != null) {
+                setProperties(name, bean, "property", property.ref, property.value);
+            }
             mutuallyExcludeProperties(property.ref, property.value);
             treeItem.getChildren().add(new TreeItem<>(property, icon));
         });
     }
 
-    private void fillConstructorArg(ClassData classData, TreeItem<Object> treeItem, Element bean) {
+    public void fillConstructorArg(ClassData classData, TreeItem<Object> treeItem, Element bean) {
         classData.getParameters().forEach((name, parameter) -> {
             final String type = parameter.getType().getName();
             final Image img = beanEditor.image(type);
@@ -148,7 +150,9 @@ public class Loader implements BeanTreeConstants {
             final ConstructorArg constructorArg = new ConstructorArg();
             constructorArg.name.set(name);
             constructorArg.type.set(type);
-            setProperties(name, bean, "constructor-arg", constructorArg.ref, constructorArg.value);
+            if (bean != null) {
+                setProperties(name, bean, "constructor-arg", constructorArg.ref, constructorArg.value);
+            }
             mutuallyExcludeProperties(constructorArg.ref, constructorArg.value);
             treeItem.getChildren().add(new TreeItem<>(constructorArg, icon));
         });

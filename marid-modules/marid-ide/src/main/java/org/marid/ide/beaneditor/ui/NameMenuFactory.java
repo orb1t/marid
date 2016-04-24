@@ -18,7 +18,7 @@
 
 package org.marid.ide.beaneditor.ui;
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.WritableObjectValue;
 import javafx.scene.control.*;
@@ -112,8 +112,9 @@ public class NameMenuFactory implements BeanTreeConstants {
             if (!menu.getItems().isEmpty()) {
                 menu.getItems().add(new SeparatorMenuItem());
             }
+            final Menu bindMenu = new Menu(s("Bind"), glyphIcon(FontAwesomeIcon.LINK, 16));
             factoryMethods.forEach((nameProperty, methods) -> {
-                final Menu m = new Menu(nameProperty.get(), glyphIcon(MaterialIcon.LINK, 16));
+                final Menu m = new Menu(nameProperty.get());
                 methods.forEach(method -> {
                     final Image image = beanEditor.image(method.getReturnType().getName());
                     final MenuItem menuItem = new MenuItem(method.getName(), new ImageView(image));
@@ -123,14 +124,15 @@ public class NameMenuFactory implements BeanTreeConstants {
                     });
                     m.getItems().add(menuItem);
                 });
-                menu.getItems().add(m);
+                bindMenu.getItems().add(m);
             });
+            menu.getItems().add(bindMenu);
         }
         if (beanData.factoryBean.isNotEmpty().get()) {
             if (!menu.getItems().isEmpty()) {
                 menu.getItems().add(new SeparatorMenuItem());
             }
-            final MenuItem menuItem = new MenuItem(s("Unbound"), glyphIcon(MaterialIcon.PHONELINK_ERASE, 16));
+            final MenuItem menuItem = new MenuItem(s("Unbind"), glyphIcon(FontAwesomeIcon.UNLINK, 16));
             menuItem.setOnAction(event -> {
                 beanData.factoryBean.unbind();
                 beanData.factoryBean.set(null);
@@ -161,6 +163,8 @@ public class NameMenuFactory implements BeanTreeConstants {
                 beanData.name.set(beanPrefix + maxBeanIndex);
                 beanData.type.set(xml.type);
                 final TreeItem<Object> item = new TreeItem<>(beanData, new ImageView(image));
+                editor.getLoader().fillConstructorArg(classData, item, null);
+                editor.getLoader().fillProperties(classData, item, null);
                 parentItem.getChildren().add(item);
                 parentItem.setExpanded(true);
             });

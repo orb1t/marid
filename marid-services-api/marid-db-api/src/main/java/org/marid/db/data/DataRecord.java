@@ -34,18 +34,18 @@ import static java.lang.String.format;
 @Immutable
 public final class DataRecord<T extends Serializable> {
 
-    private final String tag;
+    private final long tag;
     private final Instant timestamp;
     private final T value;
 
     @ConstructorProperties({"tag", "timestamp", "value"})
-    public DataRecord(@Nonnull String tag, Instant timestamp, @Nonnull T value) {
+    public DataRecord(long tag, Instant timestamp, @Nonnull T value) {
         this.tag = tag;
         this.timestamp = timestamp;
         this.value = value;
     }
 
-    public String getTag() {
+    public long getTag() {
         return tag;
     }
 

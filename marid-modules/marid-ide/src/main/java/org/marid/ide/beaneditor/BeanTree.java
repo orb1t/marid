@@ -21,8 +21,6 @@ package org.marid.ide.beaneditor;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import org.codehaus.plexus.util.FileUtils;
-import org.marid.ide.beaneditor.data.Loader;
-import org.marid.ide.beaneditor.data.Saver;
 import org.marid.ide.beaneditor.ui.*;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
@@ -34,14 +32,10 @@ import org.marid.logging.LogSupport;
 class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport, BeanTreeConstants {
 
     private final BeanEditor beanEditor;
-    private final Loader loader;
-    private final Saver saver;
 
     BeanTree(ProjectProfile rootObject, BeanEditor beanEditor) {
         super(new TreeItem<>(rootObject, new ImageView(ROOT)));
         this.beanEditor = beanEditor;
-        this.loader = new Loader(beanEditor);
-        this.saver = new Saver();
         setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
         getColumns().add(nameColumn());
         getColumns().add(typeColumn());
@@ -61,7 +55,7 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport,
 
     public void load() {
         try {
-            loader.load(getRoot());
+            beanEditor.loader.load(getRoot());
         } catch (Exception x) {
             log(WARNING, "Unable to load beans", x);
         }
@@ -71,7 +65,7 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport,
         try {
             final ProjectProfile profile = getProfile();
             FileUtils.cleanDirectory(profile.getBeansDirectory().toFile());
-            saver.save(getRoot());
+            beanEditor.saver.save(getRoot());
         } catch (Exception x) {
             log(WARNING, "Unable to save beans", x);
         }

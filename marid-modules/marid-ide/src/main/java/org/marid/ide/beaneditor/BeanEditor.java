@@ -36,6 +36,8 @@ import org.marid.beans.MaridBeanXml;
 import org.marid.beans.MaridBeansXml;
 import org.marid.ee.IdeSingleton;
 import org.marid.ide.Ide;
+import org.marid.ide.beaneditor.data.Loader;
+import org.marid.ide.beaneditor.data.Saver;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.ScrollPanes;
@@ -50,7 +52,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
-import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -73,6 +74,8 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
     final Map<String, Image> iconMap = new HashMap<>();
     final Map<String, ClassData> classDataMap = new HashMap<>();
     final Copies<BeanEditor, TreeItem<Object>> copies;
+    final Loader loader;
+    final Saver saver;
 
     @Inject
     public BeanEditor(ProjectManager projectManager) {
@@ -80,6 +83,8 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
         this.projectManager = projectManager;
         getIcons().addAll(Ide.IMAGES);
         projectManager.profileProperty().addListener((observable, oldValue, newValue) -> update(newValue));
+        this.loader = new Loader(this);
+        this.saver = new Saver();
         this.beanTree = new BeanTree(profile, this);
         final BorderPane pane = getTreePane();
         setScene(new Scene(pane, 1024, 768));
@@ -89,6 +94,10 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
 
     public Copies<BeanEditor, TreeItem<Object>> getCopies() {
         return copies;
+    }
+
+    public Loader getLoader() {
+        return loader;
     }
 
     private BorderPane getTreePane() {

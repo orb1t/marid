@@ -46,7 +46,7 @@ public interface DaqWriter<T extends Serializable> extends DaqReader<T> {
      * @param to Upper bound (exclusive).
      * @return Count of removed records.
      */
-    long delete(Set<String> tags, Instant from, Instant to);
+    long delete(long[] tags, Instant from, Instant to);
 
     /**
      * Merges data.

@@ -43,13 +43,13 @@ import static java.util.Collections.singletonList;
 public class RandomNumericDaqGenerator implements LogSupport {
 
     private final NumericWriter numericWriter;
-    private final String tag;
+    private final long tag;
     private final double min;
     private final double max;
     private final long periodMillis;
     private final Timer timer = new Timer();
 
-    public RandomNumericDaqGenerator(NumericWriter numericWriter, String tag, double min, double max, long periodSeconds) {
+    public RandomNumericDaqGenerator(NumericWriter numericWriter, long tag, double min, double max, long periodSeconds) {
         this.numericWriter = numericWriter;
         this.tag = tag;
         this.min = min;
@@ -64,7 +64,7 @@ public class RandomNumericDaqGenerator implements LogSupport {
             final double v = ThreadLocalRandom.current().nextDouble(min, max);
             final Set<DataRecordKey> result = numericWriter.merge(singletonList(new DataRecord<>(tag, t, v)), true);
             if (!result.isEmpty()) {
-                log(Level.FINE, "Generated {0} {1} {2}", tag, t, v);
+                log(Level.INFO, "Generated {0} {1} {2}", tag, t, v);
             }
         }), periodMillis, periodMillis);
     }

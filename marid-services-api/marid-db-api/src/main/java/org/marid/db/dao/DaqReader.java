@@ -24,7 +24,6 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Generic DAQ DAO.
@@ -41,21 +40,7 @@ public interface DaqReader<T extends Serializable> extends DaqMXBean, AutoClosea
      * @param to Upper bound (exclusive).
      * @return Tag set.
      */
-    Set<String> tags(Instant from, Instant to);
-
-    /**
-     * Get all tags with the given prefix.
-     * @param prefix Tag prefix.
-     * @return Tag set.
-     */
-    Set<String> tagsWithPrefix(String prefix);
-
-    /**
-     * Get all tags with the given suffix.
-     * @param suffix Tag suffix.
-     * @return Tag set.
-     */
-    Set<String> tagsWithSuffix(String suffix);
+    long[] tags(Instant from, Instant to);
 
     /**
      * Get tag count within the given time range.
@@ -71,7 +56,7 @@ public interface DaqReader<T extends Serializable> extends DaqMXBean, AutoClosea
      * @param instant Timestamp.
      * @return Data record.
      */
-    DataRecord<T> fetchRecord(String tag, Instant instant);
+    DataRecord<T> fetchRecord(long tag, Instant instant);
 
     /**
      * Fetches all the records within the given time range.
@@ -80,7 +65,7 @@ public interface DaqReader<T extends Serializable> extends DaqMXBean, AutoClosea
      * @param to Upper bound (exclusive).
      * @return Fetched records.
      */
-    List<DataRecord<T>> fetchRecords(Set<String> tags, Instant from, Instant to);
+    List<DataRecord<T>> fetchRecords(long[] tags, Instant from, Instant to);
 
     /**
      * Hashes record range.
@@ -90,5 +75,5 @@ public interface DaqReader<T extends Serializable> extends DaqMXBean, AutoClosea
      * @param algorithm Digest algorithm (e.g. SHA-1 or MD5).
      * @return Hashes.
      */
-    Map<String, String> hash(Instant from, Instant to, boolean includeData, String algorithm);
+    Map<Long, String> hash(Instant from, Instant to, boolean includeData, String algorithm);
 }
