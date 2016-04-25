@@ -32,7 +32,7 @@ import org.marid.ide.beaneditor.BeanEditor;
 import org.marid.ide.beaneditor.BeanTreeConstants;
 import org.marid.ide.beaneditor.BeanTreeUtils;
 import org.marid.ide.beaneditor.data.BeanData;
-import org.marid.ide.beaneditor.data.Property;
+import org.marid.ide.beaneditor.data.ConstructorArg;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.copy.Copies;
 import org.marid.l10n.L10nSupport;
@@ -79,7 +79,7 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
                 event.acceptTransferModes(t.transferModes);
             }));
             setOnDragDropped(event -> copies.finish(currentItem(event), event.getTransferMode(), BeanTreeUtils::finishCopy));
-            if (treeItem.getValue() instanceof Property) {
+            if (treeItem.getValue() instanceof ConstructorArg) {
                 setStyle("-fx-underline: true");
             } else {
                 setStyle(null);

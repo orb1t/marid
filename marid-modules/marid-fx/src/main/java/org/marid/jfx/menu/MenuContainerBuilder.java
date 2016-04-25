@@ -44,7 +44,7 @@ public class MenuContainerBuilder implements L10nSupport {
         return this;
     }
 
-    public void build(Consumer<Menu> menuConsumer, Collection<Node> buttons) {
+    public void build(Consumer<Menu> menuConsumer, Consumer<Node> nodeConsumer) {
         actionMap.forEach((menuText, actions) -> {
             final Menu menu = new Menu(s(menuText));
             menuConsumer.accept(menu);
@@ -70,31 +70,27 @@ public class MenuContainerBuilder implements L10nSupport {
                 menu.getItems().add(menuItem);
             });
         });
-        if (buttons != null) {
-            toolbarActionMap.values().forEach(actions -> {
-                if (!buttons.isEmpty()) {
-                    buttons.add(new Separator());
+        toolbarActionMap.values().forEach(actions -> {
+            actions.forEach(action -> {
+                final Button button = new Button();
+                button.setFocusTraversable(false);
+                button.setGraphic(FontIcons.glyphIcon((GlyphIcons) action.getProperties().get("icon"), 20));
+                final Tooltip tooltip = new Tooltip();
+                tooltip.textProperty().bindBidirectional(action.textProperty());
+                button.setTooltip(tooltip);
+                button.disableProperty().bindBidirectional(action.disabledProperty());
+                nodeConsumer.accept(button);
+                if (action.getProperties().containsKey("menu")) {
+                    button.setOnAction(event -> {
+                        final ContextMenu contextMenu = (ContextMenu) action.getProperties().get("menu");
+                        contextMenu.show(button, Side.BOTTOM, 0, 0);
+                    });
+                } else {
+                    button.setOnAction(action);
                 }
-                actions.forEach(action -> {
-                    final Button button = new Button();
-                    button.setFocusTraversable(false);
-                    button.setGraphic(FontIcons.glyphIcon((GlyphIcons) action.getProperties().get("icon"), 20));
-                    final Tooltip tooltip = new Tooltip();
-                    tooltip.textProperty().bindBidirectional(action.textProperty());
-                    button.setTooltip(tooltip);
-                    button.disableProperty().bindBidirectional(action.disabledProperty());
-                    buttons.add(button);
-                    if (action.getProperties().containsKey("menu")) {
-                        button.setOnAction(event -> {
-                            final ContextMenu contextMenu = (ContextMenu) action.getProperties().get("menu");
-                            contextMenu.show(button, Side.BOTTOM, 0, 0);
-                        });
-                    } else {
-                        button.setOnAction(action);
-                    }
-                });
             });
-        }
+            nodeConsumer.accept(new Separator());
+        });
     }
 
     public class MenuBuilder {

@@ -139,7 +139,7 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
                 .menu("Window", b -> b
                         .item("*Refresh", MaterialDesignIcon.REFRESH, "F5", event -> beanTree.refresh())
                 )
-                .build(menuBar.getMenus()::add, toolBar.getItems());
+                .build(menuBar.getMenus()::add, toolBar.getItems()::add);
         final VBox vBox = new VBox(menuBar, toolBar);
         final BorderPane pane = new BorderPane(ScrollPanes.scrollPane(beanTree), vBox, null, null, null);
         pane.setFocusTraversable(false);
