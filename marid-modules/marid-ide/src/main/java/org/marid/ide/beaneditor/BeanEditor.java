@@ -45,6 +45,7 @@ import org.marid.jfx.copy.Copies;
 import org.marid.jfx.menu.MenuContainerBuilder;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
+import org.marid.pref.PrefSupport;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -64,7 +65,7 @@ import static org.marid.xml.XmlBind.load;
  * @author Dmitry Ovchinnikov
  */
 @IdeSingleton
-public class BeanEditor extends Stage implements LogSupport, L10nSupport {
+public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSupport {
 
     private URLClassLoader classLoader;
     final ProjectManager projectManager;
@@ -87,7 +88,7 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport {
         this.saver = new Saver();
         this.beanTree = new BeanTree(profile, this);
         final BorderPane pane = getTreePane();
-        setScene(new Scene(pane, 1024, 768));
+        setScene(new Scene(pane, 1500, 800));
         update(profile);
         this.copies = new Copies<>(this);
     }

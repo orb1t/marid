@@ -25,7 +25,6 @@ import org.jboss.logmanager.LogManager;
 import org.jboss.weld.environment.se.Weld;
 import org.marid.ide.panes.logging.IdeLogHandler;
 import org.marid.ide.scenes.IdeScene;
-import org.marid.jfx.Windows;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
@@ -57,12 +56,12 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
     public void start(Stage primaryStage) throws Exception {
         Application.setUserAgentStylesheet(getPref("style", STYLESHEET_MODENA));
         final IdeScene ideScene = weld.initialize().select(IdeScene.class).get();
-        Windows.persistState(primaryStage, preferences());
         primaryStage.setMinWidth(750.0);
         primaryStage.setMinHeight(550.0);
         primaryStage.setTitle(s("Marid IDE"));
         primaryStage.setScene(ideScene);
         primaryStage.getIcons().addAll(IMAGES);
+        primaryStage.setMaximized(true);
         primaryStage.show();
     }
 

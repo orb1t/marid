@@ -21,7 +21,6 @@ package org.marid.db.hsqldb;
 import org.hsqldb.Database;
 import org.hsqldb.DatabaseManager;
 import org.hsqldb.jdbc.JDBCSessionDataSource;
-import org.hsqldb.jdbc.JDBCSessionPool;
 import org.hsqldb.server.Server;
 import org.hsqldb.server.ServerConstants;
 import org.marid.beans.MaridBean;
@@ -56,7 +55,6 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
     private final Server server;
     private final File directory;
     private final long shutdownTimeout;
-    private final int connectionPoolSize;
     private final Map<String, URL> databaseNameToIndex = new LinkedHashMap<>();
 
     private PrintWriter outWriter;
@@ -66,7 +64,6 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
         log(INFO, "{0}", properties);
         directory = properties.getDirectory();
         shutdownTimeout = SECONDS.toMillis(properties.getShutdownTimeoutSeconds());
-        connectionPoolSize = properties.getConnectionPoolSize();
         server = new Server();
         server.setNoSystemExit(true);
         server.setRestartOnShutdown(false);
@@ -146,9 +143,7 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
     private DataSource getDataSource(String name) {
         final int dbIndex = databaseNameToIndex.keySet().stream().collect(Collectors.toList()).indexOf(name);
         final Database database = DatabaseManager.getDatabase(dbIndex);
-        return connectionPoolSize == 0
-                ? new JDBCSessionDataSource(database, "PUBLIC")
-                : new JDBCSessionPool(connectionPoolSize, database, "PUBLIC");
+        return new JDBCSessionDataSource(database, "PUBLIC");
     }
 
     @MaridBean(icon = "http://icons.iconarchive.com/icons/double-j-design/ravenna-3d/24/Database-Table-icon.png")

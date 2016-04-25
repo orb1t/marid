@@ -23,7 +23,6 @@ import javafx.stage.Stage;
 import org.marid.ee.IdeSingleton;
 import org.marid.ide.panes.main.IdePane;
 
-import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
@@ -35,11 +34,10 @@ public class IdeScene extends Scene {
 
     @Inject
     public IdeScene(IdePane idePane) {
-        super(idePane);
+        super(idePane, 1024, 768);
     }
 
     @Produces
-    @Dependent
     public Stage primaryStage() {
         return (Stage) getWindow();
     }

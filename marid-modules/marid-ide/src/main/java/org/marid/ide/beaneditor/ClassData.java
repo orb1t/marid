@@ -101,7 +101,7 @@ public class ClassData {
     }
 
     private static boolean isAllowed(Class<?> type) {
-        return !type.isPrimitive() && Modifier.isPublic(type.getModifiers());
+        return Modifier.isPublic(type.getModifiers());
     }
 
     public int getParameterIndex(String name) {

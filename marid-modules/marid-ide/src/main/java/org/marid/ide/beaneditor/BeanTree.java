@@ -75,7 +75,7 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport,
         final TreeTableColumn<Object, String> column = new TreeTableColumn<>(s("Name"));
         column.setCellValueFactory(new NameFactory());
         column.setCellFactory(c -> new NameCell(c, beanEditor));
-        column.setPrefWidth(200);
+        column.setPrefWidth(400);
         return column;
     }
 
@@ -91,7 +91,7 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport,
         final TreeTableColumn<Object, Label> column = new TreeTableColumn<>(s("Value"));
         column.setCellValueFactory(new ValueFactory());
         column.setCellFactory(c -> new ValueCell(c, beanEditor));
-        column.setPrefWidth(400);
+        column.setPrefWidth(500);
         return column;
     }
 
