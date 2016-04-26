@@ -19,28 +19,36 @@
 package org.marid.jfx.menu;
 
 import de.jensd.fx.glyphs.GlyphIcons;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.ObservableStringValue;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
-import org.controlsfx.control.action.Action;
-import org.marid.jfx.icons.FontIcons;
 import org.marid.l10n.L10nSupport;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class MenuContainerBuilder implements L10nSupport {
 
-    private final Map<String, Set<Action>> actionMap = new LinkedHashMap<>();
-    private final Map<String, Set<Action>> toolbarActionMap = new LinkedHashMap<>();
+    private final Map<String, Set<MenuBuilder.MenuItemBuilder>> actionMap = new LinkedHashMap<>();
 
-    public MenuContainerBuilder menu(String text, Consumer<MenuBuilder> menuBuilderConsumer) {
-        menuBuilderConsumer.accept(new MenuBuilder(text));
+    public MenuContainerBuilder menu(String text, boolean toolbar, Consumer<MenuBuilder> menuBuilderConsumer) {
+        menuBuilderConsumer.accept(new MenuBuilder(text, toolbar));
         return this;
     }
 
@@ -50,98 +58,179 @@ public class MenuContainerBuilder implements L10nSupport {
             menuConsumer.accept(menu);
             actions.forEach(action -> {
                 final MenuItem menuItem;
-                if (action.getProperties().containsKey("menu")) {
+                if (!action.menuItems.isEmpty()) {
                     final Menu subMenu = new Menu();
-                    subMenu.textProperty().bindBidirectional(action.textProperty());
+                    if (action.text != null) {
+                        subMenu.textProperty().bind(action.text);
+                    }
                     menuItem = subMenu;
-                    subMenu.getItems().addAll(((ContextMenu) action.getProperties().get("menu")).getItems());
-                } else if ("-".equals(action.getText())) {
+                    subMenu.getItems().addAll(action.menuItems);
+                } else if (action.separator) {
                     menuItem = new SeparatorMenuItem();
                 } else {
                     menuItem = new MenuItem();
-                    menuItem.textProperty().bindBidirectional(action.textProperty());
+                    if (action.text != null) {
+                        menuItem.textProperty().bind(action.text);
+                    }
+                    if (action.icon != null) {
+                        menuItem.graphicProperty().bind(Bindings.createObjectBinding(
+                                () -> glyphIcon(action.icon.getValue(), 16),
+                                action.icon
+                        ));
+                    }
+                    menuItem.setOnAction(action.action);
                 }
-                if (action.getProperties().containsKey("icon")) {
-                    menuItem.setGraphic(FontIcons.glyphIcon((GlyphIcons) action.getProperties().get("icon"), 16));
+                if (action.accelerator != null) {
+                    menuItem.acceleratorProperty().bind(action.accelerator);
                 }
-                menuItem.disableProperty().bindBidirectional(action.disabledProperty());
-                menuItem.acceleratorProperty().bindBidirectional(action.acceleratorProperty());
-                menuItem.setOnAction(action);
+                if (action.disabled != null) {
+                    menuItem.disableProperty().bind(action.disabled);
+                }
                 menu.getItems().add(menuItem);
             });
-        });
-        toolbarActionMap.values().forEach(actions -> {
-            actions.forEach(action -> {
-                final Button button = new Button();
-                button.setFocusTraversable(false);
-                button.setGraphic(FontIcons.glyphIcon((GlyphIcons) action.getProperties().get("icon"), 20));
-                final Tooltip tooltip = new Tooltip();
-                tooltip.textProperty().bindBidirectional(action.textProperty());
-                button.setTooltip(tooltip);
-                button.disableProperty().bindBidirectional(action.disabledProperty());
-                nodeConsumer.accept(button);
-                if (action.getProperties().containsKey("menu")) {
-                    button.setOnAction(event -> {
-                        final ContextMenu contextMenu = (ContextMenu) action.getProperties().get("menu");
-                        contextMenu.show(button, Side.BOTTOM, 0, 0);
-                    });
-                } else {
-                    button.setOnAction(action);
-                }
-            });
-            nodeConsumer.accept(new Separator());
+            final Set<MenuBuilder.MenuItemBuilder> set = actions.stream()
+                    .filter(a -> a.toolbar)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            if (!set.isEmpty()) {
+                set.forEach(action -> {
+                    final Button button = new Button();
+                    button.setFocusTraversable(false);
+                    if (action.icon != null) {
+                        button.graphicProperty().bind(Bindings.createObjectBinding(
+                                () -> glyphIcon(action.icon.getValue(), 20),
+                                action.icon
+                        ));
+                    }
+                    if (action.text != null) {
+                        final Tooltip tooltip = new Tooltip();
+                        tooltip.textProperty().bind(action.text);
+                        button.setTooltip(tooltip);
+                    }
+                    nodeConsumer.accept(button);
+                    if (!action.menuItems.isEmpty()) {
+                        button.setOnAction(event -> {
+                            final ContextMenu contextMenu = new ContextMenu();
+                            contextMenu.getItems().addAll(action.menuItems);
+                            contextMenu.show(button, Side.BOTTOM, 0, 0);
+                        });
+                    } else {
+                        button.setOnAction(action.action);
+                    }
+                });
+                nodeConsumer.accept(new Separator());
+            }
         });
     }
 
     public class MenuBuilder {
 
-        private final String menu;
+        private final boolean toolbar;
+        private final Set<MenuItemBuilder> menuItemBuilders;
 
-        private MenuBuilder(String menu) {
-            this.menu = menu;
+        private MenuBuilder(String menu, boolean toolbar) {
+            this.toolbar = toolbar;
+            this.menuItemBuilders = actionMap.computeIfAbsent(menu, k -> new LinkedHashSet<>());
         }
 
-        public MenuBuilder item(String label, GlyphIcons icon, String accelerator, Consumer<ActionEvent> eventHandler) {
-            final boolean toolbar = label.startsWith("*");
-            if (toolbar) {
-                label = label.substring(1);
-            }
-            final Set<Action> actions = actionMap.computeIfAbsent(menu, l -> new LinkedHashSet<>());
-            final Action action = new Action(LS.s(label), eventHandler);
-            if (icon != null) {
-                action.getProperties().put("icon", icon);
-            }
-            if (accelerator != null) {
-                action.setAccelerator(KeyCombination.valueOf(accelerator));
-            }
-            actions.add(action);
-            if (toolbar) {
-                toolbarActionMap.computeIfAbsent(menu, k -> new LinkedHashSet<>()).add(action);
-            }
+        public MenuBuilder item(boolean toolbar, Consumer<MenuItemBuilder> menuItemBuilderConsumer) {
+            final MenuItemBuilder menuItemBuilder = new MenuItemBuilder(toolbar, false);
+            menuItemBuilders.add(menuItemBuilder);
+            menuItemBuilderConsumer.accept(menuItemBuilder);
             return this;
         }
 
-        public MenuBuilder item(String label, GlyphIcons icon, Consumer<ActionEvent> eventHandler) {
-            return item(label, icon, null, eventHandler);
+        public MenuBuilder item(Consumer<MenuItemBuilder> menuItemBuilderConsumer) {
+            return item(toolbar, menuItemBuilderConsumer);
         }
 
-        public MenuBuilder item(String label, GlyphIcons icon, ContextMenu contextMenu) {
-            item(label, icon, null, null);
-            return last(a -> a.getProperties().put("menu", contextMenu));
-        }
-
-        public MenuBuilder last(Consumer<Action> actionConsumer) {
-            final Set<Action> actions = actionMap.get(menu);
-            if (actions != null) {
-                actionConsumer.accept(new LinkedList<>(actions).getLast());
-            }
+        public MenuBuilder item(String text, boolean toolbar, Consumer<MenuItemBuilder> menuItemBuilderConsumer) {
+            final MenuItemBuilder menuItemBuilder = new MenuItemBuilder(toolbar, false).text(text);
+            menuItemBuilders.add(menuItemBuilder);
+            menuItemBuilderConsumer.accept(menuItemBuilder);
             return this;
+        }
+
+        public MenuBuilder item(String text, Consumer<MenuItemBuilder> menuItemBuilderConsumer) {
+            return item(text, toolbar, menuItemBuilderConsumer);
         }
 
         public MenuBuilder separator() {
-            final Set<Action> actions = actionMap.computeIfAbsent(menu, l -> new LinkedHashSet<>());
-            actions.add(new Action("-"));
+            final MenuItemBuilder menuItemBuilder = new MenuItemBuilder(false, true);
+            menuItemBuilders.add(menuItemBuilder);
             return this;
+        }
+
+        public final class MenuItemBuilder {
+
+            private final boolean toolbar;
+            private final boolean separator;
+            private final Set<MenuItem> menuItems = new LinkedHashSet<>();
+
+            private ObservableStringValue text;
+            private ObservableBooleanValue disabled;
+            private ObservableValue<KeyCombination> accelerator;
+            private ObservableValue<GlyphIcons> icon;
+            private EventHandler<ActionEvent> action;
+
+            private MenuItemBuilder(boolean toolbar, boolean separator) {
+                this.toolbar = toolbar;
+                this.separator = separator;
+            }
+
+            public MenuItemBuilder text(ObservableStringValue text) {
+                this.text = text;
+                return this;
+            }
+
+            public MenuItemBuilder text(String text) {
+                return text(new SimpleStringProperty(text));
+            }
+
+            public MenuItemBuilder disabled(ObservableBooleanValue disabled) {
+                this.disabled = disabled;
+                return this;
+            }
+
+            public MenuItemBuilder disabled(boolean disabled) {
+                return disabled(new SimpleBooleanProperty(disabled));
+            }
+
+            public MenuItemBuilder accelerator(ObservableValue<KeyCombination> accelerator) {
+                this.accelerator = accelerator;
+                return this;
+            }
+
+            public MenuItemBuilder accelerator(KeyCombination accelerator) {
+                return accelerator(new SimpleObjectProperty<>(accelerator));
+            }
+
+            public MenuItemBuilder accelerator(String accelerator) {
+                return accelerator(KeyCombination.valueOf(accelerator));
+            }
+
+            public MenuItemBuilder menuItems(MenuItem... menuItems) {
+                Collections.addAll(this.menuItems, menuItems);
+                return this;
+            }
+
+            public MenuItemBuilder menuItems(Collection<? extends MenuItem> menuItems) {
+                this.menuItems.addAll(menuItems);
+                return this;
+            }
+
+            public MenuItemBuilder icon(ObservableValue<GlyphIcons> icon) {
+                this.icon = icon;
+                return this;
+            }
+
+            public MenuItemBuilder icon(GlyphIcons icon) {
+                return icon(new SimpleObjectProperty<>(icon));
+            }
+
+            public MenuItemBuilder action(EventHandler<ActionEvent> action) {
+                this.action = action;
+                return this;
+            }
         }
     }
 }

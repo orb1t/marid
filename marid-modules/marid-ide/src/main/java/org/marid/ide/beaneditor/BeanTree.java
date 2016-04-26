@@ -18,6 +18,10 @@
 
 package org.marid.ide.beaneditor;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import org.codehaus.plexus.util.FileUtils;
@@ -98,5 +102,14 @@ class BeanTree extends TreeTableView<Object> implements LogSupport, L10nSupport,
     void update(ProjectProfile profile) {
         setRoot(new TreeItem<>(profile, new ImageView(ROOT)));
         load();
+    }
+
+    BooleanProperty clearAllDisabled() {
+        final BooleanProperty property = new SimpleBooleanProperty(getRoot().getChildren().isEmpty());
+        rootProperty().addListener((observable, o, n) -> {
+            final ObservableList<TreeItem<Object>> list = n.getChildren();
+            list.addListener((ListChangeListener<TreeItem<Object>>) c -> property.set(n.getChildren().isEmpty()));
+        });
+        return property;
     }
 }

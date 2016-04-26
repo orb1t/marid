@@ -58,7 +58,14 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
     public void updateItem(String item, boolean empty) {
         super.updateItem(item, empty);
         final TreeItem<Object> treeItem = getTreeTableRow() == null ? null : getTreeTableRow().getTreeItem();
-        if (!empty && treeItem != null) {
+        if (empty || treeItem == null) {
+            setOnDragDetected(null);
+            setOnDragOver(null);
+            setOnDragDropped(null);
+            setStyle(null);
+            setContextMenu(null);
+            setGraphic(null);
+        } else {
             if (treeItem.getValue() instanceof Path) {
                 setContextMenu(NameMenuFactory.menu(beanEditor, treeItem, (Path) treeItem.getValue()));
             } else if (treeItem.getValue() instanceof ProjectProfile) {
@@ -84,12 +91,6 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
             } else {
                 setStyle(null);
             }
-        } else {
-            setOnDragDetected(null);
-            setOnDragOver(null);
-            setOnDragDropped(null);
-            setStyle(null);
-            setContextMenu(null);
         }
     }
 

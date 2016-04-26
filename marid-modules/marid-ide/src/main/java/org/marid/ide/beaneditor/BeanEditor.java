@@ -23,7 +23,6 @@ import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.beans.binding.Bindings;
-import javafx.collections.ListChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ToolBar;
@@ -105,39 +104,71 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
         final ToolBar toolBar = new ToolBar();
         final MenuBar menuBar = new MenuBar();
         new MenuContainerBuilder()
-                .menu("File", b -> b
-                        .item("*Reload", MaterialIcon.RESTORE, "Ctrl+R", event -> {
-                            beanTree.getRoot().getChildren().clear();
-                            beanTree.load();
-                        })
-                        .item("*Save", MaterialIcon.SAVE, "Ctrl+S", event -> beanTree.save())
+                .menu("File", true, b -> b
+                        .item("Reload", mb -> mb
+                                .accelerator("Ctrl+R")
+                                .icon(MaterialIcon.RESTORE)
+                                .action(event -> {
+                                    beanTree.getRoot().getChildren().clear();
+                                    beanTree.load();
+                                })
+                        )
+                        .item("Save", mb -> mb
+                                .accelerator("Ctrl+S")
+                                .icon(MaterialIcon.SAVE)
+                                .action(event -> beanTree.save())
+                        )
                         .separator()
-                        .item("*Print", MaterialIcon.PRINT, "Ctrl+P", event -> {
-                        })
+                        .item("Print", mb -> mb
+                                .accelerator("Ctrl+P")
+                                .icon(MaterialIcon.PRINT)
+                                .action(event -> {
+                                })
+                        )
                 )
-                .menu("Edit", b -> b
-                        .item("*Cut", MaterialDesignIcon.CONTENT_CUT, "Ctrl+X", event -> {
-
-                        })
-                        .item("*Copy", MaterialDesignIcon.CONTENT_COPY, "Ctrl+C", event -> {
-                        })
-                        .item("*Paste", MaterialDesignIcon.CONTENT_PASTE, "Ctrl+V", event -> {
-                        })
+                .menu("Edit", true, b -> b
+                        .item("Cut", mb -> mb
+                                .accelerator("Ctrl+X")
+                                .icon(MaterialDesignIcon.CONTENT_CUT)
+                                .action(event -> {
+                                })
+                        )
+                        .item("Copy", mb -> mb
+                                .accelerator("Ctrl+C")
+                                .icon(MaterialDesignIcon.CONTENT_COPY)
+                                .action(event -> {
+                                })
+                        )
+                        .item("Paste", mb -> mb
+                                .accelerator("Ctrl+V")
+                                .icon(MaterialDesignIcon.CONTENT_PASTE)
+                                .action(event -> {
+                                })
+                        )
                 )
-                .menu("Beans", b -> b
-                        .item("*Remove", MaterialIcon.REMOVE, "F8", event -> BeanTreeUtils.remove(beanTree))
-                        .last(a -> a.disabledProperty().bind(Bindings.createBooleanBinding(() -> !isRemovable(beanTree),
-                                beanTree.getSelectionModel().selectedItemProperty())))
+                .menu("Beans", true, b -> b
+                        .item("Remove", mb -> mb
+                                .accelerator("F8")
+                                .icon(MaterialIcon.REMOVE)
+                                .action(event -> BeanTreeUtils.remove(beanTree))
+                                .disabled(Bindings.createBooleanBinding(
+                                        () -> !isRemovable(beanTree),
+                                        beanTree.getSelectionModel().selectedItemProperty()))
+                        )
                         .separator()
-                        .item("*Clear all", MaterialIcon.CLEAR_ALL, "F9", event -> beanTree.getRoot().getChildren().clear())
-                        .last(a -> beanTree.rootProperty().addListener((observable, oldValue, newValue) -> {
-                            newValue.getChildren().addListener((ListChangeListener<TreeItem<Object>>) c -> {
-                                a.setDisabled(beanTree.getRoot().getChildren().isEmpty());
-                            });
-                        }))
+                        .item("Clear all", mb -> mb
+                                .accelerator("F9")
+                                .icon(MaterialIcon.CLEAR_ALL)
+                                .action(event -> beanTree.getRoot().getChildren().clear())
+                                .disabled(beanTree.clearAllDisabled())
+                        )
                 )
-                .menu("Window", b -> b
-                        .item("*Refresh", MaterialDesignIcon.REFRESH, "F5", event -> beanTree.refresh())
+                .menu("Window", true, b -> b
+                        .item("Refresh", mb -> mb
+                                .accelerator("F5")
+                                .icon(MaterialDesignIcon.REFRESH)
+                                .action(event -> beanTree.refresh())
+                        )
                 )
                 .build(menuBar.getMenus()::add, toolBar.getItems()::add);
         final VBox vBox = new VBox(menuBar, toolBar);
