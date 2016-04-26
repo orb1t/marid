@@ -106,6 +106,9 @@ public class MenuContainerBuilder implements L10nSupport {
                         tooltip.textProperty().bind(action.text);
                         button.setTooltip(tooltip);
                     }
+                    if (action.disabled != null) {
+                        button.disableProperty().bind(action.disabled);
+                    }
                     nodeConsumer.accept(button);
                     if (!action.menuItems.isEmpty()) {
                         button.setOnAction(event -> {

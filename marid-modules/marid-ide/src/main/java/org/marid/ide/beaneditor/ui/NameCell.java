@@ -18,11 +18,10 @@
 
 package org.marid.ide.beaneditor.ui;
 
+import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.event.Event;
 import javafx.geometry.Pos;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableRow;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -35,6 +34,7 @@ import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.beaneditor.data.ConstructorArg;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.copy.Copies;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 
@@ -75,6 +75,7 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
             } else {
                 setContextMenu(null);
             }
+            fillContextMenu(getContextMenu(), treeItem);
             final Copies<BeanEditor, TreeItem<Object>> copies = beanEditor.getCopies();
             setOnDragDetected(event -> copies.start(currentItem(event), BeanTreeUtils::transferModes, data -> {
                 final Dragboard dragboard = getTreeTableView().startDragAndDrop(data.transferModes);
@@ -91,6 +92,20 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
             } else {
                 setStyle(null);
             }
+        }
+    }
+
+    private void fillContextMenu(ContextMenu contextMenu, TreeItem<Object> treeItem) {
+        if (contextMenu == null) {
+            return;
+        }
+        if (BeanTreeUtils.isRemovable(treeItem)) {
+            if (!contextMenu.getItems().isEmpty()) {
+                contextMenu.getItems().add(new SeparatorMenuItem());
+            }
+            final MenuItem menuItem = new MenuItem(s("Remove"), FontIcons.glyphIcon(MaterialIcon.REMOVE));
+            menuItem.setOnAction(event -> BeanTreeUtils.remove(treeItem));
+            contextMenu.getItems().add(menuItem);
         }
     }
 
