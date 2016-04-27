@@ -277,35 +277,41 @@ public class BeanTreeUtils implements BeanTreeConstants {
         }
     }
 
-    public static BooleanBinding cutOrCopyDisabled(BeanTree beanTree) {
-        return Bindings.createBooleanBinding(() -> {
-            final TreeItem<Object> item = beanTree.getSelectionModel().getSelectedItem();
-            if (item == null) {
-                return true;
-            }
-            if (item.getValue() instanceof BeanData) {
-                return false;
-            }
-            if (item.getValue() instanceof Path) {
-                return false;
-            }
+    public static boolean cutOrCopyDisabled(TreeItem<Object> item) {
+        if (item == null) {
             return true;
-        }, beanTree.getSelectionModel().selectedItemProperty());
+        }
+        if (item.getValue() instanceof BeanData) {
+            return false;
+        }
+        if (item.getValue() instanceof Path) {
+            return false;
+        }
+        return true;
+    }
+
+    public static BooleanBinding cutOrCopyDisabled(BeanEditor editor) {
+        return Bindings.createBooleanBinding(
+                () -> cutOrCopyDisabled(editor.beanTree.getSelectionModel().getSelectedItem()),
+                editor.beanTree.getSelectionModel().selectedItemProperty());
+    }
+
+    public static boolean pasteDisabled(BeanEditor editor, TreeItem<Object> item) {
+        if (!editor.copies.canTransferProperty().get()) {
+            return true;
+        }
+        final AtomicBoolean disabled = new AtomicBoolean(true);
+        editor.copies.progress(item, null, BeanTreeUtils::transferModes, (s, t) -> {
+            if (t.transferModes.length > 0) {
+                disabled.set(false);
+            }
+        });
+        return disabled.get();
     }
 
     public static BooleanBinding pasteDisabled(BeanEditor editor) {
-        return Bindings.createBooleanBinding(() -> {
-            if (!editor.copies.canTransferProperty().get()) {
-                return true;
-            }
-            final AtomicBoolean disabled = new AtomicBoolean(true);
-            final TreeItem<Object> item = editor.beanTree.getSelectionModel().getSelectedItem();
-            editor.copies.progress(item, null, BeanTreeUtils::transferModes, (s, t) -> {
-                if (t.transferModes.length > 0) {
-                    disabled.set(false);
-                }
-            });
-            return disabled.get();
-        }, editor.beanTree.getSelectionModel().selectedItemProperty(), editor.copies.canTransferProperty());
+        return Bindings.createBooleanBinding(
+                () -> pasteDisabled(editor, editor.beanTree.getSelectionModel().getSelectedItem()),
+                editor.beanTree.getSelectionModel().selectedItemProperty(), editor.copies.canTransferProperty());
     }
 }

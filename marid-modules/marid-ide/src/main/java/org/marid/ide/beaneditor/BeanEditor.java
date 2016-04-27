@@ -133,13 +133,13 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
                                 .accelerator("Ctrl+X")
                                 .icon(MaterialDesignIcon.CONTENT_CUT)
                                 .action(event -> copies.start(currentItem(), MOVE, BeanTreeUtils::transferModes))
-                                .disabled(BeanTreeUtils.cutOrCopyDisabled(beanTree))
+                                .disabled(BeanTreeUtils.cutOrCopyDisabled(this))
                         )
                         .item("Copy", mb -> mb
                                 .accelerator("Ctrl+C")
                                 .icon(MaterialDesignIcon.CONTENT_COPY)
                                 .action(event -> copies.start(currentItem(), COPY, BeanTreeUtils::transferModes))
-                                .disabled(BeanTreeUtils.cutOrCopyDisabled(beanTree))
+                                .disabled(BeanTreeUtils.cutOrCopyDisabled(this))
                         )
                         .item("Paste", mb -> mb
                                 .accelerator("Ctrl+V")

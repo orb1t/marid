@@ -35,10 +35,14 @@ import org.marid.ide.beaneditor.data.ConstructorArg;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.copy.Copies;
 import org.marid.jfx.icons.FontIcons;
+import org.marid.jfx.menu.MenuUtils;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 
 import java.nio.file.Path;
+
+import static javafx.scene.input.TransferMode.COPY;
+import static javafx.scene.input.TransferMode.MOVE;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -99,14 +103,27 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
         if (contextMenu == null) {
             return;
         }
-        if (BeanTreeUtils.isRemovable(treeItem)) {
-            if (!contextMenu.getItems().isEmpty()) {
-                contextMenu.getItems().add(new SeparatorMenuItem());
+        MenuUtils.addGroup(contextMenu.getItems(), items -> {
+            if (BeanTreeUtils.isRemovable(treeItem)) {
+                final MenuItem menuItem = new MenuItem(s("Remove"), FontIcons.glyphIcon(MaterialIcon.REMOVE));
+                menuItem.setOnAction(event -> BeanTreeUtils.remove(treeItem));
+                items.add(menuItem);
             }
-            final MenuItem menuItem = new MenuItem(s("Remove"), FontIcons.glyphIcon(MaterialIcon.REMOVE));
-            menuItem.setOnAction(event -> BeanTreeUtils.remove(treeItem));
-            contextMenu.getItems().add(menuItem);
-        }
+        });
+        MenuUtils.addGroup(contextMenu.getItems(), items -> {
+            if (!BeanTreeUtils.cutOrCopyDisabled(treeItem)) {
+                final MenuItem cutItem = new MenuItem(s("Cut"), FontIcons.glyphIcon(MaterialIcon.CONTENT_CUT));
+                cutItem.setOnAction(event -> beanEditor.getCopies().start(treeItem, MOVE, BeanTreeUtils::transferModes));
+                final MenuItem copyItem = new MenuItem(s("Copy"), FontIcons.glyphIcon(MaterialIcon.CONTENT_COPY));
+                copyItem.setOnAction(event -> beanEditor.getCopies().start(treeItem, COPY, BeanTreeUtils::transferModes));
+                items.addAll(cutItem, copyItem);
+            }
+            if (!BeanTreeUtils.pasteDisabled(beanEditor, treeItem)) {
+                final MenuItem menuItem = new MenuItem(s("Paste"), FontIcons.glyphIcon(MaterialIcon.CONTENT_PASTE));
+                menuItem.setOnAction(event -> beanEditor.getCopies().finish(treeItem, null, BeanTreeUtils::finishCopy));
+                items.add(menuItem);
+            }
+        });
     }
 
     private TreeItem<Object> currentItem(Event event) {
