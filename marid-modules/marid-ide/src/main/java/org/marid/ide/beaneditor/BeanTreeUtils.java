@@ -18,6 +18,8 @@
 
 package org.marid.ide.beaneditor;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.ImageView;
@@ -31,6 +33,7 @@ import org.marid.jfx.copy.CopyData;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
@@ -272,5 +275,37 @@ public class BeanTreeUtils implements BeanTreeConstants {
         } catch (Exception x) {
             return false;
         }
+    }
+
+    public static BooleanBinding cutOrCopyDisabled(BeanTree beanTree) {
+        return Bindings.createBooleanBinding(() -> {
+            final TreeItem<Object> item = beanTree.getSelectionModel().getSelectedItem();
+            if (item == null) {
+                return true;
+            }
+            if (item.getValue() instanceof BeanData) {
+                return false;
+            }
+            if (item.getValue() instanceof Path) {
+                return false;
+            }
+            return true;
+        }, beanTree.getSelectionModel().selectedItemProperty());
+    }
+
+    public static BooleanBinding pasteDisabled(BeanEditor editor) {
+        return Bindings.createBooleanBinding(() -> {
+            if (!editor.copies.canTransferProperty().get()) {
+                return true;
+            }
+            final AtomicBoolean disabled = new AtomicBoolean(true);
+            final TreeItem<Object> item = editor.beanTree.getSelectionModel().getSelectedItem();
+            editor.copies.progress(item, null, BeanTreeUtils::transferModes, (s, t) -> {
+                if (t.transferModes.length > 0) {
+                    disabled.set(false);
+                }
+            });
+            return disabled.get();
+        }, editor.beanTree.getSelectionModel().selectedItemProperty(), editor.copies.canTransferProperty());
     }
 }

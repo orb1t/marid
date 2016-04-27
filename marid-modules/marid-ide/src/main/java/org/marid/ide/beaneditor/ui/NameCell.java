@@ -77,7 +77,7 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
             }
             fillContextMenu(getContextMenu(), treeItem);
             final Copies<BeanEditor, TreeItem<Object>> copies = beanEditor.getCopies();
-            setOnDragDetected(event -> copies.start(currentItem(event), BeanTreeUtils::transferModes, data -> {
+            setOnDragDetected(event -> copies.start(currentItem(event), null, BeanTreeUtils::transferModes, data -> {
                 final Dragboard dragboard = getTreeTableView().startDragAndDrop(data.transferModes);
                 final ClipboardContent content = new ClipboardContent();
                 content.putString(item);

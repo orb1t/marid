@@ -18,6 +18,8 @@
 
 package org.marid.jfx.copy;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.input.TransferMode;
 
 import java.util.function.*;
@@ -29,35 +31,49 @@ public class Copies<N, E> {
 
     private final N node;
     private CopyData<N, E> originalData;
+    private final BooleanProperty canTransfer = new SimpleBooleanProperty();
 
     public Copies(N node) {
         this.node = node;
     }
 
-    public void start(E element, Function<E, TransferMode[]> modesFunc, Consumer<CopyData<N, E>> task) {
+    public boolean start(E element, TransferMode mode, Function<E, TransferMode[]> modesFunc, Consumer<CopyData<N, E>> task) {
         final TransferMode[] modes = modesFunc.apply(element);
-        originalData = new CopyData<>(null, node, element, modes);
         if (modes.length > 0) {
+            originalData = new CopyData<>(mode, node, element, modes);
+            canTransfer.set(true);
             task.accept(originalData);
         }
+        return modes.length > 0;
     }
 
-    public void progress(E element,
-                         TransferMode transferMode,
-                         BiFunction<CopyData<N, E>, CopyData<N, E>, TransferMode[]> modesFunc,
-                         BiConsumer<CopyData<N, E>, CopyData<N, E>> task) {
+    public boolean start(E element, TransferMode mode, Function<E, TransferMode[]> modesFunc) {
+        return start(element, mode, modesFunc, d -> {
+        });
+    }
+
+    public void progress(E element, TransferMode mode, BiFunction<CopyData<N, E>, CopyData<N, E>, TransferMode[]> modesFunc, BiConsumer<CopyData<N, E>, CopyData<N, E>> task) {
+        if (mode == null) {
+            mode = originalData.transferMode;
+        }
         final TransferMode[] transferModes = modesFunc.apply(
                 originalData,
-                new CopyData<>(transferMode, originalData.node, element, originalData.transferModes));
-        task.accept(originalData, new CopyData<>(transferMode, originalData.node, element, transferModes));
+                new CopyData<>(mode, originalData.node, element, originalData.transferModes));
+        task.accept(originalData, new CopyData<>(mode, originalData.node, element, transferModes));
     }
 
-    public boolean finish(E element,
-                          TransferMode transferMode,
-                          BiPredicate<CopyData<N, E>, CopyData<N, E>> task) {
+    public boolean finish(E element, TransferMode mode, BiPredicate<CopyData<N, E>, CopyData<N, E>> task) {
+        if (mode == null) {
+            mode = originalData.transferMode;
+        }
         final CopyData<N, E> original = originalData;
-        final CopyData<N, E> target = new CopyData<>(transferMode, originalData.node, element, originalData.transferModes);
+        final CopyData<N, E> target = new CopyData<>(mode, originalData.node, element, originalData.transferModes);
         originalData = null;
+        canTransfer.set(false);
         return task.test(original, target);
+    }
+
+    public BooleanProperty canTransferProperty() {
+        return canTransfer;
     }
 }

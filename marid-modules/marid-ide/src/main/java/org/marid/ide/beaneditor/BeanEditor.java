@@ -57,6 +57,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 
+import static javafx.scene.input.TransferMode.COPY;
+import static javafx.scene.input.TransferMode.MOVE;
 import static org.marid.ide.beaneditor.BeanTreeUtils.isRemovable;
 import static org.marid.xml.XmlBind.load;
 
@@ -86,10 +88,10 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
         this.loader = new Loader(this);
         this.saver = new Saver();
         this.beanTree = new BeanTree(profile, this);
+        this.copies = new Copies<>(this);
         final BorderPane pane = getTreePane();
         setScene(new Scene(pane, 1500, 800));
         update(profile);
-        this.copies = new Copies<>(this);
     }
 
     public Copies<BeanEditor, TreeItem<Object>> getCopies() {
@@ -130,20 +132,20 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
                         .item("Cut", mb -> mb
                                 .accelerator("Ctrl+X")
                                 .icon(MaterialDesignIcon.CONTENT_CUT)
-                                .action(event -> {
-                                })
+                                .action(event -> copies.start(currentItem(), MOVE, BeanTreeUtils::transferModes))
+                                .disabled(BeanTreeUtils.cutOrCopyDisabled(beanTree))
                         )
                         .item("Copy", mb -> mb
                                 .accelerator("Ctrl+C")
                                 .icon(MaterialDesignIcon.CONTENT_COPY)
-                                .action(event -> {
-                                })
+                                .action(event -> copies.start(currentItem(), COPY, BeanTreeUtils::transferModes))
+                                .disabled(BeanTreeUtils.cutOrCopyDisabled(beanTree))
                         )
                         .item("Paste", mb -> mb
                                 .accelerator("Ctrl+V")
                                 .icon(MaterialDesignIcon.CONTENT_PASTE)
-                                .action(event -> {
-                                })
+                                .action(event -> copies.finish(currentItem(), null, BeanTreeUtils::finishCopy))
+                                .disabled(BeanTreeUtils.pasteDisabled(this))
                         )
                 )
                 .menu("Beans", true, b -> b
@@ -175,6 +177,10 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
         final BorderPane pane = new BorderPane(ScrollPanes.scrollPane(beanTree), vBox, null, null, null);
         pane.setFocusTraversable(false);
         return pane;
+    }
+
+    private TreeItem<Object> currentItem() {
+        return beanTree.getSelectionModel().getSelectedItem();
     }
 
     void update(ProjectProfile profile) {

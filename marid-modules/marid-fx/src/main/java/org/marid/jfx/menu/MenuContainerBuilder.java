@@ -38,6 +38,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static javafx.beans.binding.Bindings.createStringBinding;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -60,25 +61,22 @@ public class MenuContainerBuilder implements L10nSupport {
                 final MenuItem menuItem;
                 if (!action.menuItems.isEmpty()) {
                     final Menu subMenu = new Menu();
-                    if (action.text != null) {
-                        subMenu.textProperty().bind(action.text);
-                    }
                     menuItem = subMenu;
                     subMenu.getItems().addAll(action.menuItems);
                 } else if (action.separator) {
                     menuItem = new SeparatorMenuItem();
                 } else {
                     menuItem = new MenuItem();
-                    if (action.text != null) {
-                        menuItem.textProperty().bind(action.text);
-                    }
-                    if (action.icon != null) {
-                        menuItem.graphicProperty().bind(Bindings.createObjectBinding(
-                                () -> glyphIcon(action.icon.getValue(), 16),
-                                action.icon
-                        ));
-                    }
                     menuItem.setOnAction(action.action);
+                }
+                if (action.icon != null) {
+                    menuItem.graphicProperty().bind(Bindings.createObjectBinding(
+                            () -> glyphIcon(action.icon.getValue(), 16),
+                            action.icon
+                    ));
+                }
+                if (action.text != null) {
+                    menuItem.textProperty().bind(createStringBinding(() -> s(action.text.get()), action.text));
                 }
                 if (action.accelerator != null) {
                     menuItem.acceleratorProperty().bind(action.accelerator);
@@ -103,7 +101,7 @@ public class MenuContainerBuilder implements L10nSupport {
                     }
                     if (action.text != null) {
                         final Tooltip tooltip = new Tooltip();
-                        tooltip.textProperty().bind(action.text);
+                        tooltip.textProperty().bind(createStringBinding(() -> s(action.text.get()), action.text));
                         button.setTooltip(tooltip);
                     }
                     if (action.disabled != null) {
