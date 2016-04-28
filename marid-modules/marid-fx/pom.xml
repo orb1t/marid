@@ -43,6 +43,12 @@
         </dependency>
 
         <dependency>
+            <groupId>eu.hansolo</groupId>
+            <artifactId>Medusa</artifactId>
+            <version>4.8</version>
+        </dependency>
+
+        <dependency>
             <groupId>de.jensd</groupId>
             <artifactId>fontawesomefx</artifactId>
             <version>8.8</version>

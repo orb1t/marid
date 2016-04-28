@@ -269,8 +269,15 @@ public class BeanTreeUtils implements BeanTreeConstants {
     }
 
     public static boolean finishCopy(CopyData<BeanEditor, TreeItem<Object>> sourceData, CopyData<BeanEditor, TreeItem<Object>> targetData) {
+        final List<TransferMode> transferModes = Arrays.asList(transferModes(sourceData, targetData));
+        if (transferModes.isEmpty()) {
+            return false;
+        }
+        final TransferMode mode = transferModes.contains(targetData.transferMode)
+                ? targetData.transferMode
+                : transferModes.iterator().next();
         try {
-            copy(sourceData.node, targetData.transferMode, sourceData.element, targetData.element);
+            copy(sourceData.node, mode, sourceData.element, targetData.element);
             return true;
         } catch (Exception x) {
             return false;

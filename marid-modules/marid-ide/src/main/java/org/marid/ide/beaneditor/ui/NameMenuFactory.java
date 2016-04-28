@@ -33,6 +33,7 @@ import org.marid.ide.beaneditor.BeanTreeConstants;
 import org.marid.ide.beaneditor.BeanTreeUtils;
 import org.marid.ide.beaneditor.ClassData;
 import org.marid.ide.beaneditor.data.BeanData;
+import org.marid.ide.beaneditor.data.RefValue;
 import org.marid.ide.project.ProjectProfile;
 
 import java.beans.Introspector;

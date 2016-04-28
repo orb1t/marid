@@ -77,7 +77,7 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
             } else if (treeItem.getValue() instanceof BeanData) {
                 setContextMenu(NameMenuFactory.menu(beanEditor, treeItem, (BeanData) treeItem.getValue()));
             } else {
-                setContextMenu(null);
+                setContextMenu(new ContextMenu());
             }
             fillContextMenu(getContextMenu(), treeItem);
             final Copies<BeanEditor, TreeItem<Object>> copies = beanEditor.getCopies();
@@ -100,9 +100,6 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
     }
 
     private void fillContextMenu(ContextMenu contextMenu, TreeItem<Object> treeItem) {
-        if (contextMenu == null) {
-            return;
-        }
         MenuUtils.addGroup(contextMenu.getItems(), items -> {
             if (BeanTreeUtils.isRemovable(treeItem)) {
                 final MenuItem menuItem = new MenuItem(s("Remove"), FontIcons.glyphIcon(MaterialIcon.REMOVE));
