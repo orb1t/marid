@@ -18,7 +18,6 @@
 
 package org.marid.ide.beaneditor.ui;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -28,6 +27,7 @@ import org.marid.ide.beaneditor.ClassData;
 import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.beaneditor.data.RefValue;
 import org.marid.jfx.dialog.MaridDialog;
+import org.marid.jfx.icons.FontIcon;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +45,7 @@ public class ValueMenuFactory {
     public static ContextMenu menu(BeanEditor editor, TreeItem<Object> item, RefValue rv) {
         final ContextMenu contextMenu = new ContextMenu();
         if (rv.ref().isBound()) {
-            final MenuItem menuItem = new MenuItem(s("Unbind"), glyphIcon(FontAwesomeIcon.UNLINK, 16));
+            final MenuItem menuItem = new MenuItem(s("Unbind"), glyphIcon(FontIcon.F_UNLINK, 16));
             menuItem.setOnAction(event -> {
                 rv.ref().unbind();
                 rv.ref().set(null);
@@ -59,7 +59,7 @@ public class ValueMenuFactory {
             return targetClassData.isAssignableFrom(beanClassData);
         }).collect(Collectors.toList());
         if (!assignableBeans.isEmpty()) {
-            final Menu menu = new Menu(s("Bind"), glyphIcon(FontAwesomeIcon.LINK, 16));
+            final Menu menu = new Menu(s("Bind"), glyphIcon(FontIcon.F_LINK, 16));
             for (final BeanData beanData : assignableBeans) {
                 final Image image = editor.image(beanData.type.get());
                 final MenuItem menuItem = new MenuItem(beanData.name.get(), new ImageView(image));
@@ -72,7 +72,7 @@ public class ValueMenuFactory {
             if (!contextMenu.getItems().isEmpty()) {
                 contextMenu.getItems().add(new SeparatorMenuItem());
             }
-            final MenuItem menuItem = new MenuItem(s("Edit value as an expression..."), glyphIcon(FontAwesomeIcon.SCRIBD, 16));
+            final MenuItem menuItem = new MenuItem(s("Edit value as an expression..."), glyphIcon(FontIcon.F_SCRIBD, 16));
             menuItem.setOnAction(event -> {
                 final ValueExpressionEditor expressionEditor = new ValueExpressionEditor(rv.value());
                 final Optional<String> value = new MaridDialog<String>(editor, ButtonType.APPLY, ButtonType.CANCEL)

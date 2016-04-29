@@ -18,7 +18,6 @@
 
 package org.marid.ide.icons.viewer;
 
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import org.marid.ide.menu.IdeMenuItem;
@@ -27,6 +26,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
 
+import static org.marid.jfx.icons.FontIcon.D_IMAGE_ALBUM;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -34,7 +35,7 @@ import javax.inject.Provider;
 public class IconViewerManager {
 
     @Produces
-    @IdeMenuItem(menu = "Icons", text = "Open viewer...", group = "icons", mdIcons = {MaterialDesignIcon.IMAGE_ALBUM})
+    @IdeMenuItem(menu = "Icons", text = "Open viewer...", group = "icons", icon = D_IMAGE_ALBUM)
     public EventHandler<ActionEvent> showViewer(Provider<IconViewer> iconViewerProvider) {
         return event -> {
             final IconViewer iconViewer = iconViewerProvider.get();

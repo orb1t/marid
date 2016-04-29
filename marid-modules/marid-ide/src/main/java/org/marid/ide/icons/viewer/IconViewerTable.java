@@ -19,61 +19,45 @@
 package org.marid.ide.icons.viewer;
 
 import de.jensd.fx.glyphs.GlyphIcon;
-import de.jensd.fx.glyphs.GlyphIcons;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
-import de.jensd.fx.glyphs.materialicons.MaterialIcon;
-import de.jensd.fx.glyphs.octicons.OctIcon;
-import de.jensd.fx.glyphs.weathericons.WeatherIcon;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import org.marid.jfx.icons.FontIcons;
+import org.marid.jfx.icons.FontIcon;
 import org.marid.l10n.L10nSupport;
 
 import javax.enterprise.context.Dependent;
+import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Dependent
-public class IconViewerTable extends TableView<GlyphIcons> implements L10nSupport {
+public class IconViewerTable extends TableView<Field> implements L10nSupport {
 
     public IconViewerTable() {
-        super(icons());
+        super(FXCollections.observableList(Arrays.asList(FontIcon.class.getFields())));
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         {
-            final TableColumn<GlyphIcons, String> column = new TableColumn<>(s("Name"));
+            final TableColumn<Field, String> column = new TableColumn<>(s("Name"));
             column.setMinWidth(100);
             column.setPrefWidth(110);
             column.setMaxWidth(500);
-            column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().name()));
+            column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getName()));
             getColumns().add(column);
         }
         {
-            final TableColumn<GlyphIcons, String> column = new TableColumn<>(s("Font family"));
-            column.setMinWidth(100);
-            column.setPrefWidth(130);
-            column.setMaxWidth(500);
-            column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getClass().getSimpleName()));
-            getColumns().add(column);
-        }
-        {
-            final TableColumn<GlyphIcons, GlyphIcon<?>> column = new TableColumn<>(s("Icon"));
+            final TableColumn<Field, GlyphIcon<?>> column = new TableColumn<>(s("Icon"));
             column.setMaxWidth(128);
             column.setPrefWidth(128);
             column.setMaxWidth(128);
-            column.setCellValueFactory(param -> new SimpleObjectProperty<>(FontIcons.glyphIcon(param.getValue(), 32)));
-            column.setCellFactory(param -> new TableCell<GlyphIcons, GlyphIcon<?>>() {
+            column.setCellValueFactory(param -> new SimpleObjectProperty<>(glyphIcon(param.getValue().getName(), 32)));
+            column.setCellFactory(param -> new TableCell<Field, GlyphIcon<?>>() {
                 @Override
                 protected void updateItem(GlyphIcon<?> item, boolean empty) {
                     super.updateItem(item, empty);
@@ -84,19 +68,5 @@ public class IconViewerTable extends TableView<GlyphIcons> implements L10nSuppor
             column.setStyle("-fx-alignment: center");
             getColumns().add(column);
         }
-    }
-
-    private static ObservableList<GlyphIcons> icons() {
-        final List<GlyphIcons> icons = Arrays.asList(
-                OctIcon.values(),
-                MaterialIcon.values(),
-                MaterialDesignIcon.values(),
-                FontAwesomeIcon.values(),
-                WeatherIcon.values()
-        ).stream()
-                .flatMap(Stream::of)
-                .sorted(Comparator.comparing(Enum::name))
-                .collect(Collectors.toList());
-        return FXCollections.unmodifiableObservableList(FXCollections.observableList(icons));
     }
 }

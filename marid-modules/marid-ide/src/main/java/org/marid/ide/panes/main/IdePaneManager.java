@@ -29,9 +29,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
 
-import static de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon.BORDER_TOP;
-import static de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon.EXIT_TO_APP;
 import static org.marid.ide.menu.MenuItemType.CHECK;
+import static org.marid.jfx.icons.FontIcon.D_BORDER_TOP;
+import static org.marid.jfx.icons.FontIcon.D_EXIT_TO_APP;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -40,7 +40,7 @@ import static org.marid.ide.menu.MenuItemType.CHECK;
 public class IdePaneManager {
 
     @Produces
-    @IdeMenuItem(menu = "Window", text = "Always on top", group = "ops", mdIcons = {BORDER_TOP}, type = CHECK)
+    @IdeMenuItem(menu = "Window", text = "Always on top", group = "ops", icon = D_BORDER_TOP, type = CHECK)
     public EventHandler<ActionEvent> alwaysOnTop(Provider<IdePane> idePaneProvider) {
         return event -> {
             final Stage stage = (Stage) idePaneProvider.get().getScene().getWindow();
@@ -50,7 +50,7 @@ public class IdePaneManager {
     }
 
     @Produces
-    @IdeMenuItem(menu = "File", text = "Exit", group = "x", key = "F12", mdIcons = {EXIT_TO_APP})
+    @IdeMenuItem(menu = "File", text = "Exit", group = "x", key = "F12", icon = D_EXIT_TO_APP)
     public EventHandler<ActionEvent> exitItem() {
         return event -> Platform.exit();
     }

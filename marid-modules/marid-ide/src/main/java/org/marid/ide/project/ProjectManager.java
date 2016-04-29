@@ -18,9 +18,6 @@
 
 package org.marid.ide.project;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
-import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -48,6 +45,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
+import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.util.Utils.callWithTime;
 
 /**
@@ -104,7 +102,7 @@ public class ProjectManager implements PrefSupport, LogSupport {
     }
 
     @Produces
-    @IdeMenuItem(menu = "Project", text = "Project setup...", group = "setup", oIcons = {OctIcon.TOOLS})
+    @IdeMenuItem(menu = "Project", text = "Project setup...", group = "setup", icon = O_TOOLS)
     @IdeToolbarItem(group = "projectSetup")
     public EventHandler<ActionEvent> projectSetup(Provider<ProjectDialog> editorProvider,
                                                   Provider<IdeModelMerger> ideModelMergerProvider) {
@@ -119,7 +117,7 @@ public class ProjectManager implements PrefSupport, LogSupport {
     }
 
     @Produces
-    @IdeMenuItem(menu = "Project", text = "Save", group = "io", faIcons = {FontAwesomeIcon.SAVE}, key = "Ctrl+S")
+    @IdeMenuItem(menu = "Project", text = "Save", group = "io", icon = F_SAVE, key = "Ctrl+S")
     @IdeToolbarItem(group = "projectIO")
     public EventHandler<ActionEvent> projectSave(Provider<ProjectSaver> projectSaverProvider) {
         return event -> callWithTime(
@@ -128,7 +126,7 @@ public class ProjectManager implements PrefSupport, LogSupport {
     }
 
     @Produces
-    @IdeMenuItem(menu = "Project", text = "Build", group = "pb", mdIcons = {MaterialDesignIcon.CLOCK_FAST}, key = "F9")
+    @IdeMenuItem(menu = "Project", text = "Build", group = "pb", icon = D_CLOCK_FAST, key = "F9")
     @IdeToolbarItem(group = "projectBuild")
     public EventHandler<ActionEvent> projectBuild(Provider<ProjectProfile> profileProvider) {
         return event -> {
@@ -144,7 +142,7 @@ public class ProjectManager implements PrefSupport, LogSupport {
     }
 
     @Produces
-    @IdeMenuItem(menu = "Project", text = "Run", group = "pb", faIcons = {FontAwesomeIcon.PLAY}, key = "F5")
+    @IdeMenuItem(menu = "Project", text = "Run", group = "pb", icon = F_PLAY, key = "F5")
     @IdeToolbarItem(group = "projectBuild")
     public EventHandler<ActionEvent> projectRun(Provider<ProjectRunner> projectRunnerProvider) {
         return event -> {

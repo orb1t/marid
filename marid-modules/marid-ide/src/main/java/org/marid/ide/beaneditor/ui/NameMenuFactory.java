@@ -18,7 +18,6 @@
 
 package org.marid.ide.beaneditor.ui;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.WritableObjectValue;
 import javafx.scene.control.*;
@@ -33,8 +32,8 @@ import org.marid.ide.beaneditor.BeanTreeConstants;
 import org.marid.ide.beaneditor.BeanTreeUtils;
 import org.marid.ide.beaneditor.ClassData;
 import org.marid.ide.beaneditor.data.BeanData;
-import org.marid.ide.beaneditor.data.RefValue;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.icons.FontIcon;
 
 import java.beans.Introspector;
 import java.lang.reflect.Method;
@@ -113,7 +112,7 @@ public class NameMenuFactory implements BeanTreeConstants {
             if (!menu.getItems().isEmpty()) {
                 menu.getItems().add(new SeparatorMenuItem());
             }
-            final Menu bindMenu = new Menu(s("Bind"), glyphIcon(FontAwesomeIcon.LINK, 16));
+            final Menu bindMenu = new Menu(s("Bind"), glyphIcon(FontIcon.F_LINK, 16));
             factoryMethods.forEach((nameProperty, methods) -> {
                 final Menu m = new Menu(nameProperty.get());
                 methods.forEach(method -> {
@@ -133,7 +132,7 @@ public class NameMenuFactory implements BeanTreeConstants {
             if (!menu.getItems().isEmpty()) {
                 menu.getItems().add(new SeparatorMenuItem());
             }
-            final MenuItem menuItem = new MenuItem(s("Unbind"), glyphIcon(FontAwesomeIcon.UNLINK, 16));
+            final MenuItem menuItem = new MenuItem(s("Unbind"), glyphIcon(FontIcon.F_UNLINK, 16));
             menuItem.setOnAction(event -> {
                 beanData.factoryBean.unbind();
                 beanData.factoryBean.set(null);

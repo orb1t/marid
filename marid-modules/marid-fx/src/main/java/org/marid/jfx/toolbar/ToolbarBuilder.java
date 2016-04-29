@@ -18,7 +18,6 @@
 
 package org.marid.jfx.toolbar;
 
-import de.jensd.fx.glyphs.GlyphIcons;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -41,7 +40,7 @@ public final class ToolbarBuilder implements Builder<ToolBar>, L10nSupport {
 
     private final List<Node> nodes = new ArrayList<>();
 
-    public ToolbarBuilder add(String tooltip, GlyphIcons icon, EventHandler<ActionEvent> eventHandler, Consumer<Button> buttonConsumer) {
+    public ToolbarBuilder add(String tooltip, String icon, EventHandler<ActionEvent> eventHandler, Consumer<Button> buttonConsumer) {
         final Button button = new Button(null, FontIcons.glyphIcon(icon, 20));
         button.setFocusTraversable(false);
         button.setTooltip(new Tooltip(s(tooltip)));
@@ -51,7 +50,7 @@ public final class ToolbarBuilder implements Builder<ToolBar>, L10nSupport {
         return this;
     }
 
-    public ToolbarBuilder add(String tooltip, GlyphIcons icon, EventHandler<ActionEvent> eventHandler) {
+    public ToolbarBuilder add(String tooltip, String icon, EventHandler<ActionEvent> eventHandler) {
         return add(tooltip, icon, eventHandler, button -> {});
     }
 

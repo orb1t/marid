@@ -18,7 +18,6 @@
 
 package org.marid.ide.project.editors;
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -34,6 +33,7 @@ import javafx.scene.layout.BorderPane;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Repository;
 import org.apache.maven.model.RepositoryPolicy;
+import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 
 import java.util.function.Consumer;
@@ -55,21 +55,21 @@ public class RepositoriesTab extends BorderPane {
                 .selectedItemProperty()
                 .isNull());
         setBottom(new ToolbarBuilder()
-                .add("Add item", MaterialIcon.ADD, event -> repositoryTable.getItems().add(new Repository()))
-                .add("Remove item", MaterialIcon.REMOVE, event -> {
+                .add("Add item", FontIcon.M_ADD, event -> repositoryTable.getItems().add(new Repository()))
+                .add("Remove item", FontIcon.M_REMOVE, event -> {
                     final int index = repositoryTable.getSelectionModel().getSelectedIndex();
                     if (index >= 0) {
                         repositoryTable.getItems().remove(index);
                     }
                 }, itemSelectionTrigger)
                 .addSeparator()
-                .add("Clear all items", MaterialIcon.CLEAR_ALL,
+                .add("Clear all items", FontIcon.M_CLEAR_ALL,
                         event -> repositoryTable.getItems().clear(),
                         b -> b.disableProperty().bind(Bindings.size(repositoryTable.getItems()).isEqualTo(0)))
                 .addSeparator()
-                .add("Cut", MaterialIcon.CONTENT_CUT, event -> {}, itemSelectionTrigger)
-                .add("Copy", MaterialIcon.CONTENT_COPY, event -> {}, itemSelectionTrigger)
-                .add("Paste", MaterialIcon.CONTENT_PASTE, event -> {}, itemSelectionTrigger)
+                .add("Cut", FontIcon.M_CONTENT_CUT, event -> {}, itemSelectionTrigger)
+                .add("Copy", FontIcon.M_CONTENT_COPY, event -> {}, itemSelectionTrigger)
+                .add("Paste", FontIcon.M_CONTENT_PASTE, event -> {}, itemSelectionTrigger)
                 .build(t -> setMargin(t,  new Insets(10, 0, 0, 0))));
     }
 

@@ -18,7 +18,6 @@
 
 package org.marid.ide.beaneditor;
 
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import org.marid.ide.menu.IdeMenuItem;
@@ -28,6 +27,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
 
+import static org.marid.jfx.icons.FontIcon.D_PUZZLE;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -35,7 +36,7 @@ import javax.inject.Provider;
 public class BeanEditorManager {
 
     @Produces
-    @IdeMenuItem(menu = "File", text = "Bean editor", group = "fileBeanEditor2", mdIcons = {MaterialDesignIcon.PUZZLE})
+    @IdeMenuItem(menu = "File", text = "Bean editor", group = "fileBeanEditor2", icon = D_PUZZLE)
     @IdeToolbarItem(group = "file")
     public EventHandler<ActionEvent> beanEditor(Provider<BeanEditor> beanEditorProvider) {
         return event -> {

@@ -18,7 +18,6 @@
 
 package org.marid.ide.beaneditor.ui;
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -34,6 +33,7 @@ import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.beaneditor.data.ConstructorArg;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.copy.Copies;
+import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.menu.MenuUtils;
 import org.marid.l10n.L10nSupport;
@@ -102,21 +102,21 @@ public class NameCell extends TextFieldTreeTableCell<Object, String> implements 
     private void fillContextMenu(ContextMenu contextMenu, TreeItem<Object> treeItem) {
         MenuUtils.addGroup(contextMenu.getItems(), items -> {
             if (BeanTreeUtils.isRemovable(treeItem)) {
-                final MenuItem menuItem = new MenuItem(s("Remove"), FontIcons.glyphIcon(MaterialIcon.REMOVE));
+                final MenuItem menuItem = new MenuItem(s("Remove"), FontIcons.glyphIcon(FontIcon.M_REMOVE));
                 menuItem.setOnAction(event -> BeanTreeUtils.remove(treeItem));
                 items.add(menuItem);
             }
         });
         MenuUtils.addGroup(contextMenu.getItems(), items -> {
             if (!BeanTreeUtils.cutOrCopyDisabled(treeItem)) {
-                final MenuItem cutItem = new MenuItem(s("Cut"), FontIcons.glyphIcon(MaterialIcon.CONTENT_CUT));
+                final MenuItem cutItem = new MenuItem(s("Cut"), FontIcons.glyphIcon(FontIcon.M_CONTENT_CUT));
                 cutItem.setOnAction(event -> beanEditor.getCopies().start(treeItem, MOVE, BeanTreeUtils::transferModes));
-                final MenuItem copyItem = new MenuItem(s("Copy"), FontIcons.glyphIcon(MaterialIcon.CONTENT_COPY));
+                final MenuItem copyItem = new MenuItem(s("Copy"), FontIcons.glyphIcon(FontIcon.M_CONTENT_COPY));
                 copyItem.setOnAction(event -> beanEditor.getCopies().start(treeItem, COPY, BeanTreeUtils::transferModes));
                 items.addAll(cutItem, copyItem);
             }
             if (!BeanTreeUtils.pasteDisabled(beanEditor, treeItem)) {
-                final MenuItem menuItem = new MenuItem(s("Paste"), FontIcons.glyphIcon(MaterialIcon.CONTENT_PASTE));
+                final MenuItem menuItem = new MenuItem(s("Paste"), FontIcons.glyphIcon(FontIcon.M_CONTENT_PASTE));
                 menuItem.setOnAction(event -> beanEditor.getCopies().finish(treeItem, null, BeanTreeUtils::finishCopy));
                 items.add(menuItem);
             }

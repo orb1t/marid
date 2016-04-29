@@ -18,10 +18,6 @@
 
 package org.marid.ide.beaneditor;
 
-import de.jensd.fx.glyphs.GlyphIcons;
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
-import de.jensd.fx.glyphs.materialicons.MaterialIcon;
-import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Scene;
 import javafx.scene.control.MenuBar;
@@ -41,6 +37,7 @@ import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.ScrollPanes;
 import org.marid.jfx.copy.Copies;
+import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.menu.MenuContainerBuilder;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
@@ -109,7 +106,7 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
                 .menu("File", true, b -> b
                         .item("Reload", mb -> mb
                                 .accelerator("Ctrl+R")
-                                .icon(MaterialIcon.RESTORE)
+                                .icon(FontIcon.M_RESTORE)
                                 .action(event -> {
                                     beanTree.getRoot().getChildren().clear();
                                     beanTree.load();
@@ -117,13 +114,13 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
                         )
                         .item("Save", mb -> mb
                                 .accelerator("Ctrl+S")
-                                .icon(MaterialIcon.SAVE)
+                                .icon(FontIcon.M_SAVE)
                                 .action(event -> beanTree.save())
                         )
                         .separator()
                         .item("Print", mb -> mb
                                 .accelerator("Ctrl+P")
-                                .icon(MaterialIcon.PRINT)
+                                .icon(FontIcon.M_PRINT)
                                 .action(event -> {
                                 })
                         )
@@ -131,19 +128,19 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
                 .menu("Edit", true, b -> b
                         .item("Cut", mb -> mb
                                 .accelerator("Ctrl+X")
-                                .icon(MaterialDesignIcon.CONTENT_CUT)
+                                .icon(FontIcon.D_CONTENT_CUT)
                                 .action(event -> copies.start(currentItem(), MOVE, BeanTreeUtils::transferModes))
                                 .disabled(BeanTreeUtils.cutOrCopyDisabled(this))
                         )
                         .item("Copy", mb -> mb
                                 .accelerator("Ctrl+C")
-                                .icon(MaterialDesignIcon.CONTENT_COPY)
+                                .icon(FontIcon.D_CONTENT_COPY)
                                 .action(event -> copies.start(currentItem(), COPY, BeanTreeUtils::transferModes))
                                 .disabled(BeanTreeUtils.cutOrCopyDisabled(this))
                         )
                         .item("Paste", mb -> mb
                                 .accelerator("Ctrl+V")
-                                .icon(MaterialDesignIcon.CONTENT_PASTE)
+                                .icon(FontIcon.D_CONTENT_PASTE)
                                 .action(event -> copies.finish(currentItem(), null, BeanTreeUtils::finishCopy))
                                 .disabled(BeanTreeUtils.pasteDisabled(this))
                         )
@@ -151,7 +148,7 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
                 .menu("Beans", true, b -> b
                         .item("Remove", mb -> mb
                                 .accelerator("F8")
-                                .icon(MaterialIcon.REMOVE)
+                                .icon(FontIcon.M_REMOVE)
                                 .action(event -> BeanTreeUtils.remove(beanTree))
                                 .disabled(Bindings.createBooleanBinding(
                                         () -> !isRemovable(beanTree),
@@ -160,7 +157,7 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
                         .separator()
                         .item("Clear all", mb -> mb
                                 .accelerator("F9")
-                                .icon(MaterialIcon.CLEAR_ALL)
+                                .icon(FontIcon.M_CLEAR_ALL)
                                 .action(event -> beanTree.getRoot().getChildren().clear())
                                 .disabled(beanTree.clearAllDisabled())
                         )
@@ -168,7 +165,7 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
                 .menu("Window", true, b -> b
                         .item("Refresh", mb -> mb
                                 .accelerator("F5")
-                                .icon(MaterialDesignIcon.REFRESH)
+                                .icon(FontIcon.D_REFRESH)
                                 .action(event -> beanTree.refresh())
                         )
                 )
@@ -298,15 +295,15 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
         });
     }
 
-    public GlyphIcons accessorIcon(int modifiers) {
+    public String accessorIcon(int modifiers) {
         if (Modifier.isPublic(modifiers)) {
-            return OctIcon.MIRROR_PUBLIC;
+            return FontIcon.O_MIRROR_PUBLIC;
         } else if (Modifier.isProtected(modifiers)) {
-            return MaterialDesignIcon.NEST_PROTECT;
+            return FontIcon.D_NEST_PROTECT;
         } else if (Modifier.isPrivate(modifiers)) {
-            return OctIcon.MIRROR_PRIVATE;
+            return FontIcon.O_MIRROR_PRIVATE;
         } else {
-            return OctIcon.PACKAGE;
+            return FontIcon.O_PACKAGE;
         }
     }
 

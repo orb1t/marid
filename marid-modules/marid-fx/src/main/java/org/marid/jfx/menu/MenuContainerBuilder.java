@@ -18,7 +18,6 @@
 
 package org.marid.jfx.menu;
 
-import de.jensd.fx.glyphs.GlyphIcons;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -170,7 +169,7 @@ public class MenuContainerBuilder implements L10nSupport {
             private ObservableStringValue text;
             private ObservableBooleanValue disabled;
             private ObservableValue<KeyCombination> accelerator;
-            private ObservableValue<GlyphIcons> icon;
+            private ObservableStringValue icon;
             private EventHandler<ActionEvent> action;
 
             private MenuItemBuilder(boolean toolbar, boolean separator) {
@@ -219,13 +218,13 @@ public class MenuContainerBuilder implements L10nSupport {
                 return this;
             }
 
-            public MenuItemBuilder icon(ObservableValue<GlyphIcons> icon) {
+            public MenuItemBuilder icon(ObservableStringValue icon) {
                 this.icon = icon;
                 return this;
             }
 
-            public MenuItemBuilder icon(GlyphIcons icon) {
-                return icon(new SimpleObjectProperty<>(icon));
+            public MenuItemBuilder icon(String icon) {
+                return icon(new SimpleStringProperty(icon));
             }
 
             public MenuItemBuilder action(EventHandler<ActionEvent> action) {

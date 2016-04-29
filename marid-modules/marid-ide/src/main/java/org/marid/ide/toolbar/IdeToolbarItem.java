@@ -18,12 +18,6 @@
 
 package org.marid.ide.toolbar;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
-import de.jensd.fx.glyphs.materialicons.MaterialIcon;
-import de.jensd.fx.glyphs.octicons.OctIcon;
-import de.jensd.fx.glyphs.weathericons.WeatherIcon;
-
 import javax.enterprise.context.Dependent;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
@@ -42,15 +36,7 @@ public @interface IdeToolbarItem {
 
     @Nonbinding String id() default "";
 
-    @Nonbinding FontAwesomeIcon[] faIcons() default {};
-
-    @Nonbinding MaterialIcon[] mIcons() default {};
-
-    @Nonbinding MaterialDesignIcon[] mdIcons() default {};
-
-    @Nonbinding OctIcon[] oIcons() default {};
-
-    @Nonbinding WeatherIcon[] wIcons() default {};
+    @Nonbinding String icon() default "";
 
     @Nonbinding String group() default "";
 }

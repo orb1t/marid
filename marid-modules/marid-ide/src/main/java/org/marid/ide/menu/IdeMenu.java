@@ -42,7 +42,6 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -69,11 +68,7 @@ public class IdeMenu extends MenuBar implements L10nSupport, LogSupport {
                 if (mi == null || mi.menu().isEmpty()) {
                     continue;
                 }
-                final GlyphIcon<?> icon = Stream.of(mi.faIcons(), mi.mdIcons(), mi.mIcons(), mi.oIcons(), mi.wIcons())
-                        .flatMap(Stream::of)
-                        .findAny()
-                        .map(e -> FontIcons.glyphIcon(e, 16))
-                        .orElse(null);
+                final GlyphIcon<?> icon = mi.icon().isEmpty() ? null : FontIcons.glyphIcon(mi.icon(), 16);
                 final String key = mi.key().isEmpty() ? null : mi.key();
                 final String text = mi.text();
                 final MenuItem menuItem = mi.type().createItem(s(text), icon);

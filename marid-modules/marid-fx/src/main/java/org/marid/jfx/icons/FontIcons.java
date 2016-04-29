@@ -19,7 +19,6 @@
 package org.marid.jfx.icons;
 
 import de.jensd.fx.glyphs.GlyphIcon;
-import de.jensd.fx.glyphs.GlyphIcons;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
@@ -30,49 +29,49 @@ import de.jensd.fx.glyphs.octicons.OctIcon;
 import de.jensd.fx.glyphs.octicons.OctIconView;
 import de.jensd.fx.glyphs.weathericons.WeatherIcon;
 import de.jensd.fx.glyphs.weathericons.WeatherIconView;
-import org.marid.cache.MaridClassValue;
-import org.marid.util.Utils;
-
-import java.util.function.Function;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class FontIcons {
 
-    private static final ClassValue<Function<GlyphIcons, GlyphIcon<?>>> ICV = new MaridClassValue<>(c -> {
-        if (c == FontAwesomeIcon.class) {
-            return i -> new FontAwesomeIconView((FontAwesomeIcon) i);
-        } else if (c == MaterialDesignIcon.class) {
-            return i -> new MaterialDesignIconView((MaterialDesignIcon) i);
-        } else if (c == MaterialIcon.class) {
-            return i -> new MaterialIconView((MaterialIcon) i);
-        } else if (c == WeatherIcon.class) {
-            return i -> new WeatherIconView((WeatherIcon) i);
-        } else if (c == OctIcon.class) {
-            return i -> new OctIconView((OctIcon) i);
+    public static GlyphIcon<?> glyphIcon(String type, Number size) {
+        GlyphIcon<?> icon;
+        if (type == null || type.isEmpty()) {
+            icon = new FontAwesomeIconView(FontAwesomeIcon.SMILE_ALT);
         } else {
-            throw new IllegalArgumentException("Icon " + c + " is not supported");
+            try {
+                switch (type.charAt(0)) {
+                    case 'O':
+                        icon = new OctIconView(OctIcon.valueOf(type.substring(2)));
+                        break;
+                    case 'W':
+                        icon = new WeatherIconView(WeatherIcon.valueOf(type.substring(2)));
+                        break;
+                    case 'M':
+                        icon = new MaterialIconView(MaterialIcon.valueOf(type.substring(2)));
+                        break;
+                    case 'D':
+                        icon = new MaterialDesignIconView(MaterialDesignIcon.valueOf(type.substring(2)));
+                        break;
+                    case 'F':
+                        icon = new FontAwesomeIconView(FontAwesomeIcon.valueOf(type.substring(2)));
+                        break;
+                    default:
+                        icon = new WeatherIconView(WeatherIcon.MOON_0);
+                        break;
+                }
+            } catch (IllegalArgumentException x) {
+                icon = new WeatherIconView(WeatherIcon.MOONSET);
+            }
         }
-    });
-
-    public static <E extends Enum<E> & GlyphIcons, I extends GlyphIcon<E>> I ideIcon(E type, Number size) {
-        return Utils.cast(glyphIcon(type, size));
-    }
-
-    public static <E extends Enum<E> & GlyphIcons, I extends GlyphIcon<E>> I ideIcon(E type) {
-        return ideIcon(type, 0);
-    }
-
-    public static GlyphIcon<?> glyphIcon(GlyphIcons type, Number size) {
-        final GlyphIcon<?> icon = ICV.get(type.getClass()).apply(type);
         if (size.intValue() > 0) {
             icon.setGlyphSize(size);
         }
-        return Utils.cast(icon);
+        return icon;
     }
 
-    public static GlyphIcon<?> glyphIcon(GlyphIcons type) {
+    public static GlyphIcon<?> glyphIcon(String type) {
         return glyphIcon(type, 0);
     }
 }

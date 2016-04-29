@@ -18,7 +18,6 @@
 
 package org.marid.ide.settings;
 
-import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import org.marid.ide.menu.IdeMenuItem;
@@ -29,6 +28,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
 
+import static org.marid.jfx.icons.FontIcon.O_SETTINGS;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -37,7 +38,7 @@ public class SettingsManager {
 
     @Produces
     @IdeToolbarItem(group = "settings")
-    @IdeMenuItem(menu = "Tools", text = "Settings...", group = "settings", oIcons = {OctIcon.SETTINGS})
+    @IdeMenuItem(menu = "Tools", text = "Settings...", group = "settings", icon = O_SETTINGS)
     public EventHandler<ActionEvent> settingsItem(Provider<SettingsDialog> settingsDialogProvider) {
         return event -> {
             final SettingsDialog settingsDialog = settingsDialogProvider.get();

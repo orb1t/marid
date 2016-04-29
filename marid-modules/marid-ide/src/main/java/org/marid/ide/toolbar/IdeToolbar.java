@@ -29,8 +29,8 @@ import javafx.scene.control.Tooltip;
 import org.jboss.weld.literal.AnyLiteral;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.marid.ee.IdeSingleton;
-import org.marid.jfx.icons.FontIcons;
 import org.marid.ide.menu.IdeMenuItem;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.logging.LogSupport;
 import org.marid.util.Utils;
 
@@ -42,7 +42,6 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -77,20 +76,12 @@ public class IdeToolbar extends ToolBar implements LogSupport {
                 final String group = ti.group().isEmpty() ? (mi != null ? mi.group() : ti.group()) : ti.group();
                 final String id = ti.id().isEmpty() ? null : ti.id();
                 final String tip = ti.tip().isEmpty() ? (mi != null ? mi.text() : null) : ti.tip();
-                final GlyphIcon<?> toolbarIcon = Stream.of(ti.faIcons(), ti.mdIcons(), ti.mIcons(), ti.oIcons(), ti.wIcons())
-                        .flatMap(Stream::of)
-                        .findAny()
-                        .map(e -> FontIcons.glyphIcon(e, 20))
-                        .orElse(null);
+                final GlyphIcon<?> toolbarIcon = ti.icon().isEmpty() ? null : FontIcons.glyphIcon(ti.icon(), 20);
                 final GlyphIcon<?> menuIcon;
                 if (mi == null || toolbarIcon != null) {
                     menuIcon = null;
                 } else {
-                    menuIcon = Stream.of(mi.faIcons(), mi.mdIcons(), mi.mIcons(), mi.oIcons(), mi.wIcons())
-                            .flatMap(Stream::of)
-                            .findAny()
-                            .map(e -> FontIcons.glyphIcon(e, 20))
-                            .orElse(null);
+                    menuIcon = mi.icon().isEmpty() ? null : FontIcons.glyphIcon(mi.icon(), 20);
                 }
                 final GlyphIcon<?> icon = toolbarIcon == null ? menuIcon : toolbarIcon;
                 final Button button = new Button(null, icon);

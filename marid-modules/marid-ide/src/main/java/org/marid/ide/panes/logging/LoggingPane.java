@@ -19,19 +19,20 @@
 package org.marid.ide.panes.logging;
 
 import de.jensd.fx.glyphs.GlyphIcon;
-import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ScrollPane;
 import org.marid.ee.IdeSingleton;
-import org.marid.jfx.icons.FontIcons;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.toolbar.IdeToolbarItem;
+import org.marid.jfx.icons.FontIcons;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import java.util.logging.Level;
+
+import static org.marid.jfx.icons.FontIcon.M_CLEAR_ALL;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -51,7 +52,7 @@ public class LoggingPane extends ScrollPane {
     }
 
     @Produces
-    @IdeMenuItem(menu = "Log", text = "Clear all log records", group = "clear", mIcons = {MaterialIcon.CLEAR_ALL}, key = "F7")
+    @IdeMenuItem(menu = "Log", text = "Clear all log records", group = "clear", icon = M_CLEAR_ALL, key = "F7")
     @IdeToolbarItem(group = "log")
     public EventHandler<ActionEvent> clearLog(LoggingFilter loggingFilter) {
         return event -> loggingFilter.clear();

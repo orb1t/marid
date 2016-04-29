@@ -19,18 +19,15 @@
 package org.marid.ide.panes.logging;
 
 import de.jensd.fx.glyphs.GlyphIcon;
-import de.jensd.fx.glyphs.GlyphIcons;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
-import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import org.marid.jfx.icons.FontIcons;
 import org.marid.ide.timers.IdeTimers;
+import org.marid.jfx.icons.FontIcon;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10nSupport;
 
@@ -72,25 +69,25 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
     public static IconDescriptor icon(Level level) {
         switch (level.intValue()) {
             case Integer.MAX_VALUE:
-                return new IconDescriptor(MaterialDesignIcon.SELECT_OFF, "red");
+                return new IconDescriptor(FontIcon.D_SELECT_OFF, "red");
             case Integer.MIN_VALUE:
-                return new IconDescriptor(MaterialDesignIcon.ARROW_ALL, "green");
+                return new IconDescriptor(FontIcon.D_ARROW_ALL, "green");
             case 1000:
-                return new IconDescriptor(MaterialIcon.ERROR, "red");
+                return new IconDescriptor(FontIcon.M_ERROR, "red");
             case 900:
-                return new IconDescriptor(FontAwesomeIcon.WARNING, "orange");
+                return new IconDescriptor(FontIcon.F_WARNING, "orange");
             case 800:
-                return new IconDescriptor(FontAwesomeIcon.INFO_CIRCLE, "blue");
+                return new IconDescriptor(FontIcon.F_INFO_CIRCLE, "blue");
             case 700:
-                return new IconDescriptor(MaterialIcon.CONTROL_POINT, "green");
+                return new IconDescriptor(FontIcon.M_CONTROL_POINT, "green");
             case 500:
-                return new IconDescriptor(MaterialDesignIcon.BATTERY_60, "green");
+                return new IconDescriptor(FontIcon.D_BATTERY_60, "green");
             case 400:
-                return new IconDescriptor(MaterialDesignIcon.BATTERY_80, "green");
+                return new IconDescriptor(FontIcon.D_BATTERY_80, "green");
             case 300:
-                return new IconDescriptor(MaterialDesignIcon.BATTERY_CHARGING_100, "green");
+                return new IconDescriptor(FontIcon.D_BATTERY_CHARGING_100, "green");
             default:
-                return new IconDescriptor(MaterialDesignIcon.BATTERY_UNKNOWN, "gray");
+                return new IconDescriptor(FontIcon.D_BATTERY_UNKNOWN, "gray");
         }
     }
 
@@ -107,7 +104,7 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
 
     private TableColumn<LogRecord, IconDescriptor> levelColumn() {
         final TableColumn<LogRecord, IconDescriptor> col = new TableColumn<>();
-        col.setGraphic(FontIcons.glyphIcon(FontAwesomeIcon.SHIELD));
+        col.setGraphic(FontIcons.glyphIcon(FontIcon.F_SHIELD));
         col.setCellValueFactory(param -> new SimpleObjectProperty<>(icon(param.getValue().getLevel())));
         col.setStyle("-fx-alignment: center;");
         col.setCellFactory(c -> new TableCell<LogRecord, IconDescriptor>() {
@@ -183,10 +180,10 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
 
     public static class IconDescriptor {
 
-        public final GlyphIcons icon;
+        public final String icon;
         public final String css;
 
-        private IconDescriptor(GlyphIcons icon, String css) {
+        private IconDescriptor(String icon, String css) {
             this.icon = icon;
             this.css = css;
         }

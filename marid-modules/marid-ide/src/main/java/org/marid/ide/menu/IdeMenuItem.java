@@ -18,12 +18,6 @@
 
 package org.marid.ide.menu;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
-import de.jensd.fx.glyphs.materialicons.MaterialIcon;
-import de.jensd.fx.glyphs.octicons.OctIcon;
-import de.jensd.fx.glyphs.weathericons.WeatherIcon;
-
 import javax.enterprise.context.Dependent;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
@@ -42,15 +36,7 @@ public @interface IdeMenuItem {
 
     @Nonbinding String text() default "";
 
-    @Nonbinding FontAwesomeIcon[] faIcons() default {};
-
-    @Nonbinding MaterialIcon[] mIcons() default {};
-
-    @Nonbinding MaterialDesignIcon[] mdIcons() default {};
-
-    @Nonbinding WeatherIcon[] wIcons() default {};
-
-    @Nonbinding OctIcon[] oIcons() default {};
+    @Nonbinding String icon() default "";
 
     @Nonbinding String group() default "";
 

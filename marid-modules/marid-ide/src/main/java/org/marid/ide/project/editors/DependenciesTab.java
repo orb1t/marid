@@ -18,7 +18,6 @@
 
 package org.marid.ide.project.editors;
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -31,6 +30,7 @@ import javafx.scene.layout.BorderPane;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.marid.jfx.Props;
+import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.util.Builder;
 
@@ -51,23 +51,23 @@ public class DependenciesTab extends BorderPane {
                 .selectedItemProperty()
                 .isNull());
         setBottom(new ToolbarBuilder()
-                .add("Add item", MaterialIcon.ADD, event -> dependencyTable.getItems().add(new Dependency()))
-                .add("Remove item", MaterialIcon.REMOVE, event -> {
+                .add("Add item", FontIcon.M_ADD, event -> dependencyTable.getItems().add(new Dependency()))
+                .add("Remove item", FontIcon.M_REMOVE, event -> {
                     final int index = dependencyTable.getSelectionModel().getSelectedIndex();
                     if (index >= 0) {
                         dependencyTable.getItems().remove(index);
                     }
                 }, itemSelectionTrigger)
                 .addSeparator()
-                .add("Clear all items", MaterialIcon.CLEAR_ALL,
+                .add("Clear all items", FontIcon.M_CLEAR_ALL,
                         event -> dependencyTable.getItems().clear(),
                         b -> b.disableProperty().bind(Bindings.size(dependencyTable.getItems()).isEqualTo(0)))
                 .addSeparator()
-                .add("Use defaults", MaterialIcon.BOOKMARK, event -> useDefaultDependencies(dependencyTable.getItems()))
+                .add("Use defaults", FontIcon.M_BOOKMARK, event -> useDefaultDependencies(dependencyTable.getItems()))
                 .addSeparator()
-                .add("Cut", MaterialIcon.CONTENT_CUT, event -> {}, itemSelectionTrigger)
-                .add("Copy", MaterialIcon.CONTENT_COPY, event -> {}, itemSelectionTrigger)
-                .add("Paste", MaterialIcon.CONTENT_PASTE, event -> {}, itemSelectionTrigger)
+                .add("Cut", FontIcon.M_CONTENT_CUT, event -> {}, itemSelectionTrigger)
+                .add("Copy", FontIcon.M_CONTENT_COPY, event -> {}, itemSelectionTrigger)
+                .add("Paste", FontIcon.M_CONTENT_PASTE, event -> {}, itemSelectionTrigger)
                 .build(t -> setMargin(t,  new Insets(10, 0, 0, 0))));
     }
 

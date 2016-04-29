@@ -19,9 +19,12 @@
 package org.marid.ide.status;
 
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import org.marid.ee.IdeSingleton;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.menu.MenuUtils;
+import org.marid.l10n.L10nSupport;
 
 import javax.inject.Inject;
 
@@ -29,7 +32,7 @@ import javax.inject.Inject;
  * @author Dmitry Ovchinnikov
  */
 @IdeSingleton
-public class IdeStatusProfile extends ComboBox<ProjectProfile> {
+public class IdeStatusProfile extends ComboBox<ProjectProfile> implements L10nSupport {
 
     @Inject
     public IdeStatusProfile(ProjectManager projectManager) {
@@ -39,5 +42,10 @@ public class IdeStatusProfile extends ComboBox<ProjectProfile> {
         getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             projectManager.profileProperty().set(newValue);
         });
+        final ContextMenu menu = new ContextMenu();
+        MenuUtils.addGroup(menu.getItems(), list -> {
+
+        });
+        setContextMenu(menu);
     }
 }

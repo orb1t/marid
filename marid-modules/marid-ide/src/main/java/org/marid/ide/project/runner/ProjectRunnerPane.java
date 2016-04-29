@@ -18,7 +18,6 @@
 
 package org.marid.ide.project.runner;
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.application.Platform;
 import javafx.scene.control.*;
 import javafx.scene.control.TabPane.TabClosingPolicy;
@@ -27,6 +26,7 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.settings.DebugSettings;
 import org.marid.ide.settings.JavaSettings;
 import org.marid.io.ProcessManager;
+import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10nSupport;
@@ -90,9 +90,9 @@ public class ProjectRunnerPane extends BorderPane implements L10nSupport, LogSup
         }, "watchThread", 96L * 1024L);
         watchThread.start();
         setTop(new ToolbarBuilder()
-                .add("Exit", MaterialIcon.STOP, e -> printStream.println("exit"))
+                .add("Exit", FontIcon.M_STOP, e -> printStream.println("exit"))
                 .addSeparator()
-                .add("Dump", MaterialIcon.LIST, e -> printStream.println("dump"))
+                .add("Dump", FontIcon.M_LIST, e -> printStream.println("dump"))
                 .build());
         setCenter(tabPane);
     }

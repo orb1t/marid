@@ -18,7 +18,6 @@
 
 package org.marid.ide.beaneditor.ui;
 
-import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
@@ -26,6 +25,7 @@ import javafx.scene.control.TreeTableColumn.CellDataFeatures;
 import javafx.util.Callback;
 import org.marid.ide.beaneditor.data.BeanData;
 import org.marid.ide.beaneditor.data.RefValue;
+import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 
 import java.nio.file.Path;
@@ -44,7 +44,7 @@ public class ValueFactory implements Callback<CellDataFeatures<Object, Label>, O
             return Bindings.createObjectBinding(() -> {
                 final Label label = new Label();
                 if (d.ref().isNotEmpty().get()) {
-                    label.setGraphic(FontIcons.glyphIcon(OctIcon.LINK_EXTERNAL));
+                    label.setGraphic(FontIcons.glyphIcon(FontIcon.O_LINK_EXTERNAL));
                     label.setText(d.ref().get());
                 } else {
                     label.setText(d.value().get());
@@ -60,12 +60,12 @@ public class ValueFactory implements Callback<CellDataFeatures<Object, Label>, O
                 final Label label = new Label("");
                 if (d.lazyInit.isEmpty().get() && d.initMethod.isEmpty().get() && d.destroyMethod.isEmpty().get()) {
                     if (d.factoryBean.isNotEmpty().get() || d.factoryMethod.isNotEmpty().get()) {
-                        label.setGraphic(FontIcons.glyphIcon(OctIcon.LINK));
+                        label.setGraphic(FontIcons.glyphIcon(FontIcon.O_LINK));
                         label.setText(d.factoryBean.get() + "." + d.factoryMethod.get());
                     }
                 } else {
                     if (d.factoryBean.isNotEmpty().get() || d.factoryMethod.isNotEmpty().get()) {
-                        label.setGraphic(FontIcons.glyphIcon(OctIcon.LINK));
+                        label.setGraphic(FontIcons.glyphIcon(FontIcon.O_LINK));
                         label.setText(d.factoryBean.get() + "." + d.factoryMethod.get());
                     }
                     final Map<String, String> map = new LinkedHashMap<>();
