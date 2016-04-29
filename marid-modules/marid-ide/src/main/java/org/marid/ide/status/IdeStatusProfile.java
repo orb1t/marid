@@ -18,14 +18,12 @@
 
 package org.marid.ide.status;
 
-import javafx.collections.FXCollections;
 import javafx.scene.control.ComboBox;
 import org.marid.ee.IdeSingleton;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 
 import javax.inject.Inject;
-import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,15 +33,9 @@ public class IdeStatusProfile extends ComboBox<ProjectProfile> {
 
     @Inject
     public IdeStatusProfile(ProjectManager projectManager) {
-        super(FXCollections.observableArrayList(projectManager.getProfiles()));
+        super(projectManager.getProfiles());
         getSelectionModel().select(projectManager.getProfile());
         setFocusTraversable(false);
-        setOnShowing(e -> {
-            final Set<ProjectProfile> profiles = projectManager.getProfiles();
-            getItems().retainAll(profiles);
-            profiles.removeAll(getItems());
-            getItems().addAll(profiles);
-        });
         getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             projectManager.profileProperty().set(newValue);
         });

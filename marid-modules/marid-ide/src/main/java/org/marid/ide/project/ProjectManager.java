@@ -23,6 +23,8 @@ import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -43,8 +45,7 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Comparator;
 import java.util.stream.Stream;
 
 import static org.marid.util.Utils.callWithTime;
@@ -57,12 +58,26 @@ public class ProjectManager implements PrefSupport, LogSupport {
 
     private final ModelMerger modelMerger = new MavenModelMerger();
     private final ObjectProperty<ProjectProfile> profile = new SimpleObjectProperty<>();
+    private final ObservableList<ProjectProfile> profiles = FXCollections.observableArrayList();
 
     public ProjectManager() {
         profile.set(new ProjectProfile(getPref("profile", "default")));
         if (!isPresent()) {
             profile.set(new ProjectProfile("default"));
         }
+        final Path profilesDir = getProfile().getPath().getParent();
+        try (final Stream<Path> stream = Files.list(profilesDir)) {
+            stream
+                    .filter(p -> Files.isDirectory(p) && !profilesDir.equals(p))
+                    .map(p -> new ProjectProfile(p.getFileName().toString()))
+                    .forEach(profiles::add);
+        } catch (Exception x) {
+            log(WARNING, "Unable to enumerate profiles", x);
+        }
+        if (!profiles.contains(getProfile())) {
+            profiles.add(getProfile());
+        }
+        profiles.sort(Comparator.comparing(ProjectProfile::getName));
     }
 
     @PreDestroy
@@ -84,18 +99,7 @@ public class ProjectManager implements PrefSupport, LogSupport {
         return profile;
     }
 
-    public Set<ProjectProfile> getProfiles() {
-        final Set<ProjectProfile> profiles = new LinkedHashSet<>();
-        final Path profilesDir = getProfile().getPath().getParent();
-        try (final Stream<Path> stream = Files.list(profilesDir)) {
-            stream
-                    .filter(p -> Files.isDirectory(p) && !profilesDir.equals(p))
-                    .map(p -> new ProjectProfile(p.getFileName().toString()))
-                    .forEach(profiles::add);
-        } catch (Exception x) {
-            log(WARNING, "Unable to enumerate profiles", x);
-        }
-        profiles.add(getProfile());
+    public ObservableList<ProjectProfile> getProfiles() {
         return profiles;
     }
 
