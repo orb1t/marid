@@ -19,10 +19,15 @@
 package org.marid.jfx.menu;
 
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import org.marid.jfx.icons.FontIcons;
 
 import java.util.function.Consumer;
+
+import static org.marid.l10n.L10nSupport.LS.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,5 +40,11 @@ public interface MenuUtils {
         if (menuItems.size() > index && index > 0) {
             menuItems.add(index, new SeparatorMenuItem());
         }
+    }
+
+    static MenuItem menuItem(String text, String icon, EventHandler<ActionEvent> eventHandler) {
+        final MenuItem menuItem = new MenuItem(s(text), FontIcons.glyphIcon(icon, 16));
+        menuItem.setOnAction(eventHandler);
+        return menuItem;
     }
 }

@@ -21,6 +21,7 @@ package org.marid.ide.project;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
+import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.jmlspecs.annotation.Immutable;
 import org.marid.logging.LogSupport;
@@ -63,6 +64,7 @@ public class ProjectProfile implements LogSupport {
     private final Path srcMainResources;
     private final Path srcTestJava;
     private final Path srcTestResources;
+    private final Path beansDirectory;
     private final Path repository;
     private final Logger logger;
 
@@ -77,6 +79,7 @@ public class ProjectProfile implements LogSupport {
         srcMainResources = srcMain.resolve("resources");
         srcTestJava = srcTest.resolve("java");
         srcTestResources = srcTest.resolve("resources");
+        beansDirectory = srcMainResources.resolve("META-INF").resolve("marid");
         repository = path.resolve(".repo");
         logger = Logger.getLogger(getName());
         model = loadModel();
@@ -115,7 +118,7 @@ public class ProjectProfile implements LogSupport {
     }
 
     public Path getBeansDirectory() {
-        return srcMainResources.resolve("META-INF").resolve("marid");
+        return beansDirectory;
     }
 
     public Path getSrc() {
@@ -157,7 +160,7 @@ public class ProjectProfile implements LogSupport {
 
     private void createFileStructure() {
         try {
-            for (final Path dir : asList(srcMainJava, srcMainResources, srcTestJava, srcTestResources)) {
+            for (final Path dir : asList(srcMainJava, beansDirectory, srcTestJava, srcTestResources)) {
                 Files.createDirectories(dir);
             }
         } catch (Exception x) {
@@ -177,6 +180,14 @@ public class ProjectProfile implements LogSupport {
     public void save() {
         createFileStructure();
         savePomFile();
+    }
+
+    public void delete() {
+        try {
+            FileUtils.deleteDirectory(path.toFile());
+        } catch (Exception x) {
+            log(WARNING, "Unable to delete {0}", x, getName());
+        }
     }
 
     @Override

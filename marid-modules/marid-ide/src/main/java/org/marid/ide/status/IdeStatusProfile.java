@@ -18,12 +18,11 @@
 
 package org.marid.ide.status;
 
+import javafx.collections.ListChangeListener;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContextMenu;
 import org.marid.ee.IdeSingleton;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.menu.MenuUtils;
 import org.marid.l10n.L10nSupport;
 
 import javax.inject.Inject;
@@ -42,10 +41,14 @@ public class IdeStatusProfile extends ComboBox<ProjectProfile> implements L10nSu
         getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             projectManager.profileProperty().set(newValue);
         });
-        final ContextMenu menu = new ContextMenu();
-        MenuUtils.addGroup(menu.getItems(), list -> {
-
+        projectManager.getProfiles().addListener((ListChangeListener<ProjectProfile>) c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    for (final ProjectProfile profile : c.getAddedSubList()) {
+                        getSelectionModel().select(profile);
+                    }
+                }
+            }
         });
-        setContextMenu(menu);
     }
 }

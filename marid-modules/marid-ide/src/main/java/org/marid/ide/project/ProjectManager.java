@@ -24,6 +24,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.TextInputDialog;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.maven.model.merge.MavenModelMerger;
@@ -32,6 +35,7 @@ import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.project.editors.ProjectDialog;
 import org.marid.ide.project.runner.ProjectRunner;
 import org.marid.ide.toolbar.IdeToolbarItem;
+import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 
@@ -43,8 +47,13 @@ import javax.inject.Provider;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.Collections.binarySearch;
+import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
+import static javafx.scene.control.ButtonType.NO;
+import static javafx.scene.control.ButtonType.YES;
 import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.util.Utils.callWithTime;
 
@@ -52,7 +61,7 @@ import static org.marid.util.Utils.callWithTime;
  * @author Dmitry Ovchinnikov
  */
 @ApplicationScoped
-public class ProjectManager implements PrefSupport, LogSupport {
+public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
 
     private final ModelMerger modelMerger = new MavenModelMerger();
     private final ObjectProperty<ProjectProfile> profile = new SimpleObjectProperty<>();
@@ -99,6 +108,25 @@ public class ProjectManager implements PrefSupport, LogSupport {
 
     public ObservableList<ProjectProfile> getProfiles() {
         return profiles;
+    }
+
+    public ProjectProfile add(String name) {
+        final ProjectProfile profile = profiles.stream()
+                .filter(p -> name.equals(p.getName()))
+                .findFirst()
+                .orElseGet(() -> new ProjectProfile(name));
+        if (profiles.contains(profile)) {
+            return profile;
+        }
+        final int index = -(binarySearch(profiles, profile, Comparator.comparing(ProjectProfile::getName)) + 1);
+        profiles.add(index, profile);
+        return profile;
+    }
+
+    public void remove(ProjectProfile profile) {
+        if (profiles.remove(profile)) {
+            profile.delete();
+        }
     }
 
     @Produces
@@ -148,6 +176,36 @@ public class ProjectManager implements PrefSupport, LogSupport {
         return event -> {
             final ProjectRunner projectRunner = projectRunnerProvider.get();
             projectRunner.show();
+        };
+    }
+
+    @Produces
+    @IdeMenuItem(menu = "Project", text = "Add profile...", group = "pm", icon = M_ADD_BOX)
+    @IdeToolbarItem(group = "projectIO")
+    public EventHandler<ActionEvent> projectAddProfile() {
+        return event -> {
+            final TextInputDialog dialog = new TextInputDialog("profile");
+            dialog.setHeaderText(s("Profile name") + ":");
+            dialog.setTitle(s("Add profile"));
+            final Optional<String> result = dialog.showAndWait();
+            if (result.isPresent()) {
+                add(result.get());
+            }
+        };
+    }
+
+    @Produces
+    @IdeMenuItem(menu = "Project", text = "Remove profile", group = "pm", icon = D_MINUS_BOX)
+    @IdeToolbarItem(group = "projectIO")
+    public EventHandler<ActionEvent> projectRemoveProfile() {
+        return event -> {
+            final Alert alert = new Alert(CONFIRMATION, s("Do you really want to remove the profile?"), YES, NO);
+            alert.setTitle(s("Profile removal"));
+            alert.setHeaderText(s("Project removal confirmation"));
+            final Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.YES) {
+                remove(getProfile());
+            }
         };
     }
 
