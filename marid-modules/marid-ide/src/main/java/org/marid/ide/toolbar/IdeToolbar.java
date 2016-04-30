@@ -96,6 +96,7 @@ public class IdeToolbar extends ToolBar implements LogSupport {
                 final CreationalContext<EventHandler<ActionEvent>> context = beanManager.createCreationalContext(bean);
                 button.setOnAction(bean.create(context));
                 button.setFocusTraversable(false);
+                button.setPrefSize(36, 36);
                 buttonMap.computeIfAbsent(group, k -> new LinkedHashSet<>()).add(button);
             } catch (Exception x) {
                 log(WARNING, "Unable to create a toolbar item {0}", x, bean);
