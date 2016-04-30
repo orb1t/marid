@@ -18,6 +18,7 @@
 
 package org.marid.ide.project;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.*;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.marid.ide.settings.MavenSettings;
@@ -26,6 +27,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 
 import static java.util.Collections.singletonList;
 
@@ -51,12 +53,25 @@ public class ProjectPrerequisites {
     }
 
     public void apply() {
+        applyAddress();
         applyPrerequisites();
         applyProperties();
         applyBuild();
         applyPluginManagement();
         applyPlugins();
         applyRuntimeDependency();
+    }
+
+    void applyAddress() {
+        if (StringUtils.isBlank(model.getArtifactId())) {
+            model.setArtifactId(UUID.randomUUID().toString());
+        }
+        if (StringUtils.isBlank(model.getGroupId())) {
+            model.setGroupId("org.myproject");
+        }
+        if (StringUtils.isBlank(model.getVersion())) {
+            model.setVersion("1.0-SNAPSHOT");
+        }
     }
 
     void applyPrerequisites() {

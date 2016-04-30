@@ -43,6 +43,8 @@ import javax.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static java.util.Comparator.comparing;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -105,7 +107,7 @@ public class IdeToolbar extends ToolBar implements LogSupport {
             buttonMap.computeIfAbsent(group, k -> new LinkedHashSet<>()).add(node);
         });
         buttonMap.forEach((group, buttons) -> {
-            getItems().addAll(buttons);
+            buttons.stream().sorted(comparing(n -> n.getId() == null ? "" : n.getId())).forEach(getItems()::add);
             getItems().add(new Separator());
         });
     }

@@ -181,7 +181,7 @@ public class ProjectProfile implements LogSupport {
         createFileStructure();
         savePomFile();
     }
-
+    
     public void delete() {
         try {
             FileUtils.deleteDirectory(path.toFile());

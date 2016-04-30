@@ -44,12 +44,14 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.binarySearch;
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
@@ -181,22 +183,28 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
 
     @Produces
     @IdeMenuItem(menu = "Project", text = "Add profile...", group = "pm", icon = M_ADD_BOX)
-    @IdeToolbarItem(group = "projectIO")
-    public EventHandler<ActionEvent> projectAddProfile() {
+    @IdeToolbarItem(group = "projectIO", id = "p_add")
+    public EventHandler<ActionEvent> projectAddProfile(Provider<ProjectSaver> projectSaverProvider) {
         return event -> {
             final TextInputDialog dialog = new TextInputDialog("profile");
             dialog.setHeaderText(s("Profile name") + ":");
             dialog.setTitle(s("Add profile"));
             final Optional<String> result = dialog.showAndWait();
             if (result.isPresent()) {
-                add(result.get());
+                final ProjectProfile profile = add(result.get());
+                try (final InputStream is = getClass().getResourceAsStream("/logging/default.properties")) {
+                    Files.copy(is, profile.getSrcMainResources().resolve("logging.properties"), REPLACE_EXISTING);
+                } catch (Exception x) {
+                    log(WARNING, "Unable to write default logging properties", x);
+                }
+                projectSaverProvider.get().save();
             }
         };
     }
 
     @Produces
     @IdeMenuItem(menu = "Project", text = "Remove profile", group = "pm", icon = D_MINUS_BOX)
-    @IdeToolbarItem(group = "projectIO")
+    @IdeToolbarItem(group = "projectIO", id = "p_remove")
     public EventHandler<ActionEvent> projectRemoveProfile() {
         return event -> {
             final Alert alert = new Alert(CONFIRMATION, s("Do you really want to remove the profile?"), YES, NO);
