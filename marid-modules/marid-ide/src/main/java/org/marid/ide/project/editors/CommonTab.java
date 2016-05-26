@@ -18,8 +18,12 @@
 
 package org.marid.ide.project.editors;
 
+import javafx.scene.control.ComboBox;
 import org.apache.maven.model.Model;
+import org.marid.ide.settings.RuntimeType;
 import org.marid.jfx.panes.GenericGridPane;
+
+import static javafx.collections.FXCollections.observableArrayList;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,5 +40,14 @@ public class CommonTab extends GenericGridPane {
         addTextField("Inception year", model, "inceptionYear");
         addTextField("Organization name", model.getOrganization(), "name");
         addTextField("Organization URL", model.getOrganization(), "url");
+        addSeparator();
+        addControl("Runtime type", () -> {
+            final ComboBox<RuntimeType> runtimeTypes = new ComboBox<>(observableArrayList(RuntimeType.values()));
+            runtimeTypes.getSelectionModel().select(RuntimeType.valueOf(model.getProperties().getProperty("marid.runtime.type")));
+            runtimeTypes.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+                model.getProperties().setProperty("marid.runtime.type", newValue.name());
+            });
+            return runtimeTypes;
+        });
     }
 }

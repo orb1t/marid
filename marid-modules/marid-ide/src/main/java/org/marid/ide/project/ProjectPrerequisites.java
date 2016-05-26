@@ -22,12 +22,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.*;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.marid.ide.settings.MavenSettings;
+import org.marid.ide.settings.RuntimeType;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 
@@ -87,6 +89,13 @@ public class ProjectPrerequisites {
         properties.setProperty("maven.compiler.source", "1.8");
         properties.setProperty("maven.compiler.target", "1.8");
         properties.setProperty("marid.runtime.version", System.getProperty("implementation.version"));
+
+        {
+            final String runtimeTypeText = properties.getProperty("marid.runtime.type");
+            if (Stream.of(RuntimeType.values()).map(Enum::name).noneMatch(e -> e.equals(runtimeTypeText))) {
+                properties.setProperty("marid.runtime.type", RuntimeType.HEADLESS.name());
+            }
+        }
     }
 
     void applyBuild() {
@@ -185,10 +194,11 @@ public class ProjectPrerequisites {
 
     void applyRuntimeDependency() {
         final List<Dependency> dependencies = model.getDependencies();
-        dependencies.removeIf(d -> "org.marid".equals(d.getGroupId()) && "marid-runtime".equals(d.getArtifactId()));
+        dependencies.removeIf(d -> Stream.of(RuntimeType.values()).anyMatch(e -> e.matches(d)));
+        final RuntimeType runtimeType = RuntimeType.valueOf(model.getProperties().getProperty("marid.runtime.type"));
         final Dependency dependency = new Dependency();
-        dependency.setGroupId("org.marid");
-        dependency.setArtifactId("marid-runtime");
+        dependency.setGroupId(runtimeType.groupId);
+        dependency.setArtifactId(runtimeType.artifactId);
         dependency.setVersion("${marid.runtime.version}");
         dependencies.add(dependency);
     }
