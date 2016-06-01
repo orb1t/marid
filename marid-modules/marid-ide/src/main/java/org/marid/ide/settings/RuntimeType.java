@@ -19,6 +19,7 @@
 package org.marid.ide.settings;
 
 import org.apache.maven.model.Dependency;
+import org.marid.l10n.L10nSupport;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,5 +39,10 @@ public enum RuntimeType {
 
     public boolean matches(Dependency dependency) {
         return groupId.equals(dependency.getGroupId()) && artifactId.equals(dependency.getArtifactId());
+    }
+
+    @Override
+    public String toString() {
+        return L10nSupport.LS.s(name());
     }
 }

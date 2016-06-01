@@ -33,6 +33,7 @@
         <module>marid-db</module>
         <module>marid-web</module>
         <module>marid-runtime</module>
+        <module>marid-hmi</module>
     </modules>
 
     <dependencies>
