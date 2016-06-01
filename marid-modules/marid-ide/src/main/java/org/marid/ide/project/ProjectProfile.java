@@ -23,7 +23,6 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.jmlspecs.annotation.Immutable;
 import org.marid.logging.LogSupport;
 import org.marid.misc.Calls;
 
@@ -50,7 +49,6 @@ import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Immutable
 public class ProjectProfile implements LogSupport {
 
     private final Model model;

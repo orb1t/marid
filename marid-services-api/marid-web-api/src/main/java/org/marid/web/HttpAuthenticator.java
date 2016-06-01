@@ -20,7 +20,6 @@ package org.marid.web;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.HttpExchange;
-import org.jmlspecs.annotation.Immutable;
 
 import javax.annotation.Nonnull;
 import java.util.function.Function;
@@ -28,7 +27,6 @@ import java.util.function.Function;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Immutable
 public final class HttpAuthenticator extends Authenticator {
 
     private final Function<HttpExchange, Authenticator.Result> authFunction;

@@ -20,7 +20,6 @@ package org.marid.web;
 
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
-import org.jmlspecs.annotation.Immutable;
 import org.marid.io.IOBiConsumer;
 
 import javax.annotation.Nonnull;
@@ -29,7 +28,6 @@ import java.io.IOException;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Immutable
 public final class HttpFilter extends Filter {
 
     private final String description;

@@ -18,8 +18,6 @@
 
 package org.marid.db.data;
 
-import org.jmlspecs.annotation.Immutable;
-
 import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.util.Objects;
@@ -27,7 +25,6 @@ import java.util.Objects;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Immutable
 public final class DataRecordKey {
 
     private final long tag;

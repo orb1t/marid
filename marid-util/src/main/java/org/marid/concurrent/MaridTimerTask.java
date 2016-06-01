@@ -18,7 +18,6 @@
 
 package org.marid.concurrent;
 
-import org.jmlspecs.annotation.Immutable;
 import org.marid.logging.LogSupport;
 
 import javax.annotation.Nonnull;
@@ -28,7 +27,6 @@ import java.util.function.Consumer;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Immutable
 public final class MaridTimerTask extends TimerTask implements LogSupport {
 
     private final Consumer<MaridTimerTask> task;

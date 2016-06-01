@@ -18,8 +18,6 @@
 
 package org.marid.db.data;
 
-import org.jmlspecs.annotation.Immutable;
-
 import javax.annotation.Nonnull;
 import java.beans.ConstructorProperties;
 import java.io.Serializable;
@@ -31,7 +29,6 @@ import static java.lang.String.format;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Immutable
 public final class DataRecord<T extends Serializable> {
 
     private final long tag;
