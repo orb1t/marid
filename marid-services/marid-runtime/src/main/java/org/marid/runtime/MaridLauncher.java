@@ -32,9 +32,10 @@ import static org.marid.runtime.MaridContextInitializer.applicationContext;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridLauncher {
+public class MaridLauncher implements MaridStarter {
 
-    public static void main(String... args) {
+    @Override
+    public void start(String... args) throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
         final GenericApplicationContext context = applicationContext(currentThread().getContextClassLoader());

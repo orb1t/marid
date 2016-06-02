@@ -36,18 +36,18 @@ class MaridBeanFactoryPostProcessor implements BeanFactoryPostProcessor, LogSupp
 
     @Override
     public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
-        log(INFO, "Destroying {0}", beanName);
+        log(LogSupport.INFO, "Destroying {0}", beanName);
     }
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        log(INFO, "Initializing {0}", beanName);
+        log(LogSupport.INFO, "Initializing {0}", beanName);
         return bean;
     }
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        log(INFO, "Initialized {0}", beanName);
+        log(LogSupport.INFO, "Initialized {0}", beanName);
         return bean;
     }
 }

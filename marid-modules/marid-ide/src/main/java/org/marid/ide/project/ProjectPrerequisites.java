@@ -157,7 +157,7 @@ public class ProjectPrerequisites {
         final Xpp3Dom manifest = new Xpp3Dom("manifest");
         archive.addChild(manifest);
         addChild(manifest, "addClasspath", "true");
-        addChild(manifest, "mainClass", "org.marid.runtime.MaridLauncher");
+        addChild(manifest, "mainClass", "org.marid.runtime.Marid");
         addChild(manifest, "classpathPrefix", "lib");
         final Xpp3Dom manifestEntries = new Xpp3Dom("manifestEntries");
         archive.addChild(manifestEntries);

@@ -31,8 +31,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
+            <groupId>org.marid</groupId>
+            <artifactId>marid-spring</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
