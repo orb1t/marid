@@ -50,10 +50,6 @@ public class ProjectPrerequisites {
         this.model = profile.getModel();
     }
 
-    public ProjectProfile getProfile() {
-        return profile;
-    }
-
     public void apply() {
         applyAddress();
         applyPrerequisites();
@@ -62,6 +58,7 @@ public class ProjectPrerequisites {
         applyPluginManagement();
         applyPlugins();
         applyRuntimeDependency();
+        profile.save();
     }
 
     void applyAddress() {

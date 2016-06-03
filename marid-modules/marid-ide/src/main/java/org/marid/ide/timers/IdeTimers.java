@@ -21,10 +21,12 @@ package org.marid.ide.timers;
 import javafx.scene.Node;
 import javafx.stage.WindowEvent;
 import org.marid.concurrent.MaridTimerTask;
+import org.marid.ide.panes.logging.IdeLogHandler;
 import org.marid.logging.LogSupport;
 
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -38,6 +40,11 @@ import java.util.function.Supplier;
 public class IdeTimers implements LogSupport {
 
     private final Timer timer = new Timer();
+
+    @Inject
+    public IdeTimers(IdeLogHandler ideLogHandler) {
+        schedule(100L, task -> ideLogHandler.flush());
+    }
 
     public TimerTask schedule(long delayMillis, long periodMillis, Consumer<MaridTimerTask> task) {
         final TimerTask timerTask = new MaridTimerTask(task);

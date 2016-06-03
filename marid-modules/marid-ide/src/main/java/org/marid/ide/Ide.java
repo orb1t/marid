@@ -23,6 +23,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.jboss.logmanager.LogManager;
 import org.jboss.weld.environment.se.Weld;
+import org.jboss.weld.environment.se.WeldContainer;
 import org.marid.ide.panes.logging.IdeLogHandler;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.l10n.L10nSupport;
@@ -31,6 +32,7 @@ import org.marid.pref.PrefSupport;
 import org.marid.pref.PrefUtils;
 import org.marid.util.Utils;
 
+import javax.enterprise.inject.Produces;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
@@ -55,7 +57,9 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
     @Override
     public void start(Stage primaryStage) throws Exception {
         Application.setUserAgentStylesheet(getPref("style", STYLESHEET_MODENA));
-        final IdeScene ideScene = weld.initialize().select(IdeScene.class).get();
+        weld.addBeanClass(IdeLog.class);
+        final WeldContainer container = weld.initialize();
+        final IdeScene ideScene = container.select(IdeScene.class).get();
         primaryStage.setMinWidth(750.0);
         primaryStage.setMinHeight(550.0);
         primaryStage.setTitle(s("Marid IDE"));
@@ -73,14 +77,14 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
     public static void main(String... args) throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
-        Logger.getLogger("").addHandler(new IdeLogHandler());
+        Logger.getLogger("").addHandler(IdeLog.IDE_LOG_HANDLER);
         Utils.merge(System.getProperties(), "meta.properties", "ide.properties");
         final String localeString = PREFERENCES.get("locale", "");
         if (!localeString.isEmpty()) {
             Locale.setDefault(Locale.forLanguageTag(localeString));
         }
         disableUrlCaching();
-        launch(args);
+        launch(Ide.class, args);
     }
 
     private static void disableUrlCaching() throws Exception {
@@ -89,5 +93,11 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
             final URLConnection connection = url.openConnection();
             connection.setDefaultUseCaches(false);
         }
+    }
+
+    public static class IdeLog {
+
+        @Produces
+        private static final IdeLogHandler IDE_LOG_HANDLER = new IdeLogHandler();
     }
 }

@@ -25,7 +25,6 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import org.marid.ide.timers.IdeTimers;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.track.Tracks;
@@ -36,11 +35,8 @@ import javax.inject.Inject;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.NoSuchElementException;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -49,8 +45,8 @@ import java.util.logging.Logger;
 public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
 
     @Inject
-    public LoggingTable(IdeTimers timers, LoggingFilter loggingFilter) {
-        super(loggingFilter.filteredList(ideLogHandler(timers).getLogRecords()));
+    public LoggingTable(LoggingFilter loggingFilter, IdeLogHandler ideLogHandler) {
+        super(loggingFilter.filteredList(ideLogHandler.getLogRecords()));
         final String columnDefaultStyle = "-fx-font-size: smaller";
         getColumns().add(levelColumn());
         getColumns().add(timestampColumn());
@@ -89,17 +85,6 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
             default:
                 return new IconDescriptor(FontIcon.D_BATTERY_UNKNOWN, "gray");
         }
-    }
-
-    private static IdeLogHandler ideLogHandler(IdeTimers timers) {
-        for (final Handler handler : Logger.getLogger("").getHandlers()) {
-            if (handler instanceof IdeLogHandler) {
-                final IdeLogHandler ideLogHandler = (IdeLogHandler) handler;
-                timers.schedule(100L, task -> ideLogHandler.flush());
-                return ideLogHandler;
-            }
-        }
-        throw new NoSuchElementException(IdeLogHandler.class.getSimpleName());
     }
 
     private TableColumn<LogRecord, IconDescriptor> levelColumn() {

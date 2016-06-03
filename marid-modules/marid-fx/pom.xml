@@ -45,7 +45,7 @@
         <dependency>
             <groupId>eu.hansolo</groupId>
             <artifactId>Medusa</artifactId>
-            <version>4.8</version>
+            <version>4.9</version>
         </dependency>
 
         <dependency>
