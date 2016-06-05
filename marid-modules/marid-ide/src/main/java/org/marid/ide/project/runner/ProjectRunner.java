@@ -20,17 +20,17 @@ package org.marid.ide.project.runner;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.marid.ee.ui.UI;
 import org.marid.ide.Ide;
 import org.marid.logging.LogSupport;
 
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
+@UI
 public class ProjectRunner extends Stage implements LogSupport {
 
     @Inject

@@ -24,12 +24,12 @@ import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
+import org.marid.ee.ui.UI;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.l10n.L10nSupport;
 import org.marid.pref.PrefSupport;
 
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import static org.marid.jfx.ScrollPanes.scrollPane;
@@ -37,7 +37,7 @@ import static org.marid.jfx.ScrollPanes.scrollPane;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
+@UI
 public class ProjectDialog extends Dialog<Model> implements PrefSupport, L10nSupport {
 
     @Inject

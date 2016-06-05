@@ -66,7 +66,6 @@ import static org.marid.xml.XmlBind.load;
 public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSupport {
 
     private URLClassLoader classLoader;
-    final ProjectManager projectManager;
     final BeanTree beanTree;
     final List<MaridBeanXml> metaBeans = new ArrayList<>();
     final Map<String, String> typeUrlMap = new HashMap<>();
@@ -77,18 +76,16 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
     final Saver saver;
 
     @Inject
-    public BeanEditor(ProjectManager projectManager) {
-        final ProjectProfile profile = projectManager.getProfile();
-        this.projectManager = projectManager;
+    public BeanEditor(ProjectProfile projectProfile, ProjectManager projectManager) {
         getIcons().addAll(Ide.IMAGES);
-        projectManager.profileProperty().addListener((observable, oldValue, newValue) -> update(newValue));
         this.loader = new Loader(this);
         this.saver = new Saver();
-        this.beanTree = new BeanTree(profile, this);
+        this.beanTree = new BeanTree(projectProfile, this);
         this.copies = new Copies<>(this);
         final BorderPane pane = getTreePane();
         setScene(new Scene(pane, 1500, 800));
-        update(profile);
+        update(projectProfile);
+        projectManager.profileProperty().addListener((observable, oldValue, newValue) -> update(newValue));
     }
 
     public Copies<BeanEditor, TreeItem<Object>> getCopies() {

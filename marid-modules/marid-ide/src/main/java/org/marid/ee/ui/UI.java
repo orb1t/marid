@@ -16,29 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.project.logging;
+package org.marid.ee.ui;
 
-import javafx.scene.control.ButtonType;
-import org.marid.ide.panes.main.IdePane;
-import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.dialog.MaridDialog;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import java.util.Properties;
+import javax.enterprise.inject.Stereotype;
+import javax.inject.Scope;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
-public class LoggingDialog extends MaridDialog<Runnable> {
+@Scope
+@Stereotype
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
+public @interface UI {
 
-    private final ProjectProfile profile;
-    private final Properties properties = new Properties();
-
-    @Inject
-    public LoggingDialog(IdePane idePane, ProjectProfile profile) {
-        super(idePane, ButtonType.APPLY, ButtonType.CANCEL);
-        this.profile = profile;
-    }
 }

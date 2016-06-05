@@ -16,10 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ee.extensions;
+package org.marid.ee.ui;
+
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.Extension;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ExtensionUtils {
+public class UIExtension implements Extension {
+
+    public void addScope(@Observes BeforeBeanDiscovery beforeBeanDiscovery) {
+        beforeBeanDiscovery.addScope(UI.class, false, false);
+    }
+
+    public void addContext(@Observes AfterBeanDiscovery afterBeanDiscovery) {
+        afterBeanDiscovery.addContext(new UIContext());
+    }
 }

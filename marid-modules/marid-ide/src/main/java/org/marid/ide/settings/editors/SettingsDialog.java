@@ -22,36 +22,39 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
+import org.marid.ee.ui.UI;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.ide.settings.AbstractSettings;
 import org.marid.l10n.L10nSupport;
 
-import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import java.util.Comparator;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static java.util.stream.Collectors.toMap;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
+@UI
 public class SettingsDialog extends Dialog<ButtonType> implements L10nSupport {
 
     @Inject
     public SettingsDialog(IdeScene ideScene, Instance<SettingsEditor> editors) {
         final DialogPane dialogPane = getDialogPane();
         dialogPane.setPrefSize(800, 600);
-        dialogPane.setContent(tabPane(editors));
+        final SettingsEditor[] settingsEditors = settingsEditors(editors);
+        dialogPane.setContent(tabPane(settingsEditors));
         dialogPane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.APPLY);
         setTitle(s("IDE settings"));
         initModality(Modality.WINDOW_MODAL);
         initOwner(ideScene.getWindow());
         setResizable(true);
-        final Map<AbstractSettings, byte[]> snapshot = StreamSupport.stream(editors.spliterator(), false)
-                .collect(Collectors.toMap(SettingsEditor::getSettings, e -> e.getSettings().save()));
+        final Map<AbstractSettings, byte[]> snapshot = Stream.of(settingsEditors)
+                .collect(toMap(SettingsEditor::getSettings, e -> e.getSettings().save()));
         setResultConverter(param -> {
             switch (param.getButtonData()) {
                 case CANCEL_CLOSE:
@@ -63,8 +66,12 @@ public class SettingsDialog extends Dialog<ButtonType> implements L10nSupport {
         });
     }
 
-    private TabPane tabPane(Instance<? extends SettingsEditor> editors) {
-        final TabPane tabPane = new TabPane(StreamSupport.stream(editors.spliterator(), false)
+    private SettingsEditor[] settingsEditors(Instance<SettingsEditor> editors) {
+        return StreamSupport.stream(editors.spliterator(), false).toArray(SettingsEditor[]::new);
+    }
+
+    private TabPane tabPane(SettingsEditor[] settingsEditors) {
+        final TabPane tabPane = new TabPane(Stream.of(settingsEditors)
                 .sorted(Comparator.comparing(e -> e.getSettings().getName()))
                 .map(editor -> new Tab(s(editor.getSettings().getName()), editor.getNode()))
                 .toArray(Tab[]::new));

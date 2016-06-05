@@ -41,7 +41,7 @@ import org.marid.pref.PrefSupport;
 
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
 import java.io.InputStream;
@@ -99,7 +99,6 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
     }
 
     @Produces
-    @Dependent
     public ProjectProfile getProfile() {
         return profile.get();
     }
@@ -134,7 +133,7 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
     @Produces
     @IdeMenuItem(menu = "Project", text = "Project setup...", group = "setup", icon = O_TOOLS)
     @IdeToolbarItem(group = "projectSetup")
-    public EventHandler<ActionEvent> projectSetup(Provider<ProjectDialog> editorProvider,
+    public EventHandler<ActionEvent> projectSetup(Instance<ProjectDialog> editorProvider,
                                                   Provider<IdeModelMerger> ideModelMergerProvider) {
         return event -> {
             final ProjectDialog editor = editorProvider.get();

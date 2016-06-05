@@ -52,12 +52,16 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
     public static final Preferences PREFERENCES = PrefUtils.preferences(Ide.class);
     public static final Image[] IMAGES = of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new);
 
-    private final Weld weld = new Weld(getClass().getName());
+    private final Weld weld;
+
+    public Ide() {
+        weld = new Weld(getClass().getName())
+                .beanClasses(IdeLog.class);
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         Application.setUserAgentStylesheet(getPref("style", STYLESHEET_MODENA));
-        weld.addBeanClass(IdeLog.class);
         final WeldContainer container = weld.initialize();
         final IdeScene ideScene = container.select(IdeScene.class).get();
         primaryStage.setMinWidth(750.0);

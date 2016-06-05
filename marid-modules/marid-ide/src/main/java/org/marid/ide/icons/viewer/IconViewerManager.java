@@ -23,8 +23,8 @@ import javafx.event.EventHandler;
 import org.marid.ide.menu.IdeMenuItem;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
-import javax.inject.Provider;
 
 import static org.marid.jfx.icons.FontIcon.D_IMAGE_ALBUM;
 
@@ -36,9 +36,10 @@ public class IconViewerManager {
 
     @Produces
     @IdeMenuItem(menu = "Icons", text = "Open viewer...", group = "icons", icon = D_IMAGE_ALBUM)
-    public EventHandler<ActionEvent> showViewer(Provider<IconViewer> iconViewerProvider) {
+    public EventHandler<ActionEvent> showViewer(Instance<IconViewer> iconViewerProvider) {
         return event -> {
             final IconViewer iconViewer = iconViewerProvider.get();
+            iconViewer.setOnHidden(e -> iconViewerProvider.destroy(iconViewer));
             iconViewer.show();
         };
     }

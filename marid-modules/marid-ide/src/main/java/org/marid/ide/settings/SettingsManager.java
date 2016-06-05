@@ -25,8 +25,8 @@ import org.marid.ide.settings.editors.SettingsDialog;
 import org.marid.ide.toolbar.IdeToolbarItem;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
-import javax.inject.Provider;
 
 import static org.marid.jfx.icons.FontIcon.O_SETTINGS;
 
@@ -39,7 +39,7 @@ public class SettingsManager {
     @Produces
     @IdeToolbarItem(group = "settings")
     @IdeMenuItem(menu = "Tools", text = "Settings...", group = "settings", icon = O_SETTINGS)
-    public EventHandler<ActionEvent> settingsItem(Provider<SettingsDialog> settingsDialogProvider) {
+    public EventHandler<ActionEvent> settingsItem(Instance<SettingsDialog> settingsDialogProvider) {
         return event -> {
             final SettingsDialog settingsDialog = settingsDialogProvider.get();
             settingsDialog.showAndWait();

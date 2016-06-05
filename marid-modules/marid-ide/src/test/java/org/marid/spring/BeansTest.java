@@ -18,15 +18,19 @@
 
 package org.marid.spring;
 
+import org.jboss.weld.environment.se.Weld;
+import org.jboss.weld.environment.se.WeldContainer;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.marid.misc.Builder;
-import org.marid.spring.beans.Bean;
-import org.marid.spring.beans.Beans;
-import org.marid.spring.beans.BeansSerializer;
 import org.marid.test.NormalTests;
 
-import java.util.Arrays;
+import javax.annotation.ManagedBean;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import java.math.BigDecimal;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,19 +39,35 @@ import java.util.Arrays;
 public class BeansTest {
 
     @Test
-    public void test1() throws Exception {
-        final Beans beans = new Beans();
-        beans.beans = Arrays.asList(
-                Builder.build(new Bean(), b -> {
-                    b.name = "x1";
-                    b.scope = "prototype";
-                }),
-                Builder.build(new Bean(), b -> {
-                    b.name = "bean2";
-                    b.primary = true;
-                    b.dependsOn = Arrays.asList("a", "b");
-                })
-        );
-        BeansSerializer.serialize(beans, System.out);
+    public void testNewBeans() throws Exception {
+        final Weld weld = new Weld("test")
+                .disableDiscovery()
+                .beanClasses(C.class, X.class);
+        try (final WeldContainer weldContainer = weld.initialize()) {
+            final C c = weldContainer.select(C.class).get();
+            System.out.println(c);
+        }
+    }
+
+    @ApplicationScoped
+    public static class C {
+
+        @Inject
+        public C(Instance<X> x) {
+            System.out.println(System.identityHashCode(x.get()));
+            System.out.println(System.identityHashCode(x.get()));
+        }
+    }
+
+    @ManagedBean
+    public static class X {
+
+        private final BigDecimal number = new BigDecimal(ThreadLocalRandom.current().nextDouble());
+
+        @Produces
+        public BigDecimal number() {
+            return number;
+        }
     }
 }
+

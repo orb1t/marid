@@ -25,17 +25,17 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.marid.ee.ui.UI;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.jfx.ScrollPanes;
 import org.marid.l10n.L10nSupport;
 
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
+@UI
 public class IconViewer extends Stage implements L10nSupport {
 
     @Inject
