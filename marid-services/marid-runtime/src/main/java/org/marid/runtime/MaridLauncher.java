@@ -23,7 +23,6 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 
-import java.util.Scanner;
 import java.util.TimeZone;
 
 import static java.lang.Thread.currentThread;
@@ -55,32 +54,7 @@ public class MaridLauncher implements MaridStarter {
         try {
             context.refresh();
             context.start();
-            try (final Scanner scanner = new Scanner(System.in)) {
-                while (scanner.hasNextLine()) {
-                    final String line = scanner.nextLine().trim();
-                    switch (line) {
-                        case "dump":
-                            Thread.getAllStackTraces().forEach((t, stes) -> {
-                                System.err.println(t);
-                                if (stes != null) {
-                                    for (final StackTraceElement e : stes) {
-                                        System.err.format("%s %s.%s:%d%n",
-                                                e.getFileName(),
-                                                e.getClassName(),
-                                                e.getMethodName(),
-                                                e.getLineNumber());
-                                    }
-                                }
-                                System.err.println();
-                            });
-                            break;
-                        case "exit":
-                        case "quit":
-                            context.close();
-                            break;
-                    }
-                }
-            }
+            MaridConsoleExitHandler.handle(context);
         } catch (Exception x) {
             x.printStackTrace();
             System.exit(3);
