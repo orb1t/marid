@@ -22,6 +22,7 @@ import javafx.application.Platform;
 import javafx.scene.control.*;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
+import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.settings.DebugSettings;
 import org.marid.ide.settings.JavaSettings;
@@ -58,10 +59,10 @@ public class ProjectRunnerPane extends BorderPane implements L10nSupport, LogSup
     final PrintStream printStream;
 
     @Inject
-    public ProjectRunnerPane(ProjectProfile profile,
+    public ProjectRunnerPane(ProjectManager projectManager,
                              JavaSettings javaSettings,
                              DebugSettings debugSettings) throws IOException {
-        this.profile = profile;
+        profile = projectManager.getProfile();
         final ScrollPane outPane = new ScrollPane(out);
         final ScrollPane errPane = new ScrollPane(err);
         Arrays.asList(outPane, errPane).forEach(pane -> {
@@ -121,9 +122,9 @@ public class ProjectRunnerPane extends BorderPane implements L10nSupport, LogSup
         }
         args.add("-jar");
         args.add(format("%s-%s.jar", profile.getModel().getArtifactId(), profile.getModel().getVersion()));
-        return new ProcessBuilder(args)
-                .directory(profile.getTarget().toFile())
-                .start();
+        final ProcessBuilder processBuilder = new ProcessBuilder(args).directory(profile.getTarget().toFile());
+        Log.log(INFO, "Running {0} in {1}", String.join(" ", processBuilder.command()), processBuilder.directory());
+        return processBuilder.start();
     }
 
     public ProjectProfile getProfile() {

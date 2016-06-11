@@ -18,12 +18,10 @@
 
 package org.marid.ide.project.editors;
 
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.CheckBox;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
-import org.marid.ide.settings.RuntimeType;
 import org.marid.jfx.panes.GenericGridPane;
-
-import static javafx.collections.FXCollections.observableArrayList;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,13 +39,21 @@ public class CommonTab extends GenericGridPane {
         addTextField("Organization name", model.getOrganization(), "name");
         addTextField("Organization URL", model.getOrganization(), "url");
         addSeparator();
-        addControl("Runtime type", () -> {
-            final ComboBox<RuntimeType> runtimeTypes = new ComboBox<>(observableArrayList(RuntimeType.values()));
-            runtimeTypes.getSelectionModel().select(RuntimeType.valueOf(model.getProperties().getProperty("marid.runtime.type")));
-            runtimeTypes.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                model.getProperties().setProperty("marid.runtime.type", newValue.name());
+        addControl("UI", () -> {
+            final CheckBox checkBox = new CheckBox();
+            checkBox.setSelected(model.getDependencies().stream().anyMatch(d ->
+                    "org.marid".equals(d.getGroupId()) && "marid-hmi".equals(d.getArtifactId())));
+            checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                final String artifactId = newValue ? "marid-hmi" : "marid-runtime";
+                model.getDependencies().removeIf(d -> "org.marid".equals(d.getGroupId())
+                        && ("marid-hmi".equals(d.getArtifactId()) || "marid-runtime".equals(d.getArtifactId())));
+                final Dependency dependency = new Dependency();
+                dependency.setGroupId("org.marid");
+                dependency.setArtifactId(artifactId);
+                dependency.setVersion("${marid.runtime.version}");
+                model.getDependencies().add(dependency);
             });
-            return runtimeTypes;
+            return checkBox;
         });
     }
 }

@@ -25,6 +25,7 @@ import javafx.stage.Modality;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
 import org.marid.ee.ui.UI;
+import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.l10n.L10nSupport;
@@ -41,8 +42,8 @@ import static org.marid.jfx.ScrollPanes.scrollPane;
 public class ProjectDialog extends Dialog<Model> implements PrefSupport, L10nSupport {
 
     @Inject
-    public ProjectDialog(IdeScene ideScene, ProjectProfile profile) {
-        final Model model = initModel(profile);
+    public ProjectDialog(IdeScene ideScene, ProjectManager projectManager) {
+        final Model model = initModel(projectManager.getProfile());
         final DialogPane dialogPane = getDialogPane();
         dialogPane.setPrefSize(800, 600);
         dialogPane.setContent(tabPane(model));

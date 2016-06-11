@@ -98,7 +98,6 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
         return Files.isDirectory(getProfile().getPath());
     }
 
-    @Produces
     public ProjectProfile getProfile() {
         return profile.get();
     }
@@ -157,9 +156,9 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
     @Produces
     @IdeMenuItem(menu = "Project", text = "Build", group = "pb", icon = D_CLOCK_FAST, key = "F9")
     @IdeToolbarItem(group = "projectBuild")
-    public EventHandler<ActionEvent> projectBuild(Provider<ProjectProfile> profileProvider) {
+    public EventHandler<ActionEvent> projectBuild(ProjectManager projectManager) {
         return event -> {
-            final ProjectProfile profile = profileProvider.get();
+            final ProjectProfile profile = projectManager.getProfile();
             final MavenProjectBuilder mavenProjectBuilder = new MavenProjectBuilder(profile)
                     .goals("clean", "install");
             try {
@@ -183,7 +182,7 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
     @Produces
     @IdeMenuItem(menu = "Project", text = "Add profile...", group = "pm", icon = M_ADD_BOX)
     @IdeToolbarItem(group = "projectIO", id = "p_add")
-    public EventHandler<ActionEvent> projectAddProfile(Provider<ProjectSaver> projectSaverProvider) {
+    public EventHandler<ActionEvent> projectAddProfile(Instance<ProjectSaver> projectSaverProvider) {
         return event -> {
             final TextInputDialog dialog = new TextInputDialog("profile");
             dialog.setHeaderText(s("Profile name") + ":");
@@ -196,7 +195,12 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
                 } catch (Exception x) {
                     log(WARNING, "Unable to write default logging properties", x);
                 }
-                projectSaverProvider.get().save();
+                final ProjectSaver projectSaver = projectSaverProvider.get();
+                try {
+                    projectSaver.save();
+                } finally {
+                    projectSaverProvider.destroy(projectSaver);
+                }
             }
         };
     }

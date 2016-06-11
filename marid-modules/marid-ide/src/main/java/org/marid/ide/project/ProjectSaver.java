@@ -36,5 +36,7 @@ public class ProjectSaver {
 
     public void save() {
         projectPrerequisites.apply();
+        final ProjectProfile profile = projectPrerequisites.getProfile();
+        profile.save();
     }
 }

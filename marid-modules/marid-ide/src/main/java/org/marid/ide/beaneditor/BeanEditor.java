@@ -76,15 +76,15 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
     final Saver saver;
 
     @Inject
-    public BeanEditor(ProjectProfile projectProfile, ProjectManager projectManager) {
+    public BeanEditor(ProjectManager projectManager) {
         getIcons().addAll(Ide.IMAGES);
         this.loader = new Loader(this);
         this.saver = new Saver();
-        this.beanTree = new BeanTree(projectProfile, this);
+        this.beanTree = new BeanTree(projectManager.getProfile(), this);
         this.copies = new Copies<>(this);
         final BorderPane pane = getTreePane();
         setScene(new Scene(pane, 1500, 800));
-        update(projectProfile);
+        update(beanTree.getProfile());
         projectManager.profileProperty().addListener((observable, oldValue, newValue) -> update(newValue));
     }
 
