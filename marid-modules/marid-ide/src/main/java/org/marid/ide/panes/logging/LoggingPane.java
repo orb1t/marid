@@ -23,7 +23,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ScrollPane;
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.toolbar.IdeToolbarItem;
 import org.marid.jfx.icons.FontIcons;
@@ -37,7 +37,7 @@ import static org.marid.jfx.icons.FontIcon.M_CLEAR_ALL;
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class LoggingPane extends ScrollPane {
 
     private final LoggingFilter loggingFilter;

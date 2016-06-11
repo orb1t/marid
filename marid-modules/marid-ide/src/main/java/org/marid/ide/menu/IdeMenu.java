@@ -28,7 +28,7 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 import org.jboss.weld.literal.AnyLiteral;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
@@ -46,7 +46,7 @@ import java.util.TreeMap;
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class IdeMenu extends MenuBar implements L10nSupport, LogSupport {
 
     public IdeMenu() {

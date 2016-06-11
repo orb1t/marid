@@ -18,12 +18,12 @@
 
 package org.marid.ide.settings;
 
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class JavaSettings extends AbstractSettings {
 
     public JavaSettings() {

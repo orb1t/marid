@@ -36,7 +36,6 @@ import javax.enterprise.inject.Produces;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
@@ -52,7 +51,8 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
     public static final Preferences PREFERENCES = PrefUtils.preferences(Ide.class);
     public static final Image[] IMAGES = of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new);
 
-    private final Weld weld = new Weld(getClass().getName()).beanClasses(IdeLog.class);
+    private final Weld weld = new Weld(getClass().getName())
+            .beanClasses(IdeLog.class);
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -74,7 +74,6 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
     }
 
     public static void main(String... args) throws Exception {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
         Logger.getLogger("").addHandler(IdeLog.IDE_LOG_HANDLER);
         Utils.merge(System.getProperties(), "meta.properties", "ide.properties");

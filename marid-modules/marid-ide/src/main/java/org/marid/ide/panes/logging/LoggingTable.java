@@ -25,7 +25,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.track.Tracks;
@@ -41,7 +41,7 @@ import java.util.logging.LogRecord;
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
 
     @Inject

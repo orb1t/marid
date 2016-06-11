@@ -18,13 +18,13 @@
 
 package org.marid.ide.settings;
 
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 import org.marid.ide.Ide;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class AppearanceSettings extends AbstractSettings {
 
     public AppearanceSettings() {

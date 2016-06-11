@@ -40,6 +40,11 @@ class MaridBeanFactoryPostProcessor implements BeanFactoryPostProcessor, LogSupp
     }
 
     @Override
+    public boolean requiresDestruction(Object o) {
+        return true;
+    }
+
+    @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         log(LogSupport.INFO, "Initializing {0}", beanName);
         return bean;

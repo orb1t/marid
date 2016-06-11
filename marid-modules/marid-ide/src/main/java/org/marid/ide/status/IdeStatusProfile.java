@@ -20,7 +20,7 @@ package org.marid.ide.status;
 
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.ComboBox;
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
@@ -30,7 +30,7 @@ import javax.inject.Inject;
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class IdeStatusProfile extends ComboBox<ProjectProfile> implements L10nSupport {
 
     @Inject

@@ -20,7 +20,7 @@ package org.marid.ide.scenes;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 import org.marid.ide.panes.main.IdePane;
 
 import javax.enterprise.inject.Produces;
@@ -29,7 +29,7 @@ import javax.inject.Inject;
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class IdeScene extends Scene {
 
     @Inject

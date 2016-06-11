@@ -19,14 +19,14 @@
 package org.marid.ide.project;
 
 import org.apache.maven.model.Model;
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 
 import java.util.Objects;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class IdeModelMerger {
 
     public void merge(Model target, Model source) {

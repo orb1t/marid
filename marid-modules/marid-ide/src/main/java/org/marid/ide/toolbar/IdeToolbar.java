@@ -28,7 +28,7 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import org.jboss.weld.literal.AnyLiteral;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.logging.LogSupport;
@@ -48,7 +48,7 @@ import static java.util.Comparator.comparing;
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class IdeToolbar extends ToolBar implements LogSupport {
 
     public IdeToolbar() {

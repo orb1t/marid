@@ -19,7 +19,7 @@
 package org.marid.ide.status;
 
 import javafx.scene.control.Label;
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 import org.marid.ide.timers.IdeTimers;
 import org.marid.pref.PrefSupport;
 
@@ -36,7 +36,7 @@ import static javafx.application.Platform.runLater;
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class IdeStatusTimer extends Label implements PrefSupport {
 
     private static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()

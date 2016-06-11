@@ -29,7 +29,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.marid.beans.MaridBeanXml;
 import org.marid.beans.MaridBeansXml;
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 import org.marid.ide.Ide;
 import org.marid.ide.beaneditor.data.Loader;
 import org.marid.ide.beaneditor.data.Saver;
@@ -62,7 +62,7 @@ import static org.marid.xml.XmlBind.load;
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSupport {
 
     private URLClassLoader classLoader;

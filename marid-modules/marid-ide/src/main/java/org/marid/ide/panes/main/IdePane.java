@@ -19,7 +19,7 @@
 package org.marid.ide.panes.main;
 
 import javafx.scene.layout.BorderPane;
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 import org.marid.ide.menu.IdeMenuToolbarPane;
 import org.marid.ide.panes.logging.LoggingPane;
 import org.marid.ide.status.IdeStatusBar;
@@ -29,7 +29,7 @@ import javax.inject.Inject;
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class IdePane extends BorderPane {
 
     @Inject

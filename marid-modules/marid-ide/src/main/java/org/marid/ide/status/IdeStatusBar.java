@@ -21,14 +21,14 @@ package org.marid.ide.status;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Separator;
 import org.controlsfx.control.StatusBar;
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 
 import javax.inject.Inject;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class IdeStatusBar extends StatusBar {
 
     @Inject

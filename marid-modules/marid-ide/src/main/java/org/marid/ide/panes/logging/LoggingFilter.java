@@ -22,7 +22,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 import org.marid.function.ForwardedPredicate;
 
 import java.util.Map;
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class LoggingFilter implements Predicate<LogRecord> {
 
     private final BooleanProperty offProperty = new SimpleBooleanProperty();

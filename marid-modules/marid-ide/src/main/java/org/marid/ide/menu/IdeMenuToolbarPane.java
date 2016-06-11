@@ -19,7 +19,7 @@
 package org.marid.ide.menu;
 
 import javafx.scene.layout.VBox;
-import org.marid.ee.IdeSingleton;
+import org.marid.ee.SingletonScoped;
 import org.marid.ide.toolbar.IdeToolbar;
 
 import javax.inject.Inject;
@@ -27,7 +27,7 @@ import javax.inject.Inject;
 /**
  * @author Dmitry Ovchinnikov
  */
-@IdeSingleton
+@SingletonScoped
 public class IdeMenuToolbarPane extends VBox {
 
     @Inject
