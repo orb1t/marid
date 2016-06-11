@@ -21,9 +21,9 @@ package org.marid.ide.project;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.*;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.marid.ee.SingletonScoped;
 import org.marid.ide.settings.MavenSettings;
 
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Properties;
@@ -34,21 +34,22 @@ import static java.util.Collections.singletonList;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
+@SingletonScoped
 public class ProjectPrerequisites {
 
     private final MavenSettings mavenSettings;
-    private final ProjectProfile profile;
-    private final Model model;
+    private final ProjectManager projectManager;
+
+    private Model model;
 
     @Inject
     public ProjectPrerequisites(MavenSettings mavenSettings, ProjectManager projectManager) {
         this.mavenSettings = mavenSettings;
-        this.profile = projectManager.getProfile();
-        this.model = profile.getModel();
+        this.projectManager = projectManager;
     }
 
     public void apply() {
+        model = projectManager.getProfile().getModel();
         applyAddress();
         applyPrerequisites();
         applyProperties();
@@ -56,10 +57,6 @@ public class ProjectPrerequisites {
         applyPluginManagement();
         applyPlugins();
         applyRuntimeDependency();
-    }
-
-    public ProjectProfile getProfile() {
-        return profile;
     }
 
     void applyAddress() {
@@ -81,7 +78,7 @@ public class ProjectPrerequisites {
     }
 
     void applyProperties() {
-        final Properties properties = profile.getModel().getProperties();
+        final Properties properties = model.getProperties();
         properties.setProperty("project.build.sourceEncoding", "UTF-8");
         properties.setProperty("project.reporting.outputEncoding", "UTF-8");
         properties.setProperty("maven.compiler.source", "1.8");
@@ -117,6 +114,7 @@ public class ProjectPrerequisites {
         applyCompilerPlugin();
         applyJarPlugin();
         applyDependencyMavenPlugin();
+        applyResourcesPluginVersion();
     }
 
     void applyCompilerPlugin() {
@@ -152,7 +150,6 @@ public class ProjectPrerequisites {
         addChild(manifest, "classpathPrefix", "lib");
         final Xpp3Dom manifestEntries = new Xpp3Dom("manifestEntries");
         archive.addChild(manifestEntries);
-        addChild(manifestEntries, "Class-Path", "ext/");
     }
 
     void applyDependencyMavenPlugin() {
@@ -165,6 +162,7 @@ public class ProjectPrerequisites {
                     model.getBuild().getPlugins().add(plugin);
                     return plugin;
                 });
+        dependencyPlugin.setVersion(mavenSettings.getDependencyPluginVersion());
         final PluginExecution copyDependenciesExecution = dependencyPlugin.getExecutions().stream()
                 .filter(e -> "copy-deps".equals(e.getId()))
                 .findAny()
@@ -181,6 +179,19 @@ public class ProjectPrerequisites {
         addChild(configuration, "outputDirectory", "${project.build.directory}/lib");
         addChild(configuration, "overWriteReleases", "true");
         addChild(configuration, "overWriteSnapshots", "true");
+    }
+
+    void applyResourcesPluginVersion() {
+        final Plugin resourcesPlugin = model.getBuild().getPlugins().stream()
+                .filter(p -> "maven-resources-plugin".equals(p.getArtifactId()))
+                .findAny()
+                .orElseGet(() -> {
+                    final Plugin plugin = new Plugin();
+                    plugin.setArtifactId("maven-resources-plugin");
+                    model.getBuild().getPlugins().add(plugin);
+                    return plugin;
+                });
+        resourcesPlugin.setVersion(mavenSettings.getResourcesPluginVersion());
     }
 
     void applyRuntimeDependency() {

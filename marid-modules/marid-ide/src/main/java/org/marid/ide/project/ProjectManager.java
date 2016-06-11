@@ -182,7 +182,7 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
     @Produces
     @IdeMenuItem(menu = "Project", text = "Add profile...", group = "pm", icon = M_ADD_BOX)
     @IdeToolbarItem(group = "projectIO", id = "p_add")
-    public EventHandler<ActionEvent> projectAddProfile(Instance<ProjectSaver> projectSaverProvider) {
+    public EventHandler<ActionEvent> projectAddProfile(ProjectSaver projectSaver) {
         return event -> {
             final TextInputDialog dialog = new TextInputDialog("profile");
             dialog.setHeaderText(s("Profile name") + ":");
@@ -195,12 +195,7 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
                 } catch (Exception x) {
                     log(WARNING, "Unable to write default logging properties", x);
                 }
-                final ProjectSaver projectSaver = projectSaverProvider.get();
-                try {
-                    projectSaver.save();
-                } finally {
-                    projectSaverProvider.destroy(projectSaver);
-                }
+                projectSaver.save();
             }
         };
     }

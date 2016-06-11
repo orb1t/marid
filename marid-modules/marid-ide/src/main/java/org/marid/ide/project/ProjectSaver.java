@@ -18,25 +18,27 @@
 
 package org.marid.ide.project;
 
-import javax.enterprise.context.Dependent;
+import org.marid.ee.SingletonScoped;
+
 import javax.inject.Inject;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
+@SingletonScoped
 public class ProjectSaver {
 
     private final ProjectPrerequisites projectPrerequisites;
+    private final ProjectManager projectManager;
 
     @Inject
-    public ProjectSaver(ProjectPrerequisites projectPrerequisites) {
+    public ProjectSaver(ProjectPrerequisites projectPrerequisites, ProjectManager projectManager) {
         this.projectPrerequisites = projectPrerequisites;
+        this.projectManager = projectManager;
     }
 
     public void save() {
         projectPrerequisites.apply();
-        final ProjectProfile profile = projectPrerequisites.getProfile();
-        profile.save();
+        projectManager.getProfile().save();
     }
 }

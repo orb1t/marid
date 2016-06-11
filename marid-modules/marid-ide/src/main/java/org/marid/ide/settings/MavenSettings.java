@@ -77,4 +77,12 @@ public class MavenSettings extends AbstractSettings {
     public void setJarPluginVersion(String value) {
         putPref("jarPluginVersion", value);
     }
+
+    public String getResourcesPluginVersion() {
+        return getPref("resourcesPluginVersion", "3.0.1");
+    }
+
+    public void setResourcesPluginVersion(String value) {
+        putPref("resourcesPluginVersion", value);
+    }
 }
