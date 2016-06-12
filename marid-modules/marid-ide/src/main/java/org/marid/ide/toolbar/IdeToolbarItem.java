@@ -18,9 +18,9 @@
 
 package org.marid.ide.toolbar;
 
-import javax.enterprise.context.Dependent;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
+import javax.inject.Singleton;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -29,7 +29,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
-@Dependent
+@Singleton
 public @interface IdeToolbarItem {
 
     @Nonbinding String tip() default "";

@@ -45,17 +45,6 @@ public class UIContext extends AbstractSharedContext implements LogSupport {
     }
 
     @Override
-    public boolean isActive() {
-        return true;
-    }
-
-    @Override
-    public void destroy(Contextual<?> contextual) {
-        super.destroy(contextual);
-        log(FINE, "{0} destroyed", contextual);
-    }
-
-    @Override
     public <T> T get(Contextual<T> contextual, CreationalContext<T> creationalContext) {
         final T instance = super.get(contextual, creationalContext);
         if (instance instanceof Node) {
