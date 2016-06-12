@@ -24,24 +24,23 @@ import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
-import org.marid.ee.ui.UI;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.l10n.L10nSupport;
 import org.marid.pref.PrefSupport;
-
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.ScrollPanes.scrollPane;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@UI
+@Component
 public class ProjectDialog extends Dialog<Model> implements PrefSupport, L10nSupport {
 
-    @Inject
+    @Autowired
     public ProjectDialog(IdeScene ideScene, ProjectManager projectManager) {
         final Model model = initModel(projectManager.getProfile());
         final DialogPane dialogPane = getDialogPane();

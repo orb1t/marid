@@ -16,14 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide;
+package org.marid;
 
 import javafx.application.Application;
+import javafx.scene.control.Dialog;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 import org.jboss.logmanager.LogManager;
-import org.jboss.weld.environment.se.Weld;
-import org.jboss.weld.environment.se.WeldContainer;
 import org.marid.ide.panes.logging.IdeLogHandler;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.l10n.L10nSupport;
@@ -31,8 +32,9 @@ import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.marid.pref.PrefUtils;
 import org.marid.util.Utils;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import javax.enterprise.inject.Produces;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
@@ -51,14 +53,29 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
     public static final Preferences PREFERENCES = PrefUtils.preferences(Ide.class);
     public static final Image[] IMAGES = of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new);
 
-    private final Weld weld = new Weld(getClass().getName())
-            .beanClasses(IdeLog.class);
+    static AnnotationConfigApplicationContext context;
+    static Ide application;
+    static Stage primaryStage;
+    static IdeLogHandler ideLogHandler;
+
+    @Override
+    public void init() throws Exception {
+        context = new AnnotationConfigApplicationContext();
+        context.setDisplayName(Ide.class.getName());
+        context.setAllowCircularReferences(false);
+        context.setClassLoader(Thread.currentThread().getContextClassLoader());
+        context.setResourceLoader(new PathMatchingResourcePatternResolver(context.getClassLoader()));
+        context.register(IdeContext.class);
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         Application.setUserAgentStylesheet(getPref("style", STYLESHEET_MODENA));
-        final WeldContainer container = weld.initialize();
-        final IdeScene ideScene = container.select(IdeScene.class).get();
+        Ide.application = this;
+        Ide.primaryStage = primaryStage;
+        context.refresh();
+        context.start();
+        final IdeScene ideScene = context.getBean(IdeScene.class);
         primaryStage.setMinWidth(750.0);
         primaryStage.setMinHeight(550.0);
         primaryStage.setTitle(s("Marid IDE"));
@@ -70,12 +87,19 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
 
     @Override
     public void stop() throws Exception {
-        weld.shutdown();
+        try {
+            context.close();
+            Logger.getLogger("").removeHandler(ideLogHandler);
+        } finally {
+            ideLogHandler = null;
+            primaryStage = null;
+            application = null;
+        }
     }
 
     public static void main(String... args) throws Exception {
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
-        Logger.getLogger("").addHandler(IdeLog.IDE_LOG_HANDLER);
+        Logger.getLogger("").addHandler(ideLogHandler = new IdeLogHandler());
         Utils.merge(System.getProperties(), "meta.properties", "ide.properties");
         final String localeString = PREFERENCES.get("locale", "");
         if (!localeString.isEmpty()) {
@@ -93,9 +117,31 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
         }
     }
 
-    public static class IdeLog {
+    static AnnotationConfigApplicationContext child(Class<?> type) {
+        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.setDisplayName(type.getName());
+        context.setParent(Ide.context);
+        context.scan(type.getPackage().getName());
+        context.refresh();
+        context.start();
+        return context;
+    }
 
-        @Produces
-        private static final IdeLogHandler IDE_LOG_HANDLER = new IdeLogHandler();
+    public static <T extends Window> T newWindow(Class<T> type) {
+        final AnnotationConfigApplicationContext context = child(type);
+        final T window = context.getBean(type);
+        window.addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> context.close());
+        return window;
+    }
+
+    public static <T extends Dialog<?>> T newDialog(Class<T> type) {
+        final AnnotationConfigApplicationContext context = child(type);
+        final T dialog = context.getBean(type);
+        dialog.showingProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                context.close();
+            }
+        });
+        return dialog;
     }
 }

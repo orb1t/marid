@@ -16,22 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ee.ui;
+package org.marid.dependent.settings;
 
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Scope;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.marid.ide.settings.JavaSettings;
+import org.marid.jfx.panes.GenericGridPane;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import static org.marid.jfx.Props.stringProperty;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Scope
-@Stereotype
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
-public @interface UI {
+@Component
+public class JavaTab extends GenericGridPane implements SettingsEditor {
 
+    private final JavaSettings javaSettings;
+
+    @Autowired
+    public JavaTab(JavaSettings javaSettings) throws Exception {
+        this.javaSettings = javaSettings;
+        addTextField("Java executable", stringProperty(javaSettings, "javaExecutable"));
+    }
+
+    @Override
+    public JavaSettings getSettings() {
+        return javaSettings;
+    }
 }

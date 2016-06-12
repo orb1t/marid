@@ -21,10 +21,10 @@ package org.marid.ide.project;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.*;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.marid.ee.SingletonScoped;
 import org.marid.ide.settings.MavenSettings;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -34,7 +34,7 @@ import static java.util.Collections.singletonList;
 /**
  * @author Dmitry Ovchinnikov
  */
-@SingletonScoped
+@Component
 public class ProjectPrerequisites {
 
     private final MavenSettings mavenSettings;
@@ -42,7 +42,7 @@ public class ProjectPrerequisites {
 
     private Model model;
 
-    @Inject
+    @Autowired
     public ProjectPrerequisites(MavenSettings mavenSettings, ProjectManager projectManager) {
         this.mavenSettings = mavenSettings;
         this.projectManager = projectManager;

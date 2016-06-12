@@ -16,44 +16,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.settings.editors;
+package org.marid.dependent.settings;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
-import org.marid.ee.ui.UI;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.ide.settings.AbstractSettings;
 import org.marid.l10n.L10nSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@UI
+@Component
 public class SettingsDialog extends Dialog<ButtonType> implements L10nSupport {
 
-    @Inject
-    public SettingsDialog(IdeScene ideScene, Instance<SettingsEditor> editors) {
+    @Autowired
+    public SettingsDialog(IdeScene ideScene, List<SettingsEditor> editors) {
         final DialogPane dialogPane = getDialogPane();
         dialogPane.setPrefSize(800, 600);
-        final SettingsEditor[] settingsEditors = settingsEditors(editors);
-        dialogPane.setContent(tabPane(settingsEditors));
+        dialogPane.setContent(tabPane(editors));
         dialogPane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.APPLY);
         setTitle(s("IDE settings"));
         initModality(Modality.WINDOW_MODAL);
         initOwner(ideScene.getWindow());
         setResizable(true);
-        final Map<AbstractSettings, byte[]> snapshot = Stream.of(settingsEditors)
+        final Map<AbstractSettings, byte[]> snapshot = editors.stream()
                 .collect(toMap(SettingsEditor::getSettings, e -> e.getSettings().save()));
         setResultConverter(param -> {
             switch (param.getButtonData()) {
@@ -66,12 +63,8 @@ public class SettingsDialog extends Dialog<ButtonType> implements L10nSupport {
         });
     }
 
-    private SettingsEditor[] settingsEditors(Instance<SettingsEditor> editors) {
-        return StreamSupport.stream(editors.spliterator(), false).toArray(SettingsEditor[]::new);
-    }
-
-    private TabPane tabPane(SettingsEditor[] settingsEditors) {
-        final TabPane tabPane = new TabPane(Stream.of(settingsEditors)
+    private TabPane tabPane(List<SettingsEditor> settingsEditors) {
+        final TabPane tabPane = new TabPane(settingsEditors.stream()
                 .sorted(Comparator.comparing(e -> e.getSettings().getName()))
                 .map(editor -> new Tab(s(editor.getSettings().getName()), editor.getNode()))
                 .toArray(Tab[]::new));

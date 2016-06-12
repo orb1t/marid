@@ -16,31 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.icons.viewer;
+package org.marid.dependent.settings;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import org.marid.ide.menu.IdeMenuItem;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-
-import static org.marid.jfx.icons.FontIcon.D_IMAGE_ALBUM;
+import org.marid.ide.settings.AppearanceSettings;
+import org.marid.jfx.panes.GenericGridPane;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@ApplicationScoped
-public class IconViewerManager {
+@Component
+public class AppearanceTab extends GenericGridPane implements SettingsEditor {
 
-    @Produces
-    @IdeMenuItem(menu = "Icons", text = "Open viewer...", group = "icons", icon = D_IMAGE_ALBUM)
-    public EventHandler<ActionEvent> showViewer(Instance<IconViewer> iconViewerProvider) {
-        return event -> {
-            final IconViewer iconViewer = iconViewerProvider.get();
-            iconViewer.setOnHidden(e -> iconViewerProvider.destroy(iconViewer));
-            iconViewer.show();
-        };
+    private final AppearanceSettings appearanceSettings;
+
+    @Autowired
+    public AppearanceTab(AppearanceSettings appearanceSettings) {
+        this.appearanceSettings = appearanceSettings;
+        addTextField("Locale", appearanceSettings, "locale");
+    }
+
+    @Override
+    public AppearanceSettings getSettings() {
+        return appearanceSettings;
     }
 }

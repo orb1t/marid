@@ -16,21 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ee;
+package org.marid.dependent.settings;
 
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Singleton;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javafx.scene.Node;
+import org.marid.ide.settings.AbstractSettings;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Stereotype
-@Singleton
-public @interface SingletonScoped {
+public interface SettingsEditor {
+
+    AbstractSettings getSettings();
+
+    default Node getNode() {
+        return (Node) this;
+    }
 }

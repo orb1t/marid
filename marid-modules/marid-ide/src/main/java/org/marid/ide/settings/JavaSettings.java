@@ -18,12 +18,12 @@
 
 package org.marid.ide.settings;
 
-import org.marid.ee.SingletonScoped;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@SingletonScoped
+@Component
 public class JavaSettings extends AbstractSettings {
 
     public JavaSettings() {

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.icons.viewer;
+package org.marid.dependent.iconviewer;
 
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -25,20 +25,19 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.marid.ee.ui.UI;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.jfx.ScrollPanes;
 import org.marid.l10n.L10nSupport;
-
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@UI
+@Component
 public class IconViewer extends Stage implements L10nSupport {
 
-    @Inject
+    @Autowired
     public IconViewer(IconViewerTable table, IdeScene ideScene) {
         super(StageStyle.UTILITY);
         initOwner(ideScene.getWindow());

@@ -31,18 +31,18 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.maven.model.merge.MavenModelMerger;
 import org.apache.maven.model.merge.ModelMerger;
+import org.marid.Ide;
+import org.marid.dependent.projectrunner.ProjectRunner;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.project.editors.ProjectDialog;
-import org.marid.ide.project.runner.ProjectRunner;
 import org.marid.ide.toolbar.IdeToolbarItem;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -62,7 +62,7 @@ import static org.marid.util.Utils.callWithTime;
 /**
  * @author Dmitry Ovchinnikov
  */
-@ApplicationScoped
+@Configuration
 public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
 
     private final ModelMerger modelMerger = new MavenModelMerger();
@@ -129,22 +129,20 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
         }
     }
 
-    @Produces
+    @Bean
     @IdeMenuItem(menu = "Project", text = "Project setup...", group = "setup", icon = O_TOOLS)
     @IdeToolbarItem(group = "projectSetup")
-    public EventHandler<ActionEvent> projectSetup(Instance<ProjectDialog> editorProvider,
-                                                  Provider<IdeModelMerger> ideModelMergerProvider) {
+    public EventHandler<ActionEvent> projectSetup(IdeModelMerger ideModelMerger) {
         return event -> {
-            final ProjectDialog editor = editorProvider.get();
+            final ProjectDialog editor = Ide.newDialog(ProjectDialog.class);
             editor.showAndWait().ifPresent(model -> {
                 modelMerger.merge(getProfile().getModel(), model, true, null);
-                final IdeModelMerger ideModelMerger = ideModelMergerProvider.get();
                 ideModelMerger.merge(getProfile().getModel(), model);
             });
         };
     }
 
-    @Produces
+    @Bean
     @IdeMenuItem(menu = "Project", text = "Save", group = "io", icon = F_SAVE, key = "Ctrl+S")
     @IdeToolbarItem(group = "projectIO")
     public EventHandler<ActionEvent> projectSave(Provider<ProjectSaver> projectSaverProvider) {
@@ -153,7 +151,7 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
                 time -> log(INFO, "Profile [{0}] saved in {1} ms", profile, time));
     }
 
-    @Produces
+    @Bean
     @IdeMenuItem(menu = "Project", text = "Build", group = "pb", icon = D_CLOCK_FAST, key = "F9")
     @IdeToolbarItem(group = "projectBuild")
     public EventHandler<ActionEvent> projectBuild(ProjectManager projectManager) {
@@ -169,17 +167,17 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
         };
     }
 
-    @Produces
+    @Bean
     @IdeMenuItem(menu = "Project", text = "Run", group = "pb", icon = F_PLAY, key = "F5")
     @IdeToolbarItem(group = "projectBuild")
-    public EventHandler<ActionEvent> projectRun(Provider<ProjectRunner> projectRunnerProvider) {
+    public EventHandler<ActionEvent> projectRun() {
         return event -> {
-            final ProjectRunner projectRunner = projectRunnerProvider.get();
+            final ProjectRunner projectRunner = Ide.newWindow(ProjectRunner.class);
             projectRunner.show();
         };
     }
 
-    @Produces
+    @Bean
     @IdeMenuItem(menu = "Project", text = "Add profile...", group = "pm", icon = M_ADD_BOX)
     @IdeToolbarItem(group = "projectIO", id = "p_add")
     public EventHandler<ActionEvent> projectAddProfile(ProjectSaver projectSaver) {
@@ -200,7 +198,7 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
         };
     }
 
-    @Produces
+    @Bean
     @IdeMenuItem(menu = "Project", text = "Remove profile", group = "pm", icon = D_MINUS_BOX)
     @IdeToolbarItem(group = "projectIO", id = "p_remove")
     public EventHandler<ActionEvent> projectRemoveProfile() {

@@ -25,13 +25,13 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import org.marid.ee.SingletonScoped;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10nSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -41,10 +41,10 @@ import java.util.logging.LogRecord;
 /**
  * @author Dmitry Ovchinnikov
  */
-@SingletonScoped
+@Component
 public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
 
-    @Inject
+    @Autowired
     public LoggingTable(LoggingFilter loggingFilter, IdeLogHandler ideLogHandler) {
         super(loggingFilter.filteredList(ideLogHandler.getLogRecords()));
         final String columnDefaultStyle = "-fx-font-size: smaller";

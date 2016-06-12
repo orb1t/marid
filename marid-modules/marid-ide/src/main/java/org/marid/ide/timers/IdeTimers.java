@@ -23,10 +23,10 @@ import javafx.stage.WindowEvent;
 import org.marid.concurrent.MaridTimerTask;
 import org.marid.ide.panes.logging.IdeLogHandler;
 import org.marid.logging.LogSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -36,12 +36,12 @@ import java.util.function.Supplier;
 /**
  * @author Dmitry Ovchinnikov
  */
-@ApplicationScoped
+@Component
 public class IdeTimers implements LogSupport {
 
     private final Timer timer = new Timer();
 
-    @Inject
+    @Autowired
     public IdeTimers(IdeLogHandler ideLogHandler) {
         schedule(100L, task -> ideLogHandler.flush());
     }

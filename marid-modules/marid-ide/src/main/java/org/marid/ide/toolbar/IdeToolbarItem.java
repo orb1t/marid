@@ -18,25 +18,23 @@
 
 package org.marid.ide.toolbar;
 
-import javax.enterprise.util.Nonbinding;
-import javax.inject.Qualifier;
-import javax.inject.Singleton;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Qualifier
 @Retention(RetentionPolicy.RUNTIME)
-@Singleton
+@Qualifier
 public @interface IdeToolbarItem {
 
-    @Nonbinding String tip() default "";
+    String tip() default "";
 
-    @Nonbinding String id() default "";
+    String id() default "";
 
-    @Nonbinding String icon() default "";
+    String icon() default "";
 
-    @Nonbinding String group() default "";
+    String group() default "";
 }

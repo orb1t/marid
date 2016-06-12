@@ -16,25 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.settings.editors;
+package org.marid.dependent.settings;
 
 import org.marid.ide.settings.MavenSettings;
 import org.marid.jfx.panes.GenericGridPane;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.Props.stringProperty;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
+@Component
 public class MavenTab extends GenericGridPane implements SettingsEditor {
 
     private final MavenSettings mavenSettings;
 
-    @Inject
+    @Autowired
     public MavenTab(MavenSettings mavenSettings) {
         this.mavenSettings = mavenSettings;
         addTextField("Releases update policy by default", stringProperty(mavenSettings, "releaseUpdatePolicy"));

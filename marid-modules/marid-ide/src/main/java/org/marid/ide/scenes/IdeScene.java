@@ -19,26 +19,18 @@
 package org.marid.ide.scenes;
 
 import javafx.scene.Scene;
-import javafx.stage.Stage;
-import org.marid.ee.SingletonScoped;
 import org.marid.ide.panes.main.IdePane;
-
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@SingletonScoped
+@Component
 public class IdeScene extends Scene {
 
-    @Inject
+    @Autowired
     public IdeScene(IdePane idePane) {
         super(idePane, 1024, 768);
-    }
-
-    @Produces
-    public Stage primaryStage() {
-        return (Stage) getWindow();
     }
 }

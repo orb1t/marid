@@ -19,11 +19,11 @@
 package org.marid.ide.status;
 
 import javafx.scene.control.Label;
-import org.marid.ee.SingletonScoped;
 import org.marid.ide.timers.IdeTimers;
 import org.marid.pref.PrefSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -36,7 +36,7 @@ import static javafx.application.Platform.runLater;
 /**
  * @author Dmitry Ovchinnikov
  */
-@SingletonScoped
+@Component
 public class IdeStatusTimer extends Label implements PrefSupport {
 
     private static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
@@ -59,7 +59,7 @@ public class IdeStatusTimer extends Label implements PrefSupport {
         setMinHeight(0.0);
     }
 
-    @Inject
+    @Autowired
     public void init(IdeTimers ideTimers) {
         ideTimers.schedule(1000L, t -> runLater(() -> setText(FORMATTER.format(now().atZone(ZoneId.systemDefault())))));
     }

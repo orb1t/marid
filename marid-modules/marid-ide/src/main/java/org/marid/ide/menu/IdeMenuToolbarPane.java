@@ -19,18 +19,17 @@
 package org.marid.ide.menu;
 
 import javafx.scene.layout.VBox;
-import org.marid.ee.SingletonScoped;
 import org.marid.ide.toolbar.IdeToolbar;
-
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@SingletonScoped
+@Component
 public class IdeMenuToolbarPane extends VBox {
 
-    @Inject
+    @Autowired
     public IdeMenuToolbarPane(IdeMenu ideMenu, IdeToolbar ideToolbar) {
         super(ideMenu, ideToolbar);
         setMaxWidth(Double.MAX_VALUE);

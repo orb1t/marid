@@ -24,9 +24,9 @@ import javafx.event.EventHandler;
 import javafx.scene.control.CheckMenuItem;
 import javafx.stage.Stage;
 import org.marid.ide.menu.IdeMenuItem;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
 
 import static org.marid.ide.menu.MenuItemType.CHECK;
@@ -36,10 +36,10 @@ import static org.marid.jfx.icons.FontIcon.D_EXIT_TO_APP;
 /**
  * @author Dmitry Ovchinnikov
  */
-@ApplicationScoped
+@Configuration
 public class IdePaneManager {
 
-    @Produces
+    @Bean
     @IdeMenuItem(menu = "Window", text = "Always on top", group = "ops", icon = D_BORDER_TOP, type = CHECK)
     public EventHandler<ActionEvent> alwaysOnTop(Provider<IdePane> idePaneProvider) {
         return event -> {
@@ -49,7 +49,7 @@ public class IdePaneManager {
         };
     }
 
-    @Produces
+    @Bean
     @IdeMenuItem(menu = "File", text = "Exit", group = "x", key = "F12", icon = D_EXIT_TO_APP)
     public EventHandler<ActionEvent> exitItem() {
         return event -> Platform.exit();

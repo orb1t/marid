@@ -18,20 +18,19 @@
 
 package org.marid.ide.project;
 
-import org.marid.ee.SingletonScoped;
-
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@SingletonScoped
+@Component
 public class ProjectSaver {
 
     private final ProjectPrerequisites projectPrerequisites;
     private final ProjectManager projectManager;
 
-    @Inject
+    @Autowired
     public ProjectSaver(ProjectPrerequisites projectPrerequisites, ProjectManager projectManager) {
         this.projectPrerequisites = projectPrerequisites;
         this.projectManager = projectManager;

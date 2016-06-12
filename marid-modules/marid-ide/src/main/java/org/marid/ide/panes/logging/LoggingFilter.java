@@ -22,8 +22,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import org.marid.ee.SingletonScoped;
 import org.marid.function.ForwardedPredicate;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.function.Predicate;
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 /**
  * @author Dmitry Ovchinnikov
  */
-@SingletonScoped
+@Component
 public class LoggingFilter implements Predicate<LogRecord> {
 
     private final BooleanProperty offProperty = new SimpleBooleanProperty();

@@ -16,32 +16,44 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.settings;
+package org.marid;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import org.marid.Ide;
-import org.marid.dependent.settings.SettingsDialog;
-import org.marid.ide.menu.IdeMenuItem;
-import org.marid.ide.toolbar.IdeToolbarItem;
+import javafx.stage.Stage;
+import org.marid.ide.panes.logging.IdeLogHandler;
+import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.support.DefaultLifecycleProcessor;
 
-import static org.marid.jfx.icons.FontIcon.O_SETTINGS;
+import static org.springframework.context.support.AbstractApplicationContext.LIFECYCLE_PROCESSOR_BEAN_NAME;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-public class SettingsManager {
+@ImportResource({"classpath*:/META-INF/marid/**/*.xml"})
+@ComponentScan({"org.marid.ide"})
+public class IdeContext {
 
     @Bean
-    @IdeToolbarItem(group = "settings")
-    @IdeMenuItem(menu = "Tools", text = "Settings...", group = "settings", icon = O_SETTINGS)
-    public EventHandler<ActionEvent> settingsItem() {
-        return event -> {
-            final SettingsDialog settingsDialog = Ide.newDialog(SettingsDialog.class);
-            settingsDialog.showAndWait();
-        };
+    public Stage primaryStage() {
+        return Ide.primaryStage;
+    }
+
+    @Bean
+    public Ide application() {
+        return Ide.application;
+    }
+
+    @Bean
+    public IdeLogHandler ideLogHandler() {
+        return Ide.ideLogHandler;
+    }
+
+    @Bean(name = LIFECYCLE_PROCESSOR_BEAN_NAME)
+    public LifecycleProcessor lifecycleProcessor() {
+        return new DefaultLifecycleProcessor();
     }
 }

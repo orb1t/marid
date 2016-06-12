@@ -18,13 +18,13 @@
 
 package org.marid.ide.settings;
 
-import org.marid.ee.SingletonScoped;
-import org.marid.ide.Ide;
+import org.marid.Ide;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@SingletonScoped
+@Component
 public class AppearanceSettings extends AbstractSettings {
 
     public AppearanceSettings() {

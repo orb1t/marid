@@ -80,6 +80,5 @@ public class IdeLogHandler extends Handler implements PrefSupport {
 
     @Override
     public void close() {
-        preferences().removePreferenceChangeListener(preferenceChangeListener);
     }
 }

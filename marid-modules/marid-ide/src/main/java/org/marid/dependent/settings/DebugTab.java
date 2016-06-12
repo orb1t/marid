@@ -16,32 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.settings.editors;
+package org.marid.dependent.settings;
 
-import org.marid.ide.settings.JavaSettings;
+import org.marid.ide.settings.AbstractSettings;
+import org.marid.ide.settings.DebugSettings;
 import org.marid.jfx.panes.GenericGridPane;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-
-import static org.marid.jfx.Props.stringProperty;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
-public class JavaTab extends GenericGridPane implements SettingsEditor {
+@Component
+public class DebugTab extends GenericGridPane implements SettingsEditor {
 
-    private final JavaSettings javaSettings;
+    private final DebugSettings debugSettings;
 
-    @Inject
-    public JavaTab(JavaSettings javaSettings) throws Exception {
-        this.javaSettings = javaSettings;
-        addTextField("Java executable", stringProperty(javaSettings, "javaExecutable"));
+    @Autowired
+    public DebugTab(DebugSettings debugSettings) {
+        this.debugSettings = debugSettings;
+        addBooleanField("Debug", debugSettings, "debug");
+        addIntField("Port", debugSettings, "port", 1000, 65535, 1);
+        addBooleanField("Suspend", debugSettings, "suspend");
     }
 
     @Override
-    public JavaSettings getSettings() {
-        return javaSettings;
+    public AbstractSettings getSettings() {
+        return debugSettings;
     }
 }

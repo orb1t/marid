@@ -16,24 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.project.runner;
+package org.marid.dependent.projectrunner;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.marid.ee.ui.UI;
-import org.marid.ide.Ide;
+import org.marid.Ide;
 import org.marid.logging.LogSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@UI
+@Component
 public class ProjectRunner extends Stage implements LogSupport {
 
-    @Inject
+    @Autowired
     public ProjectRunner(ProjectRunnerPane runnerPane) {
         getIcons().addAll(Ide.IMAGES);
         setScene(new Scene(runnerPane, 800, 600));

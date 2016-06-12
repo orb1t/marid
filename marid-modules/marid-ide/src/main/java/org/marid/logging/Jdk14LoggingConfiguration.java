@@ -16,33 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.settings.editors;
+package org.marid.logging;
 
-import org.marid.ide.settings.AbstractSettings;
-import org.marid.ide.settings.DebugSettings;
-import org.marid.jfx.panes.GenericGridPane;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import org.apache.maven.cli.logging.Slf4jConfiguration;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
-public class DebugTab extends GenericGridPane implements SettingsEditor {
+public class Jdk14LoggingConfiguration implements Slf4jConfiguration {
+    @Override
+    public void setRootLoggerLevel(Level level) {
 
-    private final DebugSettings debugSettings;
-
-    @Inject
-    public DebugTab(DebugSettings debugSettings) {
-        this.debugSettings = debugSettings;
-        addBooleanField("Debug", debugSettings, "debug");
-        addIntField("Port", debugSettings, "port", 1000, 65535, 1);
-        addBooleanField("Suspend", debugSettings, "suspend");
     }
 
     @Override
-    public AbstractSettings getSettings() {
-        return debugSettings;
+    public void activate() {
+
     }
 }

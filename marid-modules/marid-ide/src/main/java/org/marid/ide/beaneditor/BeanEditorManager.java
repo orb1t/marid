@@ -22,9 +22,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.toolbar.IdeToolbarItem;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
 import javax.inject.Provider;
 
 import static org.marid.jfx.icons.FontIcon.D_PUZZLE;
@@ -32,13 +32,13 @@ import static org.marid.jfx.icons.FontIcon.D_PUZZLE;
 /**
  * @author Dmitry Ovchinnikov
  */
-@ApplicationScoped
+@Configuration
 public class BeanEditorManager {
 
-    @Produces
+    @Bean
     @IdeMenuItem(menu = "File", text = "Bean editor", group = "fileBeanEditor2", icon = D_PUZZLE)
     @IdeToolbarItem(group = "file")
-    public EventHandler<ActionEvent> beanEditor(Provider<BeanEditor> beanEditorProvider) {
+    public EventHandler<ActionEvent> beanEditorItem(Provider<BeanEditor> beanEditorProvider) {
         return event -> {
             final BeanEditor beanEditor = beanEditorProvider.get();
             beanEditor.show();

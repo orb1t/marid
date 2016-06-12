@@ -16,19 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.settings.editors;
+package org.marid.dependent.iconviewer;
 
-import javafx.scene.Node;
-import org.marid.ide.settings.AbstractSettings;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import org.marid.Ide;
+import org.marid.ide.menu.IdeMenuItem;
+
+import static org.marid.jfx.icons.FontIcon.D_IMAGE_ALBUM;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface SettingsEditor {
+public class IconViewerManager {
 
-    AbstractSettings getSettings();
-
-    default Node getNode() {
-        return (Node) this;
+    @IdeMenuItem(menu = "Icons", text = "Open viewer...", group = "icons", icon = D_IMAGE_ALBUM)
+    public EventHandler<ActionEvent> showViewer() {
+        return event -> {
+            final IconViewer iconViewer = Ide.newWindow(IconViewer.class);
+            iconViewer.show();
+        };
     }
 }

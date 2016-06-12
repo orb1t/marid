@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.project.runner;
+package org.marid.dependent.projectrunner;
 
 import javafx.application.Platform;
 import javafx.scene.control.*;
@@ -32,9 +32,9 @@ import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ import static java.lang.String.format;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
+@Component
 public class ProjectRunnerPane extends BorderPane implements L10nSupport, LogSupport {
 
     final ProjectProfile profile;
@@ -58,7 +58,7 @@ public class ProjectRunnerPane extends BorderPane implements L10nSupport, LogSup
     final ProcessManager processManager;
     final PrintStream printStream;
 
-    @Inject
+    @Autowired
     public ProjectRunnerPane(ProjectManager projectManager,
                              JavaSettings javaSettings,
                              DebugSettings debugSettings) throws IOException {

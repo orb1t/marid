@@ -20,20 +20,19 @@ package org.marid.ide.status;
 
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.ComboBox;
-import org.marid.ee.SingletonScoped;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
-
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@SingletonScoped
+@Component
 public class IdeStatusProfile extends ComboBox<ProjectProfile> implements L10nSupport {
 
-    @Inject
+    @Autowired
     public IdeStatusProfile(ProjectManager projectManager) {
         super(projectManager.getProfiles());
         getSelectionModel().select(projectManager.getProfile());

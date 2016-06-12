@@ -19,20 +19,19 @@
 package org.marid.ide.panes.main;
 
 import javafx.scene.layout.BorderPane;
-import org.marid.ee.SingletonScoped;
 import org.marid.ide.menu.IdeMenuToolbarPane;
 import org.marid.ide.panes.logging.LoggingPane;
 import org.marid.ide.status.IdeStatusBar;
-
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@SingletonScoped
+@Component
 public class IdePane extends BorderPane {
 
-    @Inject
+    @Autowired
     public IdePane(LoggingPane loggingPane, IdeMenuToolbarPane ideMenuToolbarPane, IdeStatusBar ideStatusBar) {
         super(loggingPane, ideMenuToolbarPane, null, ideStatusBar, null);
     }

@@ -27,7 +27,7 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 /**
  * @author Dmitry Ovchinnikov
  */
-class MaridBeanFactoryPostProcessor implements BeanFactoryPostProcessor, LogSupport, DestructionAwareBeanPostProcessor {
+public class MaridBeanFactoryPostProcessor implements BeanFactoryPostProcessor, LogSupport, DestructionAwareBeanPostProcessor {
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {

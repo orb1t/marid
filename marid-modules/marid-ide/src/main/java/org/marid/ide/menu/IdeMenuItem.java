@@ -18,29 +18,24 @@
 
 package org.marid.ide.menu;
 
-import javax.enterprise.util.Nonbinding;
-import javax.inject.Qualifier;
-import javax.inject.Singleton;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Qualifier
 @Retention(RetentionPolicy.RUNTIME)
-@Singleton
 public @interface IdeMenuItem {
 
-    @Nonbinding String menu() default "";
+    String menu();
 
-    @Nonbinding String text() default "";
+    String text() default "";
 
-    @Nonbinding String icon() default "";
+    String icon() default "";
 
-    @Nonbinding String group() default "";
+    String group() default "";
 
-    @Nonbinding String key() default "";
+    String key() default "";
 
-    @Nonbinding MenuItemType type() default MenuItemType.NORMAL;
+    MenuItemType type() default MenuItemType.NORMAL;
 }

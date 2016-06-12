@@ -21,17 +21,16 @@ package org.marid.ide.status;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Separator;
 import org.controlsfx.control.StatusBar;
-import org.marid.ee.SingletonScoped;
-
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@SingletonScoped
+@Component
 public class IdeStatusBar extends StatusBar {
 
-    @Inject
+    @Autowired
     public IdeStatusBar(IdeStatusTimer ideStatusTimer, IdeStatusProfile ideStatusProfile) {
         setText("Marid Version 0.8");
         getRightItems().addAll(separator(), ideStatusProfile, separator(), ideStatusTimer);

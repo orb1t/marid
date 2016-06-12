@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.icons.viewer;
+package org.marid.dependent.iconviewer;
 
 import de.jensd.fx.glyphs.GlyphIcon;
 import javafx.beans.property.SimpleObjectProperty;
@@ -27,8 +27,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.l10n.L10nSupport;
+import org.springframework.stereotype.Component;
 
-import javax.enterprise.context.Dependent;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
@@ -37,7 +37,7 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Dependent
+@Component
 public class IconViewerTable extends TableView<Field> implements L10nSupport {
 
     public IconViewerTable() {

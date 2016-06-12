@@ -27,10 +27,9 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.marid.Ide;
 import org.marid.beans.MaridBeanXml;
 import org.marid.beans.MaridBeansXml;
-import org.marid.ee.SingletonScoped;
-import org.marid.ide.Ide;
 import org.marid.ide.beaneditor.data.Loader;
 import org.marid.ide.beaneditor.data.Saver;
 import org.marid.ide.project.ProjectManager;
@@ -42,9 +41,10 @@ import org.marid.jfx.menu.MenuContainerBuilder;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -62,7 +62,7 @@ import static org.marid.xml.XmlBind.load;
 /**
  * @author Dmitry Ovchinnikov
  */
-@SingletonScoped
+@Component
 public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSupport {
 
     private URLClassLoader classLoader;
@@ -75,7 +75,7 @@ public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSu
     final Loader loader;
     final Saver saver;
 
-    @Inject
+    @Autowired
     public BeanEditor(ProjectManager projectManager) {
         getIcons().addAll(Ide.IMAGES);
         this.loader = new Loader(this);
