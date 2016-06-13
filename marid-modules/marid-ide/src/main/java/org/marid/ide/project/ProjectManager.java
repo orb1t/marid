@@ -32,7 +32,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.maven.model.merge.MavenModelMerger;
 import org.apache.maven.model.merge.ModelMerger;
 import org.marid.Ide;
-import org.marid.dependent.projectrunner.ProjectRunner;
+import org.marid.dependent.project.runner.ProjectRunner;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.dependent.project.config.ProjectDialog;
 import org.marid.ide.toolbar.IdeToolbarItem;
