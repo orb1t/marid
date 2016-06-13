@@ -27,12 +27,12 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.prefs.Preferences;
 
 import static java.util.ServiceLoader.load;
@@ -74,9 +74,9 @@ public abstract class PrefCodecs implements LogSupport {
         putReader(URI.class, stringReader(URI::new));
         putReader(File.class, stringReader(File::new));
         putReader(Path.class, stringReader(Paths::get));
-        putReader(InetSocketAddress.class, stringReader(PrefCodecs::parseInetSocketAddress));
         putReader(InetAddress.class, stringReader(InetAddress::getByName));
         putReader(String[].class, stringReader(s -> of(s.split(",")).map(StringUtils::urlDecode).toArray(String[]::new)));
+        putReader(Level.class, stringReader(Level::parse));
 
         // Primitive writers
         putWriter(Integer.class, Preferences::putInt);
@@ -104,9 +104,9 @@ public abstract class PrefCodecs implements LogSupport {
         putWriter(URI.class, stringWriter(URI::toString));
         putWriter(File.class, stringWriter(File::toString));
         putWriter(Path.class, stringWriter(Path::toString));
-        putWriter(InetSocketAddress.class, stringWriter(InetSocketAddress::toString));
         putWriter(InetAddress.class, stringWriter(InetAddress::toString));
         putWriter(String[].class, stringWriter(s -> of(s).map(StringUtils::urlEncode).collect(joining(","))));
+        putWriter(Level.class, stringWriter(Level::getName));
 
         // Custom readers and writers
         try {
@@ -149,14 +149,16 @@ public abstract class PrefCodecs implements LogSupport {
         };
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> PrefReader<T> getReader(Class<T> type) {
         final PrefReader<T> reader = Utils.cast(READERS.get(type));
         if (reader != null) {
             return reader;
         } else if (type.isEnum()) {
-            final Class<Enum> enumType = Utils.cast(type);
-            return stringReader(s -> type.cast(Enum.valueOf(enumType, s)));
+            final Class<Enum<?>> enumType = Utils.cast(type);
+            return stringReader(s -> {
+                final Object object = Enum.valueOf(Utils.cast(enumType), s);
+                return Utils.cast(object);
+            });
         } else {
             throw new IllegalArgumentException("Preference reader for " + type + " is not found");
         }
@@ -171,10 +173,5 @@ public abstract class PrefCodecs implements LogSupport {
         } else {
             throw new IllegalArgumentException("Preference writer for " + type + " is not found");
         }
-    }
-
-    public static InetSocketAddress parseInetSocketAddress(String value) throws Exception {
-        final URI uri = new URI("proto://" + value);
-        return InetSocketAddress.createUnresolved(uri.getHost(), uri.getPort());
     }
 }

@@ -25,11 +25,9 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import org.jboss.logmanager.LogManager;
-import org.marid.ide.panes.logging.IdeLogHandler;
+import org.marid.ide.logging.IdeConsoleLogHandler;
+import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.scenes.IdeScene;
-import org.marid.l10n.L10nSupport;
-import org.marid.logging.LogSupport;
-import org.marid.pref.PrefSupport;
 import org.marid.pref.PrefUtils;
 import org.marid.util.Utils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -38,6 +36,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
@@ -48,14 +48,13 @@ import static org.marid.jfx.FxMaridIcon.maridIcon;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Ide extends Application implements L10nSupport, LogSupport, PrefSupport {
+public class Ide extends Application {
 
     public static final Preferences PREFERENCES = PrefUtils.preferences(Ide.class);
     public static final Image[] IMAGES = of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new);
 
     static AnnotationConfigApplicationContext context;
     static Ide application;
-    static IdeLogHandler ideLogHandler;
 
     @Override
     public void init() throws Exception {
@@ -72,11 +71,11 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Application.setUserAgentStylesheet(getPref("style", STYLESHEET_MODENA));
+        Application.setUserAgentStylesheet(PREFERENCES.get("style", STYLESHEET_MODENA));
         final IdeScene ideScene = context.getBean(IdeScene.class);
         primaryStage.setMinWidth(750.0);
         primaryStage.setMinHeight(550.0);
-        primaryStage.setTitle(s("Marid IDE"));
+        primaryStage.setTitle("Marid IDE");
         primaryStage.setScene(ideScene);
         primaryStage.getIcons().addAll(IMAGES);
         primaryStage.setMaximized(true);
@@ -86,17 +85,21 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
     @Override
     public void stop() throws Exception {
         try {
+            final IdeLogHandler ideLogHandler = context.getBean(IdeLogHandler.class);
             context.close();
             Logger.getLogger("").removeHandler(ideLogHandler);
         } finally {
-            ideLogHandler = null;
             application = null;
         }
     }
 
     public static void main(String... args) throws Exception {
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
-        Logger.getLogger("").addHandler(ideLogHandler = new IdeLogHandler());
+        Optional.ofNullable(Logger.getLogger("")).ifPresent(logger -> {
+            logger.setLevel(Level.parse(PREFERENCES.get("logLevel", Level.INFO.getName())));
+            logger.addHandler(new IdeLogHandler());
+            logger.addHandler(new IdeConsoleLogHandler());
+        });
         Utils.merge(System.getProperties(), "meta.properties", "ide.properties");
         final String localeString = PREFERENCES.get("locale", "");
         if (!localeString.isEmpty()) {

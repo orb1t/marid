@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.logging;
+package org.marid.ide.logging;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;

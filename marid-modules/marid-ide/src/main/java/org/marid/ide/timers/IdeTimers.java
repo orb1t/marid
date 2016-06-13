@@ -21,7 +21,7 @@ package org.marid.ide.timers;
 import javafx.scene.Node;
 import javafx.stage.WindowEvent;
 import org.marid.concurrent.MaridTimerTask;
-import org.marid.ide.panes.logging.IdeLogHandler;
+import org.marid.ide.logging.IdeLogHandler;
 import org.marid.logging.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

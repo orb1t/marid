@@ -18,6 +18,7 @@
 
 package org.marid.spring;
 
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -54,16 +55,20 @@ public class AnnotatedBean<T extends Annotation, E> {
     public static <T extends Annotation, E> void walk(GenericApplicationContext context, Class<T> annotationType, Class<E> type, Consumer<AnnotatedBean<T, E>> walker) {
         for (final String beanName : context.getBeanDefinitionNames()) {
             final BeanDefinition definition = context.getBeanDefinition(beanName);
-            final Object source = definition.getSource();
-            if (source instanceof AnnotatedTypeMetadata) {
-                final AnnotatedTypeMetadata metadata = (AnnotatedTypeMetadata) source;
-                final Map<String, Object> map = metadata.getAnnotationAttributes(annotationType.getName(), false);
-                if (map != null) {
-                    final T annotation = AnnotationUtils.synthesizeAnnotation(map, annotationType, null);
-                    final Object bean = context.getBean(beanName);
-                    if (type.isInstance(bean)) {
-                        walker.accept(new AnnotatedBean<>(annotation, type.cast(bean), beanName, definition, metadata));
-                    }
+            final AnnotatedTypeMetadata metadata;
+            if (definition.getSource() instanceof AnnotatedTypeMetadata) {
+                metadata = (AnnotatedTypeMetadata) definition.getSource();
+            } else if (definition instanceof AnnotatedBeanDefinition) {
+                metadata = ((AnnotatedBeanDefinition) definition).getMetadata();
+            } else {
+                continue;
+            }
+            final Map<String, Object> map = metadata.getAnnotationAttributes(annotationType.getName(), false);
+            if (map != null) {
+                final T annotation = AnnotationUtils.synthesizeAnnotation(map, annotationType, null);
+                final Object bean = context.getBean(beanName);
+                if (type.isInstance(bean)) {
+                    walker.accept(new AnnotatedBean<>(annotation, type.cast(bean), beanName, definition, metadata));
                 }
             }
         }

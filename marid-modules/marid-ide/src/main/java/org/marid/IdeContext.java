@@ -18,13 +18,16 @@
 
 package org.marid;
 
-import org.marid.ide.panes.logging.IdeLogHandler;
+import org.marid.ide.logging.IdeLogHandler;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.support.DefaultLifecycleProcessor;
+
+import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static org.springframework.context.support.AbstractApplicationContext.LIFECYCLE_PROCESSOR_BEAN_NAME;
 
@@ -43,7 +46,11 @@ public class IdeContext {
 
     @Bean
     public IdeLogHandler ideLogHandler() {
-        return Ide.ideLogHandler;
+        return Stream.of(Logger.getLogger("").getHandlers())
+                .filter(IdeLogHandler.class::isInstance)
+                .map(IdeLogHandler.class::cast)
+                .findAny()
+                .orElse(null);
     }
 
     @Bean(name = LIFECYCLE_PROCESSOR_BEAN_NAME)
