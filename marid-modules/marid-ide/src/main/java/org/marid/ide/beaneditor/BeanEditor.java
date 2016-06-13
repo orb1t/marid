@@ -42,6 +42,7 @@ import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -63,6 +64,7 @@ import static org.marid.xml.XmlBind.load;
  * @author Dmitry Ovchinnikov
  */
 @Component
+@Lazy
 public class BeanEditor extends Stage implements LogSupport, L10nSupport, PrefSupport {
 
     private URLClassLoader classLoader;

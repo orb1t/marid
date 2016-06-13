@@ -34,7 +34,7 @@ import org.apache.maven.model.merge.ModelMerger;
 import org.marid.Ide;
 import org.marid.dependent.projectrunner.ProjectRunner;
 import org.marid.ide.menu.IdeMenuItem;
-import org.marid.ide.project.editors.ProjectDialog;
+import org.marid.dependent.project.config.ProjectDialog;
 import org.marid.ide.toolbar.IdeToolbarItem;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;

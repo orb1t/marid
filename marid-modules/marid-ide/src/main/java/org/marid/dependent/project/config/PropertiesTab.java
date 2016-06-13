@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.project.editors;
+package org.marid.dependent.project.config;
 
 import javafx.beans.property.StringProperty;
 import org.apache.maven.model.Model;

@@ -25,7 +25,6 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
-import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.l10n.L10nSupport;
@@ -46,43 +45,49 @@ import java.util.TreeMap;
 public class IdeMenu extends MenuBar implements L10nSupport, LogSupport {
 
     @Autowired
-    public IdeMenu(Stage primaryStage, GenericApplicationContext context) {
+    public IdeMenu(GenericApplicationContext context) {
         setMaxWidth(Double.MAX_VALUE);
-        primaryStage.addEventHandler(WindowEvent.WINDOW_SHOWING, event -> {
-            final Map<String, Map<String, Map<String, MenuItem>>> itemMap = new TreeMap<>();
-            AnnotatedBean.walk(context, IdeMenuItem.class, bean -> {
-                final IdeMenuItem mi = bean.annotation;
-                final GlyphIcon<?> icon = mi.icon().isEmpty() ? null : FontIcons.glyphIcon(mi.icon(), 16);
-                final String key = mi.key().isEmpty() ? null : mi.key();
-                final String text = mi.text();
-                final MenuItem menuItem;
-                if (bean.object instanceof MenuItem) {
-                    menuItem = (MenuItem) bean.object;
-                } else if (bean.object instanceof EventHandler) {
-                    menuItem = mi.type().createItem(s(text), icon);
-                    menuItem.setOnAction(Utils.cast(bean.object));
-                } else {
-                    return;
-                }
-                if (key != null) {
-                    menuItem.setAccelerator(KeyCombination.valueOf(key));
-                }
-                itemMap
-                        .computeIfAbsent(mi.menu(), k -> new TreeMap<>())
-                        .computeIfAbsent(mi.group(), k -> new TreeMap<>())
-                        .put(mi.text(), menuItem);
-            });
-            itemMap.forEach((menu, groupMap) -> {
-                final Menu m = new Menu(s(menu));
-                groupMap.forEach((group, menuItems) -> {
-                    m.getItems().addAll(menuItems.values());
-                    m.getItems().add(new SeparatorMenuItem());
+        sceneProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                newValue.windowProperty().addListener((observable1, oldWin, newWin) -> {
+                    newWin.addEventHandler(WindowEvent.WINDOW_SHOWING, event -> {
+                        final Map<String, Map<String, Map<String, MenuItem>>> itemMap = new TreeMap<>();
+                        AnnotatedBean.walk(context, IdeMenuItem.class, bean -> {
+                            final IdeMenuItem mi = bean.annotation;
+                            final GlyphIcon<?> icon = mi.icon().isEmpty() ? null : FontIcons.glyphIcon(mi.icon(), 16);
+                            final String key = mi.key().isEmpty() ? null : mi.key();
+                            final String text = mi.text();
+                            final MenuItem menuItem;
+                            if (bean.object instanceof MenuItem) {
+                                menuItem = (MenuItem) bean.object;
+                            } else if (bean.object instanceof EventHandler) {
+                                menuItem = mi.type().createItem(s(text), icon);
+                                menuItem.setOnAction(Utils.cast(bean.object));
+                            } else {
+                                return;
+                            }
+                            if (key != null) {
+                                menuItem.setAccelerator(KeyCombination.valueOf(key));
+                            }
+                            itemMap
+                                    .computeIfAbsent(mi.menu(), k -> new TreeMap<>())
+                                    .computeIfAbsent(mi.group(), k -> new TreeMap<>())
+                                    .put(mi.text(), menuItem);
+                        });
+                        itemMap.forEach((menu, groupMap) -> {
+                            final Menu m = new Menu(s(menu));
+                            groupMap.forEach((group, menuItems) -> {
+                                m.getItems().addAll(menuItems.values());
+                                m.getItems().add(new SeparatorMenuItem());
+                            });
+                            if (!m.getItems().isEmpty()) {
+                                m.getItems().remove(m.getItems().size() - 1);
+                            }
+                            getMenus().add(m);
+                        });
+                    });
                 });
-                if (!m.getItems().isEmpty()) {
-                    m.getItems().remove(m.getItems().size() - 1);
-                }
-                getMenus().add(m);
-            });
+            }
         });
     }
 }

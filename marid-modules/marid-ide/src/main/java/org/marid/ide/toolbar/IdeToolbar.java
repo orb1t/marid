@@ -22,7 +22,6 @@ import de.jensd.fx.glyphs.GlyphIcon;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.jfx.icons.FontIcons;
@@ -47,49 +46,53 @@ import static java.util.Comparator.comparing;
 public class IdeToolbar extends ToolBar implements LogSupport {
 
     @Autowired
-    public IdeToolbar(Stage primaryStage, GenericApplicationContext context) {
+    public IdeToolbar(GenericApplicationContext context) {
         setMaxWidth(Double.MAX_VALUE);
-        primaryStage.addEventHandler(WindowEvent.WINDOW_SHOWING, event -> {
-            final Map<String, Set<Node>> buttonMap = new TreeMap<>();
-            AnnotatedBean.walk(context, IdeToolbarItem.class, bean -> {
-                final IdeToolbarItem ti = bean.annotation;
-                final IdeMenuItem mi = bean.getAnnotation(IdeMenuItem.class);
-                final String group = ti.group().isEmpty() ? (mi != null ? mi.group() : ti.group()) : ti.group();
-                final String id = ti.id().isEmpty() ? null : ti.id();
-                final String tip = ti.tip().isEmpty() ? (mi != null ? mi.text() : null) : ti.tip();
-                final GlyphIcon<?> toolbarIcon = ti.icon().isEmpty() ? null : FontIcons.glyphIcon(ti.icon(), 20);
-                final GlyphIcon<?> menuIcon;
-                if (mi == null || toolbarIcon != null) {
-                    menuIcon = null;
-                } else {
-                    menuIcon = mi.icon().isEmpty() ? null : FontIcons.glyphIcon(mi.icon(), 20);
-                }
-                final GlyphIcon<?> icon = toolbarIcon == null ? menuIcon : toolbarIcon;
-                final Node node;
-                if (bean.object instanceof Node) {
-                    node = (Node) bean.object;
-                } else if (bean.object instanceof EventHandler) {
-                    final Button button = new Button(null, icon);
-                    button.setOnAction(Utils.cast(bean.object));
-                    node = button;
-                } else {
-                    return;
-                }
-                if (node instanceof Control) {
-                    final Control control = (Control) node;
-                    if (tip != null) {
-                        control.setTooltip(new Tooltip(tip));
-                    }
-                }
-                if (id != null) {
-                    node.setId(id);
-                }
-                node.setFocusTraversable(false);
-                buttonMap.computeIfAbsent(group, k -> new LinkedHashSet<>()).add(node);
-            });
-            buttonMap.forEach((group, buttons) -> {
-                buttons.stream().sorted(comparing(n -> n.getId() == null ? "" : n.getId())).forEach(getItems()::add);
-                getItems().add(new Separator());
+        sceneProperty().addListener((observable, oldValue, newValue) -> {
+            newValue.windowProperty().addListener((observable1, oldWin, newWin) -> {
+                newWin.addEventHandler(WindowEvent.WINDOW_SHOWING, event -> {
+                    final Map<String, Set<Node>> buttonMap = new TreeMap<>();
+                    AnnotatedBean.walk(context, IdeToolbarItem.class, bean -> {
+                        final IdeToolbarItem ti = bean.annotation;
+                        final IdeMenuItem mi = bean.getAnnotation(IdeMenuItem.class);
+                        final String group = ti.group().isEmpty() ? (mi != null ? mi.group() : ti.group()) : ti.group();
+                        final String id = ti.id().isEmpty() ? null : ti.id();
+                        final String tip = ti.tip().isEmpty() ? (mi != null ? mi.text() : null) : ti.tip();
+                        final GlyphIcon<?> toolbarIcon = ti.icon().isEmpty() ? null : FontIcons.glyphIcon(ti.icon(), 20);
+                        final GlyphIcon<?> menuIcon;
+                        if (mi == null || toolbarIcon != null) {
+                            menuIcon = null;
+                        } else {
+                            menuIcon = mi.icon().isEmpty() ? null : FontIcons.glyphIcon(mi.icon(), 20);
+                        }
+                        final GlyphIcon<?> icon = toolbarIcon == null ? menuIcon : toolbarIcon;
+                        final Node node;
+                        if (bean.object instanceof Node) {
+                            node = (Node) bean.object;
+                        } else if (bean.object instanceof EventHandler) {
+                            final Button button = new Button(null, icon);
+                            button.setOnAction(Utils.cast(bean.object));
+                            node = button;
+                        } else {
+                            return;
+                        }
+                        if (node instanceof Control) {
+                            final Control control = (Control) node;
+                            if (tip != null) {
+                                control.setTooltip(new Tooltip(tip));
+                            }
+                        }
+                        if (id != null) {
+                            node.setId(id);
+                        }
+                        node.setFocusTraversable(false);
+                        buttonMap.computeIfAbsent(group, k -> new LinkedHashSet<>()).add(node);
+                    });
+                    buttonMap.forEach((group, buttons) -> {
+                        buttons.stream().sorted(comparing(n -> n.getId() == null ? "" : n.getId())).forEach(getItems()::add);
+                        getItems().add(new Separator());
+                    });
+                });
             });
         });
     }

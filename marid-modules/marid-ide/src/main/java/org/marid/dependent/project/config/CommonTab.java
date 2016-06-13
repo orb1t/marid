@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.project.editors;
+package org.marid.dependent.project.config;
 
 import javafx.scene.control.CheckBox;
 import org.apache.maven.model.Dependency;

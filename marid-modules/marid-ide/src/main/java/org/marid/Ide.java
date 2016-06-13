@@ -55,7 +55,6 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
 
     static AnnotationConfigApplicationContext context;
     static Ide application;
-    static Stage primaryStage;
     static IdeLogHandler ideLogHandler;
 
     @Override
@@ -66,15 +65,14 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
         context.setClassLoader(Thread.currentThread().getContextClassLoader());
         context.setResourceLoader(new PathMatchingResourcePatternResolver(context.getClassLoader()));
         context.register(IdeContext.class);
+        application = this;
+        context.refresh();
+        context.start();
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         Application.setUserAgentStylesheet(getPref("style", STYLESHEET_MODENA));
-        Ide.application = this;
-        Ide.primaryStage = primaryStage;
-        context.refresh();
-        context.start();
         final IdeScene ideScene = context.getBean(IdeScene.class);
         primaryStage.setMinWidth(750.0);
         primaryStage.setMinHeight(550.0);
@@ -92,7 +90,6 @@ public class Ide extends Application implements L10nSupport, LogSupport, PrefSup
             Logger.getLogger("").removeHandler(ideLogHandler);
         } finally {
             ideLogHandler = null;
-            primaryStage = null;
             application = null;
         }
     }

@@ -18,7 +18,6 @@
 
 package org.marid;
 
-import javafx.stage.Stage;
 import org.marid.ide.panes.logging.IdeLogHandler;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.annotation.Bean;
@@ -36,11 +35,6 @@ import static org.springframework.context.support.AbstractApplicationContext.LIF
 @ImportResource({"classpath*:/META-INF/marid/**/*.xml"})
 @ComponentScan({"org.marid.ide"})
 public class IdeContext {
-
-    @Bean
-    public Stage primaryStage() {
-        return Ide.primaryStage;
-    }
 
     @Bean
     public Ide application() {
