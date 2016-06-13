@@ -19,7 +19,6 @@
 package org.marid.pref;
 
 import org.marid.function.SafeFunction;
-import org.marid.logging.LogSupport;
 import org.marid.util.StringUtils;
 import org.marid.util.Utils;
 
@@ -42,7 +41,7 @@ import static java.util.stream.Stream.of;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class PrefCodecs implements LogSupport {
+public abstract class PrefCodecs {
 
     private static final Map<Class<?>, PrefReader<?>> READERS = new IdentityHashMap<>(256);
     private static final Map<Class<?>, PrefWriter<?>> WRITERS = new IdentityHashMap<>(256);
@@ -115,7 +114,7 @@ public abstract class PrefCodecs implements LogSupport {
                 WRITERS.putAll(prefCodecs.writers());
             }
         } catch (Exception x) {
-            Log.log(WARNING, "Unable to enumerate pref codecs", x);
+            x.printStackTrace(System.err); // log infrastructure initialization order workaround
         }
     }
 
