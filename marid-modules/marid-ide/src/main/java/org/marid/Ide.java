@@ -28,15 +28,15 @@ import org.jboss.logmanager.LogManager;
 import org.marid.ide.logging.IdeConsoleLogHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.scenes.IdeScene;
+import org.marid.io.UrlConnection;
 import org.marid.pref.PrefUtils;
 import org.marid.util.Utils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -85,11 +85,19 @@ public class Ide extends Application {
     @Override
     public void stop() throws Exception {
         try {
-            final IdeLogHandler ideLogHandler = context.getBean(IdeLogHandler.class);
             context.close();
-            Logger.getLogger("").removeHandler(ideLogHandler);
+            final Logger logger = Logger.getLogger("");
+            for (final Handler handler : logger.getHandlers()) {
+                try {
+                    handler.close();
+                } catch (Exception x) {
+                    x.printStackTrace(System.err);
+                }
+                logger.removeHandler(handler);
+            }
         } finally {
             application = null;
+            context = null;
         }
     }
 
@@ -105,16 +113,8 @@ public class Ide extends Application {
         if (!localeString.isEmpty()) {
             Locale.setDefault(Locale.forLanguageTag(localeString));
         }
-        disableUrlCaching();
+        new UrlConnection(null, null).setDefaultUseCaches(false);
         launch(Ide.class, args);
-    }
-
-    private static void disableUrlCaching() throws Exception {
-        final URL url = Thread.currentThread().getContextClassLoader().getResource("ide.properties");
-        if (url != null) {
-            final URLConnection connection = url.openConnection();
-            connection.setDefaultUseCaches(false);
-        }
     }
 
     static AnnotationConfigApplicationContext child(Class<?> type) {
@@ -127,21 +127,23 @@ public class Ide extends Application {
         return context;
     }
 
+    static void closeContext(boolean showing, AnnotationConfigApplicationContext context) {
+        if (!showing) {
+            context.close();
+        }
+    }
+
     public static <T extends Window> T newWindow(Class<T> type) {
         final AnnotationConfigApplicationContext context = child(type);
         final T window = context.getBean(type);
-        window.addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> context.close());
+        window.addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> closeContext(false, context));
         return window;
     }
 
     public static <T extends Dialog<?>> T newDialog(Class<T> type) {
         final AnnotationConfigApplicationContext context = child(type);
         final T dialog = context.getBean(type);
-        dialog.showingProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue) {
-                context.close();
-            }
-        });
+        dialog.showingProperty().addListener((observable, oldValue, newValue) -> closeContext(newValue, context));
         return dialog;
     }
 }

@@ -18,6 +18,9 @@
 
 package org.marid.ide.project;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
@@ -25,6 +28,7 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.logging.LogSupport;
 import org.marid.misc.Calls;
+import org.marid.spring.xml.data.BeanFile;
 
 import javax.annotation.Nonnull;
 import java.io.File;
