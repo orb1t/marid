@@ -24,7 +24,7 @@ import javafx.beans.property.StringProperty;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanData implements Copiable<BeanData> {
+public class BeanData extends AbstractData<BeanData> {
 
     public final StringProperty type = new SimpleStringProperty(this, "class");
     public final StringProperty name = new SimpleStringProperty(this, "name");

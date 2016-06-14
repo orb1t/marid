@@ -18,31 +18,9 @@
 
 package org.marid.spring.xml.data;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Property implements RefValue<Property>, Copiable<Property> {
+public class Property extends RefValue<Property> {
 
-    public final StringProperty name = new SimpleStringProperty(this, "name");
-    public final StringProperty ref = new SimpleStringProperty(this, "ref");
-    public final StringProperty value = new SimpleStringProperty(this, "value");
-    public final StringProperty type = new SimpleStringProperty(this, "type");
-
-    @Override
-    public StringProperty ref() {
-        return ref;
-    }
-
-    @Override
-    public StringProperty value() {
-        return value;
-    }
-
-    @Override
-    public StringProperty type() {
-        return type;
-    }
 }

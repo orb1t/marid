@@ -24,7 +24,7 @@ import javafx.collections.ObservableList;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanFile implements Copiable<BeanFile> {
+public class BeanFile extends AbstractData<BeanFile> {
 
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList();
 }

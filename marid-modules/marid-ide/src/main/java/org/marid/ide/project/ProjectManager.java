@@ -18,9 +18,6 @@
 
 package org.marid.ide.project;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -34,12 +31,17 @@ import org.marid.pref.PrefSupport;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.Scheduled;
 
-import javax.annotation.Nonnull;
 import javax.annotation.PreDestroy;
+import java.lang.ref.WeakReference;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import static java.util.Collections.binarySearch;
@@ -53,14 +55,7 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
     private final BeanFileLoader beanFileLoader;
     private final ObjectProperty<ProjectProfile> profile = new SimpleObjectProperty<>();
     private final ObservableList<ProjectProfile> profiles = FXCollections.observableArrayList();
-    private final LoadingCache<Path, BeanFile> fileCache = CacheBuilder.newBuilder()
-            .weakValues()
-            .build(new CacheLoader<Path, BeanFile>() {
-                @Override
-                public BeanFile load(@Nonnull Path key) throws Exception {
-                    return beanFileLoader.load(key);
-                }
-            });
+    private final Map<Path, WeakReference<BeanFile>> fileCache = new ConcurrentHashMap<>();
 
     @Autowired
     public ProjectManager(BeanFileLoader beanFileLoader) {
@@ -82,6 +77,17 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
             profiles.add(getProfile());
         }
         profiles.sort(Comparator.comparing(ProjectProfile::getName));
+    }
+
+    @Scheduled(fixedDelay = 1_000L)
+    private void cleanFileCache() {
+        for (final Iterator<Entry<Path, WeakReference<BeanFile>>> it = fileCache.entrySet().iterator(); it.hasNext(); ) {
+            final Entry<Path, WeakReference<BeanFile>> entry = it.next();
+            if (entry.getValue().get() == null) {
+                it.remove();
+                log(INFO, "Cleaned cache entry for {0}", entry.getKey());
+            }
+        }
     }
 
     @PreDestroy

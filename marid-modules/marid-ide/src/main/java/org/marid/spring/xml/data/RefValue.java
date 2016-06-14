@@ -18,16 +18,16 @@
 
 package org.marid.spring.xml.data;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface RefValue<T extends RefValue<T>> extends Copiable<T> {
+public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
 
-    StringProperty ref();
-
-    StringProperty value();
-
-    StringProperty type();
+    public final StringProperty name = new SimpleStringProperty(this, "name");
+    public final StringProperty ref = new SimpleStringProperty(this, "ref");
+    public final StringProperty value = new SimpleStringProperty(this, "value");
+    public final StringProperty type = new SimpleStringProperty(this, "type");
 }

@@ -21,6 +21,7 @@ package org.marid.ide.logging;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import org.marid.pref.PrefSupport;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +64,7 @@ public class IdeLogHandler extends Handler implements PrefSupport {
     }
 
     @Override
+    @Scheduled(fixedDelay = 100L)
     public void flush() {
         Platform.runLater(() -> {
             final List<LogRecord> logRecords = new ArrayList<>();

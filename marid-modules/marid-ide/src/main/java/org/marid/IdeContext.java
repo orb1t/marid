@@ -18,6 +18,7 @@
 
 package org.marid;
 
+import javafx.application.Platform;
 import org.marid.ide.logging.IdeLogHandler;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +26,11 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.support.DefaultLifecycleProcessor;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -35,6 +40,7 @@ import static org.springframework.context.support.AbstractApplicationContext.LIF
  * @author Dmitry Ovchinnikov
  */
 @Configuration
+@EnableScheduling
 @ImportResource({"classpath*:/META-INF/marid/**/*.xml"})
 @ComponentScan({"org.marid.ide"})
 public class IdeContext {
@@ -56,5 +62,21 @@ public class IdeContext {
     @Bean(name = LIFECYCLE_PROCESSOR_BEAN_NAME)
     public LifecycleProcessor lifecycleProcessor() {
         return new DefaultLifecycleProcessor();
+    }
+
+    @Bean
+    public ConcurrentTaskScheduler taskScheduler() {
+        return new ConcurrentTaskScheduler(new ScheduledThreadPoolExecutor(1));
+    }
+
+    @Bean
+    public AutoCloseable taskSchedulerDestroyer(ConcurrentTaskScheduler taskScheduler) {
+        return () -> {
+            final ScheduledThreadPoolExecutor executor = (ScheduledThreadPoolExecutor) taskScheduler.getConcurrentExecutor();
+            executor.shutdown();
+            if (!executor.awaitTermination(1L, TimeUnit.MINUTES)) {
+                Platform.exit();
+            }
+        };
     }
 }
