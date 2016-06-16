@@ -23,8 +23,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import org.apache.maven.model.Model;
+import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.project.ProjectManager;
-import org.marid.ide.scenes.IdeScene;
 import org.marid.l10n.L10nSupport;
 import org.marid.pref.PrefSupport;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ import static org.marid.jfx.ScrollPanes.scrollPane;
 public class ProjectDialog extends Dialog<Boolean> implements PrefSupport, L10nSupport {
 
     @Autowired
-    public ProjectDialog(IdeScene ideScene, ProjectManager projectManager) {
+    public ProjectDialog(IdePane idePane, ProjectManager projectManager) {
         final Model model = projectManager.getProfile().getModel();
         final DialogPane dialogPane = getDialogPane();
         dialogPane.setPrefSize(800, 600);
@@ -47,7 +47,7 @@ public class ProjectDialog extends Dialog<Boolean> implements PrefSupport, L10nS
         dialogPane.getButtonTypes().addAll(ButtonType.CLOSE);
         setTitle("Project preferences");
         initModality(Modality.WINDOW_MODAL);
-        initOwner(ideScene.getWindow());
+        initOwner(idePane.getScene().getWindow());
         setResizable(true);
         setResultConverter(type -> true);
     }

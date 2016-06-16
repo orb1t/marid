@@ -18,10 +18,14 @@
 
 package org.marid.ide.panes.filebrowser;
 
+import javafx.geometry.Orientation;
 import javafx.scene.layout.BorderPane;
 import org.marid.jfx.ScrollPanes;
+import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static org.marid.jfx.icons.FontIcon.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -34,5 +38,17 @@ public class BeanFileBrowserPane extends BorderPane {
     @Autowired
     public BeanFileBrowserPane(BeanFileBrowserTree tree) {
         setCenter(ScrollPanes.scrollPane(this.tree = tree));
+        setLeft(new ToolbarBuilder()
+                .add("Add file", M_ADD, event -> {
+                })
+                .add("Add directory", M_FOLDER, event -> {
+                })
+                .addSeparator()
+                .add("Rename file/directory", O_DIFF_RENAMED, event -> {
+                })
+                .addSeparator()
+                .add("Delete file/directory", O_TAG_REMOVE, event -> {
+                })
+                .build(toolBar -> toolBar.setOrientation(Orientation.VERTICAL)));
     }
 }

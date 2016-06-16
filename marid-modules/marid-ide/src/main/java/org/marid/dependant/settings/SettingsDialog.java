@@ -22,7 +22,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
-import org.marid.ide.scenes.IdeScene;
+import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.settings.AbstractSettings;
 import org.marid.l10n.L10nSupport;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,14 +41,14 @@ import static java.util.stream.Collectors.toMap;
 public class SettingsDialog extends Dialog<ButtonType> implements L10nSupport {
 
     @Autowired
-    public SettingsDialog(IdeScene ideScene, List<SettingsEditor> editors) {
+    public SettingsDialog(IdePane idePane, List<SettingsEditor> editors) {
         final DialogPane dialogPane = getDialogPane();
         dialogPane.setPrefSize(800, 600);
         dialogPane.setContent(tabPane(editors));
         dialogPane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.APPLY);
         setTitle(s("IDE settings"));
         initModality(Modality.WINDOW_MODAL);
-        initOwner(ideScene.getWindow());
+        initOwner(idePane.getScene().getWindow());
         setResizable(true);
         final Map<AbstractSettings, byte[]> snapshot = editors.stream()
                 .collect(toMap(SettingsEditor::getSettings, e -> e.getSettings().save()));

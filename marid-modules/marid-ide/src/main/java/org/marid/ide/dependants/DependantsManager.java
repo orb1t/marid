@@ -18,7 +18,16 @@
 
 package org.marid.ide.dependants;
 
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import org.marid.Ide;
+import org.marid.dependant.iconviewer.IconViewer;
+import org.marid.ide.menu.IdeMenuItem;
+import org.marid.ide.toolbar.IdeToolbarItem;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static org.marid.jfx.icons.FontIcon.O_PIN;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -26,4 +35,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DependantsManager {
 
+    @Bean
+    @IdeMenuItem(menu = "Tools", text = "Icon viewer...", group = "icons", icon = O_PIN)
+    @IdeToolbarItem(group = "projectSetup")
+    public EventHandler<ActionEvent> iconViewer() {
+        return event -> {
+            final IconViewer editor = Ide.newWindow(IconViewer.class);
+            editor.show();
+        };
+    }
 }

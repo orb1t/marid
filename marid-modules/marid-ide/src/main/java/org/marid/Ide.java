@@ -19,6 +19,7 @@
 package org.marid;
 
 import javafx.application.Application;
+import javafx.scene.Scene;
 import javafx.scene.control.Dialog;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -27,7 +28,7 @@ import javafx.stage.WindowEvent;
 import org.jboss.logmanager.LogManager;
 import org.marid.ide.logging.IdeConsoleLogHandler;
 import org.marid.ide.logging.IdeLogHandler;
-import org.marid.ide.scenes.IdeScene;
+import org.marid.ide.panes.main.IdePane;
 import org.marid.io.UrlConnection;
 import org.marid.pref.PrefUtils;
 import org.marid.util.Utils;
@@ -72,11 +73,11 @@ public class Ide extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Application.setUserAgentStylesheet(PREFERENCES.get("style", STYLESHEET_MODENA));
-        final IdeScene ideScene = context.getBean(IdeScene.class);
+        final IdePane idePane = context.getBean(IdePane.class);
         primaryStage.setMinWidth(750.0);
         primaryStage.setMinHeight(550.0);
         primaryStage.setTitle("Marid IDE");
-        primaryStage.setScene(ideScene);
+        primaryStage.setScene(new Scene(idePane, 1024, 768));
         primaryStage.getIcons().addAll(IMAGES);
         primaryStage.setMaximized(true);
         primaryStage.show();

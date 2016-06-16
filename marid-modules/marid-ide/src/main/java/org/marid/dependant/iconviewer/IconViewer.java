@@ -25,7 +25,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.marid.ide.scenes.IdeScene;
+import org.marid.ide.panes.main.IdePane;
 import org.marid.jfx.ScrollPanes;
 import org.marid.l10n.L10nSupport;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +38,9 @@ import org.springframework.stereotype.Component;
 public class IconViewer extends Stage implements L10nSupport {
 
     @Autowired
-    public IconViewer(IconViewerTable table, IdeScene ideScene) {
+    public IconViewer(IconViewerTable table, IdePane idePane) {
         super(StageStyle.UTILITY);
-        initOwner(ideScene.getWindow());
+        initOwner(idePane.getScene().getWindow());
         setTitle(s("Icon viewer"));
         final ScrollPane scrollPane = ScrollPanes.scrollPane(table);
         final BorderPane pane = new BorderPane(scrollPane);

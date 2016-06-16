@@ -18,6 +18,7 @@
 
 package org.marid.dependant.project.config;
 
+import com.google.common.collect.ImmutableSet;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -32,10 +33,9 @@ import org.apache.maven.model.Model;
 import org.marid.jfx.Props;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
-import org.marid.util.Builder;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -72,24 +72,15 @@ public class DependenciesTab extends BorderPane {
     }
 
     public static void useDefaultDependencies(List<Dependency> dependencies) {
-        dependencies.clear();
-        final String maridVersion = System.getProperty("implementation.version");
-        Collections.addAll(dependencies,
-                new Builder<>(new Dependency())
-                        .$(Dependency::setGroupId, "org.marid")
-                        .$(Dependency::setArtifactId, "marid-db")
-                        .$(Dependency::setVersion, maridVersion)
-                        .build(),
-                new Builder<>(new Dependency())
-                        .$(Dependency::setGroupId, "org.marid")
-                        .$(Dependency::setArtifactId, "marid-proto")
-                        .$(Dependency::setVersion, maridVersion)
-                        .build(),
-                new Builder<>(new Dependency())
-                        .$(Dependency::setGroupId, "org.marid")
-                        .$(Dependency::setArtifactId, "marid-web")
-                        .$(Dependency::setVersion, maridVersion)
-                        .build());
+        final Set<String> artifacts = ImmutableSet.of("marid-db", "marid-proto", "marid-web");
+        dependencies.removeIf(d -> "org.marid".equals(d.getGroupId()) && artifacts.contains(d.getArtifactId()));
+        artifacts.forEach(artifact -> {
+            final Dependency dependency = new Dependency();
+            dependency.setGroupId("org.marid");
+            dependency.setArtifactId(artifact);
+            dependency.setVersion("${marid.runtime.version}");
+            dependencies.add(dependency);
+        });
     }
 
     private static class DependencyTable extends TableView<Dependency> {
@@ -135,7 +126,7 @@ public class DependenciesTab extends BorderPane {
             final TableColumn<Dependency, String> col = new TableColumn<>("version");
             col.setCellValueFactory(param -> Props.stringProperty(param.getValue(), "version"));
             col.setCellFactory(TextFieldTableCell.forTableColumn());
-            col.setPrefWidth(150);
+            col.setPrefWidth(200);
             col.setStyle("-fx-alignment: center-right");
             col.setSortable(false);
             return col;
