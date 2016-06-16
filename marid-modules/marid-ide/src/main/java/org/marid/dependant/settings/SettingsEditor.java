@@ -16,23 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.main;
+package org.marid.dependant.settings;
 
-import javafx.scene.layout.BorderPane;
-import org.marid.ide.menu.IdeMenuToolbarPane;
-import org.marid.ide.panes.tabs.IdeTabPane;
-import org.marid.ide.status.IdeStatusBar;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import javafx.scene.Node;
+import org.marid.ide.settings.AbstractSettings;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class IdePane extends BorderPane {
+public interface SettingsEditor {
 
-    @Autowired
-    public IdePane(IdeTabPane ideTabPane, IdeMenuToolbarPane ideMenuToolbarPane, IdeStatusBar ideStatusBar) {
-        super(ideTabPane, ideMenuToolbarPane, null, ideStatusBar, null);
+    AbstractSettings getSettings();
+
+    default Node getNode() {
+        return (Node) this;
     }
 }

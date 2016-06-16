@@ -137,9 +137,9 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
             return new SimpleStringProperty(String.join(".", parts));
         });
         col.setStyle("-fx-alignment: center-right;");
-        col.setMinWidth(180);
-        col.setPrefWidth(250);
-        col.setMaxWidth(290);
+        col.setMinWidth(310);
+        col.setPrefWidth(320);
+        col.setMaxWidth(350);
         col.setSortable(false);
         return col;
     }

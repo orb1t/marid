@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependent.settings;
+package org.marid.dependant.settings;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.*;

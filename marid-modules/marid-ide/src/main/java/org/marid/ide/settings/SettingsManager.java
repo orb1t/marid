@@ -21,7 +21,7 @@ package org.marid.ide.settings;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import org.marid.Ide;
-import org.marid.dependent.settings.SettingsDialog;
+import org.marid.dependant.settings.SettingsDialog;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.toolbar.IdeToolbarItem;
 import org.springframework.context.annotation.Bean;

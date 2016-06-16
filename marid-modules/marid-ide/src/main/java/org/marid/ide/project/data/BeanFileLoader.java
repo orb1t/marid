@@ -18,15 +18,12 @@
 
 package org.marid.ide.project.data;
 
-import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.BeanFile;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import javax.inject.Provider;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -42,26 +39,22 @@ import java.nio.file.Path;
 @Component
 public class BeanFileLoader {
 
-    private final Provider<ProjectManager> projectManager;
-
-    @Autowired
-    public BeanFileLoader(Provider<ProjectManager> projectManager) {
-        this.projectManager = projectManager;
+    public BeanFileLoader() {
     }
 
-    public BeanFile load(Path path) throws IOException, SAXException, ParserConfigurationException {
+    public BeanFile load(Path path, ProjectProfile profile) throws IOException, SAXException, ParserConfigurationException {
         try (final InputStream inputStream = Files.newInputStream(path)) {
-            return load(inputStream);
+            return load(inputStream, profile);
         }
     }
 
-    public BeanFile load(InputStream inputStream) throws IOException, SAXException, ParserConfigurationException {
+    public BeanFile load(InputStream stream, ProjectProfile profile) throws IOException, SAXException, ParserConfigurationException {
         final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setCoalescing(true);
         documentBuilderFactory.setNamespaceAware(true);
         final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        final Document document = documentBuilder.parse(inputStream);
-        return new Loader(document).load();
+        final Document document = documentBuilder.parse(stream);
+        return new Loader(document, profile).load();
     }
 
     private class Loader {
@@ -70,9 +63,9 @@ public class BeanFileLoader {
         private final URLClassLoader classLoader;
         private final Document document;
 
-        private Loader(Document document) {
+        private Loader(Document document, ProjectProfile profile) {
             this.document = document;
-            this.profile = projectManager.get().getProfile();
+            this.profile = profile;
             this.classLoader = profile.classLoader();
         }
 

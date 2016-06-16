@@ -16,30 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependent.project.config;
+package org.marid.dependant.settings;
 
-import javafx.beans.property.StringProperty;
-import org.apache.maven.model.Model;
-import org.marid.jfx.Props;
+import org.marid.ide.settings.JavaSettings;
 import org.marid.jfx.panes.GenericGridPane;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import java.util.Properties;
+import static org.marid.jfx.Props.stringProperty;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class PropertiesTab extends GenericGridPane {
+@Component
+public class JavaTab extends GenericGridPane implements SettingsEditor {
 
-    public PropertiesTab(Model model) {
-        final Properties properties = model.getProperties();
-        addTextField(properties, "Marid version", "marid.runtime.version", System.getProperty("implementation.version"));
+    private final JavaSettings javaSettings;
+
+    @Autowired
+    public JavaTab(JavaSettings javaSettings) throws Exception {
+        this.javaSettings = javaSettings;
+        addTextField("Java executable", stringProperty(javaSettings, "javaExecutable"));
     }
 
-    private void addTextField(Properties properties, String text, String key, String defaultValue) {
-        addTextField(text, stringProperty(properties, key, defaultValue));
-    }
-
-    private StringProperty stringProperty(Properties properties, String key, String defaultValue) {
-        return Props.stringProperty(() -> properties.getProperty(key, defaultValue), v -> properties.setProperty(key, v));
+    @Override
+    public JavaSettings getSettings() {
+        return javaSettings;
     }
 }

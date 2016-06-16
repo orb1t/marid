@@ -16,19 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependent.settings;
+package org.marid.dependant.settings;
 
-import javafx.scene.Node;
 import org.marid.ide.settings.AbstractSettings;
+import org.marid.ide.settings.DebugSettings;
+import org.marid.jfx.panes.GenericGridPane;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface SettingsEditor {
+@Component
+public class DebugTab extends GenericGridPane implements SettingsEditor {
 
-    AbstractSettings getSettings();
+    private final DebugSettings debugSettings;
 
-    default Node getNode() {
-        return (Node) this;
+    @Autowired
+    public DebugTab(DebugSettings debugSettings) {
+        this.debugSettings = debugSettings;
+        addBooleanField("Debug", debugSettings, "debug");
+        addIntField("Port", debugSettings, "port", 1000, 65535, 1);
+        addBooleanField("Suspend", debugSettings, "suspend");
+    }
+
+    @Override
+    public AbstractSettings getSettings() {
+        return debugSettings;
     }
 }

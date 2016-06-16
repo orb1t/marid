@@ -28,20 +28,13 @@ import org.marid.ide.project.data.BeanFileLoader;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
-import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PreDestroy;
-import java.lang.ref.WeakReference;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import static java.util.Collections.binarySearch;
@@ -55,39 +48,26 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
     private final BeanFileLoader beanFileLoader;
     private final ObjectProperty<ProjectProfile> profile = new SimpleObjectProperty<>();
     private final ObservableList<ProjectProfile> profiles = FXCollections.observableArrayList();
-    private final Map<Path, WeakReference<BeanFile>> fileCache = new ConcurrentHashMap<>();
 
     @Autowired
     public ProjectManager(BeanFileLoader beanFileLoader) {
         this.beanFileLoader = beanFileLoader;
-        profile.set(new ProjectProfile(getPref("profile", "default")));
+        profile.set(new ProjectProfile(getPref("profile", "default"), beanFileLoader));
         if (!isPresent()) {
-            profile.set(new ProjectProfile("default"));
+            profile.set(new ProjectProfile("default", beanFileLoader));
         }
+        profiles.add(profile.get());
         final Path profilesDir = getProfile().getPath().getParent();
         try (final Stream<Path> stream = Files.list(profilesDir)) {
             stream
                     .filter(p -> Files.isDirectory(p) && !profilesDir.equals(p))
-                    .map(p -> new ProjectProfile(p.getFileName().toString()))
+                    .filter(p -> !p.getFileName().toString().equals(profile.get().getName()))
+                    .map(p -> new ProjectProfile(p.getFileName().toString(), beanFileLoader))
                     .forEach(profiles::add);
         } catch (Exception x) {
             log(WARNING, "Unable to enumerate profiles", x);
         }
-        if (!profiles.contains(getProfile())) {
-            profiles.add(getProfile());
-        }
         profiles.sort(Comparator.comparing(ProjectProfile::getName));
-    }
-
-    @Scheduled(fixedDelay = 1_000L)
-    private void cleanFileCache() {
-        for (final Iterator<Entry<Path, WeakReference<BeanFile>>> it = fileCache.entrySet().iterator(); it.hasNext(); ) {
-            final Entry<Path, WeakReference<BeanFile>> entry = it.next();
-            if (entry.getValue().get() == null) {
-                it.remove();
-                log(INFO, "Cleaned cache entry for {0}", entry.getKey());
-            }
-        }
     }
 
     @PreDestroy
@@ -115,7 +95,7 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
         final ProjectProfile profile = profiles.stream()
                 .filter(p -> name.equals(p.getName()))
                 .findFirst()
-                .orElseGet(() -> new ProjectProfile(name));
+                .orElseGet(() -> new ProjectProfile(name, beanFileLoader));
         if (profiles.contains(profile)) {
             return profile;
         }

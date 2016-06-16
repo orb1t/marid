@@ -16,9 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.logging;
+package org.marid.dependant.settings;
 
-import javafx.scene.control.ScrollPane;
+import org.marid.ide.settings.AppearanceSettings;
+import org.marid.jfx.panes.GenericGridPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,13 +27,18 @@ import org.springframework.stereotype.Component;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class LoggingPane extends ScrollPane {
+public class AppearanceTab extends GenericGridPane implements SettingsEditor {
+
+    private final AppearanceSettings appearanceSettings;
 
     @Autowired
-    public LoggingPane(LoggingTable table) {
-        super(table);
-        setFitToHeight(true);
-        setFitToWidth(true);
-        setStyle("-fx-background-color: transparent");
+    public AppearanceTab(AppearanceSettings appearanceSettings) {
+        this.appearanceSettings = appearanceSettings;
+        addTextField("Locale", appearanceSettings, "locale");
+    }
+
+    @Override
+    public AppearanceSettings getSettings() {
+        return appearanceSettings;
     }
 }

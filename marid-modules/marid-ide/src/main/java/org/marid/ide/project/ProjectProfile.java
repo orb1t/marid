@@ -18,14 +18,14 @@
 
 package org.marid.ide.project;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.marid.ide.project.data.BeanFileLoader;
 import org.marid.logging.LogSupport;
 import org.marid.misc.Calls;
 import org.marid.spring.xml.data.BeanFile;
@@ -69,8 +69,9 @@ public class ProjectProfile implements LogSupport {
     private final Path beansDirectory;
     private final Path repository;
     private final Logger logger;
+    private final ObservableMap<Path, BeanFile> beanFiles;
 
-    public ProjectProfile(String name) {
+    ProjectProfile(String name, BeanFileLoader beanFileLoader) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
         pomFile = path.resolve("pom.xml");
         src = path.resolve("src");
@@ -87,6 +88,7 @@ public class ProjectProfile implements LogSupport {
         model = loadModel();
         model.setModelVersion("4.0.0");
         createFileStructure();
+        beanFiles = loadBeanFiles(beanFileLoader);
     }
 
     private Model loadModel() {
@@ -101,6 +103,29 @@ public class ProjectProfile implements LogSupport {
             log(WARNING, "Unable to parse pom.xml", x);
         }
         return new Model();
+    }
+
+    private ObservableMap<Path, BeanFile> loadBeanFiles(BeanFileLoader beanFileLoader) {
+        try (final Stream<Path> stream = Files.walk(beansDirectory)) {
+            return stream.filter(p -> p.getFileName().toString().endsWith(".xml"))
+                    .collect(Collectors.toMap(p -> p, p -> {
+                        try {
+                            return beanFileLoader.load(p, this);
+                        } catch (Exception x) {
+                            log(WARNING, "Unable to load {0}", x, p);
+                            return new BeanFile();
+                        }
+                    }, (m1, m2) -> m2, FXCollections::observableHashMap));
+        } catch (IOException x) {
+            log(WARNING, "Unable to load bean files", x);
+        } catch (Exception x) {
+            log(SEVERE, "Unknown error", x);
+        }
+        return FXCollections.observableHashMap();
+    }
+
+    public ObservableMap<Path, BeanFile> getBeanFiles() {
+        return beanFiles;
     }
 
     public Model getModel() {

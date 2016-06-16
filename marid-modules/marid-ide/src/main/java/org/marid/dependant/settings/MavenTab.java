@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependent.settings;
+package org.marid.dependant.settings;
 
 import org.marid.ide.settings.MavenSettings;
 import org.marid.jfx.panes.GenericGridPane;

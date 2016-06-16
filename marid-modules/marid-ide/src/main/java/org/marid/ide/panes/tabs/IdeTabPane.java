@@ -16,29 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependent.settings;
+package org.marid.ide.panes.tabs;
 
-import org.marid.ide.settings.AppearanceSettings;
-import org.marid.jfx.panes.GenericGridPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import org.marid.ide.panes.filebrowser.BeanFileBrowserPane;
+import org.marid.ide.panes.logging.LoggingTable;
+import org.marid.l10n.L10nSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static org.marid.jfx.ScrollPanes.scrollPane;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class AppearanceTab extends GenericGridPane implements SettingsEditor {
+public class IdeTabPane extends TabPane implements L10nSupport {
 
-    private final AppearanceSettings appearanceSettings;
+    private final LoggingTable loggingPane;
+    private final BeanFileBrowserPane beanFileBrowserPane;
 
     @Autowired
-    public AppearanceTab(AppearanceSettings appearanceSettings) {
-        this.appearanceSettings = appearanceSettings;
-        addTextField("Locale", appearanceSettings, "locale");
-    }
-
-    @Override
-    public AppearanceSettings getSettings() {
-        return appearanceSettings;
+    public IdeTabPane(LoggingTable loggingPane, BeanFileBrowserPane beanFileBrowserPane) {
+        setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
+        getTabs().add(new Tab(s("Log"), scrollPane(this.loggingPane = loggingPane)));
+        getTabs().add(new Tab(s("Bean files"), this.beanFileBrowserPane = beanFileBrowserPane));
     }
 }

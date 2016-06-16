@@ -16,25 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependent.iconviewer;
+package org.marid.ide.panes.filebrowser;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import org.marid.Ide;
-import org.marid.ide.menu.IdeMenuItem;
-
-import static org.marid.jfx.icons.FontIcon.D_IMAGE_ALBUM;
+import javafx.scene.layout.BorderPane;
+import org.marid.jfx.ScrollPanes;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class IconViewerManager {
+@Component
+public class BeanFileBrowserPane extends BorderPane {
 
-    @IdeMenuItem(menu = "Icons", text = "Open viewer...", group = "icons", icon = D_IMAGE_ALBUM)
-    public EventHandler<ActionEvent> showViewer() {
-        return event -> {
-            final IconViewer iconViewer = Ide.newWindow(IconViewer.class);
-            iconViewer.show();
-        };
+    final BeanFileBrowserTree tree;
+
+    @Autowired
+    public BeanFileBrowserPane(BeanFileBrowserTree tree) {
+        setCenter(ScrollPanes.scrollPane(this.tree = tree));
     }
 }

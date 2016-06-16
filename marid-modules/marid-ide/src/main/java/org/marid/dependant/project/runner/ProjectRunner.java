@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependent.project.runner;
+package org.marid.dependant.project.runner;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;

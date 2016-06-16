@@ -16,32 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependent.settings;
+package org.marid.dependant.iconviewer;
 
-import org.marid.ide.settings.AbstractSettings;
-import org.marid.ide.settings.DebugSettings;
-import org.marid.jfx.panes.GenericGridPane;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import org.marid.Ide;
+import org.marid.ide.menu.IdeMenuItem;
+
+import static org.marid.jfx.icons.FontIcon.D_IMAGE_ALBUM;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class DebugTab extends GenericGridPane implements SettingsEditor {
+public class IconViewerManager {
 
-    private final DebugSettings debugSettings;
-
-    @Autowired
-    public DebugTab(DebugSettings debugSettings) {
-        this.debugSettings = debugSettings;
-        addBooleanField("Debug", debugSettings, "debug");
-        addIntField("Port", debugSettings, "port", 1000, 65535, 1);
-        addBooleanField("Suspend", debugSettings, "suspend");
-    }
-
-    @Override
-    public AbstractSettings getSettings() {
-        return debugSettings;
+    @IdeMenuItem(menu = "Icons", text = "Open viewer...", group = "icons", icon = D_IMAGE_ALBUM)
+    public EventHandler<ActionEvent> showViewer() {
+        return event -> {
+            final IconViewer iconViewer = Ide.newWindow(IconViewer.class);
+            iconViewer.show();
+        };
     }
 }

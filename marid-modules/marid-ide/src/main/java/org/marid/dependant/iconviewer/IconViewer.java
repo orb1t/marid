@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependent.iconviewer;
+package org.marid.dependant.iconviewer;
 
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
