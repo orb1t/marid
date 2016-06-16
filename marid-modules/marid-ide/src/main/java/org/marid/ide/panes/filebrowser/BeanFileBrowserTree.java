@@ -59,6 +59,7 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
         super(new TreeItem<>(projectManager.getProfile().getBeansDirectory(), glyphIcon(D_FOLDER, 16)));
         setShowRoot(false);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
+        setTableMenuButtonVisible(true);
         this.projectManager = projectManager;
         this.projectManager.profileProperty().addListener((observable, oldValue, newValue) -> {
             oldValue.getBeanFiles().removeListener(filesChangeListener);

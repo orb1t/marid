@@ -23,9 +23,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Organization;
 import org.marid.ide.project.ProjectManager;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.scenes.IdeScene;
 import org.marid.l10n.L10nSupport;
 import org.marid.pref.PrefSupport;
@@ -38,32 +36,20 @@ import static org.marid.jfx.ScrollPanes.scrollPane;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ProjectDialog extends Dialog<Model> implements PrefSupport, L10nSupport {
+public class ProjectDialog extends Dialog<Boolean> implements PrefSupport, L10nSupport {
 
     @Autowired
     public ProjectDialog(IdeScene ideScene, ProjectManager projectManager) {
-        final Model model = initModel(projectManager.getProfile());
+        final Model model = projectManager.getProfile().getModel();
         final DialogPane dialogPane = getDialogPane();
         dialogPane.setPrefSize(800, 600);
         dialogPane.setContent(tabPane(model));
-        dialogPane.getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
+        dialogPane.getButtonTypes().addAll(ButtonType.CLOSE);
         setTitle("Project preferences");
         initModality(Modality.WINDOW_MODAL);
         initOwner(ideScene.getWindow());
         setResizable(true);
-        setResultConverter(type -> type == ButtonType.APPLY ? model : null);
-    }
-
-    private Model initModel(ProjectProfile profile) {
-        final Model model = profile.getModel().clone();
-        if (model.getOrganization() == null) {
-            model.setOrganization(new Organization());
-        }
-        if (model.getDependencies().isEmpty()) {
-            DependenciesTab.useDefaultDependencies(model.getDependencies());
-        }
-        model.getDependencies().removeIf(d -> "marid-runtime".equals(d.getArtifactId()) && "org.marid".equals(d.getGroupId()));
-        return model;
+        setResultConverter(type -> true);
     }
 
     private TabPane tabPane(Model model) {

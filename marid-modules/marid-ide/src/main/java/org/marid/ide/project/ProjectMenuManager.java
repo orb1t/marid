@@ -23,8 +23,6 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
-import org.apache.maven.model.merge.MavenModelMerger;
-import org.apache.maven.model.merge.ModelMerger;
 import org.marid.Ide;
 import org.marid.dependant.project.config.ProjectDialog;
 import org.marid.dependant.project.runner.ProjectRunner;
@@ -54,7 +52,6 @@ import static org.marid.util.Utils.callWithTime;
 @Configuration
 public class ProjectMenuManager implements LogSupport, L10nSupport {
 
-    private final ModelMerger modelMerger = new MavenModelMerger();
     private final ProjectManager projectManager;
 
     @Autowired
@@ -65,13 +62,10 @@ public class ProjectMenuManager implements LogSupport, L10nSupport {
     @Bean
     @IdeMenuItem(menu = "Project", text = "Project setup...", group = "setup", icon = O_TOOLS)
     @IdeToolbarItem(group = "projectSetup")
-    public EventHandler<ActionEvent> projectSetup(IdeModelMerger ideModelMerger) {
+    public EventHandler<ActionEvent> projectSetup() {
         return event -> {
             final ProjectDialog editor = Ide.newDialog(ProjectDialog.class);
-            editor.showAndWait().ifPresent(model -> {
-                modelMerger.merge(projectManager.getProfile().getModel(), model, true, null);
-                ideModelMerger.merge(projectManager.getProfile().getModel(), model);
-            });
+            editor.showAndWait();
         };
     }
 

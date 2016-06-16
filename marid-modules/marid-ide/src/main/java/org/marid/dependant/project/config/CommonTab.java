@@ -41,12 +41,10 @@ public class CommonTab extends GenericGridPane {
         addSeparator();
         addControl("UI", () -> {
             final CheckBox checkBox = new CheckBox();
-            checkBox.setSelected(model.getDependencies().stream().anyMatch(d ->
-                    "org.marid".equals(d.getGroupId()) && "marid-hmi".equals(d.getArtifactId())));
+            checkBox.setSelected(model.getDependencies().stream().anyMatch(CommonTab::isHmi));
             checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
                 final String artifactId = newValue ? "marid-hmi" : "marid-runtime";
-                model.getDependencies().removeIf(d -> "org.marid".equals(d.getGroupId())
-                        && ("marid-hmi".equals(d.getArtifactId()) || "marid-runtime".equals(d.getArtifactId())));
+                model.getDependencies().removeIf(d -> isHmi(d) || isRuntime(d));
                 final Dependency dependency = new Dependency();
                 dependency.setGroupId("org.marid");
                 dependency.setArtifactId(artifactId);
@@ -55,5 +53,13 @@ public class CommonTab extends GenericGridPane {
             });
             return checkBox;
         });
+    }
+
+    private static boolean isRuntime(Dependency dependency) {
+        return "org.marid".equals(dependency.getGroupId()) && "marid-runtime".equals(dependency.getArtifactId());
+    }
+
+    private static boolean isHmi(Dependency dependency) {
+        return "org.marid".equals(dependency.getGroupId()) && "marid-hmi".equals(dependency.getArtifactId());
     }
 }

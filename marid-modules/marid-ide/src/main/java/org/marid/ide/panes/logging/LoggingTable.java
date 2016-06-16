@@ -48,6 +48,7 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
     @Autowired
     public LoggingTable(LoggingFilter loggingFilter, IdeLogHandler ideLogHandler) {
         super(loggingFilter.filteredList(ideLogHandler.getLogRecords()));
+        setTableMenuButtonVisible(true);
         final String columnDefaultStyle = "-fx-font-size: smaller";
         getColumns().add(levelColumn());
         getColumns().add(timestampColumn());
@@ -90,7 +91,7 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
 
     private TableColumn<LogRecord, IconDescriptor> levelColumn() {
         final TableColumn<LogRecord, IconDescriptor> col = new TableColumn<>();
-        col.setGraphic(FontIcons.glyphIcon(FontIcon.F_SHIELD));
+        col.setText("☼");
         col.setCellValueFactory(param -> new SimpleObjectProperty<>(icon(param.getValue().getLevel())));
         col.setStyle("-fx-alignment: center;");
         col.setCellFactory(c -> new TableCell<LogRecord, IconDescriptor>() {

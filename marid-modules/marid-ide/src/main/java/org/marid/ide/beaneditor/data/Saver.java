@@ -59,11 +59,8 @@ public class Saver {
         final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         final Document document = documentBuilder.newDocument();
         final Element beansElement = document.createElement("beans");
-        beansElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:context", xsdPath("context"));
-        beansElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:util", xsdPath("util"));
         beansElement.setAttribute("xmlns", xsdPath("beans"));
         document.appendChild(beansElement);
-        beansElement.appendChild(document.createElementNS(xsdPath("context"), "context:annotation-config"));
         save(document, pathItem, beansElement);
         final TransformerFactory transformerFactory = TransformerFactory.newInstance();
         final Transformer transformer = transformerFactory.newTransformer();
