@@ -20,7 +20,7 @@ package org.marid.ide.settings;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import org.marid.Ide;
+import org.marid.IdeDependants;
 import org.marid.dependant.settings.SettingsDialog;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.toolbar.IdeToolbarItem;
@@ -40,7 +40,7 @@ public class SettingsManager {
     @IdeMenuItem(menu = "Tools", text = "Settings...", group = "settings", icon = O_SETTINGS)
     public EventHandler<ActionEvent> settingsItem() {
         return event -> {
-            final SettingsDialog settingsDialog = Ide.newDialog(SettingsDialog.class);
+            final SettingsDialog settingsDialog = IdeDependants.newDialog(SettingsDialog.class);
             settingsDialog.showAndWait();
         };
     }

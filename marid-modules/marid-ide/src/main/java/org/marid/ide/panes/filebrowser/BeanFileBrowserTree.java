@@ -18,15 +18,22 @@
 
 package org.marid.ide.panes.filebrowser;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
+import javafx.event.ActionEvent;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import org.marid.ide.project.ProjectManager;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
 import org.marid.spring.xml.data.BeanFile;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -34,6 +41,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.marid.jfx.icons.FontIcon.D_FILE;
@@ -47,29 +55,33 @@ import static org.marid.misc.Builder.build;
 @Component
 public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupport {
 
-    final ProjectManager projectManager;
-    final MapChangeListener<Path, BeanFile> filesChangeListener = change -> {
-        if (change.wasAdded()) {
-            add(change.getKey());
-        }
-        if (change.wasRemoved()) {
-            remove(change.getKey());
-        }
-    };
+    final ObservableValue<ProjectProfile> projectProfileObservableValue;
 
+    @Autowired
     public BeanFileBrowserTree(ProjectManager projectManager) {
-        super(new TreeItem<>(projectManager.getProfile().getBeansDirectory(), glyphIcon(D_FOLDER, 16)));
-        setShowRoot(false);
+        this(projectManager.profileProperty());
+    }
+
+    protected BeanFileBrowserTree(ObservableValue<ProjectProfile> projectProfileObservableValue) {
+        super(new TreeItem<>(projectProfileObservableValue.getValue().getBeansDirectory(), glyphIcon(D_FOLDER, 16)));
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
-        this.projectManager = projectManager;
-        this.projectManager.profileProperty().addListener((observable, oldValue, newValue) -> {
+        this.projectProfileObservableValue = projectProfileObservableValue;
+        final MapChangeListener<Path, BeanFile> filesChangeListener = change -> {
+            if (change.wasAdded()) {
+                add(change.getKey());
+            }
+            if (change.wasRemoved()) {
+                remove(change.getKey());
+            }
+        };
+        projectProfileObservableValue.addListener((observable, oldValue, newValue) -> {
             oldValue.getBeanFiles().removeListener(filesChangeListener);
             newValue.getBeanFiles().addListener(filesChangeListener);
             setRoot(new TreeItem<>(newValue.getBeansDirectory(), glyphIcon(D_FOLDER, 16)));
             newValue.getBeanFiles().keySet().forEach(this::add);
         });
-        projectManager.getProfile().getBeanFiles().keySet().forEach(this::add);
+        projectProfileObservableValue.getValue().getBeanFiles().keySet().forEach(this::add);
         getColumns().add(build(new TreeTableColumn<Path, String>(), col -> {
             col.setText(s("File"));
             col.setPrefWidth(600);
@@ -86,7 +98,7 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
                 try {
                     return new SimpleObjectProperty<>(Files.getLastModifiedTime(path));
                 } catch (IOException x) {
-                    return new SimpleObjectProperty<>(FileTime.fromMillis(0L));
+                    return null;
                 }
             });
         }));
@@ -97,7 +109,7 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
             col.setStyle("-fx-alignment: baseline-right");
             col.setCellValueFactory(param -> {
                 final Path path = param.getValue().getValue();
-                return new SimpleObjectProperty<>(projectManager.getProfile().getBeanFiles().entrySet().stream()
+                return new SimpleObjectProperty<>(projectProfileObservableValue.getValue().getBeanFiles().entrySet().stream()
                         .filter(e -> e.getKey().startsWith(path))
                         .mapToInt(e -> e.getValue().beans.size())
                         .sum());
@@ -107,7 +119,7 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
     }
 
     private void add(Path path) {
-        final Path base = projectManager.getProfile().getBeansDirectory();
+        final Path base = projectProfileObservableValue.getValue().getBeansDirectory();
         if (!path.startsWith(base)) {
             return;
         }
@@ -131,7 +143,7 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
     }
 
     private void remove(Path path) {
-        final Path base = projectManager.getProfile().getBeansDirectory();
+        final Path base = projectProfileObservableValue.getValue().getBeansDirectory();
         if (!path.startsWith(base)) {
             return;
         }
@@ -151,6 +163,49 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
         }
         if (itemRef.get() != null) {
             itemRef.get().getParent().getChildren().remove(itemRef.get());
+        }
+    }
+
+    public void onFileAddEventHandler(ActionEvent event) {
+        final TextInputDialog dialog = new TextInputDialog("file");
+        dialog.setTitle(s("New file"));
+        dialog.setHeaderText(s("Enter file name") + ":");
+        final Optional<String> value = dialog.showAndWait();
+        if (value.isPresent()) {
+            final String name = value.get().endsWith(".xml") ? value.get() : value.get() + ".xml";
+            final TreeItem<Path> item = getSelectionModel().getSelectedItem();
+            final Path path = item.getValue().resolve(name);
+            projectProfileObservableValue.getValue().getBeanFiles().put(path, new BeanFile());
+            final TreeItem<Path> newItem = new TreeItem<>(path, glyphIcon(D_FILE));
+            item.getChildren().add(newItem);
+            item.setExpanded(true);
+        }
+    }
+
+    public BooleanBinding fileAddDisabled() {
+        return Bindings.createBooleanBinding(() -> {
+            final TreeItem<Path> item = getSelectionModel().getSelectedItem();
+            if (item == null) {
+                return true;
+            }
+            if (item.getValue().getFileName().toString().endsWith(".xml")) {
+                return true;
+            }
+            return false;
+        }, getSelectionModel().selectedItemProperty());
+    }
+
+    public void onDirAddEventHandler(ActionEvent event) {
+        final TextInputDialog dialog = new TextInputDialog("directory");
+        dialog.setTitle(s("New directory"));
+        dialog.setHeaderText(s("Enter directory name") + ":");
+        final Optional<String> value = dialog.showAndWait();
+        if (value.isPresent()) {
+            final TreeItem<Path> item = getSelectionModel().getSelectedItem();
+            final Path path = item.getValue().resolve(value.get());
+            final TreeItem<Path> newItem = new TreeItem<>(path, glyphIcon(D_FILE));
+            item.getChildren().add(newItem);
+            item.setExpanded(true);
         }
     }
 }

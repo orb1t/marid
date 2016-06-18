@@ -20,11 +20,8 @@ package org.marid;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.Dialog;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import javafx.stage.Window;
-import javafx.stage.WindowEvent;
 import org.jboss.logmanager.LogManager;
 import org.marid.ide.logging.IdeConsoleLogHandler;
 import org.marid.ide.logging.IdeLogHandler;
@@ -116,35 +113,5 @@ public class Ide extends Application {
         }
         new UrlConnection(null, null).setDefaultUseCaches(false);
         launch(Ide.class, args);
-    }
-
-    static AnnotationConfigApplicationContext child(Class<?> type) {
-        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        context.setDisplayName(type.getName());
-        context.setParent(Ide.context);
-        context.scan(type.getPackage().getName());
-        context.refresh();
-        context.start();
-        return context;
-    }
-
-    static void closeContext(boolean showing, AnnotationConfigApplicationContext context) {
-        if (!showing) {
-            context.close();
-        }
-    }
-
-    public static <T extends Window> T newWindow(Class<T> type) {
-        final AnnotationConfigApplicationContext context = child(type);
-        final T window = context.getBean(type);
-        window.addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> closeContext(false, context));
-        return window;
-    }
-
-    public static <T extends Dialog<?>> T newDialog(Class<T> type) {
-        final AnnotationConfigApplicationContext context = child(type);
-        final T dialog = context.getBean(type);
-        dialog.showingProperty().addListener((observable, oldValue, newValue) -> closeContext(newValue, context));
-        return dialog;
     }
 }

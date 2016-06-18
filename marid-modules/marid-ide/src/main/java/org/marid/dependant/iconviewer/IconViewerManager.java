@@ -20,7 +20,7 @@ package org.marid.dependant.iconviewer;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import org.marid.Ide;
+import org.marid.IdeDependants;
 import org.marid.ide.menu.IdeMenuItem;
 
 import static org.marid.jfx.icons.FontIcon.D_IMAGE_ALBUM;
@@ -33,7 +33,7 @@ public class IconViewerManager {
     @IdeMenuItem(menu = "Icons", text = "Open viewer...", group = "icons", icon = D_IMAGE_ALBUM)
     public EventHandler<ActionEvent> showViewer() {
         return event -> {
-            final IconViewer iconViewer = Ide.newWindow(IconViewer.class);
+            final IconViewer iconViewer = IdeDependants.newWindow(IconViewer.class);
             iconViewer.show();
         };
     }

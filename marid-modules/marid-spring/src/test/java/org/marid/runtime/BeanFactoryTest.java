@@ -16,30 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.dependants;
+package org.marid.runtime;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import org.marid.IdeDependants;
-import org.marid.dependant.iconviewer.IconViewer;
-import org.marid.ide.menu.IdeMenuItem;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import static org.marid.jfx.icons.FontIcon.M_OPEN_IN_BROWSER;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.marid.test.NormalTests;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
-public class DependantsManager {
+@Category({NormalTests.class})
+public class BeanFactoryTest {
 
-    @Bean
-    @IdeMenuItem(menu = "Tools", text = "Icon viewer...", group = "icons", icon = M_OPEN_IN_BROWSER)
-    public EventHandler<ActionEvent> iconViewer() {
-        return event -> {
-            final IconViewer editor = IdeDependants.newWindow(IconViewer.class);
-            editor.show();
-        };
+    @Test
+    public void test() {
+
     }
 }

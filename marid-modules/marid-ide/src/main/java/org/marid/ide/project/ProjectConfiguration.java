@@ -23,7 +23,7 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
-import org.marid.Ide;
+import org.marid.IdeDependants;
 import org.marid.dependant.project.config.ProjectDialog;
 import org.marid.dependant.project.runner.ProjectRunner;
 import org.marid.ide.menu.IdeMenuItem;
@@ -64,7 +64,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     @IdeToolbarItem(group = "projectSetup")
     public EventHandler<ActionEvent> projectSetup() {
         return event -> {
-            final ProjectDialog editor = Ide.newDialog(ProjectDialog.class);
+            final ProjectDialog editor = IdeDependants.newDialog(ProjectDialog.class);
             editor.showAndWait();
         };
     }
@@ -99,7 +99,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     @IdeToolbarItem(group = "projectBuild")
     public EventHandler<ActionEvent> projectRun() {
         return event -> {
-            final ProjectRunner projectRunner = Ide.newWindow(ProjectRunner.class);
+            final ProjectRunner projectRunner = IdeDependants.newWindow(ProjectRunner.class);
             projectRunner.show();
         };
     }
