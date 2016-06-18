@@ -25,9 +25,9 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.marid.ide.project.data.BeanFileLoader;
 import org.marid.logging.LogSupport;
 import org.marid.misc.Calls;
+import org.marid.spring.xml.MaridBeanDefinitionLoader;
 import org.marid.spring.xml.data.BeanFile;
 
 import javax.annotation.Nonnull;
@@ -71,7 +71,7 @@ public class ProjectProfile implements LogSupport {
     private final Logger logger;
     private final ObservableMap<Path, BeanFile> beanFiles;
 
-    ProjectProfile(String name, BeanFileLoader beanFileLoader) {
+    ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
         pomFile = path.resolve("pom.xml");
         src = path.resolve("src");
@@ -88,7 +88,7 @@ public class ProjectProfile implements LogSupport {
         model = loadModel();
         model.setModelVersion("4.0.0");
         createFileStructure();
-        beanFiles = loadBeanFiles(beanFileLoader);
+        beanFiles = loadBeanFiles();
     }
 
     private Model loadModel() {
@@ -105,12 +105,12 @@ public class ProjectProfile implements LogSupport {
         return new Model();
     }
 
-    private ObservableMap<Path, BeanFile> loadBeanFiles(BeanFileLoader beanFileLoader) {
+    private ObservableMap<Path, BeanFile> loadBeanFiles() {
         try (final Stream<Path> stream = Files.walk(beansDirectory)) {
             return stream.filter(p -> p.getFileName().toString().endsWith(".xml"))
                     .collect(Collectors.toMap(p -> p, p -> {
                         try {
-                            return beanFileLoader.load(p, this);
+                            return MaridBeanDefinitionLoader.load(p);
                         } catch (Exception x) {
                             log(WARNING, "Unable to load {0}", x, p);
                             return new BeanFile();

@@ -24,12 +24,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.marid.ide.project.data.BeanFileLoader;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.nio.file.Files;
@@ -42,19 +40,16 @@ import static java.util.Collections.binarySearch;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
+@Component
 public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
 
-    private final BeanFileLoader beanFileLoader;
     private final ObjectProperty<ProjectProfile> profile = new SimpleObjectProperty<>();
     private final ObservableList<ProjectProfile> profiles = FXCollections.observableArrayList();
 
-    @Autowired
-    public ProjectManager(BeanFileLoader beanFileLoader) {
-        this.beanFileLoader = beanFileLoader;
-        profile.set(new ProjectProfile(getPref("profile", "default"), beanFileLoader));
+    public ProjectManager() {
+        profile.set(new ProjectProfile(getPref("profile", "default")));
         if (!isPresent()) {
-            profile.set(new ProjectProfile("default", beanFileLoader));
+            profile.set(new ProjectProfile("default"));
         }
         profiles.add(profile.get());
         final Path profilesDir = getProfile().getPath().getParent();
@@ -62,7 +57,7 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
             stream
                     .filter(p -> Files.isDirectory(p) && !profilesDir.equals(p))
                     .filter(p -> !p.getFileName().toString().equals(profile.get().getName()))
-                    .map(p -> new ProjectProfile(p.getFileName().toString(), beanFileLoader))
+                    .map(p -> new ProjectProfile(p.getFileName().toString()))
                     .forEach(profiles::add);
         } catch (Exception x) {
             log(WARNING, "Unable to enumerate profiles", x);
@@ -95,7 +90,7 @@ public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
         final ProjectProfile profile = profiles.stream()
                 .filter(p -> name.equals(p.getName()))
                 .findFirst()
-                .orElseGet(() -> new ProjectProfile(name, beanFileLoader));
+                .orElseGet(() -> new ProjectProfile(name));
         if (profiles.contains(profile)) {
             return profile;
         }

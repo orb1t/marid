@@ -50,12 +50,12 @@ import static org.marid.util.Utils.callWithTime;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-public class ProjectMenuManager implements LogSupport, L10nSupport {
+public class ProjectConfiguration implements LogSupport, L10nSupport {
 
     private final ProjectManager projectManager;
 
     @Autowired
-    public ProjectMenuManager(ProjectManager projectManager) {
+    public ProjectConfiguration(ProjectManager projectManager) {
         this.projectManager = projectManager;
     }
 

@@ -20,6 +20,8 @@ package org.marid.spring.xml.data;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -33,4 +35,7 @@ public class BeanData extends AbstractData<BeanData> {
     public final StringProperty factoryBean = new SimpleStringProperty(this, "factory-bean");
     public final StringProperty factoryMethod = new SimpleStringProperty(this, "factory-method");
     public final StringProperty lazyInit = new SimpleStringProperty(this, "lazy-init");
+
+    public final ObservableList<ConstructorArg> constructorArgs = FXCollections.observableArrayList();
+    public final ObservableList<Property> properties = FXCollections.observableArrayList();
 }

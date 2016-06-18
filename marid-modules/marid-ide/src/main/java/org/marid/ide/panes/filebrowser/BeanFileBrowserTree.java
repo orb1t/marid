@@ -29,9 +29,11 @@ import org.marid.l10n.L10nSupport;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.marid.jfx.icons.FontIcon.D_FILE;
@@ -70,21 +72,35 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
         projectManager.getProfile().getBeanFiles().keySet().forEach(this::add);
         getColumns().add(build(new TreeTableColumn<Path, String>(), col -> {
             col.setText(s("File"));
-            col.setMinWidth(500);
             col.setPrefWidth(600);
             col.setMaxWidth(2000);
             col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getValue().getFileName().toString()));
         }));
-        getColumns().add(build(new TreeTableColumn<Path, Integer>(), col -> {
-            col.setText(s("Bean count"));
-            col.setMinWidth(200);
+        getColumns().add(build(new TreeTableColumn<Path, FileTime>(), col -> {
+            col.setText(s("Date"));
             col.setPrefWidth(250);
             col.setMaxWidth(300);
             col.setStyle("-fx-alignment: baseline-right");
-            col.setCellValueFactory(param ->  {
-                final Map<Path, BeanFile> map = projectManager.getProfile().getBeanFiles();
-                final BeanFile beanFile = map.getOrDefault(param.getValue().getValue(), new BeanFile());
-                return new SimpleObjectProperty<>(beanFile.beans.size());
+            col.setCellValueFactory(param -> {
+                final Path path = param.getValue().getValue();
+                try {
+                    return new SimpleObjectProperty<>(Files.getLastModifiedTime(path));
+                } catch (IOException x) {
+                    return new SimpleObjectProperty<>(FileTime.fromMillis(0L));
+                }
+            });
+        }));
+        getColumns().add(build(new TreeTableColumn<Path, Integer>(), col -> {
+            col.setText(s("Bean count"));
+            col.setPrefWidth(250);
+            col.setMaxWidth(250);
+            col.setStyle("-fx-alignment: baseline-right");
+            col.setCellValueFactory(param -> {
+                final Path path = param.getValue().getValue();
+                return new SimpleObjectProperty<>(projectManager.getProfile().getBeanFiles().entrySet().stream()
+                        .filter(e -> e.getKey().startsWith(path))
+                        .mapToInt(e -> e.getValue().beans.size())
+                        .sum());
             });
         }));
         setTreeColumn(getColumns().get(0));
