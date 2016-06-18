@@ -28,6 +28,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.logging.LogSupport;
 import org.marid.misc.Calls;
 import org.marid.spring.xml.MaridBeanDefinitionLoader;
+import org.marid.spring.xml.MaridBeanDefinitionSaver;
 import org.marid.spring.xml.data.BeanFile;
 
 import javax.annotation.Nonnull;
@@ -43,6 +44,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -204,9 +206,27 @@ public class ProjectProfile implements LogSupport {
         }
     }
 
+    private void saveBeanFiles() {
+        try {
+            FileUtils.cleanDirectory(getBeansDirectory().toFile());
+        } catch (IOException x) {
+            log(WARNING, "Unable to clean beans directory", x);
+            return;
+        }
+        for (final Map.Entry<Path, BeanFile> entry : beanFiles.entrySet()) {
+            try {
+                Files.createDirectories(entry.getKey().getParent());
+                MaridBeanDefinitionSaver.write(entry.getKey(), entry.getValue());
+            } catch (Exception x) {
+                log(WARNING, "Unable to save {0}", x, entry.getKey());
+            }
+        }
+    }
+
     public void save() {
         createFileStructure();
         savePomFile();
+        saveBeanFiles();
     }
     
     public void delete() {

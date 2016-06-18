@@ -25,10 +25,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
 import javafx.event.ActionEvent;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
+import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
@@ -166,7 +164,7 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
         }
     }
 
-    public void onFileAddEventHandler(ActionEvent event) {
+    public void onFileAdd(ActionEvent event) {
         final TextInputDialog dialog = new TextInputDialog("file");
         dialog.setTitle(s("New file"));
         dialog.setHeaderText(s("Enter file name") + ":");
@@ -195,17 +193,55 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
         }, getSelectionModel().selectedItemProperty());
     }
 
-    public void onDirAddEventHandler(ActionEvent event) {
+    public void onDirAdd(ActionEvent event) {
         final TextInputDialog dialog = new TextInputDialog("directory");
         dialog.setTitle(s("New directory"));
         dialog.setHeaderText(s("Enter directory name") + ":");
         final Optional<String> value = dialog.showAndWait();
         if (value.isPresent()) {
-            final TreeItem<Path> item = getSelectionModel().getSelectedItem();
-            final Path path = item.getValue().resolve(value.get());
-            final TreeItem<Path> newItem = new TreeItem<>(path, glyphIcon(D_FILE));
-            item.getChildren().add(newItem);
-            item.setExpanded(true);
+            if (value.get().endsWith(".xml")) {
+                final Alert alert = new Alert(AlertType.ERROR, m("Directory ends with .xml"), ButtonType.CLOSE);
+                alert.setHeaderText(m("Directory creation error"));
+                alert.showAndWait();
+            } else {
+                final TreeItem<Path> item = getSelectionModel().getSelectedItem();
+                final Path path = item.getValue().resolve(value.get());
+                final TreeItem<Path> newItem = new TreeItem<>(path, glyphIcon(D_FILE));
+                item.getChildren().add(newItem);
+                item.setExpanded(true);
+            }
         }
+    }
+
+    public void onRename(ActionEvent event) {
+        final TreeItem<Path> item = getSelectionModel().getSelectedItem();
+        final Path path = item.getValue();
+        final boolean file = path.getFileName().toString().endsWith(".xml");
+        final String fileName = path.getFileName().toString();
+        final String defaultValue = file ? fileName : fileName.substring(0, fileName.length() - 4);
+        final TextInputDialog dialog = new TextInputDialog(defaultValue);
+        dialog.setTitle(file ? s("Rename file") : s("Rename directory"));
+        dialog.setHeaderText(file ? s("Enter a new file name") : s("Enter a new file name"));
+        final Optional<String> value = dialog.showAndWait();
+        if (value.isPresent()) {
+            if (file) {
+                item.setValue(path.getParent().resolve(value.get().endsWith(".xml") ? value.get() : value.get() + ".xml"));
+            } else {
+                if (value.get().endsWith(".xml")) {
+                    final Alert alert = new Alert(AlertType.ERROR, m("Directory ends with .xml"), ButtonType.CLOSE);
+                    alert.setHeaderText(m("Directory creation error"));
+                    alert.showAndWait();
+                } else {
+                    item.setValue(path.getParent().resolve(value.get()));
+                }
+            }
+        }
+    }
+
+    public BooleanBinding moveDisabled() {
+        return Bindings.createBooleanBinding(() -> {
+            final TreeItem<Path> item = getSelectionModel().getSelectedItem();
+            return item == null || item == getRoot();
+        }, getSelectionModel().selectedItemProperty());
     }
 }

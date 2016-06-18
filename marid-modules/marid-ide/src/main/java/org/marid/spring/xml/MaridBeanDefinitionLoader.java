@@ -41,19 +41,23 @@ import java.nio.file.Path;
  */
 public class MaridBeanDefinitionLoader {
 
-    public static BeanFile load(Path path) throws IOException, SAXException, ParserConfigurationException {
+    public static BeanFile load(Path path) throws IOException {
         try (final InputStream inputStream = Files.newInputStream(path)) {
             return load(inputStream);
         }
     }
 
-    public static BeanFile load(InputStream stream) throws IOException, SAXException, ParserConfigurationException {
+    public static BeanFile load(InputStream stream) throws IOException {
         final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setCoalescing(true);
         documentBuilderFactory.setNamespaceAware(true);
-        final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        final Document document = documentBuilder.parse(stream);
-        return new Loader(document).load();
+        try {
+            final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            final Document document = documentBuilder.parse(stream);
+            return new Loader(document).load();
+        } catch (SAXException | ParserConfigurationException x) {
+            throw new IOException(x);
+        }
     }
 
     private static class Loader {

@@ -40,11 +40,10 @@ public class BeanFileBrowserPane extends BorderPane implements L10nSupport {
     public BeanFileBrowserPane(BeanFileBrowserTree tree) {
         setCenter(ScrollPanes.scrollPane(this.tree = tree));
         setLeft(new ToolbarBuilder()
-                .add("Add file", M_ADD, tree::onFileAddEventHandler, b -> b.disableProperty().bind(tree.fileAddDisabled()))
-                .add("Add directory", M_FOLDER, tree::onDirAddEventHandler, b -> b.disableProperty().bind(tree.fileAddDisabled()))
+                .add("Add file", M_ADD, tree::onFileAdd, b -> b.disableProperty().bind(tree.fileAddDisabled()))
+                .add("Add directory", M_FOLDER, tree::onDirAdd, b -> b.disableProperty().bind(tree.fileAddDisabled()))
                 .addSeparator()
-                .add("Rename file/directory", O_DIFF_RENAMED, event -> {
-                })
+                .add("Rename file/directory", O_DIFF_RENAMED, tree::onRename, b -> b.disableProperty().bind(tree.moveDisabled()))
                 .addSeparator()
                 .add("Delete file/directory", O_TAG_REMOVE, event -> {
                 })
