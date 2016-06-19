@@ -262,11 +262,11 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
         final TreeItem<Path> item = getSelectionModel().getSelectedItem();
         final Path path = item.getValue();
         if (isFile(path)) {
-            remove(path);
+            getProfile().getBeanFiles().remove(path);
         } else {
             getProfile().getBeanFiles().keySet().forEach(p -> {
                 if (p.startsWith(path)) {
-                    remove(path);
+                    getProfile().getBeanFiles().remove(p);
                 }
             });
         }

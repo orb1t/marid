@@ -18,6 +18,7 @@
 
 package org.marid.ide.panes.filebrowser;
 
+import javafx.collections.MapChangeListener;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Tab;
 import org.marid.dependant.beaneditor.BeanEditor;
@@ -27,10 +28,12 @@ import org.marid.l10n.L10nSupport;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Provider;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Objects.requireNonNull;
 import static org.marid.IdeDependants.newNode;
@@ -55,12 +58,27 @@ public class BeanFileEditorLauncher implements L10nSupport {
         final ProjectProfile profile = tree.getProfile();
         final Path path = tree.getSelectionModel().getSelectedItem().getValue();
         final BeanFile beanFile = requireNonNull(profile.getBeanFiles().get(path));
+        final AtomicReference<Tab> tabRef = new AtomicReference<>();
+        final MapChangeListener<Path, BeanFile> beanFilesChangeListener = change -> {
+            if (change.wasRemoved()) {
+                if (path.equals(change.getKey()) && tabRef.get() != null) {
+                    ideTabPane.get().getTabs().remove(tabRef.get());
+                }
+            }
+        };
+        profile.getBeanFiles().addListener(beanFilesChangeListener);
         final BeanEditor beanEditor = newNode(BeanEditor.class, context -> {
+            context.addApplicationListener(event -> {
+                if (event instanceof ContextClosedEvent) {
+                    profile.getBeanFiles().removeListener(beanFilesChangeListener);
+                }
+            });
             final DefaultListableBeanFactory listableBeanFactory = context.getDefaultListableBeanFactory();
             listableBeanFactory.registerSingleton("beanFile", beanFile);
         });
         final Path relativePath = profile.getBeansDirectory().relativize(path);
         final Tab tab = new Tab(s("[%s]: %s", profile, relativePath), beanEditor);
+        tabRef.set(tab);
         final IdeTabPane tabPane = ideTabPane.get();
         tabPane.getTabs().add(tab);
         tabPane.getSelectionModel().select(tab);
