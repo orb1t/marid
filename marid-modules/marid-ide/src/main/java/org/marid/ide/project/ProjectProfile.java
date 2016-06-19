@@ -228,8 +228,7 @@ public class ProjectProfile implements LogSupport {
         savePomFile();
         saveBeanFiles();
     }
-    
-    public void delete() {
+    void delete() {
         try {
             FileUtils.deleteDirectory(path.toFile());
         } catch (Exception x) {

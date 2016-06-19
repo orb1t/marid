@@ -30,6 +30,7 @@ import javafx.scene.control.Alert.AlertType;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
+import org.marid.spring.xml.MaridBeanUtils;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,13 +40,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.util.stream.Collectors.toMap;
 import static org.marid.jfx.icons.FontIcon.D_FILE;
 import static org.marid.jfx.icons.FontIcon.D_FOLDER;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.misc.Builder.build;
+import static org.marid.spring.xml.MaridBeanUtils.isFile;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -62,9 +66,9 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
 
     protected BeanFileBrowserTree(ObservableValue<ProjectProfile> projectProfileObservableValue) {
         super(new TreeItem<>(projectProfileObservableValue.getValue().getBeansDirectory(), glyphIcon(D_FOLDER, 16)));
+        this.projectProfileObservableValue = projectProfileObservableValue;
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
-        this.projectProfileObservableValue = projectProfileObservableValue;
         final MapChangeListener<Path, BeanFile> filesChangeListener = change -> {
             if (change.wasAdded()) {
                 add(change.getKey());
@@ -79,7 +83,8 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
             setRoot(new TreeItem<>(newValue.getBeansDirectory(), glyphIcon(D_FOLDER, 16)));
             newValue.getBeanFiles().keySet().forEach(this::add);
         });
-        projectProfileObservableValue.getValue().getBeanFiles().keySet().forEach(this::add);
+        getProfile().getBeanFiles().addListener(filesChangeListener);
+        getProfile().getBeanFiles().keySet().forEach(this::add);
         getColumns().add(build(new TreeTableColumn<Path, String>(), col -> {
             col.setText(s("File"));
             col.setPrefWidth(600);
@@ -116,8 +121,12 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
         setTreeColumn(getColumns().get(0));
     }
 
+    public ProjectProfile getProfile() {
+        return projectProfileObservableValue.getValue();
+    }
+
     private void add(Path path) {
-        final Path base = projectProfileObservableValue.getValue().getBeansDirectory();
+        final Path base = getProfile().getBeansDirectory();
         if (!path.startsWith(base)) {
             return;
         }
@@ -131,7 +140,7 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
                     .filter(e -> e.getValue().equals(p))
                     .findAny()
                     .orElseGet(() -> {
-                        final TreeItem<Path> newItem = new TreeItem<>(p, glyphIcon(D_FILE, 16));
+                        final TreeItem<Path> newItem = new TreeItem<>(p, glyphIcon(isFile(p) ? D_FILE : D_FOLDER, 16));
                         itemRef.get().getChildren().add(newItem);
                         itemRef.get().getChildren().sort(Comparator.comparing(TreeItem::getValue));
                         itemRef.get().setExpanded(true);
@@ -141,7 +150,7 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
     }
 
     private void remove(Path path) {
-        final Path base = projectProfileObservableValue.getValue().getBeansDirectory();
+        final Path base = getProfile().getBeansDirectory();
         if (!path.startsWith(base)) {
             return;
         }
@@ -160,7 +169,13 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
             }
         }
         if (itemRef.get() != null) {
-            itemRef.get().getParent().getChildren().remove(itemRef.get());
+            final TreeItem<Path> parent = itemRef.get().getParent();
+            parent.getChildren().remove(itemRef.get());
+            for (TreeItem<Path> i = parent, p = i.getParent(); p != null; i = p, p = i.getParent()) {
+                if (i.getChildren().isEmpty()) {
+                    p.getChildren().remove(i);
+                }
+            }
         }
     }
 
@@ -173,10 +188,7 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
             final String name = value.get().endsWith(".xml") ? value.get() : value.get() + ".xml";
             final TreeItem<Path> item = getSelectionModel().getSelectedItem();
             final Path path = item.getValue().resolve(name);
-            projectProfileObservableValue.getValue().getBeanFiles().put(path, new BeanFile());
-            final TreeItem<Path> newItem = new TreeItem<>(path, glyphIcon(D_FILE));
-            item.getChildren().add(newItem);
-            item.setExpanded(true);
+            getProfile().getBeanFiles().put(path, new BeanFile());
         }
     }
 
@@ -206,7 +218,7 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
             } else {
                 final TreeItem<Path> item = getSelectionModel().getSelectedItem();
                 final Path path = item.getValue().resolve(value.get());
-                final TreeItem<Path> newItem = new TreeItem<>(path, glyphIcon(D_FILE));
+                final TreeItem<Path> newItem = new TreeItem<>(path, glyphIcon(D_FOLDER, 16));
                 item.getChildren().add(newItem);
                 item.setExpanded(true);
             }
@@ -216,25 +228,47 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
     public void onRename(ActionEvent event) {
         final TreeItem<Path> item = getSelectionModel().getSelectedItem();
         final Path path = item.getValue();
-        final boolean file = path.getFileName().toString().endsWith(".xml");
+        final boolean file = isFile(path);
         final String fileName = path.getFileName().toString();
-        final String defaultValue = file ? fileName : fileName.substring(0, fileName.length() - 4);
+        final String defaultValue = file ? fileName.substring(0, fileName.length() - 4) : fileName;
         final TextInputDialog dialog = new TextInputDialog(defaultValue);
         dialog.setTitle(file ? s("Rename file") : s("Rename directory"));
         dialog.setHeaderText(file ? s("Enter a new file name") : s("Enter a new file name"));
         final Optional<String> value = dialog.showAndWait();
         if (value.isPresent()) {
             if (file) {
-                item.setValue(path.getParent().resolve(value.get().endsWith(".xml") ? value.get() : value.get() + ".xml"));
+                final Path newPath = path.getParent().resolve(value.get().endsWith(".xml") ? value.get() : value.get() + ".xml");
+                final BeanFile beanFile = getProfile().getBeanFiles().remove(path);
+                getProfile().getBeanFiles().put(newPath, beanFile);
             } else {
                 if (value.get().endsWith(".xml")) {
                     final Alert alert = new Alert(AlertType.ERROR, m("Directory ends with .xml"), ButtonType.CLOSE);
                     alert.setHeaderText(m("Directory creation error"));
                     alert.showAndWait();
                 } else {
-                    item.setValue(path.getParent().resolve(value.get()));
+                    final Map<Path, BeanFile> relativeMap = getProfile().getBeanFiles().entrySet()
+                            .stream()
+                            .filter(e -> e.getKey().startsWith(path))
+                            .collect(toMap(e -> path.relativize(e.getKey()), Map.Entry::getValue));
+                    getProfile().getBeanFiles().keySet().removeIf(p -> p.startsWith(path));
+                    final Path newPath = path.getParent().resolve(value.get());
+                    relativeMap.forEach((p, beanFile) -> getProfile().getBeanFiles().put(newPath.resolve(p), beanFile));
                 }
             }
+        }
+    }
+
+    public void onDelete(ActionEvent event) {
+        final TreeItem<Path> item = getSelectionModel().getSelectedItem();
+        final Path path = item.getValue();
+        if (isFile(path)) {
+            remove(path);
+        } else {
+            getProfile().getBeanFiles().keySet().forEach(p -> {
+                if (p.startsWith(path)) {
+                    remove(path);
+                }
+            });
         }
     }
 
@@ -242,6 +276,13 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
         return Bindings.createBooleanBinding(() -> {
             final TreeItem<Path> item = getSelectionModel().getSelectedItem();
             return item == null || item == getRoot();
+        }, getSelectionModel().selectedItemProperty());
+    }
+
+    public BooleanBinding launchDisabled() {
+        return Bindings.createBooleanBinding(() -> {
+            final TreeItem<Path> item = getSelectionModel().getSelectedItem();
+            return item == null || !MaridBeanUtils.isFile(item.getValue());
         }, getSelectionModel().selectedItemProperty());
     }
 }

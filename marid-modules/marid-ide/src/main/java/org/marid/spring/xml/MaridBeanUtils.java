@@ -16,20 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.runtime;
+package org.marid.spring.xml;
 
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.marid.test.NormalTests;
+import java.nio.file.Path;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Category({NormalTests.class})
-public class BeanFactoryTest {
+public interface MaridBeanUtils {
 
-    @Test
-    public void test() {
-
+    static boolean isFile(Path path) {
+        return path.getFileName().toString().endsWith(".xml");
     }
 }

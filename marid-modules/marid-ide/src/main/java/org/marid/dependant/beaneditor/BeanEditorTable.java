@@ -16,28 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.tabs;
+package org.marid.dependant.beaneditor;
 
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import org.marid.l10n.L10nSupport;
+import javafx.scene.control.TableView;
+import org.marid.spring.xml.data.BeanData;
+import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-
-import static javafx.scene.control.TabPane.TabClosingPolicy.ALL_TABS;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeTabPane extends TabPane implements L10nSupport {
+public class BeanEditorTable extends TableView<BeanData> {
 
     @Autowired
-    public IdeTabPane(@Qualifier("ideTab") List<Tab> tabs) {
-        setTabClosingPolicy(ALL_TABS);
-        getTabs().addAll(tabs);
+    public BeanEditorTable(BeanFile beanFile) {
+        super(beanFile.beans);
     }
 }

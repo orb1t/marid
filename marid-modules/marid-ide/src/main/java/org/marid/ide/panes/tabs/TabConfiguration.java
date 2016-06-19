@@ -19,25 +19,36 @@
 package org.marid.ide.panes.tabs;
 
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import org.marid.ide.panes.filebrowser.BeanFileBrowserPane;
+import org.marid.ide.panes.logging.LoggingTable;
+import org.marid.jfx.ScrollPanes;
 import org.marid.l10n.L10nSupport;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-
-import static javafx.scene.control.TabPane.TabClosingPolicy.ALL_TABS;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class IdeTabPane extends TabPane implements L10nSupport {
+@Configuration
+public class TabConfiguration implements L10nSupport {
 
-    @Autowired
-    public IdeTabPane(@Qualifier("ideTab") List<Tab> tabs) {
-        setTabClosingPolicy(ALL_TABS);
-        getTabs().addAll(tabs);
+    @Bean
+    @Qualifier("ideTab")
+    @Order(1)
+    public Tab logTab(LoggingTable loggingTable) {
+        final Tab tab = new Tab(s("Log"), ScrollPanes.scrollPane(loggingTable));
+        tab.setClosable(false);
+        return tab;
+    }
+
+    @Bean
+    @Qualifier("ideTab")
+    @Order(2)
+    public Tab beanFilesTab(BeanFileBrowserPane beanFileBrowserPane) {
+        final Tab tab = new Tab(s("Bean files"), beanFileBrowserPane);
+        tab.setClosable(false);
+        return tab;
     }
 }
