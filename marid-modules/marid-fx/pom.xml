@@ -32,7 +32,7 @@
     <dependencies>
         <dependency>
             <groupId>org.marid</groupId>
-            <artifactId>marid-lib</artifactId>
+            <artifactId>marid-util</artifactId>
             <version>${project.version}</version>
         </dependency>
 

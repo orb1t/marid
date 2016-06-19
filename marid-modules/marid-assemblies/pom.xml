@@ -27,12 +27,5 @@
 
     <artifactId>marid-assemblies</artifactId>
     <packaging>jar</packaging>
-
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>marid-lib</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
+    
 </project>

@@ -16,14 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.util;
+package org.marid.misc;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.test.NormalTests;
 
 import static org.junit.Assert.assertEquals;
-import static org.marid.util.StringUtils.*;
+import static org.marid.misc.StringUtils.*;
 
 /**
  * @author Dmitry Ovchinnikov

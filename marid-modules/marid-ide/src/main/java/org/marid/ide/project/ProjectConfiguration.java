@@ -44,7 +44,7 @@ import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
 import static org.marid.jfx.icons.FontIcon.*;
-import static org.marid.util.Utils.callWithTime;
+import static org.marid.misc.Calls.callWithTime;
 
 /**
  * @author Dmitry Ovchinnikov

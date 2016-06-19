@@ -27,8 +27,8 @@ import org.marid.ide.logging.IdeConsoleLogHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.io.UrlConnection;
+import org.marid.misc.Props;
 import org.marid.pref.PrefUtils;
-import org.marid.util.Utils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -106,7 +106,7 @@ public class Ide extends Application {
             logger.addHandler(new IdeLogHandler());
             logger.addHandler(new IdeConsoleLogHandler());
         });
-        Utils.merge(System.getProperties(), "meta.properties", "ide.properties");
+        Props.merge(System.getProperties(), "meta.properties", "ide.properties");
         final String localeString = PREFERENCES.get("locale", "");
         if (!localeString.isEmpty()) {
             Locale.setDefault(Locale.forLanguageTag(localeString));

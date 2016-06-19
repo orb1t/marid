@@ -20,7 +20,7 @@ package org.marid.pref;
 
 import org.marid.function.SafeFunction;
 import org.marid.misc.Casts;
-import org.marid.util.StringUtils;
+import org.marid.misc.StringUtils;
 
 import java.io.File;
 import java.math.BigDecimal;
