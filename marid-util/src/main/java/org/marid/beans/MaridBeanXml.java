@@ -18,11 +18,17 @@
 
 package org.marid.beans;
 
+import org.marid.function.SafeFunction;
+
 import javax.lang.model.element.ElementKind;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.lang.reflect.Field;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -63,28 +69,9 @@ public class MaridBeanXml {
 
     @Override
     public String toString() {
-        final Map<String, Object> map = new LinkedHashMap<>();
-        if (type != null) {
-            map.put("type", type);
-        }
-        if (parent != null) {
-            map.put("parent", parent);
-        }
-        if (kind != null) {
-            map.put("kind", kind);
-        }
-        if (text != null) {
-            map.put("text", text);
-        }
-        if (icon != null) {
-            map.put("icon", icon);
-        }
-        if (help != null) {
-            map.put("help", help);
-        }
-        if (description != null) {
-            map.put("description", description);
-        }
-        return getClass().getSimpleName() + map;
+        return getClass().getSimpleName() + Stream.of(getClass().getFields())
+                .map((SafeFunction<Field, Entry<String, Object>>) f -> new SimpleImmutableEntry<>(f.getName(), f.get(this)))
+                .filter(e -> e.getValue() != null)
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (o1, o2) -> o2, TreeMap::new));
     }
 }

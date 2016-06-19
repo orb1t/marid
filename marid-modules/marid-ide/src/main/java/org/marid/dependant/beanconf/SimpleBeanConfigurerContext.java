@@ -16,12 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.beans.meta;
+package org.marid.dependant.beanconf;
+
+import org.marid.ide.project.ProjectProfile;
+import org.marid.spring.xml.data.BeanData;
+import org.marid.spring.xml.data.BeanFile;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.net.URLClassLoader;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface BeanIntrospector {
+@Component
+public class SimpleBeanConfigurerContext {
 
-    MetaBeanInfo[] getBeans(ClassLoader classLoader);
+    private final ProjectProfile profile;
+    private final BeanFile beanFile;
+    private final BeanData beanData;
+    private final URLClassLoader classLoader;
+
+    @Autowired
+    public SimpleBeanConfigurerContext(ProjectProfile profile, BeanFile beanFile, BeanData beanData) {
+        this.profile = profile;
+        this.beanFile = beanFile;
+        this.beanData = beanData;
+        this.classLoader = profile.classLoader();
+    }
 }
