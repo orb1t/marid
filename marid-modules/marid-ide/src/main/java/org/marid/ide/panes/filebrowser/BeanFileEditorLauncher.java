@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Objects.requireNonNull;
 import static org.marid.IdeDependants.newNode;
+import static org.marid.spring.util.TypedApplicationEventListener.listen;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -68,11 +69,7 @@ public class BeanFileEditorLauncher implements L10nSupport {
         };
         profile.getBeanFiles().addListener(beanFilesChangeListener);
         final BeanEditor beanEditor = newNode(BeanEditor.class, context -> {
-            context.addApplicationListener(event -> {
-                if (event instanceof ContextClosedEvent) {
-                    profile.getBeanFiles().removeListener(beanFilesChangeListener);
-                }
-            });
+            listen(context, ContextClosedEvent.class, event -> profile.getBeanFiles().removeListener(beanFilesChangeListener));
             final DefaultListableBeanFactory listableBeanFactory = context.getDefaultListableBeanFactory();
             listableBeanFactory.registerSingleton("beanFile", beanFile);
         });
