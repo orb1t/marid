@@ -21,12 +21,13 @@ package org.marid.spring.xml.data;
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.marid.util.Utils;
 
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+
+import static org.marid.misc.Casts.cast;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,11 +37,11 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Cloneab
     @Override
     public T clone() {
         try {
-            final T instance = Utils.cast(getClass().newInstance());
+            final T instance = cast(getClass().newInstance());
             for (final Field field : getClass().getFields()) {
                 if (javafx.beans.property.Property.class.isAssignableFrom(field.getType())) {
-                    final Property<Object> oldProp = Utils.cast(field.get(this));
-                    final Property<Object> newProp = Utils.cast(field.get(instance));
+                    final Property<Object> oldProp = cast(field.get(this));
+                    final Property<Object> newProp = cast(field.get(instance));
                     final Object oldValue = oldProp.getValue();
                     if (oldValue instanceof AbstractData<?>) {
                         newProp.setValue(((AbstractData<?>) oldValue).clone());
@@ -48,8 +49,8 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Cloneab
                         newProp.setValue(oldValue);
                     }
                 } else if (ObservableList.class.isAssignableFrom(field.getType())) {
-                    final List<Object> oldList = Utils.cast(field.get(this));
-                    final List<Object> newList = Utils.cast(field.get(instance));
+                    final List<Object> oldList = cast(field.get(this));
+                    final List<Object> newList = cast(field.get(instance));
                     for (final Object e : oldList) {
                         if (e instanceof AbstractData<?>) {
                             newList.add(((AbstractData<?>) e).clone());

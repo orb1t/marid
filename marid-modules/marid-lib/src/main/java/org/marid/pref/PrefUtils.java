@@ -18,7 +18,7 @@
 
 package org.marid.pref;
 
-import org.marid.util.Utils;
+import org.marid.misc.Casts;
 
 import java.util.prefs.Preferences;
 
@@ -58,7 +58,7 @@ public class PrefUtils {
     }
 
     public static <T> T getPref(Preferences preferences, String key, T def, String... nodes) {
-        return getPref(preferences, Utils.cast(def.getClass()), key, def, nodes);
+        return getPref(preferences, Casts.cast(def.getClass()), key, def, nodes);
     }
 
     public static <T> void putPref(Preferences preferences, Class<T> type, String key, T value, String... nodes) {
@@ -78,6 +78,6 @@ public class PrefUtils {
     }
 
     public static void putPref(Preferences preferences, String key, Object value, String... nodes) {
-        putPref(preferences, Utils.cast(value.getClass()), key, value, nodes);
+        putPref(preferences, Casts.cast(value.getClass()), key, value, nodes);
     }
 }

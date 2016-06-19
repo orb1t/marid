@@ -19,8 +19,8 @@
 package org.marid.pref;
 
 import org.marid.function.SafeFunction;
+import org.marid.misc.Casts;
 import org.marid.util.StringUtils;
-import org.marid.util.Utils;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -149,14 +149,14 @@ public abstract class PrefCodecs {
     }
 
     public static <T> PrefReader<T> getReader(Class<T> type) {
-        final PrefReader<T> reader = Utils.cast(READERS.get(type));
+        final PrefReader<T> reader = Casts.cast(READERS.get(type));
         if (reader != null) {
             return reader;
         } else if (type.isEnum()) {
-            final Class<Enum<?>> enumType = Utils.cast(type);
+            final Class<Enum<?>> enumType = Casts.cast(type);
             return stringReader(s -> {
-                final Object object = Enum.valueOf(Utils.cast(enumType), s);
-                return Utils.cast(object);
+                final Object object = Enum.valueOf(Casts.cast(enumType), s);
+                return Casts.cast(object);
             });
         } else {
             throw new IllegalArgumentException("Preference reader for " + type + " is not found");
@@ -164,7 +164,7 @@ public abstract class PrefCodecs {
     }
 
     public static <T> PrefWriter<T> getWriter(Class<T> type) {
-        final PrefWriter<T> writer = Utils.cast(WRITERS.get(type));
+        final PrefWriter<T> writer = Casts.cast(WRITERS.get(type));
         if (writer != null) {
             return writer;
         } else if (type.isEnum()) {

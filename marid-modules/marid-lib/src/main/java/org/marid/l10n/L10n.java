@@ -17,8 +17,6 @@
  */
 package org.marid.l10n;
 
-import org.marid.util.Utils;
-
 import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
@@ -55,31 +53,31 @@ public class L10n {
     };
 
     public static String s(Locale locale, String key, Object... ps) {
-        return s(getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL), key, ps);
+        return s(getBundle(STRS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL), key, ps);
     }
 
     public static void s(Locale locale, String key, Appendable out, Object... ps) {
-        s(getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL), out, key, ps);
+        s(getBundle(STRS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL), out, key, ps);
     }
 
     public static void s(Locale locale, String key, Formatter formatter, Object... ps) {
-        s(getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL), formatter, key, ps);
+        s(getBundle(STRS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL), formatter, key, ps);
     }
 
     public static String m(Locale locale, String k, Object... v) {
-        return m(getBundle(MSGS, locale, Utils.currentClassLoader(), UTF8_CONTROL), k, v);
+        return m(getBundle(MSGS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL), k, v);
     }
 
     public static void m(Locale locale, String k, StringBuffer buffer, Object... v) {
-        m(getBundle(MSGS, locale, Utils.currentClassLoader(), UTF8_CONTROL), buffer, k, v);
+        m(getBundle(MSGS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL), buffer, k, v);
     }
 
     public static ResourceBundle getMessagesBundle(Locale locale) {
-        return getBundle(MSGS, locale, Utils.currentClassLoader(), UTF8_CONTROL);
+        return getBundle(MSGS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL);
     }
 
     public static ResourceBundle getStringsBundle(Locale locale) {
-        return getBundle(STRS, locale, Utils.currentClassLoader(), UTF8_CONTROL);
+        return getBundle(STRS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL);
     }
 
     private static void m(ResourceBundle b, StringBuffer buf, String key, Object... v) {

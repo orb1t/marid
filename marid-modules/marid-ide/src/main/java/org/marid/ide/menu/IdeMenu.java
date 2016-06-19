@@ -29,8 +29,8 @@ import javafx.stage.WindowEvent;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
+import org.marid.misc.Casts;
 import org.marid.spring.AnnotatedBean;
-import org.marid.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
@@ -62,7 +62,7 @@ public class IdeMenu extends MenuBar implements L10nSupport, LogSupport {
                                 menuItem = (MenuItem) bean.object;
                             } else if (bean.object instanceof EventHandler) {
                                 menuItem = mi.type().createItem(s(text), icon);
-                                menuItem.setOnAction(Utils.cast(bean.object));
+                                menuItem.setOnAction(Casts.cast(bean.object));
                             } else {
                                 return;
                             }

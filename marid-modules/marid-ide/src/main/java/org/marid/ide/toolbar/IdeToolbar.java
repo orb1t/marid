@@ -26,8 +26,8 @@ import javafx.stage.WindowEvent;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.logging.LogSupport;
+import org.marid.misc.Casts;
 import org.marid.spring.AnnotatedBean;
-import org.marid.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
@@ -71,7 +71,7 @@ public class IdeToolbar extends ToolBar implements LogSupport {
                             node = (Node) bean.object;
                         } else if (bean.object instanceof EventHandler) {
                             final Button button = new Button(null, icon);
-                            button.setOnAction(Utils.cast(bean.object));
+                            button.setOnAction(Casts.cast(bean.object));
                             node = button;
                         } else {
                             return;

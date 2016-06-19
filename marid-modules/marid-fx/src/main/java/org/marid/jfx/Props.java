@@ -29,7 +29,7 @@ import javafx.beans.property.adapter.JavaBeanStringPropertyBuilder;
 import org.marid.jfx.props.BooleanPropertyHolder;
 import org.marid.jfx.props.PropertyHolder;
 import org.marid.jfx.props.StringPropertyHolder;
-import org.marid.util.Utils;
+import org.marid.misc.Casts;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -88,7 +88,7 @@ public class Props {
 
     public static <T> Property<T> property(Supplier<T> supplier, Consumer<T> consumer) {
         try {
-            return Utils.cast(JavaBeanObjectPropertyBuilder.create()
+            return Casts.cast(JavaBeanObjectPropertyBuilder.create()
                     .bean(new PropertyHolder<>(supplier, consumer))
                     .name("property")
                     .build());
