@@ -35,6 +35,8 @@
         <module>marid-ide</module>
         <module>marid-fx</module>
         <module>marid-spring</module>
+        <module>marid-runtime</module>
+        <module>marid-hmi</module>
     </modules>
 
     <dependencies>
