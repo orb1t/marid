@@ -18,30 +18,49 @@
 
 package org.marid.dependant.beanconf;
 
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import org.marid.dependant.beanconf.editors.RefValueListEditor;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.l10n.L10nSupport;
 import org.marid.spring.xml.data.BeanData;
-import org.marid.spring.xml.data.BeanFile;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.marid.spring.xml.data.ConstructorArg;
+import org.marid.spring.xml.data.Property;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import java.net.URLClassLoader;
+import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
+import static org.marid.jfx.ScrollPanes.scrollPane;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class SimpleBeanConfigurerContext {
+@Configuration
+public class SimpleBeanConfigurerContext implements L10nSupport {
 
-    private final ProjectProfile profile;
-    private final BeanFile beanFile;
-    private final BeanData beanData;
-    private final URLClassLoader classLoader;
+    @Bean
+    public RefValueListEditor<ConstructorArg> constructorArgEditor(ProjectProfile profile,
+                                                                   ApplicationEventPublisher eventPublisher,
+                                                                   BeanData beanData) {
+        return new RefValueListEditor<>(profile, eventPublisher, beanData.constructorArgs);
+    }
 
-    @Autowired
-    public SimpleBeanConfigurerContext(ProjectProfile profile, BeanFile beanFile, BeanData beanData) {
-        this.profile = profile;
-        this.beanFile = beanFile;
-        this.beanData = beanData;
-        this.classLoader = profile.classLoader();
+    @Bean
+    public RefValueListEditor<Property> propertyEditor(ProjectProfile profile,
+                                                       ApplicationEventPublisher eventPublisher,
+                                                       BeanData beanData) {
+        return new RefValueListEditor<>(profile, eventPublisher, beanData.properties);
+    }
+
+    @Bean
+    public TabPane tabPane(RefValueListEditor<ConstructorArg> constructorArgEditor,
+                           RefValueListEditor<Property> propertyEditor) {
+        final TabPane tabPane = new TabPane(
+                new Tab(s("Constructor arguments"), scrollPane(constructorArgEditor)),
+                new Tab(s("Properties"), scrollPane(propertyEditor))
+        );
+        tabPane.setTabClosingPolicy(UNAVAILABLE);
+        return tabPane;
     }
 }

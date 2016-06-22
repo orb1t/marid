@@ -26,6 +26,9 @@ import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.settings.AbstractSettings;
 import org.marid.l10n.L10nSupport;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
@@ -41,8 +44,9 @@ import static java.util.stream.Collectors.toMap;
 public class SettingsDialog extends Dialog<ButtonType> implements L10nSupport {
 
     @Autowired
-    public SettingsDialog(IdePane idePane, List<SettingsEditor> editors) {
+    public SettingsDialog(IdePane idePane, List<SettingsEditor> editors, AnnotationConfigApplicationContext context) {
         final DialogPane dialogPane = getDialogPane();
+        setOnHidden(event -> context.close());
         dialogPane.setPrefSize(800, 600);
         dialogPane.setContent(tabPane(editors));
         dialogPane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.APPLY);
@@ -61,6 +65,11 @@ public class SettingsDialog extends Dialog<ButtonType> implements L10nSupport {
                     return param;
             }
         });
+    }
+
+    @EventListener
+    private void onStart(ContextStartedEvent event) {
+        showAndWait();
     }
 
     private TabPane tabPane(List<SettingsEditor> settingsEditors) {

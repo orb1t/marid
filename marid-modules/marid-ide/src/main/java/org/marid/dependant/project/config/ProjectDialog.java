@@ -28,6 +28,8 @@ import org.marid.ide.project.ProjectManager;
 import org.marid.l10n.L10nSupport;
 import org.marid.pref.PrefSupport;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.ScrollPanes.scrollPane;
@@ -50,6 +52,11 @@ public class ProjectDialog extends Dialog<Boolean> implements PrefSupport, L10nS
         initOwner(idePane.getScene().getWindow());
         setResizable(true);
         setResultConverter(type -> true);
+    }
+
+    @EventListener
+    private void onStart(ContextStartedEvent event) {
+        showAndWait();
     }
 
     private TabPane tabPane(Model model) {

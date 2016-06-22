@@ -16,27 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.dependants;
+package org.marid.ide.project.event;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import org.marid.dependant.iconviewer.IconViewerConfiguration;
-import org.marid.ide.menu.IdeMenuItem;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import static org.marid.IdeDependants.startDependant;
-import static org.marid.jfx.icons.FontIcon.M_OPEN_IN_BROWSER;
+import org.marid.ide.project.ProjectProfile;
+import org.springframework.context.ApplicationEvent;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
-public class DependantsManager {
+public class BeanNameChangedEvent extends ApplicationEvent {
 
-    @Bean
-    @IdeMenuItem(menu = "Tools", text = "Icon viewer...", group = "icons", icon = M_OPEN_IN_BROWSER)
-    public EventHandler<ActionEvent> iconViewer() {
-        return event -> startDependant("iconViewer", IconViewerConfiguration.class.getPackage());
+    private final String oldBeanName;
+    private final String newBeanName;
+
+    public BeanNameChangedEvent(ProjectProfile source, String oldBeanName, String newBeanName) {
+        super(source);
+        this.oldBeanName = oldBeanName;
+        this.newBeanName = newBeanName;
+    }
+
+    @Override
+    public ProjectProfile getSource() {
+        return (ProjectProfile) super.getSource();
+    }
+
+    public String getOldBeanName() {
+        return oldBeanName;
+    }
+
+    public String getNewBeanName() {
+        return newBeanName;
     }
 }

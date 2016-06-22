@@ -18,6 +18,8 @@
 
 package org.marid.ide.project;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import org.apache.maven.model.Model;
@@ -43,8 +45,10 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,7 +59,7 @@ import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProjectProfile implements LogSupport {
+public class ProjectProfile implements Observable, LogSupport {
 
     private final Model model;
     private final Path path;
@@ -72,6 +76,10 @@ public class ProjectProfile implements LogSupport {
     private final Path repository;
     private final Logger logger;
     private final ObservableMap<Path, BeanFile> beanFiles;
+    private final Map<String, Class<?>> classMap = new HashMap<>();
+    private final List<InvalidationListener> invalidationListeners = new CopyOnWriteArrayList<>();
+
+    private URLClassLoader classLoader;
 
     ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -91,6 +99,7 @@ public class ProjectProfile implements LogSupport {
         model.setModelVersion("4.0.0");
         createFileStructure();
         beanFiles = loadBeanFiles();
+        updateCache();
     }
 
     private Model loadModel() {
@@ -124,6 +133,16 @@ public class ProjectProfile implements LogSupport {
             log(SEVERE, "Unknown error", x);
         }
         return FXCollections.observableHashMap();
+    }
+
+    @Override
+    public void addListener(InvalidationListener invalidationListener) {
+        invalidationListeners.add(invalidationListener);
+    }
+
+    @Override
+    public void removeListener(InvalidationListener invalidationListener) {
+        invalidationListeners.remove(invalidationListener);
     }
 
     public ObservableMap<Path, BeanFile> getBeanFiles() {
@@ -170,6 +189,37 @@ public class ProjectProfile implements LogSupport {
     @Override
     public Logger logger() {
         return logger;
+    }
+
+    private void fireInvalidated() {
+        for (final InvalidationListener invalidationListener : invalidationListeners) {
+            try {
+                invalidationListener.invalidated(this);
+            } catch (Exception x) {
+                log(WARNING, "Unable to fire {0}", x, invalidationListener);
+            }
+        }
+    }
+
+    public void updateCache() {
+        try (final URLClassLoader classLoader = this.classLoader) {
+            classMap.clear();
+        } catch (Exception x) {
+            log(WARNING, "Unable to close class loader", x);
+        }
+        classLoader = classLoader();
+        fireInvalidated();
+    }
+
+    public Class<?> getClass(String type) {
+        return classMap.computeIfAbsent(type, t -> {
+            try {
+                return Class.forName(t, false, classLoader);
+            } catch (Exception x) {
+                log(WARNING, "Unable to load {0}", x, t);
+                return Object.class;
+            }
+        });
     }
 
     public URLClassLoader classLoader() {
@@ -228,6 +278,7 @@ public class ProjectProfile implements LogSupport {
         savePomFile();
         saveBeanFiles();
     }
+
     void delete() {
         try {
             FileUtils.deleteDirectory(path.toFile());

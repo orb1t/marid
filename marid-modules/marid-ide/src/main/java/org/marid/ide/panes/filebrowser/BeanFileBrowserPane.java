@@ -18,14 +18,17 @@
 
 package org.marid.ide.panes.filebrowser;
 
+import javafx.event.ActionEvent;
 import javafx.geometry.Orientation;
 import javafx.scene.layout.BorderPane;
+import org.marid.dependant.beaneditor.BeanEditorConfiguration;
 import org.marid.jfx.ScrollPanes;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.l10n.L10nSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.marid.IdeDependants.startDependant;
 import static org.marid.jfx.icons.FontIcon.*;
 
 /**
@@ -37,7 +40,7 @@ public class BeanFileBrowserPane extends BorderPane implements L10nSupport {
     final BeanFileBrowserTree tree;
 
     @Autowired
-    public BeanFileBrowserPane(BeanFileBrowserTree tree, BeanFileEditorLauncher launcher) {
+    public BeanFileBrowserPane(BeanFileBrowserTree tree) {
         setCenter(ScrollPanes.scrollPane(this.tree = tree));
         setLeft(new ToolbarBuilder()
                 .add("Add file", M_ADD, tree::onFileAdd, b -> b.disableProperty().bind(tree.fileAddDisabled()))
@@ -47,7 +50,11 @@ public class BeanFileBrowserPane extends BorderPane implements L10nSupport {
                 .addSeparator()
                 .add("Delete file/directory", O_TAG_REMOVE, tree::onDelete, b -> b.disableProperty().bind(tree.moveDisabled()))
                 .addSeparator()
-                .add("Bean editor...", M_EDIT, launcher::launch, b -> b.disableProperty().bind(tree.launchDisabled()))
+                .add("Bean editor...", M_EDIT, this::launchBeanEditor, b -> b.disableProperty().bind(tree.launchDisabled()))
                 .build(toolBar -> toolBar.setOrientation(Orientation.VERTICAL)));
+    }
+
+    private void launchBeanEditor(ActionEvent event) {
+        startDependant("beanFileEditor", BeanEditorConfiguration.class.getPackage());
     }
 }

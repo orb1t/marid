@@ -18,16 +18,14 @@
 
 package org.marid;
 
-import javafx.scene.Node;
-import javafx.scene.control.Dialog;
-import javafx.stage.Window;
-import javafx.stage.WindowEvent;
+import org.marid.ide.dependants.conf.SimpleUIConfig;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,30 +33,6 @@ import java.util.function.Consumer;
 public class IdeDependants {
 
     private static final LinkedList<AnnotationConfigApplicationContext> DEPENDENT_CONTEXTS = new LinkedList<>();
-
-    @SafeVarargs
-    public static <T extends Window> T newWindow(Class<T> type, Consumer<AnnotationConfigApplicationContext>... initializers) {
-        final AnnotationConfigApplicationContext context = child(type, initializers);
-        final T window = context.getBean(type);
-        window.addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> closeContext(false, context));
-        return window;
-    }
-
-    @SafeVarargs
-    public static <T extends Dialog<?>> T newDialog(Class<T> type, Consumer<AnnotationConfigApplicationContext>... initializers) {
-        final AnnotationConfigApplicationContext context = child(type, initializers);
-        final T dialog = context.getBean(type);
-        dialog.showingProperty().addListener((observable, oldValue, newValue) -> closeContext(newValue, context));
-        return dialog;
-    }
-
-    @SafeVarargs
-    public static <T extends Node> T newNode(Class<T> type, Consumer<AnnotationConfigApplicationContext>... initializers) {
-        final AnnotationConfigApplicationContext context = child(type, initializers);
-        final T node = context.getBean(type);
-        node.sceneProperty().addListener((observable, oldValue, newValue) -> closeContext(newValue != null, context));
-        return node;
-    }
 
     public static <T> List<T> getDependants(Class<T> type) {
         final List<T> list = new ArrayList<>();
@@ -68,28 +42,29 @@ public class IdeDependants {
         return list;
     }
 
-    @SafeVarargs
-    static AnnotationConfigApplicationContext child(Class<?> type, Consumer<AnnotationConfigApplicationContext>... initializers) {
+    public static AnnotationConfigApplicationContext startDependant(String name, Class<?>... classes) {
+        return startDependant(context -> {
+            context.setDisplayName(name);
+            context.register(classes);
+            context.register(SimpleUIConfig.class);
+        });
+    }
+
+    public static AnnotationConfigApplicationContext startDependant(String name, Package... packages) {
+        return startDependant(context -> {
+            context.setDisplayName(name);
+            context.scan(Stream.of(packages).map(Package::getName).toArray(String[]::new));
+            context.register(SimpleUIConfig.class);
+        });
+    }
+
+    public static AnnotationConfigApplicationContext startDependant(Consumer<AnnotationConfigApplicationContext> contextConsumer) {
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        context.setDisplayName(type.getName());
         context.setParent(Ide.context);
-        context.scan(type.getPackage().getName());
-        for (final Consumer<AnnotationConfigApplicationContext> initializer : initializers) {
-            initializer.accept(context);
-        }
+        contextConsumer.accept(context);
         context.refresh();
         context.start();
         DEPENDENT_CONTEXTS.add(context);
         return context;
-    }
-
-    static void closeContext(boolean showing, AnnotationConfigApplicationContext context) {
-        if (!showing) {
-            try {
-                context.close();
-            } finally {
-                DEPENDENT_CONTEXTS.remove(context);
-            }
-        }
     }
 }

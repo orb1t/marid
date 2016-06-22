@@ -29,6 +29,8 @@ import org.marid.ide.panes.main.IdePane;
 import org.marid.jfx.ScrollPanes;
 import org.marid.l10n.L10nSupport;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
@@ -50,5 +52,10 @@ public class IconViewer extends Stage implements L10nSupport {
         BorderPane.setMargin(scrollPane, new Insets(10, 10, 5, 10));
         BorderPane.setMargin(countLabel, new Insets(5, 10, 10, 10));
         setScene(new Scene(pane));
+    }
+
+    @EventListener
+    private void onStart(ContextStartedEvent event) {
+        show();
     }
 }

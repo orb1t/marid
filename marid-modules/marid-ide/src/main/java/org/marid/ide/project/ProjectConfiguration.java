@@ -23,9 +23,8 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
-import org.marid.IdeDependants;
-import org.marid.dependant.project.config.ProjectDialog;
-import org.marid.dependant.project.runner.ProjectRunner;
+import org.marid.dependant.project.config.ProjectConfigConfiguration;
+import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
 import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.toolbar.IdeToolbarItem;
 import org.marid.l10n.L10nSupport;
@@ -43,6 +42,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
+import static org.marid.IdeDependants.startDependant;
 import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.misc.Calls.callWithTime;
 
@@ -63,10 +63,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     @IdeMenuItem(menu = "Project", text = "Project setup...", group = "setup", icon = O_TOOLS)
     @IdeToolbarItem(group = "projectSetup")
     public EventHandler<ActionEvent> projectSetup() {
-        return event -> {
-            final ProjectDialog editor = IdeDependants.newDialog(ProjectDialog.class);
-            editor.showAndWait();
-        };
+        return event -> startDependant("projectSetup", ProjectConfigConfiguration.class.getPackage());
     }
 
     @Bean
@@ -98,10 +95,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     @IdeMenuItem(menu = "Project", text = "Run", group = "pb", icon = F_PLAY, key = "F5")
     @IdeToolbarItem(group = "projectBuild")
     public EventHandler<ActionEvent> projectRun() {
-        return event -> {
-            final ProjectRunner projectRunner = IdeDependants.newWindow(ProjectRunner.class);
-            projectRunner.show();
-        };
+        return event -> startDependant("projectSetup", ProjectRunnerConfiguration.class.getPackage());
     }
 
     @Bean

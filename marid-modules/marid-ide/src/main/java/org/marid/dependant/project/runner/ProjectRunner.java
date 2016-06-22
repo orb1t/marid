@@ -23,6 +23,8 @@ import javafx.stage.Stage;
 import org.marid.Ide;
 import org.marid.logging.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -56,5 +58,10 @@ public class ProjectRunner extends Stage implements LogSupport {
                 }
             }
         });
+    }
+
+    @EventListener
+    private void onStart(ContextStartedEvent event) {
+        show();
     }
 }
