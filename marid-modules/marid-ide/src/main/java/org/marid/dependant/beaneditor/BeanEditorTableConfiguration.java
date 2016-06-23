@@ -18,8 +18,6 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Tab;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
@@ -44,14 +42,15 @@ import java.nio.file.Path;
 public class BeanEditorTableConfiguration implements L10nSupport {
 
     @Bean
-    public EventHandler<ActionEvent> tableEditHandler(AnnotationConfigApplicationContext context) {
-        return event -> IdeDependants.startDependant(context, "beanConfigurer", BeanDataEditorConfiguration.class);
-    }
-
-    @Bean
-    public ToolBar beanEditorToolbar(EventHandler<ActionEvent> tableEditHandler) {
+    public ToolBar beanEditorToolbar(AnnotationConfigApplicationContext context, BeanEditorTable table) {
         return new ToolbarBuilder()
-                .add(s("Edit..."), FontIcon.M_EDIT, tableEditHandler)
+                .add(s("Edit..."), FontIcon.M_EDIT,
+                        event -> IdeDependants.startDependant(context, "beanConfigurer", BeanDataEditorConfiguration.class))
+                .addSeparator()
+                .add(s("Remove"), FontIcon.O_REPO_DELETE,
+                        event -> table.getItems().remove(table.getSelectionModel().getSelectedIndex()))
+                .add(s("Clear"), FontIcon.M_CLEAR_ALL,
+                        event -> table.getItems().clear())
                 .build();
     }
 

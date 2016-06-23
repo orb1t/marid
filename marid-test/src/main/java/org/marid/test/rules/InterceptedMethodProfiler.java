@@ -24,7 +24,6 @@ import groovy.lang.ProxyMetaClass;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import java.beans.IntrospectionException;
 import java.util.Formatter;
 import java.util.Map;
 
@@ -37,12 +36,8 @@ public abstract class InterceptedMethodProfiler extends MethodProfiler {
     private final BenchmarkInterceptor interceptor;
 
     public InterceptedMethodProfiler(Class<?> type) {
-        try {
-            proxyMetaClass = ProxyMetaClass.getInstance(type);
-            proxyMetaClass.setInterceptor(interceptor = new BenchmarkInterceptor());
-        } catch (IntrospectionException x) {
-            throw new IllegalStateException(x);
-        }
+        proxyMetaClass = ProxyMetaClass.getInstance(type);
+        proxyMetaClass.setInterceptor(interceptor = new BenchmarkInterceptor());
     }
 
     @Override

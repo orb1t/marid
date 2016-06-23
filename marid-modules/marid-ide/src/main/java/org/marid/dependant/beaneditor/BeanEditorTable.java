@@ -91,8 +91,8 @@ public class BeanEditorTable extends TableView<BeanData> implements L10nSupport 
         getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
             col.setText(s("Lazy"));
             col.setCellValueFactory(param -> param.getValue().lazyInit);
-            col.setPrefWidth(150);
-            col.setMaxWidth(250);
+            col.setPrefWidth(60);
+            col.setMaxWidth(100);
         }));
     }
 }

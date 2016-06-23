@@ -80,6 +80,7 @@ public class BeanDataEditorConfiguration implements L10nSupport {
     public Stage simpleBeanConfigurerStage(IdePane idePane, Scene simpleBeanConfigurerScene) {
         final Stage stage = new Stage(StageStyle.UTILITY);
         stage.initOwner(idePane.getScene().getWindow());
+        stage.setTitle(s("Bean editor"));
         stage.setScene(simpleBeanConfigurerScene);
         return stage;
     }
