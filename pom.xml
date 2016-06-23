@@ -51,10 +51,8 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
-        <excluded.benchmarks>org.marid.test.BrokenBenchmarks</excluded.benchmarks>
         <excluded.tests>org.marid.test.BrokenTests</excluded.tests>
         <test.groups>org.marid.test.NormalTests</test.groups>
-        <benchmark.groups>org.marid.test.NormalBenchmarks</benchmark.groups>
 
         <repo-id>sourceforge</repo-id>
         <repo-name>sourceforge</repo-name>
