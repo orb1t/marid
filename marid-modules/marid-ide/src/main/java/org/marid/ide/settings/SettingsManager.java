@@ -39,6 +39,6 @@ public class SettingsManager {
     @IdeToolbarItem(group = "settings")
     @IdeMenuItem(menu = "Tools", text = "Settings...", group = "settings", icon = O_SETTINGS)
     public EventHandler<ActionEvent> settingsItem() {
-        return event -> startDependant("settingsDialog", SettingsConfiguration.class.getPackage());
+        return event -> startDependant("settingsDialog", SettingsConfiguration.class);
     }
 }

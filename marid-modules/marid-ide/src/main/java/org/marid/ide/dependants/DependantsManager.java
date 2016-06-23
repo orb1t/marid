@@ -37,6 +37,6 @@ public class DependantsManager {
     @Bean
     @IdeMenuItem(menu = "Tools", text = "Icon viewer...", group = "icons", icon = M_OPEN_IN_BROWSER)
     public EventHandler<ActionEvent> iconViewer() {
-        return event -> startDependant("iconViewer", IconViewerConfiguration.class.getPackage());
+        return event -> startDependant("iconViewer", IconViewerConfiguration.class);
     }
 }

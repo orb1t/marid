@@ -18,19 +18,19 @@
 
 package org.marid;
 
-import javafx.application.Platform;
 import org.marid.ide.logging.IdeLogHandler;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.DefaultLifecycleProcessor;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -70,13 +70,10 @@ public class IdeContext {
     }
 
     @Bean
-    public AutoCloseable taskSchedulerDestroyer(ConcurrentTaskScheduler taskScheduler) {
-        return () -> {
+    public ApplicationListener<ContextClosedEvent> taskSchedulerDestroyer(ConcurrentTaskScheduler taskScheduler) {
+        return event -> {
             final ScheduledThreadPoolExecutor executor = (ScheduledThreadPoolExecutor) taskScheduler.getConcurrentExecutor();
             executor.shutdown();
-            if (!executor.awaitTermination(1L, TimeUnit.MINUTES)) {
-                Platform.exit();
-            }
         };
     }
 }

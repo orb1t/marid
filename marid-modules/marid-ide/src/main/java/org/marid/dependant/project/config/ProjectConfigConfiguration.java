@@ -18,12 +18,14 @@
 
 package org.marid.dependant.project.config;
 
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
+@ComponentScan(basePackageClasses = {ProjectConfigConfiguration.class})
 public class ProjectConfigConfiguration {
 
 }

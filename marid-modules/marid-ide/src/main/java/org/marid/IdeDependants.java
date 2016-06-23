@@ -19,52 +19,34 @@
 package org.marid;
 
 import org.marid.ide.dependants.conf.SimpleUIConfig;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class IdeDependants {
 
-    private static final LinkedList<AnnotationConfigApplicationContext> DEPENDENT_CONTEXTS = new LinkedList<>();
-
-    public static <T> List<T> getDependants(Class<T> type) {
-        final List<T> list = new ArrayList<>();
-        for (final AnnotationConfigApplicationContext context : DEPENDENT_CONTEXTS) {
-            list.addAll(context.getBeansOfType(type).values());
-        }
-        return list;
+    public static AnnotationConfigApplicationContext startDependant(String name, Class<?> configuration) {
+        return startDependant(Ide.context, name, configuration);
     }
 
-    public static AnnotationConfigApplicationContext startDependant(String name, Class<?>... classes) {
+    public static AnnotationConfigApplicationContext startDependant(ApplicationContext parent, String name, Class<?> configuration) {
         return startDependant(context -> {
             context.setDisplayName(name);
-            context.register(classes);
+            context.register(configuration);
             context.register(SimpleUIConfig.class);
-        });
-    }
-
-    public static AnnotationConfigApplicationContext startDependant(String name, Package... packages) {
-        return startDependant(context -> {
-            context.setDisplayName(name);
-            context.scan(Stream.of(packages).map(Package::getName).toArray(String[]::new));
-            context.register(SimpleUIConfig.class);
+            context.setParent(parent);
         });
     }
 
     public static AnnotationConfigApplicationContext startDependant(Consumer<AnnotationConfigApplicationContext> contextConsumer) {
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        context.setParent(Ide.context);
         contextConsumer.accept(context);
         context.refresh();
         context.start();
-        DEPENDENT_CONTEXTS.add(context);
         return context;
     }
 }

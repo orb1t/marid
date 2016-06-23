@@ -55,6 +55,6 @@ public class BeanFileBrowserPane extends BorderPane implements L10nSupport {
     }
 
     private void launchBeanEditor(ActionEvent event) {
-        startDependant("beanFileEditor", BeanEditorConfiguration.class.getPackage());
+        startDependant("beanFileEditor", BeanEditorConfiguration.class);
     }
 }

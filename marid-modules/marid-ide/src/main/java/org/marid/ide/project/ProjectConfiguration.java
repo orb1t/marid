@@ -63,7 +63,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     @IdeMenuItem(menu = "Project", text = "Project setup...", group = "setup", icon = O_TOOLS)
     @IdeToolbarItem(group = "projectSetup")
     public EventHandler<ActionEvent> projectSetup() {
-        return event -> startDependant("projectSetup", ProjectConfigConfiguration.class.getPackage());
+        return event -> startDependant("projectSetup", ProjectConfigConfiguration.class);
     }
 
     @Bean
@@ -95,7 +95,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     @IdeMenuItem(menu = "Project", text = "Run", group = "pb", icon = F_PLAY, key = "F5")
     @IdeToolbarItem(group = "projectBuild")
     public EventHandler<ActionEvent> projectRun() {
-        return event -> startDependant("projectSetup", ProjectRunnerConfiguration.class.getPackage());
+        return event -> startDependant("projectSetup", ProjectRunnerConfiguration.class);
     }
 
     @Bean

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beanconf.editors;
+package org.marid.dependant.beandata;
 
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
@@ -33,11 +33,11 @@ import static org.marid.misc.Builder.build;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class RefValueListEditor<T extends RefValue<T>> extends TableView<T> implements L10nSupport {
+public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> implements L10nSupport {
 
     private final ProjectProfile profile;
 
-    public RefValueListEditor(ProjectProfile profile, ApplicationEventPublisher eventPublisher, ObservableList<T> list) {
+    public RefValuesEditor(ProjectProfile profile, ApplicationEventPublisher eventPublisher, ObservableList<T> list) {
         super(list);
         this.profile = profile;
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
@@ -76,7 +76,7 @@ public class RefValueListEditor<T extends RefValue<T>> extends TableView<T> impl
             col.setEditable(false);
             col.setPrefWidth(500);
             col.setMaxWidth(1500);
-            col.setCellValueFactory(param -> param.getValue().ref);
+            col.setCellValueFactory(param -> param.getValue().value);
         }));
     }
 }
