@@ -20,6 +20,10 @@ package org.marid.dependant.beaneditor;
 
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.converter.DefaultStringConverter;
+import org.marid.ide.project.ProjectManager;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanFile;
@@ -35,14 +39,24 @@ import static org.marid.misc.Builder.build;
 public class BeanEditorTable extends TableView<BeanData> implements L10nSupport {
 
     @Autowired
-    public BeanEditorTable(BeanFile beanFile) {
+    public BeanEditorTable(BeanFile beanFile, ProjectProfile profile) {
         super(beanFile.beans);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
+        setEditable(true);
         getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
             col.setText(s("Name"));
             col.setCellValueFactory(param -> param.getValue().name);
+            col.setCellFactory(param -> new TextFieldTableCell<BeanData, String>(new DefaultStringConverter()) {
+                @Override
+                public void commitEdit(String newValue) {
+                    final String oldValue = getItem();
+                    super.commitEdit(newValue);
+                    ProjectManager.onBeanNameChange(profile, oldValue, newValue);
+                }
+            });
             col.setPrefWidth(250);
             col.setMaxWidth(450);
+            col.setEditable(true);
         }));
         getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
             col.setText(s("Type"));

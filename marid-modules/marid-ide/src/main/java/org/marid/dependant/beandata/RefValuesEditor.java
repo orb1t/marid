@@ -21,12 +21,8 @@ package org.marid.dependant.beandata;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.TextFieldTableCell;
-import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.project.event.BeanNameChangedEvent;
 import org.marid.l10n.L10nSupport;
 import org.marid.spring.xml.data.RefValue;
-import org.springframework.context.ApplicationEventPublisher;
 
 import static org.marid.misc.Builder.build;
 
@@ -35,11 +31,8 @@ import static org.marid.misc.Builder.build;
  */
 public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> implements L10nSupport {
 
-    private final ProjectProfile profile;
-
-    public RefValuesEditor(ProjectProfile profile, ApplicationEventPublisher eventPublisher, ObservableList<T> list) {
+    public RefValuesEditor(ObservableList<T> list) {
         super(list);
-        this.profile = profile;
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
         getColumns().add(build(new TableColumn<T, String>(), col -> {
@@ -47,15 +40,6 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> impleme
             col.setPrefWidth(200);
             col.setMaxWidth(400);
             col.setCellValueFactory(param -> param.getValue().name);
-            col.setEditable(true);
-            col.setCellFactory(param -> new TextFieldTableCell<T, String>() {
-                @Override
-                public void commitEdit(String newValue) {
-                    final String oldValue = getSelectionModel().getSelectedItem().name.get();
-                    super.commitEdit(newValue);
-                    eventPublisher.publishEvent(new BeanNameChangedEvent(profile, oldValue, newValue));
-                }
-            });
         }));
         getColumns().add(build(new TableColumn<T, String>(), col -> {
             col.setText(s("Type"));
@@ -73,7 +57,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> impleme
         }));
         getColumns().add(build(new TableColumn<T, String>(), col -> {
             col.setText(s("Value"));
-            col.setEditable(false);
+            col.setEditable(true);
             col.setPrefWidth(500);
             col.setMaxWidth(1500);
             col.setCellValueFactory(param -> param.getValue().value);

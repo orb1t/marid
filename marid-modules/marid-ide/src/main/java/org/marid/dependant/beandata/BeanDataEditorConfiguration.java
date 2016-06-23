@@ -25,12 +25,10 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.marid.dependant.beaneditor.BeanEditorTable;
 import org.marid.ide.panes.main.IdePane;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10nSupport;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.ConstructorArg;
 import org.marid.spring.xml.data.Property;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -53,17 +51,13 @@ public class BeanDataEditorConfiguration implements L10nSupport {
     }
 
     @Bean
-    public RefValuesEditor<ConstructorArg> constructorArgEditor(ProjectProfile profile,
-                                                                ApplicationEventPublisher eventPublisher,
-                                                                BeanData beanData) {
-        return new RefValuesEditor<>(profile, eventPublisher, beanData.constructorArgs);
+    public RefValuesEditor<ConstructorArg> constructorArgEditor(BeanData beanData) {
+        return new RefValuesEditor<>(beanData.constructorArgs);
     }
 
     @Bean
-    public RefValuesEditor<Property> propertyEditor(ProjectProfile profile,
-                                                    ApplicationEventPublisher eventPublisher,
-                                                    BeanData beanData) {
-        return new RefValuesEditor<>(profile, eventPublisher, beanData.properties);
+    public RefValuesEditor<Property> propertyEditor(BeanData beanData) {
+        return new RefValuesEditor<>(beanData.properties);
     }
 
     @Bean
