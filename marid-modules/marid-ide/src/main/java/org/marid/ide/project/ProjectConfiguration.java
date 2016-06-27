@@ -33,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.inject.Provider;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Optional;
@@ -69,18 +68,17 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     @Bean
     @IdeMenuItem(menu = "Project", text = "Save", group = "io", icon = F_SAVE, key = "Ctrl+S")
     @IdeToolbarItem(group = "projectIO")
-    public EventHandler<ActionEvent> projectSave(Provider<ProjectSaver> projectSaverProvider) {
-        return event -> callWithTime(
-                () -> projectSaverProvider.get().save(),
+    public EventHandler<ActionEvent> projectSave(ProjectSaver projectSaver) {
+        return event -> callWithTime(projectSaver::save,
                 time -> log(INFO, "Profile [{0}] saved in {1} ms", projectManager.getProfile(), time));
     }
 
     @Bean
     @IdeMenuItem(menu = "Project", text = "Build", group = "pb", icon = D_CLOCK_FAST, key = "F9")
     @IdeToolbarItem(group = "projectBuild")
-    public EventHandler<ActionEvent> projectBuild(Provider<ProjectManager> projectManager) {
+    public EventHandler<ActionEvent> projectBuild() {
         return event -> {
-            final ProjectProfile profile = projectManager.get().getProfile();
+            final ProjectProfile profile = projectManager.getProfile();
             final MavenProjectBuilder mavenProjectBuilder = new MavenProjectBuilder(profile)
                     .goals("clean", "install");
             try {
@@ -101,7 +99,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     @Bean
     @IdeMenuItem(menu = "Project", text = "Add profile...", group = "pm", icon = M_ADD_BOX)
     @IdeToolbarItem(group = "projectIO", id = "p_add")
-    public EventHandler<ActionEvent> projectAddProfile(Provider<ProjectSaver> projectSaver) {
+    public EventHandler<ActionEvent> projectAddProfile(ProjectSaver projectSaver) {
         return event -> {
             final TextInputDialog dialog = new TextInputDialog("profile");
             dialog.setHeaderText(s("Profile name") + ":");
@@ -114,7 +112,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
                 } catch (Exception x) {
                     log(WARNING, "Unable to write default logging properties", x);
                 }
-                projectSaver.get().save();
+                projectSaver.save();
             }
         };
     }

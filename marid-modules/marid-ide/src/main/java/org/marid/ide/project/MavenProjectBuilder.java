@@ -140,6 +140,7 @@ public class MavenProjectBuilder implements LogSupport {
                 for (final Throwable exception : result.getExceptions()) {
                     log(WARNING, "Build exception", exception);
                 }
+                log(INFO, "Built in {0} s", result.getBuildSummary(result.getProject()).getTime() / 1000f);
             } catch (Exception x) {
                 log(WARNING, "Unable to execute maven", x);
             } finally {
