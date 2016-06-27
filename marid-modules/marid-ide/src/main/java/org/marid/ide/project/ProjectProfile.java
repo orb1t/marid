@@ -23,6 +23,7 @@ import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.FileUtils;
@@ -99,7 +100,16 @@ public class ProjectProfile implements Observable, LogSupport {
         model.setModelVersion("4.0.0");
         createFileStructure();
         beanFiles = loadBeanFiles();
+        init();
         updateCache();
+    }
+
+    private void init() {
+        if (model.getProfiles().stream().noneMatch(p -> "ui".equals(p.getId()))) {
+            final Profile profile = new Profile();
+            profile.setId("ui");
+            model.getProfiles().add(profile);
+        }
     }
 
     private Model loadModel() {
