@@ -79,7 +79,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     public EventHandler<ActionEvent> projectBuild() {
         return event -> {
             final ProjectProfile profile = projectManager.getProfile();
-            final MavenProjectBuilder mavenProjectBuilder = new MavenProjectBuilder(profile)
+            final MavenProjectBuilder mavenProjectBuilder = new MavenProjectBuilder(profile, profile.logger()::log)
                     .goals("clean", "install");
             try {
                 mavenProjectBuilder.build();

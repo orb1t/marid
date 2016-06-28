@@ -18,7 +18,7 @@
 
 package org.marid.ide.project;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.Module;
 import org.apache.maven.Maven;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionRequest;
@@ -26,6 +26,7 @@ import org.apache.maven.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.extension.internal.CoreExports;
 import org.apache.maven.extension.internal.CoreExtensionEntry;
+import org.apache.maven.model.Profile;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusConstants;
@@ -56,14 +57,11 @@ public class MavenProjectBuilder implements LogSupport {
     private final Consumer<LogRecord> logRecordConsumer;
     private final Map<String, ProjectPlexusLogger> loggerMap = new ConcurrentHashMap<>();
     private final List<String> goals = new ArrayList<>();
+    private final List<Profile> profiles = new ArrayList<>();
 
     public MavenProjectBuilder(ProjectProfile profile, Consumer<LogRecord> logRecordConsumer) {
         this.profile = profile;
         this.logRecordConsumer = logRecordConsumer;
-    }
-
-    public MavenProjectBuilder(ProjectProfile profile) {
-        this(profile, profile.logger()::log);
     }
 
     private ProjectPlexusLogger logger(String name) {
@@ -75,36 +73,43 @@ public class MavenProjectBuilder implements LogSupport {
         return this;
     }
 
+    public MavenProjectBuilder profiles(String... ids) {
+        final Set<String> idSet = new HashSet<>(Arrays.asList(ids));
+        for (final Profile p : profile.getModel().getProfiles()) {
+            if (idSet.contains(p.getId()) && !profiles.contains(p)) {
+                profiles.add(p);
+            }
+        }
+        return this;
+    }
+
     private PlexusContainer buildPlexusContainer() throws Exception {
         final ClassWorld classWorld = new ClassWorld("plexus.core", Thread.currentThread().getContextClassLoader());
         final ClassRealm classRealm = classWorld.getClassRealm("plexus.core");
         final CoreExtensionEntry extensionEntry = CoreExtensionEntry.discoverFrom(classRealm);
+        final Module bindModule = binder -> {
+            binder.bind(RepositoryConnectorFactory.class).to(BasicRepositoryConnectorFactory.class);
+            binder.bind(TransporterFactory.class).to(HttpTransporterFactory.class);
+            binder.bind(TransporterFactory.class).to(WagonTransporterFactory.class);
+            binder.bind(TransporterFactory.class).to(FileTransporterFactory.class);
+            binder.bind(CoreExports.class).toInstance(
+                    new CoreExports(
+                            classRealm,
+                            extensionEntry.getExportedArtifacts(),
+                            extensionEntry.getExportedPackages()));
+        };
         final DefaultPlexusContainer container = new DefaultPlexusContainer(new DefaultContainerConfiguration()
                 .setClassWorld(classWorld)
                 .setRealm(classRealm)
                 .setClassPathScanning(PlexusConstants.SCANNING_INDEX)
                 .setAutoWiring(true)
-                .setName("maven"), new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(RepositoryConnectorFactory.class).to(BasicRepositoryConnectorFactory.class);
-                bind(TransporterFactory.class).to(HttpTransporterFactory.class);
-                bind(TransporterFactory.class).to(WagonTransporterFactory.class);
-                bind(TransporterFactory.class).to(FileTransporterFactory.class);
-                bind(CoreExports.class).toInstance(
-                        new CoreExports(
-                                classRealm,
-                                extensionEntry.getExportedArtifacts(),
-                                extensionEntry.getExportedPackages()));
-            }
-        });
+                .setName("maven"), bindModule);
         container.setLoggerManager(new BaseLoggerManager() {
             @Override
             protected Logger createLogger(String name) {
                 return logger(name);
             }
         });
-        container.setLookupRealm(null);
         return container;
     }
 
@@ -126,16 +131,18 @@ public class MavenProjectBuilder implements LogSupport {
                 .setTransferListener(new ProjectMavenTransferListener(profile))
                 .setCacheNotFound(true)
                 .setInteractiveMode(true)
-                .setCacheTransferError(false);
+                .setCacheTransferError(false)
+                .setProfiles(profiles.isEmpty() ? null : profiles);
     }
 
     public Thread build() throws Exception {
-        final PlexusContainer plexusContainer = buildPlexusContainer();
-        final MavenExecutionRequest mavenExecutionRequest = mavenExecutionRequest(plexusContainer);
-        final Maven maven = plexusContainer.lookup(Maven.class);
         final Thread thread = new Thread(() -> {
-            Thread.currentThread().setContextClassLoader(plexusContainer.getContainerRealm());
+            PlexusContainer plexusContainer = null;
             try {
+                plexusContainer = buildPlexusContainer();
+                final MavenExecutionRequest mavenExecutionRequest = mavenExecutionRequest(plexusContainer);
+                final Maven maven = plexusContainer.lookup(Maven.class);
+                Thread.currentThread().setContextClassLoader(plexusContainer.getContainerRealm());
                 final MavenExecutionResult result = maven.execute(mavenExecutionRequest);
                 for (final Throwable exception : result.getExceptions()) {
                     log(WARNING, "Build exception", exception);
@@ -144,7 +151,9 @@ public class MavenProjectBuilder implements LogSupport {
             } catch (Exception x) {
                 log(WARNING, "Unable to execute maven", x);
             } finally {
-                plexusContainer.dispose();
+                if (plexusContainer != null) {
+                    plexusContainer.dispose();
+                }
             }
         });
         thread.start();
