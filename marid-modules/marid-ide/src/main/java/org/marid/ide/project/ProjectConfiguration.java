@@ -26,6 +26,7 @@ import javafx.scene.control.TextInputDialog;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
 import org.marid.ide.menu.IdeMenuItem;
+import org.marid.ide.project.cache.ProjectCacheManager;
 import org.marid.ide.toolbar.IdeToolbarItem;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
@@ -76,17 +77,8 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     @Bean
     @IdeMenuItem(menu = "Project", text = "Build", group = "pb", icon = D_CLOCK_FAST, key = "F9")
     @IdeToolbarItem(group = "projectBuild")
-    public EventHandler<ActionEvent> projectBuild() {
-        return event -> {
-            final ProjectProfile profile = projectManager.getProfile();
-            final MavenProjectBuilder mavenProjectBuilder = new MavenProjectBuilder(profile, profile.logger()::log)
-                    .goals("clean", "install");
-            try {
-                mavenProjectBuilder.build();
-            } catch (Exception x) {
-                log(WARNING, "Unable to build", x);
-            }
-        };
+    public EventHandler<ActionEvent> projectBuild(ProjectCacheManager projectCacheManager) {
+        return event -> projectCacheManager.build(projectManager.getProfile());
     }
 
     @Bean

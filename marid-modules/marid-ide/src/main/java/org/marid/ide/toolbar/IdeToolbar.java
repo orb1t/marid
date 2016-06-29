@@ -32,10 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 import static java.util.Comparator.comparing;
 
@@ -95,5 +92,14 @@ public class IdeToolbar extends ToolBar implements LogSupport {
                 });
             });
         });
+    }
+
+    public <T extends Node> T getNode(Class<T> type, String id) {
+        return getItems().stream()
+                .filter(type::isInstance)
+                .map(type::cast)
+                .filter(n -> id.equals(n.getId()))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException(id));
     }
 }

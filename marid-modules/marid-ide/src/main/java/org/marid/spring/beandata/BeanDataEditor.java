@@ -21,10 +21,16 @@ package org.marid.spring.beandata;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.BeanData;
 
+import java.util.Set;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface BeanDataEditor {
 
     void edit(BeanData beanData, ProjectProfile profile);
+
+    Set<String> getEditableTypes();
+
+    String getIcon();
 }

@@ -58,7 +58,7 @@ public class ProjectPrerequisites {
         applyPluginManagement();
         applyPlugins();
         applyRuntimeDependency();
-        applyUiProfile();
+        applyConfProfile();
     }
 
     void applyAddress() {
@@ -232,41 +232,42 @@ public class ProjectPrerequisites {
         parent.addChild(node);
     }
 
-    private void applyUiProfile() {
-        applyUiBuild();
+    private void applyConfProfile() {
+        applyConfBuild();
     }
 
-    private void applyUiBuild() {
-        final Profile uiProfile = model.getProfiles().stream().filter(p -> "ui".equals(p.getId())).findAny().orElse(null);
-        final BuildBase uiBuild = Optional.ofNullable(uiProfile.getBuild()).orElseGet(() -> {
+    private void applyConfBuild() {
+        final Profile confProfile = model.getProfiles().stream().filter(p -> "conf".equals(p.getId())).findAny().orElse(null);
+        final BuildBase confBuild = Optional.ofNullable(confProfile.getBuild()).orElseGet(() -> {
             final Build build = new Build();
-            uiProfile.setBuild(build);
+            confProfile.setBuild(build);
             return build;
         });
         {
-            final Plugin dependencyPlugin = uiBuild.getPlugins().stream()
+            final Plugin dependencyPlugin = confBuild.getPlugins().stream()
                     .filter(p -> "maven-dependency-plugin".equals(p.getArtifactId()))
                     .findAny()
                     .orElseGet(() -> {
                         final Plugin plugin = new Plugin();
                         plugin.setArtifactId("maven-dependency-plugin");
-                        uiBuild.getPlugins().add(plugin);
+                        confBuild.getPlugins().add(plugin);
                         return plugin;
                     });
             dependencyPlugin.setVersion(mavenSettings.getDependencyPluginVersion());
             final PluginExecution copyDependenciesExecution = dependencyPlugin.getExecutions().stream()
-                    .filter(e -> "ui-copy-deps".equals(e.getId()))
+                    .filter(e -> "conf-copy-deps".equals(e.getId()))
                     .findAny()
                     .orElseGet(() -> {
                         final PluginExecution execution = new PluginExecution();
-                        execution.setId("ui-copy-deps");
+                        execution.setId("conf-copy-deps");
                         dependencyPlugin.getExecutions().add(execution);
                         return execution;
                     });
             copyDependenciesExecution.setGoals(singletonList("copy-dependencies"));
+            copyDependenciesExecution.setPhase("package");
             final Xpp3Dom configuration = new Xpp3Dom("configuration");
             copyDependenciesExecution.setConfiguration(configuration);
-            addChild(configuration, "outputDirectory", "${project.build.directory}/uiLib");
+            addChild(configuration, "outputDirectory", "${project.build.directory}/confLib");
             addChild(configuration, "overWriteReleases", "true");
             addChild(configuration, "overWriteSnapshots", "true");
         }

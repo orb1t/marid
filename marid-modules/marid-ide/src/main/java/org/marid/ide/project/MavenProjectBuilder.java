@@ -135,7 +135,7 @@ public class MavenProjectBuilder implements LogSupport {
                 .setProfiles(profiles.isEmpty() ? null : profiles);
     }
 
-    public Thread build() throws Exception {
+    public Thread build(Consumer<MavenExecutionResult> consumer) {
         final Thread thread = new Thread(() -> {
             PlexusContainer plexusContainer = null;
             try {
@@ -144,10 +144,7 @@ public class MavenProjectBuilder implements LogSupport {
                 final Maven maven = plexusContainer.lookup(Maven.class);
                 Thread.currentThread().setContextClassLoader(plexusContainer.getContainerRealm());
                 final MavenExecutionResult result = maven.execute(mavenExecutionRequest);
-                for (final Throwable exception : result.getExceptions()) {
-                    log(WARNING, "Build exception", exception);
-                }
-                log(INFO, "Built in {0} s", result.getBuildSummary(result.getProject()).getTime() / 1000f);
+                consumer.accept(result);
             } catch (Exception x) {
                 log(WARNING, "Unable to execute maven", x);
             } finally {
