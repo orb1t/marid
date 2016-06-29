@@ -22,10 +22,10 @@ import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
-import org.marid.beans.MaridBean;
 import org.marid.logging.LogSupport;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -41,7 +41,7 @@ import static org.marid.concurrent.ThreadPools.CALLER_RUNS_POLICY;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(icon = "http://icons.iconarchive.com/icons/chromatix/aerial/24/web-icon.png")
+@Resource(name = "simpleWebServer", description = "Simple web server", type = SimpleWebServer.class)
 public class SimpleWebServer implements Closeable, LogSupport {
 
     private final HttpServer httpServer;

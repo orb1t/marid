@@ -18,8 +18,7 @@
 
 package org.marid.web;
 
-import org.marid.beans.MaridBean;
-
+import javax.annotation.Resource;
 import javax.net.ssl.SSLContext;
 import java.util.Collections;
 import java.util.Map;
@@ -28,7 +27,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(icon = "http://icons.iconarchive.com/icons/wallpaperfx/3d-bluefx-desktop/24/Web-icon.png")
+@Resource(name = "simpleWebServiceProperties", description = "Simple web server properties", type = SimpleWebServerProperties.class)
 public final class SimpleWebServerProperties {
 
     private String host = "0.0.0.0";

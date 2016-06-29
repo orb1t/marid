@@ -18,7 +18,6 @@
 
 package org.marid.db.generator;
 
-import org.marid.beans.MaridBean;
 import org.marid.concurrent.MaridTimerTask;
 import org.marid.db.dao.NumericWriter;
 import org.marid.db.data.DataRecord;
@@ -27,6 +26,7 @@ import org.marid.logging.LogSupport;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import java.time.Instant;
 import java.util.Set;
 import java.util.Timer;
@@ -39,7 +39,7 @@ import static java.util.Collections.singletonList;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(icon = "http://icons.iconarchive.com/icons/double-j-design/super-mono-3d/24/button-round-random-icon.png")
+@Resource(name = "randomNumericDaqGenerator", description = "Random numeric DAQ generator", type = RandomNumericDaqGenerator.class)
 public class RandomNumericDaqGenerator implements LogSupport {
 
     private final NumericWriter numericWriter;

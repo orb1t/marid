@@ -23,12 +23,12 @@ import org.hsqldb.DatabaseManager;
 import org.hsqldb.jdbc.JDBCSessionDataSource;
 import org.hsqldb.server.Server;
 import org.hsqldb.server.ServerConstants;
-import org.marid.beans.MaridBean;
 import org.marid.db.dao.NumericWriter;
 import org.marid.logging.LogSupport;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.io.*;
 import java.net.URL;
@@ -49,7 +49,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(icon = "http://icons.iconarchive.com/icons/icojam/blue-bits/24/database-icon.png")
+@Resource(name = "hsqldbDatabase", description = "HSQLDB database service", type = HsqldbDatabase.class)
 public final class HsqldbDatabase implements Closeable, LogSupport {
 
     private final Server server;
@@ -146,7 +146,6 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
         return new JDBCSessionDataSource(database, "PUBLIC");
     }
 
-    @MaridBean(icon = "http://icons.iconarchive.com/icons/double-j-design/ravenna-3d/24/Database-Table-icon.png")
     public NumericWriter numericWriter() {
         return new HsqldbDaqNumericWriter(getDataSource("NUMERICS"), "NUMERICS");
     }

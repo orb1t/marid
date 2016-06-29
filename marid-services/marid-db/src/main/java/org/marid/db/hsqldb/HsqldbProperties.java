@@ -20,15 +20,15 @@ package org.marid.db.hsqldb;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.marid.beans.MaridBean;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.net.URL;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(icon = "http://icons.iconarchive.com/icons/icojam/blue-bits/24/database-settings-icon.png")
+@Resource(name = "hsqldbProperties", description = "HSQLDB service properties", type = HsqldbProperties.class)
 public final class HsqldbProperties {
 
     private File directory = new File("daqDatabase");
