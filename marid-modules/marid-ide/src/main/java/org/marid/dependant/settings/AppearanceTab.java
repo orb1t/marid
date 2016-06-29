@@ -18,6 +18,7 @@
 
 package org.marid.dependant.settings;
 
+import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.settings.AppearanceSettings;
 import org.marid.jfx.panes.GenericGridPane;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +33,10 @@ public class AppearanceTab extends GenericGridPane implements SettingsEditor {
     private final AppearanceSettings appearanceSettings;
 
     @Autowired
-    public AppearanceTab(AppearanceSettings appearanceSettings) {
+    public AppearanceTab(AppearanceSettings appearanceSettings, IdeLogHandler ideLogHandler) {
         this.appearanceSettings = appearanceSettings;
         addTextField("Locale", appearanceSettings, "locale");
+        addIntField("Max log records", ideLogHandler, "maxLogRecords", 100, 100_000, 100);
     }
 
     @Override

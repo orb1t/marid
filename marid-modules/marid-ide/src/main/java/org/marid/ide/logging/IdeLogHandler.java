@@ -24,13 +24,11 @@ import org.marid.pref.PrefSupport;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
-import java.util.prefs.PreferenceChangeListener;
 
 import static javafx.collections.FXCollections.observableArrayList;
 
@@ -39,24 +37,20 @@ import static javafx.collections.FXCollections.observableArrayList;
  */
 public class IdeLogHandler extends Handler implements PrefSupport {
 
-    private final BlockingQueue<LogRecord> buffer = new LinkedBlockingQueue<>();
+    private final ConcurrentLinkedQueue<LogRecord> queue = new ConcurrentLinkedQueue<>();
     private final ObservableList<LogRecord> logRecords = observableArrayList();
-    private final AtomicInteger maxLogRecords = new AtomicInteger(getPref("maxLogRecords", 10_000));
-    private final PreferenceChangeListener preferenceChangeListener = evt -> {
-        switch (evt.getKey()) {
-            case "maxLogRecords":
-                maxLogRecords.set(Integer.parseInt(evt.getNewValue()));
-                break;
-        }
-    };
 
-    public IdeLogHandler() {
-        preferences().addPreferenceChangeListener(preferenceChangeListener);
+    public int getMaxLogRecords() {
+        return getPref("maxLogRecords", 10_000);
+    }
+
+    public void setMaxLogRecords(int maxLogRecords) {
+        putPref("maxLogRecords", maxLogRecords);
     }
 
     @Override
     public void publish(LogRecord record) {
-        buffer.add(record);
+        queue.add(record);
     }
 
     public ObservableList<LogRecord> getLogRecords() {
@@ -66,15 +60,19 @@ public class IdeLogHandler extends Handler implements PrefSupport {
     @Override
     @Scheduled(fixedDelay = 100L)
     public void flush() {
-        if (!buffer.isEmpty()) {
+        if (!queue.isEmpty()) {
             final List<LogRecord> records = new ArrayList<>();
-            buffer.drainTo(records);
+            for (final Iterator<LogRecord> it = queue.iterator(); it.hasNext(); ) {
+                records.add(it.next());
+                it.remove();
+            }
+            final int maxLogRecords = getMaxLogRecords();
             Platform.runLater(() -> {
                 logRecords.addAll(records);
                 final int size = logRecords.size();
-                final int toRemove = size - maxLogRecords.get();
+                final int toRemove = size - maxLogRecords;
                 if (toRemove > 0) {
-                    this.logRecords.remove(0, toRemove);
+                    logRecords.remove(0, toRemove);
                 }
             });
         }
