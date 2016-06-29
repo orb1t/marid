@@ -46,7 +46,7 @@ public class ProjectDialog extends Dialog<Boolean> implements PrefSupport, L10nS
         final DialogPane dialogPane = getDialogPane();
         dialogPane.setPrefSize(800, 600);
         dialogPane.setContent(tabPane(model));
-        dialogPane.getButtonTypes().addAll(ButtonType.CLOSE);
+        dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
         setTitle("Project preferences");
         initModality(Modality.WINDOW_MODAL);
         initOwner(idePane.getScene().getWindow());

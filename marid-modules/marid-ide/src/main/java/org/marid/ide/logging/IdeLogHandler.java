@@ -66,18 +66,18 @@ public class IdeLogHandler extends Handler implements PrefSupport {
     @Override
     @Scheduled(fixedDelay = 100L)
     public void flush() {
-        Platform.runLater(() -> {
-            final List<LogRecord> logRecords = new ArrayList<>();
-            buffer.drainTo(logRecords);
-            if (!logRecords.isEmpty()) {
-                this.logRecords.addAll(logRecords);
-                final int size = this.logRecords.size();
+        if (!buffer.isEmpty()) {
+            final List<LogRecord> records = new ArrayList<>();
+            buffer.drainTo(records);
+            Platform.runLater(() -> {
+                logRecords.addAll(records);
+                final int size = logRecords.size();
                 final int toRemove = size - maxLogRecords.get();
                 if (toRemove > 0) {
                     this.logRecords.remove(0, toRemove);
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override

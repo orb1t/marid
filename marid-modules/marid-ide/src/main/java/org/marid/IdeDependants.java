@@ -36,9 +36,8 @@ public class IdeDependants {
     public static AnnotationConfigApplicationContext startDependant(ApplicationContext parent, String name, Class<?> configuration) {
         return startDependant(context -> {
             context.setDisplayName(name);
-            context.register(configuration);
-            context.register(SimpleUIConfig.class);
             context.setParent(parent);
+            context.register(SimpleUIConfig.class, configuration);
         });
     }
 

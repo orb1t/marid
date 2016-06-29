@@ -72,8 +72,10 @@ public class IdeContext {
     @Bean
     public ApplicationListener<ContextClosedEvent> taskSchedulerDestroyer(ConcurrentTaskScheduler taskScheduler) {
         return event -> {
-            final ScheduledThreadPoolExecutor executor = (ScheduledThreadPoolExecutor) taskScheduler.getConcurrentExecutor();
-            executor.shutdown();
+            if (event.getApplicationContext() == Ide.context) {
+                final ScheduledThreadPoolExecutor executor = (ScheduledThreadPoolExecutor) taskScheduler.getConcurrentExecutor();
+                executor.shutdown();
+            }
         };
     }
 }

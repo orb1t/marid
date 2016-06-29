@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -62,8 +63,12 @@ public class ProjectCacheManager implements LogSupport {
     }
 
     public void build(ProjectProfile profile) {
-        final ProjectCacheEntry entry = cache.computeIfAbsent(profile, ProjectCacheEntry::new);
-        if (entry.shouldBeUpdated()) {
+        final AtomicBoolean first = new AtomicBoolean();
+        final ProjectCacheEntry entry = cache.computeIfAbsent(profile, p -> {
+            first.set(true);
+            return new ProjectCacheEntry(p);
+        });
+        if (entry.shouldBeUpdated() || first.get()) {
             final MavenProjectBuilder mavenProjectBuilder = new MavenProjectBuilder(profile, profile.logger()::log)
                     .profiles("conf")
                     .goals("clean", "install");

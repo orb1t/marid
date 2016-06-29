@@ -28,13 +28,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.nio.file.Files.isDirectory;
 import static java.nio.file.StandardWatchEventKinds.*;
-import static java.util.stream.Collectors.toCollection;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -55,12 +58,19 @@ public class ProjectCacheEntry implements AutoCloseable, LogSupport {
         try (final Stream<Path> stream = Files.walk(profile.getPath())) {
             fileSystem = profile.getPath().getFileSystem();
             watchService = fileSystem.newWatchService();
-            final Set<Path> directories = stream.filter(p -> Files.isDirectory(p)).collect(toCollection(TreeSet::new));
-            for (final Path dir : directories) {
-                final WatchKey watchKey = dir.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-                log(INFO, "{0} registered for watch", dir);
-                watchKeyMap.put(dir, watchKey);
-            }
+            stream
+                    .filter(Files::isDirectory)
+                    .filter(d -> !d.startsWith(profile.getTarget()))
+                    .forEach(dir -> {
+                        try {
+                            final WatchKey watchKey = dir.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+                            log(INFO, "{0} registered for watch", dir);
+                            watchKeyMap.put(dir, watchKey);
+                        } catch (Exception x) {
+                            log(WARNING, "Unable to register {0}", x, dir);
+                        }
+                    });
+            classLoader = classLoader();
         } catch (Exception x) {
             throw new IllegalStateException(x);
         }
@@ -73,9 +83,6 @@ public class ProjectCacheEntry implements AutoCloseable, LogSupport {
     }
 
     public boolean shouldBeUpdated() {
-        if (classLoader == null) {
-            return true;
-        }
         boolean dirty = false;
         for (WatchKey watchKey = watchService.poll(); watchKey != null; watchKey = watchService.poll()) {
             if (!watchKey.isValid()) {
@@ -84,13 +91,16 @@ public class ProjectCacheEntry implements AutoCloseable, LogSupport {
             try {
                 for (final WatchEvent<?> watchEvent : watchKey.pollEvents()) {
                     final Path path = ((Path) watchKey.watchable()).resolve((Path) watchEvent.context());
+                    if (path.startsWith(profile.getTarget())) {
+                        continue;
+                    }
                     if (watchEvent.kind() == ENTRY_DELETE) {
                         final WatchKey dirKey = watchKeyMap.remove(path);
                         if (dirKey != null) {
                             dirKey.cancel();
                         }
                     } else if (watchEvent.kind() == ENTRY_CREATE) {
-                        if (Files.isDirectory(path)) {
+                        if (isDirectory(path)) {
                             try {
                                 final WatchKey key = path.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
                                 log(INFO, "{0} registered for watch", path);
@@ -130,7 +140,7 @@ public class ProjectCacheEntry implements AutoCloseable, LogSupport {
     }
 
     private void addJars(List<URL> urls, Path dir) {
-        if (Files.isDirectory(dir)) {
+        if (isDirectory(dir)) {
             final File[] files = dir.toFile().listFiles((d, name) -> name.endsWith(".jar"));
             urls.addAll(Stream.of(files).map(f -> Calls.call(() -> f.toURI().toURL())).collect(Collectors.toList()));
         }
@@ -140,7 +150,7 @@ public class ProjectCacheEntry implements AutoCloseable, LogSupport {
         final List<URL> urls = new ArrayList<>();
         addJars(urls, profile.getTarget().resolve("lib"));
         addJars(urls, profile.getTarget().resolve("confLib"));
-        if (Files.isDirectory(profile.getTarget().resolve("classes"))) {
+        if (isDirectory(profile.getTarget().resolve("classes"))) {
             urls.add(Calls.call(() -> profile.getTarget().resolve("classes").toUri().toURL()));
         }
         return new URLClassLoader(urls.toArray(new URL[urls.size()]));

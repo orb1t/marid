@@ -22,7 +22,6 @@ import javafx.scene.control.Dialog;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -38,7 +37,6 @@ public class SimpleUIConfig implements DestructionAwareBeanPostProcessor {
     private final List<Window> windows = new ArrayList<>();
     private final AnnotationConfigApplicationContext context;
 
-    @Autowired
     public SimpleUIConfig(AnnotationConfigApplicationContext context) {
         this.context = context;
     }
