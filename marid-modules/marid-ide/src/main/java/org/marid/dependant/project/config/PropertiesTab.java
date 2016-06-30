@@ -22,14 +22,20 @@ import javafx.beans.property.StringProperty;
 import org.apache.maven.model.Model;
 import org.marid.jfx.Props;
 import org.marid.jfx.panes.GenericGridPane;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import java.util.Properties;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component("Properties")
+@Qualifier("projectConf")
 public class PropertiesTab extends GenericGridPane {
 
+    @Autowired
     public PropertiesTab(Model model) {
         final Properties properties = model.getProperties();
         addTextField(properties, "Marid version", "marid.runtime.version", System.getProperty("implementation.version"));

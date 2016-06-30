@@ -26,7 +26,6 @@ import org.apache.maven.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.extension.internal.CoreExports;
 import org.apache.maven.extension.internal.CoreExtensionEntry;
-import org.apache.maven.model.Profile;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusConstants;
@@ -57,7 +56,7 @@ public class MavenProjectBuilder implements LogSupport {
     private final Consumer<LogRecord> logRecordConsumer;
     private final Map<String, ProjectPlexusLogger> loggerMap = new ConcurrentHashMap<>();
     private final List<String> goals = new ArrayList<>();
-    private final List<Profile> profiles = new ArrayList<>();
+    private final List<String> profiles = new ArrayList<>();
 
     public MavenProjectBuilder(ProjectProfile profile, Consumer<LogRecord> logRecordConsumer) {
         this.profile = profile;
@@ -74,12 +73,7 @@ public class MavenProjectBuilder implements LogSupport {
     }
 
     public MavenProjectBuilder profiles(String... ids) {
-        final Set<String> idSet = new HashSet<>(Arrays.asList(ids));
-        for (final Profile p : profile.getModel().getProfiles()) {
-            if (idSet.contains(p.getId()) && !profiles.contains(p)) {
-                profiles.add(p);
-            }
-        }
+        Collections.addAll(profiles, ids);
         return this;
     }
 
@@ -132,7 +126,7 @@ public class MavenProjectBuilder implements LogSupport {
                 .setCacheNotFound(true)
                 .setInteractiveMode(true)
                 .setCacheTransferError(false)
-                .setProfiles(profiles.isEmpty() ? null : profiles);
+                .setActiveProfiles(profiles.isEmpty() ? null : profiles);
     }
 
     public Thread build(Consumer<MavenExecutionResult> consumer) {

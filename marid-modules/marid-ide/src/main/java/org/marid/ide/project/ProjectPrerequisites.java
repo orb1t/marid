@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -58,7 +57,6 @@ public class ProjectPrerequisites {
         applyPluginManagement();
         applyPlugins();
         applyRuntimeDependency();
-        applyConfProfile();
     }
 
     void applyAddress() {
@@ -230,46 +228,5 @@ public class ProjectPrerequisites {
             node.setValue(value);
         }
         parent.addChild(node);
-    }
-
-    private void applyConfProfile() {
-        applyConfBuild();
-    }
-
-    private void applyConfBuild() {
-        final Profile confProfile = model.getProfiles().stream().filter(p -> "conf".equals(p.getId())).findAny().orElse(null);
-        final BuildBase confBuild = Optional.ofNullable(confProfile.getBuild()).orElseGet(() -> {
-            final Build build = new Build();
-            confProfile.setBuild(build);
-            return build;
-        });
-        {
-            final Plugin dependencyPlugin = confBuild.getPlugins().stream()
-                    .filter(p -> "maven-dependency-plugin".equals(p.getArtifactId()))
-                    .findAny()
-                    .orElseGet(() -> {
-                        final Plugin plugin = new Plugin();
-                        plugin.setArtifactId("maven-dependency-plugin");
-                        confBuild.getPlugins().add(plugin);
-                        return plugin;
-                    });
-            dependencyPlugin.setVersion(mavenSettings.getDependencyPluginVersion());
-            final PluginExecution copyDependenciesExecution = dependencyPlugin.getExecutions().stream()
-                    .filter(e -> "conf-copy-deps".equals(e.getId()))
-                    .findAny()
-                    .orElseGet(() -> {
-                        final PluginExecution execution = new PluginExecution();
-                        execution.setId("conf-copy-deps");
-                        dependencyPlugin.getExecutions().add(execution);
-                        return execution;
-                    });
-            copyDependenciesExecution.setGoals(singletonList("copy-dependencies"));
-            copyDependenciesExecution.setPhase("package");
-            final Xpp3Dom configuration = new Xpp3Dom("configuration");
-            copyDependenciesExecution.setConfiguration(configuration);
-            addChild(configuration, "outputDirectory", "${project.build.directory}/confLib");
-            addChild(configuration, "overWriteReleases", "true");
-            addChild(configuration, "overWriteSnapshots", "true");
-        }
     }
 }

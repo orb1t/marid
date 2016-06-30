@@ -35,6 +35,8 @@ import org.apache.maven.model.Repository;
 import org.apache.maven.model.RepositoryPolicy;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -45,6 +47,8 @@ import static org.marid.jfx.Props.stringProperty;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component("Repositories")
+@Qualifier("projectConf")
 public class RepositoriesTab extends BorderPane {
 
     public RepositoriesTab(Model model) {

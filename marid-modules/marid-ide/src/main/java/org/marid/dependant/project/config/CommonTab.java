@@ -22,10 +22,14 @@ import javafx.scene.control.CheckBox;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.marid.jfx.panes.GenericGridPane;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component("Common")
+@Qualifier("projectConf")
 public class CommonTab extends GenericGridPane {
 
     public CommonTab(Model model) {
