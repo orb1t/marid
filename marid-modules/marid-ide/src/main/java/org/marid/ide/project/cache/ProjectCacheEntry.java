@@ -149,7 +149,6 @@ public class ProjectCacheEntry implements AutoCloseable, LogSupport {
     private URLClassLoader classLoader() {
         final List<URL> urls = new ArrayList<>();
         addJars(urls, profile.getTarget().resolve("lib"));
-        addJars(urls, profile.getTarget().resolve("confLib"));
         if (isDirectory(profile.getTarget().resolve("classes"))) {
             urls.add(Calls.call(() -> profile.getTarget().resolve("classes").toUri().toURL()));
         }

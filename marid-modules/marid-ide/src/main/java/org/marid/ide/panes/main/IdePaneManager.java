@@ -19,17 +19,15 @@
 package org.marid.ide.panes.main;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.CheckMenuItem;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
-import org.marid.ide.menu.IdeMenuItem;
+import org.marid.jfx.action.FxAction;
+import org.marid.spring.action.MenuAction;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.inject.Provider;
-
-import static org.marid.ide.menu.MenuItemType.CHECK;
 import static org.marid.jfx.icons.FontIcon.D_BORDER_TOP;
 import static org.marid.jfx.icons.FontIcon.D_EXIT_TO_APP;
 
@@ -40,18 +38,26 @@ import static org.marid.jfx.icons.FontIcon.D_EXIT_TO_APP;
 public class IdePaneManager {
 
     @Bean
-    @IdeMenuItem(menu = "Window", text = "Always on top", group = "ops", icon = D_BORDER_TOP, type = CHECK)
-    public EventHandler<ActionEvent> alwaysOnTop(Provider<IdePane> idePaneProvider) {
-        return event -> {
-            final Stage stage = (Stage) idePaneProvider.get().getScene().getWindow();
-            final CheckMenuItem menuItem = (CheckMenuItem) event.getSource();
-            stage.setAlwaysOnTop(menuItem.isSelected());
-        };
+    @MenuAction
+    public FxAction alwaysOnTopAction(ObjectFactory<IdePane> idePaneObjectFactory) {
+        return new FxAction(null, "ops", "Window")
+                .setText("Always on top")
+                .setIcon(D_BORDER_TOP)
+                .setSelected(false)
+                .setEventHandler(event -> {
+                    final Stage stage = (Stage) idePaneObjectFactory.getObject().getScene().getWindow();
+                    final CheckMenuItem menuItem = (CheckMenuItem) event.getSource();
+                    stage.setAlwaysOnTop(menuItem.isSelected());
+                });
     }
 
     @Bean
-    @IdeMenuItem(menu = "File", text = "Exit", group = "x", key = "F12", icon = D_EXIT_TO_APP)
-    public EventHandler<ActionEvent> exitItem() {
-        return event -> Platform.exit();
+    @MenuAction
+    public FxAction exitAction() {
+        return new FxAction(null, "x", "File")
+                .setText("Exit")
+                .setIcon(D_EXIT_TO_APP)
+                .setEventHandler(event -> Platform.exit())
+                .setAccelerator(KeyCombination.valueOf("F12"));
     }
 }

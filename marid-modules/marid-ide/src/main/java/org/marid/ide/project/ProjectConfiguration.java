@@ -18,18 +18,18 @@
 
 package org.marid.ide.project;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.KeyCombination;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
-import org.marid.ide.menu.IdeMenuItem;
 import org.marid.ide.project.cache.ProjectCacheManager;
-import org.marid.ide.toolbar.IdeToolbarItem;
+import org.marid.jfx.action.FxAction;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
+import org.marid.spring.action.MenuAction;
+import org.marid.spring.action.ToolbarAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,67 +60,88 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     }
 
     @Bean
-    @IdeMenuItem(menu = "Project", text = "Project setup...", group = "setup", icon = O_TOOLS)
-    @IdeToolbarItem(group = "projectSetup")
-    public EventHandler<ActionEvent> projectSetup() {
-        return event -> startDependant("projectSetup", ProjectConfigConfiguration.class);
+    @MenuAction
+    @ToolbarAction
+    public FxAction projectSetupAction() {
+        return new FxAction("projectSetup", "setup", "Project")
+                .setText("Project setup...")
+                .setIcon(O_TOOLS)
+                .setEventHandler(event -> startDependant("projectSetup", ProjectConfigConfiguration.class));
     }
 
     @Bean
-    @IdeMenuItem(menu = "Project", text = "Save", group = "io", icon = F_SAVE, key = "Ctrl+S")
-    @IdeToolbarItem(group = "projectIO")
-    public EventHandler<ActionEvent> projectSave(ProjectSaver projectSaver) {
-        return event -> callWithTime(projectSaver::save,
-                time -> log(INFO, "Profile [{0}] saved in {1} ms", projectManager.getProfile(), time));
+    @MenuAction
+    @ToolbarAction
+    public FxAction projectSaveAction(ProjectSaver projectSaver) {
+        return new FxAction("projectIO", "io", "Project")
+                .setAccelerator(KeyCombination.valueOf("Ctrl+S"))
+                .setText("Save")
+                .setIcon(F_SAVE)
+                .setEventHandler(event -> callWithTime(projectSaver::save,
+                        time -> log(INFO, "Profile [{0}] saved in {1} ms", projectManager.getProfile(), time)));
     }
 
     @Bean
-    @IdeMenuItem(menu = "Project", text = "Build", group = "pb", icon = D_CLOCK_FAST, key = "F9")
-    @IdeToolbarItem(group = "projectBuild")
-    public EventHandler<ActionEvent> projectBuild(ProjectCacheManager projectCacheManager) {
-        return event -> projectCacheManager.build(projectManager.getProfile());
+    @MenuAction
+    @ToolbarAction
+    public FxAction projectBuildAction(ProjectCacheManager projectCacheManager) {
+        return new FxAction("projectBuild", "pb", "Project")
+                .setAccelerator(KeyCombination.valueOf("F9"))
+                .setText("Build")
+                .setIcon(D_CLOCK_FAST)
+                .setEventHandler(event -> projectCacheManager.build(projectManager.getProfile()));
     }
 
     @Bean
-    @IdeMenuItem(menu = "Project", text = "Run", group = "pb", icon = F_PLAY, key = "F5")
-    @IdeToolbarItem(group = "projectBuild")
-    public EventHandler<ActionEvent> projectRun() {
-        return event -> startDependant("projectSetup", ProjectRunnerConfiguration.class);
+    @MenuAction
+    @ToolbarAction
+    public FxAction projectRunAction() {
+        return new FxAction("projectBuild", "pb", "Project")
+                .setAccelerator(KeyCombination.valueOf("F5"))
+                .setText("Run")
+                .setIcon(F_PLAY)
+                .setEventHandler(event -> startDependant("projectSetup", ProjectRunnerConfiguration.class));
     }
 
     @Bean
-    @IdeMenuItem(menu = "Project", text = "Add profile...", group = "pm", icon = M_ADD_BOX)
-    @IdeToolbarItem(group = "projectIO", id = "p_add")
-    public EventHandler<ActionEvent> projectAddProfile(ProjectSaver projectSaver) {
-        return event -> {
-            final TextInputDialog dialog = new TextInputDialog("profile");
-            dialog.setHeaderText(s("Profile name") + ":");
-            dialog.setTitle(s("Add profile"));
-            final Optional<String> result = dialog.showAndWait();
-            if (result.isPresent()) {
-                final ProjectProfile profile = projectManager.add(result.get());
-                try (final InputStream is = getClass().getResourceAsStream("/logging/default.properties")) {
-                    Files.copy(is, profile.getSrcMainResources().resolve("logging.properties"), REPLACE_EXISTING);
-                } catch (Exception x) {
-                    log(WARNING, "Unable to write default logging properties", x);
-                }
-                projectSaver.save();
-            }
-        };
+    @MenuAction
+    @ToolbarAction
+    public FxAction projectAddProfileAction(ProjectSaver projectSaver) {
+        return new FxAction("projectIO", "pm", "Project")
+                .setText("Add profile...")
+                .setIcon(M_ADD_BOX)
+                .setEventHandler(event -> {
+                    final TextInputDialog dialog = new TextInputDialog("profile");
+                    dialog.setHeaderText(s("Profile name") + ":");
+                    dialog.setTitle(s("Add profile"));
+                    final Optional<String> result = dialog.showAndWait();
+                    if (result.isPresent()) {
+                        final ProjectProfile profile = projectManager.add(result.get());
+                        try (final InputStream is = getClass().getResourceAsStream("/logging/default.properties")) {
+                            Files.copy(is, profile.getSrcMainResources().resolve("logging.properties"), REPLACE_EXISTING);
+                        } catch (Exception x) {
+                            log(WARNING, "Unable to write default logging properties", x);
+                        }
+                        projectSaver.save();
+                    }
+                });
     }
 
     @Bean
-    @IdeMenuItem(menu = "Project", text = "Remove profile", group = "pm", icon = D_MINUS_BOX)
-    @IdeToolbarItem(group = "projectIO", id = "p_remove")
-    public EventHandler<ActionEvent> projectRemoveProfile() {
-        return event -> {
-            final Alert alert = new Alert(CONFIRMATION, s("Do you really want to remove the profile?"), YES, NO);
-            alert.setTitle(s("Profile removal"));
-            alert.setHeaderText(s("Project removal confirmation"));
-            final Optional<ButtonType> result = alert.showAndWait();
-            if (result.isPresent() && result.get() == ButtonType.YES) {
-                projectManager.remove(projectManager.getProfile());
-            }
-        };
+    @MenuAction
+    @ToolbarAction
+    public FxAction projectRemoveProfileAction() {
+        return new FxAction("projectIO", "pm", "Project")
+                .setText("Remove profile")
+                .setIcon(D_MINUS_BOX)
+                .setEventHandler(event -> {
+                    final Alert alert = new Alert(CONFIRMATION, s("Do you really want to remove the profile?"), YES, NO);
+                    alert.setTitle(s("Profile removal"));
+                    alert.setHeaderText(s("Project removal confirmation"));
+                    final Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent() && result.get() == ButtonType.YES) {
+                        projectManager.remove(projectManager.getProfile());
+                    }
+                });
     }
 }

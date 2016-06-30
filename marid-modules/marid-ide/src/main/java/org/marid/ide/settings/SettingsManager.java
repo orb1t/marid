@@ -18,11 +18,10 @@
 
 package org.marid.ide.settings;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import org.marid.dependant.settings.SettingsConfiguration;
-import org.marid.ide.menu.IdeMenuItem;
-import org.marid.ide.toolbar.IdeToolbarItem;
+import org.marid.jfx.action.FxAction;
+import org.marid.spring.action.MenuAction;
+import org.marid.spring.action.ToolbarAction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -36,9 +35,12 @@ import static org.marid.jfx.icons.FontIcon.O_SETTINGS;
 public class SettingsManager {
 
     @Bean
-    @IdeToolbarItem(group = "settings")
-    @IdeMenuItem(menu = "Tools", text = "Settings...", group = "settings", icon = O_SETTINGS)
-    public EventHandler<ActionEvent> settingsItem() {
-        return event -> startDependant("settingsDialog", SettingsConfiguration.class);
+    @MenuAction
+    @ToolbarAction
+    public FxAction settingsAction() {
+        return new FxAction("settings", "settings", "Tools")
+                .setIcon(O_SETTINGS)
+                .setText("Settings...")
+                .setEventHandler(event -> startDependant("settingsDialog", SettingsConfiguration.class));
     }
 }

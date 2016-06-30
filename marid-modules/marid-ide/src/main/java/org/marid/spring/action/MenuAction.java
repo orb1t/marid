@@ -16,25 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.toolbar;
+package org.marid.spring.action;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER})
 @Qualifier
-public @interface IdeToolbarItem {
-
-    String tip() default "";
-
-    String id() default "";
-
-    String icon() default "";
-
-    String group() default "";
+public @interface MenuAction {
 }

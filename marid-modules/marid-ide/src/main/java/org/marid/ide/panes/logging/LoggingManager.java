@@ -18,13 +18,10 @@
 
 package org.marid.ide.panes.logging;
 
-import de.jensd.fx.glyphs.GlyphIcon;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.control.CheckMenuItem;
-import org.marid.ide.menu.IdeMenuItem;
-import org.marid.ide.toolbar.IdeToolbarItem;
-import org.marid.jfx.icons.FontIcons;
+import javafx.scene.input.KeyCombination;
+import org.marid.jfx.action.FxAction;
+import org.marid.spring.action.MenuAction;
+import org.marid.spring.action.ToolbarAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,71 +44,76 @@ public class LoggingManager {
     }
 
     @Bean
-    @IdeMenuItem(menu = "Log", text = "Clear all log records", group = "clear", icon = M_CLEAR_ALL, key = "F7")
-    @IdeToolbarItem(group = "log")
-    public EventHandler<ActionEvent> clearLog(LoggingFilter loggingFilter) {
-        return event -> loggingFilter.clear();
+    @MenuAction
+    @ToolbarAction
+    public FxAction clearLogAction(LoggingFilter loggingFilter) {
+        return new FxAction("log", "clear", "Log")
+                .setText("Clear all log records")
+                .setIcon(M_CLEAR_ALL)
+                .setAccelerator(KeyCombination.valueOf("F7"))
+                .setEventHandler(event -> loggingFilter.clear());
     }
 
-    private CheckMenuItem menuItem(Level level) {
-        final LoggingTable.IconDescriptor iconDescriptor = LoggingTable.icon(level);
-        final GlyphIcon<?> glyphIcon = FontIcons.glyphIcon(iconDescriptor.icon, 16);
-        final CheckMenuItem menuItem = new CheckMenuItem(level.getLocalizedName(), glyphIcon);
-        menuItem.selectedProperty().bindBidirectional(loggingFilter.getProperty(level));
-        return menuItem;
-    }
-
-    @Bean
-    @IdeMenuItem(menu = "Log", group = "levels", text = "02")
-    public CheckMenuItem offMenuItem() {
-        return menuItem(Level.OFF);
-    }
-
-    @Bean
-    @IdeMenuItem(menu = "Log", group = "levels", text = "02")
-    public CheckMenuItem severeMenuItem() {
-        return menuItem(Level.SEVERE);
+    public FxAction levelAction(Level level) {
+        final FxAction action = new FxAction(null, "levels", "Log")
+                .setText(level.getLocalizedName())
+                .setIcon(LoggingTable.icon(level).icon)
+                .setSelected(false);
+        action.selectedProperty().bindBidirectional(loggingFilter.getProperty(level));
+        return action;
     }
 
     @Bean
-    @IdeMenuItem(menu = "Log", group = "levels", text = "03")
-    public CheckMenuItem warningMenuItem() {
-        return menuItem(Level.WARNING);
+    @MenuAction
+    public FxAction offMenuItem() {
+        return levelAction(Level.OFF);
     }
 
     @Bean
-    @IdeMenuItem(menu = "Log", group = "levels", text = "04")
-    public CheckMenuItem infoMenuItem() {
-        return menuItem(Level.INFO);
+    @MenuAction
+    public FxAction severeMenuItem() {
+        return levelAction(Level.SEVERE);
     }
 
     @Bean
-    @IdeMenuItem(menu = "Log", group = "levels", text = "05")
-    public CheckMenuItem configMenuItem() {
-        return menuItem(Level.CONFIG);
+    @MenuAction
+    public FxAction warningMenuItem() {
+        return levelAction(Level.WARNING);
     }
 
     @Bean
-    @IdeMenuItem(menu = "Log", group = "levels", text = "06")
-    public CheckMenuItem fineMenuItem() {
-        return menuItem(Level.FINE);
+    @MenuAction
+    public FxAction infoMenuItem() {
+        return levelAction(Level.INFO);
     }
 
     @Bean
-    @IdeMenuItem(menu = "Log", group = "levels", text = "07")
-    public CheckMenuItem finerMenuItem() {
-        return menuItem(Level.FINER);
+    @MenuAction
+    public FxAction configMenuItem() {
+        return levelAction(Level.CONFIG);
     }
 
     @Bean
-    @IdeMenuItem(menu = "Log", group = "levels", text = "08")
-    public CheckMenuItem finestMenuItem() {
-        return menuItem(Level.FINEST);
+    @MenuAction
+    public FxAction fineMenuItem() {
+        return levelAction(Level.FINE);
     }
 
     @Bean
-    @IdeMenuItem(menu = "Log", group = "levelsAll", text = "09")
-    public CheckMenuItem allLevelsMenuItem() {
-        return menuItem(Level.ALL);
+    @MenuAction
+    public FxAction finerMenuItem() {
+        return levelAction(Level.FINER);
+    }
+
+    @Bean
+    @MenuAction
+    public FxAction finestMenuItem() {
+        return levelAction(Level.FINEST);
+    }
+
+    @Bean
+    @MenuAction
+    public FxAction allLevelsMenuItem() {
+        return levelAction(Level.ALL);
     }
 }

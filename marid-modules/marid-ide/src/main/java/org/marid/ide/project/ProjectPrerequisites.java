@@ -101,8 +101,7 @@ public class ProjectPrerequisites {
 
     void applyExecMavenPluginManagement() {
         final PluginManagement pluginManagement = model.getBuild().getPluginManagement();
-        pluginManagement.getPlugins().removeIf(p ->
-                "org.codehaus.mojo".equals(p.getGroupId()) && "exec-maven-plugin".equals(p.getArtifactId()));
+        pluginManagement.getPlugins().removeIf(p -> "org.codehaus.mojo".equals(p.getGroupId()) && "exec-maven-plugin".equals(p.getArtifactId()));
         final Plugin plugin = new Plugin();
         plugin.setGroupId("org.codehaus.mojo");
         plugin.setArtifactId("exec-maven-plugin");

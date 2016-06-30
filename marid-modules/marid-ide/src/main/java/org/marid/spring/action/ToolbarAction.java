@@ -16,22 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.jfx;
+package org.marid.spring.action;
 
-import javafx.beans.property.StringProperty;
-import javafx.collections.ObservableList;
-import javafx.scene.control.ComboBox;
+import org.springframework.beans.factory.annotation.Qualifier;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ComboBoxes {
-
-    static <T> ComboBox<T> comboBox(ObservableList<T> list, StringProperty textProperty) {
-        final ComboBox<T> comboBox = new ComboBox<>(list);
-        comboBox.setEditable(true);
-        comboBox.getEditor().textProperty().bindBidirectional(textProperty);
-        comboBox.setMaxWidth(Double.MAX_VALUE);
-        return comboBox;
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER})
+@Qualifier
+public @interface ToolbarAction {
 }

@@ -18,10 +18,9 @@
 
 package org.marid.ide.dependants;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import org.marid.dependant.iconviewer.IconViewerConfiguration;
-import org.marid.ide.menu.IdeMenuItem;
+import org.marid.jfx.action.FxAction;
+import org.marid.spring.action.MenuAction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,8 +34,11 @@ import static org.marid.jfx.icons.FontIcon.M_OPEN_IN_BROWSER;
 public class DependantsManager {
 
     @Bean
-    @IdeMenuItem(menu = "Tools", text = "Icon viewer...", group = "icons", icon = M_OPEN_IN_BROWSER)
-    public EventHandler<ActionEvent> iconViewer() {
-        return event -> startDependant("iconViewer", IconViewerConfiguration.class);
+    @MenuAction
+    public FxAction iconViewerAction() {
+        return new FxAction(null, "icons", "Tools")
+                .setIcon(M_OPEN_IN_BROWSER)
+                .setText("Icon viewer")
+                .setEventHandler(event -> startDependant("iconViewer", IconViewerConfiguration.class));
     }
 }

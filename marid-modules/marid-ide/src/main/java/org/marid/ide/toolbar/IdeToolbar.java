@@ -19,87 +19,62 @@
 package org.marid.ide.toolbar;
 
 import de.jensd.fx.glyphs.GlyphIcon;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Separator;
+import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
 import javafx.stage.WindowEvent;
-import org.marid.ide.menu.IdeMenuItem;
+import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcons;
+import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
-import org.marid.misc.Casts;
-import org.marid.spring.AnnotatedBean;
+import org.marid.spring.action.ToolbarAction;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 import static java.util.Comparator.comparing;
+import static javafx.beans.binding.Bindings.createObjectBinding;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeToolbar extends ToolBar implements LogSupport {
+public class IdeToolbar extends ToolBar implements LogSupport, L10nSupport {
 
     @Autowired
-    public IdeToolbar(GenericApplicationContext context) {
+    public IdeToolbar(@Lazy @ToolbarAction Map<String, FxAction> menuActions) {
         setMaxWidth(Double.MAX_VALUE);
         sceneProperty().addListener((observable, oldValue, newValue) -> {
             newValue.windowProperty().addListener((observable1, oldWin, newWin) -> {
                 newWin.addEventHandler(WindowEvent.WINDOW_SHOWING, event -> {
                     final Map<String, Set<Node>> buttonMap = new TreeMap<>();
-                    AnnotatedBean.walk(context, IdeToolbarItem.class, bean -> {
-                        final IdeToolbarItem ti = bean.annotation;
-                        final IdeMenuItem mi = bean.getAnnotation(IdeMenuItem.class);
-                        final String group = ti.group().isEmpty() ? (mi != null ? mi.group() : ti.group()) : ti.group();
-                        final String id = ti.id().isEmpty() ? null : ti.id();
-                        final String tip = ti.tip().isEmpty() ? (mi != null ? mi.text() : null) : ti.tip();
-                        final GlyphIcon<?> toolbarIcon = ti.icon().isEmpty() ? null : FontIcons.glyphIcon(ti.icon(), 20);
-                        final GlyphIcon<?> menuIcon;
-                        if (mi == null || toolbarIcon != null) {
-                            menuIcon = null;
-                        } else {
-                            menuIcon = mi.icon().isEmpty() ? null : FontIcons.glyphIcon(mi.icon(), 20);
+                    final Map<Node, String> reversedMap = new IdentityHashMap<>();
+                    menuActions.forEach((id, action) -> {
+                        final String group = action.getToolbarGroup();
+                        final GlyphIcon<?> icon = action.getIcon() != null ? FontIcons.glyphIcon(action.getIcon(), 20) : null;
+                        final Button button = new Button(null, icon);
+                        button.setOnAction(action.getEventHandler());
+                        if (action.disabledProperty() != null) {
+                            button.disableProperty().bindBidirectional(action.disabledProperty());
                         }
-                        final GlyphIcon<?> icon = toolbarIcon == null ? menuIcon : toolbarIcon;
-                        final Node node;
-                        if (bean.object instanceof Node) {
-                            node = (Node) bean.object;
-                        } else if (bean.object instanceof EventHandler) {
-                            final Button button = new Button(null, icon);
-                            button.setOnAction(Casts.cast(bean.object));
-                            node = button;
-                        } else {
-                            return;
+                        if (action.hintProperty() != null) {
+                            button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(s(action.getHint())), action.hintProperty()));
+                        } else if (action.textProperty() != null) {
+                            button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(s(action.getText())), action.textProperty()));
                         }
-                        if (node instanceof Control) {
-                            final Control control = (Control) node;
-                            if (tip != null) {
-                                control.setTooltip(new Tooltip(tip));
-                            }
-                        }
-                        if (id != null) {
-                            node.setId(id);
-                        }
-                        node.setFocusTraversable(false);
-                        buttonMap.computeIfAbsent(group, k -> new LinkedHashSet<>()).add(node);
+                        reversedMap.put(button, id);
+                        buttonMap.computeIfAbsent(group, g -> new HashSet<>()).add(button);
                     });
                     buttonMap.forEach((group, buttons) -> {
-                        buttons.stream().sorted(comparing(n -> n.getId() == null ? "" : n.getId())).forEach(getItems()::add);
+                        buttons.stream().sorted(comparing(reversedMap::get)).forEach(getItems()::add);
                         getItems().add(new Separator());
                     });
                 });
             });
         });
-    }
-
-    public <T extends Node> T getNode(Class<T> type, String id) {
-        return getItems().stream()
-                .filter(type::isInstance)
-                .map(type::cast)
-                .filter(n -> id.equals(n.getId()))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException(id));
     }
 }
