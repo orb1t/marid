@@ -20,7 +20,7 @@ package org.marid.ide.dependants;
 
 import org.marid.dependant.iconviewer.IconViewerConfiguration;
 import org.marid.jfx.action.FxAction;
-import org.marid.spring.action.MenuAction;
+import org.marid.spring.action.IdeAction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,7 +34,7 @@ import static org.marid.jfx.icons.FontIcon.M_OPEN_IN_BROWSER;
 public class DependantsManager {
 
     @Bean
-    @MenuAction
+    @IdeAction
     public FxAction iconViewerAction() {
         return new FxAction(null, "icons", "Tools")
                 .setIcon(M_OPEN_IN_BROWSER)

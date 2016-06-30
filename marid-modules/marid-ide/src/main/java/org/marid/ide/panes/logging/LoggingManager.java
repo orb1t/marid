@@ -20,8 +20,7 @@ package org.marid.ide.panes.logging;
 
 import javafx.scene.input.KeyCombination;
 import org.marid.jfx.action.FxAction;
-import org.marid.spring.action.MenuAction;
-import org.marid.spring.action.ToolbarAction;
+import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,8 +43,7 @@ public class LoggingManager {
     }
 
     @Bean
-    @MenuAction
-    @ToolbarAction
+    @IdeAction
     public FxAction clearLogAction(LoggingFilter loggingFilter) {
         return new FxAction("log", "clear", "Log")
                 .setText("Clear all log records")
@@ -64,55 +62,55 @@ public class LoggingManager {
     }
 
     @Bean
-    @MenuAction
+    @IdeAction
     public FxAction offMenuItem() {
         return levelAction(Level.OFF);
     }
 
     @Bean
-    @MenuAction
+    @IdeAction
     public FxAction severeMenuItem() {
         return levelAction(Level.SEVERE);
     }
 
     @Bean
-    @MenuAction
+    @IdeAction
     public FxAction warningMenuItem() {
         return levelAction(Level.WARNING);
     }
 
     @Bean
-    @MenuAction
+    @IdeAction
     public FxAction infoMenuItem() {
         return levelAction(Level.INFO);
     }
 
     @Bean
-    @MenuAction
+    @IdeAction
     public FxAction configMenuItem() {
         return levelAction(Level.CONFIG);
     }
 
     @Bean
-    @MenuAction
+    @IdeAction
     public FxAction fineMenuItem() {
         return levelAction(Level.FINE);
     }
 
     @Bean
-    @MenuAction
+    @IdeAction
     public FxAction finerMenuItem() {
         return levelAction(Level.FINER);
     }
 
     @Bean
-    @MenuAction
+    @IdeAction
     public FxAction finestMenuItem() {
         return levelAction(Level.FINEST);
     }
 
     @Bean
-    @MenuAction
+    @IdeAction
     public FxAction allLevelsMenuItem() {
         return levelAction(Level.ALL);
     }

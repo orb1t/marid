@@ -20,8 +20,7 @@ package org.marid.ide.settings;
 
 import org.marid.dependant.settings.SettingsConfiguration;
 import org.marid.jfx.action.FxAction;
-import org.marid.spring.action.MenuAction;
-import org.marid.spring.action.ToolbarAction;
+import org.marid.spring.action.IdeAction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,8 +34,7 @@ import static org.marid.jfx.icons.FontIcon.O_SETTINGS;
 public class SettingsManager {
 
     @Bean
-    @MenuAction
-    @ToolbarAction
+    @IdeAction
     public FxAction settingsAction() {
         return new FxAction("settings", "settings", "Tools")
                 .setIcon(O_SETTINGS)

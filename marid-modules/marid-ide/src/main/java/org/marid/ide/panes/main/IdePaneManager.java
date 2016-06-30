@@ -23,7 +23,7 @@ import javafx.scene.control.CheckMenuItem;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import org.marid.jfx.action.FxAction;
-import org.marid.spring.action.MenuAction;
+import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,7 +38,7 @@ import static org.marid.jfx.icons.FontIcon.D_EXIT_TO_APP;
 public class IdePaneManager {
 
     @Bean
-    @MenuAction
+    @IdeAction
     public FxAction alwaysOnTopAction(ObjectFactory<IdePane> idePaneObjectFactory) {
         return new FxAction(null, "ops", "Window")
                 .setText("Always on top")
@@ -52,7 +52,7 @@ public class IdePaneManager {
     }
 
     @Bean
-    @MenuAction
+    @IdeAction
     public FxAction exitAction() {
         return new FxAction(null, "x", "File")
                 .setText("Exit")

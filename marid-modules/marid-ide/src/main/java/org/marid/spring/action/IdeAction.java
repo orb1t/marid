@@ -31,5 +31,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER})
 @Qualifier
-public @interface ToolbarAction {
+public @interface IdeAction {
 }

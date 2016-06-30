@@ -28,8 +28,7 @@ import org.marid.ide.project.cache.ProjectCacheManager;
 import org.marid.jfx.action.FxAction;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
-import org.marid.spring.action.MenuAction;
-import org.marid.spring.action.ToolbarAction;
+import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,8 +59,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     }
 
     @Bean
-    @MenuAction
-    @ToolbarAction
+    @IdeAction
     public FxAction projectSetupAction() {
         return new FxAction("projectSetup", "setup", "Project")
                 .setText("Project setup...")
@@ -70,8 +68,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     }
 
     @Bean
-    @MenuAction
-    @ToolbarAction
+    @IdeAction
     public FxAction projectSaveAction(ProjectSaver projectSaver) {
         return new FxAction("projectIO", "io", "Project")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+S"))
@@ -82,8 +79,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     }
 
     @Bean
-    @MenuAction
-    @ToolbarAction
+    @IdeAction
     public FxAction projectBuildAction(ProjectCacheManager projectCacheManager) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F9"))
@@ -93,8 +89,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     }
 
     @Bean
-    @MenuAction
-    @ToolbarAction
+    @IdeAction
     public FxAction projectRunAction() {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F5"))
@@ -104,8 +99,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     }
 
     @Bean
-    @MenuAction
-    @ToolbarAction
+    @IdeAction
     public FxAction projectAddProfileAction(ProjectSaver projectSaver) {
         return new FxAction("projectIO", "pm", "Project")
                 .setText("Add profile...")
@@ -128,8 +122,7 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
     }
 
     @Bean
-    @MenuAction
-    @ToolbarAction
+    @IdeAction
     public FxAction projectRemoveProfileAction() {
         return new FxAction("projectIO", "pm", "Project")
                 .setText("Remove profile")
