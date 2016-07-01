@@ -26,8 +26,8 @@ import org.marid.jfx.icons.FontIcons;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -40,14 +40,14 @@ import java.util.TreeMap;
 public class IdeMenu extends MenuBar implements L10nSupport, LogSupport {
 
     @Autowired
-    public IdeMenu(@Lazy @IdeAction Map<String, FxAction> menuActions) {
+    public IdeMenu(@IdeAction ObjectFactory<Map<String, FxAction>> menuActionsFactory) {
         setMaxWidth(Double.MAX_VALUE);
         sceneProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 newValue.windowProperty().addListener((observable1, oldWin, newWin) -> {
                     newWin.addEventHandler(WindowEvent.WINDOW_SHOWING, event -> {
                         final Map<String, Map<String, Map<String, MenuItem>>> itemMap = new TreeMap<>();
-                        menuActions.forEach((id, action) -> {
+                        menuActionsFactory.getObject().forEach((id, action) -> {
                             if (action.getGroup() == null) {
                                 return;
                             }

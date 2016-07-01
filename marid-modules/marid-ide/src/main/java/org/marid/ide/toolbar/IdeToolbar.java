@@ -30,8 +30,8 @@ import org.marid.jfx.icons.FontIcons;
 import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -46,14 +46,14 @@ import static javafx.beans.binding.Bindings.createObjectBinding;
 public class IdeToolbar extends ToolBar implements LogSupport, L10nSupport {
 
     @Autowired
-    public IdeToolbar(@Lazy @IdeAction Map<String, FxAction> menuActions) {
+    public IdeToolbar(@IdeAction ObjectFactory<Map<String, FxAction>> menuActionsFactory) {
         setMaxWidth(Double.MAX_VALUE);
         sceneProperty().addListener((observable, oldValue, newValue) -> {
             newValue.windowProperty().addListener((observable1, oldWin, newWin) -> {
                 newWin.addEventHandler(WindowEvent.WINDOW_SHOWING, event -> {
                     final Map<String, Set<Node>> buttonMap = new TreeMap<>();
                     final Map<Node, String> reversedMap = new IdentityHashMap<>();
-                    menuActions.forEach((id, action) -> {
+                    menuActionsFactory.getObject().forEach((id, action) -> {
                         if (action.getToolbarGroup() == null) {
                             return;
                         }
