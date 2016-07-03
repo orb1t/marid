@@ -58,7 +58,9 @@ public class Ide extends Application {
     public void init() throws Exception {
         context = new AnnotationConfigApplicationContext();
         context.setDisplayName(Ide.class.getName());
+        context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
+
         context.setClassLoader(Thread.currentThread().getContextClassLoader());
         context.setResourceLoader(new PathMatchingResourcePatternResolver(context.getClassLoader()));
         context.register(IdeContext.class);

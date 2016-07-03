@@ -19,10 +19,11 @@
 package org.marid.ide.project.cache;
 
 import javafx.collections.ListChangeListener;
-import org.marid.ide.project.ProjectMavenBuilder;
 import org.marid.ide.project.ProjectManager;
+import org.marid.ide.project.ProjectMavenBuilder;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.logging.LogSupport;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,13 +37,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Component
 public class ProjectCacheManager implements LogSupport {
 
-    private final ProjectManager projectManager;
-    private final ProjectMavenBuilder projectBuilder;
+    private final ObjectFactory<ProjectMavenBuilder> projectBuilder;
     private final Map<ProjectProfile, ProjectCacheEntry> cache = new ConcurrentHashMap<>();
 
     @Autowired
-    public ProjectCacheManager(ProjectManager projectManager, ProjectMavenBuilder projectBuilder) {
-        this.projectManager = projectManager;
+    public ProjectCacheManager(ProjectManager projectManager, ObjectFactory<ProjectMavenBuilder> projectBuilder) {
         this.projectBuilder = projectBuilder;
         final ListChangeListener<ProjectProfile> projectProfileListChangeListener = change -> {
             if (change.wasRemoved() || change.wasReplaced()) {
@@ -71,7 +70,7 @@ public class ProjectCacheManager implements LogSupport {
             return new ProjectCacheEntry(p);
         });
         if (entry.shouldBeUpdated() || first.get()) {
-            projectBuilder.build(profile, result -> {
+            projectBuilder.getObject().build(profile, result -> {
                 try {
                     log(INFO, "[{0}] Built {1}", profile, result);
                     entry.update();

@@ -40,7 +40,7 @@ import static org.springframework.context.support.AbstractApplicationContext.LIF
 @EnableScheduling
 @ImportResource({"classpath*:/META-INF/marid/**/*.xml"})
 @PropertySource("meta.properties")
-@ComponentScan({"org.marid.ide"})
+@ComponentScan(basePackages = {"org.marid.ide"}, lazyInit = true)
 public class IdeContext {
 
     @Bean
