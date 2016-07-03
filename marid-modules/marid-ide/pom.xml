@@ -32,34 +32,20 @@
 
         <dependency>
             <groupId>org.apache.maven</groupId>
-            <artifactId>maven-embedder</artifactId>
+            <artifactId>maven-model-builder</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.marid</groupId>
+            <artifactId>marid-maven</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-connector-basic</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-transport-wagon</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-transport-http</artifactId>
-            <version>1.0.2.v20150114</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-transport-file</artifactId>
-            <version>1.0.2.v20150114</version>
         </dependency>
     </dependencies>
 
@@ -76,6 +62,24 @@
                         </manifest>
                     </archive>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-marid-maven</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                            <includeArtifactIds>marid-maven</includeArtifactIds>
+                            <includeTypes>zip</includeTypes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.logging;
+package org.marid.maven;
 
 import org.apache.maven.cli.logging.Slf4jConfiguration;
 

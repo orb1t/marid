@@ -16,8 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.project;
+package org.marid.maven;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import org.apache.maven.Maven;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
@@ -40,26 +41,27 @@ import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.aether.transport.wagon.WagonTransporterFactory;
-import org.marid.logging.LogSupport;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MavenProjectBuilder implements LogSupport {
+public class MavenProjectBuilder {
 
-    private final ProjectProfile profile;
+    private final Path projectPath;
     private final Consumer<LogRecord> logRecordConsumer;
     private final Map<String, ProjectPlexusLogger> loggerMap = new ConcurrentHashMap<>();
     private final List<String> goals = new ArrayList<>();
     private final List<String> profiles = new ArrayList<>();
 
-    public MavenProjectBuilder(ProjectProfile profile, Consumer<LogRecord> logRecordConsumer) {
-        this.profile = profile;
+    public MavenProjectBuilder(Path projectPath, Consumer<LogRecord> logRecordConsumer) {
+        this.projectPath = projectPath;
         this.logRecordConsumer = logRecordConsumer;
     }
 
@@ -111,7 +113,7 @@ public class MavenProjectBuilder implements LogSupport {
         final DefaultMavenExecutionRequest request = new DefaultMavenExecutionRequest();
         final MavenExecutionRequestPopulator populator = plexusContainer.lookup(MavenExecutionRequestPopulator.class);
         populator.populateDefaults(request);
-        request.setMultiModuleProjectDirectory(profile.getPath().toFile());
+        request.setMultiModuleProjectDirectory(projectPath.toFile());
         return request
                 .setOffline(false)
                 .setGoals(goals)
@@ -120,34 +122,35 @@ public class MavenProjectBuilder implements LogSupport {
                 .setReactorFailureBehavior(MavenExecutionRequest.REACTOR_FAIL_AT_END)
                 .setShowErrors(true)
                 .setGlobalChecksumPolicy(MavenExecutionRequest.CHECKSUM_POLICY_WARN)
-                .setPom(profile.getPomFile().toFile())
-                .setBaseDirectory(profile.getPath().toFile())
-                .setTransferListener(new ProjectMavenTransferListener(profile))
+                .setPom(projectPath.resolve("pom.xml").toFile())
+                .setBaseDirectory(projectPath.toFile())
+                .setTransferListener(new ProjectMavenTransferListener(logRecordConsumer))
                 .setCacheNotFound(true)
                 .setInteractiveMode(true)
                 .setCacheTransferError(false)
                 .setActiveProfiles(profiles.isEmpty() ? null : profiles);
     }
 
-    public Thread build(Consumer<MavenExecutionResult> consumer) {
-        final Thread thread = new Thread(() -> {
-            PlexusContainer plexusContainer = null;
-            try {
-                plexusContainer = buildPlexusContainer();
-                final MavenExecutionRequest mavenExecutionRequest = mavenExecutionRequest(plexusContainer);
-                final Maven maven = plexusContainer.lookup(Maven.class);
-                Thread.currentThread().setContextClassLoader(plexusContainer.getContainerRealm());
-                final MavenExecutionResult result = maven.execute(mavenExecutionRequest);
-                consumer.accept(result);
-            } catch (Exception x) {
-                log(WARNING, "Unable to execute maven", x);
-            } finally {
-                if (plexusContainer != null) {
-                    plexusContainer.dispose();
-                }
+    public void build(Consumer<Map<String, Object>> consumer) {
+        PlexusContainer plexusContainer = null;
+        try {
+            plexusContainer = buildPlexusContainer();
+            final MavenExecutionRequest mavenExecutionRequest = mavenExecutionRequest(plexusContainer);
+            final Maven maven = plexusContainer.lookup(Maven.class);
+            Thread.currentThread().setContextClassLoader(plexusContainer.getContainerRealm());
+            final MavenExecutionResult result = maven.execute(mavenExecutionRequest);
+            consumer.accept(ImmutableMap.of(
+                    "time", result.getBuildSummary(result.getProject()).getTime(),
+                    "exceptions", result.getExceptions()));
+        } catch (Exception x) {
+            final LogRecord record = new LogRecord(Level.WARNING, "Unable to execute maven");
+            record.setThrown(x);
+            record.setSourceClassName(null);
+            logRecordConsumer.accept(record);
+        } finally {
+            if (plexusContainer != null) {
+                plexusContainer.dispose();
             }
-        });
-        thread.start();
-        return thread;
+        }
     }
 }

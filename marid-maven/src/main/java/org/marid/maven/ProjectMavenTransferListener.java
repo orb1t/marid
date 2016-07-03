@@ -16,31 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.project;
+package org.marid.maven;
 
 import org.eclipse.aether.transfer.TransferCancelledException;
 import org.eclipse.aether.transfer.TransferEvent;
 import org.eclipse.aether.transfer.TransferListener;
-import org.marid.logging.LogSupport;
 
-import javax.annotation.Nonnull;
-import java.util.logging.Logger;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+
+import static java.util.logging.Level.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProjectMavenTransferListener implements TransferListener, LogSupport {
+public class ProjectMavenTransferListener implements TransferListener {
 
-    private final ProjectProfile profile;
+    private final Consumer<LogRecord> logRecordConsumer;
 
-    public ProjectMavenTransferListener(ProjectProfile profile) {
-        this.profile = profile;
+    public ProjectMavenTransferListener(Consumer<LogRecord> logRecordConsumer) {
+        this.logRecordConsumer = logRecordConsumer;
     }
 
-    @Nonnull
-    @Override
-    public Logger logger() {
-        return profile.logger();
+    private void log(Level level, String message, Object... args) {
+        final LogRecord logRecord = new LogRecord(level, message);
+        logRecord.setSourceClassName(null);
+        logRecord.setParameters(args);
+        logRecordConsumer.accept(logRecord);
     }
 
     @Override
@@ -55,7 +58,7 @@ public class ProjectMavenTransferListener implements TransferListener, LogSuppor
 
     @Override
     public void transferProgressed(TransferEvent event) throws TransferCancelledException {
-        log(INFO, "{0}", event);
+        //log(INFO, "{0}", event);
     }
 
     @Override

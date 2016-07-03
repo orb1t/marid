@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.project;
+package org.marid.maven;
 
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.codehaus.plexus.logging.AbstractLogger;

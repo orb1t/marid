@@ -203,6 +203,7 @@
         <module>marid-services-api</module>
         <module>marid-services</module>
         <module>marid-util</module>
+        <module>marid-maven</module>
     </modules>
 
     <build>

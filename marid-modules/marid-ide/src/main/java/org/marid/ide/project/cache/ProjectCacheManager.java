@@ -19,7 +19,7 @@
 package org.marid.ide.project.cache;
 
 import javafx.collections.ListChangeListener;
-import org.marid.ide.project.MavenProjectBuilder;
+import org.marid.ide.project.ProjectBuilder;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.logging.LogSupport;
@@ -37,11 +37,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ProjectCacheManager implements LogSupport {
 
     private final ProjectManager projectManager;
+    private final ProjectBuilder projectBuilder;
     private final Map<ProjectProfile, ProjectCacheEntry> cache = new ConcurrentHashMap<>();
 
     @Autowired
-    public ProjectCacheManager(ProjectManager projectManager) {
+    public ProjectCacheManager(ProjectManager projectManager, ProjectBuilder projectBuilder) {
         this.projectManager = projectManager;
+        this.projectBuilder = projectBuilder;
         final ListChangeListener<ProjectProfile> projectProfileListChangeListener = change -> {
             if (change.wasRemoved() || change.wasReplaced()) {
                 for (final ProjectProfile profile : change.getRemoved()) {
@@ -69,18 +71,15 @@ public class ProjectCacheManager implements LogSupport {
             return new ProjectCacheEntry(p);
         });
         if (entry.shouldBeUpdated() || first.get()) {
-            final MavenProjectBuilder mavenProjectBuilder = new MavenProjectBuilder(profile, profile.logger()::log)
-                    .profiles("conf")
-                    .goals("clean", "install");
-            mavenProjectBuilder.build(result -> {
+            projectBuilder.build(profile, result -> {
                 try {
-                    log(INFO, "[{0}] Built in {1} s", profile, result.getBuildSummary(result.getProject()).getTime() / 1000f);
+                    log(INFO, "[{0}] Built {1}", profile, result);
                     entry.update();
                     log(INFO, "[{0}] Updated", profile);
                 } catch (Exception x) {
                     log(WARNING, "Unable to update cache {0}", x, profile);
                 }
-            });
+            }, profile.logger()::log);
         } else {
             log(INFO, "Nothing to do");
         }
