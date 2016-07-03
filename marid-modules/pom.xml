@@ -36,6 +36,7 @@
         <module>marid-spring</module>
         <module>marid-runtime</module>
         <module>marid-hmi</module>
+        <module>marid-ide-api</module>
     </modules>
 
     <dependencies>

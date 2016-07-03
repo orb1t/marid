@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,26 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.logging;
+package org.marid.maven;
 
-import org.marid.cache.MaridClassValue;
-
-import java.util.logging.Logger;
+import java.nio.file.Path;
+import java.util.function.Consumer;
+import java.util.logging.LogRecord;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-class Logging {
+public interface ProjectBuilderFactory {
 
-    static final ClassValue<Logger> LOGGER_CLASS_VALUE = new MaridClassValue<>(c -> {
-        final String name = c.getName();
-        final int index = name.indexOf("$$");
-        final String loggerName;
-        if (index >= 0) {
-            loggerName = name.substring(0, index);
-        } else {
-            loggerName = name;
-        }
-        return Logger.getLogger(loggerName);
-    });
+    ProjectBuilder newBuilder(Path projectPath, Consumer<LogRecord> logRecordConsumer);
 }

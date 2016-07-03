@@ -20,21 +20,18 @@ package org.marid.ide.project;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.marid.logging.LogSupport;
+import org.marid.maven.ProjectBuilder;
+import org.marid.maven.ProjectBuilderFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.LogRecord;
 import java.util.stream.Collectors;
@@ -44,12 +41,12 @@ import java.util.stream.Stream;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ProjectBuilder implements LogSupport {
+public class ProjectMavenBuilder implements LogSupport {
 
     private final Path tempDirectory;
     private final URLClassLoader classLoader;
 
-    public ProjectBuilder(@Value("${implementation.version}") String version) throws IOException, URISyntaxException {
+    public ProjectMavenBuilder(@Value("${implementation.version}") String version) throws IOException, URISyntaxException {
         this.tempDirectory = Files.createTempDirectory("projectBuilder");
         final String resource = String.format("marid-maven-%s.zip", version);
         final ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
@@ -79,18 +76,11 @@ public class ProjectBuilder implements LogSupport {
 
     public Thread build(ProjectProfile profile, Consumer<Map<String, Object>> resultConsumer, Consumer<LogRecord> logConsumer) {
         final Thread thread = new Thread(() -> {
-            try {
-                final Class<?> builderClass = classLoader.loadClass("org.marid.maven.MavenProjectBuilder");
-                final Constructor<?> constructor = builderClass.getConstructor(Path.class, Consumer.class);
-                final Object builder = constructor.newInstance(profile.getPath(), logConsumer);
-                final Method goalsMethod = builderClass.getMethod("goals", String[].class);
-                goalsMethod.invoke(builder, (Object) new String[]{"clean", "install"});
-                final Method profilesMethod = builderClass.getMethod("profiles", String[].class);
-                profilesMethod.invoke(builder, (Object) new String[]{"conf"});
-                final Method buildMethod = builderClass.getMethod("build", Consumer.class);
-                buildMethod.invoke(builder, resultConsumer);
-            } catch (Exception x) {
-                log(WARNING, "Unable to build", x);
+            for (final ProjectBuilderFactory factory : ServiceLoader.load(ProjectBuilderFactory.class)) {
+                final ProjectBuilder projectBuilder = factory.newBuilder(profile.getPath(), logConsumer)
+                        .goals("clean", "install")
+                        .profiles("conf");
+                projectBuilder.build(resultConsumer);
             }
         });
         thread.setContextClassLoader(classLoader);

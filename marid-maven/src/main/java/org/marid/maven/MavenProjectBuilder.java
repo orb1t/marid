@@ -52,7 +52,7 @@ import java.util.logging.LogRecord;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MavenProjectBuilder {
+public class MavenProjectBuilder implements ProjectBuilder {
 
     private final Path projectPath;
     private final Consumer<LogRecord> logRecordConsumer;
@@ -69,11 +69,13 @@ public class MavenProjectBuilder {
         return loggerMap.computeIfAbsent(name, k -> new ProjectPlexusLogger(k, logRecordConsumer));
     }
 
+    @Override
     public MavenProjectBuilder goals(String... goals) {
         Collections.addAll(this.goals, goals);
         return this;
     }
 
+    @Override
     public MavenProjectBuilder profiles(String... ids) {
         Collections.addAll(profiles, ids);
         return this;
@@ -131,6 +133,7 @@ public class MavenProjectBuilder {
                 .setActiveProfiles(profiles.isEmpty() ? null : profiles);
     }
 
+    @Override
     public void build(Consumer<Map<String, Object>> consumer) {
         PlexusContainer plexusContainer = null;
         try {

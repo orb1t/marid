@@ -19,7 +19,7 @@
 package org.marid.ide.project.cache;
 
 import javafx.collections.ListChangeListener;
-import org.marid.ide.project.ProjectBuilder;
+import org.marid.ide.project.ProjectMavenBuilder;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.logging.LogSupport;
@@ -37,11 +37,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ProjectCacheManager implements LogSupport {
 
     private final ProjectManager projectManager;
-    private final ProjectBuilder projectBuilder;
+    private final ProjectMavenBuilder projectBuilder;
     private final Map<ProjectProfile, ProjectCacheEntry> cache = new ConcurrentHashMap<>();
 
     @Autowired
-    public ProjectCacheManager(ProjectManager projectManager, ProjectBuilder projectBuilder) {
+    public ProjectCacheManager(ProjectManager projectManager, ProjectMavenBuilder projectBuilder) {
         this.projectManager = projectManager;
         this.projectBuilder = projectBuilder;
         final ListChangeListener<ProjectProfile> projectProfileListChangeListener = change -> {
