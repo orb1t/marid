@@ -64,7 +64,7 @@ public class ProjectMavenBuilder implements LogSupport {
                     }
                 }
             }
-            classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), ClassLoader.getSystemClassLoader());
+            classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
         }
     }
 
