@@ -18,6 +18,7 @@
 
 package org.marid;
 
+import org.marid.ide.IdePostProcessor;
 import org.marid.ide.logging.IdeLogHandler;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,8 +42,8 @@ import static org.springframework.context.support.AbstractApplicationContext.LIF
  */
 @Configuration
 @EnableScheduling
-@ImportResource({"classpath*:/META-INF/marid/**/*.xml"})
 @PropertySource("meta.properties")
+@Import({IdePostProcessor.class})
 @ComponentScan(basePackages = {"org.marid.ide"}, lazyInit = true)
 public class IdeContext {
 

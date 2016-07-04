@@ -29,6 +29,7 @@ import org.marid.jfx.action.FxAction;
 import org.marid.l10n.L10n;
 import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -69,12 +70,12 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
-    public FxAction projectSaveAction(ProjectSaver projectSaver) {
+    public FxAction projectSaveAction(ObjectFactory<ProjectSaver> projectSaver) {
         return new FxAction("projectIO", "io", "Project")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+S"))
                 .setText("Save")
                 .setIcon(F_SAVE)
-                .setEventHandler(event -> callWithTime(projectSaver::save,
+                .setEventHandler(event -> callWithTime(() -> projectSaver.getObject().save(),
                         time -> log(INFO, "Profile [{0}] saved in {1} ms", projectManager.getProfile(), time)));
     }
 
@@ -100,7 +101,7 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
-    public FxAction projectAddProfileAction(ProjectSaver projectSaver) {
+    public FxAction projectAddProfileAction(ObjectFactory<ProjectSaver> projectSaverFactory) {
         return new FxAction("projectIO", "pm", "Project")
                 .setText("Add profile...")
                 .setIcon(M_ADD_BOX)
@@ -116,7 +117,7 @@ public class ProjectConfiguration implements LogSupport {
                         } catch (Exception x) {
                             log(WARNING, "Unable to write default logging properties", x);
                         }
-                        projectSaver.save();
+                        projectSaverFactory.getObject().save();
                     }
                 });
     }
