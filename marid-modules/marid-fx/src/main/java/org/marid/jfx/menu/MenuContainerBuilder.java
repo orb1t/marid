@@ -31,7 +31,7 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -43,7 +43,7 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MenuContainerBuilder implements L10nSupport {
+public class MenuContainerBuilder {
 
     private final Map<String, Set<MenuBuilder.MenuItemBuilder>> actionMap = new LinkedHashMap<>();
 
@@ -54,7 +54,7 @@ public class MenuContainerBuilder implements L10nSupport {
 
     public void build(Consumer<Menu> menuConsumer, Consumer<Node> nodeConsumer) {
         actionMap.forEach((menuText, actions) -> {
-            final Menu menu = new Menu(s(menuText));
+            final Menu menu = new Menu(L10n.s(menuText));
             menuConsumer.accept(menu);
             actions.forEach(action -> {
                 final MenuItem menuItem;
@@ -75,7 +75,7 @@ public class MenuContainerBuilder implements L10nSupport {
                     ));
                 }
                 if (action.text != null) {
-                    menuItem.textProperty().bind(createStringBinding(() -> s(action.text.get()), action.text));
+                    menuItem.textProperty().bind(createStringBinding(() -> L10n.s(action.text.get()), action.text));
                 }
                 if (action.accelerator != null) {
                     menuItem.acceleratorProperty().bind(action.accelerator);
@@ -100,7 +100,7 @@ public class MenuContainerBuilder implements L10nSupport {
                     }
                     if (action.text != null) {
                         final Tooltip tooltip = new Tooltip();
-                        tooltip.textProperty().bind(createStringBinding(() -> s(action.text.get()), action.text));
+                        tooltip.textProperty().bind(createStringBinding(() -> L10n.s(action.text.get()), action.text));
                         button.setTooltip(tooltip);
                     }
                     if (action.disabled != null) {

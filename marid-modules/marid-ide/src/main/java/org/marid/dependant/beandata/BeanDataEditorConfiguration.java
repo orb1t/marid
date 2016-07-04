@@ -25,7 +25,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.marid.dependant.beaneditor.BeanEditorTable;
 import org.marid.ide.panes.main.IdePane;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.ConstructorArg;
 import org.marid.spring.xml.data.Property;
@@ -43,7 +43,7 @@ import static org.marid.jfx.ScrollPanes.scrollPane;
  */
 @Configuration
 @ComponentScan(basePackageClasses = {BeanDataEditorConfiguration.class})
-public class BeanDataEditorConfiguration implements L10nSupport {
+public class BeanDataEditorConfiguration {
 
     @Bean
     public BeanData beanData(BeanEditorTable beanEditorTable) {
@@ -64,8 +64,8 @@ public class BeanDataEditorConfiguration implements L10nSupport {
     public TabPane tabPane(RefValuesEditor<ConstructorArg> constructorArgEditor,
                            RefValuesEditor<Property> propertyEditor) {
         final TabPane tabPane = new TabPane(
-                new Tab(s("Constructor arguments"), scrollPane(constructorArgEditor)),
-                new Tab(s("Properties"), scrollPane(propertyEditor))
+                new Tab(L10n.s("Constructor arguments"), scrollPane(constructorArgEditor)),
+                new Tab(L10n.s("Properties"), scrollPane(propertyEditor))
         );
         tabPane.setTabClosingPolicy(UNAVAILABLE);
         return tabPane;
@@ -80,7 +80,7 @@ public class BeanDataEditorConfiguration implements L10nSupport {
     public Stage simpleBeanConfigurerStage(IdePane idePane, Scene simpleBeanConfigurerScene) {
         final Stage stage = new Stage(StageStyle.UTILITY);
         stage.initOwner(idePane.getScene().getWindow());
-        stage.setTitle(s("Bean editor"));
+        stage.setTitle(L10n.s("Bean editor"));
         stage.setScene(simpleBeanConfigurerScene);
         return stage;
     }

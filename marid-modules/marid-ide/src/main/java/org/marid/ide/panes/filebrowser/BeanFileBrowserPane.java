@@ -24,7 +24,6 @@ import javafx.scene.layout.BorderPane;
 import org.marid.dependant.beaneditor.BeanEditorConfiguration;
 import org.marid.jfx.ScrollPanes;
 import org.marid.jfx.toolbar.ToolbarBuilder;
-import org.marid.l10n.L10nSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +34,7 @@ import static org.marid.jfx.icons.FontIcon.*;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanFileBrowserPane extends BorderPane implements L10nSupport {
+public class BeanFileBrowserPane extends BorderPane {
 
     final BeanFileBrowserTree tree;
 

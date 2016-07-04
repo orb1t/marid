@@ -29,7 +29,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 import org.marid.spring.xml.MaridBeanUtils;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +55,7 @@ import static org.marid.spring.xml.MaridBeanUtils.isFile;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupport {
+public class BeanFileBrowserTree extends TreeTableView<Path> {
 
     final ObservableValue<ProjectProfile> projectProfileObservableValue;
 
@@ -86,13 +86,13 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
         getProfile().getBeanFiles().addListener(filesChangeListener);
         getProfile().getBeanFiles().keySet().forEach(this::add);
         getColumns().add(build(new TreeTableColumn<Path, String>(), col -> {
-            col.setText(s("File"));
+            col.setText(L10n.s("File"));
             col.setPrefWidth(600);
             col.setMaxWidth(2000);
             col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getValue().getFileName().toString()));
         }));
         getColumns().add(build(new TreeTableColumn<Path, FileTime>(), col -> {
-            col.setText(s("Date"));
+            col.setText(L10n.s("Date"));
             col.setPrefWidth(250);
             col.setMaxWidth(300);
             col.setStyle("-fx-alignment: baseline-right");
@@ -106,7 +106,7 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
             });
         }));
         getColumns().add(build(new TreeTableColumn<Path, Integer>(), col -> {
-            col.setText(s("Bean count"));
+            col.setText(L10n.s("Bean count"));
             col.setPrefWidth(250);
             col.setMaxWidth(250);
             col.setStyle("-fx-alignment: baseline-right");
@@ -181,8 +181,8 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
 
     public void onFileAdd(ActionEvent event) {
         final TextInputDialog dialog = new TextInputDialog("file");
-        dialog.setTitle(s("New file"));
-        dialog.setHeaderText(s("Enter file name") + ":");
+        dialog.setTitle(L10n.s("New file"));
+        dialog.setHeaderText(L10n.s("Enter file name") + ":");
         final Optional<String> value = dialog.showAndWait();
         if (value.isPresent()) {
             final String name = value.get().endsWith(".xml") ? value.get() : value.get() + ".xml";
@@ -207,13 +207,13 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
 
     public void onDirAdd(ActionEvent event) {
         final TextInputDialog dialog = new TextInputDialog("directory");
-        dialog.setTitle(s("New directory"));
-        dialog.setHeaderText(s("Enter directory name") + ":");
+        dialog.setTitle(L10n.s("New directory"));
+        dialog.setHeaderText(L10n.s("Enter directory name") + ":");
         final Optional<String> value = dialog.showAndWait();
         if (value.isPresent()) {
             if (value.get().endsWith(".xml")) {
-                final Alert alert = new Alert(AlertType.ERROR, m("Directory ends with .xml"), ButtonType.CLOSE);
-                alert.setHeaderText(m("Directory creation error"));
+                final Alert alert = new Alert(AlertType.ERROR, L10n.m("Directory ends with .xml"), ButtonType.CLOSE);
+                alert.setHeaderText(L10n.m("Directory creation error"));
                 alert.showAndWait();
             } else {
                 final TreeItem<Path> item = getSelectionModel().getSelectedItem();
@@ -232,8 +232,8 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
         final String fileName = path.getFileName().toString();
         final String defaultValue = file ? fileName.substring(0, fileName.length() - 4) : fileName;
         final TextInputDialog dialog = new TextInputDialog(defaultValue);
-        dialog.setTitle(file ? s("Rename file") : s("Rename directory"));
-        dialog.setHeaderText(file ? s("Enter a new file name") : s("Enter a new file name"));
+        dialog.setTitle(file ? L10n.s("Rename file") : L10n.s("Rename directory"));
+        dialog.setHeaderText(file ? L10n.s("Enter a new file name") : L10n.s("Enter a new file name"));
         final Optional<String> value = dialog.showAndWait();
         if (value.isPresent()) {
             if (file) {
@@ -242,8 +242,8 @@ public class BeanFileBrowserTree extends TreeTableView<Path> implements L10nSupp
                 getProfile().getBeanFiles().put(newPath, beanFile);
             } else {
                 if (value.get().endsWith(".xml")) {
-                    final Alert alert = new Alert(AlertType.ERROR, m("Directory ends with .xml"), ButtonType.CLOSE);
-                    alert.setHeaderText(m("Directory creation error"));
+                    final Alert alert = new Alert(AlertType.ERROR, L10n.m("Directory ends with .xml"), ButtonType.CLOSE);
+                    alert.setHeaderText(L10n.m("Directory creation error"));
                     alert.showAndWait();
                 } else {
                     final Map<Path, BeanFile> relativeMap = getProfile().getBeanFiles().entrySet()

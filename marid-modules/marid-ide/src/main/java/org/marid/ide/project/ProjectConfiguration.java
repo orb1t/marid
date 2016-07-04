@@ -26,7 +26,7 @@ import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
 import org.marid.ide.project.cache.ProjectCacheManager;
 import org.marid.jfx.action.FxAction;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +49,7 @@ import static org.marid.misc.Calls.callWithTime;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-public class ProjectConfiguration implements LogSupport, L10nSupport {
+public class ProjectConfiguration implements LogSupport {
 
     private final ProjectManager projectManager;
 
@@ -106,8 +106,8 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
                 .setIcon(M_ADD_BOX)
                 .setEventHandler(event -> {
                     final TextInputDialog dialog = new TextInputDialog("profile");
-                    dialog.setHeaderText(s("Profile name") + ":");
-                    dialog.setTitle(s("Add profile"));
+                    dialog.setHeaderText(L10n.s("Profile name") + ":");
+                    dialog.setTitle(L10n.s("Add profile"));
                     final Optional<String> result = dialog.showAndWait();
                     if (result.isPresent()) {
                         final ProjectProfile profile = projectManager.add(result.get());
@@ -128,9 +128,9 @@ public class ProjectConfiguration implements LogSupport, L10nSupport {
                 .setText("Remove profile")
                 .setIcon(D_MINUS_BOX)
                 .setEventHandler(event -> {
-                    final Alert alert = new Alert(CONFIRMATION, s("Do you really want to remove the profile?"), YES, NO);
-                    alert.setTitle(s("Profile removal"));
-                    alert.setHeaderText(s("Project removal confirmation"));
+                    final Alert alert = new Alert(CONFIRMATION, L10n.s("Do you really want to remove the profile?"), YES, NO);
+                    alert.setTitle(L10n.s("Profile removal"));
+                    alert.setHeaderText(L10n.s("Project removal confirmation"));
                     final Optional<ButtonType> result = alert.showAndWait();
                     if (result.isPresent() && result.get() == ButtonType.YES) {
                         projectManager.remove(projectManager.getProfile());

@@ -23,7 +23,7 @@ import javafx.scene.control.*;
 import javafx.stage.WindowEvent;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcons;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -37,7 +37,7 @@ import java.util.TreeMap;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeMenu extends MenuBar implements L10nSupport, LogSupport {
+public class IdeMenu extends MenuBar implements LogSupport {
 
     @Autowired
     public IdeMenu(@IdeAction ObjectFactory<Map<String, FxAction>> menuActionsFactory) {
@@ -54,11 +54,11 @@ public class IdeMenu extends MenuBar implements L10nSupport, LogSupport {
                             final GlyphIcon<?> icon = action.getIcon() != null ? FontIcons.glyphIcon(action.getIcon(), 16) : null;
                             final MenuItem menuItem;
                             if (action.selectedProperty() != null) {
-                                final CheckMenuItem checkMenuItem = new CheckMenuItem(s(action.getText()), icon);
+                                final CheckMenuItem checkMenuItem = new CheckMenuItem(L10n.s(action.getText()), icon);
                                 checkMenuItem.selectedProperty().bindBidirectional(action.selectedProperty());
                                 menuItem = checkMenuItem;
                             } else {
-                                menuItem = new MenuItem(s(action.getText()), icon);
+                                menuItem = new MenuItem(L10n.s(action.getText()), icon);
                             }
                             menuItem.setAccelerator(action.getAccelerator());
                             menuItem.setOnAction(action.getEventHandler());
@@ -68,7 +68,7 @@ public class IdeMenu extends MenuBar implements L10nSupport, LogSupport {
                                     .put(action.getText(), menuItem);
                         });
                         itemMap.forEach((menu, groupMap) -> {
-                            final Menu m = new Menu(s(menu));
+                            final Menu m = new Menu(L10n.s(menu));
                             groupMap.forEach((group, menuItems) -> {
                                 m.getItems().addAll(menuItems.values());
                                 m.getItems().add(new SeparatorMenuItem());

@@ -30,7 +30,7 @@ import org.marid.io.ProcessManager;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.jfx.track.Tracks;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 import org.marid.logging.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -49,7 +49,7 @@ import static java.lang.String.format;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ProjectRunnerPane extends BorderPane implements L10nSupport, LogSupport {
+public class ProjectRunnerPane extends BorderPane implements LogSupport {
 
     final ProjectProfile profile;
     final ListView<String> out = listView();
@@ -70,8 +70,8 @@ public class ProjectRunnerPane extends BorderPane implements L10nSupport, LogSup
             pane.setFitToWidth(true);
         });
         final TabPane tabPane = new TabPane(
-                new Tab(s("Standard output"), outPane),
-                new Tab(s("Error output"), errPane));
+                new Tab(L10n.s("Standard output"), outPane),
+                new Tab(L10n.s("Error output"), errPane));
         tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
         tabPane.setFocusTraversable(false);
         process = process(profile, javaSettings, debugSettings);

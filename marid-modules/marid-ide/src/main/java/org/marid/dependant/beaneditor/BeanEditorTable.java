@@ -24,7 +24,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ import static org.marid.misc.Builder.build;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanEditorTable extends TableView<BeanData> implements L10nSupport {
+public class BeanEditorTable extends TableView<BeanData> {
 
     @Autowired
     public BeanEditorTable(BeanFile beanFile, ProjectProfile profile) {
@@ -44,7 +44,7 @@ public class BeanEditorTable extends TableView<BeanData> implements L10nSupport 
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setEditable(true);
         getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(s("Name"));
+            col.setText(L10n.s("Name"));
             col.setCellValueFactory(param -> param.getValue().name);
             col.setCellFactory(param -> new TextFieldTableCell<BeanData, String>(new DefaultStringConverter()) {
                 @Override
@@ -59,37 +59,37 @@ public class BeanEditorTable extends TableView<BeanData> implements L10nSupport 
             col.setEditable(true);
         }));
         getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(s("Type"));
+            col.setText(L10n.s("Type"));
             col.setCellValueFactory(param -> param.getValue().type);
             col.setPrefWidth(450);
             col.setMaxWidth(650);
         }));
         getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(s("Factory bean"));
+            col.setText(L10n.s("Factory bean"));
             col.setCellValueFactory(param -> param.getValue().factoryBean);
             col.setPrefWidth(250);
             col.setMaxWidth(450);
         }));
         getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(s("Factory method"));
+            col.setText(L10n.s("Factory method"));
             col.setCellValueFactory(param -> param.getValue().factoryMethod);
             col.setPrefWidth(250);
             col.setMaxWidth(450);
         }));
         getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(s("Init trigger"));
+            col.setText(L10n.s("Init trigger"));
             col.setCellValueFactory(param -> param.getValue().initMethod);
             col.setPrefWidth(200);
             col.setMaxWidth(350);
         }));
         getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(s("Destroy trigger"));
+            col.setText(L10n.s("Destroy trigger"));
             col.setCellValueFactory(param -> param.getValue().destroyMethod);
             col.setPrefWidth(200);
             col.setMaxWidth(350);
         }));
         getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(s("Lazy"));
+            col.setText(L10n.s("Lazy"));
             col.setCellValueFactory(param -> param.getValue().lazyInit);
             col.setPrefWidth(60);
             col.setMaxWidth(100);

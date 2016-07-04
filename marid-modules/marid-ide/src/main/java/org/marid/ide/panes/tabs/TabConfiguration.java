@@ -22,7 +22,7 @@ import javafx.scene.control.Tab;
 import org.marid.ide.panes.filebrowser.BeanFileBrowserPane;
 import org.marid.ide.panes.logging.LoggingTable;
 import org.marid.jfx.ScrollPanes;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,13 +32,13 @@ import org.springframework.core.annotation.Order;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-public class TabConfiguration implements L10nSupport {
+public class TabConfiguration {
 
     @Bean
     @Qualifier("ideTab")
     @Order(1)
     public Tab logTab(LoggingTable loggingTable) {
-        final Tab tab = new Tab(s("Log"), ScrollPanes.scrollPane(loggingTable));
+        final Tab tab = new Tab(L10n.s("Log"), ScrollPanes.scrollPane(loggingTable));
         tab.setClosable(false);
         return tab;
     }
@@ -47,7 +47,7 @@ public class TabConfiguration implements L10nSupport {
     @Qualifier("ideTab")
     @Order(2)
     public Tab beanFilesTab(BeanFileBrowserPane beanFileBrowserPane) {
-        final Tab tab = new Tab(s("Bean files"), beanFileBrowserPane);
+        final Tab tab = new Tab(L10n.s("Bean files"), beanFileBrowserPane);
         tab.setClosable(false);
         return tab;
     }

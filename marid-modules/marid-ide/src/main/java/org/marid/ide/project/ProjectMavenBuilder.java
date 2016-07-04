@@ -19,9 +19,10 @@
 package org.marid.ide.project;
 
 import org.codehaus.plexus.util.FileUtils;
-import org.marid.logging.LogSupport;
 import org.marid.maven.ProjectBuilder;
 import org.marid.maven.ProjectBuilderFactory;
+import org.marid.status.MaridStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -41,12 +42,14 @@ import java.util.stream.Stream;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ProjectMavenBuilder implements LogSupport {
+public class ProjectMavenBuilder {
 
     private final Path tempDirectory;
     private final URLClassLoader classLoader;
 
-    public ProjectMavenBuilder(@Value("${implementation.version}") String version) throws IOException, URISyntaxException {
+    @Autowired
+    public ProjectMavenBuilder(@Value("${implementation.version}") String version,
+                               MaridStatus maridStatus) throws IOException, URISyntaxException {
         this.tempDirectory = Files.createTempDirectory("projectBuilder");
         final String resource = String.format("marid-maven-%s.zip", version);
         final ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
@@ -59,13 +62,14 @@ public class ProjectMavenBuilder implements LogSupport {
                     for (final Path path : paths) {
                         final Path target = tempDirectory.resolve(path.getFileName().toString());
                         Files.copy(path, target);
-                        log(INFO, "Copied {0} to {1}", path, target);
+                        maridStatus.doWithSession(session -> session.showMessage("Copied {0} to {1}", path, target));
                         urls.add(target.toUri().toURL());
                     }
                 }
             }
             classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
         }
+        maridStatus.doWithSession(session -> session.showMessage("marid-maven copied to temporary directory"));
     }
 
     @PreDestroy

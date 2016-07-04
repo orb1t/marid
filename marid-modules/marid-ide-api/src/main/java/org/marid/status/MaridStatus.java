@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,35 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.l10n;
+package org.marid.status;
 
-import java.util.Locale;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface L10nSupport {
+public interface MaridStatus {
 
-    default String s(String format, Object... args) {
-        return L10n.s(getDefaultL10nLocale(), format, args);
-    }
-
-    default String m(String format, Object... args) {
-        return L10n.m(getDefaultL10nLocale(), format, args);
-    }
-
-    default Locale getDefaultL10nLocale() {
-        return Locale.getDefault();
-    }
-
-    class LS {
-
-        public static String s(String format, Object... args) {
-            return L10n.s(Locale.getDefault(), format, args);
-        }
-
-        public static String m(String format, Object... args) {
-            return L10n.m(Locale.getDefault(), format, args);
-        }
-    }
+    void doWithSession(Consumer<MaridStatusSession> statusSessionConsumer);
 }

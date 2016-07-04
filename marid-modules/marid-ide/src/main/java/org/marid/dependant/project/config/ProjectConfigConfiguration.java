@@ -31,7 +31,7 @@ import org.marid.dependant.project.config.deps.DependenciesEditor;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.project.ProjectManager;
 import org.marid.jfx.ScrollPanes;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -46,7 +46,7 @@ import java.util.Map;
  */
 @Configuration
 @ComponentScan(basePackageClasses = {ProjectConfigConfiguration.class})
-public class ProjectConfigConfiguration implements L10nSupport {
+public class ProjectConfigConfiguration {
 
     @Bean
     public Model model(ProjectManager projectManager) {
@@ -74,7 +74,7 @@ public class ProjectConfigConfiguration implements L10nSupport {
         final TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         nodes.forEach((name, node) -> {
-            final Tab tab = new Tab(s(name), ScrollPanes.scrollPane(node));
+            final Tab tab = new Tab(L10n.s(name), ScrollPanes.scrollPane(node));
             ((Region) tab.getContent()).setPadding(new Insets(10, 0, 10, 0));
             tab.getContent().setStyle("-fx-background-color: -fx-background");
             tabPane.getTabs().add(tab);
@@ -88,7 +88,7 @@ public class ProjectConfigConfiguration implements L10nSupport {
         dialog.getDialogPane().setPrefSize(800, 600);
         dialog.getDialogPane().setContent(tabPane);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
-        dialog.setTitle(s("Project preferences: %s", projectManager.getProfile()));
+        dialog.setTitle(L10n.s("Project preferences: %s", projectManager.getProfile()));
         dialog.initModality(Modality.WINDOW_MODAL);
         dialog.initOwner(idePane.getScene().getWindow());
         dialog.setResultConverter(type -> true);

@@ -24,10 +24,10 @@ import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import org.marid.jfx.icons.FontIcons;
+import org.marid.l10n.L10n;
 
+import java.util.Locale;
 import java.util.function.Consumer;
-
-import static org.marid.l10n.L10nSupport.LS.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -43,7 +43,7 @@ public interface MenuUtils {
     }
 
     static MenuItem menuItem(String text, String icon, EventHandler<ActionEvent> eventHandler) {
-        final MenuItem menuItem = new MenuItem(s(text), FontIcons.glyphIcon(icon, 16));
+        final MenuItem menuItem = new MenuItem(L10n.s(Locale.getDefault(), text), FontIcons.glyphIcon(icon, 16));
         menuItem.setOnAction(eventHandler);
         return menuItem;
     }

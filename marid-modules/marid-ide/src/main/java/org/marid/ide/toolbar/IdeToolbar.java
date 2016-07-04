@@ -27,7 +27,7 @@ import javafx.scene.control.Tooltip;
 import javafx.stage.WindowEvent;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcons;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -43,7 +43,7 @@ import static javafx.beans.binding.Bindings.createObjectBinding;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeToolbar extends ToolBar implements LogSupport, L10nSupport {
+public class IdeToolbar extends ToolBar implements LogSupport {
 
     @Autowired
     public IdeToolbar(@IdeAction ObjectFactory<Map<String, FxAction>> menuActionsFactory) {
@@ -65,9 +65,9 @@ public class IdeToolbar extends ToolBar implements LogSupport, L10nSupport {
                             button.disableProperty().bindBidirectional(action.disabledProperty());
                         }
                         if (action.hintProperty() != null) {
-                            button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(s(action.getHint())), action.hintProperty()));
+                            button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(L10n.s(action.getHint())), action.hintProperty()));
                         } else if (action.textProperty() != null) {
-                            button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(s(action.getText())), action.textProperty()));
+                            button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(L10n.s(action.getText())), action.textProperty()));
                         }
                         reversedMap.put(button, id);
                         buttonMap.computeIfAbsent(group, g -> new HashSet<>()).add(button);

@@ -28,7 +28,7 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.ScrollPanes;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,17 +39,17 @@ import java.nio.file.Path;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-public class BeanEditorTableConfiguration implements L10nSupport {
+public class BeanEditorTableConfiguration {
 
     @Bean
     public ToolBar beanEditorToolbar(AnnotationConfigApplicationContext context, BeanEditorTable table) {
         return new ToolbarBuilder()
-                .add(s("Edit..."), FontIcon.M_EDIT,
+                .add(L10n.s("Edit..."), FontIcon.M_EDIT,
                         event -> IdeDependants.startDependant(context, "beanConfigurer", BeanDataEditorConfiguration.class))
                 .addSeparator()
-                .add(s("Remove"), FontIcon.O_REPO_DELETE,
+                .add(L10n.s("Remove"), FontIcon.O_REPO_DELETE,
                         event -> table.getItems().remove(table.getSelectionModel().getSelectedIndex()))
-                .add(s("Clear"), FontIcon.M_CLEAR_ALL,
+                .add(L10n.s("Clear"), FontIcon.M_CLEAR_ALL,
                         event -> table.getItems().clear())
                 .build();
     }
@@ -70,7 +70,7 @@ public class BeanEditorTableConfiguration implements L10nSupport {
     @Bean
     public Tab tab(ProjectProfile profile, IdeTabPane tabPane, BorderPane beanEditor, Path beanFilePath) {
         final Path relativePath = profile.getBeansDirectory().relativize(beanFilePath);
-        final Tab tab = new Tab(s("[%s]: %s", profile, relativePath), beanEditor);
+        final Tab tab = new Tab(L10n.s("[%s]: %s", profile, relativePath), beanEditor);
         tabPane.getTabs().add(tab);
         tabPane.getSelectionModel().select(tab);
         return tab;

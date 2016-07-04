@@ -22,7 +22,6 @@ import javafx.collections.ListChangeListener;
 import javafx.scene.control.ComboBox;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.l10n.L10nSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +29,7 @@ import org.springframework.stereotype.Component;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeStatusProfile extends ComboBox<ProjectProfile> implements L10nSupport {
+public class IdeStatusProfile extends ComboBox<ProjectProfile> {
 
     @Autowired
     public IdeStatusProfile(ProjectManager projectManager) {

@@ -24,7 +24,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 
 import java.util.function.Supplier;
 
@@ -37,7 +37,7 @@ import static org.marid.jfx.Props.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class GenericGridPane extends GridPane implements L10nSupport {
+public class GenericGridPane extends GridPane {
 
     public GenericGridPane() {
         getColumnConstraints().add(new ColumnConstraints(0, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, NEVER, LEFT, false));
@@ -53,7 +53,7 @@ public class GenericGridPane extends GridPane implements L10nSupport {
     public TextField addTextField(String text, StringProperty stringProperty) {
         final TextField textField = new TextField();
         textField.textProperty().bindBidirectional(stringProperty);
-        final Label label = new Label(s(text) + ": ");
+        final Label label = new Label(L10n.s(text) + ": ");
         addRow(getNextRowIndex(), label, textField);
         return textField;
     }
@@ -61,7 +61,7 @@ public class GenericGridPane extends GridPane implements L10nSupport {
     public TextField addTextField(String text, Object bean, String property) {
         final TextField textField = new TextField();
         textField.textProperty().bindBidirectional(stringProperty(bean, property));
-        final Label label = new Label(s(text) + ": ");
+        final Label label = new Label(L10n.s(text) + ": ");
         addRow(getNextRowIndex(), label, textField);
         return textField;
     }
@@ -69,7 +69,7 @@ public class GenericGridPane extends GridPane implements L10nSupport {
     public CheckBox addBooleanField(String text, Object bean, String property) {
         final CheckBox checkBox = new CheckBox();
         checkBox.selectedProperty().bindBidirectional(booleanProperty(bean, property));
-        final Label label = new Label(s(text) + ": ");
+        final Label label = new Label(L10n.s(text) + ": ");
         addRow(getNextRowIndex(), label, checkBox);
         return checkBox;
     }
@@ -81,13 +81,13 @@ public class GenericGridPane extends GridPane implements L10nSupport {
         spinner.valueProperty().addListener((observable, oldValue, newValue) -> {
             p.set(newValue);
         });
-        final Label label = new Label(s(text) + ": ");
+        final Label label = new Label(L10n.s(text) + ": ");
         addRow(getNextRowIndex(), label, spinner);
         return spinner;
     }
 
     public <T extends Node> T addControl(String text, Supplier<T> nodeSupplier) {
-        final Label label = new Label(s(text) + ": ");
+        final Label label = new Label(L10n.s(text) + ": ");
         final T node = nodeSupplier.get();
         addRow(getNextRowIndex(), label, node);
         return node;

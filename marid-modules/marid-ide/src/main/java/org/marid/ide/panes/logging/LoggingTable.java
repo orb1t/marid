@@ -29,7 +29,7 @@ import org.marid.ide.logging.IdeLogHandler;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.track.Tracks;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +43,7 @@ import java.util.logging.LogRecord;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
+public class LoggingTable extends TableView<LogRecord> {
 
     @Autowired
     public LoggingTable(LoggingFilter loggingFilter, IdeLogHandler ideLogHandler) {
@@ -113,7 +113,7 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
     }
 
     private TableColumn<LogRecord, String> timestampColumn() {
-        final TableColumn<LogRecord, String> col = new TableColumn<>(s("Time"));
+        final TableColumn<LogRecord, String> col = new TableColumn<>(L10n.s("Time"));
         col.setCellValueFactory(param -> {
             final SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
             final String time = format.format(new Date(param.getValue().getMillis()));
@@ -127,7 +127,7 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
     }
 
     private TableColumn<LogRecord, String> loggerColumn() {
-        final TableColumn<LogRecord, String> col = new TableColumn<>(s("Logger"));
+        final TableColumn<LogRecord, String> col = new TableColumn<>(L10n.s("Logger"));
         col.setCellValueFactory(param -> {
             final String loggerName = String.valueOf(param.getValue().getLoggerName());
             final String[] parts = loggerName.split("[.]");
@@ -146,7 +146,7 @@ public class LoggingTable extends TableView<LogRecord> implements L10nSupport {
     }
 
     private TableColumn<LogRecord, String> messageColumn() {
-        final TableColumn<LogRecord, String> col = new TableColumn<>(s("Message"));
+        final TableColumn<LogRecord, String> col = new TableColumn<>(L10n.s("Message"));
         col.setCellValueFactory(param -> {
             String message = param.getValue().getMessage();
             if (param.getValue().getParameters() != null && param.getValue().getParameters().length > 0) {

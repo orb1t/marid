@@ -24,7 +24,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.marid.l10n.L10nSupport;
 import org.marid.logging.LogSupport;
 import org.marid.pref.PrefSupport;
 import org.springframework.stereotype.Component;
@@ -41,7 +40,7 @@ import static java.util.Collections.binarySearch;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ProjectManager implements PrefSupport, LogSupport, L10nSupport {
+public class ProjectManager implements PrefSupport, LogSupport {
 
     private final ObjectProperty<ProjectProfile> profile = new SimpleObjectProperty<>();
     private final ObservableList<ProjectProfile> profiles = FXCollections.observableArrayList();

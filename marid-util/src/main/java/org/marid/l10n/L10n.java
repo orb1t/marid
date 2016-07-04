@@ -52,6 +52,10 @@ public class L10n {
         }
     };
 
+    public static String s(String key, Object... ps) {
+        return s(Locale.getDefault(), key, ps);
+    }
+
     public static String s(Locale locale, String key, Object... ps) {
         return s(getBundle(STRS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL), key, ps);
     }
@@ -62,6 +66,10 @@ public class L10n {
 
     public static void s(Locale locale, String key, Formatter formatter, Object... ps) {
         s(getBundle(STRS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL), formatter, key, ps);
+    }
+
+    public static String m(String k, Object... v) {
+        return m(Locale.getDefault(), k, v);
     }
 
     public static String m(Locale locale, String k, Object... v) {

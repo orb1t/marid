@@ -24,7 +24,7 @@ import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.settings.AbstractSettings;
-import org.marid.l10n.L10nSupport;
+import org.marid.l10n.L10n;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextStartedEvent;
@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.toMap;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class SettingsDialog extends Dialog<ButtonType> implements L10nSupport {
+public class SettingsDialog extends Dialog<ButtonType> {
 
     @Autowired
     public SettingsDialog(IdePane idePane, List<SettingsEditor> editors, AnnotationConfigApplicationContext context) {
@@ -50,7 +50,7 @@ public class SettingsDialog extends Dialog<ButtonType> implements L10nSupport {
         dialogPane.setPrefSize(800, 600);
         dialogPane.setContent(tabPane(editors));
         dialogPane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.APPLY);
-        setTitle(s("IDE settings"));
+        setTitle(L10n.s("IDE settings"));
         initModality(Modality.WINDOW_MODAL);
         initOwner(idePane.getScene().getWindow());
         setResizable(true);
@@ -75,7 +75,7 @@ public class SettingsDialog extends Dialog<ButtonType> implements L10nSupport {
     private TabPane tabPane(List<SettingsEditor> settingsEditors) {
         final TabPane tabPane = new TabPane(settingsEditors.stream()
                 .sorted(Comparator.comparing(e -> e.getSettings().getName()))
-                .map(editor -> new Tab(s(editor.getSettings().getName()), editor.getNode()))
+                .map(editor -> new Tab(L10n.s(editor.getSettings().getName()), editor.getNode()))
                 .toArray(Tab[]::new));
         for (final Tab tab : tabPane.getTabs()) {
             ((Region) tab.getContent()).setPadding(new Insets(10, 0, 10, 0));
