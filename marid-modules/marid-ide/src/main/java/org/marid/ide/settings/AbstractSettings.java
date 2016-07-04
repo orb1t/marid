@@ -18,13 +18,9 @@
 
 package org.marid.ide.settings;
 
-import org.marid.pref.PrefSupport;
-import org.marid.pref.PrefUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.prefs.AbstractPreferences;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.InvalidPreferencesFormatException;
 import java.util.prefs.Preferences;
@@ -32,17 +28,12 @@ import java.util.prefs.Preferences;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractSettings implements PrefSupport {
+public abstract class AbstractSettings {
 
-    private final Preferences preferences;
+    protected final Preferences preferences;
 
     public AbstractSettings(String name) {
-        preferences = PrefUtils.preferences(AbstractPreferences.class, name);
-    }
-
-    @Override
-    public final Preferences preferences() {
-        return preferences;
+        preferences = Preferences.userNodeForPackage(getClass()).node(getClass().getName()).node(name);
     }
 
     public String getName() {

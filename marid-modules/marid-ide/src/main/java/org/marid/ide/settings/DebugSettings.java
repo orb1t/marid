@@ -31,26 +31,26 @@ public class DebugSettings extends AbstractSettings {
     }
 
     public boolean isDebug() {
-        return getPref("debug", false);
+        return preferences.getBoolean("debug", false);
     }
 
     public void setDebug(boolean debug) {
-        putPref("debug", debug);
+        preferences.putBoolean("debug", debug);
     }
 
     public int getPort() {
-        return getPref("port", 5005);
+        return preferences.getInt("port", 5005);
     }
 
     public void setPort(int port) {
-        putPref("port", port);
+        preferences.putInt("port", port);
     }
 
     public boolean isSuspend() {
-        return getPref("suspend", false);
+        return preferences.getBoolean("suspend", false);
     }
 
     public void setSuspend(boolean suspend) {
-        putPref("suspend", suspend);
+        preferences.putBoolean("suspend", suspend);
     }
 }

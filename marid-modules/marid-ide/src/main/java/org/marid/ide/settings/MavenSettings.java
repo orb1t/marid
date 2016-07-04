@@ -31,58 +31,58 @@ public class MavenSettings extends AbstractSettings {
     }
 
     public String getSnapshotUpdatePolicy() {
-        return getPref(String.class, "snapshotUpdatePolicy", null);
+        return preferences.get("snapshotUpdatePolicy", null);
     }
 
     public void setSnapshotUpdatePolicy(String value) {
-        putPref(String.class, "snapshotUpdatePolicy", value);
+        preferences.put("snapshotUpdatePolicy", value);
     }
 
     public String getReleaseUpdatePolicy() {
-        return getPref(String.class, "releaseUpdatePolicy", null);
+        return preferences.get("releaseUpdatePolicy", null);
     }
 
     public void setReleaseUpdatePolicy(String value) {
-        putPref(String.class, "releaseUpdatePolicy", value);
+        preferences.put("releaseUpdatePolicy", value);
     }
 
     public String getDependencyPluginVersion() {
-        return getPref("dependencyPluginVersion", "2.10");
+        return preferences.get("dependencyPluginVersion", "2.10");
     }
 
     public void setDependencyPluginVersion(String value) {
-        putPref("dependencyPluginVersion", value);
+        preferences.put("dependencyPluginVersion", value);
     }
 
     public String getCompilerPluginVersion() {
-        return getPref("compilerPluginVersion", "3.5.1");
+        return preferences.get("compilerPluginVersion", "3.5.1");
     }
 
     public void setCompilerPluginVersion(String value) {
-        putPref("compilerPluginVersion", value);
+        preferences.put("compilerPluginVersion", value);
     }
 
     public String getEclipseCompilerVersion() {
-        return getPref("eclipseCompilerVersion", "2.7");
+        return preferences.get("eclipseCompilerVersion", "2.7");
     }
 
     public void setEclipseCompilerVersion(String value) {
-        putPref("eclipseCompilerVersion", value);
+        preferences.put("eclipseCompilerVersion", value);
     }
 
     public String getJarPluginVersion() {
-        return getPref("jarPluginVersion", "2.6");
+        return preferences.get("jarPluginVersion", "2.6");
     }
 
     public void setJarPluginVersion(String value) {
-        putPref("jarPluginVersion", value);
+        preferences.put("jarPluginVersion", value);
     }
 
     public String getResourcesPluginVersion() {
-        return getPref("resourcesPluginVersion", "3.0.1");
+        return preferences.get("resourcesPluginVersion", "3.0.1");
     }
 
     public void setResourcesPluginVersion(String value) {
-        putPref("resourcesPluginVersion", value);
+        preferences.put("resourcesPluginVersion", value);
     }
 }

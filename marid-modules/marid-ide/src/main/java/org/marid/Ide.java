@@ -28,7 +28,6 @@ import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.io.UrlConnection;
 import org.marid.misc.Props;
-import org.marid.pref.PrefUtils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -48,7 +47,7 @@ import static org.marid.jfx.FxMaridIcon.maridIcon;
  */
 public class Ide extends Application {
 
-    public static final Preferences PREFERENCES = PrefUtils.preferences(Ide.class);
+    public static final Preferences PREFERENCES = Preferences.userNodeForPackage(Ide.class).node("Ide");
     public static final Image[] IMAGES = of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new);
 
     static AnnotationConfigApplicationContext context;

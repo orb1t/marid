@@ -19,6 +19,8 @@
 package org.marid;
 
 import org.marid.ide.logging.IdeLogHandler;
+import org.springframework.beans.factory.InjectionPoint;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.annotation.*;
@@ -29,6 +31,7 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
 import static org.springframework.context.support.AbstractApplicationContext.LIFECYCLE_PROCESSOR_BEAN_NAME;
@@ -75,5 +78,12 @@ public class IdeContext {
                 executor.shutdown();
             }
         };
+    }
+
+    @Bean
+    @Scope("prototype")
+    public Preferences preferences(InjectionPoint injectionPoint,
+                                   @Value("${implementation.version}") String version) {
+        return Preferences.userNodeForPackage(injectionPoint.getMember().getDeclaringClass()).node(version);
     }
 }

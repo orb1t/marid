@@ -20,7 +20,7 @@ package org.marid.ide.logging;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import org.marid.pref.PrefSupport;
+import org.marid.Ide;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.ArrayList;
@@ -35,17 +35,17 @@ import static javafx.collections.FXCollections.observableArrayList;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class IdeLogHandler extends Handler implements PrefSupport {
+public class IdeLogHandler extends Handler {
 
     private final ConcurrentLinkedQueue<LogRecord> queue = new ConcurrentLinkedQueue<>();
     private final ObservableList<LogRecord> logRecords = observableArrayList();
 
     public int getMaxLogRecords() {
-        return getPref("maxLogRecords", 10_000);
+        return Ide.PREFERENCES.getInt("maxLogRecords", 10_000);
     }
 
     public void setMaxLogRecords(int maxLogRecords) {
-        putPref("maxLogRecords", maxLogRecords);
+        Ide.PREFERENCES.putInt("maxLogRecords", maxLogRecords);
     }
 
     @Override

@@ -25,13 +25,14 @@ import javafx.collections.ObservableList;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.logging.LogSupport;
-import org.marid.pref.PrefSupport;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
 import static java.util.Collections.binarySearch;
@@ -40,13 +41,16 @@ import static java.util.Collections.binarySearch;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ProjectManager implements PrefSupport, LogSupport {
+public class ProjectManager implements LogSupport {
 
     private final ObjectProperty<ProjectProfile> profile = new SimpleObjectProperty<>();
     private final ObservableList<ProjectProfile> profiles = FXCollections.observableArrayList();
+    private final Preferences preferences;
 
-    public ProjectManager() {
-        profile.set(new ProjectProfile(getPref("profile", "default")));
+    @Autowired
+    public ProjectManager(Preferences preferences) {
+        this.preferences = preferences;
+        profile.set(new ProjectProfile(preferences.get("profile", "default")));
         if (!isPresent()) {
             profile.set(new ProjectProfile("default"));
         }
@@ -66,7 +70,7 @@ public class ProjectManager implements PrefSupport, LogSupport {
 
     @PreDestroy
     private void savePrefs() {
-        putPref("profile", getProfile().getName());
+        preferences.put("profile", getProfile().getName());
     }
 
     boolean isPresent() {

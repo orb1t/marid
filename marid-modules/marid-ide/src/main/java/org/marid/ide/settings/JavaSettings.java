@@ -20,6 +20,8 @@ package org.marid.ide.settings;
 
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -31,18 +33,18 @@ public class JavaSettings extends AbstractSettings {
     }
 
     public String getJavaExecutable() {
-        return getPref("javaExecutable", "java");
+        return preferences.get("javaExecutable", "java");
     }
 
     public void setJavaExecutable(String value) {
-        putPref("javaExecutable", value);
+        preferences.put("javaExecutable", value);
     }
 
     public String[] getJavaArguments() {
-        return getPref("javaArguments", new String[0]);
+        return Optional.ofNullable(preferences.get("javaArguments", null)).map(s -> s.split("\000")).orElse(new String[0]);
     }
 
     public void setJavaArguments(String[] arguments) {
-        putPref("javaArguments", arguments);
+        preferences.put("javaArguments", String.join("\\000", arguments));
     }
 }

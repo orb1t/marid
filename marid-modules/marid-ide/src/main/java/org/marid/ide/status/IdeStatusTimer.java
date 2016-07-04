@@ -19,7 +19,6 @@
 package org.marid.ide.status;
 
 import javafx.scene.control.Label;
-import org.marid.pref.PrefSupport;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +35,7 @@ import static javafx.application.Platform.runLater;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeStatusTimer extends Label implements PrefSupport {
+public class IdeStatusTimer extends Label {
 
     private static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
             .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
