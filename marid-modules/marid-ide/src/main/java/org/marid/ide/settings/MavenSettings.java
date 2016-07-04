@@ -26,10 +26,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class MavenSettings extends AbstractSettings {
 
-    public MavenSettings() {
-        super("Maven");
-    }
-
     public String getSnapshotUpdatePolicy() {
         return preferences.get("snapshotUpdatePolicy", null);
     }
@@ -84,5 +80,10 @@ public class MavenSettings extends AbstractSettings {
 
     public void setResourcesPluginVersion(String value) {
         preferences.put("resourcesPluginVersion", value);
+    }
+
+    @Override
+    public String getName() {
+        return "Maven";
     }
 }

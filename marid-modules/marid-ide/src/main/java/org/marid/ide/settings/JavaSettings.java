@@ -28,10 +28,6 @@ import java.util.Optional;
 @Component
 public class JavaSettings extends AbstractSettings {
 
-    public JavaSettings() {
-        super("Java");
-    }
-
     public String getJavaExecutable() {
         return preferences.get("javaExecutable", "java");
     }
@@ -45,6 +41,11 @@ public class JavaSettings extends AbstractSettings {
     }
 
     public void setJavaArguments(String[] arguments) {
-        preferences.put("javaArguments", String.join("\\000", arguments));
+        preferences.put("javaArguments", String.join("\\000", (CharSequence[]) arguments));
+    }
+
+    @Override
+    public String getName() {
+        return "Java";
     }
 }

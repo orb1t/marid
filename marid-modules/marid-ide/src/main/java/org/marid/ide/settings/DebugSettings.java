@@ -26,10 +26,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class DebugSettings extends AbstractSettings {
 
-    public DebugSettings() {
-        super("Debug");
-    }
-
     public boolean isDebug() {
         return preferences.getBoolean("debug", false);
     }
@@ -52,5 +48,10 @@ public class DebugSettings extends AbstractSettings {
 
     public void setSuspend(boolean suspend) {
         preferences.putBoolean("suspend", suspend);
+    }
+
+    @Override
+    public String getName() {
+        return "Debug";
     }
 }

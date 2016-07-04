@@ -25,20 +25,16 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.InvalidPreferencesFormatException;
 import java.util.prefs.Preferences;
 
+import static java.util.prefs.Preferences.userNodeForPackage;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public abstract class AbstractSettings {
 
-    protected final Preferences preferences;
+    protected final Preferences preferences = userNodeForPackage(getClass()).node(getClass().getName()).node(getName());
 
-    public AbstractSettings(String name) {
-        preferences = Preferences.userNodeForPackage(getClass()).node(getClass().getName()).node(name);
-    }
-
-    public String getName() {
-        return preferences.name();
-    }
+    public abstract String getName();
 
     public byte[] save() {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();

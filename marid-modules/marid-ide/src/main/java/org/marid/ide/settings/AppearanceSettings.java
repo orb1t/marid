@@ -27,15 +27,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class AppearanceSettings extends AbstractSettings {
 
-    public AppearanceSettings() {
-        super("Appearance");
-    }
-
     public String getLocale() {
         return Ide.PREFERENCES.get("locale", "");
     }
 
     public void setLocale(String locale) {
         Ide.PREFERENCES.put("locale", locale);
+    }
+
+    @Override
+    public String getName() {
+        return "Appearance";
     }
 }
