@@ -84,6 +84,7 @@ public class IdeContext {
     @Scope("prototype")
     public Preferences preferences(InjectionPoint injectionPoint,
                                    @Value("${implementation.version}") String version) {
-        return Preferences.userNodeForPackage(injectionPoint.getMember().getDeclaringClass()).node(version);
+        final Class<?> type = injectionPoint.getMember().getDeclaringClass();
+        return Preferences.userNodeForPackage(type).node(type.getName()).node(version);
     }
 }
