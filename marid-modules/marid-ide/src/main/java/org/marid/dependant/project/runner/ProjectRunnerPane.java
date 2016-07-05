@@ -35,6 +35,7 @@ import org.marid.logging.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -96,6 +97,11 @@ public class ProjectRunnerPane extends BorderPane implements LogSupport {
                 .add("Dump", FontIcon.M_LIST, e -> printStream.println("dump"))
                 .build());
         setCenter(tabPane);
+    }
+
+    @PreDestroy
+    private void destroy() {
+        process.destroyForcibly();
     }
 
     private Consumer<String> consumer(ListView<String> listView) {

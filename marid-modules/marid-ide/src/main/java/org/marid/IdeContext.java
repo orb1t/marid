@@ -18,15 +18,15 @@
 
 package org.marid;
 
+import javafx.stage.Stage;
 import org.marid.ide.IdePostProcessor;
 import org.marid.ide.logging.IdeLogHandler;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.annotation.*;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.DefaultLifecycleProcessor;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 
@@ -48,8 +48,13 @@ import static org.springframework.context.support.AbstractApplicationContext.LIF
 public class IdeContext {
 
     @Bean
-    public Ide ide(AnnotationConfigApplicationContext context) {
-        return context.getEnvironment().getProperty("ide", Ide.class);
+    public Ide ide(ConfigurableEnvironment environment) {
+        return environment.getProperty("ide", Ide.class);
+    }
+
+    @Bean
+    public Stage primaryStage(ConfigurableEnvironment environment) {
+        return environment.getProperty("primaryStage", Stage.class);
     }
 
     @Bean
@@ -72,12 +77,8 @@ public class IdeContext {
     }
 
     @Bean
-    public ApplicationListener<ContextClosedEvent> taskSchedulerDestroyer(ConcurrentTaskScheduler taskScheduler, Ide ide) {
-        return event -> {
-            if (event.getApplicationContext() == ide.context) {
-                ((ScheduledThreadPoolExecutor) taskScheduler.getConcurrentExecutor()).shutdown();
-            }
-        };
+    public AutoCloseable taskSchedulerDestroyer(ConcurrentTaskScheduler scheduler) {
+        return () -> ((ScheduledThreadPoolExecutor) scheduler.getConcurrentExecutor()).shutdown();
     }
 
     @Bean
@@ -86,5 +87,10 @@ public class IdeContext {
                                    @Value("${implementation.version}") String version) {
         final Class<?> type = injectionPoint.getMember().getDeclaringClass();
         return Preferences.userNodeForPackage(type).node(type.getName()).node(version);
+    }
+
+    @Bean
+    public AutoCloseable dependantsDestroyer() {
+        return IdeDependants::closeDependants;
     }
 }

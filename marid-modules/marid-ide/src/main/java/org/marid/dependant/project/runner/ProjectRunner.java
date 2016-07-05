@@ -19,8 +19,8 @@
 package org.marid.dependant.project.runner;
 
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.marid.Ide;
 import org.marid.logging.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
@@ -36,8 +36,9 @@ import java.util.concurrent.TimeUnit;
 public class ProjectRunner extends Stage implements LogSupport {
 
     @Autowired
-    public ProjectRunner(ProjectRunnerPane runnerPane) {
-        getIcons().addAll(Ide.IMAGES);
+    public ProjectRunner(ProjectRunnerPane runnerPane, Stage primaryStage) {
+        getIcons().addAll(primaryStage.getIcons());
+        initModality(Modality.NONE);
         setScene(new Scene(runnerPane, 800, 600));
         setMaximized(true);
         setTitle("[" + runnerPane.getProfile() + "]");

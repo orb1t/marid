@@ -74,8 +74,10 @@ public class SimpleUIConfig implements DestructionAwareBeanPostProcessor {
     public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
         if (bean instanceof Dialog<?>) {
             dialogs.remove(bean);
+            ((Dialog<?>) bean).close();
         } else if (bean instanceof Window) {
             windows.remove(bean);
+            ((Window) bean).hide();
         }
     }
 

@@ -23,13 +23,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+
+import static org.marid.logging.LogSupport.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component("dependants")
 public class IdeDependants {
+
+    private static final LinkedList<AnnotationConfigApplicationContext> CONTEXTS = new LinkedList<>();
 
     private final AnnotationConfigApplicationContext parent;
 
@@ -53,5 +60,17 @@ public class IdeDependants {
         context.refresh();
         context.start();
         return context;
+    }
+
+    public static void closeDependants() {
+        for (final Iterator<AnnotationConfigApplicationContext> iterator = CONTEXTS.descendingIterator(); iterator.hasNext(); ) {
+            try (final AnnotationConfigApplicationContext context = iterator.next()) {
+                log(Level.INFO, "Closing {0}", context);
+            } catch (Exception x) {
+                log(Level.WARNING, "Unable to close context", x);
+            } finally {
+                iterator.remove();
+            }
+        }
     }
 }

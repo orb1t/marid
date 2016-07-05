@@ -50,32 +50,34 @@ import static org.marid.jfx.FxMaridIcon.maridIcon;
 public class Ide extends Application {
 
     public static final Preferences PREFERENCES = Preferences.userNodeForPackage(Ide.class).node("Ide");
-    public static final Image[] IMAGES = of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new);
 
     final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
     @Override
     public void init() throws Exception {
-        context.getEnvironment().getPropertySources().addLast(new MapPropertySource("ideProps", ImmutableMap.of("ide", this)));
         context.setDisplayName(Ide.class.getName());
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
         context.setClassLoader(Thread.currentThread().getContextClassLoader());
         context.setResourceLoader(new PathMatchingResourcePatternResolver(context.getClassLoader()));
         context.register(IdeContext.class);
-        context.refresh();
-        context.start();
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         Application.setUserAgentStylesheet(PREFERENCES.get("style", STYLESHEET_MODENA));
+        context.getEnvironment().getPropertySources().addLast(new MapPropertySource("ideProps", ImmutableMap.of(
+                "ide", this,
+                "primaryStage", primaryStage
+        )));
+        context.refresh();
+        context.start();
         final IdePane idePane = context.getBean(IdePane.class);
         primaryStage.setMinWidth(750.0);
         primaryStage.setMinHeight(550.0);
         primaryStage.setTitle("Marid IDE");
         primaryStage.setScene(new Scene(idePane, 1024, 768));
-        primaryStage.getIcons().addAll(IMAGES);
+        primaryStage.getIcons().addAll(of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new));
         primaryStage.setMaximized(true);
         primaryStage.show();
     }
