@@ -26,7 +26,6 @@ import org.marid.logging.LogSupport;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import java.time.Instant;
 import java.util.Set;
 import java.util.Timer;
@@ -39,7 +38,6 @@ import static java.util.Collections.singletonList;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Resource(name = "randomNumericDaqGenerator", description = "Random numeric DAQ generator", type = RandomNumericDaqGenerator.class)
 public class RandomNumericDaqGenerator implements LogSupport {
 
     private final NumericWriter numericWriter;

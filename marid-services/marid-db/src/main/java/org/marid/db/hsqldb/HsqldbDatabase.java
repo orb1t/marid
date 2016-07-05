@@ -28,7 +28,6 @@ import org.marid.logging.LogSupport;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.io.*;
 import java.net.URL;
@@ -49,7 +48,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Resource(name = "hsqldbDatabase", description = "HSQLDB database service", type = HsqldbDatabase.class)
 public final class HsqldbDatabase implements Closeable, LogSupport {
 
     private final Server server;

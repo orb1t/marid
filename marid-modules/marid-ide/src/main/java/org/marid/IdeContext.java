@@ -43,13 +43,13 @@ import static org.springframework.context.support.AbstractApplicationContext.LIF
 @Configuration
 @EnableScheduling
 @PropertySource("meta.properties")
-@Import({IdePostProcessor.class})
+@Import({IdePostProcessor.class, IdeDependants.class})
 @ComponentScan(basePackages = {"org.marid.ide"}, lazyInit = true)
 public class IdeContext {
 
     @Bean
-    public Ide application() {
-        return Ide.application;
+    public Ide ide(AnnotationConfigApplicationContext context) {
+        return context.getEnvironment().getProperty("ide", Ide.class);
     }
 
     @Bean
@@ -72,11 +72,10 @@ public class IdeContext {
     }
 
     @Bean
-    public ApplicationListener<ContextClosedEvent> taskSchedulerDestroyer(ConcurrentTaskScheduler taskScheduler) {
+    public ApplicationListener<ContextClosedEvent> taskSchedulerDestroyer(ConcurrentTaskScheduler taskScheduler, Ide ide) {
         return event -> {
-            if (event.getApplicationContext() == Ide.context) {
-                final ScheduledThreadPoolExecutor executor = (ScheduledThreadPoolExecutor) taskScheduler.getConcurrentExecutor();
-                executor.shutdown();
+            if (event.getApplicationContext() == ide.context) {
+                ((ScheduledThreadPoolExecutor) taskScheduler.getConcurrentExecutor()).shutdown();
             }
         };
     }

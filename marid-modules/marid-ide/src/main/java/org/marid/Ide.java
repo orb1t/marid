@@ -18,6 +18,7 @@
 
 package org.marid;
 
+import com.google.common.collect.ImmutableMap;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -29,6 +30,7 @@ import org.marid.ide.panes.main.IdePane;
 import org.marid.io.UrlConnection;
 import org.marid.misc.Props;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.util.Locale;
@@ -50,20 +52,17 @@ public class Ide extends Application {
     public static final Preferences PREFERENCES = Preferences.userNodeForPackage(Ide.class).node("Ide");
     public static final Image[] IMAGES = of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new);
 
-    static AnnotationConfigApplicationContext context;
-    static Ide application;
+    final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
     @Override
     public void init() throws Exception {
-        context = new AnnotationConfigApplicationContext();
+        context.getEnvironment().getPropertySources().addLast(new MapPropertySource("ideProps", ImmutableMap.of("ide", this)));
         context.setDisplayName(Ide.class.getName());
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
-
         context.setClassLoader(Thread.currentThread().getContextClassLoader());
         context.setResourceLoader(new PathMatchingResourcePatternResolver(context.getClassLoader()));
         context.register(IdeContext.class);
-        application = this;
         context.refresh();
         context.start();
     }
@@ -83,20 +82,15 @@ public class Ide extends Application {
 
     @Override
     public void stop() throws Exception {
-        try {
-            context.close();
-            final Logger logger = Logger.getLogger("");
-            for (final Handler handler : logger.getHandlers()) {
-                try {
-                    handler.close();
-                } catch (Exception x) {
-                    x.printStackTrace(System.err);
-                }
-                logger.removeHandler(handler);
+        context.close();
+        final Logger logger = Logger.getLogger("");
+        for (final Handler handler : logger.getHandlers()) {
+            try {
+                handler.close();
+            } catch (Exception x) {
+                x.printStackTrace(System.err);
             }
-        } finally {
-            application = null;
-            context = null;
+            logger.removeHandler(handler);
         }
     }
 

@@ -21,14 +21,12 @@ package org.marid.db.hsqldb;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.net.URL;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Resource(name = "hsqldbProperties", description = "HSQLDB service properties", type = HsqldbProperties.class)
 public final class HsqldbProperties {
 
     private File directory = new File("daqDatabase");

@@ -19,30 +19,36 @@
 package org.marid;
 
 import org.marid.ide.dependants.conf.SimpleUIConfig;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component("dependants")
 public class IdeDependants {
 
-    public static AnnotationConfigApplicationContext startDependant(String name, Class<?> configuration) {
-        return startDependant(Ide.context, name, configuration);
+    private final AnnotationConfigApplicationContext parent;
+
+    @Autowired
+    public IdeDependants(AnnotationConfigApplicationContext parent) {
+        this.parent = parent;
     }
 
-    public static AnnotationConfigApplicationContext startDependant(ApplicationContext parent, String name, Class<?> configuration) {
+    public AnnotationConfigApplicationContext startDependant(Class<?> configuration) {
         return startDependant(context -> {
-            context.setDisplayName(name);
-            context.setParent(parent);
+            context.setDisplayName(configuration.getSimpleName());
             context.register(SimpleUIConfig.class, configuration);
         });
     }
 
-    public static AnnotationConfigApplicationContext startDependant(Consumer<AnnotationConfigApplicationContext> contextConsumer) {
+    private AnnotationConfigApplicationContext startDependant(Consumer<AnnotationConfigApplicationContext> contextConsumer) {
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(IdeDependants.class);
+        context.setParent(parent);
         contextConsumer.accept(context);
         context.refresh();
         context.start();

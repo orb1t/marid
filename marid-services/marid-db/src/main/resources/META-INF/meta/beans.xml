@@ -1,0 +1,41 @@
+<!--
+  ~ Copyright (c) 2016 Dmitry Ovchinnikov
+  ~ Marid, the free data acquisition and visualization software
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of
+  ~ the License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans">
+
+    <bean name="randomNumericDaqGenerator" class="org.marid.db.generator.RandomNumericDaqGenerator" abstract="true">
+        <description>Random numeric DAQ generator</description>
+        <constructor-arg name="max" value="1.0"/>
+        <constructor-arg name="min" value="0.0"/>
+        <constructor-arg name="periodSeconds" value="1"/>
+        <constructor-arg name="tag" value="1"/>
+    </bean>
+
+    <bean name="hsqldbProperties" class="org.marid.db.hsqldb.HsqldbProperties" abstract="true">
+        <description>HSQLDB database properties</description>
+    </bean>
+
+    <bean name="hsqldbDatabase" class="org.marid.db.hsqldb.HsqldbDatabase" abstract="true">
+        <description>HSQLDB database</description>
+
+    </bean>
+
+    <bean name="numericWriter" factory-bean="hsqldbDatabase" factory-method="numericWriter" abstract="true">
+        <description>Numeric writer</description>
+    </bean>
+</beans>

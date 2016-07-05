@@ -22,6 +22,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCombination;
+import org.marid.IdeDependants;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
 import org.marid.ide.project.cache.ProjectCacheManager;
@@ -42,7 +43,6 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
-import static org.marid.IdeDependants.startDependant;
 import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.misc.Calls.callWithTime;
 
@@ -61,11 +61,11 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
-    public FxAction projectSetupAction() {
+    public FxAction projectSetupAction(IdeDependants dependants) {
         return new FxAction("projectSetup", "setup", "Project")
                 .setText("Project setup...")
                 .setIcon(O_TOOLS)
-                .setEventHandler(event -> startDependant("projectSetup", ProjectConfigConfiguration.class));
+                .setEventHandler(event -> dependants.startDependant(ProjectConfigConfiguration.class));
     }
 
     @Bean
@@ -81,22 +81,22 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
-    public FxAction projectBuildAction(ProjectCacheManager projectCacheManager) {
+    public FxAction projectBuildAction(ObjectFactory<ProjectCacheManager> projectCacheManager) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F9"))
                 .setText("Build")
                 .setIcon(D_CLOCK_FAST)
-                .setEventHandler(event -> projectCacheManager.build(projectManager.getProfile()));
+                .setEventHandler(event -> projectCacheManager.getObject().build(projectManager.getProfile()));
     }
 
     @Bean
     @IdeAction
-    public FxAction projectRunAction() {
+    public FxAction projectRunAction(IdeDependants dependants) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F5"))
                 .setText("Run")
                 .setIcon(F_PLAY)
-                .setEventHandler(event -> startDependant("projectSetup", ProjectRunnerConfiguration.class));
+                .setEventHandler(event -> dependants.startDependant(ProjectRunnerConfiguration.class));
     }
 
     @Bean

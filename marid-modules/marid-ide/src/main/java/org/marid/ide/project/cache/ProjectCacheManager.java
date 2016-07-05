@@ -27,6 +27,7 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.net.URLClassLoader;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,6 +62,10 @@ public class ProjectCacheManager implements LogSupport {
 
     public Class<?> getClass(ProjectProfile profile, String type) {
         return cache.computeIfAbsent(profile, ProjectCacheEntry::new).getClass(type);
+    }
+
+    public URLClassLoader getClassLoader(ProjectProfile profile) {
+        return cache.computeIfAbsent(profile, ProjectCacheEntry::new).getClassLoader();
     }
 
     public void build(ProjectProfile profile) {

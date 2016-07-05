@@ -119,6 +119,10 @@ public class ProjectCacheEntry implements AutoCloseable, LogSupport {
         return dirty;
     }
 
+    public URLClassLoader getClassLoader() {
+        return classLoader;
+    }
+
     public void update() throws Exception {
         classMap.clear();
         try (final URLClassLoader classLoader = this.classLoader) {
