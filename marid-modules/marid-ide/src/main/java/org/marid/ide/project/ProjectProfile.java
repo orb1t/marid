@@ -35,7 +35,6 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -53,23 +52,22 @@ import static org.apache.commons.lang3.SystemUtils.USER_HOME;
  */
 public class ProjectProfile implements LogSupport {
 
-    private final Model model;
-    private final Path path;
-    private final Path pomFile;
-    private final Path src;
-    private final Path target;
-    private final Path srcMain;
-    private final Path srcTest;
-    private final Path srcMainJava;
-    private final Path srcMainResources;
-    private final Path srcTestJava;
-    private final Path srcTestResources;
-    private final Path beansDirectory;
-    private final Path repository;
-    private final Logger logger;
-    private final ObservableMap<Path, BeanFile> beanFiles;
-
-    private URLClassLoader classLoader;
+    final Model model;
+    final Path path;
+    final Path pomFile;
+    final Path src;
+    final Path target;
+    final Path srcMain;
+    final Path srcTest;
+    final Path srcMainJava;
+    final Path srcMainResources;
+    final Path srcTestJava;
+    final Path srcTestResources;
+    final Path beansDirectory;
+    final Path repository;
+    final Logger logger;
+    final ObservableMap<Path, BeanFile> beanFiles;
+    final ProjectCacheEntry cacheEntry;
 
     ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -90,6 +88,7 @@ public class ProjectProfile implements LogSupport {
         createFileStructure();
         beanFiles = loadBeanFiles();
         init();
+        cacheEntry = new ProjectCacheEntry(this);
     }
 
     private void init() {

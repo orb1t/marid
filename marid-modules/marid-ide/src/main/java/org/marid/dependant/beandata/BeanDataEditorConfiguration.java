@@ -21,10 +21,15 @@ package org.marid.dependant.beandata;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.ToolBar;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.marid.dependant.beaneditor.BeanEditorTable;
 import org.marid.ide.panes.main.IdePane;
+import org.marid.ide.project.ProjectCacheManager;
+import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.l10n.L10n;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.ConstructorArg;
@@ -37,6 +42,7 @@ import org.springframework.context.event.ContextStartedEvent;
 
 import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
 import static org.marid.jfx.ScrollPanes.scrollPane;
+import static org.marid.jfx.icons.FontIcon.M_REFRESH;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -46,8 +52,10 @@ import static org.marid.jfx.ScrollPanes.scrollPane;
 public class BeanDataEditorConfiguration {
 
     @Bean
-    public BeanData beanData(BeanEditorTable beanEditorTable) {
-        return beanEditorTable.getSelectionModel().getSelectedItem();
+    public BeanData beanData(BeanEditorTable beanEditorTable, ProjectCacheManager projectCacheManager, ProjectProfile profile) {
+        final BeanData beanData = beanEditorTable.getSelectionModel().getSelectedItem();
+        projectCacheManager.updateBeanData(profile, beanData);
+        return beanData;
     }
 
     @Bean
@@ -72,8 +80,18 @@ public class BeanDataEditorConfiguration {
     }
 
     @Bean
-    public Scene simpleBeanConfigurerScene(TabPane tabPane) {
-        return new Scene(tabPane, 1024, 768);
+    public BorderPane sceneRoot(TabPane tabPane, BeanDataActions actions) {
+        final BorderPane pane = new BorderPane(tabPane);
+        final ToolBar toolBar = new ToolbarBuilder()
+                .add("Update", M_REFRESH, actions::onRefresh)
+                .build();
+        pane.setTop(toolBar);
+        return pane;
+    }
+
+    @Bean
+    public Scene simpleBeanConfigurerScene(BorderPane sceneRoot) {
+        return new Scene(sceneRoot, 1024, 768);
     }
 
     @Bean

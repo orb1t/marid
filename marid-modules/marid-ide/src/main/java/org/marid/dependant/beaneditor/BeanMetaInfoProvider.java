@@ -18,8 +18,8 @@
 
 package org.marid.dependant.beaneditor;
 
+import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.project.cache.ProjectCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -51,6 +51,7 @@ public class BeanMetaInfoProvider {
             return Collections.emptyMap();
         } else {
             try (final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext()) {
+                context.setDisplayName(profile.getName());
                 context.setConfigLocation("classpath*:/META-INF/meta/beans.xml");
                 context.setAllowBeanDefinitionOverriding(true);
                 context.setAllowCircularReferences(true);

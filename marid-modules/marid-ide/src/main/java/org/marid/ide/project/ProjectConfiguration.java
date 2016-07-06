@@ -25,7 +25,6 @@ import javafx.scene.input.KeyCombination;
 import org.marid.IdeDependants;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
-import org.marid.ide.project.cache.ProjectCacheManager;
 import org.marid.jfx.action.FxAction;
 import org.marid.l10n.L10n;
 import org.marid.logging.LogSupport;

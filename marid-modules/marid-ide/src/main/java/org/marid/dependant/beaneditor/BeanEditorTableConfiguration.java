@@ -24,22 +24,13 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
-import org.marid.IdeDependants;
-import org.marid.dependant.beandata.BeanDataEditorConfiguration;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.panes.tabs.IdeTabPane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.ScrollPanes;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
-import org.marid.spring.xml.data.BeanData;
-import org.marid.spring.xml.data.ConstructorArg;
-import org.marid.spring.xml.data.Property;
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,7 +38,6 @@ import org.springframework.context.annotation.Scope;
 
 import java.nio.file.Path;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
@@ -63,56 +53,14 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 public class BeanEditorTableConfiguration {
 
     @Bean
-    public ToolBar beanEditorToolbar(BeanEditorTable table,
-                                     ObjectFactory<Dialog<Entry<String, BeanDefinition>>> beanBrowser,
-                                     IdeDependants dependants) {
+    public ToolBar beanEditorToolbar(BeanEditorActions actions) {
         return new ToolbarBuilder()
-                .add(s("Edit..."), FontIcon.M_EDIT, event -> dependants.startDependant(BeanDataEditorConfiguration.class))
+                .add(s("Edit..."), FontIcon.M_EDIT, actions::onEdit)
                 .addSeparator()
-                .add(s("Remove"), FontIcon.O_REPO_DELETE,
-                        event -> table.getItems().remove(table.getSelectionModel().getSelectedIndex()))
-                .add(s("Clear"), FontIcon.M_CLEAR_ALL,
-                        event -> table.getItems().clear())
+                .add(s("Remove"), FontIcon.O_REPO_DELETE, actions::onDelete)
+                .add(s("Clear"), FontIcon.M_CLEAR_ALL, actions::onClear)
                 .addSeparator()
-                .add(s("Browse"), FontIcon.O_BROWSER, event -> {
-                    final Optional<Entry<String, BeanDefinition>> entry = beanBrowser.getObject().showAndWait();
-                    if (entry.isPresent()) {
-                        final BeanData beanData = new BeanData();
-                        final BeanDefinition def = entry.get().getValue();
-                        beanData.name.set(entry.get().getKey());
-                        beanData.factoryBean.set(def.getFactoryBeanName());
-                        beanData.factoryMethod.set(def.getFactoryMethodName());
-                        beanData.type.set(def.getBeanClassName());
-                        beanData.lazyInit.set(def.isLazyInit() ? "true" : null);
-
-                        if (entry.get().getValue() instanceof AbstractBeanDefinition) {
-                            final AbstractBeanDefinition definition = (AbstractBeanDefinition) entry.get().getValue();
-                            beanData.initMethod.set(definition.getInitMethodName());
-                            beanData.destroyMethod.set(definition.getDestroyMethodName());
-                        }
-
-                        if (def.getConstructorArgumentValues() != null) {
-                            for (final ValueHolder holder : def.getConstructorArgumentValues().getGenericArgumentValues()) {
-                                final ConstructorArg constructorArg = new ConstructorArg();
-                                constructorArg.name.set(holder.getName());
-                                constructorArg.type.set(holder.getType());
-                                constructorArg.value.set(holder.getValue() == null ? null : holder.getValue().toString());
-                                beanData.constructorArgs.add(constructorArg);
-                            }
-                        }
-
-                        if (def.getPropertyValues() != null) {
-                            for (final PropertyValue propertyValue : def.getPropertyValues().getPropertyValueList()) {
-                                final Property property = new Property();
-                                property.name.set(propertyValue.getName());
-                                property.value.set(propertyValue.getValue() == null ? null : propertyValue.getValue().toString());
-                                beanData.properties.add(property);
-                            }
-                        }
-
-                        table.getItems().add(beanData);
-                    }
-                })
+                .add(s("Browse"), FontIcon.O_BROWSER, actions::onBrowse)
                 .build();
     }
 

@@ -51,7 +51,7 @@ public class Ide extends Application {
 
     public static final Preferences PREFERENCES = Preferences.userNodeForPackage(Ide.class).node("Ide");
 
-    final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+    private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
     @Override
     public void init() throws Exception {
