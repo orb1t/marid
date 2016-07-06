@@ -20,17 +20,18 @@ package org.marid.dependant.beaneditor;
 
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
+import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.l10n.L10n;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.marid.misc.Builder.build;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,61 +39,111 @@ import static org.marid.misc.Builder.build;
 @Component
 public class BeanEditorTable extends TableView<BeanData> {
 
+    private final ProjectProfile profile;
+    private final ProjectCacheManager projectCacheManager;
+
     @Autowired
-    public BeanEditorTable(BeanFile beanFile, ProjectProfile profile) {
+    public BeanEditorTable(BeanFile beanFile, ProjectProfile profile, ProjectCacheManager projectCacheManager) {
         super(beanFile.beans);
+        this.profile = profile;
+        this.projectCacheManager = projectCacheManager;
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setEditable(true);
-        getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(L10n.s("Name"));
-            col.setCellValueFactory(param -> param.getValue().name);
-            col.setCellFactory(param -> new TextFieldTableCell<BeanData, String>(new DefaultStringConverter()) {
+        getColumns().add(nameColumn());
+        getColumns().add(typeColumn());
+        getColumns().add(factoryBeanColumn());
+        getColumns().add(factoryMethodColumn());
+        getColumns().add(initMethodColumn());
+        getColumns().add(destroyMethodColumn());
+        getColumns().add(lazyColumn());
+    }
+
+    private TableColumn<BeanData, String> nameColumn() {
+        final TableColumn<BeanData, String> col = new TableColumn<>(s("Name"));
+        col.setCellValueFactory(param -> param.getValue().name);
+        col.setCellFactory(param -> new TextFieldTableCell<BeanData, String>(new DefaultStringConverter()) {
+            @Override
+            public void commitEdit(String newValue) {
+                final String oldValue = getItem();
+                super.commitEdit(newValue);
+                ProjectManager.onBeanNameChange(profile, oldValue, newValue);
+            }
+        });
+        col.setPrefWidth(250);
+        col.setMaxWidth(450);
+        col.setEditable(true);
+        return col;
+    }
+
+    private TableColumn<BeanData, String> typeColumn() {
+        final TableColumn<BeanData, String> col = new TableColumn<>(s("Type"));
+        col.setCellValueFactory(param -> param.getValue().type);
+        col.setPrefWidth(450);
+        col.setMaxWidth(650);
+        return col;
+    }
+
+    private TableColumn<BeanData, String> factoryBeanColumn() {
+        final TableColumn<BeanData, String> col = new TableColumn<>(s("Factory bean"));
+        col.setCellValueFactory(param -> param.getValue().factoryBean);
+        col.setPrefWidth(250);
+        col.setMaxWidth(450);
+        return col;
+    }
+
+    private TableColumn<BeanData, String> factoryMethodColumn() {
+        final TableColumn<BeanData, String> col = new TableColumn<>(s("Factory method"));
+        col.setCellValueFactory(param -> param.getValue().factoryMethod);
+        col.setPrefWidth(250);
+        col.setMaxWidth(450);
+        return col;
+    }
+
+    private TableColumn<BeanData, String> initMethodColumn() {
+        final TableColumn<BeanData, String> col = new TableColumn<>(s("Init method"));
+        col.setCellValueFactory(param -> param.getValue().initMethod);
+        col.setCellFactory(param -> {
+            final ComboBoxTableCell<BeanData, String> cell = new ComboBoxTableCell<>();
+            cell.setComboBoxEditable(true);
+            return cell;
+        });
+        col.setPrefWidth(180);
+        col.setMaxWidth(340);
+        return col;
+    }
+
+    private TableColumn<BeanData, String> destroyMethodColumn() {
+        final TableColumn<BeanData, String> col = new TableColumn<>(s("Destroy method"));
+        col.setCellValueFactory(param -> param.getValue().destroyMethod);
+        col.setCellFactory(param -> {
+            final ComboBoxTableCell<BeanData, String> cell = new ComboBoxTableCell<>();
+            cell.setComboBoxEditable(true);
+            return cell;
+        });
+        col.setPrefWidth(180);
+        col.setMaxWidth(340);
+        return col;
+    }
+
+    private TableColumn<BeanData, String> lazyColumn() {
+        final TableColumn<BeanData, String> col = new TableColumn<>(s("Lazy"));
+        col.setCellValueFactory(param -> param.getValue().lazyInit);
+        col.setCellFactory(param -> {
+            final ComboBoxTableCell<BeanData, String> cell = new ComboBoxTableCell<BeanData, String>("true", "false", "default", "null") {
                 @Override
                 public void commitEdit(String newValue) {
-                    final String oldValue = getItem();
+                    if ("null".equals(newValue)) {
+                        newValue = null;
+                    }
                     super.commitEdit(newValue);
-                    ProjectManager.onBeanNameChange(profile, oldValue, newValue);
                 }
-            });
-            col.setPrefWidth(250);
-            col.setMaxWidth(450);
-            col.setEditable(true);
-        }));
-        getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(L10n.s("Type"));
-            col.setCellValueFactory(param -> param.getValue().type);
-            col.setPrefWidth(450);
-            col.setMaxWidth(650);
-        }));
-        getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(L10n.s("Factory bean"));
-            col.setCellValueFactory(param -> param.getValue().factoryBean);
-            col.setPrefWidth(250);
-            col.setMaxWidth(450);
-        }));
-        getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(L10n.s("Factory method"));
-            col.setCellValueFactory(param -> param.getValue().factoryMethod);
-            col.setPrefWidth(250);
-            col.setMaxWidth(450);
-        }));
-        getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(L10n.s("Init trigger"));
-            col.setCellValueFactory(param -> param.getValue().initMethod);
-            col.setPrefWidth(200);
-            col.setMaxWidth(350);
-        }));
-        getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(L10n.s("Destroy trigger"));
-            col.setCellValueFactory(param -> param.getValue().destroyMethod);
-            col.setPrefWidth(200);
-            col.setMaxWidth(350);
-        }));
-        getColumns().add(build(new TableColumn<BeanData, String>(), col -> {
-            col.setText(L10n.s("Lazy"));
-            col.setCellValueFactory(param -> param.getValue().lazyInit);
-            col.setPrefWidth(60);
-            col.setMaxWidth(100);
-        }));
+            };
+            cell.setComboBoxEditable(true);
+            return cell;
+        });
+        col.setPrefWidth(100);
+        col.setMaxWidth(150);
+        col.setEditable(true);
+        return col;
     }
 }

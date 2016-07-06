@@ -38,4 +38,8 @@ public class BeanData extends AbstractData<BeanData> {
 
     public final ObservableList<ConstructorArg> constructorArgs = FXCollections.observableArrayList();
     public final ObservableList<Property> properties = FXCollections.observableArrayList();
+
+    public boolean isFactoryBean() {
+        return factoryBean.isNotEmpty().get() && factoryMethod.isNotEmpty().get();
+    }
 }

@@ -29,12 +29,11 @@ import org.springframework.stereotype.Component;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.URLClassLoader;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -53,10 +52,6 @@ public class ProjectCacheManager implements LogSupport {
         this.projectBuilder = projectBuilder;
     }
 
-    public Class<?> getClass(ProjectProfile profile, String type) {
-        return profile.cacheEntry.getClass(type);
-    }
-
     public URLClassLoader getClassLoader(ProjectProfile profile) {
         return profile.cacheEntry.getClassLoader();
     }
@@ -73,49 +68,52 @@ public class ProjectCacheManager implements LogSupport {
         }, profile.logger()::log);
     }
 
-    private Method getFactoryMethod(ProjectProfile profile, BeanData beanData) {
-        final Class<?> beanType = profile.getBeanFiles().values().stream()
-                .flatMap(f -> f.beans.stream())
-                .filter(b -> beanData.factoryBean.isEqualTo(b.name).get())
-                .map(b -> getClass(profile, b.type.get()))
-                .findFirst()
-                .orElse(null);
-        if (beanType == null) {
-            return null;
+    public Optional<Class<?>> getBeanClass(ProjectProfile profile, BeanData beanData) {
+        if (beanData.isFactoryBean()) {
+            final Optional<Class<?>> type = profile.getBeanFiles().values().stream()
+                    .flatMap(f -> f.beans.stream())
+                    .filter(b -> beanData.factoryBean.isEqualTo(b.name).get())
+                    .map(b -> profile.cacheEntry.getClass(b.type.get()))
+                    .filter(Optional::isPresent)
+                    .findFirst()
+                    .map(Optional::get);
+            if (type.isPresent()) {
+                if (beanData.type.isNotEqualTo(type.get().getName()).get()) {
+                    beanData.type.set(type.get().getName());
+                }
+                return type;
+            }
         }
-        return Stream.of(beanType.getMethods())
-                .filter(m -> beanData.factoryMethod.isEqualTo(m.getName()).get())
-                .findFirst()
-                .orElse(null);
+        return profile.cacheEntry.getClass(beanData.type.get());
     }
 
     public void updateBeanData(ProjectProfile profile, BeanData beanData) {
-        final Class<?> type = getClass(profile, beanData.type.get());
-        if (type == Object.class) {
-            return;
-        }
-
-        ConstructorArgs:
-        {
+        try {
+            final Class<?> type = getBeanClass(profile, beanData).orElseThrow(IllegalStateException::new);
             final Parameter[] parameters;
-            if (beanData.factoryBean.isNotEmpty().get() || beanData.factoryMethod.isNotEmpty().get()) {
-                final Method method = getFactoryMethod(profile, beanData);
-                if (method == null) {
-                    break ConstructorArgs;
-                }
-                beanData.type.set(method.getReturnType().getName());
-                parameters = method.getParameters();
+            if (beanData.isFactoryBean()) {
+                parameters = profile.getBeanFiles().values().stream()
+                        .flatMap(f -> f.beans.stream())
+                        .filter(b -> beanData.factoryBean.isEqualTo(b.name).get())
+                        .map(b -> getBeanClass(profile, b))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst()
+                        .flatMap(t -> Stream.of(t.getMethods())
+                                .filter(m -> beanData.factoryMethod.isEqualTo(m.getName()).get())
+                                .reduce((m1, m2) -> m2.getParameterCount() < m1.getParameterCount() ? m2 : m1))
+                        .orElseThrow(IllegalStateException::new)
+                        .getParameters();
             } else {
-                final Constructor<?>[] constructors = type.getConstructors();
-                if (constructors.length == 0) {
-                    break ConstructorArgs;
-                }
-                parameters = constructors[0].getParameters();
+                parameters = Stream.of(type.getConstructors())
+                        .reduce((c1, c2) -> c2.getParameterCount() < c1.getParameterCount() ? c2 : c1)
+                        .orElseThrow(IllegalStateException::new)
+                        .getParameters();
             }
-            final Map<String, ConstructorArg> map = beanData.constructorArgs.stream().collect(toMap(e -> e.name.get(), e -> e));
+            final Map<String, ConstructorArg> cmap = beanData.constructorArgs.stream().collect(toMap(e -> e.name.get(), e -> e));
             beanData.constructorArgs.clear();
             for (final Parameter parameter : parameters) {
-                final ConstructorArg arg = map.computeIfAbsent(parameter.getName(), n -> {
+                final ConstructorArg arg = cmap.computeIfAbsent(parameter.getName(), n -> {
                     final ConstructorArg constructorArg = new ConstructorArg();
                     constructorArg.name.set(n);
                     return constructorArg;
@@ -123,30 +121,28 @@ public class ProjectCacheManager implements LogSupport {
                 arg.type.set(parameter.getType().getName());
                 beanData.constructorArgs.add(arg);
             }
-        }
 
-        final Class<?> beanType = getClass(profile, beanData.type.get());
-        if (beanType == Object.class) {
-            return;
-        }
-        final List<PropertyDescriptor> propertyDescriptors;
-        try {
-            propertyDescriptors = Stream.of(Introspector.getBeanInfo(beanType).getPropertyDescriptors())
-                    .filter(d -> d.getWriteMethod() != null)
-                    .collect(Collectors.toList());
-        } catch (IntrospectionException x) {
-            return;
-        }
-        final Map<String, Property> map = beanData.properties.stream().collect(toMap(e -> e.name.get(), e -> e));
-        beanData.properties.clear();
-        for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-            final Property prop = map.computeIfAbsent(propertyDescriptor.getName(), n -> {
-                final Property property = new Property();
-                property.name.set(n);
-                return property;
-            });
-            prop.type.set(propertyDescriptor.getPropertyType().getName());
-            beanData.properties.add(prop);
+            final List<PropertyDescriptor> propertyDescriptors;
+            try {
+                propertyDescriptors = Stream.of(Introspector.getBeanInfo(type).getPropertyDescriptors())
+                        .filter(d -> d.getWriteMethod() != null)
+                        .collect(Collectors.toList());
+            } catch (IntrospectionException x) {
+                return;
+            }
+            final Map<String, Property> pmap = beanData.properties.stream().collect(toMap(e -> e.name.get(), e -> e));
+            beanData.properties.clear();
+            for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+                final Property prop = pmap.computeIfAbsent(propertyDescriptor.getName(), n -> {
+                    final Property property = new Property();
+                    property.name.set(n);
+                    return property;
+                });
+                prop.type.set(propertyDescriptor.getPropertyType().getName());
+                beanData.properties.add(prop);
+            }
+        } catch (IllegalStateException x) {
+            // no op
         }
     }
 }
