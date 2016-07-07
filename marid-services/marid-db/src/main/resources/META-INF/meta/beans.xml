@@ -20,22 +20,30 @@
 
     <bean name="randomNumericDaqGenerator" class="org.marid.db.generator.RandomNumericDaqGenerator" abstract="true">
         <description>Random numeric DAQ generator</description>
+
         <constructor-arg name="max" value="1.0"/>
         <constructor-arg name="min" value="0.0"/>
         <constructor-arg name="periodSeconds" value="1"/>
         <constructor-arg name="tag" value="1"/>
+
+        <meta key="icon" value="P_ADD"/>
     </bean>
 
     <bean name="hsqldbProperties" class="org.marid.db.hsqldb.HsqldbProperties" abstract="true">
         <description>HSQLDB database properties</description>
+
+        <meta key="icon" value="P_ADD"/>
     </bean>
 
     <bean name="hsqldbDatabase" class="org.marid.db.hsqldb.HsqldbDatabase" abstract="true">
         <description>HSQLDB database</description>
 
+        <meta key="ICON" value="P_ADD"/>
     </bean>
 
-    <bean name="numericWriter" factory-bean="hsqldbDatabase" factory-method="numericWriter" abstract="true">
+    <bean name="numericWriter" class="org.marid.db.dao.NumericWriter" abstract="true" scope="prototype">
         <description>Numeric writer</description>
+
+        <meta key="icon" value="P_ADD"/>
     </bean>
 </beans>

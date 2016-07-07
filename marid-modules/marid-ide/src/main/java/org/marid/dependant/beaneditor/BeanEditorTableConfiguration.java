@@ -96,6 +96,7 @@ public class BeanEditorTableConfiguration {
                 .filter(e -> e.getValue().getFactoryBeanName() == null)
                 .filter(e -> e.getValue().getFactoryMethodName() == null)
                 .filter(e -> e.getValue().getBeanClassName() != null)
+                .filter(e -> !e.getValue().isPrototype())
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
         final TableView<Entry<String, BeanDefinition>> tableView = new TableView<>(definitions);
         tableView.setEditable(false);
