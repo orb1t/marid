@@ -25,8 +25,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-import static afu.org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static afu.org.apache.commons.lang3.StringUtils.stripToNull;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.stripToNull;
 
 /**
  * @author Dmitry Ovchinnikov

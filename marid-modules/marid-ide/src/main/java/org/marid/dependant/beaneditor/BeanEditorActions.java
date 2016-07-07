@@ -18,6 +18,8 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Dialog;
 import org.marid.IdeDependants;
@@ -50,6 +52,9 @@ public class BeanEditorActions {
     private final IdeDependants dependants;
     private final ProjectProfile profile;
 
+    public final BooleanBinding itemActionDisabled;
+    public final BooleanBinding clearDisabled;
+
     @Autowired
     public BeanEditorActions(BeanEditorTable table,
                              ProjectCacheManager cacheManager,
@@ -61,6 +66,9 @@ public class BeanEditorActions {
         this.beanBrowser = beanBrowser;
         this.dependants = dependants;
         this.profile = profile;
+
+        this.itemActionDisabled = table.getSelectionModel().selectedIndexProperty().lessThan(0);
+        this.clearDisabled = Bindings.isEmpty(table.getItems());
     }
 
     void onEdit(ActionEvent event) {

@@ -302,7 +302,7 @@
 
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.0.2</version>
                     <configuration>
                         <archive>
                             <manifestEntries>
@@ -343,7 +343,7 @@
 
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.0.1</version>
                 </plugin>
 
                 <plugin>
@@ -461,13 +461,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.codehaus.groovy</groupId>
-                <artifactId>groovy-all</artifactId>
-                <classifier>indy</classifier>
-                <version>2.4.7</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
                 <type>pom</type>
@@ -504,7 +497,7 @@
             <dependency>
                 <groupId>org.jboss.logmanager</groupId>
                 <artifactId>jboss-logmanager</artifactId>
-                <version>2.0.3.Final</version>
+                <version>2.0.4.Final</version>
             </dependency>
 
             <dependency>
@@ -522,7 +515,7 @@
             <groupId>org.checkerframework</groupId>
             <artifactId>checker</artifactId>
             <scope>provided</scope>
-            <version>2.0.1</version>
+            <version>2.1.0</version>
         </dependency>
     </dependencies>
 

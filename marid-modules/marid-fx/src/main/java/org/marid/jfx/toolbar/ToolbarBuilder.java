@@ -18,6 +18,7 @@
 
 package org.marid.jfx.toolbar;
 
+import javafx.beans.binding.BooleanBinding;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -46,6 +47,16 @@ public final class ToolbarBuilder implements Builder<ToolBar> {
         button.setTooltip(new Tooltip(L10n.s(tooltip)));
         button.setOnAction(eventHandler);
         buttonConsumer.accept(button);
+        nodes.add(button);
+        return this;
+    }
+
+    public ToolbarBuilder add(String tooltip, String icon, EventHandler<ActionEvent> eventHandler, BooleanBinding disabled) {
+        final Button button = new Button(null, FontIcons.glyphIcon(icon, 20));
+        button.setFocusTraversable(false);
+        button.setTooltip(new Tooltip(L10n.s(tooltip)));
+        button.setOnAction(eventHandler);
+        button.disableProperty().bind(disabled);
         nodes.add(button);
         return this;
     }

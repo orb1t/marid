@@ -18,8 +18,6 @@
 
 package org.marid.jfx.action;
 
-import afu.org.apache.commons.lang3.builder.ToStringBuilder;
-import afu.org.apache.commons.lang3.builder.ToStringStyle;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableStringValue;
@@ -27,6 +25,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyCombination;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author Dmitry Ovchinnikov

@@ -28,7 +28,6 @@ import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.panes.tabs.IdeTabPane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.ScrollPanes;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -42,6 +41,7 @@ import java.util.stream.Collectors;
 
 import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
 import static javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY;
+import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.l10n.L10n.s;
 import static org.marid.misc.Builder.build;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
@@ -55,12 +55,12 @@ public class BeanEditorTableConfiguration {
     @Bean
     public ToolBar beanEditorToolbar(BeanEditorActions actions) {
         return new ToolbarBuilder()
-                .add(s("Edit..."), FontIcon.M_EDIT, actions::onEdit)
+                .add(s("Edit..."), M_EDIT, actions::onEdit, actions.itemActionDisabled)
                 .addSeparator()
-                .add(s("Remove"), FontIcon.O_REPO_DELETE, actions::onDelete)
-                .add(s("Clear"), FontIcon.M_CLEAR_ALL, actions::onClear)
+                .add(s("Remove"), O_REPO_DELETE, actions::onDelete, actions.itemActionDisabled)
+                .add(s("Clear"), M_CLEAR_ALL, actions::onClear)
                 .addSeparator()
-                .add(s("Browse"), FontIcon.O_BROWSER, actions::onBrowse)
+                .add(s("Browse"), O_BROWSER, actions::onBrowse, actions.itemActionDisabled)
                 .build();
     }
 
