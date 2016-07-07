@@ -21,10 +21,30 @@ package org.marid.spring.xml.data;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public class BeanFile extends AbstractData<BeanFile> {
 
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList();
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeInt(beans.size());
+        for (final BeanData beanData : beans) {
+            out.writeObject(beanData);
+        }
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        final int beanCount = in.readInt();
+        for (int i = 0; i < beanCount; i++) {
+            beans.add((BeanData) in.readObject());
+        }
+    }
 }

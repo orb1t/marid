@@ -22,6 +22,7 @@ import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.io.Externalizable;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
@@ -32,14 +33,14 @@ import static org.marid.misc.Casts.cast;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractData<T extends AbstractData<T>> implements Cloneable {
+public abstract class AbstractData<T extends AbstractData<T>> implements Cloneable, Externalizable {
 
     @Override
     public T clone() {
         try {
             final T instance = cast(getClass().newInstance());
             for (final Field field : getClass().getFields()) {
-                if (javafx.beans.property.Property.class.isAssignableFrom(field.getType())) {
+                if (Property.class.isAssignableFrom(field.getType())) {
                     final Property<Object> oldProp = cast(field.get(this));
                     final Property<Object> newProp = cast(field.get(instance));
                     final Object oldValue = oldProp.getValue();

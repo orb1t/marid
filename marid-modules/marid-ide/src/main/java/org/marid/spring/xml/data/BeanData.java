@@ -23,6 +23,13 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
+import static afu.org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static afu.org.apache.commons.lang3.StringUtils.stripToNull;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -41,5 +48,47 @@ public class BeanData extends AbstractData<BeanData> {
 
     public boolean isFactoryBean() {
         return factoryBean.isNotEmpty().get() && factoryMethod.isNotEmpty().get();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(defaultIfBlank(type.get(), ""));
+        out.writeUTF(defaultIfBlank(name.get(), ""));
+        out.writeUTF(defaultIfBlank(initMethod.get(), ""));
+        out.writeUTF(defaultIfBlank(destroyMethod.get(), ""));
+        out.writeUTF(defaultIfBlank(factoryBean.get(), ""));
+        out.writeUTF(defaultIfBlank(factoryMethod.get(), ""));
+        out.writeUTF(defaultIfBlank(lazyInit.get(), ""));
+
+        out.writeInt(constructorArgs.size());
+        for (final ConstructorArg arg : constructorArgs) {
+            out.writeObject(arg);
+        }
+
+        out.writeInt(properties.size());
+        for (final Property property : properties) {
+            out.writeObject(property);
+        }
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        type.set(stripToNull(in.readUTF()));
+        name.set(stripToNull(in.readUTF()));
+        initMethod.set(stripToNull(in.readUTF()));
+        destroyMethod.set(stripToNull(in.readUTF()));
+        factoryBean.set(stripToNull(in.readUTF()));
+        factoryMethod.set(stripToNull(in.readUTF()));
+        lazyInit.set(stripToNull(in.readUTF()));
+
+        final int argCount = in.readInt();
+        for (int i = 0; i < argCount; i++) {
+            constructorArgs.add((ConstructorArg) in.readObject());
+        }
+
+        final int propCount = in.readInt();
+        for (int i = 0; i < propCount; i++) {
+            properties.add((Property) in.readObject());
+        }
     }
 }
