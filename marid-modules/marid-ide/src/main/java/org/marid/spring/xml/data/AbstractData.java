@@ -24,9 +24,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.io.Externalizable;
 import java.lang.reflect.Field;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static org.marid.misc.Casts.cast;
 
@@ -127,5 +125,23 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Cloneab
         } catch (ReflectiveOperationException x) {
             throw new IllegalStateException(x);
         }
+    }
+
+    @Override
+    public String toString() {
+        final Map<String, Object> map = new LinkedHashMap<>();
+        for (final Field field : getClass().getFields()) {
+            try {
+                if (Property.class.isAssignableFrom(field.getType())) {
+                    final Property<?> property = (Property<?>) field.get(this);
+                    map.put(property.getName(), property.getValue());
+                } else {
+                    map.put(field.getName(), field.get(this));
+                }
+            } catch (ReflectiveOperationException x) {
+                throw new IllegalStateException(x);
+            }
+        }
+        return getClass().getSimpleName() + map;
     }
 }
