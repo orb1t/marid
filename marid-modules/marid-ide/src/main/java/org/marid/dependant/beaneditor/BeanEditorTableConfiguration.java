@@ -61,6 +61,8 @@ public class BeanEditorTableConfiguration {
                 .add(s("Clear"), M_CLEAR_ALL, actions::onClear)
                 .addSeparator()
                 .add(s("Browse"), O_BROWSER, actions::onBrowse, actions.itemActionDisabled)
+                .addSeparator()
+                .add(s("Actions"), M_CREATE, actions::onShowPopup, actions.itemActionDisabled)
                 .build();
     }
 

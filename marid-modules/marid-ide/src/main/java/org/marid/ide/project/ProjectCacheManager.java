@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.URLClassLoader;
 import java.util.List;
@@ -73,10 +74,13 @@ public class ProjectCacheManager implements LogSupport {
             final Optional<Class<?>> type = profile.getBeanFiles().values().stream()
                     .flatMap(f -> f.beans.stream())
                     .filter(b -> beanData.factoryBean.isEqualTo(b.name).get())
-                    .map(b -> profile.cacheEntry.getClass(b.type.get()))
+                    .map(b -> getBeanClass(profile, b))
                     .filter(Optional::isPresent)
-                    .findFirst()
-                    .map(Optional::get);
+                    .map(Optional::get)
+                    .flatMap(c -> Stream.of(c.getMethods()))
+                    .filter(m -> m.getName().equals(beanData.factoryMethod.get()))
+                    .reduce((m1, m2) -> m2.getParameterCount() < m1.getParameterCount() ? m2 : m1)
+                    .map(Method::getReturnType);
             if (type.isPresent()) {
                 if (beanData.type.isNotEqualTo(type.get().getName()).get()) {
                     beanData.type.set(type.get().getName());

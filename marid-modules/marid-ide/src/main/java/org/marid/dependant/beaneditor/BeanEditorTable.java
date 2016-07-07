@@ -23,13 +23,16 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
-import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanFile;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 import static org.marid.l10n.L10n.s;
 
@@ -39,29 +42,28 @@ import static org.marid.l10n.L10n.s;
 @Component
 public class BeanEditorTable extends TableView<BeanData> {
 
-    private final ProjectProfile profile;
-    private final ProjectCacheManager projectCacheManager;
-
     @Autowired
-    public BeanEditorTable(BeanFile beanFile, ProjectProfile profile, ProjectCacheManager projectCacheManager) {
+    public BeanEditorTable(BeanFile beanFile) {
         super(beanFile.beans);
-        this.profile = profile;
-        this.projectCacheManager = projectCacheManager;
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setEditable(true);
-        getColumns().add(nameColumn());
-        getColumns().add(typeColumn());
-        getColumns().add(factoryBeanColumn());
-        getColumns().add(factoryMethodColumn());
-        getColumns().add(initMethodColumn());
-        getColumns().add(destroyMethodColumn());
-        getColumns().add(lazyColumn());
     }
 
-    private TableColumn<BeanData, String> nameColumn() {
+    @Autowired
+    @Order(1)
+    private void nameColumn(ObjectFactory<BeanEditorActions> actions, ProjectProfile profile) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Name"));
         col.setCellValueFactory(param -> param.getValue().name);
         col.setCellFactory(param -> new TextFieldTableCell<BeanData, String>(new DefaultStringConverter()) {
+            @Override
+            public void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    final BeanData beanData = getItems().get(getIndex());
+                    setContextMenu(actions.getObject().contextMenu(beanData));
+                }
+            }
+
             @Override
             public void commitEdit(String newValue) {
                 final String oldValue = getItem();
@@ -72,34 +74,42 @@ public class BeanEditorTable extends TableView<BeanData> {
         col.setPrefWidth(250);
         col.setMaxWidth(450);
         col.setEditable(true);
-        return col;
+        getColumns().add(col);
     }
 
-    private TableColumn<BeanData, String> typeColumn() {
+    @PostConstruct
+    @Order(2)
+    private void typeColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Type"));
         col.setCellValueFactory(param -> param.getValue().type);
         col.setPrefWidth(450);
         col.setMaxWidth(650);
-        return col;
+        getColumns().add(col);
     }
 
-    private TableColumn<BeanData, String> factoryBeanColumn() {
+    @PostConstruct
+    @Order(3)
+    private void factoryBeanColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Factory bean"));
         col.setCellValueFactory(param -> param.getValue().factoryBean);
         col.setPrefWidth(250);
         col.setMaxWidth(450);
-        return col;
+        getColumns().add(col);
     }
 
-    private TableColumn<BeanData, String> factoryMethodColumn() {
+    @PostConstruct
+    @Order(4)
+    private void factoryMethodColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Factory method"));
         col.setCellValueFactory(param -> param.getValue().factoryMethod);
         col.setPrefWidth(250);
         col.setMaxWidth(450);
-        return col;
+        getColumns().add(col);
     }
 
-    private TableColumn<BeanData, String> initMethodColumn() {
+    @PostConstruct
+    @Order(5)
+    private void initMethodColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Init method"));
         col.setCellValueFactory(param -> param.getValue().initMethod);
         col.setCellFactory(param -> {
@@ -109,10 +119,12 @@ public class BeanEditorTable extends TableView<BeanData> {
         });
         col.setPrefWidth(180);
         col.setMaxWidth(340);
-        return col;
+        getColumns().add(col);
     }
 
-    private TableColumn<BeanData, String> destroyMethodColumn() {
+    @PostConstruct
+    @Order(6)
+    private void destroyMethodColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Destroy method"));
         col.setCellValueFactory(param -> param.getValue().destroyMethod);
         col.setCellFactory(param -> {
@@ -122,10 +134,12 @@ public class BeanEditorTable extends TableView<BeanData> {
         });
         col.setPrefWidth(180);
         col.setMaxWidth(340);
-        return col;
+        getColumns().add(col);
     }
 
-    private TableColumn<BeanData, String> lazyColumn() {
+    @PostConstruct
+    @Order(7)
+    private void lazyColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Lazy"));
         col.setCellValueFactory(param -> param.getValue().lazyInit);
         col.setCellFactory(param -> {
@@ -144,6 +158,6 @@ public class BeanEditorTable extends TableView<BeanData> {
         col.setPrefWidth(100);
         col.setMaxWidth(150);
         col.setEditable(true);
-        return col;
+        getColumns().add(col);
     }
 }

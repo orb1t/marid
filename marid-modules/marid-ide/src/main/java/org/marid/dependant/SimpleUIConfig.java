@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.dependants.conf;
+package org.marid.dependant;
 
 import javafx.scene.control.Dialog;
 import javafx.stage.Window;

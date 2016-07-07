@@ -21,7 +21,12 @@ package org.marid.dependant.beaneditor;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.event.ActionEvent;
+import javafx.geometry.Side;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.MenuItem;
 import org.marid.IdeDependants;
 import org.marid.dependant.beandata.BeanDataEditorConfiguration;
 import org.marid.ide.project.ProjectCacheManager;
@@ -37,8 +42,11 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -71,19 +79,19 @@ public class BeanEditorActions {
         this.clearDisabled = Bindings.isEmpty(table.getItems());
     }
 
-    void onEdit(ActionEvent event) {
+    public void onEdit(ActionEvent event) {
         dependants.startDependant(BeanDataEditorConfiguration.class);
     }
 
-    void onDelete(ActionEvent event) {
+    public void onDelete(ActionEvent event) {
         table.getItems().remove(table.getSelectionModel().getSelectedIndex());
     }
 
-    void onClear(ActionEvent event) {
+    public void onClear(ActionEvent event) {
         table.getItems().clear();
     }
 
-    void onBrowse(ActionEvent event) {
+    public void onBrowse(ActionEvent event) {
         final Optional<Map.Entry<String, BeanDefinition>> entry = beanBrowser.getObject().showAndWait();
         if (entry.isPresent()) {
             final BeanData beanData = new BeanData();
@@ -123,5 +131,38 @@ public class BeanEditorActions {
 
             table.getItems().add(beanData);
         }
+    }
+
+    public void onShowPopup(ActionEvent event) {
+        final Node node = (Node) event.getSource();
+        final Side side = node instanceof Button ? Side.BOTTOM : Side.RIGHT;
+        contextMenu(table.getSelectionModel().getSelectedItem()).show(node, side, 5, 5);
+    }
+
+    public ContextMenu contextMenu(BeanData beanData) {
+        final ContextMenu contextMenu = new ContextMenu();
+        final Class<?> type = cacheManager.getBeanClass(profile, beanData).orElse(null);
+
+        if (type != null) {
+            for (final Method method : type.getMethods()) {
+                if (method.getReturnType() == void.class || method.getDeclaringClass() == Object.class) {
+                    continue;
+                }
+                final String name = Stream.of(method.getParameters())
+                        .map(p -> p.getParameterizedType().toString())
+                        .collect(Collectors.joining(",", method.getName() + "(", ") : " + method.getGenericReturnType()));
+                final MenuItem menuItem = new MenuItem(name);
+                menuItem.setOnAction(ev -> {
+                    final BeanData newBeanData = new BeanData();
+                    newBeanData.name.set(method.getName());
+                    newBeanData.factoryBean.set(beanData.name.get());
+                    newBeanData.factoryMethod.set(method.getName());
+                    cacheManager.updateBeanData(profile, newBeanData);
+                    table.getItems().add(newBeanData);
+                });
+                contextMenu.getItems().add(menuItem);
+            }
+        }
+        return contextMenu;
     }
 }
