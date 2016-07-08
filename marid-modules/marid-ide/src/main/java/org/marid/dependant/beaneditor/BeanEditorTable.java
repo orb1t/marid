@@ -26,6 +26,8 @@ import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10n;
+import org.marid.spring.Prototype;
+import org.marid.spring.TypeQualifier;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.ObjectFactory;
@@ -36,6 +38,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,8 +58,16 @@ public class BeanEditorTable extends TableView<BeanData> {
     }
 
     @Autowired
+    private void init(@TypeQualifier(BeanEditorTable.class) List<TableColumn<BeanData, ?>> columns) {
+        getColumns().addAll(columns);
+    }
+
+    @Prototype
+    @TypeQualifier(BeanEditorTable.class)
     @Order(1)
-    private void nameColumn(ObjectFactory<BeanEditorActions> actions, ProjectProfile profile, ProjectCacheManager cacheManager) {
+    private TableColumn<BeanData, String> nameColumn(ObjectFactory<BeanEditorActions> actions,
+                                                     ProjectProfile profile,
+                                                     ProjectCacheManager cacheManager) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Name"));
         col.setCellValueFactory(param -> param.getValue().name);
         col.setCellFactory(param -> new TextFieldTableCell<BeanData, String>(new DefaultStringConverter()) {
@@ -84,30 +95,33 @@ public class BeanEditorTable extends TableView<BeanData> {
         col.setPrefWidth(250);
         col.setMaxWidth(450);
         col.setEditable(true);
-        getColumns().add(col);
+        return col;
     }
 
-    @Autowired
+    @Prototype
+    @TypeQualifier(BeanEditorTable.class)
     @Order(2)
-    private void typeColumn(ProjectProfile profile) {
+    private TableColumn<BeanData, String> typeColumn(ProjectProfile profile) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Type"));
         col.setCellValueFactory(param -> param.getValue().type);
         col.setPrefWidth(450);
         col.setMaxWidth(650);
-        getColumns().add(col);
+        return col;
     }
 
-    @Autowired
+    @Prototype
+    @TypeQualifier(BeanEditorTable.class)
     @Order(3)
-    private void factoryBeanColumn(ProjectProfile profile) {
+    private TableColumn<BeanData, String> factoryBeanColumn(ProjectProfile profile) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Factory bean"));
         col.setCellValueFactory(param -> param.getValue().factoryBean);
         col.setPrefWidth(250);
         col.setMaxWidth(450);
-        getColumns().add(col);
+        return col;
     }
 
-    @Autowired
+    @Prototype
+    @TypeQualifier(BeanEditorTable.class)
     @Order(4)
     private void factoryMethodColumn(ProjectProfile profile) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Factory method"));
@@ -146,31 +160,34 @@ public class BeanEditorTable extends TableView<BeanData> {
         return cell;
     }
 
-    @Autowired
+    @Prototype
+    @TypeQualifier(BeanEditorTable.class)
     @Order(5)
-    private void initMethodColumn(ProjectProfile profile, ProjectCacheManager cacheManager) {
+    private TableColumn<BeanData, String> initMethodColumn(ProjectProfile profile, ProjectCacheManager cacheManager) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Init method"));
         col.setCellValueFactory(param -> param.getValue().initMethod);
         col.setCellFactory(param -> methodCell(param, profile, cacheManager));
         col.setPrefWidth(180);
         col.setMaxWidth(340);
-        getColumns().add(col);
+        return col;
     }
 
-    @Autowired
+    @Prototype
+    @TypeQualifier(BeanEditorTable.class)
     @Order(6)
-    private void destroyMethodColumn(ProjectProfile profile, ProjectCacheManager cacheManager) {
+    private TableColumn<BeanData, String> destroyMethodColumn(ProjectProfile profile, ProjectCacheManager cacheManager) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Destroy method"));
         col.setCellValueFactory(param -> param.getValue().destroyMethod);
         col.setCellFactory(param -> methodCell(param, profile, cacheManager));
         col.setPrefWidth(180);
         col.setMaxWidth(340);
-        getColumns().add(col);
+        return col;
     }
 
-    @Autowired
+    @Prototype
+    @TypeQualifier(BeanEditorTable.class)
     @Order(7)
-    private void lazyColumn(ProjectProfile profile) {
+    private TableColumn<BeanData, String> lazyColumn(ProjectProfile profile) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Lazy"));
         col.setCellValueFactory(param -> param.getValue().lazyInit);
         col.setCellFactory(param -> {
@@ -190,6 +207,6 @@ public class BeanEditorTable extends TableView<BeanData> {
         col.setPrefWidth(100);
         col.setMaxWidth(150);
         col.setEditable(true);
-        getColumns().add(col);
+        return col;
     }
 }
