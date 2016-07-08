@@ -20,6 +20,7 @@ package org.marid.ide.project;
 
 import org.marid.logging.LogSupport;
 import org.marid.spring.xml.data.BeanData;
+import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.data.ConstructorArg;
 import org.marid.spring.xml.data.Property;
 import org.springframework.beans.factory.ObjectFactory;
@@ -148,5 +149,23 @@ public class ProjectCacheManager implements LogSupport {
         } catch (IllegalStateException x) {
             // no op
         }
+    }
+
+    public boolean containsBean(ProjectProfile profile, String name) {
+        for (final BeanFile file : profile.beanFiles.values()) {
+            for (final BeanData beanData : file.beans) {
+                if (beanData.name.isEqualTo(name).get()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public String generateBeanName(ProjectProfile profile, String name) {
+        while (containsBean(profile, name)) {
+            name += "_new";
+        }
+        return name;
     }
 }

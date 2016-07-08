@@ -18,15 +18,14 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.l10n.L10n;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.ObjectFactory;
@@ -57,7 +56,7 @@ public class BeanEditorTable extends TableView<BeanData> {
 
     @Autowired
     @Order(1)
-    private void nameColumn(ObjectFactory<BeanEditorActions> actions, ProjectProfile profile) {
+    private void nameColumn(ObjectFactory<BeanEditorActions> actions, ProjectProfile profile, ProjectCacheManager cacheManager) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Name"));
         col.setCellValueFactory(param -> param.getValue().name);
         col.setCellFactory(param -> new TextFieldTableCell<BeanData, String>(new DefaultStringConverter()) {
@@ -72,6 +71,11 @@ public class BeanEditorTable extends TableView<BeanData> {
 
             @Override
             public void commitEdit(String newValue) {
+                if (cacheManager.containsBean(profile, newValue)) {
+                    final Alert alert = new Alert(Alert.AlertType.WARNING, L10n.m("Bean name already exists"), ButtonType.OK);
+                    alert.showAndWait();
+                    return;
+                }
                 final String oldValue = getItem();
                 super.commitEdit(newValue);
                 ProjectManager.onBeanNameChange(profile, oldValue, newValue);
@@ -170,7 +174,8 @@ public class BeanEditorTable extends TableView<BeanData> {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Lazy"));
         col.setCellValueFactory(param -> param.getValue().lazyInit);
         col.setCellFactory(param -> {
-            final ComboBoxTableCell<BeanData, String> cell = new ComboBoxTableCell<BeanData, String>("true", "false", "default", "null") {
+            final String[] items = {"true", "false", "default", "null"};
+            final ComboBoxTableCell<BeanData, String> cell = new ComboBoxTableCell<BeanData, String>(items) {
                 @Override
                 public void commitEdit(String newValue) {
                     if ("null".equals(newValue)) {

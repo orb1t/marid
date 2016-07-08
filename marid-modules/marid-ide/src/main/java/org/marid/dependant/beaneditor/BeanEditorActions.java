@@ -96,7 +96,7 @@ public class BeanEditorActions {
         if (entry.isPresent()) {
             final BeanData beanData = new BeanData();
             final BeanDefinition def = entry.get().getValue();
-            beanData.name.set(entry.get().getKey());
+            beanData.name.set(cacheManager.generateBeanName(profile, entry.get().getKey()));
             beanData.factoryBean.set(def.getFactoryBeanName());
             beanData.factoryMethod.set(def.getFactoryMethodName());
             beanData.type.set(def.getBeanClassName());
