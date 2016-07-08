@@ -62,7 +62,7 @@ public class BeanEditorTableConfiguration {
                 .addSeparator()
                 .add(s("Browse"), O_BROWSER, actions::onBrowse, actions.itemActionDisabled)
                 .addSeparator()
-                .add(s("Actions"), M_CREATE, actions::onShowPopup, actions.itemActionDisabled)
+                .add(s("Actions"), M_CREDIT_CARD, actions::onShowPopup, actions.itemActionDisabled)
                 .build();
     }
 
