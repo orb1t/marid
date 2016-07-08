@@ -19,14 +19,22 @@
 package org.marid.ide.panes.tabs;
 
 import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import org.marid.ide.panes.filebrowser.BeanFileBrowserPane;
 import org.marid.ide.panes.logging.LoggingTable;
 import org.marid.jfx.ScrollPanes;
 import org.marid.l10n.L10n;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.marid.spring.TypeQualifier;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.Order;
+
+import java.util.Map;
+
+import static javafx.scene.control.TabPane.TabClosingPolicy.ALL_TABS;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,7 +43,7 @@ import org.springframework.core.annotation.Order;
 public class TabConfiguration {
 
     @Bean
-    @Qualifier("ideTab")
+    @TypeQualifier(TabConfiguration.class)
     @Order(1)
     public Tab logTab(LoggingTable loggingTable) {
         final Tab tab = new Tab(L10n.s("Log"), ScrollPanes.scrollPane(loggingTable));
@@ -44,11 +52,26 @@ public class TabConfiguration {
     }
 
     @Bean
-    @Qualifier("ideTab")
+    @TypeQualifier(TabConfiguration.class)
     @Order(2)
+    @Primary
     public Tab beanFilesTab(BeanFileBrowserPane beanFileBrowserPane) {
         final Tab tab = new Tab(L10n.s("Bean files"), beanFileBrowserPane);
         tab.setClosable(false);
         return tab;
+    }
+
+    @Bean
+    public TabPane ideTabPane(@TypeQualifier(TabConfiguration.class) Map<String, Tab> tabs, GenericApplicationContext context) {
+        final TabPane tabPane = new TabPane();
+        tabPane.setTabClosingPolicy(ALL_TABS);
+        tabs.forEach((name, tab) -> {
+            final BeanDefinition definition = context.getBeanDefinition(name);
+            tabPane.getTabs().add(tab);
+            if (definition.isPrimary()) {
+                tabPane.getSelectionModel().select(tab);
+            }
+        });
+        return tabPane;
     }
 }

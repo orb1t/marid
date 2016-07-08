@@ -25,7 +25,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import org.marid.ide.panes.main.IdePane;
-import org.marid.ide.panes.tabs.IdeTabPane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.ScrollPanes;
 import org.marid.jfx.toolbar.ToolbarBuilder;
@@ -80,7 +79,7 @@ public class BeanEditorTableConfiguration {
     }
 
     @Bean
-    public Tab tab(ProjectProfile profile, IdeTabPane tabPane, BorderPane beanEditor, Path beanFilePath) {
+    public Tab tab(ProjectProfile profile, TabPane tabPane, BorderPane beanEditor, Path beanFilePath) {
         final Path relativePath = profile.getBeansDirectory().relativize(beanFilePath);
         final Tab tab = new Tab(s("[%s]: %s", profile, relativePath), beanEditor);
         tabPane.getTabs().add(tab);

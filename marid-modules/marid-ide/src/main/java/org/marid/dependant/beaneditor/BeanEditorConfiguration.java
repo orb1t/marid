@@ -20,8 +20,8 @@ package org.marid.dependant.beaneditor;
 
 import javafx.collections.MapChangeListener;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import org.marid.ide.panes.filebrowser.BeanFileBrowserTree;
-import org.marid.ide.panes.tabs.IdeTabPane;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.BeanFile;
@@ -58,7 +58,7 @@ public class BeanEditorConfiguration {
     }
 
     @Bean
-    public MapChangeListener<Path, BeanFile> beanFilesChangeListener(IdeTabPane ideTabPane,
+    public MapChangeListener<Path, BeanFile> beanFilesChangeListener(TabPane ideTabPane,
                                                                      ProjectProfile profile,
                                                                      Tab tab,
                                                                      Path beanFilePath) {
