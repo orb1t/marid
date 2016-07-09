@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.tabs;
+package org.marid.ide.configurations;
 
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -24,7 +24,7 @@ import org.marid.ide.panes.filebrowser.BeanFileBrowserPane;
 import org.marid.ide.panes.logging.LoggingTable;
 import org.marid.jfx.ScrollPanes;
 import org.marid.l10n.L10n;
-import org.marid.spring.TypeQualifier;
+import org.marid.spring.annotation.TypeQualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

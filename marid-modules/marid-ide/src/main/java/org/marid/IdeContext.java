@@ -19,7 +19,7 @@
 package org.marid;
 
 import javafx.stage.Stage;
-import org.marid.ide.IdePostProcessor;
+import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.ide.logging.IdeLogHandler;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +43,7 @@ import static org.springframework.context.support.AbstractApplicationContext.LIF
 @Configuration
 @EnableScheduling
 @PropertySource("meta.properties")
-@Import({IdePostProcessor.class, IdeDependants.class})
+@Import({LogBeansPostProcessor.class, IdeDependants.class})
 @ComponentScan(basePackages = {"org.marid.ide"}, lazyInit = true)
 public class IdeContext {
 

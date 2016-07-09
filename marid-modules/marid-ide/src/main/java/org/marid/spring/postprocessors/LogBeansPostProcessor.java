@@ -16,16 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide;
+package org.marid.spring.postprocessors;
 
 import org.marid.logging.LogSupport;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.core.Ordered;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class IdePostProcessor implements DestructionAwareBeanPostProcessor, LogSupport {
+public class LogBeansPostProcessor implements DestructionAwareBeanPostProcessor, LogSupport, Ordered {
 
     @Override
     public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
@@ -46,5 +47,10 @@ public class IdePostProcessor implements DestructionAwareBeanPostProcessor, LogS
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         log(INFO, "Initialized {0}", beanName);
         return bean;
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }

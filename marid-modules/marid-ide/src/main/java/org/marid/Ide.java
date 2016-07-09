@@ -29,6 +29,7 @@ import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.io.UrlConnection;
 import org.marid.misc.Props;
+import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -61,6 +62,7 @@ public class Ide extends Application {
         context.setClassLoader(Thread.currentThread().getContextClassLoader());
         context.setResourceLoader(new PathMatchingResourcePatternResolver(context.getClassLoader()));
         context.register(IdeContext.class);
+        context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
     }
 
     @Override
