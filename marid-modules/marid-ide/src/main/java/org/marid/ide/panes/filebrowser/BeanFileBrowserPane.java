@@ -18,11 +18,8 @@
 
 package org.marid.ide.panes.filebrowser;
 
-import javafx.event.ActionEvent;
 import javafx.geometry.Orientation;
 import javafx.scene.layout.BorderPane;
-import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.BeanEditorConfiguration;
 import org.marid.jfx.ScrollPanes;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,26 +33,18 @@ import static org.marid.jfx.icons.FontIcon.*;
 @Component
 public class BeanFileBrowserPane extends BorderPane {
 
-    final BeanFileBrowserTree tree;
-    final IdeDependants dependants;
-
     @Autowired
-    public BeanFileBrowserPane(BeanFileBrowserTree tree, IdeDependants dependants) {
-        this.dependants = dependants;
-        setCenter(ScrollPanes.scrollPane(this.tree = tree));
+    public BeanFileBrowserPane(BeanFileBrowserActions actions, BeanFileBrowserTree tree) {
+        setCenter(ScrollPanes.scrollPane(tree));
         setLeft(new ToolbarBuilder()
-                .add("Add file", M_ADD, tree::onFileAdd, b -> b.disableProperty().bind(tree.fileAddDisabled()))
-                .add("Add directory", M_FOLDER, tree::onDirAdd, b -> b.disableProperty().bind(tree.fileAddDisabled()))
+                .add("Add file", M_ADD, actions::onFileAdd, actions.fileAddDisabled())
+                .add("Add directory", M_FOLDER, actions::onDirAdd, actions.fileAddDisabled())
                 .addSeparator()
-                .add("Rename file/directory", O_DIFF_RENAMED, tree::onRename, b -> b.disableProperty().bind(tree.moveDisabled()))
+                .add("Rename file/directory", O_DIFF_RENAMED, actions::onRename, actions.moveDisabled())
                 .addSeparator()
-                .add("Delete file/directory", O_TAG_REMOVE, tree::onDelete, b -> b.disableProperty().bind(tree.moveDisabled()))
+                .add("Delete file/directory", O_TAG_REMOVE, actions::onDelete, actions.moveDisabled())
                 .addSeparator()
-                .add("Bean editor...", M_EDIT, this::launchBeanEditor, b -> b.disableProperty().bind(tree.launchDisabled()))
+                .add("Bean editor...", M_EDIT, actions::launchBeanEditor, actions.launchDisabled())
                 .build(toolBar -> toolBar.setOrientation(Orientation.VERTICAL)));
-    }
-
-    private void launchBeanEditor(ActionEvent event) {
-        dependants.startDependant(BeanEditorConfiguration.class);
     }
 }

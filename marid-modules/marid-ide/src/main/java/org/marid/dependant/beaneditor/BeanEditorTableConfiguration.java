@@ -76,6 +76,8 @@ public class BeanEditorTableConfiguration {
     public Tab tab(ProjectProfile profile, TabPane tabPane, BorderPane beanEditor, Path beanFilePath) {
         final Path relativePath = profile.getBeansDirectory().relativize(beanFilePath);
         final Tab tab = new Tab(s("[%s]: %s", profile, relativePath), beanEditor);
+        tab.getProperties().put("profile", profile);
+        tab.getProperties().put("path", beanFilePath);
         tabPane.getTabs().add(tab);
         tabPane.getSelectionModel().select(tab);
         return tab;
