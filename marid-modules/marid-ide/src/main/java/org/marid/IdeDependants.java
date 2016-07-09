@@ -19,6 +19,7 @@
 package org.marid;
 
 import org.marid.dependant.SimpleUIConfig;
+import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -56,7 +57,8 @@ public class IdeDependants {
     private AnnotationConfigApplicationContext startDependant(Consumer<AnnotationConfigApplicationContext> contextConsumer) {
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         CONTEXTS.add(context);
-        context.getDefaultListableBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
+        context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
+        context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
         context.register(IdeDependants.class);
         context.setParent(parent);
         contextConsumer.accept(context);

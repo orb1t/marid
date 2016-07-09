@@ -18,9 +18,6 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
@@ -36,13 +33,10 @@ import org.springframework.context.annotation.Scope;
 
 import java.nio.file.Path;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
-import static javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY;
 import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.l10n.L10n.s;
-import static org.marid.misc.Builder.build;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 /**
@@ -57,9 +51,9 @@ public class BeanEditorTableConfiguration {
                 .add(s("Edit..."), M_EDIT, actions::onEdit, actions.itemActionDisabled)
                 .addSeparator()
                 .add(s("Remove"), O_REPO_DELETE, actions::onDelete, actions.itemActionDisabled)
-                .add(s("Clear"), M_CLEAR_ALL, actions::onClear)
+                .add(s("Clear"), M_CLEAR_ALL, actions::onClear, actions.clearDisabled)
                 .addSeparator()
-                .add(s("Browse"), O_BROWSER, actions::onBrowse, actions.itemActionDisabled)
+                .add(s("Browse"), O_BROWSER, actions::onBrowse)
                 .addSeparator()
                 .add(s("Actions"), M_CREDIT_CARD, actions::onShowPopup, actions.itemActionDisabled)
                 .build();
@@ -89,42 +83,7 @@ public class BeanEditorTableConfiguration {
 
     @Bean
     @Scope(SCOPE_PROTOTYPE)
-    public TableView<Entry<String, BeanDefinition>> beans(BeanMetaInfoProvider beanMetaInfoProvider) {
-        final ObservableList<Entry<String, BeanDefinition>> definitions = beanMetaInfoProvider.beans().entrySet().stream()
-                .filter(e -> e.getValue().isAbstract())
-                .filter(e -> e.getValue().getFactoryBeanName() == null)
-                .filter(e -> e.getValue().getFactoryMethodName() == null)
-                .filter(e -> e.getValue().getBeanClassName() != null)
-                .filter(e -> !e.getValue().isPrototype())
-                .collect(Collectors.toCollection(FXCollections::observableArrayList));
-        final TableView<Entry<String, BeanDefinition>> tableView = new TableView<>(definitions);
-        tableView.setEditable(false);
-        tableView.setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
-        tableView.setTableMenuButtonVisible(true);
-        tableView.getColumns().add(build(new TableColumn<Entry<String, BeanDefinition>, String>(), col -> {
-            col.setText(s("Name"));
-            col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getKey()));
-            col.setPrefWidth(300);
-            col.setMaxWidth(600);
-        }));
-        tableView.getColumns().add(build(new TableColumn<Entry<String, BeanDefinition>, String>(), col -> {
-            col.setText(s("Type"));
-            col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getValue().getBeanClassName()));
-            col.setPrefWidth(500);
-            col.setMaxWidth(1000);
-        }));
-        tableView.getColumns().add(build(new TableColumn<Entry<String, BeanDefinition>, String>(), col -> {
-            col.setText(s("Description"));
-            col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getValue().getDescription()));
-            col.setPrefWidth(500);
-            col.setMaxWidth(2000);
-        }));
-        return tableView;
-    }
-
-    @Bean
-    @Scope(SCOPE_PROTOTYPE)
-    public Dialog<Entry<String, BeanDefinition>> beanBrowser(IdePane idePane, TableView<Entry<String, BeanDefinition>> beans) {
+    public Dialog<Entry<String, BeanDefinition>> beanBrowser(IdePane idePane, BeanBrowserTable beans) {
         final Dialog<Entry<String, BeanDefinition>> dialog = new Dialog<>();
         dialog.initModality(Modality.WINDOW_MODAL);
         dialog.initOwner(idePane.getScene().getWindow());

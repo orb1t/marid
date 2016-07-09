@@ -21,12 +21,15 @@ package org.marid.spring.postprocessors;
 import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.MethodParameter;
 
+import java.lang.reflect.Parameter;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
@@ -48,6 +51,7 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        final AutowireCapableBeanFactory autowireCapableBeanFactory = context.getAutowireCapableBeanFactory();
         Stream.of(bean.getClass().getMethods())
                 .filter(m -> m.isAnnotationPresent(OrderedInit.class))
                 .filter(m -> m.getReturnType() == void.class)
@@ -55,13 +59,17 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
                 .forEach(method -> {
                     final boolean eager = !method.isAnnotationPresent(Lazy.class);
                     final Object[] args = new Object[method.getParameterCount()];
+                    final Parameter[] parameters = method.getParameters();
                     for (int i = 0; i < args.length; i++) {
-                        final DependencyDescriptor descriptor = new DependencyDescriptor(new MethodParameter(method, i), true, eager);
+                        final MethodParameter methodParameter = new MethodParameter(method, i);
+                        final Autowired autowired = parameters[i].getAnnotation(Autowired.class);
+                        final boolean required = autowired != null && autowired.required();
+                        final DependencyDescriptor descriptor = new DependencyDescriptor(methodParameter, required, eager);
                         try {
-                            final Object arg = context.getAutowireCapableBeanFactory().resolveDependency(descriptor, null);
+                            final Object arg = autowireCapableBeanFactory.resolveDependency(descriptor, null);
                             args[i] = arg;
                         } catch (Exception x) {
-                            throw new BeanInstantiationException(bean.getClass(), "Unable to autowire " + method.getParameters()[i].getName(), x);
+                            throw new BeanInstantiationException(bean.getClass(), "Unable to autowire " + methodParameter, x);
                         }
                     }
                     try {

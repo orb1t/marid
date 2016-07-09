@@ -19,13 +19,13 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.l10n.L10n;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanFile;
@@ -39,6 +39,7 @@ import java.lang.reflect.Method;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -73,7 +74,7 @@ public class BeanEditorTable extends TableView<BeanData> {
             @Override
             public void commitEdit(String newValue) {
                 if (cacheManager.containsBean(profile, newValue)) {
-                    final Alert alert = new Alert(Alert.AlertType.WARNING, L10n.m("Bean name already exists"), ButtonType.OK);
+                    final Alert alert = new Alert(AlertType.WARNING, m("Bean name already exists"), ButtonType.OK);
                     alert.showAndWait();
                     return;
                 }
@@ -89,7 +90,7 @@ public class BeanEditorTable extends TableView<BeanData> {
     }
 
     @OrderedInit(2)
-    public void typeColumn(ProjectProfile profile) {
+    public void typeColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Type"));
         col.setCellValueFactory(param -> param.getValue().type);
         col.setPrefWidth(450);
@@ -98,7 +99,7 @@ public class BeanEditorTable extends TableView<BeanData> {
     }
 
     @OrderedInit(3)
-    public void factoryBeanColumn(ProjectProfile profile) {
+    public void factoryBeanColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Factory bean"));
         col.setCellValueFactory(param -> param.getValue().factoryBean);
         col.setPrefWidth(250);
@@ -107,7 +108,7 @@ public class BeanEditorTable extends TableView<BeanData> {
     }
 
     @OrderedInit(4)
-    public void factoryMethodColumn(ProjectProfile profile) {
+    public void factoryMethodColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Factory method"));
         col.setCellValueFactory(param -> param.getValue().factoryMethod);
         col.setPrefWidth(250);
@@ -165,7 +166,7 @@ public class BeanEditorTable extends TableView<BeanData> {
     }
 
     @OrderedInit(7)
-    public void lazyColumn(ProjectProfile profile) {
+    public void lazyColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Lazy"));
         col.setCellValueFactory(param -> param.getValue().lazyInit);
         col.setCellFactory(param -> {
