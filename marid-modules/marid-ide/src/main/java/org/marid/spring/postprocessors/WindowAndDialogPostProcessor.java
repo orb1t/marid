@@ -16,13 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant;
+package org.marid.spring.postprocessors;
 
 import javafx.scene.control.Dialog;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.ArrayList;
@@ -31,13 +31,13 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SimpleUIConfig implements DestructionAwareBeanPostProcessor {
+public class WindowAndDialogPostProcessor implements BeanPostProcessor {
 
     private final List<Dialog<?>> dialogs = new ArrayList<>();
     private final List<Window> windows = new ArrayList<>();
     private final AnnotationConfigApplicationContext context;
 
-    public SimpleUIConfig(AnnotationConfigApplicationContext context) {
+    public WindowAndDialogPostProcessor(AnnotationConfigApplicationContext context) {
         this.context = context;
     }
 
@@ -68,22 +68,6 @@ public class SimpleUIConfig implements DestructionAwareBeanPostProcessor {
             }
         }
         return bean;
-    }
-
-    @Override
-    public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
-        if (bean instanceof Dialog<?>) {
-            dialogs.remove(bean);
-            ((Dialog<?>) bean).close();
-        } else if (bean instanceof Window) {
-            windows.remove(bean);
-            ((Window) bean).hide();
-        }
-    }
-
-    @Override
-    public boolean requiresDestruction(Object bean) {
-        return true;
     }
 
     private void closeIfNecessary() {

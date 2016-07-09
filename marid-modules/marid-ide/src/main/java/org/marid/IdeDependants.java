@@ -18,9 +18,9 @@
 
 package org.marid;
 
-import org.marid.dependant.SimpleUIConfig;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
+import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
@@ -50,7 +50,8 @@ public class IdeDependants {
     public AnnotationConfigApplicationContext startDependant(Class<?> configuration) {
         return startDependant(context -> {
             context.setDisplayName(configuration.getSimpleName());
-            context.register(SimpleUIConfig.class, configuration);
+            context.register(configuration);
+            context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
         });
     }
 

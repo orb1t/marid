@@ -18,8 +18,9 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
@@ -39,7 +40,6 @@ import java.lang.reflect.Method;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -73,12 +73,8 @@ public class BeanEditorTable extends TableView<BeanData> {
 
             @Override
             public void commitEdit(String newValue) {
-                if (cacheManager.containsBean(profile, newValue)) {
-                    final Alert alert = new Alert(AlertType.WARNING, m("Bean name already exists"), ButtonType.OK);
-                    alert.showAndWait();
-                    return;
-                }
                 final String oldValue = getItem();
+                newValue = cacheManager.generateBeanName(profile, newValue);
                 super.commitEdit(newValue);
                 ProjectManager.onBeanNameChange(profile, oldValue, newValue);
             }
