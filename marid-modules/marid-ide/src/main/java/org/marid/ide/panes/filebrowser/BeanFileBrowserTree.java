@@ -20,14 +20,10 @@ package org.marid.ide.panes.filebrowser;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.MapChangeListener;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import org.marid.ide.project.ProjectManager;
-import org.marid.ide.project.ProjectProfile;
-import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,16 +33,12 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Comparator;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-import static org.marid.jfx.icons.FontIcon.D_FILE;
 import static org.marid.jfx.icons.FontIcon.D_FOLDER;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 import static org.marid.misc.Builder.build;
-import static org.marid.spring.xml.MaridBeanUtils.isFile;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -54,34 +46,12 @@ import static org.marid.spring.xml.MaridBeanUtils.isFile;
 @Component
 public class BeanFileBrowserTree extends TreeTableView<Path> {
 
-    final ObservableValue<ProjectProfile> projectProfileObservableValue;
-
     @Autowired
     public BeanFileBrowserTree(ProjectManager projectManager) {
-        this(projectManager.profileProperty());
-    }
-
-    protected BeanFileBrowserTree(ObservableValue<ProjectProfile> projectProfileObservableValue) {
-        super(new TreeItem<>(projectProfileObservableValue.getValue().getBeansDirectory(), glyphIcon(D_FOLDER, 16)));
-        this.projectProfileObservableValue = projectProfileObservableValue;
+        super(new TreeItem<>(projectManager.getProfile().getBeansDirectory(), glyphIcon(D_FOLDER, 16)));
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
-        final MapChangeListener<Path, BeanFile> filesChangeListener = change -> {
-            if (change.wasAdded()) {
-                add(change.getKey());
-            }
-            if (change.wasRemoved()) {
-                remove(change.getKey());
-            }
-        };
-        projectProfileObservableValue.addListener((observable, oldValue, newValue) -> {
-            oldValue.getBeanFiles().removeListener(filesChangeListener);
-            newValue.getBeanFiles().addListener(filesChangeListener);
-            setRoot(new TreeItem<>(newValue.getBeansDirectory(), glyphIcon(D_FOLDER, 16)));
-            newValue.getBeanFiles().keySet().forEach(this::add);
-        });
-        getProfile().getBeanFiles().addListener(filesChangeListener);
-        getProfile().getBeanFiles().keySet().forEach(this::add);
+
         getColumns().add(build(new TreeTableColumn<Path, String>(), col -> {
             col.setText(s("File"));
             col.setPrefWidth(600);
@@ -111,70 +81,12 @@ public class BeanFileBrowserTree extends TreeTableView<Path> {
             col.setStyle("-fx-alignment: baseline-right");
             col.setCellValueFactory(param -> {
                 final Path path = param.getValue().getValue();
-                return new SimpleObjectProperty<>(projectProfileObservableValue.getValue().getBeanFiles().entrySet().stream()
+                return new SimpleObjectProperty<>(projectManager.getProfile().getBeanFiles().entrySet().stream()
                         .filter(e -> e.getKey().startsWith(path))
                         .mapToInt(e -> e.getValue().beans.size())
                         .sum());
             });
         }));
         setTreeColumn(getColumns().get(0));
-    }
-
-    public ProjectProfile getProfile() {
-        return projectProfileObservableValue.getValue();
-    }
-
-    private void add(Path path) {
-        final Path base = getProfile().getBeansDirectory();
-        if (!path.startsWith(base)) {
-            return;
-        }
-        final Path relative = base.relativize(path);
-        final AtomicReference<TreeItem<Path>> itemRef = new AtomicReference<>(getRoot());
-        for (int i = 1; i <= relative.getNameCount(); i++) {
-            final Path suffix = relative.subpath(0, i);
-            final Path p = base.resolve(suffix);
-            itemRef.set(itemRef.get().getChildren()
-                    .stream()
-                    .filter(e -> e.getValue().equals(p))
-                    .findAny()
-                    .orElseGet(() -> {
-                        final TreeItem<Path> newItem = new TreeItem<>(p, glyphIcon(isFile(p) ? D_FILE : D_FOLDER, 16));
-                        itemRef.get().getChildren().add(newItem);
-                        itemRef.get().getChildren().sort(Comparator.comparing(TreeItem::getValue));
-                        itemRef.get().setExpanded(true);
-                        return newItem;
-                    }));
-        }
-    }
-
-    private void remove(Path path) {
-        final Path base = getProfile().getBeansDirectory();
-        if (!path.startsWith(base)) {
-            return;
-        }
-        final Path relative = base.relativize(path);
-        final AtomicReference<TreeItem<Path>> itemRef = new AtomicReference<>(getRoot());
-        for (int i = 1; i <= relative.getNameCount(); i++) {
-            final Path suffix = relative.subpath(0, i);
-            final Path p = base.resolve(suffix);
-            itemRef.set(itemRef.get().getChildren()
-                    .stream()
-                    .filter(e -> e.getValue().equals(p))
-                    .findAny()
-                    .orElse(null));
-            if (itemRef.get() == null) {
-                break;
-            }
-        }
-        if (itemRef.get() != null) {
-            final TreeItem<Path> parent = itemRef.get().getParent();
-            parent.getChildren().remove(itemRef.get());
-            for (TreeItem<Path> i = parent, p = i.getParent(); p != null; i = p, p = i.getParent()) {
-                if (i.getChildren().isEmpty()) {
-                    p.getChildren().remove(i);
-                }
-            }
-        }
     }
 }
