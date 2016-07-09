@@ -154,7 +154,7 @@ public class BeanEditorActions {
                 final MenuItem menuItem = new MenuItem(name);
                 menuItem.setOnAction(ev -> {
                     final BeanData newBeanData = new BeanData();
-                    newBeanData.name.set(method.getName());
+                    newBeanData.name.set(cacheManager.generateBeanName(profile, method.getName()));
                     newBeanData.factoryBean.set(beanData.name.get());
                     newBeanData.factoryMethod.set(method.getName());
                     cacheManager.updateBeanData(profile, newBeanData);

@@ -62,6 +62,9 @@ public class IdeMenu extends MenuBar implements LogSupport {
                             }
                             menuItem.setAccelerator(action.getAccelerator());
                             menuItem.setOnAction(action.getEventHandler());
+                            if (action.disabledProperty() != null) {
+                                menuItem.disableProperty().bindBidirectional(action.disabledProperty());
+                            }
                             itemMap
                                     .computeIfAbsent(action.getMenu(), k -> new TreeMap<>())
                                     .computeIfAbsent(action.getGroup(), k -> new TreeMap<>())

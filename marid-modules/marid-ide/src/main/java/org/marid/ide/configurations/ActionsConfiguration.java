@@ -16,22 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.dependants;
+package org.marid.ide.configurations;
 
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import org.marid.IdeDependants;
 import org.marid.dependant.iconviewer.IconViewerConfiguration;
+import org.marid.dependant.monitor.MonitorConfiguration;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.marid.jfx.icons.FontIcon.M_OPEN_IN_BROWSER;
+import static org.marid.jfx.icons.FontIcon.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-public class DependantsManager {
+public class ActionsConfiguration {
 
     @Bean
     @IdeAction
@@ -40,5 +43,33 @@ public class DependantsManager {
                 .setIcon(M_OPEN_IN_BROWSER)
                 .setText("Icon viewer")
                 .setEventHandler(event -> dependants.startDependant(IconViewerConfiguration.class));
+    }
+
+    @Bean
+    @IdeAction
+    public FxAction monitorAction(IdeDependants dependants, TabPane ideTabPane) {
+        return new FxAction(null, "monitor", "Tools")
+                .setIcon(M_GRAPHIC_EQ)
+                .setText("System monitor")
+                .setEventHandler(event -> {
+                    final Tab tab = ideTabPane.getTabs().stream()
+                            .filter(t -> "monitor".equals(t.getId()))
+                            .findFirst()
+                            .orElse(null);
+                    if (tab != null) {
+                        ideTabPane.getSelectionModel().select(tab);
+                    } else {
+                        dependants.startDependant(MonitorConfiguration.class);
+                    }
+                });
+    }
+
+    @Bean
+    @IdeAction
+    public FxAction garbageCollectAction() {
+        return new FxAction(null, "monitor", "Tools")
+                .setIcon(M_CHEVRON_LEFT)
+                .setText("Run garbage collection")
+                .setEventHandler(event -> System.gc());
     }
 }

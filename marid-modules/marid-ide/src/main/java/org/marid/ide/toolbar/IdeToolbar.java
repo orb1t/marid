@@ -60,6 +60,7 @@ public class IdeToolbar extends ToolBar implements LogSupport {
                         final String group = action.getToolbarGroup();
                         final GlyphIcon<?> icon = action.getIcon() != null ? FontIcons.glyphIcon(action.getIcon(), 20) : null;
                         final Button button = new Button(null, icon);
+                        button.setFocusTraversable(false);
                         button.setOnAction(action.getEventHandler());
                         if (action.disabledProperty() != null) {
                             button.disableProperty().bindBidirectional(action.disabledProperty());
