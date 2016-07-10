@@ -31,6 +31,7 @@ import org.marid.io.UrlConnection;
 import org.marid.misc.Props;
 import org.marid.preloader.CloseNotification;
 import org.marid.preloader.IdePreloader;
+import org.marid.preloader.IdePreloaderLogHandler;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -62,7 +63,7 @@ public class Ide extends Application {
     public void init() throws Exception {
         Ide.ide = this;
         rootLogger.addHandler(ideLogHandler = new IdeLogHandler());
-        rootLogger.addHandler(IdePreloader.IDE_PRELOADER_LOG_HANDLER);
+        rootLogger.addHandler(IdePreloaderLogHandler.IDE_PRELOADER_LOG_HANDLER);
         context.setDisplayName(Ide.class.getName());
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
@@ -73,6 +74,7 @@ public class Ide extends Application {
         context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
         context.refresh();
         context.start();
+        context.getBean(IdePane.class);
     }
 
     @Override
@@ -96,7 +98,8 @@ public class Ide extends Application {
     }
 
     private void closePreloader() {
-        rootLogger.removeHandler(IdePreloader.IDE_PRELOADER_LOG_HANDLER);
+        rootLogger.removeHandler(IdePreloaderLogHandler.IDE_PRELOADER_LOG_HANDLER);
+        IdePreloaderLogHandler.IDE_PRELOADER_LOG_HANDLER.close();
         notifyPreloader(new CloseNotification());
     }
 

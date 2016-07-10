@@ -19,17 +19,18 @@
 package org.marid.preloader;
 
 import javafx.application.Preloader;
+import javafx.scene.text.Text;
 
-import java.util.logging.LogRecord;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class LogNotification implements Preloader.PreloaderNotification {
 
-    public final LogRecord logRecord;
+    public final List<Text> texts;
 
-    public LogNotification(LogRecord logRecord) {
-        this.logRecord = logRecord;
+    public LogNotification(List<Text> texts) {
+        this.texts = texts;
     }
 }

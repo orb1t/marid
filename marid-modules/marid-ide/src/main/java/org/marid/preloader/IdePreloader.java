@@ -34,30 +34,22 @@ import javafx.scene.effect.Lighting;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.marid.IdePrefs;
 import org.marid.jfx.FxMaridIcon;
 import org.marid.l10n.L10n;
-import org.marid.logging.MaridLogHandler;
 
 import java.lang.reflect.Field;
-import java.text.MessageFormat;
-import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
 
-import static org.marid.Ide.ide;
 import static org.marid.logging.LogSupport.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class IdePreloader extends Preloader {
-
-    public static final Handler IDE_PRELOADER_LOG_HANDLER = new MaridLogHandler(r -> ide.notifyPreloader(new LogNotification(r)));
 
     private final TextFlow log = new TextFlow();
     private final ScrollPane logScrollPane = new ScrollPane(log);
@@ -132,13 +124,7 @@ public class IdePreloader extends Preloader {
     public void handleApplicationNotification(PreloaderNotification info) {
         if (info instanceof LogNotification) {
             final LogNotification logNotification = (LogNotification) info;
-            final LogRecord record = logNotification.logRecord;
-            final StringBuffer logBuffer = new StringBuffer(128);
-            final MessageFormat messageFormat = new MessageFormat(record.getMessage());
-            messageFormat.format(record.getParameters(), logBuffer, null);
-            logBuffer.append(System.lineSeparator());
-            final Text text = new Text(logBuffer.toString());
-            log.getChildren().add(text);
+            log.getChildren().addAll(logNotification.texts);
             logScrollPane.setVvalue(1.0);
         } else if (info instanceof CloseNotification) {
             primaryStage.close();
