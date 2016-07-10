@@ -26,11 +26,9 @@ import org.apache.maven.cli.logging.Slf4jConfiguration;
 public class Jdk14LoggingConfiguration implements Slf4jConfiguration {
     @Override
     public void setRootLoggerLevel(Level level) {
-
     }
 
     @Override
     public void activate() {
-
     }
 }
