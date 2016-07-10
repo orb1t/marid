@@ -18,17 +18,25 @@
 
 package org.marid.dependant.settings;
 
+import javafx.application.Application;
+import javafx.scene.control.ComboBox;
+import org.marid.Ide;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.settings.AppearanceSettings;
 import org.marid.jfx.panes.GenericGridPane;
+import org.marid.logging.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static javafx.application.Application.STYLESHEET_CASPIAN;
+import static javafx.application.Application.STYLESHEET_MODENA;
+import static javafx.collections.FXCollections.observableArrayList;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class AppearanceTab extends GenericGridPane implements SettingsEditor {
+public class AppearanceTab extends GenericGridPane implements SettingsEditor, LogSupport {
 
     private final AppearanceSettings appearanceSettings;
 
@@ -37,6 +45,17 @@ public class AppearanceTab extends GenericGridPane implements SettingsEditor {
         this.appearanceSettings = appearanceSettings;
         addTextField("Locale", appearanceSettings, "locale");
         addIntField("Max log records", ideLogHandler, "maxLogRecords", 100, 100_000, 100);
+        addSeparator();
+        addControl("System stylesheet", () -> {
+            final ComboBox<String> stylesheetCombo = new ComboBox<>(observableArrayList(STYLESHEET_CASPIAN, STYLESHEET_MODENA));
+            stylesheetCombo.getSelectionModel().select(Application.getUserAgentStylesheet());
+            stylesheetCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+                log(INFO, "Applying stylesheet {0}", newValue);
+                Application.setUserAgentStylesheet(newValue);
+                stylesheetCombo.setOnAction(event -> Ide.PREFERENCES.put("style", newValue));
+            });
+            return stylesheetCombo;
+        });
     }
 
     @Override
