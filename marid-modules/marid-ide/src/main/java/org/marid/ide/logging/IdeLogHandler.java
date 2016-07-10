@@ -20,7 +20,7 @@ package org.marid.ide.logging;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import org.marid.Ide;
+import org.marid.IdePrefs;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.ArrayList;
@@ -41,11 +41,11 @@ public class IdeLogHandler extends Handler {
     private final ObservableList<LogRecord> logRecords = observableArrayList();
 
     public int getMaxLogRecords() {
-        return Ide.PREFERENCES.getInt("maxLogRecords", 10_000);
+        return IdePrefs.PREFERENCES.getInt("maxLogRecords", 10_000);
     }
 
     public void setMaxLogRecords(int maxLogRecords) {
-        Ide.PREFERENCES.putInt("maxLogRecords", maxLogRecords);
+        IdePrefs.PREFERENCES.putInt("maxLogRecords", maxLogRecords);
     }
 
     @Override

@@ -47,6 +47,9 @@
                             <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>org.marid.Ide</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <JavaFX-Version>8.0</JavaFX-Version>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>

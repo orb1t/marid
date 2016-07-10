@@ -16,27 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.settings;
+package org.marid.preloader;
 
-import org.marid.IdePrefs;
-import org.springframework.stereotype.Component;
+import javafx.application.Preloader;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class AppearanceSettings extends AbstractSettings {
-
-    public String getLocale() {
-        return IdePrefs.PREFERENCES.get("locale", "");
-    }
-
-    public void setLocale(String locale) {
-        IdePrefs.PREFERENCES.put("locale", locale);
-    }
-
-    @Override
-    public String getName() {
-        return "Appearance";
-    }
+public class CloseNotification implements Preloader.PreloaderNotification {
 }

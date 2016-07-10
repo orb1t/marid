@@ -16,27 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.settings;
+package org.marid.preloader;
 
-import org.marid.IdePrefs;
-import org.springframework.stereotype.Component;
+import javafx.application.Preloader;
+
+import java.util.logging.LogRecord;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class AppearanceSettings extends AbstractSettings {
+public class LogNotification implements Preloader.PreloaderNotification {
 
-    public String getLocale() {
-        return IdePrefs.PREFERENCES.get("locale", "");
-    }
+    public final LogRecord logRecord;
 
-    public void setLocale(String locale) {
-        IdePrefs.PREFERENCES.put("locale", locale);
-    }
-
-    @Override
-    public String getName() {
-        return "Appearance";
+    public LogNotification(LogRecord logRecord) {
+        this.logRecord = logRecord;
     }
 }

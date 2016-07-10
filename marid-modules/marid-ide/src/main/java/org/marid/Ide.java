@@ -18,7 +18,7 @@
 
 package org.marid;
 
-import com.google.common.collect.ImmutableMap;
+import com.sun.javafx.application.LauncherImpl;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -29,18 +29,16 @@ import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.io.UrlConnection;
 import org.marid.misc.Props;
+import org.marid.preloader.CloseNotification;
+import org.marid.preloader.IdePreloader;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.util.Locale;
-import java.util.Optional;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 
 import static java.util.stream.IntStream.of;
 import static javafx.scene.paint.Color.GREEN;
@@ -51,12 +49,20 @@ import static org.marid.jfx.FxMaridIcon.maridIcon;
  */
 public class Ide extends Application {
 
-    public static final Preferences PREFERENCES = Preferences.userNodeForPackage(Ide.class).node("Ide");
-
     private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+
+    public static Stage primaryStage;
+    public static Ide ide;
+
+    static Logger rootLogger;
+    static IdeLogHandler ideLogHandler;
+    static IdeConsoleLogHandler ideConsoleLogHandler;
 
     @Override
     public void init() throws Exception {
+        Ide.ide = this;
+        rootLogger.addHandler(ideLogHandler = new IdeLogHandler());
+        rootLogger.addHandler(IdePreloader.IDE_PRELOADER_LOG_HANDLER);
         context.setDisplayName(Ide.class.getName());
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
@@ -65,17 +71,13 @@ public class Ide extends Application {
         context.register(IdeContext.class);
         context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
         context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
+        context.refresh();
+        context.start();
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Application.setUserAgentStylesheet(PREFERENCES.get("style", STYLESHEET_MODENA));
-        context.getEnvironment().getPropertySources().addLast(new MapPropertySource("ideProps", ImmutableMap.of(
-                "ide", this,
-                "primaryStage", primaryStage
-        )));
-        context.refresh();
-        context.start();
+        Ide.primaryStage = primaryStage;
         final IdePane idePane = context.getBean(IdePane.class);
         primaryStage.setMinWidth(750.0);
         primaryStage.setMinHeight(550.0);
@@ -84,35 +86,35 @@ public class Ide extends Application {
         primaryStage.getIcons().addAll(of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new));
         primaryStage.setMaximized(true);
         primaryStage.show();
+        closePreloader();
     }
 
     @Override
     public void stop() throws Exception {
+        closePreloader();
         context.close();
-        final Logger logger = Logger.getLogger("");
-        for (final Handler handler : logger.getHandlers()) {
-            try {
-                handler.close();
-            } catch (Exception x) {
-                x.printStackTrace(System.err);
-            }
-            logger.removeHandler(handler);
-        }
+    }
+
+    private void closePreloader() {
+        rootLogger.removeHandler(IdePreloader.IDE_PRELOADER_LOG_HANDLER);
+        notifyPreloader(new CloseNotification());
     }
 
     public static void main(String... args) throws Exception {
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
-        Optional.ofNullable(Logger.getLogger("")).ifPresent(logger -> {
-            logger.setLevel(Level.parse(PREFERENCES.get("logLevel", Level.INFO.getName())));
-            logger.addHandler(new IdeLogHandler());
-            logger.addHandler(new IdeConsoleLogHandler());
-        });
+        rootLogger = Logger.getLogger("");
+        rootLogger.setLevel(Level.parse(IdePrefs.PREFERENCES.get("logLevel", Level.INFO.getName())));
+        rootLogger.addHandler(ideConsoleLogHandler = new IdeConsoleLogHandler());
         Props.merge(System.getProperties(), "meta.properties", "ide.properties");
-        final String localeString = PREFERENCES.get("locale", "");
+        final String localeString = IdePrefs.PREFERENCES.get("locale", "");
         if (!localeString.isEmpty()) {
             Locale.setDefault(Locale.forLanguageTag(localeString));
         }
         new UrlConnection(null, null).setDefaultUseCaches(false);
-        launch(Ide.class, args);
+        if ("true".equalsIgnoreCase(System.getProperty("ide.preloader.disabled"))) {
+            launch(Ide.class, args);
+        } else {
+            LauncherImpl.launchApplication(Ide.class, IdePreloader.class, args);
+        }
     }
 }

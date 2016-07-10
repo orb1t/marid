@@ -18,21 +18,17 @@
 
 package org.marid;
 
-import javafx.stage.Stage;
 import org.marid.ide.logging.IdeLogHandler;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.DefaultLifecycleProcessor;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.logging.Logger;
 import java.util.prefs.Preferences;
-import java.util.stream.Stream;
 
 import static org.springframework.context.support.AbstractApplicationContext.LIFECYCLE_PROCESSOR_BEAN_NAME;
 
@@ -47,22 +43,13 @@ import static org.springframework.context.support.AbstractApplicationContext.LIF
 public class IdeContext {
 
     @Bean
-    public Ide ide(ConfigurableEnvironment environment) {
-        return environment.getProperty("ide", Ide.class);
-    }
-
-    @Bean
-    public Stage primaryStage(ConfigurableEnvironment environment) {
-        return environment.getProperty("primaryStage", Stage.class);
+    public Ide ide() {
+        return Ide.ide;
     }
 
     @Bean
     public IdeLogHandler ideLogHandler() {
-        return Stream.of(Logger.getLogger("").getHandlers())
-                .filter(IdeLogHandler.class::isInstance)
-                .map(IdeLogHandler.class::cast)
-                .findAny()
-                .orElse(null);
+        return Ide.ideLogHandler;
     }
 
     @Bean(name = LIFECYCLE_PROCESSOR_BEAN_NAME)

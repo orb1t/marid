@@ -20,7 +20,7 @@ package org.marid.dependant.settings;
 
 import javafx.application.Application;
 import javafx.scene.control.ComboBox;
-import org.marid.Ide;
+import org.marid.IdePrefs;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.settings.AppearanceSettings;
 import org.marid.jfx.panes.GenericGridPane;
@@ -52,7 +52,7 @@ public class AppearanceTab extends GenericGridPane implements SettingsEditor, Lo
             stylesheetCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
                 log(INFO, "Applying stylesheet {0}", newValue);
                 Application.setUserAgentStylesheet(newValue);
-                Ide.PREFERENCES.put("style", newValue);
+                IdePrefs.PREFERENCES.put("style", newValue);
             });
             return stylesheetCombo;
         });
