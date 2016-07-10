@@ -43,7 +43,7 @@ public class IdePreloaderLogHandler extends Handler {
     private final Timer timer = new Timer();
 
     private IdePreloaderLogHandler() {
-        timer.schedule(new MaridTimerTask(task -> flush()), 100L, 100L);
+        timer.schedule(new MaridTimerTask(task -> flush()), 100L, 30L);
     }
 
     @Override
