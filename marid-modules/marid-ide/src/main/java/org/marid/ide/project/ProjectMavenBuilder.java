@@ -53,7 +53,7 @@ public class ProjectMavenBuilder {
         this.tempDirectory = Files.createTempDirectory("projectBuilder");
         final String resource = String.format("marid-maven-%s.zip", version);
         final ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
-        final URL url = Objects.requireNonNull(contextLoader.getResource(resource));
+        final URL url = Objects.requireNonNull(contextLoader.getResource(resource), "marid-maven artifact is not found");
         try (final FileSystem fileSystem = FileSystems.newFileSystem(Paths.get(url.toURI()), contextLoader)) {
             final List<URL> urls = new ArrayList<>();
             for (final Path root : fileSystem.getRootDirectories()) {

@@ -129,7 +129,10 @@ public class IdePreloader extends Preloader {
         } else if (info instanceof CloseNotification) {
             primaryStage.close();
             try {
-                final Field field = LauncherImpl.class.getDeclaredField("currentPreloader");
+                Field field = LauncherImpl.class.getDeclaredField("currentPreloader");
+                field.setAccessible(true);
+                field.set(null, null);
+                field = LauncherImpl.class.getDeclaredField("savedPreloaderClass");
                 field.setAccessible(true);
                 field.set(null, null);
                 log(Level.INFO, "Preloader closed and cleaned");
