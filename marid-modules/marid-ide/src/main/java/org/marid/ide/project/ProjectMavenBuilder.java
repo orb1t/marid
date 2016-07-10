@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -54,7 +55,11 @@ public class ProjectMavenBuilder {
         final String resource = String.format("marid-maven-%s.zip", version);
         final ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
         final URL url = Objects.requireNonNull(contextLoader.getResource(resource), "marid-maven artifact is not found");
-        try (final FileSystem fileSystem = FileSystems.newFileSystem(Paths.get(url.toURI()), contextLoader)) {
+        final Path localZipFile = Files.createTempFile("temp", ".zip");
+        try (final InputStream inputStream = url.openStream()) {
+            Files.copy(inputStream, localZipFile, StandardCopyOption.REPLACE_EXISTING);
+        }
+        try (final FileSystem fileSystem = FileSystems.newFileSystem(localZipFile, contextLoader)) {
             final List<URL> urls = new ArrayList<>();
             for (final Path root : fileSystem.getRootDirectories()) {
                 try (final Stream<Path> stream = Files.list(root)) {
@@ -69,6 +74,7 @@ public class ProjectMavenBuilder {
             }
             classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
         }
+        Files.deleteIfExists(localZipFile);
         maridStatus.doWithSession(session -> session.showMessage("marid-maven copied to temporary directory"));
     }
 
