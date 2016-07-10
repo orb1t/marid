@@ -28,16 +28,18 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.LogRecord;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -55,26 +57,29 @@ public class ProjectMavenBuilder {
         final String resource = String.format("marid-maven-%s.zip", version);
         final ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
         final URL url = Objects.requireNonNull(contextLoader.getResource(resource), "marid-maven artifact is not found");
-        final Path localZipFile = Files.createTempFile("temp", ".zip");
-        try (final InputStream inputStream = url.openStream()) {
-            Files.copy(inputStream, localZipFile, StandardCopyOption.REPLACE_EXISTING);
-        }
-        try (final FileSystem fileSystem = FileSystems.newFileSystem(localZipFile, contextLoader)) {
+        try (final ZipInputStream zipInputStream = new ZipInputStream(url.openStream(), StandardCharsets.UTF_8)) {
             final List<URL> urls = new ArrayList<>();
-            for (final Path root : fileSystem.getRootDirectories()) {
-                try (final Stream<Path> stream = Files.list(root)) {
-                    final List<Path> paths = stream.collect(Collectors.toList());
-                    for (final Path path : paths) {
-                        final Path target = tempDirectory.resolve(path.getFileName().toString());
-                        Files.copy(path, target);
-                        maridStatus.doWithSession(session -> session.showMessage("Copied {0} to {1}", path, target));
-                        urls.add(target.toUri().toURL());
+            for (ZipEntry entry = zipInputStream.getNextEntry(); entry != null; entry = zipInputStream.getNextEntry()) {
+                if (!entry.isDirectory()) {
+                    final Path target = tempDirectory.resolve(entry.getName());
+                    try (final OutputStream os = Files.newOutputStream(target)) {
+                        final byte[] buffer = new byte[65536];
+                        while (true) {
+                            final int n = zipInputStream.read(buffer);
+                            if (n < 0) {
+                                break;
+                            }
+                            os.write(buffer, 0, n);
+                        }
                     }
+                    final String name = entry.getName();
+                    maridStatus.doWithSession(session -> session.showMessage("Copied {0} to {1}", name, target));
+                    urls.add(target.toUri().toURL());
                 }
+                zipInputStream.closeEntry();
             }
             classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
         }
-        Files.deleteIfExists(localZipFile);
         maridStatus.doWithSession(session -> session.showMessage("marid-maven copied to temporary directory"));
     }
 
