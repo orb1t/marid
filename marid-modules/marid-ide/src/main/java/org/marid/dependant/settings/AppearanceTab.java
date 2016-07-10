@@ -52,7 +52,7 @@ public class AppearanceTab extends GenericGridPane implements SettingsEditor, Lo
             stylesheetCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
                 log(INFO, "Applying stylesheet {0}", newValue);
                 Application.setUserAgentStylesheet(newValue);
-                stylesheetCombo.setOnAction(event -> Ide.PREFERENCES.put("style", newValue));
+                Ide.PREFERENCES.put("style", newValue);
             });
             return stylesheetCombo;
         });
