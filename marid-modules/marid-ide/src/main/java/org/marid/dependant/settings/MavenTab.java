@@ -23,8 +23,6 @@ import org.marid.jfx.panes.GenericGridPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.marid.jfx.Props.stringProperty;
-
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -36,14 +34,14 @@ public class MavenTab extends GenericGridPane implements SettingsEditor {
     @Autowired
     public MavenTab(MavenSettings mavenSettings) {
         this.mavenSettings = mavenSettings;
-        addTextField("Releases update policy by default", stringProperty(mavenSettings, "releaseUpdatePolicy"));
-        addTextField("Snapshots update policy by default", stringProperty(mavenSettings, "snapshotUpdatePolicy"));
+        addTextField("Releases update policy by default", mavenSettings::getReleaseUpdatePolicy, mavenSettings::setReleaseUpdatePolicy);
+        addTextField("Snapshots update policy by default", mavenSettings::getSnapshotUpdatePolicy, mavenSettings::setSnapshotUpdatePolicy);
         addSeparator();
-        addTextField("Dependency plugin version", stringProperty(mavenSettings, "dependencyPluginVersion"));
-        addTextField("Compiler plugin version", stringProperty(mavenSettings, "compilerPluginVersion"));
-        addTextField("Eclipse compiler version", stringProperty(mavenSettings, "eclipseCompilerVersion"));
-        addTextField("JAR plugin version", stringProperty(mavenSettings, "jarPluginVersion"));
-        addTextField("Resources plugin version", stringProperty(mavenSettings, "resourcesPluginVersion"));
+        addTextField("Dependency plugin version", mavenSettings::getDependencyPluginVersion, mavenSettings::setDependencyPluginVersion);
+        addTextField("Compiler plugin version", mavenSettings::getCompilerPluginVersion, mavenSettings::setCompilerPluginVersion);
+        addTextField("Eclipse compiler version", mavenSettings::getEclipseCompilerVersion, mavenSettings::setEclipseCompilerVersion);
+        addTextField("JAR plugin version", mavenSettings::getJarPluginVersion, mavenSettings::setJarPluginVersion);
+        addTextField("Resources plugin version", mavenSettings::getResourcesPluginVersion, mavenSettings::setResourcesPluginVersion);
     }
 
     @Override

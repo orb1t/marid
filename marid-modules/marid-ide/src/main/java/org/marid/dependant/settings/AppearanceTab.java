@@ -43,8 +43,8 @@ public class AppearanceTab extends GenericGridPane implements SettingsEditor, Lo
     @Autowired
     public AppearanceTab(AppearanceSettings appearanceSettings, IdeLogHandler ideLogHandler) {
         this.appearanceSettings = appearanceSettings;
-        addTextField("Locale", appearanceSettings, "locale");
-        addIntField("Max log records", ideLogHandler, "maxLogRecords", 100, 100_000, 100);
+        addTextField("Locale", appearanceSettings::getLocale, appearanceSettings::setLocale);
+        addIntField("Max log records", ideLogHandler::getMaxLogRecords, ideLogHandler::setMaxLogRecords, 100, 100_000, 100);
         addSeparator();
         addControl("System stylesheet", () -> {
             final ComboBox<String> stylesheetCombo = new ComboBox<>(observableArrayList(STYLESHEET_CASPIAN, STYLESHEET_MODENA));

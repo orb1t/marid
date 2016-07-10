@@ -23,8 +23,6 @@ import org.marid.jfx.panes.GenericGridPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.marid.jfx.Props.stringProperty;
-
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -36,7 +34,7 @@ public class JavaTab extends GenericGridPane implements SettingsEditor {
     @Autowired
     public JavaTab(JavaSettings javaSettings) throws Exception {
         this.javaSettings = javaSettings;
-        addTextField("Java executable", stringProperty(javaSettings, "javaExecutable"));
+        addTextField("Java executable", javaSettings::getJavaExecutable, javaSettings::setJavaExecutable);
     }
 
     @Override

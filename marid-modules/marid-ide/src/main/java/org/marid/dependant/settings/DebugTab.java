@@ -35,9 +35,9 @@ public class DebugTab extends GenericGridPane implements SettingsEditor {
     @Autowired
     public DebugTab(DebugSettings debugSettings) {
         this.debugSettings = debugSettings;
-        addBooleanField("Debug", debugSettings, "debug");
-        addIntField("Port", debugSettings, "port", 1000, 65535, 1);
-        addBooleanField("Suspend", debugSettings, "suspend");
+        addBooleanField("Debug", debugSettings::isDebug, debugSettings::setDebug);
+        addIntField("Port", debugSettings::getPort, debugSettings::setPort, 1000, 65535, 1);
+        addBooleanField("Suspend", debugSettings::isSuspend, debugSettings::setSuspend);
     }
 
     @Override

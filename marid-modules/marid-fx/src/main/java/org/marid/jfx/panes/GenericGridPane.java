@@ -18,21 +18,19 @@
 
 package org.marid.jfx.panes;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import org.marid.l10n.L10n;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static java.lang.Double.MAX_VALUE;
 import static javafx.geometry.HPos.LEFT;
 import static javafx.scene.layout.Priority.NEVER;
 import static javafx.scene.layout.Priority.SOMETIMES;
-import static org.marid.jfx.Props.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,37 +48,27 @@ public class GenericGridPane extends GridPane {
         return getChildren().stream().mapToInt(c -> c instanceof Separator ? 2 : 1).sum() / 2;
     }
 
-    public TextField addTextField(String text, StringProperty stringProperty) {
-        final TextField textField = new TextField();
-        textField.textProperty().bindBidirectional(stringProperty);
+    public TextField addTextField(String text, Supplier<String> supplier, Consumer<String> consumer) {
+        final TextField textField = new TextField(supplier.get());
+        textField.textProperty().addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
         final Label label = new Label(L10n.s(text) + ": ");
         addRow(getNextRowIndex(), label, textField);
         return textField;
     }
 
-    public TextField addTextField(String text, Object bean, String property) {
-        final TextField textField = new TextField();
-        textField.textProperty().bindBidirectional(stringProperty(bean, property));
-        final Label label = new Label(L10n.s(text) + ": ");
-        addRow(getNextRowIndex(), label, textField);
-        return textField;
-    }
-
-    public CheckBox addBooleanField(String text, Object bean, String property) {
+    public CheckBox addBooleanField(String text, Supplier<Boolean> supplier, Consumer<Boolean> consumer) {
         final CheckBox checkBox = new CheckBox();
-        checkBox.selectedProperty().bindBidirectional(booleanProperty(bean, property));
+        checkBox.setSelected(supplier.get());
+        checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
         final Label label = new Label(L10n.s(text) + ": ");
         addRow(getNextRowIndex(), label, checkBox);
         return checkBox;
     }
 
-    public Spinner addIntField(String text, Object bean, String property, int low, int high, int step) {
-        final IntegerProperty p = integerProperty(bean, property);
-        final Spinner<Integer> spinner = new Spinner<>(low, high, p.get(), step);
+    public Spinner addIntField(String text, Supplier<Integer> supplier, Consumer<Integer> consumer, int low, int high, int step) {
+        final Spinner<Integer> spinner = new Spinner<>(low, high, supplier.get(), step);
         spinner.setEditable(true);
-        spinner.valueProperty().addListener((observable, oldValue, newValue) -> {
-            p.set(newValue);
-        });
+        spinner.valueProperty().addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
         final Label label = new Label(L10n.s(text) + ": ");
         addRow(getNextRowIndex(), label, spinner);
         return spinner;

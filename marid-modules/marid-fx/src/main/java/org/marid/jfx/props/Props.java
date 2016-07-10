@@ -18,27 +18,29 @@
 
 package org.marid.jfx.props;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BooleanPropertyHolder {
+public interface Props {
 
-    private final BooleanSupplier supplier;
-    private final Consumer<Boolean> consumer;
-
-    public BooleanPropertyHolder(BooleanSupplier supplier, Consumer<Boolean> consumer) {
-        this.supplier = supplier;
-        this.consumer = consumer;
+    static StringProperty stringProp(Supplier<String> supplier, Consumer<String> consumer) {
+        final StringProperty property = new SimpleStringProperty(supplier.get());
+        property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
+        return property;
     }
 
-    public boolean isProperty() {
-        return supplier.getAsBoolean();
-    }
-
-    public void setProperty(boolean value) {
-        consumer.accept(value);
+    static BooleanProperty boolProp(BooleanSupplier supplier, Consumer<Boolean> consumer) {
+        final BooleanProperty property = new SimpleBooleanProperty(supplier.getAsBoolean());
+        property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
+        return property;
     }
 }

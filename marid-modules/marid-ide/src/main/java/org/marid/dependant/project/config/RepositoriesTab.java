@@ -34,15 +34,13 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Repository;
 import org.apache.maven.model.RepositoryPolicy;
 import org.marid.jfx.icons.FontIcon;
+import org.marid.jfx.props.Props;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import static org.marid.jfx.Props.booleanProperty;
-import static org.marid.jfx.Props.stringProperty;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -102,7 +100,7 @@ public class RepositoriesTab extends BorderPane {
 
         private TableColumn<Repository, String> idColumn() {
             final TableColumn<Repository, String> col = new TableColumn<>("Id");
-            col.setCellValueFactory(param -> stringProperty(param.getValue(), "id"));
+            col.setCellValueFactory(param -> Props.stringProp(param.getValue()::getId, param.getValue()::setId));
             col.setCellFactory(TextFieldTableCell.forTableColumn());
             col.setPrefWidth(40);
             col.setSortable(false);
@@ -111,7 +109,7 @@ public class RepositoriesTab extends BorderPane {
 
         private TableColumn<Repository, String> nameColumn() {
             final TableColumn<Repository, String> col = new TableColumn<>("Name");
-            col.setCellValueFactory(param -> stringProperty(param.getValue(), "name"));
+            col.setCellValueFactory(param -> Props.stringProp(param.getValue()::getName, param.getValue()::setName));
             col.setCellFactory(TextFieldTableCell.forTableColumn());
             col.setPrefWidth(70);
             col.setSortable(false);
@@ -120,7 +118,7 @@ public class RepositoriesTab extends BorderPane {
 
         private TableColumn<Repository, String> urlColumn() {
             final TableColumn<Repository, String> col = new TableColumn<>("URL");
-            col.setCellValueFactory(param -> stringProperty(param.getValue(), "url"));
+            col.setCellValueFactory(param -> Props.stringProp(param.getValue()::getUrl, param.getValue()::setUrl));
             col.setCellFactory(TextFieldTableCell.forTableColumn());
             col.setPrefWidth(150);
             col.setSortable(false);
@@ -129,7 +127,7 @@ public class RepositoriesTab extends BorderPane {
 
         private TableColumn<Repository, String> layoutColumn() {
             final TableColumn<Repository, String> col = new TableColumn<>("Layout");
-            col.setCellValueFactory(param -> stringProperty(param.getValue(), "layout"));
+            col.setCellValueFactory(param -> Props.stringProp(param.getValue()::getLayout, param.getValue()::setLayout));
             col.setCellFactory(ComboBoxTableCell.forTableColumn("default", "legacy"));
             col.setPrefWidth(120);
             col.setSortable(false);
@@ -143,9 +141,7 @@ public class RepositoriesTab extends BorderPane {
             if (repository.getReleases() == null) {
                 repository.setReleases(new RepositoryPolicy());
             }
-            return booleanProperty(
-                    () -> "true".equals(f.apply(repository).getEnabled()),
-                    e -> f.apply(repository).setEnabled(e ? "true" : null));
+            return Props.boolProp(() -> "true".equals(f.apply(repository).getEnabled()), e -> f.apply(repository).setEnabled(e ? "true" : null));
         }
 
         private TableColumn<Repository, Boolean> snapshotsColumn() {

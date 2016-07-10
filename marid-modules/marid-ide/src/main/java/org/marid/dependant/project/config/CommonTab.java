@@ -21,7 +21,9 @@ package org.marid.dependant.project.config;
 import javafx.scene.control.CheckBox;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Organization;
 import org.marid.jfx.panes.GenericGridPane;
+import org.marid.misc.Builder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -33,15 +35,16 @@ import org.springframework.stereotype.Component;
 public class CommonTab extends GenericGridPane {
 
     public CommonTab(Model model) {
-        addTextField("Name", model, "name");
-        addTextField("GroupId", model, "groupId");
-        addTextField("ArtifactId", model, "artifactId");
-        addTextField("Version", model, "version");
-        addTextField("Description", model, "description");
-        addTextField("URL", model, "url");
-        addTextField("Inception year", model, "inceptionYear");
-        addTextField("Organization name", model.getOrganization(), "name");
-        addTextField("Organization URL", model.getOrganization(), "url");
+        final Organization organization = Builder.getFrom(model::getOrganization, Organization::new, model::setOrganization);
+        addTextField("Name", model::getName, model::setName);
+        addTextField("GroupId", model::getGroupId, model::setGroupId);
+        addTextField("ArtifactId", model::getArtifactId, model::setArtifactId);
+        addTextField("Version", model::getVersion, model::setVersion);
+        addTextField("Description", model::getDescription, model::setDescription);
+        addTextField("URL", model::getUrl, model::setUrl);
+        addTextField("Inception year", model::getInceptionYear, model::setInceptionYear);
+        addTextField("Organization name", organization::getName, organization::setName);
+        addTextField("Organization URL", organization::getUrl, organization::setUrl);
         addSeparator();
         addControl("UI", () -> {
             final CheckBox checkBox = new CheckBox();

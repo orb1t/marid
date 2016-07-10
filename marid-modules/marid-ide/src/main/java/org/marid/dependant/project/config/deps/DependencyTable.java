@@ -24,7 +24,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.apache.maven.model.Dependency;
-import org.marid.jfx.Props;
+import org.marid.jfx.props.Props;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class DependencyTable extends TableView<Dependency> {
 
     private TableColumn<Dependency, String> groupIdColumn() {
         final TableColumn<Dependency, String> col = new TableColumn<>("groupId");
-        col.setCellValueFactory(param -> Props.stringProperty(param.getValue(), "groupId"));
+        col.setCellValueFactory(param -> Props.stringProp(param.getValue()::getGroupId, param.getValue()::setGroupId));
         col.setCellFactory(TextFieldTableCell.forTableColumn());
         col.setPrefWidth(150);
         col.setSortable(false);
@@ -63,7 +63,7 @@ public class DependencyTable extends TableView<Dependency> {
 
     private TableColumn<Dependency, String> artifactIdColumn() {
         final TableColumn<Dependency, String> col = new TableColumn<>("artifactId");
-        col.setCellValueFactory(param -> Props.stringProperty(param.getValue(), "artifactId"));
+        col.setCellValueFactory(param -> Props.stringProp(param.getValue()::getArtifactId, param.getValue()::setArtifactId));
         col.setCellFactory(TextFieldTableCell.forTableColumn());
         col.setPrefWidth(150);
         col.setSortable(false);
@@ -72,7 +72,7 @@ public class DependencyTable extends TableView<Dependency> {
 
     private TableColumn<Dependency, String> versionColumn() {
         final TableColumn<Dependency, String> col = new TableColumn<>("version");
-        col.setCellValueFactory(param -> Props.stringProperty(param.getValue(), "version"));
+        col.setCellValueFactory(param -> Props.stringProp(param.getValue()::getVersion, param.getValue()::setVersion));
         col.setCellFactory(TextFieldTableCell.forTableColumn());
         col.setPrefWidth(200);
         col.setStyle("-fx-alignment: center-right");
@@ -82,7 +82,7 @@ public class DependencyTable extends TableView<Dependency> {
 
     private TableColumn<Dependency, String> classifierColumn() {
         final TableColumn<Dependency, String> col = new TableColumn<>("classifier");
-        col.setCellValueFactory(param -> Props.stringProperty(param.getValue(), "classifier"));
+        col.setCellValueFactory(param -> Props.stringProp(param.getValue()::getClassifier, param.getValue()::setClassifier));
         col.setCellFactory(TextFieldTableCell.forTableColumn());
         col.setPrefWidth(150);
         col.setSortable(false);

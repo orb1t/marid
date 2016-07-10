@@ -18,9 +18,7 @@
 
 package org.marid.dependant.project.config;
 
-import javafx.beans.property.StringProperty;
 import org.apache.maven.model.Model;
-import org.marid.jfx.Props;
 import org.marid.jfx.panes.GenericGridPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,10 +40,6 @@ public class PropertiesTab extends GenericGridPane {
     }
 
     private void addTextField(Properties properties, String text, String key, String defaultValue) {
-        addTextField(text, stringProperty(properties, key, defaultValue));
-    }
-
-    private StringProperty stringProperty(Properties properties, String key, String defaultValue) {
-        return Props.stringProperty(() -> properties.getProperty(key, defaultValue), v -> properties.setProperty(key, v));
+        addTextField(text, () -> properties.getProperty(key, defaultValue), value -> properties.setProperty(key, value));
     }
 }
