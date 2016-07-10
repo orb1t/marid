@@ -50,25 +50,12 @@ public class ProjectPrerequisites {
 
     public void apply() {
         model = projectManager.getProfile().getModel();
-        applyAddress();
         applyPrerequisites();
         applyProperties();
         applyBuild();
         applyPluginManagement();
         applyPlugins();
         applyRuntimeDependency();
-    }
-
-    void applyAddress() {
-        if (StringUtils.isBlank(model.getArtifactId())) {
-            model.setArtifactId(UUID.randomUUID().toString());
-        }
-        if (StringUtils.isBlank(model.getGroupId())) {
-            model.setGroupId("org.myproject");
-        }
-        if (StringUtils.isBlank(model.getVersion())) {
-            model.setVersion("1.0-SNAPSHOT");
-        }
     }
 
     void applyPrerequisites() {

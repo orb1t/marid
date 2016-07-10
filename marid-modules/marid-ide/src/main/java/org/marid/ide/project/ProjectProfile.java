@@ -21,6 +21,7 @@ package org.marid.ide.project;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Organization;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
@@ -110,7 +111,13 @@ public class ProjectProfile implements LogSupport {
         } catch (XmlPullParserException x) {
             log(WARNING, "Unable to parse pom.xml", x);
         }
-        return new Model();
+        final Model model = new Model();
+        model.setOrganization(new Organization());
+        model.setName(getName());
+        model.setArtifactId(getName());
+        model.setGroupId("org.myproject");
+        model.setVersion("1.0-SNAPSHOT");
+        return model;
     }
 
     private ObservableMap<Path, BeanFile> loadBeanFiles() {
