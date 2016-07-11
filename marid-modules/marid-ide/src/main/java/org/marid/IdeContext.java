@@ -57,14 +57,14 @@ public class IdeContext {
         return new DefaultLifecycleProcessor();
     }
 
-    @Bean
-    public ConcurrentTaskScheduler taskScheduler() {
-        return new ConcurrentTaskScheduler(new ScheduledThreadPoolExecutor(1));
+    @Bean(destroyMethod = "shutdown")
+    public ScheduledThreadPoolExecutor taskExecutor() {
+        return new ScheduledThreadPoolExecutor(1);
     }
 
     @Bean
-    public AutoCloseable taskSchedulerDestroyer(ConcurrentTaskScheduler scheduler) {
-        return () -> ((ScheduledThreadPoolExecutor) scheduler.getConcurrentExecutor()).shutdown();
+    public ConcurrentTaskScheduler taskScheduler(ScheduledThreadPoolExecutor taskExecutor) {
+        return new ConcurrentTaskScheduler(taskExecutor);
     }
 
     @Bean
