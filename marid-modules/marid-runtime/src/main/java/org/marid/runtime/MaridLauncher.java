@@ -51,7 +51,7 @@ public class MaridLauncher implements MaridStarter {
         try {
             context.refresh();
             context.start();
-            MaridConsoleExitHandler.handle(context);
+            MaridConsoleExitHandler.handle(() -> context.close());
         } catch (Exception x) {
             x.printStackTrace();
             System.exit(3);

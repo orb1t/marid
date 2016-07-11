@@ -18,7 +18,6 @@
 
 package org.marid.runtime;
 
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -27,7 +26,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
  */
 public class MaridContextInitializer {
 
-    public static GenericApplicationContext applicationContext(ClassLoader classLoader) {
+    public static GenericXmlApplicationContext applicationContext(ClassLoader classLoader) {
         final GenericXmlApplicationContext context = new GenericXmlApplicationContext();
         context.addBeanFactoryPostProcessor(new MaridBeanFactoryPostProcessor());
         context.setClassLoader(classLoader);

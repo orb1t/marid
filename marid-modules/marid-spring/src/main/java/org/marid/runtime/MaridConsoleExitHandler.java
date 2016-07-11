@@ -18,8 +18,6 @@
 
 package org.marid.runtime;
 
-import org.springframework.context.support.AbstractApplicationContext;
-
 import java.util.Scanner;
 
 /**
@@ -27,7 +25,7 @@ import java.util.Scanner;
  */
 public class MaridConsoleExitHandler {
 
-    public static void handle(AbstractApplicationContext applicationContext) {
+    public static void handle(Runnable closeTask) {
         try (final Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
                 final String line = scanner.nextLine().trim();
@@ -49,7 +47,7 @@ public class MaridConsoleExitHandler {
                         break;
                     case "exit":
                     case "quit":
-                        applicationContext.close();
+                        closeTask.run();
                         break;
                 }
             }
