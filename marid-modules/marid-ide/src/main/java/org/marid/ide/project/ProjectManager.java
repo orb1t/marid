@@ -24,15 +24,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.marid.IdePrefs;
 import org.marid.logging.LogSupport;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
-import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
 import static java.util.Collections.binarySearch;
@@ -45,12 +44,9 @@ public class ProjectManager implements LogSupport {
 
     private final ObjectProperty<ProjectProfile> profile = new SimpleObjectProperty<>();
     private final ObservableList<ProjectProfile> profiles = FXCollections.observableArrayList();
-    private final Preferences preferences;
 
-    @Autowired
-    public ProjectManager(Preferences preferences) {
-        this.preferences = preferences;
-        profile.set(new ProjectProfile(preferences.get("profile", "default")));
+    public ProjectManager() {
+        profile.set(new ProjectProfile(IdePrefs.PREFERENCES.get("profile", "default")));
         if (!isPresent()) {
             profile.set(new ProjectProfile("default"));
         }
@@ -70,7 +66,7 @@ public class ProjectManager implements LogSupport {
 
     @PreDestroy
     private void savePrefs() {
-        preferences.put("profile", getProfile().getName());
+        IdePrefs.PREFERENCES.put("profile", getProfile().getName());
     }
 
     boolean isPresent() {

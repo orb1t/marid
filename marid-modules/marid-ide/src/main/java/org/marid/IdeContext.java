@@ -18,9 +18,9 @@
 
 package org.marid;
 
+import org.marid.ide.common.IdeValues;
 import org.marid.ide.logging.IdeLogHandler;
 import org.springframework.beans.factory.InjectionPoint;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.DefaultLifecycleProcessor;
@@ -69,10 +69,9 @@ public class IdeContext {
 
     @Bean
     @Scope("prototype")
-    public Preferences preferences(InjectionPoint injectionPoint,
-                                   @Value("${implementation.version}") String version) {
+    public Preferences preferences(InjectionPoint injectionPoint, IdeValues ideValues) {
         final Class<?> type = injectionPoint.getMember().getDeclaringClass();
-        return Preferences.userNodeForPackage(type).node(type.getName()).node(version);
+        return Preferences.userNodeForPackage(type).node(type.getName()).node(ideValues.implementationVersion);
     }
 
     @Bean

@@ -19,11 +19,11 @@
 package org.marid.ide.project;
 
 import org.codehaus.plexus.util.FileUtils;
+import org.marid.ide.common.IdeValues;
 import org.marid.maven.ProjectBuilder;
 import org.marid.maven.ProjectBuilderFactory;
 import org.marid.status.MaridStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -51,10 +51,9 @@ public class ProjectMavenBuilder {
     private final URLClassLoader classLoader;
 
     @Autowired
-    public ProjectMavenBuilder(@Value("${implementation.version}") String version,
-                               MaridStatus maridStatus) throws IOException, URISyntaxException {
+    public ProjectMavenBuilder(IdeValues ideValues, MaridStatus maridStatus) throws IOException, URISyntaxException {
         this.tempDirectory = Files.createTempDirectory("projectBuilder");
-        final String resource = String.format("marid-maven-%s.zip", version);
+        final String resource = String.format("marid-maven-%s.zip", ideValues.implementationVersion);
         final ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
         final URL url = Objects.requireNonNull(contextLoader.getResource(resource), "marid-maven artifact is not found");
         try (final ZipInputStream zipInputStream = new ZipInputStream(url.openStream(), StandardCharsets.UTF_8)) {
