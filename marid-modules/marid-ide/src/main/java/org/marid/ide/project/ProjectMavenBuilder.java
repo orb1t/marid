@@ -60,7 +60,7 @@ public class ProjectMavenBuilder {
         try (final ZipInputStream zipInputStream = new ZipInputStream(url.openStream(), StandardCharsets.UTF_8)) {
             final List<URL> urls = new ArrayList<>();
             for (ZipEntry entry = zipInputStream.getNextEntry(); entry != null; entry = zipInputStream.getNextEntry()) {
-                if (!entry.isDirectory()) {
+                if (entry.getName().endsWith(".jar")) {
                     final Path target = tempDirectory.resolve(entry.getName());
                     try (final OutputStream os = Files.newOutputStream(target)) {
                         final byte[] buffer = new byte[65536];
@@ -78,7 +78,7 @@ public class ProjectMavenBuilder {
                 }
                 zipInputStream.closeEntry();
             }
-            classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
+            classLoader = URLClassLoader.newInstance(urls.toArray(new URL[urls.size()]));
         }
         maridStatus.doWithSession(session -> session.showMessage("marid-maven copied to temporary directory"));
     }

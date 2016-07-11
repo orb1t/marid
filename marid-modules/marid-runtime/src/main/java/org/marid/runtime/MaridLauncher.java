@@ -23,8 +23,6 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 
-import java.util.TimeZone;
-
 import static java.lang.Thread.currentThread;
 import static org.marid.runtime.MaridContextInitializer.applicationContext;
 
@@ -35,7 +33,6 @@ public class MaridLauncher implements MaridStarter {
 
     @Override
     public void start(String... args) throws Exception {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
         final GenericApplicationContext context = applicationContext(currentThread().getContextClassLoader());
         context.getEnvironment().getPropertySources().addFirst(new SimpleCommandLinePropertySource(args));

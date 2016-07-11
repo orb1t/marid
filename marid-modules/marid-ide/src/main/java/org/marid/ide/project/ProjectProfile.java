@@ -190,6 +190,13 @@ public class ProjectProfile implements LogSupport {
             for (final Path dir : asList(srcMainJava, beansDirectory, srcTestJava, srcTestResources)) {
                 Files.createDirectories(dir);
             }
+            final Path loggingProperties = srcMainResources.resolve("logging.properties");
+            if (Files.notExists(loggingProperties)) {
+                final ClassLoader currentLoader = Thread.currentThread().getContextClassLoader();
+                try (final InputStream is = currentLoader.getResourceAsStream("logging/default.properties")) {
+                    Files.copy(is, loggingProperties);
+                }
+            }
         } catch (Exception x) {
             log(WARNING, "Unable to create file structure", x);
         }
