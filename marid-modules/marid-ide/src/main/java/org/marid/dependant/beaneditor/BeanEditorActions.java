@@ -35,7 +35,7 @@ import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.ConstructorArg;
 import org.marid.spring.xml.data.Property;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -56,7 +56,7 @@ public class BeanEditorActions {
 
     private final BeanEditorTable table;
     private final ProjectCacheManager cacheManager;
-    private final ObjectFactory<Dialog<Map.Entry<String, BeanDefinition>>> beanBrowser;
+    private final ObjectProvider<Dialog<Map.Entry<String, BeanDefinition>>> beanBrowser;
     private final IdeDependants dependants;
     private final ProjectProfile profile;
 
@@ -66,7 +66,7 @@ public class BeanEditorActions {
     @Autowired
     public BeanEditorActions(BeanEditorTable table,
                              ProjectCacheManager cacheManager,
-                             ObjectFactory<Dialog<Map.Entry<String, BeanDefinition>>> beanBrowser,
+                             ObjectProvider<Dialog<Map.Entry<String, BeanDefinition>>> beanBrowser,
                              IdeDependants dependants,
                              ProjectProfile profile) {
         this.table = table;

@@ -85,7 +85,8 @@ public class ProjectConfiguration implements LogSupport {
                 .setAccelerator(KeyCombination.valueOf("F9"))
                 .setText("Build")
                 .setIcon(D_CLOCK_FAST)
-                .setEventHandler(event -> projectCacheManager.getObject().build(projectManager.getProfile()));
+                .setEventHandler(event -> projectCacheManager.getObject().build(projectManager.getProfile()))
+                .setDisabled(false);
     }
 
     @Bean

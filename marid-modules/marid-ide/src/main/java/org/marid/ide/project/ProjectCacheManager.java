@@ -24,6 +24,7 @@ import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.data.ConstructorArg;
 import org.marid.spring.xml.data.Property;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,10 +48,10 @@ import static java.util.stream.Collectors.toMap;
 @Component
 public class ProjectCacheManager implements LogSupport {
 
-    private final ObjectFactory<ProjectMavenBuilder> projectBuilder;
+    private final ObjectProvider<ProjectMavenBuilder> projectBuilder;
 
     @Autowired
-    public ProjectCacheManager(ObjectFactory<ProjectMavenBuilder> projectBuilder) {
+    public ProjectCacheManager(ObjectProvider<ProjectMavenBuilder> projectBuilder) {
         this.projectBuilder = projectBuilder;
     }
 

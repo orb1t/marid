@@ -18,11 +18,14 @@
 
 package org.marid.ide.project;
 
+import javafx.application.Platform;
 import org.codehaus.plexus.util.FileUtils;
 import org.marid.ide.common.IdeValues;
+import org.marid.jfx.action.FxAction;
 import org.marid.maven.ProjectBuilder;
 import org.marid.maven.ProjectBuilderFactory;
 import org.marid.status.MaridStatus;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,9 +52,13 @@ public class ProjectMavenBuilder {
 
     private final Path tempDirectory;
     private final URLClassLoader classLoader;
+    private final ObjectProvider<FxAction> projectBuildAction;
 
     @Autowired
-    public ProjectMavenBuilder(IdeValues ideValues, MaridStatus maridStatus) throws IOException, URISyntaxException {
+    public ProjectMavenBuilder(IdeValues ideValues,
+                               MaridStatus maridStatus,
+                               ObjectProvider<FxAction> projectBuildAction) throws IOException, URISyntaxException {
+        this.projectBuildAction = projectBuildAction;
         this.tempDirectory = Files.createTempDirectory("projectBuilder");
         final String resource = String.format("marid-maven-%s.zip", ideValues.implementationVersion);
         final ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
@@ -90,12 +97,14 @@ public class ProjectMavenBuilder {
 
     public Thread build(ProjectProfile profile, Consumer<Map<String, Object>> resultConsumer, Consumer<LogRecord> logConsumer) {
         final Thread thread = new Thread(() -> {
+            Platform.runLater(() -> projectBuildAction.getObject().setDisabled(true));
             for (final ProjectBuilderFactory factory : ServiceLoader.load(ProjectBuilderFactory.class)) {
                 final ProjectBuilder projectBuilder = factory.newBuilder(profile.getPath(), logConsumer)
                         .goals("clean", "install")
                         .profiles("conf");
                 projectBuilder.build(resultConsumer);
             }
+            Platform.runLater(() -> projectBuildAction.getObject().setDisabled(false));
         });
         thread.setContextClassLoader(classLoader);
         thread.start();

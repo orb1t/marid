@@ -31,6 +31,7 @@ import org.marid.l10n.L10n;
 import org.marid.spring.xml.MaridBeanUtils;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,16 +50,16 @@ import static org.marid.spring.xml.MaridBeanUtils.isFile;
 @Component
 public class BeanFileBrowserActions {
 
-    private final ObjectFactory<BeanFileBrowserTree> tree;
+    private final ObjectProvider<BeanFileBrowserTree> tree;
     private final ObservableValue<ProjectProfile> projectProfileObservableValue;
     private final IdeDependants dependants;
-    private final ObjectFactory<TabPane> ideTabPane;
+    private final ObjectProvider<TabPane> ideTabPane;
 
     @Autowired
-    public BeanFileBrowserActions(ObjectFactory<BeanFileBrowserTree> tree,
+    public BeanFileBrowserActions(ObjectProvider<BeanFileBrowserTree> tree,
                                   ProjectManager manager,
                                   IdeDependants dependants,
-                                  ObjectFactory<TabPane> ideTabPane) {
+                                  ObjectProvider<TabPane> ideTabPane) {
         this.tree = tree;
         this.projectProfileObservableValue = manager.profileProperty();
         this.dependants = dependants;
