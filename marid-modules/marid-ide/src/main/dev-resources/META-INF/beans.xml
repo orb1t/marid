@@ -26,4 +26,5 @@
     <context:component-scan base-package="org.marid.dependant"/>
 
     <bean name="ideContext" class="org.marid.IdeContext"/>
+    <bean name="dependants" class="org.marid.IdeDependants"/>
 </beans>
