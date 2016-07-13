@@ -20,13 +20,13 @@ package org.marid.ide.project;
 
 import org.apache.maven.model.*;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.marid.ide.common.IdeValues;
 import org.marid.ide.settings.MavenSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Properties;
-import java.util.function.Predicate;
 
 import static java.util.Collections.singletonList;
 
@@ -38,13 +38,15 @@ public class ProjectPrerequisites {
 
     private final MavenSettings mavenSettings;
     private final ProjectManager projectManager;
+    private final IdeValues ideValues;
 
     private Model model;
 
     @Autowired
-    public ProjectPrerequisites(MavenSettings mavenSettings, ProjectManager projectManager) {
+    public ProjectPrerequisites(MavenSettings mavenSettings, ProjectManager projectManager, IdeValues ideValues) {
         this.mavenSettings = mavenSettings;
         this.projectManager = projectManager;
+        this.ideValues = ideValues;
     }
 
     public void apply() {
@@ -69,7 +71,7 @@ public class ProjectPrerequisites {
         properties.setProperty("project.reporting.outputEncoding", "UTF-8");
         properties.setProperty("maven.compiler.source", "1.8");
         properties.setProperty("maven.compiler.target", "1.8");
-        properties.setProperty("marid.runtime.version", System.getProperty("implementation.version"));
+        properties.setProperty("marid.runtime.version", ideValues.implementationVersion);
     }
 
     void applyBuild() {
@@ -87,7 +89,7 @@ public class ProjectPrerequisites {
 
     void applyExecMavenPluginManagement() {
         final PluginManagement pluginManagement = model.getBuild().getPluginManagement();
-        pluginManagement.getPlugins().removeIf(p -> "org.codehaus.mojo".equals(p.getGroupId()) && "exec-maven-plugin".equals(p.getArtifactId()));
+        pluginManagement.getPlugins().removeIf(p -> is(p, "org.codehaus.mojo", "exec-maven-plugin"));
         final Plugin plugin = new Plugin();
         plugin.setGroupId("org.codehaus.mojo");
         plugin.setArtifactId("exec-maven-plugin");
@@ -131,7 +133,7 @@ public class ProjectPrerequisites {
         final Xpp3Dom manifest = new Xpp3Dom("manifest");
         archive.addChild(manifest);
         addChild(manifest, "addClasspath", "true");
-        if (hasHmiDependency(model)) {
+        if (model.getDependencies().stream().anyMatch(d -> is(d, "org.marid", "marid-hmi"))) {
             addChild(manifest, "mainClass", "org.marid.hmi.HmiLauncher");
         } else {
             addChild(manifest, "mainClass", "org.marid.runtime.MaridLauncher");
@@ -186,13 +188,11 @@ public class ProjectPrerequisites {
     void applyRuntimeDependency() {
         final List<Dependency> dependencies = model.getDependencies();
         final Dependency runtimeDependency = dependencies.stream()
-                .filter(d -> "org.marid".equals(d.getGroupId()))
-                .filter(d -> "marid-runtime".equals(d.getArtifactId()))
+                .filter(d -> is(d, "org.marid", "marid-runtime"))
                 .findFirst()
                 .orElse(null);
         final Dependency hmiDependency = dependencies.stream()
-                .filter(d -> "org.marid".equals(d.getGroupId()))
-                .filter(d -> "marid-hmi".equals(d.getArtifactId()))
+                .filter(d -> is(d, "org.marid", "marid-hmi"))
                 .findFirst()
                 .orElse(null);
         final Dependency dependency;
@@ -219,9 +219,11 @@ public class ProjectPrerequisites {
         parent.addChild(node);
     }
 
-    public static boolean hasHmiDependency(Model model) {
-        final Predicate<Dependency> groupMatch = d -> "org.marid".equals(d.getGroupId());
-        final Predicate<Dependency> artifactMatch = d -> "marid-hmi".equals(d.getArtifactId());
-        return model.getDependencies().stream().anyMatch(groupMatch.and(artifactMatch));
+    public static boolean is(Dependency dependency, String groupId, String artifactId) {
+        return groupId.equals(dependency.getGroupId()) && artifactId.equals(dependency.getArtifactId());
+    }
+
+    public static boolean is(Plugin plugin, String groupId, String artifactId) {
+        return groupId.equals(plugin.getGroupId()) && artifactId.equals(plugin.getArtifactId());
     }
 }
