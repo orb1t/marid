@@ -55,6 +55,6 @@ public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
     }
 
     public boolean isEmpty() {
-        return ref.isEmpty().get() || value.isEmpty().get();
+        return ref.isEmpty().get() && value.isEmpty().get();
     }
 }

@@ -358,7 +358,7 @@
 
                 <plugin>
                     <artifactId>maven-scm-plugin</artifactId>
-                    <version>1.9.4</version>
+                    <version>1.9.5</version>
                 </plugin>
 
                 <plugin>
@@ -400,7 +400,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.10</version>
+                    <version>1.11</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -427,15 +427,6 @@
                     <includes>*.zip,*.tar.gz,*.tar.bz2</includes>
                     <url>sftp://frs.sf.net</url>
                     <toDir>/home/frs/project/marid/${project.version}</toDir>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>2.2</version>
-                <configuration>
-                    <autoLinkItems>true</autoLinkItems>
                 </configuration>
             </plugin>
         </plugins>
