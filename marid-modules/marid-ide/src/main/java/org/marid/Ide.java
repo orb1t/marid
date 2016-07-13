@@ -35,7 +35,6 @@ import org.marid.preloader.IdePreloaderLogHandler;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.util.Locale;
 import java.util.logging.Level;
@@ -68,7 +67,6 @@ public class Ide extends Application {
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
         context.setClassLoader(Thread.currentThread().getContextClassLoader());
-        context.setResourceLoader(new PathMatchingResourcePatternResolver(context.getClassLoader()));
         context.register(IdeContext.class);
         context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
         context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
