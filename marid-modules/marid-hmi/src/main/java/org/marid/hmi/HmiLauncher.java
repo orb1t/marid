@@ -20,15 +20,13 @@ package org.marid.hmi;
 
 import javafx.application.Application;
 import org.jboss.logmanager.LogManager;
-import org.marid.runtime.MaridStarter;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class HmiLauncher implements MaridStarter {
+public class HmiLauncher {
 
-    @Override
-    public void start(String... args) throws Exception {
+    public static void main(String... args) throws Exception {
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
         Application.launch(HmiApplication.class, args);
     }

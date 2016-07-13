@@ -18,7 +18,6 @@
 
 package org.marid.ide.project;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.*;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.marid.ide.settings.MavenSettings;
@@ -27,7 +26,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Properties;
-import java.util.UUID;
+import java.util.function.Predicate;
 
 import static java.util.Collections.singletonList;
 
@@ -54,8 +53,8 @@ public class ProjectPrerequisites {
         applyProperties();
         applyBuild();
         applyPluginManagement();
-        applyPlugins();
         applyRuntimeDependency();
+        applyPlugins();
     }
 
     void applyPrerequisites() {
@@ -132,7 +131,11 @@ public class ProjectPrerequisites {
         final Xpp3Dom manifest = new Xpp3Dom("manifest");
         archive.addChild(manifest);
         addChild(manifest, "addClasspath", "true");
-        addChild(manifest, "mainClass", "org.marid.runtime.Marid");
+        if (hasHmiDependency(model)) {
+            addChild(manifest, "mainClass", "org.marid.hmi.HmiLauncher");
+        } else {
+            addChild(manifest, "mainClass", "org.marid.runtime.MaridLauncher");
+        }
         addChild(manifest, "classpathPrefix", "lib");
         final Xpp3Dom manifestEntries = new Xpp3Dom("manifestEntries");
         archive.addChild(manifestEntries);
@@ -214,5 +217,11 @@ public class ProjectPrerequisites {
             node.setValue(value);
         }
         parent.addChild(node);
+    }
+
+    public static boolean hasHmiDependency(Model model) {
+        final Predicate<Dependency> groupMatch = d -> "org.marid".equals(d.getGroupId());
+        final Predicate<Dependency> artifactMatch = d -> "marid-hmi".equals(d.getArtifactId());
+        return model.getDependencies().stream().anyMatch(groupMatch.and(artifactMatch));
     }
 }

@@ -29,10 +29,9 @@ import static org.marid.runtime.MaridContextInitializer.applicationContext;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridLauncher implements MaridStarter {
+public class MaridLauncher {
 
-    @Override
-    public void start(String... args) throws Exception {
+    public static void main(String... args) throws Exception {
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
         final GenericApplicationContext context = applicationContext(currentThread().getContextClassLoader());
         context.getEnvironment().getPropertySources().addFirst(new SimpleCommandLinePropertySource(args));
@@ -51,7 +50,7 @@ public class MaridLauncher implements MaridStarter {
         try {
             context.refresh();
             context.start();
-            MaridConsoleExitHandler.handle(() -> context.close());
+            MaridConsoleExitHandler.handle(context::close);
         } catch (Exception x) {
             x.printStackTrace();
             System.exit(3);
