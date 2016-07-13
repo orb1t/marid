@@ -28,10 +28,7 @@ import javafx.stage.StageStyle;
 import org.marid.dependant.beaneditor.BeanEditorTable;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
-import org.marid.l10n.L10n;
 import org.marid.spring.xml.data.BeanData;
-import org.marid.spring.xml.data.ConstructorArg;
-import org.marid.spring.xml.data.Property;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -42,6 +39,7 @@ import org.springframework.context.event.ContextStartedEvent;
 import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
 import static org.marid.jfx.ScrollPanes.scrollPane;
 import static org.marid.jfx.icons.FontIcon.M_REFRESH;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -57,21 +55,10 @@ public class BeanDataEditorConfiguration {
     }
 
     @Bean
-    public RefValuesEditor<ConstructorArg> constructorArgEditor(BeanData beanData) {
-        return new RefValuesEditor<>(beanData.constructorArgs);
-    }
-
-    @Bean
-    public RefValuesEditor<Property> propertyEditor(BeanData beanData) {
-        return new RefValuesEditor<>(beanData.properties);
-    }
-
-    @Bean
-    public TabPane tabPane(RefValuesEditor<ConstructorArg> constructorArgEditor,
-                           RefValuesEditor<Property> propertyEditor) {
+    public TabPane tabPane(RefValuesEditorProvider provider, BeanData beanData) {
         final TabPane tabPane = new TabPane(
-                new Tab(L10n.s("Constructor arguments"), scrollPane(constructorArgEditor)),
-                new Tab(L10n.s("Properties"), scrollPane(propertyEditor))
+                new Tab(s("Constructor arguments"), scrollPane(provider.newEditor(beanData.constructorArgs))),
+                new Tab(s("Properties"), scrollPane(provider.newEditor(beanData.properties)))
         );
         tabPane.setTabClosingPolicy(UNAVAILABLE);
         return tabPane;
@@ -96,7 +83,7 @@ public class BeanDataEditorConfiguration {
     public Stage simpleBeanConfigurerStage(IdePane idePane, Scene simpleBeanConfigurerScene) {
         final Stage stage = new Stage(StageStyle.UTILITY);
         stage.initOwner(idePane.getScene().getWindow());
-        stage.setTitle(L10n.s("Bean editor"));
+        stage.setTitle(s("Bean editor"));
         stage.setScene(simpleBeanConfigurerScene);
         return stage;
     }

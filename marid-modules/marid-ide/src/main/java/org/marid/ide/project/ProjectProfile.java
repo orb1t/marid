@@ -41,6 +41,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -183,6 +184,10 @@ public class ProjectProfile implements LogSupport {
     @Override
     public Logger logger() {
         return logger;
+    }
+
+    public Optional<Class<?>> getClass(String type) {
+        return cacheEntry.getClass(type);
     }
 
     private void createFileStructure() {
