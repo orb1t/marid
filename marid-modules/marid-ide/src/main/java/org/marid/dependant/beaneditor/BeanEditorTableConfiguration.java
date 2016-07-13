@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map.Entry;
 
 import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
@@ -85,14 +86,14 @@ public class BeanEditorTableConfiguration {
 
     @Bean
     @Scope(SCOPE_PROTOTYPE)
-    public Dialog<Entry<String, BeanDefinition>> beanBrowser(IdePane idePane, BeanBrowserTable beans) {
-        final Dialog<Entry<String, BeanDefinition>> dialog = new Dialog<>();
+    public Dialog<List<Entry<String, BeanDefinition>>> beanBrowser(IdePane idePane, BeanBrowserTable beans) {
+        final Dialog<List<Entry<String, BeanDefinition>>> dialog = new Dialog<>();
         dialog.initModality(Modality.WINDOW_MODAL);
         dialog.initOwner(idePane.getScene().getWindow());
         dialog.getDialogPane().setPrefSize(1024, 768);
         dialog.setTitle(s("Bean browser"));
         dialog.setResizable(true);
-        dialog.setResultConverter(param -> param.getButtonData() == OK_DONE ? beans.getSelectionModel().getSelectedItem() : null);
+        dialog.setResultConverter(p -> p.getButtonData() == OK_DONE ? beans.getSelectionModel().getSelectedItems() : null);
         dialog.getDialogPane().getButtonTypes().addAll(new ButtonType(s("Add"), OK_DONE), ButtonType.CANCEL);
         dialog.getDialogPane().setContent(ScrollPanes.scrollPane(beans));
         return dialog;

@@ -44,7 +44,8 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.util.Map;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,7 +58,7 @@ public class BeanEditorActions {
 
     private final BeanEditorTable table;
     private final ProjectCacheManager cacheManager;
-    private final ObjectProvider<Dialog<Map.Entry<String, BeanDefinition>>> beanBrowser;
+    private final ObjectProvider<Dialog<List<Entry<String, BeanDefinition>>>> beanBrowser;
     private final IdeDependants dependants;
     private final ProjectProfile profile;
 
@@ -67,7 +68,7 @@ public class BeanEditorActions {
     @Autowired
     public BeanEditorActions(BeanEditorTable table,
                              ProjectCacheManager cacheManager,
-                             ObjectProvider<Dialog<Map.Entry<String, BeanDefinition>>> beanBrowser,
+                             ObjectProvider<Dialog<List<Entry<String, BeanDefinition>>>> beanBrowser,
                              IdeDependants dependants,
                              ProjectProfile profile) {
         this.table = table;
@@ -93,49 +94,55 @@ public class BeanEditorActions {
     }
 
     public void onBrowse(ActionEvent event) {
-        final Optional<Map.Entry<String, BeanDefinition>> entry = beanBrowser.getObject().showAndWait();
+        final Optional<List<Entry<String, BeanDefinition>>> entry = beanBrowser.getObject().showAndWait();
         if (entry.isPresent()) {
-            final BeanData beanData = new BeanData();
-            final BeanDefinition def = entry.get().getValue();
-            beanData.name.set(cacheManager.generateBeanName(profile, entry.get().getKey()));
-            beanData.factoryBean.set(def.getFactoryBeanName());
-            beanData.factoryMethod.set(def.getFactoryMethodName());
-            beanData.type.set(def.getBeanClassName());
-            beanData.lazyInit.set(def.isLazyInit() ? "true" : null);
-
-            if (entry.get().getValue() instanceof AbstractBeanDefinition) {
-                final AbstractBeanDefinition definition = (AbstractBeanDefinition) entry.get().getValue();
-                beanData.initMethod.set(definition.getInitMethodName());
-                beanData.destroyMethod.set(definition.getDestroyMethodName());
-            }
-
-            if (def.getConstructorArgumentValues() != null) {
-                for (final ConstructorArgumentValues.ValueHolder holder : def.getConstructorArgumentValues().getGenericArgumentValues()) {
-                    final ConstructorArg constructorArg = new ConstructorArg();
-                    constructorArg.name.set(holder.getName());
-                    constructorArg.type.set(holder.getType());
-                    if (holder.getValue() instanceof TypedStringValue) {
-                        final TypedStringValue typedStringValue = (TypedStringValue) holder.getValue();
-                        constructorArg.value.set(typedStringValue.getValue());
-                    }
-                    beanData.constructorArgs.add(constructorArg);
-                }
-            }
-
-            if (def.getPropertyValues() != null) {
-                for (final PropertyValue propertyValue : def.getPropertyValues().getPropertyValueList()) {
-                    final Property property = new Property();
-                    property.name.set(propertyValue.getName());
-                    if (propertyValue.getValue() instanceof TypedStringValue) {
-                        final TypedStringValue typedStringValue = (TypedStringValue) propertyValue.getValue();
-                        property.value.set(typedStringValue.getValue());
-                    }
-                    beanData.properties.add(property);
-                }
-            }
-
-            table.getItems().add(beanData);
+            entry.get().forEach(this::insertItem);
         }
+    }
+
+    private void insertItem(Entry<String, BeanDefinition> entry) {
+        final BeanDefinition def = entry.getValue();
+        final BeanData beanData = new BeanData();
+        beanData.name.set(cacheManager.generateBeanName(profile, entry.getKey()));
+        beanData.factoryBean.set(def.getFactoryBeanName());
+        beanData.factoryMethod.set(def.getFactoryMethodName());
+        beanData.type.set(def.getBeanClassName());
+        beanData.lazyInit.set(def.isLazyInit() ? "true" : null);
+
+        if (entry.getValue() instanceof AbstractBeanDefinition) {
+            final AbstractBeanDefinition definition = (AbstractBeanDefinition) entry.getValue();
+            beanData.initMethod.set(definition.getInitMethodName());
+            beanData.destroyMethod.set(definition.getDestroyMethodName());
+        }
+
+        if (def.getConstructorArgumentValues() != null) {
+            for (final ConstructorArgumentValues.ValueHolder holder : def.getConstructorArgumentValues().getGenericArgumentValues()) {
+                final ConstructorArg constructorArg = new ConstructorArg();
+                constructorArg.name.set(holder.getName());
+                constructorArg.type.set(holder.getType());
+                if (holder.getValue() instanceof TypedStringValue) {
+                    final TypedStringValue typedStringValue = (TypedStringValue) holder.getValue();
+                    constructorArg.value.set(typedStringValue.getValue());
+                }
+                beanData.constructorArgs.add(constructorArg);
+            }
+        }
+
+        if (def.getPropertyValues() != null) {
+            for (final PropertyValue propertyValue : def.getPropertyValues().getPropertyValueList()) {
+                final Property property = new Property();
+                property.name.set(propertyValue.getName());
+                if (propertyValue.getValue() instanceof TypedStringValue) {
+                    final TypedStringValue typedStringValue = (TypedStringValue) propertyValue.getValue();
+                    property.value.set(typedStringValue.getValue());
+                }
+                beanData.properties.add(property);
+            }
+        }
+
+        cacheManager.updateBeanData(profile, beanData);
+
+        table.getItems().add(beanData);
     }
 
     public void onShowPopup(ActionEvent event) {

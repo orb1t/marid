@@ -20,6 +20,7 @@ package org.marid.dependant.beaneditor;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.marid.spring.annotation.OrderedInit;
@@ -48,6 +49,7 @@ public class BeanBrowserTable extends TableView<Map.Entry<String, BeanDefinition
         setEditable(false);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
+        getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
     @OrderedInit(1)
