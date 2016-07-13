@@ -89,29 +89,44 @@ public class MaridBeanDefinitionSaver {
                 final Element beanElement = document.createElement("bean");
                 beans.appendChild(beanElement);
                 setAttr(beanData.name, beanElement);
-                setAttr(beanData.type, beanElement);
                 setAttr(beanData.destroyMethod, beanElement);
                 setAttr(beanData.initMethod, beanElement);
-                setAttr(beanData.factoryBean, beanElement);
-                setAttr(beanData.factoryMethod, beanElement);
+                if (beanData.isFactoryBean()) {
+                    setAttr(beanData.factoryBean, beanElement);
+                    setAttr(beanData.factoryMethod, beanElement);
+                } else {
+                    setAttr(beanData.type, beanElement);
+                }
                 setAttr(beanData.lazyInit, beanElement);
 
                 for (final ConstructorArg constructorArg : beanData.constructorArgs) {
+                    if (constructorArg.isEmpty()) {
+                        continue;
+                    }
                     final Element element = document.createElement("constructor-arg");
                     beanElement.appendChild(element);
                     setAttr(constructorArg.name, element);
-                    setAttr(constructorArg.ref, element);
+                    if (constructorArg.ref.isNotEmpty().get()) {
+                        setAttr(constructorArg.ref, element);
+                    } else {
+                        setAttr(constructorArg.value, element);
+                    }
                     setAttr(constructorArg.type, element);
-                    setAttr(constructorArg.value, element);
                 }
 
                 for (final Property property : beanData.properties) {
+                    if (property.isEmpty()) {
+                        continue;
+                    }
                     final Element element = document.createElement("property");
                     beanElement.appendChild(element);
                     setAttr(property.name, element);
-                    setAttr(property.ref, element);
+                    if (property.ref.isNotEmpty().get()) {
+                        setAttr(property.ref, element);
+                    } else {
+                        setAttr(property.value, element);
+                    }
                     setAttr(property.type, element);
-                    setAttr(property.value, element);
                 }
             }
         }

@@ -27,8 +27,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.marid.dependant.beaneditor.BeanEditorTable;
 import org.marid.ide.panes.main.IdePane;
-import org.marid.ide.project.ProjectCacheManager;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.l10n.L10n;
 import org.marid.spring.xml.data.BeanData;
@@ -38,6 +36,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.ContextStartedEvent;
 
 import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
@@ -52,10 +51,9 @@ import static org.marid.jfx.icons.FontIcon.M_REFRESH;
 public class BeanDataEditorConfiguration {
 
     @Bean
-    public BeanData beanData(BeanEditorTable beanEditorTable, ProjectCacheManager projectCacheManager, ProjectProfile profile) {
-        final BeanData beanData = beanEditorTable.getSelectionModel().getSelectedItem();
-        projectCacheManager.updateBeanData(profile, beanData);
-        return beanData;
+    @Lazy
+    public BeanData beanData(BeanEditorTable beanEditorTable) {
+        return beanEditorTable.getSelectionModel().getSelectedItem();
     }
 
     @Bean

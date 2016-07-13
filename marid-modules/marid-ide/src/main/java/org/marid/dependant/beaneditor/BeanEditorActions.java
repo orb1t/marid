@@ -39,6 +39,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.stereotype.Component;
 
@@ -113,7 +114,10 @@ public class BeanEditorActions {
                     final ConstructorArg constructorArg = new ConstructorArg();
                     constructorArg.name.set(holder.getName());
                     constructorArg.type.set(holder.getType());
-                    constructorArg.value.set(holder.getValue() == null ? null : holder.getValue().toString());
+                    if (holder.getValue() instanceof TypedStringValue) {
+                        final TypedStringValue typedStringValue = (TypedStringValue) holder.getValue();
+                        constructorArg.value.set(typedStringValue.getValue());
+                    }
                     beanData.constructorArgs.add(constructorArg);
                 }
             }
@@ -122,12 +126,13 @@ public class BeanEditorActions {
                 for (final PropertyValue propertyValue : def.getPropertyValues().getPropertyValueList()) {
                     final Property property = new Property();
                     property.name.set(propertyValue.getName());
-                    property.value.set(propertyValue.getValue() == null ? null : propertyValue.getValue().toString());
+                    if (propertyValue.getValue() instanceof TypedStringValue) {
+                        final TypedStringValue typedStringValue = (TypedStringValue) propertyValue.getValue();
+                        property.value.set(typedStringValue.getValue());
+                    }
                     beanData.properties.add(property);
                 }
             }
-
-            cacheManager.updateBeanData(profile, beanData);
 
             table.getItems().add(beanData);
         }

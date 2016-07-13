@@ -53,4 +53,8 @@ public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
         type.set(stripToNull(in.readUTF()));
         value.set(stripToNull(in.readObject().toString()));
     }
+
+    public boolean isEmpty() {
+        return ref.isEmpty().get() || value.isEmpty().get();
+    }
 }
