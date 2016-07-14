@@ -23,14 +23,13 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.event.ActionEvent;
 import javafx.geometry.Side;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import org.marid.IdeDependants;
 import org.marid.dependant.beandata.BeanDataEditorConfiguration;
 import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.spring.beandata.BeanEditor;
+import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.ConstructorArg;
 import org.marid.spring.xml.data.Property;
@@ -41,14 +40,17 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.util.List;
+import java.net.URLClassLoader;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.joining;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -56,6 +58,7 @@ import java.util.stream.Stream;
 @Component
 public class BeanEditorActions {
 
+    private final AnnotationConfigApplicationContext context;
     private final BeanEditorTable table;
     private final ProjectCacheManager cacheManager;
     private final ObjectProvider<Dialog<List<Entry<String, BeanDefinition>>>> beanBrowser;
@@ -66,11 +69,13 @@ public class BeanEditorActions {
     public final BooleanBinding clearDisabled;
 
     @Autowired
-    public BeanEditorActions(BeanEditorTable table,
+    public BeanEditorActions(AnnotationConfigApplicationContext context,
+                             BeanEditorTable table,
                              ProjectCacheManager cacheManager,
                              ObjectProvider<Dialog<List<Entry<String, BeanDefinition>>>> beanBrowser,
                              IdeDependants dependants,
                              ProjectProfile profile) {
+        this.context = context;
         this.table = table;
         this.cacheManager = cacheManager;
         this.beanBrowser = beanBrowser;
@@ -151,30 +156,73 @@ public class BeanEditorActions {
         contextMenu(table.getSelectionModel().getSelectedItem()).show(node, side, 5, 5);
     }
 
-    public ContextMenu contextMenu(BeanData beanData) {
-        final ContextMenu contextMenu = new ContextMenu();
-        final Class<?> type = cacheManager.getBeanClass(profile, beanData).orElse(null);
+    private List<MenuItem> factoryItems(Class<?> type, BeanData beanData) {
+        final List<MenuItem> items = new ArrayList<>();
+        for (final Method method : type.getMethods()) {
+            if (method.getReturnType() == void.class || method.getDeclaringClass() == Object.class) {
+                continue;
+            }
+            final String name = Stream.of(method.getParameters())
+                    .map(p -> p.getParameterizedType().toString())
+                    .collect(joining(",", method.getName() + "(", ") : " + method.getGenericReturnType()));
+            final MenuItem menuItem = new MenuItem(name);
+            menuItem.setOnAction(ev -> {
+                final BeanData newBeanData = new BeanData();
+                newBeanData.name.set(cacheManager.generateBeanName(profile, method.getName()));
+                newBeanData.factoryBean.set(beanData.name.get());
+                newBeanData.factoryMethod.set(method.getName());
+                cacheManager.updateBeanData(profile, newBeanData);
+                table.getItems().add(newBeanData);
+            });
+            items.add(menuItem);
+        }
+        return items;
+    }
 
-        if (type != null) {
-            for (final Method method : type.getMethods()) {
-                if (method.getReturnType() == void.class || method.getDeclaringClass() == Object.class) {
-                    continue;
+    private List<MenuItem> editors(Class<?> type, BeanData beanData) {
+        final List<MenuItem> items = new ArrayList<>();
+        final URLClassLoader classLoader = cacheManager.getClassLoader(profile);
+        for (final BeanEditor editor : ServiceLoader.load(BeanEditor.class, classLoader)) {
+            for (final Class<?> e : editor.getBeanTypes()) {
+                if (e == type || (e.isInterface() || e.getConstructors().length == 0) && e.isAssignableFrom(type)) {
+                    final MenuItem menuItem = new MenuItem(s(editor.getName()));
+                    menuItem.setOnAction(event -> {
+                        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+                        context.setClassLoader(classLoader);
+                        context.setAllowCircularReferences(false);
+                        context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
+                        context.setDisplayName(editor.getName());
+                        context.register((Class[]) editor.getConfigurations());
+                        context.setParent(BeanEditorActions.this.context);
+                        context.getBeanFactory().registerSingleton("beanData", beanData);
+                        context.refresh();
+                        context.start();
+                    });
+                    items.add(menuItem);
                 }
-                final String name = Stream.of(method.getParameters())
-                        .map(p -> p.getParameterizedType().toString())
-                        .collect(Collectors.joining(",", method.getName() + "(", ") : " + method.getGenericReturnType()));
-                final MenuItem menuItem = new MenuItem(name);
-                menuItem.setOnAction(ev -> {
-                    final BeanData newBeanData = new BeanData();
-                    newBeanData.name.set(cacheManager.generateBeanName(profile, method.getName()));
-                    newBeanData.factoryBean.set(beanData.name.get());
-                    newBeanData.factoryMethod.set(method.getName());
-                    cacheManager.updateBeanData(profile, newBeanData);
-                    table.getItems().add(newBeanData);
-                });
-                contextMenu.getItems().add(menuItem);
             }
         }
-        return contextMenu;
+        return items;
+    }
+
+    public ContextMenu contextMenu(BeanData beanData) {
+        final ContextMenu menu = new ContextMenu();
+        final List<List<MenuItem>> menuItems = new ArrayList<>();
+        final Class<?> type = cacheManager.getBeanClass(profile, beanData).orElse(null);
+        if (type == null) {
+            return menu;
+        }
+
+        menuItems.add(factoryItems(type, beanData));
+        menuItems.add(editors(type, beanData));
+
+        menuItems.removeIf(List::isEmpty);
+        for (final ListIterator<List<MenuItem>> i = menuItems.listIterator(); i.hasNext(); ) {
+            if (i.hasPrevious()) {
+                menu.getItems().add(new SeparatorMenuItem());
+            }
+            menu.getItems().addAll(i.next());
+        }
+        return menu;
     }
 }

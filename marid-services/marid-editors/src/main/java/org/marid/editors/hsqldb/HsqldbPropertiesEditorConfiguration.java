@@ -16,21 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.beandata;
+package org.marid.editors.hsqldb;
 
-import org.marid.ide.project.ProjectProfile;
-import org.marid.spring.xml.data.BeanData;
-
-import java.util.Set;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public interface BeanDataEditor {
-
-    void edit(BeanData beanData, ProjectProfile profile);
-
-    Set<String> getEditableTypes();
-
-    String getIcon();
+@Configuration
+public class HsqldbPropertiesEditorConfiguration {
 }
