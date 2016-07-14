@@ -20,6 +20,7 @@ package org.marid.preloader;
 
 import com.sun.javafx.application.LauncherImpl;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.application.Preloader;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -34,16 +35,22 @@ import javafx.scene.effect.Lighting;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.marid.Ide;
 import org.marid.IdePrefs;
 import org.marid.jfx.FxMaridIcon;
 import org.marid.l10n.L10n;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
+import static org.marid.l10n.L10n.m;
 import static org.marid.logging.LogSupport.Log.log;
 
 /**
@@ -51,12 +58,16 @@ import static org.marid.logging.LogSupport.Log.log;
  */
 public class IdePreloader extends Preloader {
 
+    private final IdePreloaderLogHandler logHandler;
     private final TextFlow log = new TextFlow();
     private final ScrollPane logScrollPane = new ScrollPane(log);
     private final ProgressBar progressBar = new ProgressBar();
+    private final AtomicInteger counter = new AtomicInteger();
+    private final int maxPreloaderMessages = IdePrefs.PREFERENCES.getInt("maxPreloaderMessages", 100);
     private Stage primaryStage;
 
     public IdePreloader() {
+        logHandler = new IdePreloaderLogHandler(this);
         logScrollPane.setFitToHeight(true);
         logScrollPane.setFitToWidth(true);
         logScrollPane.setFocusTraversable(false);
@@ -120,26 +131,49 @@ public class IdePreloader extends Preloader {
         return gridPane;
     }
 
+    private void publishTextsSync(List<Text> texts) {
+        log.getChildren().addAll(texts);
+        final int count = counter.addAndGet(texts.size());
+        final double progress = count / (double) maxPreloaderMessages;
+        progressBar.setProgress(progress);
+        logScrollPane.setVvalue(1.0);
+    }
+
+    private void publishText(Text text) {
+        publishTextsSync(Collections.singletonList(text));
+    }
+
+    public void publishTexts(List<Text> texts) {
+        Platform.runLater(() -> publishTextsSync(texts));
+    }
+
     @Override
-    public void handleApplicationNotification(PreloaderNotification info) {
-        if (info instanceof LogNotification) {
-            final LogNotification logNotification = (LogNotification) info;
-            log.getChildren().addAll(logNotification.texts);
-            logScrollPane.setVvalue(1.0);
-        } else if (info instanceof CloseNotification) {
-            primaryStage.close();
-            try {
-                Field field = LauncherImpl.class.getDeclaredField("currentPreloader");
-                field.setAccessible(true);
-                field.set(null, null);
-                field = LauncherImpl.class.getDeclaredField("savedPreloaderClass");
-                field.setAccessible(true);
-                field.set(null, null);
-                log(Level.INFO, "Preloader closed and cleaned");
-            } catch (Exception x) {
-                log(Level.WARNING, "Unable to null the Preloader", x);
-                log(Level.INFO, "Preloader closed");
-            }
+    public void handleStateChangeNotification(StateChangeNotification info) {
+        switch (info.getType()) {
+            case BEFORE_INIT:
+                Ide.rootLogger.addHandler(logHandler);
+                publishText(new Text(m("Loader initialized") + System.lineSeparator()));
+                break;
+            case BEFORE_LOAD:
+                publishText(new Text(m("Loading application...") + System.lineSeparator()));
+                break;
+            case BEFORE_START:
+                publishText(new Text(m("Starting application...") + System.lineSeparator()));
+                logHandler.close();
+                primaryStage.close();
+                try {
+                    Field field = LauncherImpl.class.getDeclaredField("currentPreloader");
+                    field.setAccessible(true);
+                    field.set(null, null);
+                    field = LauncherImpl.class.getDeclaredField("savedPreloaderClass");
+                    field.setAccessible(true);
+                    field.set(null, null);
+                    log(Level.INFO, "Preloader closed and cleaned");
+                } catch (Exception x) {
+                    log(Level.WARNING, "Unable to null the Preloader", x);
+                    log(Level.INFO, "Preloader closed");
+                }
+                break;
         }
     }
 

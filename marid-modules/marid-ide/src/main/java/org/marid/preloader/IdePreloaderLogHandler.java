@@ -19,7 +19,6 @@
 package org.marid.preloader;
 
 import javafx.scene.text.Text;
-import org.marid.Ide;
 import org.marid.concurrent.MaridTimerTask;
 
 import java.util.ArrayList;
@@ -37,12 +36,12 @@ import static org.marid.l10n.L10n.m;
  */
 public class IdePreloaderLogHandler extends Handler {
 
-    public static final IdePreloaderLogHandler IDE_PRELOADER_LOG_HANDLER = new IdePreloaderLogHandler();
-
+    private final IdePreloader preloader;
     private final ConcurrentLinkedQueue<LogRecord> queue = new ConcurrentLinkedQueue<>();
     private final Timer timer = new Timer();
 
-    private IdePreloaderLogHandler() {
+    IdePreloaderLogHandler(IdePreloader preloader) {
+        this.preloader = preloader;
         timer.schedule(new MaridTimerTask(task -> flush()), 100L, 30L);
     }
 
@@ -74,7 +73,7 @@ public class IdePreloaderLogHandler extends Handler {
             }
         }
         if (!texts.isEmpty()) {
-            Ide.ide.notifyPreloader(new LogNotification(texts));
+            preloader.publishTexts(texts);
         }
     }
 

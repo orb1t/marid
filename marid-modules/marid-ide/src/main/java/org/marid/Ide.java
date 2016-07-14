@@ -28,9 +28,7 @@ import org.marid.ide.logging.IdeConsoleLogHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.io.UrlConnection;
-import org.marid.preloader.CloseNotification;
 import org.marid.preloader.IdePreloader;
-import org.marid.preloader.IdePreloaderLogHandler;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -56,16 +54,14 @@ public class Ide extends Application {
 
     public static Stage primaryStage;
     public static Ide ide;
+    public static Logger rootLogger;
 
-    static Logger rootLogger;
     static IdeLogHandler ideLogHandler;
-    static IdeConsoleLogHandler ideConsoleLogHandler;
 
     @Override
     public void init() throws Exception {
         Ide.ide = this;
         rootLogger.addHandler(ideLogHandler = new IdeLogHandler());
-        rootLogger.addHandler(IdePreloaderLogHandler.IDE_PRELOADER_LOG_HANDLER);
         context.setDisplayName(Ide.class.getName());
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
@@ -89,26 +85,18 @@ public class Ide extends Application {
         primaryStage.getIcons().addAll(of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new));
         primaryStage.setMaximized(true);
         primaryStage.show();
-        closePreloader();
     }
 
     @Override
     public void stop() throws Exception {
-        closePreloader();
         context.close();
-    }
-
-    private void closePreloader() {
-        rootLogger.removeHandler(IdePreloaderLogHandler.IDE_PRELOADER_LOG_HANDLER);
-        IdePreloaderLogHandler.IDE_PRELOADER_LOG_HANDLER.close();
-        notifyPreloader(new CloseNotification());
     }
 
     public static void main(String... args) throws Exception {
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
         rootLogger = Logger.getLogger("");
         rootLogger.setLevel(Level.parse(IdePrefs.PREFERENCES.get("logLevel", Level.INFO.getName())));
-        rootLogger.addHandler(ideConsoleLogHandler = new IdeConsoleLogHandler());
+        rootLogger.addHandler(new IdeConsoleLogHandler());
         for (final String resource : new String[] {"meta.properties", "ide.properties"}) {
             final Enumeration<URL> e = currentThread().getContextClassLoader().getResources(resource);
             while (e.hasMoreElements()) {
