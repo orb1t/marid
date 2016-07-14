@@ -28,6 +28,8 @@ import org.marid.IdeDependants;
 import org.marid.dependant.beandata.BeanDataEditorConfiguration;
 import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.icons.FontIcon;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.beandata.BeanEditor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.marid.spring.xml.data.BeanData;
@@ -165,7 +167,7 @@ public class BeanEditorActions {
             final String name = Stream.of(method.getParameters())
                     .map(p -> p.getParameterizedType().toString())
                     .collect(joining(",", method.getName() + "(", ") : " + method.getGenericReturnType()));
-            final MenuItem menuItem = new MenuItem(name);
+            final MenuItem menuItem = new MenuItem(name, FontIcons.glyphIcon(FontIcon.M_MEMORY, 16));
             menuItem.setOnAction(ev -> {
                 final BeanData newBeanData = new BeanData();
                 newBeanData.name.set(cacheManager.generateBeanName(profile, method.getName()));
