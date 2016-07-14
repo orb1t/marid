@@ -28,7 +28,6 @@ import org.marid.ide.logging.IdeConsoleLogHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.io.UrlConnection;
-import org.marid.misc.Props;
 import org.marid.preloader.CloseNotification;
 import org.marid.preloader.IdePreloader;
 import org.marid.preloader.IdePreloaderLogHandler;
@@ -36,10 +35,14 @@ import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static java.lang.Thread.currentThread;
 import static java.util.stream.IntStream.of;
 import static javafx.scene.paint.Color.GREEN;
 import static org.marid.jfx.FxMaridIcon.maridIcon;
@@ -106,7 +109,14 @@ public class Ide extends Application {
         rootLogger = Logger.getLogger("");
         rootLogger.setLevel(Level.parse(IdePrefs.PREFERENCES.get("logLevel", Level.INFO.getName())));
         rootLogger.addHandler(ideConsoleLogHandler = new IdeConsoleLogHandler());
-        Props.merge(System.getProperties(), "meta.properties", "ide.properties");
+        for (final String resource : new String[] {"meta.properties", "ide.properties"}) {
+            final Enumeration<URL> e = currentThread().getContextClassLoader().getResources(resource);
+            while (e.hasMoreElements()) {
+                try (final InputStream inputStream = e.nextElement().openStream()) {
+                    System.getProperties().load(inputStream);
+                }
+            }
+        }
         final String localeString = IdePrefs.PREFERENCES.get("locale", "");
         if (!localeString.isEmpty()) {
             Locale.setDefault(Locale.forLanguageTag(localeString));

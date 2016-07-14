@@ -44,8 +44,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static java.lang.String.format;
-
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -122,12 +120,14 @@ public class ProjectRunnerPane extends BorderPane implements LogSupport {
         args.add(javaSettings.getJavaExecutable());
         Collections.addAll(args, javaSettings.getJavaArguments());
         if (debugSettings.isDebug()) {
-            final char suspend = debugSettings.isSuspend() ? 'y' : 'n';
-            final int port = debugSettings.getPort();
-            args.add(format("-Xrunjdwp:transport=dt_socket,server=y,suspend=%s,address=%d", suspend, port));
+            args.add(String.format("-Xrunjdwp:transport=dt_socket,server=y,suspend=%s,address=%d,timeout=%d",
+                    debugSettings.isSuspend() ? 'y' : 'n',
+                    debugSettings.getPort(),
+                    30_000L
+            ));
         }
         args.add("-jar");
-        args.add(format("%s-%s.jar", profile.getModel().getArtifactId(), profile.getModel().getVersion()));
+        args.add(String.format("%s-%s.jar", profile.getModel().getArtifactId(), profile.getModel().getVersion()));
         final ProcessBuilder processBuilder = new ProcessBuilder(args).directory(profile.getTarget().toFile());
         Log.log(INFO, "Running {0} in {1}", String.join(" ", processBuilder.command()), processBuilder.directory());
         return processBuilder.start();
