@@ -73,7 +73,7 @@ public class ProjectRunnerPane extends BorderPane implements LogSupport {
                 new Tab(L10n.s("Error output"), errPane));
         tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
         tabPane.setFocusTraversable(false);
-        process = process(profile, javaSettings, debugSettings);
+        process = process(javaSettings, debugSettings);
         printStream = new PrintStream(process.getOutputStream(), true);
         processManager = new ProcessManager(profile.getName(), process, consumer(out), consumer(err));
         final Thread watchThread = new Thread(null, () -> {
@@ -113,9 +113,7 @@ public class ProjectRunnerPane extends BorderPane implements LogSupport {
         return listView;
     }
 
-    private static Process process(ProjectProfile profile,
-                                   JavaSettings javaSettings,
-                                   DebugSettings debugSettings) throws IOException {
+    private Process process(JavaSettings javaSettings, DebugSettings debugSettings) throws IOException {
         final List<String> args = new ArrayList<>();
         args.add(javaSettings.getJavaExecutable());
         Collections.addAll(args, javaSettings.getJavaArguments());
@@ -129,7 +127,7 @@ public class ProjectRunnerPane extends BorderPane implements LogSupport {
         args.add("-jar");
         args.add(String.format("%s-%s.jar", profile.getModel().getArtifactId(), profile.getModel().getVersion()));
         final ProcessBuilder processBuilder = new ProcessBuilder(args).directory(profile.getTarget().toFile());
-        Log.log(INFO, "Running {0} in {1}", String.join(" ", processBuilder.command()), processBuilder.directory());
+        log(INFO, "Running {0} in {1}", String.join(" ", processBuilder.command()), processBuilder.directory());
         return processBuilder.start();
     }
 
