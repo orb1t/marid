@@ -91,6 +91,8 @@ public class BeanEditorTable extends TableView<BeanData> {
         col.setCellValueFactory(param -> param.getValue().type);
         col.setPrefWidth(450);
         col.setMaxWidth(650);
+        col.setCellFactory(param -> new TextFieldTableCell<>(new DefaultStringConverter()));
+        col.setEditable(true);
         getColumns().add(col);
     }
 

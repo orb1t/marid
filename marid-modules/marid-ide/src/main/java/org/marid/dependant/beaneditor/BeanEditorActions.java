@@ -49,6 +49,8 @@ import java.lang.reflect.Method;
 import java.net.URLClassLoader;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -107,6 +109,14 @@ public class BeanEditorActions {
         }
     }
 
+    public void onAddNew(ActionEvent event) {
+        final BeanData beanData = new BeanData();
+        final String name = cacheManager.generateBeanName(profile, "newBean");
+        beanData.name.set(name);
+        beanData.type.set(Object.class.getName());
+        table.getItems().add(beanData);
+    }
+
     private void insertItem(Entry<String, BeanDefinition> entry) {
         final BeanDefinition def = entry.getValue();
         final BeanData beanData = new BeanData();
@@ -160,10 +170,27 @@ public class BeanEditorActions {
 
     private List<MenuItem> factoryItems(Class<?> type, BeanData beanData) {
         final List<MenuItem> items = new ArrayList<>();
-        for (final Method method : type.getMethods()) {
-            if (method.getReturnType() == void.class || method.getDeclaringClass() == Object.class) {
-                continue;
-            }
+        final Set<Method> getters = Stream.of(type.getMethods())
+                .filter(m -> m.getReturnType() != void.class)
+                .filter(m -> m.getDeclaringClass() != Object.class)
+                .filter(m -> m.getParameterCount() == 0)
+                .sorted(Comparator.comparing(Method::getName))
+                .filter(m -> m.getName().startsWith("get") || m.getName().startsWith("is"))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        final Set<Method> producers = Stream.of(type.getMethods())
+                .filter(m -> m.getReturnType() != void.class)
+                .filter(m -> m.getDeclaringClass() != Object.class)
+                .filter(m -> m.getParameterCount() == 0)
+                .filter(m -> !getters.contains(m))
+                .sorted(Comparator.comparing(Method::getName))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        final Set<Method> parameterizedProducers = Stream.of(type.getMethods())
+                .filter(m -> m.getReturnType() != void.class)
+                .filter(m -> m.getDeclaringClass() != Object.class)
+                .filter(m -> m.getParameterCount() > 0)
+                .sorted(Comparator.comparing(Method::getName))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        final Function<Method, MenuItem> menuItemFunction = method -> {
             final String name = Stream.of(method.getParameters())
                     .map(p -> p.getParameterizedType().toString())
                     .collect(joining(",", method.getName() + "(", ") : " + method.getGenericReturnType()));
@@ -176,8 +203,21 @@ public class BeanEditorActions {
                 cacheManager.updateBeanData(profile, newBeanData);
                 table.getItems().add(newBeanData);
             });
-            items.add(menuItem);
+            return menuItem;
+        };
+        if (!getters.isEmpty()) {
+            final Menu menu = new Menu(s("Getters"));
+            getters.forEach(method -> menu.getItems().add(menuItemFunction.apply(method)));
+            items.add(menu);
         }
+        if (!producers.isEmpty()) {
+            final Menu menu = new Menu(s("Producers"));
+            producers.forEach(method -> menu.getItems().add(menuItemFunction.apply(method)));
+            items.add(menu);
+        }
+        final Menu menu = new Menu(s("Parameterized producers"));
+        parameterizedProducers.forEach(method -> menu.getItems().add(menuItemFunction.apply(method)));
+        items.add(menu);
         return items;
     }
 
@@ -186,7 +226,7 @@ public class BeanEditorActions {
         final URLClassLoader classLoader = cacheManager.getClassLoader(profile);
         for (final BeanEditor editor : ServiceLoader.load(BeanEditor.class, classLoader)) {
             for (final Class<?> e : editor.getBeanTypes()) {
-                if (e == type || (e.isInterface() || e.getConstructors().length == 0) && e.isAssignableFrom(type)) {
+                if (e.isAssignableFrom(type)) {
                     final MenuItem menuItem = new MenuItem(s(editor.getName()));
                     menuItem.setOnAction(event -> {
                         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();

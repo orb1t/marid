@@ -26,6 +26,7 @@ import javafx.collections.ObservableList;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.stripToNull;
@@ -48,6 +49,18 @@ public class BeanData extends AbstractData<BeanData> {
 
     public boolean isFactoryBean() {
         return factoryBean.isNotEmpty().get() || factoryMethod.isNotEmpty().get();
+    }
+
+    public Optional<ConstructorArg> constructorArg(String name) {
+        return constructorArgs.stream()
+                .filter(a -> a.name.isEqualTo(name).get())
+                .findAny();
+    }
+
+    public Optional<Property> property(String name) {
+        return properties.stream()
+                .filter(p -> p.name.isEqualTo(name).get())
+                .findAny();
     }
 
     @Override

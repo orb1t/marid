@@ -28,11 +28,12 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.util.Builder;
 import org.marid.jfx.icons.FontIcons;
-import org.marid.l10n.L10n;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -44,7 +45,7 @@ public final class ToolbarBuilder implements Builder<ToolBar> {
     public ToolbarBuilder add(String tooltip, String icon, EventHandler<ActionEvent> eventHandler, Consumer<Button> buttonConsumer) {
         final Button button = new Button(null, FontIcons.glyphIcon(icon, 20));
         button.setFocusTraversable(false);
-        button.setTooltip(new Tooltip(L10n.s(tooltip)));
+        button.setTooltip(new Tooltip(s(tooltip)));
         button.setOnAction(eventHandler);
         buttonConsumer.accept(button);
         nodes.add(button);
@@ -54,7 +55,7 @@ public final class ToolbarBuilder implements Builder<ToolBar> {
     public ToolbarBuilder add(String tooltip, String icon, EventHandler<ActionEvent> eventHandler, BooleanBinding disabled) {
         final Button button = new Button(null, FontIcons.glyphIcon(icon, 20));
         button.setFocusTraversable(false);
-        button.setTooltip(new Tooltip(L10n.s(tooltip)));
+        button.setTooltip(new Tooltip(s(tooltip)));
         button.setOnAction(eventHandler);
         button.disableProperty().bind(disabled);
         nodes.add(button);

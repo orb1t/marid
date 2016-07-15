@@ -49,14 +49,15 @@ public class BeanEditorTableConfiguration {
     @Bean
     public ToolBar beanEditorToolbar(BeanEditorActions actions) {
         return new ToolbarBuilder()
-                .add(s("Edit..."), M_EDIT, actions::onEdit, actions.itemActionDisabled)
+                .add("Add", M_ADD, actions::onAddNew)
+                .add("Edit...", M_EDIT, actions::onEdit, actions.itemActionDisabled)
                 .addSeparator()
-                .add(s("Remove"), O_REPO_DELETE, actions::onDelete, actions.itemActionDisabled)
-                .add(s("Clear"), M_CLEAR_ALL, actions::onClear, actions.clearDisabled)
+                .add("Remove", O_REPO_DELETE, actions::onDelete, actions.itemActionDisabled)
+                .add("Clear", M_CLEAR_ALL, actions::onClear, actions.clearDisabled)
                 .addSeparator()
-                .add(s("Browse"), O_BROWSER, actions::onBrowse)
+                .add("Browse", O_BROWSER, actions::onBrowse)
                 .addSeparator()
-                .add(s("Actions"), M_CREDIT_CARD, actions::onShowPopup, actions.itemActionDisabled)
+                .add("Actions", M_CREDIT_CARD, actions::onShowPopup, actions.itemActionDisabled)
                 .build();
     }
 

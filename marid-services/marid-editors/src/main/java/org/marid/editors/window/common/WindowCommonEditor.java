@@ -16,30 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.editors.hsqldb;
+package org.marid.editors.window.common;
 
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.event.ContextStartedEvent;
+import javafx.stage.Window;
+import org.marid.spring.beandata.BeanEditor;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Configuration
-@Import({HsqldbPropertiesDialog.class})
-public class HsqldbPropertiesEditorConfiguration {
+public class WindowCommonEditor implements BeanEditor {
 
-    @Bean
-    public ApplicationListener<ContextStartedEvent> onStartEvent(HsqldbPropertiesDialog dialog) {
-        return event -> {
-            final Optional<Runnable> runnable = dialog.showAndWait();
-            if (runnable.isPresent()) {
-                runnable.get().run();
-            }
-        };
+    @Override
+    public Set<Class<?>> getBeanTypes() {
+        return Collections.singleton(Window.class);
+    }
+
+    @Override
+    public String getName() {
+        return "Common window configuration editor";
+    }
+
+    @Override
+    public Class<?>[] getConfigurations() {
+        return new Class<?>[] {WindowCommonEditorConfiguration.class};
     }
 }
