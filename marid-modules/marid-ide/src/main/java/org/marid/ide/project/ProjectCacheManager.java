@@ -102,12 +102,18 @@ public class ProjectCacheManager implements LogSupport {
     }
 
     private Optional<? extends Executable> getConstructor(ProjectProfile profile, BeanData beanData) {
-        final Class<?>[] types = beanData.constructorArgs.stream()
-                .map(a -> profile.getClass(a.type.get()).orElse(Object.class))
-                .toArray(Class<?>[]::new);
-        return getConstructors(profile, beanData)
-                .filter(m -> Arrays.equals(types, m.getParameterTypes()))
-                .findFirst();
+        final List<? extends Executable> executables = getConstructors(profile, beanData).collect(Collectors.toList());
+        switch (executables.size()) {
+            case 0:
+                return Optional.empty();
+            case 1:
+                return Optional.of(executables.get(0));
+            default:
+                final Class<?>[] types = beanData.constructorArgs.stream()
+                        .map(a -> profile.getClass(a.type.get()).orElse(Object.class))
+                        .toArray(Class<?>[]::new);
+                return executables.stream().filter(m -> Arrays.equals(types, m.getParameterTypes())).findFirst();
+        }
     }
 
     public Optional<Class<?>> getBeanClass(ProjectProfile profile, BeanData beanData) {
