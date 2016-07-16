@@ -215,9 +215,11 @@ public class BeanEditorActions {
             producers.forEach(method -> menu.getItems().add(menuItemFunction.apply(method)));
             items.add(menu);
         }
-        final Menu menu = new Menu(s("Parameterized producers"));
-        parameterizedProducers.forEach(method -> menu.getItems().add(menuItemFunction.apply(method)));
-        items.add(menu);
+        if (!parameterizedProducers.isEmpty()) {
+            final Menu menu = new Menu(s("Parameterized producers"));
+            parameterizedProducers.forEach(method -> menu.getItems().add(menuItemFunction.apply(method)));
+            items.add(menu);
+        }
         return items;
     }
 
