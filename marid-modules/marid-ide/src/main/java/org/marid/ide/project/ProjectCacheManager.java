@@ -123,9 +123,9 @@ public class ProjectCacheManager implements LogSupport {
                 .map(p -> {
                     final Optional<ConstructorArg> found = beanData.constructorArgs.stream()
                             .filter(a -> a.name.isEqualTo(parameterName(p)).get())
-                            .filter(a -> a.type.isEqualTo(p.getType().getName()).get())
                             .findFirst();
                     if (found.isPresent()) {
+                        found.get().type.set(p.getType().getName());
                         return found.get();
                     } else {
                         final ConstructorArg arg = new ConstructorArg();
@@ -140,12 +140,20 @@ public class ProjectCacheManager implements LogSupport {
     }
 
     public void updateBeanData(ProjectProfile profile, BeanData beanData) {
-        final Class<?> type = getBeanClass(profile, beanData).orElseThrow(IllegalStateException::new);
-        final Parameter[] parameters = getConstructor(profile, beanData)
-                .map(Executable::getParameters)
-                .orElseGet(() -> new Parameter[0]);
-        if (parameters.length > 0) {
-            updateBeanDataConstructorArgs(parameters, beanData);
+        final Class<?> type = getBeanClass(profile, beanData).orElse(null);
+        if (type == null) {
+            return;
+        }
+        final List<Executable> executables = getConstructors(profile, beanData).collect(Collectors.toList());
+        if (!executables.isEmpty()) {
+            if (executables.size() == 1) {
+                updateBeanDataConstructorArgs(executables.get(0).getParameters(), beanData);
+            } else {
+                final Optional<? extends Executable> executable = getConstructor(profile, beanData);
+                if (executable.isPresent()) {
+                    updateBeanDataConstructorArgs(executable.get().getParameters(), beanData);
+                }
+            }
         }
 
         final List<PropertyDescriptor> propertyDescriptors;

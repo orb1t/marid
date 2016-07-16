@@ -18,8 +18,16 @@
 
 package org.marid.db.hsqldb;
 
+import org.marid.db.dao.NumericReader;
+
+import javax.sql.DataSource;
+
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class HsqldbDaqNumericReader {
+public interface HsqldbDaqFactory {
+
+    static NumericReader numericReader(DataSource dataSource, String table) {
+        return new HsqldbDaqNumericWriter(dataSource, table);
+    }
 }

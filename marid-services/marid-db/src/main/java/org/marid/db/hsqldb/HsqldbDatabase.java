@@ -23,13 +23,13 @@ import org.hsqldb.DatabaseManager;
 import org.hsqldb.jdbc.JDBCSessionDataSource;
 import org.hsqldb.server.Server;
 import org.hsqldb.server.ServerConstants;
-import org.marid.db.dao.NumericWriter;
 import org.marid.logging.LogSupport;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -58,7 +58,7 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
     private PrintWriter outWriter;
     private PrintWriter errWriter;
 
-    public HsqldbDatabase(HsqldbProperties properties) {
+    public HsqldbDatabase(HsqldbProperties properties) throws MalformedURLException {
         log(INFO, "{0}", properties);
         directory = properties.getDirectory();
         shutdownTimeout = SECONDS.toMillis(properties.getShutdownTimeoutSeconds());
@@ -66,7 +66,19 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
         server.setNoSystemExit(true);
         server.setRestartOnShutdown(false);
         server.setPort(properties.getPort());
-        setDatabase("NUMERICS", properties.getNumericsSql());
+        server.setSilent(properties.isSilent());
+        if (properties.getDatabases() == null) {
+            setDatabase("NUMERICS", getClass().getResource("default.sql"));
+        } else {
+            for (final String database : properties.getDatabases().stringPropertyNames()) {
+                final String urlText = properties.getDatabases().getProperty(database);
+                if (!urlText.contains("://")) {
+                    setDatabase(database, getClass().getClassLoader().getResource(urlText));
+                } else {
+                    setDatabase(database, new URL(urlText));
+                }
+            }
+        }
     }
 
     private void setDatabase(String name, URL url) {
@@ -96,7 +108,7 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
     }
 
     private void initDatabase(String name, URL url) throws SQLException, IOException {
-        try (final Connection c = getDataSource(name).getConnection()) {
+        try (final Connection c = dataSource(name).getConnection()) {
             c.setAutoCommit(true);
             final boolean tableExists;
             try (final ResultSet rs = c.getMetaData().getTables(null, null, name, new String[]{"TABLE"})) {
@@ -139,13 +151,9 @@ public final class HsqldbDatabase implements Closeable, LogSupport {
         }
     }
 
-    private DataSource getDataSource(String name) {
+    public DataSource dataSource(String name) {
         final int dbIndex = databaseNameToIndex.keySet().stream().collect(Collectors.toList()).indexOf(name);
         final Database database = DatabaseManager.getDatabase(dbIndex);
         return new JDBCSessionDataSource(database, "PUBLIC");
-    }
-
-    public NumericWriter numericWriter() {
-        return new HsqldbDaqNumericWriter(getDataSource("NUMERICS"), "NUMERICS");
     }
 }

@@ -18,7 +18,6 @@
 
 package org.marid.ide.status;
 
-import javafx.collections.ListChangeListener;
 import javafx.scene.control.ComboBox;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
@@ -36,17 +35,7 @@ public class IdeStatusProfile extends ComboBox<ProjectProfile> {
         super(projectManager.getProfiles());
         getSelectionModel().select(projectManager.getProfile());
         setFocusTraversable(false);
-        getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            projectManager.profileProperty().set(newValue);
-        });
-        projectManager.getProfiles().addListener((ListChangeListener<ProjectProfile>) c -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    for (final ProjectProfile profile : c.getAddedSubList()) {
-                        getSelectionModel().select(profile);
-                    }
-                }
-            }
-        });
+        projectManager.profileProperty().addListener((observable, oldValue, newValue) -> getSelectionModel().select(newValue));
+        getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> projectManager.profileProperty().set(newValue));
     }
 }

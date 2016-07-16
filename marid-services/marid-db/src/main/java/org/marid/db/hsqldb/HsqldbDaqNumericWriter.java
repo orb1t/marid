@@ -30,7 +30,7 @@ import java.sql.SQLException;
 /**
  * @author Dmitry Ovchinnikov.
  */
-class HsqldbDaqNumericWriter extends HsqldbDaqAbstractWriter<Double> implements NumericWriter {
+public class HsqldbDaqNumericWriter extends HsqldbDaqAbstractWriter<Double> implements NumericWriter {
 
     public HsqldbDaqNumericWriter(DataSource dataSource, String table) {
         super(dataSource, table);

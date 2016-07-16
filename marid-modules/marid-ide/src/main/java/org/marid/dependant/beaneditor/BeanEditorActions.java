@@ -30,6 +30,7 @@ import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
+import org.marid.misc.Reflections;
 import org.marid.spring.beandata.BeanEditor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.marid.spring.xml.data.BeanData;
@@ -46,6 +47,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.URLClassLoader;
 import java.util.*;
 import java.util.Map.Entry;
@@ -200,8 +202,14 @@ public class BeanEditorActions {
                 newBeanData.name.set(cacheManager.generateBeanName(profile, method.getName()));
                 newBeanData.factoryBean.set(beanData.name.get());
                 newBeanData.factoryMethod.set(method.getName());
-                cacheManager.updateBeanData(profile, newBeanData);
+                for (final Parameter parameter : method.getParameters()) {
+                    final ConstructorArg arg = new ConstructorArg();
+                    arg.name.set(Reflections.parameterName(parameter));
+                    arg.type.set(parameter.getType().getName());
+                    newBeanData.constructorArgs.add(arg);
+                }
                 table.getItems().add(newBeanData);
+                cacheManager.updateBeanData(profile, newBeanData);
             });
             return menuItem;
         };

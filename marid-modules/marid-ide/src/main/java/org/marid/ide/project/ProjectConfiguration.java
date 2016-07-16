@@ -113,6 +113,7 @@ public class ProjectConfiguration implements LogSupport {
                         } catch (Exception x) {
                             log(WARNING, "Unable to write default logging properties", x);
                         }
+                        projectManager.getObject().profileProperty().set(profile);
                         projectSaverFactory.getObject().save();
                     }
                 });

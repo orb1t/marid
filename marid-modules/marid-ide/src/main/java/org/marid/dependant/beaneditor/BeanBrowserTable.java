@@ -41,10 +41,6 @@ public class BeanBrowserTable extends TableView<Map.Entry<String, BeanDefinition
     public BeanBrowserTable(BeanMetaInfoProvider beanMetaInfoProvider) {
         super(beanMetaInfoProvider.beans().entrySet().stream()
                 .filter(e -> e.getValue().isAbstract())
-                .filter(e -> e.getValue().getFactoryBeanName() == null)
-                .filter(e -> e.getValue().getFactoryMethodName() == null)
-                .filter(e -> e.getValue().getBeanClassName() != null)
-                .filter(e -> !e.getValue().isPrototype())
                 .collect(Collectors.toCollection(FXCollections::observableArrayList)));
         setEditable(false);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);

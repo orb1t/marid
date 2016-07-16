@@ -41,8 +41,29 @@
         <meta key="ICON" value="P_ADD"/>
     </bean>
 
-    <bean name="numericWriter" class="org.marid.db.dao.NumericWriter" abstract="true" scope="prototype">
-        <description>Numeric writer</description>
+    <bean name="numericWriter" class="org.marid.db.hsqldb.HsqldbDaqNumericWriter" abstract="true">
+        <description>HSQLDB numeric writer</description>
+
+        <constructor-arg name="table" value="NUMERICS"/>
+
+        <meta key="icon" value="P_ADD"/>
+    </bean>
+
+    <bean name="hsqldbDataSource" class="org.hsqldb.jdbc.JDBCDataSource" abstract="true">
+        <description>HSQLDB data source</description>
+
+        <property name="url" value="hsql://localhost:9001/NUMERICS"/>
+        <property name="loginTimeout" value="1000"/>
+        <property name="user" value="SA"/>
+        <property name="password" value="#{''}"/>
+        
+        <meta key="icon" value="P_ADD"/>
+    </bean>
+
+    <bean name="hsqldbNumericReader" class="org.marid.db.hsqldb.HsqldbDaqFactory" factory-method="numericReader" abstract="true">
+        <description>HSQLDB numeric reader</description>
+
+        <constructor-arg name="table" value="NUMERICS"/>
 
         <meta key="icon" value="P_ADD"/>
     </bean>

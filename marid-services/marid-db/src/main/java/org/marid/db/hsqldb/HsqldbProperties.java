@@ -22,7 +22,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.File;
-import java.net.URL;
+import java.util.Properties;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -31,8 +31,9 @@ public final class HsqldbProperties {
 
     private File directory = new File("daqDatabase");
     private long shutdownTimeoutSeconds = 60L;
-    private URL numericsSql = getClass().getResource("numerics.sql");
-    private int port;
+    private Properties databases;
+    private int port = 9001;
+    private boolean silent = true;
 
     public File getDirectory() {
         return directory;
@@ -50,12 +51,12 @@ public final class HsqldbProperties {
         this.shutdownTimeoutSeconds = shutdownTimeoutSeconds;
     }
 
-    public URL getNumericsSql() {
-        return numericsSql;
+    public Properties getDatabases() {
+        return databases;
     }
 
-    public void setNumericsSql(URL numericsSql) {
-        this.numericsSql = numericsSql;
+    public void setDatabases(Properties databases) {
+        this.databases = databases;
     }
 
     public int getPort() {
@@ -64,6 +65,14 @@ public final class HsqldbProperties {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public boolean isSilent() {
+        return silent;
+    }
+
+    public void setSilent(boolean silent) {
+        this.silent = silent;
     }
 
     @Override

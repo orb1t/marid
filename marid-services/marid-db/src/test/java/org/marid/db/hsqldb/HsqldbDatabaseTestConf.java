@@ -26,6 +26,7 @@ import org.springframework.util.FileSystemUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -53,12 +54,12 @@ class HsqldbDatabaseTestConf {
     }
 
     @Bean
-    public HsqldbDatabase wrapper(HsqldbProperties hsqldbProperties) {
+    public HsqldbDatabase wrapper(HsqldbProperties hsqldbProperties) throws MalformedURLException {
         return new HsqldbDatabase(hsqldbProperties);
     }
 
     @Bean
     public NumericWriter numericWriter(HsqldbDatabase wrapper) throws IOException {
-        return wrapper.numericWriter();
+        return new HsqldbDaqNumericWriter(wrapper.dataSource("NUMERICS"), "NUMERICS");
     }
 }
