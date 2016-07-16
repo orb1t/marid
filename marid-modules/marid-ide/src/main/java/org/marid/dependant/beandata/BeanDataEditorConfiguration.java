@@ -33,11 +33,11 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.ContextStartedEvent;
 
 import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
 import static org.marid.jfx.ScrollPanes.scrollPane;
+import static org.marid.jfx.icons.FontIcon.M_LIST;
 import static org.marid.jfx.icons.FontIcon.M_REFRESH;
 import static org.marid.l10n.L10n.s;
 
@@ -49,7 +49,6 @@ import static org.marid.l10n.L10n.s;
 public class BeanDataEditorConfiguration {
 
     @Bean
-    @Lazy
     public BeanData beanData(BeanEditorTable beanEditorTable) {
         return beanEditorTable.getSelectionModel().getSelectedItem();
     }
@@ -69,6 +68,8 @@ public class BeanDataEditorConfiguration {
         final BorderPane pane = new BorderPane(tabPane);
         final ToolBar toolBar = new ToolbarBuilder()
                 .add("Update", M_REFRESH, actions::onRefresh)
+                .addSeparator()
+                .add("Select constructor", M_LIST, actions::onSelectConstructor)
                 .build();
         pane.setTop(toolBar);
         return pane;

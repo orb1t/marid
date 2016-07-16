@@ -20,9 +20,11 @@ package org.marid.ide.project;
 
 import org.marid.logging.LogSupport;
 import org.marid.misc.Calls;
+import org.marid.misc.Casts;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
@@ -58,28 +60,35 @@ public class ProjectCacheEntry implements AutoCloseable, LogSupport {
     }
 
     public void update() throws Exception {
-        classMap.clear();
-        try (final URLClassLoader classLoader = this.classLoader) {
-            if (classLoader != null) {
-                log(INFO, "Closing a class loader");
-            }
-        }
+        close();
         classLoader = classLoader();
     }
 
     public Optional<Class<?>> getClass(String type) {
-        return Optional.ofNullable(classMap.computeIfAbsent(type, t -> {
-            try {
-                return Class.forName(type, false, classLoader);
-            } catch (Exception x) {
-                return null;
+        if (type == null) {
+            return Optional.empty();
+        } else {
+            final Class<?> primitiveType = Casts.primitiveType(type);
+            if (primitiveType == null) {
+                return Optional.ofNullable(classMap.computeIfAbsent(type, t -> {
+                    try {
+                        return Class.forName(type, false, classLoader);
+                    } catch (Exception x) {
+                        return null;
+                    }
+                }));
+            } else {
+                return Optional.of(primitiveType);
             }
-        }));
+        }
     }
 
     private void addJars(List<URL> urls, Path dir) {
         if (isDirectory(dir)) {
             final File[] files = dir.toFile().listFiles((d, name) -> name.endsWith(".jar"));
+            if (files == null) {
+                return;
+            }
             urls.addAll(Stream.of(files).map(f -> Calls.call(() -> f.toURI().toURL())).collect(Collectors.toList()));
         }
     }
@@ -94,7 +103,14 @@ public class ProjectCacheEntry implements AutoCloseable, LogSupport {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         classMap.clear();
+        try (final URLClassLoader classLoader = this.classLoader) {
+            if (classLoader != null) {
+                log(INFO, "Closing a class loader");
+            }
+        } catch (IOException x) {
+            log(WARNING, "Class loader close error", x);
+        }
     }
 }

@@ -23,7 +23,6 @@ import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.data.ConstructorArg;
 import org.marid.spring.xml.data.Property;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,9 +30,11 @@ import org.springframework.stereotype.Component;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
+import static org.marid.misc.Reflections.parameterName;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -71,84 +73,88 @@ public class ProjectCacheManager implements LogSupport {
         }, profile.logger()::log);
     }
 
-    public Optional<Class<?>> getBeanClass(ProjectProfile profile, BeanData beanData) {
+    public Stream<? extends Executable> getConstructors(ProjectProfile profile, BeanData beanData) {
         if (beanData.isFactoryBean()) {
-            final Optional<Class<?>> type = profile.getBeanFiles().values().stream()
+            return profile.getBeanFiles().values().stream()
                     .flatMap(f -> f.beans.stream())
                     .filter(b -> beanData.factoryBean.isEqualTo(b.name).get())
                     .map(b -> getBeanClass(profile, b))
                     .filter(Optional::isPresent)
                     .map(Optional::get)
-                    .flatMap(c -> Stream.of(c.getMethods()))
-                    .filter(m -> m.getName().equals(beanData.factoryMethod.get()))
-                    .reduce((m1, m2) -> m2.getParameterCount() < m1.getParameterCount() ? m2 : m1)
-                    .map(Method::getReturnType);
-            if (type.isPresent()) {
-                if (beanData.type.isNotEqualTo(type.get().getName()).get()) {
-                    beanData.type.set(type.get().getName());
-                }
-                return type;
-            }
+                    .flatMap(t -> Stream.of(t.getMethods()))
+                    .filter(m -> beanData.factoryMethod.isEqualTo(m.getName()).get());
+        } else {
+            return getBeanClass(profile, beanData)
+                    .map(c -> Stream.of(c.getConstructors()))
+                    .orElseGet(Stream::empty);
         }
-        return profile.cacheEntry.getClass(beanData.type.get());
+    }
+
+    public Optional<? extends Executable> getConstructor(ProjectProfile profile, BeanData beanData) {
+        final Class<?>[] types = beanData.constructorArgs.stream()
+                .map(a -> profile.getClass(a.type.get()).orElse(Object.class))
+                .toArray(Class<?>[]::new);
+        return getConstructors(profile, beanData)
+                .filter(m -> Arrays.equals(types, m.getParameterTypes()))
+                .findFirst();
+    }
+
+    public Optional<Class<?>> getBeanClass(ProjectProfile profile, BeanData beanData) {
+        if (beanData.isFactoryBean()) {
+            return getConstructor(profile, beanData).map(e -> ((Method) e).getReturnType());
+        } else {
+            return profile.cacheEntry.getClass(beanData.type.get());
+        }
+    }
+
+    public void updateBeanDataConstructorArgs(Parameter[] parameters, BeanData beanData) {
+        final List<ConstructorArg> args = Stream.of(parameters)
+                .map(p -> {
+                    final Optional<ConstructorArg> found = beanData.constructorArgs.stream()
+                            .filter(a -> a.name.isEqualTo(parameterName(p)).get())
+                            .filter(a -> a.type.isEqualTo(p.getType().getName()).get())
+                            .findFirst();
+                    if (found.isPresent()) {
+                        return found.get();
+                    } else {
+                        final ConstructorArg arg = new ConstructorArg();
+                        arg.name.set(parameterName(p));
+                        arg.type.set(p.getType().getName());
+                        return arg;
+                    }
+                })
+                .collect(Collectors.toList());
+        beanData.constructorArgs.clear();
+        beanData.constructorArgs.addAll(args);
     }
 
     public void updateBeanData(ProjectProfile profile, BeanData beanData) {
-        try {
-            final Class<?> type = getBeanClass(profile, beanData).orElseThrow(IllegalStateException::new);
-            final Parameter[] parameters;
-            if (beanData.isFactoryBean()) {
-                parameters = profile.getBeanFiles().values().stream()
-                        .flatMap(f -> f.beans.stream())
-                        .filter(b -> beanData.factoryBean.isEqualTo(b.name).get())
-                        .map(b -> getBeanClass(profile, b))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .findFirst()
-                        .flatMap(t -> Stream.of(t.getMethods())
-                                .filter(m -> beanData.factoryMethod.isEqualTo(m.getName()).get())
-                                .reduce((m1, m2) -> m2.getParameterCount() < m1.getParameterCount() ? m2 : m1))
-                        .orElseThrow(IllegalStateException::new)
-                        .getParameters();
-            } else {
-                parameters = Stream.of(type.getConstructors())
-                        .reduce((c1, c2) -> c2.getParameterCount() < c1.getParameterCount() ? c2 : c1)
-                        .orElseThrow(IllegalStateException::new)
-                        .getParameters();
-            }
-            final Map<String, ConstructorArg> cmap = beanData.constructorArgs.stream().collect(toMap(e -> e.name.get(), e -> e));
-            beanData.constructorArgs.clear();
-            for (final Parameter parameter : parameters) {
-                final ConstructorArg arg = cmap.computeIfAbsent(parameter.getName(), n -> {
-                    final ConstructorArg constructorArg = new ConstructorArg();
-                    constructorArg.name.set(n);
-                    return constructorArg;
-                });
-                arg.type.set(parameter.getType().getName());
-                beanData.constructorArgs.add(arg);
-            }
+        final Class<?> type = getBeanClass(profile, beanData).orElseThrow(IllegalStateException::new);
+        final Parameter[] parameters = getConstructor(profile, beanData)
+                .map(Executable::getParameters)
+                .orElseGet(() -> new Parameter[0]);
+        if (parameters.length > 0) {
+            updateBeanDataConstructorArgs(parameters, beanData);
+        }
 
-            final List<PropertyDescriptor> propertyDescriptors;
-            try {
-                propertyDescriptors = Stream.of(Introspector.getBeanInfo(type).getPropertyDescriptors())
-                        .filter(d -> d.getWriteMethod() != null)
-                        .collect(Collectors.toList());
-            } catch (IntrospectionException x) {
-                return;
-            }
-            final Map<String, Property> pmap = beanData.properties.stream().collect(toMap(e -> e.name.get(), e -> e));
-            beanData.properties.clear();
-            for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-                final Property prop = pmap.computeIfAbsent(propertyDescriptor.getName(), n -> {
-                    final Property property = new Property();
-                    property.name.set(n);
-                    return property;
-                });
-                prop.type.set(propertyDescriptor.getPropertyType().getName());
-                beanData.properties.add(prop);
-            }
-        } catch (IllegalStateException x) {
-            // no op
+        final List<PropertyDescriptor> propertyDescriptors;
+        try {
+            propertyDescriptors = Stream.of(Introspector.getBeanInfo(type).getPropertyDescriptors())
+                    .filter(d -> d.getWriteMethod() != null)
+                    .collect(Collectors.toList());
+        } catch (IntrospectionException x) {
+            return;
+        }
+        final Map<String, Property> pmap = beanData.properties.stream().collect(toMap(e -> e.name.get(), e -> e));
+        beanData.properties.clear();
+        for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+            final Property prop = pmap.computeIfAbsent(propertyDescriptor.getName(), n -> {
+                final Property property = new Property();
+                property.name.set(n);
+                return property;
+            });
+            prop.type.set(propertyDescriptor.getPropertyType().getName());
+            beanData.properties.add(prop);
         }
     }
 

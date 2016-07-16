@@ -241,6 +241,7 @@ public class ProjectProfile implements LogSupport {
 
     void delete() {
         try {
+            cacheEntry.close();
             FileUtils.deleteDirectory(path.toFile());
         } catch (Exception x) {
             log(WARNING, "Unable to delete {0}", x, getName());
