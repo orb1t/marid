@@ -18,21 +18,23 @@
 
 package org.marid.dependant.beandata;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.scene.control.ButtonType;
-import org.controlsfx.dialog.CommandLinksDialog;
-import org.controlsfx.dialog.CommandLinksDialog.CommandLinksButtonType;
+import javafx.scene.control.ListCell;
 import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.dialog.ListDialog;
+import org.marid.jfx.icons.FontIcon;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.data.BeanData;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Executable;
-import java.util.*;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Comparator.comparing;
 import static org.marid.misc.Reflections.parameterName;
 
 /**
@@ -56,35 +58,35 @@ public class BeanDataActions {
     }
 
     public void onSelectConstructor(ActionEvent event) {
-        final Class<?>[] types = beanData.constructorArgs.stream()
-                .map(a -> profile.getClass(a.type.get()).orElse(Object.class))
-                .toArray(Class<?>[]::new);
-        final Map<ButtonType, Executable> executableMap = new TreeMap<>(comparing(ButtonType::getText));
-        final List<CommandLinksButtonType> buttonTypes = new ArrayList<>();
-        cacheManager.getConstructors(profile, beanData).forEach(e -> {
-            final String text = e.getName() + "/" + e.getParameterCount();
-            final String longText = Stream.of(e.getParameters())
-                    .map(p -> {
-                        final String type = p.getParameterizedType() instanceof Class<?>
-                                ? ((Class) p.getParameterizedType()).getName()
-                                : p.getParameterizedType().toString();
-                        return parameterName(p) + " : " + type;
-                    })
-                    .collect(Collectors.joining(", "));
-            final boolean def = Arrays.equals(types, e.getParameterTypes());
-            final CommandLinksButtonType bt = new CommandLinksDialog.CommandLinksButtonType(text, longText, def);
-            buttonTypes.add(bt);
-            executableMap.put(bt.getButtonType(), e);
-        });
-        final CommandLinksDialog dialog = new CommandLinksDialog(buttonTypes);
-        dialog.getDialogPane().setPrefWidth(1024);
-        final Optional<ButtonType> result = dialog.showAndWait();
-        if (result.isPresent()) {
-            final Executable e = executableMap.get(result.get());
-            if (e == null) {
-                return;
+        final ObservableList<Executable> constructors = cacheManager.getConstructors(profile, beanData)
+                .collect(Collectors.toCollection(FXCollections::observableArrayList));
+        final ListDialog<Executable> dialog = new ListDialog<>("Select constructor", constructors);
+        dialog.getListView().setCellFactory(param -> new ListCell<Executable>() {
+            @Override
+            protected void updateItem(Executable item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    final String longText = Stream.of(item.getParameters())
+                            .map(p -> {
+                                final String type = p.getParameterizedType() instanceof Class<?>
+                                        ? ((Class) p.getParameterizedType()).getName()
+                                        : p.getParameterizedType().toString();
+                                return parameterName(p) + " : " + type;
+                            })
+                            .collect(Collectors.joining(", ", "(", ")"));
+                    setGraphic(FontIcons.glyphIcon(FontIcon.M_MEMORY, 16));
+                    setText(longText);
+                }
             }
-            cacheManager.updateBeanDataConstructorArgs(e.getParameters(), beanData);
+        });
+        dialog.getDialogPane().setPrefWidth(1024);
+        dialog.setResizable(true);
+        final Optional<Executable> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            cacheManager.updateBeanDataConstructorArgs(result.get().getParameters(), beanData);
         }
     }
 }

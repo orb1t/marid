@@ -30,15 +30,16 @@ import org.springframework.stereotype.Component;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toMap;
 import static org.marid.misc.Reflections.parameterName;
 
@@ -83,19 +84,19 @@ public class ProjectCacheManager implements LogSupport {
                         .flatMap(t -> Stream.of(t.getMethods()))
                         .filter(m -> m.getReturnType() != void.class)
                         .filter(m -> beanData.factoryMethod.isEqualTo(m.getName()).get())
-                        .sorted(Comparator.comparingInt(Method::getParameterCount));
+                        .sorted(comparingInt(Method::getParameterCount));
             } else {
                 return profile.getClass(beanData.type.get())
                         .map(type -> Stream.of(type.getMethods())
                                 .filter(m -> Modifier.isStatic(m.getModifiers()))
                                 .filter(m -> m.getReturnType() != void.class)
                                 .filter(m -> beanData.factoryMethod.isEqualTo(m.getName()).get())
-                                .sorted(Comparator.comparingInt(Method::getParameterCount)))
+                                .sorted(comparingInt(Method::getParameterCount)))
                         .orElse(Stream.empty());
             }
         } else {
             return getBeanClass(profile, beanData)
-                    .map(c -> Stream.of(c.getConstructors()))
+                    .map(c -> Stream.of(c.getConstructors()).sorted(comparingInt(Constructor::getParameterCount)))
                     .orElseGet(Stream::empty);
         }
     }
