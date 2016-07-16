@@ -32,6 +32,7 @@ public final class HsqldbProperties {
     private File directory = new File("daqDatabase");
     private long shutdownTimeoutSeconds = 60L;
     private URL numericsSql = getClass().getResource("numerics.sql");
+    private int port;
 
     public File getDirectory() {
         return directory;
@@ -55,6 +56,14 @@ public final class HsqldbProperties {
 
     public void setNumericsSql(URL numericsSql) {
         this.numericsSql = numericsSql;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     @Override

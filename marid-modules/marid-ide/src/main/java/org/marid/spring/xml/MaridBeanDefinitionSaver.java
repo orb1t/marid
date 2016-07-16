@@ -91,12 +91,9 @@ public class MaridBeanDefinitionSaver {
                 setAttr(beanData.name, beanElement);
                 setAttr(beanData.destroyMethod, beanElement);
                 setAttr(beanData.initMethod, beanElement);
-                if (beanData.isFactoryBean()) {
-                    setAttr(beanData.factoryBean, beanElement);
-                    setAttr(beanData.factoryMethod, beanElement);
-                } else {
-                    setAttr(beanData.type, beanElement);
-                }
+                setAttr(beanData.factoryBean, beanElement);
+                setAttr(beanData.factoryMethod, beanElement);
+                setAttr(beanData.type, beanElement);
                 setAttr(beanData.lazyInit, beanElement);
 
                 for (final ConstructorArg constructorArg : beanData.constructorArgs) {

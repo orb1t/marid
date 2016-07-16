@@ -260,6 +260,18 @@ public class BeanEditorActions {
         menuItems.add(factoryItems(type, beanData));
         menuItems.add(editors(type, beanData));
 
+        {
+            final MenuItem editItem = new MenuItem(s("Edit..."), FontIcons.glyphIcon(FontIcon.M_EDIT, 16));
+            editItem.setOnAction(this::onEdit);
+            menuItems.add(Collections.singletonList(editItem));
+        }
+
+        {
+            final MenuItem removeItem = new MenuItem(s("Remove"), FontIcons.glyphIcon(FontIcon.M_REMOVE, 16));
+            removeItem.setOnAction(e -> table.getItems().remove(beanData));
+            menuItems.add(Collections.singletonList(removeItem));
+        }
+
         menuItems.removeIf(List::isEmpty);
         for (final ListIterator<List<MenuItem>> i = menuItems.listIterator(); i.hasNext(); ) {
             if (i.hasPrevious()) {

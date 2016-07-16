@@ -96,7 +96,7 @@ public class MaridIcon {
     }
 
     public static void main(String... args) throws Exception {
-        final int size = args.length < 1 ? 32 : Integer.parseInt(args[0]);
+        final int size = args.length < 1 ? 128 : Integer.parseInt(args[0]);
         final Color color = args.length < 2 || "-".equals(args[1]) ? Color.GREEN : Color.decode(args[1]);
         final String format = args.length < 3 ? "PNG" : args[2];
         final BufferedImage image = getImage(size, color);

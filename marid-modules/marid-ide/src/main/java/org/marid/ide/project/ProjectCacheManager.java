@@ -32,12 +32,10 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -75,14 +73,26 @@ public class ProjectCacheManager implements LogSupport {
 
     public Stream<? extends Executable> getConstructors(ProjectProfile profile, BeanData beanData) {
         if (beanData.isFactoryBean()) {
-            return profile.getBeanFiles().values().stream()
-                    .flatMap(f -> f.beans.stream())
-                    .filter(b -> beanData.factoryBean.isEqualTo(b.name).get())
-                    .map(b -> getBeanClass(profile, b))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .flatMap(t -> Stream.of(t.getMethods()))
-                    .filter(m -> beanData.factoryMethod.isEqualTo(m.getName()).get());
+            if (beanData.factoryBean.isNotEmpty().get()) {
+                return profile.getBeanFiles().values().stream()
+                        .flatMap(f -> f.beans.stream())
+                        .filter(b -> beanData.factoryBean.isEqualTo(b.name).get())
+                        .map(b -> getBeanClass(profile, b))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .flatMap(t -> Stream.of(t.getMethods()))
+                        .filter(m -> m.getReturnType() != void.class)
+                        .filter(m -> beanData.factoryMethod.isEqualTo(m.getName()).get())
+                        .sorted(Comparator.comparingInt(Method::getParameterCount));
+            } else {
+                return profile.getClass(beanData.type.get())
+                        .map(type -> Stream.of(type.getMethods())
+                                .filter(m -> Modifier.isStatic(m.getModifiers()))
+                                .filter(m -> m.getReturnType() != void.class)
+                                .filter(m -> beanData.factoryMethod.isEqualTo(m.getName()).get())
+                                .sorted(Comparator.comparingInt(Method::getParameterCount)))
+                        .orElse(Stream.empty());
+            }
         } else {
             return getBeanClass(profile, beanData)
                     .map(c -> Stream.of(c.getConstructors()))
@@ -90,7 +100,7 @@ public class ProjectCacheManager implements LogSupport {
         }
     }
 
-    public Optional<? extends Executable> getConstructor(ProjectProfile profile, BeanData beanData) {
+    private Optional<? extends Executable> getConstructor(ProjectProfile profile, BeanData beanData) {
         final Class<?>[] types = beanData.constructorArgs.stream()
                 .map(a -> profile.getClass(a.type.get()).orElse(Object.class))
                 .toArray(Class<?>[]::new);

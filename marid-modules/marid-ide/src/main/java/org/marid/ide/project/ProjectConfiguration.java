@@ -30,7 +30,6 @@ import org.marid.l10n.L10n;
 import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -43,20 +42,12 @@ import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
 import static org.marid.jfx.icons.FontIcon.*;
-import static org.marid.misc.Calls.callWithTime;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
 public class ProjectConfiguration implements LogSupport {
-
-    private final ProjectManager projectManager;
-
-    @Autowired
-    public ProjectConfiguration(ProjectManager projectManager) {
-        this.projectManager = projectManager;
-    }
 
     @Bean
     @IdeAction
@@ -70,22 +61,26 @@ public class ProjectConfiguration implements LogSupport {
     @Bean
     @IdeAction
     public FxAction projectSaveAction(ObjectFactory<ProjectSaver> projectSaver) {
-        return new FxAction("projectIO", "io", "Project")
+        return new FxAction(null, "io", "Project")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+S"))
                 .setText("Save")
                 .setIcon(F_SAVE)
-                .setEventHandler(event -> callWithTime(() -> projectSaver.getObject().save(),
-                        time -> log(INFO, "Profile [{0}] saved in {1} ms", projectManager.getProfile(), time)));
+                .setEventHandler(event -> projectSaver.getObject().save());
     }
 
     @Bean
     @IdeAction
-    public FxAction projectBuildAction(ObjectFactory<ProjectCacheManager> projectCacheManager) {
+    public FxAction projectBuildAction(ObjectFactory<ProjectCacheManager> projectCacheManager,
+                                       ObjectFactory<ProjectSaver> projectSaver,
+                                       ObjectFactory<ProjectManager> projectManager) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F9"))
                 .setText("Build")
                 .setIcon(D_CLOCK_FAST)
-                .setEventHandler(event -> projectCacheManager.getObject().build(projectManager.getProfile()))
+                .setEventHandler(event -> {
+                    projectSaver.getObject().save();
+                    projectCacheManager.getObject().build(projectManager.getObject().getProfile());
+                })
                 .setDisabled(false);
     }
 
@@ -101,7 +96,8 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
-    public FxAction projectAddProfileAction(ObjectFactory<ProjectSaver> projectSaverFactory) {
+    public FxAction projectAddProfileAction(ObjectFactory<ProjectSaver> projectSaverFactory,
+                                            ObjectFactory<ProjectManager> projectManager) {
         return new FxAction("projectIO", "pm", "Project")
                 .setText("Add profile...")
                 .setIcon(M_ADD_BOX)
@@ -111,7 +107,7 @@ public class ProjectConfiguration implements LogSupport {
                     dialog.setTitle(L10n.s("Add profile"));
                     final Optional<String> result = dialog.showAndWait();
                     if (result.isPresent()) {
-                        final ProjectProfile profile = projectManager.add(result.get());
+                        final ProjectProfile profile = projectManager.getObject().add(result.get());
                         try (final InputStream is = getClass().getResourceAsStream("/logging/default.properties")) {
                             Files.copy(is, profile.getSrcMainResources().resolve("logging.properties"), REPLACE_EXISTING);
                         } catch (Exception x) {
@@ -124,7 +120,7 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
-    public FxAction projectRemoveProfileAction() {
+    public FxAction projectRemoveProfileAction(ObjectFactory<ProjectManager> projectManager) {
         return new FxAction("projectIO", "pm", "Project")
                 .setText("Remove profile")
                 .setIcon(D_MINUS_BOX)
@@ -134,7 +130,7 @@ public class ProjectConfiguration implements LogSupport {
                     alert.setHeaderText(L10n.s("Project removal confirmation"));
                     final Optional<ButtonType> result = alert.showAndWait();
                     if (result.isPresent() && result.get() == ButtonType.YES) {
-                        projectManager.remove(projectManager.getProfile());
+                        projectManager.getObject().remove(projectManager.getObject().getProfile());
                     }
                 });
     }
