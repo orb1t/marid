@@ -19,21 +19,18 @@
 package org.marid.dependant.beaneditor.beans;
 
 import javafx.collections.MapChangeListener;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import org.marid.ide.panes.filebrowser.BeanFileBrowserTree;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.BeanFile;
-import org.springframework.context.ApplicationListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
 
 import java.nio.file.Path;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -57,26 +54,20 @@ public class BeanEditorConfiguration {
         return profile.getBeanFiles().get(beanFilePath);
     }
 
-    @Bean
-    public MapChangeListener<Path, BeanFile> beanFilesChangeListener(TabPane ideTabPane,
-                                                                     ProjectProfile profile,
-                                                                     Tab tab,
-                                                                     Path beanFilePath) {
-        final MapChangeListener<Path, BeanFile> listener = change -> {
-            final BeanFile beanFile = requireNonNull(profile.getBeanFiles().get(beanFilePath));
+    @Autowired
+    private void listenBeans(ProjectProfile profile, BeanEditorTab tab, Path beanFilePath, ConfigurableApplicationContext context) {
+        final MapChangeListener<Path, BeanFile> changeListener = change -> {
             if (change.wasRemoved()) {
-                if (beanFile.equals(change.getKey())) {
-                    ideTabPane.getTabs().remove(tab);
+                if (beanFilePath.equals(change.getKey())) {
+                    tab.getTabPane().getTabs().remove(tab);
                 }
             }
         };
-        profile.getBeanFiles().addListener(listener);
-        return listener;
-    }
-
-    @Bean
-    public ApplicationListener<ContextClosedEvent> contextClosedListener(ProjectProfile profile,
-                                                                         MapChangeListener<Path, BeanFile> beanFileMapChangeListener) {
-        return event -> profile.getBeanFiles().removeListener(beanFileMapChangeListener);
+        profile.getBeanFiles().addListener(changeListener);
+        context.addApplicationListener(event -> {
+          if (event instanceof ContextClosedEvent) {
+              profile.getBeanFiles().removeListener(changeListener);
+          }
+        });
     }
 }

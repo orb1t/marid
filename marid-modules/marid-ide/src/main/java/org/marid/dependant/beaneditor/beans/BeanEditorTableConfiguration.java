@@ -18,11 +18,12 @@
 
 package org.marid.dependant.beaneditor.beans;
 
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import org.marid.ide.panes.main.IdePane;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.ScrollPanes;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -31,7 +32,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -72,17 +72,6 @@ public class BeanEditorTableConfiguration {
         pane.setCenter(ScrollPanes.scrollPane(table));
         pane.setTop(beanEditorToolbar);
         return pane;
-    }
-
-    @Bean
-    public Tab tab(ProjectProfile profile, TabPane tabPane, BorderPane beanEditor, Path beanFilePath) {
-        final Path relativePath = profile.getBeansDirectory().relativize(beanFilePath);
-        final Tab tab = new Tab(s("[%s]: %s", profile, relativePath), beanEditor);
-        tab.getProperties().put("profile", profile);
-        tab.getProperties().put("path", beanFilePath);
-        tabPane.getTabs().add(tab);
-        tabPane.getSelectionModel().select(tab);
-        return tab;
     }
 
     @Bean
