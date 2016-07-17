@@ -31,12 +31,24 @@ import java.io.ObjectOutput;
 public class BeanFile extends AbstractData<BeanFile> {
 
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList();
+    public final ObservableList<UtilProperties> properties = FXCollections.observableArrayList();
+    public final ObservableList<UtilConstant> constants = FXCollections.observableArrayList();
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeInt(beans.size());
         for (final BeanData beanData : beans) {
             out.writeObject(beanData);
+        }
+
+        out.writeInt(properties.size());
+        for (final UtilProperties prop : properties) {
+            out.writeObject(prop);
+        }
+
+        out.writeInt(constants.size());
+        for (final UtilConstant constant : constants) {
+            out.writeObject(constant);
         }
     }
 
@@ -45,6 +57,16 @@ public class BeanFile extends AbstractData<BeanFile> {
         final int beanCount = in.readInt();
         for (int i = 0; i < beanCount; i++) {
             beans.add((BeanData) in.readObject());
+        }
+
+        final int propCount = in.readInt();
+        for (int i = 0; i < propCount; i++) {
+            properties.add((UtilProperties) in.readObject());
+        }
+
+        final int constCount = in.readInt();
+        for (int i = 0; i < constCount; i++) {
+            constants.add((UtilConstant) in.readObject());
         }
     }
 }

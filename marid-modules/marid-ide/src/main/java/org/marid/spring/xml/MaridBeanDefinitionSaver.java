@@ -82,6 +82,8 @@ public class MaridBeanDefinitionSaver {
             this.beanFile = beanFile;
             document.appendChild(beans = document.createElement("beans"));
             beans.setAttribute("xmlns", SPRING_SCHEMA_PREFIX + "beans");
+            beans.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:lang", SPRING_SCHEMA_PREFIX + "lang");
+            beans.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:util", SPRING_SCHEMA_PREFIX + "util");
         }
 
         private void save() {

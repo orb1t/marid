@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor;
+package org.marid.dependant.beaneditor.beans;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -25,7 +25,7 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import org.marid.IdeDependants;
-import org.marid.dependant.beandata.BeanDataEditorConfiguration;
+import org.marid.dependant.beaneditor.props.BeanDataEditorConfiguration;
 import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;

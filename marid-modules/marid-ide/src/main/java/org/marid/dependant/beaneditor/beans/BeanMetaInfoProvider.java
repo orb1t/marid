@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor;
+package org.marid.dependant.beaneditor.beans;
 
 import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;

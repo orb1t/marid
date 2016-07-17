@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beandata;
+package org.marid.dependant.beaneditor.props;
 
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
@@ -25,7 +25,7 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.marid.dependant.beaneditor.BeanEditorTable;
+import org.marid.dependant.beaneditor.beans.BeanEditorTable;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.spring.xml.data.BeanData;
