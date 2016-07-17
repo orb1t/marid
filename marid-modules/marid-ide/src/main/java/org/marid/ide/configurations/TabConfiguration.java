@@ -25,14 +25,11 @@ import org.marid.ide.panes.logging.LoggingTable;
 import org.marid.jfx.ScrollPanes;
 import org.marid.l10n.L10n;
 import org.marid.spring.annotation.TypeQualifier;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.Order;
 
-import java.util.Map;
+import java.util.List;
 
 import static javafx.scene.control.TabPane.TabClosingPolicy.ALL_TABS;
 
@@ -54,24 +51,22 @@ public class TabConfiguration {
     @Bean
     @TypeQualifier(TabConfiguration.class)
     @Order(2)
-    @Primary
     public Tab beanFilesTab(BeanFileBrowserPane beanFileBrowserPane) {
         final Tab tab = new Tab(L10n.s("Bean files"), beanFileBrowserPane);
         tab.setClosable(false);
+        tab.tabPaneProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                newValue.getSelectionModel().select(tab);
+            }
+        });
         return tab;
     }
 
     @Bean
-    public TabPane ideTabPane(@TypeQualifier(TabConfiguration.class) Map<String, Tab> tabs, GenericApplicationContext context) {
+    public TabPane ideTabPane(@TypeQualifier(TabConfiguration.class) List<Tab> tabs) {
         final TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(ALL_TABS);
-        tabs.forEach((name, tab) -> {
-            final BeanDefinition definition = context.getBeanDefinition(name);
-            tabPane.getTabs().add(tab);
-            if (definition.isPrimary()) {
-                tabPane.getSelectionModel().select(tab);
-            }
-        });
+        tabs.forEach(tabPane.getTabs()::add);
         return tabPane;
     }
 }
