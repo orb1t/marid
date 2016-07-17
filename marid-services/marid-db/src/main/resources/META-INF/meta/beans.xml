@@ -32,6 +32,8 @@
     <bean name="hsqldbProperties" class="org.marid.db.hsqldb.HsqldbProperties" abstract="true">
         <description>HSQLDB database properties</description>
 
+        <property name="directory" value="${user.home}/data"/>
+
         <meta key="icon" value="P_ADD"/>
     </bean>
 

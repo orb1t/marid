@@ -24,11 +24,9 @@ import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextClosedEvent;
 
 import java.nio.file.Path;
 
@@ -55,7 +53,7 @@ public class BeanEditorConfiguration {
     }
 
     @Autowired
-    private void listenBeans(ProjectProfile profile, BeanEditorTab tab, Path beanFilePath, ConfigurableApplicationContext context) {
+    private void listenBeans(ProjectProfile profile, BeanEditorTab tab, Path beanFilePath) {
         final MapChangeListener<Path, BeanFile> changeListener = change -> {
             if (change.wasRemoved()) {
                 if (beanFilePath.equals(change.getKey())) {
@@ -64,10 +62,6 @@ public class BeanEditorConfiguration {
             }
         };
         profile.getBeanFiles().addListener(changeListener);
-        context.addApplicationListener(event -> {
-          if (event instanceof ContextClosedEvent) {
-              profile.getBeanFiles().removeListener(changeListener);
-          }
-        });
+        tab.setOnCloseRequest(event -> profile.getBeanFiles().removeListener(changeListener));
     }
 }

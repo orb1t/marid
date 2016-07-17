@@ -20,9 +20,9 @@ package org.marid.dependant.beaneditor.beans;
 
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.BorderPane;
 import org.marid.ide.project.ProjectProfile;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
@@ -36,11 +36,16 @@ import static org.marid.l10n.L10n.s;
 public class BeanEditorTab extends Tab {
 
     @Autowired
-    public BeanEditorTab(ProjectProfile profile, TabPane tabPane, BorderPane beanEditor, Path beanFilePath) {
-        super(s("[%s]: %s", profile, profile.getBeansDirectory().relativize(beanFilePath)), beanEditor);
+    public BeanEditorTab(ProjectProfile profile, TabPane ideTabPane, TabPane beanEditorTabs, Path beanFilePath) {
+        super(s("[%s]: %s", profile, profile.getBeansDirectory().relativize(beanFilePath)), beanEditorTabs);
         getProperties().put("profile", profile);
         getProperties().put("path", beanFilePath);
-        tabPane.getTabs().add(this);
-        tabPane.getSelectionModel().select(this);
+        ideTabPane.getTabs().add(this);
+        ideTabPane.getSelectionModel().select(this);
+    }
+
+    @Autowired
+    private void listenClose(AnnotationConfigApplicationContext context) {
+        setOnClosed(event -> context.close());
     }
 }

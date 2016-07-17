@@ -16,35 +16,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans;
+package org.marid.dependant.beaneditor.beans.conf;
 
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Modality;
-import org.marid.ide.panes.main.IdePane;
+import org.marid.dependant.beaneditor.beans.BeanBrowserTable;
+import org.marid.dependant.beaneditor.beans.BeanEditorActions;
+import org.marid.dependant.beaneditor.beans.BeanEditorTable;
 import org.marid.jfx.ScrollPanes;
+import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.toolbar.ToolbarBuilder;
+import org.marid.spring.annotation.PrototypeBean;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 
 import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
+import static javafx.scene.control.ButtonType.CANCEL;
+import static org.marid.Ide.primaryStage;
 import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.l10n.L10n.s;
-import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
 @Configuration
-public class BeanEditorTableConfiguration {
+public class BeanListConfiguration {
 
     @Bean
     public ToolBar beanEditorToolbar(BeanEditorActions actions) {
@@ -62,30 +64,20 @@ public class BeanEditorTableConfiguration {
     }
 
     @Bean
-    public BorderPane beanEditor(BeanEditorTable table, ToolBar beanEditorToolbar, AnnotationConfigApplicationContext context) {
+    public BorderPane beanEditor(BeanEditorTable table, ToolBar beanEditorToolbar) {
         final BorderPane pane = new BorderPane();
-        pane.sceneProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == null) {
-                context.close();
-            }
-        });
         pane.setCenter(ScrollPanes.scrollPane(table));
         pane.setTop(beanEditorToolbar);
         return pane;
     }
 
-    @Bean
-    @Scope(SCOPE_PROTOTYPE)
-    public Dialog<List<Entry<String, BeanDefinition>>> beanBrowser(IdePane idePane, BeanBrowserTable beans) {
-        final Dialog<List<Entry<String, BeanDefinition>>> dialog = new Dialog<>();
-        dialog.initModality(Modality.WINDOW_MODAL);
-        dialog.initOwner(idePane.getScene().getWindow());
-        dialog.getDialogPane().setPrefSize(1024, 768);
-        dialog.setTitle(s("Bean browser"));
-        dialog.setResizable(true);
-        dialog.setResultConverter(p -> p.getButtonData() == OK_DONE ? beans.getSelectionModel().getSelectedItems() : null);
-        dialog.getDialogPane().getButtonTypes().addAll(new ButtonType(s("Add"), OK_DONE), ButtonType.CANCEL);
-        dialog.getDialogPane().setContent(ScrollPanes.scrollPane(beans));
-        return dialog;
+    @PrototypeBean
+    public Dialog<List<Map.Entry<String, BeanDefinition>>> beanBrowser(BeanBrowserTable beans) {
+        return new MaridDialog<List<Map.Entry<String, BeanDefinition>>>(primaryStage, new ButtonType(s("Add"), OK_DONE), CANCEL)
+                .preferredSize(1024, 768)
+                .title("Bean browser")
+                .with((d, p) -> d.setResizable(true))
+                .result(beans.getSelectionModel()::getSelectedItems)
+                .with((d, p) -> p.setContent(ScrollPanes.scrollPane(beans)));
     }
 }
