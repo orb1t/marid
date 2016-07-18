@@ -20,10 +20,15 @@ package org.marid.spring.xml.data;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.marid.ide.project.ProjectProfile;
 
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Field;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.stripToNull;
@@ -31,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.stripToNull;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class UtilConstant extends AbstractData<UtilConstant> {
+public class UtilConstant extends AbstractData<UtilConstant> implements BeanLike {
 
     public final StringProperty id = new SimpleStringProperty(this, "id");
     public final StringProperty staticField = new SimpleStringProperty(this, "static-field");
@@ -46,5 +51,44 @@ public class UtilConstant extends AbstractData<UtilConstant> {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         id.set(stripToNull(in.readUTF()));
         staticField.set(stripToNull(in.readUTF()));
+    }
+
+    @Override
+    public Stream<? extends Executable> getConstructors(ProjectProfile profile) {
+        return Stream.empty();
+    }
+
+    @Override
+    public Optional<Class<?>> getClass(ProjectProfile profile) {
+        if (staticField.isEmpty().get()) {
+            return Optional.empty();
+        }
+        final String text = staticField.get();
+        final int index = text.lastIndexOf('.');
+        if (index < 0) {
+            return Optional.empty();
+        }
+        final String className = text.substring(0, index);
+        final String fieldName = text.substring(index + 1);
+        final Optional<Class<?>> type = profile.getClass(className);
+        if (type.isPresent()) {
+            try {
+                final Field field = type.get().getField(fieldName);
+                return Optional.of(field.getType());
+            } catch (NoSuchFieldException x) {
+                return Optional.empty();
+            }
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public void updateBeanData(ProjectProfile profile) {
+    }
+
+    @Override
+    public StringProperty nameProperty() {
+        return id;
     }
 }

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans;
+package org.marid.dependant.beaneditor.beans.beans;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -28,6 +28,8 @@ import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.props.BeanDataEditorConfiguration;
 import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.ScrollPanes;
+import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.misc.Reflections;
@@ -37,7 +39,6 @@ import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.ConstructorArg;
 import org.marid.spring.xml.data.Property;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -56,18 +57,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
+import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
+import static javafx.scene.control.ButtonType.CANCEL;
+import static org.marid.Ide.primaryStage;
 import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanEditorActions {
+public class BeanListActions {
 
     private final AnnotationConfigApplicationContext context;
-    private final BeanEditorTable table;
+    private final BeanListTable table;
     private final ProjectCacheManager cacheManager;
-    private final ObjectProvider<Dialog<List<Entry<String, BeanDefinition>>>> beanBrowser;
+    private final BeanMetaInfoProvider beanMetaInfoProvider;
     private final IdeDependants dependants;
     private final ProjectProfile profile;
 
@@ -75,16 +79,16 @@ public class BeanEditorActions {
     public final BooleanBinding clearDisabled;
 
     @Autowired
-    public BeanEditorActions(AnnotationConfigApplicationContext context,
-                             BeanEditorTable table,
-                             ProjectCacheManager cacheManager,
-                             ObjectProvider<Dialog<List<Entry<String, BeanDefinition>>>> beanBrowser,
-                             IdeDependants dependants,
-                             ProjectProfile profile) {
+    public BeanListActions(AnnotationConfigApplicationContext context,
+                           BeanListTable table,
+                           ProjectCacheManager cacheManager,
+                           BeanMetaInfoProvider beanMetaInfoProvider,
+                           IdeDependants dependants,
+                           ProjectProfile profile) {
         this.context = context;
         this.table = table;
         this.cacheManager = cacheManager;
-        this.beanBrowser = beanBrowser;
+        this.beanMetaInfoProvider = beanMetaInfoProvider;
         this.dependants = dependants;
         this.profile = profile;
 
@@ -105,10 +109,15 @@ public class BeanEditorActions {
     }
 
     public void onBrowse(ActionEvent event) {
-        final Optional<List<Entry<String, BeanDefinition>>> entry = beanBrowser.getObject().showAndWait();
-        if (entry.isPresent()) {
-            entry.get().forEach(this::insertItem);
-        }
+        final BeanBrowserTable beans = new BeanBrowserTable(beanMetaInfoProvider);
+        new MaridDialog<List<Entry<String, BeanDefinition>>>(primaryStage, new ButtonType(s("Add"), OK_DONE), CANCEL)
+                .preferredSize(1024, 768)
+                .title("Bean browser")
+                .with((d, p) -> d.setResizable(true))
+                .result(beans.getSelectionModel()::getSelectedItems)
+                .with((d, p) -> p.setContent(ScrollPanes.scrollPane(beans)))
+                .showAndWait()
+                .ifPresent(entries -> entries.forEach(this::insertItem));
     }
 
     public void onAddNew(ActionEvent event) {
@@ -245,7 +254,7 @@ public class BeanEditorActions {
                         context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
                         context.setDisplayName(editor.getName());
                         context.register((Class[]) editor.getConfigurations());
-                        context.setParent(BeanEditorActions.this.context);
+                        context.setParent(BeanListActions.this.context);
                         context.getBeanFactory().registerSingleton("beanData", beanData);
                         context.refresh();
                         context.start();

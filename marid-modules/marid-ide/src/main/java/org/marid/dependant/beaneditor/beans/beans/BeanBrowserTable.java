@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans;
+package org.marid.dependant.beaneditor.beans.beans;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -24,7 +24,6 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.marid.spring.annotation.OrderedInit;
-import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.config.BeanDefinition;
 
 import java.util.Map;
@@ -35,7 +34,6 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov
  */
-@PrototypeComponent
 public class BeanBrowserTable extends TableView<Map.Entry<String, BeanDefinition>> {
 
     public BeanBrowserTable(BeanMetaInfoProvider beanMetaInfoProvider) {

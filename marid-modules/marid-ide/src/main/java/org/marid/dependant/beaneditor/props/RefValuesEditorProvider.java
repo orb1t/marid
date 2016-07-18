@@ -25,6 +25,7 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.data.RefValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -82,14 +83,16 @@ public class RefValuesEditorProvider {
                         final Optional<Class<?>> bco = profile.getClass(data.type.get());
                         if (bco.isPresent()) {
                             getItems().clear();
-                            profile.getBeanFiles().values().forEach(file -> file.beans.forEach(bean -> {
-                                final Optional<Class<?>> co = bean.getClass(profile);
-                                if (co.isPresent()) {
-                                    if (bco.get().isAssignableFrom(co.get())) {
-                                        getItems().add(bean.name.get());
+                            for (final BeanFile beanFile : profile.getBeanFiles().values()) {
+                                beanFile.allBeans().forEach(b -> {
+                                    final Optional<Class<?>> co = b.getClass(profile);
+                                    if (co.isPresent()) {
+                                        if (bco.get().isAssignableFrom(co.get())) {
+                                            getItems().add(b.nameProperty().get());
+                                        }
                                     }
-                                }
-                            }));
+                                });
+                            }
                         }
                         super.startEdit();
                     }

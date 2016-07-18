@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans;
+package org.marid.dependant.beaneditor.beans.beans;
 
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -24,8 +24,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
-import org.marid.ide.project.ProjectCacheManager;
-import org.marid.ide.project.ProjectManager;
+import org.marid.dependant.beaneditor.beans.controls.NameColumn;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.data.BeanData;
@@ -46,39 +45,23 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanEditorTable extends TableView<BeanData> {
+public class BeanListTable extends TableView<BeanData> {
 
     @Autowired
-    public BeanEditorTable(BeanFile beanFile) {
+    public BeanListTable(BeanFile beanFile) {
         super(beanFile.beans);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setEditable(true);
     }
 
     @OrderedInit(1)
-    public void nameColumn(ObjectFactory<BeanEditorActions> actions,
-                           ProjectProfile profile,
-                           ProjectCacheManager cacheManager) {
+    public void nameColumn(ObjectFactory<BeanListActions> actions, ProjectProfile profile) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Name"));
         col.setCellValueFactory(param -> param.getValue().name);
-        col.setCellFactory(param -> new TextFieldTableCell<BeanData, String>(new DefaultStringConverter()) {
-            @Override
-            public void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (!empty && item != null) {
-                    final BeanData beanData = getItems().get(getIndex());
-                    setContextMenu(actions.getObject().contextMenu(beanData));
-                }
-            }
-
-            @Override
-            public void commitEdit(String newValue) {
-                final String oldValue = getItem();
-                newValue = cacheManager.generateBeanName(profile, newValue);
-                super.commitEdit(newValue);
-                ProjectManager.onBeanNameChange(profile, oldValue, newValue);
-            }
-        });
+        col.setCellFactory(param -> new NameColumn<>(profile, c -> {
+            final BeanData beanData = getItems().get(c.getIndex());
+            setContextMenu(actions.getObject().contextMenu(beanData));
+        }));
         col.setPrefWidth(250);
         col.setMaxWidth(450);
         col.setEditable(true);
@@ -118,7 +101,7 @@ public class BeanEditorTable extends TableView<BeanData> {
         final ComboBoxTableCell<BeanData, String> cell = new ComboBoxTableCell<BeanData, String>() {
             @Override
             public void startEdit() {
-                final BeanData beanData = BeanEditorTable.this.getItems().get(getIndex());
+                final BeanData beanData = BeanListTable.this.getItems().get(getIndex());
                 getItems().clear();
                 final Class<?> type = beanData.getClass(profile).orElse(null);
                 if (type != null) {

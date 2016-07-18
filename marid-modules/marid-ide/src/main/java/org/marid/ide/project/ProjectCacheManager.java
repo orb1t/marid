@@ -19,7 +19,6 @@
 package org.marid.ide.project;
 
 import org.marid.logging.LogSupport;
-import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,18 +55,16 @@ public class ProjectCacheManager implements LogSupport {
         }, profile.logger()::log);
     }
 
-    public boolean containsBean(ProjectProfile profile, String name) {
+    public static boolean containsBean(ProjectProfile profile, String name) {
         for (final BeanFile file : profile.beanFiles.values()) {
-            for (final BeanData beanData : file.beans) {
-                if (beanData.name.isEqualTo(name).get()) {
-                    return true;
-                }
+            if (file.allBeans().anyMatch(b -> b.nameProperty().isEqualTo(name).get())) {
+                return true;
             }
         }
         return false;
     }
 
-    public String generateBeanName(ProjectProfile profile, String name) {
+    public static String generateBeanName(ProjectProfile profile, String name) {
         while (containsBean(profile, name)) {
             name += "_new";
         }

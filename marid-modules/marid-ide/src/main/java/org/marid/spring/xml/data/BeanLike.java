@@ -18,6 +18,7 @@
 
 package org.marid.spring.xml.data;
 
+import javafx.beans.property.StringProperty;
 import org.marid.ide.project.ProjectProfile;
 
 import java.lang.reflect.Executable;
@@ -34,4 +35,6 @@ public interface BeanLike {
     Optional<Class<?>> getClass(ProjectProfile profile);
 
     void updateBeanData(ProjectProfile profile);
+
+    StringProperty nameProperty();
 }

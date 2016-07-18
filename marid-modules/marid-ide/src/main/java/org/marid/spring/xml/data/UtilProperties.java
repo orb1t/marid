@@ -22,12 +22,17 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
+import org.marid.ide.project.ProjectProfile;
 
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.lang.reflect.Executable;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.stripToNull;
@@ -35,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.stripToNull;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class UtilProperties extends AbstractData<UtilProperties> {
+public class UtilProperties extends AbstractData<UtilProperties> implements BeanLike {
 
     public final StringProperty id = new SimpleStringProperty(this, "id");
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type", String.class.getName());
@@ -74,5 +79,24 @@ public class UtilProperties extends AbstractData<UtilProperties> {
             final String value = in.readUTF();
             entries.put(key, value);
         }
+    }
+
+    @Override
+    public Stream<? extends Executable> getConstructors(ProjectProfile profile) {
+        return Stream.empty();
+    }
+
+    @Override
+    public Optional<Class<?>> getClass(ProjectProfile profile) {
+        return Optional.of(Properties.class);
+    }
+
+    @Override
+    public void updateBeanData(ProjectProfile profile) {
+    }
+
+    @Override
+    public StringProperty nameProperty() {
+        return id;
     }
 }

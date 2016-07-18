@@ -224,4 +224,9 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
             properties.add(prop);
         }
     }
+
+    @Override
+    public StringProperty nameProperty() {
+        return name;
+    }
 }

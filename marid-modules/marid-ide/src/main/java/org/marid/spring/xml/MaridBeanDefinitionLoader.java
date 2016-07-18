@@ -18,10 +18,7 @@
 
 package org.marid.spring.xml;
 
-import org.marid.spring.xml.data.BeanData;
-import org.marid.spring.xml.data.BeanFile;
-import org.marid.spring.xml.data.ConstructorArg;
-import org.marid.spring.xml.data.Property;
+import org.marid.spring.xml.data.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -89,6 +86,12 @@ public class MaridBeanDefinitionLoader {
                         beanData.factoryBean.set(e.getAttribute("factory-bean"));
                         beanData.factoryMethod.set(e.getAttribute("factory-method"));
                         beanFile.beans.add(beanData);
+                        break;
+                    case "util:constant":
+                        final UtilConstant constant = new UtilConstant();
+                        constant.id.set(e.getAttribute("id"));
+                        constant.staticField.set(e.getAttribute("static-field"));
+                        beanFile.constants.add(constant);
                         break;
                 }
             }

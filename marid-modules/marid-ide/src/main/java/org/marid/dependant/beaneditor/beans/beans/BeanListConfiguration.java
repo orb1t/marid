@@ -16,31 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans.conf;
+package org.marid.dependant.beaneditor.beans.beans;
 
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
-import org.marid.dependant.beaneditor.beans.BeanBrowserTable;
-import org.marid.dependant.beaneditor.beans.BeanEditorActions;
-import org.marid.dependant.beaneditor.beans.BeanEditorTable;
 import org.marid.jfx.ScrollPanes;
-import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.toolbar.ToolbarBuilder;
-import org.marid.spring.annotation.PrototypeBean;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
-import java.util.Map;
-
-import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
-import static javafx.scene.control.ButtonType.CANCEL;
-import static org.marid.Ide.primaryStage;
 import static org.marid.jfx.icons.FontIcon.*;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -49,7 +34,7 @@ import static org.marid.l10n.L10n.s;
 public class BeanListConfiguration {
 
     @Bean
-    public ToolBar beanEditorToolbar(BeanEditorActions actions) {
+    public ToolBar beanEditorToolbar(BeanListActions actions) {
         return new ToolbarBuilder()
                 .add("Add", M_ADD, actions::onAddNew)
                 .add("Edit...", M_EDIT, actions::onEdit, actions.itemActionDisabled)
@@ -64,20 +49,7 @@ public class BeanListConfiguration {
     }
 
     @Bean
-    public BorderPane beanEditor(BeanEditorTable table, ToolBar beanEditorToolbar) {
-        final BorderPane pane = new BorderPane();
-        pane.setCenter(ScrollPanes.scrollPane(table));
-        pane.setTop(beanEditorToolbar);
-        return pane;
-    }
-
-    @PrototypeBean
-    public Dialog<List<Map.Entry<String, BeanDefinition>>> beanBrowser(BeanBrowserTable beans) {
-        return new MaridDialog<List<Map.Entry<String, BeanDefinition>>>(primaryStage, new ButtonType(s("Add"), OK_DONE), CANCEL)
-                .preferredSize(1024, 768)
-                .title("Bean browser")
-                .with((d, p) -> d.setResizable(true))
-                .result(beans.getSelectionModel()::getSelectedItems)
-                .with((d, p) -> p.setContent(ScrollPanes.scrollPane(beans)));
+    public BorderPane beanEditor(BeanListTable table, ToolBar beanEditorToolbar) {
+        return new BorderPane(ScrollPanes.scrollPane(table), beanEditorToolbar, null, null, null);
     }
 }

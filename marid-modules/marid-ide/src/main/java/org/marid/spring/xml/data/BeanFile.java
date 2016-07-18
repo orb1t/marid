@@ -24,6 +24,7 @@ import javafx.collections.ObservableList;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -68,5 +69,13 @@ public class BeanFile extends AbstractData<BeanFile> {
         for (int i = 0; i < constCount; i++) {
             constants.add((UtilConstant) in.readObject());
         }
+    }
+
+    public Stream<BeanLike> allBeans() {
+        final Stream.Builder<BeanLike> builder = Stream.builder();
+        beans.forEach(builder::add);
+        properties.forEach(builder::add);
+        constants.forEach(builder::add);
+        return builder.build();
     }
 }

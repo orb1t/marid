@@ -25,7 +25,7 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.marid.dependant.beaneditor.beans.BeanEditorTable;
+import org.marid.dependant.beaneditor.beans.beans.BeanListTable;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.spring.xml.data.BeanData;
@@ -49,8 +49,8 @@ import static org.marid.l10n.L10n.s;
 public class BeanDataEditorConfiguration {
 
     @Bean
-    public BeanData beanData(BeanEditorTable beanEditorTable) {
-        return beanEditorTable.getSelectionModel().getSelectedItem();
+    public BeanData beanData(BeanListTable beanListTable) {
+        return beanListTable.getSelectionModel().getSelectedItem();
     }
 
     @Bean

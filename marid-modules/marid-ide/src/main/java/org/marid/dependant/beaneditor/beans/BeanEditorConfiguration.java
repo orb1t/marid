@@ -19,6 +19,10 @@
 package org.marid.dependant.beaneditor.beans;
 
 import javafx.collections.MapChangeListener;
+import javafx.geometry.Side;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.layout.BorderPane;
 import org.marid.ide.panes.filebrowser.BeanFileBrowserTree;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
@@ -29,6 +33,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import java.nio.file.Path;
+
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -63,5 +69,20 @@ public class BeanEditorConfiguration {
         };
         profile.getBeanFiles().addListener(changeListener);
         tab.setOnCloseRequest(event -> profile.getBeanFiles().removeListener(changeListener));
+    }
+
+    @Bean
+    public TabPane beanEditorTabs(BorderPane beanEditor, BorderPane constantsEditor) {
+        final TabPane tabPane = new TabPane(
+                new Tab(s("Beans"), beanEditor),
+                new Tab(s("Constants"), constantsEditor),
+                new Tab(s("Properties"), new BorderPane()),
+                new Tab(s("Maps"), new BorderPane()),
+                new Tab(s("Lists"), new BorderPane()),
+                new Tab(s("Sets"), new BorderPane())
+        );
+        tabPane.setSide(Side.BOTTOM);
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        return tabPane;
     }
 }

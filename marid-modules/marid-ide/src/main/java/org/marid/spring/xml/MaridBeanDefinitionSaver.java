@@ -19,10 +19,7 @@
 package org.marid.spring.xml;
 
 import javafx.beans.property.StringProperty;
-import org.marid.spring.xml.data.BeanData;
-import org.marid.spring.xml.data.BeanFile;
-import org.marid.spring.xml.data.ConstructorArg;
-import org.marid.spring.xml.data.Property;
+import org.marid.spring.xml.data.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -127,6 +124,13 @@ public class MaridBeanDefinitionSaver {
                     }
                     setAttr(property.type, element);
                 }
+            }
+
+            for (final UtilConstant constant : beanFile.constants) {
+                final Element beanElement = document.createElementNS(SPRING_SCHEMA_PREFIX + "util", "util:constant");
+                beans.appendChild(beanElement);
+                setAttr(constant.id, beanElement);
+                setAttr(constant.staticField, beanElement);
             }
         }
 
