@@ -24,6 +24,8 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.marid.spring.annotation.OrderedInit;
+import org.marid.spring.annotation.PrototypeComponent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 
 import java.util.Map;
@@ -34,8 +36,10 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov
  */
+@PrototypeComponent
 public class BeanBrowserTable extends TableView<Map.Entry<String, BeanDefinition>> {
 
+    @Autowired
     public BeanBrowserTable(BeanMetaInfoProvider beanMetaInfoProvider) {
         super(beanMetaInfoProvider.beans().entrySet().stream()
                 .filter(e -> e.getValue().isAbstract())

@@ -39,7 +39,7 @@ public class ProjectCacheManager implements LogSupport {
         this.projectBuilder = projectBuilder;
     }
 
-    public URLClassLoader getClassLoader(ProjectProfile profile) {
+    public static URLClassLoader getClassLoader(ProjectProfile profile) {
         return profile.cacheEntry.getClassLoader();
     }
 

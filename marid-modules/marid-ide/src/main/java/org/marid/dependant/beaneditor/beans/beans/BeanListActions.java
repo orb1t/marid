@@ -70,8 +70,6 @@ public class BeanListActions {
 
     private final AnnotationConfigApplicationContext context;
     private final BeanListTable table;
-    private final ProjectCacheManager cacheManager;
-    private final BeanMetaInfoProvider beanMetaInfoProvider;
     private final IdeDependants dependants;
     private final ProjectProfile profile;
 
@@ -81,14 +79,10 @@ public class BeanListActions {
     @Autowired
     public BeanListActions(AnnotationConfigApplicationContext context,
                            BeanListTable table,
-                           ProjectCacheManager cacheManager,
-                           BeanMetaInfoProvider beanMetaInfoProvider,
                            IdeDependants dependants,
                            ProjectProfile profile) {
         this.context = context;
         this.table = table;
-        this.cacheManager = cacheManager;
-        this.beanMetaInfoProvider = beanMetaInfoProvider;
         this.dependants = dependants;
         this.profile = profile;
 
@@ -109,7 +103,7 @@ public class BeanListActions {
     }
 
     public void onBrowse(ActionEvent event) {
-        final BeanBrowserTable beans = new BeanBrowserTable(beanMetaInfoProvider);
+        final BeanBrowserTable beans = context.getBean(BeanBrowserTable.class);
         new MaridDialog<List<Entry<String, BeanDefinition>>>(primaryStage, new ButtonType(s("Add"), OK_DONE), CANCEL)
                 .preferredSize(1024, 768)
                 .title("Bean browser")
@@ -122,7 +116,7 @@ public class BeanListActions {
 
     public void onAddNew(ActionEvent event) {
         final BeanData beanData = new BeanData();
-        final String name = cacheManager.generateBeanName(profile, "newBean");
+        final String name = ProjectCacheManager.generateBeanName(profile, "newBean");
         beanData.name.set(name);
         beanData.type.set(Object.class.getName());
         table.getItems().add(beanData);
@@ -131,7 +125,7 @@ public class BeanListActions {
     private void insertItem(Entry<String, BeanDefinition> entry) {
         final BeanDefinition def = entry.getValue();
         final BeanData beanData = new BeanData();
-        beanData.name.set(cacheManager.generateBeanName(profile, entry.getKey()));
+        beanData.name.set(ProjectCacheManager.generateBeanName(profile, entry.getKey()));
         beanData.factoryBean.set(def.getFactoryBeanName());
         beanData.factoryMethod.set(def.getFactoryMethodName());
         beanData.type.set(def.getBeanClassName());
@@ -208,7 +202,7 @@ public class BeanListActions {
             final MenuItem menuItem = new MenuItem(name, FontIcons.glyphIcon(FontIcon.M_MEMORY, 16));
             menuItem.setOnAction(ev -> {
                 final BeanData newBeanData = new BeanData();
-                newBeanData.name.set(cacheManager.generateBeanName(profile, method.getName()));
+                newBeanData.name.set(ProjectCacheManager.generateBeanName(profile, method.getName()));
                 newBeanData.factoryBean.set(beanData.name.get());
                 newBeanData.factoryMethod.set(method.getName());
                 for (final Parameter parameter : method.getParameters()) {
@@ -242,7 +236,7 @@ public class BeanListActions {
 
     private List<MenuItem> editors(Class<?> type, BeanData beanData) {
         final List<MenuItem> items = new ArrayList<>();
-        final URLClassLoader classLoader = cacheManager.getClassLoader(profile);
+        final URLClassLoader classLoader = ProjectCacheManager.getClassLoader(profile);
         for (final BeanEditor editor : ServiceLoader.load(BeanEditor.class, classLoader)) {
             for (final Class<?> e : editor.getBeanTypes()) {
                 if (e.isAssignableFrom(type)) {
