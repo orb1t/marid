@@ -22,7 +22,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ListCell;
-import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.dialog.ListDialog;
 import org.marid.jfx.icons.FontIcon;
@@ -44,21 +43,19 @@ import static org.marid.misc.Reflections.parameterName;
 public class BeanDataActions {
 
     private final ProjectProfile profile;
-    private final ProjectCacheManager cacheManager;
     private final BeanData beanData;
 
-    public BeanDataActions(ProjectProfile profile, ProjectCacheManager cacheManager, BeanData beanData) {
+    public BeanDataActions(ProjectProfile profile, BeanData beanData) {
         this.profile = profile;
-        this.cacheManager = cacheManager;
         this.beanData = beanData;
     }
 
     public void onRefresh(ActionEvent event) {
-        cacheManager.updateBeanData(profile, beanData);
+        beanData.updateBeanData(profile);
     }
 
     public void onSelectConstructor(ActionEvent event) {
-        final ObservableList<Executable> constructors = cacheManager.getConstructors(profile, beanData)
+        final ObservableList<Executable> constructors = beanData.getConstructors(profile)
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
         final ListDialog<Executable> dialog = new ListDialog<>("Select constructor", constructors);
         dialog.getListView().setCellFactory(param -> new ListCell<Executable>() {
@@ -86,7 +83,7 @@ public class BeanDataActions {
         dialog.setResizable(true);
         final Optional<Executable> result = dialog.showAndWait();
         if (result.isPresent()) {
-            cacheManager.updateBeanDataConstructorArgs(result.get().getParameters(), beanData);
+            beanData.updateBeanDataConstructorArgs(result.get().getParameters());
         }
     }
 }

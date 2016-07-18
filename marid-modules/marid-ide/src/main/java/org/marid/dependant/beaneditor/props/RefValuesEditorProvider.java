@@ -24,7 +24,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
-import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.RefValue;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +41,10 @@ import static org.marid.l10n.L10n.s;
 public class RefValuesEditorProvider {
 
     private final ProjectProfile profile;
-    private final ProjectCacheManager cacheManager;
 
     @Autowired
-    public RefValuesEditorProvider(ProjectProfile profile, ProjectCacheManager cacheManager) {
+    public RefValuesEditorProvider(ProjectProfile profile) {
         this.profile = profile;
-        this.cacheManager = cacheManager;
     }
 
     public <T extends RefValue<T>> TableView<T> newEditor(ObservableList<T> values) {
@@ -86,7 +83,7 @@ public class RefValuesEditorProvider {
                         if (bco.isPresent()) {
                             getItems().clear();
                             profile.getBeanFiles().values().forEach(file -> file.beans.forEach(bean -> {
-                                final Optional<Class<?>> co = cacheManager.getBeanClass(profile, bean);
+                                final Optional<Class<?>> co = bean.getClass(profile);
                                 if (co.isPresent()) {
                                     if (bco.get().isAssignableFrom(co.get())) {
                                         getItems().add(bean.name.get());

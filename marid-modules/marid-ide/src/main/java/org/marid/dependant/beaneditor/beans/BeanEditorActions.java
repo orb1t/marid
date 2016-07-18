@@ -159,7 +159,7 @@ public class BeanEditorActions {
             }
         }
 
-        cacheManager.updateBeanData(profile, beanData);
+        beanData.updateBeanData(profile);
 
         table.getItems().add(beanData);
     }
@@ -209,7 +209,7 @@ public class BeanEditorActions {
                     newBeanData.constructorArgs.add(arg);
                 }
                 table.getItems().add(newBeanData);
-                cacheManager.updateBeanData(profile, newBeanData);
+                newBeanData.updateBeanData(profile);
             });
             return menuItem;
         };
@@ -260,7 +260,7 @@ public class BeanEditorActions {
     public ContextMenu contextMenu(BeanData beanData) {
         final ContextMenu menu = new ContextMenu();
         final List<List<MenuItem>> menuItems = new ArrayList<>();
-        final Class<?> type = cacheManager.getBeanClass(profile, beanData).orElse(null);
+        final Class<?> type = beanData.getClass(profile).orElse(null);
         if (type == null) {
             return menu;
         }

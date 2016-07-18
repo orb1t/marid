@@ -114,15 +114,13 @@ public class BeanEditorTable extends TableView<BeanData> {
         getColumns().add(col);
     }
 
-    private TableCell<BeanData, String> methodCell(TableColumn<BeanData, String> column,
-                                                   ProjectProfile profile,
-                                                   ProjectCacheManager cacheManager) {
+    private TableCell<BeanData, String> methodCell(TableColumn<BeanData, String> column, ProjectProfile profile) {
         final ComboBoxTableCell<BeanData, String> cell = new ComboBoxTableCell<BeanData, String>() {
             @Override
             public void startEdit() {
                 final BeanData beanData = BeanEditorTable.this.getItems().get(getIndex());
                 getItems().clear();
-                final Class<?> type = cacheManager.getBeanClass(profile, beanData).orElse(null);
+                final Class<?> type = beanData.getClass(profile).orElse(null);
                 if (type != null) {
                     getItems().addAll(Stream.of(type.getMethods())
                             .filter(method -> method.getParameterCount() == 0)
@@ -144,20 +142,20 @@ public class BeanEditorTable extends TableView<BeanData> {
     }
 
     @OrderedInit(5)
-    public void initMethodColumn(ProjectProfile profile, ProjectCacheManager cacheManager) {
+    public void initMethodColumn(ProjectProfile profile) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Init method"));
         col.setCellValueFactory(param -> param.getValue().initMethod);
-        col.setCellFactory(param -> methodCell(param, profile, cacheManager));
+        col.setCellFactory(param -> methodCell(param, profile));
         col.setPrefWidth(180);
         col.setMaxWidth(340);
         getColumns().add(col);
     }
 
     @OrderedInit(6)
-    public void destroyMethodColumn(ProjectProfile profile, ProjectCacheManager cacheManager) {
+    public void destroyMethodColumn(ProjectProfile profile) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Destroy method"));
         col.setCellValueFactory(param -> param.getValue().destroyMethod);
-        col.setCellFactory(param -> methodCell(param, profile, cacheManager));
+        col.setCellFactory(param -> methodCell(param, profile));
         col.setPrefWidth(180);
         col.setMaxWidth(340);
         getColumns().add(col);
