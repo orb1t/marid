@@ -117,9 +117,9 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
         if (isFactoryBean()) {
             if (factoryBean.isNotEmpty().get()) {
                 return profile.getBeanFiles().values().stream()
-                        .flatMap(f -> f.beans.stream())
-                        .filter(b -> factoryBean.isEqualTo(b.name).get())
-                        .map(b -> getClass(profile))
+                        .flatMap(BeanFile::allBeans)
+                        .filter(b -> factoryBean.isEqualTo(b.nameProperty()).get())
+                        .map(b -> b.getClass(profile))
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .flatMap(t -> Stream.of(t.getMethods()))
