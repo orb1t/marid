@@ -22,9 +22,9 @@ import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.MethodParameter;
@@ -51,12 +51,11 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        final AutowireCapableBeanFactory autowireCapableBeanFactory = context.getAutowireCapableBeanFactory();
+        final DefaultListableBeanFactory f = new DefaultListableBeanFactory(context.getAutowireCapableBeanFactory());
         Stream.of(bean.getClass().getMethods())
                 .filter(m -> m.isAnnotationPresent(OrderedInit.class))
-                .filter(m -> m.getReturnType() == void.class)
                 .sorted(Comparator.comparingInt(m -> m.getAnnotation(OrderedInit.class).value()))
-                .forEach(method -> {
+                .forEachOrdered(method -> {
                     final boolean eager = !method.isAnnotationPresent(Lazy.class);
                     final Object[] args = new Object[method.getParameterCount()];
                     final Parameter[] parameters = method.getParameters();
@@ -66,14 +65,16 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
                         final boolean required = autowired != null && autowired.required();
                         final DependencyDescriptor descriptor = new DependencyDescriptor(methodParameter, required, eager);
                         try {
-                            final Object arg = autowireCapableBeanFactory.resolveDependency(descriptor, null);
-                            args[i] = arg;
+                            args[i] = f.resolveDependency(descriptor, null);
                         } catch (Exception x) {
                             throw new BeanInstantiationException(bean.getClass(), "Unable to autowire " + methodParameter, x);
                         }
                     }
                     try {
-                        method.invoke(bean, args);
+                        final Object result = method.invoke(bean, args);
+                        if (result != null) {
+                            f.registerSingleton(method.getName(), result);
+                        }
                     } catch (Exception x) {
                         throw new BeanInstantiationException(bean.getClass(), null, x);
                     }

@@ -20,12 +20,12 @@ package org.marid.dependant.beaneditor.beans.beans;
 
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.dependant.beaneditor.beans.controls.NameColumn;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanFile;
@@ -45,7 +45,7 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanListTable extends TableView<BeanData> {
+public class BeanListTable extends MaridTableView<BeanData> {
 
     @Autowired
     public BeanListTable(BeanFile beanFile) {

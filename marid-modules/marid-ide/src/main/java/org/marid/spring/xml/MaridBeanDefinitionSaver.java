@@ -132,6 +132,23 @@ public class MaridBeanDefinitionSaver {
                 setAttr(constant.id, beanElement);
                 setAttr(constant.staticField, beanElement);
             }
+
+            for (final UtilProperties properties : beanFile.properties) {
+                final Element element = document.createElementNS(SPRING_SCHEMA_PREFIX + "util", "util:constant");
+                beans.appendChild(element);
+                setAttr(properties.id, element);
+                setAttr(properties.ignoreResourceNotFound, element);
+                setAttr(properties.localOverride, element);
+                setAttr(properties.valueType, element);
+                setAttr(properties.location, element);
+
+                properties.entries.forEach((k, v) -> {
+                    final Element e = document.createElement("prop");
+                    element.appendChild(e);
+                    e.setAttribute("key", k);
+                    e.setTextContent(v);
+                });
+            }
         }
 
         private void setAttr(StringProperty property, Element element) {

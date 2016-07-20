@@ -18,8 +18,6 @@
 
 package org.marid.dependant.beaneditor.beans.beans;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.event.ActionEvent;
 import javafx.geometry.Side;
 import javafx.scene.Node;
@@ -44,6 +42,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -68,16 +67,13 @@ import static org.marid.l10n.L10n.s;
 @Component
 public class BeanListActions {
 
-    private final AnnotationConfigApplicationContext context;
+    private final ApplicationContext context;
     private final BeanListTable table;
     private final IdeDependants dependants;
     private final ProjectProfile profile;
 
-    public final BooleanBinding itemActionDisabled;
-    public final BooleanBinding clearDisabled;
-
     @Autowired
-    public BeanListActions(AnnotationConfigApplicationContext context,
+    public BeanListActions(ApplicationContext context,
                            BeanListTable table,
                            IdeDependants dependants,
                            ProjectProfile profile) {
@@ -85,9 +81,6 @@ public class BeanListActions {
         this.table = table;
         this.dependants = dependants;
         this.profile = profile;
-
-        this.itemActionDisabled = table.getSelectionModel().selectedIndexProperty().lessThan(0);
-        this.clearDisabled = Bindings.isEmpty(table.getItems());
     }
 
     public void onEdit(ActionEvent event) {

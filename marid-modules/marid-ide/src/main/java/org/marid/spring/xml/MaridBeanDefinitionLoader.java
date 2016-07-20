@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -93,6 +94,16 @@ public class MaridBeanDefinitionLoader {
                         constant.staticField.set(e.getAttribute("static-field"));
                         beanFile.constants.add(constant);
                         break;
+                    case "util:properties":
+                        final UtilProperties properties = new UtilProperties();
+                        properties.id.set(e.getAttribute("id"));
+                        properties.ignoreResourceNotFound.set(e.getAttribute("ignore-resource-not-found"));
+                        properties.localOverride.set(e.getAttribute(e.getAttribute("local-override")));
+                        properties.location.set(e.getAttribute("location"));
+                        properties.valueType.set(e.getAttribute("value-type"));
+                        fillProperties(properties.entries, e);
+                        beanFile.properties.add(properties);
+                        break;
                 }
             }
             return beanFile;
@@ -124,6 +135,16 @@ public class MaridBeanDefinitionLoader {
                         beanData.properties.add(p);
                         break;
                 }
+            }
+        }
+
+        private void fillProperties(Map<String, String> map, Element element) {
+            final NodeList children = element.getElementsByTagName("prop");
+            for (int i = 0; i < children.getLength(); i++) {
+                final Element e = (Element) children.item(i);
+                final String key = e.getAttribute("key");
+                final String value = e.getTextContent();
+                map.put(key, value);
             }
         }
     }

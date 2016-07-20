@@ -72,11 +72,13 @@ public class BeanEditorConfiguration {
     }
 
     @Bean
-    public TabPane beanEditorTabs(BorderPane beanEditor, BorderPane constantsEditor) {
+    public TabPane beanEditorTabs(BorderPane beanEditor,
+                                  BorderPane constantsEditor,
+                                  BorderPane propertiesEditor) {
         final TabPane tabPane = new TabPane(
                 new Tab(s("Beans"), beanEditor),
                 new Tab(s("Constants"), constantsEditor),
-                new Tab(s("Properties"), new BorderPane()),
+                new Tab(s("Properties"), propertiesEditor),
                 new Tab(s("Maps"), new BorderPane()),
                 new Tab(s("Lists"), new BorderPane()),
                 new Tab(s("Sets"), new BorderPane())

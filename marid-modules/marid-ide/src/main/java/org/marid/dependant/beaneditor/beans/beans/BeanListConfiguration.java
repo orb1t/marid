@@ -34,17 +34,17 @@ import static org.marid.jfx.icons.FontIcon.*;
 public class BeanListConfiguration {
 
     @Bean
-    public ToolBar beanEditorToolbar(BeanListActions actions) {
+    public ToolBar beanEditorToolbar(BeanListActions actions, BeanListTable table) {
         return new ToolbarBuilder()
                 .add("Add", M_ADD, actions::onAddNew)
-                .add("Edit...", M_EDIT, actions::onEdit, actions.itemActionDisabled)
+                .add("Edit...", M_EDIT, actions::onEdit, table.changeDisabled)
                 .addSeparator()
-                .add("Remove", O_REPO_DELETE, actions::onDelete, actions.itemActionDisabled)
-                .add("Clear", M_CLEAR_ALL, actions::onClear, actions.clearDisabled)
+                .add("Remove", O_REPO_DELETE, actions::onDelete, table.changeDisabled)
+                .add("Clear", M_CLEAR_ALL, actions::onClear, table.clearDisabled)
                 .addSeparator()
                 .add("Browse", O_BROWSER, actions::onBrowse)
                 .addSeparator()
-                .add("Actions", M_CREDIT_CARD, actions::onShowPopup, actions.itemActionDisabled)
+                .add("Actions", M_CREDIT_CARD, actions::onShowPopup, table.changeDisabled)
                 .build();
     }
 
