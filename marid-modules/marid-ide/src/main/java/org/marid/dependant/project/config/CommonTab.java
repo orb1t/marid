@@ -25,16 +25,19 @@ import org.apache.maven.model.Organization;
 import org.marid.jfx.panes.GenericGridPane;
 import org.marid.misc.Builder;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component("Common")
+@Component
 @Qualifier("projectConf")
+@Order(1)
 public class CommonTab extends GenericGridPane {
 
     public CommonTab(Model model) {
+        setId("Common");
         final Organization organization = Builder.getFrom(model::getOrganization, Organization::new, model::setOrganization);
         addTextField("Name", model::getName, model::setName);
         addTextField("GroupId", model::getGroupId, model::setGroupId);

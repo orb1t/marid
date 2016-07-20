@@ -43,8 +43,6 @@ public class NameColumn<T extends BeanLike> extends TextFieldTableCell<T, String
     public void updateItem(String item, boolean empty) {
         super.updateItem(item, empty);
         if (empty || item == null) {
-            setText(null);
-            setGraphic(null);
             setContextMenu(null);
         } else {
             updateTask.accept(this);

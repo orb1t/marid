@@ -37,6 +37,7 @@ import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.props.Props;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
@@ -45,11 +46,13 @@ import java.util.function.Function;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component("Repositories")
+@Component
 @Qualifier("projectConf")
+@Order(3)
 public class RepositoriesTab extends BorderPane {
 
     public RepositoriesTab(Model model) {
+        setId("Repositories");
         final RepositoryTable repositoryTable = new RepositoryTable(model);
         setCenter(repositoryTable);
         final Consumer<Button> itemSelectionTrigger = b -> b.disableProperty().bind(repositoryTable

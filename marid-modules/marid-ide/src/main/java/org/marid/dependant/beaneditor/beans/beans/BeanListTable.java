@@ -60,7 +60,7 @@ public class BeanListTable extends MaridTableView<BeanData> {
         col.setCellValueFactory(param -> param.getValue().name);
         col.setCellFactory(param -> new NameColumn<>(profile, c -> {
             final BeanData beanData = getItems().get(c.getIndex());
-            setContextMenu(actions.getObject().contextMenu(beanData));
+            c.setContextMenu(actions.getObject().contextMenu(beanData));
         }));
         col.setPrefWidth(250);
         col.setMaxWidth(450);

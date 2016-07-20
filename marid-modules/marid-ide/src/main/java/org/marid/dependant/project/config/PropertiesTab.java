@@ -22,6 +22,7 @@ import org.apache.maven.model.Model;
 import org.marid.jfx.panes.GenericGridPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.Properties;
@@ -29,12 +30,14 @@ import java.util.Properties;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component("Properties")
+@Component
 @Qualifier("projectConf")
+@Order(2)
 public class PropertiesTab extends GenericGridPane {
 
     @Autowired
     public PropertiesTab(Model model) {
+        setId("Properties");
         final Properties properties = model.getProperties();
         addTextField(properties, "Marid version", "marid.runtime.version", System.getProperty("implementation.version"));
     }

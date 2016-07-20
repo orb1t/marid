@@ -18,45 +18,36 @@
 
 package org.marid.dependant.project.config.deps;
 
-import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
-import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import org.apache.maven.model.Dependency;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class DependenciesEditor extends BorderPane {
 
-    public DependenciesEditor(List<Dependency> dependencies) {
+    public DependenciesEditor(String name, List<Dependency> dependencies) {
+        setId(name);
         final DependencyTable dependencyTable = new DependencyTable(dependencies);
         setCenter(dependencyTable);
-        final Consumer<Button> itemSelectionTrigger = b -> b.disableProperty().bind(dependencyTable
-                .getSelectionModel()
-                .selectedItemProperty()
-                .isNull());
         setBottom(new ToolbarBuilder()
                 .add("Add item", FontIcon.M_ADD, event -> dependencyTable.getItems().add(new Dependency()))
-                .add("Remove item", FontIcon.M_REMOVE, event -> {
-                    final int index = dependencyTable.getSelectionModel().getSelectedIndex();
-                    if (index >= 0) {
-                        dependencyTable.getItems().remove(index);
+                .add("Remove item", FontIcon.M_REMOVE, dependencyTable::onDelete, dependencyTable.changeDisabled)
+                .addSeparator()
+                .add("Clear all items", FontIcon.M_CLEAR_ALL, dependencyTable::onClear, dependencyTable.clearDisabled)
+                .addSeparator()
+                .add("Marid dependency", FontIcon.M_STAR_HALF, event -> {
+                    for (final Dependency dependency : dependencyTable.getSelectionModel().getSelectedItems()) {
+                        dependency.setGroupId("org.marid");
+                        dependency.setVersion("${marid.runtime.version}");
+                        dependencyTable.refresh();
                     }
-                }, itemSelectionTrigger)
-                .addSeparator()
-                .add("Clear all items", FontIcon.M_CLEAR_ALL,
-                        event -> dependencyTable.getItems().clear(),
-                        b -> b.disableProperty().bind(Bindings.size(dependencyTable.getItems()).isEqualTo(0)))
-                .addSeparator()
-                .add("Cut", FontIcon.M_CONTENT_CUT, event -> {}, itemSelectionTrigger)
-                .add("Copy", FontIcon.M_CONTENT_COPY, event -> {}, itemSelectionTrigger)
-                .add("Paste", FontIcon.M_CONTENT_PASTE, event -> {}, itemSelectionTrigger)
+                }, dependencyTable.changeDisabled)
                 .build(t -> setMargin(t,  new Insets(10, 0, 0, 0))));
     }
 }

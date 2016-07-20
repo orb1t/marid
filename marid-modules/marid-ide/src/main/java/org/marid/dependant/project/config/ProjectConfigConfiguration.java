@@ -20,7 +20,10 @@ package org.marid.dependant.project.config;
 
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import org.apache.maven.model.Model;
@@ -28,15 +31,17 @@ import org.marid.dependant.project.config.deps.DependenciesEditor;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.project.ProjectManager;
 import org.marid.jfx.panes.MaridScrollPane;
-import org.marid.l10n.L10n;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.core.annotation.Order;
 
-import java.util.Map;
+import java.util.List;
+
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,32 +55,34 @@ public class ProjectConfigConfiguration {
         return projectManager.getProfile().getModel();
     }
 
-    @Bean(name = "Dependencies")
+    @Bean
     @Qualifier("projectConf")
+    @Order(4)
     public DependenciesEditor mainDependencyEditor(Model model) {
-        return new DependenciesEditor(model.getDependencies());
+        return new DependenciesEditor("Dependencies", model.getDependencies());
     }
 
-    @Bean(name = "Configuration dependencies")
+    @Bean
     @Qualifier("projectConf")
+    @Order(5)
     public DependenciesEditor confDependencyEditor(Model model) {
-        return new DependenciesEditor(model.getProfiles().stream()
+        return new DependenciesEditor("Configuration dependencies", model.getProfiles().stream()
                 .filter(p -> "conf".equals(p.getId()))
                 .findAny()
-                .orElse(null)
+                .orElseThrow(IllegalStateException::new)
                 .getDependencies());
     }
 
     @Bean
-    public TabPane tabPane(@Qualifier("projectConf") Map<String, Node> nodes) {
+    public TabPane tabPane(@Qualifier("projectConf") List<Node> nodes) {
         final TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        nodes.forEach((name, node) -> {
-            final Tab tab = new Tab(L10n.s(name), new MaridScrollPane(node));
+        for (final Node node : nodes) {
+            final Tab tab = new Tab(s(node.getId()), new MaridScrollPane(node));
             ((Region) tab.getContent()).setPadding(new Insets(10, 0, 10, 0));
             tab.getContent().setStyle("-fx-background-color: -fx-background");
             tabPane.getTabs().add(tab);
-        });
+        }
         return tabPane;
     }
 
@@ -85,7 +92,7 @@ public class ProjectConfigConfiguration {
         dialog.getDialogPane().setPrefSize(800, 600);
         dialog.getDialogPane().setContent(tabPane);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
-        dialog.setTitle(L10n.s("Project preferences: %s", projectManager.getProfile()));
+        dialog.setTitle(s("Project preferences: %s", projectManager.getProfile()));
         dialog.initModality(Modality.WINDOW_MODAL);
         dialog.initOwner(idePane.getScene().getWindow());
         dialog.setResultConverter(type -> true);
