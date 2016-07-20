@@ -27,6 +27,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.marid.dependant.beaneditor.beans.beans.BeanListTable;
 import org.marid.ide.panes.main.IdePane;
+import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.spring.xml.data.BeanData;
 import org.springframework.context.ApplicationListener;
@@ -36,7 +37,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextStartedEvent;
 
 import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
-import static org.marid.jfx.ScrollPanes.scrollPane;
 import static org.marid.jfx.icons.FontIcon.M_LIST;
 import static org.marid.jfx.icons.FontIcon.M_REFRESH;
 import static org.marid.l10n.L10n.s;
@@ -56,8 +56,8 @@ public class BeanDataEditorConfiguration {
     @Bean
     public TabPane tabPane(RefValuesEditorProvider provider, BeanData beanData) {
         final TabPane tabPane = new TabPane(
-                new Tab(s("Constructor arguments"), scrollPane(provider.newEditor(beanData.constructorArgs))),
-                new Tab(s("Properties"), scrollPane(provider.newEditor(beanData.properties)))
+                new Tab(s("Constructor arguments"), new MaridScrollPane(provider.newEditor(beanData.constructorArgs))),
+                new Tab(s("Properties"), new MaridScrollPane(provider.newEditor(beanData.properties)))
         );
         tabPane.setTabClosingPolicy(UNAVAILABLE);
         return tabPane;

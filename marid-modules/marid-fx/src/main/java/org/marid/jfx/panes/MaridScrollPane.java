@@ -18,18 +18,18 @@
 
 package org.marid.jfx.panes;
 
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.ToolBar;
-import org.controlsfx.control.StatusBar;
+import javafx.scene.Node;
+import javafx.scene.control.ScrollPane;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-public interface Dashboard {
+public class MaridScrollPane extends ScrollPane {
 
-    ToolBar getToolBar();
-
-    MenuBar getMenuBar();
-
-    StatusBar getStatusBar();
+    public MaridScrollPane(Node node) {
+        super(node);
+        setFitToHeight(true);
+        setFitToWidth(true);
+        setStyle("-fx-background-color: transparent");
+    }
 }

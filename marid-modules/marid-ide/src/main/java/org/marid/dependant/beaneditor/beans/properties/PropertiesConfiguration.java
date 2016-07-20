@@ -20,7 +20,7 @@ package org.marid.dependant.beaneditor.beans.properties;
 
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
-import org.marid.jfx.ScrollPanes;
+import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +39,6 @@ public class PropertiesConfiguration {
 
     @Bean
     public BorderPane propertiesEditor(PropertiesTable table, ToolBar propertiesToolbar) {
-        return new BorderPane(ScrollPanes.scrollPane(table), propertiesToolbar, null, null, null);
+        return new BorderPane(new MaridScrollPane(table), propertiesToolbar, null, null, null);
     }
 }

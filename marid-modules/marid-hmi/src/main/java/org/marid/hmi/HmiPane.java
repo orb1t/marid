@@ -23,12 +23,11 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import org.controlsfx.control.StatusBar;
-import org.marid.jfx.panes.Dashboard;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class HmiPane extends BorderPane implements Dashboard {
+public class HmiPane extends BorderPane {
 
     final MenuBar menuBar = new MenuBar();
     final ToolBar toolBar = new ToolBar();
@@ -40,17 +39,14 @@ public class HmiPane extends BorderPane implements Dashboard {
         statusBar.setText("");
     }
 
-    @Override
     public MenuBar getMenuBar() {
         return menuBar;
     }
 
-    @Override
     public ToolBar getToolBar() {
         return toolBar;
     }
 
-    @Override
     public StatusBar getStatusBar() {
         return statusBar;
     }

@@ -26,7 +26,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.marid.ide.panes.main.IdePane;
-import org.marid.jfx.ScrollPanes;
+import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.l10n.L10n;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
@@ -44,7 +44,7 @@ public class IconViewer extends Stage {
         super(StageStyle.UTILITY);
         initOwner(idePane.getScene().getWindow());
         setTitle(L10n.s("Icon viewer"));
-        final ScrollPane scrollPane = ScrollPanes.scrollPane(table);
+        final ScrollPane scrollPane = new MaridScrollPane(table);
         final BorderPane pane = new BorderPane(scrollPane);
         pane.setPrefSize(800, 600);
         final Label countLabel = new Label(L10n.s("Icon count: %d", table.getItems().size()));
