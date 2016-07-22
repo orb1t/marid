@@ -19,9 +19,9 @@
 package org.marid.dependant.project.runner;
 
 import javafx.scene.Scene;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.marid.Ide;
+import org.marid.IdePrefs;
 import org.marid.logging.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
@@ -29,6 +29,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
+import java.util.prefs.Preferences;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,14 +37,19 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class ProjectRunner extends Stage implements LogSupport {
 
+    private final Preferences preferences;
+
     @Autowired
     public ProjectRunner(ProjectRunnerPane runnerPane) {
+        preferences = IdePrefs.PREFERENCES.node(runnerPane.profile.getName()).node("runner");
         getIcons().addAll(Ide.primaryStage.getIcons());
-        initModality(Modality.NONE);
-        setScene(new Scene(runnerPane, 800, 600));
-        setMaximized(true);
+        setScene(new Scene(runnerPane, preferences.getDouble("width", 800), preferences.getDouble("height", 600)));
         setTitle("[" + runnerPane.getProfile() + "]");
         setOnCloseRequest(event -> {
+            preferences.putDouble("x", getX());
+            preferences.putDouble("y", getY());
+            preferences.putDouble("width", getWidth());
+            preferences.putDouble("height", getHeight());
             boolean stopped = false;
             try {
                 runnerPane.printStream.println("exit");
@@ -59,6 +65,10 @@ public class ProjectRunner extends Stage implements LogSupport {
                     }
                 }
             }
+        });
+        setOnShowing(event -> {
+            setX(preferences.getDouble("x", getX()));
+            setY(preferences.getDouble("y", getY()));
         });
     }
 

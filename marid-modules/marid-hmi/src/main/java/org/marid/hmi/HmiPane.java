@@ -18,36 +18,24 @@
 
 package org.marid.hmi;
 
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
-import org.controlsfx.control.StatusBar;
+import javafx.stage.Stage;
+import org.marid.jfx.panes.MaridScrollPane;
+
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class HmiPane extends BorderPane {
 
-    final MenuBar menuBar = new MenuBar();
-    final ToolBar toolBar = new ToolBar();
-    final StatusBar statusBar = new StatusBar();
+    private final HmiStagesList stagesList = new HmiStagesList();
 
     public HmiPane() {
-        setTop(new VBox(menuBar, toolBar));
-        setBottom(statusBar);
-        statusBar.setText("");
+        setCenter(new MaridScrollPane(stagesList));
     }
 
-    public MenuBar getMenuBar() {
-        return menuBar;
-    }
-
-    public ToolBar getToolBar() {
-        return toolBar;
-    }
-
-    public StatusBar getStatusBar() {
-        return statusBar;
+    public void addStages(Map<String, Stage> stageMap) {
+        stagesList.getItems().addAll(stageMap.entrySet());
     }
 }

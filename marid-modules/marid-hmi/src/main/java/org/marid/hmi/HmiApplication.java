@@ -19,7 +19,6 @@
 package org.marid.hmi;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.marid.runtime.MaridConsoleExitHandler;
@@ -30,6 +29,7 @@ import org.springframework.core.env.MapPropertySource;
 import java.util.Map;
 
 import static java.lang.Thread.currentThread;
+import static javafx.application.Platform.runLater;
 import static org.marid.misc.Casts.cast;
 import static org.marid.runtime.MaridContextInitializer.applicationContext;
 
@@ -40,20 +40,21 @@ public class HmiApplication extends Application {
 
     private final GenericXmlApplicationContext context = applicationContext(currentThread().getContextClassLoader());
 
-    public static HmiApplication application;
-
     @Override
     public void init() throws Exception {
-        context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("cmd", cast(getParameters().getNamed())));
-        final Thread thread = new Thread(() -> MaridConsoleExitHandler.handle(() -> Platform.runLater(context::close)));
+        final MapPropertySource cmdProps = new MapPropertySource("cmd", cast(getParameters().getNamed()));
+        context.getBeanFactory().registerSingleton("application", this);
+        context.getBeanFactory().addBeanPostProcessor(new HmiPostProcessor());
+        context.getEnvironment().getPropertySources().addFirst(cmdProps);
+        final Thread thread = new Thread(() -> MaridConsoleExitHandler.handle(() -> runLater(context::close)));
         thread.setDaemon(true);
         thread.start();
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        HmiApplication.application = this;
-        context.load("classpath*:/META-INF/hmi/**/*.xml");
+        context.getBeanFactory().registerSingleton("primaryStage", this);
+        final HmiPane pane = new HmiPane();
         context.addApplicationListener(event -> {
             if (event instanceof ContextClosedEvent) {
                 primaryStage.close();
@@ -62,15 +63,10 @@ public class HmiApplication extends Application {
         context.refresh();
         context.start();
         primaryStage.setOnCloseRequest(event -> context.close());
-        primaryStage.setScene(new Scene(context.getBean(HmiPane.class), 800, -1));
+        primaryStage.setScene(new Scene(pane, 800, 600));
         primaryStage.show();
         final Map<String, Stage> stageMap = context.getBeansOfType(Stage.class, true, true);
-        stageMap.forEach((name, stage) -> {
-            try {
-                stage.show();
-            } catch (Exception x) {
-                throw new IllegalStateException("Unable to show " + name, x);
-            }
-        });
+        pane.addStages(stageMap);
+        stageMap.forEach((name, stage) -> stage.show());
     }
 }

@@ -50,6 +50,7 @@ public class SimpleGraphWidget extends Stage {
     private final NumericReader reader;
     private final long tag;
     private final String name;
+    private final int tickCount;
     private final long period;
     private final ObservableList<LineChart.Data<Number, Number>> data;
     private final NumberAxis xAxis;
@@ -66,15 +67,19 @@ public class SimpleGraphWidget extends Stage {
         this.tag = conf.getTag();
         this.name = conf.getName();
         this.period = conf.getPeriod();
+        this.tickCount = conf.getTickCount();
         this.data = FXCollections.observableArrayList();
         this.xAxis = new NumberAxis();
         this.xAxis.setForceZeroInRange(false);
+        this.xAxis.setAutoRanging(false);
+        this.xAxis.setTickUnit((period * tickCount) / 10L);
         this.xAxis.setTickLabelFormatter(new FormatStringConverter<>(DateFormat.getTimeInstance(DateFormat.MEDIUM)));
         this.yAxis = new NumberAxis();
         this.series = new LineChart.Series<>(name, data);
         this.chart = new LineChart<>(xAxis, yAxis);
         this.lastTime = new AtomicLong(System.currentTimeMillis() - period * conf.getTickCount());
         this.chart.getData().add(series);
+        this.chart.setAnimated(false);
         setResizable(true);
         setTitle(s("Graph %s (%d), period = %d ms", name, tag, period));
         setScene(new Scene(chart));
@@ -83,11 +88,13 @@ public class SimpleGraphWidget extends Stage {
     private void updateData() {
         final Instant last = Instant.ofEpochMilli(lastTime.getAndSet(System.currentTimeMillis()));
         final Instant now = Instant.ofEpochMilli(lastTime.get());
-        final long minTime = now.toEpochMilli() - period * data.size();
+        final long minTime = now.toEpochMilli() - period * tickCount;
         final List<DataRecord<Double>> records = reader.fetchRecords(new long[] {tag}, last, now);
         Platform.runLater(() -> {
             data.removeIf(d -> d.getXValue().longValue() < minTime);
             records.forEach(r -> data.add(new LineChart.Data<>(r.getTimestamp().toEpochMilli(), r.getValue())));
+            xAxis.setLowerBound(data.stream().mapToDouble(d -> d.getXValue().doubleValue()).min().orElse(0.0));
+            xAxis.setUpperBound(data.stream().mapToDouble(d -> d.getXValue().doubleValue()).max().orElse(0.0));
         });
     }
 
