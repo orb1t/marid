@@ -143,11 +143,13 @@ public class MaridBeanDefinitionSaver {
                 setAttr(properties.valueType, element);
                 setAttr(properties.location, element);
 
-                properties.entries.forEach((k, v) -> {
-                    final Element e = document.createElement("prop");
-                    element.appendChild(e);
-                    e.setAttribute("key", k);
-                    e.setTextContent(v);
+                properties.entries.forEach(entry -> {
+                    if (entry.key.isNotEmpty().get() && entry.value.isNotEmpty().get()) {
+                        final Element e = document.createElement("prop");
+                        element.appendChild(e);
+                        e.setAttribute("key", entry.key.get());
+                        e.setTextContent(entry.value.get());
+                    }
                 });
             }
         }

@@ -21,17 +21,15 @@ package org.marid.spring.xml.data;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableMap;
+import javafx.collections.ObservableList;
 import org.marid.ide.project.ProjectProfile;
 
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.lang.reflect.Executable;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
@@ -48,7 +46,7 @@ public class UtilProperties extends AbstractData<UtilProperties> implements Bean
     public final StringProperty localOverride = new SimpleStringProperty(this, "local-override");
     public final StringProperty ignoreResourceNotFound = new SimpleStringProperty(this, "ignore-resource-not-found");
 
-    public final ObservableMap<String, String> entries = FXCollections.observableMap(new TreeMap<>());
+    public final ObservableList<Entry> entries = FXCollections.observableArrayList();
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
@@ -59,9 +57,8 @@ public class UtilProperties extends AbstractData<UtilProperties> implements Bean
         out.writeUTF(defaultIfBlank(ignoreResourceNotFound.get(), ""));
 
         out.writeInt(entries.size());
-        for (final Map.Entry<String, String> e : entries.entrySet()) {
-            out.writeUTF(e.getKey());
-            out.writeUTF(e.getValue());
+        for (final Entry entry : entries) {
+            out.writeObject(entry);
         }
     }
 
@@ -77,7 +74,10 @@ public class UtilProperties extends AbstractData<UtilProperties> implements Bean
         for (int i = 0; i < size; i++) {
             final String key = in.readUTF();
             final String value = in.readUTF();
-            entries.put(key, value);
+            final Entry entry = new Entry();
+            entry.key.set(key);
+            entry.value.set(value);
+            entries.add(entry);
         }
     }
 

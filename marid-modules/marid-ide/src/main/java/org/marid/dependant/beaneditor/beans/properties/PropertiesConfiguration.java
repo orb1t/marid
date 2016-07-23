@@ -20,6 +20,7 @@ package org.marid.dependant.beaneditor.beans.properties;
 
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
+import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.context.annotation.Bean;
@@ -32,8 +33,14 @@ import org.springframework.context.annotation.Configuration;
 public class PropertiesConfiguration {
 
     @Bean
-    public ToolBar propertiesToolbar() {
+    public ToolBar propertiesToolbar(PropertiesTable table, PropertiesActions actions) {
         return new ToolbarBuilder()
+                .add("Add", FontIcon.M_ADD, actions::onAdd)
+                .addSeparator()
+                .add("Remove", FontIcon.M_REMOVE, table::onDelete, table.changeDisabled)
+                .add("Clear", FontIcon.M_CLEAR_ALL, table::onClear, table.clearDisabled)
+                .addSeparator()
+                .add("Edit", FontIcon.M_EDIT, actions::onEdit, table.changeDisabled)
                 .build();
     }
 

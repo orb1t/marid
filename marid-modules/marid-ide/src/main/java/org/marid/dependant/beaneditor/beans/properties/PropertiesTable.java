@@ -19,12 +19,12 @@
 package org.marid.dependant.beaneditor.beans.properties;
 
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.dependant.beaneditor.beans.controls.NameColumn;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.data.UtilProperties;
@@ -37,7 +37,7 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov.
  */
 @Component
-public class PropertiesTable extends TableView<UtilProperties> {
+public class PropertiesTable extends MaridTableView<UtilProperties> {
 
     @Autowired
     public PropertiesTable(BeanFile beanFile) {

@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -138,13 +138,16 @@ public class MaridBeanDefinitionLoader {
             }
         }
 
-        private void fillProperties(Map<String, String> map, Element element) {
+        private void fillProperties(List<Entry> entries, Element element) {
             final NodeList children = element.getElementsByTagName("prop");
             for (int i = 0; i < children.getLength(); i++) {
                 final Element e = (Element) children.item(i);
                 final String key = e.getAttribute("key");
                 final String value = e.getTextContent();
-                map.put(key, value);
+                final Entry entry = new Entry();
+                entry.key.set(key);
+                entry.value.set(value);
+                entries.add(entry);
             }
         }
     }
