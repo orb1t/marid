@@ -62,7 +62,7 @@
         <meta key="icon" value="P_ADD"/>
     </bean>
 
-    <bean name="hsqldbNumericReader" class="org.marid.db.hsqldb.HsqldbDaqFactory" factory-method="numericReader" abstract="true">
+    <bean name="hsqldbNumericReader" class="org.marid.db.hsqldb.HsqldbDaqNumericReader" abstract="true">
         <description>HSQLDB numeric reader</description>
 
         <constructor-arg name="table" value="NUMERICS"/>
