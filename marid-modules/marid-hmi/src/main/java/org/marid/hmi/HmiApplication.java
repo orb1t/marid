@@ -27,9 +27,13 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.env.MapPropertySource;
 
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import static java.lang.Thread.currentThread;
+import static java.util.stream.Collectors.toList;
 import static javafx.application.Platform.runLater;
+import static javafx.scene.paint.Color.GREEN;
+import static org.marid.jfx.FxMaridIcon.maridIcon;
 import static org.marid.misc.Casts.cast;
 import static org.marid.runtime.MaridContextInitializer.applicationContext;
 
@@ -62,11 +66,17 @@ public class HmiApplication extends Application {
         });
         context.refresh();
         context.start();
-        primaryStage.setOnCloseRequest(event -> context.close());
         primaryStage.setScene(new Scene(pane, 800, 600));
+        primaryStage.getIcons().addAll(IntStream.of(16, 24, 32).mapToObj(s -> maridIcon(s, GREEN)).collect(toList()));
+        primaryStage.setOnCloseRequest(event -> context.close());
         primaryStage.show();
         final Map<String, Stage> stageMap = context.getBeansOfType(Stage.class, true, true);
         pane.addStages(stageMap);
-        stageMap.forEach((name, stage) -> stage.show());
+        stageMap.forEach((name, stage) -> {
+            if (stage.getIcons().isEmpty()) {
+                stage.getIcons().addAll(primaryStage.getIcons());
+            }
+            stage.show();
+        });
     }
 }

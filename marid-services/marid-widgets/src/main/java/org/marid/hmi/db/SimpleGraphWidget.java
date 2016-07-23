@@ -28,6 +28,7 @@ import javafx.stage.Stage;
 import javafx.util.converter.FormatStringConverter;
 import org.marid.db.dao.NumericReader;
 import org.marid.db.data.DataRecord;
+import org.marid.logging.LogSupport;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -44,7 +45,7 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class SimpleGraphWidget extends Stage {
+public class SimpleGraphWidget extends Stage implements LogSupport {
 
     private final ScheduledExecutorService timer;
     private final NumericReader reader;
@@ -89,7 +90,13 @@ public class SimpleGraphWidget extends Stage {
         final Instant last = Instant.ofEpochMilli(lastTime.getAndSet(System.currentTimeMillis()));
         final Instant now = Instant.ofEpochMilli(lastTime.get());
         final long minTime = now.toEpochMilli() - period * tickCount;
-        final List<DataRecord<Double>> records = reader.fetchRecords(new long[] {tag}, last, now);
+        final List<DataRecord<Double>> records;
+        try {
+            records = reader.fetchRecords(new long[] {tag}, last, now);
+        } catch (Exception x) {
+            log(WARNING, "Unable to read {0}", x, tag);
+            return;
+        }
         Platform.runLater(() -> {
             data.removeIf(d -> d.getXValue().longValue() < minTime);
             records.forEach(r -> data.add(new LineChart.Data<>(r.getTimestamp().toEpochMilli(), r.getValue())));
