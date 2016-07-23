@@ -24,6 +24,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.spring.xml.data.UtilProperties;
@@ -66,6 +67,10 @@ public class PropertiesActions {
         stage.setScene(new Scene(new BorderPane(
                 new MaridScrollPane(propertyListTable),
                 new ToolbarBuilder()
+                        .add("Add", FontIcon.M_ADD, propertyListTable::onAdd)
+                        .addSeparator()
+                        .add("Remove", FontIcon.M_REMOVE, propertyListTable::onDelete, propertyListTable.changeDisabled)
+                        .add("Clear", FontIcon.M_CLEAR_ALL, propertyListTable::onClear, propertyListTable.clearDisabled)
                         .build(),
                 null, null, null
         ), 800, 600));
