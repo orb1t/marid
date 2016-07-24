@@ -23,6 +23,10 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.ide.project.ProjectProfile;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -34,6 +38,8 @@ import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.stripToNull;
+import static org.marid.spring.xml.MaridBeanDefinitionSaver.SPRING_SCHEMA_PREFIX;
+import static org.marid.spring.xml.MaridBeanUtils.setAttr;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -98,5 +104,29 @@ public class UtilProperties extends AbstractData<UtilProperties> implements Bean
     @Override
     public StringProperty nameProperty() {
         return id;
+    }
+
+    @Override
+    public void save(Node node, Document document) {
+        final Element element = document.createElementNS(SPRING_SCHEMA_PREFIX + "util", "util:properties");
+        node.appendChild(element);
+        setAttr(id, element);
+        setAttr(ignoreResourceNotFound, element);
+        setAttr(localOverride, element);
+        setAttr(valueType, element);
+        setAttr(location, element);
+
+        entries.forEach(entry -> entry.save(element, document));
+    }
+
+    @Override
+    public void load(Node node, Document document) {
+        final NodeList children = ((Element) node).getElementsByTagName("prop");
+        for (int i = 0; i < children.getLength(); i++) {
+            final Element e = (Element) children.item(i);
+            final Entry entry = new Entry();
+            entry.load(e, document);
+            entries.add(entry);
+        }
     }
 }

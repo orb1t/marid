@@ -21,6 +21,8 @@ package org.marid.spring.xml.data;
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import java.io.Externalizable;
 import java.lang.reflect.Field;
@@ -32,6 +34,10 @@ import static org.marid.misc.Casts.cast;
  * @author Dmitry Ovchinnikov
  */
 public abstract class AbstractData<T extends AbstractData<T>> implements Cloneable, Externalizable {
+
+    public abstract void save(Node node, Document document);
+
+    public abstract void load(Node node, Document document);
 
     @Override
     public T clone() {

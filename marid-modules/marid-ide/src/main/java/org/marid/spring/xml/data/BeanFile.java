@@ -20,11 +20,17 @@ package org.marid.spring.xml.data;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.stream.Stream;
+
+import static org.marid.spring.xml.MaridBeanDefinitionSaver.SPRING_SCHEMA_PREFIX;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -77,5 +83,49 @@ public class BeanFile extends AbstractData<BeanFile> {
         properties.forEach(builder::add);
         constants.forEach(builder::add);
         return builder.build();
+    }
+
+    @Override
+    public void save(Node node, Document document) {
+        final Element beans = document.createElement("beans");
+        document.appendChild(beans);
+        beans.setAttribute("xmlns", SPRING_SCHEMA_PREFIX + "beans");
+        beans.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:lang", SPRING_SCHEMA_PREFIX + "lang");
+        beans.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:util", SPRING_SCHEMA_PREFIX + "util");
+        beans.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:context", SPRING_SCHEMA_PREFIX + "context");
+
+        this.beans.forEach(beanData -> beanData.save(beans, document));
+        this.constants.forEach(constants -> constants.save(beans, document));
+        this.properties.forEach(properties -> properties.save(beans, document));
+    }
+
+    @Override
+    public void load(Node node, Document document) {
+        final Element beans = document.getDocumentElement();
+        final NodeList nodeList = beans.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            final Node n = nodeList.item(i);
+            if (!(n instanceof Element) || n.getNodeName() == null) {
+                continue;
+            }
+            final Element e = (Element) n;
+            switch (e.getNodeName()) {
+                case "bean":
+                    final BeanData beanData = new BeanData();
+                    beanData.load(e, document);
+                    this.beans.add(beanData);
+                    break;
+                case "util:constant":
+                    final UtilConstant constant = new UtilConstant();
+                    constant.load(e, document);
+                    this.constants.add(constant);
+                    break;
+                case "util:properties":
+                    final UtilProperties properties = new UtilProperties();
+                    properties.load(e, document);
+                    this.properties.add(properties);
+                    break;
+            }
+        }
     }
 }

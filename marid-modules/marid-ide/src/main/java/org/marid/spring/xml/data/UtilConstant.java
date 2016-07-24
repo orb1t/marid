@@ -21,6 +21,9 @@ package org.marid.spring.xml.data;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.ide.project.ProjectProfile;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -32,6 +35,8 @@ import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.stripToNull;
+import static org.marid.spring.xml.MaridBeanDefinitionSaver.SPRING_SCHEMA_PREFIX;
+import static org.marid.spring.xml.MaridBeanUtils.setAttr;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -90,5 +95,18 @@ public class UtilConstant extends AbstractData<UtilConstant> implements BeanLike
     @Override
     public StringProperty nameProperty() {
         return id;
+    }
+
+    @Override
+    public void save(Node node, Document document) {
+        final Element beanElement = document.createElementNS(SPRING_SCHEMA_PREFIX + "util", "util:constant");
+        node.appendChild(beanElement);
+        setAttr(id, beanElement);
+        setAttr(staticField, beanElement);
+    }
+
+    @Override
+    public void load(Node node, Document document) {
+
     }
 }

@@ -23,4 +23,8 @@ package org.marid.spring.xml.data;
  */
 public class Property extends RefValue<Property> {
 
+    @Override
+    protected String elementName() {
+        return "property";
+    }
 }

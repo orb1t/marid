@@ -20,6 +20,9 @@ package org.marid.spring.xml.data;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -27,6 +30,7 @@ import java.io.ObjectOutput;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.stripToNull;
+import static org.marid.spring.xml.MaridBeanUtils.setAttr;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -56,5 +60,32 @@ public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
 
     public boolean isEmpty() {
         return ref.isEmpty().get() && value.isEmpty().get();
+    }
+
+    protected abstract String elementName();
+
+    @Override
+    public void save(Node node, Document document) {
+        if (isEmpty()) {
+            return;
+        }
+        final Element element = document.createElement(elementName());
+        node.appendChild(element);
+        setAttr(name, element);
+        if (ref.isNotEmpty().get()) {
+            setAttr(ref, element);
+        } else {
+            setAttr(value, element);
+        }
+        setAttr(type, element);
+    }
+
+    @Override
+    public void load(Node node, Document document) {
+        final Element e = (Element) node;
+        name.set(e.getAttribute("name"));
+        ref.set(e.getAttribute("ref"));
+        type.set(e.getAttribute("type"));
+        value.set(e.getAttribute("value"));
     }
 }

@@ -20,6 +20,9 @@ package org.marid.spring.xml.data;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -46,5 +49,21 @@ public class Entry extends AbstractData<Entry> {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         key.set(stripToNull(in.readUTF()));
         value.set(stripToNull(in.readUTF()));
+    }
+
+    @Override
+    public void save(Node node, Document document) {
+        if (key.isNotEmpty().get() && value.isNotEmpty().get()) {
+            final Element e = document.createElement("prop");
+            node.appendChild(e);
+            e.setAttribute("key", key.get());
+            e.setTextContent(value.get());
+        }
+    }
+
+    @Override
+    public void load(Node node, Document document) {
+        key.set(((Element) node).getAttribute("key"));
+        value.set(node.getTextContent());
     }
 }

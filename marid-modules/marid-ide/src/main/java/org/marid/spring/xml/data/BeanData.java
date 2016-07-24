@@ -23,6 +23,10 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.ide.project.ProjectProfile;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -43,6 +47,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.stripToNull;
 import static org.marid.misc.Reflections.parameterName;
+import static org.marid.spring.xml.MaridBeanUtils.setAttr;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -228,5 +233,55 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
     @Override
     public StringProperty nameProperty() {
         return name;
+    }
+
+    @Override
+    public void save(Node node, Document document) {
+        final Element beanElement = document.createElement("bean");
+        node.appendChild(beanElement);
+        setAttr(name, beanElement);
+        setAttr(destroyMethod, beanElement);
+        setAttr(initMethod, beanElement);
+        setAttr(factoryBean, beanElement);
+        setAttr(factoryMethod, beanElement);
+        setAttr(type, beanElement);
+        setAttr(lazyInit, beanElement);
+
+        constructorArgs.forEach(constructorArg -> constructorArg.save(beanElement, document));
+        properties.forEach(property -> property.save(beanElement, document));
+    }
+
+    @Override
+    public void load(Node node, Document document) {
+        {
+            final Element e = (Element) node;
+            name.set(e.getAttribute("name"));
+            type.set(e.getAttribute("class"));
+            lazyInit.set(e.getAttribute("lazy-init"));
+            initMethod.set(e.getAttribute("init-method"));
+            destroyMethod.set(e.getAttribute("destroy-method"));
+            factoryBean.set(e.getAttribute("factory-bean"));
+            factoryMethod.set(e.getAttribute("factory-method"));
+        }
+        final NodeList nodeList = node.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            final Node n = nodeList.item(i);
+            if (!(n instanceof Element) || n.getNodeName() == null) {
+                continue;
+            }
+            final Element e = (Element) n;
+            switch (e.getNodeName()) {
+                case "constructor-arg":
+                    final ConstructorArg ca = new ConstructorArg();
+                    ca.load(e, document);
+                    constructorArgs.add(ca);
+                    break;
+                case "property":
+                    final Property p = new Property();
+                    p.load(e, document);
+                    properties.add(p);
+                    break;
+            }
+        }
     }
 }

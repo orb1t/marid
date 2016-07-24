@@ -18,6 +18,9 @@
 
 package org.marid.spring.xml;
 
+import javafx.beans.property.StringProperty;
+import org.w3c.dom.Element;
+
 import java.nio.file.Path;
 
 /**
@@ -27,5 +30,11 @@ public interface MaridBeanUtils {
 
     static boolean isFile(Path path) {
         return path.getFileName().toString().endsWith(".xml");
+    }
+
+    static void setAttr(StringProperty property, Element element) {
+        if (property.isNotEmpty().get()) {
+            element.setAttribute(property.getName(), property.get());
+        }
     }
 }

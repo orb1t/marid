@@ -23,4 +23,8 @@ package org.marid.spring.xml.data;
  */
 public class ConstructorArg extends RefValue<ConstructorArg> {
 
+    @Override
+    protected String elementName() {
+        return "constructor-arg";
+    }
 }

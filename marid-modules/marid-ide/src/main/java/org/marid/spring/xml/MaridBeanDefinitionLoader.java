@@ -18,11 +18,8 @@
 
 package org.marid.spring.xml;
 
-import org.marid.spring.xml.data.*;
+import org.marid.spring.xml.data.BeanFile;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -32,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -52,103 +48,11 @@ public class MaridBeanDefinitionLoader {
         try {
             final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             final Document document = documentBuilder.parse(stream);
-            return new Loader(document).load();
+            final BeanFile beanFile = new BeanFile();
+            beanFile.load(document, document);
+            return beanFile;
         } catch (SAXException | ParserConfigurationException x) {
             throw new IOException(x);
-        }
-    }
-
-    private static class Loader {
-
-        private final Element beans;
-
-        private Loader(Document document) {
-            this.beans = document.getDocumentElement();
-        }
-
-        private BeanFile load() {
-            final BeanFile beanFile = new BeanFile();
-            final NodeList nodeList = beans.getChildNodes();
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                final Node node = nodeList.item(i);
-                if (!(node instanceof Element) || node.getNodeName() == null) {
-                    continue;
-                }
-                final Element e = (Element) node;
-                switch (e.getNodeName()) {
-                    case "bean":
-                        final BeanData beanData = new BeanData();
-                        fillBeanData(beanData, e);
-                        beanData.name.set(e.getAttribute("name"));
-                        beanData.type.set(e.getAttribute("class"));
-                        beanData.lazyInit.set(e.getAttribute("lazy-init"));
-                        beanData.initMethod.set(e.getAttribute("init-method"));
-                        beanData.destroyMethod.set(e.getAttribute("destroy-method"));
-                        beanData.factoryBean.set(e.getAttribute("factory-bean"));
-                        beanData.factoryMethod.set(e.getAttribute("factory-method"));
-                        beanFile.beans.add(beanData);
-                        break;
-                    case "util:constant":
-                        final UtilConstant constant = new UtilConstant();
-                        constant.id.set(e.getAttribute("id"));
-                        constant.staticField.set(e.getAttribute("static-field"));
-                        beanFile.constants.add(constant);
-                        break;
-                    case "util:properties":
-                        final UtilProperties properties = new UtilProperties();
-                        properties.id.set(e.getAttribute("id"));
-                        properties.ignoreResourceNotFound.set(e.getAttribute("ignore-resource-not-found"));
-                        properties.localOverride.set(e.getAttribute(e.getAttribute("local-override")));
-                        properties.location.set(e.getAttribute("location"));
-                        properties.valueType.set(e.getAttribute("value-type"));
-                        fillProperties(properties.entries, e);
-                        beanFile.properties.add(properties);
-                        break;
-                }
-            }
-            return beanFile;
-        }
-
-        private void fillBeanData(BeanData beanData, Element bean) {
-            final NodeList nodeList = bean.getChildNodes();
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                final Node node = nodeList.item(i);
-                if (!(node instanceof Element) || node.getNodeName() == null) {
-                    continue;
-                }
-                final Element e = (Element) node;
-                switch (e.getNodeName()) {
-                    case "constructor-arg":
-                        final ConstructorArg ca = new ConstructorArg();
-                        ca.name.set(e.getAttribute("name"));
-                        ca.ref.set(e.getAttribute("ref"));
-                        ca.type.set(e.getAttribute("type"));
-                        ca.value.set(e.getAttribute("value"));
-                        beanData.constructorArgs.add(ca);
-                        break;
-                    case "property":
-                        final Property p = new Property();
-                        p.name.set(e.getAttribute("name"));
-                        p.ref.set(e.getAttribute("ref"));
-                        p.type.set(e.getAttribute("type"));
-                        p.value.set(e.getAttribute("value"));
-                        beanData.properties.add(p);
-                        break;
-                }
-            }
-        }
-
-        private void fillProperties(List<Entry> entries, Element element) {
-            final NodeList children = element.getElementsByTagName("prop");
-            for (int i = 0; i < children.getLength(); i++) {
-                final Element e = (Element) children.item(i);
-                final String key = e.getAttribute("key");
-                final String value = e.getTextContent();
-                final Entry entry = new Entry();
-                entry.key.set(key);
-                entry.value.set(value);
-                entries.add(entry);
-            }
         }
     }
 }
