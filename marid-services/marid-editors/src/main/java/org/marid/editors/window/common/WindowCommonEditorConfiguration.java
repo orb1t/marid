@@ -115,7 +115,7 @@ public class WindowCommonEditorConfiguration extends Stage {
         }
         {
             final Label label = new Label();
-            label.textProperty().bind(format("HEIGHT: %f", yProperty()));
+            label.textProperty().bind(format("HEIGHT: %f", heightProperty()));
             label.setRotate(90);
             final VBox box = new VBox(new Group(label));
             box.setAlignment(Pos.CENTER);
