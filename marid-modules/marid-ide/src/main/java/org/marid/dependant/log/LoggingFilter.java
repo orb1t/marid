@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.logging;
+package org.marid.dependant.log;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -90,11 +90,6 @@ public class LoggingFilter implements Predicate<LogRecord> {
 
     public void clear() {
         filteredList.getSource().clear();
-    }
-
-    public void switchLevel(Level level) {
-        final BooleanProperty property = getProperty(level);
-        property.set(!property.get());
     }
 
     public FilteredList<LogRecord> filteredList(ObservableList<LogRecord> list) {

@@ -22,6 +22,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import org.marid.IdeDependants;
 import org.marid.dependant.iconviewer.IconViewerConfiguration;
+import org.marid.dependant.log.LogConfiguration;
 import org.marid.dependant.monitor.MonitorConfiguration;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
@@ -71,5 +72,14 @@ public class ActionsConfiguration {
                 .setIcon(M_CHEVRON_LEFT)
                 .setText("Run garbage collection")
                 .setEventHandler(event -> System.gc());
+    }
+
+    @Bean
+    @IdeAction
+    public FxAction showLogsAction(IdeDependants dependants) {
+        return new FxAction("log", "log", "Tools")
+                .setIcon(M_VIEW_LIST)
+                .setText("Show logs")
+                .setEventHandler(event -> dependants.startDependant(LogConfiguration.class));
     }
 }

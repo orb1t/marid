@@ -21,8 +21,6 @@ package org.marid.ide.configurations;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import org.marid.ide.panes.filebrowser.BeanFileBrowserPane;
-import org.marid.ide.panes.logging.LoggingTable;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.l10n.L10n;
 import org.marid.spring.annotation.TypeQualifier;
 import org.springframework.context.annotation.Bean;
@@ -42,15 +40,6 @@ public class TabConfiguration {
     @Bean
     @TypeQualifier(TabConfiguration.class)
     @Order(1)
-    public Tab logTab(LoggingTable loggingTable) {
-        final Tab tab = new Tab(L10n.s("Log"), new MaridScrollPane(loggingTable));
-        tab.setClosable(false);
-        return tab;
-    }
-
-    @Bean
-    @TypeQualifier(TabConfiguration.class)
-    @Order(2)
     public Tab beanFilesTab(BeanFileBrowserPane beanFileBrowserPane) {
         final Tab tab = new Tab(L10n.s("Bean files"), beanFileBrowserPane);
         tab.setClosable(false);

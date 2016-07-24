@@ -38,6 +38,7 @@ import java.nio.file.Files;
 import java.util.Optional;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static javafx.beans.binding.Bindings.createBooleanBinding;
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
@@ -121,17 +122,18 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
-    public FxAction projectRemoveProfileAction(ObjectFactory<ProjectManager> projectManager) {
+    public FxAction projectRemoveProfileAction(ProjectManager manager) {
         return new FxAction("projectIO", "pm", "Project")
                 .setText("Remove profile")
                 .setIcon(D_MINUS_BOX)
+                .bindDisabled(createBooleanBinding(() -> manager.getProfiles().size() < 2, manager.getProfiles()))
                 .setEventHandler(event -> {
                     final Alert alert = new Alert(CONFIRMATION, L10n.s("Do you really want to remove the profile?"), YES, NO);
                     alert.setTitle(L10n.s("Profile removal"));
                     alert.setHeaderText(L10n.s("Project removal confirmation"));
                     final Optional<ButtonType> result = alert.showAndWait();
                     if (result.isPresent() && result.get() == ButtonType.YES) {
-                        projectManager.getObject().remove(projectManager.getObject().getProfile());
+                        manager.remove(manager.getProfile());
                     }
                 });
     }
