@@ -18,10 +18,13 @@
 
 package org.marid.editors.window.common;
 
+import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -32,7 +35,9 @@ import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import static javafx.beans.binding.Bindings.createStringBinding;
+import static javafx.beans.binding.Bindings.format;
+import static org.marid.jfx.icons.FontIcon.*;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -79,25 +84,51 @@ public class WindowCommonEditorConfiguration extends Stage {
             height = 300;
         }
         setAlwaysOnTop(true);
-        final Button button = new Button(s("Click here to set values"));
-        button.setOnAction(event -> {
-            widthProperty.value.set(Double.toString(getWidth()));
-            heightProperty.value.set(Double.toString(getHeight()));
-            xProperty.value.set(Double.toString(getX()));
-            yProperty.value.set(Double.toString(getY()));
-        });
-        final BorderPane pane = new BorderPane(button);
-        final Label label = new Label();
-        label.textProperty().bind(createStringBinding(
-                () -> s("x = %f, y = %f, width = %f, height = %f", getX(), getY(), getWidth(), getHeight()),
-                xProperty(), yProperty(), widthProperty(), heightProperty()));
-        pane.setBottom(label);
+        final BorderPane pane = new BorderPane();
+        {
+            final Button button = new Button(s("Apply"), glyphIcon(D_CHECK_ALL, 24));
+            button.setOnAction(event -> {
+                widthProperty.value.set(Double.toString(getWidth()));
+                heightProperty.value.set(Double.toString(getHeight()));
+                xProperty.value.set(Double.toString(x));
+                yProperty.value.set(Double.toString(y));
+            });
+            pane.setCenter(button);
+        }
+        {
+            final Label label = new Label();
+            label.textProperty().bind(format("X: %f", xProperty()));
+            pane.setTop(new BorderPane(label, null, glyphIcon(D_ARROW_TOP_RIGHT, 24), null, glyphIcon(D_ARROW_TOP_LEFT, 24)));
+        }
+        {
+            final Label label = new Label();
+            label.textProperty().bind(format("WIDTH: %f", widthProperty()));
+            pane.setBottom(new BorderPane(label, null, glyphIcon(D_ARROW_BOTTOM_RIGHT, 24), null, glyphIcon(D_ARROW_BOTTOM_LEFT, 24)));
+        }
+        {
+            final Label label = new Label();
+            label.textProperty().bind(format("Y: %f", yProperty()));
+            label.setRotate(-90);
+            final VBox box = new VBox(new Group(label));
+            box.setAlignment(Pos.CENTER);
+            pane.setLeft(box);
+        }
+        {
+            final Label label = new Label();
+            label.textProperty().bind(format("HEIGHT: %f", yProperty()));
+            label.setRotate(90);
+            final VBox box = new VBox(new Group(label));
+            box.setAlignment(Pos.CENTER);
+            pane.setRight(box);
+        }
         setScene(new Scene(pane, width, height));
     }
 
 
     @EventListener
     private void onStart(ContextStartedEvent event) {
+        setX(x);
+        setY(y);
         show();
     }
 }
