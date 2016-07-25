@@ -18,34 +18,27 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.controls.IdeTab;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
-
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 @Component
-public class BeanEditorTab extends Tab {
+public class BeanEditorTab extends IdeTab {
+
+    public final ProjectProfile profile;
+    public final Path beanFilePath;
 
     @Autowired
-    public BeanEditorTab(ProjectProfile profile, TabPane ideTabPane, TabPane beanEditorTabs, Path beanFilePath) {
-        super(s("[%s]: %s", profile, profile.getBeansDirectory().relativize(beanFilePath)), beanEditorTabs);
-        getProperties().put("profile", profile);
-        getProperties().put("path", beanFilePath);
-        ideTabPane.getTabs().add(this);
-        ideTabPane.getSelectionModel().select(this);
-    }
-
-    @Autowired
-    private void listenClose(AnnotationConfigApplicationContext context) {
-        setOnClosed(event -> context.close());
+    public BeanEditorTab(ProjectProfile profile, TabPane beanEditorTabs, Path beanFilePath) {
+        super(beanEditorTabs, "[%s]: %s", profile, profile.getBeansDirectory().relativize(beanFilePath));
+        this.profile = profile;
+        this.beanFilePath = beanFilePath;
     }
 }

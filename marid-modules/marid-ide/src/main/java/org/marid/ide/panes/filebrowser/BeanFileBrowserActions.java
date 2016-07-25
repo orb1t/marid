@@ -26,6 +26,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.BeanEditorConfiguration;
+import org.marid.dependant.beaneditor.BeanEditorTab;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10n;
@@ -179,9 +180,11 @@ public class BeanFileBrowserActions {
 
     public void launchBeanEditor(ActionEvent event) {
         final Path path = tree.getObject().getSelectionModel().getSelectedItem().getValue();
-        final Tab tab = ideTabPane.getObject().getTabs().stream()
-                .filter(t -> getProfile().equals(t.getProperties().get("profile")))
-                .filter(t -> path.equals(t.getProperties().get("path")))
+        final BeanEditorTab tab = ideTabPane.getObject().getTabs().stream()
+                .filter(BeanEditorTab.class::isInstance)
+                .map(BeanEditorTab.class::cast)
+                .filter(t -> t.profile.equals(getProfile()))
+                .filter(t -> t.beanFilePath.equals(path))
                 .findFirst()
                 .orElse(null);
         if (tab != null) {
