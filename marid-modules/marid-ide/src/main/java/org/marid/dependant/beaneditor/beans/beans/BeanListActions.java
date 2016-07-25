@@ -18,12 +18,13 @@
 
 package org.marid.dependant.beaneditor.beans.beans;
 
+import com.google.common.collect.ImmutableMap;
 import javafx.event.ActionEvent;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.props.BeanDataEditorConfiguration;
+import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
 import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.dialog.MaridDialog;
@@ -84,7 +85,10 @@ public class BeanListActions {
     }
 
     public void onEdit(ActionEvent event) {
-        dependants.startDependant(BeanDataEditorConfiguration.class);
+        dependants.startDependant(
+                BeanDataEditorConfiguration.class,
+                ImmutableMap.of("beanData", table.getSelectionModel().getSelectedItem())
+        );
     }
 
     public void onDelete(ActionEvent event) {

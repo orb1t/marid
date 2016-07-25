@@ -19,16 +19,20 @@
 package org.marid.spring.xml.data;
 
 import javafx.beans.property.Property;
-import javafx.collections.ObservableList;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.exception.CloneFailedException;
+import org.marid.io.FastArrayOutputStream;
+import org.marid.misc.Casts;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
-import java.util.*;
-
-import static org.marid.misc.Casts.cast;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -39,97 +43,47 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Cloneab
 
     public abstract void load(Node node, Document document);
 
+    @SuppressWarnings("CloneDoesntCallSuperClone")
     @Override
     public T clone() {
-        try {
-            final T instance = cast(getClass().newInstance());
-            for (final Field field : getClass().getFields()) {
-                if (Property.class.isAssignableFrom(field.getType())) {
-                    final Property<Object> oldProp = cast(field.get(this));
-                    final Property<Object> newProp = cast(field.get(instance));
-                    final Object oldValue = oldProp.getValue();
-                    if (oldValue instanceof AbstractData<?>) {
-                        newProp.setValue(((AbstractData<?>) oldValue).clone());
-                    } else {
-                        newProp.setValue(oldValue);
-                    }
-                } else if (ObservableList.class.isAssignableFrom(field.getType())) {
-                    final List<Object> oldList = cast(field.get(this));
-                    final List<Object> newList = cast(field.get(instance));
-                    for (final Object e : oldList) {
-                        if (e instanceof AbstractData<?>) {
-                            newList.add(((AbstractData<?>) e).clone());
-                        } else if (e instanceof Number || e instanceof String || e instanceof Date) {
-                            newList.add(e);
-                        }
-                    }
-                }
-            }
-            return instance;
-        } catch (ReflectiveOperationException x) {
-            throw new IllegalStateException(x);
+        final FastArrayOutputStream os = new FastArrayOutputStream();
+        try (final ObjectOutputStream oos = new ObjectOutputStream(os)) {
+            oos.writeObject(this);
+        } catch (IOException x) {
+            throw new CloneFailedException(x);
+        }
+        try (final ObjectInputStream ois = new ObjectInputStream(os.getSharedInputStream())) {
+            return Casts.cast(ois.readObject());
+        } catch (IOException | ClassNotFoundException x) {
+            throw new CloneFailedException(x);
         }
     }
 
     @Override
     public int hashCode() {
-        final HashCodeBuilder builder = new HashCodeBuilder();
-        try {
-            for (final Field field : getClass().getFields()) {
-                final Object fieldValue = field.get(this);
-                if (fieldValue instanceof Property<?>) {
-                    builder.append(((Property<?>) fieldValue).getValue());
-                } else if (fieldValue instanceof ObservableList<?>) {
-                    ((ObservableList<?>) fieldValue).forEach(builder::append);
-                } else {
-                    builder.append(fieldValue);
-                }
-            }
-        } catch (ReflectiveOperationException x) {
+        final FastArrayOutputStream os = new FastArrayOutputStream();
+        try (final ObjectOutputStream oos = new ObjectOutputStream(os)) {
+            oos.writeObject(this);
+        } catch (IOException x) {
             throw new IllegalStateException(x);
         }
-        return builder.hashCode();
+        return Arrays.hashCode(os.getSharedBuffer());
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
+        if (obj == null || obj.getClass() != getClass()) {
             return false;
-        }
-        if (obj.getClass() != getClass()) {
-            return false;
-        }
-        try {
-            for (final Field field : getClass().getFields()) {
-                final Object thisVal = field.get(this);
-                final Object thatVal = field.get(obj);
-                if (thisVal instanceof Property<?>) {
-                    if (!Objects.equals(((Property<?>) thisVal).getValue(), ((Property<?>) thatVal).getValue())) {
-                        return false;
-                    }
-                } else if (thisVal instanceof ObservableList<?>) {
-                    final ObservableList<?> thisList = (ObservableList<?>) thisVal;
-                    final ObservableList<?> thatList = (ObservableList<?>) thatVal;
-                    if (thisList.size() != thatList.size()) {
-                        return false;
-                    } else {
-                        for (int i = 0; i < thisList.size(); i++) {
-                            final Object thisElem = thisList.get(i);
-                            final Object thatElem = thatList.get(i);
-                            if (!Objects.equals(thisElem, thatElem)) {
-                                return false;
-                            }
-                        }
-                    }
-                } else {
-                    if (!Objects.equals(thisVal, thatVal)) {
-                        return false;
-                    }
-                }
+        } else {
+            final FastArrayOutputStream thisOs = new FastArrayOutputStream(), thatOs = new FastArrayOutputStream();
+            try (final ObjectOutputStream thisOos = new ObjectOutputStream(thisOs);
+                 final ObjectOutputStream thatOos = new ObjectOutputStream(thatOs)) {
+                thisOos.writeObject(this);
+                thatOos.writeObject(obj);
+            } catch (IOException x) {
+                throw new IllegalStateException(x);
             }
-            return true;
-        } catch (ReflectiveOperationException x) {
-            throw new IllegalStateException(x);
+            return Arrays.equals(thisOs.getSharedBuffer(), thatOs.getSharedBuffer());
         }
     }
 

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.props;
+package org.marid.dependant.beaneditor.beandata;
 
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
@@ -25,16 +25,16 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.marid.dependant.beaneditor.beans.beans.BeanListTable;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.spring.xml.data.BeanData;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.core.env.Environment;
 
 import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
 import static org.marid.jfx.icons.FontIcon.M_LIST;
@@ -45,12 +45,12 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@ComponentScan(basePackageClasses = {BeanDataEditorConfiguration.class})
+@Import({BeanDataActions.class, RefValuesEditorProvider.class})
 public class BeanDataEditorConfiguration {
 
     @Bean
-    public BeanData beanData(BeanListTable beanListTable) {
-        return beanListTable.getSelectionModel().getSelectedItem();
+    public BeanData beanData(Environment environment) {
+        return environment.getProperty("beanData", BeanData.class);
     }
 
     @Bean

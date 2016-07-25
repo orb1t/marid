@@ -23,14 +23,13 @@ import javafx.geometry.Side;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
-import org.marid.ide.panes.filebrowser.BeanFileBrowserTree;
-import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 import java.nio.file.Path;
 
@@ -44,13 +43,13 @@ import static org.marid.l10n.L10n.s;
 public class BeanEditorConfiguration {
 
     @Bean
-    public ProjectProfile projectProfile(ProjectManager projectManager) {
-        return projectManager.getProfile();
+    public ProjectProfile projectProfile(Environment environment) {
+        return environment.getProperty("profile", ProjectProfile.class);
     }
 
     @Bean
-    public Path beanFilePath(BeanFileBrowserTree tree) {
-        return tree.getSelectionModel().getSelectedItem().getValue();
+    public Path beanFilePath(Environment environment) {
+        return environment.getProperty("beanFilePath", Path.class);
     }
 
     @Bean

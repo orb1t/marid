@@ -23,10 +23,13 @@ import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -47,12 +50,19 @@ public class IdeDependants {
         this.parent = parent;
     }
 
-    public AnnotationConfigApplicationContext startDependant(Class<?> configuration) {
+    public AnnotationConfigApplicationContext startDependant(Class<?> configuration, Map<String, Object> beans) {
         return startDependant(context -> {
             context.setDisplayName(configuration.getSimpleName());
             context.register(configuration);
+            if (!beans.isEmpty()) {
+                context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("beanMap", beans));
+            }
             context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
         });
+    }
+
+    public AnnotationConfigApplicationContext startDependant(Class<?> configuration) {
+        return startDependant(configuration, Collections.emptyMap());
     }
 
     private AnnotationConfigApplicationContext startDependant(Consumer<AnnotationConfigApplicationContext> contextConsumer) {
