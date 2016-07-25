@@ -23,12 +23,18 @@ import javafx.geometry.Side;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
+import org.marid.dependant.beaneditor.beans.beans.BeanListConfiguration;
+import org.marid.dependant.beaneditor.beans.constants.ConstantListConfiguration;
+import org.marid.dependant.beaneditor.beans.properties.PropertiesConfiguration;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.BeanFile;
+import org.marid.spring.xml.providers.BeanDataProvider;
+import org.marid.spring.xml.providers.ConstantsProvider;
+import org.marid.spring.xml.providers.PropertiesProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 import java.nio.file.Path;
@@ -39,7 +45,12 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@ComponentScan(basePackageClasses = {BeanEditorConfiguration.class})
+@Import({
+        BeanEditorTab.class,
+        PropertiesConfiguration.class,
+        ConstantListConfiguration.class,
+        BeanListConfiguration.class
+})
 public class BeanEditorConfiguration {
 
     @Bean
@@ -55,6 +66,21 @@ public class BeanEditorConfiguration {
     @Bean
     public BeanFile beanFile(Path beanFilePath, ProjectProfile profile) {
         return profile.getBeanFiles().get(beanFilePath);
+    }
+
+    @Bean
+    public PropertiesProvider propertiesProvider(BeanFile beanFile) {
+        return () -> beanFile.properties;
+    }
+
+    @Bean
+    public ConstantsProvider constantsProvider(BeanFile beanFile) {
+        return () -> beanFile.constants;
+    }
+
+    @Bean
+    public BeanDataProvider beanDataProvider(BeanFile beanFile) {
+        return () -> beanFile.beans;
     }
 
     @Autowired

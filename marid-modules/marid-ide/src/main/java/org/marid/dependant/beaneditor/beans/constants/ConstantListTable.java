@@ -21,12 +21,12 @@ package org.marid.dependant.beaneditor.beans.constants;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
-import org.marid.dependant.beaneditor.beans.controls.NameColumn;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.controls.NameColumn;
 import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
-import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.data.UtilConstant;
+import org.marid.spring.xml.providers.ConstantsProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,8 +39,8 @@ import static org.marid.l10n.L10n.s;
 public class ConstantListTable extends MaridTableView<UtilConstant> {
 
     @Autowired
-    public ConstantListTable(BeanFile beanFile) {
-        super(beanFile.constants);
+    public ConstantListTable(ConstantsProvider constantsProvider) {
+        super(constantsProvider.constants());
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setEditable(true);
     }

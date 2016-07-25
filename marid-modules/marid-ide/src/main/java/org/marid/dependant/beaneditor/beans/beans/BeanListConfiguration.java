@@ -24,6 +24,7 @@ import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import static org.marid.jfx.icons.FontIcon.*;
 
@@ -31,6 +32,7 @@ import static org.marid.jfx.icons.FontIcon.*;
  * @author Dmitry Ovchinnikov.
  */
 @Configuration
+@Import({BeanBrowserTable.class, BeanListActions.class, BeanListTable.class, BeanMetaInfoProvider.class})
 public class BeanListConfiguration {
 
     @Bean

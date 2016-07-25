@@ -25,11 +25,13 @@ import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 @Configuration
+@Import({PropertiesActions.class, PropertiesTable.class, PropertyListTable.class})
 public class PropertiesConfiguration {
 
     @Bean

@@ -23,12 +23,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
-import org.marid.dependant.beaneditor.beans.controls.NameColumn;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.controls.NameColumn;
 import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.data.BeanData;
-import org.marid.spring.xml.data.BeanFile;
+import org.marid.spring.xml.providers.BeanDataProvider;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,8 +48,8 @@ import static org.marid.l10n.L10n.s;
 public class BeanListTable extends MaridTableView<BeanData> {
 
     @Autowired
-    public BeanListTable(BeanFile beanFile) {
-        super(beanFile.beans);
+    public BeanListTable(BeanDataProvider beanDataProvider) {
+        super(beanDataProvider.beanData());
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setEditable(true);
     }

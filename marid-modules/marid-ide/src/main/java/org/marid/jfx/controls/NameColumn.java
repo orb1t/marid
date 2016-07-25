@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans.controls;
+package org.marid.jfx.controls;
 
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.marid.ide.project.ProjectCacheManager;
