@@ -18,15 +18,12 @@
 
 package org.marid.dependant.monitor;
 
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
-import org.marid.l10n.L10n;
+import org.marid.jfx.controls.IdeTab;
 import org.marid.logging.LogSupport;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -41,16 +38,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class MonitorConfiguration implements LogSupport {
 
     @Bean
-    public GridPane monitorGridPane(TabPane ideTabPane, AnnotationConfigApplicationContext context) {
+    public GridPane monitorGridPane() {
         final GridPane pane = new GridPane();
-        final Tab tab = new Tab(L10n.s("Monitor"), pane);
-        tab.setId("monitor");
-        tab.setOnClosed(event -> {
-            ideTabPane.getTabs().remove(tab);
-            context.close();
-        });
-        ideTabPane.getTabs().add(tab);
-        ideTabPane.getSelectionModel().select(tab);
 
         final ColumnConstraints col1 = new ColumnConstraints();
         col1.setFillWidth(true);
@@ -72,5 +61,10 @@ public class MonitorConfiguration implements LogSupport {
         row2.setVgrow(Priority.ALWAYS);
         pane.getRowConstraints().add(row2);
         return pane;
+    }
+
+    @Bean
+    public IdeTab tab(GridPane monitorGridPane) {
+        return new IdeTab(monitorGridPane, "Monitor");
     }
 }
