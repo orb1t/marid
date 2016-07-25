@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans.constants;
+package org.marid.dependant.beaneditor.constants;
 
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;

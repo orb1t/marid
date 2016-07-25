@@ -16,16 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans;
+package org.marid.dependant.beaneditor;
 
 import javafx.collections.MapChangeListener;
 import javafx.geometry.Side;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
-import org.marid.dependant.beaneditor.beans.beans.BeanListConfiguration;
-import org.marid.dependant.beaneditor.beans.constants.ConstantListConfiguration;
-import org.marid.dependant.beaneditor.beans.properties.PropertiesConfiguration;
+import org.marid.dependant.beaneditor.beans.BeanListConfiguration;
+import org.marid.dependant.beaneditor.constants.ConstantListConfiguration;
+import org.marid.dependant.beaneditor.properties.PropertiesConfiguration;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.providers.BeanDataProvider;

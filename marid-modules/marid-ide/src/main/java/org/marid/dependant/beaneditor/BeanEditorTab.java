@@ -16,34 +16,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans.constants;
+package org.marid.dependant.beaneditor;
 
-import javafx.event.ActionEvent;
-import org.marid.ide.project.ProjectCacheManager;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.spring.xml.data.UtilConstant;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
+
+import java.nio.file.Path;
+
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 @Component
-public class ConstantListActions {
-
-    private final ConstantListTable table;
-    private final ProjectProfile profile;
+public class BeanEditorTab extends Tab {
 
     @Autowired
-    public ConstantListActions(ConstantListTable table, ProjectProfile profile) {
-        this.table = table;
-        this.profile = profile;
+    public BeanEditorTab(ProjectProfile profile, TabPane ideTabPane, TabPane beanEditorTabs, Path beanFilePath) {
+        super(s("[%s]: %s", profile, profile.getBeansDirectory().relativize(beanFilePath)), beanEditorTabs);
+        getProperties().put("profile", profile);
+        getProperties().put("path", beanFilePath);
+        ideTabPane.getTabs().add(this);
+        ideTabPane.getSelectionModel().select(this);
     }
 
-    public void onAdd(ActionEvent event) {
-        final String newBeanName = ProjectCacheManager.generateBeanName(profile, "newConstant");
-        final UtilConstant constant = new UtilConstant();
-        constant.id.set(newBeanName);
-        table.getItems().add(constant);
+    @Autowired
+    private void listenClose(AnnotationConfigApplicationContext context) {
+        setOnClosed(event -> context.close());
     }
 }

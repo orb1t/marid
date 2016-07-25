@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans.beans;
+package org.marid.dependant.beaneditor.beans;
 
 import com.google.common.collect.ImmutableMap;
 import javafx.event.ActionEvent;
@@ -24,7 +24,7 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
+import org.marid.dependant.beaneditor.beans.beandata.BeanDataEditorConfiguration;
 import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.dialog.MaridDialog;

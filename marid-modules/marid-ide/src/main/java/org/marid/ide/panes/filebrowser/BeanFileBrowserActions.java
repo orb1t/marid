@@ -25,7 +25,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.beans.BeanEditorConfiguration;
+import org.marid.dependant.beaneditor.BeanEditorConfiguration;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.l10n.L10n;

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans.properties;
+package org.marid.dependant.beaneditor.constants;
 
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
@@ -31,23 +31,22 @@ import org.springframework.context.annotation.Import;
  * @author Dmitry Ovchinnikov.
  */
 @Configuration
-@Import({PropertiesActions.class, PropertiesTable.class, PropertyListTable.class})
-public class PropertiesConfiguration {
+@Import({ConstantListActions.class, ConstantListTable.class})
+public class ConstantListConfiguration {
 
     @Bean
-    public ToolBar propertiesToolbar(PropertiesTable table, PropertiesActions actions) {
+    public ToolBar constantsToolbar(ConstantListActions actions, ConstantListTable table) {
         return new ToolbarBuilder()
                 .add("Add", FontIcon.M_ADD, actions::onAdd)
                 .addSeparator()
                 .add("Remove", FontIcon.M_REMOVE, table::onDelete, table.changeDisabled)
-                .add("Clear", FontIcon.M_CLEAR_ALL, table::onClear, table.clearDisabled)
                 .addSeparator()
-                .add("Edit", FontIcon.M_EDIT, actions::onEdit, table.changeDisabled)
+                .add("Clear", FontIcon.M_CLEAR_ALL, table::onClear, table.clearDisabled)
                 .build();
     }
 
     @Bean
-    public BorderPane propertiesEditor(PropertiesTable table, ToolBar propertiesToolbar) {
-        return new BorderPane(new MaridScrollPane(table), propertiesToolbar, null, null, null);
+    public BorderPane constantsEditor(ConstantListTable table, ToolBar constantsToolbar) {
+        return new BorderPane(new MaridScrollPane(table), constantsToolbar, null, null, null);
     }
 }

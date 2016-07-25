@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans.properties;
+package org.marid.dependant.beaneditor.properties;
 
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
