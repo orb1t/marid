@@ -18,10 +18,11 @@
 
 package org.marid.spring.xml.data;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import org.marid.spring.xml.data.props.Props;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -44,7 +45,7 @@ public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
     public final StringProperty value = new SimpleStringProperty(this, "value");
     public final StringProperty type = new SimpleStringProperty(this, "type");
 
-    public final ObservableList<UtilProperties> properties = FXCollections.observableArrayList();
+    public final ObjectProperty<Props> props = new SimpleObjectProperty<>(this, "props");
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {

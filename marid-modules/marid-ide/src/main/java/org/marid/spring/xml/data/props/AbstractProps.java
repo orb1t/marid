@@ -16,13 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.data;
+package org.marid.spring.xml.data.props;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.spring.xml.data.AbstractData;
+import org.marid.spring.xml.data.BeanLike;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -38,13 +40,13 @@ import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.stripToNull;
-import static org.marid.spring.xml.MaridBeanDefinitionSaver.SPRING_SCHEMA_PREFIX;
 import static org.marid.spring.xml.MaridBeanUtils.setAttr;
+import static org.marid.spring.xml.MaridBeanUtils.setProperty;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class UtilProperties extends AbstractData<UtilProperties> implements BeanLike {
+public abstract class AbstractProps<T extends AbstractProps<T>> extends AbstractData<T> implements BeanLike {
 
     public final StringProperty id = new SimpleStringProperty(this, "id");
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type", String.class.getName());
@@ -106,10 +108,13 @@ public class UtilProperties extends AbstractData<UtilProperties> implements Bean
         return id;
     }
 
+    protected abstract Element newElement(Document document);
+
     @Override
     public void save(Node node, Document document) {
-        final Element element = document.createElementNS(SPRING_SCHEMA_PREFIX + "util", "util:properties");
+        final Element element = newElement(document);
         node.appendChild(element);
+
         setAttr(id, element);
         setAttr(ignoreResourceNotFound, element);
         setAttr(localOverride, element);
@@ -121,7 +126,15 @@ public class UtilProperties extends AbstractData<UtilProperties> implements Bean
 
     @Override
     public void load(Node node, Document document) {
-        final NodeList children = ((Element) node).getElementsByTagName("prop");
+        final Element element = (Element) node;
+
+        setProperty(id, element);
+        setProperty(valueType, element);
+        setProperty(location, element);
+        setProperty(localOverride, element);
+        setProperty(ignoreResourceNotFound, element);
+
+        final NodeList children = element.getElementsByTagName("prop");
         for (int i = 0; i < children.getLength(); i++) {
             final Element e = (Element) children.item(i);
             final PropertyEntry entry = new PropertyEntry();

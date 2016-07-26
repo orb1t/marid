@@ -19,7 +19,7 @@
 package org.marid.spring.xml.providers;
 
 import javafx.collections.ObservableList;
-import org.marid.spring.xml.data.UtilProperties;
+import org.marid.spring.xml.data.props.Props;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -27,5 +27,5 @@ import org.marid.spring.xml.data.UtilProperties;
 @FunctionalInterface
 public interface PropertiesProvider {
 
-    ObservableList<UtilProperties> properties();
+    ObservableList<Props> properties();
 }

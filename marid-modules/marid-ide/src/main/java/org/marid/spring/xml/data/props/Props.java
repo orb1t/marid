@@ -16,16 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.providers;
+package org.marid.spring.xml.data.props;
 
-import javafx.collections.ObservableList;
-import org.marid.spring.xml.data.UtilConstant;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@FunctionalInterface
-public interface ConstantsProvider {
+public class Props extends AbstractProps<Props> {
 
-    ObservableList<UtilConstant> constants();
+    @Override
+    protected Element newElement(Document document) {
+        return document.createElement("props");
+    }
 }

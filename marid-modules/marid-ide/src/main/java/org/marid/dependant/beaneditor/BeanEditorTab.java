@@ -18,7 +18,7 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.scene.control.TabPane;
+import javafx.scene.layout.BorderPane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.controls.IdeTab;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +36,8 @@ public class BeanEditorTab extends IdeTab {
     public final Path beanFilePath;
 
     @Autowired
-    public BeanEditorTab(ProjectProfile profile, TabPane beanEditorTabs, Path beanFilePath) {
-        super(beanEditorTabs, "[%s]: %s", profile, profile.getBeansDirectory().relativize(beanFilePath));
+    public BeanEditorTab(ProjectProfile profile, BorderPane beanEditor, Path beanFilePath) {
+        super(beanEditor, "[%s]: %s", profile, profile.getBeansDirectory().relativize(beanFilePath));
         this.profile = profile;
         this.beanFilePath = beanFilePath;
     }

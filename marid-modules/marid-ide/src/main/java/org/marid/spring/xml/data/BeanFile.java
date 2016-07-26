@@ -38,24 +38,12 @@ import static org.marid.spring.xml.MaridBeanDefinitionSaver.SPRING_SCHEMA_PREFIX
 public class BeanFile extends AbstractData<BeanFile> {
 
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList();
-    public final ObservableList<UtilProperties> properties = FXCollections.observableArrayList();
-    public final ObservableList<UtilConstant> constants = FXCollections.observableArrayList();
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeInt(beans.size());
         for (final BeanData beanData : beans) {
             out.writeObject(beanData);
-        }
-
-        out.writeInt(properties.size());
-        for (final UtilProperties prop : properties) {
-            out.writeObject(prop);
-        }
-
-        out.writeInt(constants.size());
-        for (final UtilConstant constant : constants) {
-            out.writeObject(constant);
         }
     }
 
@@ -65,23 +53,11 @@ public class BeanFile extends AbstractData<BeanFile> {
         for (int i = 0; i < beanCount; i++) {
             beans.add((BeanData) in.readObject());
         }
-
-        final int propCount = in.readInt();
-        for (int i = 0; i < propCount; i++) {
-            properties.add((UtilProperties) in.readObject());
-        }
-
-        final int constCount = in.readInt();
-        for (int i = 0; i < constCount; i++) {
-            constants.add((UtilConstant) in.readObject());
-        }
     }
 
     public Stream<BeanLike> allBeans() {
         final Stream.Builder<BeanLike> builder = Stream.builder();
         beans.forEach(builder::add);
-        properties.forEach(builder::add);
-        constants.forEach(builder::add);
         return builder.build();
     }
 
@@ -95,8 +71,6 @@ public class BeanFile extends AbstractData<BeanFile> {
         beans.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:context", SPRING_SCHEMA_PREFIX + "context");
 
         this.beans.forEach(beanData -> beanData.save(beans, document));
-        this.constants.forEach(constants -> constants.save(beans, document));
-        this.properties.forEach(properties -> properties.save(beans, document));
     }
 
     @Override
@@ -114,16 +88,6 @@ public class BeanFile extends AbstractData<BeanFile> {
                     final BeanData beanData = new BeanData();
                     beanData.load(e, document);
                     this.beans.add(beanData);
-                    break;
-                case "util:constant":
-                    final UtilConstant constant = new UtilConstant();
-                    constant.load(e, document);
-                    this.constants.add(constant);
-                    break;
-                case "util:properties":
-                    final UtilProperties properties = new UtilProperties();
-                    properties.load(e, document);
-                    this.properties.add(properties);
                     break;
             }
         }

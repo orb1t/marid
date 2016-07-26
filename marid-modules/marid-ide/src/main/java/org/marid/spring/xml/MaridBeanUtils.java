@@ -37,4 +37,10 @@ public interface MaridBeanUtils {
             element.setAttribute(property.getName(), property.get());
         }
     }
+
+    static void setProperty(StringProperty property, Element element) {
+        if (element.getAttribute(property.getName()) != null) {
+            property.set(element.getAttribute(property.getName()));
+        }
+    }
 }
