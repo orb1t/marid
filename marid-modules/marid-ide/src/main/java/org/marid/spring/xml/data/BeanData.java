@@ -62,14 +62,14 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
     public final StringProperty factoryMethod = new SimpleStringProperty(this, "factory-method");
     public final StringProperty lazyInit = new SimpleStringProperty(this, "lazy-init");
 
-    public final ObservableList<ConstructorArg> constructorArgs = FXCollections.observableArrayList();
-    public final ObservableList<Property> properties = FXCollections.observableArrayList();
+    public final ObservableList<BeanArg> beanArgs = FXCollections.observableArrayList();
+    public final ObservableList<BeanProp> properties = FXCollections.observableArrayList();
 
     public boolean isFactoryBean() {
         return factoryBean.isNotEmpty().get() || factoryMethod.isNotEmpty().get();
     }
 
-    public Optional<Property> property(String name) {
+    public Optional<BeanProp> property(String name) {
         return properties.stream()
                 .filter(p -> p.name.isEqualTo(name).get())
                 .findAny();
@@ -85,13 +85,13 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
         out.writeUTF(defaultIfBlank(factoryMethod.get(), ""));
         out.writeUTF(defaultIfBlank(lazyInit.get(), ""));
 
-        out.writeInt(constructorArgs.size());
-        for (final ConstructorArg arg : constructorArgs) {
+        out.writeInt(beanArgs.size());
+        for (final BeanArg arg : beanArgs) {
             out.writeObject(arg);
         }
 
         out.writeInt(properties.size());
-        for (final Property property : properties) {
+        for (final BeanProp property : properties) {
             out.writeObject(property);
         }
     }
@@ -108,12 +108,12 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
 
         final int argCount = in.readInt();
         for (int i = 0; i < argCount; i++) {
-            constructorArgs.add((ConstructorArg) in.readObject());
+            beanArgs.add((BeanArg) in.readObject());
         }
 
         final int propCount = in.readInt();
         for (int i = 0; i < propCount; i++) {
-            properties.add((Property) in.readObject());
+            properties.add((BeanProp) in.readObject());
         }
     }
 
@@ -155,7 +155,7 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
             case 1:
                 return Optional.of(executables.get(0));
             default:
-                final Class<?>[] types = constructorArgs.stream()
+                final Class<?>[] types = beanArgs.stream()
                         .map(a -> profile.getClass(a.type.get()).orElse(Object.class))
                         .toArray(Class<?>[]::new);
                 return executables.stream().filter(m -> Arrays.equals(types, m.getParameterTypes())).findFirst();
@@ -172,24 +172,24 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
     }
 
     public void updateBeanDataConstructorArgs(Parameter[] parameters) {
-        final List<ConstructorArg> args = Stream.of(parameters)
+        final List<BeanArg> args = Stream.of(parameters)
                 .map(p -> {
-                    final Optional<ConstructorArg> found = constructorArgs.stream()
+                    final Optional<BeanArg> found = beanArgs.stream()
                             .filter(a -> a.name.isEqualTo(parameterName(p)).get())
                             .findFirst();
                     if (found.isPresent()) {
                         found.get().type.set(p.getType().getName());
                         return found.get();
                     } else {
-                        final ConstructorArg arg = new ConstructorArg();
+                        final BeanArg arg = new BeanArg();
                         arg.name.set(parameterName(p));
                         arg.type.set(p.getType().getName());
                         return arg;
                     }
                 })
                 .collect(Collectors.toList());
-        constructorArgs.clear();
-        constructorArgs.addAll(args);
+        beanArgs.clear();
+        beanArgs.addAll(args);
     }
 
     public void updateBeanData(ProjectProfile profile) {
@@ -217,11 +217,11 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
         } catch (IntrospectionException x) {
             return;
         }
-        final Map<String, Property> pmap = properties.stream().collect(toMap(e -> e.name.get(), e -> e));
+        final Map<String, BeanProp> pmap = properties.stream().collect(toMap(e -> e.name.get(), e -> e));
         properties.clear();
         for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-            final Property prop = pmap.computeIfAbsent(propertyDescriptor.getName(), n -> {
-                final Property property = new Property();
+            final BeanProp prop = pmap.computeIfAbsent(propertyDescriptor.getName(), n -> {
+                final BeanProp property = new BeanProp();
                 property.name.set(n);
                 return property;
             });
@@ -247,7 +247,7 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
         setAttr(type, beanElement);
         setAttr(lazyInit, beanElement);
 
-        constructorArgs.forEach(constructorArg -> constructorArg.save(beanElement, document));
+        beanArgs.forEach(beanArg -> beanArg.save(beanElement, document));
         properties.forEach(property -> property.save(beanElement, document));
     }
 
@@ -272,12 +272,12 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
             final Element e = (Element) n;
             switch (e.getNodeName()) {
                 case "constructor-arg":
-                    final ConstructorArg ca = new ConstructorArg();
+                    final BeanArg ca = new BeanArg();
                     ca.load(e, document);
-                    constructorArgs.add(ca);
+                    beanArgs.add(ca);
                     break;
                 case "property":
-                    final Property p = new Property();
+                    final BeanProp p = new BeanProp();
                     p.load(e, document);
                     properties.add(p);
                     break;

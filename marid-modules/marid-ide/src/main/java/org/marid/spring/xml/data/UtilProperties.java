@@ -52,7 +52,7 @@ public class UtilProperties extends AbstractData<UtilProperties> implements Bean
     public final StringProperty localOverride = new SimpleStringProperty(this, "local-override");
     public final StringProperty ignoreResourceNotFound = new SimpleStringProperty(this, "ignore-resource-not-found");
 
-    public final ObservableList<Entry> entries = FXCollections.observableArrayList();
+    public final ObservableList<PropertyEntry> entries = FXCollections.observableArrayList();
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
@@ -63,7 +63,7 @@ public class UtilProperties extends AbstractData<UtilProperties> implements Bean
         out.writeUTF(defaultIfBlank(ignoreResourceNotFound.get(), ""));
 
         out.writeInt(entries.size());
-        for (final Entry entry : entries) {
+        for (final PropertyEntry entry : entries) {
             out.writeObject(entry);
         }
     }
@@ -80,7 +80,7 @@ public class UtilProperties extends AbstractData<UtilProperties> implements Bean
         for (int i = 0; i < size; i++) {
             final String key = in.readUTF();
             final String value = in.readUTF();
-            final Entry entry = new Entry();
+            final PropertyEntry entry = new PropertyEntry();
             entry.key.set(key);
             entry.value.set(value);
             entries.add(entry);
@@ -124,7 +124,7 @@ public class UtilProperties extends AbstractData<UtilProperties> implements Bean
         final NodeList children = ((Element) node).getElementsByTagName("prop");
         for (int i = 0; i < children.getLength(); i++) {
             final Element e = (Element) children.item(i);
-            final Entry entry = new Entry();
+            final PropertyEntry entry = new PropertyEntry();
             entry.load(e, document);
             entries.add(entry);
         }

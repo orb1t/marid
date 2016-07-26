@@ -21,7 +21,7 @@ package org.marid.spring.xml.data;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Property extends RefValue<Property> {
+public class BeanProp extends RefValue<BeanProp> {
 
     @Override
     protected String elementName() {

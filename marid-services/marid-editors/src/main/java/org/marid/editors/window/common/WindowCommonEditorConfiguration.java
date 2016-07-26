@@ -29,7 +29,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.marid.spring.xml.data.BeanData;
-import org.marid.spring.xml.data.Property;
+import org.marid.spring.xml.data.BeanProp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
@@ -46,20 +46,20 @@ import static org.marid.l10n.L10n.s;
 @Component
 public class WindowCommonEditorConfiguration extends Stage {
 
-    private final Property widthProperty;
-    private final Property heightProperty;
-    private final Property xProperty;
-    private final Property yProperty;
+    private final BeanProp widthProperty;
+    private final BeanProp heightProperty;
+    private final BeanProp xProperty;
+    private final BeanProp yProperty;
     private final double x;
     private final double y;
 
     @Autowired
     public WindowCommonEditorConfiguration(BeanData beanData) {
         super(StageStyle.UTILITY);
-        xProperty = beanData.property("x").orElseGet(Property::new);
-        yProperty = beanData.property("y").orElseGet(Property::new);
-        widthProperty = beanData.property("width").orElseGet(Property::new);
-        heightProperty = beanData.property("height").orElseGet(Property::new);
+        xProperty = beanData.property("x").orElseGet(BeanProp::new);
+        yProperty = beanData.property("y").orElseGet(BeanProp::new);
+        widthProperty = beanData.property("width").orElseGet(BeanProp::new);
+        heightProperty = beanData.property("height").orElseGet(BeanProp::new);
         if (NumberUtils.isNumber(xProperty.value.get())) {
             x = Double.parseDouble(xProperty.value.get());
         } else {

@@ -25,7 +25,7 @@ import javafx.util.converter.DefaultStringConverter;
 import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.annotation.PrototypeComponent;
-import org.marid.spring.xml.data.Entry;
+import org.marid.spring.xml.data.PropertyEntry;
 import org.marid.spring.xml.data.UtilProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,7 +35,7 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov.
  */
 @PrototypeComponent
-public class PropertyListTable extends MaridTableView<Entry> {
+public class PropertyListTable extends MaridTableView<PropertyEntry> {
 
     final UtilProperties properties;
 
@@ -48,7 +48,7 @@ public class PropertyListTable extends MaridTableView<Entry> {
 
     @OrderedInit(1)
     public void keyColumn() {
-        final TableColumn<Entry, String> column = new TableColumn<>(s("Key"));
+        final TableColumn<PropertyEntry, String> column = new TableColumn<>(s("Key"));
         column.setCellValueFactory(param -> param.getValue().key);
         column.setCellFactory(param -> new TextFieldTableCell<>(new DefaultStringConverter()));
         column.setPrefWidth(150);
@@ -58,7 +58,7 @@ public class PropertyListTable extends MaridTableView<Entry> {
 
     @OrderedInit(2)
     public void valueColumn() {
-        final TableColumn<Entry, String> column = new TableColumn<>(s("Value"));
+        final TableColumn<PropertyEntry, String> column = new TableColumn<>(s("Value"));
         column.setCellValueFactory(param -> param.getValue().value);
         column.setCellFactory(param -> new TextFieldTableCell<>(new DefaultStringConverter()));
         column.setPrefWidth(350);
@@ -67,7 +67,7 @@ public class PropertyListTable extends MaridTableView<Entry> {
     }
 
     public void onAdd(ActionEvent event) {
-        final Entry entry = new Entry();
+        final PropertyEntry entry = new PropertyEntry();
         entry.key.set("key");
         getItems().add(entry);
     }

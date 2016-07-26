@@ -34,7 +34,7 @@ import static org.apache.commons.lang3.StringUtils.stripToNull;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class Entry extends AbstractData<Entry> {
+public class PropertyEntry extends AbstractData<PropertyEntry> {
 
     public final StringProperty key = new SimpleStringProperty(this, "key");
     public final StringProperty value = new SimpleStringProperty(this, "value");

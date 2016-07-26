@@ -29,7 +29,7 @@ import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.panes.GenericGridPane;
 import org.marid.spring.xml.data.BeanData;
-import org.marid.spring.xml.data.Property;
+import org.marid.spring.xml.data.BeanProp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +52,7 @@ public class HsqldbPropertiesDialog extends Dialog<Runnable> {
         initModality(Modality.APPLICATION_MODAL);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        final Property dirProperty = beanData.properties.stream()
+        final BeanProp dirProperty = beanData.properties.stream()
                 .filter(p -> p.name.isEqualTo("directory").get())
                 .findAny()
                 .orElse(null);

@@ -56,7 +56,7 @@ public class BeanDataEditorConfiguration {
     @Bean
     public TabPane tabPane(RefValuesEditorProvider provider, BeanData beanData) {
         final TabPane tabPane = new TabPane(
-                new Tab(s("Constructor arguments"), new MaridScrollPane(provider.newEditor(beanData.constructorArgs))),
+                new Tab(s("Constructor arguments"), new MaridScrollPane(provider.newEditor(beanData.beanArgs))),
                 new Tab(s("Properties"), new MaridScrollPane(provider.newEditor(beanData.properties)))
         );
         tabPane.setTabClosingPolicy(UNAVAILABLE);

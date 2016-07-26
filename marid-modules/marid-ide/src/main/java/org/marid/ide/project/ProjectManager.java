@@ -110,7 +110,7 @@ public class ProjectManager implements LogSupport {
                 if (beanData.factoryBean.isEqualTo(oldName).get()) {
                     beanData.factoryBean.set(newName);
                 }
-                beanData.constructorArgs.forEach(constructorArg -> {
+                beanData.beanArgs.forEach(constructorArg -> {
                     if (constructorArg.ref.isEqualTo(oldName).get()) {
                         constructorArg.ref.set(newName);
                     }

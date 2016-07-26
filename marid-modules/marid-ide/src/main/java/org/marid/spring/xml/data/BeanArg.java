@@ -21,7 +21,7 @@ package org.marid.spring.xml.data;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ConstructorArg extends RefValue<ConstructorArg> {
+public class BeanArg extends RefValue<BeanArg> {
 
     @Override
     protected String elementName() {

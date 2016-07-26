@@ -35,8 +35,8 @@ import org.marid.misc.Reflections;
 import org.marid.spring.beandata.BeanEditor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.marid.spring.xml.data.BeanData;
-import org.marid.spring.xml.data.ConstructorArg;
-import org.marid.spring.xml.data.Property;
+import org.marid.spring.xml.data.BeanArg;
+import org.marid.spring.xml.data.BeanProp;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -136,20 +136,20 @@ public class BeanListActions {
 
         if (def.getConstructorArgumentValues() != null) {
             for (final ConstructorArgumentValues.ValueHolder holder : def.getConstructorArgumentValues().getGenericArgumentValues()) {
-                final ConstructorArg constructorArg = new ConstructorArg();
-                constructorArg.name.set(holder.getName());
-                constructorArg.type.set(holder.getType());
+                final BeanArg beanArg = new BeanArg();
+                beanArg.name.set(holder.getName());
+                beanArg.type.set(holder.getType());
                 if (holder.getValue() instanceof TypedStringValue) {
                     final TypedStringValue typedStringValue = (TypedStringValue) holder.getValue();
-                    constructorArg.value.set(typedStringValue.getValue());
+                    beanArg.value.set(typedStringValue.getValue());
                 }
-                beanData.constructorArgs.add(constructorArg);
+                beanData.beanArgs.add(beanArg);
             }
         }
 
         if (def.getPropertyValues() != null) {
             for (final PropertyValue propertyValue : def.getPropertyValues().getPropertyValueList()) {
-                final Property property = new Property();
+                final BeanProp property = new BeanProp();
                 property.name.set(propertyValue.getName());
                 if (propertyValue.getValue() instanceof TypedStringValue) {
                     final TypedStringValue typedStringValue = (TypedStringValue) propertyValue.getValue();
@@ -203,10 +203,10 @@ public class BeanListActions {
                 newBeanData.factoryBean.set(beanData.name.get());
                 newBeanData.factoryMethod.set(method.getName());
                 for (final Parameter parameter : method.getParameters()) {
-                    final ConstructorArg arg = new ConstructorArg();
+                    final BeanArg arg = new BeanArg();
                     arg.name.set(Reflections.parameterName(parameter));
                     arg.type.set(parameter.getType().getName());
-                    newBeanData.constructorArgs.add(arg);
+                    newBeanData.beanArgs.add(arg);
                 }
                 table.getItems().add(newBeanData);
                 newBeanData.updateBeanData(profile);

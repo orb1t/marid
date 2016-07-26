@@ -36,8 +36,8 @@ import static org.junit.Assert.assertEquals;
 @RunWith(JUnitParamsRunner.class)
 public class SerializeTest {
 
-    private static Property property(String name, String type, String ref, String value) {
-        final Property property = new Property();
+    private static BeanProp property(String name, String type, String ref, String value) {
+        final BeanProp property = new BeanProp();
         property.name.set(name);
         property.type.set(type);
         property.ref.set(ref);
@@ -55,14 +55,14 @@ public class SerializeTest {
 
     @Parameters(method = "propParams")
     @Test
-    public void testProperties(Property property) throws IOException, ClassNotFoundException {
+    public void testProperties(BeanProp property) throws IOException, ClassNotFoundException {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(100);
         try (final ObjectOutputStream oos = new ObjectOutputStream(os)) {
             oos.writeObject(property);
         }
         final ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
         try (final ObjectInputStream ois = new ObjectInputStream(is)) {
-            final Property cloned = (Property) ois.readObject();
+            final BeanProp cloned = (BeanProp) ois.readObject();
             assertEquals(property.name.get(), cloned.name.get());
             assertEquals(property.type.get(), cloned.type.get());
             assertEquals(property.ref.get(), cloned.ref.get());
