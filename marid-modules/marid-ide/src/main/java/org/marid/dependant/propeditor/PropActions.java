@@ -16,16 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.providers;
+package org.marid.dependant.propeditor;
 
-import javafx.collections.ObservableList;
-import org.marid.spring.xml.data.props.Props;
+import javafx.event.ActionEvent;
+import org.marid.spring.xml.data.props.PropertyEntry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@FunctionalInterface
-public interface PropertiesProvider {
+@Component
+public class PropActions {
 
-    ObservableList<Props> properties();
+    private final PropTable propTable;
+
+    @Autowired
+    public PropActions(PropTable propTable) {
+        this.propTable = propTable;
+    }
+
+    public void onAdd(ActionEvent event) {
+        final PropertyEntry entry = new PropertyEntry();
+        entry.key.set("key");
+        entry.value.set("value");
+        propTable.getItems().add(entry);
+    }
 }

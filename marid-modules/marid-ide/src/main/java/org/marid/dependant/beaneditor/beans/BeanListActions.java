@@ -28,7 +28,6 @@ import org.marid.dependant.beaneditor.beans.beandata.BeanDataEditorConfiguration
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.icons.FontIcon;
-import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.misc.Reflections;
 import org.marid.spring.beandata.BeanEditor;
@@ -59,6 +58,9 @@ import static java.util.stream.Collectors.joining;
 import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
 import static javafx.scene.control.ButtonType.CANCEL;
 import static org.marid.Ide.primaryStage;
+import static org.marid.jfx.icons.FontIcon.M_EDIT;
+import static org.marid.jfx.icons.FontIcon.M_REMOVE;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -195,7 +197,7 @@ public class BeanListActions {
             final String name = Stream.of(method.getParameters())
                     .map(p -> p.getParameterizedType().toString())
                     .collect(joining(",", method.getName() + "(", ") : " + method.getGenericReturnType()));
-            final MenuItem menuItem = new MenuItem(name, FontIcons.glyphIcon(FontIcon.M_MEMORY, 16));
+            final MenuItem menuItem = new MenuItem(name, glyphIcon(FontIcon.M_MEMORY, 16));
             menuItem.setOnAction(ev -> {
                 final BeanData newBeanData = new BeanData();
                 newBeanData.name.set(ProjectProfile.generateBeanName(profile, method.getName()));
@@ -268,13 +270,13 @@ public class BeanListActions {
         menuItems.add(editors(type, beanData));
 
         {
-            final MenuItem editItem = new MenuItem(s("Edit..."), FontIcons.glyphIcon(FontIcon.M_EDIT, 16));
+            final MenuItem editItem = new MenuItem(s("Edit..."), glyphIcon(M_EDIT, 16));
             editItem.setOnAction(this::onEdit);
             menuItems.add(Collections.singletonList(editItem));
         }
 
         {
-            final MenuItem removeItem = new MenuItem(s("Remove"), FontIcons.glyphIcon(FontIcon.M_REMOVE, 16));
+            final MenuItem removeItem = new MenuItem(s("Remove"), glyphIcon(M_REMOVE, 16));
             removeItem.setOnAction(e -> table.getItems().remove(beanData));
             menuItems.add(Collections.singletonList(removeItem));
         }

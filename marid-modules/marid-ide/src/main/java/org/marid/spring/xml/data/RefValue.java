@@ -26,6 +26,7 @@ import org.marid.spring.xml.data.props.Props;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import static org.marid.spring.xml.MaridBeanUtils.setAttr;
 
@@ -42,7 +43,7 @@ public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
     public final ObjectProperty<Props> props = new SimpleObjectProperty<>(this, "props");
 
     public boolean isEmpty() {
-        return ref.isEmpty().get() && value.isEmpty().get();
+        return ref.isEmpty().get() && value.isEmpty().get() && props.isNull().get();
     }
 
     protected abstract String elementName();
@@ -61,6 +62,9 @@ public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
             setAttr(value, element);
         }
         setAttr(type, element);
+        if (props.isNotNull().get()) {
+            props.get().save(element, document);
+        }
     }
 
     @Override
@@ -70,5 +74,17 @@ public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
         ref.set(e.getAttribute("ref"));
         type.set(e.getAttribute("type"));
         value.set(e.getAttribute("value"));
+
+        final NodeList nodeList = e.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            switch (nodeList.item(i).getNodeName()) {
+                case "props":
+                    final Element propsElement = (Element) nodeList.item(i);
+                    final Props props = new Props();
+                    this.props.set(props);
+                    props.load(propsElement, document);
+                    break;
+            }
+        }
     }
 }

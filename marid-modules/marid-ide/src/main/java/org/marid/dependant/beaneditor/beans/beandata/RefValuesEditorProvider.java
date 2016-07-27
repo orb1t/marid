@@ -18,20 +18,30 @@
 
 package org.marid.dependant.beaneditor.beans.beandata;
 
+import com.google.common.collect.ImmutableMap;
 import javafx.collections.ObservableList;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
+import org.marid.IdeDependants;
+import org.marid.dependant.propeditor.PropEditorConfiguration;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.data.RefValue;
+import org.marid.spring.xml.data.props.Props;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.Properties;
 
+import static org.marid.jfx.icons.FontIcon.M_CLEAR;
+import static org.marid.jfx.icons.FontIcon.M_MODE_EDIT;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -42,10 +52,12 @@ import static org.marid.l10n.L10n.s;
 public class RefValuesEditorProvider {
 
     private final ProjectProfile profile;
+    private final IdeDependants dependants;
 
     @Autowired
-    public RefValuesEditorProvider(ProjectProfile profile) {
+    public RefValuesEditorProvider(ProjectProfile profile, IdeDependants dependants) {
         this.profile = profile;
+        this.dependants = dependants;
     }
 
     public <T extends RefValue<T>> TableView<T> newEditor(ObservableList<T> values) {
@@ -116,6 +128,39 @@ public class RefValuesEditorProvider {
             col.setMaxWidth(1500);
             col.setCellValueFactory(param -> param.getValue().value);
             col.setCellFactory(param -> new TextFieldTableCell<T, String>(new DefaultStringConverter()) {
+                @Override
+                public void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setContextMenu(null);
+                    } else {
+                        final T data = table.getItems().get(getTableRow().getIndex());
+                        if (profile.getClass(data.type.get()).orElse(Object.class).isAssignableFrom(Properties.class)) {
+                            final ContextMenu contextMenu = new ContextMenu();
+                            {
+                                final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon(M_MODE_EDIT, 16));
+                                mi.setOnAction(event -> {
+                                    if (data.props.isNull().get()) {
+                                        data.props.set(new Props());
+                                    }
+                                    final Props props = data.props.get();
+                                    dependants.startDependant(
+                                            PropEditorConfiguration.class,
+                                            ImmutableMap.of("props", props));
+                                });
+                                contextMenu.getItems().add(mi);
+                            }
+                            {
+                                final MenuItem mi = new MenuItem(s("Clear properties"), glyphIcon(M_CLEAR, 16));
+                                mi.disableProperty().bind(data.props.isNull());
+                                mi.setOnAction(event -> data.props.set(null));
+                                contextMenu.getItems().add(mi);
+                            }
+                            setContextMenu(contextMenu);
+                        }
+                    }
+                }
+
                 @Override
                 public void commitEdit(String newValue) {
                     super.commitEdit(newValue);

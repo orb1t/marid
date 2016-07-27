@@ -22,18 +22,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.AbstractData;
-import org.marid.spring.xml.data.BeanLike;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import java.lang.reflect.Executable;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.stream.Stream;
 
 import static org.marid.spring.xml.MaridBeanUtils.setAttr;
 import static org.marid.spring.xml.MaridBeanUtils.setProperty;
@@ -41,44 +34,17 @@ import static org.marid.spring.xml.MaridBeanUtils.setProperty;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class Props extends AbstractData<Props> implements BeanLike {
+public class Props extends AbstractData<Props> {
 
-    public final StringProperty id = new SimpleStringProperty(this, "id");
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type", String.class.getName());
-    public final StringProperty location = new SimpleStringProperty(this, "location");
-    public final StringProperty localOverride = new SimpleStringProperty(this, "local-override");
-    public final StringProperty ignoreResourceNotFound = new SimpleStringProperty(this, "ignore-resource-not-found");
     public final ObservableList<PropertyEntry> entries = FXCollections.observableArrayList();
-
-    @Override
-    public Stream<? extends Executable> getConstructors(ProjectProfile profile) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Optional<Class<?>> getClass(ProjectProfile profile) {
-        return Optional.of(Properties.class);
-    }
-
-    @Override
-    public void updateBeanData(ProjectProfile profile) {
-    }
-
-    @Override
-    public StringProperty nameProperty() {
-        return id;
-    }
 
     @Override
     public void save(Node node, Document document) {
         final Element element = document.createElement("props");
         node.appendChild(element);
 
-        setAttr(id, element);
-        setAttr(ignoreResourceNotFound, element);
-        setAttr(localOverride, element);
         setAttr(valueType, element);
-        setAttr(location, element);
 
         entries.forEach(entry -> entry.save(element, document));
     }
@@ -87,11 +53,7 @@ public class Props extends AbstractData<Props> implements BeanLike {
     public void load(Node node, Document document) {
         final Element element = (Element) node;
 
-        setProperty(id, element);
         setProperty(valueType, element);
-        setProperty(location, element);
-        setProperty(localOverride, element);
-        setProperty(ignoreResourceNotFound, element);
 
         final NodeList children = element.getElementsByTagName("prop");
         for (int i = 0; i < children.getLength(); i++) {
