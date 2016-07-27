@@ -18,7 +18,6 @@
 
 package org.marid.dependant.beaneditor.beans;
 
-import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -37,16 +36,14 @@ import java.util.Map;
 public class BeanMetaInfoProvider {
 
     private final ProjectProfile profile;
-    private final ProjectCacheManager projectCacheManager;
 
     @Autowired
-    public BeanMetaInfoProvider(ProjectProfile profile, ProjectCacheManager projectCacheManager) {
+    public BeanMetaInfoProvider(ProjectProfile profile) {
         this.profile = profile;
-        this.projectCacheManager = projectCacheManager;
     }
 
     public Map<String, BeanDefinition> beans() {
-        final URLClassLoader classLoader = projectCacheManager.getClassLoader(profile);
+        final URLClassLoader classLoader = profile.getClassLoader();
         if (classLoader == null) {
             return Collections.emptyMap();
         } else {

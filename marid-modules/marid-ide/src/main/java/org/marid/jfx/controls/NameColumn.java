@@ -19,7 +19,6 @@
 package org.marid.jfx.controls;
 
 import javafx.scene.control.cell.TextFieldTableCell;
-import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.BeanLike;
@@ -52,7 +51,7 @@ public class NameColumn<T extends BeanLike> extends TextFieldTableCell<T, String
     @Override
     public void commitEdit(String newValue) {
         final String oldValue = getItem();
-        newValue = ProjectCacheManager.generateBeanName(profile, newValue);
+        newValue = ProjectProfile.generateBeanName(profile, newValue);
         super.commitEdit(newValue);
         ProjectManager.onBeanNameChange(profile, oldValue, newValue);
     }

@@ -25,7 +25,6 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.beans.beandata.BeanDataEditorConfiguration;
-import org.marid.ide.project.ProjectCacheManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.icons.FontIcon;
@@ -34,8 +33,8 @@ import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.misc.Reflections;
 import org.marid.spring.beandata.BeanEditor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
-import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanArg;
+import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanProp;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,7 +112,7 @@ public class BeanListActions {
 
     public void onAddNew(ActionEvent event) {
         final BeanData beanData = new BeanData();
-        final String name = ProjectCacheManager.generateBeanName(profile, "newBean");
+        final String name = ProjectProfile.generateBeanName(profile, "newBean");
         beanData.name.set(name);
         beanData.type.set(Object.class.getName());
         table.getItems().add(beanData);
@@ -122,7 +121,7 @@ public class BeanListActions {
     private void insertItem(Entry<String, BeanDefinition> entry) {
         final BeanDefinition def = entry.getValue();
         final BeanData beanData = new BeanData();
-        beanData.name.set(ProjectCacheManager.generateBeanName(profile, entry.getKey()));
+        beanData.name.set(ProjectProfile.generateBeanName(profile, entry.getKey()));
         beanData.factoryBean.set(def.getFactoryBeanName());
         beanData.factoryMethod.set(def.getFactoryMethodName());
         beanData.type.set(def.getBeanClassName());
@@ -199,7 +198,7 @@ public class BeanListActions {
             final MenuItem menuItem = new MenuItem(name, FontIcons.glyphIcon(FontIcon.M_MEMORY, 16));
             menuItem.setOnAction(ev -> {
                 final BeanData newBeanData = new BeanData();
-                newBeanData.name.set(ProjectCacheManager.generateBeanName(profile, method.getName()));
+                newBeanData.name.set(ProjectProfile.generateBeanName(profile, method.getName()));
                 newBeanData.factoryBean.set(beanData.name.get());
                 newBeanData.factoryMethod.set(method.getName());
                 for (final Parameter parameter : method.getParameters()) {
@@ -233,7 +232,7 @@ public class BeanListActions {
 
     private List<MenuItem> editors(Class<?> type, BeanData beanData) {
         final List<MenuItem> items = new ArrayList<>();
-        final URLClassLoader classLoader = ProjectCacheManager.getClassLoader(profile);
+        final URLClassLoader classLoader = profile.getClassLoader();
         for (final BeanEditor editor : ServiceLoader.load(BeanEditor.class, classLoader)) {
             for (final Class<?> e : editor.getBeanTypes()) {
                 if (e.isAssignableFrom(type)) {

@@ -71,7 +71,7 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
-    public FxAction projectBuildAction(ObjectFactory<ProjectCacheManager> projectCacheManager,
+    public FxAction projectBuildAction(ObjectFactory<ProjectMavenBuilder> mavenBuilder,
                                        ObjectFactory<ProjectSaver> projectSaver,
                                        ObjectFactory<ProjectManager> projectManager) {
         return new FxAction("projectBuild", "pb", "Project")
@@ -79,8 +79,17 @@ public class ProjectConfiguration implements LogSupport {
                 .setText("Build")
                 .setIcon(D_CLOCK_FAST)
                 .setEventHandler(event -> {
+                    final ProjectProfile profile = projectManager.getObject().getProfile();
                     projectSaver.getObject().save();
-                    projectCacheManager.getObject().build(projectManager.getObject().getProfile());
+                    mavenBuilder.getObject().build(profile, result -> {
+                        try {
+                            log(INFO, "[{0}] Built {1}", profile, result);
+                            profile.cacheEntry.update();
+                            log(INFO, "[{0}] Updated", profile);
+                        } catch (Exception x) {
+                            log(WARNING, "Unable to update cache {0}", x, profile);
+                        }
+                    }, profile.logger()::log);
                 })
                 .setDisabled(false);
     }

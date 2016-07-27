@@ -36,6 +36,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -91,6 +92,26 @@ public class ProjectProfile implements LogSupport {
         beanFiles = loadBeanFiles();
         init();
         cacheEntry = new ProjectCacheEntry(this);
+    }
+
+    public URLClassLoader getClassLoader() {
+        return cacheEntry.getClassLoader();
+    }
+
+    public static boolean containsBean(ProjectProfile profile, String name) {
+        for (final BeanFile file : profile.beanFiles.values()) {
+            if (file.allBeans().anyMatch(b -> b.nameProperty().isEqualTo(name).get())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String generateBeanName(ProjectProfile profile, String name) {
+        while (containsBean(profile, name)) {
+            name += "_new";
+        }
+        return name;
     }
 
     private void init() {
