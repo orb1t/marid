@@ -31,9 +31,6 @@ import org.w3c.dom.NodeList;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.List;
@@ -44,8 +41,6 @@ import java.util.stream.Stream;
 
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.stripToNull;
 import static org.marid.misc.Reflections.parameterName;
 import static org.marid.spring.xml.MaridBeanUtils.setAttr;
 
@@ -73,48 +68,6 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
         return properties.stream()
                 .filter(p -> p.name.isEqualTo(name).get())
                 .findAny();
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeUTF(defaultIfBlank(type.get(), ""));
-        out.writeUTF(defaultIfBlank(name.get(), ""));
-        out.writeUTF(defaultIfBlank(initMethod.get(), ""));
-        out.writeUTF(defaultIfBlank(destroyMethod.get(), ""));
-        out.writeUTF(defaultIfBlank(factoryBean.get(), ""));
-        out.writeUTF(defaultIfBlank(factoryMethod.get(), ""));
-        out.writeUTF(defaultIfBlank(lazyInit.get(), ""));
-
-        out.writeInt(beanArgs.size());
-        for (final BeanArg arg : beanArgs) {
-            out.writeObject(arg);
-        }
-
-        out.writeInt(properties.size());
-        for (final BeanProp property : properties) {
-            out.writeObject(property);
-        }
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        type.set(stripToNull(in.readUTF()));
-        name.set(stripToNull(in.readUTF()));
-        initMethod.set(stripToNull(in.readUTF()));
-        destroyMethod.set(stripToNull(in.readUTF()));
-        factoryBean.set(stripToNull(in.readUTF()));
-        factoryMethod.set(stripToNull(in.readUTF()));
-        lazyInit.set(stripToNull(in.readUTF()));
-
-        final int argCount = in.readInt();
-        for (int i = 0; i < argCount; i++) {
-            beanArgs.add((BeanArg) in.readObject());
-        }
-
-        final int propCount = in.readInt();
-        for (int i = 0; i < propCount; i++) {
-            properties.add((BeanProp) in.readObject());
-        }
     }
 
     @Override

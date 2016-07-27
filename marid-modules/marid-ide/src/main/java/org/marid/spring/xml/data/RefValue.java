@@ -27,12 +27,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.stripToNull;
 import static org.marid.spring.xml.MaridBeanUtils.setAttr;
 
 /**
@@ -46,22 +40,6 @@ public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
     public final StringProperty type = new SimpleStringProperty(this, "type");
 
     public final ObjectProperty<Props> props = new SimpleObjectProperty<>(this, "props");
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeUTF(defaultIfBlank(name.get(), ""));
-        out.writeUTF(defaultIfBlank(ref.get(), ""));
-        out.writeUTF(defaultIfBlank(type.get(), ""));
-        out.writeObject(defaultIfBlank(value.get(), ""));
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        name.set(stripToNull(in.readUTF()));
-        ref.set(stripToNull(in.readUTF()));
-        type.set(stripToNull(in.readUTF()));
-        value.set(stripToNull(in.readObject().toString()));
-    }
 
     public boolean isEmpty() {
         return ref.isEmpty().get() && value.isEmpty().get();

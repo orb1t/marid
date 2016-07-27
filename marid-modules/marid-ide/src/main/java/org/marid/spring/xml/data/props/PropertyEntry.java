@@ -25,13 +25,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-
-import static org.apache.commons.lang3.StringUtils.stripToEmpty;
-import static org.apache.commons.lang3.StringUtils.stripToNull;
-
 /**
  * @author Dmitry Ovchinnikov.
  */
@@ -39,18 +32,6 @@ public class PropertyEntry extends AbstractData<PropertyEntry> {
 
     public final StringProperty key = new SimpleStringProperty(this, "key");
     public final StringProperty value = new SimpleStringProperty(this, "value");
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeUTF(stripToEmpty(key.get()));
-        out.writeUTF(stripToEmpty(value.get()));
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        key.set(stripToNull(in.readUTF()));
-        value.set(stripToNull(in.readUTF()));
-    }
 
     @Override
     public void save(Node node, Document document) {

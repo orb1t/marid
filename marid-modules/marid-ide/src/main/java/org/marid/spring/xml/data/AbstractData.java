@@ -19,20 +19,24 @@
 package org.marid.spring.xml.data;
 
 import javafx.beans.property.Property;
+import javafx.beans.value.WritableValue;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import org.apache.commons.lang3.exception.CloneFailedException;
 import org.marid.io.FastArrayOutputStream;
 import org.marid.misc.Casts;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.lang.reflect.Method;
+import java.util.*;
+
+import static java.lang.reflect.Modifier.isStatic;
+import static java.lang.reflect.Modifier.isTransient;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -56,6 +60,45 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Cloneab
             return Casts.cast(ois.readObject());
         } catch (IOException | ClassNotFoundException x) {
             throw new CloneFailedException(x);
+        }
+    }
+
+    @Override
+    public final void writeExternal(ObjectOutput out) throws IOException {
+        final TreeMap<String, Object> map = new TreeMap<>();
+        for (final Field field : getClass().getFields()) {
+            if (!isTransient(field.getModifiers()) && !isStatic(field.getModifiers())) {
+                try {
+                    map.put(field.getName(), toSerializable(field.get(this)));
+                } catch (ReflectiveOperationException x) {
+                    throw new IllegalStateException(x);
+                }
+            }
+        }
+        out.writeObject(map);
+    }
+
+    @Override
+    public final void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        final TreeMap<?, ?> map = (TreeMap<?, ?>) in.readObject();
+        for (final Map.Entry<?, ?> e : map.entrySet()) {
+            try {
+                final Field field = getClass().getField(e.getKey().toString());
+                if (Property.class.isAssignableFrom(field.getType())) {
+                    final Method setValue = WritableValue.class.getMethod("setValue", Object.class);
+                    setValue.invoke(field.get(this), e.getValue());
+                } else if (ObservableList.class.isAssignableFrom(field.getType())) {
+                    final Method addAll = List.class.getMethod("addAll", Collection.class);
+                    addAll.invoke(field.get(this), e.getValue());
+                } else if (ObservableMap.class.isAssignableFrom(field.getType())) {
+                    final Method putAll = Map.class.getMethod("putAll", Map.class);
+                    putAll.invoke(field.get(this), e.getValue());
+                }
+            } catch (NoSuchFieldException x) {
+                continue;
+            } catch (ReflectiveOperationException x) {
+                throw new IllegalStateException(x);
+            }
         }
     }
 
@@ -87,21 +130,20 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Cloneab
         }
     }
 
-    @Override
-    public String toString() {
-        final Map<String, Object> map = new LinkedHashMap<>();
-        for (final Field field : getClass().getFields()) {
-            try {
-                if (Property.class.isAssignableFrom(field.getType())) {
-                    final Property<?> property = (Property<?>) field.get(this);
-                    map.put(property.getName(), property.getValue());
-                } else {
-                    map.put(field.getName(), field.get(this));
-                }
-            } catch (ReflectiveOperationException x) {
-                throw new IllegalStateException(x);
-            }
+    private Serializable toSerializable(Object o) {
+        if (o == null || o instanceof Serializable) {
+            return (Serializable) o;
+        } else if (o instanceof ObservableList<?>) {
+            final ObservableList<?> list = (ObservableList<?>) o;
+            return list.stream().map(this::toSerializable).collect(toCollection(ArrayList::new));
+        } else if (o instanceof ObservableMap<?, ?>) {
+            final Map<?, ?> m = (ObservableMap<?, ?>) o;
+            return m.entrySet().stream().collect(toMap(Map.Entry::getKey,
+                    e -> toSerializable(e.getValue()), (u, v) -> v, LinkedHashMap::new));
+        } else if (o instanceof Property<?>) {
+            return toSerializable(((Property<?>) o).getValue());
+        } else {
+            throw new IllegalArgumentException("Not serializable value " + o);
         }
-        return getClass().getSimpleName() + map;
     }
 }

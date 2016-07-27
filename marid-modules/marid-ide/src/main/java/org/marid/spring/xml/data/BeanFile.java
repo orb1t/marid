@@ -25,9 +25,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.stream.Stream;
 
 import static org.marid.spring.xml.MaridBeanDefinitionSaver.SPRING_SCHEMA_PREFIX;
@@ -38,22 +35,6 @@ import static org.marid.spring.xml.MaridBeanDefinitionSaver.SPRING_SCHEMA_PREFIX
 public class BeanFile extends AbstractData<BeanFile> {
 
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList();
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeInt(beans.size());
-        for (final BeanData beanData : beans) {
-            out.writeObject(beanData);
-        }
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        final int beanCount = in.readInt();
-        for (int i = 0; i < beanCount; i++) {
-            beans.add((BeanData) in.readObject());
-        }
-    }
 
     public Stream<BeanLike> allBeans() {
         final Stream.Builder<BeanLike> builder = Stream.builder();

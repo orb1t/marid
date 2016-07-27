@@ -30,16 +30,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.lang.reflect.Executable;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.stripToNull;
 import static org.marid.spring.xml.MaridBeanUtils.setAttr;
 import static org.marid.spring.xml.MaridBeanUtils.setProperty;
 
@@ -54,39 +49,6 @@ public class Props extends AbstractData<Props> implements BeanLike {
     public final StringProperty localOverride = new SimpleStringProperty(this, "local-override");
     public final StringProperty ignoreResourceNotFound = new SimpleStringProperty(this, "ignore-resource-not-found");
     public final ObservableList<PropertyEntry> entries = FXCollections.observableArrayList();
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeUTF(defaultIfBlank(id.get(), ""));
-        out.writeUTF(defaultIfBlank(valueType.get(), ""));
-        out.writeUTF(defaultIfBlank(location.get(), ""));
-        out.writeUTF(defaultIfBlank(localOverride.get(), ""));
-        out.writeUTF(defaultIfBlank(ignoreResourceNotFound.get(), ""));
-
-        out.writeInt(entries.size());
-        for (final PropertyEntry entry : entries) {
-            out.writeObject(entry);
-        }
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        id.set(stripToNull(in.readUTF()));
-        valueType.set(stripToNull(in.readUTF()));
-        location.set(stripToNull(in.readUTF()));
-        localOverride.set(stripToNull(in.readUTF()));
-        ignoreResourceNotFound.set(stripToNull(in.readUTF()));
-
-        final int size = in.readInt();
-        for (int i = 0; i < size; i++) {
-            final String key = in.readUTF();
-            final String value = in.readUTF();
-            final PropertyEntry entry = new PropertyEntry();
-            entry.key.set(key);
-            entry.value.set(value);
-            entries.add(entry);
-        }
-    }
 
     @Override
     public Stream<? extends Executable> getConstructors(ProjectProfile profile) {
