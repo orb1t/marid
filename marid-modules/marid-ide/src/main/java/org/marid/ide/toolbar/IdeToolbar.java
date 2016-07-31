@@ -18,67 +18,28 @@
 
 package org.marid.ide.toolbar;
 
-import de.jensd.fx.glyphs.GlyphIcon;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.Separator;
-import javafx.scene.control.ToolBar;
-import javafx.scene.control.Tooltip;
-import javafx.stage.WindowEvent;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.icons.FontIcons;
-import org.marid.l10n.L10n;
-import org.marid.logging.LogSupport;
+import org.marid.jfx.toolbar.MaridToolbar;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Map;
 
-import static java.util.Comparator.comparing;
-import static javafx.beans.binding.Bindings.createObjectBinding;
+import static javafx.stage.WindowEvent.WINDOW_SHOWING;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeToolbar extends ToolBar implements LogSupport {
+public class IdeToolbar extends MaridToolbar {
 
     @Autowired
     public IdeToolbar(@IdeAction ObjectFactory<Map<String, FxAction>> menuActionsFactory) {
-        setMaxWidth(Double.MAX_VALUE);
-        sceneProperty().addListener((observable, oldValue, newValue) -> {
-            newValue.windowProperty().addListener((observable1, oldWin, newWin) -> {
-                newWin.addEventHandler(WindowEvent.WINDOW_SHOWING, event -> {
-                    final Map<String, Set<Node>> buttonMap = new TreeMap<>();
-                    final Map<Node, String> reversedMap = new IdentityHashMap<>();
-                    menuActionsFactory.getObject().forEach((id, action) -> {
-                        if (action.getToolbarGroup() == null) {
-                            return;
-                        }
-                        final String group = action.getToolbarGroup();
-                        final GlyphIcon<?> icon = action.getIcon() != null ? FontIcons.glyphIcon(action.getIcon(), 20) : null;
-                        final Button button = new Button(null, icon);
-                        button.setFocusTraversable(false);
-                        button.setOnAction(action.getEventHandler());
-                        if (action.disabledProperty() != null) {
-                            button.disableProperty().bindBidirectional(action.disabledProperty());
-                        }
-                        if (action.hintProperty() != null) {
-                            button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(L10n.s(action.getHint())), action.hintProperty()));
-                        } else if (action.textProperty() != null) {
-                            button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(L10n.s(action.getText())), action.textProperty()));
-                        }
-                        reversedMap.put(button, id);
-                        buttonMap.computeIfAbsent(group, g -> new HashSet<>()).add(button);
-                    });
-                    buttonMap.forEach((group, buttons) -> {
-                        buttons.stream().sorted(comparing(reversedMap::get)).forEach(getItems()::add);
-                        getItems().add(new Separator());
-                    });
-                });
-            });
-        });
+        sceneProperty().addListener((o1, os, ns) -> ns.windowProperty().addListener((o2, ow, nw) -> {
+            final Map<String, FxAction> actionMap = menuActionsFactory.getObject();
+            nw.addEventHandler(WINDOW_SHOWING, event -> init(actionMap));
+        }));
     }
 }

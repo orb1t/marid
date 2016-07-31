@@ -18,71 +18,32 @@
 
 package org.marid.ide.menu;
 
-import de.jensd.fx.glyphs.GlyphIcon;
-import javafx.scene.control.*;
+import javafx.event.EventHandler;
 import javafx.stage.WindowEvent;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.icons.FontIcons;
-import org.marid.l10n.L10n;
-import org.marid.logging.LogSupport;
+import org.marid.jfx.menu.MaridMenu;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.TreeMap;
+
+import static javafx.stage.WindowEvent.WINDOW_SHOWING;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeMenu extends MenuBar implements LogSupport {
+public class IdeMenu extends MaridMenu {
 
     @Autowired
     public IdeMenu(@IdeAction ObjectFactory<Map<String, FxAction>> menuActionsFactory) {
-        setMaxWidth(Double.MAX_VALUE);
-        sceneProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                newValue.windowProperty().addListener((observable1, oldWin, newWin) -> {
-                    newWin.addEventHandler(WindowEvent.WINDOW_SHOWING, event -> {
-                        final Map<String, Map<String, Map<String, MenuItem>>> itemMap = new TreeMap<>();
-                        menuActionsFactory.getObject().forEach((id, action) -> {
-                            if (action.getGroup() == null) {
-                                return;
-                            }
-                            final GlyphIcon<?> icon = action.getIcon() != null ? FontIcons.glyphIcon(action.getIcon(), 16) : null;
-                            final MenuItem menuItem;
-                            if (action.selectedProperty() != null) {
-                                final CheckMenuItem checkMenuItem = new CheckMenuItem(L10n.s(action.getText()), icon);
-                                checkMenuItem.selectedProperty().bindBidirectional(action.selectedProperty());
-                                menuItem = checkMenuItem;
-                            } else {
-                                menuItem = new MenuItem(L10n.s(action.getText()), icon);
-                            }
-                            menuItem.setAccelerator(action.getAccelerator());
-                            menuItem.setOnAction(action.getEventHandler());
-                            if (action.disabledProperty() != null) {
-                                menuItem.disableProperty().bindBidirectional(action.disabledProperty());
-                            }
-                            itemMap
-                                    .computeIfAbsent(action.getMenu(), k -> new TreeMap<>())
-                                    .computeIfAbsent(action.getGroup(), k -> new TreeMap<>())
-                                    .put(action.getText(), menuItem);
-                        });
-                        itemMap.forEach((menu, groupMap) -> {
-                            final Menu m = new Menu(L10n.s(menu));
-                            groupMap.forEach((group, menuItems) -> {
-                                m.getItems().addAll(menuItems.values());
-                                m.getItems().add(new SeparatorMenuItem());
-                            });
-                            if (!m.getItems().isEmpty()) {
-                                m.getItems().remove(m.getItems().size() - 1);
-                            }
-                            getMenus().add(m);
-                        });
-                    });
-                });
+        sceneProperty().addListener((s, os, ns) -> {
+            if (ns != null) {
+                final Map<String, FxAction> actionMap = menuActionsFactory.getObject();
+                final EventHandler<WindowEvent> handler = event -> init(actionMap);
+                ns.windowProperty().addListener((w, ow, nw) -> nw.addEventHandler(WINDOW_SHOWING, handler));
             }
         });
     }

@@ -23,6 +23,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ListCell;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.Action;
+import org.marid.jfx.action.FxActions;
 import org.marid.jfx.dialog.ListDialog;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
@@ -40,7 +42,7 @@ import static org.marid.misc.Reflections.parameterName;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanDataActions {
+public class BeanDataActions extends FxActions {
 
     private final ProjectProfile profile;
     private final BeanData beanData;
@@ -50,10 +52,12 @@ public class BeanDataActions {
         this.beanData = beanData;
     }
 
+    @Action(icon = FontIcon.M_REFRESH, name = "Refresh", tGroup = "refresh")
     public void onRefresh(ActionEvent event) {
         beanData.updateBeanData(profile);
     }
 
+    @Action(icon = FontIcon.M_CREATE, name = "Select constructor", tGroup = "constructors")
     public void onSelectConstructor(ActionEvent event) {
         final ObservableList<Executable> constructors = beanData.getConstructors(profile)
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
