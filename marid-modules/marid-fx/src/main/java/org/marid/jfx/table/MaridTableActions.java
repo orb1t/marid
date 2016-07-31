@@ -21,48 +21,38 @@ package org.marid.jfx.table;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TableView;
-import org.marid.jfx.action.Action;
-import org.marid.jfx.action.ActionConfigurer;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.FxActions;
-
-import static org.marid.jfx.icons.FontIcon.M_CLEAR_ALL;
-import static org.marid.jfx.icons.FontIcon.M_REMOVE;
+import org.marid.jfx.icons.FontIcon;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 public class MaridTableActions<T> extends FxActions {
 
-    protected final TableView<T> tableView;
+    protected final TableView<T> table;
 
-    public MaridTableActions(TableView<T> tableView) {
-        this.tableView = tableView;
+    public MaridTableActions(TableView<T> table) {
+        this.table = table;
     }
 
-    @Action(menu = "Items", group = "clear", tGroup = "clear", icon = M_CLEAR_ALL, name = "Clear", conf = ClearConfigurer.class)
-    public void onClear(ActionEvent event) {
-        tableView.getItems().clear();
+    public FxAction clearAction() {
+        return new FxAction("clear", "clear", "Items")
+                .setEventHandler(event -> table.getItems().clear())
+                .bindDisabled(Bindings.isEmpty(table.getItems()))
+                .setText("Clear")
+                .setIcon(FontIcon.M_CLEAR_ALL);
     }
 
-    @Action(menu = "Items", group = "clear", tGroup = "clear", icon = M_REMOVE, name = "Remove", conf = CommonItemConfigurer.class)
+    public FxAction removeAction() {
+        return new FxAction("clear", "clear", "Items")
+                .setEventHandler(event -> table.getItems().removeAll(table.getSelectionModel().getSelectedItems()))
+                .bindDisabled(Bindings.isEmpty(table.getSelectionModel().getSelectedItems()))
+                .setText("Clear")
+                .setIcon(FontIcon.M_REMOVE);
+    }
+
     public void onRemove(ActionEvent event) {
-        tableView.getItems().removeAll(tableView.getSelectionModel().getSelectedItems());
-    }
-
-    public class ClearConfigurer implements ActionConfigurer {
-
-        @Override
-        public void configure(FxAction action) {
-            action.bindDisabled(Bindings.isEmpty(tableView.getItems()));
-        }
-    }
-
-    public class CommonItemConfigurer implements ActionConfigurer {
-
-        @Override
-        public void configure(FxAction action) {
-            action.bindDisabled(Bindings.isEmpty(tableView.getSelectionModel().getSelectedItems()));
-        }
+        table.getItems().removeAll(table.getSelectionModel().getSelectedItems());
     }
 }

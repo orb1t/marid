@@ -22,7 +22,6 @@ import org.marid.jfx.menu.MaridMenu;
 import org.marid.jfx.toolbar.MaridToolbar;
 import org.marid.logging.LogSupport;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,55 +37,11 @@ public class FxActions implements LogSupport {
         if (!actionMap.isEmpty()) {
             return actionMap;
         }
-        MethodLoop:
         for (final Method method : getClass().getMethods()) {
-            if (method.isAnnotationPresent(Action.class)) {
+            if (FxAction.class.isAssignableFrom(method.getReturnType()) && method.getParameterCount() == 0) {
                 try {
-                    final Action action = method.getAnnotation(Action.class);
-                    final FxAction fxAction;
-                    if (FxAction.class.isAssignableFrom(method.getReturnType()) && method.getParameterCount() == 0) {
-                        fxAction = (FxAction) method.invoke(this);
-                    } else {
-                        fxAction = new FxAction(action.tGroup(), action.group(), action.menu());
-                        fxAction.setEventHandler(event -> {
-                            try {
-                                switch (method.getParameterCount()) {
-                                    case 0:
-                                        method.invoke(this);
-                                        break;
-                                    case 1:
-                                        method.invoke(this, event);
-                                        break;
-                                    case 2:
-                                        method.invoke(this, fxAction, event);
-                                        break;
-                                    default:
-                                        throw new IllegalArgumentException("Incorrect method signature");
-                                }
-                            } catch (Exception x) {
-                                log(INFO, "Unable to execute {0}", x, method);
-                            }
-                        });
-                    }
-                    if (fxAction.getHint() == null && !action.hint().isEmpty()) {
-                        fxAction.setHint(action.hint());
-                    }
-                    if (fxAction.getText() == null && !action.name().isEmpty()) {
-                        fxAction.setText(action.name());
-                    }
-                    if (fxAction.getIcon() == null && !action.icon().isEmpty()) {
-                        fxAction.setIcon(action.icon());
-                    }
-                    if (action.conf() != ActionConfigurer.class) {
-                        for (final Constructor<?> constructor : action.conf().getConstructors()) {
-                            final Class<?>[] argTypes = constructor.getParameterTypes();
-                            if (argTypes.length == 1 && argTypes[0].isAssignableFrom(getClass())) {
-                                final ActionConfigurer configurer = (ActionConfigurer) constructor.newInstance(this);
-                                configurer.configure(fxAction);
-                            }
-                        }
-                    }
-                    actionMap.put(method.getName(), fxAction);
+                    final FxAction action = (FxAction) method.invoke(this);
+                    actionMap.put(method.getName(), action);
                 } catch (ReflectiveOperationException x) {
                     throw new IllegalStateException(x);
                 }
