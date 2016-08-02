@@ -24,11 +24,12 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.ListCell;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.action.FxActions;
 import org.marid.jfx.dialog.ListDialog;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
+import org.marid.spring.annotation.TypeQualifier;
 import org.marid.spring.xml.data.BeanData;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Executable;
@@ -42,7 +43,7 @@ import static org.marid.misc.Reflections.parameterName;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanDataActions extends FxActions {
+public class BeanDataActions {
 
     private final ProjectProfile profile;
     private final BeanData beanData;
@@ -52,6 +53,8 @@ public class BeanDataActions extends FxActions {
         this.beanData = beanData;
     }
 
+    @Bean
+    @TypeQualifier(BeanDataActions.class)
     public FxAction refreshAction() {
         return new FxAction("refresh", "refresh", "Actions")
                 .setEventHandler(event -> beanData.updateBeanData(profile))
@@ -59,6 +62,8 @@ public class BeanDataActions extends FxActions {
                 .setText("Refresh");
     }
 
+    @Bean
+    @TypeQualifier(BeanDataActions.class)
     public FxAction selectConstructorAction() {
         return new FxAction("search", "search", "Actions")
                 .setEventHandler(this::onSelectConstructor)

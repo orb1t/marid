@@ -37,6 +37,11 @@ public class MaridMenu extends MenuBar {
         setMaxWidth(Double.MAX_VALUE);
     }
 
+    public MaridMenu(Map<String, FxAction> actionMap) {
+        this();
+        init(actionMap);
+    }
+
     public void init(Map<String, FxAction> actionMap) {
         final Map<String, Map<String, Map<String, MenuItem>>> itemMap = new TreeMap<>();
         actionMap.forEach((id, action) -> {

@@ -42,6 +42,11 @@ public class MaridToolbar extends ToolBar {
         setMaxWidth(Double.MAX_VALUE);
     }
 
+    public MaridToolbar(Map<String, FxAction> actionMap) {
+        this();
+        init(actionMap);
+    }
+
     public void init(Map<String, FxAction> actionMap) {
         final Map<String, Set<Node>> buttonMap = new TreeMap<>();
         final Map<Node, String> reversedMap = new IdentityHashMap<>();

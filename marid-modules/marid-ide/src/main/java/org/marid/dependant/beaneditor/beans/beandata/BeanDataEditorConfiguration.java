@@ -25,7 +25,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.marid.ide.panes.main.IdePane;
+import org.marid.jfx.action.FxAction;
 import org.marid.jfx.panes.MaridScrollPane;
+import org.marid.jfx.toolbar.MaridToolbar;
+import org.marid.spring.annotation.TypeQualifier;
 import org.marid.spring.xml.data.BeanData;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +36,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.core.env.Environment;
+
+import java.util.Map;
 
 import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
 import static org.marid.l10n.L10n.s;
@@ -60,8 +65,8 @@ public class BeanDataEditorConfiguration {
     }
 
     @Bean
-    public BorderPane sceneRoot(TabPane tabPane, BeanDataActions actions) {
-        return new BorderPane(tabPane, actions.createToolbar(), null, null, null);
+    public BorderPane sceneRoot(TabPane tabPane, @TypeQualifier(BeanDataActions.class) Map<String, FxAction> actionMap) {
+        return new BorderPane(tabPane, new MaridToolbar(actionMap), null, null, null);
     }
 
     @Bean
