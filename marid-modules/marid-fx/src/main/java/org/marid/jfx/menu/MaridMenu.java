@@ -42,7 +42,7 @@ public class MaridMenu extends MenuBar {
         init(actionMap);
     }
 
-    public void init(Map<String, FxAction> actionMap) {
+    protected void init(Map<String, FxAction> actionMap) {
         final Map<String, Map<String, Map<String, MenuItem>>> itemMap = new TreeMap<>();
         actionMap.forEach((id, action) -> {
             if (action.getGroup() == null) {

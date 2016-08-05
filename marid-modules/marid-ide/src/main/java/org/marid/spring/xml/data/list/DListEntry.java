@@ -16,30 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.propeditor;
+package org.marid.spring.xml.data.list;
 
-import javafx.event.ActionEvent;
-import org.marid.spring.xml.data.props.DPropEntry;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.marid.spring.xml.data.ValueHolder;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Component
-public class PropActions {
+public class DListEntry extends ValueHolder<DListEntry> {
 
-    private final PropTable propTable;
+    @Override
+    protected void doSave(Element element, Node node, Document document) {
 
-    @Autowired
-    public PropActions(PropTable propTable) {
-        this.propTable = propTable;
     }
 
-    public void onAdd(ActionEvent event) {
-        final DPropEntry entry = new DPropEntry();
-        entry.key.set("key");
-        entry.value.set("value");
-        propTable.getItems().add(entry);
+    @Override
+    protected void doLoad(Element element, Node node, Document document) {
+    }
+
+    @Override
+    protected String elementName() {
+        return "value";
     }
 }

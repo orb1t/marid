@@ -18,43 +18,30 @@
 
 package org.marid.spring.xml.data;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.spring.xml.data.props.Props;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import static org.marid.spring.xml.MaridBeanUtils.setAttr;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
+public abstract class RefValue<T extends RefValue<T>> extends ValueHolder<T> {
 
     public final StringProperty name = new SimpleStringProperty(this, "name");
     public final StringProperty ref = new SimpleStringProperty(this, "ref");
     public final StringProperty value = new SimpleStringProperty(this, "value");
     public final StringProperty type = new SimpleStringProperty(this, "type");
 
-    public final ObjectProperty<Props> props = new SimpleObjectProperty<>(this, "props");
-
     public boolean isEmpty() {
-        return ref.isEmpty().get() && value.isEmpty().get() && props.isNull().get();
+        return ref.isEmpty().get() && value.isEmpty().get() && super.isEmpty();
     }
 
-    protected abstract String elementName();
-
     @Override
-    public void save(Node node, Document document) {
-        if (isEmpty()) {
-            return;
-        }
-        final Element element = document.createElement(elementName());
-        node.appendChild(element);
+    protected void doSave(Element element, Node node, Document document) {
         setAttr(name, element);
         if (ref.isNotEmpty().get()) {
             setAttr(ref, element);
@@ -62,29 +49,13 @@ public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
             setAttr(value, element);
         }
         setAttr(type, element);
-        if (props.isNotNull().get()) {
-            props.get().save(element, document);
-        }
     }
 
     @Override
-    public void load(Node node, Document document) {
-        final Element e = (Element) node;
-        name.set(e.getAttribute("name"));
-        ref.set(e.getAttribute("ref"));
-        type.set(e.getAttribute("type"));
-        value.set(e.getAttribute("value"));
-
-        final NodeList nodeList = e.getChildNodes();
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            switch (nodeList.item(i).getNodeName()) {
-                case "props":
-                    final Element propsElement = (Element) nodeList.item(i);
-                    final Props props = new Props();
-                    this.props.set(props);
-                    props.load(propsElement, document);
-                    break;
-            }
-        }
+    protected void doLoad(Element element, Node node, Document document) {
+        name.set(element.getAttribute("name"));
+        ref.set(element.getAttribute("ref"));
+        type.set(element.getAttribute("type"));
+        value.set(element.getAttribute("value"));
     }
 }

@@ -32,7 +32,7 @@ import org.marid.dependant.propeditor.PropEditorConfiguration;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.data.RefValue;
-import org.marid.spring.xml.data.props.Props;
+import org.marid.spring.xml.data.props.DProps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -141,9 +141,9 @@ public class RefValuesEditorProvider {
                                 final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon(M_MODE_EDIT, 16));
                                 mi.setOnAction(event -> {
                                     if (data.props.isNull().get()) {
-                                        data.props.set(new Props());
+                                        data.props.set(new DProps());
                                     }
-                                    final Props props = data.props.get();
+                                    final DProps props = data.props.get();
                                     dependants.startDependant(
                                             PropEditorConfiguration.class,
                                             ImmutableMap.of("props", props));

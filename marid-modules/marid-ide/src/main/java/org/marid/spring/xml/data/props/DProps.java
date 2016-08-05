@@ -20,32 +20,50 @@ package org.marid.spring.xml.data.props;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.marid.spring.xml.data.AbstractData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import static org.marid.spring.xml.MaridBeanUtils.setAttr;
+import static org.marid.spring.xml.MaridBeanUtils.setProperty;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class PropertyEntry extends AbstractData<PropertyEntry> {
+public class DProps extends AbstractData<DProps> {
 
-    public final StringProperty key = new SimpleStringProperty(this, "key");
-    public final StringProperty value = new SimpleStringProperty(this, "value");
+    public final StringProperty valueType = new SimpleStringProperty(this, "value-type", String.class.getName());
+    public final ObservableList<DPropEntry> entries = FXCollections.observableArrayList();
 
     @Override
     public void save(Node node, Document document) {
-        if (key.isNotEmpty().get() && value.isNotEmpty().get()) {
-            final Element e = document.createElement("prop");
-            node.appendChild(e);
-            e.setAttribute("key", key.get());
-            e.setTextContent(value.get());
+        if (entries.isEmpty()) {
+            return;
         }
+        final Element element = document.createElement("props");
+        node.appendChild(element);
+
+        setAttr(valueType, element);
+
+        entries.forEach(entry -> entry.save(element, document));
     }
 
     @Override
     public void load(Node node, Document document) {
-        key.set(((Element) node).getAttribute("key"));
-        value.set(node.getTextContent());
+        final Element element = (Element) node;
+
+        setProperty(valueType, element);
+
+        final NodeList children = element.getElementsByTagName("prop");
+        for (int i = 0; i < children.getLength(); i++) {
+            final Element e = (Element) children.item(i);
+            final DPropEntry entry = new DPropEntry();
+            entry.load(e, document);
+            entries.add(entry);
+        }
     }
 }

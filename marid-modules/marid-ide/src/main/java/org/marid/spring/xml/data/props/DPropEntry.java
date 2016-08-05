@@ -20,47 +20,32 @@ package org.marid.spring.xml.data.props;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.marid.spring.xml.data.AbstractData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import static org.marid.spring.xml.MaridBeanUtils.setAttr;
-import static org.marid.spring.xml.MaridBeanUtils.setProperty;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class Props extends AbstractData<Props> {
+public class DPropEntry extends AbstractData<DPropEntry> {
 
-    public final StringProperty valueType = new SimpleStringProperty(this, "value-type", String.class.getName());
-    public final ObservableList<PropertyEntry> entries = FXCollections.observableArrayList();
+    public final StringProperty key = new SimpleStringProperty(this, "key");
+    public final StringProperty value = new SimpleStringProperty(this, "value");
 
     @Override
     public void save(Node node, Document document) {
-        final Element element = document.createElement("props");
-        node.appendChild(element);
-
-        setAttr(valueType, element);
-
-        entries.forEach(entry -> entry.save(element, document));
+        if (key.isNotEmpty().get() && value.isNotEmpty().get()) {
+            final Element e = document.createElement("prop");
+            node.appendChild(e);
+            e.setAttribute("key", key.get());
+            e.setTextContent(value.get());
+        }
     }
 
     @Override
     public void load(Node node, Document document) {
-        final Element element = (Element) node;
-
-        setProperty(valueType, element);
-
-        final NodeList children = element.getElementsByTagName("prop");
-        for (int i = 0; i < children.getLength(); i++) {
-            final Element e = (Element) children.item(i);
-            final PropertyEntry entry = new PropertyEntry();
-            entry.load(e, document);
-            entries.add(entry);
-        }
+        key.set(((Element) node).getAttribute("key"));
+        value.set(node.getTextContent());
     }
 }
