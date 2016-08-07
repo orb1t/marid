@@ -21,7 +21,6 @@ package org.marid.spring.xml.data.list;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.ValueHolder;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.lang.reflect.Type;
@@ -41,17 +40,6 @@ public class DListEntry extends ValueHolder<DListEntry> {
     public void save(Node node, Document document) {
         if (isEmpty()) {
             return;
-        }
-        save((Element) node, document);
-    }
-
-    @Override
-    public void load(Node node, Document document) {
-        final Element element = (Element) node;
-        switch (element.getNodeName()) {
-            case "value":
-
-                break;
         }
     }
 }
