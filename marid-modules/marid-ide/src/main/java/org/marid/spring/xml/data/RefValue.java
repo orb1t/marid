@@ -23,6 +23,7 @@ import javafx.beans.property.StringProperty;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import static org.marid.spring.xml.MaridBeanUtils.setAttr;
 
@@ -33,7 +34,6 @@ public abstract class RefValue<T extends RefValue<T>> extends ValueHolder<T> {
 
     public final StringProperty name = new SimpleStringProperty(this, "name");
     public final StringProperty ref = new SimpleStringProperty(this, "ref");
-    public final StringProperty value = new SimpleStringProperty(this, "value");
     public final StringProperty type = new SimpleStringProperty(this, "type");
 
     public boolean isEmpty() {
@@ -41,21 +41,37 @@ public abstract class RefValue<T extends RefValue<T>> extends ValueHolder<T> {
     }
 
     @Override
-    protected void doSave(Element element, Node node, Document document) {
-        setAttr(name, element);
-        if (ref.isNotEmpty().get()) {
-            setAttr(ref, element);
-        } else {
-            setAttr(value, element);
+    public void save(Node node, Document document) {
+        if (isEmpty()) {
+            return;
         }
+        final Element element = document.createElement(elementName());
+        node.appendChild(element);
+        setAttr(name, element);
+        setAttr(ref.isNotEmpty().get() ? ref : value, element);
         setAttr(type, element);
+        super.save(element, document);
     }
 
     @Override
-    protected void doLoad(Element element, Node node, Document document) {
+    public void load(Node node, Document document) {
+        final Element element = (Element) node;
         name.set(element.getAttribute("name"));
         ref.set(element.getAttribute("ref"));
         type.set(element.getAttribute("type"));
         value.set(element.getAttribute("value"));
+
+        final NodeList nodeList = element.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            if (nodeList.item(i) instanceof Element) {
+                final Element e = (Element) nodeList.item(i);
+                super.load(e, document);
+                if (!isEmpty()) {
+                    break;
+                }
+            }
+        }
     }
+
+    protected abstract String elementName();
 }

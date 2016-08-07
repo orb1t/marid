@@ -20,13 +20,13 @@ package org.marid.spring.xml.data;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.list.DList;
 import org.marid.spring.xml.data.props.DProps;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import java.lang.reflect.Type;
 import java.util.Optional;
@@ -37,63 +37,42 @@ import java.util.stream.Stream;
  */
 public abstract class ValueHolder<T extends ValueHolder<T>> extends AbstractData<T> {
 
+    public final StringProperty value = new SimpleStringProperty(this, "value");
     public final ObjectProperty<DProps> props = new SimpleObjectProperty<>(this, "props");
     public final ObjectProperty<DList> list = new SimpleObjectProperty<>(this, "list");
 
     @Override
     public void save(Node node, Document document) {
-        if (isEmpty()) {
-            return;
-        }
-        final Element element = document.createElement(elementName());
-        node.appendChild(element);
-
-        doSave(element, node, document);
-
         if (props.isNotNull().get()) {
-            props.get().save(element, document);
-        }
-        if (list.isNotNull().get()) {
-            list.get().save(element, document);
+            props.get().save(node, document);
+        } else if (list.isNotNull().get()) {
+            list.get().save(node, document);
         }
     }
-
-    protected abstract void doSave(Element element, Node node, Document document);
 
     @Override
     public void load(Node node, Document document) {
-        final Element element = (Element) node;
-
-        doLoad(element, node, document);
-
-        final NodeList nodeList = element.getChildNodes();
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            if (nodeList.item(i) instanceof Element) {
-                final Element e = (Element) nodeList.item(i);
-                switch (e.getNodeName()) {
-                    case "props":
-                        final DProps props = new DProps();
-                        this.props.set(props);
-                        props.load(e, document);
-                        break;
-                    case "list":
-                        final DList list = new DList();
-                        this.list.set(list);
-                        list.load(e, document);
-                        break;
-                }
-            }
+        switch (node.getNodeName()) {
+            case "value":
+                value.set(node.getTextContent());
+                break;
+            case "props":
+                final DProps props = new DProps();
+                props.load(node, document);
+                this.props.set(props);
+                break;
+            case "list":
+                final DList list = new DList();
+                list.load(node, document);
+                this.list.set(list);
+                break;
         }
     }
-
-    protected abstract void doLoad(Element element, Node node, Document document);
 
     public boolean isEmpty() {
         return Stream.of(props, list)
                 .allMatch(e -> e.isNull().get());
     }
-
-    protected abstract String elementName();
 
     public abstract Optional<? extends Type> getType(ProjectProfile profile);
 }

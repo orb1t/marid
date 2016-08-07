@@ -33,20 +33,25 @@ import java.util.Optional;
 public class DListEntry extends ValueHolder<DListEntry> {
 
     @Override
-    protected void doSave(Element element, Node node, Document document) {
-    }
-
-    @Override
-    protected void doLoad(Element element, Node node, Document document) {
-    }
-
-    @Override
-    protected String elementName() {
-        return "value";
-    }
-
-    @Override
     public Optional<? extends Type> getType(ProjectProfile profile) {
         return Optional.empty();
+    }
+
+    @Override
+    public void save(Node node, Document document) {
+        if (isEmpty()) {
+            return;
+        }
+        save((Element) node, document);
+    }
+
+    @Override
+    public void load(Node node, Document document) {
+        final Element element = (Element) node;
+        switch (element.getNodeName()) {
+            case "value":
+
+                break;
+        }
     }
 }
