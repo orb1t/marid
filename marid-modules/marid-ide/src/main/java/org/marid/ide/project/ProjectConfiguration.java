@@ -56,7 +56,7 @@ public class ProjectConfiguration implements LogSupport {
         return new FxAction("projectSetup", "setup", "Project")
                 .setText("Project setup...")
                 .setIcon(O_TOOLS)
-                .setEventHandler(event -> dependants.startDependant(ProjectConfigConfiguration.class));
+                .setEventHandler(event -> dependants.start(ProjectConfigConfiguration.class));
     }
 
     @Bean
@@ -101,7 +101,7 @@ public class ProjectConfiguration implements LogSupport {
                 .setAccelerator(KeyCombination.valueOf("F5"))
                 .setText("Run")
                 .setIcon(F_PLAY)
-                .setEventHandler(event -> dependants.startDependant(ProjectRunnerConfiguration.class));
+                .setEventHandler(event -> dependants.start(ProjectRunnerConfiguration.class));
     }
 
     @Bean

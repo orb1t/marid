@@ -21,6 +21,7 @@ package org.marid.dependant.beaneditor.beans.beandata;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -28,13 +29,14 @@ import org.marid.ide.panes.main.IdePane;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.MaridToolbar;
-import org.marid.spring.annotation.TypeQualifier;
+import org.marid.spring.annotation.Q;
+import org.marid.spring.xml.data.BeanArg;
 import org.marid.spring.xml.data.BeanData;
-import org.springframework.context.ApplicationListener;
+import org.marid.spring.xml.data.BeanProp;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 
 import java.util.Map;
@@ -46,7 +48,7 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@Import({BeanDataActions.class, RefValuesEditorProvider.class})
+@Import({BeanDataActions.class})
 public class BeanDataEditorConfiguration {
 
     @Bean
@@ -55,18 +57,44 @@ public class BeanDataEditorConfiguration {
     }
 
     @Bean
-    public TabPane tabPane(RefValuesEditorProvider provider, BeanData beanData) {
-        final TabPane tabPane = new TabPane(
-                new Tab(s("Constructor arguments"), new MaridScrollPane(provider.newEditor(beanData.beanArgs))),
-                new Tab(s("Properties"), new MaridScrollPane(provider.newEditor(beanData.properties)))
-        );
+    public RefValuesEditor<BeanArg> beanArgsEditor(BeanData beanData) {
+        return new RefValuesEditor<>(beanData.beanArgs);
+    }
+
+    @Bean
+    public RefValuesEditor<BeanProp> beanPropsEditor(BeanData beanData) {
+        return new RefValuesEditor<>(beanData.properties);
+    }
+
+    @Bean
+    @Q(BeanDataEditorConfiguration.class)
+    @Order(1)
+    public Tab beanArgsTab(RefValuesEditor<BeanArg> editor) {
+        return new Tab(s("Constructor arguments"), new MaridScrollPane(editor));
+    }
+
+    @Bean
+    @Q(BeanDataEditorConfiguration.class)
+    @Order(2)
+    public Tab beanPropsTab(RefValuesEditor<BeanProp> editor) {
+        return new Tab(s("Properties"), new MaridScrollPane(editor));
+    }
+
+    @Bean
+    public TabPane beanDataEditorTabs(@Q(BeanDataEditorConfiguration.class) Tab[] tabs) {
+        final TabPane tabPane = new TabPane(tabs);
         tabPane.setTabClosingPolicy(UNAVAILABLE);
         return tabPane;
     }
 
     @Bean
-    public BorderPane sceneRoot(TabPane tabPane, @TypeQualifier(BeanDataActions.class) Map<String, FxAction> actionMap) {
-        return new BorderPane(tabPane, new MaridToolbar(actionMap), null, null, null);
+    public ToolBar beanDataEditorToolbar(@Q(BeanDataActions.class) Map<String, FxAction> actionMap) {
+        return new MaridToolbar(actionMap);
+    }
+
+    @Bean
+    public BorderPane sceneRoot(TabPane beanDataEditorTabs, ToolBar beanDataEditorToolbar) {
+        return new BorderPane(beanDataEditorTabs, beanDataEditorToolbar, null, null, null);
     }
 
     @Bean
@@ -74,17 +102,12 @@ public class BeanDataEditorConfiguration {
         return new Scene(sceneRoot, 1024, 768);
     }
 
-    @Bean
+    @Bean(initMethod = "show")
     public Stage simpleBeanConfigurerStage(IdePane idePane, Scene simpleBeanConfigurerScene) {
         final Stage stage = new Stage(StageStyle.UTILITY);
         stage.initOwner(idePane.getScene().getWindow());
         stage.setTitle(s("Bean editor"));
         stage.setScene(simpleBeanConfigurerScene);
         return stage;
-    }
-
-    @Bean
-    public ApplicationListener<ContextStartedEvent> contextStartedListener(Stage simpleBeanConfigurerStage) {
-        return event -> simpleBeanConfigurerStage.show();
     }
 }

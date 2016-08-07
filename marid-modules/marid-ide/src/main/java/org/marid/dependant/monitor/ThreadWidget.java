@@ -23,7 +23,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.layout.GridPane;
-import org.marid.spring.annotation.TypeQualifier;
+import org.marid.spring.annotation.Q;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -41,7 +41,7 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 @Component
-@TypeQualifier(MonitorConfiguration.class)
+@Q(MonitorConfiguration.class)
 @Order(1)
 public class ThreadWidget extends LineChart<Number, Number> {
 

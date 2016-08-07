@@ -16,37 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.data.list;
+package org.marid.spring.annotation;
 
-import org.marid.ide.project.ProjectProfile;
-import org.marid.spring.xml.data.ValueHolder;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.lang.reflect.Type;
-import java.util.Optional;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-public class DListEntry extends ValueHolder<DListEntry> {
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+@Qualifier
+public @interface Q {
 
-    @Override
-    protected void doSave(Element element, Node node, Document document) {
-    }
-
-    @Override
-    protected void doLoad(Element element, Node node, Document document) {
-    }
-
-    @Override
-    protected String elementName() {
-        return "value";
-    }
-
-    @Override
-    public Optional<? extends Type> getType(ProjectProfile profile) {
-        return Optional.empty();
-    }
+    Class<?> value();
 }

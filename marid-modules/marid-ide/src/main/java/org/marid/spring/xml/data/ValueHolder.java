@@ -20,6 +20,7 @@ package org.marid.spring.xml.data;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.list.DList;
 import org.marid.spring.xml.data.props.DProps;
 import org.w3c.dom.Document;
@@ -27,6 +28,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.lang.reflect.Type;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -91,4 +94,6 @@ public abstract class ValueHolder<T extends ValueHolder<T>> extends AbstractData
     }
 
     protected abstract String elementName();
+
+    public abstract Optional<? extends Type> getType(ProjectProfile profile);
 }

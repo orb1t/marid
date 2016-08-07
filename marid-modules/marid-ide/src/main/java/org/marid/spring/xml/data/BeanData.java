@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -36,10 +37,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.marid.misc.Reflections.parameterName;
 import static org.marid.spring.xml.MaridBeanUtils.setAttr;
@@ -101,7 +102,7 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
     }
 
     public Optional<? extends Executable> getConstructor(ProjectProfile profile) {
-        final List<? extends Executable> executables = getConstructors(profile).collect(Collectors.toList());
+        final List<? extends Executable> executables = getConstructors(profile).collect(toList());
         switch (executables.size()) {
             case 0:
                 return Optional.empty();
@@ -124,6 +125,15 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
         }
     }
 
+    @Override
+    public Optional<? extends Type> getType(ProjectProfile profile) {
+        if (isFactoryBean()) {
+            return getConstructor(profile).map(e -> ((Method) e).getGenericReturnType());
+        } else {
+            return profile.getClass(type.get());
+        }
+    }
+
     public void updateBeanDataConstructorArgs(Parameter[] parameters) {
         final List<BeanArg> args = Stream.of(parameters)
                 .map(p -> {
@@ -140,7 +150,7 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
                         return arg;
                     }
                 })
-                .collect(Collectors.toList());
+                .collect(toList());
         beanArgs.clear();
         beanArgs.addAll(args);
     }
@@ -150,7 +160,7 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
         if (type == null) {
             return;
         }
-        final List<Executable> executables = getConstructors(profile).collect(Collectors.toList());
+        final List<Executable> executables = getConstructors(profile).collect(toList());
         if (!executables.isEmpty()) {
             if (executables.size() == 1) {
                 updateBeanDataConstructorArgs(executables.get(0).getParameters());
@@ -162,14 +172,7 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
             }
         }
 
-        final List<PropertyDescriptor> propertyDescriptors;
-        try {
-            propertyDescriptors = Stream.of(Introspector.getBeanInfo(type).getPropertyDescriptors())
-                    .filter(d -> d.getWriteMethod() != null)
-                    .collect(Collectors.toList());
-        } catch (IntrospectionException x) {
-            return;
-        }
+        final List<PropertyDescriptor> propertyDescriptors = getPropertyDescriptors(profile).collect(toList());
         final Map<String, BeanProp> pmap = properties.stream().collect(toMap(e -> e.name.get(), e -> e));
         properties.clear();
         for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
@@ -180,6 +183,17 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
             });
             prop.type.set(propertyDescriptor.getPropertyType().getName());
             properties.add(prop);
+        }
+    }
+
+    public Stream<PropertyDescriptor> getPropertyDescriptors(ProjectProfile profile) {
+        final Class<?> type = getClass(profile).orElse(Object.class);
+        try {
+            final BeanInfo beanInfo = Introspector.getBeanInfo(type);
+            return Stream.of(beanInfo.getPropertyDescriptors())
+                    .filter(d -> d.getWriteMethod() != null);
+        } catch (IntrospectionException x) {
+            return Stream.empty();
         }
     }
 

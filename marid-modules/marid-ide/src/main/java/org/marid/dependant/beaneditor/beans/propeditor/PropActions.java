@@ -16,22 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.annotation;
+package org.marid.dependant.beaneditor.beans.propeditor;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javafx.event.ActionEvent;
+import org.marid.spring.xml.data.props.DPropEntry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
-@Retention(RetentionPolicy.RUNTIME)
-@Qualifier
-public @interface TypeQualifier {
+@Component
+public class PropActions {
 
-    Class<?> value();
+    private final PropTable propTable;
+
+    @Autowired
+    public PropActions(PropTable propTable) {
+        this.propTable = propTable;
+    }
+
+    public void onAdd(ActionEvent event) {
+        final DPropEntry entry = new DPropEntry();
+        entry.key.set("key");
+        entry.value.set("value");
+        propTable.getItems().add(entry);
+    }
 }

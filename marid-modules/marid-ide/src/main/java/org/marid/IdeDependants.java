@@ -50,8 +50,8 @@ public class IdeDependants {
         this.parent = parent;
     }
 
-    public AnnotationConfigApplicationContext startDependant(Class<?> configuration, Map<String, Object> beans) {
-        return startDependant(context -> {
+    public AnnotationConfigApplicationContext start(Class<?> configuration, Map<String, Object> beans) {
+        return start(context -> {
             context.setDisplayName(configuration.getSimpleName());
             context.register(configuration);
             if (!beans.isEmpty()) {
@@ -61,11 +61,11 @@ public class IdeDependants {
         });
     }
 
-    public AnnotationConfigApplicationContext startDependant(Class<?> configuration) {
-        return startDependant(configuration, Collections.emptyMap());
+    public AnnotationConfigApplicationContext start(Class<?> configuration) {
+        return start(configuration, Collections.emptyMap());
     }
 
-    private AnnotationConfigApplicationContext startDependant(Consumer<AnnotationConfigApplicationContext> contextConsumer) {
+    private AnnotationConfigApplicationContext start(Consumer<AnnotationConfigApplicationContext> contextConsumer) {
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         CONTEXTS.add(context);
         context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));

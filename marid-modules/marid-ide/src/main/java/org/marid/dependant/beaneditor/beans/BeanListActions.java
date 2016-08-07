@@ -86,7 +86,7 @@ public class BeanListActions {
     }
 
     public void onEdit(ActionEvent event) {
-        dependants.startDependant(
+        dependants.start(
                 BeanDataEditorConfiguration.class,
                 ImmutableMap.of("beanData", table.getSelectionModel().getSelectedItem())
         );

@@ -43,7 +43,7 @@ public class ActionsConfiguration {
         return new FxAction(null, "icons", "Tools")
                 .setIcon(M_OPEN_IN_BROWSER)
                 .setText("Icon viewer")
-                .setEventHandler(event -> dependants.startDependant(IconViewerConfiguration.class));
+                .setEventHandler(event -> dependants.start(IconViewerConfiguration.class));
     }
 
     @Bean
@@ -60,7 +60,7 @@ public class ActionsConfiguration {
                     if (tab != null) {
                         ideTabPane.getSelectionModel().select(tab);
                     } else {
-                        dependants.startDependant(MonitorConfiguration.class);
+                        dependants.start(MonitorConfiguration.class);
                     }
                 });
     }
@@ -80,6 +80,6 @@ public class ActionsConfiguration {
         return new FxAction("log", "log", "Tools")
                 .setIcon(M_VIEW_LIST)
                 .setText("Show logs")
-                .setEventHandler(event -> dependants.startDependant(LogConfiguration.class));
+                .setEventHandler(event -> dependants.start(LogConfiguration.class));
     }
 }

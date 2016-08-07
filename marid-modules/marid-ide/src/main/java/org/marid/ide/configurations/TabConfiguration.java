@@ -22,7 +22,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import org.marid.ide.panes.filebrowser.BeanFileBrowserPane;
 import org.marid.l10n.L10n;
-import org.marid.spring.annotation.TypeQualifier;
+import org.marid.spring.annotation.Q;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -38,7 +38,7 @@ import static javafx.scene.control.TabPane.TabClosingPolicy.ALL_TABS;
 public class TabConfiguration {
 
     @Bean
-    @TypeQualifier(TabConfiguration.class)
+    @Q(TabConfiguration.class)
     @Order(1)
     public Tab beanFilesTab(BeanFileBrowserPane beanFileBrowserPane) {
         final Tab tab = new Tab(L10n.s("Bean files"), beanFileBrowserPane);
@@ -52,7 +52,7 @@ public class TabConfiguration {
     }
 
     @Bean
-    public TabPane ideTabPane(@TypeQualifier(TabConfiguration.class) List<Tab> tabs) {
+    public TabPane ideTabPane(@Q(TabConfiguration.class) List<Tab> tabs) {
         final TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(ALL_TABS);
         tabs.forEach(tabPane.getTabs()::add);

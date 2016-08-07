@@ -16,10 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.propeditor;
+package org.marid.dependant.beaneditor.beans.listeditor;
 
-import javafx.event.ActionEvent;
-import org.marid.spring.xml.data.props.DPropEntry;
+import javafx.scene.control.ListView;
+import org.marid.spring.xml.data.list.DList;
+import org.marid.spring.xml.data.list.DListEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,19 +28,13 @@ import org.springframework.stereotype.Component;
  * @author Dmitry Ovchinnikov.
  */
 @Component
-public class PropActions {
+public class ListEditor extends ListView<DListEntry> {
 
-    private final PropTable propTable;
+    private final DList list;
 
     @Autowired
-    public PropActions(PropTable propTable) {
-        this.propTable = propTable;
-    }
-
-    public void onAdd(ActionEvent event) {
-        final DPropEntry entry = new DPropEntry();
-        entry.key.set("key");
-        entry.value.set("value");
-        propTable.getItems().add(entry);
+    public ListEditor(DList list) {
+        super(list.entries);
+        this.list = list;
     }
 }

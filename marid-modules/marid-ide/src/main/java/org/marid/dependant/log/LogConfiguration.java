@@ -25,7 +25,7 @@ import javafx.stage.Stage;
 import org.marid.Ide;
 import org.marid.IdePrefs;
 import org.marid.jfx.panes.MaridScrollPane;
-import org.marid.spring.annotation.TypeQualifier;
+import org.marid.spring.annotation.Q;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -52,7 +52,7 @@ import static org.marid.l10n.L10n.s;
 public class LogConfiguration {
 
     @Bean
-    @TypeQualifier(LogConfiguration.class)
+    @Q(LogConfiguration.class)
     @Order(1)
     public Menu filterMenu(LoggingFilter loggingFilter) {
         final Menu menu = new Menu(s("Filter"));
@@ -67,7 +67,7 @@ public class LogConfiguration {
     }
 
     @Bean
-    @TypeQualifier(LogConfiguration.class)
+    @Q(LogConfiguration.class)
     @Order(2)
     public Menu actionsMenu(LoggingFilter loggingFilter) {
         final Menu menu = new Menu(s("Actions"));
@@ -80,21 +80,21 @@ public class LogConfiguration {
     }
 
     @Bean
-    @TypeQualifier(LogConfiguration.class)
-    public MenuBar logMenuBar(@TypeQualifier(LogConfiguration.class) List<Menu> menus) {
+    @Q(LogConfiguration.class)
+    public MenuBar logMenuBar(@Q(LogConfiguration.class) List<Menu> menus) {
         return new MenuBar(menus.toArray(new Menu[menus.size()]));
     }
 
     @Bean
-    @TypeQualifier(LogConfiguration.class)
-    public BorderPane logPane(@TypeQualifier(LogConfiguration.class) MenuBar menuBar, LoggingTable table) {
+    @Q(LogConfiguration.class)
+    public BorderPane logPane(@Q(LogConfiguration.class) MenuBar menuBar, LoggingTable table) {
         return new BorderPane(new MaridScrollPane(table), menuBar, null, null, null);
     }
 
     @Bean(initMethod = "show")
-    @TypeQualifier(LogConfiguration.class)
-    public Stage logStage(@TypeQualifier(LogConfiguration.class) BorderPane logPane,
-                          @TypeQualifier(LogConfiguration.class) Menu actionsMenu) {
+    @Q(LogConfiguration.class)
+    public Stage logStage(@Q(LogConfiguration.class) BorderPane logPane,
+                          @Q(LogConfiguration.class) Menu actionsMenu) {
         final Preferences preferences = IdePrefs.PREFERENCES.node("logs");
         final Stage stage = new Stage();
         stage.initOwner(Ide.primaryStage);

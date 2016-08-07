@@ -18,6 +18,12 @@
 
 package org.marid.spring.xml.data;
 
+import org.marid.ide.project.ProjectProfile;
+
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Type;
+import java.util.Optional;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -26,5 +32,29 @@ public class BeanProp extends RefValue<BeanProp> {
     @Override
     protected String elementName() {
         return "property";
+    }
+
+    @Override
+    public Optional<? extends Type> getType(ProjectProfile profile) {
+        final BeanData beanData = profile.getBeanFiles().values()
+                .stream()
+                .flatMap(f -> f.beans.stream())
+                .filter(d -> d.properties.stream().anyMatch(a -> a == this))
+                .findAny()
+                .orElse(null);
+        if (beanData != null) {
+            final PropertyDescriptor descriptor = beanData.getPropertyDescriptors(profile)
+                    .filter(d -> d.getName().equals(name.get()))
+                    .findAny()
+                    .orElse(null);
+            if (descriptor != null) {
+                return Optional.of(descriptor.getWriteMethod().getGenericParameterTypes()[0]);
+            }
+        }
+        if (type.isNotEmpty().get()) {
+            return profile.getClass(type.get());
+        } else {
+            return Optional.empty();
+        }
     }
 }

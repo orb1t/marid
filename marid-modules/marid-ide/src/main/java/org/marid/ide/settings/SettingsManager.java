@@ -39,6 +39,6 @@ public class SettingsManager {
         return new FxAction("settings", "settings", "Tools")
                 .setIcon(O_SETTINGS)
                 .setText("Settings...")
-                .setEventHandler(event -> dependants.startDependant(SettingsConfiguration.class));
+                .setEventHandler(event -> dependants.start(SettingsConfiguration.class));
     }
 }

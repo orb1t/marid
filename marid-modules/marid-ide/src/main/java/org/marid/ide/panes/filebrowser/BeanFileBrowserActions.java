@@ -190,7 +190,7 @@ public class BeanFileBrowserActions {
         if (tab != null) {
             ideTabPane.getObject().getSelectionModel().select(tab);
         } else {
-            dependants.startDependant(
+            dependants.start(
                     BeanEditorConfiguration.class,
                     ImmutableMap.of("beanFilePath", path, "profile", getProfile())
             );

@@ -18,6 +18,15 @@
 
 package org.marid.spring.xml.data;
 
+import org.marid.ide.project.ProjectProfile;
+
+import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
+import java.util.Optional;
+
+import static java.util.stream.Stream.of;
+import static org.marid.misc.Reflections.parameterName;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -26,5 +35,28 @@ public class BeanArg extends RefValue<BeanArg> {
     @Override
     protected String elementName() {
         return "constructor-arg";
+    }
+
+    @Override
+    public Optional<? extends Type> getType(ProjectProfile profile) {
+        final BeanData beanData = profile.getBeanFiles().values()
+                .stream()
+                .flatMap(f -> f.beans.stream())
+                .filter(d -> d.beanArgs.stream().anyMatch(a -> a == this))
+                .findAny()
+                .orElse(null);
+        if (beanData != null) {
+            final Parameter parameter = beanData.getConstructor(profile)
+                    .flatMap(e -> of(e.getParameters()).filter(p -> parameterName(p).equals(name.get())).findAny())
+                    .orElse(null);
+            if (parameter != null) {
+                return Optional.of(parameter.getParameterizedType());
+            }
+        }
+        if (type.isNotEmpty().get()) {
+            return profile.getClass(type.get());
+        } else {
+            return Optional.empty();
+        }
     }
 }

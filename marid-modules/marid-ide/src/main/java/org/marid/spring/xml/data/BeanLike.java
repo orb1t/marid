@@ -22,6 +22,7 @@ import javafx.beans.property.StringProperty;
 import org.marid.ide.project.ProjectProfile;
 
 import java.lang.reflect.Executable;
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -33,6 +34,8 @@ public interface BeanLike {
     Stream<? extends Executable> getConstructors(ProjectProfile profile);
 
     Optional<Class<?>> getClass(ProjectProfile profile);
+
+    Optional<? extends Type> getType(ProjectProfile profile);
 
     void updateBeanData(ProjectProfile profile);
 
