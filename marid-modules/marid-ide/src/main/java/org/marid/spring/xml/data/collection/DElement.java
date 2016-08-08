@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.data.list;
+package org.marid.spring.xml.data.collection;
 
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.ValueHolder;
@@ -27,9 +27,9 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-public class DListEntry extends ValueHolder<DListEntry> {
+public class DElement extends ValueHolder<DElement> {
 
     @Override
     public Optional<? extends Type> getType(ProjectProfile profile) {
@@ -38,8 +38,8 @@ public class DListEntry extends ValueHolder<DListEntry> {
 
     @Override
     public void save(Node node, Document document) {
-        if (isEmpty()) {
-            return;
+        if (!isEmpty()) {
+            super.save(node, document);
         }
     }
 }

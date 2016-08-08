@@ -19,22 +19,42 @@
 package org.marid.dependant.beaneditor.beans.listeditor;
 
 import javafx.scene.control.ListView;
+import javafx.scene.control.cell.TextFieldListCell;
+import org.marid.spring.xml.data.collection.DElement;
 import org.marid.spring.xml.data.list.DList;
-import org.marid.spring.xml.data.list.DListEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 @Component
-public class ListEditor extends ListView<DListEntry> {
+public class ListEditor extends ListView<DElement> {
 
     private final DList list;
 
     @Autowired
     public ListEditor(DList list) {
-        super(list.entries);
+        super(list.elements);
         this.list = list;
+        setCellFactory(param -> new TextFieldListCell<DElement>() {
+            @Override
+            public void updateItem(DElement item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    if (item.value.isNotEmpty().get()) {
+                        setText(item.value.get());
+                    } else if (item.list.isNotNull().get()) {
+                        setText(s("<list>"));
+                    } else if (item.props.isNotNull().get()) {
+                        setText(s("<props>"));
+                    }
+                }
+            }
+        });
     }
 }

@@ -16,17 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.data.list;
+package org.marid.spring.xml.data.array;
 
 import org.marid.spring.xml.data.collection.DCollection;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-public class DList extends DCollection<DList> {
+public class DArray extends DCollection<DArray> {
 
     @Override
     protected String elementName() {
-        return "list";
+        return "array";
     }
 }
