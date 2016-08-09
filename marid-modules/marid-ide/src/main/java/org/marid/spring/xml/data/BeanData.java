@@ -23,11 +23,8 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.ide.project.ProjectProfile;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
+import javax.xml.bind.annotation.*;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -43,12 +40,14 @@ import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.marid.misc.Reflections.parameterName;
-import static org.marid.spring.xml.MaridBeanUtils.setAttr;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanData extends AbstractData<BeanData> implements BeanLike {
+@XmlRootElement(name = "bean")
+@XmlSeeAlso({BeanProp.class, BeanArg.class})
+@XmlAccessorType(XmlAccessType.NONE)
+public class BeanData implements AbstractData<BeanData>, BeanLike {
 
     public final StringProperty type = new SimpleStringProperty(this, "class");
     public final StringProperty name = new SimpleStringProperty(this, "name");
@@ -60,6 +59,87 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
 
     public final ObservableList<BeanArg> beanArgs = FXCollections.observableArrayList();
     public final ObservableList<BeanProp> properties = FXCollections.observableArrayList();
+
+    @XmlAttribute(name = "class")
+    public String getType() {
+        return type.get();
+    }
+
+    public void setType(String type) {
+        this.type.set(type);
+    }
+
+    @XmlAttribute(name = "name")
+    public String getName() {
+        return name.get();
+    }
+
+    public void setName(String name) {
+        this.name.set(name);
+    }
+
+    @XmlAttribute(name = "init-method")
+    public String getInitMethod() {
+        return initMethod.get();
+    }
+
+    public void setInitMethod(String initMethod) {
+        this.initMethod.set(initMethod);
+    }
+
+    @XmlAttribute(name = "destroy-method")
+    public String getDestroyMethod() {
+        return destroyMethod.get();
+    }
+
+    public void setDestroyMethod(String destroyMethod) {
+        this.destroyMethod.set(destroyMethod);
+    }
+
+    @XmlAttribute(name = "factory-bean")
+    public String getFactoryBean() {
+        return factoryBean.get();
+    }
+
+    public void setFactoryBean(String factoryBean) {
+        this.factoryBean.set(factoryBean);
+    }
+
+    @XmlAttribute(name = "factory-method")
+    public String getFactoryMethod() {
+        return factoryMethod.get();
+    }
+
+    public void setFactoryMethod(String factoryMethod) {
+        this.factoryMethod.set(factoryMethod);
+    }
+
+    @XmlAttribute(name = "lazy-init")
+    public String getLazyInit() {
+        return lazyInit.get();
+    }
+
+    public void setLazyInit(String lazyInit) {
+        this.lazyInit.set(lazyInit);
+    }
+
+    @XmlElement(name = "constructor-arg")
+    public BeanArg[] getBeanArgs() {
+        return beanArgs.toArray(new BeanArg[beanArgs.size()]);
+    }
+
+    public void setBeanArgs(BeanArg[] beanArgs) {
+        this.beanArgs.addAll(beanArgs);
+    }
+
+    @XmlElement(name = "property")
+    public BeanProp[] getBeanProps() {
+        return properties.toArray(new BeanProp[properties.size()]);
+    }
+
+    public void setBeanProps(BeanProp[] beanProps) {
+        this.properties.addAll(beanProps);
+    }
 
     public boolean isFactoryBean() {
         return factoryBean.isNotEmpty().get() || factoryMethod.isNotEmpty().get();
@@ -200,55 +280,5 @@ public class BeanData extends AbstractData<BeanData> implements BeanLike {
     @Override
     public StringProperty nameProperty() {
         return name;
-    }
-
-    @Override
-    public void save(Node node, Document document) {
-        final Element beanElement = document.createElement("bean");
-        node.appendChild(beanElement);
-        setAttr(name, beanElement);
-        setAttr(destroyMethod, beanElement);
-        setAttr(initMethod, beanElement);
-        setAttr(factoryBean, beanElement);
-        setAttr(factoryMethod, beanElement);
-        setAttr(type, beanElement);
-        setAttr(lazyInit, beanElement);
-
-        beanArgs.forEach(beanArg -> beanArg.save(beanElement, document));
-        properties.forEach(property -> property.save(beanElement, document));
-    }
-
-    @Override
-    public void load(Node node, Document document) {
-        {
-            final Element e = (Element) node;
-            name.set(e.getAttribute("name"));
-            type.set(e.getAttribute("class"));
-            lazyInit.set(e.getAttribute("lazy-init"));
-            initMethod.set(e.getAttribute("init-method"));
-            destroyMethod.set(e.getAttribute("destroy-method"));
-            factoryBean.set(e.getAttribute("factory-bean"));
-            factoryMethod.set(e.getAttribute("factory-method"));
-        }
-        final NodeList nodeList = node.getChildNodes();
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            final Node n = nodeList.item(i);
-            if (!(n instanceof Element) || n.getNodeName() == null) {
-                continue;
-            }
-            final Element e = (Element) n;
-            switch (e.getNodeName()) {
-                case "constructor-arg":
-                    final BeanArg ca = new BeanArg();
-                    ca.load(e, document);
-                    beanArgs.add(ca);
-                    break;
-                case "property":
-                    final BeanProp p = new BeanProp();
-                    p.load(e, document);
-                    properties.add(p);
-                    break;
-            }
-        }
     }
 }

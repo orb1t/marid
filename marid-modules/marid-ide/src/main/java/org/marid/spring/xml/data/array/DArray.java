@@ -20,13 +20,12 @@ package org.marid.spring.xml.data.array;
 
 import org.marid.spring.xml.data.collection.DCollection;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * @author Dmitry Ovchinnikov
  */
+@XmlRootElement(name = "array")
 public class DArray extends DCollection<DArray> {
 
-    @Override
-    protected String elementName() {
-        return "array";
-    }
 }

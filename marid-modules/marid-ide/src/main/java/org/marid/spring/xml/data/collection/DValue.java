@@ -18,17 +18,26 @@
 
 package org.marid.spring.xml.data.collection;
 
-import org.marid.spring.xml.data.AbstractData;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlMixed;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlSeeAlso({DCollection.class, DValue.class})
-@XmlAccessorType(XmlAccessType.NONE)
-public abstract class DElement<T extends DElement<T>> implements AbstractData<T> {
+@XmlRootElement(name = "value")
+public final class DValue extends DElement<DValue> {
 
+    public final StringProperty value = new SimpleStringProperty(this, "value");
+
+    @XmlMixed
+    public String getValue() {
+        return value.get();
+    }
+
+    public void setValue(String value) {
+        this.value.set(value);
+    }
 }

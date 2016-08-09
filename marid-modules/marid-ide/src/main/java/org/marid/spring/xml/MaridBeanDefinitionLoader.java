@@ -19,12 +19,9 @@
 package org.marid.spring.xml;
 
 import org.marid.spring.xml.data.BeanFile;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -42,16 +39,10 @@ public class MaridBeanDefinitionLoader {
     }
 
     public static BeanFile load(InputStream stream) throws IOException {
-        final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setCoalescing(true);
-        documentBuilderFactory.setNamespaceAware(true);
         try {
-            final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            final Document document = documentBuilder.parse(stream);
-            final BeanFile beanFile = new BeanFile();
-            beanFile.load(document, document);
-            return beanFile;
-        } catch (SAXException | ParserConfigurationException x) {
+            final Unmarshaller unmarshaller = MaridBeanDefinitionSaver.CONTEXT.createUnmarshaller();
+            return (BeanFile) unmarshaller.unmarshal(stream);
+        } catch (JAXBException x) {
             throw new IOException(x);
         }
     }

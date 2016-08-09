@@ -25,8 +25,6 @@ import javafx.collections.ObservableMap;
 import org.apache.commons.lang3.exception.CloneFailedException;
 import org.marid.io.FastArrayOutputStream;
 import org.marid.misc.Casts;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -41,15 +39,9 @@ import static java.util.stream.Collectors.toMap;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractData<T extends AbstractData<T>> implements Cloneable, Externalizable {
+public interface AbstractData<T extends AbstractData<T>> extends Externalizable {
 
-    public abstract void save(Node node, Document document);
-
-    public abstract void load(Node node, Document document);
-
-    @SuppressWarnings("CloneDoesntCallSuperClone")
-    @Override
-    public T clone() {
+    default T copy() {
         final FastArrayOutputStream os = new FastArrayOutputStream();
         try (final ObjectOutputStream oos = new ObjectOutputStream(os)) {
             oos.writeObject(this);
@@ -64,7 +56,7 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Cloneab
     }
 
     @Override
-    public final void writeExternal(ObjectOutput out) throws IOException {
+    default void writeExternal(ObjectOutput out) throws IOException {
         final TreeMap<String, Object> map = new TreeMap<>();
         for (final Field field : getClass().getFields()) {
             if (!isTransient(field.getModifiers()) && !isStatic(field.getModifiers())) {
@@ -79,7 +71,7 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Cloneab
     }
 
     @Override
-    public final void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    default void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         final TreeMap<?, ?> map = (TreeMap<?, ?>) in.readObject();
         for (final Map.Entry<?, ?> e : map.entrySet()) {
             try {
@@ -102,35 +94,7 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Cloneab
         }
     }
 
-    @Override
-    public int hashCode() {
-        final FastArrayOutputStream os = new FastArrayOutputStream();
-        try (final ObjectOutputStream oos = new ObjectOutputStream(os)) {
-            oos.writeObject(this);
-        } catch (IOException x) {
-            throw new IllegalStateException(x);
-        }
-        return Arrays.hashCode(os.getSharedBuffer());
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null || obj.getClass() != getClass()) {
-            return false;
-        } else {
-            final FastArrayOutputStream thisOs = new FastArrayOutputStream(), thatOs = new FastArrayOutputStream();
-            try (final ObjectOutputStream thisOos = new ObjectOutputStream(thisOs);
-                 final ObjectOutputStream thatOos = new ObjectOutputStream(thatOs)) {
-                thisOos.writeObject(this);
-                thatOos.writeObject(obj);
-            } catch (IOException x) {
-                throw new IllegalStateException(x);
-            }
-            return Arrays.equals(thisOs.getSharedBuffer(), thatOs.getSharedBuffer());
-        }
-    }
-
-    private Serializable toSerializable(Object o) {
+    default Serializable toSerializable(Object o) {
         if (o == null || o instanceof Serializable) {
             return (Serializable) o;
         } else if (o instanceof ObservableList<?>) {

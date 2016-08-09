@@ -22,48 +22,36 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.marid.spring.xml.data.AbstractData;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.marid.spring.xml.data.collection.DElement;
 
-import static org.marid.spring.xml.MaridBeanUtils.setAttr;
-import static org.marid.spring.xml.MaridBeanUtils.setProperty;
+import javax.xml.bind.annotation.*;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class DProps extends AbstractData<DProps> {
+@XmlRootElement(name = "props")
+@XmlSeeAlso({DPropEntry.class})
+@XmlAccessorType(XmlAccessType.NONE)
+public class DProps extends DElement<DProps> {
 
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type", String.class.getName());
     public final ObservableList<DPropEntry> entries = FXCollections.observableArrayList();
 
-    @Override
-    public void save(Node node, Document document) {
-        if (entries.isEmpty()) {
-            return;
-        }
-        final Element element = document.createElement("props");
-        node.appendChild(element);
-
-        setAttr(valueType, element);
-
-        entries.forEach(entry -> entry.save(element, document));
+    @XmlAttribute(name = "value-type")
+    public String getValueType() {
+        return valueType.get();
     }
 
-    @Override
-    public void load(Node node, Document document) {
-        final Element element = (Element) node;
+    public void setValueType(String valueType) {
+        this.valueType.set(valueType);
+    }
 
-        setProperty(valueType, element);
+    @XmlElement(name = "prop")
+    public DPropEntry[] getEntries() {
+        return entries.toArray(new DPropEntry[entries.size()]);
+    }
 
-        final NodeList children = element.getElementsByTagName("prop");
-        for (int i = 0; i < children.getLength(); i++) {
-            final Element e = (Element) children.item(i);
-            final DPropEntry entry = new DPropEntry();
-            entry.load(e, document);
-            entries.add(entry);
-        }
+    public void setEntries(DPropEntry[] entries) {
+        this.entries.addAll(entries);
     }
 }

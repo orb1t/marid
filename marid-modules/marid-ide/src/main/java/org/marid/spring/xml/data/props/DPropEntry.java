@@ -21,31 +21,34 @@ package org.marid.spring.xml.data.props;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.spring.xml.data.AbstractData;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+
+import javax.xml.bind.annotation.*;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class DPropEntry extends AbstractData<DPropEntry> {
+@XmlRootElement(name = "prop")
+@XmlAccessorType(XmlAccessType.NONE)
+public class DPropEntry implements AbstractData<DPropEntry> {
 
     public final StringProperty key = new SimpleStringProperty(this, "key");
     public final StringProperty value = new SimpleStringProperty(this, "value");
 
-    @Override
-    public void save(Node node, Document document) {
-        if (key.isNotEmpty().get() && value.isNotEmpty().get()) {
-            final Element e = document.createElement("prop");
-            node.appendChild(e);
-            e.setAttribute("key", key.get());
-            e.setTextContent(value.get());
-        }
+    @XmlAttribute(name = "key")
+    public String getKey() {
+        return key.get();
     }
 
-    @Override
-    public void load(Node node, Document document) {
-        key.set(((Element) node).getAttribute("key"));
-        value.set(node.getTextContent());
+    public void setKey(String key) {
+        this.key.set(key);
+    }
+
+    @XmlValue
+    public String getValue() {
+        return value.get();
+    }
+
+    public void setValue(String value) {
+        this.value.set(value);
     }
 }

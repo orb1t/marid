@@ -18,18 +18,13 @@
 
 package org.marid.spring.xml;
 
+import org.marid.misc.Calls;
 import org.marid.spring.xml.data.BeanFile;
-import org.w3c.dom.Document;
 
-import javax.xml.parsers.DocumentBuilder;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -40,7 +35,7 @@ import java.nio.file.Path;
  */
 public class MaridBeanDefinitionSaver {
 
-    public static final String SPRING_SCHEMA_PREFIX = "http://www.springframework.org/schema/";
+    static final JAXBContext CONTEXT = Calls.call(() -> JAXBContext.newInstance(BeanFile.class));
 
     public static void write(Path path, BeanFile beanFile) throws IOException {
         try (final OutputStream outputStream = Files.newOutputStream(path)) {
@@ -52,16 +47,11 @@ public class MaridBeanDefinitionSaver {
         final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setNamespaceAware(true);
         try {
-            final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            final Document document = documentBuilder.newDocument();
-            final TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            final Transformer transformer = transformerFactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-            beanFile.save(document, document);
-            transformer.transform(new DOMSource(document), new StreamResult(outputStream));
-        } catch (ParserConfigurationException | TransformerException x) {
+            final Marshaller marshaller = CONTEXT.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+            marshaller.marshal(beanFile, outputStream);
+        } catch (JAXBException x) {
             throw new IOException(x);
         }
     }

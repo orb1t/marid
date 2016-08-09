@@ -20,6 +20,7 @@ package org.marid.spring.xml.data;
 
 import org.marid.ide.project.ProjectProfile;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.Optional;
@@ -30,12 +31,8 @@ import static org.marid.misc.Reflections.parameterName;
 /**
  * @author Dmitry Ovchinnikov
  */
+@XmlRootElement(name = "constructor-arg")
 public class BeanArg extends RefValue<BeanArg> {
-
-    @Override
-    protected String elementName() {
-        return "constructor-arg";
-    }
 
     @Override
     public Optional<? extends Type> getType(ProjectProfile profile) {

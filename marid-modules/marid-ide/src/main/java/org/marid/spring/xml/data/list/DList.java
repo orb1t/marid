@@ -20,13 +20,12 @@ package org.marid.spring.xml.data.list;
 
 import org.marid.spring.xml.data.collection.DCollection;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * @author Dmitry Ovchinnikov.
  */
+@XmlRootElement(name = "list")
 public class DList extends DCollection<DList> {
 
-    @Override
-    protected String elementName() {
-        return "list";
-    }
 }

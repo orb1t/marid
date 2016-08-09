@@ -22,50 +22,37 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.marid.spring.xml.MaridBeanUtils;
-import org.marid.spring.xml.data.AbstractData;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.marid.spring.xml.data.array.DArray;
+import org.marid.spring.xml.data.list.DList;
+
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class DCollection<T extends DCollection<T>> extends AbstractData<T> {
+@XmlSeeAlso({DList.class, DArray.class})
+public abstract class DCollection<T extends DCollection<T>> extends DElement<T> {
 
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type", Object.class.getName());
-    public final ObservableList<DElement> elements = FXCollections.observableArrayList();
+    public final ObservableList<DElement<?>> elements = FXCollections.observableArrayList();
 
-    protected abstract String elementName();
-
-    @Override
-    public void save(Node node, Document document) {
-        if (elements.isEmpty()) {
-            return;
-        }
-        final Element element = document.createElement(elementName());
-        node.appendChild(element);
-
-        MaridBeanUtils.setAttr(valueType, element);
-
-        elements.forEach(e -> e.save(element, document));
+    @XmlAttribute(name = "value-type")
+    public String getValueType() {
+        return valueType.get();
     }
 
-    @Override
-    public void load(Node node, Document document) {
-        final Element element = (Element) node;
+    public void setValueType(String valueType) {
+        this.valueType.set(valueType);
+    }
 
-        MaridBeanUtils.setProperty(valueType, element);
+    @XmlAnyElement(lax = true)
+    public DElement<?>[] getElements() {
+        return elements.toArray(new DElement<?>[elements.size()]);
+    }
 
-        final NodeList nodeList = node.getChildNodes();
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            final Node n = nodeList.item(i);
-            final DElement de = new DElement();
-            de.load(n, document);
-            if (!de.isEmpty()) {
-                elements.add(de);
-            }
-        }
+    public void setElements(DElement<?>[] elements) {
+        this.elements.addAll(elements);
     }
 }

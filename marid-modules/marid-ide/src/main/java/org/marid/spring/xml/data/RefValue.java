@@ -18,60 +18,75 @@
 
 package org.marid.spring.xml.data;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.marid.ide.project.ProjectProfile;
+import org.marid.spring.xml.data.collection.DElement;
 
-import static org.marid.spring.xml.MaridBeanUtils.setAttr;
+import javax.xml.bind.annotation.*;
+import java.lang.reflect.Type;
+import java.util.Optional;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class RefValue<T extends RefValue<T>> extends ValueHolder<T> {
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlSeeAlso({DElement.class})
+public abstract class RefValue<T extends RefValue<T>> implements AbstractData<T> {
 
     public final StringProperty name = new SimpleStringProperty(this, "name");
     public final StringProperty ref = new SimpleStringProperty(this, "ref");
     public final StringProperty type = new SimpleStringProperty(this, "type");
+    public final StringProperty value = new SimpleStringProperty(this, "value");
 
-    public boolean isEmpty() {
-        return ref.isEmpty().get() && value.isEmpty().get() && super.isEmpty();
+    public final ObjectProperty<DElement<?>> data = new SimpleObjectProperty<>(this, "data");
+
+    @XmlAttribute(name = "name")
+    public String getName() {
+        return name.get();
     }
 
-    @Override
-    public void save(Node node, Document document) {
-        if (isEmpty()) {
-            return;
-        }
-        final Element element = document.createElement(elementName());
-        node.appendChild(element);
-        setAttr(name, element);
-        setAttr(ref.isNotEmpty().get() ? ref : value, element);
-        setAttr(type, element);
-        super.save(element, document);
+    public void setName(String name) {
+        this.name.set(name);
     }
 
-    @Override
-    public void load(Node node, Document document) {
-        final Element element = (Element) node;
-        name.set(element.getAttribute("name"));
-        ref.set(element.getAttribute("ref"));
-        type.set(element.getAttribute("type"));
-        value.set(element.getAttribute("value"));
-
-        final NodeList nodeList = element.getChildNodes();
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            if (nodeList.item(i) instanceof Element) {
-                final Element e = (Element) nodeList.item(i);
-                super.load(e, document);
-                if (!isEmpty()) {
-                    break;
-                }
-            }
-        }
+    @XmlAttribute(name = "ref")
+    public String getRef() {
+        return ref.get();
     }
 
-    protected abstract String elementName();
+    public void setRef(String ref) {
+        this.ref.set(ref);
+    }
+
+    @XmlAttribute(name = "type")
+    public String getType() {
+        return type.get();
+    }
+
+    public void setType(String type) {
+        this.type.set(type);
+    }
+
+    @XmlAnyElement(lax = true)
+    public DElement<?> getData() {
+        return data.get();
+    }
+
+    public void setData(DElement<?> data) {
+        this.data.set(data);
+    }
+
+    @XmlAttribute(name = "value")
+    public String getValue() {
+        return value.get();
+    }
+
+    public void setValue(String value) {
+        this.value.set(value);
+    }
+
+    public abstract Optional<? extends Type> getType(ProjectProfile profile);
 }

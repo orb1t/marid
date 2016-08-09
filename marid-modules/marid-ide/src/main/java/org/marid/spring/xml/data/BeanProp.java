@@ -20,6 +20,7 @@ package org.marid.spring.xml.data;
 
 import org.marid.ide.project.ProjectProfile;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Type;
 import java.util.Optional;
@@ -27,12 +28,8 @@ import java.util.Optional;
 /**
  * @author Dmitry Ovchinnikov
  */
+@XmlRootElement(name = "property")
 public class BeanProp extends RefValue<BeanProp> {
-
-    @Override
-    protected String elementName() {
-        return "property";
-    }
 
     @Override
     public Optional<? extends Type> getType(ProjectProfile profile) {

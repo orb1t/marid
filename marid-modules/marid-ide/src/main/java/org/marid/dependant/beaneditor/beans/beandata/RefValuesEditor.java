@@ -32,7 +32,6 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.data.RefValue;
-import org.marid.spring.xml.data.ValueHolder;
 import org.marid.spring.xml.data.list.DList;
 import org.marid.spring.xml.data.props.DProps;
 
@@ -168,7 +167,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
         getColumns().add(col);
     }
 
-    public static List<MenuItem> valueItems(ProjectProfile profile, IdeDependants dependants, ValueHolder<?> holder) {
+    public static List<MenuItem> valueItems(ProjectProfile profile, IdeDependants dependants, RefValue<?> holder) {
         final Type type = holder.getType(profile).orElse(null);
         if (type == null) {
             return Collections.emptyList();
@@ -177,14 +176,14 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
         if (TypeUtils.isAssignable(type, Properties.class)) {
             final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon(M_MODE_EDIT, 16));
             final DProps props;
-            if (holder.props.isNull().get()) {
-                props = new DProps();
-                holder.props.set(props);
-            } else {
-                props = holder.props.get();
+            if (holder.data.get() instanceof DProps) {
+                props = (DProps) holder.data.get();
                 final MenuItem clearItem = new MenuItem(s("Clear properties"), glyphIcon(M_CLEAR, 16));
-                clearItem.setOnAction(ev -> holder.props.set(null));
+                clearItem.setOnAction(ev -> holder.data.set(null));
                 items.add(clearItem);
+            } else {
+                props = new DProps();
+                holder.data.setValue(props);
             }
             mi.setOnAction(e -> dependants.start(PropEditorConfiguration.class, ImmutableMap.of("props", props)));
             items.add(mi);
@@ -195,14 +194,14 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
             final MenuItem mi = new MenuItem(s("Edit list..."), glyphIcon(M_MODE_EDIT, 16));
             mi.setOnAction(event -> {
                 final DList list;
-                if (holder.list.isNull().get()) {
-                    list = new DList();
-                    holder.list.set(list);
-                } else {
-                    list = holder.list.get();
+                if (holder.data.get() instanceof DList) {
+                    list = (DList) holder.data.get();
                     final MenuItem clearItem = new MenuItem(s("Clear list"), glyphIcon(M_CLEAR, 16));
-                    clearItem.setOnAction(ev -> holder.list.set(null));
+                    clearItem.setOnAction(ev -> holder.data.set(null));
                     items.add(clearItem);
+                } else {
+                    list = new DList();
+                    holder.data.set(list);
                 }
                 dependants.start(ListEditorConfiguration.class, ImmutableMap.of("list", list));
             });

@@ -20,19 +20,17 @@ package org.marid.spring.xml.data;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
+import javax.xml.bind.annotation.*;
 import java.util.stream.Stream;
-
-import static org.marid.spring.xml.MaridBeanDefinitionSaver.SPRING_SCHEMA_PREFIX;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanFile extends AbstractData<BeanFile> {
+@XmlRootElement(name = "beans")
+@XmlSeeAlso({BeanData.class})
+@XmlAccessorType(XmlAccessType.NONE)
+public class BeanFile implements AbstractData<BeanFile> {
 
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList();
 
@@ -42,35 +40,12 @@ public class BeanFile extends AbstractData<BeanFile> {
         return builder.build();
     }
 
-    @Override
-    public void save(Node node, Document document) {
-        final Element beans = document.createElement("beans");
-        document.appendChild(beans);
-        beans.setAttribute("xmlns", SPRING_SCHEMA_PREFIX + "beans");
-        beans.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:lang", SPRING_SCHEMA_PREFIX + "lang");
-        beans.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:util", SPRING_SCHEMA_PREFIX + "util");
-        beans.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:context", SPRING_SCHEMA_PREFIX + "context");
-
-        this.beans.forEach(beanData -> beanData.save(beans, document));
+    @XmlElement(name = "bean")
+    public BeanData[] getBeans() {
+        return beans.toArray(new BeanData[beans.size()]);
     }
 
-    @Override
-    public void load(Node node, Document document) {
-        final Element beans = document.getDocumentElement();
-        final NodeList nodeList = beans.getChildNodes();
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            final Node n = nodeList.item(i);
-            if (!(n instanceof Element) || n.getNodeName() == null) {
-                continue;
-            }
-            final Element e = (Element) n;
-            switch (e.getNodeName()) {
-                case "bean":
-                    final BeanData beanData = new BeanData();
-                    beanData.load(e, document);
-                    this.beans.add(beanData);
-                    break;
-            }
-        }
+    public void setBeans(BeanData[] beans) {
+        this.beans.addAll(beans);
     }
 }
