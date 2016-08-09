@@ -19,6 +19,7 @@
 package org.marid.spring.xml.data.collection;
 
 import org.marid.spring.xml.data.AbstractData;
+import org.marid.spring.xml.data.props.DProps;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -27,7 +28,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlSeeAlso({DCollection.class, DValue.class})
+@XmlSeeAlso({DCollection.class, DValue.class, DProps.class})
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class DElement<T extends DElement<T>> implements AbstractData<T> {
 
