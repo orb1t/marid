@@ -34,8 +34,8 @@ public class BeanFile implements AbstractData<BeanFile> {
 
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList();
 
-    public Stream<BeanLike> allBeans() {
-        final Stream.Builder<BeanLike> builder = Stream.builder();
+    public Stream<BeanData> allBeans() {
+        final Stream.Builder<BeanData> builder = Stream.builder();
         beans.forEach(builder::add);
         return builder.build();
     }

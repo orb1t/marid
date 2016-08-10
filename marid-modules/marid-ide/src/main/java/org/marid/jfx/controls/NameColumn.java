@@ -21,14 +21,13 @@ package org.marid.jfx.controls;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.spring.xml.data.BeanLike;
 
 import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class NameColumn<T extends BeanLike> extends TextFieldTableCell<T, String> {
+public class NameColumn<T> extends TextFieldTableCell<T, String> {
 
     private final ProjectProfile profile;
     private final Consumer<NameColumn<T>> updateTask;

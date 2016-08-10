@@ -20,12 +20,15 @@ package org.marid.spring.xml.data.list;
 
 import org.marid.spring.xml.data.collection.DCollection;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 @XmlRootElement(name = "list")
+@XmlAccessorType(XmlAccessType.NONE)
 public class DList extends DCollection<DList> {
 
 }

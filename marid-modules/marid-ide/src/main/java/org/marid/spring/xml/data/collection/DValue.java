@@ -21,18 +21,21 @@ package org.marid.spring.xml.data.collection;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-import javax.xml.bind.annotation.XmlMixed;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @XmlRootElement(name = "value")
-public final class DValue extends DElement<DValue> {
+@XmlAccessorType(XmlAccessType.NONE)
+public final class DValue implements DElement<DValue> {
 
     public final StringProperty value = new SimpleStringProperty(this, "value");
 
-    @XmlMixed
+    @XmlValue
     public String getValue() {
         return value.get();
     }

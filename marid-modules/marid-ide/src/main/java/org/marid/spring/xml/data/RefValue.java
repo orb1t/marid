@@ -23,6 +23,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.spring.xml.data.collection.DCollection;
 import org.marid.spring.xml.data.collection.DElement;
 
 import javax.xml.bind.annotation.*;
@@ -33,7 +34,7 @@ import java.util.Optional;
  * @author Dmitry Ovchinnikov
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlSeeAlso({DElement.class})
+@XmlSeeAlso({DCollection.class})
 public abstract class RefValue<T extends RefValue<T>> implements AbstractData<T> {
 
     public final StringProperty name = new SimpleStringProperty(this, "name");

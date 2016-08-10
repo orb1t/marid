@@ -47,7 +47,7 @@ import static org.marid.misc.Reflections.parameterName;
 @XmlRootElement(name = "bean")
 @XmlSeeAlso({BeanProp.class, BeanArg.class})
 @XmlAccessorType(XmlAccessType.NONE)
-public class BeanData implements AbstractData<BeanData>, BeanLike {
+public class BeanData implements AbstractData<BeanData> {
 
     public final StringProperty type = new SimpleStringProperty(this, "class");
     public final StringProperty name = new SimpleStringProperty(this, "name");
@@ -151,7 +151,6 @@ public class BeanData implements AbstractData<BeanData>, BeanLike {
                 .findAny();
     }
 
-    @Override
     public Stream<? extends Executable> getConstructors(ProjectProfile profile) {
         if (isFactoryBean()) {
             if (factoryBean.isNotEmpty().get()) {
@@ -196,7 +195,6 @@ public class BeanData implements AbstractData<BeanData>, BeanLike {
         }
     }
 
-    @Override
     public Optional<Class<?>> getClass(ProjectProfile profile) {
         if (isFactoryBean()) {
             return getConstructor(profile).map(e -> ((Method) e).getReturnType());
@@ -205,7 +203,6 @@ public class BeanData implements AbstractData<BeanData>, BeanLike {
         }
     }
 
-    @Override
     public Optional<? extends Type> getType(ProjectProfile profile) {
         if (isFactoryBean()) {
             return getConstructor(profile).map(e -> ((Method) e).getGenericReturnType());
@@ -277,7 +274,6 @@ public class BeanData implements AbstractData<BeanData>, BeanLike {
         }
     }
 
-    @Override
     public StringProperty nameProperty() {
         return name;
     }

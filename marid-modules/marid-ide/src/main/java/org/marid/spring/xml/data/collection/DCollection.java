@@ -24,16 +24,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.spring.xml.data.array.DArray;
 import org.marid.spring.xml.data.list.DList;
+import org.marid.spring.xml.data.props.DProps;
 
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlSeeAlso({DList.class, DArray.class})
-public abstract class DCollection<T extends DCollection<T>> extends DElement<T> {
+@XmlSeeAlso({DList.class, DArray.class, DValue.class, DProps.class})
+@XmlAccessorType(XmlAccessType.NONE)
+public abstract class DCollection<T extends DCollection<T>> implements DElement<T> {
 
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type", Object.class.getName());
     public final ObservableList<DElement<?>> elements = FXCollections.observableArrayList();

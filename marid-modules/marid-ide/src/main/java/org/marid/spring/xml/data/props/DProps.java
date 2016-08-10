@@ -32,7 +32,7 @@ import javax.xml.bind.annotation.*;
 @XmlRootElement(name = "props")
 @XmlSeeAlso({DPropEntry.class})
 @XmlAccessorType(XmlAccessType.NONE)
-public class DProps extends DElement<DProps> {
+public class DProps implements DElement<DProps> {
 
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type", String.class.getName());
     public final ObservableList<DPropEntry> entries = FXCollections.observableArrayList();
