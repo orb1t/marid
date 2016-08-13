@@ -75,6 +75,7 @@ public class StdProtoBusTaskRunner implements ProtoBusTaskRunner<StdProtoBus> {
     private void doWithChannel(IOConsumer<ProtoIO> consumer) {
         synchronized (bus.scheduler) {
             try {
+                bus.init();
                 consumer.accept(bus.io);
                 bus.health.successfulTransactionCount.incrementAndGet();
                 bus.health.lastSuccessfulTransactionTimestamp.set(System.currentTimeMillis());

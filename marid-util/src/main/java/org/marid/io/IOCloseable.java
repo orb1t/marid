@@ -16,33 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.proto.io;
+package org.marid.io;
 
-import org.marid.io.IOBiConsumer;
-import org.marid.io.IOBiFunction;
-import org.marid.io.IOCloseable;
-
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
-import java.io.PushbackInputStream;
+import java.io.UncheckedIOException;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ProtoIO extends IOCloseable {
+@FunctionalInterface
+public interface IOCloseable extends Closeable {
 
-    PushbackInputStream getPushbackInputStream();
-
-    DataInputStream getDataInputStream();
-
-    DataOutputStream getDataOutputStream();
-
-    default void doWith(IOBiConsumer<DataInputStream, DataOutputStream> consumer) throws IOException {
-        consumer.ioAccept(getDataInputStream(), getDataOutputStream());
-    }
-
-    default <T> T call(IOBiFunction<DataInputStream, DataOutputStream, T> function) throws IOException {
-        return function.ioApply(getDataInputStream(), getDataOutputStream());
+    default void closeSafely() throws UncheckedIOException {
+        try {
+            close();
+        } catch (IOException x) {
+            throw new UncheckedIOException(x);
+        }
     }
 }

@@ -21,9 +21,7 @@ package org.marid.proto;
 import org.marid.io.IOSupplier;
 import org.marid.proto.io.ProtoIO;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -83,17 +81,22 @@ public class StdProtoBus extends StdProto implements ProtoBus {
         }
     }
 
-    @PostConstruct
     @Override
     public void reset() {
         synchronized (this) {
-            try {
-                if (io != null) {
-                    io.close();
+            if (io != null) {
+                io.closeSafely();
+            }
+            io = ioProvider.get();
+        }
+    }
+
+    void init() {
+        if (io == null) {
+            synchronized (this) {
+                if (io == null) {
+                    io = ioProvider.get();
                 }
-                io = ioProvider.get();
-            } catch (IOException x) {
-                throw new UncheckedIOException(x);
             }
         }
     }

@@ -97,7 +97,6 @@ public class ModbusTest {
             final int pushback = busProps.getPushbackSize();
             final IOSupplier<ProtoIO> ioProvider = () -> new StdProtoSocketIO(new Socket(getLocalHost(), port), pushback);
             final StdProtoBus bus = root.bus("bus1", "bus1", ioProvider, busProps);
-            bus.reset();
             final ModbusTcpDriverProps modbusTcpDriverProps = new ModbusTcpDriverProps();
             modbusTcpDriverProps.setDelay(0L);
             modbusTcpDriverProps.setPeriod(1L);
