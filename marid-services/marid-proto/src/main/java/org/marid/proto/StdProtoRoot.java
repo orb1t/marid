@@ -16,26 +16,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.proto;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
+import org.marid.io.IOSupplier;
+
+import java.nio.channels.ByteChannel;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class UrlConnection extends URLConnection {
+public class StdProtoRoot extends StdProto implements ProtoRoot {
 
-    private final IOBiConsumer<URL, UrlConnection> connector;
+    private final Map<String, StdProtoBus> children = new LinkedHashMap<>();
+    private final ThreadGroup threadGroup;
 
-    public UrlConnection(URL url, IOBiConsumer<URL, UrlConnection> connector) {
-        super(url);
-        this.connector = connector;
+    public StdProtoRoot(String id, String name) {
+        super(id, name);
+        this.threadGroup = new ThreadGroup(id);
     }
 
     @Override
-    public void connect() throws IOException {
-        connector.accept(getURL(), this);
+    public Map<String, StdProtoBus> getChildren() {
+        return children;
+    }
+
+    public ThreadGroup getThreadGroup() {
+        return threadGroup;
+    }
+
+    public StdProtoBus bus(String id, String name, IOSupplier<ByteChannel> channelProvider, StdProtoBusProps props) {
+        return new StdProtoBus(this, id, name, channelProvider, props);
     }
 }

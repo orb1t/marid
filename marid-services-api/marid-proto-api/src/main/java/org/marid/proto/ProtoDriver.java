@@ -16,11 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.proto;
+
+import java.io.Closeable;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface IOConstants {
+public interface ProtoDriver extends Proto, Closeable {
 
+    @Override
+    ProtoBus getParent();
+
+    @Override
+    default Map<String, ? extends Proto> getChildren() {
+        return Collections.emptyMap();
+    }
+
+    void start();
+
+    boolean isRunning();
 }

@@ -16,26 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.proto;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.function.BiFunction;
+import java.io.Closeable;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface IOBiFunction<T, U, R> extends BiFunction<T, U, R> {
+public interface ProtoBus extends Proto, Closeable {
 
-    R ioApply(T arg1, U arg2) throws IOException;
+    void reset();
 
     @Override
-    default R apply(T t, U u) throws UncheckedIOException {
-        try {
-            return ioApply(t, u);
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
-    }
+    ProtoRoot getParent();
+
+    @Override
+    Map<String, ? extends ProtoDriver> getChildren();
+
+    ProtoBusTaskRunner<? extends ProtoBus> getTaskRunner();
+
+    ProtoHealth getHealth();
 }

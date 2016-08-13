@@ -29,4 +29,11 @@
 
     <artifactId>marid-proto-api</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.marid</groupId>
+            <artifactId>marid-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

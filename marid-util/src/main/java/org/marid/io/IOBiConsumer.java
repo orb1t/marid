@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@ import java.io.UncheckedIOException;
 import java.util.function.BiConsumer;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
 @FunctionalInterface
 public interface IOBiConsumer<T, U> extends BiConsumer<T, U> {
@@ -31,7 +31,7 @@ public interface IOBiConsumer<T, U> extends BiConsumer<T, U> {
     void ioAccept(T t, U u) throws IOException;
 
     @Override
-    default void accept(T t, U u) {
+    default void accept(T t, U u) throws UncheckedIOException {
         try {
             ioAccept(t, u);
         } catch (IOException x) {

@@ -16,26 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.proto;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.function.BiFunction;
+import org.marid.logging.LogSupport;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface IOBiFunction<T, U, R> extends BiFunction<T, U, R> {
+public abstract class StdProto implements Proto, LogSupport {
 
-    R ioApply(T arg1, U arg2) throws IOException;
+    private final String id;
+    private final String name;
+
+    public StdProto(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     @Override
-    default R apply(T t, U u) throws UncheckedIOException {
-        try {
-            return ioApply(t, u);
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return Proto.label(this);
     }
 }

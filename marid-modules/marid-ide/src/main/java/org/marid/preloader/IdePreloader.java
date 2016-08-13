@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 import static org.marid.l10n.L10n.m;
-import static org.marid.logging.LogSupport.Log.log;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov

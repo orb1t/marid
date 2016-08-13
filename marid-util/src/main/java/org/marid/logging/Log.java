@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,32 +20,18 @@ package org.marid.logging;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.invoke.MethodHandles;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-public interface LogSupport {
+public class Log {
 
-    Level INFO = Level.INFO;
-    Level SEVERE = Level.SEVERE;
-    Level WARNING = Level.WARNING;
-    Level FINE = Level.FINE;
-    Level FINER = Level.FINER;
-    Level FINEST = Level.FINEST;
-    Level CONFIG = Level.CONFIG;
-    Level ALL = Level.ALL;
-    Level OFF = Level.OFF;
-
-    @Nonnull
-    default Logger logger() {
-        return Logging.LOGGER_CLASS_VALUE.get(getClass());
-    }
-
-    default void log(@Nonnull Level level, @Nonnull String message, @Nullable Throwable thrown, @Nonnull Object... args) {
-        final Logger logger = logger();
+    public static void log(@Nonnull Level level, @Nonnull String message, @Nullable Throwable thrown, @Nonnull Object... args) {
+        final Logger logger = Logging.LOGGER_CLASS_VALUE.get(caller());
         final LogRecord record = new LogRecord(level, message);
         record.setLoggerName(logger.getName());
         record.setSourceClassName(null);
@@ -54,12 +40,24 @@ public interface LogSupport {
         logger.log(record);
     }
 
-    default void log(@Nonnull Level level, @Nonnull String message, @Nonnull Object... args) {
-        final Logger logger = logger();
+    public static void log(@Nonnull Level level, @Nonnull String message, @Nonnull Object... args) {
+        final Logger logger = Logging.LOGGER_CLASS_VALUE.get(caller());
         final LogRecord record = new LogRecord(level, message);
         record.setLoggerName(logger.getName());
         record.setSourceClassName(null);
         record.setParameters(args);
         logger.log(record);
+    }
+
+    private static Class<?> caller() {
+        final Class<?>[] classes = new SecurityPublicClassContext().getClassContext();
+        return classes.length > 3 ? classes[3] : MethodHandles.lookup().lookupClass();
+    }
+
+    private static class SecurityPublicClassContext extends SecurityManager {
+        @Override
+        public Class[] getClassContext() {
+            return super.getClassContext();
+        }
     }
 }

@@ -20,22 +20,22 @@ package org.marid.io;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @FunctionalInterface
-public interface IOBiFunction<T, U, R> extends BiFunction<T, U, R> {
-
-    R ioApply(T arg1, U arg2) throws IOException;
+public interface IOSupplier<T> extends Supplier<T> {
 
     @Override
-    default R apply(T t, U u) throws UncheckedIOException {
+    default T get() throws UncheckedIOException {
         try {
-            return ioApply(t, u);
+            return ioGet();
         } catch (IOException x) {
             throw new UncheckedIOException(x);
         }
     }
+
+    T ioGet() throws IOException;
 }

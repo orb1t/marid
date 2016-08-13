@@ -16,26 +16,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.function.BiFunction;
+package org.marid.proto;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface IOBiFunction<T, U, R> extends BiFunction<T, U, R> {
+public class StdProtoBusProps {
 
-    R ioApply(T arg1, U arg2) throws IOException;
+    private long terminationTimeout = 10_000L;
+    private int threadCount = 1;
+    private long stackSize;
 
-    @Override
-    default R apply(T t, U u) throws UncheckedIOException {
-        try {
-            return ioApply(t, u);
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
+    public long getTerminationTimeout() {
+        return terminationTimeout;
+    }
+
+    public void setTerminationTimeout(long terminationTimeout) {
+        this.terminationTimeout = terminationTimeout;
+    }
+
+    public int getThreadCount() {
+        return threadCount;
+    }
+
+    public void setThreadCount(int threadCount) {
+        this.threadCount = threadCount;
+    }
+
+    public long getStackSize() {
+        return stackSize;
+    }
+
+    public void setStackSize(long stackSize) {
+        this.stackSize = stackSize;
     }
 }

@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
-import static org.marid.logging.LogSupport.Log.log;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov

@@ -16,26 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.proto;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.function.BiFunction;
+import java.util.Date;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface IOBiFunction<T, U, R> extends BiFunction<T, U, R> {
+public interface ProtoHealth {
 
-    R ioApply(T arg1, U arg2) throws IOException;
+    long getSuccessfulTransactionCount();
 
-    @Override
-    default R apply(T t, U u) throws UncheckedIOException {
-        try {
-            return ioApply(t, u);
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
-    }
+    long getFailedTransactionCount();
+
+    Date getLastSuccessfulTransactionTimestamp();
+
+    Date getLastFailedTransactionTimestamp();
+
+    void reset();
 }

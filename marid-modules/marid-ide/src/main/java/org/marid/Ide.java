@@ -27,7 +27,6 @@ import org.jboss.logmanager.LogManager;
 import org.marid.ide.logging.IdeConsoleLogHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
-import org.marid.io.UrlConnection;
 import org.marid.preloader.IdePreloader;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
@@ -109,7 +108,6 @@ public class Ide extends Application {
         if (!localeString.isEmpty()) {
             Locale.setDefault(Locale.forLanguageTag(localeString));
         }
-        new UrlConnection(null, null).setDefaultUseCaches(false);
         if ("true".equalsIgnoreCase(System.getProperty("ide.preloader.disabled"))) {
             launch(Ide.class, args);
         } else {

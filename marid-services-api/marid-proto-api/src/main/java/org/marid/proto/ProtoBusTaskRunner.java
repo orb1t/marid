@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,26 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.proto;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.function.Function;
+import org.marid.io.IOBiConsumer;
+import org.marid.io.IOBiFunction;
+
+import java.nio.channels.ByteChannel;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface IOFunction<T, R> extends Function<T, R> {
+public interface ProtoBusTaskRunner<T extends ProtoBus> {
 
-    R ioApply(T arg) throws IOException;
+    Future<?> runAsync(IOBiConsumer<T, ByteChannel> consumer);
 
-    @Override
-    default R apply(T arg) {
-        try {
-            return ioApply(arg);
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
-    }
+    <R> Future<R> callAsync(IOBiFunction<T, ByteChannel, R> function);
+
+    ScheduledFuture<?> schedule(IOBiConsumer<T, ByteChannel> task, long delay, long period, TimeUnit unit, boolean fair);
+
+    void run(IOBiConsumer<T, ByteChannel> consumer);
+
+    <R> R call(IOBiFunction<T, ByteChannel, R> function);
 }
