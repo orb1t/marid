@@ -19,11 +19,11 @@
 package org.marid.proto;
 
 import org.marid.io.IOSupplier;
+import org.marid.proto.io.ProtoIO;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.channels.ByteChannel;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -36,20 +36,20 @@ import java.util.concurrent.TimeUnit;
 public class StdProtoBus extends StdProto implements ProtoBus {
 
     private final StdProtoRoot root;
-    private final IOSupplier<ByteChannel> channelProvider;
+    private final IOSupplier<ProtoIO> ioProvider;
     private final Map<String, ProtoDriver> children = new LinkedHashMap<>();
     private final long terminationTimeout;
 
     final ScheduledExecutorService scheduler;
     final StdProtoHealth health = new StdProtoHealth();
 
-    volatile ByteChannel channel;
+    volatile ProtoIO io;
 
-    StdProtoBus(StdProtoRoot root, String id, String name, IOSupplier<ByteChannel> channelProvider, StdProtoBusProps p) {
+    StdProtoBus(StdProtoRoot root, String id, String name, IOSupplier<ProtoIO> ioProvider, StdProtoBusProps p) {
         super(id, name);
         this.root = root;
         this.root.getChildren().put(id, this);
-        this.channelProvider = channelProvider;
+        this.ioProvider = ioProvider;
         this.scheduler = new ScheduledThreadPoolExecutor(p.getThreadCount(), r -> {
             final String threadName = root.getId() + "/" + id;
             final Thread thread = new Thread(root.getThreadGroup(), r, threadName, p.getStackSize());
@@ -70,9 +70,9 @@ public class StdProtoBus extends StdProto implements ProtoBus {
         }
         synchronized (this) {
             try {
-                if (channel != null) {
-                    channel.close();
-                    channel = null;
+                if (io != null) {
+                    io.close();
+                    io = null;
                 }
             } catch (Exception x) {
                 exception.addSuppressed(x);
@@ -88,10 +88,10 @@ public class StdProtoBus extends StdProto implements ProtoBus {
     public void reset() {
         synchronized (this) {
             try {
-                if (this.channel != null) {
-                    this.channel.close();
+                if (io != null) {
+                    io.close();
                 }
-                this.channel = channelProvider.get();
+                io = ioProvider.get();
             } catch (IOException x) {
                 throw new UncheckedIOException(x);
             }

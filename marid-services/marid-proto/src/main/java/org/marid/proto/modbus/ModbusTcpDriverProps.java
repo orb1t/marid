@@ -20,7 +20,6 @@ package org.marid.proto.modbus;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.nio.ByteOrder;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -35,7 +34,6 @@ public class ModbusTcpDriverProps {
     private long delay = 1L;
     private TimeUnit timeUnit = TimeUnit.SECONDS;
     private int address;
-    private ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
     private long timeout = 1_000L;
     private long errorTimeout = 100L;
 
@@ -98,14 +96,6 @@ public class ModbusTcpDriverProps {
 
     public void setAddress(int address) {
         this.address = address;
-    }
-
-    public ByteOrder getByteOrder() {
-        return byteOrder;
-    }
-
-    public void setByteOrder(ByteOrder byteOrder) {
-        this.byteOrder = byteOrder;
     }
 
     public long getTimeout() {

@@ -26,6 +26,7 @@ public class StdProtoBusProps {
     private long terminationTimeout = 10_000L;
     private int threadCount = 1;
     private long stackSize;
+    private int pushbackSize = 16;
 
     public long getTerminationTimeout() {
         return terminationTimeout;
@@ -49,5 +50,13 @@ public class StdProtoBusProps {
 
     public void setStackSize(long stackSize) {
         this.stackSize = stackSize;
+    }
+
+    public int getPushbackSize() {
+        return pushbackSize;
+    }
+
+    public void setPushbackSize(int pushbackSize) {
+        this.pushbackSize = pushbackSize;
     }
 }

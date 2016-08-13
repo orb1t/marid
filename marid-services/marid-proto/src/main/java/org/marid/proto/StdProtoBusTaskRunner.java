@@ -21,8 +21,8 @@ package org.marid.proto;
 import org.marid.io.IOBiConsumer;
 import org.marid.io.IOBiFunction;
 import org.marid.io.IOConsumer;
+import org.marid.proto.io.ProtoIO;
 
-import java.nio.channels.ByteChannel;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -40,17 +40,17 @@ public class StdProtoBusTaskRunner implements ProtoBusTaskRunner<StdProtoBus> {
     }
 
     @Override
-    public Future<?> runAsync(IOBiConsumer<StdProtoBus, ByteChannel> consumer) {
+    public Future<?> runAsync(IOBiConsumer<StdProtoBus, ProtoIO> consumer) {
         return bus.scheduler.submit(() -> run(consumer));
     }
 
     @Override
-    public <R> Future<R> callAsync(IOBiFunction<StdProtoBus, ByteChannel, R> function) {
+    public <R> Future<R> callAsync(IOBiFunction<StdProtoBus, ProtoIO, R> function) {
         return bus.scheduler.submit(() -> call(function));
     }
 
     @Override
-    public ScheduledFuture<?> schedule(IOBiConsumer<StdProtoBus, ByteChannel> task, long delay, long period, TimeUnit unit, boolean fair) {
+    public ScheduledFuture<?> schedule(IOBiConsumer<StdProtoBus, ProtoIO> task, long delay, long period, TimeUnit unit, boolean fair) {
         if (period == 0) {
             return bus.scheduler.schedule(() -> run(task), delay, unit);
         } else {
@@ -61,21 +61,21 @@ public class StdProtoBusTaskRunner implements ProtoBusTaskRunner<StdProtoBus> {
     }
 
     @Override
-    public void run(IOBiConsumer<StdProtoBus, ByteChannel> consumer) {
+    public void run(IOBiConsumer<StdProtoBus, ProtoIO> consumer) {
         doWithChannel(ch -> consumer.accept(bus, ch));
     }
 
     @Override
-    public <R> R call(IOBiFunction<StdProtoBus, ByteChannel, R> function) {
+    public <R> R call(IOBiFunction<StdProtoBus, ProtoIO, R> function) {
         final AtomicReference<R> ref = new AtomicReference<>();
         doWithChannel(ch -> ref.set(function.apply(bus, ch)));
         return ref.get();
     }
 
-    private void doWithChannel(IOConsumer<ByteChannel> consumer) {
+    private void doWithChannel(IOConsumer<ProtoIO> consumer) {
         synchronized (bus.scheduler) {
             try {
-                consumer.accept(bus.channel);
+                consumer.accept(bus.io);
                 bus.health.successfulTransactionCount.incrementAndGet();
                 bus.health.lastSuccessfulTransactionTimestamp.set(System.currentTimeMillis());
             } catch (Exception x) {

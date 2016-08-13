@@ -25,15 +25,11 @@ import org.marid.proto.StdProto;
 
 import javax.annotation.PostConstruct;
 import java.io.StreamCorruptedException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static java.lang.System.currentTimeMillis;
 import static java.nio.ByteBuffer.allocate;
-import static java.util.concurrent.locks.LockSupport.parkNanos;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,7 +46,6 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
     private final long delay;
     private final long period;
     private final TimeUnit timeUnit;
-    private final ByteOrder byteOrder;
     private final Consumer<char[]> consumer;
 
     private ScheduledFuture<?> task;
@@ -69,7 +64,6 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
         this.delay = props.getDelay();
         this.period = props.getPeriod();
         this.timeUnit = props.getTimeUnit();
-        this.byteOrder = props.getByteOrder();
     }
 
     @PostConstruct
@@ -78,61 +72,36 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
         if (task != null) {
             return;
         }
-        task = bus.getTaskRunner().schedule((b, ch) -> {
-            {
-                final ByteBuffer out = ByteBuffer.allocate(12)
-                        .putChar(transactionIdentifier)
-                        .putChar((char) 0)
-                        .putChar((char) 6)
-                        .putChar(slaveAndFunc)
-                        .putChar(address)
-                        .putChar(count);
-                while (out.remaining() > 0) {
-                    ch.write(out);
-                }
+        task = bus.getTaskRunner().schedule((b, ch) -> ch.doWith((is, os) -> {
+            os.writeChar(transactionIdentifier);
+            os.writeChar(0);
+            os.writeChar(6);
+            os.writeChar(slaveAndFunc);
+            os.writeChar(address);
+            os.writeChar(count);
+            final char ti = is.readChar();
+            if (ti != transactionIdentifier) {
+                ch.getPushbackInputStream().unread(2);
+                throw new StreamCorruptedException("Invalid transaction identifier: " + (int) ti);
             }
-            {
-                final ByteBuffer in = ByteBuffer.allocate(8 + 2 * count);
-                final long start = System.currentTimeMillis();
-                while (currentTimeMillis() - start < timeout) {
-                    ch.read(in);
-                    if (in.remaining() == 0) {
-                        break;
-                    }
-                }
-                if (in.remaining() > 0) {
-                    parkNanos(TimeUnit.MILLISECONDS.toNanos(errorTimeout));
-                    final ByteBuffer buffer = ByteBuffer.allocate(512);
-                    while (ch.read(buffer) > 0) {
-                        buffer.clear();
-                    }
-                } else {
-                    in.flip();
-                    final char ti = in.getChar();
-                    if (ti != transactionIdentifier) {
-                        throw new StreamCorruptedException("Invalid transaction identifier: " + (int) ti);
-                    }
-                    final char pi = in.getChar();
-                    if (pi != 0) {
-                        throw new StreamCorruptedException("Invalid protocol: " + (int) pi);
-                    }
-                    final char size = in.getChar();
-                    if (size != 2 * count) {
-                        throw new StreamCorruptedException("Incorrect size: " + (int) size);
-                    }
-                    final char saf = in.getChar();
-                    if (saf != slaveAndFunc) {
-                        throw new StreamCorruptedException("Incorrect slave and func: " + Integer.toHexString(saf));
-                    }
-                    in.order(byteOrder);
-                    final char[] data = new char[count];
-                    for (int i = 0; i < count; i++) {
-                        data[i] = in.getChar();
-                    }
-                    consumer.accept(data);
-                }
+            final char pi = is.readChar();
+            if (pi != 0) {
+                throw new StreamCorruptedException("Invalid protocol: " + (int) pi);
             }
-        }, delay, period, timeUnit, false);
+            final char size = is.readChar();
+            if (size != 2 * count) {
+                throw new StreamCorruptedException("Incorrect size: " + (int) size);
+            }
+            final char saf = is.readChar();
+            if (saf != slaveAndFunc) {
+                throw new StreamCorruptedException("Incorrect slave and func: " + Integer.toHexString(saf));
+            }
+            final char[] data = new char[count];
+            for (int i = 0; i < count; i++) {
+                data[i] = is.readChar();
+            }
+            consumer.accept(data);
+        }), delay, period, timeUnit, false);
     }
 
     @Override

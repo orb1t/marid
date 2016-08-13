@@ -16,37 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.proto;
+package org.marid.proto.io;
 
-import org.marid.io.IOSupplier;
-import org.marid.proto.io.ProtoIO;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.net.Socket;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class StdProtoRoot extends StdProto implements ProtoRoot {
+public class StdProtoSocketIO extends StdProtoIO {
 
-    private final Map<String, StdProtoBus> children = new LinkedHashMap<>();
-    private final ThreadGroup threadGroup;
+    private final Socket socket;
 
-    public StdProtoRoot(String id, String name) {
-        super(id, name);
-        this.threadGroup = new ThreadGroup(id);
+    public StdProtoSocketIO(Socket socket, int pushbackSize) throws IOException {
+        super(socket.getInputStream(), socket.getOutputStream(), pushbackSize);
+        this.socket = socket;
     }
 
     @Override
-    public Map<String, StdProtoBus> getChildren() {
-        return children;
-    }
-
-    public ThreadGroup getThreadGroup() {
-        return threadGroup;
-    }
-
-    public StdProtoBus bus(String id, String name, IOSupplier<ProtoIO> ioProvider, StdProtoBusProps props) {
-        return new StdProtoBus(this, id, name, ioProvider, props);
+    public void close() throws IOException {
+        try {
+            super.close();
+        } finally {
+            socket.close();
+        }
     }
 }

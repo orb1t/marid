@@ -16,37 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.proto;
+package org.marid.proto.io;
 
-import org.marid.io.IOSupplier;
-import org.marid.proto.io.ProtoIO;
+import org.marid.io.IOBiConsumer;
+import org.marid.io.IOBiFunction;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.io.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class StdProtoRoot extends StdProto implements ProtoRoot {
+public interface ProtoIO extends Closeable {
 
-    private final Map<String, StdProtoBus> children = new LinkedHashMap<>();
-    private final ThreadGroup threadGroup;
+    PushbackInputStream getPushbackInputStream();
 
-    public StdProtoRoot(String id, String name) {
-        super(id, name);
-        this.threadGroup = new ThreadGroup(id);
+    DataInputStream getDataInputStream();
+
+    DataOutputStream getDataOutputStream();
+
+    default void doWith(IOBiConsumer<DataInputStream, DataOutputStream> consumer) throws IOException {
+        consumer.ioAccept(getDataInputStream(), getDataOutputStream());
     }
 
-    @Override
-    public Map<String, StdProtoBus> getChildren() {
-        return children;
-    }
-
-    public ThreadGroup getThreadGroup() {
-        return threadGroup;
-    }
-
-    public StdProtoBus bus(String id, String name, IOSupplier<ProtoIO> ioProvider, StdProtoBusProps props) {
-        return new StdProtoBus(this, id, name, ioProvider, props);
+    default <T> T call(IOBiFunction<DataInputStream, DataOutputStream, T> function) throws IOException {
+        return function.ioApply(getDataInputStream(), getDataOutputStream());
     }
 }
