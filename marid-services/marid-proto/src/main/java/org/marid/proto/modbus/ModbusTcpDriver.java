@@ -89,16 +89,27 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
                 throw new StreamCorruptedException("Invalid protocol: " + (int) pi);
             }
             final char size = is.readChar();
-            if (size != 2 * count) {
+            if (size != 3 + 2 * count) {
                 throw new StreamCorruptedException("Incorrect size: " + (int) size);
             }
             final char saf = is.readChar();
             if (saf != slaveAndFunc) {
                 throw new StreamCorruptedException("Incorrect slave and func: " + Integer.toHexString(saf));
             }
+            final int n = is.read();
+            if (n / 2 != count) {
+                throw new StreamCorruptedException("Incorrect bytes count: " + n);
+            }
             final char[] data = new char[count];
             for (int i = 0; i < count; i++) {
                 data[i] = is.readChar();
+            }
+            for (int len = is.available(); len > 0; len = is.available()) {
+                final byte[] buf = new byte[len];
+                final int c = is.read(buf);
+                if (c < 0) {
+                    break;
+                }
             }
             consumer.accept(data);
         }), delay, period, timeUnit, false);

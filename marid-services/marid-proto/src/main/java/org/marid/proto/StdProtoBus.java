@@ -24,7 +24,6 @@ import org.marid.proto.io.ProtoIO;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +37,7 @@ public class StdProtoBus extends StdProto implements ProtoBus {
     private final Map<String, ProtoDriver> children = new LinkedHashMap<>();
     private final long terminationTimeout;
 
-    final ScheduledExecutorService scheduler;
+    final ScheduledThreadPoolExecutor scheduler;
     final StdProtoHealth health = new StdProtoHealth();
 
     volatile ProtoIO io;

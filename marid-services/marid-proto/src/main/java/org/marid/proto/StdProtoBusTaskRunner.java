@@ -28,6 +28,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.marid.logging.LogSupport.WARNING;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -82,7 +84,7 @@ public class StdProtoBusTaskRunner implements ProtoBusTaskRunner<StdProtoBus> {
             } catch (Exception x) {
                 bus.health.failedTransactionCount.incrementAndGet();
                 bus.health.lastFailedTransactionTimestamp.set(System.currentTimeMillis());
-                throw x;
+                bus.log(WARNING, "Error", x);
             }
         }
     }

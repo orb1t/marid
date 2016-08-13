@@ -44,6 +44,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 
 import static java.net.InetAddress.getLocalHost;
+import static org.junit.Assert.assertEquals;
 import static org.marid.logging.Log.log;
 
 /**
@@ -59,7 +60,10 @@ public class ModbusTest {
 
     @BeforeClass
     public static void init() throws Exception {
+        //System.setProperty("net.wimpi.modbus.debug", "true");
+
         IMAGE.addRegister(new SimpleRegister(6890));
+        IMAGE.addRegister(new SimpleRegister(8890));
 
         ModbusCoupler.getReference().setUnitID(1);
         ModbusCoupler.getReference().setMaster(false);
@@ -109,6 +113,8 @@ public class ModbusTest {
             if (data == null) {
                 throw new TimeoutException();
             }
+            assertEquals(1, data.length);
+            assertEquals(6890, data[0]);
         }
     }
 }
