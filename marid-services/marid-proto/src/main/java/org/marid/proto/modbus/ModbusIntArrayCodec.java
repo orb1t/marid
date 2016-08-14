@@ -16,37 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.proto;
+package org.marid.proto.modbus;
 
-import org.marid.io.IOSupplier;
-import org.marid.proto.io.ProtoIO;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+import static java.util.Arrays.copyOfRange;
+import static java.util.stream.IntStream.range;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class StdProtoRoot extends StdProto implements ProtoRoot {
+public class ModbusIntArrayCodec implements ModbusCodec<int[]> {
 
-    private final Map<String, StdProtoBus> children = new LinkedHashMap<>();
-    private final ThreadGroup threadGroup;
+    private final ModbusIntCodec codec;
 
-    public StdProtoRoot(String id, String name) {
-        super(id, name);
-        this.threadGroup = new ThreadGroup(id);
+    public ModbusIntArrayCodec(ModbusTwoRegisterOrder order) {
+        this.codec = new ModbusIntCodec(order);
     }
 
     @Override
-    public Map<String, StdProtoBus> getChildren() {
-        return children;
+    public int[] decode(byte[] data) {
+        return range(0, data.length / 4).map(i -> codec.decode(copyOfRange(data, 4 * i, 4 * i + 4))).toArray();
     }
 
-    public ThreadGroup getThreadGroup() {
-        return threadGroup;
-    }
-
-    public StdProtoBus bus(String id, String name, IOSupplier<? extends ProtoIO> ioProvider, StdProtoBusProps props) {
-        return new StdProtoBus(this, id, name, ioProvider, props);
+    @Override
+    public byte[] encode(int[] data) {
+        final byte[] res = new byte[data.length * 4];
+        for (int i = 0; i < data.length; i++) {
+            System.arraycopy(codec.encode(data[i]), 0, res, 4 * i, 4);
+        }
+        return res;
     }
 }

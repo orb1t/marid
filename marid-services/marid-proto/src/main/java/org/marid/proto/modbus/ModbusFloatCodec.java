@@ -16,37 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.proto;
+package org.marid.proto.modbus;
 
-import org.marid.io.IOSupplier;
-import org.marid.proto.io.ProtoIO;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.google.common.primitives.Ints;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class StdProtoRoot extends StdProto implements ProtoRoot {
+public class ModbusFloatCodec implements ModbusCodec<Float> {
 
-    private final Map<String, StdProtoBus> children = new LinkedHashMap<>();
-    private final ThreadGroup threadGroup;
+    private final ModbusTwoRegisterOrder order;
 
-    public StdProtoRoot(String id, String name) {
-        super(id, name);
-        this.threadGroup = new ThreadGroup(id);
+    public ModbusFloatCodec(ModbusTwoRegisterOrder order) {
+        this.order = order;
     }
 
     @Override
-    public Map<String, StdProtoBus> getChildren() {
-        return children;
+    public Float decode(byte[] data) {
+        return Float.intBitsToFloat(Ints.fromByteArray(order.decode(data)));
     }
 
-    public ThreadGroup getThreadGroup() {
-        return threadGroup;
-    }
-
-    public StdProtoBus bus(String id, String name, IOSupplier<? extends ProtoIO> ioProvider, StdProtoBusProps props) {
-        return new StdProtoBus(this, id, name, ioProvider, props);
+    @Override
+    public byte[] encode(Float data) {
+        return order.encode(Ints.toByteArray(Float.floatToIntBits(data)));
     }
 }

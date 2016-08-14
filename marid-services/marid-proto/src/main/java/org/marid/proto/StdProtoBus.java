@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 public class StdProtoBus extends StdProto implements ProtoBus {
 
     private final StdProtoRoot root;
-    private final IOSupplier<ProtoIO> ioProvider;
+    private final IOSupplier<? extends ProtoIO> ioProvider;
     private final Map<String, ProtoDriver> children = new LinkedHashMap<>();
     private final long terminationTimeout;
 
@@ -42,7 +42,7 @@ public class StdProtoBus extends StdProto implements ProtoBus {
 
     volatile ProtoIO io;
 
-    StdProtoBus(StdProtoRoot root, String id, String name, IOSupplier<ProtoIO> ioProvider, StdProtoBusProps p) {
+    StdProtoBus(StdProtoRoot root, String id, String name, IOSupplier<? extends ProtoIO> ioProvider, StdProtoBusProps p) {
         super(id, name);
         this.root = root;
         this.root.getChildren().put(id, this);

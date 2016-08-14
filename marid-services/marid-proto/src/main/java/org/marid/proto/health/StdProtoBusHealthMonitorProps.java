@@ -16,37 +16,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.proto;
-
-import org.marid.io.IOSupplier;
-import org.marid.proto.io.ProtoIO;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+package org.marid.proto.health;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class StdProtoRoot extends StdProto implements ProtoRoot {
+public class StdProtoBusHealthMonitorProps {
 
-    private final Map<String, StdProtoBus> children = new LinkedHashMap<>();
-    private final ThreadGroup threadGroup;
+    private long delaySeconds = 60L;
+    private long periodSeconds = 60L;
+    private long maxRecencySeconds = 180L;
 
-    public StdProtoRoot(String id, String name) {
-        super(id, name);
-        this.threadGroup = new ThreadGroup(id);
+    public long getDelaySeconds() {
+        return delaySeconds;
     }
 
-    @Override
-    public Map<String, StdProtoBus> getChildren() {
-        return children;
+    public void setDelaySeconds(long delaySeconds) {
+        this.delaySeconds = delaySeconds;
     }
 
-    public ThreadGroup getThreadGroup() {
-        return threadGroup;
+    public long getPeriodSeconds() {
+        return periodSeconds;
     }
 
-    public StdProtoBus bus(String id, String name, IOSupplier<? extends ProtoIO> ioProvider, StdProtoBusProps props) {
-        return new StdProtoBus(this, id, name, ioProvider, props);
+    public void setPeriodSeconds(long periodSeconds) {
+        this.periodSeconds = periodSeconds;
+    }
+
+    public long getMaxRecencySeconds() {
+        return maxRecencySeconds;
+    }
+
+    public void setMaxRecencySeconds(long maxRecencySeconds) {
+        this.maxRecencySeconds = maxRecencySeconds;
     }
 }
