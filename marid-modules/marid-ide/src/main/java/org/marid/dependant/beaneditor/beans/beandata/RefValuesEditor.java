@@ -25,6 +25,7 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.beans.listeditor.ListEditorConfiguration;
 import org.marid.dependant.beaneditor.beans.propeditor.PropEditorConfiguration;
@@ -36,6 +37,7 @@ import org.marid.spring.xml.data.list.DList;
 import org.marid.spring.xml.data.props.DProps;
 
 import java.lang.reflect.Type;
+import java.nio.file.Path;
 import java.util.*;
 
 import static org.marid.jfx.icons.FontIcon.M_CLEAR;
@@ -90,8 +92,8 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
                     final Optional<Class<?>> bco = profile.getClass(data.type.get());
                     if (bco.isPresent()) {
                         getItems().clear();
-                        for (final BeanFile beanFile : profile.getBeanFiles().values()) {
-                            beanFile.allBeans().forEach(b -> {
+                        for (final Pair<Path, BeanFile> beanFile : profile.getBeanFiles()) {
+                            beanFile.getValue().allBeans().forEach(b -> {
                                 final Optional<Class<?>> co = b.getClass(profile);
                                 if (co.isPresent()) {
                                     if (bco.get().isAssignableFrom(co.get())) {

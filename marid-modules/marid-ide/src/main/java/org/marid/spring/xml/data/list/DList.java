@@ -31,4 +31,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class DList extends DCollection<DList> {
 
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
 }

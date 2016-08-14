@@ -105,23 +105,21 @@ public class ProjectManager implements LogSupport {
     }
 
     public static void onBeanNameChange(ProjectProfile profile, String oldName, String newName) {
-        profile.getBeanFiles().values().forEach(beanFile -> {
-            beanFile.beans.forEach(beanData -> {
-                if (beanData.factoryBean.isEqualTo(oldName).get()) {
-                    beanData.factoryBean.set(newName);
+        profile.getBeanFiles().forEach(beanFile -> beanFile.getValue().beans.forEach(beanData -> {
+            if (beanData.factoryBean.isEqualTo(oldName).get()) {
+                beanData.factoryBean.set(newName);
+            }
+            beanData.beanArgs.forEach(constructorArg -> {
+                if (constructorArg.ref.isEqualTo(oldName).get()) {
+                    constructorArg.ref.set(newName);
                 }
-                beanData.beanArgs.forEach(constructorArg -> {
-                    if (constructorArg.ref.isEqualTo(oldName).get()) {
-                        constructorArg.ref.set(newName);
-                    }
-                });
-                beanData.properties.forEach(property -> {
-                    if (property.ref.isEqualTo(oldName).get()) {
-                        property.ref.set(newName);
-                    }
-                });
             });
-        });
+            beanData.properties.forEach(property -> {
+                if (property.ref.isEqualTo(oldName).get()) {
+                    property.ref.set(newName);
+                }
+            });
+        }));
     }
 
     @Override

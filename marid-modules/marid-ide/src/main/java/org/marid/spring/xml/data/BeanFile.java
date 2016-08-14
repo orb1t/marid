@@ -42,7 +42,7 @@ public class BeanFile implements AbstractData<BeanFile> {
 
     @XmlElement(name = "bean")
     public BeanData[] getBeans() {
-        return beans.toArray(new BeanData[beans.size()]);
+        return beans.stream().filter(b -> !b.isEmpty()).toArray(BeanData[]::new);
     }
 
     public void setBeans(BeanData[] beans) {

@@ -62,7 +62,7 @@ public class BeanData implements AbstractData<BeanData> {
 
     @XmlAttribute(name = "class")
     public String getType() {
-        return type.get();
+        return type.isEmpty().get() ? null : type.get();
     }
 
     public void setType(String type) {
@@ -71,7 +71,7 @@ public class BeanData implements AbstractData<BeanData> {
 
     @XmlAttribute(name = "name")
     public String getName() {
-        return name.get();
+        return name.isEmpty().get() ? null : name.get();
     }
 
     public void setName(String name) {
@@ -80,7 +80,7 @@ public class BeanData implements AbstractData<BeanData> {
 
     @XmlAttribute(name = "init-method")
     public String getInitMethod() {
-        return initMethod.get();
+        return initMethod.isEmpty().get() ? null : initMethod.get();
     }
 
     public void setInitMethod(String initMethod) {
@@ -89,7 +89,7 @@ public class BeanData implements AbstractData<BeanData> {
 
     @XmlAttribute(name = "destroy-method")
     public String getDestroyMethod() {
-        return destroyMethod.get();
+        return destroyMethod.isEmpty().get() ? null : destroyMethod.get();
     }
 
     public void setDestroyMethod(String destroyMethod) {
@@ -98,7 +98,7 @@ public class BeanData implements AbstractData<BeanData> {
 
     @XmlAttribute(name = "factory-bean")
     public String getFactoryBean() {
-        return factoryBean.get();
+        return factoryBean.isEmpty().get() ? null : factoryBean.get();
     }
 
     public void setFactoryBean(String factoryBean) {
@@ -107,7 +107,7 @@ public class BeanData implements AbstractData<BeanData> {
 
     @XmlAttribute(name = "factory-method")
     public String getFactoryMethod() {
-        return factoryMethod.get();
+        return factoryMethod.isEmpty().get() ? null : factoryMethod.get();
     }
 
     public void setFactoryMethod(String factoryMethod) {
@@ -116,7 +116,7 @@ public class BeanData implements AbstractData<BeanData> {
 
     @XmlAttribute(name = "lazy-init")
     public String getLazyInit() {
-        return lazyInit.get();
+        return lazyInit.isEmpty().get() ? null : lazyInit.get();
     }
 
     public void setLazyInit(String lazyInit) {
@@ -125,7 +125,7 @@ public class BeanData implements AbstractData<BeanData> {
 
     @XmlElement(name = "constructor-arg")
     public BeanArg[] getBeanArgs() {
-        return beanArgs.toArray(new BeanArg[beanArgs.size()]);
+        return beanArgs.stream().filter(a -> !a.isEmpty()).toArray(BeanArg[]::new);
     }
 
     public void setBeanArgs(BeanArg[] beanArgs) {
@@ -134,7 +134,7 @@ public class BeanData implements AbstractData<BeanData> {
 
     @XmlElement(name = "property")
     public BeanProp[] getBeanProps() {
-        return properties.toArray(new BeanProp[properties.size()]);
+        return properties.stream().filter(p -> !p.isEmpty()).toArray(BeanProp[]::new);
     }
 
     public void setBeanProps(BeanProp[] beanProps) {
@@ -154,8 +154,8 @@ public class BeanData implements AbstractData<BeanData> {
     public Stream<? extends Executable> getConstructors(ProjectProfile profile) {
         if (isFactoryBean()) {
             if (factoryBean.isNotEmpty().get()) {
-                return profile.getBeanFiles().values().stream()
-                        .flatMap(BeanFile::allBeans)
+                return profile.getBeanFiles().stream()
+                        .flatMap(e -> e.getValue().allBeans())
                         .filter(b -> factoryBean.isEqualTo(b.nameProperty()).get())
                         .map(b -> b.getClass(profile))
                         .filter(Optional::isPresent)
@@ -276,5 +276,9 @@ public class BeanData implements AbstractData<BeanData> {
 
     public StringProperty nameProperty() {
         return name;
+    }
+
+    public boolean isEmpty() {
+        return (type.isEmpty().get() && factoryMethod.isEmpty().get()) || name.isEmpty().get();
     }
 }

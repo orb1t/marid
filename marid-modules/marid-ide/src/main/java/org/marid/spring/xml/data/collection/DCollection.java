@@ -35,12 +35,12 @@ import javax.xml.bind.annotation.*;
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class DCollection<T extends DCollection<T>> implements DElement<T> {
 
-    public final StringProperty valueType = new SimpleStringProperty(this, "value-type", Object.class.getName());
+    public final StringProperty valueType = new SimpleStringProperty(this, "value-type");
     public final ObservableList<DElement<?>> elements = FXCollections.observableArrayList();
 
     @XmlAttribute(name = "value-type")
     public String getValueType() {
-        return valueType.get();
+        return valueType.isEmpty().get() ? null : valueType.get();
     }
 
     public void setValueType(String valueType) {
@@ -49,7 +49,7 @@ public abstract class DCollection<T extends DCollection<T>> implements DElement<
 
     @XmlAnyElement(lax = true)
     public DElement<?>[] getElements() {
-        return elements.toArray(new DElement<?>[elements.size()]);
+        return elements.stream().filter(e -> !e.isEmpty()).toArray(DElement[]::new);
     }
 
     public void setElements(DElement<?>[] elements) {

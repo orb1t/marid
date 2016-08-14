@@ -19,7 +19,9 @@
 package org.marid.ide.project;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableMap;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
 import org.apache.maven.model.Profile;
@@ -41,7 +43,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -69,8 +71,9 @@ public class ProjectProfile implements LogSupport {
     final Path beansDirectory;
     final Path repository;
     final Logger logger;
-    final ObservableMap<Path, BeanFile> beanFiles;
+    final ObservableList<Pair<Path, BeanFile>> beanFiles;
     final ProjectCacheEntry cacheEntry;
+    final ListChangeListener<Pair<Path, BeanFile>> sortingListener;
 
     ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -90,6 +93,17 @@ public class ProjectProfile implements LogSupport {
         model.setModelVersion("4.0.0");
         createFileStructure();
         beanFiles = loadBeanFiles();
+        beanFiles.sort(Comparator.comparing(Pair::getKey));
+        sortingListener = c -> {
+            while (c.next()) {
+                if (c.wasAdded() || c.wasReplaced() || c.wasUpdated() || c.wasPermutated()) {
+                    beanFiles.removeListener(getSortingListener());
+                    beanFiles.sort(Comparator.comparing(Pair::getKey));
+                    beanFiles.addListener(getSortingListener());
+                }
+            }
+        };
+        beanFiles.addListener(sortingListener);
         init();
         cacheEntry = new ProjectCacheEntry(this);
     }
@@ -98,13 +112,14 @@ public class ProjectProfile implements LogSupport {
         return cacheEntry.getClassLoader();
     }
 
+    private ListChangeListener<Pair<Path, BeanFile>> getSortingListener() {
+        return sortingListener;
+    }
+
     public static boolean containsBean(ProjectProfile profile, String name) {
-        for (final BeanFile file : profile.beanFiles.values()) {
-            if (file.allBeans().anyMatch(b -> b.nameProperty().isEqualTo(name).get())) {
-                return true;
-            }
-        }
-        return false;
+        return profile.beanFiles.stream()
+                .map(Pair::getValue)
+                .anyMatch(f -> f.allBeans().anyMatch(b -> b.nameProperty().isEqualTo(name).get()));
     }
 
     public static String generateBeanName(ProjectProfile profile, String name) {
@@ -142,26 +157,27 @@ public class ProjectProfile implements LogSupport {
         return model;
     }
 
-    private ObservableMap<Path, BeanFile> loadBeanFiles() {
+    private ObservableList<Pair<Path, BeanFile>> loadBeanFiles() {
         try (final Stream<Path> stream = Files.walk(beansDirectory)) {
             return stream.filter(p -> p.getFileName().toString().endsWith(".xml"))
-                    .collect(Collectors.toMap(p -> p, p -> {
+                    .map(p -> {
                         try {
-                            return MaridBeanDefinitionLoader.load(p);
+                            return Pair.of(p, MaridBeanDefinitionLoader.load(p));
                         } catch (Exception x) {
                             log(WARNING, "Unable to load {0}", x, p);
-                            return new BeanFile();
+                            return Pair.of(p, new BeanFile());
                         }
-                    }, (m1, m2) -> m2, FXCollections::observableHashMap));
+                    })
+                    .collect(Collectors.toCollection(FXCollections::observableArrayList));
         } catch (IOException x) {
             log(WARNING, "Unable to load bean files", x);
         } catch (Exception x) {
             log(SEVERE, "Unknown error", x);
         }
-        return FXCollections.observableHashMap();
+        return FXCollections.observableArrayList();
     }
 
-    public ObservableMap<Path, BeanFile> getBeanFiles() {
+    public ObservableList<Pair<Path, BeanFile>> getBeanFiles() {
         return beanFiles;
     }
 
@@ -244,7 +260,7 @@ public class ProjectProfile implements LogSupport {
             log(WARNING, "Unable to clean beans directory", x);
             return;
         }
-        for (final Map.Entry<Path, BeanFile> entry : beanFiles.entrySet()) {
+        for (final Pair<Path, BeanFile> entry : beanFiles) {
             try {
                 Files.createDirectories(entry.getKey().getParent());
                 MaridBeanDefinitionSaver.write(entry.getKey(), entry.getValue());

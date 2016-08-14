@@ -36,9 +36,9 @@ public class BeanArg extends RefValue<BeanArg> {
 
     @Override
     public Optional<? extends Type> getType(ProjectProfile profile) {
-        final BeanData beanData = profile.getBeanFiles().values()
+        final BeanData beanData = profile.getBeanFiles()
                 .stream()
-                .flatMap(f -> f.beans.stream())
+                .flatMap(f -> f.getValue().beans.stream())
                 .filter(d -> d.beanArgs.stream().anyMatch(a -> a == this))
                 .findAny()
                 .orElse(null);

@@ -55,7 +55,7 @@ public abstract class RefValue<T extends RefValue<T>> implements AbstractData<T>
 
     @XmlAttribute(name = "ref")
     public String getRef() {
-        return ref.get();
+        return ref.isEmpty().get() ? null : ref.get();
     }
 
     public void setRef(String ref) {
@@ -64,7 +64,7 @@ public abstract class RefValue<T extends RefValue<T>> implements AbstractData<T>
 
     @XmlAttribute(name = "type")
     public String getType() {
-        return type.get();
+        return type.isEmpty().get() ? null : type.get();
     }
 
     public void setType(String type) {
@@ -82,11 +82,15 @@ public abstract class RefValue<T extends RefValue<T>> implements AbstractData<T>
 
     @XmlAttribute(name = "value")
     public String getValue() {
-        return value.get();
+        return value.isEmpty().get() ? null : value.get();
     }
 
     public void setValue(String value) {
         this.value.set(value);
+    }
+
+    public boolean isEmpty() {
+        return data.isNull().get() && value.isEmpty().get() && ref.isEmpty().get();
     }
 
     public abstract Optional<? extends Type> getType(ProjectProfile profile);

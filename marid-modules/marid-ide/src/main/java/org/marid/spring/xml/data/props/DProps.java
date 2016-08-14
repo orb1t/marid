@@ -34,12 +34,12 @@ import javax.xml.bind.annotation.*;
 @XmlAccessorType(XmlAccessType.NONE)
 public class DProps implements DElement<DProps> {
 
-    public final StringProperty valueType = new SimpleStringProperty(this, "value-type", String.class.getName());
+    public final StringProperty valueType = new SimpleStringProperty(this, "value-type");
     public final ObservableList<DPropEntry> entries = FXCollections.observableArrayList();
 
     @XmlAttribute(name = "value-type")
     public String getValueType() {
-        return valueType.get();
+        return valueType.isEmpty().get() ? null : valueType.get();
     }
 
     public void setValueType(String valueType) {
@@ -48,10 +48,15 @@ public class DProps implements DElement<DProps> {
 
     @XmlElement(name = "prop")
     public DPropEntry[] getEntries() {
-        return entries.toArray(new DPropEntry[entries.size()]);
+        return entries.stream().filter(e -> !e.isEmpty()).toArray(DPropEntry[]::new);
     }
 
     public void setEntries(DPropEntry[] entries) {
         this.entries.addAll(entries);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
     }
 }

@@ -25,4 +25,5 @@ import org.marid.spring.xml.data.AbstractData;
  */
 public interface DElement<T extends DElement<T>> extends AbstractData<T> {
 
+    boolean isEmpty();
 }

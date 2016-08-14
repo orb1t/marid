@@ -43,4 +43,9 @@ public final class DValue implements DElement<DValue> {
     public void setValue(String value) {
         this.value.set(value);
     }
+
+    @Override
+    public boolean isEmpty() {
+        return value.isEmpty().get();
+    }
 }

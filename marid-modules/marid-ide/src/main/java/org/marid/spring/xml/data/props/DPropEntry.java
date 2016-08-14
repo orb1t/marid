@@ -51,4 +51,8 @@ public class DPropEntry implements AbstractData<DPropEntry> {
     public void setValue(String value) {
         this.value.set(value);
     }
+
+    public boolean isEmpty() {
+        return key.isEmpty().get() && value.isEmpty().get();
+    }
 }

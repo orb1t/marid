@@ -25,6 +25,7 @@ import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static javafx.beans.binding.Bindings.isEmpty;
 import static org.marid.jfx.icons.FontIcon.*;
 
 /**
@@ -34,17 +35,16 @@ import static org.marid.jfx.icons.FontIcon.*;
 public class BeanFileBrowserPane extends BorderPane {
 
     @Autowired
-    public BeanFileBrowserPane(BeanFileBrowserActions actions, BeanFileBrowserTree tree) {
+    public BeanFileBrowserPane(BeanFileBrowserActions actions, BeanFileBrowser tree) {
         setCenter(new MaridScrollPane(tree));
         setLeft(new ToolbarBuilder()
-                .add("Add file", M_ADD, actions::onFileAdd, actions.fileAddDisabled())
-                .add("Add directory", M_FOLDER, actions::onDirAdd, actions.fileAddDisabled())
+                .add("Add file", M_ADD, actions::onFileAdd)
                 .addSeparator()
-                .add("Rename file/directory", O_DIFF_RENAMED, actions::onRename, actions.moveDisabled())
+                .add("Rename file/directory", O_DIFF_RENAMED, actions::onRename, isEmpty(tree.getSelectionModel().getSelectedItems()))
                 .addSeparator()
-                .add("Delete file/directory", O_TAG_REMOVE, actions::onDelete, actions.moveDisabled())
+                .add("Delete file/directory", O_TAG_REMOVE, actions::onDelete, isEmpty(tree.getSelectionModel().getSelectedItems()))
                 .addSeparator()
-                .add("Bean editor...", M_EDIT, actions::launchBeanEditor, actions.launchDisabled())
+                .add("Bean editor...", M_EDIT, actions::launchBeanEditor, isEmpty(tree.getSelectionModel().getSelectedItems()))
                 .build(toolBar -> toolBar.setOrientation(Orientation.VERTICAL)));
     }
 }

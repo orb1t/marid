@@ -18,7 +18,8 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.collections.MapChangeListener;
+import javafx.collections.ListChangeListener;
+import org.apache.commons.lang3.tuple.Pair;
 import org.marid.dependant.beaneditor.beans.BeanListConfiguration;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.BeanFile;
@@ -50,7 +51,12 @@ public class BeanEditorConfiguration {
 
     @Bean
     public BeanFile beanFile(Path beanFilePath, ProjectProfile profile) {
-        return profile.getBeanFiles().get(beanFilePath);
+        return profile.getBeanFiles()
+                .stream()
+                .filter(e -> e.getKey().equals(beanFilePath))
+                .map(Pair::getValue)
+                .findAny()
+                .orElse(null);
     }
 
     @Bean
@@ -60,10 +66,14 @@ public class BeanEditorConfiguration {
 
     @Autowired
     private void listenBeans(ProjectProfile profile, BeanEditorTab tab, Path beanFilePath) {
-        final MapChangeListener<Path, BeanFile> changeListener = change -> {
-            if (change.wasRemoved()) {
-                if (beanFilePath.equals(change.getKey())) {
-                    tab.getTabPane().getTabs().remove(tab);
+        final ListChangeListener<Pair<Path, BeanFile>> changeListener = c -> {
+            while (c.next()) {
+                if (c.wasRemoved()) {
+                    c.getRemoved().forEach(e -> {
+                        if (e.getKey().equals(beanFilePath)) {
+                            tab.getTabPane().getTabs().remove(tab);
+                        }
+                    });
                 }
             }
         };
