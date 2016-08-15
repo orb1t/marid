@@ -35,6 +35,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Comparator;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static org.marid.l10n.L10n.s;
@@ -47,18 +48,21 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
 
     @Autowired
     public BeanFileBrowser(ProjectManager projectManager) {
-        super(projectManager.getProfile().getBeanFiles());
+        super(projectManager.getProfile().getBeanFiles().sorted(Comparator.comparing(Pair::getKey)));
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
         projectManager.profileProperty().addListener((observable, oldValue, newValue) -> setItems(newValue.getBeanFiles()));
     }
 
     @OrderedInit(1)
-    public void fileColumn() {
+    public void fileColumn(ProjectManager projectManager) {
         final TableColumn<Pair<Path, BeanFile>, String> col = new TableColumn<>(s("File"));
         col.setPrefWidth(600);
         col.setMaxWidth(2000);
-        col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getKey().getFileName().toString()));
+        col.setCellValueFactory(param -> {
+            final Path path = projectManager.getProfile().getBeansDirectory().relativize(param.getValue().getKey());
+            return new SimpleStringProperty(path.toString());
+        });
         getColumns().add(col);
     }
 

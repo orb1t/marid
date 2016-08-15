@@ -19,7 +19,6 @@
 package org.marid.ide.project;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.model.Model;
@@ -43,7 +42,6 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Comparator;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -73,7 +71,6 @@ public class ProjectProfile implements LogSupport {
     final Logger logger;
     final ObservableList<Pair<Path, BeanFile>> beanFiles;
     final ProjectCacheEntry cacheEntry;
-    final ListChangeListener<Pair<Path, BeanFile>> sortingListener;
 
     ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -93,27 +90,12 @@ public class ProjectProfile implements LogSupport {
         model.setModelVersion("4.0.0");
         createFileStructure();
         beanFiles = loadBeanFiles();
-        beanFiles.sort(Comparator.comparing(Pair::getKey));
-        sortingListener = c -> {
-            while (c.next()) {
-                if (c.wasAdded() || c.wasReplaced() || c.wasUpdated() || c.wasPermutated()) {
-                    beanFiles.removeListener(getSortingListener());
-                    beanFiles.sort(Comparator.comparing(Pair::getKey));
-                    beanFiles.addListener(getSortingListener());
-                }
-            }
-        };
-        beanFiles.addListener(sortingListener);
         init();
         cacheEntry = new ProjectCacheEntry(this);
     }
 
     public URLClassLoader getClassLoader() {
         return cacheEntry.getClassLoader();
-    }
-
-    private ListChangeListener<Pair<Path, BeanFile>> getSortingListener() {
-        return sortingListener;
     }
 
     public static boolean containsBean(ProjectProfile profile, String name) {
