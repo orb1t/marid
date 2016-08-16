@@ -51,7 +51,7 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
         super(projectManager.getProfile().getBeanFiles().sorted(Comparator.comparing(Pair::getKey)));
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
-        projectManager.profileProperty().addListener((observable, oldValue, newValue) -> setItems(newValue.getBeanFiles()));
+        projectManager.profileProperty().addListener((o, ov, nv) -> setItems(nv.getBeanFiles()));
     }
 
     @OrderedInit(1)

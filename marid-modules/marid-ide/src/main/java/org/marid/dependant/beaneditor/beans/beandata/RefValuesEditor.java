@@ -39,6 +39,7 @@ import org.marid.spring.xml.data.props.DProps;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Function;
 
 import static org.marid.jfx.icons.FontIcon.M_CLEAR;
 import static org.marid.jfx.icons.FontIcon.M_MODE_EDIT;
@@ -50,8 +51,11 @@ import static org.marid.l10n.L10n.s;
  */
 public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
 
-    public RefValuesEditor(ObservableList<T> items) {
+    private final Function<String, Optional<? extends Type>> typeFunc;
+
+    public RefValuesEditor(ObservableList<T> items, Function<String, Optional<? extends Type>> typeFunc) {
         super(items);
+        this.typeFunc = typeFunc;
         setEditable(true);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
@@ -89,14 +93,14 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
                 @Override
                 public void startEdit() {
                     final T data = RefValuesEditor.this.getItems().get(getTableRow().getIndex());
-                    final Optional<Class<?>> bco = profile.getClass(data.type.get());
+                    final Optional<? extends Type> bco = typeFunc.apply(data.name.get());
                     if (bco.isPresent()) {
                         getItems().clear();
                         for (final Pair<Path, BeanFile> beanFile : profile.getBeanFiles()) {
                             beanFile.getValue().allBeans().forEach(b -> {
-                                final Optional<Class<?>> co = b.getClass(profile);
+                                final Optional<? extends Type> co = b.getType(profile);
                                 if (co.isPresent()) {
-                                    if (bco.get().isAssignableFrom(co.get())) {
+                                    if (TypeUtils.isAssignable(co.get(), bco.get())) {
                                         getItems().add(b.nameProperty().get());
                                     }
                                 }

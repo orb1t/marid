@@ -211,6 +211,28 @@ public class BeanData implements AbstractData<BeanData> {
         }
     }
 
+    public Optional<? extends Type> getArgType(ProjectProfile profile, String name) {
+        final Optional<? extends Executable> c = getConstructor(profile);
+        if (c.isPresent()) {
+            final Parameter[] parameters = c.get().getParameters();
+            final Optional<Parameter> parameter = Stream.of(parameters).filter(p -> p.getName().equals(name)).findAny();
+            if (parameter.isPresent()) {
+                return Optional.of(parameter.get().getParameterizedType());
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<? extends Type> getPropType(ProjectProfile profile, String name) {
+        final Optional<PropertyDescriptor> pd = getPropertyDescriptors(profile)
+                .filter(d -> d.getName().equals(name))
+                .findAny();
+        if (pd.isPresent()) {
+            return Optional.of(pd.get().getWriteMethod().getGenericParameterTypes()[0]);
+        }
+        return Optional.empty();
+    }
+
     public void updateBeanDataConstructorArgs(Parameter[] parameters) {
         final List<BeanArg> args = Stream.of(parameters)
                 .map(p -> {

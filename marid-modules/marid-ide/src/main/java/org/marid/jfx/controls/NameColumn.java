@@ -19,6 +19,7 @@
 package org.marid.jfx.controls;
 
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 
@@ -33,6 +34,7 @@ public class NameColumn<T> extends TextFieldTableCell<T, String> {
     private final Consumer<NameColumn<T>> updateTask;
 
     public NameColumn(ProjectProfile profile, Consumer<NameColumn<T>> updateTask) {
+        super(new DefaultStringConverter());
         this.profile = profile;
         this.updateTask = updateTask;
     }
