@@ -18,32 +18,30 @@
 
 package org.marid.dependant.beaneditor.beans.beandata;
 
-import com.google.common.collect.ImmutableMap;
+import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
-import javafx.scene.control.*;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.beans.listeditor.ListEditorConfiguration;
-import org.marid.dependant.beaneditor.beans.propeditor.PropEditorConfiguration;
+import org.marid.dependant.beaneditor.common.ValueMenuItems;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.data.RefValue;
-import org.marid.spring.xml.data.list.DList;
-import org.marid.spring.xml.data.props.DProps;
 
 import java.lang.reflect.Type;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
-import static org.marid.jfx.icons.FontIcon.M_CLEAR;
-import static org.marid.jfx.icons.FontIcon.M_MODE_EDIT;
-import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -135,31 +133,17 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
             public void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty) {
-                    setContextMenu(null);
+                    contextMenuProperty().unbind();
                 } else {
-                    final ContextMenu menu = new ContextMenu();
-                    final Runnable persistentItemsAdder = () -> {
-                        {
-                            final MenuItem mi = new MenuItem(s("Clear value"), glyphIcon(M_CLEAR, 16));
-                            mi.setOnAction(event -> {
-                                final T data = getItems().get(getTableRow().getIndex());
-                                data.value.set(null);
-                            });
-                            menu.getItems().add(mi);
-                        }
-                    };
-                    persistentItemsAdder.run();
-                    setContextMenu(menu);
-                    menu.setOnShowing(event -> {
-                        final T data = getItems().get(getTableRow().getIndex());
-                        menu.getItems().clear();
-                        persistentItemsAdder.run();
-                        final List<MenuItem> valueItems = valueItems(profile, dependants, data);
-                        if (!valueItems.isEmpty()) {
-                            menu.getItems().add(new SeparatorMenuItem());
-                        }
+                    final T data = getItems().get(getTableRow().getIndex());
+                    contextMenuProperty().bind(Bindings.createObjectBinding(() -> {
+                        final ContextMenu menu = new ContextMenu();
+                        final List<MenuItem> valueItems = new ValueMenuItems(
+                                dependants, data.data, () -> data.getType(profile).orElse(null)
+                        ).menuItems();
                         menu.getItems().addAll(valueItems);
-                    });
+                        return menu;
+                    }, data));
                 }
             }
 
@@ -171,48 +155,5 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
             }
         });
         getColumns().add(col);
-    }
-
-    public static List<MenuItem> valueItems(ProjectProfile profile, IdeDependants dependants, RefValue<?> holder) {
-        final Type type = holder.getType(profile).orElse(null);
-        if (type == null) {
-            return Collections.emptyList();
-        }
-        final List<MenuItem> items = new ArrayList<>();
-        if (TypeUtils.isAssignable(type, Properties.class)) {
-            final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon(M_MODE_EDIT, 16));
-            final DProps props;
-            if (holder.data.get() instanceof DProps) {
-                props = (DProps) holder.data.get();
-                final MenuItem clearItem = new MenuItem(s("Clear properties"), glyphIcon(M_CLEAR, 16));
-                clearItem.setOnAction(ev -> holder.data.set(null));
-                items.add(clearItem);
-            } else {
-                props = new DProps();
-                holder.data.setValue(props);
-            }
-            mi.setOnAction(e -> dependants.start(PropEditorConfiguration.class, ImmutableMap.of("props", props)));
-            items.add(mi);
-        } else if (TypeUtils.isAssignable(type, List.class)) {
-            if (!items.isEmpty()) {
-                items.add(new SeparatorMenuItem());
-            }
-            final MenuItem mi = new MenuItem(s("Edit list..."), glyphIcon(M_MODE_EDIT, 16));
-            mi.setOnAction(event -> {
-                final DList list;
-                if (holder.data.get() instanceof DList) {
-                    list = (DList) holder.data.get();
-                    final MenuItem clearItem = new MenuItem(s("Clear list"), glyphIcon(M_CLEAR, 16));
-                    clearItem.setOnAction(ev -> holder.data.set(null));
-                    items.add(clearItem);
-                } else {
-                    list = new DList();
-                    holder.data.set(list);
-                }
-                dependants.start(ListEditorConfiguration.class, ImmutableMap.of("list", list));
-            });
-            items.add(mi);
-        }
-        return items;
     }
 }

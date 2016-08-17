@@ -400,7 +400,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.11</version>
+                    <version>1.12</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -506,7 +506,7 @@
             <groupId>org.checkerframework</groupId>
             <artifactId>checker</artifactId>
             <scope>provided</scope>
-            <version>2.1.0</version>
+            <version>2.1.1</version>
         </dependency>
     </dependencies>
 

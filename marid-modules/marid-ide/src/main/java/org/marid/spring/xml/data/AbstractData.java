@@ -18,6 +18,8 @@
 
 package org.marid.spring.xml.data;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.Property;
 import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
@@ -25,11 +27,13 @@ import javafx.collections.ObservableMap;
 import org.apache.commons.lang3.exception.CloneFailedException;
 import org.marid.io.FastArrayOutputStream;
 import org.marid.misc.Casts;
+import org.marid.spring.xml.MaridDataFactory;
 
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.Map.Entry;
 
 import static java.lang.reflect.Modifier.isStatic;
 import static java.lang.reflect.Modifier.isTransient;
@@ -39,7 +43,17 @@ import static java.util.stream.Collectors.toMap;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface AbstractData<T extends AbstractData<T>> extends Externalizable {
+public interface AbstractData<T extends AbstractData<T>> extends Externalizable, Observable {
+
+    @Override
+    default void addListener(InvalidationListener listener) {
+        MaridDataFactory.addListener(this, listener);
+    }
+
+    @Override
+    default void removeListener(InvalidationListener listener) {
+        MaridDataFactory.removeListener(this, listener);
+    }
 
     default T copy() {
         final FastArrayOutputStream os = new FastArrayOutputStream();
@@ -73,7 +87,7 @@ public interface AbstractData<T extends AbstractData<T>> extends Externalizable 
     @Override
     default void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         final TreeMap<?, ?> map = (TreeMap<?, ?>) in.readObject();
-        for (final Map.Entry<?, ?> e : map.entrySet()) {
+        for (final Entry<?, ?> e : map.entrySet()) {
             try {
                 final Field field = getClass().getField(e.getKey().toString());
                 if (Property.class.isAssignableFrom(field.getType())) {
@@ -86,6 +100,7 @@ public interface AbstractData<T extends AbstractData<T>> extends Externalizable 
                     final Method putAll = Map.class.getMethod("putAll", Map.class);
                     putAll.invoke(field.get(this), e.getValue());
                 }
+                MaridDataFactory.installInvalidationListeners(this);
             } catch (NoSuchFieldException x) {
                 continue;
             } catch (ReflectiveOperationException x) {
@@ -102,7 +117,7 @@ public interface AbstractData<T extends AbstractData<T>> extends Externalizable 
             return list.stream().map(this::toSerializable).collect(toCollection(ArrayList::new));
         } else if (o instanceof ObservableMap<?, ?>) {
             final Map<?, ?> m = (ObservableMap<?, ?>) o;
-            return m.entrySet().stream().collect(toMap(Map.Entry::getKey,
+            return m.entrySet().stream().collect(toMap(Entry::getKey,
                     e -> toSerializable(e.getValue()), (u, v) -> v, LinkedHashMap::new));
         } else if (o instanceof Property<?>) {
             return toSerializable(((Property<?>) o).getValue());

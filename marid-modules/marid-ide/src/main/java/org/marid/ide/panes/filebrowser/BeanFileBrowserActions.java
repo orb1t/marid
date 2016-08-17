@@ -29,6 +29,7 @@ import org.marid.dependant.beaneditor.BeanEditorConfiguration;
 import org.marid.dependant.beaneditor.BeanEditorTab;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.spring.xml.MaridDataFactory;
 import org.marid.spring.xml.data.BeanFile;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +74,7 @@ public class BeanFileBrowserActions {
         if (value.isPresent()) {
             final String name = value.get().endsWith(".xml") ? value.get() : value.get() + ".xml";
             final Path path = getProfile().getBeansDirectory().resolve(name);
-            getProfile().getBeanFiles().add(Pair.of(path, new BeanFile()));
+            getProfile().getBeanFiles().add(Pair.of(path, MaridDataFactory.create(BeanFile.class)));
         }
     }
 
