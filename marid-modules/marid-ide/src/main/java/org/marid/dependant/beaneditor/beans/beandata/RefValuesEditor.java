@@ -21,7 +21,6 @@ package org.marid.dependant.beaneditor.beans.beandata;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
@@ -38,7 +37,6 @@ import org.marid.spring.xml.data.RefValue;
 
 import java.lang.reflect.Type;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -138,10 +136,8 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
                     final T data = getItems().get(getTableRow().getIndex());
                     contextMenuProperty().bind(Bindings.createObjectBinding(() -> {
                         final ContextMenu menu = new ContextMenu();
-                        final List<MenuItem> valueItems = new ValueMenuItems(
-                                dependants, data.data, () -> data.getType(profile).orElse(null)
-                        ).menuItems();
-                        menu.getItems().addAll(valueItems);
+                        final ValueMenuItems items = new ValueMenuItems(dependants, data.data, data.getType(profile).orElse(null));
+                        menu.getItems().addAll(items.menuItems());
                         return menu;
                     }, data));
                 }

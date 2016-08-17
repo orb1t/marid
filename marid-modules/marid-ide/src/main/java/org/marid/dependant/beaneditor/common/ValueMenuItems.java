@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.function.Supplier;
 
 import static org.marid.jfx.icons.FontIcon.M_CLEAR;
 import static org.marid.jfx.icons.FontIcon.M_MODE_EDIT;
@@ -50,16 +49,15 @@ public class ValueMenuItems {
 
     private final IdeDependants dependants;
     private final Property<DElement<?>> element;
-    private final Supplier<? extends Type> typeSupplier;
+    private final Type type;
 
-    public ValueMenuItems(IdeDependants dependants, Property<DElement<?>> element, Supplier<? extends Type> typeSupplier) {
+    public ValueMenuItems(IdeDependants dependants, Property<DElement<?>> element, Type type) {
         this.dependants = dependants;
         this.element = element;
-        this.typeSupplier = typeSupplier;
+        this.type = type;
     }
 
     public List<MenuItem> menuItems() {
-        final Type type = typeSupplier.get();
         if (type == null) {
             return Collections.emptyList();
         }
@@ -71,7 +69,7 @@ public class ValueMenuItems {
             items.add(new SeparatorMenuItem());
         }
         {
-            final MenuItem mi = new MenuItem(s("Edit value"), glyphIcon(M_MODE_EDIT, 16));
+            final MenuItem mi = new MenuItem(s("Edit value..."), glyphIcon(M_MODE_EDIT, 16));
             mi.setOnAction(event -> {
             });
             items.add(mi);
