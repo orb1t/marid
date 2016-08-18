@@ -27,6 +27,7 @@ import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.beans.listeditor.ListEditorConfiguration;
 import org.marid.dependant.beaneditor.beans.propeditor.PropEditorConfiguration;
 import org.marid.spring.xml.MaridDataFactory;
+import org.marid.spring.xml.data.array.DArray;
 import org.marid.spring.xml.data.collection.DElement;
 import org.marid.spring.xml.data.list.DList;
 import org.marid.spring.xml.data.props.DProps;
@@ -104,6 +105,25 @@ public class ValueMenuItems {
                                     list.valueType.setValue(rawType.getName());
                                 }
                             });
+                        }
+                        element.setValue(list);
+                    }
+                    dependants.start(ListEditorConfiguration.class, ImmutableMap.of("list", list));
+                });
+                items.add(mi);
+                items.add(new SeparatorMenuItem());
+            } else if (TypeUtils.isArrayType(type)) {
+                final MenuItem mi = new MenuItem(s("Edit array..."), glyphIcon(M_MODE_EDIT, 16));
+                mi.setOnAction(event -> {
+                    final DArray list;
+                    if (element.getValue() instanceof DArray) {
+                        list = (DArray) element.getValue();
+                    } else {
+                        list = MaridDataFactory.create(DArray.class);
+                        final Type componentType = TypeUtils.getArrayComponentType(type);
+                        final Class<?> rawType = TypeUtils.getRawType(componentType, null);
+                        if (rawType != null) {
+                            list.valueType.setValue(rawType.getName());
                         }
                         element.setValue(list);
                     }

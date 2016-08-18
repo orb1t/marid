@@ -20,6 +20,7 @@ package org.marid.dependant.beaneditor.beans.listeditor;
 
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
+import org.marid.spring.xml.data.collection.DCollection;
 import org.marid.spring.xml.data.collection.DElement;
 import org.marid.spring.xml.data.collection.DValue;
 import org.marid.spring.xml.data.list.DList;
@@ -35,10 +36,10 @@ import static org.marid.l10n.L10n.s;
 @Component
 public class ListEditor extends ListView<DElement<?>> {
 
-    private final DList list;
+    private final DCollection<?> list;
 
     @Autowired
-    public ListEditor(DList list) {
+    public ListEditor(DCollection<?> list) {
         super(list.elements);
         this.list = list;
         setCellFactory(param -> new TextFieldListCell<DElement<?>>() {

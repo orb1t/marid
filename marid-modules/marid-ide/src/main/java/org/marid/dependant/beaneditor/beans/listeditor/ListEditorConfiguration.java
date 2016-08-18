@@ -23,7 +23,7 @@ import org.marid.jfx.action.FxAction;
 import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.toolbar.MaridToolbar;
 import org.marid.spring.annotation.Q;
-import org.marid.spring.xml.data.list.DList;
+import org.marid.spring.xml.data.collection.DCollection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -37,8 +37,8 @@ import java.util.Map;
 public class ListEditorConfiguration {
 
     @Bean
-    public DList list(Environment environment) {
-        return environment.getProperty("list", DList.class);
+    public DCollection<?> list(Environment environment) {
+        return environment.getProperty("list", DCollection.class);
     }
 
     @Bean
