@@ -32,9 +32,10 @@ import org.marid.spring.xml.data.list.DList;
 import org.marid.spring.xml.data.props.DProps;
 
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import static org.marid.jfx.icons.FontIcon.M_CLEAR;
@@ -58,9 +59,6 @@ public class ValueMenuItems {
     }
 
     public List<MenuItem> menuItems() {
-        if (type == null) {
-            return Collections.emptyList();
-        }
         final List<MenuItem> items = new ArrayList<>();
         if (element.getValue() != null) {
             final MenuItem clearItem = new MenuItem(s("Clear value"), glyphIcon(M_CLEAR, 16));
@@ -75,34 +73,45 @@ public class ValueMenuItems {
             items.add(mi);
             items.add(new SeparatorMenuItem());
         }
-        if (TypeUtils.isAssignable(type, Properties.class)) {
-            final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon(M_MODE_EDIT, 16));
-            mi.setOnAction(e -> {
-                final DProps props;
-                if (element.getValue() instanceof DProps) {
-                    props = (DProps) element.getValue();
-                } else {
-                    props = MaridDataFactory.create(DProps.class);
-                    element.setValue(props);
-                }
-                dependants.start(PropEditorConfiguration.class, ImmutableMap.of("props", props));
-            });
-            items.add(mi);
-            items.add(new SeparatorMenuItem());
-        } else if (TypeUtils.isAssignable(type, List.class)) {
-            final MenuItem mi = new MenuItem(s("Edit list..."), glyphIcon(M_MODE_EDIT, 16));
-            mi.setOnAction(event -> {
-                final DList list;
-                if (element.getValue() instanceof DList) {
-                    list = (DList) element.getValue();
-                } else {
-                    list = MaridDataFactory.create(DList.class);
-                    element.setValue(list);
-                }
-                dependants.start(ListEditorConfiguration.class, ImmutableMap.of("list", list));
-            });
-            items.add(mi);
-            items.add(new SeparatorMenuItem());
+        if (type != null) {
+            if (TypeUtils.isAssignable(type, Properties.class)) {
+                final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon(M_MODE_EDIT, 16));
+                mi.setOnAction(e -> {
+                    final DProps props;
+                    if (element.getValue() instanceof DProps) {
+                        props = (DProps) element.getValue();
+                    } else {
+                        props = MaridDataFactory.create(DProps.class);
+                        element.setValue(props);
+                    }
+                    dependants.start(PropEditorConfiguration.class, ImmutableMap.of("props", props));
+                });
+                items.add(mi);
+                items.add(new SeparatorMenuItem());
+            } else if (TypeUtils.isAssignable(type, List.class)) {
+                final MenuItem mi = new MenuItem(s("Edit list..."), glyphIcon(M_MODE_EDIT, 16));
+                mi.setOnAction(event -> {
+                    final DList list;
+                    if (element.getValue() instanceof DList) {
+                        list = (DList) element.getValue();
+                    } else {
+                        list = MaridDataFactory.create(DList.class);
+                        final Map<TypeVariable<?>, Type> map = TypeUtils.getTypeArguments(type, List.class);
+                        if (map != null) {
+                            map.forEach((v, t) -> {
+                                final Class<?> rawType = TypeUtils.getRawType(v, t);
+                                if (rawType != null) {
+                                    list.valueType.setValue(rawType.getName());
+                                }
+                            });
+                        }
+                        element.setValue(list);
+                    }
+                    dependants.start(ListEditorConfiguration.class, ImmutableMap.of("list", list));
+                });
+                items.add(mi);
+                items.add(new SeparatorMenuItem());
+            }
         }
         if (!items.isEmpty()) {
             final MenuItem last = items.get(items.size() - 1);
