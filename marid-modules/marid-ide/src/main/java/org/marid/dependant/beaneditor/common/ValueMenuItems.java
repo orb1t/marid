@@ -26,9 +26,11 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.beans.listeditor.ListEditorConfiguration;
 import org.marid.dependant.beaneditor.beans.propeditor.PropEditorConfiguration;
+import org.marid.dependant.beaneditor.beans.valueeditor.ValueEditorConfiguration;
 import org.marid.spring.xml.MaridDataFactory;
 import org.marid.spring.xml.data.array.DArray;
 import org.marid.spring.xml.data.collection.DElement;
+import org.marid.spring.xml.data.collection.DValue;
 import org.marid.spring.xml.data.list.DList;
 import org.marid.spring.xml.data.props.DProps;
 
@@ -70,6 +72,13 @@ public class ValueMenuItems {
         {
             final MenuItem mi = new MenuItem(s("Edit value..."), glyphIcon(M_MODE_EDIT, 16));
             mi.setOnAction(event -> {
+                final DValue value;
+                if (element.getValue() instanceof DValue) {
+                    value = (DValue) element.getValue();
+                } else {
+                    element.setValue(value = new DValue());
+                }
+                dependants.start(ValueEditorConfiguration.class, ImmutableMap.of("value", value));
             });
             items.add(mi);
             items.add(new SeparatorMenuItem());

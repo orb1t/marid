@@ -269,6 +269,7 @@
                             <arg>-Xlint:unchecked</arg>
                             <arg>-parameters</arg>
                         </compilerArgs>
+                        <compilerReuseStrategy>reuseSame</compilerReuseStrategy>
                     </configuration>
                 </plugin>
 
@@ -321,6 +322,9 @@
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>2.10</version>
+                    <configuration>
+                        <useJvmChmod>true</useJvmChmod>
+                    </configuration>
                 </plugin>
 
                 <plugin>
@@ -373,11 +377,6 @@
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>3.0.1</version>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-shade-plugin</artifactId>
-                    <version>2.4.3</version>
                 </plugin>
 
                 <plugin>
