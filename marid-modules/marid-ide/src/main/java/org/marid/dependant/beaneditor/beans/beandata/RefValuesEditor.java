@@ -18,10 +18,11 @@
 
 package org.marid.dependant.beaneditor.beans.beandata;
 
-import javafx.beans.binding.Bindings;
+import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -32,11 +33,16 @@ import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.common.ValueMenuItems;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.annotation.OrderedInit;
+import org.marid.spring.xml.data.AbstractData;
 import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.data.RefValue;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PreDestroy;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -48,6 +54,7 @@ import static org.marid.l10n.L10n.s;
 public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
 
     private final Function<String, Optional<? extends Type>> typeFunc;
+    private final Map<T, InvalidationListener> invalidationListenerMap = new HashMap<>();
 
     public RefValuesEditor(ObservableList<T> items, Function<String, Optional<? extends Type>> typeFunc) {
         super(items);
@@ -120,29 +127,13 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
     }
 
     @OrderedInit(4)
-    public void valueColumn(ProjectProfile profile, IdeDependants dependants) {
+    public void valueColumn() {
         final TableColumn<T, String> col = new TableColumn<>(s("Value"));
         col.setEditable(true);
         col.setPrefWidth(500);
         col.setMaxWidth(1500);
         col.setCellValueFactory(param -> param.getValue().value);
         col.setCellFactory(param -> new TextFieldTableCell<T, String>(new DefaultStringConverter()) {
-            @Override
-            public void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    contextMenuProperty().unbind();
-                } else {
-                    final T data = getItems().get(getTableRow().getIndex());
-                    contextMenuProperty().bind(Bindings.createObjectBinding(() -> {
-                        final ContextMenu menu = new ContextMenu();
-                        final ValueMenuItems items = new ValueMenuItems(dependants, data.data, data.getType(profile).orElse(null));
-                        menu.getItems().addAll(items.menuItems());
-                        return menu;
-                    }, data));
-                }
-            }
-
             @Override
             public void commitEdit(String newValue) {
                 super.commitEdit(newValue);
@@ -151,5 +142,43 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
             }
         });
         getColumns().add(col);
+    }
+
+    @Autowired
+    public void initContextMenu(ProjectProfile profile, IdeDependants dependants) {
+        setRowFactory(param -> {
+            final TableRow<T> row = new TableRow<>();
+            row.itemProperty().addListener((o, ov, nv) -> {
+                if (nv == null) {
+                    row.setContextMenu(null);
+                    invalidationListenerMap.computeIfPresent(ov, (v, old) -> {
+                        v.removeListener(old);
+                        return null;
+                    });
+                } else {
+                    final InvalidationListener listener = observable -> {
+                        final ContextMenu menu = new ContextMenu();
+                        final Type type = nv.getType(profile).orElse(null);
+                        final ValueMenuItems items = new ValueMenuItems(dependants, nv.data, type);
+                        menu.getItems().addAll(items.menuItems());
+                        row.setContextMenu(menu);
+                    };
+                    listener.invalidated(nv);
+                    invalidationListenerMap.compute(nv, (v, old) -> {
+                        if (old != null) {
+                            v.removeListener(old);
+                        }
+                        return listener;
+                    });
+                    nv.addListener(listener);
+                }
+            });
+            return row;
+        });
+    }
+
+    @PreDestroy
+    public void destroy() {
+        invalidationListenerMap.forEach(AbstractData::removeListener);
     }
 }

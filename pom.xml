@@ -57,6 +57,8 @@
         <repo-id>sourceforge</repo-id>
         <repo-name>sourceforge</repo-name>
         <repo-url>sftp://frs.sf.net/home/frs/project/marid/repo</repo-url>
+
+        <lineLength>120</lineLength>
     </properties>
 
     <scm>
@@ -253,7 +255,6 @@
                     <configuration>
                         <showWarnings>true</showWarnings>
                         <showDeprecation>true</showDeprecation>
-                        <lineLength>120</lineLength>
                         <compilerArgs>
                             <arg>-Xlint:unchecked</arg>
                             <arg>-parameters</arg>
@@ -305,7 +306,6 @@
                                 <Specification-Vendor>${project.organization.name}</Specification-Vendor>
                             </manifestEntries>
                         </archive>
-                        <lineLength>120</lineLength>
                     </configuration>
                 </plugin>
 
@@ -314,7 +314,6 @@
                     <version>2.10</version>
                     <configuration>
                         <useJvmChmod>true</useJvmChmod>
-                        <lineLength>120</lineLength>
                     </configuration>
                 </plugin>
 
@@ -362,15 +361,14 @@
                     <configuration>
                         <useJvmChmod>true</useJvmChmod>
                         <appendAssemblyId>false</appendAssemblyId>
+                        <recompressZippedFiles>false</recompressZippedFiles>
+                        <tarLongFileMode>posix</tarLongFileMode>
                     </configuration>
                 </plugin>
 
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>3.0.1</version>
-                    <configuration>
-                        <lineLength>120</lineLength>
-                    </configuration>
                 </plugin>
 
                 <plugin>

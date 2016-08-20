@@ -29,6 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import static java.util.logging.Level.INFO;
+import static org.marid.logging.Log.log;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -37,12 +40,14 @@ public class MaridDataFactory {
     private static final Map<AbstractData, List<InvalidationListener>> LISTENERS = new WeakHashMap<>();
 
     public static void addListener(AbstractData data, InvalidationListener listener) {
+        log(INFO, "Add listener {0} to {1}", listener, data);
         final List<InvalidationListener> listeners = LISTENERS.computeIfAbsent(data, k -> new ArrayList<>());
         listeners.add(listener);
     }
 
     public static void removeListener(AbstractData data, InvalidationListener listener) {
         LISTENERS.computeIfPresent(data, (d, ls) -> {
+            log(INFO, "Remove listener {0} from {1}", listener, data);
             ls.remove(listener);
             return ls.isEmpty() ? null : ls;
         });

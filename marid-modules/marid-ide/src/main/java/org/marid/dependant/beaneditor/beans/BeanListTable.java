@@ -18,15 +18,18 @@
 
 package org.marid.dependant.beaneditor.beans;
 
+import javafx.beans.InvalidationListener;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
+import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.controls.NameColumn;
 import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
+import org.marid.spring.xml.data.AbstractData;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.providers.BeanDataProvider;
 import org.springframework.beans.factory.ObjectFactory;
@@ -36,6 +39,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,6 +51,8 @@ import static org.marid.l10n.L10n.s;
  */
 @Component
 public class BeanListTable extends MaridTableView<BeanData> {
+
+    private final Map<BeanData, InvalidationListener> invalidationListenerMap = new HashMap<>();
 
     @Autowired
     public BeanListTable(BeanDataProvider beanDataProvider) {
@@ -58,10 +65,15 @@ public class BeanListTable extends MaridTableView<BeanData> {
     public void nameColumn(ObjectFactory<BeanListActions> actions, ProjectProfile profile) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Name"));
         col.setCellValueFactory(param -> param.getValue().name);
-        col.setCellFactory(param -> new NameColumn<>(profile, c -> {
-            final BeanData beanData = getItems().get(c.getIndex());
-            c.setContextMenu(actions.getObject().contextMenu(beanData));
-        }));
+        col.setCellFactory(param -> new TextFieldTableCell<BeanData, String>(new DefaultStringConverter()) {
+            @Override
+            public void commitEdit(String newValue) {
+                final String oldValue = getItem();
+                newValue = ProjectProfile.generateBeanName(profile, newValue);
+                super.commitEdit(newValue);
+                ProjectManager.onBeanNameChange(profile, oldValue, newValue);
+            }
+        });
         col.setPrefWidth(250);
         col.setMaxWidth(450);
         col.setEditable(true);
@@ -166,5 +178,37 @@ public class BeanListTable extends MaridTableView<BeanData> {
         col.setMaxWidth(150);
         col.setEditable(true);
         getColumns().add(col);
+    }
+
+    @Autowired
+    public void initRowFactory(ObjectFactory<BeanListActions> actions) {
+        setRowFactory(view -> {
+            final TableRow<BeanData> row = new TableRow<>();
+            row.itemProperty().addListener((o, ov, nv) -> {
+                if (nv == null) {
+                    row.setContextMenu(null);
+                    invalidationListenerMap.computeIfPresent(ov, (v, old) -> {
+                        v.removeListener(old);
+                        return null;
+                    });
+                } else {
+                    final InvalidationListener l = observable -> row.setContextMenu(actions.getObject().contextMenu(nv));
+                    l.invalidated(nv);
+                    nv.addListener(l);
+                    invalidationListenerMap.compute(nv, (v, old) -> {
+                        if (old != null) {
+                            v.removeListener(old);
+                        }
+                        return l;
+                    });
+                }
+            });
+            return row;
+        });
+    }
+
+    @PreDestroy
+    public void destroy() {
+        invalidationListenerMap.forEach(AbstractData::removeListener);
     }
 }
