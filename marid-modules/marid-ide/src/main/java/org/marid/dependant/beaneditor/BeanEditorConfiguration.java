@@ -22,6 +22,7 @@ import javafx.collections.ListChangeListener;
 import org.apache.commons.lang3.tuple.Pair;
 import org.marid.dependant.beaneditor.beans.BeanListConfiguration;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.providers.BeanDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,11 @@ public class BeanEditorConfiguration {
     @Bean
     public ProjectProfile projectProfile(Environment environment) {
         return environment.getProperty("profile", ProjectProfile.class);
+    }
+
+    @Bean
+    public ProjectProfileReflection reflection(ProjectProfile profile) {
+        return new ProjectProfileReflection(profile);
     }
 
     @Bean

@@ -92,6 +92,4 @@ public abstract class RefValue<T extends RefValue<T>> implements AbstractData<T>
     public boolean isEmpty() {
         return data.isNull().get() && value.isEmpty().get() && ref.isEmpty().get();
     }
-
-    public abstract Optional<? extends Type> getType(ProjectProfile profile);
 }

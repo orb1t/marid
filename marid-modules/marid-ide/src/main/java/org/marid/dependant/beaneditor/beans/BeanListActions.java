@@ -26,6 +26,7 @@ import javafx.scene.control.*;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.beans.beandata.BeanDataEditorConfiguration;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
@@ -74,16 +75,19 @@ public class BeanListActions {
     private final BeanListTable table;
     private final IdeDependants dependants;
     private final ProjectProfile profile;
+    private final ProjectProfileReflection reflection;
 
     @Autowired
     public BeanListActions(ApplicationContext context,
                            BeanListTable table,
                            IdeDependants dependants,
-                           ProjectProfile profile) {
+                           ProjectProfile profile,
+                           ProjectProfileReflection reflection) {
         this.context = context;
         this.table = table;
         this.dependants = dependants;
         this.profile = profile;
+        this.reflection = reflection;
     }
 
     public void onEdit(ActionEvent event) {
@@ -161,7 +165,7 @@ public class BeanListActions {
             }
         }
 
-        beanData.updateBeanData(profile);
+        reflection.updateBeanData(beanData);
 
         table.getItems().add(beanData);
     }
@@ -211,7 +215,7 @@ public class BeanListActions {
                     newBeanData.beanArgs.add(arg);
                 }
                 table.getItems().add(newBeanData);
-                newBeanData.updateBeanData(profile);
+                reflection.updateBeanData(newBeanData);
             });
             return menuItem;
         };
@@ -262,7 +266,7 @@ public class BeanListActions {
     public ContextMenu contextMenu(BeanData beanData) {
         final ContextMenu menu = new ContextMenu();
         final List<List<MenuItem>> menuItems = new ArrayList<>();
-        final Class<?> type = beanData.getClass(profile).orElse(null);
+        final Class<?> type = reflection.getClass(beanData).orElse(null);
         if (type == null) {
             return menu;
         }

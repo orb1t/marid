@@ -32,6 +32,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.common.ValueMenuItems;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.data.AbstractData;
 import org.marid.spring.xml.data.BeanFile;
@@ -85,7 +86,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
     }
 
     @OrderedInit(3)
-    public void refColumn(ProjectProfile profile) {
+    public void refColumn(ProjectProfile profile, ProjectProfileReflection reflection) {
         final TableColumn<T, String> col = new TableColumn<>(s("Reference"));
         col.setEditable(true);
         col.setPrefWidth(200);
@@ -101,7 +102,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
                         getItems().clear();
                         for (final Pair<Path, BeanFile> beanFile : profile.getBeanFiles()) {
                             beanFile.getValue().allBeans().forEach(b -> {
-                                final Optional<? extends Type> co = b.getType(profile);
+                                final Optional<? extends Type> co = reflection.getType(b);
                                 if (co.isPresent()) {
                                     if (TypeUtils.isAssignable(co.get(), bco.get())) {
                                         getItems().add(b.nameProperty().get());
@@ -145,7 +146,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
     }
 
     @Autowired
-    public void initContextMenu(ProjectProfile profile, IdeDependants dependants) {
+    public void initContextMenu(ProjectProfile profile, IdeDependants dependants, ProjectProfileReflection reflection) {
         setRowFactory(param -> {
             final TableRow<T> row = new TableRow<>();
             row.itemProperty().addListener((o, ov, nv) -> {
@@ -158,7 +159,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
                 } else {
                     final InvalidationListener listener = observable -> {
                         final ContextMenu menu = new ContextMenu();
-                        final Type type = nv.getType(profile).orElse(null);
+                        final Type type = reflection.getType(nv).orElse(null);
                         final ValueMenuItems items = new ValueMenuItems(dependants, nv.data, type);
                         menu.getItems().addAll(items.menuItems());
                         row.setContextMenu(menu);

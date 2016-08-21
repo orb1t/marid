@@ -22,24 +22,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.marid.ide.project.ProjectProfile;
 
 import javax.xml.bind.annotation.*;
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
-
-import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static org.marid.misc.Reflections.parameterName;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -145,162 +130,17 @@ public class BeanData implements AbstractData<BeanData> {
         return factoryBean.isNotEmpty().get() || factoryMethod.isNotEmpty().get();
     }
 
-    public Optional<BeanProp> property(String name) {
-        return properties.stream()
-                .filter(p -> p.name.isEqualTo(name).get())
-                .findAny();
-    }
-
-    public Stream<? extends Executable> getConstructors(ProjectProfile profile) {
-        if (isFactoryBean()) {
-            if (factoryBean.isNotEmpty().get()) {
-                return profile.getBeanFiles().stream()
-                        .flatMap(e -> e.getValue().allBeans())
-                        .filter(b -> factoryBean.isEqualTo(b.nameProperty()).get())
-                        .map(b -> b.getClass(profile))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .flatMap(t -> Stream.of(t.getMethods()))
-                        .filter(m -> m.getReturnType() != void.class)
-                        .filter(m -> factoryMethod.isEqualTo(m.getName()).get())
-                        .sorted(comparingInt(Method::getParameterCount));
-            } else {
-                return profile.getClass(type.get())
-                        .map(type -> Stream.of(type.getMethods())
-                                .filter(m -> Modifier.isStatic(m.getModifiers()))
-                                .filter(m -> m.getReturnType() != void.class)
-                                .filter(m -> factoryMethod.isEqualTo(m.getName()).get())
-                                .sorted(comparingInt(Method::getParameterCount)))
-                        .orElse(Stream.empty());
-            }
-        } else {
-            return getClass(profile)
-                    .map(c -> Stream.of(c.getConstructors()).sorted(comparingInt(Constructor::getParameterCount)))
-                    .orElseGet(Stream::empty);
-        }
-    }
-
-    public Optional<? extends Executable> getConstructor(ProjectProfile profile) {
-        final List<? extends Executable> executables = getConstructors(profile).collect(toList());
-        switch (executables.size()) {
-            case 0:
-                return Optional.empty();
-            case 1:
-                return Optional.of(executables.get(0));
-            default:
-                final Class<?>[] types = beanArgs.stream()
-                        .map(a -> profile.getClass(a.type.get()).orElse(Object.class))
-                        .toArray(Class<?>[]::new);
-                return executables.stream().filter(m -> Arrays.equals(types, m.getParameterTypes())).findFirst();
-        }
-    }
-
-    public Optional<Class<?>> getClass(ProjectProfile profile) {
-        if (isFactoryBean()) {
-            return getConstructor(profile).map(e -> ((Method) e).getReturnType());
-        } else {
-            return profile.getClass(type.get());
-        }
-    }
-
-    public Optional<? extends Type> getType(ProjectProfile profile) {
-        if (isFactoryBean()) {
-            return getConstructor(profile).map(e -> ((Method) e).getGenericReturnType());
-        } else {
-            return profile.getClass(type.get());
-        }
-    }
-
-    public Optional<? extends Type> getArgType(ProjectProfile profile, String name) {
-        final Optional<? extends Executable> c = getConstructor(profile);
-        if (c.isPresent()) {
-            final Parameter[] parameters = c.get().getParameters();
-            final Optional<Parameter> parameter = Stream.of(parameters).filter(p -> p.getName().equals(name)).findAny();
-            if (parameter.isPresent()) {
-                return Optional.of(parameter.get().getParameterizedType());
-            }
-        }
-        return Optional.empty();
-    }
-
-    public Optional<? extends Type> getPropType(ProjectProfile profile, String name) {
-        final Optional<PropertyDescriptor> pd = getPropertyDescriptors(profile)
-                .filter(d -> d.getName().equals(name))
-                .findAny();
-        if (pd.isPresent()) {
-            return Optional.of(pd.get().getWriteMethod().getGenericParameterTypes()[0]);
-        }
-        return Optional.empty();
-    }
-
-    public void updateBeanDataConstructorArgs(Parameter[] parameters) {
-        final List<BeanArg> args = Stream.of(parameters)
-                .map(p -> {
-                    final Optional<BeanArg> found = beanArgs.stream()
-                            .filter(a -> a.name.isEqualTo(parameterName(p)).get())
-                            .findFirst();
-                    if (found.isPresent()) {
-                        found.get().type.set(p.getType().getName());
-                        return found.get();
-                    } else {
-                        final BeanArg arg = new BeanArg();
-                        arg.name.set(parameterName(p));
-                        arg.type.set(p.getType().getName());
-                        return arg;
-                    }
-                })
-                .collect(toList());
-        beanArgs.clear();
-        beanArgs.addAll(args);
-    }
-
-    public void updateBeanData(ProjectProfile profile) {
-        final Class<?> type = getClass(profile).orElse(null);
-        if (type == null) {
-            return;
-        }
-        final List<Executable> executables = getConstructors(profile).collect(toList());
-        if (!executables.isEmpty()) {
-            if (executables.size() == 1) {
-                updateBeanDataConstructorArgs(executables.get(0).getParameters());
-            } else {
-                final Optional<? extends Executable> executable = getConstructor(profile);
-                if (executable.isPresent()) {
-                    updateBeanDataConstructorArgs(executable.get().getParameters());
-                }
-            }
-        }
-
-        final List<PropertyDescriptor> propertyDescriptors = getPropertyDescriptors(profile).collect(toList());
-        final Map<String, BeanProp> pmap = properties.stream().collect(toMap(e -> e.name.get(), e -> e));
-        properties.clear();
-        for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-            final BeanProp prop = pmap.computeIfAbsent(propertyDescriptor.getName(), n -> {
-                final BeanProp property = new BeanProp();
-                property.name.set(n);
-                return property;
-            });
-            prop.type.set(propertyDescriptor.getPropertyType().getName());
-            properties.add(prop);
-        }
-    }
-
-    public Stream<PropertyDescriptor> getPropertyDescriptors(ProjectProfile profile) {
-        final Class<?> type = getClass(profile).orElse(Object.class);
-        try {
-            final BeanInfo beanInfo = Introspector.getBeanInfo(type);
-            return Stream.of(beanInfo.getPropertyDescriptors())
-                    .filter(d -> d.getWriteMethod() != null);
-        } catch (IntrospectionException x) {
-            return Stream.empty();
-        }
-    }
-
     public StringProperty nameProperty() {
         return name;
     }
 
     public boolean isEmpty() {
         return (type.isEmpty().get() && factoryMethod.isEmpty().get()) || name.isEmpty().get();
+    }
+
+    public Optional<BeanProp> property(String name) {
+        return properties.stream()
+                .filter(p -> p.name.isEqualTo(name).get())
+                .findAny();
     }
 }

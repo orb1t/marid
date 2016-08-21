@@ -22,7 +22,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ListCell;
-import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.dialog.ListDialog;
 import org.marid.jfx.icons.FontIcon;
@@ -45,19 +45,19 @@ import static org.marid.misc.Reflections.parameterName;
 @Component
 public class BeanDataActions {
 
-    private final ProjectProfile profile;
     private final BeanData beanData;
+    private final ProjectProfileReflection reflection;
 
-    public BeanDataActions(ProjectProfile profile, BeanData beanData) {
-        this.profile = profile;
+    public BeanDataActions(BeanData beanData, ProjectProfileReflection reflection) {
         this.beanData = beanData;
+        this.reflection = reflection;
     }
 
     @Bean
     @Q(BeanDataActions.class)
     public FxAction refreshAction() {
         return new FxAction("refresh", "refresh", "Actions")
-                .setEventHandler(event -> beanData.updateBeanData(profile))
+                .setEventHandler(event -> reflection.updateBeanData(beanData))
                 .setIcon(FontIcon.M_REFRESH)
                 .setText("Refresh");
     }
@@ -72,7 +72,7 @@ public class BeanDataActions {
     }
 
     public void onSelectConstructor(ActionEvent event) {
-        final ObservableList<Executable> constructors = beanData.getConstructors(profile)
+        final ObservableList<Executable> constructors = reflection.getConstructors(beanData)
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
         final ListDialog<Executable> dialog = new ListDialog<>("Select constructor", constructors);
         dialog.getListView().setCellFactory(param -> new ListCell<Executable>() {
@@ -100,7 +100,7 @@ public class BeanDataActions {
         dialog.setResizable(true);
         final Optional<Executable> result = dialog.showAndWait();
         if (result.isPresent()) {
-            beanData.updateBeanDataConstructorArgs(result.get().getParameters());
+            reflection.updateBeanDataConstructorArgs(beanData, result.get().getParameters());
         }
     }
 }

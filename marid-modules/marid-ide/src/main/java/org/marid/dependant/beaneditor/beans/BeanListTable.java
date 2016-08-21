@@ -27,6 +27,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.data.AbstractData;
@@ -52,17 +53,19 @@ import static org.marid.l10n.L10n.s;
 @Component
 public class BeanListTable extends MaridTableView<BeanData> {
 
+    private final ProjectProfileReflection reflection;
     private final Map<BeanData, InvalidationListener> invalidationListenerMap = new HashMap<>();
 
     @Autowired
-    public BeanListTable(BeanDataProvider beanDataProvider) {
+    public BeanListTable(BeanDataProvider beanDataProvider, ProjectProfileReflection reflection) {
         super(beanDataProvider.beanData());
+        this.reflection = reflection;
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setEditable(true);
     }
 
     @OrderedInit(1)
-    public void nameColumn(ObjectFactory<BeanListActions> actions, ProjectProfile profile) {
+    public void nameColumn(ProjectProfile profile) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Name"));
         col.setCellValueFactory(param -> param.getValue().name);
         col.setCellFactory(param -> new TextFieldTableCell<BeanData, String>(new DefaultStringConverter()) {
@@ -109,13 +112,13 @@ public class BeanListTable extends MaridTableView<BeanData> {
         getColumns().add(col);
     }
 
-    private TableCell<BeanData, String> methodCell(TableColumn<BeanData, String> column, ProjectProfile profile) {
+    private TableCell<BeanData, String> methodCell(TableColumn<BeanData, String> column) {
         final ComboBoxTableCell<BeanData, String> cell = new ComboBoxTableCell<BeanData, String>() {
             @Override
             public void startEdit() {
                 final BeanData beanData = BeanListTable.this.getItems().get(getIndex());
                 getItems().clear();
-                final Class<?> type = beanData.getClass(profile).orElse(null);
+                final Class<?> type = reflection.getClass(beanData).orElse(null);
                 if (type != null) {
                     getItems().addAll(Stream.of(type.getMethods())
                             .filter(method -> method.getParameterCount() == 0)
@@ -137,20 +140,20 @@ public class BeanListTable extends MaridTableView<BeanData> {
     }
 
     @OrderedInit(5)
-    public void initMethodColumn(ProjectProfile profile) {
+    public void initMethodColumn(ProjectProfileReflection reflection) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Init method"));
         col.setCellValueFactory(param -> param.getValue().initMethod);
-        col.setCellFactory(param -> methodCell(param, profile));
+        col.setCellFactory(this::methodCell);
         col.setPrefWidth(180);
         col.setMaxWidth(340);
         getColumns().add(col);
     }
 
     @OrderedInit(6)
-    public void destroyMethodColumn(ProjectProfile profile) {
+    public void destroyMethodColumn(ProjectProfileReflection reflection) {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Destroy method"));
         col.setCellValueFactory(param -> param.getValue().destroyMethod);
-        col.setCellFactory(param -> methodCell(param, profile));
+        col.setCellFactory(this::methodCell);
         col.setPrefWidth(180);
         col.setMaxWidth(340);
         getColumns().add(col);
