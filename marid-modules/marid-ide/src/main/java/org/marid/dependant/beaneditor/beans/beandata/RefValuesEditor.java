@@ -146,7 +146,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
     }
 
     @Autowired
-    public void initContextMenu(ProjectProfile profile, IdeDependants dependants, ProjectProfileReflection reflection) {
+    public void initContextMenu(IdeDependants dependants, ProjectProfileReflection reflection) {
         setRowFactory(param -> {
             final TableRow<T> row = new TableRow<>();
             row.itemProperty().addListener((o, ov, nv) -> {
@@ -160,7 +160,8 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
                     final InvalidationListener listener = observable -> {
                         final ContextMenu menu = new ContextMenu();
                         final Type type = reflection.getType(nv).orElse(null);
-                        final ValueMenuItems items = new ValueMenuItems(dependants, nv.data, type);
+                        final Type typeArg = type == null ? Object.class : type;
+                        final ValueMenuItems items = new ValueMenuItems(dependants, nv.data, typeArg);
                         menu.getItems().addAll(items.menuItems());
                         row.setContextMenu(menu);
                     };

@@ -140,7 +140,7 @@ public class BeanListTable extends MaridTableView<BeanData> {
     }
 
     @OrderedInit(5)
-    public void initMethodColumn(ProjectProfileReflection reflection) {
+    public void initMethodColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Init method"));
         col.setCellValueFactory(param -> param.getValue().initMethod);
         col.setCellFactory(this::methodCell);
@@ -150,7 +150,7 @@ public class BeanListTable extends MaridTableView<BeanData> {
     }
 
     @OrderedInit(6)
-    public void destroyMethodColumn(ProjectProfileReflection reflection) {
+    public void destroyMethodColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Destroy method"));
         col.setCellValueFactory(param -> param.getValue().destroyMethod);
         col.setCellFactory(this::methodCell);

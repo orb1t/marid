@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
@@ -39,6 +40,11 @@ public class ListEditorConfiguration {
     @Bean
     public DCollection<?> list(Environment environment) {
         return environment.getProperty("list", DCollection.class);
+    }
+
+    @Bean
+    public Type type(Environment environment) {
+        return environment.getProperty("type", Type.class);
     }
 
     @Bean
