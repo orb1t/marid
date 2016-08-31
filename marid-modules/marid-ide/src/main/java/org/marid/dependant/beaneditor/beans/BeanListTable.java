@@ -19,15 +19,15 @@
 package org.marid.dependant.beaneditor.beans;
 
 import javafx.beans.InvalidationListener;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectProfileReflection;
+import org.marid.jfx.icons.FontIcon;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.data.AbstractData;
@@ -164,17 +164,18 @@ public class BeanListTable extends MaridTableView<BeanData> {
         final TableColumn<BeanData, String> col = new TableColumn<>(s("Lazy"));
         col.setCellValueFactory(param -> param.getValue().lazyInit);
         col.setCellFactory(param -> {
-            final String[] items = {"true", "false", "default", "null"};
-            final ComboBoxTableCell<BeanData, String> cell = new ComboBoxTableCell<BeanData, String>(items) {
-                @Override
-                public void commitEdit(String newValue) {
-                    if ("null".equals(newValue)) {
-                        newValue = null;
-                    }
-                    super.commitEdit(newValue);
-                }
-            };
-            cell.setComboBoxEditable(true);
+            final String[] items = {"true", "false", "default"};
+            final ComboBoxTableCell<BeanData, String> cell = new ComboBoxTableCell<>(items);
+            final ContextMenu contextMenu = new ContextMenu();
+            {
+                final MenuItem item = new MenuItem(s("Clear value"), FontIcons.glyphIcon(FontIcon.M_CLEAR));
+                item.setOnAction(event -> {
+                    final BeanData beanData = getItems().get(cell.getIndex());
+                    beanData.lazyInit.set(null);
+                });
+                contextMenu.getItems().add(item);
+            }
+            cell.setContextMenu(contextMenu);
             return cell;
         });
         col.setPrefWidth(100);
