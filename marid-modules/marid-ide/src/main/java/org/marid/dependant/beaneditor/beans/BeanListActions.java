@@ -200,7 +200,18 @@ public class BeanListActions {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         final Function<Method, MenuItem> menuItemFunction = method -> {
             final String name = Stream.of(method.getParameters())
-                    .map(p -> p.getParameterizedType().toString())
+                    .map(Parameter::getParameterizedType)
+                    .map(t -> {
+                        if (t instanceof Class<?>) {
+                            final Class<?> klass = (Class<?>) t;
+                            if (klass.getName().startsWith("java.lang.")) {
+                                return klass.getSimpleName();
+                            }
+                            return klass.getName();
+                        } else {
+                            return t.toString();
+                        }
+                    })
                     .collect(joining(",", method.getName() + "(", ") : " + method.getGenericReturnType()));
             final MenuItem menuItem = new MenuItem(name, glyphIcon(FontIcon.M_MEMORY, 16));
             menuItem.setOnAction(ev -> {
