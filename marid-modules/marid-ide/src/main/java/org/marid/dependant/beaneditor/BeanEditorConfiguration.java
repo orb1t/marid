@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 
 import java.nio.file.Path;
 
@@ -41,18 +40,8 @@ import java.nio.file.Path;
 public class BeanEditorConfiguration {
 
     @Bean
-    public ProjectProfile projectProfile(Environment environment) {
-        return environment.getProperty("profile", ProjectProfile.class);
-    }
-
-    @Bean
     public ProjectProfileReflection reflection(ProjectProfile profile) {
         return new ProjectProfileReflection(profile);
-    }
-
-    @Bean
-    public Path beanFilePath(Environment environment) {
-        return environment.getProperty("beanFilePath", Path.class);
     }
 
     @Bean

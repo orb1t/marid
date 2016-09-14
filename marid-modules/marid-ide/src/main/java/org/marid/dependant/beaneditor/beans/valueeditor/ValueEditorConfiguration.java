@@ -29,18 +29,12 @@ import org.marid.spring.annotation.Q;
 import org.marid.spring.xml.data.collection.DValue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
 public class ValueEditorConfiguration {
-
-    @Bean
-    public DValue value(Environment environment) {
-        return environment.getProperty("value", DValue.class);
-    }
 
     @Bean
     @Q(ValueEditorConfiguration.class)

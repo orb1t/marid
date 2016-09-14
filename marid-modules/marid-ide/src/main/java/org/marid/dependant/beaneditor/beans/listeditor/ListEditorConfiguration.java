@@ -23,12 +23,9 @@ import org.marid.jfx.action.FxAction;
 import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.toolbar.MaridToolbar;
 import org.marid.spring.annotation.Q;
-import org.marid.spring.xml.data.collection.DCollection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
-import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
@@ -36,16 +33,6 @@ import java.util.Map;
  */
 @Configuration
 public class ListEditorConfiguration {
-
-    @Bean
-    public DCollection<?> list(Environment environment) {
-        return environment.getProperty("list", DCollection.class);
-    }
-
-    @Bean
-    public Type type(Environment environment) {
-        return environment.getProperty("type", Type.class);
-    }
 
     @Bean
     @Q(ListEditorConfiguration.class)

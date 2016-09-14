@@ -20,10 +20,8 @@ package org.marid;
 
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
-import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.core.env.MapPropertySource;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -54,10 +52,7 @@ public class IdeDependants {
         return start(context -> {
             context.setDisplayName(configuration.getSimpleName());
             context.register(configuration);
-            if (!beans.isEmpty()) {
-                context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("beanMap", beans));
-            }
-            context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
+            beans.forEach(context.getBeanFactory()::registerSingleton);
         });
     }
 
