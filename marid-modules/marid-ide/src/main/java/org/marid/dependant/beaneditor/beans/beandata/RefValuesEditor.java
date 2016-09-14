@@ -29,8 +29,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.common.ValueMenuItems;
+import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.spring.annotation.OrderedInit;
@@ -146,7 +145,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
     }
 
     @Autowired
-    public void initContextMenu(IdeDependants dependants, ProjectProfileReflection reflection) {
+    public void initContextMenu(ProjectProfileReflection reflection, ValueMenuItems vmi) {
         setRowFactory(param -> {
             final TableRow<T> row = new TableRow<>();
             row.itemProperty().addListener((o, ov, nv) -> {
@@ -161,8 +160,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
                         final ContextMenu menu = new ContextMenu();
                         final Type type = reflection.getType(nv).orElse(null);
                         final Type typeArg = type == null ? Object.class : type;
-                        final ValueMenuItems items = new ValueMenuItems(dependants, nv.data, typeArg);
-                        menu.getItems().addAll(items.menuItems());
+                        menu.getItems().addAll(vmi.menuItems(nv.data, typeArg));
                         row.setContextMenu(menu);
                     };
                     listener.invalidated(nv);

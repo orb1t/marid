@@ -32,16 +32,14 @@ import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.lang.Thread.currentThread;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.IntStream.of;
 import static javafx.scene.paint.Color.GREEN;
+import static org.marid.IdePrefs.PREFERENCES;
 import static org.marid.jfx.FxMaridIcon.maridIcon;
 
 /**
@@ -94,24 +92,9 @@ public class Ide extends Application {
     public static void main(String... args) throws Exception {
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
         rootLogger = Logger.getLogger("");
-        rootLogger.setLevel(Level.parse(IdePrefs.PREFERENCES.get("logLevel", Level.INFO.getName())));
+        rootLogger.setLevel(Level.parse(PREFERENCES.get("logLevel", Level.INFO.getName())));
+        ofNullable(PREFERENCES.get("locale", null)).map(Locale::forLanguageTag).ifPresent(Locale::setDefault);
         rootLogger.addHandler(new IdeConsoleLogHandler());
-        for (final String resource : new String[] {"meta.properties", "ide.properties"}) {
-            final Enumeration<URL> e = currentThread().getContextClassLoader().getResources(resource);
-            while (e.hasMoreElements()) {
-                try (final InputStream inputStream = e.nextElement().openStream()) {
-                    System.getProperties().load(inputStream);
-                }
-            }
-        }
-        final String localeString = IdePrefs.PREFERENCES.get("locale", "");
-        if (!localeString.isEmpty()) {
-            Locale.setDefault(Locale.forLanguageTag(localeString));
-        }
-        if ("true".equalsIgnoreCase(System.getProperty("ide.preloader.disabled"))) {
-            launch(Ide.class, args);
-        } else {
-            LauncherImpl.launchApplication(Ide.class, IdePreloader.class, args);
-        }
+        LauncherImpl.launchApplication(Ide.class, IdePreloader.class, args);
     }
 }

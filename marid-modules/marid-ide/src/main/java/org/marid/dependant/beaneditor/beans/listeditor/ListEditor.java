@@ -19,12 +19,13 @@
 package org.marid.dependant.beaneditor.beans.listeditor;
 
 import javafx.beans.InvalidationListener;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
-import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.common.ValueMenuItems;
+import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
+import org.marid.jfx.props.WritableValueImpl;
 import org.marid.spring.xml.data.AbstractData;
 import org.marid.spring.xml.data.collection.DCollection;
 import org.marid.spring.xml.data.collection.DElement;
@@ -59,7 +60,7 @@ public class ListEditor extends ListView<DElement<?>> {
     }
 
     @Autowired
-    public void initCellFactory(Type type, IdeDependants dependants) {
+    public void initCellFactory(Type type, ValueMenuItems vmi) {
         setCellFactory(param -> new TextFieldListCell<DElement<?>>() {
             @Override
             public void updateItem(DElement<?> item, boolean empty) {
@@ -81,7 +82,9 @@ public class ListEditor extends ListView<DElement<?>> {
                     }
                     final Consumer<DElement<?>> consumer = e -> list.elements.set(getIndex(), e);
                     final Supplier<DElement<?>> supplier = () -> list.elements.get(getIndex());
-                    setContextMenu(new ValueMenuItems(dependants, supplier, consumer, type).contextMenu());
+                    final ContextMenu contextMenu = new ContextMenu();
+                    contextMenu.getItems().addAll(vmi.menuItems(new WritableValueImpl<>(consumer, supplier), type));
+                    setContextMenu(contextMenu);
                     item.addListener(invalidationListenerMap.compute(item, (i, old) -> {
                         if (old != null) {
                             i.removeListener(old);

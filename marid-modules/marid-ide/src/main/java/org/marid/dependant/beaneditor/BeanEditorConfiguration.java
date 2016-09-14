@@ -37,7 +37,7 @@ import java.nio.file.Path;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@Import({BeanEditorTab.class, BeanListConfiguration.class})
+@Import({BeanEditorTab.class, BeanListConfiguration.class, ValueMenuItems.class})
 public class BeanEditorConfiguration {
 
     @Bean

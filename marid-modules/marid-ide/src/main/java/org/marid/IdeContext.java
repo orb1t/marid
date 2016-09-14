@@ -37,7 +37,7 @@ import static org.springframework.context.support.AbstractApplicationContext.LIF
  */
 @Configuration
 @EnableScheduling
-@PropertySource("meta.properties")
+@PropertySource({"meta.properties", "ide.properties"})
 @Import({IdeDependants.class})
 @ComponentScan(basePackages = {"org.marid.ide"}, lazyInit = true)
 public class IdeContext {

@@ -22,13 +22,10 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.data.collection.DCollection;
 import org.marid.spring.xml.data.collection.DElement;
 
 import javax.xml.bind.annotation.*;
-import java.lang.reflect.Type;
-import java.util.Optional;
 
 /**
  * @author Dmitry Ovchinnikov

@@ -16,11 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.common;
+package org.marid.dependant.beaneditor;
 
 import com.google.common.collect.ImmutableMap;
-import javafx.beans.property.Property;
-import javafx.scene.control.ContextMenu;
+import javafx.beans.value.WritableValue;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -34,6 +33,8 @@ import org.marid.spring.xml.data.collection.DElement;
 import org.marid.spring.xml.data.collection.DValue;
 import org.marid.spring.xml.data.list.DList;
 import org.marid.spring.xml.data.props.DProps;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -41,8 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import static org.marid.jfx.icons.FontIcon.M_CLEAR;
 import static org.marid.jfx.icons.FontIcon.M_MODE_EDIT;
@@ -52,49 +52,37 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component
 public class ValueMenuItems {
 
     private final IdeDependants dependants;
-    private final Supplier<DElement<?>> elementSupplier;
-    private final Consumer<DElement<?>> elementConsumer;
-    private final Type type;
 
-    public ValueMenuItems(IdeDependants dependants,
-                          Supplier<DElement<?>> elementSupplier,
-                          Consumer<DElement<?>> elementConsumer,
-                          Type type) {
+    @Autowired
+    public ValueMenuItems(IdeDependants dependants) {
         this.dependants = dependants;
-        this.elementSupplier = elementSupplier;
-        this.elementConsumer = elementConsumer;
-        this.type = type;
     }
 
-    public ValueMenuItems(IdeDependants dependants, Property<DElement<?>> property, Type type) {
-        this(dependants, property::getValue, property::setValue, type);
-    }
-
-    private Map<String, Object> args(String name) {
-        final ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.builder();
-        mapBuilder.put(name, elementSupplier.get());
-        mapBuilder.put("type", type);
-        return mapBuilder.build();
-    }
-
-    public List<MenuItem> menuItems() {
+    public List<MenuItem> menuItems(WritableValue<DElement<?>> elementProperty, Type type) {
+        final Function<String, Map<String, Object>> args = name -> {
+            final ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.builder();
+            mapBuilder.put(name, elementProperty.getValue());
+            mapBuilder.put("type", type);
+            return mapBuilder.build();
+        };
         final List<MenuItem> items = new ArrayList<>();
-        if (elementSupplier.get() != null) {
+        if (elementProperty.getValue() != null) {
             final MenuItem clearItem = new MenuItem(s("Clear value"), glyphIcon(M_CLEAR, 16));
-            clearItem.setOnAction(ev -> elementConsumer.accept(null));
+            clearItem.setOnAction(ev -> elementProperty.setValue(null));
             items.add(clearItem);
             items.add(new SeparatorMenuItem());
         }
         {
             final MenuItem mi = new MenuItem(s("Edit value..."), glyphIcon(M_MODE_EDIT, 16));
             mi.setOnAction(event -> {
-                if (!(elementSupplier.get() instanceof DValue)) {
-                    elementConsumer.accept(MaridDataFactory.create(DValue.class));
+                if (!(elementProperty.getValue() instanceof DValue)) {
+                    elementProperty.setValue(MaridDataFactory.create(DValue.class));
                 }
-                dependants.start(ValueEditorConfiguration.class, args("value"));
+                dependants.start(ValueEditorConfiguration.class, args.apply("value"));
             });
             items.add(mi);
             items.add(new SeparatorMenuItem());
@@ -103,17 +91,17 @@ public class ValueMenuItems {
             if (TypeUtils.isAssignable(type, Properties.class)) {
                 final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon(M_MODE_EDIT, 16));
                 mi.setOnAction(e -> {
-                    if (!(elementSupplier.get() instanceof DProps)) {
-                        elementConsumer.accept(MaridDataFactory.create(DProps.class));
+                    if (!(elementProperty.getValue() instanceof DProps)) {
+                        elementProperty.setValue(MaridDataFactory.create(DProps.class));
                     }
-                    dependants.start(PropEditorConfiguration.class, args("props"));
+                    dependants.start(PropEditorConfiguration.class, args.apply("props"));
                 });
                 items.add(mi);
                 items.add(new SeparatorMenuItem());
             } else if (TypeUtils.isAssignable(type, List.class)) {
                 final MenuItem mi = new MenuItem(s("Edit list..."), glyphIcon(M_MODE_EDIT, 16));
                 mi.setOnAction(event -> {
-                    if (!(elementSupplier.get() instanceof DList)) {
+                    if (!(elementProperty.getValue() instanceof DList)) {
                         final DList list = MaridDataFactory.create(DList.class);
                         final Map<TypeVariable<?>, Type> map = TypeUtils.getTypeArguments(type, List.class);
                         if (map != null) {
@@ -124,25 +112,25 @@ public class ValueMenuItems {
                                 }
                             });
                         }
-                        elementConsumer.accept(list);
+                        elementProperty.setValue(list);
                     }
-                    dependants.start(ListEditorConfiguration.class, args("list"));
+                    dependants.start(ListEditorConfiguration.class, args.apply("list"));
                 });
                 items.add(mi);
                 items.add(new SeparatorMenuItem());
             } else if (TypeUtils.isArrayType(type)) {
                 final MenuItem mi = new MenuItem(s("Edit array..."), glyphIcon(M_MODE_EDIT, 16));
                 mi.setOnAction(event -> {
-                    if (!(elementSupplier.get() instanceof DArray)) {
+                    if (!(elementProperty.getValue() instanceof DArray)) {
                         final DArray list = MaridDataFactory.create(DArray.class);
                         final Type componentType = TypeUtils.getArrayComponentType(type);
                         final Class<?> rawType = TypeUtils.getRawType(componentType, null);
                         if (rawType != null) {
                             list.valueType.setValue(rawType.getName());
                         }
-                        elementConsumer.accept(list);
+                        elementProperty.setValue(list);
                     }
-                    dependants.start(ListEditorConfiguration.class, args("list"));
+                    dependants.start(ListEditorConfiguration.class, args.apply("list"));
                 });
                 items.add(mi);
                 items.add(new SeparatorMenuItem());
@@ -155,11 +143,5 @@ public class ValueMenuItems {
             }
         }
         return items;
-    }
-
-    public ContextMenu contextMenu() {
-        final ContextMenu contextMenu = new ContextMenu();
-        contextMenu.getItems().addAll(menuItems());
-        return contextMenu;
     }
 }
