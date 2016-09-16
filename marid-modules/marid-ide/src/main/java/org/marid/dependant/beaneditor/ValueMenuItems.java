@@ -18,7 +18,6 @@
 
 package org.marid.dependant.beaneditor;
 
-import com.google.common.collect.ImmutableMap;
 import javafx.beans.value.WritableValue;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -42,7 +41,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.function.Function;
 
 import static org.marid.jfx.icons.FontIcon.M_CLEAR;
 import static org.marid.jfx.icons.FontIcon.M_MODE_EDIT;
@@ -63,12 +61,6 @@ public class ValueMenuItems {
     }
 
     public List<MenuItem> menuItems(WritableValue<DElement<?>> elementProperty, Type type) {
-        final Function<String, Map<String, Object>> args = name -> {
-            final ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.builder();
-            mapBuilder.put(name, elementProperty.getValue());
-            mapBuilder.put("type", type);
-            return mapBuilder.build();
-        };
         final List<MenuItem> items = new ArrayList<>();
         if (elementProperty.getValue() != null) {
             final MenuItem clearItem = new MenuItem(s("Clear value"), glyphIcon(M_CLEAR, 16));
@@ -82,7 +74,7 @@ public class ValueMenuItems {
                 if (!(elementProperty.getValue() instanceof DValue)) {
                     elementProperty.setValue(MaridDataFactory.create(DValue.class));
                 }
-                dependants.start(ValueEditorConfiguration.class, args.apply("value"));
+                dependants.start(ValueEditorConfiguration.class, (DValue) elementProperty.getValue(), type);
             });
             items.add(mi);
             items.add(new SeparatorMenuItem());
@@ -94,7 +86,7 @@ public class ValueMenuItems {
                     if (!(elementProperty.getValue() instanceof DProps)) {
                         elementProperty.setValue(MaridDataFactory.create(DProps.class));
                     }
-                    dependants.start(PropEditorConfiguration.class, args.apply("props"));
+                    dependants.start(PropEditorConfiguration.class, (DProps) elementProperty.getValue(), type);
                 });
                 items.add(mi);
                 items.add(new SeparatorMenuItem());
@@ -114,7 +106,7 @@ public class ValueMenuItems {
                         }
                         elementProperty.setValue(list);
                     }
-                    dependants.start(ListEditorConfiguration.class, args.apply("list"));
+                    dependants.start(ListEditorConfiguration.class, (DList) elementProperty.getValue(), type);
                 });
                 items.add(mi);
                 items.add(new SeparatorMenuItem());
@@ -130,7 +122,7 @@ public class ValueMenuItems {
                         }
                         elementProperty.setValue(list);
                     }
-                    dependants.start(ListEditorConfiguration.class, args.apply("list"));
+                    dependants.start(ListEditorConfiguration.class, (DArray) elementProperty.getValue(), type);
                 });
                 items.add(mi);
                 items.add(new SeparatorMenuItem());

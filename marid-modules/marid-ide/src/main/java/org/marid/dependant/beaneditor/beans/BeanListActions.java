@@ -18,7 +18,6 @@
 
 package org.marid.dependant.beaneditor.beans;
 
-import com.google.common.collect.ImmutableMap;
 import javafx.event.ActionEvent;
 import javafx.geometry.Side;
 import javafx.scene.Node;
@@ -91,10 +90,7 @@ public class BeanListActions {
     }
 
     public void onEdit(ActionEvent event) {
-        dependants.start(
-                BeanDataEditorConfiguration.class,
-                ImmutableMap.of("beanData", table.getSelectionModel().getSelectedItem())
-        );
+        dependants.start(BeanDataEditorConfiguration.class, table.getSelectionModel().getSelectedItem());
     }
 
     public void onDelete(ActionEvent event) {

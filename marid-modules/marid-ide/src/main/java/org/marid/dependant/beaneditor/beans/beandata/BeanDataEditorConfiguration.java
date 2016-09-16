@@ -51,6 +51,17 @@ import static org.marid.l10n.L10n.s;
 @Import({BeanDataActions.class})
 public class BeanDataEditorConfiguration {
 
+    private final BeanData beanData;
+
+    public BeanDataEditorConfiguration(BeanData beanData) {
+        this.beanData = beanData;
+    }
+
+    @Bean
+    public BeanData beanData() {
+        return beanData;
+    }
+
     @Bean
     public RefValuesEditor<BeanArg> beanArgsEditor(BeanData beanData, ProjectProfileReflection reflection) {
         return new RefValuesEditor<>(beanData.beanArgs, name -> reflection.getArgType(beanData, name));

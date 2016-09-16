@@ -39,6 +39,24 @@ import java.nio.file.Path;
 @Import({BeanEditorTab.class, BeanListConfiguration.class, ValueMenuItems.class})
 public class BeanEditorConfiguration {
 
+    private final Path beanFilePath;
+    private final ProjectProfile profile;
+
+    public BeanEditorConfiguration(Path beanFilePath, ProjectProfile profile) {
+        this.beanFilePath = beanFilePath;
+        this.profile = profile;
+    }
+
+    @Bean
+    public Path beanFilePath() {
+        return beanFilePath;
+    }
+
+    @Bean
+    public ProjectProfile profile() {
+        return profile;
+    }
+
     @Bean
     public ProjectProfileReflection reflection(ProjectProfile profile) {
         return new ProjectProfileReflection(profile);

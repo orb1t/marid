@@ -18,7 +18,6 @@
 
 package org.marid.ide.panes.filebrowser;
 
-import com.google.common.collect.ImmutableMap;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TabPane;
@@ -108,10 +107,7 @@ public class BeanFileBrowserActions {
         if (tab != null) {
             ideTabPane.getObject().getSelectionModel().select(tab);
         } else {
-            dependants.start(
-                    BeanEditorConfiguration.class,
-                    ImmutableMap.of("beanFilePath", path, "profile", getProfile())
-            );
+            dependants.start(BeanEditorConfiguration.class, path, getProfile());
         }
     }
 }

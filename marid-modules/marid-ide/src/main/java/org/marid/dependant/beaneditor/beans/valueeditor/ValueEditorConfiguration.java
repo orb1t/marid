@@ -30,11 +30,31 @@ import org.marid.spring.xml.data.collection.DValue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.lang.reflect.Type;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
 public class ValueEditorConfiguration {
+
+    private final DValue value;
+    private final Type type;
+
+    public ValueEditorConfiguration(DValue value, Type type) {
+        this.value = value;
+        this.type = type;
+    }
+
+    @Bean
+    public DValue value() {
+        return value;
+    }
+
+    @Bean
+    public Type type() {
+        return type;
+    }
 
     @Bean
     @Q(ValueEditorConfiguration.class)

@@ -23,16 +23,38 @@ import org.marid.jfx.action.FxAction;
 import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.toolbar.MaridToolbar;
 import org.marid.spring.annotation.Q;
+import org.marid.spring.xml.data.collection.DCollection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 @Configuration
+@Import({ListEditor.class})
 public class ListEditorConfiguration {
+
+    private final DCollection<?> list;
+    private final Type type;
+
+    public ListEditorConfiguration(DCollection<?> list, Type type) {
+        this.list = list;
+        this.type = type;
+    }
+
+    @Bean
+    public DCollection<?> list() {
+        return list;
+    }
+
+    @Bean
+    public Type type() {
+        return type;
+    }
 
     @Bean
     @Q(ListEditorConfiguration.class)

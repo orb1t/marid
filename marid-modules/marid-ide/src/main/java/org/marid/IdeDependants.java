@@ -20,14 +20,18 @@ package org.marid;
 
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
+import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.support.AbstractBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -48,16 +52,25 @@ public class IdeDependants {
         this.parent = parent;
     }
 
-    public AnnotationConfigApplicationContext start(Class<?> configuration, Map<String, Object> beans) {
+    public final AnnotationConfigApplicationContext start(Class<?> configuration, Object... args) {
         return start(context -> {
             context.setDisplayName(configuration.getSimpleName());
-            context.register(configuration);
-            beans.forEach(context.getBeanFactory()::registerSingleton);
+            if (args.length > 0) {
+                final AnnotatedGenericBeanDefinition definition = new AnnotatedGenericBeanDefinition(configuration);
+                final ConstructorArgumentValues values = new ConstructorArgumentValues();
+                for (final Object arg : args) {
+                    values.addGenericArgumentValue(arg);
+                }
+                definition.setConstructorArgumentValues(values);
+                definition.setScope(AbstractBeanFactory.SCOPE_SINGLETON);
+                final String beanName = BeanDefinitionReaderUtils.generateBeanName(definition, context);
+                AnnotationConfigUtils.processCommonDefinitionAnnotations(definition);
+                final BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, beanName);
+                BeanDefinitionReaderUtils.registerBeanDefinition(holder, context);
+            } else {
+                context.register(configuration);
+            }
         });
-    }
-
-    public AnnotationConfigApplicationContext start(Class<?> configuration) {
-        return start(configuration, Collections.emptyMap());
     }
 
     private AnnotationConfigApplicationContext start(Consumer<AnnotationConfigApplicationContext> contextConsumer) {
