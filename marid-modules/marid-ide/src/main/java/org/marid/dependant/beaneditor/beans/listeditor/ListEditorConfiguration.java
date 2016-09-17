@@ -22,8 +22,8 @@ import javafx.scene.control.ToolBar;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.toolbar.MaridToolbar;
-import org.marid.spring.annotation.Q;
 import org.marid.spring.xml.data.collection.DCollection;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -57,19 +57,19 @@ public class ListEditorConfiguration {
     }
 
     @Bean
-    @Q(ListEditorConfiguration.class)
+    @Qualifier("listEditor")
     public FxAction clearAction(ListEditor editor) {
         return MaridListActions.clearAction(editor);
     }
 
     @Bean
-    @Q(ListEditorConfiguration.class)
+    @Qualifier("listEditor")
     public FxAction removeAction(ListEditor editor) {
         return MaridListActions.removeAction(editor);
     }
 
     @Bean
-    public ToolBar listEditorToolbar(@Q(ListEditorConfiguration.class) Map<String, FxAction> actionMap) {
+    public ToolBar listEditorToolbar(@Qualifier("listEditor") Map<String, FxAction> actionMap) {
         return new MaridToolbar(actionMap);
     }
 }

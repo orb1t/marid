@@ -30,10 +30,10 @@ import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.MaridToolbar;
-import org.marid.spring.annotation.Q;
 import org.marid.spring.xml.data.BeanArg;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanProp;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -73,28 +73,28 @@ public class BeanDataEditorConfiguration {
     }
 
     @Bean
-    @Q(BeanDataEditorConfiguration.class)
+    @Qualifier("beanData")
     @Order(1)
     public Tab beanArgsTab(RefValuesEditor<BeanArg> editor) {
         return new Tab(s("Constructor arguments"), new MaridScrollPane(editor));
     }
 
     @Bean
-    @Q(BeanDataEditorConfiguration.class)
+    @Qualifier("beanData")
     @Order(2)
     public Tab beanPropsTab(RefValuesEditor<BeanProp> editor) {
         return new Tab(s("Properties"), new MaridScrollPane(editor));
     }
 
     @Bean
-    public TabPane beanDataEditorTabs(@Q(BeanDataEditorConfiguration.class) Tab[] tabs) {
+    public TabPane beanDataEditorTabs(@Qualifier("beanData") Tab[] tabs) {
         final TabPane tabPane = new TabPane(tabs);
         tabPane.setTabClosingPolicy(UNAVAILABLE);
         return tabPane;
     }
 
     @Bean
-    public ToolBar beanDataEditorToolbar(@Q(BeanDataActions.class) Map<String, FxAction> actionMap) {
+    public ToolBar beanDataEditorToolbar(@Qualifier("beanData") Map<String, FxAction> actionMap) {
         return new MaridToolbar(actionMap);
     }
 

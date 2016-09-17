@@ -25,8 +25,8 @@ import javafx.stage.Stage;
 import org.marid.Ide;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.l10n.L10n;
-import org.marid.spring.annotation.Q;
 import org.marid.spring.xml.data.collection.DValue;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -57,7 +57,7 @@ public class ValueEditorConfiguration {
     }
 
     @Bean
-    @Q(ValueEditorConfiguration.class)
+    @Qualifier("valueEditor")
     public TextArea textArea(DValue value) {
         final TextArea textArea = new TextArea();
         textArea.textProperty().bindBidirectional(value.value);
@@ -65,18 +65,18 @@ public class ValueEditorConfiguration {
     }
 
     @Bean
-    public AutoCloseable textAreaDestroyer(@Q(ValueEditorConfiguration.class) TextArea textArea, DValue value) {
+    public AutoCloseable textAreaDestroyer(@Qualifier("valueEditor") TextArea textArea, DValue value) {
         return () -> textArea.textProperty().unbindBidirectional(value.value);
     }
 
     @Bean
-    @Q(ValueEditorConfiguration.class)
-    public BorderPane pane(@Q(ValueEditorConfiguration.class) TextArea textArea) {
+    @Qualifier("valueEditor")
+    public BorderPane pane(@Qualifier("valueEditor") TextArea textArea) {
         return new BorderPane(new MaridScrollPane(textArea));
     }
 
     @Bean(initMethod = "show")
-    public Stage valueEditorStage(@Q(ValueEditorConfiguration.class) BorderPane pane) {
+    public Stage valueEditorStage(@Qualifier("valueEditor") BorderPane pane) {
         final Stage stage = new Stage();
         stage.initOwner(Ide.primaryStage);
         stage.setScene(new Scene(pane, 800, 600));
