@@ -74,7 +74,7 @@ public class ValueMenuItems {
                 if (!(elementProperty.getValue() instanceof DValue)) {
                     elementProperty.setValue(MaridDataFactory.create(DValue.class));
                 }
-                dependants.start(ValueEditorConfiguration.class, (DValue) elementProperty.getValue(), type);
+                dependants.start(ValueEditorConfiguration.class, elementProperty.getValue(), type);
             });
             items.add(mi);
             items.add(new SeparatorMenuItem());
@@ -86,7 +86,7 @@ public class ValueMenuItems {
                     if (!(elementProperty.getValue() instanceof DProps)) {
                         elementProperty.setValue(MaridDataFactory.create(DProps.class));
                     }
-                    dependants.start(PropEditorConfiguration.class, (DProps) elementProperty.getValue(), type);
+                    dependants.start(PropEditorConfiguration.class, elementProperty.getValue(), type);
                 });
                 items.add(mi);
                 items.add(new SeparatorMenuItem());
@@ -106,7 +106,7 @@ public class ValueMenuItems {
                         }
                         elementProperty.setValue(list);
                     }
-                    dependants.start(ListEditorConfiguration.class, (DList) elementProperty.getValue(), type);
+                    dependants.start(ListEditorConfiguration.class, elementProperty.getValue(), type);
                 });
                 items.add(mi);
                 items.add(new SeparatorMenuItem());
@@ -122,7 +122,7 @@ public class ValueMenuItems {
                         }
                         elementProperty.setValue(list);
                     }
-                    dependants.start(ListEditorConfiguration.class, (DArray) elementProperty.getValue(), type);
+                    dependants.start(ListEditorConfiguration.class, elementProperty.getValue(), type);
                 });
                 items.add(mi);
                 items.add(new SeparatorMenuItem());
