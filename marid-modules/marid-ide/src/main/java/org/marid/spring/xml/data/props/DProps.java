@@ -59,4 +59,9 @@ public class DProps implements DElement<DProps> {
     public boolean isEmpty() {
         return false;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Props(%d)", entries.size());
+    }
 }

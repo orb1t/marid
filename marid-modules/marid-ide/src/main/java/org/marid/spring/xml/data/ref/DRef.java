@@ -16,20 +16,42 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.data.array;
+package org.marid.spring.xml.data.ref;
 
-import org.marid.spring.xml.data.collection.DCollection;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import org.marid.spring.xml.data.collection.DElement;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "array")
-public class DArray extends DCollection<DArray> {
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement(name = "ref")
+public class DRef implements DElement<DRef> {
+
+    public final StringProperty ref = new SimpleStringProperty(this, "value");
+
+    @XmlAttribute(name = "bean")
+    public String getBean() {
+        return ref.isEmpty().get() ? null : ref.get();
+    }
+
+    public void setBean(String bean) {
+        ref.set(bean);
+    }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return ref.isEmpty().get();
+    }
+
+    @Override
+    public String toString() {
+        return getBean();
     }
 }

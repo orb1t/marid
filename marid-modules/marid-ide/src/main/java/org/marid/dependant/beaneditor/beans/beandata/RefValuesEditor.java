@@ -20,32 +20,27 @@ package org.marid.dependant.beaneditor.beans.beandata;
 
 import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.ComboBoxTableCell;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.util.converter.DefaultStringConverter;
-import org.apache.commons.lang3.reflect.TypeUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import javafx.scene.control.*;
 import org.marid.dependant.beaneditor.ValueMenuItems;
-import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.project.ProjectProfileReflection;
+import org.marid.jfx.icons.FontIcon;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.data.AbstractData;
-import org.marid.spring.xml.data.BeanFile;
 import org.marid.spring.xml.data.RefValue;
+import org.marid.spring.xml.data.collection.DCollection;
+import org.marid.spring.xml.data.collection.DElement;
+import org.marid.spring.xml.data.collection.DValue;
+import org.marid.spring.xml.data.ref.DRef;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PreDestroy;
 import java.lang.reflect.Type;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -59,7 +54,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
     public RefValuesEditor(ObservableList<T> items, Function<String, Optional<? extends Type>> typeFunc) {
         super(items);
         this.typeFunc = typeFunc;
-        setEditable(true);
+        setEditable(false);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
     }
@@ -70,14 +65,12 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
         col.setPrefWidth(200);
         col.setMaxWidth(400);
         col.setCellValueFactory(param -> param.getValue().name);
-        col.setEditable(false);
         getColumns().add(col);
     }
 
     @OrderedInit(2)
     public void typeColumn() {
         final TableColumn<T, String> col = new TableColumn<>(s("Type"));
-        col.setEditable(false);
         col.setPrefWidth(250);
         col.setMaxWidth(520);
         col.setCellValueFactory(param -> param.getValue().type);
@@ -85,67 +78,30 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
     }
 
     @OrderedInit(3)
-    public void refColumn(ProjectProfile profile, ProjectProfileReflection reflection) {
-        final TableColumn<T, String> col = new TableColumn<>(s("Reference"));
-        col.setEditable(true);
-        col.setPrefWidth(200);
-        col.setMaxWidth(400);
-        col.setCellValueFactory(param -> param.getValue().ref);
-        col.setCellFactory(param -> {
-            final ComboBoxTableCell<T, String> cell = new ComboBoxTableCell<T, String>(new DefaultStringConverter()) {
-                @Override
-                public void startEdit() {
-                    final T data = RefValuesEditor.this.getItems().get(getTableRow().getIndex());
-                    final Optional<? extends Type> bco = typeFunc.apply(data.name.get());
-                    if (bco.isPresent()) {
-                        getItems().clear();
-                        for (final Pair<Path, BeanFile> beanFile : profile.getBeanFiles()) {
-                            beanFile.getValue().allBeans().forEach(b -> {
-                                final Optional<? extends Type> co = reflection.getType(b);
-                                if (co.isPresent()) {
-                                    if (TypeUtils.isAssignable(co.get(), bco.get())) {
-                                        getItems().add(b.nameProperty().get());
-                                    }
-                                }
-                            });
-                        }
-                    }
-                    super.startEdit();
-                }
-
-                @Override
-                public void commitEdit(String newValue) {
-                    super.commitEdit(newValue);
-                    final T data = RefValuesEditor.this.getItems().get(getTableRow().getIndex());
-                    data.value.set(null);
-                }
-            };
-            cell.setComboBoxEditable(true);
-            return cell;
-        });
-        getColumns().add(col);
-    }
-
-    @OrderedInit(4)
     public void valueColumn() {
-        final TableColumn<T, String> col = new TableColumn<>(s("Value"));
-        col.setEditable(true);
+        final TableColumn<T, Label> col = new TableColumn<>(s("Value"));
         col.setPrefWidth(500);
         col.setMaxWidth(1500);
-        col.setCellValueFactory(param -> param.getValue().value);
-        col.setCellFactory(param -> new TextFieldTableCell<T, String>(new DefaultStringConverter()) {
-            @Override
-            public void commitEdit(String newValue) {
-                super.commitEdit(newValue);
-                final T data = getItems().get(getTableRow().getIndex());
-                data.ref.set(null);
+        col.setCellValueFactory(param -> createObjectBinding(() -> {
+            final Label label = new Label();
+            final DElement<?> element = param.getValue().getData();
+            if (element instanceof DRef) {
+                label.setGraphic(FontIcons.glyphIcon(FontIcon.M_LINK, 16));
+            } else if (element instanceof DValue) {
+                label.setGraphic(FontIcons.glyphIcon(FontIcon.M_TEXT_FORMAT, 16));
+            } else if (element instanceof DCollection) {
+                label.setGraphic(FontIcons.glyphIcon(FontIcon.M_LIST, 16));
             }
-        });
+            if (element != null) {
+                label.setText(element.toString());
+            }
+            return label;
+        }, param.getValue().data));
         getColumns().add(col);
     }
 
     @Autowired
-    public void initContextMenu(ProjectProfileReflection reflection, ValueMenuItems vmi) {
+    public void initContextMenu(ValueMenuItems vmi) {
         setRowFactory(param -> {
             final TableRow<T> row = new TableRow<>();
             row.itemProperty().addListener((o, ov, nv) -> {
@@ -158,7 +114,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
                 } else {
                     final InvalidationListener listener = observable -> {
                         final ContextMenu menu = new ContextMenu();
-                        final Type type = reflection.getType(nv).orElse(null);
+                        final Type type = typeFunc.apply(nv.getName()).orElse(null);
                         final Type typeArg = type == null ? Object.class : type;
                         menu.getItems().addAll(vmi.menuItems(nv.data, typeArg));
                         row.setContextMenu(menu);

@@ -22,16 +22,15 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.marid.spring.xml.data.array.DArray;
-import org.marid.spring.xml.data.list.DList;
 import org.marid.spring.xml.data.props.DProps;
+import org.marid.spring.xml.data.ref.DRef;
 
 import javax.xml.bind.annotation.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlSeeAlso({DList.class, DArray.class, DValue.class, DProps.class})
+@XmlSeeAlso({DList.class, DArray.class, DValue.class, DProps.class, DRef.class})
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class DCollection<T extends DCollection<T>> implements DElement<T> {
 
@@ -54,5 +53,11 @@ public abstract class DCollection<T extends DCollection<T>> implements DElement<
 
     public void setElements(DElement<?>[] elements) {
         this.elements.addAll(elements);
+    }
+
+    @Override
+    public String toString() {
+        final String className = getClass().getSimpleName().substring(1);
+        return className + "(" + elements.size() + ")";
     }
 }

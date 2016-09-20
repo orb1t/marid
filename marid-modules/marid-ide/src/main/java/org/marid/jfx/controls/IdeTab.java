@@ -46,13 +46,6 @@ public class IdeTab extends Tab {
         super(s(text, args), content);
     }
 
-    public IdeTab(String text, Object... args) {
-        super(s(text, args));
-    }
-
-    public IdeTab() {
-    }
-
     @PostConstruct
     private void init() {
         ideTabPane.getTabs().add(this);

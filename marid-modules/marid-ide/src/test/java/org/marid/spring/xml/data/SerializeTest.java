@@ -40,8 +40,6 @@ public class SerializeTest {
         final BeanProp property = new BeanProp();
         property.name.set(name);
         property.type.set(type);
-        property.ref.set(ref);
-        property.value.set(value);
         return property;
     }
 
@@ -65,8 +63,6 @@ public class SerializeTest {
             final BeanProp cloned = (BeanProp) ois.readObject();
             assertEquals(property.name.get(), cloned.name.get());
             assertEquals(property.type.get(), cloned.type.get());
-            assertEquals(property.ref.get(), cloned.ref.get());
-            assertEquals(property.value.get(), cloned.value.get());
         }
     }
 }

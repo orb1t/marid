@@ -26,6 +26,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.IdePrefs;
 import org.marid.logging.LogSupport;
+import org.marid.spring.xml.data.collection.DCollection;
+import org.marid.spring.xml.data.collection.DElement;
+import org.marid.spring.xml.data.ref.DRef;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -109,17 +112,24 @@ public class ProjectManager implements LogSupport {
             if (beanData.factoryBean.isEqualTo(oldName).get()) {
                 beanData.factoryBean.set(newName);
             }
-            beanData.beanArgs.forEach(constructorArg -> {
-                if (constructorArg.ref.isEqualTo(oldName).get()) {
-                    constructorArg.ref.set(newName);
-                }
-            });
-            beanData.properties.forEach(property -> {
-                if (property.ref.isEqualTo(oldName).get()) {
-                    property.ref.set(newName);
-                }
-            });
+            Stream.concat(beanData.beanArgs.stream(), beanData.properties.stream())
+                    .map(b -> b.data.get())
+                    .forEach(d -> onBeanNameChange(d, oldName, newName));
         }));
+    }
+
+    private static void onBeanNameChange(DElement<?> element, String oldName, String newName) {
+        if (element instanceof DRef) {
+            final DRef ref = (DRef) element;
+            if (ref.ref.isEqualTo(oldName).get()) {
+                ref.ref.set(newName);
+            }
+        } else if (element instanceof DCollection<?>) {
+            final DCollection<?> collection = (DCollection<?>) element;
+            for (final DElement<?> e : collection.elements) {
+                onBeanNameChange(e, oldName, newName);
+            }
+        }
     }
 
     @Override

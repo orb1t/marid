@@ -21,7 +21,6 @@ package org.marid.ide.project;
 import org.marid.spring.xml.data.BeanArg;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanProp;
-import org.marid.spring.xml.data.RefValue;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -37,7 +36,6 @@ import java.util.stream.Stream;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Stream.of;
 import static org.marid.misc.Reflections.parameterName;
 
 /**
@@ -193,59 +191,6 @@ public class ProjectProfileReflection {
                     .filter(d -> d.getWriteMethod() != null);
         } catch (IntrospectionException x) {
             return Stream.empty();
-        }
-    }
-
-    public Optional<? extends Type> getType(BeanArg arg) {
-        final BeanData beanData = profile.getBeanFiles()
-                .stream()
-                .flatMap(f -> f.getValue().beans.stream())
-                .filter(d -> d.beanArgs.stream().anyMatch(a -> a == arg))
-                .findAny()
-                .orElse(null);
-        if (beanData != null) {
-            final Parameter parameter = getConstructor(beanData)
-                    .flatMap(e -> of(e.getParameters()).filter(p -> parameterName(p).equals(arg.name.get())).findAny())
-                    .orElse(null);
-            if (parameter != null) {
-                return Optional.of(parameter.getParameterizedType());
-            }
-        }
-        if (arg.type.isNotEmpty().get()) {
-            return profile.getClass(arg.type.get());
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    public Optional<? extends Type> getType(BeanProp prop) {
-        final BeanData beanData = profile.getBeanFiles()
-                .stream()
-                .flatMap(f -> f.getValue().beans.stream())
-                .filter(d -> d.properties.stream().anyMatch(a -> a == prop))
-                .findAny()
-                .orElse(null);
-        if (beanData != null) {
-            final PropertyDescriptor descriptor = getPropertyDescriptors(beanData)
-                    .filter(d -> d.getName().equals(prop.name.get()))
-                    .findAny()
-                    .orElse(null);
-            if (descriptor != null) {
-                return Optional.of(descriptor.getWriteMethod().getGenericParameterTypes()[0]);
-            }
-        }
-        if (prop.type.isNotEmpty().get()) {
-            return profile.getClass(prop.type.get());
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    public Optional<? extends Type> getType(RefValue<?> refValue) {
-        if (refValue instanceof BeanArg) {
-            return getType((BeanArg) refValue);
-        } else {
-            return getType((BeanProp) refValue);
         }
     }
 }

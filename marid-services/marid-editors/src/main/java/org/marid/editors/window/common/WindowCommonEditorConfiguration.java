@@ -27,9 +27,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanProp;
+import org.marid.spring.xml.data.collection.DValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
@@ -53,6 +53,24 @@ public class WindowCommonEditorConfiguration extends Stage {
     private final double x;
     private final double y;
 
+    private double getValue(BeanProp prop, double defValue) {
+        if (prop.data.get() instanceof DValue) {
+            try {
+                final DValue value = (DValue) prop.data.get();
+                return Double.parseDouble(value.getValue());
+            } catch (NullPointerException | NumberFormatException x) {
+                return defValue;
+            }
+        }
+        return defValue;
+    }
+
+    private void setValue(BeanProp prop, double value) {
+        final DValue v = new DValue();
+        v.setValue(Double.toString(value));
+        prop.data.setValue(v);
+    }
+
     @Autowired
     public WindowCommonEditorConfiguration(BeanData beanData) {
         super(StageStyle.UTILITY);
@@ -60,25 +78,12 @@ public class WindowCommonEditorConfiguration extends Stage {
         yProperty = beanData.property("y").orElseGet(BeanProp::new);
         widthProperty = beanData.property("width").orElseGet(BeanProp::new);
         heightProperty = beanData.property("height").orElseGet(BeanProp::new);
-        if (NumberUtils.isNumber(xProperty.value.get())) {
-            x = Double.parseDouble(xProperty.value.get());
-        } else {
-            x = 0;
-        }
-        if (NumberUtils.isNumber(yProperty.value.get())) {
-            y = Double.parseDouble(yProperty.value.get());
-        } else {
-            y = 0;
-        }
-        double width = 100, height = 100;
-        if (NumberUtils.isNumber(widthProperty.value.get())) {
-            width = Double.parseDouble(widthProperty.value.get());
-        }
-        if (NumberUtils.isNumber(heightProperty.value.get())) {
-            height = Double.parseDouble(heightProperty.value.get());
-        }
+        x = getValue(xProperty, 0);
+        y = getValue(yProperty, 0);
+        double width = getValue(widthProperty, 400);
+        double height = getValue(heightProperty, 300);
         if (width < 400) {
-            width = 300;
+            width = 400;
         }
         if (height < 300) {
             height = 300;
@@ -88,10 +93,10 @@ public class WindowCommonEditorConfiguration extends Stage {
         {
             final Button button = new Button(s("Apply"), glyphIcon(D_CHECK_ALL, 24));
             button.setOnAction(event -> {
-                widthProperty.value.set(Double.toString(getWidth()));
-                heightProperty.value.set(Double.toString(getHeight()));
-                xProperty.value.set(Double.toString(x));
-                yProperty.value.set(Double.toString(y));
+                setValue(xProperty, getX());
+                setValue(yProperty, getY());
+                setValue(widthProperty, getWidth());
+                setValue(heightProperty, getHeight());
             });
             pane.setCenter(button);
         }

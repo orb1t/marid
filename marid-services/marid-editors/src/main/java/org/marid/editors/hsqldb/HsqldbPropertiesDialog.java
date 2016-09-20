@@ -30,6 +30,7 @@ import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.panes.GenericGridPane;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanProp;
+import org.marid.spring.xml.data.collection.DValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,9 +64,16 @@ public class HsqldbPropertiesDialog extends Dialog<Runnable> {
 
         if (dirProperty != null) {
             final GlyphIcon<?> icon = FontIcons.glyphIcon(FontIcon.M_STORE_MALL_DIRECTORY, 16);
-            final TextField field = new TextField(dirProperty.value.get());
+            final TextField field = new TextField();
+            if (dirProperty.data.get() instanceof DValue) {
+                field.setText(dirProperty.data.get().toString());
+            }
             pane.addRow(row.getAndIncrement(), new Label(s("Directory"), icon), field);
-            commitTasks.add(() -> dirProperty.value.set(field.getText()));
+            commitTasks.add(() -> {
+                final DValue value = new DValue();
+                value.setValue(field.getText());
+                dirProperty.setData(value);
+            });
         }
 
         getDialogPane().setContent(pane);

@@ -18,39 +18,16 @@
 
 package org.marid.spring.xml.data.collection;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlValue;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "value")
-@XmlAccessorType(XmlAccessType.NONE)
-public final class DValue implements DElement<DValue> {
-
-    public final StringProperty value = new SimpleStringProperty(this, "value");
-
-    @XmlValue
-    public String getValue() {
-        return value.get();
-    }
-
-    public void setValue(String value) {
-        this.value.set(value);
-    }
+@XmlRootElement(name = "array")
+public class DArray extends DCollection<DArray> {
 
     @Override
     public boolean isEmpty() {
-        return value.isEmpty().get();
-    }
-
-    @Override
-    public String toString() {
-        return getValue();
+        return false;
     }
 }

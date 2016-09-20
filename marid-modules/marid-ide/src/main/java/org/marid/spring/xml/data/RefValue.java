@@ -35,9 +35,7 @@ import javax.xml.bind.annotation.*;
 public abstract class RefValue<T extends RefValue<T>> implements AbstractData<T> {
 
     public final StringProperty name = new SimpleStringProperty(this, "name");
-    public final StringProperty ref = new SimpleStringProperty(this, "ref");
     public final StringProperty type = new SimpleStringProperty(this, "type");
-    public final StringProperty value = new SimpleStringProperty(this, "value");
 
     public final ObjectProperty<DElement<?>> data = new SimpleObjectProperty<>(this, "data");
 
@@ -48,15 +46,6 @@ public abstract class RefValue<T extends RefValue<T>> implements AbstractData<T>
 
     public void setName(String name) {
         this.name.set(name);
-    }
-
-    @XmlAttribute(name = "ref")
-    public String getRef() {
-        return ref.isEmpty().get() ? null : ref.get();
-    }
-
-    public void setRef(String ref) {
-        this.ref.set(ref);
     }
 
     @XmlAttribute(name = "type")
@@ -77,16 +66,7 @@ public abstract class RefValue<T extends RefValue<T>> implements AbstractData<T>
         this.data.set(data);
     }
 
-    @XmlAttribute(name = "value")
-    public String getValue() {
-        return value.isEmpty().get() ? null : value.get();
-    }
-
-    public void setValue(String value) {
-        this.value.set(value);
-    }
-
     public boolean isEmpty() {
-        return data.isNull().get() && value.isEmpty().get() && ref.isEmpty().get();
+        return data.isNull().get();
     }
 }

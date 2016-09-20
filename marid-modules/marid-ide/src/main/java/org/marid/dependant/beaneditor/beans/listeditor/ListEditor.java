@@ -30,7 +30,7 @@ import org.marid.spring.xml.data.AbstractData;
 import org.marid.spring.xml.data.collection.DCollection;
 import org.marid.spring.xml.data.collection.DElement;
 import org.marid.spring.xml.data.collection.DValue;
-import org.marid.spring.xml.data.list.DList;
+import org.marid.spring.xml.data.collection.DList;
 import org.marid.spring.xml.data.props.DProps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

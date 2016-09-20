@@ -48,7 +48,7 @@ public class WindowAndDialogPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (context != null && context.isSingleton(beanName)) {
+        if (context.isSingleton(beanName)) {
             if (bean instanceof Dialog<?>) {
                 final Dialog<?> dialog = (Dialog<?>) bean;
                 dialog.showingProperty().addListener((observable, oldValue, newValue) -> {

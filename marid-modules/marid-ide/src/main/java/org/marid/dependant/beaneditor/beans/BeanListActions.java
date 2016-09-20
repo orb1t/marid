@@ -36,10 +36,11 @@ import org.marid.spring.xml.MaridDataFactory;
 import org.marid.spring.xml.data.BeanArg;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanProp;
+import org.marid.spring.xml.data.collection.DValue;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -137,13 +138,14 @@ public class BeanListActions {
         }
 
         if (def.getConstructorArgumentValues() != null) {
-            for (final ConstructorArgumentValues.ValueHolder holder : def.getConstructorArgumentValues().getGenericArgumentValues()) {
+            for (final ValueHolder holder : def.getConstructorArgumentValues().getGenericArgumentValues()) {
                 final BeanArg beanArg = MaridDataFactory.create(BeanArg.class);
                 beanArg.name.set(holder.getName());
                 beanArg.type.set(holder.getType());
                 if (holder.getValue() instanceof TypedStringValue) {
-                    final TypedStringValue typedStringValue = (TypedStringValue) holder.getValue();
-                    beanArg.value.set(typedStringValue.getValue());
+                    final DValue value = new DValue();
+                    value.setValue(((TypedStringValue) holder.getValue()).getValue());
+                    beanArg.data.set(value);
                 }
                 beanData.beanArgs.add(beanArg);
             }
@@ -154,8 +156,9 @@ public class BeanListActions {
                 final BeanProp property = MaridDataFactory.create(BeanProp.class);
                 property.name.set(propertyValue.getName());
                 if (propertyValue.getValue() instanceof TypedStringValue) {
-                    final TypedStringValue typedStringValue = (TypedStringValue) propertyValue.getValue();
-                    property.value.set(typedStringValue.getValue());
+                    final DValue value = new DValue();
+                    value.setValue(((TypedStringValue) propertyValue.getValue()).getValue());
+                    property.data.set(value);
                 }
                 beanData.properties.add(property);
             }

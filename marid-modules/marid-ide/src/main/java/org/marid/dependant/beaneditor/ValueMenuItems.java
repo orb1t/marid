@@ -19,6 +19,7 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.beans.value.WritableValue;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -27,10 +28,10 @@ import org.marid.dependant.beaneditor.beans.listeditor.ListEditorConfiguration;
 import org.marid.dependant.beaneditor.beans.propeditor.PropEditorConfiguration;
 import org.marid.dependant.beaneditor.beans.valueeditor.ValueEditorConfiguration;
 import org.marid.spring.xml.MaridDataFactory;
-import org.marid.spring.xml.data.array.DArray;
+import org.marid.spring.xml.data.collection.DArray;
 import org.marid.spring.xml.data.collection.DElement;
 import org.marid.spring.xml.data.collection.DValue;
-import org.marid.spring.xml.data.list.DList;
+import org.marid.spring.xml.data.collection.DList;
 import org.marid.spring.xml.data.props.DProps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -42,8 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.marid.jfx.icons.FontIcon.M_CLEAR;
-import static org.marid.jfx.icons.FontIcon.M_MODE_EDIT;
+import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
@@ -77,6 +77,11 @@ public class ValueMenuItems {
                 dependants.start(ValueEditorConfiguration.class, elementProperty.getValue(), type);
             });
             items.add(mi);
+            items.add(new SeparatorMenuItem());
+        }
+        {
+            final Menu menu = new Menu(s("Reference"), glyphIcon(M_LINK, 16));
+            items.add(menu);
             items.add(new SeparatorMenuItem());
         }
         if (type != null) {
