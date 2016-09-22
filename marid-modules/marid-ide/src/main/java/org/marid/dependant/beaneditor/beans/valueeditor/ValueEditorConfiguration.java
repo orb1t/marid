@@ -29,6 +29,7 @@ import org.marid.spring.xml.data.collection.DValue;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 import java.lang.reflect.Type;
 
@@ -38,35 +39,25 @@ import java.lang.reflect.Type;
 @Configuration
 public class ValueEditorConfiguration {
 
-    private final DValue value;
-    private final Type type;
-
-    public ValueEditorConfiguration(DValue value, Type type) {
-        this.value = value;
-        this.type = type;
+    @Bean
+    public DValue value(Environment environment) {
+        return environment.getProperty("value", DValue.class);
     }
 
     @Bean
-    public DValue value() {
-        return value;
-    }
-
-    @Bean
-    public Type type() {
-        return type;
+    public Type type(Environment environment) {
+        return environment.getProperty("type", Type.class);
     }
 
     @Bean
     @Qualifier("valueEditor")
     public TextArea textArea(DValue value) {
-        final TextArea textArea = new TextArea();
-        textArea.textProperty().bindBidirectional(value.value);
-        return textArea;
+        return new TextArea(value.getValue());
     }
 
     @Bean
     public AutoCloseable textAreaDestroyer(@Qualifier("valueEditor") TextArea textArea, DValue value) {
-        return () -> textArea.textProperty().unbindBidirectional(value.value);
+        return () -> value.value.set(textArea.getText());
     }
 
     @Bean

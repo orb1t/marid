@@ -32,9 +32,13 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "ref")
-public class DRef implements DElement<DRef> {
+public final class DRef extends DElement<DRef> {
 
     public final StringProperty ref = new SimpleStringProperty(this, "value");
+
+    public DRef() {
+        installInvalidationListeners();
+    }
 
     @XmlAttribute(name = "bean")
     public String getBean() {

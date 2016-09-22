@@ -20,10 +20,13 @@ package org.marid.spring.xml.data.collection;
 
 import org.marid.spring.xml.data.AbstractData;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface DElement<T extends DElement<T>> extends AbstractData<T> {
+@XmlTransient
+public abstract class DElement<T extends DElement<T>> extends AbstractData<T> {
 
-    boolean isEmpty();
+    public abstract boolean isEmpty();
 }

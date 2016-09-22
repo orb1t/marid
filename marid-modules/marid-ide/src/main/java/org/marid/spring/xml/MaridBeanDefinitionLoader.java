@@ -18,7 +18,6 @@
 
 package org.marid.spring.xml;
 
-import org.marid.spring.xml.data.AbstractData;
 import org.marid.spring.xml.data.BeanFile;
 
 import javax.xml.bind.JAXBException;
@@ -42,14 +41,6 @@ public class MaridBeanDefinitionLoader {
     public static BeanFile load(InputStream stream) throws IOException {
         try {
             final Unmarshaller unmarshaller = MaridBeanDefinitionSaver.CONTEXT.createUnmarshaller();
-            unmarshaller.setListener(new Unmarshaller.Listener() {
-                @Override
-                public void afterUnmarshal(Object target, Object parent) {
-                    if (target instanceof AbstractData) {
-                        MaridDataFactory.installInvalidationListeners((AbstractData) target);
-                    }
-                }
-            });
             return (BeanFile) unmarshaller.unmarshal(stream);
         } catch (JAXBException x) {
             throw new IOException(x);

@@ -32,7 +32,7 @@ import java.util.Optional;
 @XmlRootElement(name = "bean")
 @XmlSeeAlso({BeanProp.class, BeanArg.class})
 @XmlAccessorType(XmlAccessType.NONE)
-public class BeanData implements AbstractData<BeanData> {
+public final class BeanData extends AbstractData<BeanData> {
 
     public final StringProperty type = new SimpleStringProperty(this, "class");
     public final StringProperty name = new SimpleStringProperty(this, "name");
@@ -44,6 +44,10 @@ public class BeanData implements AbstractData<BeanData> {
 
     public final ObservableList<BeanArg> beanArgs = FXCollections.observableArrayList();
     public final ObservableList<BeanProp> properties = FXCollections.observableArrayList();
+
+    public BeanData() {
+        installInvalidationListeners();
+    }
 
     @XmlAttribute(name = "class")
     public String getType() {

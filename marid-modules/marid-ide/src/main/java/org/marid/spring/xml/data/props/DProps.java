@@ -32,10 +32,14 @@ import javax.xml.bind.annotation.*;
 @XmlRootElement(name = "props")
 @XmlSeeAlso({DPropEntry.class})
 @XmlAccessorType(XmlAccessType.NONE)
-public class DProps implements DElement<DProps> {
+public final class DProps extends DElement<DProps> {
 
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type");
     public final ObservableList<DPropEntry> entries = FXCollections.observableArrayList();
+
+    public DProps() {
+        installInvalidationListeners();
+    }
 
     @XmlAttribute(name = "value-type")
     public String getValueType() {

@@ -27,11 +27,12 @@ import javafx.collections.ObservableMap;
 import org.apache.commons.lang3.exception.CloneFailedException;
 import org.marid.io.FastArrayOutputStream;
 import org.marid.misc.Casts;
-import org.marid.spring.xml.MaridDataFactory;
 
+import javax.xml.bind.annotation.XmlTransient;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -43,19 +44,24 @@ import static java.util.stream.Collectors.toMap;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface AbstractData<T extends AbstractData<T>> extends Externalizable, Observable {
+@XmlTransient
+public abstract class AbstractData<T extends AbstractData<T>> implements Externalizable, Observable, Cloneable {
+
+    private final Set<InvalidationListener> listeners = new LinkedHashSet<>();
 
     @Override
-    default void addListener(InvalidationListener listener) {
-        MaridDataFactory.addListener(this, listener);
+    public void addListener(InvalidationListener listener) {
+        listeners.add(listener);
     }
 
     @Override
-    default void removeListener(InvalidationListener listener) {
-        MaridDataFactory.removeListener(this, listener);
+    public void removeListener(InvalidationListener listener) {
+        listeners.remove(listener);
     }
 
-    default T copy() {
+    @SuppressWarnings("CloneDoesntCallSuperClone")
+    @Override
+    public T clone() {
         final FastArrayOutputStream os = new FastArrayOutputStream();
         try (final ObjectOutputStream oos = new ObjectOutputStream(os)) {
             oos.writeObject(this);
@@ -70,7 +76,7 @@ public interface AbstractData<T extends AbstractData<T>> extends Externalizable,
     }
 
     @Override
-    default void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(ObjectOutput out) throws IOException {
         final TreeMap<String, Object> map = new TreeMap<>();
         for (final Field field : getClass().getFields()) {
             if (!isTransient(field.getModifiers()) && !isStatic(field.getModifiers())) {
@@ -85,7 +91,7 @@ public interface AbstractData<T extends AbstractData<T>> extends Externalizable,
     }
 
     @Override
-    default void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         final TreeMap<?, ?> map = (TreeMap<?, ?>) in.readObject();
         for (final Entry<?, ?> e : map.entrySet()) {
             try {
@@ -100,16 +106,15 @@ public interface AbstractData<T extends AbstractData<T>> extends Externalizable,
                     final Method putAll = Map.class.getMethod("putAll", Map.class);
                     putAll.invoke(field.get(this), e.getValue());
                 }
-                MaridDataFactory.installInvalidationListeners(this);
             } catch (NoSuchFieldException x) {
-                continue;
+                throw new InvalidClassException(x.getMessage());
             } catch (ReflectiveOperationException x) {
                 throw new IllegalStateException(x);
             }
         }
     }
 
-    default Serializable toSerializable(Object o) {
+    private Serializable toSerializable(Object o) {
         if (o == null || o instanceof Serializable) {
             return (Serializable) o;
         } else if (o instanceof ObservableList<?>) {
@@ -123,6 +128,23 @@ public interface AbstractData<T extends AbstractData<T>> extends Externalizable,
             return toSerializable(((Property<?>) o).getValue());
         } else {
             throw new IllegalArgumentException("Not serializable value " + o);
+        }
+    }
+
+    protected void invalidate(Observable observable) {
+        listeners.forEach(listener -> listener.invalidated(this));
+    }
+
+    protected void installInvalidationListeners() {
+        for (final Field field : getClass().getFields()) {
+            if (!Modifier.isStatic(field.getModifiers()) && Observable.class.isAssignableFrom(field.getType())) {
+                try {
+                    final Observable observable = (Observable) field.get(this);
+                    observable.addListener(this::invalidate);
+                } catch (ReflectiveOperationException x) {
+                    throw new IllegalStateException(x);
+                }
+            }
         }
     }
 }

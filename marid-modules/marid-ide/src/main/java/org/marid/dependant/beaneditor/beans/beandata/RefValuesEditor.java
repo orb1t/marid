@@ -21,6 +21,7 @@ package org.marid.dependant.beaneditor.beans.beandata;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
+import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
@@ -96,12 +97,12 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
                 label.setText(element.toString());
             }
             return label;
-        }, param.getValue().data));
+        }, param.getValue()));
         getColumns().add(col);
     }
 
     @Autowired
-    public void initContextMenu(ValueMenuItems vmi) {
+    public void initContextMenu(IdeDependants dependants) {
         setRowFactory(param -> {
             final TableRow<T> row = new TableRow<>();
             row.itemProperty().addListener((o, ov, nv) -> {
@@ -116,7 +117,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
                         final ContextMenu menu = new ContextMenu();
                         final Type type = typeFunc.apply(nv.getName()).orElse(null);
                         final Type typeArg = type == null ? Object.class : type;
-                        menu.getItems().addAll(vmi.menuItems(nv.data, typeArg));
+                        menu.getItems().addAll(ValueMenuItems.menuItems(dependants, nv.data, typeArg));
                         row.setContextMenu(menu);
                     };
                     listener.invalidated(nv);

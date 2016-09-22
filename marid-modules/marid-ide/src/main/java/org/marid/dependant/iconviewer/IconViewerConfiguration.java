@@ -18,14 +18,14 @@
 
 package org.marid.dependant.iconviewer;
 
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@ComponentScan(basePackageClasses = {IconViewerConfiguration.class})
+@Import({IconViewer.class, IconViewerTable.class})
 public class IconViewerConfiguration {
 
 

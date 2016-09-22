@@ -32,7 +32,7 @@ import javax.xml.bind.annotation.*;
  */
 @XmlSeeAlso({DList.class, DArray.class, DValue.class, DProps.class, DRef.class})
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class DCollection<T extends DCollection<T>> implements DElement<T> {
+public abstract class DCollection<T extends DCollection<T>> extends DElement<T> {
 
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type");
     public final ObservableList<DElement<?>> elements = FXCollections.observableArrayList();

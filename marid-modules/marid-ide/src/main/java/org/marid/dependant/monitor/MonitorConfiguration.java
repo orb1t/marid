@@ -25,16 +25,16 @@ import javafx.scene.layout.RowConstraints;
 import org.marid.jfx.controls.IdeTab;
 import org.marid.logging.LogSupport;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@ComponentScan(basePackageClasses = {MonitorConfiguration.class})
 @EnableScheduling
+@Import({ClassLoadingWidget.class, MemoryWidget.class, OperatingSystemWidget.class, ThreadWidget.class})
 public class MonitorConfiguration implements LogSupport {
 
     @Bean

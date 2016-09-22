@@ -20,18 +20,17 @@ package org.marid;
 
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
-import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
+import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.support.AbstractBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigUtils;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -52,38 +51,17 @@ public class IdeDependants {
         this.parent = parent;
     }
 
-    public final AnnotationConfigApplicationContext start(Class<?> configuration, Object... args) {
-        return start(context -> {
-            context.setDisplayName(configuration.getSimpleName());
-            if (args.length > 0) {
-                final AnnotatedGenericBeanDefinition definition = new AnnotatedGenericBeanDefinition(configuration);
-                final ConstructorArgumentValues values = new ConstructorArgumentValues();
-                for (final Object arg : args) {
-                    values.addGenericArgumentValue(arg);
-                }
-                definition.setConstructorArgumentValues(values);
-                definition.setScope(AbstractBeanFactory.SCOPE_SINGLETON);
-                final String beanName = BeanDefinitionReaderUtils.generateBeanName(definition, context);
-                AnnotationConfigUtils.processCommonDefinitionAnnotations(definition);
-                final BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, beanName);
-                BeanDefinitionReaderUtils.registerBeanDefinition(holder, context);
-            } else {
-                context.register(configuration);
-            }
-        });
+    public final void start(String name, Consumer<Builder> builderConsumer) {
+        final Builder builder = new Builder(name);
+        builderConsumer.accept(builder);
+        builder.initArgs();
+        builder.context.refresh();
+        builder.context.start();
     }
 
-    private AnnotationConfigApplicationContext start(Consumer<AnnotationConfigApplicationContext> contextConsumer) {
-        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        CONTEXTS.add(context);
-        context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
-        context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
-        context.register(IdeDependants.class);
-        context.setParent(parent);
-        contextConsumer.accept(context);
-        context.refresh();
-        context.start();
-        return context;
+    @Override
+    public String toString() {
+        return parent.toString();
     }
 
     public static void closeDependants() {
@@ -94,6 +72,51 @@ public class IdeDependants {
                 log(Level.WARNING, "Unable to close context", x);
             } finally {
                 iterator.remove();
+            }
+        }
+    }
+
+    public final class Builder {
+
+        private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        private final Map<String, Object> args = new HashMap<>();
+
+        private Builder(String name) {
+            CONTEXTS.add(context);
+            context.addApplicationListener(event -> {
+                if (event instanceof ContextClosedEvent) {
+                    final ContextClosedEvent contextClosedEvent = (ContextClosedEvent) event;
+                    if (contextClosedEvent.getApplicationContext() == context) {
+                        CONTEXTS.remove(context);
+                    }
+                }
+            });
+            context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
+            context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
+            context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
+            context.register(IdeDependants.class);
+            context.setParent(parent);
+            context.setDisplayName(name);
+        }
+
+        public Builder conf(Class<?>... classes) {
+            context.register(classes);
+            return this;
+        }
+
+        public Builder withContext(Consumer<AnnotationConfigApplicationContext> contextConsumer) {
+            contextConsumer.accept(context);
+            return this;
+        }
+
+        public Builder arg(String name, Object arg) {
+            args.put(name, arg);
+            return this;
+        }
+
+        private void initArgs() {
+            if (!args.isEmpty()) {
+                context.getEnvironment().getPropertySources().addLast(new MapPropertySource("args", args));
             }
         }
     }

@@ -22,15 +22,15 @@ import javafx.beans.InvalidationListener;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
-import org.marid.dependant.beaneditor.ValueMenuItems;
+import org.marid.IdeDependants;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.props.WritableValueImpl;
 import org.marid.spring.xml.data.AbstractData;
 import org.marid.spring.xml.data.collection.DCollection;
 import org.marid.spring.xml.data.collection.DElement;
-import org.marid.spring.xml.data.collection.DValue;
 import org.marid.spring.xml.data.collection.DList;
+import org.marid.spring.xml.data.collection.DValue;
 import org.marid.spring.xml.data.props.DProps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static org.marid.dependant.beaneditor.ValueMenuItems.menuItems;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -50,17 +51,15 @@ import static org.marid.l10n.L10n.s;
 @Component
 public class ListEditor extends ListView<DElement<?>> {
 
-    private final DCollection<?> list;
     private final Map<DElement<?>, InvalidationListener> invalidationListenerMap = new HashMap<>();
 
     @Autowired
-    public ListEditor(DCollection<?> list) {
-        super(list.elements);
-        this.list = list;
+    public ListEditor(DCollection<?> collection) {
+        super(collection.elements);
     }
 
     @Autowired
-    public void initCellFactory(Type type, ValueMenuItems vmi) {
+    public void initCellFactory(Type type, IdeDependants dependants) {
         setCellFactory(param -> new TextFieldListCell<DElement<?>>() {
             @Override
             public void updateItem(DElement<?> item, boolean empty) {
@@ -80,10 +79,10 @@ public class ListEditor extends ListView<DElement<?>> {
                         setText(s("<props>"));
                         setGraphic(FontIcons.glyphIcon(FontIcon.D_VIEW_LIST, 16));
                     }
-                    final Consumer<DElement<?>> consumer = e -> list.elements.set(getIndex(), e);
-                    final Supplier<DElement<?>> supplier = () -> list.elements.get(getIndex());
+                    final Consumer<DElement<?>> consumer = e -> getItems().set(getIndex(), e);
+                    final Supplier<DElement<?>> supplier = () -> getItems().get(getIndex());
                     final ContextMenu contextMenu = new ContextMenu();
-                    contextMenu.getItems().addAll(vmi.menuItems(new WritableValueImpl<>(consumer, supplier), type));
+                    contextMenu.getItems().addAll(menuItems(dependants, new WritableValueImpl<>(consumer, supplier), type));
                     setContextMenu(contextMenu);
                     item.addListener(invalidationListenerMap.compute(item, (i, old) -> {
                         if (old != null) {

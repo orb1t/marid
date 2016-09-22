@@ -31,9 +31,13 @@ import javax.xml.bind.annotation.XmlValue;
  */
 @XmlRootElement(name = "value")
 @XmlAccessorType(XmlAccessType.NONE)
-public final class DValue implements DElement<DValue> {
+public final class DValue extends DElement<DValue> {
 
     public final StringProperty value = new SimpleStringProperty(this, "value");
+
+    public DValue() {
+        installInvalidationListeners();
+    }
 
     @XmlValue
     public String getValue() {

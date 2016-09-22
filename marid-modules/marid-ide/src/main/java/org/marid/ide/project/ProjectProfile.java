@@ -31,7 +31,6 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.logging.LogSupport;
 import org.marid.spring.xml.MaridBeanDefinitionLoader;
 import org.marid.spring.xml.MaridBeanDefinitionSaver;
-import org.marid.spring.xml.MaridDataFactory;
 import org.marid.spring.xml.data.BeanFile;
 
 import javax.annotation.Nonnull;
@@ -148,7 +147,7 @@ public class ProjectProfile implements LogSupport {
                             return Pair.of(p, MaridBeanDefinitionLoader.load(p));
                         } catch (Exception x) {
                             log(WARNING, "Unable to load {0}", x, p);
-                            return Pair.of(p, MaridDataFactory.create(BeanFile.class));
+                            return Pair.of(p, new BeanFile());
                         }
                     })
                     .collect(Collectors.toCollection(FXCollections::observableArrayList));

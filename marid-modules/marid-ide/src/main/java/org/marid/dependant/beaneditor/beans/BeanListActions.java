@@ -32,7 +32,6 @@ import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.misc.Reflections;
 import org.marid.spring.beandata.BeanEditor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
-import org.marid.spring.xml.MaridDataFactory;
 import org.marid.spring.xml.data.BeanArg;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.data.BeanProp;
@@ -91,7 +90,9 @@ public class BeanListActions {
     }
 
     public void onEdit(ActionEvent event) {
-        dependants.start(BeanDataEditorConfiguration.class, table.getSelectionModel().getSelectedItem());
+        dependants.start("beanDataEditor", builder -> builder
+                .conf(BeanDataEditorConfiguration.class)
+                .arg("beanData", table.getSelectionModel().getSelectedItem()));
     }
 
     public void onDelete(ActionEvent event) {
@@ -115,7 +116,7 @@ public class BeanListActions {
     }
 
     public void onAddNew(ActionEvent event) {
-        final BeanData beanData = MaridDataFactory.create(BeanData.class);
+        final BeanData beanData = new BeanData();
         final String name = ProjectProfile.generateBeanName(profile, "newBean");
         beanData.name.set(name);
         beanData.type.set(Object.class.getName());
@@ -124,7 +125,7 @@ public class BeanListActions {
 
     private void insertItem(Entry<String, BeanDefinition> entry) {
         final BeanDefinition def = entry.getValue();
-        final BeanData beanData = MaridDataFactory.create(BeanData.class);
+        final BeanData beanData = new BeanData();
         beanData.name.set(ProjectProfile.generateBeanName(profile, entry.getKey()));
         beanData.factoryBean.set(def.getFactoryBeanName());
         beanData.factoryMethod.set(def.getFactoryMethodName());
@@ -139,7 +140,7 @@ public class BeanListActions {
 
         if (def.getConstructorArgumentValues() != null) {
             for (final ValueHolder holder : def.getConstructorArgumentValues().getGenericArgumentValues()) {
-                final BeanArg beanArg = MaridDataFactory.create(BeanArg.class);
+                final BeanArg beanArg = new BeanArg();
                 beanArg.name.set(holder.getName());
                 beanArg.type.set(holder.getType());
                 if (holder.getValue() instanceof TypedStringValue) {
@@ -153,7 +154,7 @@ public class BeanListActions {
 
         if (def.getPropertyValues() != null) {
             for (final PropertyValue propertyValue : def.getPropertyValues().getPropertyValueList()) {
-                final BeanProp property = MaridDataFactory.create(BeanProp.class);
+                final BeanProp property = new BeanProp();
                 property.name.set(propertyValue.getName());
                 if (propertyValue.getValue() instanceof TypedStringValue) {
                     final DValue value = new DValue();
@@ -214,12 +215,12 @@ public class BeanListActions {
                     .collect(joining(",", method.getName() + "(", ") : " + method.getGenericReturnType()));
             final MenuItem menuItem = new MenuItem(name, glyphIcon(FontIcon.M_MEMORY, 16));
             menuItem.setOnAction(ev -> {
-                final BeanData newBeanData = MaridDataFactory.create(BeanData.class);
+                final BeanData newBeanData = new BeanData();
                 newBeanData.name.set(ProjectProfile.generateBeanName(profile, method.getName()));
                 newBeanData.factoryBean.set(beanData.name.get());
                 newBeanData.factoryMethod.set(method.getName());
                 for (final Parameter parameter : method.getParameters()) {
-                    final BeanArg arg = MaridDataFactory.create(BeanArg.class);
+                    final BeanArg arg = new BeanArg();
                     arg.name.set(Reflections.parameterName(parameter));
                     arg.type.set(parameter.getType().getName());
                     newBeanData.beanArgs.add(arg);

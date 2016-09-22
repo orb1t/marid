@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 
 import java.nio.file.Path;
 
@@ -39,22 +40,14 @@ import java.nio.file.Path;
 @Import({BeanEditorTab.class, BeanListConfiguration.class, ValueMenuItems.class})
 public class BeanEditorConfiguration {
 
-    private final Path beanFilePath;
-    private final ProjectProfile profile;
-
-    public BeanEditorConfiguration(Path beanFilePath, ProjectProfile profile) {
-        this.beanFilePath = beanFilePath;
-        this.profile = profile;
+    @Bean
+    public Path beanFilePath(Environment environment) {
+        return environment.getProperty("beanFilePath", Path.class);
     }
 
     @Bean
-    public Path beanFilePath() {
-        return beanFilePath;
-    }
-
-    @Bean
-    public ProjectProfile profile() {
-        return profile;
+    public ProjectProfile profile(Environment environment) {
+        return environment.getProperty("profile", ProjectProfile.class);
     }
 
     @Bean

@@ -29,10 +29,14 @@ import javax.xml.bind.annotation.*;
  */
 @XmlRootElement(name = "prop")
 @XmlAccessorType(XmlAccessType.NONE)
-public class DPropEntry implements AbstractData<DPropEntry> {
+public final class DPropEntry extends AbstractData<DPropEntry> {
 
     public final StringProperty key = new SimpleStringProperty(this, "key");
     public final StringProperty value = new SimpleStringProperty(this, "value");
+
+    public DPropEntry() {
+        installInvalidationListeners();
+    }
 
     @XmlAttribute(name = "key")
     public String getKey() {

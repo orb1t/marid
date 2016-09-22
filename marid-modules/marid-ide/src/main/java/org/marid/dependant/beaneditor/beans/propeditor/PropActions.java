@@ -19,7 +19,6 @@
 package org.marid.dependant.beaneditor.beans.propeditor;
 
 import javafx.event.ActionEvent;
-import org.marid.spring.xml.MaridDataFactory;
 import org.marid.spring.xml.data.props.DPropEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,7 +37,7 @@ public class PropActions {
     }
 
     public void onAdd(ActionEvent event) {
-        final DPropEntry entry = MaridDataFactory.create(DPropEntry.class);
+        final DPropEntry entry = new DPropEntry();
         entry.key.set("key");
         entry.value.set("value");
         propTable.getItems().add(entry);

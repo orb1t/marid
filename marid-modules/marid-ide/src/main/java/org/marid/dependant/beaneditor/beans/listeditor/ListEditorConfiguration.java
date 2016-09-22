@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -38,22 +39,14 @@ import java.util.Map;
 @Import({ListEditor.class})
 public class ListEditorConfiguration {
 
-    private final DCollection<?> list;
-    private final Type type;
-
-    public ListEditorConfiguration(DCollection<?> list, Type type) {
-        this.list = list;
-        this.type = type;
+    @Bean
+    public DCollection<?> collection(Environment environment) {
+        return environment.getProperty("collection", DCollection.class);
     }
 
     @Bean
-    public DCollection<?> list() {
-        return list;
-    }
-
-    @Bean
-    public Type type() {
-        return type;
+    public Type type(Environment environment) {
+        return environment.getProperty("type", Type.class);
     }
 
     @Bean

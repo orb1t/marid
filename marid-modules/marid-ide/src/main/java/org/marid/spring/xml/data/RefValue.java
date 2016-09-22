@@ -32,12 +32,16 @@ import javax.xml.bind.annotation.*;
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlSeeAlso({DCollection.class})
-public abstract class RefValue<T extends RefValue<T>> implements AbstractData<T> {
+public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
 
     public final StringProperty name = new SimpleStringProperty(this, "name");
     public final StringProperty type = new SimpleStringProperty(this, "type");
 
     public final ObjectProperty<DElement<?>> data = new SimpleObjectProperty<>(this, "data");
+
+    public RefValue() {
+        data.addListener((observable, oldValue, newValue) -> newValue.addListener(this::invalidate));
+    }
 
     @XmlAttribute(name = "name")
     public String getName() {

@@ -27,14 +27,11 @@ import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.beans.listeditor.ListEditorConfiguration;
 import org.marid.dependant.beaneditor.beans.propeditor.PropEditorConfiguration;
 import org.marid.dependant.beaneditor.beans.valueeditor.ValueEditorConfiguration;
-import org.marid.spring.xml.MaridDataFactory;
 import org.marid.spring.xml.data.collection.DArray;
 import org.marid.spring.xml.data.collection.DElement;
-import org.marid.spring.xml.data.collection.DValue;
 import org.marid.spring.xml.data.collection.DList;
+import org.marid.spring.xml.data.collection.DValue;
 import org.marid.spring.xml.data.props.DProps;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -50,17 +47,9 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
 public class ValueMenuItems {
 
-    private final IdeDependants dependants;
-
-    @Autowired
-    public ValueMenuItems(IdeDependants dependants) {
-        this.dependants = dependants;
-    }
-
-    public List<MenuItem> menuItems(WritableValue<DElement<?>> elementProperty, Type type) {
+    public static List<MenuItem> menuItems(IdeDependants dependants, WritableValue<DElement<?>> elementProperty, Type type) {
         final List<MenuItem> items = new ArrayList<>();
         if (elementProperty.getValue() != null) {
             final MenuItem clearItem = new MenuItem(s("Clear value"), glyphIcon(M_CLEAR, 16));
@@ -72,9 +61,12 @@ public class ValueMenuItems {
             final MenuItem mi = new MenuItem(s("Edit value..."), glyphIcon(M_MODE_EDIT, 16));
             mi.setOnAction(event -> {
                 if (!(elementProperty.getValue() instanceof DValue)) {
-                    elementProperty.setValue(MaridDataFactory.create(DValue.class));
+                    elementProperty.setValue(new DValue());
                 }
-                dependants.start(ValueEditorConfiguration.class, elementProperty.getValue(), type);
+                dependants.start("valueEditor", dependantBuilder -> dependantBuilder
+                        .conf(ValueEditorConfiguration.class)
+                        .arg("value", elementProperty.getValue())
+                        .arg("type", type));
             });
             items.add(mi);
             items.add(new SeparatorMenuItem());
@@ -89,9 +81,12 @@ public class ValueMenuItems {
                 final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon(M_MODE_EDIT, 16));
                 mi.setOnAction(e -> {
                     if (!(elementProperty.getValue() instanceof DProps)) {
-                        elementProperty.setValue(MaridDataFactory.create(DProps.class));
+                        elementProperty.setValue(new DProps());
                     }
-                    dependants.start(PropEditorConfiguration.class, elementProperty.getValue(), type);
+                    dependants.start("propsEditor", dependantBuilder -> dependantBuilder
+                            .conf(PropEditorConfiguration.class)
+                            .arg("props", elementProperty.getValue())
+                            .arg("type", type));
                 });
                 items.add(mi);
                 items.add(new SeparatorMenuItem());
@@ -99,7 +94,7 @@ public class ValueMenuItems {
                 final MenuItem mi = new MenuItem(s("Edit list..."), glyphIcon(M_MODE_EDIT, 16));
                 mi.setOnAction(event -> {
                     if (!(elementProperty.getValue() instanceof DList)) {
-                        final DList list = MaridDataFactory.create(DList.class);
+                        final DList list = new DList();
                         final Map<TypeVariable<?>, Type> map = TypeUtils.getTypeArguments(type, List.class);
                         if (map != null) {
                             map.forEach((v, t) -> {
@@ -111,7 +106,10 @@ public class ValueMenuItems {
                         }
                         elementProperty.setValue(list);
                     }
-                    dependants.start(ListEditorConfiguration.class, elementProperty.getValue(), type);
+                    dependants.start("listEditor", dependantBuilder -> dependantBuilder
+                            .conf(ListEditorConfiguration.class)
+                            .arg("collection", elementProperty.getValue())
+                            .arg("type", type));
                 });
                 items.add(mi);
                 items.add(new SeparatorMenuItem());
@@ -119,7 +117,7 @@ public class ValueMenuItems {
                 final MenuItem mi = new MenuItem(s("Edit array..."), glyphIcon(M_MODE_EDIT, 16));
                 mi.setOnAction(event -> {
                     if (!(elementProperty.getValue() instanceof DArray)) {
-                        final DArray list = MaridDataFactory.create(DArray.class);
+                        final DArray list = new DArray();
                         final Type componentType = TypeUtils.getArrayComponentType(type);
                         final Class<?> rawType = TypeUtils.getRawType(componentType, null);
                         if (rawType != null) {
@@ -127,7 +125,10 @@ public class ValueMenuItems {
                         }
                         elementProperty.setValue(list);
                     }
-                    dependants.start(ListEditorConfiguration.class, elementProperty.getValue(), type);
+                    dependants.start("arrayEditor", dependantBuilder -> dependantBuilder
+                            .conf(ListEditorConfiguration.class)
+                            .arg("collection", elementProperty.getValue())
+                            .arg("type", type));
                 });
                 items.add(mi);
                 items.add(new SeparatorMenuItem());

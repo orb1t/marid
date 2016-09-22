@@ -30,6 +30,7 @@ import org.marid.spring.xml.data.props.DProps;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 
 import java.lang.reflect.Type;
 
@@ -42,22 +43,14 @@ import static org.marid.l10n.L10n.s;
 @Import({PropActions.class, PropTable.class})
 public class PropEditorConfiguration {
 
-    private final DProps props;
-    private final Type type;
-
-    public PropEditorConfiguration(DProps props, Type type) {
-        this.props = props;
-        this.type = type;
+    @Bean
+    public DProps props(Environment environment) {
+        return environment.getProperty("props", DProps.class);
     }
 
     @Bean
-    public DProps props() {
-        return props;
-    }
-
-    @Bean
-    public Type type() {
-        return type;
+    public Type type(Environment environment) {
+        return environment.getProperty("type", Type.class);
     }
 
     @Bean

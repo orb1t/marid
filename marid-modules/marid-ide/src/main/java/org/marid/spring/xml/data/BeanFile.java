@@ -30,9 +30,13 @@ import java.util.stream.Stream;
 @XmlRootElement(name = "beans")
 @XmlSeeAlso({BeanData.class})
 @XmlAccessorType(XmlAccessType.NONE)
-public class BeanFile implements AbstractData<BeanFile> {
+public final class BeanFile extends AbstractData<BeanFile> {
 
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList();
+
+    public BeanFile() {
+        installInvalidationListeners();
+    }
 
     public Stream<BeanData> allBeans() {
         final Stream.Builder<BeanData> builder = Stream.builder();
