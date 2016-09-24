@@ -40,7 +40,14 @@ public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
     public final ObjectProperty<DElement<?>> data = new SimpleObjectProperty<>(this, "data");
 
     public RefValue() {
-        data.addListener((observable, oldValue, newValue) -> newValue.addListener(this::invalidate));
+        data.addListener((observable, oldValue, newValue) -> {
+            if (oldValue != null) {
+                oldValue.removeListener(this::invalidate);
+            }
+            if (newValue != null) {
+                newValue.addListener(this::invalidate);
+            }
+        });
     }
 
     @XmlAttribute(name = "name")
