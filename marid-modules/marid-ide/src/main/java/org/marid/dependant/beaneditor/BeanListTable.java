@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans;
+package org.marid.dependant.beaneditor;
 
 import javafx.beans.InvalidationListener;
 import javafx.scene.control.*;

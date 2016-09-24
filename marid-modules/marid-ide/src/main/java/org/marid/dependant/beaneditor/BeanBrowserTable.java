@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans;
+package org.marid.dependant.beaneditor;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;

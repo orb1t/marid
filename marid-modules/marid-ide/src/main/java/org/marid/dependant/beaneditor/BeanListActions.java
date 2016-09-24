@@ -16,14 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans;
+package org.marid.dependant.beaneditor;
 
 import javafx.event.ActionEvent;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.beans.beandata.BeanDataEditorConfiguration;
+import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.jfx.dialog.MaridDialog;

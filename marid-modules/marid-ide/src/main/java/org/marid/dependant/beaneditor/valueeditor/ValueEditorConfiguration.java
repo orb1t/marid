@@ -16,36 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beans.propeditor;
+package org.marid.dependant.beaneditor.valueeditor;
 
 import javafx.scene.Scene;
-import javafx.scene.control.ToolBar;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.marid.Ide;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
-import org.marid.jfx.toolbar.ToolbarBuilder;
-import org.marid.spring.xml.data.props.DProps;
+import org.marid.l10n.L10n;
+import org.marid.spring.xml.data.collection.DValue;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 import java.lang.reflect.Type;
 
-import static org.marid.l10n.L10n.s;
-
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
 @Configuration
-@Import({PropActions.class, PropTable.class})
-public class PropEditorConfiguration {
+public class ValueEditorConfiguration {
 
     @Bean
-    public DProps props(Environment environment) {
-        return environment.getProperty("props", DProps.class);
+    public DValue value(Environment environment) {
+        return environment.getProperty("value", DValue.class);
     }
 
     @Bean
@@ -54,23 +50,28 @@ public class PropEditorConfiguration {
     }
 
     @Bean
-    public ToolBar propEditorToolbar(PropTable propTable, PropActions propActions) {
-        return new ToolbarBuilder()
-                .add("Add property", FontIcon.M_ADD, propActions::onAdd)
-                .build();
+    @Qualifier("valueEditor")
+    public TextArea textArea(DValue value) {
+        return new TextArea(value.getValue());
     }
 
     @Bean
-    public BorderPane propEditorPane(PropTable propTable, ToolBar propEditorToolbar) {
-        return new BorderPane(new MaridScrollPane(propTable), propEditorToolbar, null, null, null);
+    public AutoCloseable textAreaDestroyer(@Qualifier("valueEditor") TextArea textArea, DValue value) {
+        return () -> value.value.set(textArea.getText());
+    }
+
+    @Bean
+    @Qualifier("valueEditor")
+    public BorderPane pane(@Qualifier("valueEditor") TextArea textArea) {
+        return new BorderPane(new MaridScrollPane(textArea));
     }
 
     @Bean(initMethod = "show")
-    public Stage propEditorStage(BorderPane propEditorPane) {
+    public Stage valueEditorStage(@Qualifier("valueEditor") BorderPane pane) {
         final Stage stage = new Stage();
         stage.initOwner(Ide.primaryStage);
-        stage.setTitle(s("Properties"));
-        stage.setScene(new Scene(propEditorPane, 800, 600));
+        stage.setScene(new Scene(pane, 800, 600));
+        stage.setTitle(L10n.s("Value editor"));
         return stage;
     }
 }
