@@ -112,28 +112,27 @@ public class BeanListActions {
                 .result(beans.getSelectionModel()::getSelectedItems)
                 .with((d, p) -> p.setContent(new MaridScrollPane(beans)))
                 .showAndWait()
-                .ifPresent(entries -> entries.forEach(this::insertItem));
+                .ifPresent(entries -> entries.forEach(e -> insertItem(e.getKey(), e.getValue())));
     }
 
     public void onAddNew(ActionEvent event) {
         final BeanData beanData = new BeanData();
-        final String name = ProjectProfile.generateBeanName(profile, "newBean");
+        final String name = profile.generateBeanName("newBean");
         beanData.name.set(name);
         beanData.type.set(Object.class.getName());
         table.getItems().add(beanData);
     }
 
-    private void insertItem(Entry<String, BeanDefinition> entry) {
-        final BeanDefinition def = entry.getValue();
+    public BeanData beanData(String name, BeanDefinition def) {
         final BeanData beanData = new BeanData();
-        beanData.name.set(ProjectProfile.generateBeanName(profile, entry.getKey()));
+        beanData.name.set(profile.generateBeanName(name));
         beanData.factoryBean.set(def.getFactoryBeanName());
         beanData.factoryMethod.set(def.getFactoryMethodName());
         beanData.type.set(def.getBeanClassName());
         beanData.lazyInit.set(def.isLazyInit() ? "true" : null);
 
-        if (entry.getValue() instanceof AbstractBeanDefinition) {
-            final AbstractBeanDefinition definition = (AbstractBeanDefinition) entry.getValue();
+        if (def instanceof AbstractBeanDefinition) {
+            final AbstractBeanDefinition definition = (AbstractBeanDefinition) def;
             beanData.initMethod.set(definition.getInitMethodName());
             beanData.destroyMethod.set(definition.getDestroyMethodName());
         }
@@ -166,8 +165,14 @@ public class BeanListActions {
         }
 
         reflection.updateBeanData(beanData);
+        return beanData;
+    }
 
+    public BeanData insertItem(String name, BeanDefinition def) {
+        final BeanData beanData = beanData(name, def);
+        reflection.updateBeanData(beanData);
         table.getItems().add(beanData);
+        return beanData;
     }
 
     public void onShowPopup(ActionEvent event) {
@@ -216,7 +221,7 @@ public class BeanListActions {
             final MenuItem menuItem = new MenuItem(name, glyphIcon(FontIcon.M_MEMORY, 16));
             menuItem.setOnAction(ev -> {
                 final BeanData newBeanData = new BeanData();
-                newBeanData.name.set(ProjectProfile.generateBeanName(profile, method.getName()));
+                newBeanData.name.set(profile.generateBeanName(method.getName()));
                 newBeanData.factoryBean.set(beanData.name.get());
                 newBeanData.factoryMethod.set(method.getName());
                 for (final Parameter parameter : method.getParameters()) {

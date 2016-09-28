@@ -18,13 +18,11 @@
 
 package org.marid.dependant.beaneditor.valueeditor;
 
-import javafx.scene.Scene;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
 import org.marid.Ide;
+import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.panes.MaridScrollPane;
-import org.marid.l10n.L10n;
 import org.marid.spring.xml.data.collection.DValue;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -55,23 +53,16 @@ public class ValueEditorConfiguration {
         return new TextArea(value.getValue());
     }
 
-    @Bean
-    public AutoCloseable textAreaDestroyer(@Qualifier("valueEditor") TextArea textArea, DValue value) {
-        return () -> value.value.set(textArea.getText());
-    }
-
-    @Bean
-    @Qualifier("valueEditor")
-    public BorderPane pane(@Qualifier("valueEditor") TextArea textArea) {
-        return new BorderPane(new MaridScrollPane(textArea));
-    }
-
     @Bean(initMethod = "show")
-    public Stage valueEditorStage(@Qualifier("valueEditor") BorderPane pane) {
-        final Stage stage = new Stage();
-        stage.initOwner(Ide.primaryStage);
-        stage.setScene(new Scene(pane, 800, 600));
-        stage.setTitle(L10n.s("Value editor"));
-        return stage;
+    public Dialog<String> valueEditorStage(@Qualifier("valueEditor") TextArea area, DValue value) {
+        return new MaridDialog<String>(Ide.primaryStage)
+                .title("Value editor")
+                .preferredSize(800, 600)
+                .with((d, p) -> p.setContent(new MaridScrollPane(area)))
+                .result(() -> {
+                    final String v = area.getText();
+                    value.setValue(v);
+                    return v;
+                });
     }
 }

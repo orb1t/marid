@@ -22,7 +22,7 @@ import javafx.beans.InvalidationListener;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
-import org.marid.IdeDependants;
+import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.props.WritableValueImpl;
@@ -32,6 +32,7 @@ import org.marid.spring.xml.data.collection.DElement;
 import org.marid.spring.xml.data.collection.DList;
 import org.marid.spring.xml.data.collection.DValue;
 import org.marid.spring.xml.data.props.DProps;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +43,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static org.marid.dependant.beaneditor.ValueMenuItems.menuItems;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -59,7 +59,7 @@ public class ListEditor extends ListView<DElement<?>> {
     }
 
     @Autowired
-    public void initCellFactory(Type type, IdeDependants dependants) {
+    public void initCellFactory(Type type, ObjectProvider<ValueMenuItems> items) {
         setCellFactory(param -> new TextFieldListCell<DElement<?>>() {
             @Override
             public void updateItem(DElement<?> item, boolean empty) {
@@ -82,7 +82,7 @@ public class ListEditor extends ListView<DElement<?>> {
                     final Consumer<DElement<?>> consumer = e -> getItems().set(getIndex(), e);
                     final Supplier<DElement<?>> supplier = () -> getItems().get(getIndex());
                     final ContextMenu contextMenu = new ContextMenu();
-                    contextMenu.getItems().addAll(menuItems(dependants, new WritableValueImpl<>(consumer, supplier), type));
+                    items.getObject(new WritableValueImpl<>(consumer, supplier), type).addTo(contextMenu);
                     setContextMenu(contextMenu);
                     item.addListener(invalidationListenerMap.compute(item, (i, old) -> {
                         if (old != null) {
@@ -98,5 +98,6 @@ public class ListEditor extends ListView<DElement<?>> {
     @PreDestroy
     public void destroy() {
         invalidationListenerMap.forEach(AbstractData::removeListener);
+        invalidationListenerMap.clear();
     }
 }

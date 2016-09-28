@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import static java.lang.reflect.Modifier.isStatic;
 import static java.lang.reflect.Modifier.isTransient;
@@ -47,7 +48,7 @@ import static java.util.stream.Collectors.toMap;
 @XmlTransient
 public abstract class AbstractData<T extends AbstractData<T>> implements Externalizable, Observable, Cloneable {
 
-    private final Set<InvalidationListener> listeners = new LinkedHashSet<>();
+    private final Set<InvalidationListener> listeners = new CopyOnWriteArraySet<>();
 
     @Override
     public void addListener(InvalidationListener listener) {

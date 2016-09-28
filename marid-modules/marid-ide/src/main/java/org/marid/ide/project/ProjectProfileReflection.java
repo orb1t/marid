@@ -193,4 +193,8 @@ public class ProjectProfileReflection {
             return Stream.empty();
         }
     }
+
+    public ProjectProfile getProfile() {
+        return profile;
+    }
 }

@@ -28,9 +28,9 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -42,7 +42,7 @@ import static org.marid.logging.Log.log;
 @Component("dependants")
 public class IdeDependants {
 
-    private static final LinkedList<AnnotationConfigApplicationContext> CONTEXTS = new LinkedList<>();
+    private static final List<AnnotationConfigApplicationContext> CONTEXTS = new CopyOnWriteArrayList<>();
 
     private final AnnotationConfigApplicationContext parent;
 
@@ -51,12 +51,13 @@ public class IdeDependants {
         this.parent = parent;
     }
 
-    public final void start(String name, Consumer<Builder> builderConsumer) {
+    public AnnotationConfigApplicationContext start(String name, Consumer<Builder> builderConsumer) {
         final Builder builder = new Builder(name);
         builderConsumer.accept(builder);
         builder.initArgs();
         builder.context.refresh();
         builder.context.start();
+        return builder.context;
     }
 
     @Override
@@ -64,16 +65,15 @@ public class IdeDependants {
         return parent.toString();
     }
 
-    public static void closeDependants() {
-        for (final Iterator<AnnotationConfigApplicationContext> iterator = CONTEXTS.descendingIterator(); iterator.hasNext(); ) {
-            try (final AnnotationConfigApplicationContext context = iterator.next()) {
-                log(Level.INFO, "Closing {0}", context);
+    public void closeDependants() {
+        for (final AnnotationConfigApplicationContext context : CONTEXTS) {
+            try (final AnnotationConfigApplicationContext c = context) {
+                log(Level.INFO, "Closing {0}", c);
             } catch (Exception x) {
                 log(Level.WARNING, "Unable to close context", x);
-            } finally {
-                iterator.remove();
             }
         }
+        CONTEXTS.clear();
     }
 
     public final class Builder {

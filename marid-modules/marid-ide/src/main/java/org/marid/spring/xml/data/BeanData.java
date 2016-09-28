@@ -22,6 +22,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.marid.spring.xml.data.collection.DCollection;
+import org.marid.spring.xml.data.collection.DElement;
 
 import javax.xml.bind.annotation.*;
 import java.util.Optional;
@@ -30,9 +32,9 @@ import java.util.Optional;
  * @author Dmitry Ovchinnikov
  */
 @XmlRootElement(name = "bean")
-@XmlSeeAlso({BeanProp.class, BeanArg.class})
+@XmlSeeAlso({BeanProp.class, BeanArg.class, DCollection.class})
 @XmlAccessorType(XmlAccessType.NONE)
-public final class BeanData extends AbstractData<BeanData> {
+public final class BeanData extends DElement<BeanData> {
 
     public final StringProperty type = new SimpleStringProperty(this, "class");
     public final StringProperty name = new SimpleStringProperty(this, "name");

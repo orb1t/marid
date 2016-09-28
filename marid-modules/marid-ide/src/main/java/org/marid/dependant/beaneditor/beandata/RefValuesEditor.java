@@ -21,8 +21,7 @@ package org.marid.dependant.beaneditor.beandata;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
-import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.ValueMenuItems;
+import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.annotation.OrderedInit;
@@ -32,6 +31,7 @@ import org.marid.spring.xml.data.collection.DCollection;
 import org.marid.spring.xml.data.collection.DElement;
 import org.marid.spring.xml.data.collection.DValue;
 import org.marid.spring.xml.data.ref.DRef;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PreDestroy;
@@ -102,40 +102,37 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
     }
 
     @Autowired
-    public void initContextMenu(IdeDependants dependants) {
-        setRowFactory(param -> {
-            final TableRow<T> row = new TableRow<>();
-            row.itemProperty().addListener((o, ov, nv) -> {
-                if (nv == null) {
-                    row.setContextMenu(null);
-                    invalidationListenerMap.computeIfPresent(ov, (v, old) -> {
-                        v.removeListener(old);
-                        return null;
-                    });
+    public void initContextMenu(ObjectProvider<ValueMenuItems> items) {
+        setRowFactory(param -> new TableRow<T>() {
+            @Override
+            protected void updateItem(T item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setContextMenu(null);
                 } else {
                     final InvalidationListener listener = observable -> {
-                        final ContextMenu menu = new ContextMenu();
-                        final Type type = typeFunc.apply(nv.getName()).orElse(null);
+                        final Type type = typeFunc.apply(item.getName()).orElse(null);
                         final Type typeArg = type == null ? Object.class : type;
-                        menu.getItems().addAll(ValueMenuItems.menuItems(dependants, nv.data, typeArg));
-                        row.setContextMenu(menu);
+                        final ContextMenu menu = new ContextMenu();
+                        items.getObject(item.data, typeArg).addTo(menu);
+                        setContextMenu(menu);
                     };
-                    listener.invalidated(nv);
-                    invalidationListenerMap.compute(nv, (v, old) -> {
+                    listener.invalidated(item);
+                    invalidationListenerMap.compute(item, (v, old) -> {
                         if (old != null) {
                             v.removeListener(old);
                         }
+                        item.addListener(listener);
                         return listener;
                     });
-                    nv.addListener(listener);
                 }
-            });
-            return row;
+            }
         });
     }
 
     @PreDestroy
     public void destroy() {
         invalidationListenerMap.forEach(AbstractData::removeListener);
+        invalidationListenerMap.clear();
     }
 }

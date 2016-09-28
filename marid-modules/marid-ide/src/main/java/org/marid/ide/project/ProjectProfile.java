@@ -98,14 +98,14 @@ public class ProjectProfile implements LogSupport {
         return cacheEntry.getClassLoader();
     }
 
-    public static boolean containsBean(ProjectProfile profile, String name) {
-        return profile.beanFiles.stream()
+    public boolean containsBean(String name) {
+        return beanFiles.stream()
                 .map(Pair::getValue)
                 .anyMatch(f -> f.allBeans().anyMatch(b -> b.nameProperty().isEqualTo(name).get()));
     }
 
-    public static String generateBeanName(ProjectProfile profile, String name) {
-        while (containsBean(profile, name)) {
+    public String generateBeanName(String name) {
+        while (containsBean(name)) {
             name += "_new";
         }
         return name;

@@ -72,7 +72,7 @@ public class BeanListTable extends MaridTableView<BeanData> {
             @Override
             public void commitEdit(String newValue) {
                 final String oldValue = getItem();
-                newValue = ProjectProfile.generateBeanName(profile, newValue);
+                newValue = profile.generateBeanName(newValue);
                 super.commitEdit(newValue);
                 ProjectManager.onBeanNameChange(profile, oldValue, newValue);
             }

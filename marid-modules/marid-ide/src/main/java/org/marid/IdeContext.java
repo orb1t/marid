@@ -75,7 +75,7 @@ public class IdeContext {
     }
 
     @Bean
-    public AutoCloseable dependantsDestroyer() {
-        return IdeDependants::closeDependants;
+    public AutoCloseable dependantsDestroyer(IdeDependants dependants) {
+        return dependants::closeDependants;
     }
 }
