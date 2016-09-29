@@ -171,8 +171,12 @@ public class BeanListActions {
     public BeanData insertItem(String name, BeanDefinition def) {
         final BeanData beanData = beanData(name, def);
         reflection.updateBeanData(beanData);
-        table.getItems().add(beanData);
+        insertItem(beanData);
         return beanData;
+    }
+
+    public void insertItem(BeanData beanData) {
+        table.getItems().add(beanData);
     }
 
     public void onShowPopup(ActionEvent event) {

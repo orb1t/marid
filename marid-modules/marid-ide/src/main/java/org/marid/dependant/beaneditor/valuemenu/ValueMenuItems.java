@@ -30,9 +30,9 @@ import org.marid.dependant.beaneditor.BeanMetaInfoProvider;
 import org.marid.dependant.beaneditor.listeditor.ListEditorConfiguration;
 import org.marid.dependant.beaneditor.propeditor.PropEditorConfiguration;
 import org.marid.dependant.beaneditor.valueeditor.ValueEditorConfiguration;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.jfx.icons.FontIcon;
-import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.marid.spring.xml.data.BeanData;
@@ -46,8 +46,9 @@ import org.marid.spring.xml.data.ref.DRef;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
+import static java.beans.Introspector.decapitalize;
+import static java.lang.reflect.Modifier.*;
 import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
@@ -94,41 +95,22 @@ public class ValueMenuItems {
     }
 
     @OrderedInit(3)
-    public void initRefValue(BeanMetaInfoProvider provider, ProjectProfileReflection reflection, BeanListActions actions) {
+    public void initRefValue(ProjectProfileReflection reflection) {
         final List<MenuItem> refItems = new ArrayList<>();
-        final AtomicBoolean changed = new AtomicBoolean();
         reflection.getProfile().getBeanFiles().forEach(p -> p.getValue().beans.forEach(data -> {
             final Optional<? extends Type> t = reflection.getType(data);
             if (t.isPresent()) {
                 if (TypeUtils.isAssignable(t.get(), type)) {
-                    final MenuItem item = new MenuItem(data.getName(), FontIcons.glyphIcon(FontIcon.M_BEENHERE, 16));
+                    final MenuItem item = new MenuItem(data.getName(), glyphIcon(FontIcon.M_BEENHERE, 16));
                     item.setOnAction(event -> {
                         final DRef ref = new DRef();
                         ref.setBean(data.getName());
                         element.setValue(ref);
                     });
                     refItems.add(item);
-                    changed.compareAndSet(false, true);
                 }
             }
         }));
-        if (changed.compareAndSet(true, false)) {
-            refItems.add(new SeparatorMenuItem());
-        }
-        provider.beans().forEach((name, definition) -> {
-            final Optional<Class<?>> beanClass = reflection.getProfile().getClass(definition.getBeanClassName());
-            if (beanClass.isPresent() && TypeUtils.isAssignable(beanClass.get(), type)) {
-                final MenuItem item = new MenuItem(name, FontIcons.glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
-                item.setOnAction(event -> {
-                    final BeanData data = actions.insertItem(name, definition);
-                    final DRef ref = new DRef();
-                    ref.setBean(data.getName());
-                    element.setValue(ref);
-                });
-                refItems.add(item);
-                changed.compareAndSet(false, true);
-            }
-        });
         if (!refItems.isEmpty()) {
             if (refItems.get(refItems.size() - 1) instanceof SeparatorMenuItem) {
                 refItems.remove(refItems.size() - 1);
@@ -141,6 +123,54 @@ public class ValueMenuItems {
     }
 
     @OrderedInit(4)
+    public void initNewBean(BeanMetaInfoProvider provider, ProjectProfile profile, BeanListActions actions) {
+        final List<MenuItem> refItems = new ArrayList<>();
+        provider.beans().forEach((name, definition) -> {
+            final Optional<Class<?>> beanClass = profile.getClass(definition.getBeanClassName());
+            if (beanClass.isPresent() && TypeUtils.isAssignable(beanClass.get(), type)) {
+                final MenuItem item = new MenuItem(name, glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
+                item.setOnAction(event -> {
+                    final BeanData data = actions.insertItem(name, definition);
+                    final DRef ref = new DRef();
+                    ref.setBean(data.getName());
+                    element.setValue(ref);
+                });
+                refItems.add(item);
+            }
+        });
+        if (!refItems.isEmpty()) {
+            if (refItems.get(refItems.size() - 1) instanceof SeparatorMenuItem) {
+                refItems.remove(refItems.size() - 1);
+            }
+            final Menu menu = new Menu(s("New bean"), glyphIcon(M_ACCOUNT_BALANCE, 16));
+            menu.getItems().addAll(refItems);
+            items.add(menu);
+            items.add(new SeparatorMenuItem());
+        }
+    }
+
+    @OrderedInit(5)
+    public void initNewBean(ProjectProfile profile, BeanListActions actions) {
+        if (type instanceof Class<?>) {
+            final Class<?> c = (Class<?>) type;
+            if ((c.getModifiers() & (INTERFACE | PRIVATE | PROTECTED | ABSTRACT)) == 0) {
+                final MenuItem item = new MenuItem("New bean from class", glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
+                item.setOnAction(event -> {
+                    final BeanData data = new BeanData();
+                    data.name.setValue(profile.generateBeanName(decapitalize(c.getSimpleName())));
+                    data.type.setValue(c.getName());
+                    actions.insertItem(data);
+                    final DRef ref = new DRef();
+                    ref.setBean(data.getName());
+                    element.setValue(ref);
+                });
+                items.add(item);
+                items.add(new SeparatorMenuItem());
+            }
+        }
+    }
+
+    @OrderedInit(6)
     public void initPropertiesEdit(IdeDependants dependants) {
         if (type != null && TypeUtils.isAssignable(type, Properties.class)) {
             final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon(M_MODE_EDIT, 16));
@@ -158,7 +188,7 @@ public class ValueMenuItems {
         }
     }
 
-    @OrderedInit(5)
+    @OrderedInit(7)
     public void initListEdit(IdeDependants dependants) {
         if (type != null && TypeUtils.isAssignable(type, List.class)) {
             final MenuItem mi = new MenuItem(s("Edit list..."), glyphIcon(M_MODE_EDIT, 16));
@@ -186,7 +216,7 @@ public class ValueMenuItems {
         }
     }
 
-    @OrderedInit(6)
+    @OrderedInit(8)
     public void initArrayEdit(IdeDependants dependants) {
         if (type != null && TypeUtils.isArrayType(type)) {
             final MenuItem mi = new MenuItem(s("Edit array..."), glyphIcon(M_MODE_EDIT, 16));
