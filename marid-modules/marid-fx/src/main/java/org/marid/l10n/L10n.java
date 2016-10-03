@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,55 +17,33 @@
  */
 package org.marid.l10n;
 
-import java.io.IOException;
-import java.net.URL;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Formatter;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
+import static org.marid.l10n.Utf8ResourceBundleControl.UTF8CTRL;
 
 /**
- * @author Dmitry Ovchinnikov (d.ovchinnikow at gmail.com)
+ * @author Dmitry Ovchinnikov
  */
 public class L10n {
-
-    public static final String MSGS = "res.messages";
-    public static final String STRS = "res.strings";
-
-    public static final ResourceBundle.Control UTF8_CONTROL = new ResourceBundle.Control() {
-        @Override
-        public ResourceBundle newBundle(String b, Locale l, String f, ClassLoader ld, boolean r) throws IllegalAccessException, InstantiationException, IOException {
-            return getResourceBundle(ld, toResourceName(toBundleName(b, l), "properties"), r);
-        }
-
-        @Override
-        public List<String> getFormats(String baseName) {
-            return FORMAT_PROPERTIES;
-        }
-
-        private ResourceBundle getResourceBundle(ClassLoader ld, String resourceName, boolean reload) throws IOException {
-            final ChainedPropertyResourceBundle bundle = new ChainedPropertyResourceBundle();
-            for (final Enumeration<URL> e = ld.getResources(resourceName); e.hasMoreElements(); ) {
-                bundle.load(e.nextElement(), !reload);
-            }
-            return bundle;
-        }
-    };
 
     public static String s(String key, Object... ps) {
         return s(Locale.getDefault(), key, ps);
     }
 
     public static String s(Locale locale, String key, Object... ps) {
-        return s(getBundle(STRS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL), key, ps);
+        return s(getStringsBundle(locale), key, ps);
     }
 
     public static void s(Locale locale, String key, Appendable out, Object... ps) {
-        s(getBundle(STRS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL), out, key, ps);
+        s(getStringsBundle(locale), out, key, ps);
     }
 
     public static void s(Locale locale, String key, Formatter formatter, Object... ps) {
-        s(getBundle(STRS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL), formatter, key, ps);
+        s(getStringsBundle(locale), formatter, key, ps);
     }
 
     public static String m(String k, Object... v) {
@@ -73,19 +51,19 @@ public class L10n {
     }
 
     public static String m(Locale locale, String k, Object... v) {
-        return m(getBundle(MSGS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL), k, v);
+        return m(getMessagesBundle(locale), k, v);
     }
 
     public static void m(Locale locale, String k, StringBuffer buffer, Object... v) {
-        m(getBundle(MSGS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL), buffer, k, v);
+        m(getMessagesBundle(locale), buffer, k, v);
     }
 
     public static ResourceBundle getMessagesBundle(Locale locale) {
-        return getBundle(MSGS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL);
+        return getBundle("res.messages", locale, Thread.currentThread().getContextClassLoader(), UTF8CTRL);
     }
 
     public static ResourceBundle getStringsBundle(Locale locale) {
-        return getBundle(STRS, locale, Thread.currentThread().getContextClassLoader(), UTF8_CONTROL);
+        return getBundle("res.strings", locale, Thread.currentThread().getContextClassLoader(), UTF8CTRL);
     }
 
     private static void m(ResourceBundle b, StringBuffer buf, String key, Object... v) {

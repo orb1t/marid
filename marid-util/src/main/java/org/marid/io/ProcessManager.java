@@ -29,7 +29,7 @@ public class ProcessManager implements Closeable {
 
     private final String name;
     private final Process process;
-    private final long waitTimeout;
+    private final long timeout;
     private final TimeUnit timeUnit;
     private final InputStream out;
     private final InputStream err;
@@ -41,11 +41,11 @@ public class ProcessManager implements Closeable {
                           Consumer<String> outLineConsumer,
                           Consumer<String> errLineConsumer,
                           int bufferSize,
-                          long waitTimeout,
+                          long timeout,
                           TimeUnit timeUnit) {
         this.name = name;
         this.process = process;
-        this.waitTimeout = waitTimeout;
+        this.timeout = timeout;
         this.timeUnit = timeUnit;
         this.out = process.getInputStream();
         this.err = process.getErrorStream();
@@ -55,33 +55,22 @@ public class ProcessManager implements Closeable {
         errConsumer.start();
     }
 
-    public ProcessManager(String name, Process process, Consumer<String> outLineConsumer, Consumer<String> errLineConsumer) {
-        this(name, process, outLineConsumer, errLineConsumer, 65536, 1L, TimeUnit.MINUTES);
-    }
-
-    private void awaitThread(Thread thread) throws IOException {
-        try {
-            thread.join();
-        } catch (InterruptedException x) {
-            throw new InterruptedIOException(thread + " joining interrupted");
-        }
-    }
-
     private void awaitThreads(IOException iox) throws IOException {
+        final IOException ex = iox != null ? iox : new IOException();
         try (final InputStream e = err; final InputStream i = out) {
+            assert e != null;
+            assert i != null;
             try {
-                awaitThread(errConsumer);
-                awaitThread(outConsumer);
-            } catch (IOException x) {
-                if (iox == null) {
-                    iox = x;
-                } else {
-                    iox.addSuppressed(x);
-                }
+                errConsumer.join();
+                outConsumer.join();
+            } catch (InterruptedException ix) {
+                ex.addSuppressed(ix);
             }
-            if (iox != null) {
-                throw iox;
-            }
+        } catch (Exception x) {
+            ex.addSuppressed(x);
+        }
+        if (ex.getMessage() != null || ex.getSuppressed().length > 0) {
+            throw ex;
         }
     }
 
@@ -90,28 +79,24 @@ public class ProcessManager implements Closeable {
         if (process.isAlive()) {
             process.destroy();
             try {
-                boolean result = process.waitFor(waitTimeout, timeUnit);
-                if (!result) {
-                    process.destroyForcibly();
-                    result = process.waitFor(waitTimeout, timeUnit);
-                    if (!result) {
-                        awaitThreads(new StreamCorruptedException("Zombie process: " + name));
-                    }
+                if (!process.waitFor(timeout, timeUnit) || !process.destroyForcibly().waitFor(timeout, timeUnit)) {
+                    awaitThreads(new StreamCorruptedException(name));
                 }
             } catch (InterruptedException x) {
                 awaitThreads(new InterruptedIOException(process.toString()));
             }
+        } else {
+            awaitThreads(null);
         }
-        awaitThreads(null);
     }
 
-    static class ConsumerThread extends Thread {
+    private static class ConsumerThread extends Thread {
 
         private final InputStream inputStream;
         private final Consumer<String> lineConsumer;
         private final int bufferSize;
 
-        ConsumerThread(String name, InputStream inputStream, int bufferSize, Consumer<String> lineConsumer) {
+        private ConsumerThread(String name, InputStream inputStream, int bufferSize, Consumer<String> lineConsumer) {
             super(null, null, name, 96L * 1024L);
             this.inputStream = inputStream;
             this.lineConsumer = lineConsumer;

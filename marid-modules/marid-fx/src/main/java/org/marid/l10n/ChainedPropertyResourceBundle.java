@@ -26,13 +26,14 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class ChainedPropertyResourceBundle extends ResourceBundle {
 
-    private final List<Properties> propertiesList = new ArrayList<>();
+    private final ArrayList<Properties> propertiesList = new ArrayList<>();
 
     public void load(URL url, boolean useCaches) throws IOException {
         final URLConnection connection = url.openConnection();
@@ -42,39 +43,27 @@ public class ChainedPropertyResourceBundle extends ResourceBundle {
             properties.load(reader);
             propertiesList.add(properties);
         }
+        propertiesList.trimToSize();
     }
 
     @Override
     public boolean containsKey(@Nonnull String key) {
-        final String k = Objects.requireNonNull(key);
-        for (final Properties properties : propertiesList) {
-            if (properties.containsKey(k)) {
-                return true;
-            }
-        }
-        return parent != null && parent.containsKey(k);
+        return propertiesList.stream().anyMatch(p -> p.containsKey(key)) || parent != null && parent.containsKey(key);
     }
 
     @Override
     protected String handleGetObject(@Nonnull String key) {
-        final String k = Objects.requireNonNull(key);
-        for (final Properties properties : propertiesList) {
-            final String value = properties.getProperty(k);
-            if (value != null) {
-                return value;
-            }
-        }
-        return null;
+        return propertiesList.stream()
+                .map(p -> p.getProperty(key))
+                .filter(Objects::nonNull)
+                .findAny()
+                .orElse(null);
     }
 
     @Nonnull
     @Override
     protected Set<String> handleKeySet() {
-        final Set<String> set = new HashSet<>();
-        for (final Properties properties : propertiesList) {
-            set.addAll(properties.stringPropertyNames());
-        }
-        return set;
+        return propertiesList.stream().flatMap(p -> p.stringPropertyNames().stream()).collect(Collectors.toSet());
     }
 
     @Nonnull

@@ -42,7 +42,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -75,7 +78,7 @@ public class ProjectRunnerPane extends BorderPane implements LogSupport {
         tabPane.setFocusTraversable(false);
         process = process(javaSettings, debugSettings);
         printStream = new PrintStream(process.getOutputStream(), true);
-        processManager = new ProcessManager(profile.getName(), process, consumer(out), consumer(err));
+        processManager = new ProcessManager(profile.getName(), process, consumer(out), consumer(err), 65536, 1L, MINUTES);
         final Thread watchThread = new Thread(null, () -> {
             try {
                 final int result = process.waitFor();

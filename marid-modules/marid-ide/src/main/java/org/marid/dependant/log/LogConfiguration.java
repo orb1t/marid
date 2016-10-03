@@ -29,15 +29,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
-import org.springframework.util.ReflectionUtils;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
+import java.util.stream.Stream;
 
-import static java.lang.reflect.Modifier.isPublic;
-import static java.lang.reflect.Modifier.isStatic;
 import static org.marid.dependant.log.LoggingTable.icon;
 import static org.marid.jfx.icons.FontIcon.M_BORDER_TOP;
 import static org.marid.jfx.icons.FontIcon.M_CLEAR_ALL;
@@ -48,7 +48,7 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov.
  */
 @Configuration
-@ComponentScan(basePackageClasses = {LogConfiguration.class})
+@Import({LoggingFilter.class, LoggingTable.class})
 public class LogConfiguration {
 
     @Qualifier("log")
@@ -56,13 +56,22 @@ public class LogConfiguration {
     @Order(1)
     public Menu filterMenu(LoggingFilter loggingFilter) {
         final Menu menu = new Menu(s("Filter"));
-        ReflectionUtils.doWithFields(Level.class, field -> {
-            final Level level = (Level) field.get(null);
+        Stream.of(
+                Level.ALL,
+                Level.CONFIG,
+                Level.FINE,
+                Level.FINER,
+                Level.FINEST,
+                Level.INFO,
+                Level.SEVERE,
+                Level.WARNING,
+                Level.OFF
+        ).sorted(Comparator.comparingInt(Level::intValue)).forEach(level -> {
             final String name = level.getLocalizedName();
             final CheckMenuItem menuItem = new CheckMenuItem(name, glyphIcon(icon(level).icon, 16));
             menuItem.selectedProperty().bindBidirectional(loggingFilter.getProperty(level));
             menu.getItems().add(menuItem);
-        }, field -> isStatic(field.getModifiers()) && isPublic(field.getModifiers()) && field.getType() == Level.class);
+        });
         return menu;
     }
 
