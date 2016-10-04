@@ -16,11 +16,12 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<beans xmlns="http://www.springframework.org/schema/beans">
+<beans xmlns="http://www.springframework.org/schema/beans" default-lazy-init="true">
 
-    <bean name="randomNumericDaqGenerator" class="org.marid.db.generator.RandomNumericDaqGenerator" abstract="true">
+    <bean name="randomNumericDaqGenerator" class="org.marid.db.generator.RandomNumericDaqGenerator">
         <description>Random numeric DAQ generator</description>
 
+        <constructor-arg name="numericWriter" value=""/>
         <constructor-arg name="max" value="1.0"/>
         <constructor-arg name="min" value="0.0"/>
         <constructor-arg name="periodSeconds" value="1"/>
@@ -29,7 +30,7 @@
         <meta key="icon" value="P_ADD"/>
     </bean>
 
-    <bean name="hsqldbProperties" class="org.marid.db.hsqldb.HsqldbProperties" abstract="true">
+    <bean name="hsqldbProperties" class="org.marid.db.hsqldb.HsqldbProperties">
         <description>HSQLDB database properties</description>
 
         <property name="directory" value="${user.home}/data"/>
@@ -37,21 +38,32 @@
         <meta key="icon" value="P_ADD"/>
     </bean>
 
-    <bean name="hsqldbDatabase" class="org.marid.db.hsqldb.HsqldbDatabase" abstract="true">
+    <bean name="hsqldbDatabase" class="org.marid.db.hsqldb.HsqldbDatabase">
         <description>HSQLDB database</description>
+
+        <constructor-arg name="properties" value=""/>
 
         <meta key="ICON" value="P_ADD"/>
     </bean>
 
-    <bean name="numericWriter" class="org.marid.db.hsqldb.HsqldbDaqNumericWriter" abstract="true">
+    <bean name="hsqldbDatabaseDataSource" factory-bean="hsqldbDatabase" factory-method="dataSource">
+        <description>HSQLDB database datasource</description>
+
+        <constructor-arg name="name" value="NUMERICS"/>
+
+        <meta key="ICON" value="P_ADD"/>
+    </bean>
+
+    <bean name="numericWriter" class="org.marid.db.hsqldb.HsqldbDaqNumericWriter">
         <description>HSQLDB numeric writer</description>
 
+        <constructor-arg name="dataSource" value=""/>
         <constructor-arg name="table" value="NUMERICS"/>
 
         <meta key="icon" value="P_ADD"/>
     </bean>
 
-    <bean name="hsqldbDataSource" class="org.hsqldb.jdbc.JDBCDataSource" abstract="true">
+    <bean name="hsqldbDataSource" class="org.hsqldb.jdbc.JDBCDataSource">
         <description>HSQLDB data source</description>
 
         <property name="url" value="hsql://localhost:9001/NUMERICS"/>
@@ -62,9 +74,10 @@
         <meta key="icon" value="P_ADD"/>
     </bean>
 
-    <bean name="hsqldbNumericReader" class="org.marid.db.hsqldb.HsqldbDaqNumericReader" abstract="true">
+    <bean name="hsqldbNumericReader" class="org.marid.db.hsqldb.HsqldbDaqNumericReader">
         <description>HSQLDB numeric reader</description>
 
+        <constructor-arg name="dataSource" value=""/>
         <constructor-arg name="table" value="NUMERICS"/>
 
         <meta key="icon" value="P_ADD"/>

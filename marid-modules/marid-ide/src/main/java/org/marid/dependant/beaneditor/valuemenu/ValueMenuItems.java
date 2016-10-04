@@ -42,6 +42,7 @@ import org.marid.spring.xml.data.collection.DList;
 import org.marid.spring.xml.data.collection.DValue;
 import org.marid.spring.xml.data.props.DProps;
 import org.marid.spring.xml.data.ref.DRef;
+import org.springframework.core.ResolvableType;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -123,20 +124,18 @@ public class ValueMenuItems {
     }
 
     @OrderedInit(4)
-    public void initNewBean(BeanMetaInfoProvider provider, ProjectProfile profile, BeanListActions actions) {
+    public void initNewBean(BeanMetaInfoProvider provider, BeanListActions actions) {
         final List<MenuItem> refItems = new ArrayList<>();
-        provider.beans().forEach((name, definition) -> {
-            final Optional<Class<?>> beanClass = profile.getClass(definition.getBeanClassName());
-            if (beanClass.isPresent() && TypeUtils.isAssignable(beanClass.get(), type)) {
-                final MenuItem item = new MenuItem(name, glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
-                item.setOnAction(event -> {
-                    final BeanData data = actions.insertItem(name, definition);
-                    final DRef ref = new DRef();
-                    ref.setBean(data.getName());
-                    element.setValue(ref);
-                });
-                refItems.add(item);
-            }
+        final BeanMetaInfoProvider.BeansMetaInfo metaInfo = provider.beans();
+        metaInfo.beans(ResolvableType.forType(type)).forEach(h -> {
+            final MenuItem item = new MenuItem(h.getBeanName(), glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
+            item.setOnAction(event -> {
+                final BeanData data = actions.insertItem(h.getBeanName(), h.getBeanDefinition());
+                final DRef ref = new DRef();
+                ref.setBean(data.getName());
+                element.setValue(ref);
+            });
+            refItems.add(item);
         });
         if (!refItems.isEmpty()) {
             if (refItems.get(refItems.size() - 1) instanceof SeparatorMenuItem) {

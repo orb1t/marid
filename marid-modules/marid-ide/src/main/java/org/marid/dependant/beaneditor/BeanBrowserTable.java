@@ -28,7 +28,6 @@ import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.marid.l10n.L10n.s;
@@ -37,12 +36,12 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 @PrototypeComponent
-public class BeanBrowserTable extends TableView<Map.Entry<String, BeanDefinition>> {
+public class BeanBrowserTable extends TableView<BeanBrowserTable.BeanBrowserItem> {
 
     @Autowired
     public BeanBrowserTable(BeanMetaInfoProvider beanMetaInfoProvider) {
-        super(beanMetaInfoProvider.beans().entrySet().stream()
-                .filter(e -> e.getValue().isAbstract())
+        super(beanMetaInfoProvider.beans().beans().stream()
+                .map(e -> new BeanBrowserItem(e.getBeanName(), e.getBeanDefinition(), beanMetaInfoProvider))
                 .collect(Collectors.toCollection(FXCollections::observableArrayList)));
         setEditable(false);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
@@ -52,8 +51,8 @@ public class BeanBrowserTable extends TableView<Map.Entry<String, BeanDefinition
 
     @OrderedInit(1)
     public void nameColumn() {
-        final TableColumn<Map.Entry<String, BeanDefinition>, String> col = new TableColumn<>(s("Name"));
-        col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getKey()));
+        final TableColumn<BeanBrowserItem, String> col = new TableColumn<>(s("Name"));
+        col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().name));
         col.setPrefWidth(300);
         col.setMaxWidth(600);
         getColumns().add(col);
@@ -61,8 +60,8 @@ public class BeanBrowserTable extends TableView<Map.Entry<String, BeanDefinition
 
     @OrderedInit(2)
     public void typeColumn() {
-        final TableColumn<Map.Entry<String, BeanDefinition>, String> col = new TableColumn<>(s("Type"));
-        col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getValue().getBeanClassName()));
+        final TableColumn<BeanBrowserItem, String> col = new TableColumn<>(s("Type"));
+        col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().definition.getBeanClassName()));
         col.setPrefWidth(500);
         col.setMaxWidth(1000);
         getColumns().add(col);
@@ -70,10 +69,23 @@ public class BeanBrowserTable extends TableView<Map.Entry<String, BeanDefinition
 
     @OrderedInit(3)
     public void descriptionColumn() {
-        final TableColumn<Map.Entry<String, BeanDefinition>, String> col = new TableColumn<>(s("Description"));
-        col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getValue().getDescription()));
+        final TableColumn<BeanBrowserItem, String> col = new TableColumn<>(s("Description"));
+        col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().definition.getDescription()));
         col.setPrefWidth(500);
         col.setMaxWidth(2000);
         getColumns().add(col);
+    }
+
+    public static class BeanBrowserItem {
+
+        public final String name;
+        public final BeanDefinition definition;
+        public final BeanMetaInfoProvider provider;
+
+        private BeanBrowserItem(String name, BeanDefinition definition, BeanMetaInfoProvider provider) {
+            this.name = name;
+            this.definition = definition;
+            this.provider = provider;
+        }
     }
 }

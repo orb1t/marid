@@ -20,14 +20,15 @@ package org.marid.dependant.beaneditor;
 
 import org.marid.ide.project.ProjectProfile;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
 import java.net.URLClassLoader;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -42,26 +43,52 @@ public class BeanMetaInfoProvider {
         this.profile = profile;
     }
 
-    public Map<String, BeanDefinition> beans() {
+    public BeansMetaInfo beans() {
         final URLClassLoader classLoader = profile.getClassLoader();
         if (classLoader == null) {
-            return Collections.emptyMap();
+            return new BeansMetaInfo(null);
         } else {
-            try (final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext()) {
-                context.setDisplayName(profile.getName());
-                context.setConfigLocation("classpath*:/META-INF/meta/beans.xml");
-                context.setAllowBeanDefinitionOverriding(true);
-                context.setAllowCircularReferences(true);
-                context.setValidating(false);
-                context.setClassLoader(classLoader);
-                context.refresh();
-                final String[] beanDefinitionNames = context.getBeanDefinitionNames();
-                final Map<String, BeanDefinition> set = new LinkedHashMap<>();
-                for (final String beanDefinitionName : beanDefinitionNames) {
-                    set.put(beanDefinitionName, context.getBeanFactory().getBeanDefinition(beanDefinitionName));
-                }
-                return set;
+            return new BeansMetaInfo(new ApplicationContext(classLoader));
+        }
+    }
+
+    private class ApplicationContext extends ClassPathXmlApplicationContext {
+
+        private ApplicationContext(ClassLoader classLoader) {
+            setDisplayName(profile.getName());
+            if (classLoader != null) {
+                setConfigLocation("classpath*:/META-INF/meta/beans.xml");
             }
+            setAllowCircularReferences(true);
+            setAllowBeanDefinitionOverriding(true);
+            setValidating(false);
+            setClassLoader(classLoader);
+
+            prepareRefresh();
+            prepareBeanFactory(obtainFreshBeanFactory());
+        }
+    }
+
+    public static class BeansMetaInfo {
+
+        private final ApplicationContext context;
+
+        private BeansMetaInfo(ApplicationContext context) {
+            this.context = context;
+        }
+
+        public List<BeanDefinitionHolder> beans() {
+            return beans(context.getBeanDefinitionNames());
+        }
+
+        public List<BeanDefinitionHolder> beans(ResolvableType resolvableType) {
+            return beans(context.getBeanNamesForType(resolvableType));
+        }
+
+        private List<BeanDefinitionHolder> beans(String... names) {
+            return Stream.of(names)
+                    .map(name -> new BeanDefinitionHolder(context.getBeanFactory().getBeanDefinition(name), name))
+                    .collect(Collectors.toList());
         }
     }
 }

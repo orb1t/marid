@@ -23,6 +23,7 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import org.marid.IdeDependants;
+import org.marid.dependant.beaneditor.BeanBrowserTable.BeanBrowserItem;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectProfileReflection;
@@ -50,7 +51,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.URLClassLoader;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -105,14 +105,14 @@ public class BeanListActions {
 
     public void onBrowse(ActionEvent event) {
         final BeanBrowserTable beans = context.getBean(BeanBrowserTable.class);
-        new MaridDialog<List<Entry<String, BeanDefinition>>>(primaryStage, new ButtonType(s("Add"), OK_DONE), CANCEL)
+        new MaridDialog<List<BeanBrowserItem>>(primaryStage, new ButtonType(s("Add"), OK_DONE), CANCEL)
                 .preferredSize(1024, 768)
                 .title("Bean browser")
                 .with((d, p) -> d.setResizable(true))
                 .result(beans.getSelectionModel()::getSelectedItems)
                 .with((d, p) -> p.setContent(new MaridScrollPane(beans)))
                 .showAndWait()
-                .ifPresent(entries -> entries.forEach(e -> insertItem(e.getKey(), e.getValue())));
+                .ifPresent(entries -> entries.forEach(e -> insertItem(e.name, e.definition)));
     }
 
     public void onAddNew(ActionEvent event) {
