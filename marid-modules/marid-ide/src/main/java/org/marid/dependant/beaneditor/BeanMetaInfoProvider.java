@@ -20,6 +20,7 @@ package org.marid.dependant.beaneditor;
 
 import org.marid.ide.project.ProjectProfile;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.ResolvableType;
@@ -75,6 +76,10 @@ public class BeanMetaInfoProvider {
 
         private BeansMetaInfo(ApplicationContext context) {
             this.context = context;
+        }
+
+        public BeanDefinition getBeanDefinition(String name) {
+            return context.getBeanFactory().getBeanDefinition(name);
         }
 
         public List<BeanDefinitionHolder> beans() {

@@ -20,6 +20,7 @@ package org.marid.dependant.beaneditor;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -40,9 +41,7 @@ public class BeanBrowserTable extends TableView<BeanBrowserTable.BeanBrowserItem
 
     @Autowired
     public BeanBrowserTable(BeanMetaInfoProvider beanMetaInfoProvider) {
-        super(beanMetaInfoProvider.beans().beans().stream()
-                .map(e -> new BeanBrowserItem(e.getBeanName(), e.getBeanDefinition(), beanMetaInfoProvider))
-                .collect(Collectors.toCollection(FXCollections::observableArrayList)));
+        super(itemsFrom(beanMetaInfoProvider));
         setEditable(false);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
@@ -76,16 +75,23 @@ public class BeanBrowserTable extends TableView<BeanBrowserTable.BeanBrowserItem
         getColumns().add(col);
     }
 
+    private static ObservableList<BeanBrowserItem> itemsFrom(BeanMetaInfoProvider metaInfoProvider) {
+        final BeanMetaInfoProvider.BeansMetaInfo metaInfo = metaInfoProvider.beans();
+        return metaInfo.beans().stream()
+                .map(e -> new BeanBrowserItem(e.getBeanName(), e.getBeanDefinition(), metaInfo))
+                .collect(Collectors.toCollection(FXCollections::observableArrayList));
+    }
+
     public static class BeanBrowserItem {
 
         public final String name;
         public final BeanDefinition definition;
-        public final BeanMetaInfoProvider provider;
+        public final BeanMetaInfoProvider.BeansMetaInfo metaInfo;
 
-        private BeanBrowserItem(String name, BeanDefinition definition, BeanMetaInfoProvider provider) {
+        private BeanBrowserItem(String name, BeanDefinition definition, BeanMetaInfoProvider.BeansMetaInfo metaInfo) {
             this.name = name;
             this.definition = definition;
-            this.provider = provider;
+            this.metaInfo = metaInfo;
         }
     }
 }

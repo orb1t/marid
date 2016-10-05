@@ -130,7 +130,7 @@ public class ValueMenuItems {
         metaInfo.beans(ResolvableType.forType(type)).forEach(h -> {
             final MenuItem item = new MenuItem(h.getBeanName(), glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
             item.setOnAction(event -> {
-                final BeanData data = actions.insertItem(h.getBeanName(), h.getBeanDefinition());
+                final BeanData data = actions.insertItem(h.getBeanName(), h.getBeanDefinition(), metaInfo);
                 final DRef ref = new DRef();
                 ref.setBean(data.getName());
                 element.setValue(ref);

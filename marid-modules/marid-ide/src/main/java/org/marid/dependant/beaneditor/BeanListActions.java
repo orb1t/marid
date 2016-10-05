@@ -112,7 +112,7 @@ public class BeanListActions {
                 .result(beans.getSelectionModel()::getSelectedItems)
                 .with((d, p) -> p.setContent(new MaridScrollPane(beans)))
                 .showAndWait()
-                .ifPresent(entries -> entries.forEach(e -> insertItem(e.name, e.definition)));
+                .ifPresent(entries -> entries.forEach(e -> insertItem(e.name, e.definition, e.metaInfo)));
     }
 
     public void onAddNew(ActionEvent event) {
@@ -168,10 +168,17 @@ public class BeanListActions {
         return beanData;
     }
 
-    public BeanData insertItem(String name, BeanDefinition def) {
+    public BeanData insertItem(String name, BeanDefinition def, BeanMetaInfoProvider.BeansMetaInfo metaInfo) {
         final BeanData beanData = beanData(name, def);
         reflection.updateBeanData(beanData);
         insertItem(beanData);
+        if (def.getFactoryBeanName() != null) {
+            name = def.getFactoryBeanName();
+            def = metaInfo.getBeanDefinition(name);
+            if (def != null && !profile.containsBean(name)) {
+                insertItem(name, def, metaInfo);
+            }
+        }
         return beanData;
     }
 
