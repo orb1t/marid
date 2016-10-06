@@ -126,7 +126,7 @@ public class ValueMenuItems {
     @OrderedInit(4)
     public void initNewBean(BeanMetaInfoProvider provider, BeanListActions actions) {
         final List<MenuItem> refItems = new ArrayList<>();
-        final BeanMetaInfoProvider.BeansMetaInfo metaInfo = provider.beans();
+        final BeanMetaInfoProvider.BeansMetaInfo metaInfo = provider.metaInfo();
         metaInfo.beans(ResolvableType.forType(type)).forEach(h -> {
             final MenuItem item = new MenuItem(h.getBeanName(), glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
             item.setOnAction(event -> {

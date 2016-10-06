@@ -76,7 +76,7 @@ public class BeanBrowserTable extends TableView<BeanBrowserTable.BeanBrowserItem
     }
 
     private static ObservableList<BeanBrowserItem> itemsFrom(BeanMetaInfoProvider metaInfoProvider) {
-        final BeanMetaInfoProvider.BeansMetaInfo metaInfo = metaInfoProvider.beans();
+        final BeanMetaInfoProvider.BeansMetaInfo metaInfo = metaInfoProvider.metaInfo();
         return metaInfo.beans().stream()
                 .map(e -> new BeanBrowserItem(e.getBeanName(), e.getBeanDefinition(), metaInfo))
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));

@@ -44,7 +44,7 @@ public class BeanMetaInfoProvider {
         this.profile = profile;
     }
 
-    public BeansMetaInfo beans() {
+    public BeansMetaInfo metaInfo() {
         final URLClassLoader classLoader = profile.getClassLoader();
         if (classLoader == null) {
             return new BeansMetaInfo(null);
