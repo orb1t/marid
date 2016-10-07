@@ -26,7 +26,4 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "constructor-arg")
 public final class BeanArg extends RefValue<BeanArg> {
 
-    public BeanArg() {
-        installInvalidationListeners();
-    }
 }

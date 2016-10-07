@@ -48,7 +48,16 @@ public final class BeanData extends DElement<BeanData> {
     public final ObservableList<BeanProp> properties = MaridCollections.list();
 
     public BeanData() {
-        installInvalidationListeners();
+        type.addListener(this::invalidate);
+        name.addListener(this::invalidate);
+        initMethod.addListener(this::invalidate);
+        destroyMethod.addListener(this::invalidate);
+        factoryMethod.addListener(this::invalidate);
+        factoryBean.addListener(this::invalidate);
+        lazyInit.addListener(this::invalidate);
+
+        beanArgs.addListener(this::invalidate);
+        properties.addListener(this::invalidate);
     }
 
     @XmlAttribute(name = "class")

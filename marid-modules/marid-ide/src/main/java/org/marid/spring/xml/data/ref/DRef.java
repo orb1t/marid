@@ -37,7 +37,7 @@ public final class DRef extends DElement<DRef> {
     public final StringProperty ref = new SimpleStringProperty(this, "value");
 
     public DRef() {
-        installInvalidationListeners();
+        ref.addListener(this::invalidate);
     }
 
     @XmlAttribute(name = "bean")

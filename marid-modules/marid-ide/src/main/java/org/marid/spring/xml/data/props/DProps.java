@@ -38,7 +38,8 @@ public final class DProps extends DElement<DProps> {
     public final ObservableList<DPropEntry> entries = MaridCollections.list();
 
     public DProps() {
-        installInvalidationListeners();
+        valueType.addListener(this::invalidate);
+        entries.addListener(this::invalidate);
     }
 
     @XmlAttribute(name = "value-type")

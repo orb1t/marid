@@ -35,7 +35,7 @@ public final class BeanFile extends AbstractData<BeanFile> {
     public final ObservableList<BeanData> beans = MaridCollections.list();
 
     public BeanFile() {
-        installInvalidationListeners();
+        beans.addListener(this::invalidate);
     }
 
     public Stream<BeanData> allBeans() {

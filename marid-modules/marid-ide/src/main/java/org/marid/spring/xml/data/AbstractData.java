@@ -32,7 +32,6 @@ import javax.xml.bind.annotation.XmlTransient;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -133,19 +132,8 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Externa
     }
 
     protected void invalidate(Observable observable) {
-        listeners.forEach(listener -> listener.invalidated(this));
-    }
-
-    protected void installInvalidationListeners() {
-        for (final Field field : getClass().getFields()) {
-            if (!Modifier.isStatic(field.getModifiers()) && Observable.class.isAssignableFrom(field.getType())) {
-                try {
-                    final Observable observable = (Observable) field.get(this);
-                    observable.addListener(this::invalidate);
-                } catch (ReflectiveOperationException x) {
-                    throw new IllegalStateException(x);
-                }
-            }
+        for (final InvalidationListener listener : listeners) {
+            listener.invalidated(this);
         }
     }
 }

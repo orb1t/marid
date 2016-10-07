@@ -37,6 +37,11 @@ public abstract class DCollection<T extends DCollection<T>> extends DElement<T> 
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type");
     public final ObservableList<DElement<?>> elements = MaridCollections.list();
 
+    public DCollection() {
+        valueType.addListener(this::invalidate);
+        elements.addListener(this::invalidate);
+    }
+
     @XmlAttribute(name = "value-type")
     public String getValueType() {
         return valueType.isEmpty().get() ? null : valueType.get();

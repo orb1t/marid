@@ -29,10 +29,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public final class DList extends DCollection<DList> {
 
-    public DList() {
-        installInvalidationListeners();
-    }
-
     @Override
     public boolean isEmpty() {
         return false;

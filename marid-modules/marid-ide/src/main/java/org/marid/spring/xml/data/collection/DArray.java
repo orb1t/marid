@@ -26,10 +26,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "array")
 public final class DArray extends DCollection<DArray> {
 
-    public DArray() {
-        installInvalidationListeners();
-    }
-
     @Override
     public boolean isEmpty() {
         return false;

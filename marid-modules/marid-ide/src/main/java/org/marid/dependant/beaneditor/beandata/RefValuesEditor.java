@@ -101,7 +101,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
             @Override
             protected void updateItem(T item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
+                if (item == null || empty) {
                     setContextMenu(null);
                 } else {
                     final Type type = typeFunc.apply(item.getName()).orElse(null);

@@ -26,7 +26,4 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "property")
 public final class BeanProp extends RefValue<BeanProp> {
 
-    public BeanProp() {
-        installInvalidationListeners();
-    }
 }

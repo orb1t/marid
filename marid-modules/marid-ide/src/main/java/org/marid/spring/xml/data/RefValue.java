@@ -48,6 +48,10 @@ public abstract class RefValue<T extends RefValue<T>> extends AbstractData<T> {
                 newValue.addListener(this::invalidate);
             }
         });
+        name.addListener(this::invalidate);
+        type.addListener(this::invalidate);
+
+        data.addListener(this::invalidate);
     }
 
     @XmlAttribute(name = "name")

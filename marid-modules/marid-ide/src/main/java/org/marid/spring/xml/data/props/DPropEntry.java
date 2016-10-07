@@ -35,7 +35,8 @@ public final class DPropEntry extends AbstractData<DPropEntry> {
     public final StringProperty value = new SimpleStringProperty(this, "value");
 
     public DPropEntry() {
-        installInvalidationListeners();
+        key.addListener(this::invalidate);
+        value.addListener(this::invalidate);
     }
 
     @XmlAttribute(name = "key")

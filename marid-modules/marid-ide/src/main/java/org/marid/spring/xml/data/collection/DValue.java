@@ -36,7 +36,7 @@ public final class DValue extends DElement<DValue> {
     public final StringProperty value = new SimpleStringProperty(this, "value");
 
     public DValue() {
-        installInvalidationListeners();
+        value.addListener(this::invalidate);
     }
 
     @XmlValue
