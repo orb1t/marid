@@ -20,8 +20,8 @@ package org.marid.spring.xml.data.props;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.marid.jfx.util.MaridCollections;
 import org.marid.spring.xml.data.collection.DElement;
 
 import javax.xml.bind.annotation.*;
@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.*;
 public final class DProps extends DElement<DProps> {
 
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type");
-    public final ObservableList<DPropEntry> entries = FXCollections.observableArrayList();
+    public final ObservableList<DPropEntry> entries = MaridCollections.list();
 
     public DProps() {
         installInvalidationListeners();

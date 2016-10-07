@@ -18,14 +18,12 @@
 
 package org.marid.dependant.beaneditor.beandata;
 
-import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.annotation.OrderedInit;
-import org.marid.spring.xml.data.AbstractData;
 import org.marid.spring.xml.data.RefValue;
 import org.marid.spring.xml.data.collection.DCollection;
 import org.marid.spring.xml.data.collection.DElement;
@@ -34,10 +32,7 @@ import org.marid.spring.xml.data.ref.DRef;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PreDestroy;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -50,7 +45,6 @@ import static org.marid.l10n.L10n.s;
 public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
 
     private final Function<String, Optional<? extends Type>> typeFunc;
-    private final Map<T, InvalidationListener> invalidationListenerMap = new HashMap<>();
 
     public RefValuesEditor(ObservableList<T> items, Function<String, Optional<? extends Type>> typeFunc) {
         super(items);
@@ -110,29 +104,13 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
                 if (empty) {
                     setContextMenu(null);
                 } else {
-                    final InvalidationListener listener = observable -> {
-                        final Type type = typeFunc.apply(item.getName()).orElse(null);
-                        final Type typeArg = type == null ? Object.class : type;
-                        final ContextMenu menu = new ContextMenu();
-                        items.getObject(item.data, typeArg).addTo(menu);
-                        setContextMenu(menu);
-                    };
-                    listener.invalidated(item);
-                    invalidationListenerMap.compute(item, (v, old) -> {
-                        if (old != null) {
-                            v.removeListener(old);
-                        }
-                        item.addListener(listener);
-                        return listener;
-                    });
+                    final Type type = typeFunc.apply(item.getName()).orElse(null);
+                    final Type typeArg = type == null ? Object.class : type;
+                    final ContextMenu menu = new ContextMenu();
+                    items.getObject(item.data, typeArg).addTo(menu);
+                    setContextMenu(menu);
                 }
             }
         });
-    }
-
-    @PreDestroy
-    public void destroy() {
-        invalidationListenerMap.forEach(AbstractData::removeListener);
-        invalidationListenerMap.clear();
     }
 }

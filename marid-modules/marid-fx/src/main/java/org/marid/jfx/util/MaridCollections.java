@@ -16,40 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.data;
+package org.marid.jfx.util;
 
+import javafx.beans.Observable;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.marid.jfx.util.MaridCollections;
 
-import javax.xml.bind.annotation.*;
-import java.util.stream.Stream;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "beans")
-@XmlSeeAlso({BeanData.class})
-@XmlAccessorType(XmlAccessType.NONE)
-public final class BeanFile extends AbstractData<BeanFile> {
+public interface MaridCollections {
 
-    public final ObservableList<BeanData> beans = MaridCollections.list();
-
-    public BeanFile() {
-        installInvalidationListeners();
+    static <E extends Observable> ObservableList<E> list(List<E> list) {
+        return FXCollections.observableList(list, e -> new Observable[] {e});
     }
 
-    public Stream<BeanData> allBeans() {
-        final Stream.Builder<BeanData> builder = Stream.builder();
-        beans.forEach(builder::add);
-        return builder.build();
-    }
-
-    @XmlElement(name = "bean")
-    public BeanData[] getBeans() {
-        return beans.stream().filter(b -> !b.isEmpty()).toArray(BeanData[]::new);
-    }
-
-    public void setBeans(BeanData[] beans) {
-        this.beans.addAll(beans);
+    static <E extends Observable> ObservableList<E> list() {
+        return FXCollections.observableArrayList(e -> new Observable[] {e});
     }
 }

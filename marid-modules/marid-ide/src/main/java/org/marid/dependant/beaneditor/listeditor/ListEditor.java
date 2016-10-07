@@ -18,7 +18,6 @@
 
 package org.marid.dependant.beaneditor.listeditor;
 
-import javafx.beans.InvalidationListener;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
@@ -26,7 +25,6 @@ import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.props.WritableValueImpl;
-import org.marid.spring.xml.data.AbstractData;
 import org.marid.spring.xml.data.collection.DCollection;
 import org.marid.spring.xml.data.collection.DElement;
 import org.marid.spring.xml.data.collection.DList;
@@ -36,10 +34,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -50,8 +45,6 @@ import static org.marid.l10n.L10n.s;
  */
 @Component
 public class ListEditor extends ListView<DElement<?>> {
-
-    private final Map<DElement<?>, InvalidationListener> invalidationListenerMap = new HashMap<>();
 
     @Autowired
     public ListEditor(DCollection<?> collection) {
@@ -84,20 +77,8 @@ public class ListEditor extends ListView<DElement<?>> {
                     final ContextMenu contextMenu = new ContextMenu();
                     items.getObject(new WritableValueImpl<>(consumer, supplier), type).addTo(contextMenu);
                     setContextMenu(contextMenu);
-                    item.addListener(invalidationListenerMap.compute(item, (i, old) -> {
-                        if (old != null) {
-                            i.removeListener(old);
-                        }
-                        return observable -> updateItem(i, false);
-                    }));
                 }
             }
         });
-    }
-
-    @PreDestroy
-    public void destroy() {
-        invalidationListenerMap.forEach(AbstractData::removeListener);
-        invalidationListenerMap.clear();
     }
 }

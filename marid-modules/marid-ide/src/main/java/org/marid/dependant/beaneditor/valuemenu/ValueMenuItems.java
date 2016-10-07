@@ -31,7 +31,6 @@ import org.marid.dependant.beaneditor.listeditor.ListEditorConfiguration;
 import org.marid.dependant.beaneditor.propeditor.PropEditorConfiguration;
 import org.marid.dependant.beaneditor.valueeditor.ValueEditorConfiguration;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.annotation.PrototypeComponent;
@@ -42,11 +41,15 @@ import org.marid.spring.xml.data.collection.DList;
 import org.marid.spring.xml.data.collection.DValue;
 import org.marid.spring.xml.data.props.DProps;
 import org.marid.spring.xml.data.ref.DRef;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.core.ResolvableType;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import static java.beans.Introspector.decapitalize;
 import static java.lang.reflect.Modifier.*;
@@ -96,22 +99,19 @@ public class ValueMenuItems {
     }
 
     @OrderedInit(3)
-    public void initRefValue(ProjectProfileReflection reflection) {
+    public void initRefValue(BeanMetaInfoProvider metaInfoProvider) {
         final List<MenuItem> refItems = new ArrayList<>();
-        reflection.getProfile().getBeanFiles().forEach(p -> p.getValue().beans.forEach(data -> {
-            final Optional<? extends Type> t = reflection.getType(data);
-            if (t.isPresent()) {
-                if (TypeUtils.isAssignable(t.get(), type)) {
-                    final MenuItem item = new MenuItem(data.getName(), glyphIcon(FontIcon.M_BEENHERE, 16));
-                    item.setOnAction(event -> {
-                        final DRef ref = new DRef();
-                        ref.setBean(data.getName());
-                        element.setValue(ref);
-                    });
-                    refItems.add(item);
-                }
-            }
-        }));
+        final BeanMetaInfoProvider.BeansMetaInfo metaInfo = metaInfoProvider.profileMetaInfo();
+        for (final BeanDefinitionHolder h : metaInfo.beans(ResolvableType.forType(type))) {
+            final String name = h.getBeanName();
+            final MenuItem item = new MenuItem(name, glyphIcon(FontIcon.M_BEENHERE, 16));
+            item.setOnAction(event -> {
+                final DRef ref = new DRef();
+                ref.setBean(name);
+                element.setValue(ref);
+            });
+            refItems.add(item);
+        }
         if (!refItems.isEmpty()) {
             if (refItems.get(refItems.size() - 1) instanceof SeparatorMenuItem) {
                 refItems.remove(refItems.size() - 1);

@@ -18,15 +18,26 @@
 
 package org.marid.dependant.beaneditor;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.logging.LogSupport;
+import org.marid.spring.xml.MaridBeanDefinitionSaver;
+import org.marid.spring.xml.data.BeanFile;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayOutputStream;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,7 +46,7 @@ import java.util.stream.Stream;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanMetaInfoProvider {
+public class BeanMetaInfoProvider implements LogSupport {
 
     private final ProjectProfile profile;
 
@@ -46,25 +57,45 @@ public class BeanMetaInfoProvider {
 
     public BeansMetaInfo metaInfo() {
         final URLClassLoader classLoader = profile.getClassLoader();
-        if (classLoader == null) {
-            return new BeansMetaInfo(null);
-        } else {
-            return new BeansMetaInfo(new ApplicationContext(classLoader));
+        final ApplicationContext context = new ApplicationContext(classLoader);
+        if (classLoader != null) {
+            context.setResourceLoader(new PathMatchingResourcePatternResolver(classLoader));
+            context.load("classpath*:/META-INF/meta/beans.xml");
         }
+        context.refresh();
+        return new BeansMetaInfo(context);
     }
 
-    private class ApplicationContext extends ClassPathXmlApplicationContext {
+    public BeansMetaInfo profileMetaInfo() {
+        final URLClassLoader classLoader = profile.getClassLoader();
+        final ApplicationContext context = new ApplicationContext(classLoader);
+        final List<Resource> resources = new ArrayList<>();
+        for (final Pair<Path, BeanFile> pair : profile.getBeanFiles()) {
+            final ByteArrayOutputStream os = new ByteArrayOutputStream();
+            try {
+                MaridBeanDefinitionSaver.write(os, pair.getRight());
+                resources.add(new ByteArrayResource(os.toByteArray()));
+            } catch (Exception x) {
+                log(WARNING, "Unable to save {0}", x, pair.getKey());
+            }
+        }
+        context.load(resources.toArray(new Resource[resources.size()]));
+        context.refresh();
+        return new BeansMetaInfo(context);
+    }
+
+    private class ApplicationContext extends GenericXmlApplicationContext {
 
         private ApplicationContext(ClassLoader classLoader) {
             setDisplayName(profile.getName());
-            if (classLoader != null) {
-                setConfigLocation("classpath*:/META-INF/meta/beans.xml");
-            }
             setAllowCircularReferences(true);
             setAllowBeanDefinitionOverriding(true);
             setValidating(false);
             setClassLoader(classLoader);
+        }
 
+        @Override
+        public void refresh() throws BeansException, IllegalStateException {
             prepareRefresh();
             prepareBeanFactory(obtainFreshBeanFactory());
         }

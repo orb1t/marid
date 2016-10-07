@@ -45,10 +45,12 @@ import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.net.URLClassLoader;
 import java.util.*;
 import java.util.function.Function;
@@ -293,13 +295,14 @@ public class BeanListActions {
     public ContextMenu contextMenu(BeanData beanData) {
         final ContextMenu menu = new ContextMenu();
         final List<List<MenuItem>> menuItems = new ArrayList<>();
-        final Class<?> type = reflection.getClass(beanData).orElse(null);
+        final Type type = reflection.getType(beanData).orElse(null);
         if (type == null) {
             return menu;
         }
+        final Class<?> rawType = ResolvableType.forType(type).getRawClass();
 
-        menuItems.add(factoryItems(type, beanData));
-        menuItems.add(editors(type, beanData));
+        menuItems.add(factoryItems(rawType, beanData));
+        menuItems.add(editors(rawType, beanData));
 
         {
             final MenuItem editItem = new MenuItem(s("Edit..."), glyphIcon(M_EDIT, 16));

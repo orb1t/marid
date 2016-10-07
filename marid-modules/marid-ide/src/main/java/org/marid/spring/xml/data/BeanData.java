@@ -20,8 +20,8 @@ package org.marid.spring.xml.data;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.marid.jfx.util.MaridCollections;
 import org.marid.spring.xml.data.collection.DCollection;
 import org.marid.spring.xml.data.collection.DElement;
 
@@ -44,8 +44,8 @@ public final class BeanData extends DElement<BeanData> {
     public final StringProperty factoryMethod = new SimpleStringProperty(this, "factory-method");
     public final StringProperty lazyInit = new SimpleStringProperty(this, "lazy-init");
 
-    public final ObservableList<BeanArg> beanArgs = FXCollections.observableArrayList();
-    public final ObservableList<BeanProp> properties = FXCollections.observableArrayList();
+    public final ObservableList<BeanArg> beanArgs = MaridCollections.list();
+    public final ObservableList<BeanProp> properties = MaridCollections.list();
 
     public BeanData() {
         installInvalidationListeners();

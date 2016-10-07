@@ -20,8 +20,8 @@ package org.marid.spring.xml.data.collection;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.marid.jfx.util.MaridCollections;
 import org.marid.spring.xml.data.props.DProps;
 import org.marid.spring.xml.data.ref.DRef;
 
@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.*;
 public abstract class DCollection<T extends DCollection<T>> extends DElement<T> {
 
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type");
-    public final ObservableList<DElement<?>> elements = FXCollections.observableArrayList();
+    public final ObservableList<DElement<?>> elements = MaridCollections.list();
 
     @XmlAttribute(name = "value-type")
     public String getValueType() {

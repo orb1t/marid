@@ -18,7 +18,6 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.beans.InvalidationListener;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -30,7 +29,6 @@ import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
-import org.marid.spring.xml.data.AbstractData;
 import org.marid.spring.xml.data.BeanData;
 import org.marid.spring.xml.providers.BeanDataProvider;
 import org.springframework.beans.factory.ObjectFactory;
@@ -40,8 +38,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,7 +50,6 @@ import static org.marid.l10n.L10n.s;
 public class BeanListTable extends MaridTableView<BeanData> {
 
     private final ProjectProfileReflection reflection;
-    private final Map<BeanData, InvalidationListener> invalidationListenerMap = new HashMap<>();
 
     @Autowired
     public BeanListTable(BeanDataProvider beanDataProvider, ProjectProfileReflection reflection) {
@@ -186,33 +181,16 @@ public class BeanListTable extends MaridTableView<BeanData> {
 
     @Autowired
     public void initRowFactory(ObjectFactory<BeanListActions> actions) {
-        setRowFactory(view -> {
-            final TableRow<BeanData> row = new TableRow<>();
-            row.itemProperty().addListener((o, ov, nv) -> {
-                if (nv == null) {
-                    row.setContextMenu(null);
-                    invalidationListenerMap.computeIfPresent(ov, (v, old) -> {
-                        v.removeListener(old);
-                        return null;
-                    });
+        setRowFactory(view -> new TableRow<BeanData>() {
+            @Override
+            protected void updateItem(BeanData item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setContextMenu(null);
                 } else {
-                    final InvalidationListener l = observable -> row.setContextMenu(actions.getObject().contextMenu(nv));
-                    l.invalidated(nv);
-                    nv.addListener(l);
-                    invalidationListenerMap.compute(nv, (v, old) -> {
-                        if (old != null) {
-                            v.removeListener(old);
-                        }
-                        return l;
-                    });
+                    setContextMenu(actions.getObject().contextMenu(item));
                 }
-            });
-            return row;
+            }
         });
-    }
-
-    @PreDestroy
-    public void destroy() {
-        invalidationListenerMap.forEach(AbstractData::removeListener);
     }
 }
