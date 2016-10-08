@@ -131,7 +131,7 @@ public class BeanListActions {
         beanData.factoryBean.set(def.getFactoryBeanName());
         beanData.factoryMethod.set(def.getFactoryMethodName());
         beanData.type.set(def.getBeanClassName());
-        beanData.lazyInit.set(def.isLazyInit() ? "true" : null);
+        beanData.lazyInit.set(Boolean.toString(def.isLazyInit()));
 
         if (def instanceof AbstractBeanDefinition) {
             final AbstractBeanDefinition definition = (AbstractBeanDefinition) def;

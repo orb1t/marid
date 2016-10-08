@@ -42,7 +42,7 @@ public final class BeanData extends DElement<BeanData> {
     public final StringProperty destroyMethod = new SimpleStringProperty(this, "destroy-method");
     public final StringProperty factoryBean = new SimpleStringProperty(this, "factory-bean");
     public final StringProperty factoryMethod = new SimpleStringProperty(this, "factory-method");
-    public final StringProperty lazyInit = new SimpleStringProperty(this, "lazy-init");
+    public final StringProperty lazyInit = new SimpleStringProperty(this, "lazy-init", "default");
 
     public final ObservableList<BeanArg> beanArgs = MaridCollections.list();
     public final ObservableList<BeanProp> properties = MaridCollections.list();
@@ -116,7 +116,7 @@ public final class BeanData extends DElement<BeanData> {
 
     @XmlAttribute(name = "lazy-init")
     public String getLazyInit() {
-        return lazyInit.isEmpty().get() ? null : lazyInit.get();
+        return lazyInit.get();
     }
 
     public void setLazyInit(String lazyInit) {

@@ -20,7 +20,7 @@ package org.marid.dependant.beaneditor;
 
 import javafx.scene.layout.BorderPane;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.controls.IdeTab;
+import org.marid.ide.tabs.IdeTab;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

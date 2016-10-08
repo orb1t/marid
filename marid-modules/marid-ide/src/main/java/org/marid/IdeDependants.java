@@ -22,27 +22,21 @@ import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-
-import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component("dependants")
 public class IdeDependants {
-
-    private static final List<AnnotationConfigApplicationContext> CONTEXTS = new CopyOnWriteArrayList<>();
 
     private final AnnotationConfigApplicationContext parent;
 
@@ -65,32 +59,22 @@ public class IdeDependants {
         return parent.toString();
     }
 
-    public void closeDependants() {
-        for (final AnnotationConfigApplicationContext context : CONTEXTS) {
-            try (final AnnotationConfigApplicationContext c = context) {
-                log(Level.INFO, "Closing {0}", c);
-            } catch (Exception x) {
-                log(Level.WARNING, "Unable to close context", x);
-            }
-        }
-        CONTEXTS.clear();
-    }
-
     public final class Builder {
 
         private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         private final Map<String, Object> args = new HashMap<>();
+        private final ApplicationListener<?> listener = event -> {
+            if (event instanceof ContextClosedEvent) {
+                final ContextClosedEvent contextClosedEvent = (ContextClosedEvent) event;
+                if (contextClosedEvent.getApplicationContext() == parent) {
+                    parent.getApplicationListeners().remove(this.listener);
+                    context.close();
+                }
+            }
+        };
 
         private Builder(String name) {
-            CONTEXTS.add(context);
-            context.addApplicationListener(event -> {
-                if (event instanceof ContextClosedEvent) {
-                    final ContextClosedEvent contextClosedEvent = (ContextClosedEvent) event;
-                    if (contextClosedEvent.getApplicationContext() == context) {
-                        CONTEXTS.remove(context);
-                    }
-                }
-            });
+            parent.addApplicationListener(listener);
             context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
             context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
             context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));

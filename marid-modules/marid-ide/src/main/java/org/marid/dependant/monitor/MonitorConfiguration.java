@@ -22,7 +22,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
-import org.marid.jfx.controls.IdeTab;
+import org.marid.ide.tabs.IdeTab;
 import org.marid.logging.LogSupport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

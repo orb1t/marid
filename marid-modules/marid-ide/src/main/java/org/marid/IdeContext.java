@@ -73,9 +73,4 @@ public class IdeContext {
         final Class<?> type = injectionPoint.getMember().getDeclaringClass();
         return Preferences.userNodeForPackage(type).node(type.getName()).node(ideValues.implementationVersion);
     }
-
-    @Bean
-    public AutoCloseable dependantsDestroyer(IdeDependants dependants) {
-        return dependants::closeDependants;
-    }
 }
