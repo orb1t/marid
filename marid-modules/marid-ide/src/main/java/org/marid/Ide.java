@@ -52,6 +52,7 @@ public class Ide extends Application {
     public static Stage primaryStage;
     public static Ide ide;
     public static Logger rootLogger;
+    public static ClassLoader classLoader;
 
     static IdeLogHandler ideLogHandler;
 
@@ -59,6 +60,7 @@ public class Ide extends Application {
     public void init() throws Exception {
         Ide.ide = this;
         rootLogger.addHandler(ideLogHandler = new IdeLogHandler());
+        classLoader = Thread.currentThread().getContextClassLoader();
         context.setDisplayName(Ide.class.getName());
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);

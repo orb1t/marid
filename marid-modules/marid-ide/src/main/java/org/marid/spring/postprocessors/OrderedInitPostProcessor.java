@@ -76,7 +76,7 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
                             f.registerSingleton(method.getName(), result);
                         }
                     } catch (Exception x) {
-                        throw new BeanInstantiationException(bean.getClass(), null, x);
+                        throw new BeanInstantiationException(bean.getClass(), method.toString(), x);
                     }
                 });
         return bean;

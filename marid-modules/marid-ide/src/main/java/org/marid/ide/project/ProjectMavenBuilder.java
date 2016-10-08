@@ -20,6 +20,7 @@ package org.marid.ide.project;
 
 import javafx.application.Platform;
 import org.codehaus.plexus.util.FileUtils;
+import org.marid.Ide;
 import org.marid.ide.common.IdeValues;
 import org.marid.jfx.action.FxAction;
 import org.marid.maven.ProjectBuilder;
@@ -61,8 +62,7 @@ public class ProjectMavenBuilder {
         this.projectBuildAction = projectBuildAction;
         this.tempDirectory = Files.createTempDirectory("projectBuilder");
         final String resource = String.format("marid-maven-%s.zip", ideValues.implementationVersion);
-        final ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
-        final URL url = Objects.requireNonNull(contextLoader.getResource(resource), "marid-maven artifact is not found");
+        final URL url = Objects.requireNonNull(Ide.classLoader.getResource(resource), "marid-maven artifact is not found");
         try (final ZipInputStream zipInputStream = new ZipInputStream(url.openStream(), StandardCharsets.UTF_8)) {
             final List<URL> urls = new ArrayList<>();
             for (ZipEntry entry = zipInputStream.getNextEntry(); entry != null; entry = zipInputStream.getNextEntry()) {

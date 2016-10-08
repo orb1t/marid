@@ -102,7 +102,8 @@ public class ValueMenuItems {
     public void initRefValue(BeanMetaInfoProvider metaInfoProvider) {
         final List<MenuItem> refItems = new ArrayList<>();
         final BeanMetaInfoProvider.BeansMetaInfo metaInfo = metaInfoProvider.profileMetaInfo();
-        for (final BeanDefinitionHolder h : metaInfo.beans(ResolvableType.forType(type))) {
+        final ResolvableType resolvableType = ResolvableType.forType(type);
+        for (final BeanDefinitionHolder h : metaInfo.beans(resolvableType)) {
             final String name = h.getBeanName();
             final MenuItem item = new MenuItem(name, glyphIcon(FontIcon.M_BEENHERE, 16));
             item.setOnAction(event -> {

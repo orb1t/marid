@@ -18,7 +18,7 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans">
 
-    <bean name="timer" class="java.util.concurrent.ScheduledThreadPoolExecutor" abstract="true" destroy-method="shutdown">
+    <bean name="timer" class="java.util.concurrent.ScheduledThreadPoolExecutor" destroy-method="shutdown">
         <description>Timer</description>
 
         <constructor-arg name="corePoolSize" type="int" value="1"/>
@@ -26,14 +26,18 @@
         <meta key="icon" value="P_ADD"/>
     </bean>
 
-    <bean name="simpleGraphWidgetProperties" class="org.marid.hmi.db.SimpleGraphWidgetProperties" abstract="true">
+    <bean name="simpleGraphWidgetProperties" class="org.marid.hmi.db.SimpleGraphWidgetProperties">
         <description>Simple graph properties</description>
 
         <meta key="icon" value="P_ADD"/>
     </bean>
 
-    <bean name="simpleGraphWidget" class="org.marid.hmi.db.SimpleGraphWidget" abstract="true">
+    <bean name="simpleGraphWidget" class="org.marid.hmi.db.SimpleGraphWidget">
         <description>Simple graph widget</description>
+
+        <constructor-arg name="timer" value=""/>
+        <constructor-arg name="reader" value=""/>
+        <constructor-arg name="conf" value=""/>
 
         <meta key="icon" value="P_ADD"/>
     </bean>

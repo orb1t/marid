@@ -23,11 +23,11 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.logging.LogSupport;
 import org.marid.spring.xml.MaridBeanDefinitionSaver;
 import org.marid.spring.xml.data.BeanFile;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -38,6 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,18 +58,25 @@ public class BeanMetaInfoProvider implements LogSupport {
 
     public BeansMetaInfo metaInfo() {
         final URLClassLoader classLoader = profile.getClassLoader();
-        final ApplicationContext context = new ApplicationContext(classLoader);
+        final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
         if (classLoader != null) {
-            context.setResourceLoader(new PathMatchingResourcePatternResolver(classLoader));
-            context.load("classpath*:/META-INF/meta/beans.xml");
+            beanFactory.setBeanClassLoader(classLoader);
+            final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+            reader.setValidating(false);
+            reader.setBeanClassLoader(classLoader);
+            reader.setResourceLoader(new PathMatchingResourcePatternResolver(classLoader));
+            reader.loadBeanDefinitions("classpath*:/META-INF/meta/beans.xml");
         }
-        context.refresh();
-        return new BeansMetaInfo(context);
+        return new BeansMetaInfo(beanFactory);
     }
 
     public BeansMetaInfo profileMetaInfo() {
         final URLClassLoader classLoader = profile.getClassLoader();
-        final ApplicationContext context = new ApplicationContext(classLoader);
+        final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+        beanFactory.setBeanClassLoader(classLoader);
+        final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+        reader.setValidating(false);
+        reader.setBeanClassLoader(classLoader);
         final List<Resource> resources = new ArrayList<>();
         for (final Pair<Path, BeanFile> pair : profile.getBeanFiles()) {
             final ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -79,51 +87,36 @@ public class BeanMetaInfoProvider implements LogSupport {
                 log(WARNING, "Unable to save {0}", x, pair.getKey());
             }
         }
-        context.load(resources.toArray(new Resource[resources.size()]));
-        context.refresh();
-        return new BeansMetaInfo(context);
-    }
-
-    private class ApplicationContext extends GenericXmlApplicationContext {
-
-        private ApplicationContext(ClassLoader classLoader) {
-            setDisplayName(profile.getName());
-            setAllowCircularReferences(true);
-            setAllowBeanDefinitionOverriding(true);
-            setValidating(false);
-            setClassLoader(classLoader);
-        }
-
-        @Override
-        public void refresh() throws BeansException, IllegalStateException {
-            prepareRefresh();
-            prepareBeanFactory(obtainFreshBeanFactory());
-        }
+        reader.loadBeanDefinitions(resources.toArray(new Resource[resources.size()]));
+        return new BeansMetaInfo(beanFactory);
     }
 
     public static class BeansMetaInfo {
 
-        private final ApplicationContext context;
+        private final DefaultListableBeanFactory beanFactory;
 
-        private BeansMetaInfo(ApplicationContext context) {
-            this.context = context;
+        private BeansMetaInfo(DefaultListableBeanFactory beanFactory) {
+            this.beanFactory = beanFactory;
         }
 
         public BeanDefinition getBeanDefinition(String name) {
-            return context.getBeanFactory().getBeanDefinition(name);
+            return beanFactory.getBeanDefinition(name);
         }
 
         public List<BeanDefinitionHolder> beans() {
-            return beans(context.getBeanDefinitionNames());
+            return beans(beanFactory.getBeanDefinitionNames());
         }
 
         public List<BeanDefinitionHolder> beans(ResolvableType resolvableType) {
-            return beans(context.getBeanNamesForType(resolvableType));
+            if (Object.class.equals(resolvableType.getRawClass())) {
+                return Collections.emptyList();
+            }
+            return beans(beanFactory.getBeanNamesForType(resolvableType));
         }
 
         private List<BeanDefinitionHolder> beans(String... names) {
             return Stream.of(names)
-                    .map(name -> new BeanDefinitionHolder(context.getBeanFactory().getBeanDefinition(name), name))
+                    .map(name -> new BeanDefinitionHolder(beanFactory.getBeanDefinition(name), name))
                     .collect(Collectors.toList());
         }
     }
