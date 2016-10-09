@@ -78,19 +78,12 @@ public class ProfilesTable extends TableView<ProjectProfile> {
 
     @Autowired
     public void init(@Qualifier("profile") Map<String, FxAction> actionMap) {
-        setRowFactory(param -> new TableRow<ProjectProfile>() {
-            @Override
-            protected void updateItem(ProjectProfile item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setContextMenu(null);
-                } else {
-                    final MaridMenu maridMenu = new MaridMenu(actionMap);
-                    setContextMenu(new ContextMenu(maridMenu.getMenus().stream()
-                            .flatMap(m -> m.getItems().stream())
-                            .toArray(MenuItem[]::new)));
-                }
-            }
+        setRowFactory(param -> {
+            final TableRow<ProjectProfile> row = new TableRow<>();
+            row.setContextMenu(new ContextMenu(new MaridMenu(actionMap).getMenus().stream()
+                    .flatMap(m -> m.getItems().stream())
+                    .toArray(MenuItem[]::new)));
+            return row;
         });
     }
 }
