@@ -16,23 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.menu;
+package org.marid.ide.panes.main;
 
-import javafx.scene.layout.VBox;
-import org.marid.ide.toolbar.IdeToolbar;
+import org.marid.jfx.action.FxAction;
+import org.marid.jfx.toolbar.MaridToolbar;
+import org.marid.spring.action.IdeAction;
+import org.marid.spring.event.IdeStartedEvent;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeMenuToolbarPane extends VBox {
+public class IdeToolbar extends MaridToolbar {
+
+    private final ObjectFactory<Map<String, FxAction>> menuActionsFactory;
 
     @Autowired
-    public IdeMenuToolbarPane(IdeMenu ideMenu, IdeToolbar ideToolbar) {
-        super(ideMenu, ideToolbar);
-        setMaxWidth(Double.MAX_VALUE);
-        setMinWidth(0.0);
+    public IdeToolbar(@IdeAction ObjectFactory<Map<String, FxAction>> menuActionsFactory) {
+        this.menuActionsFactory = menuActionsFactory;
+    }
+
+    @EventListener
+    private void onIdeStart(IdeStartedEvent event) {
+        init(menuActionsFactory.getObject());
     }
 }

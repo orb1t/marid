@@ -16,22 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.main;
+package org.marid.spring.event;
 
-import javafx.scene.layout.BorderPane;
-import org.marid.ide.status.IdeStatusBar;
-import org.marid.ide.tabs.IdeTabPane;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import java.util.EventObject;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class IdePane extends BorderPane {
+public class IdeStartedEvent extends EventObject {
 
-    @Autowired
-    public IdePane(IdeTabPane ideTabPane, IdeMenuToolbarPane ideMenuToolbarPane, IdeStatusBar ideStatusBar) {
-        super(ideTabPane, ideMenuToolbarPane, null, ideStatusBar, null);
+    public IdeStartedEvent(Object source) {
+        super(source);
     }
 }

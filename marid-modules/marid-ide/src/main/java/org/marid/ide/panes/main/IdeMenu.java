@@ -18,20 +18,32 @@
 
 package org.marid.ide.panes.main;
 
-import javafx.scene.layout.BorderPane;
-import org.marid.ide.status.IdeStatusBar;
-import org.marid.ide.tabs.IdeTabPane;
+import org.marid.jfx.action.FxAction;
+import org.marid.jfx.menu.MaridMenu;
+import org.marid.spring.action.IdeAction;
+import org.marid.spring.event.IdeStartedEvent;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdePane extends BorderPane {
+public class IdeMenu extends MaridMenu {
+
+    private final ObjectFactory<Map<String, FxAction>> menuActionsFactory;
 
     @Autowired
-    public IdePane(IdeTabPane ideTabPane, IdeMenuToolbarPane ideMenuToolbarPane, IdeStatusBar ideStatusBar) {
-        super(ideTabPane, ideMenuToolbarPane, null, ideStatusBar, null);
+    public IdeMenu(@IdeAction ObjectFactory<Map<String, FxAction>> menuActionsFactory) {
+        this.menuActionsFactory = menuActionsFactory;
+    }
+
+    @EventListener
+    private void onIdeStart(IdeStartedEvent event) {
+        init(menuActionsFactory.getObject());
     }
 }

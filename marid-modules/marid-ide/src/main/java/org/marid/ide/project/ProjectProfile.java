@@ -119,6 +119,11 @@ public class ProjectProfile implements LogSupport {
         }
     }
 
+    public boolean isHmi() {
+        return model.getDependencies().stream()
+                .anyMatch(d -> "org.marid".equals(d.getGroupId()) && "marid-hmi".equals(d.getArtifactId()));
+    }
+
     private Model loadModel() {
         try (final InputStream is = Files.newInputStream(pomFile)) {
             final MavenXpp3Reader reader = new MavenXpp3Reader();

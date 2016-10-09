@@ -16,22 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.main;
+package org.marid.ide.tabs;
 
-import javafx.scene.layout.BorderPane;
-import org.marid.ide.status.IdeStatusBar;
-import org.marid.ide.tabs.IdeTabPane;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import javafx.scene.Node;
+import javafx.scene.control.Tab;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class IdePane extends BorderPane {
+public class IdeKeyTab extends IdeTab {
 
-    @Autowired
-    public IdePane(IdeTabPane ideTabPane, IdeMenuToolbarPane ideMenuToolbarPane, IdeStatusBar ideStatusBar) {
-        super(ideTabPane, ideMenuToolbarPane, null, ideStatusBar, null);
+    public IdeKeyTab(Node content, String text, Object... args) {
+        super(content, text, args);
+    }
+
+    @Override
+    protected void register() {
+        final Tab tab = ideTabPane.getTabs().stream().filter(getClass()::isInstance).findAny().orElse(null);
+        if (tab != null) {
+            context.close();
+            ideTabPane.getSelectionModel().select(tab);
+        } else {
+            super.register();
+        }
     }
 }

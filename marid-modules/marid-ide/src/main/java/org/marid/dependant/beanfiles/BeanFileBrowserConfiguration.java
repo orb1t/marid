@@ -16,22 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.main;
+package org.marid.dependant.beanfiles;
 
-import javafx.scene.layout.BorderPane;
-import org.marid.ide.status.IdeStatusBar;
-import org.marid.ide.tabs.IdeTabPane;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.marid.ide.project.ProjectManager;
+import org.marid.ide.project.ProjectProfile;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class IdePane extends BorderPane {
+@Configuration
+@Import({
+        BeanFileBrowser.class,
+        BeanFileBrowserActions.class,
+        BeanFileBrowserPane.class,
+        BeanFileBrowserTab.class
+})
+public class BeanFileBrowserConfiguration {
 
-    @Autowired
-    public IdePane(IdeTabPane ideTabPane, IdeMenuToolbarPane ideMenuToolbarPane, IdeStatusBar ideStatusBar) {
-        super(ideTabPane, ideMenuToolbarPane, null, ideStatusBar, null);
+    @Bean
+    public ProjectProfile profile(ProjectManager projectManager) {
+        return projectManager.getProfile();
     }
 }

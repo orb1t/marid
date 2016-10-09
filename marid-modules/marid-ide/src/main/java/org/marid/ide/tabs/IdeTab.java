@@ -22,12 +22,11 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 
 import static org.marid.l10n.L10n.s;
 
@@ -36,10 +35,10 @@ import static org.marid.l10n.L10n.s;
  */
 public class IdeTab extends Tab {
 
-    @Resource
-    protected TabPane ideTabPane;
+    @Autowired
+    protected IdeTabPane ideTabPane;
 
-    @Resource
+    @Autowired
     protected AnnotationConfigApplicationContext context;
 
     public IdeTab(Node content, String text, Object...args) {
@@ -48,7 +47,7 @@ public class IdeTab extends Tab {
 
     @PostConstruct
     private void init() {
-        ideTabPane.getTabs().add(this);
+        register();
         ideTabPane.getSelectionModel().select(this);
         final EventHandler<Event> oldClosed = getOnClosed();
         setOnClosed(event -> {
@@ -57,6 +56,10 @@ public class IdeTab extends Tab {
             }
             context.close();
         });
+    }
+
+    protected void register() {
+        ideTabPane.getTabs().add(this);
     }
 
     @PreDestroy

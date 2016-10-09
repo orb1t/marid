@@ -23,6 +23,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCombination;
 import org.marid.IdeDependants;
+import org.marid.dependant.beanfiles.BeanFileBrowserConfiguration;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
 import org.marid.jfx.action.FxAction;
@@ -144,6 +145,18 @@ public class ProjectConfiguration implements LogSupport {
                     if (result.isPresent() && result.get() == ButtonType.YES) {
                         manager.remove(manager.getProfile());
                     }
+                });
+    }
+
+    @Bean
+    @IdeAction
+    public FxAction projectBeanFilesAction(IdeDependants dependants, ProjectManager projectManager) {
+        return new FxAction("projectTree", "pt", "Project")
+                .setText("Project files")
+                .setIcon(M_FOLDER_SHARED)
+                .setEventHandler(event -> {
+                    final ProjectProfile profile = projectManager.getProfile();
+                    dependants.start(profile.getName(), b -> b.conf(BeanFileBrowserConfiguration.class));
                 });
     }
 }

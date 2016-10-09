@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.filebrowser;
+package org.marid.dependant.beanfiles;
 
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;

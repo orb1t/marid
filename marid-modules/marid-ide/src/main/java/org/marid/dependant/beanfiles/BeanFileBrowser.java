@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.filebrowser;
+package org.marid.dependant.beanfiles;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -24,6 +24,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.apache.commons.lang3.tuple.Pair;
 import org.marid.ide.project.ProjectManager;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,11 +48,10 @@ import static org.marid.l10n.L10n.s;
 public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
 
     @Autowired
-    public BeanFileBrowser(ProjectManager projectManager) {
-        super(projectManager.getProfile().getBeanFiles().sorted(Comparator.comparing(Pair::getKey)));
+    public BeanFileBrowser(ProjectProfile profile) {
+        super(profile.getBeanFiles().sorted(Comparator.comparing(Pair::getKey)));
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
-        projectManager.profileProperty().addListener((o, ov, nv) -> setItems(nv.getBeanFiles()));
     }
 
     @OrderedInit(1)
@@ -99,5 +99,10 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
                     .sum());
         });
         getColumns().add(col);
+    }
+
+    @Autowired
+    public void init() {
+
     }
 }

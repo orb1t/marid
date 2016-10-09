@@ -16,22 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.main;
+package org.marid.ide.panes.profiles;
 
-import javafx.scene.layout.BorderPane;
-import org.marid.ide.status.IdeStatusBar;
-import org.marid.ide.tabs.IdeTabPane;
+import org.marid.ide.tabs.IdeTab;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdePane extends BorderPane {
+@Lazy(false)
+public class ProfilesTab extends IdeTab {
 
     @Autowired
-    public IdePane(IdeTabPane ideTabPane, IdeMenuToolbarPane ideMenuToolbarPane, IdeStatusBar ideStatusBar) {
-        super(ideTabPane, ideMenuToolbarPane, null, ideStatusBar, null);
+    public ProfilesTab(ProfilesTable table) {
+        super(table, "Profiles");
+        setClosable(false);
     }
 }
