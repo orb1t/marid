@@ -31,12 +31,14 @@ import org.marid.l10n.L10n;
 import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static javafx.beans.binding.Bindings.createBooleanBinding;
@@ -52,36 +54,47 @@ import static org.marid.jfx.icons.FontIcon.*;
 public class ProjectConfiguration implements LogSupport {
 
     @Bean
-    @IdeAction
-    public FxAction projectSetupAction(IdeDependants dependants) {
-        return new FxAction("projectSetup", "setup", "Project")
-                .setText("Project setup...")
-                .setIcon(O_TOOLS)
-                .setEventHandler(event -> dependants.start("projectEditor", b -> b.conf(ProjectConfigConfiguration.class)));
+    public Supplier<ProjectProfile> profileSupplier(ObjectProvider<ProjectProfile> profileProvider,
+                                                    ProjectManager projectManager) {
+        return () -> {
+            final ProjectProfile profile = profileProvider.getIfAvailable();
+            return profile != null ? profile : projectManager.getProfile();
+        };
     }
 
     @Bean
     @IdeAction
-    public FxAction projectSaveAction(ObjectFactory<ProjectSaver> projectSaver) {
+    public FxAction projectSetupAction(IdeDependants dependants, Supplier<ProjectProfile> profile) {
+        return new FxAction("projectSetup", "setup", "Project")
+                .setText("Project setup...")
+                .setIcon(O_TOOLS)
+                .setEventHandler(event -> dependants.start("projectEditor", b -> b
+                        .conf(ProjectConfigConfiguration.class)
+                        .arg("profile", profile.get())));
+    }
+
+    @Bean
+    @IdeAction
+    public FxAction projectSaveAction(ObjectFactory<ProjectSaver> projectSaver, Supplier<ProjectProfile> profile) {
         return new FxAction(null, "io", "Project")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+S"))
                 .setText("Save")
                 .setIcon(F_SAVE)
-                .setEventHandler(event -> projectSaver.getObject().save());
+                .setEventHandler(event -> projectSaver.getObject().save(profile.get()));
     }
 
     @Bean
     @IdeAction
     public FxAction projectBuildAction(ObjectFactory<ProjectMavenBuilder> mavenBuilder,
                                        ObjectFactory<ProjectSaver> projectSaver,
-                                       ObjectFactory<ProjectManager> projectManager) {
+                                       Supplier<ProjectProfile> profileSupplier) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F9"))
                 .setText("Build")
                 .setIcon(D_CLOCK_FAST)
                 .setEventHandler(event -> {
-                    final ProjectProfile profile = projectManager.getObject().getProfile();
-                    projectSaver.getObject().save();
+                    final ProjectProfile profile = profileSupplier.get();
+                    projectSaver.getObject().save(profile);
                     mavenBuilder.getObject().build(profile, result -> {
                         try {
                             log(INFO, "[{0}] Built {1}", profile, result);
@@ -97,12 +110,14 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
-    public FxAction projectRunAction(IdeDependants dependants) {
+    public FxAction projectRunAction(IdeDependants dependants, Supplier<ProjectProfile> profile) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F5"))
                 .setText("Run")
                 .setIcon(F_PLAY)
-                .setEventHandler(event -> dependants.start("projectRunner", b -> b.conf(ProjectRunnerConfiguration.class)));
+                .setEventHandler(event -> dependants.start("projectRunner", b -> b
+                        .conf(ProjectRunnerConfiguration.class)
+                        .arg("profile", profile.get())));
     }
 
     @Bean
@@ -125,14 +140,14 @@ public class ProjectConfiguration implements LogSupport {
                             log(WARNING, "Unable to write default logging properties", x);
                         }
                         projectManager.getObject().profileProperty().set(profile);
-                        projectSaverFactory.getObject().save();
+                        projectSaverFactory.getObject().save(profile);
                     }
                 });
     }
 
     @Bean
     @IdeAction
-    public FxAction projectRemoveProfileAction(ProjectManager manager) {
+    public FxAction projectRemoveProfileAction(ProjectManager manager, Supplier<ProjectProfile> profile) {
         return new FxAction("projectIO", "pm", "Project")
                 .setText("Remove profile")
                 .setIcon(D_MINUS_BOX)
@@ -143,20 +158,19 @@ public class ProjectConfiguration implements LogSupport {
                     alert.setHeaderText(L10n.s("Project removal confirmation"));
                     final Optional<ButtonType> result = alert.showAndWait();
                     if (result.isPresent() && result.get() == ButtonType.YES) {
-                        manager.remove(manager.getProfile());
+                        manager.remove(profile.get());
                     }
                 });
     }
 
     @Bean
     @IdeAction
-    public FxAction projectBeanFilesAction(IdeDependants dependants, ProjectManager projectManager) {
+    public FxAction projectBeanFilesAction(IdeDependants dependants, Supplier<ProjectProfile> profile) {
         return new FxAction("projectTree", "pt", "Project")
                 .setText("Project files")
                 .setIcon(M_FOLDER_SHARED)
-                .setEventHandler(event -> {
-                    final ProjectProfile profile = projectManager.getProfile();
-                    dependants.start(profile.getName(), b -> b.conf(BeanFileBrowserConfiguration.class));
-                });
+                .setEventHandler(event -> dependants.start(profile.get().getName(), b -> b
+                        .conf(BeanFileBrowserConfiguration.class)
+                        .arg("profile", profile.get())));
     }
 }

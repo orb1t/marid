@@ -29,7 +29,7 @@ import javafx.stage.Modality;
 import org.apache.maven.model.Model;
 import org.marid.dependant.project.config.deps.DependenciesEditor;
 import org.marid.ide.panes.main.IdePane;
-import org.marid.ide.project.ProjectManager;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
@@ -38,6 +38,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 
 import java.util.List;
 
@@ -51,8 +52,13 @@ import static org.marid.l10n.L10n.s;
 public class ProjectConfigConfiguration {
 
     @Bean
-    public Model model(ProjectManager projectManager) {
-        return projectManager.getProfile().getModel();
+    public ProjectProfile profile(Environment environment) {
+        return environment.getProperty("profile", ProjectProfile.class);
+    }
+
+    @Bean
+    public Model model(ProjectProfile profile) {
+        return profile.getModel();
     }
 
     @Bean
@@ -87,12 +93,12 @@ public class ProjectConfigConfiguration {
     }
 
     @Bean
-    public Dialog<Boolean> dialog(IdePane idePane, TabPane tabPane, ProjectManager projectManager) {
+    public Dialog<Boolean> dialog(IdePane idePane, TabPane tabPane, ProjectProfile profile) {
         final Dialog<Boolean> dialog = new Dialog<>();
         dialog.getDialogPane().setPrefSize(800, 600);
         dialog.getDialogPane().setContent(tabPane);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
-        dialog.setTitle(s("Project preferences: %s", projectManager.getProfile()));
+        dialog.setTitle(s("Project preferences: %s", profile));
         dialog.initModality(Modality.WINDOW_MODAL);
         dialog.initOwner(idePane.getScene().getWindow());
         dialog.setResultConverter(type -> true);

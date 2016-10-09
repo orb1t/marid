@@ -28,16 +28,14 @@ import org.springframework.stereotype.Component;
 public class ProjectSaver {
 
     private final ProjectPrerequisites projectPrerequisites;
-    private final ProjectManager projectManager;
 
     @Autowired
-    public ProjectSaver(ProjectPrerequisites projectPrerequisites, ProjectManager projectManager) {
+    public ProjectSaver(ProjectPrerequisites projectPrerequisites) {
         this.projectPrerequisites = projectPrerequisites;
-        this.projectManager = projectManager;
     }
 
-    public void save() {
-        projectPrerequisites.apply();
-        projectManager.getProfile().save();
+    public void save(ProjectProfile profile) {
+        projectPrerequisites.apply(profile);
+        profile.save();
     }
 }

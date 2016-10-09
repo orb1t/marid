@@ -22,7 +22,6 @@ import javafx.application.Platform;
 import javafx.scene.control.*;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
-import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.settings.DebugSettings;
 import org.marid.ide.settings.JavaSettings;
@@ -42,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -61,10 +59,10 @@ public class ProjectRunnerPane extends BorderPane implements LogSupport {
     final PrintStream printStream;
 
     @Autowired
-    public ProjectRunnerPane(ProjectManager projectManager,
+    public ProjectRunnerPane(ProjectProfile profile,
                              JavaSettings javaSettings,
                              DebugSettings debugSettings) throws IOException {
-        profile = projectManager.getProfile();
+        this.profile = profile;
         final ScrollPane outPane = new ScrollPane(out);
         final ScrollPane errPane = new ScrollPane(err);
         Arrays.asList(outPane, errPane).forEach(pane -> {

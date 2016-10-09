@@ -37,20 +37,18 @@ import static java.util.Collections.singletonList;
 public class ProjectPrerequisites {
 
     private final MavenSettings mavenSettings;
-    private final ProjectManager projectManager;
     private final IdeValues ideValues;
 
     private Model model;
 
     @Autowired
-    public ProjectPrerequisites(MavenSettings mavenSettings, ProjectManager projectManager, IdeValues ideValues) {
+    public ProjectPrerequisites(MavenSettings mavenSettings, IdeValues ideValues) {
         this.mavenSettings = mavenSettings;
-        this.projectManager = projectManager;
         this.ideValues = ideValues;
     }
 
-    public void apply() {
-        model = projectManager.getProfile().getModel();
+    public void apply(ProjectProfile profile) {
+        model = profile.getModel();
         applyPrerequisites();
         applyProperties();
         applyBuild();
