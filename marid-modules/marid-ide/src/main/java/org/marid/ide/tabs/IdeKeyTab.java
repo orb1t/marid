@@ -32,10 +32,14 @@ public class IdeKeyTab extends IdeTab {
 
     @Override
     protected void register() {
-        final Tab tab = ideTabPane.getTabs().stream().filter(getClass()::isInstance).findAny().orElse(null);
+        final Tab tab = ideTabPane.getTabs().stream()
+                .filter(getClass()::isInstance)
+                .filter(this::equals)
+                .findAny()
+                .orElse(null);
         if (tab != null) {
-            context.close();
             ideTabPane.getSelectionModel().select(tab);
+            context.close();
         } else {
             super.register();
         }

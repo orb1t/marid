@@ -166,6 +166,7 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
+    @Qualifier("profile")
     public FxAction projectBeanFilesAction(IdeDependants dependants, Supplier<ProjectProfile> profile) {
         return new FxAction("projectTree", "pt", "Project")
                 .setText("Project files")
