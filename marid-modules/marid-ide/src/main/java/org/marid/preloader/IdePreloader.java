@@ -18,7 +18,6 @@
 
 package org.marid.preloader;
 
-import com.sun.javafx.application.LauncherImpl;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.application.Preloader;
@@ -44,14 +43,11 @@ import org.marid.IdePrefs;
 import org.marid.jfx.FxMaridIcon;
 import org.marid.l10n.L10n;
 
-import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 
 import static org.marid.l10n.L10n.m;
-import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -161,18 +157,6 @@ public class IdePreloader extends Preloader {
                 publishText(new Text(m("Starting application...") + System.lineSeparator()));
                 logHandler.close();
                 primaryStage.close();
-                try {
-                    Field field = LauncherImpl.class.getDeclaredField("currentPreloader");
-                    field.setAccessible(true);
-                    field.set(null, null);
-                    field = LauncherImpl.class.getDeclaredField("savedPreloaderClass");
-                    field.setAccessible(true);
-                    field.set(null, null);
-                    log(Level.INFO, "Preloader closed and cleaned");
-                } catch (Exception x) {
-                    log(Level.WARNING, "Unable to null the Preloader", x);
-                    log(Level.INFO, "Preloader closed");
-                }
                 break;
         }
     }

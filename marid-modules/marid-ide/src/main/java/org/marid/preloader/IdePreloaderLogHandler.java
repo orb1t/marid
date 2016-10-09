@@ -19,6 +19,7 @@
 package org.marid.preloader;
 
 import javafx.scene.text.Text;
+import org.marid.Ide;
 import org.marid.concurrent.MaridTimerTask;
 
 import java.util.ArrayList;
@@ -81,5 +82,6 @@ public class IdePreloaderLogHandler extends Handler {
     public void close() {
         timer.cancel();
         flush();
+        Ide.rootLogger.removeHandler(this);
     }
 }
