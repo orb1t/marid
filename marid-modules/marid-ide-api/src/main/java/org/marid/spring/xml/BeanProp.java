@@ -16,17 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.data.collection;
+package org.marid.spring.xml;
 
-import org.marid.spring.xml.data.AbstractData;
-
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlTransient
-public abstract class DElement<T extends DElement<T>> extends AbstractData<T> {
+@XmlRootElement(name = "property")
+public final class BeanProp extends RefValue<BeanProp> {
 
-    public abstract boolean isEmpty();
 }

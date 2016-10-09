@@ -16,14 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.data.collection;
+package org.marid.spring.xml.collection;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
-import org.marid.jfx.util.MaridCollections;
-import org.marid.spring.xml.data.props.DProps;
-import org.marid.spring.xml.data.ref.DRef;
+import org.marid.spring.xml.props.DProps;
+import org.marid.spring.xml.ref.DRef;
+import org.marid.util.MaridCollections;
 
 import javax.xml.bind.annotation.*;
 

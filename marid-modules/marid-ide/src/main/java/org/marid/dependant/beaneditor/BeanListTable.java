@@ -29,8 +29,8 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
-import org.marid.spring.xml.data.BeanData;
-import org.marid.spring.xml.providers.BeanDataProvider;
+import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,8 +52,8 @@ public class BeanListTable extends MaridTableView<BeanData> {
     private final ProjectProfileReflection reflection;
 
     @Autowired
-    public BeanListTable(BeanDataProvider beanDataProvider, ProjectProfileReflection reflection) {
-        super(beanDataProvider.beanData());
+    public BeanListTable(BeanFile beanFile, ProjectProfileReflection reflection) {
+        super(beanFile.beans);
         this.reflection = reflection;
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setEditable(true);

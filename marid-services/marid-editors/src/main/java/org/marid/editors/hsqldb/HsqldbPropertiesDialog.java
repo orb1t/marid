@@ -28,9 +28,9 @@ import javafx.stage.Modality;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.panes.GenericGridPane;
-import org.marid.spring.xml.data.BeanData;
-import org.marid.spring.xml.data.BeanProp;
-import org.marid.spring.xml.data.collection.DValue;
+import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.BeanProp;
+import org.marid.spring.xml.collection.DValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

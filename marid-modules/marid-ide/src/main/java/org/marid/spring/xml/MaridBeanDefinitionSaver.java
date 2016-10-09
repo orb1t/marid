@@ -19,7 +19,6 @@
 package org.marid.spring.xml;
 
 import org.marid.misc.Calls;
-import org.marid.spring.xml.data.BeanFile;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

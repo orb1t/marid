@@ -22,7 +22,7 @@ import javafx.scene.control.ToolBar;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.toolbar.MaridToolbar;
-import org.marid.spring.xml.data.collection.DCollection;
+import org.marid.spring.xml.collection.DCollection;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

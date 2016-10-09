@@ -25,7 +25,7 @@ import javafx.scene.control.TableView;
 import org.apache.commons.lang3.tuple.Pair;
 import org.marid.ide.project.ProjectManager;
 import org.marid.spring.annotation.OrderedInit;
-import org.marid.spring.xml.data.BeanFile;
+import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

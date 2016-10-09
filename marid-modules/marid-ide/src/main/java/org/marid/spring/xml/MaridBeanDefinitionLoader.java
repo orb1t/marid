@@ -18,8 +18,6 @@
 
 package org.marid.spring.xml;
 
-import org.marid.spring.xml.data.BeanFile;
-
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.IOException;

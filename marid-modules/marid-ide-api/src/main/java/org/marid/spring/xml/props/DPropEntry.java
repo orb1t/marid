@@ -16,46 +16,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.data.ref;
+package org.marid.spring.xml.props;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.spring.xml.data.collection.DElement;
+import org.marid.spring.xml.AbstractData;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
+@XmlRootElement(name = "prop")
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "ref")
-public final class DRef extends DElement<DRef> {
+public final class DPropEntry extends AbstractData<DPropEntry> {
 
-    public final StringProperty ref = new SimpleStringProperty(this, "value");
+    public final StringProperty key = new SimpleStringProperty(this, "key");
+    public final StringProperty value = new SimpleStringProperty(this, "value");
 
-    public DRef() {
-        ref.addListener(this::invalidate);
+    public DPropEntry() {
+        key.addListener(this::invalidate);
+        value.addListener(this::invalidate);
     }
 
-    @XmlAttribute(name = "bean")
-    public String getBean() {
-        return ref.isEmpty().get() ? null : ref.get();
+    @XmlAttribute(name = "key")
+    public String getKey() {
+        return key.get();
     }
 
-    public void setBean(String bean) {
-        ref.set(bean);
+    public void setKey(String key) {
+        this.key.set(key);
     }
 
-    @Override
+    @XmlValue
+    public String getValue() {
+        return value.get();
+    }
+
+    public void setValue(String value) {
+        this.value.set(value);
+    }
+
     public boolean isEmpty() {
-        return ref.isEmpty().get();
-    }
-
-    @Override
-    public String toString() {
-        return getBean();
+        return key.isEmpty().get() && value.isEmpty().get();
     }
 }

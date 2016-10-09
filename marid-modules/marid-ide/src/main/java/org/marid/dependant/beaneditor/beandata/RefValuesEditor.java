@@ -24,11 +24,11 @@ import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.annotation.OrderedInit;
-import org.marid.spring.xml.data.RefValue;
-import org.marid.spring.xml.data.collection.DCollection;
-import org.marid.spring.xml.data.collection.DElement;
-import org.marid.spring.xml.data.collection.DValue;
-import org.marid.spring.xml.data.ref.DRef;
+import org.marid.spring.xml.RefValue;
+import org.marid.spring.xml.collection.DCollection;
+import org.marid.spring.xml.collection.DElement;
+import org.marid.spring.xml.collection.DValue;
+import org.marid.spring.xml.ref.DRef;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.data;
+package org.marid.spring.xml;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -25,8 +25,6 @@ import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import org.apache.commons.lang3.exception.CloneFailedException;
-import org.marid.io.FastArrayOutputStream;
-import org.marid.misc.Casts;
 
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.*;
@@ -59,17 +57,17 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Externa
         listeners.remove(listener);
     }
 
-    @SuppressWarnings("CloneDoesntCallSuperClone")
+    @SuppressWarnings({"CloneDoesntCallSuperClone", "unchecked"})
     @Override
     public T clone() {
-        final FastArrayOutputStream os = new FastArrayOutputStream();
-        try (final ObjectOutputStream oos = new ObjectOutputStream(os)) {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (final ObjectOutputStream oos = new ObjectOutputStream(bos)) {
             oos.writeObject(this);
         } catch (IOException x) {
             throw new CloneFailedException(x);
         }
-        try (final ObjectInputStream ois = new ObjectInputStream(os.getSharedInputStream())) {
-            return Casts.cast(ois.readObject());
+        try (final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
+            return (T) ois.readObject();
         } catch (IOException | ClassNotFoundException x) {
             throw new CloneFailedException(x);
         }

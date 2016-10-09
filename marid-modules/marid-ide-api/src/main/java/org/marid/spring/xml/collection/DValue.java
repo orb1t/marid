@@ -16,40 +16,45 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.data;
+package org.marid.spring.xml.collection;
 
-import javafx.collections.ObservableList;
-import org.marid.jfx.util.MaridCollections;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
-import javax.xml.bind.annotation.*;
-import java.util.stream.Stream;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "beans")
-@XmlSeeAlso({BeanData.class})
+@XmlRootElement(name = "value")
 @XmlAccessorType(XmlAccessType.NONE)
-public final class BeanFile extends AbstractData<BeanFile> {
+public final class DValue extends DElement<DValue> {
 
-    public final ObservableList<BeanData> beans = MaridCollections.list();
+    public final StringProperty value = new SimpleStringProperty(this, "value");
 
-    public BeanFile() {
-        beans.addListener(this::invalidate);
+    public DValue() {
+        value.addListener(this::invalidate);
     }
 
-    public Stream<BeanData> allBeans() {
-        final Stream.Builder<BeanData> builder = Stream.builder();
-        beans.forEach(builder::add);
-        return builder.build();
+    @XmlValue
+    public String getValue() {
+        return value.get();
     }
 
-    @XmlElement(name = "bean")
-    public BeanData[] getBeans() {
-        return beans.stream().filter(b -> !b.isEmpty()).toArray(BeanData[]::new);
+    public void setValue(String value) {
+        this.value.set(value);
     }
 
-    public void setBeans(BeanData[] beans) {
-        this.beans.addAll(beans);
+    @Override
+    public boolean isEmpty() {
+        return value.isEmpty().get();
+    }
+
+    @Override
+    public String toString() {
+        return getValue();
     }
 }

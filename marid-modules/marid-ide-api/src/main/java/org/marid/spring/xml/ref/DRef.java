@@ -16,21 +16,46 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.data.collection;
+package org.marid.spring.xml.ref;
+
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import org.marid.spring.xml.collection.DElement;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "list")
 @XmlAccessorType(XmlAccessType.NONE)
-public final class DList extends DCollection<DList> {
+@XmlRootElement(name = "ref")
+public final class DRef extends DElement<DRef> {
+
+    public final StringProperty ref = new SimpleStringProperty(this, "value");
+
+    public DRef() {
+        ref.addListener(this::invalidate);
+    }
+
+    @XmlAttribute(name = "bean")
+    public String getBean() {
+        return ref.isEmpty().get() ? null : ref.get();
+    }
+
+    public void setBean(String bean) {
+        ref.set(bean);
+    }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return ref.isEmpty().get();
+    }
+
+    @Override
+    public String toString() {
+        return getBean();
     }
 }

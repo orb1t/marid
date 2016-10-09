@@ -23,6 +23,7 @@ import junitparams.Parameters;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.marid.spring.xml.BeanProp;
 import org.marid.test.NormalTests;
 
 import java.io.*;

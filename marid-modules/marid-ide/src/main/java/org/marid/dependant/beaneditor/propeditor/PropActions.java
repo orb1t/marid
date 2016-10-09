@@ -19,7 +19,7 @@
 package org.marid.dependant.beaneditor.propeditor;
 
 import javafx.event.ActionEvent;
-import org.marid.spring.xml.data.props.DPropEntry;
+import org.marid.spring.xml.props.DPropEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -28,7 +28,7 @@ import org.marid.dependant.beaneditor.BeanEditorConfiguration;
 import org.marid.dependant.beaneditor.BeanEditorTab;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.spring.xml.data.BeanFile;
+import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

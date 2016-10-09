@@ -16,16 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.providers;
+package org.marid.spring.xml.collection;
 
-import javafx.collections.ObservableList;
-import org.marid.spring.xml.data.BeanData;
+import org.marid.spring.xml.AbstractData;
+
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface BeanDataProvider {
+@XmlTransient
+public abstract class DElement<T extends DElement<T>> extends AbstractData<T> {
 
-    ObservableList<BeanData> beanData();
+    public abstract boolean isEmpty();
 }

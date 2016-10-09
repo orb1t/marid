@@ -23,8 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectProfileReflection;
-import org.marid.spring.xml.data.BeanFile;
-import org.marid.spring.xml.providers.BeanDataProvider;
+import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,11 +62,6 @@ public class BeanEditorConfiguration {
                 .map(Pair::getValue)
                 .findAny()
                 .orElse(null);
-    }
-
-    @Bean
-    public BeanDataProvider beanDataProvider(BeanFile beanFile) {
-        return () -> beanFile.beans;
     }
 
     @Autowired

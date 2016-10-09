@@ -23,7 +23,7 @@ import javafx.scene.control.TextArea;
 import org.marid.Ide;
 import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.panes.MaridScrollPane;
-import org.marid.spring.xml.data.collection.DValue;
+import org.marid.spring.xml.collection.DValue;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

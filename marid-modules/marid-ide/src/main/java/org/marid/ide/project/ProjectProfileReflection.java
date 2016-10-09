@@ -18,9 +18,9 @@
 
 package org.marid.ide.project;
 
-import org.marid.spring.xml.data.BeanArg;
-import org.marid.spring.xml.data.BeanData;
-import org.marid.spring.xml.data.BeanProp;
+import org.marid.spring.xml.BeanArg;
+import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.BeanProp;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;

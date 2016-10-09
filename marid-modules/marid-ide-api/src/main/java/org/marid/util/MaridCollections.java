@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.jfx.util;
+package org.marid.util;
 
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;

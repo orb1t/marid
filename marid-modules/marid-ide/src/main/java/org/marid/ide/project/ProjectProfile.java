@@ -31,7 +31,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.logging.LogSupport;
 import org.marid.spring.xml.MaridBeanDefinitionLoader;
 import org.marid.spring.xml.MaridBeanDefinitionSaver;
-import org.marid.spring.xml.data.BeanFile;
+import org.marid.spring.xml.BeanFile;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

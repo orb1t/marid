@@ -16,14 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.data;
+package org.marid.spring.xml.collection;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "property")
-public final class BeanProp extends RefValue<BeanProp> {
+@XmlRootElement(name = "array")
+public final class DArray extends DCollection<DArray> {
 
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
 }

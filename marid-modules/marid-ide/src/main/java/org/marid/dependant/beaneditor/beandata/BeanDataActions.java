@@ -27,7 +27,7 @@ import org.marid.jfx.action.FxAction;
 import org.marid.jfx.dialog.ListDialog;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
-import org.marid.spring.xml.data.BeanData;
+import org.marid.spring.xml.BeanData;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
