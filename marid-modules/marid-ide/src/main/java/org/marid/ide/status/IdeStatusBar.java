@@ -18,24 +18,17 @@
 
 package org.marid.ide.status;
 
-import javafx.application.Platform;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Separator;
 import org.controlsfx.control.StatusBar;
-import org.marid.l10n.L10n;
-import org.marid.status.MaridStatus;
-import org.marid.status.MaridStatusSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Locale;
-import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeStatusBar extends StatusBar implements MaridStatus, MaridStatusSession {
+public class IdeStatusBar extends StatusBar {
 
     @Autowired
     public IdeStatusBar(IdeStatusTimer ideStatusTimer, IdeStatusProfile ideStatusProfile) {
@@ -47,15 +40,5 @@ public class IdeStatusBar extends StatusBar implements MaridStatus, MaridStatusS
         final Separator separator = new Separator(Orientation.VERTICAL);
         separator.setMinWidth(10.0);
         return separator;
-    }
-
-    @Override
-    public void doWithSession(Consumer<MaridStatusSession> statusSessionConsumer) {
-        statusSessionConsumer.accept(this);
-    }
-
-    @Override
-    public void showMessage(String text, Object...args) {
-        Platform.runLater(() -> setText(L10n.m(Locale.getDefault(), text, args)));
     }
 }

@@ -56,11 +56,17 @@ public class BeanMetaInfoProvider implements LogSupport {
         this.profile = profile;
     }
 
+    private DefaultListableBeanFactory beanFactory(URLClassLoader classLoader) {
+        final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+        beanFactory.setBeanClassLoader(classLoader);
+        beanFactory.setAllowBeanDefinitionOverriding(true);
+        return beanFactory;
+    }
+
     public BeansMetaInfo metaInfo() {
         final URLClassLoader classLoader = profile.getClassLoader();
-        final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+        final DefaultListableBeanFactory beanFactory = beanFactory(classLoader);
         if (classLoader != null) {
-            beanFactory.setBeanClassLoader(classLoader);
             final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
             reader.setValidating(false);
             reader.setBeanClassLoader(classLoader);
@@ -72,8 +78,7 @@ public class BeanMetaInfoProvider implements LogSupport {
 
     public BeansMetaInfo profileMetaInfo() {
         final URLClassLoader classLoader = profile.getClassLoader();
-        final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-        beanFactory.setBeanClassLoader(classLoader);
+        final DefaultListableBeanFactory beanFactory = beanFactory(classLoader);
         final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
         reader.setValidating(false);
         reader.setBeanClassLoader(classLoader);

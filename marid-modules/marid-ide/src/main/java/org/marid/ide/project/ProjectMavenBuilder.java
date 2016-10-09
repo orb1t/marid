@@ -25,7 +25,6 @@ import org.marid.ide.common.IdeValues;
 import org.marid.jfx.action.FxAction;
 import org.marid.maven.ProjectBuilder;
 import org.marid.maven.ProjectBuilderFactory;
-import org.marid.status.MaridStatus;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,7 +32,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -56,9 +54,7 @@ public class ProjectMavenBuilder {
     private final ObjectProvider<FxAction> projectBuildAction;
 
     @Autowired
-    public ProjectMavenBuilder(IdeValues ideValues,
-                               MaridStatus maridStatus,
-                               ObjectProvider<FxAction> projectBuildAction) throws IOException, URISyntaxException {
+    public ProjectMavenBuilder(IdeValues ideValues, ObjectProvider<FxAction> projectBuildAction) throws Exception {
         this.projectBuildAction = projectBuildAction;
         this.tempDirectory = Files.createTempDirectory("projectBuilder");
         final String resource = String.format("marid-maven-%s.zip", ideValues.implementationVersion);
@@ -78,15 +74,12 @@ public class ProjectMavenBuilder {
                             os.write(buffer, 0, n);
                         }
                     }
-                    final String name = entry.getName();
-                    maridStatus.doWithSession(session -> session.showMessage("Copied {0} to {1}", name, target));
                     urls.add(target.toUri().toURL());
                 }
                 zipInputStream.closeEntry();
             }
             classLoader = URLClassLoader.newInstance(urls.toArray(new URL[urls.size()]));
         }
-        maridStatus.doWithSession(session -> session.showMessage("marid-maven copied to temporary directory"));
     }
 
     @PreDestroy
