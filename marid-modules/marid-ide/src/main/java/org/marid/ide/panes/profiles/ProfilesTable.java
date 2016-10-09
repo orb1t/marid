@@ -21,14 +21,19 @@ package org.marid.ide.panes.profiles;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.FxAction;
+import org.marid.jfx.menu.MaridMenu;
 import org.marid.l10n.L10n;
 import org.marid.spring.annotation.OrderedInit;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -69,5 +74,23 @@ public class ProfilesTable extends TableView<ProjectProfile> {
         column.setCellFactory(param -> new CheckBoxTableCell<>());
         column.setCellValueFactory(param -> new SimpleBooleanProperty(param.getValue().isHmi()));
         getColumns().add(column);
+    }
+
+    @Autowired
+    public void init(@Qualifier("profile") Map<String, FxAction> actionMap) {
+        setRowFactory(param -> new TableRow<ProjectProfile>() {
+            @Override
+            protected void updateItem(ProjectProfile item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setContextMenu(null);
+                } else {
+                    final MaridMenu maridMenu = new MaridMenu(actionMap);
+                    setContextMenu(new ContextMenu(maridMenu.getMenus().stream()
+                            .flatMap(m -> m.getItems().stream())
+                            .toArray(MenuItem[]::new)));
+                }
+            }
+        });
     }
 }

@@ -100,9 +100,4 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
         });
         getColumns().add(col);
     }
-
-    @Autowired
-    public void init() {
-
-    }
 }

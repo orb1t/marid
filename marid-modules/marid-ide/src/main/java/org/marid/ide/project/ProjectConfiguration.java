@@ -31,7 +31,7 @@ import org.marid.l10n.L10n;
 import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -54,16 +54,13 @@ import static org.marid.jfx.icons.FontIcon.*;
 public class ProjectConfiguration implements LogSupport {
 
     @Bean
-    public Supplier<ProjectProfile> profileSupplier(ObjectProvider<ProjectProfile> profileProvider,
-                                                    ProjectManager projectManager) {
-        return () -> {
-            final ProjectProfile profile = profileProvider.getIfAvailable();
-            return profile != null ? profile : projectManager.getProfile();
-        };
+    public Supplier<ProjectProfile> profileSupplier(ProjectManager projectManager) {
+        return projectManager::getProfile;
     }
 
     @Bean
     @IdeAction
+    @Qualifier("profile")
     public FxAction projectSetupAction(IdeDependants dependants, Supplier<ProjectProfile> profile) {
         return new FxAction("projectSetup", "setup", "Project")
                 .setText("Project setup...")
@@ -75,6 +72,7 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
+    @Qualifier("profile")
     public FxAction projectSaveAction(ObjectFactory<ProjectSaver> projectSaver, Supplier<ProjectProfile> profile) {
         return new FxAction(null, "io", "Project")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+S"))
@@ -85,6 +83,7 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
+    @Qualifier("profile")
     public FxAction projectBuildAction(ObjectFactory<ProjectMavenBuilder> mavenBuilder,
                                        ObjectFactory<ProjectSaver> projectSaver,
                                        Supplier<ProjectProfile> profileSupplier) {
@@ -110,6 +109,7 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
+    @Qualifier("profile")
     public FxAction projectRunAction(IdeDependants dependants, Supplier<ProjectProfile> profile) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F5"))
@@ -147,6 +147,7 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
+    @Qualifier("profile")
     public FxAction projectRemoveProfileAction(ProjectManager manager, Supplier<ProjectProfile> profile) {
         return new FxAction("projectIO", "pm", "Project")
                 .setText("Remove profile")
