@@ -23,7 +23,6 @@ import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.core.env.MapPropertySource;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -87,9 +86,7 @@ public class IdeDependants {
         }
 
         private void initArgs() {
-            if (!args.isEmpty()) {
-                context.getEnvironment().getPropertySources().addLast(new MapPropertySource("args", args));
-            }
+            args.forEach(context.getBeanFactory()::registerSingleton);
         }
     }
 }

@@ -18,11 +18,8 @@
 
 package org.marid.dependant.project.runner;
 
-import org.marid.ide.project.ProjectProfile;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -31,8 +28,4 @@ import org.springframework.core.env.Environment;
 @ComponentScan(basePackageClasses = {ProjectRunnerConfiguration.class})
 public class ProjectRunnerConfiguration {
 
-    @Bean
-    public ProjectProfile profile(Environment environment) {
-        return environment.getProperty("profile", ProjectProfile.class);
-    }
 }

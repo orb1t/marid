@@ -27,25 +27,12 @@ import org.marid.spring.xml.collection.DValue;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-
-import java.lang.reflect.Type;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
 public class ValueEditorConfiguration {
-
-    @Bean
-    public DValue value(Environment environment) {
-        return environment.getProperty("value", DValue.class);
-    }
-
-    @Bean
-    public Type type(Environment environment) {
-        return environment.getProperty("type", Type.class);
-    }
 
     @Bean
     @Qualifier("valueEditor")

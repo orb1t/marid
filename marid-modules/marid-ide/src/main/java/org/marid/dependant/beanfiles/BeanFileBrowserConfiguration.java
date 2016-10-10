@@ -18,11 +18,8 @@
 
 package org.marid.dependant.beanfiles;
 
-import org.marid.ide.project.ProjectProfile;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,8 +33,4 @@ import org.springframework.core.env.Environment;
 })
 public class BeanFileBrowserConfiguration {
 
-    @Bean
-    public ProjectProfile profile(Environment environment) {
-        return environment.getProperty("profile", ProjectProfile.class);
-    }
 }

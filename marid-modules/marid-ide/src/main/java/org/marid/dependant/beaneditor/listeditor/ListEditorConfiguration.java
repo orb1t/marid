@@ -22,14 +22,11 @@ import javafx.scene.control.ToolBar;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.toolbar.MaridToolbar;
-import org.marid.spring.xml.collection.DCollection;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 
-import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
@@ -38,16 +35,6 @@ import java.util.Map;
 @Configuration
 @Import({ListEditor.class})
 public class ListEditorConfiguration {
-
-    @Bean
-    public DCollection<?> collection(Environment environment) {
-        return environment.getProperty("collection", DCollection.class);
-    }
-
-    @Bean
-    public Type type(Environment environment) {
-        return environment.getProperty("type", Type.class);
-    }
 
     @Bean
     @Qualifier("listEditor")

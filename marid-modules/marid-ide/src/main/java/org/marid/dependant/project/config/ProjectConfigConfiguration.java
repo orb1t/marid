@@ -38,7 +38,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 
 import java.util.List;
 
@@ -50,11 +49,6 @@ import static org.marid.l10n.L10n.s;
 @Configuration
 @ComponentScan(basePackageClasses = {ProjectConfigConfiguration.class})
 public class ProjectConfigConfiguration {
-
-    @Bean
-    public ProjectProfile profile(Environment environment) {
-        return environment.getProperty("profile", ProjectProfile.class);
-    }
 
     @Bean
     public Model model(ProjectProfile profile) {

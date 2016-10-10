@@ -26,13 +26,9 @@ import org.marid.Ide;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
-import org.marid.spring.xml.props.DProps;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
-
-import java.lang.reflect.Type;
 
 import static org.marid.l10n.L10n.s;
 
@@ -42,16 +38,6 @@ import static org.marid.l10n.L10n.s;
 @Configuration
 @Import({PropActions.class, PropTable.class})
 public class PropEditorConfiguration {
-
-    @Bean
-    public DProps props(Environment environment) {
-        return environment.getProperty("props", DProps.class);
-    }
-
-    @Bean
-    public Type type(Environment environment) {
-        return environment.getProperty("type", Type.class);
-    }
 
     @Bean
     public ToolBar propEditorToolbar(PropTable propTable, PropActions propActions) {
