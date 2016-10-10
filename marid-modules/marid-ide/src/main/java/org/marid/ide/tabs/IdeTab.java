@@ -47,13 +47,13 @@ public class IdeTab extends Tab {
 
     @PostConstruct
     private void init() {
-        final Tab tab = ideTabPane.getTabs().stream().filter(this::equals).findAny().orElse(null);
-        if (tab != null) {
-            ideTabPane.getSelectionModel().select(tab);
-            context.close();
-            return;
+        final int index = ideTabPane.getTabs().indexOf(this);
+        if (index >= 0) {
+            ideTabPane.getTabs().remove(index);
+            ideTabPane.getTabs().add(index, this);
+        } else {
+            ideTabPane.getTabs().add(this);
         }
-        ideTabPane.getTabs().add(this);
         ideTabPane.getSelectionModel().select(this);
         final EventHandler<Event> oldClosed = getOnClosed();
         setOnClosed(event -> {
