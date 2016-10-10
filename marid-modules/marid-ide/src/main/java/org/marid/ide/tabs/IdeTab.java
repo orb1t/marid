@@ -18,10 +18,9 @@
 
 package org.marid.ide.tabs;
 
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
+import org.marid.jfx.props.Props;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -55,13 +54,7 @@ public class IdeTab extends Tab {
             ideTabPane.getTabs().add(this);
         }
         ideTabPane.getSelectionModel().select(this);
-        final EventHandler<Event> oldClosed = getOnClosed();
-        setOnClosed(event -> {
-            if (oldClosed != null) {
-                oldClosed.handle(event);
-            }
-            context.close();
-        });
+        Props.addHandler(onClosedProperty(), event -> context.close());
     }
 
     @PreDestroy

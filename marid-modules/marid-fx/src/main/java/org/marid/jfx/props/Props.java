@@ -18,10 +18,9 @@
 
 package org.marid.jfx.props;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -42,5 +41,17 @@ public interface Props {
         final BooleanProperty property = new SimpleBooleanProperty(supplier.getAsBoolean());
         property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
         return property;
+    }
+
+    static <E extends Event> void addHandler(Property<EventHandler<E>> property, EventHandler<E> handler) {
+        final EventHandler<E> old = property.getValue();
+        if (old == null) {
+            property.setValue(handler);
+        } else {
+            property.setValue(event -> {
+                old.handle(event);
+                handler.handle(event);
+            });
+        }
     }
 }
