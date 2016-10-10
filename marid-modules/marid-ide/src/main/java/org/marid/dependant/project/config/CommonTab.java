@@ -18,15 +18,21 @@
 
 package org.marid.dependant.project.config;
 
-import javafx.scene.control.CheckBox;
+import javafx.scene.control.TextField;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
+import org.controlsfx.control.Notifications;
 import org.marid.jfx.panes.GenericGridPane;
+import org.marid.l10n.L10n;
 import org.marid.misc.Builder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -40,36 +46,36 @@ public class CommonTab extends GenericGridPane {
         setId("Common");
         final Organization organization = Builder.getFrom(model::getOrganization, Organization::new, model::setOrganization);
         addTextField("Name", model::getName, model::setName);
-        addTextField("GroupId", model::getGroupId, model::setGroupId);
-        addTextField("ArtifactId", model::getArtifactId, model::setArtifactId);
-        addTextField("Version", model::getVersion, model::setVersion);
+        addNonUnicodeTextField("GroupId", model::getGroupId, model::setGroupId);
+        addNonUnicodeTextField("ArtifactId", model::getArtifactId, model::setArtifactId);
+        addNonUnicodeTextField("Version", model::getVersion, model::setVersion);
         addTextField("Description", model::getDescription, model::setDescription);
         addTextField("URL", model::getUrl, model::setUrl);
         addTextField("Inception year", model::getInceptionYear, model::setInceptionYear);
         addTextField("Organization name", organization::getName, organization::setName);
         addTextField("Organization URL", organization::getUrl, organization::setUrl);
-        addSeparator();
-        addControl("UI", () -> {
-            final CheckBox checkBox = new CheckBox();
-            checkBox.setSelected(model.getDependencies().stream().anyMatch(CommonTab::isHmi));
-            checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-                final String artifactId = newValue ? "marid-hmi" : "marid-runtime";
-                model.getDependencies().removeIf(d -> isHmi(d) || isRuntime(d));
-                final Dependency dependency = new Dependency();
-                dependency.setGroupId("org.marid");
-                dependency.setArtifactId(artifactId);
-                dependency.setVersion("${marid.runtime.version}");
-                model.getDependencies().add(dependency);
-            });
-            return checkBox;
-        });
     }
 
-    private static boolean isRuntime(Dependency dependency) {
+    private TextField addNonUnicodeTextField(String label, Supplier<String> supplier, Consumer<String> consumer) {
+        final TextField textField = addTextField(label, supplier, consumer);
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            final byte[] bytes = newValue.getBytes(StandardCharsets.UTF_8);
+            final char[] chars = newValue.toCharArray();
+            if (bytes.length != chars.length) {
+                Notifications.create()
+                        .text(L10n.m("Label {0} has invalid characters", label))
+                        .title(L10n.s("Incorrect characters"))
+                        .showError();
+            }
+        });
+        return textField;
+    }
+
+    public static boolean isRuntime(Dependency dependency) {
         return "org.marid".equals(dependency.getGroupId()) && "marid-runtime".equals(dependency.getArtifactId());
     }
 
-    private static boolean isHmi(Dependency dependency) {
+    public static boolean isHmi(Dependency dependency) {
         return "org.marid".equals(dependency.getGroupId()) && "marid-hmi".equals(dependency.getArtifactId());
     }
 }

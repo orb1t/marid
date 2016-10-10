@@ -122,6 +122,7 @@ public class ProjectConfiguration implements LogSupport {
 
     @Bean
     @IdeAction
+    @Qualifier("profile")
     public FxAction projectAddProfileAction(ObjectFactory<ProjectSaver> projectSaverFactory,
                                             ObjectFactory<ProjectManager> projectManager) {
         return new FxAction("projectIO", "pm", "Project")

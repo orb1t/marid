@@ -19,14 +19,14 @@
 package org.marid.dependant.beanfiles;
 
 import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.tabs.IdeKeyTab;
+import org.marid.ide.tabs.IdeTab;
 import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanFileBrowserTab extends IdeKeyTab {
+public class BeanFileBrowserTab extends IdeTab {
 
     private final ProjectProfile profile;
 

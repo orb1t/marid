@@ -27,7 +27,9 @@ import org.jboss.logmanager.LogManager;
 import org.marid.ide.logging.IdeConsoleLogHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
+import org.marid.logging.Log;
 import org.marid.preloader.IdePreloader;
+import org.marid.spring.context.LiveContexts;
 import org.marid.spring.event.IdeStartedEvent;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
@@ -90,6 +92,14 @@ public class Ide extends Application {
 
     @Override
     public void stop() throws Exception {
+        final LiveContexts contexts = new LiveContexts();
+        contexts.findApplicationContexts().stream().filter(context -> context != this.context).forEach(context -> {
+            try {
+                context.close();
+            } catch (Exception x) {
+                Log.log(Level.WARNING, "Unable to close {0}", x, context);
+            }
+        });
         context.close();
     }
 

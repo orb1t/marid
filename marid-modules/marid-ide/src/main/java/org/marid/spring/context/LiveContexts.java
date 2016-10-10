@@ -16,32 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.tabs;
+package org.marid.spring.context;
 
-import javafx.scene.Node;
-import javafx.scene.control.Tab;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.LiveBeansView;
+
+import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class IdeKeyTab extends IdeTab {
-
-    public IdeKeyTab(Node content, String text, Object... args) {
-        super(content, text, args);
-    }
+public class LiveContexts extends LiveBeansView {
 
     @Override
-    protected void register() {
-        final Tab tab = ideTabPane.getTabs().stream()
-                .filter(getClass()::isInstance)
-                .filter(this::equals)
-                .findAny()
-                .orElse(null);
-        if (tab != null) {
-            ideTabPane.getSelectionModel().select(tab);
-            context.close();
-        } else {
-            super.register();
-        }
+    public Set<ConfigurableApplicationContext> findApplicationContexts() {
+        return super.findApplicationContexts();
     }
 }

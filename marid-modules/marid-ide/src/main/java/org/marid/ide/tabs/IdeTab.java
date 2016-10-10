@@ -47,7 +47,13 @@ public class IdeTab extends Tab {
 
     @PostConstruct
     private void init() {
-        register();
+        final Tab tab = ideTabPane.getTabs().stream().filter(this::equals).findAny().orElse(null);
+        if (tab != null) {
+            ideTabPane.getSelectionModel().select(tab);
+            context.close();
+            return;
+        }
+        ideTabPane.getTabs().add(this);
         ideTabPane.getSelectionModel().select(this);
         final EventHandler<Event> oldClosed = getOnClosed();
         setOnClosed(event -> {
@@ -56,10 +62,6 @@ public class IdeTab extends Tab {
             }
             context.close();
         });
-    }
-
-    protected void register() {
-        ideTabPane.getTabs().add(this);
     }
 
     @PreDestroy

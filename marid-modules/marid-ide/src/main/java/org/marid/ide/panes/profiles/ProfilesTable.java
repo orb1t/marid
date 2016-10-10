@@ -18,7 +18,6 @@
 
 package org.marid.ide.panes.profiles;
 
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.*;
@@ -44,7 +43,7 @@ public class ProfilesTable extends TableView<ProjectProfile> {
     public ProfilesTable(ProjectManager manager) {
         super(manager.getProfiles());
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
-        setEditable(false);
+        setEditable(true);
         getSelectionModel().select(manager.getProfile());
         final ChangeListener<ProjectProfile> listener = ($, o, v) -> manager.profileProperty().setValue(v);
         getSelectionModel().selectedItemProperty().addListener(listener);
@@ -60,6 +59,7 @@ public class ProfilesTable extends TableView<ProjectProfile> {
     @OrderedInit(1)
     public void initNameColumn() {
         final TableColumn<ProjectProfile, String> column = new TableColumn<>(L10n.s("Name"));
+        column.setEditable(false);
         column.setPrefWidth(400);
         column.setMaxWidth(2000);
         column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getName()));
@@ -72,7 +72,7 @@ public class ProfilesTable extends TableView<ProjectProfile> {
         column.setPrefWidth(60);
         column.setMaxWidth(70);
         column.setCellFactory(param -> new CheckBoxTableCell<>());
-        column.setCellValueFactory(param -> new SimpleBooleanProperty(param.getValue().isHmi()));
+        column.setCellValueFactory(param -> param.getValue().hmiProperty());
         getColumns().add(column);
     }
 

@@ -18,9 +18,12 @@
 
 package org.marid.ide.project;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
 import org.apache.maven.model.Profile;
@@ -28,10 +31,11 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.marid.dependant.project.config.CommonTab;
 import org.marid.logging.LogSupport;
+import org.marid.spring.xml.BeanFile;
 import org.marid.spring.xml.MaridBeanDefinitionLoader;
 import org.marid.spring.xml.MaridBeanDefinitionSaver;
-import org.marid.spring.xml.BeanFile;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -71,6 +75,7 @@ public class ProjectProfile implements LogSupport {
     final Logger logger;
     final ObservableList<Pair<Path, BeanFile>> beanFiles;
     final ProjectCacheEntry cacheEntry;
+    final BooleanProperty hmi;
 
     ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -92,6 +97,8 @@ public class ProjectProfile implements LogSupport {
         beanFiles = loadBeanFiles();
         init();
         cacheEntry = new ProjectCacheEntry(this);
+        hmi = new SimpleBooleanProperty(isHmi());
+        hmi.addListener((observable, oldValue, newValue) -> setHmi(newValue));
     }
 
     public URLClassLoader getClassLoader() {
@@ -119,9 +126,40 @@ public class ProjectProfile implements LogSupport {
         }
     }
 
-    public boolean isHmi() {
-        return model.getDependencies().stream()
-                .anyMatch(d -> "org.marid".equals(d.getGroupId()) && "marid-hmi".equals(d.getArtifactId()));
+    public BooleanProperty hmiProperty() {
+        return hmi;
+    }
+
+    private boolean isHmi() {
+        return model.getDependencies().stream().anyMatch(CommonTab::isHmi);
+    }
+
+    private boolean setHmi(boolean hmi) {
+        if (hmi) {
+            if (model.getDependencies().stream().anyMatch(CommonTab::isHmi)) {
+                return false;
+            } else {
+                model.getDependencies().removeIf(CommonTab::isRuntime);
+                final Dependency dependency = new Dependency();
+                dependency.setGroupId("org.marid");
+                dependency.setArtifactId("marid-hmi");
+                dependency.setVersion("${marid.runtime.version}");
+                model.getDependencies().add(dependency);
+                return true;
+            }
+        } else {
+            if (model.getDependencies().stream().anyMatch(CommonTab::isRuntime)) {
+                return false;
+            } else {
+                model.getDependencies().removeIf(CommonTab::isHmi);
+                final Dependency dependency = new Dependency();
+                dependency.setGroupId("org.marid");
+                dependency.setArtifactId("marid-runtime");
+                dependency.setVersion("${marid.runtime.version}");
+                model.getDependencies().add(dependency);
+                return true;
+            }
+        }
     }
 
     private Model loadModel() {
