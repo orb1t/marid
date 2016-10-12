@@ -19,9 +19,9 @@
 package org.marid.hmi;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.marid.runtime.MaridConsoleExitHandler;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.env.MapPropertySource;
@@ -31,7 +31,6 @@ import java.util.stream.IntStream;
 
 import static java.lang.Thread.currentThread;
 import static java.util.stream.Collectors.toList;
-import static javafx.application.Platform.runLater;
 import static javafx.scene.paint.Color.GREEN;
 import static org.marid.jfx.FxMaridIcon.maridIcon;
 import static org.marid.misc.Casts.cast;
@@ -50,18 +49,18 @@ public class HmiApplication extends Application {
         context.getBeanFactory().registerSingleton("application", this);
         context.getBeanFactory().addBeanPostProcessor(new HmiPostProcessor());
         context.getEnvironment().getPropertySources().addFirst(cmdProps);
-        final Thread thread = new Thread(() -> MaridConsoleExitHandler.handle(() -> runLater(context::close)));
-        thread.setDaemon(true);
-        thread.start();
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        context.getBeanFactory().registerSingleton("primaryStage", this);
         final HmiPane pane = new HmiPane();
         context.addApplicationListener(event -> {
             if (event instanceof ContextClosedEvent) {
-                primaryStage.close();
+                if (Platform.isFxApplicationThread()) {
+                    primaryStage.close();
+                } else {
+                    Platform.runLater(primaryStage::close);
+                }
             }
         });
         context.refresh();

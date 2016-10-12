@@ -19,7 +19,6 @@
 package org.marid.runtime;
 
 import org.jboss.logmanager.LogManager;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 
@@ -35,22 +34,9 @@ public class MaridLauncher {
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
         final GenericApplicationContext context = applicationContext(currentThread().getContextClassLoader());
         context.getEnvironment().getPropertySources().addFirst(new SimpleCommandLinePropertySource(args));
-        final Thread shutdownHook = new Thread(context::close);
-        Runtime.getRuntime().addShutdownHook(shutdownHook);
-        context.addApplicationListener(event -> {
-            if (event instanceof ContextClosedEvent) {
-                try {
-                    Runtime.getRuntime().removeShutdownHook(shutdownHook);
-                    System.in.close();
-                } catch (Exception x) {
-                    x.printStackTrace();
-                }
-            }
-        });
         try {
             context.refresh();
             context.start();
-            MaridConsoleExitHandler.handle(context::close);
         } catch (Exception x) {
             x.printStackTrace();
             System.exit(3);

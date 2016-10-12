@@ -18,39 +18,62 @@
 
 package org.marid.runtime;
 
+import org.marid.logging.LogSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.annotation.PostConstruct;
 import java.util.Scanner;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridConsoleExitHandler {
+public class MaridConsoleExitHandler implements LogSupport {
 
-    public static void handle(Runnable closeTask) {
-        try (final Scanner scanner = new Scanner(System.in)) {
-            while (scanner.hasNextLine()) {
-                final String line = scanner.nextLine().trim();
-                switch (line) {
-                    case "dump":
-                        Thread.getAllStackTraces().forEach((t, stes) -> {
-                            System.err.println(t);
-                            if (stes != null) {
-                                for (final StackTraceElement e : stes) {
-                                    System.err.format("%s %s.%s:%d%n",
-                                            e.getFileName(),
-                                            e.getClassName(),
-                                            e.getMethodName(),
-                                            e.getLineNumber());
-                                }
-                            }
-                            System.err.println();
-                        });
-                        break;
-                    case "exit":
-                    case "quit":
-                        closeTask.run();
-                        break;
+    private final MaridCloseAction closeAction;
+
+    @Autowired
+    public MaridConsoleExitHandler(MaridCloseAction closeAction) {
+        this.closeAction = closeAction;
+    }
+
+    @PostConstruct
+    private void init() {
+        final Thread thread = new Thread(null, () -> {
+            try (final Scanner scanner = new Scanner(System.in)) {
+                while (scanner.hasNextLine()) {
+                    final String line = scanner.nextLine().trim();
+                    try {
+                        switch (line) {
+                            case "dump":
+                                Thread.getAllStackTraces().forEach((t, stes) -> {
+                                    System.err.println(t);
+                                    if (stes != null) {
+                                        for (final StackTraceElement e : stes) {
+                                            System.err.format("%s %s.%s:%d%n",
+                                                    e.getFileName(),
+                                                    e.getClassName(),
+                                                    e.getMethodName(),
+                                                    e.getLineNumber());
+                                        }
+                                    }
+                                    System.err.println();
+                                });
+                                break;
+                            case "close":
+                                closeAction.run();
+                                break;
+                            case "exit":
+                            case "quit":
+                                System.exit(0);
+                                break;
+                        }
+                    } catch (Exception x) {
+                        log(WARNING, "Unable to execute {0}", x, line);
+                    }
                 }
             }
-        }
+        }, "console-daemon", 64L * 1024L);
+        thread.setDaemon(true);
+        thread.start();
     }
 }

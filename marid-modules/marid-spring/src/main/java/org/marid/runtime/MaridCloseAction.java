@@ -18,23 +18,8 @@
 
 package org.marid.runtime;
 
-import org.springframework.context.support.GenericXmlApplicationContext;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridContextInitializer {
-
-    public static GenericXmlApplicationContext applicationContext(ClassLoader classLoader) {
-        final GenericXmlApplicationContext context = new GenericXmlApplicationContext();
-        context.registerShutdownHook();
-        context.addBeanFactoryPostProcessor(new MaridBeanFactoryPostProcessor());
-        context.setClassLoader(classLoader);
-        context.setAllowCircularReferences(false);
-        context.setValidating(false);
-        context.setResourceLoader(new PathMatchingResourcePatternResolver(classLoader));
-        context.load("classpath*:/META-INF/marid/**/*.xml");
-        return context;
-    }
+public interface MaridCloseAction extends Runnable {
 }

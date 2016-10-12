@@ -26,4 +26,11 @@
     <context:property-placeholder ignore-resource-not-found="true" location="ide.properties"/>
     <context:property-placeholder ignore-resource-not-found="true" location="meta.properties"/>
 
+    <!-- Parameter passing -->
+
+    <bean class="org.marid.spring.xml.BeanData" name="beanData"/>
+    <bean class="org.marid.ide.project.ProjectProfile" name="profile">
+        <constructor-arg name="name" value="default"/>
+    </bean>
+    <bean factory-bean="profile" factory-method="getBeansDirectory" name="beanFilePath"/>
 </beans>

@@ -16,13 +16,7 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:context="http://www.springframework.org/schema/context">
+<beans xmlns="http://www.springframework.org/schema/beans">
 
-    <context:annotation-config/>
-    <context:property-placeholder file-encoding="UTF-8" location="classpath*:/META-INF/marid/application.properties"/>
-    <context:property-override file-encoding="UTF-8" location="classpath*:/META-INF/application-override.properties"/>
-    <context:mbean-export registration="replaceExisting"/>
-
-    <bean class="org.marid.runtime.MaridConsoleExitHandler"/>
+    <bean class="org.marid.runtime.RuntimeCloseAction"/>
 </beans>

@@ -91,6 +91,7 @@ public class ProjectRunnerPane extends BorderPane implements LogSupport {
         }, "watchThread", 96L * 1024L);
         watchThread.start();
         setTop(new ToolbarBuilder()
+                .add("Close", FontIcon.M_CLOSE, e -> printStream.println("close"))
                 .add("Exit", FontIcon.M_STOP, e -> printStream.println("exit"))
                 .addSeparator()
                 .add("Dump", FontIcon.M_LIST, e -> printStream.println("dump"))
