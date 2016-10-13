@@ -30,7 +30,7 @@
         <meta key="icon" value="P_ADD"/>
     </bean>
 
-    <bean name="swingNumericDaqGenerator" class="org.marid.db.generator.SwingNumericDaqGenerator">
+    <bean name="swingNumericDaqGenerator" class="org.marid.db.generator.swing.SwingNumericDaqGenerator">
         <description>SWING numeric DAQ generator</description>
 
         <constructor-arg name="numericWriter" value=""/>

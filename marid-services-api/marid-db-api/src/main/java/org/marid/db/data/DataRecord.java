@@ -81,6 +81,6 @@ public final class DataRecord<T extends Serializable> {
         if (val.length() > 100) {
             val = val.substring(0, 100) + "...]";
         }
-        return format("%s(%s, %s, %s)", tag, getClass().getSimpleName(), timestamp, val);
+        return format("(%d, %s, %s)", tag, timestamp, val);
     }
 }
