@@ -43,7 +43,7 @@ class SwingNumericDaqGeneratorModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 6;
+        return 5;
     }
 
     public void visitTagInfos(Consumer<TagInfo> consumer) {
@@ -75,10 +75,8 @@ class SwingNumericDaqGeneratorModel extends AbstractTableModel {
             case 2:
                 return tagInfo.maxValue;
             case 3:
-                return tagInfo.ticks;
-            case 4:
                 return tagInfo.value;
-            case 5:
+            case 4:
                 return tagInfo.value;
             default:
                 throw new IllegalArgumentException(Integer.toString(columnIndex));
@@ -88,7 +86,7 @@ class SwingNumericDaqGeneratorModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         switch (columnIndex) {
-            case 4:
+            case 3:
                 return false;
             default:
                 return true;
@@ -105,10 +103,8 @@ class SwingNumericDaqGeneratorModel extends AbstractTableModel {
             case 2:
                 return s("Max");
             case 3:
-                return s("Ticks");
-            case 4:
                 return s("Value");
-            case 5:
+            case 4:
                 return s("Control");
             default:
                 return "";
@@ -128,10 +124,7 @@ class SwingNumericDaqGeneratorModel extends AbstractTableModel {
             case 2:
                 tagInfo.maxValue = ((Number) aValue).intValue();
                 break;
-            case 3:
-                tagInfo.ticks = ((Number) aValue).intValue();
-                break;
-            case 5:
+            case 4:
                 tagInfo.value = ((Number) aValue).intValue();
                 break;
         }
@@ -152,7 +145,6 @@ class SwingNumericDaqGeneratorModel extends AbstractTableModel {
         long tag = 1L;
         int minValue = 0;
         int maxValue = 100;
-        int ticks = 1;
         int value = 0;
     }
 }

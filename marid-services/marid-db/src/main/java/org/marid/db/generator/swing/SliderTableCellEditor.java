@@ -58,7 +58,7 @@ public class SliderTableCellEditor extends AbstractCellEditor implements TableCe
         }
         slider.addChangeListener(changeListener = e -> {
             tagInfo.value = slider.getValue();
-            model.fireTableCellUpdated(row, 4);
+            model.fireTableCellUpdated(row, 3);
         });
         return slider;
     }

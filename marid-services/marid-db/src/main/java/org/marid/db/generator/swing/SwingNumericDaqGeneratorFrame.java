@@ -81,14 +81,14 @@ class SwingNumericDaqGeneratorFrame extends JFrame implements LogSupport {
         table.setRowHeight(48);
         table.setShowGrid(true);
         table.setGridColor(SystemColor.control);
-        final int[] widths = {100, 50, 50, 50, 50, 300};
+        final int[] widths = {100, 50, 50, 50, 300};
         for (int i = 0; i < widths.length; i++) {
             final TableColumn column = table.getColumnModel().getColumn(i);
             column.setMinWidth(widths[i] / 2);
             column.setMaxWidth(widths[i] * 5);
             column.setPreferredWidth(widths[i]);
         }
-        final TableColumn lastColumn = table.getColumnModel().getColumn(5);
+        final TableColumn lastColumn = table.getColumnModel().getColumn(4);
         lastColumn.setCellEditor(new SliderTableCellEditor());
         lastColumn.setCellRenderer(new SliderTableCellRenderer());
     }
