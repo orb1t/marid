@@ -22,14 +22,19 @@ import org.marid.db.dao.NumericWriter;
 import org.marid.db.data.DataRecord;
 import org.marid.db.generator.swing.SwingNumericDaqGeneratorModel.TagInfo;
 import org.marid.logging.LogSupport;
+import org.marid.xml.XmlBind;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableColumn;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -104,8 +109,28 @@ class SwingNumericDaqGeneratorFrame extends JFrame implements LogSupport {
         });
         toolBar.addSeparator();
         add(toolBar, "Load", "oxygen-icons.org/oxygen/24/Actions-document-open-icon.png", e -> {
+            final JFileChooser chooser = new JFileChooser();
+            chooser.setFileFilter(new FileNameExtensionFilter("XML", "xml"));
+            chooser.setMultiSelectionEnabled(false);
+            switch (chooser.showOpenDialog(this)) {
+                case JFileChooser.APPROVE_OPTION:
+                    final File file = chooser.getSelectedFile();
+                    model.load(XmlBind.load(SwingNumericDaqGeneratorModel.class, file, Unmarshaller::unmarshal));
+                    break;
+            }
         });
         add(toolBar, "Save", "oxygen-icons.org/oxygen/24/Actions-document-save-icon.png", e -> {
+            final JFileChooser chooser = new JFileChooser();
+            chooser.setFileFilter(new FileNameExtensionFilter("XML", "xml"));
+            switch (chooser.showOpenDialog(this)) {
+                case JFileChooser.APPROVE_OPTION:
+                    if (!chooser.getSelectedFile().getName().endsWith(".xml")) {
+                        final File file = chooser.getSelectedFile();
+                        chooser.setSelectedFile(new File(file.getParentFile(), file.getName() + ".xml"));
+                    }
+                    XmlBind.save(model, chooser.getSelectedFile(), Marshaller::marshal);
+                    break;
+            }
         });
         toolBar.addSeparator();
         add(toolBar, "Run", "oxygen-icons.org/oxygen/24/Actions-media-playback-start-icon.png", e -> {

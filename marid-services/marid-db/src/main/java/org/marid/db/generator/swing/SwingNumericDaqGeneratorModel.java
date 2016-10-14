@@ -19,6 +19,10 @@
 package org.marid.db.generator.swing;
 
 import javax.swing.table.AbstractTableModel;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.function.Consumer;
@@ -28,9 +32,18 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov
  */
+@XmlRootElement(name = "model")
+@XmlSeeAlso({SwingNumericDaqGeneratorModel.TagInfo.class})
 class SwingNumericDaqGeneratorModel extends AbstractTableModel {
 
+    @XmlElement(name = "tag")
     private final ArrayList<TagInfo> list = new ArrayList<>();
+
+    public void load(SwingNumericDaqGeneratorModel model) {
+        list.clear();
+        list.addAll(model.list);
+        fireTableDataChanged();
+    }
 
     public TagInfo get(int index) {
         return list.get(index);
@@ -140,11 +153,19 @@ class SwingNumericDaqGeneratorModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    static class TagInfo {
+    @XmlRootElement(name = "tag")
+    public static class TagInfo {
 
+        @XmlAttribute(name = "tag")
         long tag = 1L;
+
+        @XmlAttribute(name = "min")
         int minValue = 0;
+
+        @XmlAttribute(name = "max")
         int maxValue = 100;
+
+        @XmlAttribute(name = "val")
         int value = 0;
     }
 }
