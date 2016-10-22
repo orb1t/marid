@@ -484,10 +484,10 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.checkerframework</groupId>
-            <artifactId>checker</artifactId>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>annotations</artifactId>
             <scope>provided</scope>
-            <version>2.1.4</version>
+            <version>3.0.1u2</version>
         </dependency>
 
         <dependency>

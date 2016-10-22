@@ -29,7 +29,6 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.util.function.Consumer;
 
-import static javax.xml.bind.JAXBContext.newInstance;
 import static org.marid.misc.Calls.call;
 
 /**
@@ -37,7 +36,7 @@ import static org.marid.misc.Calls.call;
  */
 public class XmlBind {
 
-    private static final ClassValue<JAXBContext> CONTEXT_CV = new MaridClassValue<>(c -> call(() -> newInstance(c)));
+    public static final ClassValue<JAXBContext> JAXB = new MaridClassValue<>(c -> () -> JAXBContext.newInstance(c));
 
     public static final Consumer<Marshaller> DEFAULT_OUTPUT = marshaller -> Calls.call(() -> {
         marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
@@ -55,7 +54,7 @@ public class XmlBind {
                                    T output,
                                    Consumer<Marshaller> marshallerConsumer,
                                    SafeTriConsumer<Marshaller, R, T> marshalTask) {
-        final JAXBContext context = CONTEXT_CV.get(type);
+        final JAXBContext context = JAXB.get(type);
         final Marshaller marshaller = call(context::createMarshaller);
         marshallerConsumer.accept(marshaller);
         marshalTask.accept(marshaller, bean, output);
@@ -65,7 +64,7 @@ public class XmlBind {
                                 T input,
                                 Consumer<Unmarshaller> unmarshallerConsumer,
                                 SafeBiFunction<Unmarshaller, T, Object> unmarshalTask) {
-        final JAXBContext context = CONTEXT_CV.get(type);
+        final JAXBContext context = JAXB.get(type);
         final Unmarshaller unmarshaller = call(context::createUnmarshaller);
         unmarshallerConsumer.accept(unmarshaller);
         return Casts.cast(unmarshalTask.apply(unmarshaller, input));

@@ -16,28 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.proto.modbus;
+package org.marid.editors.hmi.screen;
 
-import java.nio.ByteBuffer;
+import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ModbusIntCodec implements ModbusCodec<Integer> {
+@Configuration
+@Import({ScreenPane.class, ScreenParentPane.class})
+public class ScreenEditorConfiguration {
 
-    private final ModbusTwoRegisterOrder order;
-
-    public ModbusIntCodec(ModbusTwoRegisterOrder order) {
-        this.order = order;
+    @Bean
+    public BorderPane borderPane(ScreenParentPane parentPane) {
+        return new BorderPane(parentPane);
     }
 
-    @Override
-    public Integer decode(byte[] data) {
-        return ByteBuffer.wrap(order.decode(data)).getInt(0);
-    }
-
-    @Override
-    public byte[] encode(Integer data) {
-        return order.encode(ByteBuffer.allocate(4).putInt(0, data).array());
+    @Bean(initMethod = "show")
+    public Stage screenStage(BorderPane borderPane) {
+        final Stage stage = new Stage();
+        stage.setScene(new Scene(borderPane, 800, 600));
+        return stage;
     }
 }

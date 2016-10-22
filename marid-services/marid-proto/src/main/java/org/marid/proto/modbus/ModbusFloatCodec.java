@@ -18,26 +18,24 @@
 
 package org.marid.proto.modbus;
 
-import com.google.common.primitives.Ints;
-
 /**
  * @author Dmitry Ovchinnikov
  */
 public class ModbusFloatCodec implements ModbusCodec<Float> {
 
-    private final ModbusTwoRegisterOrder order;
+    private final ModbusIntCodec codec;
 
     public ModbusFloatCodec(ModbusTwoRegisterOrder order) {
-        this.order = order;
+        this.codec = new ModbusIntCodec(order);
     }
 
     @Override
     public Float decode(byte[] data) {
-        return Float.intBitsToFloat(Ints.fromByteArray(order.decode(data)));
+        return Float.intBitsToFloat(codec.decode(data));
     }
 
     @Override
     public byte[] encode(Float data) {
-        return order.encode(Ints.toByteArray(Float.floatToIntBits(data)));
+        return codec.encode(Float.floatToIntBits(data));
     }
 }

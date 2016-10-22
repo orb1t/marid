@@ -18,8 +18,6 @@
 
 package org.marid.proto.modbus;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -83,11 +81,6 @@ public class ModbusTcpDriverProps {
 
     public void setTimeUnit(TimeUnit timeUnit) {
         this.timeUnit = timeUnit;
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
     }
 
     public int getAddress() {

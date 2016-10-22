@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,26 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.logging;
+package org.marid.editors.hmi.screen;
 
-import org.marid.cache.MaridClassValue;
+import org.marid.hmi.screen.HmiScreen;
+import org.marid.spring.beandata.BeanEditor;
 
-import java.util.logging.Logger;
+import java.util.Collections;
+import java.util.Set;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-class Logging {
+public class ScreenEditor implements BeanEditor {
+    @Override
+    public Set<Class<?>> getBeanTypes() {
+        return Collections.singleton(HmiScreen.class);
+    }
 
-    static final ClassValue<Logger> LOGGER_CLASS_VALUE = new MaridClassValue<>(c -> () -> {
-        final String name = c.getName();
-        final int index = name.indexOf("$$");
-        final String loggerName;
-        if (index >= 0) {
-            loggerName = name.substring(0, index);
-        } else {
-            loggerName = name;
-        }
-        return Logger.getLogger(loggerName);
-    });
+    @Override
+    public String getName() {
+        return "Screen Editor";
+    }
+
+    @Override
+    public Class<?>[] getConfigurations() {
+        return new Class[] {ScreenEditorConfiguration.class};
+    }
 }

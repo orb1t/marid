@@ -23,21 +23,14 @@ import org.junit.experimental.categories.Category;
 import org.marid.test.NormalTests;
 
 import static org.junit.Assert.assertEquals;
-import static org.marid.misc.StringUtils.*;
+import static org.marid.misc.StringUtils.camelToText;
+import static org.marid.misc.StringUtils.delimited;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Category(NormalTests.class)
 public class StringUtilsTest {
-
-    @Test
-    public void testRepeated() {
-        assertEquals("aaaa", repeated('a', 4));
-        assertEquals("abab", repeated("ab", 2));
-        assertEquals("", repeated('a', 0));
-        assertEquals("", repeated("ab", 0));
-    }
 
     @Test
     public void testDelimited() {

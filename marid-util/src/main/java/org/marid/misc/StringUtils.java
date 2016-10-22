@@ -22,7 +22,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 import static java.lang.Character.*;
 
@@ -37,25 +36,6 @@ public class StringUtils {
 
     public static String decapitalize(String text) {
         return text.isEmpty() ? text : text.substring(0, 1).toLowerCase() + text.substring(1);
-    }
-
-    public static String repeated(char symbol, int times) {
-        char[] buf = new char[times];
-        Arrays.fill(buf, symbol);
-        return String.valueOf(buf);
-    }
-
-    public static String repeated(String str, int times) {
-        int n = str.length();
-        char[] buf = new char[n * times];
-        for (int i = 0; i < buf.length; i += n) {
-            str.getChars(0, n, buf, i);
-        }
-        return new String(buf);
-    }
-
-    public static String repeated(Object obj, int times) {
-        return repeated(String.valueOf(obj), times);
     }
 
     public static String delimited(char delimiter, String... array) {

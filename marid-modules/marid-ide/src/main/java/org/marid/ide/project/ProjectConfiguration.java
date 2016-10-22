@@ -27,7 +27,6 @@ import org.marid.dependant.beanfiles.BeanFileBrowserConfiguration;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
 import org.marid.jfx.action.FxAction;
-import org.marid.l10n.L10n;
 import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -46,6 +45,7 @@ import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
 import static org.marid.jfx.icons.FontIcon.*;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -75,7 +75,7 @@ public class ProjectConfiguration implements LogSupport {
     @Qualifier("profile")
     public FxAction projectSaveAction(ObjectFactory<ProjectSaver> projectSaver, Supplier<ProjectProfile> profile) {
         return new FxAction(null, "io", "Project")
-                .setAccelerator(KeyCombination.valueOf("Ctrl+S"))
+                .setAccelerator(KeyCombination.valueOf("F2"))
                 .setText("Save")
                 .setIcon(F_SAVE)
                 .setEventHandler(event -> projectSaver.getObject().save(profile.get()));
@@ -130,8 +130,8 @@ public class ProjectConfiguration implements LogSupport {
                 .setIcon(M_ADD_BOX)
                 .setEventHandler(event -> {
                     final TextInputDialog dialog = new TextInputDialog("profile");
-                    dialog.setHeaderText(L10n.s("Profile name") + ":");
-                    dialog.setTitle(L10n.s("Add profile"));
+                    dialog.setHeaderText(s("Profile name") + ":");
+                    dialog.setTitle(s("Add profile"));
                     final Optional<String> result = dialog.showAndWait();
                     if (result.isPresent()) {
                         final ProjectProfile profile = projectManager.getObject().add(result.get());
@@ -155,9 +155,9 @@ public class ProjectConfiguration implements LogSupport {
                 .setIcon(D_MINUS_BOX)
                 .bindDisabled(createBooleanBinding(() -> manager.getProfiles().size() < 2, manager.getProfiles()))
                 .setEventHandler(event -> {
-                    final Alert alert = new Alert(CONFIRMATION, L10n.s("Do you really want to remove the profile?"), YES, NO);
-                    alert.setTitle(L10n.s("Profile removal"));
-                    alert.setHeaderText(L10n.s("Project removal confirmation"));
+                    final Alert alert = new Alert(CONFIRMATION, s("Do you really want to remove the profile?"), YES, NO);
+                    alert.setTitle(s("Profile removal"));
+                    alert.setHeaderText(s("Project removal confirmation"));
                     final Optional<ButtonType> result = alert.showAndWait();
                     if (result.isPresent() && result.get() == ButtonType.YES) {
                         manager.remove(profile.get());
@@ -171,6 +171,7 @@ public class ProjectConfiguration implements LogSupport {
     public FxAction projectBeanFilesAction(IdeDependants dependants, Supplier<ProjectProfile> profile) {
         return new FxAction("projectTree", "pt", "Project")
                 .setText("Project files")
+                .setAccelerator(KeyCombination.valueOf("F4"))
                 .setIcon(M_FOLDER_SHARED)
                 .setEventHandler(event -> dependants.start(profile.get().getName(), b -> b
                         .conf(BeanFileBrowserConfiguration.class)

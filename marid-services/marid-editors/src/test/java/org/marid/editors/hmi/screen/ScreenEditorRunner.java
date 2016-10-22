@@ -16,40 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.xml;
+package org.marid.editors.hmi.screen;
 
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import java.util.Iterator;
-import java.util.function.IntFunction;
-import java.util.function.IntSupplier;
+import javafx.application.Application;
+import javafx.stage.Stage;
+import org.marid.spring.xml.BeanData;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class NodeListIterator implements Iterator<Node> {
-
-    private final IntFunction<Node> elements;
-    private final IntSupplier size;
-    int index;
-
-    public NodeListIterator(IntFunction<Node> elements, IntSupplier size) {
-        this.elements = elements;
-        this.size = size;
-    }
-
-    public NodeListIterator(NodeList nodeList) {
-        this(nodeList::item, nodeList::getLength);
-    }
+public class ScreenEditorRunner extends Application {
 
     @Override
-    public boolean hasNext() {
-        return index < size.getAsInt();
-    }
-
-    @Override
-    public Node next() {
-        return elements.apply(index++);
+    public void start(Stage primaryStage) throws Exception {
+        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.getBeanFactory().registerSingleton("beanData", new BeanData());
+        context.register(ScreenEditorConfiguration.class);
+        context.refresh();
+        context.start();
     }
 }

@@ -19,8 +19,6 @@
 package org.marid.misc;
 
 import javax.annotation.Nullable;
-import java.time.Duration;
-import java.util.Properties;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -54,61 +52,6 @@ public interface Casts {
                 return long.class;
             default:
                 return null;
-        }
-    }
-
-    static boolean pBool(Properties properties, String name, boolean defaultValue) {
-        final Object val = properties.get(name);
-        if (val instanceof Boolean) {
-            return ((Boolean) val);
-        } else if (val == null) {
-            return defaultValue;
-        } else {
-            switch (val.toString().toLowerCase()) {
-                case "0":
-                case "false":
-                case "no":
-                    return false;
-                case "1":
-                case "true":
-                case "yes":
-                    return true;
-                default:
-                    throw new IllegalArgumentException("Illegal boolean value " + val);
-            }
-        }
-    }
-
-    static int pInt(Properties properties, String name, int defaultValue) {
-        final Object val = properties.get(name);
-        if (val instanceof Number) {
-            return ((Number) val).intValue();
-        } else if (val == null) {
-            return defaultValue;
-        } else {
-            return Integer.parseInt(val.toString());
-        }
-    }
-
-    static long pLong(Properties properties, String name, long defaultValue) {
-        final Object val = properties.get(name);
-        if (val instanceof Number) {
-            return ((Number) val).longValue();
-        } else if (val == null) {
-            return defaultValue;
-        } else {
-            return Long.parseLong(val.toString());
-        }
-    }
-
-    static Duration pDur(Properties properties, String name, Duration defaultValue) {
-        final Object val = properties.get(name);
-        if (val instanceof Number) {
-            return Duration.ofSeconds(((Number) val).longValue());
-        } else if (val == null) {
-            return defaultValue;
-        } else {
-            return Duration.parse(val.toString());
         }
     }
 }

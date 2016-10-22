@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,11 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.misc;
+package org.marid.hmi.screen;
+
+import javafx.scene.Group;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.web.WebView;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-public interface Ios {
+public class HmiScreen extends BorderPane {
 
+    private final WebView webView = new WebView();
+    private final Group webGroup = new Group(webView);
+
+    public HmiScreen() {
+        setCenter(webGroup);
+        webView.getEngine().setJavaScriptEnabled(true);
+    }
+
+    public void setLocation(String url) {
+
+    }
 }

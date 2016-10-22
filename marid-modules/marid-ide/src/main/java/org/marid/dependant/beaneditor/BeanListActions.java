@@ -282,6 +282,7 @@ public class BeanListActions {
                         context.register((Class[]) editor.getConfigurations());
                         context.setParent(BeanListActions.this.context);
                         context.getBeanFactory().registerSingleton("beanData", beanData);
+                        reflection.updateBeanData(beanData);
                         context.refresh();
                         context.start();
                     });

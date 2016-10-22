@@ -66,4 +66,33 @@ public class FastArrayOutputStream extends ByteArrayOutputStream {
         buffer.limit(limit);
         return buffer;
     }
+
+    @Override
+    public int hashCode() {
+        int result = 1;
+        for (int i = 0; i < size(); i++) {
+            result = result * 31 + buf[i];
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof FastArrayOutputStream)) {
+            return false;
+        }
+        final FastArrayOutputStream that = (FastArrayOutputStream) obj;
+        if (this.size() != that.size()) {
+            return false;
+        }
+        for (int i = 0; i < size(); i++) {
+            if (this.buf[i] != that.buf[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

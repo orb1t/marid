@@ -46,6 +46,13 @@
 
         <dependency>
             <groupId>org.marid</groupId>
+            <artifactId>marid-widgets</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.marid</groupId>
             <artifactId>marid-ide</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>

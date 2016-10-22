@@ -24,7 +24,6 @@ import javafx.beans.property.Property;
 import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
-import org.apache.commons.lang3.exception.CloneFailedException;
 
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.*;
@@ -64,12 +63,12 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Externa
         try (final ObjectOutputStream oos = new ObjectOutputStream(bos)) {
             oos.writeObject(this);
         } catch (IOException x) {
-            throw new CloneFailedException(x);
+            throw new IllegalStateException(x);
         }
         try (final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
             return (T) ois.readObject();
         } catch (IOException | ClassNotFoundException x) {
-            throw new CloneFailedException(x);
+            throw new IllegalStateException(x);
         }
     }
 
