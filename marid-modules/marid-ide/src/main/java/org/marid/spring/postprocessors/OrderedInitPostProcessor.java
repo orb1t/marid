@@ -29,6 +29,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.MethodParameter;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Comparator;
 import java.util.stream.Stream;
@@ -54,6 +55,7 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
         final DefaultListableBeanFactory f = new DefaultListableBeanFactory(context.getAutowireCapableBeanFactory());
         Stream.of(bean.getClass().getMethods())
                 .filter(m -> m.isAnnotationPresent(OrderedInit.class))
+                .sorted(Comparator.comparing(Method::getName))
                 .sorted(Comparator.comparingInt(m -> m.getAnnotation(OrderedInit.class).value()))
                 .forEachOrdered(method -> {
                     final boolean eager = !method.isAnnotationPresent(Lazy.class);

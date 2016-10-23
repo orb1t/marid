@@ -22,7 +22,9 @@ import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -46,6 +48,7 @@ public class IdeDependants {
         final Builder builder = new Builder(name);
         builderConsumer.accept(builder);
         builder.initArgs();
+        parent.addApplicationListener(builder.listener);
         builder.context.refresh();
         builder.context.start();
         return builder.context;
@@ -60,6 +63,15 @@ public class IdeDependants {
 
         private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         private final Map<String, Object> args = new HashMap<>();
+        private final ApplicationListener<?> listener = event -> {
+            if (event instanceof ContextClosedEvent) {
+                final ContextClosedEvent contextClosedEvent = (ContextClosedEvent) event;
+                if (contextClosedEvent.getApplicationContext() == parent) {
+                    parent.getApplicationListeners().remove(this.listener);
+                    context.close();
+                }
+            }
+        };
 
         private Builder(String name) {
             context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));

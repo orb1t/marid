@@ -22,6 +22,11 @@ import javafx.scene.Group;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.NoSuchFileException;
+import java.util.Scanner;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -36,6 +41,23 @@ public class HmiScreen extends BorderPane {
     }
 
     public void setLocation(String url) {
+        webView.getEngine().load(url);
+    }
 
+    public void setRelativeLocation(String relativeUrl) throws IOException {
+        try (final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(relativeUrl)) {
+            if (is != null) {
+                try (final Scanner scanner = new Scanner(is, "UTF-8")) {
+                    final StringBuilder builder = new StringBuilder();
+                    while (scanner.hasNextLine()) {
+                        builder.append(scanner.nextLine());
+                        builder.append('\n');
+                    }
+                    webView.getEngine().loadContent(builder.toString(), "image/svg+xml");
+                }
+            } else {
+                throw new NoSuchFileException(relativeUrl);
+            }
+        }
     }
 }

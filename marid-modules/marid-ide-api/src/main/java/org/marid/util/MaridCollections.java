@@ -43,9 +43,8 @@ public interface MaridCollections {
             while (c.next()) {
                 if (c.wasUpdated()) {
                     for (int i = c.getFrom(); i < c.getTo(); i++) {
-                        final E old = list.get(i);
-                        list.set(i, null);
-                        list.set(i, old);
+                        final E old = list.remove(i);
+                        list.add(i, old);
                     }
                 }
             }

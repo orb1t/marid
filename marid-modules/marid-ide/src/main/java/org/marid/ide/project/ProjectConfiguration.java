@@ -26,6 +26,8 @@ import org.marid.IdeDependants;
 import org.marid.dependant.beanfiles.BeanFileBrowserConfiguration;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
+import org.marid.dependant.resources.ResourcesConfiguration;
+import org.marid.ide.tabs.IdeTabPane;
 import org.marid.jfx.action.FxAction;
 import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
@@ -168,13 +170,32 @@ public class ProjectConfiguration implements LogSupport {
     @Bean
     @IdeAction
     @Qualifier("profile")
-    public FxAction projectBeanFilesAction(IdeDependants dependants, Supplier<ProjectProfile> profile) {
+    public FxAction projectBeanFilesAction(IdeDependants dependants,
+                                           Supplier<ProjectProfile> profile,
+                                           IdeTabPane ideTabPane) {
         return new FxAction("projectTree", "pt", "Project")
                 .setText("Project files")
                 .setAccelerator(KeyCombination.valueOf("F4"))
                 .setIcon(M_FOLDER_SHARED)
+                .bindDisabled(ideTabPane.getSelectionModel().selectedIndexProperty().isNotEqualTo(0))
                 .setEventHandler(event -> dependants.start(profile.get().getName(), b -> b
                         .conf(BeanFileBrowserConfiguration.class)
+                        .arg("profile", profile.get())));
+    }
+
+    @Bean
+    @IdeAction
+    @Qualifier("profile")
+    public FxAction projectResourcesAction(IdeDependants dependants,
+                                           Supplier<ProjectProfile> profile,
+                                           IdeTabPane ideTabPane) {
+        return new FxAction("projectTree", "pt", "Project")
+                .setText("Project resources")
+                .setAccelerator(KeyCombination.valueOf("F3"))
+                .setIcon(M_STORE_MALL_DIRECTORY)
+                .bindDisabled(ideTabPane.getSelectionModel().selectedIndexProperty().isNotEqualTo(0))
+                .setEventHandler(event -> dependants.start(profile.get().getName(), b -> b
+                        .conf(ResourcesConfiguration.class)
                         .arg("profile", profile.get())));
     }
 }

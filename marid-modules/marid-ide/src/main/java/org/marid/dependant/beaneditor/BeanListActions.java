@@ -37,10 +37,12 @@ import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
 import org.marid.spring.xml.collection.DValue;
+import org.marid.spring.xml.ref.DRef;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -173,6 +175,34 @@ public class BeanListActions {
     public BeanData insertItem(String name, BeanDefinition def, BeanMetaInfoProvider.BeansMetaInfo metaInfo) {
         final BeanData beanData = beanData(name, def);
         reflection.updateBeanData(beanData);
+        if (def.getConstructorArgumentValues() != null) {
+            for (final ValueHolder valueHolder : def.getConstructorArgumentValues().getGenericArgumentValues()) {
+                if (valueHolder.getValue() instanceof RuntimeBeanReference) {
+                    final RuntimeBeanReference reference = (RuntimeBeanReference) valueHolder.getValue();
+                    final BeanDefinition beanDefinition = metaInfo.getBeanDefinition(reference.getBeanName());
+                    insertItem(reference.getBeanName(), beanDefinition, metaInfo);
+                    beanData.beanArgs.filtered(a -> a.name.isEqualTo(valueHolder.getName()).get()).forEach(a -> {
+                        final DRef ref = new DRef();
+                        ref.setBean(reference.getBeanName());
+                        a.data.setValue(ref);
+                    });
+                }
+            }
+        }
+        if (def.getPropertyValues() != null && def.getPropertyValues().getPropertyValues() != null) {
+            for (final PropertyValue propertyValue : def.getPropertyValues().getPropertyValues()) {
+                if (propertyValue.getValue() instanceof RuntimeBeanReference) {
+                    final RuntimeBeanReference reference = (RuntimeBeanReference) propertyValue.getValue();
+                    final BeanDefinition beanDefinition = metaInfo.getBeanDefinition(reference.getBeanName());
+                    insertItem(reference.getBeanName(), beanDefinition, metaInfo);
+                    beanData.properties.filtered(a -> a.name.isEqualTo(propertyValue.getName()).get()).forEach(p -> {
+                        final DRef ref = new DRef();
+                        ref.setBean(reference.getBeanName());
+                        p.data.setValue(ref);
+                    });
+                }
+            }
+        }
         insertItem(beanData);
         if (def.getFactoryBeanName() != null) {
             name = def.getFactoryBeanName();
