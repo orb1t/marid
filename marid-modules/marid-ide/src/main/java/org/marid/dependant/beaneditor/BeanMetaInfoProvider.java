@@ -18,7 +18,7 @@
 
 package org.marid.dependant.beaneditor;
 
-import org.apache.commons.lang3.tuple.Pair;
+import javafx.util.Pair;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.logging.LogSupport;
 import org.marid.spring.xml.BeanFile;
@@ -86,7 +86,7 @@ public class BeanMetaInfoProvider implements LogSupport {
         for (final Pair<Path, BeanFile> pair : profile.getBeanFiles()) {
             final ByteArrayOutputStream os = new ByteArrayOutputStream();
             try {
-                MaridBeanDefinitionSaver.write(os, pair.getRight());
+                MaridBeanDefinitionSaver.write(os, pair.getValue());
                 resources.add(new ByteArrayResource(os.toByteArray(), pair.getKey().toString()));
             } catch (Exception x) {
                 log(WARNING, "Unable to save {0}", x, pair.getKey());

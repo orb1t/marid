@@ -20,9 +20,7 @@ package org.marid.editors.window.common;
 
 import javafx.stage.Window;
 import org.marid.spring.beandata.BeanEditor;
-
-import java.util.Collections;
-import java.util.Set;
+import org.marid.spring.beandata.BeanEditorContext;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -30,8 +28,8 @@ import java.util.Set;
 public class WindowCommonEditor implements BeanEditor {
 
     @Override
-    public Set<Class<?>> getBeanTypes() {
-        return Collections.singleton(Window.class);
+    public boolean isCompatibe(BeanEditorContext beanEditorContext) {
+        return Window.class.isAssignableFrom(beanEditorContext.getType());
     }
 
     @Override

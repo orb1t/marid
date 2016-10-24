@@ -112,8 +112,9 @@ public class ProjectProfileReflection {
     public Optional<? extends Type> getArgType(BeanData data, String name) {
         final Optional<? extends Executable> c = getConstructor(data);
         if (c.isPresent()) {
-            final Parameter[] parameters = c.get().getParameters();
-            final Optional<Parameter> parameter = Stream.of(parameters).filter(p -> parameterName(p).equals(name)).findAny();
+            final Optional<Parameter> parameter = Stream.of(c.get().getParameters())
+                    .filter(p -> parameterName(p).equals(name))
+                    .findAny();
             if (parameter.isPresent()) {
                 return Optional.of(parameter.get().getParameterizedType());
             }

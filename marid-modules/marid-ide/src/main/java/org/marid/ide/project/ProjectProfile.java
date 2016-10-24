@@ -22,7 +22,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.apache.commons.lang3.tuple.Pair;
+import javafx.util.Pair;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
@@ -187,10 +187,10 @@ public class ProjectProfile implements LogSupport {
             return stream.filter(p -> p.getFileName().toString().endsWith(".xml"))
                     .map(p -> {
                         try {
-                            return Pair.of(p, MaridBeanDefinitionLoader.load(p));
+                            return new Pair<>(p, MaridBeanDefinitionLoader.load(p));
                         } catch (Exception x) {
                             log(WARNING, "Unable to load {0}", x, p);
-                            return Pair.of(p, new BeanFile());
+                            return new Pair<>(p, new BeanFile());
                         }
                     })
                     .collect(Collectors.toCollection(FXCollections::observableArrayList));

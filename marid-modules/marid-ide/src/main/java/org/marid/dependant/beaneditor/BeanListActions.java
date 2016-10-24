@@ -18,10 +18,12 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.util.Pair;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.BeanBrowserTable.BeanBrowserItem;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
@@ -32,9 +34,11 @@ import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.misc.Reflections;
 import org.marid.spring.beandata.BeanEditor;
+import org.marid.spring.beandata.BeanEditorContext;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.BeanFile;
 import org.marid.spring.xml.BeanProp;
 import org.marid.spring.xml.collection.DValue;
 import org.marid.spring.xml.ref.DRef;
@@ -54,6 +58,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -299,25 +304,24 @@ public class BeanListActions {
     private List<MenuItem> editors(Class<?> type, BeanData beanData) {
         final List<MenuItem> items = new ArrayList<>();
         final URLClassLoader classLoader = profile.getClassLoader();
+        final BeanEditorContext beanEditorContext = new BeanEditorContextImpl(type, beanData);
         for (final BeanEditor editor : ServiceLoader.load(BeanEditor.class, classLoader)) {
-            for (final Class<?> e : editor.getBeanTypes()) {
-                if (e.isAssignableFrom(type)) {
-                    final MenuItem menuItem = new MenuItem(s(editor.getName()));
-                    menuItem.setOnAction(event -> {
-                        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-                        context.setClassLoader(classLoader);
-                        context.setAllowCircularReferences(false);
-                        context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
-                        context.setDisplayName(editor.getName());
-                        context.register((Class[]) editor.getConfigurations());
-                        context.setParent(BeanListActions.this.context);
-                        context.getBeanFactory().registerSingleton("beanData", beanData);
-                        reflection.updateBeanData(beanData);
-                        context.refresh();
-                        context.start();
-                    });
-                    items.add(menuItem);
-                }
+            if (editor.isCompatibe(beanEditorContext)) {
+                final MenuItem menuItem = new MenuItem(s(editor.getName()));
+                menuItem.setOnAction(event -> {
+                    final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+                    context.setClassLoader(classLoader);
+                    context.setAllowCircularReferences(false);
+                    context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
+                    context.setDisplayName(editor.getName());
+                    context.register((Class[]) editor.getConfigurations());
+                    context.setParent(BeanListActions.this.context);
+                    context.getBeanFactory().registerSingleton("beanData", beanData);
+                    reflection.updateBeanData(beanData);
+                    context.refresh();
+                    context.start();
+                });
+                items.add(menuItem);
             }
         }
         return items;
@@ -355,5 +359,71 @@ public class BeanListActions {
             menu.getItems().addAll(i.next());
         }
         return menu;
+    }
+
+    private class BeanEditorContextImpl implements BeanEditorContext {
+
+        private final Class<?> type;
+        private final BeanData beanData;
+
+        private BeanEditorContextImpl(Class<?> type, BeanData beanData) {
+            this.type = type;
+            this.beanData = beanData;
+        }
+
+        @Override
+        public URLClassLoader getClassLoader() {
+            return profile.getClassLoader();
+        }
+
+        @Override
+        public boolean containBean(String name) {
+            return profile.containsBean(name);
+        }
+
+        @Override
+        public String generateBeanName(String name) {
+            return profile.generateBeanName(name);
+        }
+
+        @Override
+        public boolean isHmi() {
+            return profile.hmiProperty().get();
+        }
+
+        @Override
+        public ObservableList<Pair<Path, BeanFile>> getBeanFiles() {
+            return profile.getBeanFiles();
+        }
+
+        @Override
+        public String getProfileName() {
+            return profile.getName();
+        }
+
+        @Override
+        public Optional<Class<?>> getType(String type) {
+            return profile.getClass(type);
+        }
+
+        @Override
+        public BeanData getBeanData() {
+            return beanData;
+        }
+
+        @Override
+        public Optional<? extends Type> getType(BeanData beanData) {
+            return reflection.getType(beanData);
+        }
+
+        @Override
+        public Optional<Class<?>> getClass(BeanData beanData) {
+            return reflection.getClass(beanData);
+        }
+
+        @Override
+        public Class<?> getType() {
+            return type;
+        }
     }
 }

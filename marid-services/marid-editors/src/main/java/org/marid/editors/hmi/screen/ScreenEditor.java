@@ -18,19 +18,17 @@
 
 package org.marid.editors.hmi.screen;
 
-import org.marid.hmi.screen.HmiScreen;
 import org.marid.spring.beandata.BeanEditor;
-
-import java.util.Collections;
-import java.util.Set;
+import org.marid.spring.beandata.BeanEditorContext;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class ScreenEditor implements BeanEditor {
+
     @Override
-    public Set<Class<?>> getBeanTypes() {
-        return Collections.singleton(HmiScreen.class);
+    public boolean isCompatibe(BeanEditorContext beanEditorContext) {
+        return true;
     }
 
     @Override

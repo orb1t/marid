@@ -22,7 +22,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextInputDialog;
-import org.apache.commons.lang3.tuple.Pair;
+import javafx.util.Pair;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.BeanEditorConfiguration;
 import org.marid.dependant.beaneditor.BeanEditorTab;
@@ -72,7 +72,7 @@ public class BeanFileBrowserActions {
         if (value.isPresent()) {
             final String name = value.get().endsWith(".xml") ? value.get() : value.get() + ".xml";
             final Path path = getProfile().getBeansDirectory().resolve(name);
-            getProfile().getBeanFiles().add(Pair.of(path, new BeanFile()));
+            getProfile().getBeanFiles().add(new Pair<>(path, new BeanFile()));
         }
     }
 
@@ -86,7 +86,7 @@ public class BeanFileBrowserActions {
         final Optional<String> value = dialog.showAndWait();
         if (value.isPresent()) {
             final Path newPath = path.getParent().resolve(value.get().endsWith(".xml") ? value.get() : value.get() + ".xml");
-            getProfile().getBeanFiles().filtered(p -> p.getKey().equals(path)).replaceAll(p -> Pair.of(newPath, p.getValue()));
+            getProfile().getBeanFiles().filtered(p -> p.getKey().equals(path)).replaceAll(p -> new Pair<>(newPath, p.getValue()));
         }
     }
 

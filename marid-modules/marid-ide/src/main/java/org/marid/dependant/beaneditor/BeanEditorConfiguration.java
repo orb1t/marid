@@ -19,7 +19,7 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.collections.ListChangeListener;
-import org.apache.commons.lang3.tuple.Pair;
+import javafx.util.Pair;
 import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectProfileReflection;

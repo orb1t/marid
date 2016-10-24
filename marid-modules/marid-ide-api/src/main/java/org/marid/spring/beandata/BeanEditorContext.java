@@ -18,14 +18,40 @@
 
 package org.marid.spring.beandata;
 
+import javafx.collections.ObservableList;
+import javafx.util.Pair;
+import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.BeanFile;
+
+import java.lang.reflect.Type;
+import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.util.Optional;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface BeanEditor {
+public interface BeanEditorContext {
 
-    boolean isCompatibe(BeanEditorContext beanEditorContext);
+    URLClassLoader getClassLoader();
 
-    String getName();
+    boolean containBean(String name);
 
-    Class<?>[] getConfigurations();
+    String generateBeanName(String name);
+
+    boolean isHmi();
+
+    ObservableList<Pair<Path, BeanFile>> getBeanFiles();
+
+    String getProfileName();
+
+    Optional<Class<?>> getType(String type);
+
+    BeanData getBeanData();
+
+    Optional<? extends Type> getType(BeanData beanData);
+
+    Optional<Class<?>> getClass(BeanData beanData);
+
+    Class<?> getType();
 }

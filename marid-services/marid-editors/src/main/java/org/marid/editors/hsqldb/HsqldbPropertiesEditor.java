@@ -20,9 +20,7 @@ package org.marid.editors.hsqldb;
 
 import org.marid.db.hsqldb.HsqldbProperties;
 import org.marid.spring.beandata.BeanEditor;
-
-import java.util.Collections;
-import java.util.Set;
+import org.marid.spring.beandata.BeanEditorContext;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -30,8 +28,8 @@ import java.util.Set;
 public class HsqldbPropertiesEditor implements BeanEditor {
 
     @Override
-    public Set<Class<?>> getBeanTypes() {
-        return Collections.singleton(HsqldbProperties.class);
+    public boolean isCompatibe(BeanEditorContext beanEditorContext) {
+        return HsqldbProperties.class.isAssignableFrom(beanEditorContext.getType());
     }
 
     @Override

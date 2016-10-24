@@ -19,3 +19,5 @@
 org.marid.editors.window.common.WindowCommonEditor
 
 org.marid.editors.hsqldb.HsqldbPropertiesEditor
+
+org.marid.editors.hmi.screen.ScreenEditor
