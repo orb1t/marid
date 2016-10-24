@@ -21,8 +21,8 @@ package org.marid.dependant.beaneditor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.logging.LogSupport;
-import org.marid.spring.xml.MaridBeanDefinitionSaver;
 import org.marid.spring.xml.BeanFile;
+import org.marid.spring.xml.MaridBeanDefinitionSaver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -87,7 +87,7 @@ public class BeanMetaInfoProvider implements LogSupport {
             final ByteArrayOutputStream os = new ByteArrayOutputStream();
             try {
                 MaridBeanDefinitionSaver.write(os, pair.getRight());
-                resources.add(new ByteArrayResource(os.toByteArray()));
+                resources.add(new ByteArrayResource(os.toByteArray(), pair.getKey().toString()));
             } catch (Exception x) {
                 log(WARNING, "Unable to save {0}", x, pair.getKey());
             }

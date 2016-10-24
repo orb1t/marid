@@ -18,7 +18,6 @@
 
 package org.marid.hmi.screen;
 
-import javafx.scene.Group;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 
@@ -33,10 +32,9 @@ import java.util.Scanner;
 public class HmiScreen extends BorderPane {
 
     private final WebView webView = new WebView();
-    private final Group webGroup = new Group(webView);
 
     public HmiScreen() {
-        setCenter(webGroup);
+        setCenter(webView);
         webView.getEngine().setJavaScriptEnabled(true);
     }
 

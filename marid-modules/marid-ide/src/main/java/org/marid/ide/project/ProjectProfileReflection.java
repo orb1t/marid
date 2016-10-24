@@ -113,7 +113,7 @@ public class ProjectProfileReflection {
         final Optional<? extends Executable> c = getConstructor(data);
         if (c.isPresent()) {
             final Parameter[] parameters = c.get().getParameters();
-            final Optional<Parameter> parameter = Stream.of(parameters).filter(p -> p.getName().equals(name)).findAny();
+            final Optional<Parameter> parameter = Stream.of(parameters).filter(p -> parameterName(p).equals(name)).findAny();
             if (parameter.isPresent()) {
                 return Optional.of(parameter.get().getParameterizedType());
             }
