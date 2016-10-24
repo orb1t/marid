@@ -38,7 +38,7 @@ public class ResourcesTable extends MaridTableView<Path> {
 
     @Autowired
     public ResourcesTable(ResourcesTracker resourcesTracker) {
-        super(resourcesTracker.resources);
+        super(resourcesTracker.resources.sorted());
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setEditable(false);
     }
