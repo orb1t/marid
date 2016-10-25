@@ -53,7 +53,7 @@
 
         <dependency>
             <groupId>org.marid</groupId>
-            <artifactId>marid-ide</artifactId>
+            <artifactId>marid-ide-api</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

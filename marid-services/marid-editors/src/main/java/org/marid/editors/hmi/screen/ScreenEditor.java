@@ -18,17 +18,54 @@
 
 package org.marid.editors.hmi.screen;
 
+import javafx.stage.Stage;
+import org.marid.hmi.screen.HmiScreen;
 import org.marid.spring.beandata.BeanEditor;
 import org.marid.spring.beandata.BeanEditorContext;
+import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.ref.DRef;
+
+import java.util.Optional;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class ScreenEditor implements BeanEditor {
 
+    private BeanData sceneBeanData;
+    private BeanData rootBeanData;
+
     @Override
     public boolean isCompatibe(BeanEditorContext beanEditorContext) {
-        return true;
+        if (!Stage.class.isAssignableFrom(beanEditorContext.getType())) {
+            return false;
+        }
+        final String sceneBeanName = beanEditorContext.getBeanData().property("scene")
+                .filter(p -> p.data.get() instanceof DRef)
+                .map(p -> DRef.class.cast(p.data.get()))
+                .map(DRef::getBean)
+                .orElse(null);
+        if (sceneBeanName == null) {
+            return false;
+        }
+        sceneBeanData = beanEditorContext.getProfileInfo().findBean(sceneBeanName).orElse(null);
+        if (sceneBeanData == null) {
+            return false;
+        }
+        final String rootBeanName = sceneBeanData.arg("root")
+                .filter(a -> a.data.get() instanceof DRef)
+                .map(a -> DRef.class.cast(a.data.get()))
+                .map(DRef::getBean)
+                .orElse(null);
+        if (rootBeanName == null) {
+            return false;
+        }
+        rootBeanData = beanEditorContext.getProfileInfo().findBean(rootBeanName).orElse(null);
+        if (rootBeanData == null) {
+            return false;
+        }
+        final Optional<Class<?>> rootBeanDataType = beanEditorContext.getProfileInfo().getClass(rootBeanData);
+        return rootBeanDataType.isPresent() && HmiScreen.class.isAssignableFrom(rootBeanDataType.get());
     }
 
     @Override
@@ -37,7 +74,7 @@ public class ScreenEditor implements BeanEditor {
     }
 
     @Override
-    public Class<?>[] getConfigurations() {
-        return new Class[] {ScreenEditorConfiguration.class};
+    public void run(BeanEditorContext context) {
+
     }
 }

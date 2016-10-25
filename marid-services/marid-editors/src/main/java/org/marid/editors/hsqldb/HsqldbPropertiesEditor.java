@@ -22,6 +22,8 @@ import org.marid.db.hsqldb.HsqldbProperties;
 import org.marid.spring.beandata.BeanEditor;
 import org.marid.spring.beandata.BeanEditorContext;
 
+import java.util.Optional;
+
 /**
  * @author Dmitry Ovchinnikov.
  */
@@ -38,7 +40,11 @@ public class HsqldbPropertiesEditor implements BeanEditor {
     }
 
     @Override
-    public Class<?>[] getConfigurations() {
-        return new Class<?>[] {HsqldbPropertiesEditorConfiguration.class};
+    public void run(BeanEditorContext context) {
+        final HsqldbPropertiesDialog dialog = new HsqldbPropertiesDialog(context.getBeanData());
+        final Optional<Runnable> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            result.get().run();
+        }
     }
 }

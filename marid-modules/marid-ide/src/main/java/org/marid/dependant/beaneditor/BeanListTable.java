@@ -26,7 +26,6 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.BeanData;
@@ -49,10 +48,10 @@ import static org.marid.l10n.L10n.s;
 @Component
 public class BeanListTable extends MaridTableView<BeanData> {
 
-    private final ProjectProfileReflection reflection;
+    private final ProjectProfile reflection;
 
     @Autowired
-    public BeanListTable(BeanFile beanFile, ProjectProfileReflection reflection) {
+    public BeanListTable(BeanFile beanFile, ProjectProfile reflection) {
         super(beanFile.beans);
         this.reflection = reflection;
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);

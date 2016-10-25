@@ -18,30 +18,28 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.util.Pair;
+import javafx.stage.Stage;
+import org.marid.Ide;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.BeanBrowserTable.BeanBrowserItem;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
+import org.marid.ide.project.ProfileInfo;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
-import org.marid.misc.Reflections;
 import org.marid.spring.beandata.BeanEditor;
 import org.marid.spring.beandata.BeanEditorContext;
-import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
-import org.marid.spring.xml.BeanFile;
 import org.marid.spring.xml.BeanProp;
 import org.marid.spring.xml.collection.DValue;
 import org.marid.spring.xml.ref.DRef;
+import org.marid.util.Reflections;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -50,7 +48,6 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
@@ -58,7 +55,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.net.URLClassLoader;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -83,19 +79,13 @@ public class BeanListActions {
     private final BeanListTable table;
     private final IdeDependants dependants;
     private final ProjectProfile profile;
-    private final ProjectProfileReflection reflection;
 
     @Autowired
-    public BeanListActions(ApplicationContext context,
-                           BeanListTable table,
-                           IdeDependants dependants,
-                           ProjectProfile profile,
-                           ProjectProfileReflection reflection) {
+    public BeanListActions(ApplicationContext context, BeanListTable table, IdeDependants dependants, ProjectProfile profile) {
         this.context = context;
         this.table = table;
         this.dependants = dependants;
         this.profile = profile;
-        this.reflection = reflection;
     }
 
     public void onEdit(ActionEvent event) {
@@ -173,13 +163,13 @@ public class BeanListActions {
             }
         }
 
-        reflection.updateBeanData(beanData);
+        profile.updateBeanData(beanData);
         return beanData;
     }
 
     public BeanData insertItem(String name, BeanDefinition def, BeanMetaInfoProvider.BeansMetaInfo metaInfo) {
         final BeanData beanData = beanData(name, def);
-        reflection.updateBeanData(beanData);
+        profile.updateBeanData(beanData);
         if (def.getConstructorArgumentValues() != null) {
             for (final ValueHolder valueHolder : def.getConstructorArgumentValues().getGenericArgumentValues()) {
                 if (valueHolder.getValue() instanceof RuntimeBeanReference) {
@@ -279,7 +269,7 @@ public class BeanListActions {
                     newBeanData.beanArgs.add(arg);
                 }
                 table.getItems().add(newBeanData);
-                reflection.updateBeanData(newBeanData);
+                profile.updateBeanData(newBeanData);
             });
             return menuItem;
         };
@@ -309,17 +299,8 @@ public class BeanListActions {
             if (editor.isCompatibe(beanEditorContext)) {
                 final MenuItem menuItem = new MenuItem(s(editor.getName()));
                 menuItem.setOnAction(event -> {
-                    final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-                    context.setClassLoader(classLoader);
-                    context.setAllowCircularReferences(false);
-                    context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
-                    context.setDisplayName(editor.getName());
-                    context.register((Class[]) editor.getConfigurations());
-                    context.setParent(BeanListActions.this.context);
-                    context.getBeanFactory().registerSingleton("beanData", beanData);
-                    reflection.updateBeanData(beanData);
-                    context.refresh();
-                    context.start();
+                    profile.updateBeanData(beanData);
+                    editor.run(beanEditorContext);
                 });
                 items.add(menuItem);
             }
@@ -330,7 +311,7 @@ public class BeanListActions {
     public ContextMenu contextMenu(BeanData beanData) {
         final ContextMenu menu = new ContextMenu();
         final List<List<MenuItem>> menuItems = new ArrayList<>();
-        final Type type = reflection.getType(beanData).orElse(null);
+        final Type type = profile.getType(beanData).orElse(null);
         if (type == null) {
             return menu;
         }
@@ -372,58 +353,23 @@ public class BeanListActions {
         }
 
         @Override
-        public URLClassLoader getClassLoader() {
-            return profile.getClassLoader();
-        }
-
-        @Override
-        public boolean containBean(String name) {
-            return profile.containsBean(name);
-        }
-
-        @Override
-        public String generateBeanName(String name) {
-            return profile.generateBeanName(name);
-        }
-
-        @Override
-        public boolean isHmi() {
-            return profile.hmiProperty().get();
-        }
-
-        @Override
-        public ObservableList<Pair<Path, BeanFile>> getBeanFiles() {
-            return profile.getBeanFiles();
-        }
-
-        @Override
-        public String getProfileName() {
-            return profile.getName();
-        }
-
-        @Override
-        public Optional<Class<?>> getType(String type) {
-            return profile.getClass(type);
-        }
-
-        @Override
         public BeanData getBeanData() {
             return beanData;
         }
 
         @Override
-        public Optional<? extends Type> getType(BeanData beanData) {
-            return reflection.getType(beanData);
-        }
-
-        @Override
-        public Optional<Class<?>> getClass(BeanData beanData) {
-            return reflection.getClass(beanData);
-        }
-
-        @Override
         public Class<?> getType() {
             return type;
+        }
+
+        @Override
+        public ProfileInfo getProfileInfo() {
+            return profile;
+        }
+
+        @Override
+        public Stage getPrimaryStage() {
+            return Ide.primaryStage;
         }
     }
 }

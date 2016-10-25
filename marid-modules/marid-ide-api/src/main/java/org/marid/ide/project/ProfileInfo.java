@@ -18,41 +18,90 @@
 
 package org.marid.ide.project;
 
+import javafx.collections.ObservableList;
+import javafx.util.Pair;
 import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.BeanFile;
 import org.marid.spring.xml.BeanProp;
+import org.marid.util.Reflections;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.*;
+import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.marid.misc.Reflections.parameterName;
+import static org.marid.util.Reflections.parameterName;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProjectProfileReflection {
+public interface ProfileInfo {
 
-    private final ProjectProfile profile;
+    boolean containsBean(String name);
 
-    public ProjectProfileReflection(ProjectProfile profile) {
-        this.profile = profile;
+    ObservableList<Pair<Path, BeanFile>> getBeanFiles();
+
+    Path getPath();
+
+    Path getPomFile();
+
+    Path getRepository();
+
+    Path getBeansDirectory();
+
+    Path getSrc();
+
+    Path getSrcMainResources();
+
+    Path getTarget();
+
+    String getName();
+
+    Logger logger();
+
+    Optional<Class<?>> getClass(String type);
+
+    void save();
+
+    boolean isHmi();
+
+    String generateBeanName(String name);
+
+    URLClassLoader getClassLoader();
+
+    default Optional<BeanData> findBean(String name) {
+        return getBeanFiles().stream()
+                .map(Pair::getValue)
+                .flatMap(BeanFile::allBeans)
+                .filter(b -> name.equals(b.getName()))
+                .findAny();
     }
 
-    public Stream<? extends Executable> getConstructors(BeanData data) {
+    default Optional<Class<?>> getClass(BeanData data) {
+        if (data.isFactoryBean()) {
+            return getConstructor(data).map(e -> ((Method) e).getReturnType());
+        } else {
+            return getClass(data.type.get());
+        }
+    }
+
+    default Stream<? extends Executable> getConstructors(BeanData data) {
         if (data.isFactoryBean()) {
             if (data.factoryBean.isNotEmpty().get()) {
-                return profile.getBeanFiles().stream()
+                return getBeanFiles().stream()
                         .flatMap(e -> e.getValue().allBeans())
                         .filter(b -> data.factoryBean.isEqualTo(b.nameProperty()).get())
                         .map(this::getClass)
@@ -63,7 +112,7 @@ public class ProjectProfileReflection {
                         .filter(m -> data.factoryMethod.isEqualTo(m.getName()).get())
                         .sorted(comparingInt(Method::getParameterCount));
             } else {
-                return profile.getClass(data.type.get())
+                return getClass(data.type.get())
                         .map(type -> Stream.of(type.getMethods())
                                 .filter(m -> Modifier.isStatic(m.getModifiers()))
                                 .filter(m -> m.getReturnType() != void.class)
@@ -78,7 +127,7 @@ public class ProjectProfileReflection {
         }
     }
 
-    public Optional<? extends Executable> getConstructor(BeanData data) {
+    default Optional<? extends Executable> getConstructor(BeanData data) {
         final List<? extends Executable> executables = getConstructors(data).collect(toList());
         switch (executables.size()) {
             case 0:
@@ -87,33 +136,25 @@ public class ProjectProfileReflection {
                 return Optional.of(executables.get(0));
             default:
                 final Class<?>[] types = data.beanArgs.stream()
-                        .map(a -> profile.getClass(a.type.get()).orElse(Object.class))
+                        .map(a -> getClass(a.type.get()).orElse(Object.class))
                         .toArray(Class<?>[]::new);
                 return executables.stream().filter(m -> Arrays.equals(types, m.getParameterTypes())).findFirst();
         }
     }
 
-    public Optional<Class<?>> getClass(BeanData data) {
-        if (data.isFactoryBean()) {
-            return getConstructor(data).map(e -> ((Method) e).getReturnType());
-        } else {
-            return profile.getClass(data.type.get());
-        }
-    }
-
-    public Optional<? extends Type> getType(BeanData data) {
+    default Optional<? extends Type> getType(BeanData data) {
         if (data.isFactoryBean()) {
             return getConstructor(data).map(e -> ((Method) e).getGenericReturnType());
         } else {
-            return profile.getClass(data.type.get());
+            return getClass(data.type.get());
         }
     }
 
-    public Optional<? extends Type> getArgType(BeanData data, String name) {
+    default Optional<? extends Type> getArgType(BeanData data, String name) {
         final Optional<? extends Executable> c = getConstructor(data);
         if (c.isPresent()) {
             final Optional<Parameter> parameter = Stream.of(c.get().getParameters())
-                    .filter(p -> parameterName(p).equals(name))
+                    .filter(p -> Reflections.parameterName(p).equals(name))
                     .findAny();
             if (parameter.isPresent()) {
                 return Optional.of(parameter.get().getParameterizedType());
@@ -122,7 +163,7 @@ public class ProjectProfileReflection {
         return Optional.empty();
     }
 
-    public Optional<? extends Type> getPropType(BeanData data, String name) {
+    default Optional<? extends Type> getPropType(BeanData data, String name) {
         final Optional<PropertyDescriptor> pd = getPropertyDescriptors(data)
                 .filter(d -> d.getName().equals(name))
                 .findAny();
@@ -132,7 +173,7 @@ public class ProjectProfileReflection {
         return Optional.empty();
     }
 
-    public void updateBeanDataConstructorArgs(BeanData data, Parameter[] parameters) {
+    default void updateBeanDataConstructorArgs(BeanData data, Parameter[] parameters) {
         final List<BeanArg> args = Stream.of(parameters)
                 .map(p -> {
                     final Optional<BeanArg> found = data.beanArgs.stream()
@@ -153,7 +194,7 @@ public class ProjectProfileReflection {
         data.beanArgs.addAll(args);
     }
 
-    public void updateBeanData(BeanData data) {
+    default void updateBeanData(BeanData data) {
         final Class<?> type = getClass(data).orElse(null);
         if (type == null) {
             return;
@@ -184,7 +225,7 @@ public class ProjectProfileReflection {
         }
     }
 
-    public Stream<PropertyDescriptor> getPropertyDescriptors(BeanData data) {
+    default Stream<PropertyDescriptor> getPropertyDescriptors(BeanData data) {
         final Class<?> type = getClass(data).orElse(Object.class);
         try {
             final BeanInfo beanInfo = Introspector.getBeanInfo(type);
@@ -193,9 +234,5 @@ public class ProjectProfileReflection {
         } catch (IntrospectionException x) {
             return Stream.empty();
         }
-    }
-
-    public ProjectProfile getProfile() {
-        return profile;
     }
 }

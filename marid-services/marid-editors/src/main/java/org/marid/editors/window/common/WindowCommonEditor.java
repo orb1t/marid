@@ -38,7 +38,8 @@ public class WindowCommonEditor implements BeanEditor {
     }
 
     @Override
-    public Class<?>[] getConfigurations() {
-        return new Class<?>[] {WindowCommonEditorConfiguration.class};
+    public void run(BeanEditorContext context) {
+        final WindowCommonEditorStage stage = new WindowCommonEditorStage(context.getBeanData());
+        stage.show();
     }
 }

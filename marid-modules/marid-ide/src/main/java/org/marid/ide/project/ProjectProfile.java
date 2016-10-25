@@ -57,7 +57,7 @@ import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProjectProfile implements LogSupport {
+public class ProjectProfile implements LogSupport, ProfileInfo {
 
     final Model model;
     final Path path;
@@ -101,16 +101,19 @@ public class ProjectProfile implements LogSupport {
         hmi.addListener((observable, oldValue, newValue) -> setHmi(newValue));
     }
 
+    @Override
     public URLClassLoader getClassLoader() {
         return cacheEntry.getClassLoader();
     }
 
+    @Override
     public boolean containsBean(String name) {
         return beanFiles.stream()
                 .map(Pair::getValue)
                 .anyMatch(f -> f.allBeans().anyMatch(b -> b.nameProperty().isEqualTo(name).get()));
     }
 
+    @Override
     public String generateBeanName(String name) {
         while (containsBean(name)) {
             name += "_new";
@@ -130,7 +133,8 @@ public class ProjectProfile implements LogSupport {
         return hmi;
     }
 
-    private boolean isHmi() {
+    @Override
+    public boolean isHmi() {
         return model.getDependencies().stream().anyMatch(CommonTab::isHmi);
     }
 
@@ -202,6 +206,7 @@ public class ProjectProfile implements LogSupport {
         return FXCollections.observableArrayList();
     }
 
+    @Override
     public ObservableList<Pair<Path, BeanFile>> getBeanFiles() {
         return beanFiles;
     }
@@ -210,34 +215,42 @@ public class ProjectProfile implements LogSupport {
         return model;
     }
 
+    @Override
     public Path getPath() {
         return path;
     }
 
+    @Override
     public Path getPomFile() {
         return pomFile;
     }
 
+    @Override
     public Path getRepository() {
         return repository;
     }
 
+    @Override
     public Path getBeansDirectory() {
         return beansDirectory;
     }
 
+    @Override
     public Path getSrc() {
         return src;
     }
 
+    @Override
     public Path getSrcMainResources() {
         return srcMainResources;
     }
 
+    @Override
     public Path getTarget() {
         return target;
     }
 
+    @Override
     public String getName() {
         return path.getFileName().toString();
     }
@@ -248,6 +261,7 @@ public class ProjectProfile implements LogSupport {
         return logger;
     }
 
+    @Override
     public Optional<Class<?>> getClass(String type) {
         return cacheEntry.getClass(type);
     }
@@ -295,6 +309,7 @@ public class ProjectProfile implements LogSupport {
         }
     }
 
+    @Override
     public void save() {
         createFileStructure();
         savePomFile();

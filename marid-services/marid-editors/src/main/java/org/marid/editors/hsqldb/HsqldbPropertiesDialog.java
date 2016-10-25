@@ -31,8 +31,6 @@ import org.marid.jfx.panes.GenericGridPane;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
 import org.marid.spring.xml.collection.DValue;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,10 +42,8 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Component
 public class HsqldbPropertiesDialog extends Dialog<Runnable> {
 
-    @Autowired
     public HsqldbPropertiesDialog(BeanData beanData) {
         setTitle(s("HSQLDB properties dialog: %s", beanData.name.get()));
         initModality(Modality.APPLICATION_MODAL);

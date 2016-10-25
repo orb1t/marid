@@ -26,6 +26,16 @@
         <meta key="icon" value="P_ADD"/>
     </bean>
 
+    <bean name="scene" class="javafx.scene.Scene">
+        <description>A scene</description>
+
+        <constructor-arg name="root" type="javafx.scene.Parent" value=""/>
+    </bean>
+
+    <bean name="stage" class="javafx.stage.Stage" init-method="show" destroy-method="hide">
+        <description>A stage</description>
+    </bean>
+
     <bean name="simpleGraphWidgetProperties" class="org.marid.hmi.db.SimpleGraphWidgetProperties">
         <description>Simple graph properties</description>
 
@@ -44,20 +54,5 @@
 
     <bean name="hmiScreen" class="org.marid.hmi.screen.HmiScreen">
         <description>HMI screen</description>
-    </bean>
-
-    <bean name="hmiScreenScene" class="javafx.scene.Scene">
-        <description>HMI screen scene</description>
-
-        <constructor-arg name="root" type="javafx.scene.Parent" ref="hmiScreen"/>
-        <constructor-arg name="width" type="double" value="800"/>
-        <constructor-arg name="height" type="double" value="600"/>
-    </bean>
-
-    <bean name="hmiScreenStage" class="javafx.stage.Stage">
-        <description>HMI screen stage</description>
-
-        <property name="scene" ref="hmiScreenScene"/>
-        <property name="title" value="HMI screen"/>
     </bean>
 </beans>

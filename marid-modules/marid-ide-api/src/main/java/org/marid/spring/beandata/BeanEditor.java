@@ -27,5 +27,5 @@ public interface BeanEditor {
 
     String getName();
 
-    Class<?>[] getConfigurations();
+    void run(BeanEditorContext context);
 }

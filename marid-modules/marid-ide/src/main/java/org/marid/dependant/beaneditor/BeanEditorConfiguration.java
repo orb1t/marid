@@ -22,7 +22,6 @@ import javafx.collections.ListChangeListener;
 import javafx.util.Pair;
 import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.project.ProjectProfileReflection;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -37,11 +36,6 @@ import java.nio.file.Path;
 @Configuration
 @Import({BeanEditorTab.class, BeanListConfiguration.class, ValueMenuItems.class})
 public class BeanEditorConfiguration {
-
-    @Bean
-    public ProjectProfileReflection reflection(ProjectProfile profile) {
-        return new ProjectProfileReflection(profile);
-    }
 
     @Bean
     public BeanFile beanFile(Path beanFilePath, ProjectProfile profile) {

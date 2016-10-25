@@ -30,10 +30,6 @@ import javafx.stage.StageStyle;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
 import org.marid.spring.xml.collection.DValue;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
 import static javafx.beans.binding.Bindings.format;
 import static org.marid.jfx.icons.FontIcon.*;
@@ -43,8 +39,7 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Component
-public class WindowCommonEditorConfiguration extends Stage {
+public class WindowCommonEditorStage extends Stage {
 
     private final BeanProp widthProperty;
     private final BeanProp heightProperty;
@@ -71,8 +66,7 @@ public class WindowCommonEditorConfiguration extends Stage {
         prop.data.setValue(v);
     }
 
-    @Autowired
-    public WindowCommonEditorConfiguration(BeanData beanData) {
+    public WindowCommonEditorStage(BeanData beanData) {
         super(StageStyle.UTILITY);
         xProperty = beanData.property("x").orElseGet(BeanProp::new);
         yProperty = beanData.property("y").orElseGet(BeanProp::new);
@@ -127,13 +121,7 @@ public class WindowCommonEditorConfiguration extends Stage {
             pane.setRight(box);
         }
         setScene(new Scene(pane, width, height));
-    }
-
-
-    @EventListener
-    private void onStart(ContextStartedEvent event) {
         setX(x);
         setY(y);
-        show();
     }
 }

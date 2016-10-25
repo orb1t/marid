@@ -47,7 +47,6 @@ public class HmiApplication extends Application {
     public void init() throws Exception {
         final MapPropertySource cmdProps = new MapPropertySource("cmd", cast(getParameters().getNamed()));
         context.getBeanFactory().registerSingleton("application", this);
-        context.getBeanFactory().addBeanPostProcessor(new HmiPostProcessor());
         context.getEnvironment().getPropertySources().addFirst(cmdProps);
     }
 
@@ -68,6 +67,7 @@ public class HmiApplication extends Application {
         primaryStage.setScene(new Scene(pane, 800, 600));
         primaryStage.getIcons().addAll(IntStream.of(16, 24, 32).mapToObj(s -> maridIcon(s, GREEN)).collect(toList()));
         primaryStage.setOnCloseRequest(event -> context.close());
+        primaryStage.setIconified(true);
         primaryStage.show();
         final Map<String, Stage> stageMap = context.getBeansOfType(Stage.class, true, true);
         pane.addStages(stageMap);
@@ -75,7 +75,6 @@ public class HmiApplication extends Application {
             if (stage.getIcons().isEmpty()) {
                 stage.getIcons().addAll(primaryStage.getIcons());
             }
-            stage.show();
         });
     }
 }

@@ -16,30 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.editors.hsqldb;
+package org.marid.util;
 
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.event.ContextStartedEvent;
+import javafx.beans.NamedArg;
 
-import java.util.Optional;
+import java.lang.reflect.Parameter;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Configuration
-@Import({HsqldbPropertiesDialog.class})
-public class HsqldbPropertiesEditorConfiguration {
+public interface Reflections {
 
-    @Bean
-    public ApplicationListener<ContextStartedEvent> onStartEvent(HsqldbPropertiesDialog dialog) {
-        return event -> {
-            final Optional<Runnable> runnable = dialog.showAndWait();
-            if (runnable.isPresent()) {
-                runnable.get().run();
-            }
-        };
+    static String parameterName(Parameter parameter) {
+        final NamedArg arg = parameter.getAnnotation(NamedArg.class);
+        return arg != null ? arg.value() : parameter.getName();
     }
 }

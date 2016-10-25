@@ -158,4 +158,10 @@ public final class BeanData extends DElement<BeanData> {
                 .filter(p -> p.name.isEqualTo(name).get())
                 .findAny();
     }
+
+    public Optional<BeanArg> arg(String name) {
+        return beanArgs.stream()
+                .filter(a -> a.name.isEqualTo(name).get())
+                .findAny();
+    }
 }

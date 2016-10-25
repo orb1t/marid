@@ -26,7 +26,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.marid.ide.panes.main.IdePane;
-import org.marid.ide.project.ProjectProfileReflection;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.MaridToolbar;
@@ -52,13 +52,13 @@ import static org.marid.l10n.L10n.s;
 public class BeanDataEditorConfiguration {
 
     @Bean
-    public RefValuesEditor<BeanArg> beanArgsEditor(BeanData beanData, ProjectProfileReflection reflection) {
-        return new RefValuesEditor<>(beanData.beanArgs, name -> reflection.getArgType(beanData, name));
+    public RefValuesEditor<BeanArg> beanArgsEditor(BeanData beanData, ProjectProfile profile) {
+        return new RefValuesEditor<>(beanData.beanArgs, name -> profile.getArgType(beanData, name));
     }
 
     @Bean
-    public RefValuesEditor<BeanProp> beanPropsEditor(BeanData beanData, ProjectProfileReflection reflection) {
-        return new RefValuesEditor<>(beanData.properties, name -> reflection.getPropType(beanData, name));
+    public RefValuesEditor<BeanProp> beanPropsEditor(BeanData beanData, ProjectProfile profile) {
+        return new RefValuesEditor<>(beanData.properties, name -> profile.getPropType(beanData, name));
     }
 
     @Bean

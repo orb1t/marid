@@ -22,7 +22,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ListCell;
-import org.marid.ide.project.ProjectProfileReflection;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.dialog.ListDialog;
 import org.marid.jfx.icons.FontIcon;
@@ -37,7 +37,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.marid.misc.Reflections.parameterName;
+import static org.marid.util.Reflections.parameterName;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -46,18 +46,18 @@ import static org.marid.misc.Reflections.parameterName;
 public class BeanDataActions {
 
     private final BeanData beanData;
-    private final ProjectProfileReflection reflection;
+    private final ProjectProfile profile;
 
-    public BeanDataActions(BeanData beanData, ProjectProfileReflection reflection) {
+    public BeanDataActions(BeanData beanData, ProjectProfile profile) {
         this.beanData = beanData;
-        this.reflection = reflection;
+        this.profile = profile;
     }
 
     @Bean
     @Qualifier("beanData")
     public FxAction refreshAction() {
         return new FxAction("refresh", "refresh", "Actions")
-                .setEventHandler(event -> reflection.updateBeanData(beanData))
+                .setEventHandler(event -> profile.updateBeanData(beanData))
                 .setIcon(FontIcon.M_REFRESH)
                 .setText("Refresh");
     }
@@ -72,7 +72,7 @@ public class BeanDataActions {
     }
 
     public void onSelectConstructor(ActionEvent event) {
-        final ObservableList<Executable> constructors = reflection.getConstructors(beanData)
+        final ObservableList<Executable> constructors = profile.getConstructors(beanData)
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
         final ListDialog<Executable> dialog = new ListDialog<>("Select constructor", constructors);
         dialog.getListView().setCellFactory(param -> new ListCell<Executable>() {
@@ -100,7 +100,7 @@ public class BeanDataActions {
         dialog.setResizable(true);
         final Optional<Executable> result = dialog.showAndWait();
         if (result.isPresent()) {
-            reflection.updateBeanDataConstructorArgs(beanData, result.get().getParameters());
+            profile.updateBeanDataConstructorArgs(beanData, result.get().getParameters());
         }
     }
 }
