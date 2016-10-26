@@ -18,6 +18,7 @@
 
 package org.marid.runtime;
 
+import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -29,7 +30,8 @@ public class MaridContextInitializer {
     public static GenericXmlApplicationContext applicationContext(ClassLoader classLoader) {
         final GenericXmlApplicationContext context = new GenericXmlApplicationContext();
         context.registerShutdownHook();
-        context.addBeanFactoryPostProcessor(new MaridBeanFactoryPostProcessor());
+        context.getBeanFactory().addBeanPostProcessor(new MaridBeanPostProcessor(context));
+        context.getBeanFactory().addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
         context.setClassLoader(classLoader);
         context.setAllowCircularReferences(false);
         context.setValidating(false);

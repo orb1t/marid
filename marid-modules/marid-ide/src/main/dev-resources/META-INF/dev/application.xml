@@ -33,4 +33,7 @@
         <constructor-arg name="name" value="default"/>
     </bean>
     <bean factory-bean="profile" factory-method="getBeansDirectory" name="beanFilePath"/>
+    <bean class="java.lang.String" name="triggerType">
+        <constructor-arg name="original" value="init"/>
+    </bean>
 </beans>

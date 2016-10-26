@@ -20,6 +20,7 @@ package org.marid.spring.xml;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.spring.xml.collection.DCollection;
 import org.marid.spring.xml.collection.DElement;
@@ -46,6 +47,9 @@ public final class BeanData extends DElement<BeanData> {
 
     public final ObservableList<BeanArg> beanArgs = MaridCollections.list();
     public final ObservableList<BeanProp> properties = MaridCollections.list();
+
+    public final ObservableList<String> initTriggers = FXCollections.observableArrayList();
+    public final ObservableList<String> destroyTriggers = FXCollections.observableArrayList();
 
     public BeanData() {
         type.addListener(this::invalidate);
@@ -139,6 +143,26 @@ public final class BeanData extends DElement<BeanData> {
 
     public void setBeanProps(BeanProp[] beanProps) {
         this.properties.addAll(beanProps);
+    }
+
+    @XmlElementWrapper(name = "init-triggers")
+    @XmlElement(name = "trigger")
+    public String[] getInitTriggers() {
+        return initTriggers.isEmpty() ? null : initTriggers.toArray(new String[initTriggers.size()]);
+    }
+
+    public void setInitTriggers(String[] triggers) {
+        initTriggers.addAll(triggers);
+    }
+
+    @XmlElementWrapper(name = "destroy-triggers")
+    @XmlElement(name = "trigger")
+    public String[] getDestroyTriggers() {
+        return destroyTriggers.isEmpty() ? null : destroyTriggers.toArray(new String[destroyTriggers.size()]);
+    }
+
+    public void setDestroyTriggers(String[] triggers) {
+        destroyTriggers.addAll(triggers);
     }
 
     public boolean isFactoryBean() {

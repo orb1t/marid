@@ -21,7 +21,7 @@
     <bean name="randomNumericDaqGenerator" class="org.marid.db.generator.RandomNumericDaqGenerator">
         <description>Random numeric DAQ generator</description>
 
-        <constructor-arg name="numericWriter" value=""/>
+        <constructor-arg name="numericWriter" ref="numericWriter"/>
         <constructor-arg name="max" value="1.0"/>
         <constructor-arg name="min" value="0.0"/>
         <constructor-arg name="periodSeconds" value="1"/>
@@ -33,7 +33,7 @@
     <bean name="swingNumericDaqGenerator" class="org.marid.db.generator.swing.SwingNumericDaqGenerator">
         <description>SWING numeric DAQ generator</description>
 
-        <constructor-arg name="numericWriter" value=""/>
+        <constructor-arg name="numericWriter" ref="numericWriter"/>
 
         <meta key="icon" value="P_ADD"/>
     </bean>
@@ -65,7 +65,7 @@
     <bean name="numericWriter" class="org.marid.db.hsqldb.HsqldbDaqNumericWriter">
         <description>HSQLDB numeric writer</description>
 
-        <constructor-arg name="dataSource" value=""/>
+        <constructor-arg name="dataSource" value="hsqldbDatabaseDataSource"/>
         <constructor-arg name="table" value="NUMERICS"/>
 
         <meta key="icon" value="P_ADD"/>
@@ -85,7 +85,7 @@
     <bean name="hsqldbNumericReader" class="org.marid.db.hsqldb.HsqldbDaqNumericReader">
         <description>HSQLDB numeric reader</description>
 
-        <constructor-arg name="dataSource" value=""/>
+        <constructor-arg name="dataSource" value="hsqldbDataSource"/>
         <constructor-arg name="table" value="NUMERICS"/>
 
         <meta key="icon" value="P_ADD"/>
