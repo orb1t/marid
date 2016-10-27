@@ -67,9 +67,11 @@ public class ProjectConfiguration implements LogSupport {
         return new FxAction("projectSetup", "setup", "Project")
                 .setText("Project setup...")
                 .setIcon(O_TOOLS)
-                .setEventHandler(event -> dependants.start("projectEditor", b -> b
-                        .conf(ProjectConfigConfiguration.class)
-                        .arg("profile", profile.get())));
+                .setEventHandler(event -> dependants.start(
+                        "projectEditor",
+                        ProjectConfigConfiguration.class,
+                        c -> c.profile = profile.get()
+                ));
     }
 
     @Bean
@@ -117,9 +119,11 @@ public class ProjectConfiguration implements LogSupport {
                 .setAccelerator(KeyCombination.valueOf("F5"))
                 .setText("Run")
                 .setIcon(F_PLAY)
-                .setEventHandler(event -> dependants.start("projectRunner", b -> b
-                        .conf(ProjectRunnerConfiguration.class)
-                        .arg("profile", profile.get())));
+                .setEventHandler(event -> dependants.start(
+                        "projectRunner",
+                        ProjectRunnerConfiguration.class,
+                        c -> c.profile = profile.get()
+                ));
     }
 
     @Bean
@@ -178,9 +182,11 @@ public class ProjectConfiguration implements LogSupport {
                 .setAccelerator(KeyCombination.valueOf("F4"))
                 .setIcon(M_FOLDER_SHARED)
                 .bindDisabled(ideTabPane.getSelectionModel().selectedIndexProperty().isNotEqualTo(0))
-                .setEventHandler(event -> dependants.start(profile.get().getName(), b -> b
-                        .conf(BeanFileBrowserConfiguration.class)
-                        .arg("profile", profile.get())));
+                .setEventHandler(event -> dependants.start(
+                        profile.get().getName(),
+                        BeanFileBrowserConfiguration.class,
+                        c -> c.profile = profile.get()
+                ));
     }
 
     @Bean
@@ -194,8 +200,10 @@ public class ProjectConfiguration implements LogSupport {
                 .setAccelerator(KeyCombination.valueOf("F3"))
                 .setIcon(M_STORE_MALL_DIRECTORY)
                 .bindDisabled(ideTabPane.getSelectionModel().selectedIndexProperty().isNotEqualTo(0))
-                .setEventHandler(event -> dependants.start(profile.get().getName(), b -> b
-                        .conf(ResourcesConfiguration.class)
-                        .arg("profile", profile.get())));
+                .setEventHandler(event -> dependants.start(
+                        profile.get().getName(),
+                        ResourcesConfiguration.class,
+                        c -> c.profile = profile.get()
+                ));
     }
 }

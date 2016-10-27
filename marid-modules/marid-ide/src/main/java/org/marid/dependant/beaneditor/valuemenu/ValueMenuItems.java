@@ -89,10 +89,10 @@ public class ValueMenuItems {
             if (!(element.getValue() instanceof DValue)) {
                 element.setValue(new DValue());
             }
-            dependants.start("valueEditor", dependantBuilder -> dependantBuilder
-                    .conf(ValueEditorConfiguration.class)
-                    .arg("value", element.getValue())
-                    .arg("type", type));
+            dependants.start("valueEditor", ValueEditorConfiguration.class, c -> {
+                c.value = (DValue) element.getValue();
+                c.type = type;
+            });
         });
         items.add(mi);
         items.add(new SeparatorMenuItem());
@@ -178,10 +178,10 @@ public class ValueMenuItems {
                 if (!(element.getValue() instanceof DProps)) {
                     element.setValue(new DProps());
                 }
-                dependants.start("propsEditor", dependantBuilder -> dependantBuilder
-                        .conf(PropEditorConfiguration.class)
-                        .arg("props", element.getValue())
-                        .arg("type", type));
+                dependants.start("propsEditor", PropEditorConfiguration.class, c -> {
+                    c.props = (DProps) element.getValue();
+                    c.type = type;
+                });
             });
             items.add(mi);
             items.add(new SeparatorMenuItem());
@@ -206,10 +206,10 @@ public class ValueMenuItems {
                     }
                     element.setValue(list);
                 }
-                dependants.start("listEditor", dependantBuilder -> dependantBuilder
-                        .conf(ListEditorConfiguration.class)
-                        .arg("collection", element.getValue())
-                        .arg("type", type));
+                dependants.start("listEditor", ListEditorConfiguration.class, c -> {
+                    c.collection = (DList) element.getValue();
+                    c.type = type;
+                });
             });
             items.add(mi);
             items.add(new SeparatorMenuItem());
@@ -230,10 +230,10 @@ public class ValueMenuItems {
                     }
                     element.setValue(list);
                 }
-                dependants.start("arrayEditor", dependantBuilder -> dependantBuilder
-                        .conf(ListEditorConfiguration.class)
-                        .arg("collection", element.getValue())
-                        .arg("type", type));
+                dependants.start("arrayEditor", ListEditorConfiguration.class, c -> {
+                    c.collection = (DArray) element.getValue();
+                    c.type = type;
+                });
             });
             items.add(mi);
             items.add(new SeparatorMenuItem());

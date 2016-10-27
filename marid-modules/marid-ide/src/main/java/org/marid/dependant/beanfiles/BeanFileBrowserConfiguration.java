@@ -18,6 +18,8 @@
 
 package org.marid.dependant.beanfiles;
 
+import org.marid.ide.project.ProjectProfile;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -33,4 +35,10 @@ import org.springframework.context.annotation.Import;
 })
 public class BeanFileBrowserConfiguration {
 
+    public ProjectProfile profile;
+
+    @Bean
+    public ProjectProfile profile() {
+        return profile;
+    }
 }

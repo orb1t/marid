@@ -106,10 +106,10 @@ public class BeanFileBrowserActions {
         if (tab != null) {
             ideTabPane.getObject().getSelectionModel().select(tab);
         } else {
-            dependants.start("beanEditor", builder -> builder
-                    .conf(BeanEditorConfiguration.class)
-                    .arg("beanFilePath", path)
-                    .arg("profile", getProfile()));
+            dependants.start("beanEditor", BeanEditorConfiguration.class, c -> {
+                c.profile = getProfile();
+                c.beanFilePath = path;
+            });
         }
     }
 }

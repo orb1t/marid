@@ -21,14 +21,18 @@ package org.marid;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.CglibSubclassingInstantiationStrategy;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Constructor;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -44,61 +48,70 @@ public class IdeDependants {
         this.parent = parent;
     }
 
-    public AnnotationConfigApplicationContext start(String name, Consumer<Builder> builderConsumer) {
-        final Builder builder = new Builder(name);
-        builderConsumer.accept(builder);
-        builder.initArgs();
-        parent.addApplicationListener(builder.listener);
-        builder.context.refresh();
-        builder.context.start();
-        return builder.context;
+    @SafeVarargs
+    public final AnnotationConfigApplicationContext start(Class<?> configuration,
+                                                          String name,
+                                                          Consumer<AnnotationConfigApplicationContext>... consumers) {
+        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        final AtomicReference<ApplicationListener<?>> listenerRef = new AtomicReference<>();
+        listenerRef.set(event -> {
+            if (event instanceof ContextClosedEvent) {
+                final ContextClosedEvent contextClosedEvent = (ContextClosedEvent) event;
+                if (contextClosedEvent.getApplicationContext() == parent) {
+                    parent.getApplicationListeners().remove(listenerRef.get());
+                    context.close();
+                }
+            }
+        });
+        context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
+        context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
+        context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
+        context.register(IdeDependants.class, configuration);
+        context.setParent(parent);
+        context.setDisplayName(name);
+        parent.addApplicationListener(listenerRef.get());
+        for (final Consumer<AnnotationConfigApplicationContext> contextConsumer : consumers) {
+            contextConsumer.accept(context);
+        }
+        context.refresh();
+        context.start();
+        return context;
+    }
+
+    @SafeVarargs
+    public final <T> AnnotationConfigApplicationContext start(String name,
+                                                              Class<T> configuration,
+                                                              Consumer<T> configurationConsumer,
+                                                              Consumer<AnnotationConfigApplicationContext>... consumers) {
+        return start(configuration, name, context -> {
+            final CglibSubclassingInstantiationStrategy is = new CglibSubclassingInstantiationStrategy() {
+                @Override
+                public Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner) {
+                    final Object object = super.instantiate(bd, beanName, owner);
+                    if (configuration.isInstance(object)) {
+                        configurationConsumer.accept(configuration.cast(object));
+                    }
+                    return object;
+                }
+
+                @Override
+                public Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner, Constructor<?> ctor, Object... args) {
+                    final Object object = super.instantiate(bd, beanName, owner, ctor, args);
+                    if (configuration.isInstance(object)) {
+                        configurationConsumer.accept(configuration.cast(object));
+                    }
+                    return object;
+                }
+            };
+            ((DefaultListableBeanFactory) context.getBeanFactory()).setInstantiationStrategy(is);
+            for (final Consumer<AnnotationConfigApplicationContext> contextConsumer : consumers) {
+                contextConsumer.accept(context);
+            }
+        });
     }
 
     @Override
     public String toString() {
         return parent.toString();
-    }
-
-    public final class Builder {
-
-        private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        private final Map<String, Object> args = new HashMap<>();
-        private final ApplicationListener<?> listener = event -> {
-            if (event instanceof ContextClosedEvent) {
-                final ContextClosedEvent contextClosedEvent = (ContextClosedEvent) event;
-                if (contextClosedEvent.getApplicationContext() == parent) {
-                    parent.getApplicationListeners().remove(this.listener);
-                    context.close();
-                }
-            }
-        };
-
-        private Builder(String name) {
-            context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
-            context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
-            context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
-            context.register(IdeDependants.class);
-            context.setParent(parent);
-            context.setDisplayName(name);
-        }
-
-        public Builder conf(Class<?>... classes) {
-            context.register(classes);
-            return this;
-        }
-
-        public Builder withContext(Consumer<AnnotationConfigApplicationContext> contextConsumer) {
-            contextConsumer.accept(context);
-            return this;
-        }
-
-        public Builder arg(String name, Object arg) {
-            args.put(name, arg);
-            return this;
-        }
-
-        private void initArgs() {
-            args.forEach(context.getBeanFactory()::registerSingleton);
-        }
     }
 }

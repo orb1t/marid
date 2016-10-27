@@ -48,6 +48,13 @@ import static org.marid.l10n.L10n.s;
 @Import({ResourcesTable.class, ResourcesTracker.class})
 public class ResourcesConfiguration implements LogSupport {
 
+    public ProjectProfile profile;
+
+    @Bean
+    public ProjectProfile profile() {
+        return profile;
+    }
+
     @Bean
     public IdeTab resourcesEditorTab(ProjectProfile profile, BorderPane resourcesPane) {
         return new IdeTab(resourcesPane, "%s: Resources", profile);

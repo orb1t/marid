@@ -89,9 +89,11 @@ public class BeanListActions {
     }
 
     public void onEdit(ActionEvent event) {
-        dependants.start("beanDataEditor", builder -> builder
-                .conf(BeanDataEditorConfiguration.class)
-                .arg("beanData", table.getSelectionModel().getSelectedItem()));
+        dependants.start(
+                "beanDataEditor",
+                BeanDataEditorConfiguration.class,
+                c -> c.beanData = table.getSelectionModel().getSelectedItem()
+        );
     }
 
     public void onDelete(ActionEvent event) {

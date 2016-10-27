@@ -28,11 +28,26 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.lang.reflect.Type;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
 public class ValueEditorConfiguration {
+
+    public DValue value;
+    public Type type;
+
+    @Bean
+    public Type type() {
+        return type;
+    }
+
+    @Bean
+    public DValue value() {
+        return value;
+    }
 
     @Bean
     @Qualifier("valueEditor")
