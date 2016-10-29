@@ -32,7 +32,7 @@ public class ResourcesTab extends IdeTab {
     private final ProjectProfile profile;
 
     public ResourcesTab(ProjectProfile profile, TabPane resourcesTabPane) {
-        super(resourcesTabPane, "Resources: %s", profile);
+        super(resourcesTabPane, "[%s]: Resources", profile);
         this.profile = profile;
     }
 

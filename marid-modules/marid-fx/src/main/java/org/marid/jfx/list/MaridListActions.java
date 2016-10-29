@@ -19,9 +19,14 @@
 package org.marid.jfx.list;
 
 import javafx.beans.binding.Bindings;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.ListView;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
+
+import java.util.Comparator;
+import java.util.OptionalInt;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -42,5 +47,62 @@ public interface MaridListActions {
                 .setEventHandler(event -> listView.getItems().clear())
                 .bindDisabled(Bindings.isEmpty(listView.getItems()))
                 .setIcon(FontIcon.M_CLEAR_ALL);
+    }
+
+    static FxAction addAction(String text, EventHandler<ActionEvent> eventHandler) {
+        return new FxAction("itemActions", "itemActions", "Actions")
+                .setText(text)
+                .setEventHandler(eventHandler)
+                .setIcon(FontIcon.M_ADD);
+    }
+
+    static <T> FxAction upAction(ListView<T> listView) {
+        return new FxAction("upDownActions", "upDownActions", "Actions")
+                .setText("Up")
+                .setIcon(FontIcon.D_MENU_UP)
+                .setEventHandler(event -> {
+                    final int[] indices = listView.getSelectionModel().getSelectedIndices()
+                            .stream()
+                            .mapToInt(Integer::intValue)
+                            .sorted()
+                            .toArray();
+                    listView.getSelectionModel().clearSelection();
+                    for (final int index : indices) {
+                        final T old = listView.getItems().remove(index);
+                        listView.getItems().add(index - 1, old);
+                        listView.getSelectionModel().select(index - 1);
+                    }
+                })
+                .bindDisabled(Bindings.createBooleanBinding(() -> {
+                    final OptionalInt min = listView.getSelectionModel().getSelectedIndices().stream()
+                            .mapToInt(Integer::intValue)
+                            .min();
+                    return  (!min.isPresent() || min.getAsInt() <= 0);
+                }, listView.getSelectionModel().getSelectedIndices()));
+    }
+
+    static <T> FxAction downAction(ListView<T> listView) {
+        return new FxAction("upDownActions", "upDownActions", "Actions")
+                .setText("Down")
+                .setIcon(FontIcon.D_MENU_DOWN)
+                .setEventHandler(event -> {
+                    final int[] indices = listView.getSelectionModel().getSelectedIndices()
+                            .stream()
+                            .sorted(Comparator.reverseOrder())
+                            .mapToInt(Integer::intValue)
+                            .toArray();
+                    listView.getSelectionModel().clearSelection();
+                    for (final int index : indices) {
+                        final T old = listView.getItems().remove(index);
+                        listView.getItems().add(index + 1, old);
+                        listView.getSelectionModel().select(index + 1);
+                    }
+                })
+                .bindDisabled(Bindings.createBooleanBinding(() -> {
+                    final OptionalInt max = listView.getSelectionModel().getSelectedIndices().stream()
+                            .mapToInt(Integer::intValue)
+                            .max();
+                    return !max.isPresent() || max.getAsInt() >= listView.getItems().size() - 1;
+                }, listView.getSelectionModel().getSelectedIndices()));
     }
 }

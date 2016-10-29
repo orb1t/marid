@@ -25,13 +25,13 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.icons.FontIcons;
-import org.marid.l10n.L10n;
 
 import java.util.*;
 
 import static java.util.Comparator.comparing;
 import static javafx.beans.binding.Bindings.createObjectBinding;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,22 +50,22 @@ public class MaridToolbar extends ToolBar {
     public void init(Map<String, FxAction> actionMap) {
         final Map<String, Set<Node>> buttonMap = new TreeMap<>();
         final Map<Node, String> reversedMap = new IdentityHashMap<>();
-        actionMap.forEach((id, action) -> {
-            if (action.getToolbarGroup() == null) {
+        actionMap.forEach((id, a) -> {
+            if (a.getToolbarGroup() == null) {
                 return;
             }
-            final String group = action.getToolbarGroup();
-            final GlyphIcon<?> icon = action.getIcon() != null ? FontIcons.glyphIcon(action.getIcon(), 20) : null;
+            final String group = a.getToolbarGroup();
+            final GlyphIcon<?> icon = a.getIcon() != null ? glyphIcon(a.getIcon(), 20) : null;
             final Button button = new Button(null, icon);
             button.setFocusTraversable(false);
-            button.setOnAction(action.getEventHandler());
-            if (action.disabledProperty() != null) {
-                button.disableProperty().bindBidirectional(action.disabledProperty());
+            button.setOnAction(a.getEventHandler());
+            if (a.disabledProperty() != null) {
+                button.disableProperty().bindBidirectional(a.disabledProperty());
             }
-            if (action.hintProperty() != null) {
-                button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(L10n.s(action.getHint())), action.hintProperty()));
-            } else if (action.textProperty() != null) {
-                button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(L10n.s(action.getText())), action.textProperty()));
+            if (a.hintProperty() != null) {
+                button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(s(a.getHint())), a.hintProperty()));
+            } else if (a.textProperty() != null) {
+                button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(s(a.getText())), a.textProperty()));
             }
             reversedMap.put(button, id);
             buttonMap.computeIfAbsent(group, g -> new HashSet<>()).add(button);

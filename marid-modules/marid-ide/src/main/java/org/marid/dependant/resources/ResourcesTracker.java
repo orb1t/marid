@@ -32,9 +32,9 @@ import javax.annotation.PostConstruct;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -63,22 +63,9 @@ public class ResourcesTracker implements Closeable, LogSupport {
         if (windows) {
             resourcesPath.register(watchService, kinds, ExtendedWatchEventModifier.FILE_TREE);
         }
-        Files.walkFileTree(resourcesPath, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                if (!windows) {
-                    final WatchKey watchKey = dir.register(watchService, kinds);
-                    watchKeyMap.put(dir, watchKey);
-                }
-                return super.postVisitDirectory(dir, exc);
-            }
-
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                resources.add(file);
-                return super.visitFile(file, attrs);
-            }
-        });
+        try (final Stream<Path> files = Files.walk(resourcesPath)) {
+            files.filter(Files::isRegularFile).forEach(resources::add);
+        }
         final Thread thread = new Thread(null, () -> {
             while (true) {
                 final WatchKey watchKey;
@@ -115,9 +102,8 @@ public class ResourcesTracker implements Closeable, LogSupport {
                             });
                         } else if (Files.isDirectory(path)) {
                             try {
-                                final WatchKey wk = path.register(watchService, kinds);
                                 if (!windows) {
-                                    final WatchKey old = watchKeyMap.put(path, wk);
+                                    final WatchKey old = watchKeyMap.put(path, path.register(watchService, kinds));
                                     if (old != null) {
                                         old.cancel();
                                     }

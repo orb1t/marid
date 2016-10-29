@@ -38,6 +38,7 @@ import java.time.ZoneId;
 import java.util.Comparator;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+import static org.marid.jfx.icons.FontIcon.M_DELETE;
 import static org.marid.jfx.icons.FontIcon.M_EDIT;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
@@ -115,6 +116,12 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
                     {
                         final MenuItem menuItem = new MenuItem(s("Edit..."), glyphIcon(M_EDIT, 16));
                         menuItem.setOnAction(actions::launchBeanEditor);
+                        menu.getItems().add(menuItem);
+                    }
+                    menu.getItems().add(new SeparatorMenuItem());
+                    {
+                        final MenuItem menuItem = new MenuItem(s("Delete"), glyphIcon(M_DELETE, 16));
+                        menuItem.setOnAction(actions::onDelete);
                         menu.getItems().add(menuItem);
                     }
                     setContextMenu(menu);

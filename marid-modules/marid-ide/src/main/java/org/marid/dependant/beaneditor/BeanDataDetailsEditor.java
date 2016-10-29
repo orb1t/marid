@@ -18,6 +18,7 @@
 
 package org.marid.dependant.beaneditor;
 
+import com.google.common.collect.ImmutableMap;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -26,8 +27,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import org.marid.Ide;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.FxAction;
+import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.panes.GenericGridPane;
 import org.marid.jfx.panes.MaridScrollPane;
+import org.marid.jfx.toolbar.MaridToolbar;
 import org.marid.spring.xml.BeanData;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,6 +40,7 @@ import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.marid.l10n.L10n.s;
@@ -115,6 +120,23 @@ public class BeanDataDetailsEditor extends Dialog<Boolean> {
     private BorderPane triggersPane(ObservableList<String> triggers) {
         final BorderPane pane = new BorderPane();
         final ListView<String> triggerList = new ListView<>(triggers);
+        triggerList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        final ImmutableMap.Builder<String, FxAction> actionMapBuilder = ImmutableMap.builder();
+        final ToolBar toolBar = new MaridToolbar(actionMapBuilder
+                .put("addButton", MaridListActions.addAction("Add trigger...", event -> {
+                    final TextInputDialog dialog = new TextInputDialog();
+                    dialog.setTitle(s("Add trigger"));
+                    final Optional<String> result = dialog.showAndWait();
+                    if (result.isPresent()) {
+                        triggers.add(result.get());
+                    }
+                }))
+                .put("Delete", MaridListActions.removeAction(triggerList))
+                .put("Clear", MaridListActions.clearAction(triggerList))
+                .put("Up", MaridListActions.upAction(triggerList))
+                .put("Down", MaridListActions.downAction(triggerList))
+                .build());
+        pane.setTop(toolBar);
         pane.setCenter(new MaridScrollPane(triggerList));
         return pane;
     }

@@ -49,6 +49,10 @@ public final class FxAction {
         this.menu = menu;
     }
 
+    public FxAction(String toolbarGroup) {
+        this(toolbarGroup, null, null);
+    }
+
     public String getToolbarGroup() {
         return toolbarGroup;
     }

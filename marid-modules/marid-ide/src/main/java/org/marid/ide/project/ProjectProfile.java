@@ -48,7 +48,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -187,8 +186,9 @@ public class ProjectProfile implements LogSupport, ProfileInfo {
     }
 
     private ObservableList<Pair<Path, BeanFile>> loadBeanFiles() {
+        final ObservableList<Pair<Path, BeanFile>> list = FXCollections.observableArrayList();
         try (final Stream<Path> stream = Files.walk(beansDirectory)) {
-            return stream.filter(p -> p.getFileName().toString().endsWith(".xml"))
+            stream.filter(p -> p.getFileName().toString().endsWith(".xml"))
                     .map(p -> {
                         try {
                             return new Pair<>(p, MaridBeanDefinitionLoader.load(p));
@@ -197,13 +197,13 @@ public class ProjectProfile implements LogSupport, ProfileInfo {
                             return new Pair<>(p, new BeanFile());
                         }
                     })
-                    .collect(Collectors.toCollection(FXCollections::observableArrayList));
+                    .forEach(list::add);
         } catch (IOException x) {
             log(WARNING, "Unable to load bean files", x);
         } catch (Exception x) {
             log(SEVERE, "Unknown error", x);
         }
-        return FXCollections.observableArrayList();
+        return list;
     }
 
     @Override
