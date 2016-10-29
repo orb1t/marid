@@ -18,10 +18,8 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
-import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.project.ProjectManager;
@@ -34,12 +32,6 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.lang.reflect.Method;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -48,12 +40,9 @@ import static org.marid.l10n.L10n.s;
 @Component
 public class BeanListTable extends MaridTableView<BeanData> {
 
-    private final ProjectProfile reflection;
-
     @Autowired
-    public BeanListTable(BeanFile beanFile, ProjectProfile reflection) {
+    public BeanListTable(BeanFile beanFile) {
         super(beanFile.beans);
-        this.reflection = reflection;
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setEditable(true);
     }
@@ -103,64 +92,6 @@ public class BeanListTable extends MaridTableView<BeanData> {
         col.setCellValueFactory(param -> param.getValue().factoryMethod);
         col.setPrefWidth(250);
         col.setMaxWidth(450);
-        getColumns().add(col);
-    }
-
-    private TableCell<BeanData, String> methodCell(TableColumn<BeanData, String> column) {
-        final ComboBoxTableCell<BeanData, String> cell = new ComboBoxTableCell<BeanData, String>() {
-            @Override
-            public void startEdit() {
-                final BeanData beanData = BeanListTable.this.getItems().get(getIndex());
-                getItems().clear();
-                final Class<?> type = reflection.getClass(beanData).orElse(null);
-                if (type != null) {
-                    getItems().addAll(Stream.of(type.getMethods())
-                            .filter(method -> method.getParameterCount() == 0)
-                            .filter(method -> method.getReturnType() == void.class)
-                            .filter(method -> method.getDeclaringClass() != Object.class)
-                            .filter(method -> !method.isAnnotationPresent(Autowired.class))
-                            .filter(method -> !method.isAnnotationPresent(PostConstruct.class))
-                            .filter(method -> !method.isAnnotationPresent(PreDestroy.class))
-                            .filter(method -> !"close".equals(method.getName()))
-                            .filter(method -> !"destroy".equals(method.getName()))
-                            .map(Method::getName)
-                            .collect(Collectors.toList()));
-                }
-                super.startEdit();
-            }
-        };
-        cell.setComboBoxEditable(true);
-        return cell;
-    }
-
-    @OrderedInit(5)
-    public void initMethodColumn() {
-        final TableColumn<BeanData, String> col = new TableColumn<>(s("Init method"));
-        col.setCellValueFactory(param -> param.getValue().initMethod);
-        col.setCellFactory(this::methodCell);
-        col.setPrefWidth(180);
-        col.setMaxWidth(340);
-        getColumns().add(col);
-    }
-
-    @OrderedInit(6)
-    public void destroyMethodColumn() {
-        final TableColumn<BeanData, String> col = new TableColumn<>(s("Destroy method"));
-        col.setCellValueFactory(param -> param.getValue().destroyMethod);
-        col.setCellFactory(this::methodCell);
-        col.setPrefWidth(180);
-        col.setMaxWidth(340);
-        getColumns().add(col);
-    }
-
-    @OrderedInit(7)
-    public void lazyColumn() {
-        final TableColumn<BeanData, String> col = new TableColumn<>(s("Lazy"));
-        col.setCellValueFactory(param -> param.getValue().lazyInit);
-        col.setCellFactory(param -> new ComboBoxTableCell<>("true", "false", "default"));
-        col.setPrefWidth(100);
-        col.setMaxWidth(150);
-        col.setEditable(true);
         getColumns().add(col);
     }
 

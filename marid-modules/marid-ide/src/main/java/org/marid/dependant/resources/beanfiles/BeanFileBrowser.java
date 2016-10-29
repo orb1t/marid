@@ -20,8 +20,7 @@ package org.marid.dependant.resources.beanfiles;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.util.Pair;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
@@ -39,6 +38,8 @@ import java.time.ZoneId;
 import java.util.Comparator;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+import static org.marid.jfx.icons.FontIcon.M_EDIT;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -99,5 +100,26 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
                     .sum());
         });
         getColumns().add(col);
+    }
+
+    @Autowired
+    private void initRowFactory(BeanFileBrowserActions actions) {
+        setRowFactory(v -> new TableRow<Pair<Path, BeanFile>>() {
+            @Override
+            protected void updateItem(Pair<Path, BeanFile> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setContextMenu(null);
+                } else {
+                    final ContextMenu menu = new ContextMenu();
+                    {
+                        final MenuItem menuItem = new MenuItem(s("Edit..."), glyphIcon(M_EDIT, 16));
+                        menuItem.setOnAction(actions::launchBeanEditor);
+                        menu.getItems().add(menuItem);
+                    }
+                    setContextMenu(menu);
+                }
+            }
+        });
     }
 }
