@@ -28,6 +28,7 @@ import org.marid.jfx.dialog.ListDialog;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -48,6 +49,7 @@ public class BeanDataActions {
     private final BeanData beanData;
     private final ProjectProfile profile;
 
+    @Autowired
     public BeanDataActions(BeanData beanData, ProjectProfile profile) {
         this.beanData = beanData;
         this.profile = profile;

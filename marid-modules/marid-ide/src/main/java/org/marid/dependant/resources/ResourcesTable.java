@@ -63,6 +63,7 @@ public class ResourcesTable extends MaridTableView<Path> {
         column.setMinWidth(100);
         column.setPrefWidth(150);
         column.setMaxWidth(250);
+        column.setStyle("-fx-alignment: baseline-right");
         column.setCellValueFactory(param -> {
             final long size = param.getValue().toFile().length();
             final NumberFormat numberFormat = NumberFormat.getIntegerInstance();

@@ -23,7 +23,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCombination;
 import org.marid.IdeDependants;
-import org.marid.dependant.beanfiles.BeanFileBrowserConfiguration;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
 import org.marid.dependant.resources.ResourcesConfiguration;
@@ -174,31 +173,13 @@ public class ProjectConfiguration implements LogSupport {
     @Bean
     @IdeAction
     @Qualifier("profile")
-    public FxAction projectBeanFilesAction(IdeDependants dependants,
-                                           Supplier<ProjectProfile> profile,
-                                           IdeTabPane ideTabPane) {
-        return new FxAction("projectTree", "pt", "Project")
-                .setText("Project files")
-                .setAccelerator(KeyCombination.valueOf("F4"))
-                .setIcon(M_FOLDER_SHARED)
-                .bindDisabled(ideTabPane.getSelectionModel().selectedIndexProperty().isNotEqualTo(0))
-                .setEventHandler(event -> dependants.start(
-                        profile.get().getName(),
-                        BeanFileBrowserConfiguration.class,
-                        c -> c.profile = profile.get()
-                ));
-    }
-
-    @Bean
-    @IdeAction
-    @Qualifier("profile")
     public FxAction projectResourcesAction(IdeDependants dependants,
                                            Supplier<ProjectProfile> profile,
                                            IdeTabPane ideTabPane) {
         return new FxAction("projectTree", "pt", "Project")
                 .setText("Project resources")
-                .setAccelerator(KeyCombination.valueOf("F3"))
-                .setIcon(M_STORE_MALL_DIRECTORY)
+                .setAccelerator(KeyCombination.valueOf("F4"))
+                .setIcon(M_FOLDER_SHARED)
                 .bindDisabled(ideTabPane.getSelectionModel().selectedIndexProperty().isNotEqualTo(0))
                 .setEventHandler(event -> dependants.start(
                         profile.get().getName(),

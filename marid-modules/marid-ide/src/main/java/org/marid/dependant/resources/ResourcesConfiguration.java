@@ -18,14 +18,19 @@
 
 package org.marid.dependant.resources;
 
+import javafx.geometry.Side;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import org.marid.Ide;
+import org.marid.dependant.resources.beanfiles.BeanFileBrowser;
+import org.marid.dependant.resources.beanfiles.BeanFileBrowserActions;
+import org.marid.dependant.resources.beanfiles.BeanFileBrowserPane;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.tabs.IdeTab;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
@@ -45,7 +50,14 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@Import({ResourcesTable.class, ResourcesTracker.class})
+@Import({
+        ResourcesTable.class,
+        ResourcesTracker.class,
+        BeanFileBrowser.class,
+        BeanFileBrowserActions.class,
+        BeanFileBrowserPane.class,
+        ResourcesTab.class
+})
 public class ResourcesConfiguration implements LogSupport {
 
     public ProjectProfile profile;
@@ -56,8 +68,14 @@ public class ResourcesConfiguration implements LogSupport {
     }
 
     @Bean
-    public IdeTab resourcesEditorTab(ProjectProfile profile, BorderPane resourcesPane) {
-        return new IdeTab(resourcesPane, "%s: Resources", profile);
+    public TabPane resourcesTabPane(BorderPane resourcesPane, BeanFileBrowserPane beanFileBrowserPane) {
+        final TabPane tabPane = new TabPane(
+                new Tab(s("Bean files"), beanFileBrowserPane),
+                new Tab(s("Resource files"), resourcesPane)
+        );
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        tabPane.setSide(Side.BOTTOM);
+        return tabPane;
     }
 
     @Bean
@@ -77,7 +95,7 @@ public class ResourcesConfiguration implements LogSupport {
                 .add("Import files...", FontIcon.M_IMPORT_EXPORT, event -> {
                     final FileChooser chooser = new FileChooser();
                     chooser.setTitle(s("Import files"));
-                    chooser.getExtensionFilters().addAll(new ExtensionFilter("All files", "*.*"));
+                    chooser.getExtensionFilters().addAll(new ExtensionFilter(s("All files"), "*.*"));
                     final List<File> files = chooser.showOpenMultipleDialog(Ide.primaryStage);
                     if (files != null) {
                         final DirectoryChooser directoryChooser = new DirectoryChooser();

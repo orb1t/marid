@@ -21,7 +21,6 @@ package org.marid.dependant.settings;
 import javafx.application.Application;
 import javafx.scene.control.ComboBox;
 import org.marid.IdePrefs;
-import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.settings.AppearanceSettings;
 import org.marid.jfx.panes.GenericGridPane;
 import org.marid.logging.LogSupport;
@@ -31,6 +30,7 @@ import org.springframework.stereotype.Component;
 import static javafx.application.Application.STYLESHEET_CASPIAN;
 import static javafx.application.Application.STYLESHEET_MODENA;
 import static javafx.collections.FXCollections.observableArrayList;
+import static org.marid.Ide.ideLogHandler;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,7 +41,7 @@ public class AppearanceTab extends GenericGridPane implements SettingsEditor, Lo
     private final AppearanceSettings appearanceSettings;
 
     @Autowired
-    public AppearanceTab(AppearanceSettings appearanceSettings, IdeLogHandler ideLogHandler) {
+    public AppearanceTab(AppearanceSettings appearanceSettings) {
         this.appearanceSettings = appearanceSettings;
         addTextField("Locale", appearanceSettings::getLocale, appearanceSettings::setLocale);
         addIntField("Max log records", ideLogHandler::getMaxLogRecords, ideLogHandler::setMaxLogRecords, 100, 100_000, 100);

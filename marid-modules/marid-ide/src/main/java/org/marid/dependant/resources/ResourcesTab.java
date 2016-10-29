@@ -16,29 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beanfiles;
+package org.marid.dependant.resources;
 
+import javafx.scene.control.TabPane;
 import org.marid.ide.project.ProjectProfile;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.marid.ide.tabs.IdeTab;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
-@Import({
-        BeanFileBrowser.class,
-        BeanFileBrowserActions.class,
-        BeanFileBrowserPane.class,
-        BeanFileBrowserTab.class
-})
-public class BeanFileBrowserConfiguration {
+@Component
+public class ResourcesTab extends IdeTab {
 
-    public ProjectProfile profile;
+    private final ProjectProfile profile;
 
-    @Bean
-    public ProjectProfile profile() {
-        return profile;
+    public ResourcesTab(ProjectProfile profile, TabPane resourcesTabPane) {
+        super(resourcesTabPane, "Resources: %s", profile);
+        this.profile = profile;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof ResourcesTab && ((ResourcesTab) obj).profile.equals(profile);
+    }
+
+    @Override
+    public int hashCode() {
+        return profile.hashCode();
     }
 }

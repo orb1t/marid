@@ -54,8 +54,7 @@ public class Ide extends Application {
     public static Ide ide;
     public static Logger rootLogger;
     public static ClassLoader classLoader;
-
-    static IdeLogHandler ideLogHandler;
+    public static IdeLogHandler ideLogHandler;
 
     @Override
     public void init() throws Exception {

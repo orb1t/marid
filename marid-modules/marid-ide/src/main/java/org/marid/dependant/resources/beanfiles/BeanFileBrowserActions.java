@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beanfiles;
+package org.marid.dependant.resources.beanfiles;
 
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
