@@ -22,26 +22,26 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.springframework.context.event.ContextClosedEvent;
+import org.marid.runtime.MaridBaseApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.env.MapPropertySource;
 
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import static java.lang.Thread.currentThread;
+import static java.util.logging.Level.SEVERE;
 import static java.util.stream.Collectors.toList;
 import static javafx.scene.paint.Color.GREEN;
 import static org.marid.jfx.FxMaridIcon.maridIcon;
+import static org.marid.logging.Log.log;
 import static org.marid.misc.Casts.cast;
-import static org.marid.runtime.MaridContextInitializer.applicationContext;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class HmiApplication extends Application {
 
-    private final GenericXmlApplicationContext context = applicationContext(currentThread().getContextClassLoader());
+    private final GenericXmlApplicationContext context = new MaridBaseApplicationContext();
 
     @Override
     public void init() throws Exception {
@@ -53,20 +53,11 @@ public class HmiApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         final HmiPane pane = new HmiPane();
-        context.addApplicationListener(event -> {
-            if (event instanceof ContextClosedEvent) {
-                if (Platform.isFxApplicationThread()) {
-                    primaryStage.close();
-                } else {
-                    Platform.runLater(primaryStage::close);
-                }
-            }
-        });
         context.refresh();
         context.start();
         primaryStage.setScene(new Scene(pane, 800, 600));
         primaryStage.getIcons().addAll(IntStream.of(16, 24, 32).mapToObj(s -> maridIcon(s, GREEN)).collect(toList()));
-        primaryStage.setOnCloseRequest(event -> context.close());
+        primaryStage.setOnCloseRequest(event -> Platform.exit());
         primaryStage.setIconified(true);
         primaryStage.show();
         final Map<String, Stage> stageMap = context.getBeansOfType(Stage.class, true, true);
@@ -76,5 +67,14 @@ public class HmiApplication extends Application {
                 stage.getIcons().addAll(primaryStage.getIcons());
             }
         });
+    }
+
+    @Override
+    public void stop() throws Exception {
+        try {
+            context.close();
+        } catch (Exception x) {
+            log(SEVERE, "Unable to close context", x);
+        }
     }
 }

@@ -22,9 +22,6 @@ import org.jboss.logmanager.LogManager;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 
-import static java.lang.Thread.currentThread;
-import static org.marid.runtime.MaridContextInitializer.applicationContext;
-
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -32,7 +29,8 @@ public class MaridLauncher {
 
     public static void main(String... args) throws Exception {
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
-        final GenericApplicationContext context = applicationContext(currentThread().getContextClassLoader());
+        final GenericApplicationContext context = new MaridBaseApplicationContext();
+        context.registerShutdownHook();
         context.getEnvironment().getPropertySources().addFirst(new SimpleCommandLinePropertySource(args));
         try {
             context.refresh();

@@ -19,4 +19,5 @@
 <beans xmlns="http://www.springframework.org/schema/beans">
 
     <bean class="org.marid.hmi.HmiCloseAction"/>
+
 </beans>

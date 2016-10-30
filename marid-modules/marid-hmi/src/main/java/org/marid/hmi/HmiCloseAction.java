@@ -18,25 +18,16 @@
 
 package org.marid.hmi;
 
-import com.sun.javafx.application.PlatformImpl;
+import javafx.application.Platform;
 import org.marid.runtime.MaridCloseAction;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class HmiCloseAction implements MaridCloseAction {
 
-    private final ConfigurableApplicationContext context;
-
-    @Autowired
-    public HmiCloseAction(ConfigurableApplicationContext context) {
-        this.context = context;
-    }
-
     @Override
     public void run() {
-        PlatformImpl.runAndWait(context::close);
+        Platform.exit();
     }
 }

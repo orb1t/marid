@@ -25,18 +25,19 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridContextInitializer {
+public class MaridBaseApplicationContext extends GenericXmlApplicationContext {
 
-    public static GenericXmlApplicationContext applicationContext(ClassLoader classLoader) {
-        final GenericXmlApplicationContext context = new GenericXmlApplicationContext();
-        context.registerShutdownHook();
-        context.getBeanFactory().addBeanPostProcessor(new MaridBeanPostProcessor(context));
-        context.getBeanFactory().addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
-        context.setClassLoader(classLoader);
-        context.setAllowCircularReferences(false);
-        context.setValidating(false);
-        context.setResourceLoader(new PathMatchingResourcePatternResolver(classLoader));
-        context.load("classpath*:/META-INF/marid/**/*.xml");
-        return context;
+    public MaridBaseApplicationContext(ClassLoader classLoader) {
+        getBeanFactory().addBeanPostProcessor(new MaridBeanPostProcessor(this));
+        getBeanFactory().addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+        setClassLoader(classLoader);
+        setAllowCircularReferences(false);
+        setValidating(false);
+        setResourceLoader(new PathMatchingResourcePatternResolver(classLoader));
+        load("classpath*:/META-INF/marid/**/*.xml");
+    }
+
+    public MaridBaseApplicationContext() {
+        this(Thread.currentThread().getContextClassLoader());
     }
 }
