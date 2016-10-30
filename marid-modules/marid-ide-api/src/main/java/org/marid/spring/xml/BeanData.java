@@ -24,16 +24,20 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.spring.xml.collection.DCollection;
 import org.marid.spring.xml.collection.DElement;
+import org.marid.spring.xml.meta.Meta;
 import org.marid.util.MaridCollections;
 
 import javax.xml.bind.annotation.*;
 import java.util.Optional;
+import java.util.stream.Stream;
+
+import static java.util.stream.IntStream.range;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @XmlRootElement(name = "bean")
-@XmlSeeAlso({BeanProp.class, BeanArg.class, DCollection.class})
+@XmlSeeAlso({BeanProp.class, BeanArg.class, DCollection.class, Meta.class})
 @XmlAccessorType(XmlAccessType.NONE)
 public final class BeanData extends DElement<BeanData> {
 
@@ -145,24 +149,22 @@ public final class BeanData extends DElement<BeanData> {
         this.properties.addAll(beanProps);
     }
 
-    @XmlElementWrapper(name = "init-triggers")
-    @XmlElement(name = "trigger")
-    public String[] getInitTriggers() {
-        return initTriggers.isEmpty() ? null : initTriggers.toArray(new String[initTriggers.size()]);
+    @XmlAnyElement(lax = true)
+    public Meta[] getMeta() {
+        return Stream.concat(
+                range(0, initTriggers.size()).mapToObj(i -> new Meta("init" + i, initTriggers.get(i))),
+                range(0, destroyTriggers.size()).mapToObj(i -> new Meta("destroy" + i, destroyTriggers.get(i)))
+        ).toArray(Meta[]::new);
     }
 
-    public void setInitTriggers(String[] triggers) {
-        initTriggers.addAll(triggers);
-    }
-
-    @XmlElementWrapper(name = "destroy-triggers")
-    @XmlElement(name = "trigger")
-    public String[] getDestroyTriggers() {
-        return destroyTriggers.isEmpty() ? null : destroyTriggers.toArray(new String[destroyTriggers.size()]);
-    }
-
-    public void setDestroyTriggers(String[] triggers) {
-        destroyTriggers.addAll(triggers);
+    public void setMeta(Meta[] metas) {
+        for (final Meta meta : metas) {
+            if (meta.key.startsWith("init")) {
+                initTriggers.add(meta.value);
+            } else if (meta.key.startsWith("destroy")) {
+                destroyTriggers.add(meta.value);
+            }
+        }
     }
 
     public boolean isFactoryBean() {

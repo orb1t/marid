@@ -22,8 +22,13 @@ import org.marid.logging.LogSupport;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.*;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.expression.Expression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -42,11 +47,11 @@ public class MaridBeanPostProcessor implements LogSupport, DestructionAwareBeanP
     private static final Pattern DESTROY_ATTR = Pattern.compile("destroy(\\d+)");
 
     private final GenericApplicationContext context;
-    private final MaridBeanExpressionContext beanExpressionContext;
+    private final SpelExpressionParser expressionParser;
 
     public MaridBeanPostProcessor(GenericApplicationContext context) {
         this.context = context;
-        this.beanExpressionContext = new MaridBeanExpressionContext(context.getBeanFactory());
+        this.expressionParser = new SpelExpressionParser();
     }
 
     @Nonnull
@@ -101,52 +106,23 @@ public class MaridBeanPostProcessor implements LogSupport, DestructionAwareBeanP
         if (indexedAttributes.isEmpty()) {
             return;
         }
-        final BeanExpressionResolver resolver = context.getBeanFactory().getBeanExpressionResolver();
-        beanExpressionContext.results.put(-1, bean);
+        final Map<Integer, Object> results = new TreeMap<>();
+        final StandardEvaluationContext evaluationContext = new StandardEvaluationContext(bean);
+        evaluationContext.setBeanResolver(new BeanFactoryResolver(context));
+        evaluationContext.setVariable("results", results);
         for (final Map.Entry<Integer, String> entry : indexedAttributes.entrySet()) {
             final String attr = entry.getValue();
             entry.setValue(beanDefinition.getAttribute(attr).toString());
         }
         for (final Map.Entry<Integer, String> entry : indexedAttributes.entrySet()) {
             final Integer index = entry.getKey();
-            final String expression = entry.getValue();
+            final String expressionText = entry.getValue();
             try {
-                final Object result = resolver.evaluate(expression, beanExpressionContext);
-                beanExpressionContext.results.put(index, result);
+                final Expression expression = expressionParser.parseExpression(expressionText);
+                final Object value = expression.getValue(evaluationContext);
+                results.put(index, value);
             } catch (BeansException x) {
                 throw new BeanInitializationException(type + " trigger " + index + " error", x);
-            }
-        }
-    }
-
-    private static class MaridBeanExpressionContext extends BeanExpressionContext {
-
-        private final TreeMap<Integer, Object> results = new TreeMap<>();
-
-        public MaridBeanExpressionContext(ConfigurableBeanFactory beanFactory) {
-            super(beanFactory, null);
-        }
-
-        @Override
-        public boolean containsObject(String key) {
-            switch (key) {
-                case "it":
-                case "results":
-                    return true;
-                default:
-                    return super.containsObject(key);
-            }
-        }
-
-        @Override
-        public Object getObject(String key) {
-            switch (key) {
-                case "it":
-                    return results.get(-1);
-                case "results":
-                    return results;
-                default:
-                    return super.getObject(key);
             }
         }
     }
