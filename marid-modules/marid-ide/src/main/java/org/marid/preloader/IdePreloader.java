@@ -48,6 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
+import static org.marid.misc.Builder.build;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -93,31 +94,26 @@ public class IdePreloader extends Preloader {
         gridPane.setPadding(new Insets(10, 10, 10, 10));
         gridPane.setHgap(10);
         gridPane.setVgap(10);
-        {
-            final ColumnConstraints cc1 = new ColumnConstraints();
-            cc1.setFillWidth(true);
-            cc1.setHgrow(Priority.NEVER);
-
-            final ColumnConstraints cc2 = new ColumnConstraints();
-            cc2.setFillWidth(true);
-            cc2.setHgrow(Priority.ALWAYS);
-
-            gridPane.getColumnConstraints().addAll(cc1, cc2);
-        }
-
-        {
-            final RowConstraints rc1 = new RowConstraints();
-            rc1.setVgrow(Priority.NEVER);
-
-            final RowConstraints rc2 = new RowConstraints();
-            rc2.setFillHeight(true);
-            rc2.setVgrow(Priority.ALWAYS);
-
-            final RowConstraints rc3 = new RowConstraints();
-            rc3.setVgrow(Priority.NEVER);
-
-            gridPane.getRowConstraints().addAll(rc1, rc2, rc3);
-        }
+        gridPane.getColumnConstraints().add(build(new ColumnConstraints(), cc -> {
+            cc.setFillWidth(true);
+            cc.setHgrow(Priority.NEVER);
+        }));
+        gridPane.getColumnConstraints().add(build(new ColumnConstraints(), cc -> {
+            cc.setFillWidth(true);
+            cc.setHgrow(Priority.ALWAYS);
+        }));
+        gridPane.getRowConstraints().add(build(new RowConstraints(), rc -> {
+            rc.setFillHeight(true);
+            rc.setVgrow(Priority.NEVER);
+        }));
+        gridPane.getRowConstraints().add(build(new RowConstraints(), rc -> {
+            rc.setFillHeight(true);
+            rc.setVgrow(Priority.ALWAYS);
+        }));
+        gridPane.getRowConstraints().add(build(new RowConstraints(), rc -> {
+            rc.setFillHeight(true);
+            rc.setVgrow(Priority.NEVER);
+        }));
         gridPane.addRow(0, new ImageView(FxMaridIcon.maridIcon(64, Color.GREEN)), titleBox());
         gridPane.add(logScrollPane, 0, 1, 2, 1);
         gridPane.add(progressBar, 0, 2, 2, 1);
