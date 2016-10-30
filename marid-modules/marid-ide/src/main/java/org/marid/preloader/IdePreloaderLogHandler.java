@@ -19,18 +19,16 @@
 package org.marid.preloader;
 
 import javafx.scene.text.Text;
+import org.jboss.logmanager.formatters.PatternFormatter;
 import org.marid.Ide;
 import org.marid.concurrent.MaridTimerTask;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
-
-import static org.marid.l10n.L10n.m;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -43,6 +41,7 @@ public class IdePreloaderLogHandler extends Handler {
 
     IdePreloaderLogHandler(IdePreloader preloader) {
         this.preloader = preloader;
+        setFormatter(new PatternFormatter("%m%n"));
         timer.schedule(new MaridTimerTask(task -> flush()), 100L, 30L);
     }
 
@@ -57,25 +56,18 @@ public class IdePreloaderLogHandler extends Handler {
             return;
         }
         final ArrayList<Text> texts = new ArrayList<>();
-        final StringBuffer buffer = new StringBuffer(128);
-        final Locale locale = Locale.getDefault();
         for (final Iterator<LogRecord> it = queue.iterator(); it.hasNext(); ) {
             final LogRecord record = it.next();
             try {
-                buffer.setLength(0);
-                m(locale, record.getMessage(), buffer, record.getParameters());
-                buffer.append(System.lineSeparator());
-                final Text text = new Text(buffer.toString());
+                final Text text = new Text(getFormatter().format(record));
                 texts.add(text);
-            } catch (Exception x) {
+            } catch (RuntimeException x) {
                 x.printStackTrace(); // it's wrong to log here
             } finally {
                 it.remove();
             }
         }
-        if (!texts.isEmpty()) {
-            preloader.publishTexts(texts);
-        }
+        preloader.publishTexts(texts);
     }
 
     @Override

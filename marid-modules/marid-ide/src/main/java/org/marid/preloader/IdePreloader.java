@@ -41,13 +41,13 @@ import javafx.stage.StageStyle;
 import org.marid.Ide;
 import org.marid.IdePrefs;
 import org.marid.jfx.FxMaridIcon;
-import org.marid.l10n.L10n;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.marid.l10n.L10n.m;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -81,7 +81,7 @@ public class IdePreloader extends Preloader {
         top.setStyle("-fx-font-size: 200%; -fx-font-weight: bold");
         box.getChildren().add(top);
         box.getChildren().add(new Separator(Orientation.HORIZONTAL));
-        final Label bottom = new Label(L10n.s("Data visualization and acquisition system"));
+        final Label bottom = new Label(s("Data visualization and acquisition system"));
         bottom.setStyle("-fx-font-style: italic");
         box.getChildren().add(bottom);
         return box;
@@ -107,7 +107,6 @@ public class IdePreloader extends Preloader {
 
         {
             final RowConstraints rc1 = new RowConstraints();
-            rc1.setFillHeight(true);
             rc1.setVgrow(Priority.NEVER);
 
             final RowConstraints rc2 = new RowConstraints();
@@ -115,13 +114,11 @@ public class IdePreloader extends Preloader {
             rc2.setVgrow(Priority.ALWAYS);
 
             final RowConstraints rc3 = new RowConstraints();
-            rc3.setFillHeight(true);
             rc3.setVgrow(Priority.NEVER);
 
             gridPane.getRowConstraints().addAll(rc1, rc2, rc3);
         }
-        gridPane.add(new ImageView(FxMaridIcon.maridIcon(64, Color.GREEN)), 0, 0);
-        gridPane.add(titleBox(), 1, 0);
+        gridPane.addRow(0, new ImageView(FxMaridIcon.maridIcon(64, Color.GREEN)), titleBox());
         gridPane.add(logScrollPane, 0, 1, 2, 1);
         gridPane.add(progressBar, 0, 2, 2, 1);
         return gridPane;
