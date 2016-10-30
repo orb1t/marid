@@ -65,11 +65,7 @@ public class HsqldbPropertiesDialog extends Dialog<Runnable> {
                 field.setText(dirProperty.data.get().toString());
             }
             pane.addRow(row.getAndIncrement(), new Label(s("Directory"), icon), field);
-            commitTasks.add(() -> {
-                final DValue value = new DValue();
-                value.setValue(field.getText());
-                dirProperty.setData(value);
-            });
+            commitTasks.add(() -> dirProperty.setData(new DValue(field.getText())));
         }
 
         getDialogPane().setContent(pane);

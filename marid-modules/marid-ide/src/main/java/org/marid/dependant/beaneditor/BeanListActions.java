@@ -64,9 +64,7 @@ import static java.util.stream.Collectors.joining;
 import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
 import static javafx.scene.control.ButtonType.CANCEL;
 import static org.marid.Ide.primaryStage;
-import static org.marid.jfx.icons.FontIcon.M_DETAILS;
-import static org.marid.jfx.icons.FontIcon.M_EDIT;
-import static org.marid.jfx.icons.FontIcon.M_REMOVE;
+import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
@@ -145,9 +143,7 @@ public class BeanListActions {
                 beanArg.name.set(holder.getName());
                 beanArg.type.set(holder.getType());
                 if (holder.getValue() instanceof TypedStringValue) {
-                    final DValue value = new DValue();
-                    value.setValue(((TypedStringValue) holder.getValue()).getValue());
-                    beanArg.data.set(value);
+                    beanArg.data.set(new DValue(((TypedStringValue) holder.getValue()).getValue()));
                 }
                 beanData.beanArgs.add(beanArg);
             }
@@ -158,9 +154,7 @@ public class BeanListActions {
                 final BeanProp property = new BeanProp();
                 property.name.set(propertyValue.getName());
                 if (propertyValue.getValue() instanceof TypedStringValue) {
-                    final DValue value = new DValue();
-                    value.setValue(((TypedStringValue) propertyValue.getValue()).getValue());
-                    property.data.set(value);
+                    property.data.set(new DValue(((TypedStringValue) propertyValue.getValue()).getValue()));
                 }
                 beanData.properties.add(property);
             }

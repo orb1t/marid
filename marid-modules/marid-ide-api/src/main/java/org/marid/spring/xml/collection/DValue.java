@@ -39,6 +39,11 @@ public final class DValue extends DElement<DValue> {
         value.addListener(this::invalidate);
     }
 
+    public DValue(String value) {
+        this();
+        this.value.set(value);
+    }
+
     @XmlValue
     public String getValue() {
         return value.get();

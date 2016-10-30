@@ -61,9 +61,7 @@ public class WindowCommonEditorStage extends Stage {
     }
 
     private void setValue(BeanProp prop, double value) {
-        final DValue v = new DValue();
-        v.setValue(Double.toString(value));
-        prop.data.setValue(v);
+        prop.data.setValue(new DValue(Double.toString(value)));
     }
 
     public WindowCommonEditorStage(BeanData beanData) {
