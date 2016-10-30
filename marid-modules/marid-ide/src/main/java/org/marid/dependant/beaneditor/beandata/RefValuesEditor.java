@@ -91,7 +91,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
                 label.setText(element.toString());
             }
             return label;
-        }));
+        }, param.getValue()));
         getColumns().add(col);
     }
 
