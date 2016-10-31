@@ -64,7 +64,8 @@ import static java.util.stream.Collectors.joining;
 import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
 import static javafx.scene.control.ButtonType.CANCEL;
 import static org.marid.Ide.primaryStage;
-import static org.marid.jfx.icons.FontIcon.*;
+import static org.marid.jfx.icons.FontIcon.M_EDIT;
+import static org.marid.jfx.icons.FontIcon.M_REMOVE;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
@@ -308,16 +309,6 @@ public class BeanListActions {
     public ContextMenu contextMenu(BeanData beanData) {
         final ContextMenu menu = new ContextMenu();
         final List<List<MenuItem>> menuItems = new ArrayList<>();
-
-        {
-            final MenuItem menuItem = new MenuItem(s("Details..."), glyphIcon(M_DETAILS, 16));
-            menuItem.setOnAction(e -> {
-                final BeanDataDetailsEditor editor = new BeanDataDetailsEditor(beanData, profile);
-                editor.showAndWait();
-            });
-            menuItems.add(Collections.singletonList(menuItem));
-        }
-
         final Type type = profile.getType(beanData).orElse(null);
         if (type == null) {
             return menu;

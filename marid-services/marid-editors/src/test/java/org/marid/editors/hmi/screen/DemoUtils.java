@@ -16,14 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.triggers;
+package org.marid.editors.hmi.screen;
 
-import org.springframework.context.annotation.Configuration;
+import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.BeanProp;
+import org.marid.spring.xml.collection.DElement;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
-public class TriggersConfiguration {
+public interface DemoUtils {
 
+    static BeanProp prop(BeanData beanData, String name, Class<?> type, DElement<?> value) {
+        return beanData.property(name)
+                .map(p -> {
+                    p.type.set(type.getName());
+                    p.data.set(value);
+                    return p;
+                })
+                .orElseGet(() -> {
+                    final BeanProp prop = new BeanProp();
+                    prop.data.set(value);
+                    prop.name.set(name);
+                    prop.type.set(type.getName());
+                    beanData.properties.add(prop);
+                    return prop;
+                });
+    }
 }

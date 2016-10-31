@@ -18,7 +18,6 @@
 
 package org.marid.dependant.resources.beanfiles;
 
-import javafx.geometry.Orientation;
 import javafx.scene.layout.BorderPane;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
@@ -37,7 +36,7 @@ public class BeanFileBrowserPane extends BorderPane {
     @Autowired
     public BeanFileBrowserPane(BeanFileBrowserActions actions, BeanFileBrowser tree) {
         setCenter(new MaridScrollPane(tree));
-        setLeft(new ToolbarBuilder()
+        setTop(new ToolbarBuilder()
                 .add("Add file", M_ADD, actions::onFileAdd)
                 .addSeparator()
                 .add("Rename file/directory", O_DIFF_RENAMED, actions::onRename, isEmpty(tree.getSelectionModel().getSelectedItems()))
@@ -45,6 +44,6 @@ public class BeanFileBrowserPane extends BorderPane {
                 .add("Delete file/directory", O_TAG_REMOVE, actions::onDelete, isEmpty(tree.getSelectionModel().getSelectedItems()))
                 .addSeparator()
                 .add("Bean editor...", M_EDIT, actions::launchBeanEditor, isEmpty(tree.getSelectionModel().getSelectedItems()))
-                .build(toolBar -> toolBar.setOrientation(Orientation.VERTICAL)));
+                .build());
     }
 }

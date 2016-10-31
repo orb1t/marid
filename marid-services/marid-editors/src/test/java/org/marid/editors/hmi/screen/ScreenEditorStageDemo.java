@@ -19,8 +19,6 @@
 package org.marid.editors.hmi.screen;
 
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.marid.ide.project.ProfileInfo;
@@ -42,9 +40,6 @@ public class ScreenEditorStageDemo extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setScene(new Scene(new BorderPane(), 800, 600));
-        primaryStage.show();
-
         final Preferences preferences = Preferences.userRoot().node("demo").node("svg");
         final DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(new File(preferences.get("dir", System.getProperty("user.home"))));
@@ -57,10 +52,9 @@ public class ScreenEditorStageDemo extends Application {
         final Path userHome = directory.toPath();
         final BeanEditorContext context = mock(BeanEditorContext.class);
         final BeanData beanData = new BeanData();
-        final BeanProp relativeLocationProp = new BeanProp();
-        relativeLocationProp.setName("relativeLocation");
-        relativeLocationProp.setType(String.class.getName());
-        beanData.properties.add(relativeLocationProp);
+        final BeanProp relativeLocationProp = DemoUtils.prop(beanData, "relativeLocation", String.class, null);
+        final BeanProp prefWidthProp = DemoUtils.prop(beanData, "prefWidth", double.class, null);
+        final BeanProp prefHeightProp = DemoUtils.prop(beanData, "prefHeight", double.class, null);
 
         final ProfileInfo profileInfo = mock(ProfileInfo.class);
         when(profileInfo.getSrcMainResources()).thenReturn(userHome);
@@ -70,6 +64,12 @@ public class ScreenEditorStageDemo extends Application {
         when(context.getProfileInfo()).thenReturn(profileInfo);
 
         final ScreenEditorStage screenEditorStage = new ScreenEditorStage(context);
-        screenEditorStage.show();
+        primaryStage.setScene(screenEditorStage.getScene());
+        primaryStage.setOnCloseRequest(event -> {
+            System.out.printf("Relative location: %s%n", relativeLocationProp.getData());
+            System.out.printf("Pref width: %s%n", prefWidthProp.getData());
+            System.out.printf("Pref height: %s%n", prefHeightProp.getData());
+        });
+        primaryStage.show();
     }
 }

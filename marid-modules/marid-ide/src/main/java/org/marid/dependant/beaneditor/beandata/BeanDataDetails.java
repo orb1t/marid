@@ -16,16 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor;
+package org.marid.dependant.beaneditor.beandata;
 
 import com.google.common.collect.ImmutableMap;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Modality;
-import org.marid.Ide;
+import javafx.scene.layout.HBox;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.list.MaridListActions;
@@ -34,6 +36,10 @@ import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.MaridToolbar;
 import org.marid.spring.xml.BeanData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -43,78 +49,110 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.marid.jfx.icons.FontIcon.D_WINDOW_RESTORE;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
+import static org.marid.misc.Builder.build;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanDataDetailsEditor extends Dialog<Boolean> {
+@Configuration
+public class BeanDataDetails {
 
     private final BeanData beanData;
     private final ProjectProfile profile;
-    private final List<Runnable> acceptActions = new ArrayList<>();
+    private final ComboBox<String> lazy;
+    private final ComboBox<String> initMethod;
+    private final ComboBox<String> destroyMethod;
+    private final String oldLazy;
+    private final String oldInitMethod;
+    private final String oldDestroyMethod;
+    private final List<String> oldInitTriggers;
+    private final List<String> oldDestroyTriggers;
 
-    public BeanDataDetailsEditor(BeanData beanData, ProjectProfile profile) {
+    @Autowired
+    public BeanDataDetails(BeanData beanData, ProjectProfile profile) {
         this.beanData = beanData;
         this.profile = profile;
-        initOwner(Ide.primaryStage);
-        initModality(Modality.WINDOW_MODAL);
-        setResizable(true);
-        setTitle(s("Bean details"));
-        getDialogPane().setContent(tabPane());
-        getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-        getDialogPane().setPrefWidth(800);
-        setResultConverter(param -> {
-            if (param.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
-                acceptActions.forEach(Runnable::run);
-                return true;
-            } else {
-                return null;
-            }
-        });
+        this.lazy = lazyCombo();
+        this.initMethod = initMethodCombo();
+        this.destroyMethod = destroyMethodCombo();
+        this.oldLazy = beanData.lazyInit.get();
+        this.oldInitMethod = beanData.initMethod.get();
+        this.oldDestroyMethod = beanData.destroyMethod.get();
+        this.oldInitTriggers = new ArrayList<>(beanData.initTriggers);
+        this.oldDestroyTriggers = new ArrayList<>(beanData.destroyTriggers);
+    }
+
+    @Bean
+    @Order(3)
+    @Qualifier("beanData")
+    public Tab detailsTab() {
+        final BorderPane pane = new BorderPane();
+        pane.setCenter(new MaridScrollPane(propertiesGridPane()));
+        pane.setBottom(buttonPane(event -> {
+            beanData.lazyInit.set(oldLazy);
+            beanData.initMethod.set(oldInitMethod);
+            beanData.destroyMethod.set(oldDestroyMethod);
+        }));
+        return new Tab(s("Details"), pane);
+    }
+
+    @Bean
+    @Order(4)
+    @Qualifier("beanData")
+    public Tab initTriggersTab() {
+        final BorderPane pane = triggersPane(beanData.initTriggers);
+        pane.setBottom(buttonPane(event -> beanData.initTriggers.setAll(oldInitTriggers)));
+        return new Tab(s("Init triggers"), pane);
+    }
+
+    @Bean
+    @Order(5)
+    @Qualifier("beanData")
+    public Tab destroyTriggersTab() {
+        final BorderPane pane = triggersPane(beanData.destroyTriggers);
+        pane.setBottom(buttonPane(event -> beanData.destroyTriggers.setAll(oldDestroyTriggers)));
+        return new Tab(s("Destroy triggers"), pane);
     }
 
     private ComboBox<String> lazyCombo() {
         final ComboBox<String> lazy = new ComboBox<>(FXCollections.observableArrayList("default", "true", "false"));
-        lazy.setValue(beanData.lazyInit.get());
+        lazy.valueProperty().bindBidirectional(beanData.lazyInit);
         lazy.setMaxWidth(Double.MAX_VALUE);
-        acceptActions.add(() -> beanData.lazyInit.set(lazy.getValue()));
         return lazy;
     }
 
     private ComboBox<String> initMethodCombo() {
         final ComboBox<String> initMethod = methodCombo();
-        initMethod.setValue(beanData.initMethod.get());
-        initMethod.setMaxWidth(Double.MAX_VALUE);
-        acceptActions.add(() -> beanData.initMethod.set(initMethod.getValue()));
+        initMethod.valueProperty().bindBidirectional(beanData.initMethod);
         return initMethod;
     }
 
     private ComboBox<String> destroyMethodCombo() {
         final ComboBox<String> destroyMethod = methodCombo();
-        destroyMethod.setValue(beanData.destroyMethod.get());
-        destroyMethod.setMaxWidth(Double.MAX_VALUE);
-        acceptActions.add(() -> beanData.destroyMethod.set(destroyMethod.getValue()));
+        destroyMethod.valueProperty().bindBidirectional(beanData.destroyMethod);
         return destroyMethod;
+    }
+
+    private HBox buttonPane(EventHandler<ActionEvent> restoreAction) {
+        final HBox box = new HBox();
+        box.setAlignment(Pos.BASELINE_RIGHT);
+        box.setPadding(new Insets(10));
+        box.getChildren().add(build(new Button(s("Restore"), glyphIcon(D_WINDOW_RESTORE, 24)), b -> {
+            b.setOnAction(restoreAction);
+        }));
+        return box;
     }
 
     private GenericGridPane propertiesGridPane() {
         final GenericGridPane gridPane = new GenericGridPane();
         gridPane.setPadding(new Insets(10));
-        gridPane.addControl("Lazy", this::lazyCombo);
-        gridPane.addControl("Init method", this::initMethodCombo);
-        gridPane.addControl("Destroy method", this::destroyMethodCombo);
+        gridPane.addControl("Lazy", () -> lazy);
+        gridPane.addControl("Init method", () -> initMethod);
+        gridPane.addControl("Destroy method", () -> destroyMethod);
         return gridPane;
-    }
-
-    private TabPane tabPane() {
-        final TabPane tabPane = new TabPane(
-                new Tab(s("Properties"), new MaridScrollPane(propertiesGridPane())),
-                new Tab(s("Init triggers"), triggersPane(beanData.initTriggers)),
-                new Tab(s("Destroy triggers"), triggersPane(beanData.destroyTriggers))
-        );
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        return tabPane;
     }
 
     private BorderPane triggersPane(ObservableList<String> triggers) {
@@ -157,6 +195,8 @@ public class BeanDataDetailsEditor extends Dialog<Boolean> {
                     .map(Method::getName)
                     .forEach(list::add);
         });
-        return new ComboBox<>(list);
+        final ComboBox<String> comboBox = new ComboBox<>(list);
+        comboBox.setMaxWidth(Double.MAX_VALUE);
+        return comboBox;
     }
 }

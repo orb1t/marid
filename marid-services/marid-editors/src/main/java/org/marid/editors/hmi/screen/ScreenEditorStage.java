@@ -19,12 +19,16 @@
 package org.marid.editors.hmi.screen;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.geometry.Dimension2D;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.ToolBar;
+import javafx.scene.control.*;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -32,20 +36,23 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.controlsfx.control.StatusBar;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.logging.LogSupport;
 import org.marid.spring.beandata.BeanEditorContext;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
 import org.marid.spring.xml.collection.DValue;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 import static javafx.scene.control.Alert.AlertType.ERROR;
 import static javafx.scene.control.ButtonType.OK;
+import static org.marid.jfx.icons.FontIcon.D_SYNC;
 import static org.marid.jfx.icons.FontIcon.M_IMPORT_EXPORT;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
@@ -58,11 +65,11 @@ public class ScreenEditorStage extends Stage implements LogSupport {
 
     private final BeanEditorContext context;
     private final ObjectProperty<File> svgFile = new SimpleObjectProperty<>(this, "svgFile");
+    private final DoubleProperty zoom = new SimpleDoubleProperty(this, "zoom", 1.0);
+    private final ObjectProperty<Dimension2D> size = new SimpleObjectProperty<>(this, "size", new Dimension2D(800, 600));
 
     public ScreenEditorStage(BeanEditorContext context) {
         this.context = context;
-        initOwner(context.getPrimaryStage());
-        initModality(Modality.WINDOW_MODAL);
         setTitle(context.getBeanData().getName());
         setScene(new Scene(mainPane(), 800, 600));
     }
@@ -71,7 +78,7 @@ public class ScreenEditorStage extends Stage implements LogSupport {
         final BorderPane pane = new BorderPane();
         pane.setTop(toolBar());
         pane.setBottom(statusBar());
-        pane.setCenter(new MaridScrollPane(webView()));
+        pane.setCenter(webView());
         return pane;
     }
 
@@ -100,13 +107,39 @@ public class ScreenEditorStage extends Stage implements LogSupport {
                         }
                     }
                 })
+                .addSeparator()
+                .add(new Label(s("Scale") + ":"), l -> {})
+                .add(new Spinner<Double>(), s -> {
+                    s.setValueFactory(new DoubleSpinnerValueFactory(0.1, 10.0, 1.0, 0.1));
+                    s.valueProperty().addListener((observable, oldValue, newValue) -> zoom.set(newValue));
+                })
+                .addSeparator()
+                .add("Apply", D_SYNC, event -> {
+                    final BeanProp locationProp = context.getBeanData().property("relativeLocation").orElse(null);
+                    final BeanProp prefWidthProp = context.getBeanData().property("prefWidth").orElse(null);
+                    final BeanProp prefHeightProp = context.getBeanData().property("prefHeight").orElse(null);
+                    if (locationProp != null && svgFile.isNotNull().get()) {
+                        final Path resourcesDir = context.getProfileInfo().getSrcMainResources();
+                        final Path relativePath = resourcesDir.relativize(svgFile.get().toPath());
+                        locationProp.setData(new DValue(relativePath.toString()));
+                    }
+                    if (size.isNotNull().get()) {
+                        if (prefWidthProp != null) {
+                            prefWidthProp.setData(new DValue(Double.toString(size.get().getWidth() + 10)));
+                        }
+                        if (prefHeightProp != null) {
+                            prefHeightProp.setData(new DValue(Double.toString(size.get().getHeight() + 10)));
+                        }
+                    }
+                })
                 .build();
     }
 
     private StatusBar statusBar() {
         final StatusBar statusBar = new StatusBar();
+        statusBar.setPadding(new Insets(5));
         statusBar.setText("");
-        statusBar.getLeftItems().add(build(new Label(s("File") + ":"), l -> {}));
+        statusBar.getLeftItems().add(build(new Label(s("File") + ": "), l -> {}));
         statusBar.getLeftItems().add(build(new Label(), l -> {
             l.textProperty().bind(Bindings.createStringBinding(() -> {
                 if (svgFile.isNull().get()) {
@@ -117,19 +150,63 @@ public class ScreenEditorStage extends Stage implements LogSupport {
                 return relative.toString();
             }, svgFile));
         }));
+        statusBar.getLeftItems().add(new Separator(Orientation.VERTICAL));
+        statusBar.getLeftItems().add(build(new Label(s("Zoom") + ": "), l -> {}));
+        statusBar.getLeftItems().add(build(new Label(), l -> l.textProperty().bind(Bindings.format("%fx", zoom))));
+        statusBar.getLeftItems().add(new Separator(Orientation.VERTICAL));
+        statusBar.getLeftItems().add(build(new Label(s("Size") + ": "), l -> {}));
+        statusBar.getLeftItems().add(build(new Label(), l -> l.textProperty().bind(Bindings.createStringBinding(() -> {
+            final Dimension2D d = size.get();
+            return String.format("%dx%d", Math.round(d.getWidth()), Math.round(d.getHeight()));
+        }, size))));
+        statusBar.getLeftItems().stream()
+                .filter(Control.class::isInstance)
+                .map(Control.class::cast)
+                .forEach(c -> c.setPadding(new Insets(5)));
         return statusBar;
     }
 
     private WebView webView() {
         final WebView webView = new WebView();
+        webView.getEngine().setJavaScriptEnabled(true);
+        webView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
+            switch (newValue) {
+                case READY:
+                case SUCCEEDED:
+                    size.set(size(webView, zoom.get()));
+                    break;
+            }
+        });
+        zoom.addListener((observable, oldValue, newValue) -> {
+            size.set(size(webView, zoom.get()));
+        });
         svgFile.addListener((observable, oldValue, newValue) -> {
             try {
                 final URL url = newValue.toURI().toURL();
                 webView.getEngine().load(url.toExternalForm());
+                webView.zoomProperty().bindBidirectional(zoom);
             } catch (Exception x) {
                 log(WARNING, "Unable to load {0}", x, newValue);
             }
         });
         return webView;
+    }
+
+    static Dimension2D size(WebView webView, double zoom) {
+        final Document document = webView.getEngine().getDocument();
+        if (document == null) {
+            return new Dimension2D(800 * zoom, 600 * zoom);
+        }
+        final Element svg = document.getDocumentElement();
+        final String viewBox = svg.getAttribute("viewBox");
+        if (viewBox == null) {
+            return new Dimension2D(800 * zoom, 600 * zoom);
+        }
+        final String[] parts = viewBox.split("\\s");
+        if (parts.length != 4) {
+            return new Dimension2D(800 * zoom, 600 * zoom);
+        }
+        final double[] elements = Stream.of(parts).mapToDouble(Double::parseDouble).toArray();
+        return new Dimension2D(elements[2] * zoom, elements[3] * zoom);
     }
 }

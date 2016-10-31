@@ -48,7 +48,7 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@Import({BeanDataActions.class})
+@Import({BeanDataActions.class, BeanDataDetails.class})
 public class BeanDataEditorConfiguration {
 
     public BeanData beanData;
