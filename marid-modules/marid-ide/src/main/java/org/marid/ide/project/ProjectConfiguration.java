@@ -64,7 +64,7 @@ public class ProjectConfiguration implements LogSupport {
     @Qualifier("profile")
     public FxAction projectSetupAction(IdeDependants dependants, Supplier<ProjectProfile> profile) {
         return new FxAction("projectSetup", "setup", "Project")
-                .setText("Project setup...")
+                .setText(s("Project setup..."))
                 .setIcon(O_TOOLS)
                 .setEventHandler(event -> dependants.start(
                         "projectEditor",
@@ -79,7 +79,7 @@ public class ProjectConfiguration implements LogSupport {
     public FxAction projectSaveAction(ObjectFactory<ProjectSaver> projectSaver, Supplier<ProjectProfile> profile) {
         return new FxAction(null, "io", "Project")
                 .setAccelerator(KeyCombination.valueOf("F2"))
-                .setText("Save")
+                .setText(s("Save"))
                 .setIcon(F_SAVE)
                 .setEventHandler(event -> projectSaver.getObject().save(profile.get()));
     }
@@ -92,7 +92,7 @@ public class ProjectConfiguration implements LogSupport {
                                        Supplier<ProjectProfile> profileSupplier) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F9"))
-                .setText("Build")
+                .setText(s("Build"))
                 .setIcon(D_CLOCK_FAST)
                 .setEventHandler(event -> {
                     final ProjectProfile profile = profileSupplier.get();
@@ -116,7 +116,7 @@ public class ProjectConfiguration implements LogSupport {
     public FxAction projectRunAction(IdeDependants dependants, Supplier<ProjectProfile> profile) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F5"))
-                .setText("Run")
+                .setText(s("Run"))
                 .setIcon(F_PLAY)
                 .setEventHandler(event -> dependants.start(
                         "projectRunner",
@@ -131,7 +131,7 @@ public class ProjectConfiguration implements LogSupport {
     public FxAction projectAddProfileAction(ObjectFactory<ProjectSaver> projectSaverFactory,
                                             ObjectFactory<ProjectManager> projectManager) {
         return new FxAction("projectIO", "pm", "Project")
-                .setText("Add profile...")
+                .setText(s("Add profile..."))
                 .setIcon(M_ADD_BOX)
                 .setEventHandler(event -> {
                     final TextInputDialog dialog = new TextInputDialog("profile");
@@ -156,7 +156,7 @@ public class ProjectConfiguration implements LogSupport {
     @Qualifier("profile")
     public FxAction projectRemoveProfileAction(ProjectManager manager, Supplier<ProjectProfile> profile) {
         return new FxAction("projectIO", "pm", "Project")
-                .setText("Remove profile")
+                .setText(s("Remove profile"))
                 .setIcon(D_MINUS_BOX)
                 .bindDisabled(createBooleanBinding(() -> manager.getProfiles().size() < 2, manager.getProfiles()))
                 .setEventHandler(event -> {
@@ -177,7 +177,7 @@ public class ProjectConfiguration implements LogSupport {
                                            Supplier<ProjectProfile> profile,
                                            IdeTabPane ideTabPane) {
         return new FxAction("projectTree", "pt", "Project")
-                .setText("Project resources")
+                .setText(s("Project resources"))
                 .setAccelerator(KeyCombination.valueOf("F4"))
                 .setIcon(M_FOLDER_SHARED)
                 .bindDisabled(ideTabPane.getSelectionModel().selectedIndexProperty().isNotEqualTo(0))

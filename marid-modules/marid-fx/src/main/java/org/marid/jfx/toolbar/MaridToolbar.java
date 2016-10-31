@@ -58,7 +58,7 @@ public class MaridToolbar extends ToolBar {
             final GlyphIcon<?> icon = a.getIcon() != null ? glyphIcon(a.getIcon(), 20) : null;
             final Button button = new Button(null, icon);
             button.setFocusTraversable(false);
-            button.setOnAction(a.getEventHandler());
+            button.setOnAction(event -> a.getEventHandler().handle(event));
             if (a.disabledProperty() != null) {
                 button.disableProperty().bindBidirectional(a.disabledProperty());
             }

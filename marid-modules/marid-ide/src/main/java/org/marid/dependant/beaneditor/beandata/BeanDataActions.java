@@ -38,6 +38,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.marid.l10n.L10n.s;
 import static org.marid.util.Reflections.parameterName;
 
 /**
@@ -61,7 +62,7 @@ public class BeanDataActions {
         return new FxAction("refresh", "refresh", "Actions")
                 .setEventHandler(event -> profile.updateBeanData(beanData))
                 .setIcon(FontIcon.M_REFRESH)
-                .setText("Refresh");
+                .setText(s("Refresh"));
     }
 
     @Bean
@@ -70,7 +71,7 @@ public class BeanDataActions {
         return new FxAction("search", "search", "Actions")
                 .setEventHandler(this::onSelectConstructor)
                 .setIcon(FontIcon.M_SEARCH)
-                .setText("Select constructor");
+                .setText(s("Select constructor"));
     }
 
     public void onSelectConstructor(ActionEvent event) {

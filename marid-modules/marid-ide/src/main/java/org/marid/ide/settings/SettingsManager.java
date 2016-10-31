@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.marid.jfx.icons.FontIcon.O_SETTINGS;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,7 +39,7 @@ public class SettingsManager {
     public FxAction settingsAction(IdeDependants dependants) {
         return new FxAction("settings", "settings", "Tools")
                 .setIcon(O_SETTINGS)
-                .setText("Settings...")
+                .setText(s("Settings..."))
                 .setEventHandler(event -> dependants.start(SettingsConfiguration.class, "settingsEditor"));
     }
 }
