@@ -33,13 +33,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.controlsfx.control.StatusBar;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.logging.LogSupport;
 import org.marid.spring.beandata.BeanEditorContext;
-import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
 import org.marid.spring.xml.collection.DValue;
 import org.w3c.dom.Document;
@@ -48,13 +46,11 @@ import org.w3c.dom.Element;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-import static javafx.scene.control.Alert.AlertType.ERROR;
-import static javafx.scene.control.ButtonType.OK;
 import static org.marid.jfx.icons.FontIcon.D_SYNC;
 import static org.marid.jfx.icons.FontIcon.M_IMPORT_EXPORT;
-import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
 import static org.marid.misc.Builder.build;
 
@@ -63,6 +59,7 @@ import static org.marid.misc.Builder.build;
  */
 public class ScreenEditorStage extends Stage implements LogSupport {
 
+    private final BorderPane mainPane;
     private final BeanEditorContext context;
     private final ObjectProperty<File> svgFile = new SimpleObjectProperty<>(this, "svgFile");
     private final DoubleProperty zoom = new SimpleDoubleProperty(this, "zoom", 1.0);
@@ -71,7 +68,20 @@ public class ScreenEditorStage extends Stage implements LogSupport {
     public ScreenEditorStage(BeanEditorContext context) {
         this.context = context;
         setTitle(context.getBeanData().getName());
-        setScene(new Scene(mainPane(), 800, 600));
+        setScene(new Scene(mainPane = mainPane(), 800, 600));
+        setOnShown(event -> {
+            final BeanProp prop = context.getBeanData().property("relativeLocation").orElse(null);
+            if (prop != null) {
+                if (prop.data.get() instanceof DValue) {
+                    final DValue value = (DValue) prop.data.get();
+                    if (value.value.isNotEmpty().get()) {
+                        final Path relativePath = Paths.get(value.value.get());
+                        final Path path = context.getProfileInfo().getSrcMainResources().resolve(relativePath);
+                        svgFile.set(path.toFile());
+                    }
+                }
+            }
+        });
     }
 
     private BorderPane mainPane() {
@@ -91,20 +101,7 @@ public class ScreenEditorStage extends Stage implements LogSupport {
                     chooser.getExtensionFilters().addAll(new ExtensionFilter(s("SVG"), "*.svg"));
                     final File file = chooser.showOpenDialog(this);
                     if (file != null) {
-                        try {
-                            final Path relative = resourcesDir.relativize(file.toPath());
-                            final BeanData beanData = context.getBeanData();
-                            final BeanProp prop = beanData.property("relativeLocation").orElse(null);
-                            if (prop != null) {
-                                prop.setData(new DValue(relative.toString()));
-                                svgFile.set(file);
-                            }
-                        } catch (IllegalArgumentException x) {
-                            final Alert alert = new Alert(ERROR, m("Selected file is not a resource"), OK);
-                            alert.initOwner(this);
-                            alert.initModality(Modality.WINDOW_MODAL);
-                            alert.showAndWait();
-                        }
+                        svgFile.set(file);
                     }
                 })
                 .addSeparator()
@@ -176,6 +173,24 @@ public class ScreenEditorStage extends Stage implements LogSupport {
                     size.set(size(webView, zoom.get()));
                     break;
             }
+        });
+        size.addListener((observable, oldValue, newValue) -> {
+            final double width = newValue.getWidth();
+            final double height = newValue.getHeight();
+            webView.setPrefWidth(width + 70);
+            webView.setPrefHeight(height + 70);
+            final double oldX = getX();
+            final double oldY = getY();
+            final double oldWidth = mainPane.getWidth();
+            final double oldHeight = mainPane.getHeight();
+            final double newWidth = mainPane.prefWidth(-1);
+            final double newHeight = mainPane.prefHeight(-1);
+            final double oldWindowWidth = getWidth();
+            final double oldWindowHeight = getHeight();
+            setX(oldX - (newWidth - oldWidth) / 2);
+            setY(oldY - (newHeight - oldHeight) / 2);
+            setWidth(oldWindowWidth + newWidth - oldWidth);
+            setHeight(oldWindowHeight + newHeight - oldHeight);
         });
         zoom.addListener((observable, oldValue, newValue) -> {
             size.set(size(webView, zoom.get()));

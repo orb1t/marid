@@ -22,6 +22,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
+import org.marid.IdeDependants;
+import org.marid.dependant.resources.ResourcesConfiguration;
+import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
@@ -33,6 +36,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -84,6 +88,20 @@ public class ProfilesTable extends TableView<ProjectProfile> {
                     .flatMap(m -> m.getItems().stream())
                     .toArray(MenuItem[]::new)));
             return row;
+        });
+    }
+
+    @Autowired
+    private void init(IdeDependants dependants, Supplier<ProjectProfile> profile, SpecialActions specialActions) {
+        focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                specialActions.setEditAction(L10n.s("Project resources"), event -> {
+                    final String name = profile.get().getName();
+                    dependants.start(name, ResourcesConfiguration.class, c -> c.profile = profile.get());
+                });
+            } else {
+                specialActions.setEditAction(null, null);
+            }
         });
     }
 }

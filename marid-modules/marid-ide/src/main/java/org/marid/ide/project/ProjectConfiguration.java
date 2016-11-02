@@ -25,8 +25,6 @@ import javafx.scene.input.KeyCombination;
 import org.marid.IdeDependants;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
-import org.marid.dependant.resources.ResourcesConfiguration;
-import org.marid.ide.tabs.IdeTabPane;
 import org.marid.jfx.action.FxAction;
 import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
@@ -168,23 +166,5 @@ public class ProjectConfiguration implements LogSupport {
                         manager.remove(profile.get());
                     }
                 });
-    }
-
-    @Bean
-    @IdeAction
-    @Qualifier("profile")
-    public FxAction projectResourcesAction(IdeDependants dependants,
-                                           Supplier<ProjectProfile> profile,
-                                           IdeTabPane ideTabPane) {
-        return new FxAction("projectTree", "pt", "Project")
-                .setText(s("Project resources"))
-                .setAccelerator(KeyCombination.valueOf("F4"))
-                .setIcon(M_FOLDER_SHARED)
-                .bindDisabled(ideTabPane.getSelectionModel().selectedIndexProperty().isNotEqualTo(0))
-                .setEventHandler(event -> dependants.start(
-                        profile.get().getName(),
-                        ResourcesConfiguration.class,
-                        c -> c.profile = profile.get()
-                ));
     }
 }

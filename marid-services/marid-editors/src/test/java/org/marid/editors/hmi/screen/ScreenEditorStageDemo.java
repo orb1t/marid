@@ -64,12 +64,12 @@ public class ScreenEditorStageDemo extends Application {
         when(context.getProfileInfo()).thenReturn(profileInfo);
 
         final ScreenEditorStage screenEditorStage = new ScreenEditorStage(context);
-        primaryStage.setScene(screenEditorStage.getScene());
-        primaryStage.setOnCloseRequest(event -> {
+        screenEditorStage.setScene(screenEditorStage.getScene());
+        screenEditorStage.setOnCloseRequest(event -> {
             System.out.printf("Relative location: %s%n", relativeLocationProp.getData());
             System.out.printf("Pref width: %s%n", prefWidthProp.getData());
             System.out.printf("Pref height: %s%n", prefHeightProp.getData());
         });
-        primaryStage.show();
+        screenEditorStage.show();
     }
 }

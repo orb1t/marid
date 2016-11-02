@@ -22,6 +22,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.*;
 import javafx.util.Pair;
+import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.annotation.OrderedInit;
@@ -126,6 +127,17 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
                     }
                     setContextMenu(menu);
                 }
+            }
+        });
+    }
+
+    @Autowired
+    private void init(BeanFileBrowserActions actions, SpecialActions specialActions) {
+        focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                specialActions.setEditAction(s("Edit..."), actions::launchBeanEditor);
+            } else {
+                specialActions.setEditAction(null, null);
             }
         });
     }
