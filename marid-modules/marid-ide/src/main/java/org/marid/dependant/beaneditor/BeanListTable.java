@@ -22,6 +22,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
+import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.table.MaridTableView;
@@ -32,6 +33,7 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.marid.ide.common.IdeValues.ls;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -108,5 +110,10 @@ public class BeanListTable extends MaridTableView<BeanData> {
                 }
             }
         });
+    }
+
+    @Autowired
+    private void initEditAction(SpecialActions specialActions, ObjectFactory<BeanListActions> actions) {
+        specialActions.setEditAction(this, ls("Edit..."), event -> actions.getObject().onEdit(event));
     }
 }

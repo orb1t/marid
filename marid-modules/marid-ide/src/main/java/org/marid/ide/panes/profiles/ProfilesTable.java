@@ -29,7 +29,6 @@ import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.menu.MaridMenu;
-import org.marid.l10n.L10n;
 import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,6 +36,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.function.Supplier;
+
+import static org.marid.ide.common.IdeValues.ls;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -62,7 +64,7 @@ public class ProfilesTable extends TableView<ProjectProfile> {
 
     @OrderedInit(1)
     public void initNameColumn() {
-        final TableColumn<ProjectProfile, String> column = new TableColumn<>(L10n.s("Name"));
+        final TableColumn<ProjectProfile, String> column = new TableColumn<>(s("Name"));
         column.setEditable(false);
         column.setPrefWidth(400);
         column.setMaxWidth(2000);
@@ -72,7 +74,7 @@ public class ProfilesTable extends TableView<ProjectProfile> {
 
     @OrderedInit(2)
     public void initHmiColumn() {
-        final TableColumn<ProjectProfile, Boolean> column = new TableColumn<>(L10n.s("HMI"));
+        final TableColumn<ProjectProfile, Boolean> column = new TableColumn<>(s("HMI"));
         column.setPrefWidth(60);
         column.setMaxWidth(70);
         column.setCellFactory(param -> new CheckBoxTableCell<>());
@@ -93,15 +95,9 @@ public class ProfilesTable extends TableView<ProjectProfile> {
 
     @Autowired
     private void init(IdeDependants dependants, Supplier<ProjectProfile> profile, SpecialActions specialActions) {
-        focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                specialActions.setEditAction(L10n.s("Project resources"), event -> {
-                    final String name = profile.get().getName();
-                    dependants.start(name, ResourcesConfiguration.class, c -> c.profile = profile.get());
-                });
-            } else {
-                specialActions.setEditAction(null, null);
-            }
+        specialActions.setEditAction(this, ls("Project resources"), event -> {
+            final String name = profile.get().getName();
+            dependants.start(name, ResourcesConfiguration.class, c -> c.profile = profile.get());
         });
     }
 }

@@ -18,8 +18,11 @@
 
 package org.marid.ide.common;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableStringValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.input.KeyCombination;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
@@ -47,16 +50,17 @@ public class SpecialActions {
                 .setDisabled(true);
     }
 
-
-    public void setEditAction(String text, EventHandler<ActionEvent> eventHandler) {
-        if (text == null || eventHandler == null) {
-            editAction().setText(s("Edit..."));
-            editAction().setEventHandler(event -> {});
-            editAction().setDisabled(true);
-        } else {
-            editAction().setDisabled(false);
-            editAction().setEventHandler(eventHandler);
-            editAction().setText(text);
-        }
+    public void setEditAction(Node node, ObservableStringValue text, EventHandler<ActionEvent> eventHandler) {
+        node.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                editAction().setDisabled(false);
+                editAction().setEventHandler(eventHandler);
+                editAction().bindText(text);
+            } else {
+                editAction().setEventHandler(event -> {});
+                editAction().setDisabled(true);
+                editAction().bindText(Bindings.createStringBinding(() -> s("Edit...")));
+            }
+        });
     }
 }
