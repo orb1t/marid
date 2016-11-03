@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static org.marid.ide.common.IdeValues.ls;
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.l10n.L10n.s;
 
 /**

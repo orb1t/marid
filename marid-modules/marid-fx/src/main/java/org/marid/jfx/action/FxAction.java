@@ -69,14 +69,6 @@ public final class FxAction {
         return text == null ? null : text.get();
     }
 
-    public FxAction setText(String value) {
-        if (text == null) {
-            text = new SimpleStringProperty();
-        }
-        text.setValue(value);
-        return this;
-    }
-
     public StringProperty textProperty() {
         return text;
     }

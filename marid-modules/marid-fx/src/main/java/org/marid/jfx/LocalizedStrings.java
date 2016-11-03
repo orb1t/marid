@@ -16,18 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.settings;
+package org.marid.jfx;
 
-import org.springframework.stereotype.Component;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableStringValue;
+
+import java.util.Locale;
+
+import static org.marid.l10n.L10n.m;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class AppearanceSettings extends AbstractSettings {
+public interface LocalizedStrings {
 
-    @Override
-    public String getName() {
-        return "Appearance";
+    ObjectProperty<Locale> LOCALE = new SimpleObjectProperty<>(Locale.getDefault());
+
+    static ObservableStringValue ls(String text, Object... args) {
+        return Bindings.createStringBinding(() -> s(LOCALE.get(), text, args), LOCALE);
+    }
+
+    static ObservableStringValue lm(String text, Object... args) {
+        return Bindings.createStringBinding(() -> m(LOCALE.get(), text, args), LOCALE);
     }
 }

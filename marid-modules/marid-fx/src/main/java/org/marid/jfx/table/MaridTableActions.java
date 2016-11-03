@@ -23,7 +23,7 @@ import javafx.scene.control.TableView;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
 
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -32,7 +32,7 @@ public interface MaridTableActions {
 
     static FxAction removeAction(TableView<?> tableView) {
         return new FxAction("itemActions", "itemActions", "Actions")
-                .setText(s("Remove"))
+                .bindText(ls("Remove"))
                 .setIcon(FontIcon.M_REMOVE)
                 .bindDisabled(Bindings.isEmpty(tableView.getSelectionModel().getSelectedItems()))
                 .setEventHandler(event -> tableView.getItems().removeAll(tableView.getSelectionModel().getSelectedItems()));
@@ -40,7 +40,7 @@ public interface MaridTableActions {
 
     static FxAction clearAction(TableView<?> tableView) {
         return new FxAction("itemsActions", "itemsActions", "Actions")
-                .setText(s("Clear"))
+                .bindText(ls("Clear"))
                 .setIcon(FontIcon.M_CLEAR_ALL)
                 .bindDisabled(Bindings.isEmpty(tableView.getItems()))
                 .setEventHandler(event -> tableView.getItems().clear());

@@ -39,7 +39,7 @@ import java.time.ZoneId;
 import java.util.Comparator;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-import static org.marid.ide.common.IdeValues.ls;
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.M_DELETE;
 import static org.marid.jfx.icons.FontIcon.M_EDIT;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;

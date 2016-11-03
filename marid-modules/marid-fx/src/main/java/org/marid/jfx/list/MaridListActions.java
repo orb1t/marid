@@ -28,7 +28,7 @@ import org.marid.jfx.icons.FontIcon;
 import java.util.Comparator;
 import java.util.OptionalInt;
 
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -37,7 +37,7 @@ public interface MaridListActions {
 
     static FxAction removeAction(ListView<?> listView) {
         return new FxAction("itemActions", "itemActions", "Actions")
-                .setText(s("Remove"))
+                .bindText(ls("Remove"))
                 .setEventHandler(event -> listView.getItems().removeAll(listView.getSelectionModel().getSelectedItems()))
                 .bindDisabled(Bindings.isEmpty(listView.getSelectionModel().getSelectedItems()))
                 .setIcon(FontIcon.M_REMOVE);
@@ -45,7 +45,7 @@ public interface MaridListActions {
 
     static FxAction clearAction(ListView<?> listView) {
         return new FxAction("itemsActions", "itemsActions", "Actions")
-                .setText(s("Clear"))
+                .bindText(ls("Clear"))
                 .setEventHandler(event -> listView.getItems().clear())
                 .bindDisabled(Bindings.isEmpty(listView.getItems()))
                 .setIcon(FontIcon.M_CLEAR_ALL);
@@ -53,14 +53,14 @@ public interface MaridListActions {
 
     static FxAction addAction(String text, EventHandler<ActionEvent> eventHandler) {
         return new FxAction("itemActions", "itemActions", "Actions")
-                .setText(s(text))
+                .bindText(ls(text))
                 .setEventHandler(eventHandler)
                 .setIcon(FontIcon.M_ADD);
     }
 
     static <T> FxAction upAction(ListView<T> listView) {
         return new FxAction("upDownActions", "upDownActions", "Actions")
-                .setText(s("Up"))
+                .bindText(ls("Up"))
                 .setIcon(FontIcon.D_MENU_UP)
                 .setEventHandler(event -> {
                     final int[] indices = listView.getSelectionModel().getSelectedIndices()
@@ -85,7 +85,7 @@ public interface MaridListActions {
 
     static <T> FxAction downAction(ListView<T> listView) {
         return new FxAction("upDownActions", "upDownActions", "Actions")
-                .setText(s("Down"))
+                .bindText(ls("Down"))
                 .setIcon(FontIcon.D_MENU_DOWN)
                 .setEventHandler(event -> {
                     final int[] indices = listView.getSelectionModel().getSelectedIndices()

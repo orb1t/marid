@@ -18,7 +18,6 @@
 
 package org.marid.ide.common;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableStringValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -30,8 +29,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.M_FOLDER_SHARED;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -44,7 +43,7 @@ public class SpecialActions {
     @Qualifier("profile")
     public FxAction editAction() {
         return new FxAction("projectTree", "pt", "Project")
-                .setText(s("Project resources"))
+                .bindText(ls("Edit..."))
                 .setAccelerator(KeyCombination.valueOf("F4"))
                 .setIcon(M_FOLDER_SHARED)
                 .setDisabled(true);
@@ -59,7 +58,7 @@ public class SpecialActions {
             } else {
                 editAction().setEventHandler(event -> {});
                 editAction().setDisabled(true);
-                editAction().bindText(Bindings.createStringBinding(() -> s("Edit...")));
+                editAction().bindText(ls("Edit..."));
             }
         });
     }

@@ -33,7 +33,7 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.marid.ide.common.IdeValues.ls;
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.l10n.L10n.s;
 
 /**

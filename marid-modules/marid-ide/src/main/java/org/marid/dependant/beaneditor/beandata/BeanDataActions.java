@@ -38,7 +38,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.util.Reflections.parameterName;
 
 /**
@@ -62,7 +62,7 @@ public class BeanDataActions {
         return new FxAction("refresh", "refresh", "Actions")
                 .setEventHandler(event -> profile.updateBeanData(beanData))
                 .setIcon(FontIcon.M_REFRESH)
-                .setText(s("Refresh"));
+                .bindText(ls("Refresh"));
     }
 
     @Bean
@@ -71,13 +71,13 @@ public class BeanDataActions {
         return new FxAction("search", "search", "Actions")
                 .setEventHandler(this::onSelectConstructor)
                 .setIcon(FontIcon.M_SEARCH)
-                .setText(s("Select constructor"));
+                .bindText(ls("Select constructor"));
     }
 
     public void onSelectConstructor(ActionEvent event) {
         final ObservableList<Executable> constructors = profile.getConstructors(beanData)
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
-        final ListDialog<Executable> dialog = new ListDialog<>("Select constructor", constructors);
+        final ListDialog<Executable> dialog = new ListDialog<>(ls("Select constructor"), constructors);
         dialog.getListView().setCellFactory(param -> new ListCell<Executable>() {
             @Override
             protected void updateItem(Executable item, boolean empty) {

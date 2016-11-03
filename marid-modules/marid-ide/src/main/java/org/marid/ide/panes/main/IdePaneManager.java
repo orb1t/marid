@@ -28,9 +28,9 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.D_BORDER_TOP;
 import static org.marid.jfx.icons.FontIcon.D_EXIT_TO_APP;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -42,7 +42,7 @@ public class IdePaneManager {
     @IdeAction
     public FxAction alwaysOnTopAction(ObjectFactory<IdePane> idePaneObjectFactory) {
         return new FxAction(null, "ops", "Window")
-                .setText(s("Always on top"))
+                .bindText(ls("Always on top"))
                 .setIcon(D_BORDER_TOP)
                 .setSelected(false)
                 .setEventHandler(event -> {
@@ -56,7 +56,7 @@ public class IdePaneManager {
     @IdeAction
     public FxAction exitAction() {
         return new FxAction(null, "x", "File")
-                .setText(s("Exit"))
+                .bindText(ls("Exit"))
                 .setIcon(D_EXIT_TO_APP)
                 .setEventHandler(event -> Platform.exit())
                 .setAccelerator(KeyCombination.valueOf("F12"));

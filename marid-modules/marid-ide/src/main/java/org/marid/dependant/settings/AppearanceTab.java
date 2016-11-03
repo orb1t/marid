@@ -22,10 +22,13 @@ import javafx.application.Application;
 import javafx.scene.control.ComboBox;
 import org.marid.IdePrefs;
 import org.marid.ide.settings.AppearanceSettings;
+import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.panes.GenericGridPane;
 import org.marid.logging.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Locale;
 
 import static javafx.application.Application.STYLESHEET_CASPIAN;
 import static javafx.application.Application.STYLESHEET_MODENA;
@@ -43,19 +46,34 @@ public class AppearanceTab extends GenericGridPane implements SettingsEditor, Lo
     @Autowired
     public AppearanceTab(AppearanceSettings appearanceSettings) {
         this.appearanceSettings = appearanceSettings;
-        addTextField("Locale", appearanceSettings::getLocale, appearanceSettings::setLocale);
+        addControl("Locale", this::localeCombo);
         addIntField("Max log records", ideLogHandler::getMaxLogRecords, ideLogHandler::setMaxLogRecords, 100, 100_000, 100);
         addSeparator();
-        addControl("System stylesheet", () -> {
-            final ComboBox<String> stylesheetCombo = new ComboBox<>(observableArrayList(STYLESHEET_CASPIAN, STYLESHEET_MODENA));
-            stylesheetCombo.getSelectionModel().select(Application.getUserAgentStylesheet());
-            stylesheetCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                log(INFO, "Applying stylesheet {0}", newValue);
-                Application.setUserAgentStylesheet(newValue);
-                IdePrefs.PREFERENCES.put("style", newValue);
-            });
-            return stylesheetCombo;
+        addControl("System stylesheet", this::styleSheetCombo);
+    }
+
+    private ComboBox<String> styleSheetCombo() {
+        final ComboBox<String> stylesheetCombo = new ComboBox<>(observableArrayList(STYLESHEET_CASPIAN, STYLESHEET_MODENA));
+        stylesheetCombo.getSelectionModel().select(Application.getUserAgentStylesheet());
+        stylesheetCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            log(INFO, "Applying stylesheet {0}", newValue);
+            Application.setUserAgentStylesheet(newValue);
+            IdePrefs.PREFERENCES.put("style", newValue);
         });
+        return stylesheetCombo;
+    }
+
+    private ComboBox<String> localeCombo() {
+        final ComboBox<String> localeCombo = new ComboBox<>(observableArrayList("en", "fr", "es", "it"));
+        localeCombo.setValue(LocalizedStrings.LOCALE.get().toLanguageTag());
+        localeCombo.setEditable(true);
+        localeCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            final Locale locale = Locale.forLanguageTag(newValue);
+            if (locale != null && !Locale.ROOT.equals(locale)) {
+                IdePrefs.PREFERENCES.put("locale", locale.toLanguageTag());
+            }
+        });
+        return localeCombo;
     }
 
     @Override

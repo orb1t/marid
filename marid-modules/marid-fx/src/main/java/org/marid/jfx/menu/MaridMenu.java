@@ -25,8 +25,8 @@ import org.marid.jfx.action.FxAction;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -79,7 +79,8 @@ public class MaridMenu extends MenuBar {
                     .put(action.getText(), menuItem);
         });
         itemMap.forEach((menu, groupMap) -> {
-            final Menu m = new Menu(s(menu));
+            final Menu m = new Menu();
+            m.textProperty().bind(ls(menu));
             groupMap.forEach((group, menuItems) -> {
                 m.getItems().addAll(menuItems.values());
                 m.getItems().add(new SeparatorMenuItem());

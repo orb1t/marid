@@ -43,6 +43,7 @@ import static javafx.beans.binding.Bindings.createBooleanBinding;
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.l10n.L10n.s;
 
@@ -62,7 +63,7 @@ public class ProjectConfiguration implements LogSupport {
     @Qualifier("profile")
     public FxAction projectSetupAction(IdeDependants dependants, Supplier<ProjectProfile> profile) {
         return new FxAction("projectSetup", "setup", "Project")
-                .setText(s("Project setup..."))
+                .bindText(ls("Project setup..."))
                 .setIcon(O_TOOLS)
                 .setEventHandler(event -> dependants.start(
                         "projectEditor",
@@ -77,7 +78,7 @@ public class ProjectConfiguration implements LogSupport {
     public FxAction projectSaveAction(ObjectFactory<ProjectSaver> projectSaver, Supplier<ProjectProfile> profile) {
         return new FxAction(null, "io", "Project")
                 .setAccelerator(KeyCombination.valueOf("F2"))
-                .setText(s("Save"))
+                .bindText(ls("Save"))
                 .setIcon(F_SAVE)
                 .setEventHandler(event -> projectSaver.getObject().save(profile.get()));
     }
@@ -90,7 +91,7 @@ public class ProjectConfiguration implements LogSupport {
                                        Supplier<ProjectProfile> profileSupplier) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F9"))
-                .setText(s("Build"))
+                .bindText(ls("Build"))
                 .setIcon(D_CLOCK_FAST)
                 .setEventHandler(event -> {
                     final ProjectProfile profile = profileSupplier.get();
@@ -114,7 +115,7 @@ public class ProjectConfiguration implements LogSupport {
     public FxAction projectRunAction(IdeDependants dependants, Supplier<ProjectProfile> profile) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F5"))
-                .setText(s("Run"))
+                .bindText(ls("Run"))
                 .setIcon(F_PLAY)
                 .setEventHandler(event -> dependants.start(
                         "projectRunner",
@@ -129,7 +130,7 @@ public class ProjectConfiguration implements LogSupport {
     public FxAction projectAddProfileAction(ObjectFactory<ProjectSaver> projectSaverFactory,
                                             ObjectFactory<ProjectManager> projectManager) {
         return new FxAction("projectIO", "pm", "Project")
-                .setText(s("Add profile..."))
+                .bindText(ls("Add profile..."))
                 .setIcon(M_ADD_BOX)
                 .setEventHandler(event -> {
                     final TextInputDialog dialog = new TextInputDialog("profile");
@@ -154,7 +155,7 @@ public class ProjectConfiguration implements LogSupport {
     @Qualifier("profile")
     public FxAction projectRemoveProfileAction(ProjectManager manager, Supplier<ProjectProfile> profile) {
         return new FxAction("projectIO", "pm", "Project")
-                .setText(s("Remove profile"))
+                .bindText(ls("Remove profile"))
                 .setIcon(D_MINUS_BOX)
                 .bindDisabled(createBooleanBinding(() -> manager.getProfiles().size() < 2, manager.getProfiles()))
                 .setEventHandler(event -> {

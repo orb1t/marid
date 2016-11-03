@@ -18,6 +18,7 @@
 
 package org.marid.jfx.dialog;
 
+import javafx.beans.value.ObservableStringValue;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
@@ -27,7 +28,6 @@ import javafx.stage.Modality;
 import org.marid.jfx.panes.MaridScrollPane;
 
 import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -36,8 +36,8 @@ public class ListDialog<T> extends Dialog<T> {
 
     private final ListView<T> listView;
 
-    public ListDialog(String text, ObservableList<T> list) {
-        setTitle(s(text));
+    public ListDialog(ObservableStringValue text, ObservableList<T> list) {
+        titleProperty().bind(text);
         initModality(Modality.APPLICATION_MODAL);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         Node node = listView = new ListView<>(list);

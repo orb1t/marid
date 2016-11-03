@@ -29,8 +29,8 @@ import org.marid.spring.action.IdeAction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.*;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -43,7 +43,7 @@ public class ActionsConfiguration {
     public FxAction iconViewerAction(IdeDependants dependants) {
         return new FxAction(null, "icons", "Tools")
                 .setIcon(M_OPEN_IN_BROWSER)
-                .setText(s("Icon viewer"))
+                .bindText(ls("Icon viewer"))
                 .setEventHandler(event -> dependants.start(IconViewerConfiguration.class, "iconViewer"));
     }
 
@@ -52,7 +52,7 @@ public class ActionsConfiguration {
     public FxAction monitorAction(IdeDependants dependants, TabPane ideTabPane) {
         return new FxAction(null, "monitor", "Tools")
                 .setIcon(M_GRAPHIC_EQ)
-                .setText(s("System monitor"))
+                .bindText(ls("System monitor"))
                 .setEventHandler(event -> {
                     final Tab tab = ideTabPane.getTabs().stream()
                             .filter(t -> "monitor".equals(t.getId()))
@@ -71,7 +71,7 @@ public class ActionsConfiguration {
     public FxAction garbageCollectAction() {
         return new FxAction(null, "monitor", "Tools")
                 .setIcon(M_CHEVRON_LEFT)
-                .setText(s("Run garbage collection"))
+                .bindText(ls("Run garbage collection"))
                 .setEventHandler(event -> System.gc());
     }
 
@@ -80,7 +80,7 @@ public class ActionsConfiguration {
     public FxAction showLogsAction(IdeDependants dependants) {
         return new FxAction("log", "log", "Tools")
                 .setIcon(M_VIEW_LIST)
-                .setText(s("Show logs"))
+                .bindText(ls("Show logs"))
                 .setEventHandler(event -> dependants.start(LogConfiguration.class, "logViewer"));
     }
 }
