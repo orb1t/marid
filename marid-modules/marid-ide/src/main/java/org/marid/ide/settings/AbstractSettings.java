@@ -18,11 +18,6 @@
 
 package org.marid.ide.settings;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.InvalidPreferencesFormatException;
 import java.util.prefs.Preferences;
 
 import static java.util.prefs.Preferences.userNodeForPackage;
@@ -35,22 +30,4 @@ public abstract class AbstractSettings {
     protected final Preferences preferences = userNodeForPackage(getClass()).node(getClass().getName()).node(getName());
 
     public abstract String getName();
-
-    public byte[] save() {
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
-            preferences.exportSubtree(bos);
-        } catch (IOException | BackingStoreException x) {
-            throw new IllegalStateException(x);
-        }
-        return bos.toByteArray();
-    }
-
-    public void load(byte[] data) {
-        try {
-            Preferences.importPreferences(new ByteArrayInputStream(data));
-        } catch (IOException | InvalidPreferencesFormatException x) {
-            throw new IllegalStateException(x);
-        }
-    }
 }

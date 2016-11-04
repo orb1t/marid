@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -64,7 +63,8 @@ public class ProfilesTable extends TableView<ProjectProfile> {
 
     @OrderedInit(1)
     public void initNameColumn() {
-        final TableColumn<ProjectProfile, String> column = new TableColumn<>(s("Name"));
+        final TableColumn<ProjectProfile, String> column = new TableColumn<>();
+        column.textProperty().bind(ls("Name"));
         column.setEditable(false);
         column.setPrefWidth(400);
         column.setMaxWidth(2000);
@@ -74,8 +74,8 @@ public class ProfilesTable extends TableView<ProjectProfile> {
 
     @OrderedInit(2)
     public void initHmiColumn() {
-        final TableColumn<ProjectProfile, Boolean> column = new TableColumn<>(s("HMI"));
-        column.setPrefWidth(60);
+        final TableColumn<ProjectProfile, Boolean> column = new TableColumn<>();
+        column.textProperty().bind(ls("HMI"));
         column.setMaxWidth(70);
         column.setCellFactory(param -> new CheckBoxTableCell<>());
         column.setCellValueFactory(param -> param.getValue().hmiProperty());

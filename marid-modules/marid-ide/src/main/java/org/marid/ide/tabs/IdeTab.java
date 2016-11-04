@@ -27,7 +27,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -41,7 +41,8 @@ public class IdeTab extends Tab {
     protected AnnotationConfigApplicationContext context;
 
     public IdeTab(Node content, String text, Object...args) {
-        super(s(text, args), content);
+        super(null, content);
+        textProperty().bind(ls(text, args));
     }
 
     @PostConstruct
