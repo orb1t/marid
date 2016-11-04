@@ -117,8 +117,8 @@ public class LocalizedStrings {
 
         @Override
         public void invalidated(Observable observable) {
-            final String oldValue = value.get();
             final String newValue = get();
+            final String oldValue = value.getAndSet(newValue);
             if (!Objects.equals(oldValue, newValue)) {
                 invalidationListeners.forEach(l -> l.invalidated(this));
                 changeListeners.forEach(l -> l.changed(this, oldValue, newValue));
