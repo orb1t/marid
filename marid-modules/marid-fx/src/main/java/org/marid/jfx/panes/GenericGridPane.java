@@ -19,10 +19,13 @@
 package org.marid.jfx.panes;
 
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Separator;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import org.marid.l10n.L10n;
+import org.marid.jfx.control.MaridLabel;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -51,7 +54,7 @@ public class GenericGridPane extends GridPane {
     public TextField addTextField(String text, Supplier<String> supplier, Consumer<String> consumer) {
         final TextField textField = new TextField(supplier.get());
         textField.textProperty().addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
-        final Label label = new Label(L10n.s(text) + ": ");
+        final MaridLabel label = new MaridLabel().format("%s: ", text);
         addRow(getNextRowIndex(), label, textField);
         return textField;
     }
@@ -60,7 +63,7 @@ public class GenericGridPane extends GridPane {
         final CheckBox checkBox = new CheckBox();
         checkBox.setSelected(supplier.get());
         checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
-        final Label label = new Label(L10n.s(text) + ": ");
+        final MaridLabel label = new MaridLabel().format("%s: ", text);
         addRow(getNextRowIndex(), label, checkBox);
         return checkBox;
     }
@@ -69,13 +72,13 @@ public class GenericGridPane extends GridPane {
         final Spinner<Integer> spinner = new Spinner<>(low, high, supplier.get(), step);
         spinner.setEditable(true);
         spinner.valueProperty().addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
-        final Label label = new Label(L10n.s(text) + ": ");
+        final MaridLabel label = new MaridLabel().format("%s: ", text);
         addRow(getNextRowIndex(), label, spinner);
         return spinner;
     }
 
     public <T extends Node> T addControl(String text, Supplier<T> nodeSupplier) {
-        final Label label = new Label(L10n.s(text) + ": ");
+        final MaridLabel label = new MaridLabel().format("%s: ", text);
         final T node = nodeSupplier.get();
         addRow(getNextRowIndex(), label, node);
         return node;

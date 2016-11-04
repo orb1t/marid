@@ -17,6 +17,7 @@
  */
 package org.marid.l10n;
 
+import javax.annotation.Nonnull;
 import java.text.MessageFormat;
 import java.util.Formatter;
 import java.util.Locale;
@@ -34,28 +35,49 @@ public class L10n {
         return s(Locale.getDefault(), key, ps);
     }
 
-    public static String s(Locale locale, String key, Object... ps) {
-        return s(getStringsBundle(locale), key, ps);
+    public static String s(@Nonnull Locale locale, @Nonnull String key, Object... ps) {
+        final StringBuilder builder = new StringBuilder(key.length());
+        final Formatter formatter = new Formatter(builder);
+        s(locale, key, formatter, ps);
+        return builder.toString();
     }
 
-    public static void s(Locale locale, String key, Appendable out, Object... ps) {
-        s(getStringsBundle(locale), out, key, ps);
+    public static void s(@Nonnull Locale locale, @Nonnull String key, @Nonnull Formatter formatter, Object... ps) {
+        final ResourceBundle b = getStringsBundle(locale);
+        final String r = b.containsKey(key) ? b.getString(key) : key;
+        if (ps == null || ps.length == 0) {
+            formatter.format("%s", r);
+        } else {
+            try {
+                formatter.format(b.getLocale(), r, ps);
+            } catch (Exception x) {
+                formatter.format("!%s", r);
+            }
+        }
     }
 
-    public static void s(Locale locale, String key, Formatter formatter, Object... ps) {
-        s(getStringsBundle(locale), formatter, key, ps);
-    }
-
-    public static String m(String k, Object... v) {
+    public static String m(@Nonnull String k, Object... v) {
         return m(Locale.getDefault(), k, v);
     }
 
-    public static String m(Locale locale, String k, Object... v) {
-        return m(getMessagesBundle(locale), k, v);
+    public static String m(@Nonnull Locale locale, @Nonnull String k, Object... v) {
+        final StringBuffer buffer = new StringBuffer(k.length());
+        m(locale, k, buffer, v);
+        return buffer.toString();
     }
 
-    public static void m(Locale locale, String k, StringBuffer buffer, Object... v) {
-        m(getMessagesBundle(locale), buffer, k, v);
+    public static void m(@Nonnull Locale locale, @Nonnull String k, @Nonnull StringBuffer buffer, Object... v) {
+        final ResourceBundle b = getMessagesBundle(locale);
+        final String r = b.containsKey(k) ? b.getString(k) : k;
+        if (v == null || v.length == 0) {
+            buffer.append(r);
+        } else {
+            try {
+                new MessageFormat(r, b.getLocale()).format(v, buffer, null);
+            } catch (Exception x) {
+                buffer.append('!').append(r);
+            }
+        }
     }
 
     public static ResourceBundle getMessagesBundle(Locale locale) {
@@ -64,54 +86,5 @@ public class L10n {
 
     public static ResourceBundle getStringsBundle(Locale locale) {
         return getBundle("res.strings", locale, Thread.currentThread().getContextClassLoader(), UTF8CTRL);
-    }
-
-    private static void m(ResourceBundle b, StringBuffer buf, String key, Object... v) {
-        if (key == null) {
-            return;
-        }
-        final String r = b.containsKey(key) ? b.getString(key) : key;
-        if (v == null || v.length == 0) {
-            buf.append(r);
-        } else {
-            try {
-                new MessageFormat(r, b.getLocale()).format(v, buf, null);
-            } catch (Exception x) {
-                buf.append('!').append(r);
-            }
-        }
-    }
-
-    private static String m(ResourceBundle b, String key, Object... v) {
-        final StringBuffer buffer = new StringBuffer(key.length());
-        m(b, buffer, key, v);
-        return buffer.toString();
-    }
-
-    private static void s(ResourceBundle b, Formatter fmt, String key, Object... v) {
-        if (key == null) {
-            return;
-        }
-        final String r = b.containsKey(key) ? b.getString(key) : key;
-        if (v == null || v.length == 0) {
-            fmt.format("%s", r);
-        } else {
-            try {
-                fmt.format(b.getLocale(), r, v);
-            } catch (Exception x) {
-                fmt.format("!%s", r);
-            }
-        }
-    }
-
-    private static void s(ResourceBundle b, Appendable buf, String key, Object... v) {
-        final Formatter formatter = new Formatter(buf);
-        s(b, formatter, key, v);
-    }
-
-    private static String s(ResourceBundle b, String key, Object... v) {
-        final StringBuilder builder = new StringBuilder(key.length());
-        s(b, builder, key, v);
-        return builder.toString();
     }
 }

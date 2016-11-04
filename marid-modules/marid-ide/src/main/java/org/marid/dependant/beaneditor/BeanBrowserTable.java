@@ -31,7 +31,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 
 import java.util.stream.Collectors;
 
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,7 +50,8 @@ public class BeanBrowserTable extends TableView<BeanBrowserTable.BeanBrowserItem
 
     @OrderedInit(1)
     public void nameColumn() {
-        final TableColumn<BeanBrowserItem, String> col = new TableColumn<>(s("Name"));
+        final TableColumn<BeanBrowserItem, String> col = new TableColumn<>();
+        col.textProperty().bind(ls("Name"));
         col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().name));
         col.setPrefWidth(300);
         col.setMaxWidth(600);
@@ -59,7 +60,8 @@ public class BeanBrowserTable extends TableView<BeanBrowserTable.BeanBrowserItem
 
     @OrderedInit(2)
     public void typeColumn() {
-        final TableColumn<BeanBrowserItem, String> col = new TableColumn<>(s("Type"));
+        final TableColumn<BeanBrowserItem, String> col = new TableColumn<>();
+        col.textProperty().bind(ls("Type"));
         col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().definition.getBeanClassName()));
         col.setPrefWidth(500);
         col.setMaxWidth(1000);
@@ -68,7 +70,8 @@ public class BeanBrowserTable extends TableView<BeanBrowserTable.BeanBrowserItem
 
     @OrderedInit(3)
     public void descriptionColumn() {
-        final TableColumn<BeanBrowserItem, String> col = new TableColumn<>(s("Description"));
+        final TableColumn<BeanBrowserItem, String> col = new TableColumn<>();
+        col.textProperty().bind(ls("Description"));
         col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().definition.getDescription()));
         col.setPrefWidth(500);
         col.setMaxWidth(2000);

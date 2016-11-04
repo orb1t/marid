@@ -64,9 +64,9 @@ public class AppearanceTab extends GenericGridPane implements SettingsEditor, Lo
     }
 
     private ComboBox<String> localeCombo() {
-        final ComboBox<String> localeCombo = new ComboBox<>(observableArrayList("en", "fr", "es", "it"));
-        localeCombo.setValue(LocalizedStrings.LOCALE.get().toLanguageTag());
+        final ComboBox<String> localeCombo = new ComboBox<>(observableArrayList("en", "fr", "es", "it", "ru"));
         localeCombo.setEditable(true);
+        localeCombo.getSelectionModel().select(LocalizedStrings.LOCALE.get().toLanguageTag());
         localeCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             final Locale locale = Locale.forLanguageTag(newValue);
             if (locale != null && !Locale.ROOT.equals(locale)) {

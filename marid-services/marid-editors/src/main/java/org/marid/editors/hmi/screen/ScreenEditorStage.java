@@ -35,6 +35,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import org.controlsfx.control.StatusBar;
+import org.marid.jfx.control.MaridLabel;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.logging.LogSupport;
 import org.marid.spring.beandata.BeanEditorContext;
@@ -49,6 +50,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
+import static javafx.beans.binding.Bindings.format;
 import static org.marid.jfx.icons.FontIcon.D_SYNC;
 import static org.marid.jfx.icons.FontIcon.M_IMPORT_EXPORT;
 import static org.marid.l10n.L10n.s;
@@ -136,7 +138,7 @@ public class ScreenEditorStage extends Stage implements LogSupport {
         final StatusBar statusBar = new StatusBar();
         statusBar.setPadding(new Insets(5));
         statusBar.setText("");
-        statusBar.getLeftItems().add(build(new Label(s("File") + ": "), l -> {}));
+        statusBar.getLeftItems().add(build(new MaridLabel(), l -> l.format("%s: ", "File")));
         statusBar.getLeftItems().add(build(new Label(), l -> {
             l.textProperty().bind(Bindings.createStringBinding(() -> {
                 if (svgFile.isNull().get()) {
@@ -148,10 +150,10 @@ public class ScreenEditorStage extends Stage implements LogSupport {
             }, svgFile));
         }));
         statusBar.getLeftItems().add(new Separator(Orientation.VERTICAL));
-        statusBar.getLeftItems().add(build(new Label(s("Zoom") + ": "), l -> {}));
-        statusBar.getLeftItems().add(build(new Label(), l -> l.textProperty().bind(Bindings.format("%fx", zoom))));
+        statusBar.getLeftItems().add(build(new MaridLabel(), l -> l.format("%s: ", "Zoom")));
+        statusBar.getLeftItems().add(build(new Label(), l -> l.textProperty().bind(format("%fx", zoom))));
         statusBar.getLeftItems().add(new Separator(Orientation.VERTICAL));
-        statusBar.getLeftItems().add(build(new Label(s("Size") + ": "), l -> {}));
+        statusBar.getLeftItems().add(build(new MaridLabel(), l -> l.format("%s: ", "Size")));
         statusBar.getLeftItems().add(build(new Label(), l -> l.textProperty().bind(Bindings.createStringBinding(() -> {
             final Dimension2D d = size.get();
             return String.format("%dx%d", Math.round(d.getWidth()), Math.round(d.getHeight()));
