@@ -60,7 +60,8 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
 
     @OrderedInit(1)
     public void fileColumn(ProjectManager projectManager) {
-        final TableColumn<Pair<Path, BeanFile>, String> col = new TableColumn<>(s("File"));
+        final TableColumn<Pair<Path, BeanFile>, String> col = new TableColumn<>();
+        col.textProperty().bind(ls("File"));
         col.setPrefWidth(600);
         col.setMaxWidth(2000);
         col.setCellValueFactory(param -> {
@@ -72,7 +73,8 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
 
     @OrderedInit(2)
     public void dateColumn() {
-        final TableColumn<Pair<Path, BeanFile>, String> col = new TableColumn<>(s("Date"));
+        final TableColumn<Pair<Path, BeanFile>, String> col = new TableColumn<>();
+        col.textProperty().bind(ls("Date"));
         col.setPrefWidth(250);
         col.setMaxWidth(300);
         col.setStyle("-fx-alignment: baseline-right");
@@ -91,7 +93,8 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
 
     @OrderedInit(3)
     public void beanCountColumn(ProjectManager projectManager) {
-        final TableColumn<Pair<Path, BeanFile>, Integer> col = new TableColumn<>(s("Bean count"));
+        final TableColumn<Pair<Path, BeanFile>, Integer> col = new TableColumn<>();
+        col.textProperty().bind(ls("Bean count"));
         col.setPrefWidth(250);
         col.setMaxWidth(250);
         col.setStyle("-fx-alignment: baseline-right");
