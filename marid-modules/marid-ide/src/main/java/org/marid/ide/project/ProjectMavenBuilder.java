@@ -31,12 +31,12 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.LogRecord;
@@ -64,16 +64,7 @@ public class ProjectMavenBuilder {
             for (ZipEntry entry = zipInputStream.getNextEntry(); entry != null; entry = zipInputStream.getNextEntry()) {
                 if (entry.getName().endsWith(".jar")) {
                     final Path target = tempDirectory.resolve(entry.getName());
-                    try (final OutputStream os = Files.newOutputStream(target)) {
-                        final byte[] buffer = new byte[65536];
-                        while (true) {
-                            final int n = zipInputStream.read(buffer);
-                            if (n < 0) {
-                                break;
-                            }
-                            os.write(buffer, 0, n);
-                        }
-                    }
+                    Files.copy(zipInputStream, target, StandardCopyOption.REPLACE_EXISTING);
                     urls.add(target.toUri().toURL());
                 }
                 zipInputStream.closeEntry();
