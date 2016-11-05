@@ -31,7 +31,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -44,21 +44,24 @@ public class HmiStagesList extends TableView<Entry<String, Stage>> {
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setEditable(true);
         {
-            final TableColumn<Entry<String, Stage>, String> column = new TableColumn<>(s("Bean"));
+            final TableColumn<Entry<String, Stage>, String> column = new TableColumn<>();
+            column.textProperty().bind(ls("Bean"));
             column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getKey()));
             column.setPrefWidth(150);
             column.setMaxWidth(300);
             getColumns().add(column);
         }
         {
-            final TableColumn<Entry<String, Stage>, String> column = new TableColumn<>(s("Title"));
+            final TableColumn<Entry<String, Stage>, String> column = new TableColumn<>();
+            column.textProperty().bind(ls("Title"));
             column.setCellValueFactory(param -> param.getValue().getValue().titleProperty());
             column.setPrefWidth(250);
             column.setMaxWidth(550);
             getColumns().add(column);
         }
         {
-            final TableColumn<Entry<String, Stage>, Boolean> column = new TableColumn<>(s("Visible"));
+            final TableColumn<Entry<String, Stage>, Boolean> column = new TableColumn<>();
+            column.textProperty().bind(ls("Visible"));
             column.setCellValueFactory(param -> visibleProps.computeIfAbsent(param.getValue().getValue(), stage -> {
                 final BooleanProperty property = new SimpleBooleanProperty(stage.isShowing());
                 final ChangeListener<Boolean> listener = (observable, oldValue, newValue) -> {

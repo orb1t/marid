@@ -56,6 +56,7 @@ public class HmiApplication extends Application {
         context.refresh();
         context.start();
         primaryStage.setScene(new Scene(pane, 800, 600));
+        primaryStage.setAlwaysOnTop(true);
         primaryStage.getIcons().addAll(IntStream.of(16, 24, 32).mapToObj(s -> maridIcon(s, GREEN)).collect(toList()));
         primaryStage.setOnCloseRequest(event -> Platform.exit());
         primaryStage.setIconified(true);

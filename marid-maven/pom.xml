@@ -191,7 +191,6 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <useJvmChmod>true</useJvmChmod>
                             <formats>
                                 <format>zip</format>
                             </formats>

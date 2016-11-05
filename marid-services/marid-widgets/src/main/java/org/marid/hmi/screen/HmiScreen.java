@@ -38,6 +38,14 @@ public class HmiScreen extends BorderPane {
         webView.getEngine().setJavaScriptEnabled(true);
     }
 
+    public double getZoom() {
+        return webView.getZoom();
+    }
+
+    public void setZoom(double zoom) {
+        webView.setZoom(zoom);
+    }
+
     public void setLocation(String url) {
         webView.getEngine().load(url);
     }
