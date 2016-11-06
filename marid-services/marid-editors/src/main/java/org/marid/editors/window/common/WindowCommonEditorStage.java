@@ -27,14 +27,16 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.marid.jfx.icons.FontIcon;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
 import org.marid.spring.xml.collection.DValue;
 
 import static javafx.beans.binding.Bindings.format;
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -83,7 +85,9 @@ public class WindowCommonEditorStage extends Stage {
         setAlwaysOnTop(true);
         final BorderPane pane = new BorderPane();
         {
-            final Button button = new Button(s("Apply"), glyphIcon(D_CHECK_ALL, 24));
+            final Button button = new Button();
+            button.textProperty().bind(ls("Apply"));
+            button.setGraphic(FontIcons.glyphIcon(FontIcon.D_CHECK_ALL, 24));
             button.setOnAction(event -> {
                 setValue(xProperty, getX());
                 setValue(yProperty, getY());

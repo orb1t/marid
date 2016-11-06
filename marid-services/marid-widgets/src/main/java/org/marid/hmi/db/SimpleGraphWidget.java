@@ -40,7 +40,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -82,7 +82,7 @@ public class SimpleGraphWidget extends Stage implements LogSupport {
         this.chart.getData().add(series);
         this.chart.setAnimated(false);
         setResizable(true);
-        setTitle(s("Graph %s (%d), period = %d ms", name, tag, period));
+        titleProperty().bind(ls("Graph %s (%d), period = %d ms", name, tag, period));
         setScene(new Scene(chart));
     }
 

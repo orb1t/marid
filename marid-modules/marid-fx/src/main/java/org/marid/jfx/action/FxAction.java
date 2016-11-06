@@ -181,14 +181,6 @@ public final class FxAction {
         return hint == null ? null : hint.get();
     }
 
-    public FxAction setHint(String hint) {
-        if (this.hint == null) {
-            this.hint = new SimpleStringProperty();
-        }
-        this.hint.set(hint);
-        return this;
-    }
-
     public StringProperty hintProperty() {
         return hint;
     }

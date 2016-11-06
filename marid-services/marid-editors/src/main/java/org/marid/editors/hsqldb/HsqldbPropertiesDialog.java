@@ -18,15 +18,12 @@
 
 package org.marid.editors.hsqldb;
 
-import de.jensd.fx.glyphs.GlyphIcon;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
-import org.marid.jfx.icons.FontIcon;
-import org.marid.jfx.icons.FontIcons;
+import org.marid.jfx.control.MaridLabel;
 import org.marid.jfx.panes.GenericGridPane;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
@@ -37,7 +34,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.jfx.icons.FontIcon.M_STORE_MALL_DIRECTORY;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -45,7 +43,7 @@ import static org.marid.l10n.L10n.s;
 public class HsqldbPropertiesDialog extends Dialog<Runnable> {
 
     public HsqldbPropertiesDialog(BeanData beanData) {
-        setTitle(s("HSQLDB properties dialog: %s", beanData.name.get()));
+        titleProperty().bind(ls("HSQLDB properties dialog: %s", beanData.name.get()));
         initModality(Modality.APPLICATION_MODAL);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
@@ -59,12 +57,11 @@ public class HsqldbPropertiesDialog extends Dialog<Runnable> {
         final AtomicInteger row = new AtomicInteger();
 
         if (dirProperty != null) {
-            final GlyphIcon<?> icon = FontIcons.glyphIcon(FontIcon.M_STORE_MALL_DIRECTORY, 16);
             final TextField field = new TextField();
             if (dirProperty.data.get() instanceof DValue) {
                 field.setText(dirProperty.data.get().toString());
             }
-            pane.addRow(row.getAndIncrement(), new Label(s("Directory"), icon), field);
+            pane.addRow(row.getAndIncrement(), new MaridLabel().text("Directory").icon(M_STORE_MALL_DIRECTORY), field);
             commitTasks.add(() -> dirProperty.setData(new DValue(field.getText())));
         }
 

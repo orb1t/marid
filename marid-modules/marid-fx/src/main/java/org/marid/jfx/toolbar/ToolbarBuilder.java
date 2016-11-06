@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -45,7 +45,11 @@ public final class ToolbarBuilder implements Builder<ToolBar> {
     public ToolbarBuilder add(String tooltip, String icon, EventHandler<ActionEvent> eventHandler, Consumer<Button> buttonConsumer) {
         final Button button = new Button(null, FontIcons.glyphIcon(icon, 20));
         button.setFocusTraversable(false);
-        button.setTooltip(new Tooltip(s(tooltip)));
+        if (tooltip != null) {
+            final Tooltip t = new Tooltip();
+            t.textProperty().bind(ls(tooltip));
+            button.setTooltip(t);
+        }
         button.setOnAction(eventHandler);
         buttonConsumer.accept(button);
         nodes.add(button);
@@ -53,13 +57,7 @@ public final class ToolbarBuilder implements Builder<ToolBar> {
     }
 
     public ToolbarBuilder add(String tooltip, String icon, EventHandler<ActionEvent> eventHandler, BooleanBinding disabled) {
-        final Button button = new Button(null, FontIcons.glyphIcon(icon, 20));
-        button.setFocusTraversable(false);
-        button.setTooltip(new Tooltip(s(tooltip)));
-        button.setOnAction(eventHandler);
-        button.disableProperty().bind(disabled);
-        nodes.add(button);
-        return this;
+        return add(tooltip, icon, eventHandler, button -> button.disableProperty().bind(disabled));
     }
 
     public ToolbarBuilder add(String tooltip, String icon, EventHandler<ActionEvent> eventHandler) {

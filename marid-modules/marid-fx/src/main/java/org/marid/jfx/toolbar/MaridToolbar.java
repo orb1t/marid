@@ -19,6 +19,7 @@
 package org.marid.jfx.toolbar;
 
 import de.jensd.fx.glyphs.GlyphIcon;
+import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Separator;
@@ -29,9 +30,7 @@ import org.marid.jfx.action.FxAction;
 import java.util.*;
 
 import static java.util.Comparator.comparing;
-import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -62,10 +61,11 @@ public class MaridToolbar extends ToolBar {
             if (a.disabledProperty() != null) {
                 button.disableProperty().bindBidirectional(a.disabledProperty());
             }
-            if (a.hintProperty() != null) {
-                button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(s(a.getHint())), a.hintProperty()));
-            } else if (a.textProperty() != null) {
-                button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(s(a.getText())), a.textProperty()));
+            final StringProperty hintText = a.hintProperty() != null ? a.hintProperty() : a.textProperty();
+            if (hintText != null) {
+                final Tooltip tooltip = new Tooltip();
+                tooltip.textProperty().bind(hintText);
+                button.setTooltip(tooltip);
             }
             reversedMap.put(button, id);
             buttonMap.computeIfAbsent(group, g -> new HashSet<>()).add(button);

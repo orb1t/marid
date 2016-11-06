@@ -43,7 +43,6 @@ import java.nio.file.Path;
 import static javafx.beans.binding.Bindings.format;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.M_IMPORT_EXPORT;
-import static org.marid.l10n.L10n.s;
 import static org.marid.misc.Builder.build;
 
 /**
@@ -110,14 +109,14 @@ public class ScreenEditorUtilityWindow extends Stage {
                     final Path resourcesDir = context.getProfileInfo().getSrcMainResources();
                     final FileChooser chooser = new FileChooser();
                     chooser.setInitialDirectory(resourcesDir.toFile());
-                    chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(s("SVG"), "*.svg"));
+                    chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("SVG", "*.svg"));
                     final File file = chooser.showOpenDialog(this);
                     if (file != null) {
                         svgFile.set(file);
                     }
                 })
                 .addSeparator()
-                .add(new Label(s("Scale") + ":"), l -> {})
+                .add(new MaridLabel(), l -> l.format("%s: ", "Scale"))
                 .add(new Spinner<Double>(), s -> {
                     s.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.1, 10.0, zoom.get(), 0.1));
                     s.valueProperty().addListener((observable, oldValue, newValue) -> zoom.set(newValue));
