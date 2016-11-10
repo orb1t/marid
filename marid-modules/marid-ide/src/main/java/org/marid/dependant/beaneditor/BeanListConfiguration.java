@@ -45,8 +45,6 @@ public class BeanListConfiguration {
                 .add("Clear", M_CLEAR_ALL, actions::onClear, table.clearDisabled)
                 .addSeparator()
                 .add("Browse", O_BROWSER, actions::onBrowse)
-                .addSeparator()
-                .add("Actions", M_CREDIT_CARD, actions::onShowPopup, table.changeDisabled)
                 .build();
     }
 

@@ -28,6 +28,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.controlsfx.control.StatusBar;
@@ -65,6 +66,8 @@ public class ScreenEditorUtilityWindow extends Stage {
         setAlwaysOnTop(true);
         setOnCloseRequest(event -> stage.close());
         setScene(new Scene(mainPane(), 800, 300));
+        setX(Screen.getPrimary().getBounds().getMinX());
+        setY(Screen.getPrimary().getBounds().getMinY());
     }
 
     private BorderPane mainPane() {

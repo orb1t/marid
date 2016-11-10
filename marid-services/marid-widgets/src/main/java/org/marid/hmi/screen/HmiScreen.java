@@ -18,7 +18,7 @@
 
 package org.marid.hmi.screen;
 
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 
 import java.io.IOException;
@@ -29,12 +29,12 @@ import java.util.Scanner;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class HmiScreen extends BorderPane {
+public class HmiScreen extends StackPane {
 
     private final WebView webView = new WebView();
 
     public HmiScreen() {
-        setCenter(webView);
+        getChildren().add(webView);
         webView.getEngine().setJavaScriptEnabled(true);
     }
 

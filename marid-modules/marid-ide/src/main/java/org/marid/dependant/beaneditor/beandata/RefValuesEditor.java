@@ -19,10 +19,9 @@
 package org.marid.dependant.beaneditor.beandata;
 
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
-import org.marid.jfx.icons.FontIcon;
-import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.RefValue;
 import org.marid.spring.xml.collection.DCollection;
@@ -37,6 +36,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
+import static org.marid.jfx.icons.FontIcon.*;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -81,11 +82,11 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
             final Label label = new Label();
             final DElement<?> element = param.getValue().getData();
             if (element instanceof DRef) {
-                label.setGraphic(FontIcons.glyphIcon(FontIcon.M_LINK, 16));
+                label.setGraphic(glyphIcon(M_LINK, 16));
             } else if (element instanceof DValue) {
-                label.setGraphic(FontIcons.glyphIcon(FontIcon.M_TEXT_FORMAT, 16));
+                label.setGraphic(glyphIcon(M_TEXT_FORMAT, 16));
             } else if (element instanceof DCollection) {
-                label.setGraphic(FontIcons.glyphIcon(FontIcon.M_LIST, 16));
+                label.setGraphic(glyphIcon(M_LIST, 16));
             }
             if (element != null) {
                 label.setText(element.toString());
@@ -104,11 +105,16 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
                 if (item == null || empty) {
                     setContextMenu(null);
                 } else {
-                    final Type type = typeFunc.apply(item.getName()).orElse(null);
-                    final Type typeArg = type == null ? Object.class : type;
-                    final ContextMenu menu = new ContextMenu();
-                    items.getObject(item.data, typeArg).addTo(menu);
-                    setContextMenu(menu);
+                    setContextMenu(new ContextMenu() {
+                        @Override
+                        public void show(Node anchor, double screenX, double screenY) {
+                            final Type type = typeFunc.apply(item.getName()).orElse(null);
+                            final Type typeArg = type == null ? Object.class : type;
+                            getItems().clear();
+                            items.getObject(item.data, typeArg).addTo(this);
+                            super.show(anchor, screenX, screenY);
+                        }
+                    });
                 }
             }
         });

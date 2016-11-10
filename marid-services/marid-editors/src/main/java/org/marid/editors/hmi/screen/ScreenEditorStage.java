@@ -26,8 +26,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.Event;
 import javafx.geometry.Dimension2D;
 import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.marid.logging.LogSupport;
 import org.marid.spring.beandata.BeanEditorContext;
@@ -48,14 +51,18 @@ public class ScreenEditorStage extends Stage implements LogSupport {
     final ObjectProperty<File> svgFile = new SimpleObjectProperty<>(this, "svgFile");
     final DoubleProperty zoom = new SimpleDoubleProperty(this, "zoom", 1.0);
     final ObjectProperty<Dimension2D> size = new SimpleObjectProperty<>(this, "size", new Dimension2D(800, 600));
+    final StackPane stackPane;
 
     private final WebView webView;
 
     public ScreenEditorStage(BeanEditorContext context) {
         this.context = context;
         setTitle(context.getBeanData().getName());
+        initStyle(StageStyle.DECORATED);
+        initOwner(context.getPrimaryStage());
+        initModality(Modality.NONE);
         final Dimension2D initialSize = initialSize();
-        setScene(new Scene(webView = webView()));
+        setScene(new Scene(stackPane = new StackPane(webView = webView())));
         webView.setPrefWidth(initialSize.getWidth());
         webView.setPrefHeight(initialSize.getHeight());
         setOnShown(event -> {

@@ -18,6 +18,8 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -106,7 +108,14 @@ public class BeanListTable extends MaridTableView<BeanData> {
                 if (item == null || empty) {
                     setContextMenu(null);
                 } else {
-                    setContextMenu(actions.getObject().contextMenu(item));
+                    setContextMenu(new ContextMenu() {
+                        @Override
+                        public void show(Node anchor, double screenX, double screenY) {
+                            getItems().clear();
+                            getItems().addAll(actions.getObject().contextMenu(item));
+                            super.show(anchor, screenX, screenY);
+                        }
+                    });
                 }
             }
         });

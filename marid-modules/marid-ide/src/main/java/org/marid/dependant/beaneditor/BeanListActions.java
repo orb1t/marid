@@ -19,9 +19,10 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.event.ActionEvent;
-import javafx.geometry.Side;
-import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.Stage;
 import org.marid.Ide;
 import org.marid.IdeDependants;
@@ -61,6 +62,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Stream.concat;
 import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
 import static javafx.scene.control.ButtonType.CANCEL;
 import static org.marid.Ide.primaryStage;
@@ -211,12 +213,6 @@ public class BeanListActions {
         table.getItems().add(beanData);
     }
 
-    public void onShowPopup(ActionEvent event) {
-        final Node node = (Node) event.getSource();
-        final Side side = node instanceof Button ? Side.BOTTOM : Side.RIGHT;
-        contextMenu(table.getSelectionModel().getSelectedItem()).show(node, side, 5, 5);
-    }
-
     private List<MenuItem> factoryItems(Class<?> type, BeanData beanData) {
         final List<MenuItem> items = new ArrayList<>();
         final Set<Method> getters = Stream.of(type.getMethods())
@@ -306,12 +302,11 @@ public class BeanListActions {
         return items;
     }
 
-    public ContextMenu contextMenu(BeanData beanData) {
-        final ContextMenu menu = new ContextMenu();
+    public List<MenuItem> contextMenu(BeanData beanData) {
         final List<List<MenuItem>> menuItems = new ArrayList<>();
         final Type type = profile.getType(beanData).orElse(null);
         if (type == null) {
-            return menu;
+            return Collections.emptyList();
         }
         final Class<?> rawType = ResolvableType.forType(type).getRawClass();
 
@@ -330,14 +325,10 @@ public class BeanListActions {
             menuItems.add(Collections.singletonList(removeItem));
         }
 
-        menuItems.removeIf(List::isEmpty);
-        for (final ListIterator<List<MenuItem>> i = menuItems.listIterator(); i.hasNext(); ) {
-            if (i.hasPrevious()) {
-                menu.getItems().add(new SeparatorMenuItem());
-            }
-            menu.getItems().addAll(i.next());
-        }
-        return menu;
+        return menuItems.stream()
+                .flatMap(l -> l.isEmpty() ? l.stream() : concat(Stream.of(new SeparatorMenuItem()), l.stream()))
+                .skip(1L)
+                .collect(Collectors.toList());
     }
 
     private class BeanEditorContextImpl implements BeanEditorContext {
