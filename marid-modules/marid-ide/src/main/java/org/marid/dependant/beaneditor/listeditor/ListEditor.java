@@ -18,6 +18,7 @@
 
 package org.marid.dependant.beaneditor.listeditor;
 
+import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
@@ -52,7 +53,7 @@ public class ListEditor extends ListView<DElement<?>> {
     }
 
     @Autowired
-    public void initCellFactory(Type type, ObjectProvider<ValueMenuItems> items) {
+    public void initRowFactory(Type type, ObjectProvider<ValueMenuItems> items) {
         setCellFactory(param -> new TextFieldListCell<DElement<?>>() {
             @Override
             public void updateItem(DElement<?> item, boolean empty) {
@@ -74,9 +75,14 @@ public class ListEditor extends ListView<DElement<?>> {
                     }
                     final Consumer<DElement<?>> consumer = e -> getItems().set(getIndex(), e);
                     final Supplier<DElement<?>> supplier = () -> getItems().get(getIndex());
-                    final ContextMenu contextMenu = new ContextMenu();
-                    items.getObject(new WritableValueImpl<>(consumer, supplier), type).addTo(contextMenu);
-                    setContextMenu(contextMenu);
+                    setContextMenu(new ContextMenu() {
+                        @Override
+                        public void show(Node anchor, double screenX, double screenY) {
+                            getItems().clear();
+                            items.getObject(new WritableValueImpl<>(consumer, supplier), type).addTo(this);
+                            super.show(anchor, screenX, screenY);
+                        }
+                    });
                 }
             }
         });
