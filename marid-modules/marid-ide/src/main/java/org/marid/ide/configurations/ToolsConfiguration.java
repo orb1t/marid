@@ -36,7 +36,7 @@ import static org.marid.jfx.icons.FontIcon.*;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-public class ActionsConfiguration {
+public class ToolsConfiguration {
 
     @Bean
     @IdeAction

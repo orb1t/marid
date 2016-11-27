@@ -16,49 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.main;
+package org.marid.ide.configurations;
 
 import javafx.application.Platform;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.input.KeyCombination;
-import javafx.stage.Stage;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.D_BORDER_TOP;
 import static org.marid.jfx.icons.FontIcon.D_EXIT_TO_APP;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
 @Configuration
-public class IdePaneManager {
-
-    @Bean
-    @IdeAction
-    public FxAction alwaysOnTopAction(ObjectFactory<IdePane> idePaneObjectFactory) {
-        return new FxAction(null, "ops", "Window")
-                .bindText(ls("Always on top"))
-                .setIcon(D_BORDER_TOP)
-                .setSelected(false)
-                .setEventHandler(event -> {
-                    final Stage stage = (Stage) idePaneObjectFactory.getObject().getScene().getWindow();
-                    final CheckMenuItem menuItem = (CheckMenuItem) event.getSource();
-                    stage.setAlwaysOnTop(menuItem.isSelected());
-                });
-    }
+public class SystemConfiguration {
 
     @Bean
     @IdeAction
     public FxAction exitAction() {
-        return new FxAction(null, "x", "File")
-                .bindText(ls("Exit"))
+        return new FxAction(null, "x", "Application")
+                .bindText("Exit")
                 .setIcon(D_EXIT_TO_APP)
-                .setEventHandler(event -> Platform.exit())
-                .setAccelerator(KeyCombination.valueOf("F12"));
+                .setEventHandler(event -> Platform.exit());
     }
 }

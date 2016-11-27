@@ -25,6 +25,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyCombination;
+import org.marid.jfx.LocalizedStrings;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -53,6 +54,10 @@ public final class FxAction {
         this(toolbarGroup, null, null);
     }
 
+    public FxAction(String group, String menu) {
+        this(null, group, menu);
+    }
+
     public String getToolbarGroup() {
         return toolbarGroup;
     }
@@ -79,6 +84,10 @@ public final class FxAction {
         }
         text.bind(value);
         return this;
+    }
+
+    public FxAction bindText(String format, Object... args) {
+        return bindText(LocalizedStrings.ls(format, args));
     }
 
     public KeyCombination getAccelerator() {

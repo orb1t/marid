@@ -40,9 +40,9 @@ public class SpecialActions {
 
     @Bean
     @IdeAction
-    @Qualifier("profile")
+    @Qualifier("special")
     public FxAction editAction() {
-        return new FxAction("projectTree", "pt", "Project")
+        return new FxAction("edit", "ed", "Edit")
                 .bindText(ls("Edit..."))
                 .setAccelerator(KeyCombination.valueOf("F4"))
                 .setIcon(M_FOLDER_SHARED)
