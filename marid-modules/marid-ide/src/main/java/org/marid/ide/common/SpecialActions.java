@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.M_FOLDER_SHARED;
+import static org.marid.jfx.icons.FontIcon.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -43,9 +43,64 @@ public class SpecialActions {
     @Qualifier("special")
     public FxAction editAction() {
         return new FxAction("edit", "ed", "Edit")
-                .bindText(ls("Edit..."))
+                .bindText("Edit...")
                 .setAccelerator(KeyCombination.valueOf("F4"))
                 .setIcon(M_FOLDER_SHARED)
+                .setDisabled(true);
+    }
+
+    @Bean
+    @IdeAction
+    @Qualifier("special")
+    public FxAction addAction() {
+        return new FxAction("mod", "mod", "Edit")
+                .bindText("Add")
+                .setAccelerator(KeyCombination.valueOf("Ctrl+Plus"))
+                .setIcon(M_ADD)
+                .setDisabled(true);
+    }
+
+    @Bean
+    @IdeAction
+    @Qualifier("special")
+    public FxAction removeAction() {
+        return new FxAction("mod", "mod", "Edit")
+                .bindText("Remove")
+                .setAccelerator(KeyCombination.valueOf("Ctrl+Minus"))
+                .setIcon(M_REMOVE)
+                .setDisabled(true);
+    }
+
+    @Bean
+    @IdeAction
+    @Qualifier("special")
+    public FxAction cutAction() {
+        return new FxAction("cp", "cp", "Edit")
+                .bindText("Cut")
+                .setAccelerator(KeyCombination.valueOf("Ctrl+X"))
+                .setIcon(M_CONTENT_CUT)
+                .setDisabled(true);
+    }
+
+    @Bean
+    @IdeAction
+    @Qualifier("special")
+    public FxAction copyAction() {
+        return new FxAction("cp", "cp", "Edit")
+                .bindText("Copy")
+                .setAccelerator(KeyCombination.valueOf("Ctrl+C"))
+                .setIcon(M_CONTENT_COPY)
+                .setDisabled(true);
+    }
+
+    @Bean
+    @IdeAction
+    @Qualifier("special")
+    public FxAction pasteAction() {
+        return new FxAction("cp", "cp", "Edit")
+                .bindText("Paste")
+                .setAccelerator(KeyCombination.valueOf("Ctrl+V"))
+                .setIcon(M_CONTENT_PASTE)
                 .setDisabled(true);
     }
 
