@@ -18,102 +18,53 @@
 
 package org.marid.ide.common;
 
-import javafx.beans.value.ObservableStringValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.input.KeyCombination;
 import org.marid.jfx.action.FxAction;
-import org.marid.spring.action.IdeAction;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.type.MethodMetadata;
+import org.springframework.stereotype.Component;
 
-import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.*;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkState;
+import static org.springframework.core.annotation.AnnotationUtils.synthesizeAnnotation;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
+@Component
 public class SpecialActions {
 
-    @Bean
-    @IdeAction
-    @Qualifier("special")
-    public FxAction editAction() {
-        return new FxAction("edit", "ed", "Edit")
-                .bindText("Edit...")
-                .setAccelerator(KeyCombination.valueOf("F4"))
-                .setIcon(M_FOLDER_SHARED)
-                .setDisabled(true);
+    private final EnumMap<IdeSpecialAction, FxAction> actionMap = new EnumMap<>(IdeSpecialAction.class);
+
+    @Autowired
+    public SpecialActions(@Qualifier("specialAction") Map<String, FxAction> actionMap, GenericApplicationContext context) {
+        actionMap.forEach((name, action) -> {
+            final AnnotatedBeanDefinition definition = (AnnotatedBeanDefinition) context.getBeanDefinition(name);
+            final MethodMetadata metadata = definition.getFactoryMethodMetadata();
+            final Map<String, Object> params = metadata.getAnnotationAttributes(SpecialAction.class.getName());
+            final SpecialAction specialAction = synthesizeAnnotation(params, SpecialAction.class, null);
+            this.actionMap.put(specialAction.value(), action);
+        });
+        checkState(this.actionMap.keySet().equals(EnumSet.allOf(IdeSpecialAction.class)));
     }
 
-    @Bean
-    @IdeAction
-    @Qualifier("special")
-    public FxAction addAction() {
-        return new FxAction("mod", "mod", "Edit")
-                .bindText("Add")
-                .setAccelerator(KeyCombination.valueOf("Ctrl+Plus"))
-                .setIcon(M_ADD)
-                .setDisabled(true);
-    }
-
-    @Bean
-    @IdeAction
-    @Qualifier("special")
-    public FxAction removeAction() {
-        return new FxAction("mod", "mod", "Edit")
-                .bindText("Remove")
-                .setAccelerator(KeyCombination.valueOf("Ctrl+Minus"))
-                .setIcon(M_REMOVE)
-                .setDisabled(true);
-    }
-
-    @Bean
-    @IdeAction
-    @Qualifier("special")
-    public FxAction cutAction() {
-        return new FxAction("cp", "cp", "Edit")
-                .bindText("Cut")
-                .setAccelerator(KeyCombination.valueOf("Ctrl+X"))
-                .setIcon(M_CONTENT_CUT)
-                .setDisabled(true);
-    }
-
-    @Bean
-    @IdeAction
-    @Qualifier("special")
-    public FxAction copyAction() {
-        return new FxAction("cp", "cp", "Edit")
-                .bindText("Copy")
-                .setAccelerator(KeyCombination.valueOf("Ctrl+C"))
-                .setIcon(M_CONTENT_COPY)
-                .setDisabled(true);
-    }
-
-    @Bean
-    @IdeAction
-    @Qualifier("special")
-    public FxAction pasteAction() {
-        return new FxAction("cp", "cp", "Edit")
-                .bindText("Paste")
-                .setAccelerator(KeyCombination.valueOf("Ctrl+V"))
-                .setIcon(M_CONTENT_PASTE)
-                .setDisabled(true);
-    }
-
-    public void setEditAction(Node node, ObservableStringValue text, EventHandler<ActionEvent> eventHandler) {
+    public void set(IdeSpecialAction action, Node node, EventHandler<ActionEvent> eventHandler) {
         node.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            final FxAction fxAction = actionMap.get(action);
             if (newValue) {
-                editAction().setDisabled(false);
-                editAction().setEventHandler(eventHandler);
-                editAction().bindText(text);
+                fxAction.setDisabled(false);
+                fxAction.setEventHandler(eventHandler);
             } else {
-                editAction().setEventHandler(event -> {});
-                editAction().setDisabled(true);
-                editAction().bindText(ls("Edit..."));
+                fxAction.setEventHandler(event -> {});
+                fxAction.setDisabled(true);
             }
         });
     }

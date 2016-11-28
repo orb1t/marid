@@ -27,23 +27,35 @@ import org.marid.dependant.resources.ResourcesConfiguration;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.project.ProjectSaver;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.menu.MaridMenu;
+import org.marid.logging.LogSupport;
 import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.Optional;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
+import static javafx.scene.control.ButtonType.NO;
+import static javafx.scene.control.ButtonType.YES;
+import static org.marid.ide.common.IdeSpecialAction.ADD;
+import static org.marid.ide.common.IdeSpecialAction.EDIT;
+import static org.marid.ide.common.IdeSpecialAction.REMOVE;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ProfilesTable extends TableView<ProjectProfile> {
+public class ProfilesTable extends TableView<ProjectProfile> implements LogSupport {
 
     public ProfilesTable(ProjectManager manager) {
         super(manager.getProfiles());
@@ -94,10 +106,40 @@ public class ProfilesTable extends TableView<ProjectProfile> {
     }
 
     @Autowired
-    private void init(IdeDependants dependants, Supplier<ProjectProfile> profile, SpecialActions specialActions) {
-        specialActions.setEditAction(this, ls("Project resources"), event -> {
-            final String name = profile.get().getName();
-            dependants.start(name, ResourcesConfiguration.class, c -> c.profile = profile.get());
+    private void init(IdeDependants dependants, ProjectManager projectManager, SpecialActions specialActions) {
+        specialActions.set(EDIT, this, event -> {
+            final ProjectProfile profile = projectManager.getProfile();
+            final String name = profile.getName();
+            dependants.start(name, ResourcesConfiguration.class, c -> c.profile = profile);
+        });
+    }
+
+    @Autowired
+    private void initAddRemove(SpecialActions specialActions, ProjectSaver projectSaver, ProjectManager manager) {
+        specialActions.set(ADD, this, event -> {
+            final TextInputDialog dialog = new TextInputDialog("profile");
+            dialog.setHeaderText(s("Profile name") + ":");
+            dialog.setTitle(s("Add profile"));
+            final Optional<String> result = dialog.showAndWait();
+            if (result.isPresent()) {
+                final ProjectProfile profile = manager.add(result.get());
+                try (final InputStream is = getClass().getResourceAsStream("/logging/default.properties")) {
+                    Files.copy(is, profile.getSrcMainResources().resolve("logging.properties"), REPLACE_EXISTING);
+                } catch (Exception x) {
+                    log(WARNING, "Unable to write default logging properties", x);
+                }
+                manager.profileProperty().set(profile);
+                projectSaver.save(profile);
+            }
+        });
+        specialActions.set(REMOVE, this, event -> {
+            final Alert alert = new Alert(CONFIRMATION, s("Do you really want to remove the profile?"), YES, NO);
+            alert.setTitle(s("Profile removal"));
+            alert.setHeaderText(s("Project removal confirmation"));
+            final Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.YES) {
+                manager.remove(manager.getProfile());
+            }
         });
     }
 }

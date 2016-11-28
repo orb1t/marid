@@ -18,6 +18,8 @@
 
 package org.marid.dependant.project.config.deps;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.layout.BorderPane;
 import org.apache.maven.model.Dependency;
@@ -33,21 +35,14 @@ public class DependenciesEditor extends BorderPane {
 
     public DependenciesEditor(String name, List<Dependency> dependencies) {
         setId(name);
-        final DependencyTable dependencyTable = new DependencyTable(dependencies);
+        final ObservableList<Dependency> list = FXCollections.observableList(dependencies);
+        final DependencyTable dependencyTable = new DependencyTable(list);
         setCenter(dependencyTable);
         setBottom(new ToolbarBuilder()
-                .add("Add item", FontIcon.M_ADD, event -> dependencyTable.getItems().add(new Dependency()))
-                .add("Remove item", FontIcon.M_REMOVE, dependencyTable::onDelete, dependencyTable.changeDisabled)
+                .add("Add item", FontIcon.M_ADD, event -> list.add(new Dependency()))
+                .add("Remove item", FontIcon.M_REMOVE, event -> list.removeAll(dependencyTable.getSelectionModel().getSelectedItems()), dependencyTable.changeDisabled)
                 .addSeparator()
-                .add("Clear all items", FontIcon.M_CLEAR_ALL, dependencyTable::onClear, dependencyTable.clearDisabled)
-                .addSeparator()
-                .add("Marid dependency", FontIcon.M_STAR_HALF, event -> {
-                    for (final Dependency dependency : dependencyTable.getSelectionModel().getSelectedItems()) {
-                        dependency.setGroupId("org.marid");
-                        dependency.setVersion("${marid.runtime.version}");
-                        dependencyTable.refresh();
-                    }
-                }, dependencyTable.changeDisabled)
+                .add("Clear all items", FontIcon.M_CLEAR_ALL, event -> list.clear(), dependencyTable.clearDisabled)
                 .build(t -> setMargin(t,  new Insets(10, 0, 0, 0))));
     }
 }

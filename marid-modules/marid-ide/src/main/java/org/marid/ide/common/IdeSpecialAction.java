@@ -16,21 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.action;
-
-import org.springframework.beans.factory.annotation.Qualifier;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.*;
+package org.marid.ide.common;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({METHOD, TYPE, FIELD, PARAMETER, ANNOTATION_TYPE})
-@Qualifier
-public @interface IdeAction {
+public enum IdeSpecialAction {
+
+    ADD,
+    REMOVE,
+
+    CUT,
+    COPY,
+    PASTE,
+
+    EDIT
 }

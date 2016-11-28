@@ -39,6 +39,7 @@ import java.time.ZoneId;
 import java.util.Comparator;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+import static org.marid.ide.common.IdeSpecialAction.EDIT;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.M_DELETE;
 import static org.marid.jfx.icons.FontIcon.M_EDIT;
@@ -137,6 +138,6 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
 
     @Autowired
     private void init(BeanFileBrowserActions actions, SpecialActions specialActions) {
-        specialActions.setEditAction(this, ls("Edit..."), actions::launchBeanEditor);
+        specialActions.set(EDIT, this, actions::launchBeanEditor);
     }
 }

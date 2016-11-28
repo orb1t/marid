@@ -19,28 +19,27 @@
 package org.marid.dependant.project.config.deps;
 
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.apache.maven.model.Dependency;
 import org.marid.jfx.props.Props;
 import org.marid.jfx.table.MaridTableView;
-
-import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class DependencyTable extends MaridTableView<Dependency> {
 
-    public DependencyTable(List<Dependency> dependencies) {
-        super(FXCollections.observableList(dependencies));
+    public DependencyTable(ObservableList<Dependency> dependencies) {
+        super(dependencies.filtered(DependencyTable::filter));
+        setEditable(true);
         getColumns().add(idColumn());
         getColumns().add(groupIdColumn());
         getColumns().add(artifactIdColumn());
         getColumns().add(versionColumn());
         getColumns().add(classifierColumn());
-        setEditable(true);
     }
 
     private TableColumn<Dependency, Integer> idColumn() {
@@ -55,28 +54,49 @@ public class DependencyTable extends MaridTableView<Dependency> {
     private TableColumn<Dependency, String> groupIdColumn() {
         final TableColumn<Dependency, String> col = new TableColumn<>("groupId");
         col.setCellValueFactory(param -> Props.stringProp(param.getValue()::getGroupId, param.getValue()::setGroupId));
-        col.setCellFactory(TextFieldTableCell.forTableColumn());
+        col.setCellFactory(param -> {
+            final ComboBoxTableCell<Dependency, String> cell = new ComboBoxTableCell<>("org.marid");
+            cell.setComboBoxEditable(true);
+            return cell;
+        });
         col.setPrefWidth(150);
         col.setSortable(false);
+        col.setEditable(true);
         return col;
     }
 
     private TableColumn<Dependency, String> artifactIdColumn() {
         final TableColumn<Dependency, String> col = new TableColumn<>("artifactId");
         col.setCellValueFactory(param -> Props.stringProp(param.getValue()::getArtifactId, param.getValue()::setArtifactId));
-        col.setCellFactory(TextFieldTableCell.forTableColumn());
+        col.setCellFactory(param -> {
+            final ComboBoxTableCell<Dependency, String> cell = new ComboBoxTableCell<>(
+                    "marid-db",
+                    "marid-editors",
+                    "marid-proto",
+                    "marid-web",
+                    "marid-widgets"
+            );
+            cell.setComboBoxEditable(true);
+            return cell;
+        });
         col.setPrefWidth(150);
         col.setSortable(false);
+        col.setEditable(true);
         return col;
     }
 
     private TableColumn<Dependency, String> versionColumn() {
         final TableColumn<Dependency, String> col = new TableColumn<>("version");
         col.setCellValueFactory(param -> Props.stringProp(param.getValue()::getVersion, param.getValue()::setVersion));
-        col.setCellFactory(TextFieldTableCell.forTableColumn());
+        col.setCellFactory(param -> {
+            final ComboBoxTableCell<Dependency, String> cell = new ComboBoxTableCell<>("${marid.runtime.version}");
+            cell.setComboBoxEditable(true);
+            return cell;
+        });
         col.setPrefWidth(200);
         col.setStyle("-fx-alignment: center-right");
         col.setSortable(false);
+        col.setEditable(true);
         return col;
     }
 
@@ -87,5 +107,20 @@ public class DependencyTable extends MaridTableView<Dependency> {
         col.setPrefWidth(150);
         col.setSortable(false);
         return col;
+    }
+
+    private static boolean filter(Dependency dependency) {
+        if (!"org.marid".equals(dependency.getGroupId())) {
+            return true;
+        }
+        if (dependency.getArtifactId() == null) {
+            return true;
+        }
+        switch (dependency.getArtifactId()) {
+            case "marid-hmi":
+            case "marid-runtime":
+                return false;
+        }
+        return true;
     }
 }

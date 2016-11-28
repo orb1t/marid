@@ -35,7 +35,7 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.ide.common.IdeSpecialAction.EDIT;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -123,6 +123,6 @@ public class BeanListTable extends MaridTableView<BeanData> {
 
     @Autowired
     private void initEditAction(SpecialActions specialActions, ObjectFactory<BeanListActions> actions) {
-        specialActions.setEditAction(this, ls("Edit..."), event -> actions.getObject().onEdit(event));
+        specialActions.set(EDIT, this, event -> actions.getObject().onEdit(event));
     }
 }
