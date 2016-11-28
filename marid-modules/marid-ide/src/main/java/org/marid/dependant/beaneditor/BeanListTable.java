@@ -35,7 +35,7 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.marid.ide.common.IdeSpecialAction.EDIT;
+import static org.marid.ide.common.SpecialActionConfiguration.EDIT;
 import static org.marid.l10n.L10n.s;
 
 /**

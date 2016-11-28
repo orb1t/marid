@@ -19,6 +19,7 @@ package org.marid.ide.common;
 
 import javafx.scene.input.KeyCombination;
 import org.marid.jfx.action.FxAction;
+import org.marid.spring.action.IdeAction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,8 +32,15 @@ import static org.marid.jfx.icons.FontIcon.*;
 @Configuration
 public class SpecialActionConfiguration {
 
-    @Bean
-    @SpecialAction(IdeSpecialAction.EDIT)
+    public static final String EDIT = "editAction";
+    public static final String ADD = "addAction";
+    public static final String REMOVE = "removeAction";
+    public static final String CUT = "cutAction";
+    public static final String COPY = "copyAction";
+    public static final String PASTE = "pasteAction";
+
+    @Bean(name = EDIT)
+    @IdeAction
     public FxAction editAction() {
         return new FxAction("edit", "ed", "Edit")
                 .bindText("Edit...")
@@ -41,8 +49,8 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean
-    @SpecialAction(IdeSpecialAction.ADD)
+    @Bean(name = ADD)
+    @IdeAction
     public FxAction addAction() {
         return new FxAction("mod", "mod", "Edit")
                 .bindText("Add")
@@ -51,8 +59,8 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean
-    @SpecialAction(IdeSpecialAction.REMOVE)
+    @Bean(name = REMOVE)
+    @IdeAction
     public FxAction removeAction() {
         return new FxAction("mod", "mod", "Edit")
                 .bindText("Remove")
@@ -61,8 +69,8 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean
-    @SpecialAction(IdeSpecialAction.CUT)
+    @Bean(name = CUT)
+    @IdeAction
     public FxAction cutAction() {
         return new FxAction("cp", "cp", "Edit")
                 .bindText("Cut")
@@ -71,8 +79,8 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean
-    @SpecialAction(IdeSpecialAction.COPY)
+    @Bean(name = COPY)
+    @IdeAction
     public FxAction copyAction() {
         return new FxAction("cp", "cp", "Edit")
                 .bindText("Copy")
@@ -81,8 +89,8 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean
-    @SpecialAction(IdeSpecialAction.PASTE)
+    @Bean(name = PASTE)
+    @IdeAction
     public FxAction pasteAction() {
         return new FxAction("cp", "cp", "Edit")
                 .bindText("Paste")

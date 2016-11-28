@@ -45,9 +45,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
-import static org.marid.ide.common.IdeSpecialAction.ADD;
-import static org.marid.ide.common.IdeSpecialAction.EDIT;
-import static org.marid.ide.common.IdeSpecialAction.REMOVE;
+import static org.marid.ide.common.SpecialActionConfiguration.*;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.l10n.L10n.s;
 

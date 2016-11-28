@@ -21,20 +21,11 @@ package org.marid.ide.common;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import org.intellij.lang.annotations.MagicConstant;
 import org.marid.jfx.action.FxAction;
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.type.MethodMetadata;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkState;
-import static org.springframework.core.annotation.AnnotationUtils.synthesizeAnnotation;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -42,23 +33,18 @@ import static org.springframework.core.annotation.AnnotationUtils.synthesizeAnno
 @Component
 public class SpecialActions {
 
-    private final EnumMap<IdeSpecialAction, FxAction> actionMap = new EnumMap<>(IdeSpecialAction.class);
+    private final ApplicationContext context;
 
     @Autowired
-    public SpecialActions(@Qualifier("specialAction") Map<String, FxAction> actionMap, GenericApplicationContext context) {
-        actionMap.forEach((name, action) -> {
-            final AnnotatedBeanDefinition definition = (AnnotatedBeanDefinition) context.getBeanDefinition(name);
-            final MethodMetadata metadata = definition.getFactoryMethodMetadata();
-            final Map<String, Object> params = metadata.getAnnotationAttributes(SpecialAction.class.getName());
-            final SpecialAction specialAction = synthesizeAnnotation(params, SpecialAction.class, null);
-            this.actionMap.put(specialAction.value(), action);
-        });
-        checkState(this.actionMap.keySet().equals(EnumSet.allOf(IdeSpecialAction.class)));
+    public SpecialActions(ApplicationContext context) {
+        this.context = context;
     }
 
-    public void set(IdeSpecialAction action, Node node, EventHandler<ActionEvent> eventHandler) {
+    public void set(@MagicConstant(valuesFromClass = SpecialActionConfiguration.class) String action,
+                    Node node,
+                    EventHandler<ActionEvent> eventHandler) {
         node.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            final FxAction fxAction = actionMap.get(action);
+            final FxAction fxAction = context.getBean(action, FxAction.class);
             if (newValue) {
                 fxAction.setDisabled(false);
                 fxAction.setEventHandler(eventHandler);
