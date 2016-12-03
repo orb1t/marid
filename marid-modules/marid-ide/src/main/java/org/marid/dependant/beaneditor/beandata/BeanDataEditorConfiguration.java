@@ -24,8 +24,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import org.marid.ide.panes.main.IdePane;
+import org.marid.Ide;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.panes.MaridScrollPane;
@@ -105,9 +104,9 @@ public class BeanDataEditorConfiguration {
     }
 
     @Bean(initMethod = "show")
-    public Stage simpleBeanConfigurerStage(IdePane idePane, Scene simpleBeanConfigurerScene) {
-        final Stage stage = new Stage(StageStyle.UTILITY);
-        stage.initOwner(idePane.getScene().getWindow());
+    public Stage simpleBeanConfigurerStage(Scene simpleBeanConfigurerScene) {
+        final Stage stage = new Stage();
+        stage.initOwner(Ide.primaryStage);
         stage.setTitle(s("Bean editor"));
         stage.setScene(simpleBeanConfigurerScene);
         return stage;

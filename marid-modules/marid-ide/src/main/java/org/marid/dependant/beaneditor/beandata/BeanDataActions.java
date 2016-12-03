@@ -102,8 +102,6 @@ public class BeanDataActions {
         dialog.getDialogPane().setPrefWidth(1024);
         dialog.setResizable(true);
         final Optional<Executable> result = dialog.showAndWait();
-        if (result.isPresent()) {
-            profile.updateBeanDataConstructorArgs(beanData, result.get().getParameters());
-        }
+        result.ifPresent(executable -> profile.updateBeanDataConstructorArgs(beanData, executable.getParameters()));
     }
 }
