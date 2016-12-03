@@ -26,7 +26,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCombination;
+import org.intellij.lang.annotations.MagicConstant;
 import org.marid.jfx.LocalizedStrings;
+import org.marid.jfx.icons.FontIcon;
 
 import java.util.function.Consumer;
 
@@ -121,7 +123,7 @@ public final class FxAction {
         return icon == null ? null : icon.get();
     }
 
-    public FxAction setIcon(String icon) {
+    public FxAction setIcon(@MagicConstant(valuesFromClass = FontIcon.class) String icon) {
         if (this.icon == null) {
             this.icon = new SimpleStringProperty();
         }

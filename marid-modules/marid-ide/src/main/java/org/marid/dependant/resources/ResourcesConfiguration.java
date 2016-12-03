@@ -21,20 +21,17 @@ package org.marid.dependant.resources;
 import javafx.geometry.Side;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.ToolBar;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 import org.marid.Ide;
 import org.marid.dependant.resources.beanfiles.BeanFileBrowser;
 import org.marid.dependant.resources.beanfiles.BeanFileBrowserActions;
-import org.marid.dependant.resources.beanfiles.BeanFileBrowserPane;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
-import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.logging.LogSupport;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -55,7 +52,6 @@ import static org.marid.l10n.L10n.s;
         ResourcesTracker.class,
         BeanFileBrowser.class,
         BeanFileBrowserActions.class,
-        BeanFileBrowserPane.class,
         ResourcesTab.class
 })
 public class ResourcesConfiguration implements LogSupport {
@@ -68,10 +64,10 @@ public class ResourcesConfiguration implements LogSupport {
     }
 
     @Bean
-    public TabPane resourcesTabPane(BorderPane resourcesPane, BeanFileBrowserPane beanFileBrowserPane) {
+    public TabPane resourcesTabPane(ResourcesTable resourcesTable, BeanFileBrowser fileBrowser) {
         final TabPane tabPane = new TabPane(
-                new Tab(s("Bean files"), beanFileBrowserPane),
-                new Tab(s("Resource files"), resourcesPane)
+                new Tab(s("Bean files"), new MaridScrollPane(fileBrowser)),
+                new Tab(s("Resource files"), new MaridScrollPane(resourcesTable))
         );
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         tabPane.setSide(Side.BOTTOM);
@@ -79,23 +75,15 @@ public class ResourcesConfiguration implements LogSupport {
     }
 
     @Bean
-    public BorderPane resourcesPane(ToolBar resourcesToolBar, ResourcesTable resourcesTable) {
-        return new BorderPane(
-                new MaridScrollPane(resourcesTable),
-                resourcesToolBar,
-                null,
-                null,
-                null
-        );
-    }
-
-    @Bean
-    public ToolBar resourcesToolBar(ProjectProfile profile) {
-        return new ToolbarBuilder()
-                .add("Import files...", FontIcon.M_IMPORT_EXPORT, event -> {
+    @Qualifier("resources")
+    public FxAction importAction(ProjectProfile profile) {
+        return new FxAction("res", "res", "Edit")
+                .bindText("Import....")
+                .setIcon(FontIcon.D_IMPORT)
+                .setEventHandler(event -> {
                     final FileChooser chooser = new FileChooser();
                     chooser.setTitle(s("Import files"));
-                    chooser.getExtensionFilters().addAll(new ExtensionFilter(s("All files"), "*.*"));
+                    chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(s("All files"), "*.*"));
                     final List<File> files = chooser.showOpenMultipleDialog(Ide.primaryStage);
                     if (files != null) {
                         final DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -114,7 +102,6 @@ public class ResourcesConfiguration implements LogSupport {
                             }
                         }
                     }
-                })
-                .build();
+                });
     }
 }

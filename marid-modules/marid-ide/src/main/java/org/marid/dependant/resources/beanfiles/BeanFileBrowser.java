@@ -136,9 +136,30 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
     }
 
     @Autowired
-    private void init(BeanFileBrowserActions actions, FxAction editAction) {
+    private void initEdit(BeanFileBrowserActions actions, FxAction editAction) {
         editAction.on(this, action -> {
             action.setEventHandler(actions::launchBeanEditor);
+            action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
+        });
+    }
+
+    @Autowired
+    private void initAdd(BeanFileBrowserActions actions, FxAction addAction) {
+        addAction.on(this, action -> action.setEventHandler(actions::onFileAdd));
+    }
+
+    @Autowired
+    private void initRemove(BeanFileBrowserActions actions, FxAction removeAction) {
+        removeAction.on(this, action -> {
+            action.setEventHandler(actions::onDelete);
+            action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
+        });
+    }
+
+    @Autowired
+    private void initRename(BeanFileBrowserActions actions, FxAction renameAction) {
+        renameAction.on(this, action -> {
+            action.setEventHandler(actions::onRename);
             action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });
     }

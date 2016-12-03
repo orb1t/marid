@@ -20,21 +20,27 @@ package org.marid.dependant.resources;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.FxAction;
 import org.marid.jfx.table.MaridTableView;
 import org.marid.l10n.L10n;
+import org.marid.logging.LogSupport;
 import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
 import java.text.NumberFormat;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ResourcesTable extends MaridTableView<Path> {
+public class ResourcesTable extends MaridTableView<Path> implements LogSupport {
 
     @Autowired
     public ResourcesTable(ResourcesTracker resourcesTracker) {
@@ -70,5 +76,14 @@ public class ResourcesTable extends MaridTableView<Path> {
             return new SimpleStringProperty(numberFormat.format(size));
         });
         getColumns().add(column);
+    }
+
+    @Autowired
+    private void initRowFactory(SpecialActions specialActions, @Qualifier("resources") Map<String, FxAction> actionMap) {
+        setRowFactory(param -> {
+            final TableRow<Path> row = new TableRow<>();
+            row.setContextMenu(specialActions.contextMenu(() -> actionMap));
+            return row;
+        });
     }
 }

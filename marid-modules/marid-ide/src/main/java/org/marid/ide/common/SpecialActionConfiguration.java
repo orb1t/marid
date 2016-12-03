@@ -40,7 +40,7 @@ public class SpecialActionConfiguration {
         return new FxAction("edit", "ed", "Edit")
                 .bindText("Edit...")
                 .setAccelerator(KeyCombination.valueOf("F4"))
-                .setIcon(M_FOLDER_SHARED)
+                .setIcon(M_EDIT)
                 .setDisabled(true);
     }
 
@@ -96,6 +96,38 @@ public class SpecialActionConfiguration {
                 .bindText("Paste")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+V"))
                 .setIcon(M_CONTENT_PASTE)
+                .setDisabled(true);
+    }
+
+    @Bean
+    @IdeAction
+    @Qualifier("specialAction")
+    public FxAction clearAllAction() {
+        return new FxAction("mod", "mod", "Edit")
+                .bindText("Clear All")
+                .setIcon(M_CLEAR_ALL)
+                .setDisabled(true);
+    }
+
+    @Bean
+    @IdeAction
+    @Qualifier("specialAction")
+    public FxAction renameAction() {
+        return new FxAction("edit", "ed", "Edit")
+                .bindText("Rename")
+                .setAccelerator(KeyCombination.valueOf("Ctrl+R"))
+                .setIcon(D_RENAME_BOX)
+                .setDisabled(true);
+    }
+
+    @Bean
+    @IdeAction
+    @Qualifier("specialAction")
+    public FxAction selecatAllAction() {
+        return new FxAction("sel", "sel", "Edit")
+                .bindText("Select All")
+                .setAccelerator(KeyCombination.valueOf("Ctrl+A"))
+                .setIcon(D_SELECT_ALL)
                 .setDisabled(true);
     }
 }
