@@ -139,7 +139,7 @@ public class BeanListTable extends MaridTableView<BeanData> {
             action.setEventHandler(event -> dependants.start(
                     "beanDataEditor",
                     BeanDataEditorConfiguration.class,
-                    c -> c.beanData = getSelectionModel().getSelectedItem()
+                    c -> c.data = getSelectionModel().getSelectedItem()
             ));
             action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });

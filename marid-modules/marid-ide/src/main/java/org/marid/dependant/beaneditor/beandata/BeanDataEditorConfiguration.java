@@ -50,11 +50,11 @@ import static org.marid.jfx.LocalizedStrings.ls;
 @Import({BeanDataActions.class, BeanDataDetails.class})
 public class BeanDataEditorConfiguration {
 
-    public BeanData beanData;
+    public BeanData data;
 
     @Bean
-    public BeanData beanData() {
-        return beanData;
+    public BeanData data() {
+        return data;
     }
 
     @Bean

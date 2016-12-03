@@ -52,7 +52,7 @@ public class SpecialActions {
         return new MaridContextMenu(m -> {
             final ObservableList<MenuItem> items = m.getItems();
             items.clear();
-            final MaridMenu maridMenu = new MaridMenu(new UnionMap<>(actionMap, additionalItemsSupplier.get()));
+            final MaridMenu maridMenu = new MaridMenu(UnionMap.of(actionMap, additionalItemsSupplier.get()));
             for (final Menu menu : maridMenu.getMenus()) {
                 items.addAll(menu.getItems());
                 items.add(new SeparatorMenuItem());

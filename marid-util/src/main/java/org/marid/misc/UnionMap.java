@@ -36,8 +36,8 @@ public class UnionMap<K, V> extends AbstractMap<K, V> {
     }
 
     @SafeVarargs
-    public UnionMap(Map<K, V>... maps) {
-        this(Arrays.asList(maps));
+    public static <K, V> UnionMap<K, V> of(Map<K, V>... maps) {
+        return new UnionMap<>(Arrays.asList(maps));
     }
 
     @Override

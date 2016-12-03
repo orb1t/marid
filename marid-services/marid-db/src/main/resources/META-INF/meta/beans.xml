@@ -65,7 +65,7 @@
     <bean name="numericWriter" class="org.marid.db.hsqldb.HsqldbDaqNumericWriter">
         <description>HSQLDB numeric writer</description>
 
-        <constructor-arg name="dataSource" value="hsqldbDatabaseDataSource"/>
+        <constructor-arg name="dataSource" ref="hsqldbDatabaseDataSource"/>
         <constructor-arg name="table" value="NUMERICS"/>
 
         <meta key="icon" value="P_ADD"/>
