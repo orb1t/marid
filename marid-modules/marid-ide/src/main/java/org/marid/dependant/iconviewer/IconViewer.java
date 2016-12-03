@@ -41,7 +41,7 @@ public class IconViewer extends Stage {
 
     @Autowired
     public IconViewer(IconViewerTable table, IdePane idePane) {
-        super(StageStyle.UTILITY);
+        super(StageStyle.UNIFIED);
         initOwner(idePane.getScene().getWindow());
         setTitle(L10n.s("Icon viewer"));
         final ScrollPane scrollPane = new MaridScrollPane(table);

@@ -18,14 +18,23 @@
 
 package org.marid.ide.common;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.Node;
-import org.intellij.lang.annotations.MagicConstant;
+import javafx.collections.ObservableList;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.menu.MaridContextMenu;
+import org.marid.jfx.menu.MaridMenu;
+import org.marid.misc.UnionMap;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.function.Supplier;
+
+import static org.marid.misc.Iterables.last;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -33,25 +42,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpecialActions {
 
-    private final ApplicationContext context;
+    private final Map<String, FxAction> actionMap;
 
     @Autowired
-    public SpecialActions(ApplicationContext context) {
-        this.context = context;
+    public SpecialActions(@Qualifier("specialAction") Map<String, FxAction> actionMap) {
+        this.actionMap = actionMap;
     }
 
-    public void set(@MagicConstant(valuesFromClass = SpecialActionConfiguration.class) String action,
-                    Node node,
-                    EventHandler<ActionEvent> eventHandler) {
-        node.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            final FxAction fxAction = context.getBean(action, FxAction.class);
-            if (newValue) {
-                fxAction.setDisabled(false);
-                fxAction.setEventHandler(eventHandler);
-            } else {
-                fxAction.setEventHandler(event -> {});
-                fxAction.setDisabled(true);
+    public ContextMenu contextMenu(Supplier<Map<String, FxAction>> additionalItemsSupplier) {
+        return new MaridContextMenu(m -> {
+            final ObservableList<MenuItem> items = m.getItems();
+            items.clear();
+            final MaridMenu maridMenu = new MaridMenu(new UnionMap<>(actionMap, additionalItemsSupplier.get()));
+            for (final Menu menu : maridMenu.getMenus()) {
+                items.addAll(menu.getItems());
+                items.add(new SeparatorMenuItem());
             }
+            last(items).filter(SeparatorMenuItem.class::isInstance).ifPresent(items::remove);
         });
     }
 }

@@ -29,7 +29,6 @@ import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectSaver;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.menu.MaridMenu;
 import org.marid.logging.LogSupport;
 import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +44,6 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
-import static org.marid.ide.common.SpecialActionConfiguration.*;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.l10n.L10n.s;
 
@@ -93,28 +91,29 @@ public class ProfilesTable extends TableView<ProjectProfile> implements LogSuppo
     }
 
     @Autowired
-    public void init(@Qualifier("profile") Map<String, FxAction> actionMap) {
+    public void init(@Qualifier("profile") Map<String, FxAction> actionMap, SpecialActions specialActions) {
         setRowFactory(param -> {
             final TableRow<ProjectProfile> row = new TableRow<>();
-            row.setContextMenu(new ContextMenu(new MaridMenu(actionMap).getMenus().stream()
-                    .flatMap(m -> m.getItems().stream())
-                    .toArray(MenuItem[]::new)));
+            row.setContextMenu(specialActions.contextMenu(() -> actionMap));
             return row;
         });
     }
 
     @Autowired
-    private void init(IdeDependants dependants, ProjectManager projectManager, SpecialActions specialActions) {
-        specialActions.set(EDIT, this, event -> {
-            final ProjectProfile profile = projectManager.getProfile();
-            final String name = profile.getName();
-            dependants.start(name, ResourcesConfiguration.class, c -> c.profile = profile);
+    private void init(IdeDependants dependants, ProjectManager projectManager, FxAction editAction) {
+        editAction.on(this, action -> {
+            action.setEventHandler(event -> {
+                final ProjectProfile profile = projectManager.getProfile();
+                final String name = profile.getName();
+                dependants.start(name, ResourcesConfiguration.class, c -> c.profile = profile);
+            });
+            action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });
     }
 
     @Autowired
-    private void initAddRemove(SpecialActions specialActions, ProjectSaver projectSaver, ProjectManager manager) {
-        specialActions.set(ADD, this, event -> {
+    private void initAdd(FxAction addAction, ProjectSaver projectSaver, ProjectManager manager) {
+        addAction.on(this, action -> action.setEventHandler(event -> {
             final TextInputDialog dialog = new TextInputDialog("profile");
             dialog.setHeaderText(s("Profile name") + ":");
             dialog.setTitle(s("Add profile"));
@@ -129,15 +128,22 @@ public class ProfilesTable extends TableView<ProjectProfile> implements LogSuppo
                 manager.profileProperty().set(profile);
                 projectSaver.save(profile);
             }
-        });
-        specialActions.set(REMOVE, this, event -> {
-            final Alert alert = new Alert(CONFIRMATION, s("Do you really want to remove the profile?"), YES, NO);
-            alert.setTitle(s("Profile removal"));
-            alert.setHeaderText(s("Project removal confirmation"));
-            final Optional<ButtonType> result = alert.showAndWait();
-            if (result.isPresent() && result.get() == ButtonType.YES) {
-                manager.remove(manager.getProfile());
-            }
+        }));
+    }
+
+    @Autowired
+    private void initRemove(FxAction removeAction, ProjectManager manager) {
+        removeAction.on(this, action -> {
+            action.setEventHandler(event -> {
+                final Alert alert = new Alert(CONFIRMATION, s("Do you really want to remove the profile?"), YES, NO);
+                alert.setTitle(s("Profile removal"));
+                alert.setHeaderText(s("Project removal confirmation"));
+                final Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent() && result.get() == ButtonType.YES) {
+                    manager.remove(manager.getProfile());
+                }
+            });
+            action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });
     }
 }

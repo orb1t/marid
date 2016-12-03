@@ -20,6 +20,7 @@ package org.marid.ide.common;
 import javafx.scene.input.KeyCombination;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,15 +33,9 @@ import static org.marid.jfx.icons.FontIcon.*;
 @Configuration
 public class SpecialActionConfiguration {
 
-    public static final String EDIT = "editAction";
-    public static final String ADD = "addAction";
-    public static final String REMOVE = "removeAction";
-    public static final String CUT = "cutAction";
-    public static final String COPY = "copyAction";
-    public static final String PASTE = "pasteAction";
-
-    @Bean(name = EDIT)
+    @Bean
     @IdeAction
+    @Qualifier("specialAction")
     public FxAction editAction() {
         return new FxAction("edit", "ed", "Edit")
                 .bindText("Edit...")
@@ -49,28 +44,31 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean(name = ADD)
+    @Bean
     @IdeAction
+    @Qualifier("specialAction")
     public FxAction addAction() {
         return new FxAction("mod", "mod", "Edit")
                 .bindText("Add")
-                .setAccelerator(KeyCombination.valueOf("Ctrl+Plus"))
+                .setAccelerator(KeyCombination.valueOf("Ctrl+I"))
                 .setIcon(M_ADD_BOX)
                 .setDisabled(true);
     }
 
-    @Bean(name = REMOVE)
+    @Bean
     @IdeAction
+    @Qualifier("specialAction")
     public FxAction removeAction() {
         return new FxAction("mod", "mod", "Edit")
                 .bindText("Remove")
-                .setAccelerator(KeyCombination.valueOf("Ctrl+Minus"))
+                .setAccelerator(KeyCombination.valueOf("Ctrl+D"))
                 .setIcon(D_MINUS_BOX)
                 .setDisabled(true);
     }
 
-    @Bean(name = CUT)
+    @Bean
     @IdeAction
+    @Qualifier("specialAction")
     public FxAction cutAction() {
         return new FxAction("cp", "cp", "Edit")
                 .bindText("Cut")
@@ -79,8 +77,9 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean(name = COPY)
+    @Bean
     @IdeAction
+    @Qualifier("specialAction")
     public FxAction copyAction() {
         return new FxAction("cp", "cp", "Edit")
                 .bindText("Copy")
@@ -89,8 +88,9 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean(name = PASTE)
+    @Bean
     @IdeAction
+    @Qualifier("specialAction")
     public FxAction pasteAction() {
         return new FxAction("cp", "cp", "Edit")
                 .bindText("Paste")

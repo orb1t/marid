@@ -24,9 +24,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
-import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.FxAction;
 import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.BeanData;
@@ -35,7 +35,6 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.marid.ide.common.SpecialActionConfiguration.EDIT;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -122,7 +121,10 @@ public class BeanListTable extends MaridTableView<BeanData> {
     }
 
     @Autowired
-    private void initEditAction(SpecialActions specialActions, ObjectFactory<BeanListActions> actions) {
-        specialActions.set(EDIT, this, event -> actions.getObject().onEdit(event));
+    private void initEditAction(FxAction editAction, ObjectFactory<BeanListActions> actions) {
+        editAction.on(this, action -> {
+            action.setEventHandler(event -> actions.getObject().onEdit(event));
+            action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
+        });
     }
 }

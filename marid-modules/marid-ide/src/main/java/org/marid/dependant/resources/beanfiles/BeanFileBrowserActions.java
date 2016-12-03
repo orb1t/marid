@@ -25,7 +25,6 @@ import javafx.scene.control.TextInputDialog;
 import javafx.util.Pair;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.BeanEditorConfiguration;
-import org.marid.dependant.beaneditor.BeanEditorTab;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.BeanFile;
@@ -96,20 +95,9 @@ public class BeanFileBrowserActions {
 
     public void launchBeanEditor(ActionEvent event) {
         final Path path = browser.getObject().getSelectionModel().getSelectedItem().getKey();
-        final BeanEditorTab tab = ideTabPane.getObject().getTabs().stream()
-                .filter(BeanEditorTab.class::isInstance)
-                .map(BeanEditorTab.class::cast)
-                .filter(t -> t.profile.equals(getProfile()))
-                .filter(t -> t.beanFilePath.equals(path))
-                .findFirst()
-                .orElse(null);
-        if (tab != null) {
-            ideTabPane.getObject().getSelectionModel().select(tab);
-        } else {
-            dependants.start("beanEditor", BeanEditorConfiguration.class, c -> {
-                c.profile = getProfile();
-                c.beanFilePath = path;
-            });
-        }
+        dependants.start("beanEditor", BeanEditorConfiguration.class, c -> {
+            c.profile = getProfile();
+            c.beanFilePath = path;
+        });
     }
 }

@@ -41,4 +41,24 @@ public class BeanEditorTab extends IdeTab {
         this.profile = profile;
         this.beanFilePath = beanFilePath;
     }
+
+    @Override
+    public int hashCode() {
+        return profile.getName().hashCode() ^ beanFilePath.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        final BeanEditorTab that = (BeanEditorTab) obj;
+        return that.beanFilePath.equals(beanFilePath) && profile.getName().equals(that.profile.getName());
+    }
 }

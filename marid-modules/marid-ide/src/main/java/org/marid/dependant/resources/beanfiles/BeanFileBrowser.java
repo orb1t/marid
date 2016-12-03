@@ -22,9 +22,9 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.*;
 import javafx.util.Pair;
-import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.FxAction;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,6 @@ import java.time.ZoneId;
 import java.util.Comparator;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-import static org.marid.ide.common.SpecialActionConfiguration.EDIT;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.M_DELETE;
 import static org.marid.jfx.icons.FontIcon.M_EDIT;
@@ -137,7 +136,10 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
     }
 
     @Autowired
-    private void init(BeanFileBrowserActions actions, SpecialActions specialActions) {
-        specialActions.set(EDIT, this, actions::launchBeanEditor);
+    private void init(BeanFileBrowserActions actions, FxAction editAction) {
+        editAction.on(this, action -> {
+            action.setEventHandler(actions::launchBeanEditor);
+            action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
+        });
     }
 }

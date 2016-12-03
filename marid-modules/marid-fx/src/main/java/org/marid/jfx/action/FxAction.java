@@ -24,8 +24,11 @@ import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.input.KeyCombination;
 import org.marid.jfx.LocalizedStrings;
+
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -232,6 +235,23 @@ public final class FxAction {
             selected = new SimpleBooleanProperty();
         }
         selected.bind(value);
+        return this;
+    }
+
+    public FxAction on(Node node, Consumer<FxAction> on) {
+        node.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                on.accept(this);
+                if (!disabledProperty().isBound()) {
+                    setDisabled(false);
+                }
+            } else {
+                if (disabledProperty().isBound()) {
+                    disabledProperty().unbind();
+                }
+                setDisabled(true);
+            }
+        });
         return this;
     }
 }
