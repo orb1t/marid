@@ -19,8 +19,6 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -28,8 +26,6 @@ import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-
-import java.util.stream.Collectors;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 
@@ -43,8 +39,8 @@ public class BeanBrowserTable extends TableView<BeanDefinitionHolder> {
 
     @Autowired
     public BeanBrowserTable(BeanMetaInfoProvider beanMetaInfoProvider) {
-        super(itemsFrom(beanMetaInfoProvider));
         metaInfo = beanMetaInfoProvider.metaInfo();
+        getItems().addAll(metaInfo.beans());
         setEditable(false);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
@@ -79,12 +75,5 @@ public class BeanBrowserTable extends TableView<BeanDefinitionHolder> {
         col.setPrefWidth(500);
         col.setMaxWidth(2000);
         getColumns().add(col);
-    }
-
-    private static ObservableList<BeanDefinitionHolder> itemsFrom(BeanMetaInfoProvider metaInfoProvider) {
-        final BeanMetaInfoProvider.BeansMetaInfo metaInfo = metaInfoProvider.metaInfo();
-        return metaInfo.beans().stream()
-                .map(e -> new BeanDefinitionHolder(e.getBeanDefinition(), e.getBeanName()))
-                .collect(Collectors.toCollection(FXCollections::observableArrayList));
     }
 }

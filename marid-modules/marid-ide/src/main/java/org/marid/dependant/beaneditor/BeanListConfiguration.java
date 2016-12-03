@@ -18,15 +18,24 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.scene.control.ToolBar;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.control.ButtonType;
+import org.marid.jfx.action.FxAction;
+import org.marid.jfx.dialog.MaridDialog;
+import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
-import org.marid.jfx.toolbar.ToolbarBuilder;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import static org.marid.jfx.icons.FontIcon.*;
+import java.util.List;
+
+import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
+import static javafx.scene.control.ButtonType.CANCEL;
+import static org.marid.Ide.primaryStage;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -36,20 +45,25 @@ import static org.marid.jfx.icons.FontIcon.*;
 public class BeanListConfiguration {
 
     @Bean
-    public ToolBar beanEditorToolbar(BeanListActions actions, BeanListTable table) {
-        return new ToolbarBuilder()
-                .add("Add", M_ADD, actions::onAddNew)
-                .add("Edit...", M_EDIT, actions::onEdit, table.changeDisabled)
-                .addSeparator()
-                .add("Remove", O_REPO_DELETE, actions::onDelete, table.changeDisabled)
-                .add("Clear", M_CLEAR_ALL, actions::onClear, table.clearDisabled)
-                .addSeparator()
-                .add("Browse", O_BROWSER, actions::onBrowse)
-                .build();
-    }
-
-    @Bean
-    public BorderPane beanEditor(BeanListTable table, ToolBar beanEditorToolbar) {
-        return new BorderPane(new MaridScrollPane(table), beanEditorToolbar, null, null, null);
+    @Qualifier("beanList")
+    public FxAction browseAction(ObjectProvider<BeanBrowserTable> browserProvider,
+                                 ObjectProvider<BeanListActions> beanListActions) {
+        return new FxAction("browse", "browse", "Edit")
+                .bindText("Browse...")
+                .setIcon(FontIcon.O_BROWSER)
+                .setEventHandler(event -> {
+                    final BeanBrowserTable table = browserProvider.getObject();
+                    new MaridDialog<List<BeanDefinitionHolder>>(primaryStage, new ButtonType(s("Add"), OK_DONE), CANCEL)
+                            .preferredSize(1024, 768)
+                            .title("Bean browser")
+                            .with((d, p) -> d.setResizable(true))
+                            .result(table.getSelectionModel()::getSelectedItems)
+                            .with((d, p) -> p.setContent(new MaridScrollPane(table)))
+                            .showAndWait()
+                            .ifPresent(entries -> entries.forEach(e -> {
+                                final BeanListActions actions = beanListActions.getObject();
+                                actions.insertItem(e.getBeanName(), e.getBeanDefinition(), table.metaInfo);
+                            }));
+                });
     }
 }

@@ -23,41 +23,54 @@ import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.stage.Window;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-public class MaridContextMenu extends ContextMenu {
+public final class MaridContextMenu extends ContextMenu {
 
-    private final Consumer<MaridContextMenu> onPreShow;
+    private final List<Consumer<MaridContextMenu>> onPreShow;
 
-    public MaridContextMenu(Consumer<MaridContextMenu> onPreShow) {
+    @SafeVarargs
+    public MaridContextMenu(Consumer<MaridContextMenu>... onPreShow) {
+        this(new ArrayList<>(Arrays.asList(onPreShow)));
+    }
+
+    public MaridContextMenu(List<Consumer<MaridContextMenu>> onPreShow) {
         this.onPreShow = onPreShow;
+    }
+
+    public MaridContextMenu addOnPreShow(Consumer<MaridContextMenu> trigger) {
+        onPreShow.add(trigger);
+        return this;
     }
 
     @Override
     public void show(Node anchor, double screenX, double screenY) {
-        onPreShow.accept(this);
+        onPreShow.forEach(c -> c.accept(this));
         super.show(anchor, screenX, screenY);
     }
 
     @Override
     public void show(Window owner) {
-        onPreShow.accept(this);
+        onPreShow.forEach(c -> c.accept(this));
         super.show(owner);
     }
 
     @Override
     public void show(Node anchor, Side side, double dx, double dy) {
-        onPreShow.accept(this);
+        onPreShow.forEach(c -> c.accept(this));
         super.show(anchor, side, dx, dy);
     }
 
     @Override
     public void show(Window ownerWindow, double anchorX, double anchorY) {
-        onPreShow.accept(this);
+        onPreShow.forEach(c -> c.accept(this));
         super.show(ownerWindow, anchorX, anchorY);
     }
 }

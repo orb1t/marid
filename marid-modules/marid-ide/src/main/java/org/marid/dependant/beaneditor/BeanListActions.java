@@ -18,20 +18,13 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.event.ActionEvent;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.Stage;
 import org.marid.Ide;
-import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
 import org.marid.ide.project.ProfileInfo;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.icons.FontIcon;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.beandata.BeanEditor;
 import org.marid.spring.beandata.BeanEditorContext;
 import org.marid.spring.xml.BeanArg;
@@ -43,18 +36,14 @@ import org.marid.util.Reflections;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
 import java.net.URLClassLoader;
 import java.util.*;
 import java.util.function.Function;
@@ -62,12 +51,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Stream.concat;
-import static javafx.scene.control.ButtonBar.ButtonData.OK_DONE;
-import static javafx.scene.control.ButtonType.CANCEL;
-import static org.marid.Ide.primaryStage;
-import static org.marid.jfx.icons.FontIcon.M_EDIT;
-import static org.marid.jfx.icons.FontIcon.M_REMOVE;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
@@ -77,53 +60,14 @@ import static org.marid.l10n.L10n.s;
 @Component
 public class BeanListActions {
 
-    private final ApplicationContext context;
+    final ProjectProfile profile;
+
     private final BeanListTable table;
-    private final IdeDependants dependants;
-    private final ProjectProfile profile;
 
     @Autowired
-    public BeanListActions(ApplicationContext context, BeanListTable table, IdeDependants dependants, ProjectProfile profile) {
-        this.context = context;
-        this.table = table;
-        this.dependants = dependants;
+    public BeanListActions(ProjectProfile profile, BeanListTable table) {
         this.profile = profile;
-    }
-
-    public void onEdit(ActionEvent event) {
-        dependants.start(
-                "beanDataEditor",
-                BeanDataEditorConfiguration.class,
-                c -> c.beanData = table.getSelectionModel().getSelectedItem()
-        );
-    }
-
-    public void onDelete(ActionEvent event) {
-        table.getItems().remove(table.getSelectionModel().getSelectedIndex());
-    }
-
-    public void onClear(ActionEvent event) {
-        table.getItems().clear();
-    }
-
-    public void onBrowse(ActionEvent event) {
-        final BeanBrowserTable beans = context.getBean(BeanBrowserTable.class);
-        new MaridDialog<List<BeanDefinitionHolder>>(primaryStage, new ButtonType(s("Add"), OK_DONE), CANCEL)
-                .preferredSize(1024, 768)
-                .title("Bean browser")
-                .with((d, p) -> d.setResizable(true))
-                .result(beans.getSelectionModel()::getSelectedItems)
-                .with((d, p) -> p.setContent(new MaridScrollPane(beans)))
-                .showAndWait()
-                .ifPresent(entries -> entries.forEach(e -> insertItem(e.getBeanName(), e.getBeanDefinition(), beans.metaInfo)));
-    }
-
-    public void onAddNew(ActionEvent event) {
-        final BeanData beanData = new BeanData();
-        final String name = profile.generateBeanName("newBean");
-        beanData.name.set(name);
-        beanData.type.set(Object.class.getName());
-        table.getItems().add(beanData);
+        this.table = table;
     }
 
     public BeanData beanData(String name, BeanDefinition def) {
@@ -213,7 +157,7 @@ public class BeanListActions {
         table.getItems().add(beanData);
     }
 
-    private List<MenuItem> factoryItems(Class<?> type, BeanData beanData) {
+    public List<MenuItem> factoryItems(Class<?> type, BeanData beanData) {
         final List<MenuItem> items = new ArrayList<>();
         final Set<Method> getters = Stream.of(type.getMethods())
                 .filter(m -> m.getReturnType() != void.class)
@@ -285,7 +229,7 @@ public class BeanListActions {
         return items;
     }
 
-    private List<MenuItem> editors(Class<?> type, BeanData beanData) {
+    public List<MenuItem> editors(Class<?> type, BeanData beanData) {
         final List<MenuItem> items = new ArrayList<>();
         final URLClassLoader classLoader = profile.getClassLoader();
         final BeanEditorContext beanEditorContext = new BeanEditorContextImpl(type, beanData);
@@ -300,35 +244,6 @@ public class BeanListActions {
             }
         }
         return items;
-    }
-
-    public List<MenuItem> contextMenu(BeanData beanData) {
-        final List<List<MenuItem>> menuItems = new ArrayList<>();
-        final Type type = profile.getType(beanData).orElse(null);
-        if (type == null) {
-            return Collections.emptyList();
-        }
-        final Class<?> rawType = ResolvableType.forType(type).getRawClass();
-
-        menuItems.add(factoryItems(rawType, beanData));
-        menuItems.add(editors(rawType, beanData));
-
-        {
-            final MenuItem editItem = new MenuItem(s("Edit..."), glyphIcon(M_EDIT, 16));
-            editItem.setOnAction(this::onEdit);
-            menuItems.add(Collections.singletonList(editItem));
-        }
-
-        {
-            final MenuItem removeItem = new MenuItem(s("Remove"), glyphIcon(M_REMOVE, 16));
-            removeItem.setOnAction(e -> table.getItems().remove(beanData));
-            menuItems.add(Collections.singletonList(removeItem));
-        }
-
-        return menuItems.stream()
-                .flatMap(l -> l.isEmpty() ? l.stream() : concat(Stream.of(new SeparatorMenuItem()), l.stream()))
-                .skip(1L)
-                .collect(Collectors.toList());
     }
 
     private class BeanEditorContextImpl implements BeanEditorContext {

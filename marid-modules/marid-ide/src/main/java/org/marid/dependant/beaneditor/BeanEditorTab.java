@@ -18,9 +18,9 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.scene.layout.BorderPane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.tabs.IdeTab;
+import org.marid.jfx.panes.MaridScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,8 +36,8 @@ public class BeanEditorTab extends IdeTab {
     public final Path beanFilePath;
 
     @Autowired
-    public BeanEditorTab(ProjectProfile profile, BorderPane beanEditor, Path beanFilePath) {
-        super(beanEditor, "[%s]: %s", profile, profile.getBeansDirectory().relativize(beanFilePath));
+    public BeanEditorTab(ProjectProfile profile, BeanListTable table, Path beanFilePath) {
+        super(new MaridScrollPane(table), "[%s]: %s", profile, profile.getBeansDirectory().relativize(beanFilePath));
         this.profile = profile;
         this.beanFilePath = beanFilePath;
     }

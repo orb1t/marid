@@ -123,7 +123,7 @@ public class SpecialActionConfiguration {
     @Bean
     @IdeAction
     @Qualifier("specialAction")
-    public FxAction selecatAllAction() {
+    public FxAction selectAllAction() {
         return new FxAction("sel", "sel", "Edit")
                 .bindText("Select All")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+A"))

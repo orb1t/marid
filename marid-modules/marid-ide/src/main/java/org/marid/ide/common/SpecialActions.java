@@ -19,7 +19,6 @@
 package org.marid.ide.common;
 
 import javafx.collections.ObservableList;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -49,7 +48,7 @@ public class SpecialActions {
         this.actionMap = actionMap;
     }
 
-    public ContextMenu contextMenu(Supplier<Map<String, FxAction>> additionalItemsSupplier) {
+    public MaridContextMenu contextMenu(Supplier<Map<String, FxAction>> additionalItemsSupplier) {
         return new MaridContextMenu(m -> {
             final ObservableList<MenuItem> items = m.getItems();
             items.clear();
