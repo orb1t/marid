@@ -26,7 +26,6 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.Stage;
 import org.marid.Ide;
 import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.BeanBrowserTable.BeanBrowserItem;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
 import org.marid.ide.project.ProfileInfo;
 import org.marid.ide.project.ProjectProfile;
@@ -44,6 +43,7 @@ import org.marid.util.Reflections;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -108,14 +108,14 @@ public class BeanListActions {
 
     public void onBrowse(ActionEvent event) {
         final BeanBrowserTable beans = context.getBean(BeanBrowserTable.class);
-        new MaridDialog<List<BeanBrowserItem>>(primaryStage, new ButtonType(s("Add"), OK_DONE), CANCEL)
+        new MaridDialog<List<BeanDefinitionHolder>>(primaryStage, new ButtonType(s("Add"), OK_DONE), CANCEL)
                 .preferredSize(1024, 768)
                 .title("Bean browser")
                 .with((d, p) -> d.setResizable(true))
                 .result(beans.getSelectionModel()::getSelectedItems)
                 .with((d, p) -> p.setContent(new MaridScrollPane(beans)))
                 .showAndWait()
-                .ifPresent(entries -> entries.forEach(e -> insertItem(e.name, e.definition, e.metaInfo)));
+                .ifPresent(entries -> entries.forEach(e -> insertItem(e.getBeanName(), e.getBeanDefinition(), beans.metaInfo)));
     }
 
     public void onAddNew(ActionEvent event) {

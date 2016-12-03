@@ -27,7 +27,7 @@ import javafx.scene.control.TableView;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 
 import java.util.stream.Collectors;
 
@@ -37,11 +37,14 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov
  */
 @PrototypeComponent
-public class BeanBrowserTable extends TableView<BeanBrowserTable.BeanBrowserItem> {
+public class BeanBrowserTable extends TableView<BeanDefinitionHolder> {
+
+    final BeanMetaInfoProvider.BeansMetaInfo metaInfo;
 
     @Autowired
     public BeanBrowserTable(BeanMetaInfoProvider beanMetaInfoProvider) {
         super(itemsFrom(beanMetaInfoProvider));
+        metaInfo = beanMetaInfoProvider.metaInfo();
         setEditable(false);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
@@ -50,9 +53,9 @@ public class BeanBrowserTable extends TableView<BeanBrowserTable.BeanBrowserItem
 
     @OrderedInit(1)
     public void nameColumn() {
-        final TableColumn<BeanBrowserItem, String> col = new TableColumn<>();
+        final TableColumn<BeanDefinitionHolder, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Name"));
-        col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().name));
+        col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getBeanName()));
         col.setPrefWidth(300);
         col.setMaxWidth(600);
         getColumns().add(col);
@@ -60,9 +63,9 @@ public class BeanBrowserTable extends TableView<BeanBrowserTable.BeanBrowserItem
 
     @OrderedInit(2)
     public void typeColumn() {
-        final TableColumn<BeanBrowserItem, String> col = new TableColumn<>();
+        final TableColumn<BeanDefinitionHolder, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Type"));
-        col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().definition.getBeanClassName()));
+        col.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBeanDefinition().getBeanClassName()));
         col.setPrefWidth(500);
         col.setMaxWidth(1000);
         getColumns().add(col);
@@ -70,31 +73,18 @@ public class BeanBrowserTable extends TableView<BeanBrowserTable.BeanBrowserItem
 
     @OrderedInit(3)
     public void descriptionColumn() {
-        final TableColumn<BeanBrowserItem, String> col = new TableColumn<>();
+        final TableColumn<BeanDefinitionHolder, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Description"));
-        col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().definition.getDescription()));
+        col.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBeanDefinition().getDescription()));
         col.setPrefWidth(500);
         col.setMaxWidth(2000);
         getColumns().add(col);
     }
 
-    private static ObservableList<BeanBrowserItem> itemsFrom(BeanMetaInfoProvider metaInfoProvider) {
+    private static ObservableList<BeanDefinitionHolder> itemsFrom(BeanMetaInfoProvider metaInfoProvider) {
         final BeanMetaInfoProvider.BeansMetaInfo metaInfo = metaInfoProvider.metaInfo();
         return metaInfo.beans().stream()
-                .map(e -> new BeanBrowserItem(e.getBeanName(), e.getBeanDefinition(), metaInfo))
+                .map(e -> new BeanDefinitionHolder(e.getBeanDefinition(), e.getBeanName()))
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
-    }
-
-    public static class BeanBrowserItem {
-
-        public final String name;
-        public final BeanDefinition definition;
-        public final BeanMetaInfoProvider.BeansMetaInfo metaInfo;
-
-        private BeanBrowserItem(String name, BeanDefinition definition, BeanMetaInfoProvider.BeansMetaInfo metaInfo) {
-            this.name = name;
-            this.definition = definition;
-            this.metaInfo = metaInfo;
-        }
     }
 }
