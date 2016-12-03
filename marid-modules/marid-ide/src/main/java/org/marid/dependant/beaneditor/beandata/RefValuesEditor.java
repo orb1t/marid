@@ -19,9 +19,12 @@
 package org.marid.dependant.beaneditor.beandata;
 
 import javafx.collections.ObservableList;
-import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
+import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.RefValue;
 import org.marid.spring.xml.collection.DCollection;
@@ -36,9 +39,9 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -57,7 +60,8 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
 
     @OrderedInit(1)
     public void nameColumn() {
-        final TableColumn<T, String> col = new TableColumn<>(s("Name"));
+        final TableColumn<T, String> col = new TableColumn<>();
+        col.textProperty().bind(ls("Name"));
         col.setPrefWidth(200);
         col.setMaxWidth(400);
         col.setCellValueFactory(param -> param.getValue().name);
@@ -66,7 +70,8 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
 
     @OrderedInit(2)
     public void typeColumn() {
-        final TableColumn<T, String> col = new TableColumn<>(s("Type"));
+        final TableColumn<T, String> col = new TableColumn<>();
+        col.textProperty().bind(ls("Type"));
         col.setPrefWidth(250);
         col.setMaxWidth(520);
         col.setCellValueFactory(param -> param.getValue().type);
@@ -75,7 +80,8 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
 
     @OrderedInit(3)
     public void valueColumn() {
-        final TableColumn<T, Label> col = new TableColumn<>(s("Value"));
+        final TableColumn<T, Label> col = new TableColumn<>();
+        col.textProperty().bind(ls("Value"));
         col.setPrefWidth(500);
         col.setMaxWidth(1500);
         col.setCellValueFactory(param -> createObjectBinding(() -> {
@@ -98,25 +104,17 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
 
     @Autowired
     public void initContextMenu(ObjectProvider<ValueMenuItems> items) {
-        setRowFactory(param -> new TableRow<T>() {
-            @Override
-            protected void updateItem(T item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setContextMenu(null);
-                } else {
-                    setContextMenu(new ContextMenu() {
-                        @Override
-                        public void show(Node anchor, double screenX, double screenY) {
-                            final Type type = typeFunc.apply(item.getName()).orElse(null);
-                            final Type typeArg = type == null ? Object.class : type;
-                            getItems().clear();
-                            items.getObject(item.data, typeArg).addTo(this);
-                            super.show(anchor, screenX, screenY);
-                        }
-                    });
+        setRowFactory(param -> {
+            final TableRow<T> row = new TableRow<>();
+            row.setContextMenu(new MaridContextMenu(m -> {
+                if (row.getItem() != null) {
+                    final Type type = typeFunc.apply(row.getItem().getName()).orElse(null);
+                    final Type typeArg = type == null ? Object.class : type;
+                    m.getItems().clear();
+                    items.getObject(row.getItem().data, typeArg).addTo(m.getItems());
                 }
-            }
+            }));
+            return row;
         });
     }
 }

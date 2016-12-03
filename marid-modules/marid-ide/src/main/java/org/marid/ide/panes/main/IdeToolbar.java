@@ -63,5 +63,8 @@ public class IdeToolbar extends MaridToolbar {
                 nodes.clear();
             }
         });
+        node.setOnContextMenuRequested(event -> {
+            System.out.println("X");
+        });
     }
 }

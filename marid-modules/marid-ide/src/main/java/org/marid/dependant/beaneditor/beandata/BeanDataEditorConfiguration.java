@@ -41,7 +41,7 @@ import org.springframework.core.annotation.Order;
 import java.util.Map;
 
 import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -71,14 +71,20 @@ public class BeanDataEditorConfiguration {
     @Qualifier("beanData")
     @Order(1)
     public Tab beanArgsTab(RefValuesEditor<BeanArg> editor) {
-        return new Tab(s("Constructor arguments"), new MaridScrollPane(editor));
+        final Tab tab = new Tab();
+        tab.setContent(new MaridScrollPane(editor));
+        tab.textProperty().bind(ls("Constructor arguments"));
+        return tab;
     }
 
     @Bean
     @Qualifier("beanData")
     @Order(2)
     public Tab beanPropsTab(RefValuesEditor<BeanProp> editor) {
-        return new Tab(s("Properties"), new MaridScrollPane(editor));
+        final Tab tab = new Tab();
+        tab.setContent(new MaridScrollPane(editor));
+        tab.textProperty().bind(ls("Properties"));
+        return tab;
     }
 
     @Bean
@@ -107,8 +113,8 @@ public class BeanDataEditorConfiguration {
     public Stage simpleBeanConfigurerStage(Scene simpleBeanConfigurerScene) {
         final Stage stage = new Stage();
         stage.initOwner(Ide.primaryStage);
-        stage.setTitle(s("Bean editor"));
         stage.setScene(simpleBeanConfigurerScene);
+        stage.titleProperty().bind(ls("Bean editor"));
         return stage;
     }
 }
