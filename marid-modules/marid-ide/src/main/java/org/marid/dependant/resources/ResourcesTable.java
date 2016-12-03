@@ -25,7 +25,6 @@ import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.table.MaridTableView;
-import org.marid.l10n.L10n;
 import org.marid.logging.LogSupport;
 import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +34,8 @@ import org.springframework.stereotype.Component;
 import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.Map;
+
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -51,7 +52,8 @@ public class ResourcesTable extends MaridTableView<Path> implements LogSupport {
 
     @OrderedInit(1)
     public void initPath(ProjectProfile profile) {
-        final TableColumn<Path, String> column = new TableColumn<>(L10n.s("Path"));
+        final TableColumn<Path, String> column = new TableColumn<>();
+        column.textProperty().bind(ls("Path"));
         column.setMinWidth(300);
         column.setPrefWidth(350);
         column.setMaxWidth(2000);
@@ -65,7 +67,8 @@ public class ResourcesTable extends MaridTableView<Path> implements LogSupport {
 
     @OrderedInit(2)
     public void initSize() {
-        final TableColumn<Path, String> column = new TableColumn<>(L10n.s("Size"));
+        final TableColumn<Path, String> column = new TableColumn<>();
+        column.textProperty().bind(ls("Size"));
         column.setMinWidth(100);
         column.setPrefWidth(150);
         column.setMaxWidth(250);

@@ -34,7 +34,7 @@ import java.util.Arrays;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -62,14 +62,14 @@ public class ClassLoadingWidget extends LineChart<Number, Number> {
 
     private Series<Number, Number> loadedClasses() {
         final Series<Number, Number> series = new Series<>();
-        series.setName(s("Loaded classes"));
+        series.nameProperty().bind(ls("Loaded classes"));
         series.getData().addAll(range(0, count).mapToObj(i -> new Data<Number, Number>(i, 0.0)).collect(toList()));
         return series;
     }
 
     private Series<Number, Number> unloadedClasses() {
         final Series<Number, Number> series = new Series<>();
-        series.setName(s("Unloaded classes"));
+        series.nameProperty().bind(ls("Unloaded classes"));
         series.getData().addAll(range(0, count).mapToObj(i -> new Data<Number, Number>(i, 0.0)).collect(toList()));
         return series;
     }
