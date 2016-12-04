@@ -19,22 +19,22 @@
 package org.marid.dependant.beaneditor.propeditor;
 
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
-import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.props.DPropEntry;
 import org.marid.spring.xml.props.DProps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
 @Component
-public class PropTable extends MaridTableView<DPropEntry> {
+public class PropTable extends TableView<DPropEntry> {
 
     @Autowired
     public PropTable(DProps props) {
@@ -43,7 +43,8 @@ public class PropTable extends MaridTableView<DPropEntry> {
 
     @OrderedInit(1)
     public void keyColumn() {
-        final TableColumn<DPropEntry, String> column = new TableColumn<>(s("Key"));
+        final TableColumn<DPropEntry, String> column = new TableColumn<>();
+        column.textProperty().bind(ls("Key"));
         column.setCellValueFactory(param -> param.getValue().key);
         column.setCellFactory(param -> new TextFieldTableCell<>(new DefaultStringConverter()));
         column.setPrefWidth(150);
@@ -53,7 +54,8 @@ public class PropTable extends MaridTableView<DPropEntry> {
 
     @OrderedInit(2)
     public void valueColumn() {
-        final TableColumn<DPropEntry, String> column = new TableColumn<>(s("Value"));
+        final TableColumn<DPropEntry, String> column = new TableColumn<>();
+        column.textProperty().bind(ls("Value"));
         column.setCellValueFactory(param -> param.getValue().value);
         column.setCellFactory(param -> new TextFieldTableCell<>(new DefaultStringConverter()));
         column.setPrefWidth(350);

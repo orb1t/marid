@@ -18,15 +18,17 @@
 
 package org.marid.dependant.project.config.deps;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.layout.BorderPane;
 import org.apache.maven.model.Dependency;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 
 import java.util.List;
+
+import static org.marid.jfx.icons.FontIcon.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -37,12 +39,13 @@ public class DependenciesEditor extends BorderPane {
         setId(name);
         final ObservableList<Dependency> list = FXCollections.observableList(dependencies);
         final DependencyTable dependencyTable = new DependencyTable(list);
+        final ObservableList<Dependency> selected = dependencyTable.getSelectionModel().getSelectedItems();
         setCenter(dependencyTable);
         setBottom(new ToolbarBuilder()
-                .add("Add item", FontIcon.M_ADD, event -> list.add(new Dependency()))
-                .add("Remove item", FontIcon.M_REMOVE, event -> list.removeAll(dependencyTable.getSelectionModel().getSelectedItems()), dependencyTable.changeDisabled)
+                .add("Add item", M_ADD, event -> list.add(new Dependency()))
+                .add("Remove item", M_REMOVE, event -> list.removeAll(selected), Bindings.isEmpty(selected))
                 .addSeparator()
-                .add("Clear all items", FontIcon.M_CLEAR_ALL, event -> list.clear(), dependencyTable.clearDisabled)
+                .add("Clear all items", M_CLEAR_ALL, event -> list.clear(), Bindings.isEmpty(list))
                 .build(t -> setMargin(t,  new Insets(10, 0, 0, 0))));
     }
 }

@@ -22,6 +22,7 @@ import javafx.beans.binding.Bindings;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.IdeDependants;
@@ -32,7 +33,6 @@ import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.menu.MaridContextMenu;
-import org.marid.jfx.table.MaridTableView;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanFile;
@@ -52,7 +52,7 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanListTable extends MaridTableView<BeanData> {
+public class BeanListTable extends TableView<BeanData> {
 
     @Autowired
     public BeanListTable(BeanFile beanFile) {

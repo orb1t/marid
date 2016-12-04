@@ -21,10 +21,10 @@ package org.marid.dependant.resources;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.table.MaridTableView;
 import org.marid.logging.LogSupport;
 import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ResourcesTable extends MaridTableView<Path> implements LogSupport {
+public class ResourcesTable extends TableView<Path> implements LogSupport {
 
     @Autowired
     public ResourcesTable(ResourcesTracker resourcesTracker) {

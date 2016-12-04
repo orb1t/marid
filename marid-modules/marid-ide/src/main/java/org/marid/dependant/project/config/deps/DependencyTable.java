@@ -21,16 +21,16 @@ package org.marid.dependant.project.config.deps;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.apache.maven.model.Dependency;
 import org.marid.jfx.props.Props;
-import org.marid.jfx.table.MaridTableView;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class DependencyTable extends MaridTableView<Dependency> {
+public class DependencyTable extends TableView<Dependency> {
 
     public DependencyTable(ObservableList<Dependency> dependencies) {
         super(dependencies.filtered(DependencyTable::filter));
