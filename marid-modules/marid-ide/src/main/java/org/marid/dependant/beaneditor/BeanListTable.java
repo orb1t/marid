@@ -18,11 +18,9 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.beans.binding.Bindings;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.IdeDependants;
@@ -31,6 +29,7 @@ import org.marid.ide.common.SpecialActions;
 import org.marid.ide.panes.main.IdeToolbar;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.idefx.CommonTableView;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.spring.annotation.OrderedInit;
@@ -52,7 +51,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanListTable extends TableView<BeanData> {
+public class BeanListTable extends CommonTableView<BeanData> {
 
     @Autowired
     public BeanListTable(BeanFile beanFile) {
@@ -157,22 +156,6 @@ public class BeanListTable extends TableView<BeanData> {
                 beanData.type.set(Object.class.getName());
                 getItems().add(beanData);
             });
-        });
-    }
-
-    @Autowired
-    private void initDelete(FxAction removeAction) {
-        removeAction.on(this, action -> {
-            action.setEventHandler(event -> getItems().removeAll(getSelectionModel().getSelectedItems()));
-            action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
-        });
-    }
-
-    @Autowired
-    private void initClearAll(FxAction clearAllAction) {
-        clearAllAction.on(this, action -> {
-            action.setEventHandler(event -> getItems().clear());
-            action.bindDisabled(Bindings.isEmpty(getItems()));
         });
     }
 

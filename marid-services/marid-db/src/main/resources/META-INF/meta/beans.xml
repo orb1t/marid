@@ -49,7 +49,7 @@
     <bean name="hsqldbDatabase" class="org.marid.db.hsqldb.HsqldbDatabase">
         <description>HSQLDB database</description>
 
-        <constructor-arg name="properties" value=""/>
+        <constructor-arg name="properties" ref="hsqldbProperties"/>
 
         <meta key="ICON" value="P_ADD"/>
     </bean>

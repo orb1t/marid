@@ -20,13 +20,14 @@ package org.marid.dependant.resources.beanfiles;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
 import javafx.util.Pair;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.idefx.CommonTableView;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.BeanFile;
@@ -49,13 +50,21 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
+public class BeanFileBrowser extends CommonTableView<Pair<Path, BeanFile>> {
+
+    private final ObservableList<Pair<Path, BeanFile>> source;
 
     @Autowired
     public BeanFileBrowser(ProjectProfile profile) {
         super(profile.getBeanFiles().sorted(Comparator.comparing(Pair::getKey)));
+        source = profile.getBeanFiles();
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
+    }
+
+    @Override
+    protected ObservableList<Pair<Path, BeanFile>> getSourceItems() {
+        return source;
     }
 
     @OrderedInit(1)
@@ -112,6 +121,7 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
     private void initRowFactory(SpecialActions specialActions) {
         setRowFactory(v -> {
             final TableRow<Pair<Path, BeanFile>> row = new TableRow<>();
+            row.disableProperty().bind(row.itemProperty().isNull());
             row.setContextMenu(specialActions.contextMenu(Collections::emptyMap));
             return row;
         });
@@ -128,14 +138,6 @@ public class BeanFileBrowser extends TableView<Pair<Path, BeanFile>> {
     @Autowired
     private void initAdd(BeanFileBrowserActions actions, FxAction addAction) {
         addAction.on(this, action -> action.setEventHandler(actions::onFileAdd));
-    }
-
-    @Autowired
-    private void initRemove(BeanFileBrowserActions actions, FxAction removeAction) {
-        removeAction.on(this, action -> {
-            action.setEventHandler(actions::onDelete);
-            action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
-        });
     }
 
     @Autowired
