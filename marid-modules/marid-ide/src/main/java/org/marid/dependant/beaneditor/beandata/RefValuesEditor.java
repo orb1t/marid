@@ -106,6 +106,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
     public void initContextMenu(ObjectProvider<ValueMenuItems> items) {
         setRowFactory(param -> {
             final TableRow<T> row = new TableRow<>();
+            row.disableProperty().bind(row.itemProperty().isNull());
             row.setContextMenu(new MaridContextMenu(m -> {
                 if (row.getItem() != null) {
                     final Type type = typeFunc.apply(row.getItem().getName()).orElse(null);

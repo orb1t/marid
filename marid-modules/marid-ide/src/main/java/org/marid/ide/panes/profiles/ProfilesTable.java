@@ -94,13 +94,14 @@ public class ProfilesTable extends TableView<ProjectProfile> implements LogSuppo
     public void init(@Qualifier("profile") Map<String, FxAction> actionMap, SpecialActions specialActions) {
         setRowFactory(param -> {
             final TableRow<ProjectProfile> row = new TableRow<>();
+            row.disableProperty().bind(row.itemProperty().isNull());
             row.setContextMenu(specialActions.contextMenu(() -> actionMap));
             return row;
         });
     }
 
     @Autowired
-    private void init(IdeDependants dependants, ProjectManager projectManager, FxAction editAction) {
+    private void initEdit(IdeDependants dependants, ProjectManager projectManager, FxAction editAction) {
         editAction.on(this, action -> {
             action.setEventHandler(event -> {
                 final ProjectProfile profile = projectManager.getProfile();

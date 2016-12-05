@@ -24,6 +24,7 @@ import org.marid.jfx.action.FxAction;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
@@ -90,5 +91,17 @@ public class MaridMenu extends MenuBar {
             }
             getMenus().add(m);
         });
+    }
+
+    public ContextMenu toContextMenu() {
+        final ContextMenu contextMenu = new ContextMenu();
+        final AtomicBoolean first = new AtomicBoolean(true);
+        getMenus().forEach(menu -> {
+            if (!first.compareAndSet(true, false)) {
+                contextMenu.getItems().add(new SeparatorMenuItem());
+            }
+            contextMenu.getItems().addAll(menu.getItems());
+        });
+        return contextMenu;
     }
 }

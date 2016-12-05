@@ -18,13 +18,12 @@
 
 package org.marid.dependant.beaneditor.listeditor;
 
-import javafx.scene.Node;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
 import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
+import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.jfx.props.WritableValueImpl;
 import org.marid.spring.xml.collection.DCollection;
 import org.marid.spring.xml.collection.DElement;
@@ -39,7 +38,7 @@ import java.lang.reflect.Type;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.fls;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -59,30 +58,27 @@ public class ListEditor extends ListView<DElement<?>> {
             public void updateItem(DElement<?> item, boolean empty) {
                 super.updateItem(item, empty);
                 if (item == null || empty) {
-                    setText(null);
+                    textProperty().unbind();
                     setContextMenu(null);
                     setGraphic(null);
                 } else {
+                    textProperty().unbind();
                     if (item instanceof DValue) {
                         setText(((DValue) item).getValue());
                         setGraphic(FontIcons.glyphIcon(FontIcon.D_COMMENT_TEXT, 16));
                     } else if (item instanceof DList) {
-                        setText(s("<list>"));
+                        textProperty().bind(fls("<%s>", "List"));
                         setGraphic(FontIcons.glyphIcon(FontIcon.M_LIST, 16));
                     } else if (item instanceof DProps) {
-                        setText(s("<props>"));
+                        textProperty().bind(fls("<%s>", "Properties"));
                         setGraphic(FontIcons.glyphIcon(FontIcon.D_VIEW_LIST, 16));
                     }
                     final Consumer<DElement<?>> consumer = e -> getItems().set(getIndex(), e);
                     final Supplier<DElement<?>> supplier = () -> getItems().get(getIndex());
-                    setContextMenu(new ContextMenu() {
-                        @Override
-                        public void show(Node anchor, double screenX, double screenY) {
-                            getItems().clear();
-                            items.getObject(new WritableValueImpl<>(consumer, supplier), type).addTo(this);
-                            super.show(anchor, screenX, screenY);
-                        }
-                    });
+                    setContextMenu(new MaridContextMenu(m -> {
+                        m.getItems().clear();
+                        items.getObject(new WritableValueImpl<>(consumer, supplier), type).addTo(m);
+                    }));
                 }
             }
         });

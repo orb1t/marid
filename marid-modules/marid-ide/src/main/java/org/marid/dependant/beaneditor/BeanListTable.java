@@ -46,7 +46,7 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.marid.l10n.L10n.s;
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -63,7 +63,8 @@ public class BeanListTable extends TableView<BeanData> {
 
     @OrderedInit(1)
     public void nameColumn(ProjectProfile profile) {
-        final TableColumn<BeanData, String> col = new TableColumn<>(s("Name"));
+        final TableColumn<BeanData, String> col = new TableColumn<>();
+        col.textProperty().bind(ls("Name"));
         col.setCellValueFactory(param -> param.getValue().name);
         col.setCellFactory(param -> new TextFieldTableCell<BeanData, String>(new DefaultStringConverter()) {
             @Override
@@ -82,7 +83,8 @@ public class BeanListTable extends TableView<BeanData> {
 
     @OrderedInit(2)
     public void typeColumn() {
-        final TableColumn<BeanData, String> col = new TableColumn<>(s("Type"));
+        final TableColumn<BeanData, String> col = new TableColumn<>();
+        col.textProperty().bind(ls("Type"));
         col.setCellValueFactory(param -> param.getValue().type);
         col.setPrefWidth(450);
         col.setMaxWidth(650);
@@ -93,7 +95,8 @@ public class BeanListTable extends TableView<BeanData> {
 
     @OrderedInit(3)
     public void factoryBeanColumn() {
-        final TableColumn<BeanData, String> col = new TableColumn<>(s("Factory bean"));
+        final TableColumn<BeanData, String> col = new TableColumn<>();
+        col.textProperty().bind(ls("Factory bean"));
         col.setCellValueFactory(param -> param.getValue().factoryBean);
         col.setPrefWidth(250);
         col.setMaxWidth(450);
@@ -102,7 +105,8 @@ public class BeanListTable extends TableView<BeanData> {
 
     @OrderedInit(4)
     public void factoryMethodColumn() {
-        final TableColumn<BeanData, String> col = new TableColumn<>(s("Factory method"));
+        final TableColumn<BeanData, String> col = new TableColumn<>();
+        col.textProperty().bind(ls("Factory method"));
         col.setCellValueFactory(param -> param.getValue().factoryMethod);
         col.setPrefWidth(250);
         col.setMaxWidth(450);
@@ -113,11 +117,9 @@ public class BeanListTable extends TableView<BeanData> {
     public void initRowFactory(SpecialActions actions, ObjectProvider<BeanListActions> beanListActionsProvider) {
         setRowFactory(view -> {
             final TableRow<BeanData> row = new TableRow<>();
+            row.disableProperty().bind(row.itemProperty().isNull());
             final MaridContextMenu contextMenu = actions.contextMenu(Collections::emptyMap);
             contextMenu.addOnPreShow(menu -> {
-                if (row.getItem() == null) {
-                    return;
-                }
                 final BeanListActions beanListActions = beanListActionsProvider.getObject();
                 final Type type = beanListActions.profile.getType(row.getItem()).orElse(null);
                 if (type == null) {

@@ -85,6 +85,7 @@ public class ResourcesTable extends TableView<Path> implements LogSupport {
     private void initRowFactory(SpecialActions specialActions, @Qualifier("resources") Map<String, FxAction> actionMap) {
         setRowFactory(param -> {
             final TableRow<Path> row = new TableRow<>();
+            row.disableProperty().bind(row.itemProperty().isNull());
             row.setContextMenu(specialActions.contextMenu(() -> actionMap));
             return row;
         });
