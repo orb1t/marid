@@ -29,7 +29,7 @@ import org.marid.ide.common.SpecialActions;
 import org.marid.ide.panes.main.IdeToolbar;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.idefx.CommonTableView;
+import org.marid.idefx.controls.CommonTableView;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.spring.annotation.OrderedInit;

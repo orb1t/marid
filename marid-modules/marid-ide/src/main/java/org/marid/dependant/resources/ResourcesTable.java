@@ -19,11 +19,12 @@
 package org.marid.dependant.resources;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.idefx.controls.CommonTableView;
 import org.marid.jfx.action.FxAction;
 import org.marid.logging.LogSupport;
 import org.marid.spring.annotation.OrderedInit;
@@ -32,7 +33,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.NumberFormat;
+import java.util.Comparator;
 import java.util.Map;
 
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -41,13 +44,21 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ResourcesTable extends TableView<Path> implements LogSupport {
+public class ResourcesTable extends CommonTableView<Path> implements LogSupport {
+
+    private final ResourcesTracker resourcesTracker;
 
     @Autowired
     public ResourcesTable(ResourcesTracker resourcesTracker) {
-        super(resourcesTracker.resources.sorted());
+        super(resourcesTracker.resources);
+        this.resourcesTracker = resourcesTracker;
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setEditable(false);
+    }
+
+    @Override
+    public boolean removeEnabled(ObservableList<Path> items) {
+        return !items.contains(resourcesTracker.resolve("logging.properties"));
     }
 
     @OrderedInit(1)
@@ -57,6 +68,8 @@ public class ResourcesTable extends TableView<Path> implements LogSupport {
         column.setMinWidth(300);
         column.setPrefWidth(350);
         column.setMaxWidth(2000);
+        column.setSortType(TableColumn.SortType.ASCENDING);
+        column.setComparator(Comparator.comparing(Paths::get));
         column.setCellValueFactory(param -> {
             final Path base = profile.getSrcMainResources();
             final Path relative = base.relativize(param.getValue());

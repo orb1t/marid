@@ -27,7 +27,7 @@ import javafx.util.Pair;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.idefx.CommonTableView;
+import org.marid.idefx.controls.CommonTableView;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.BeanFile;
@@ -63,7 +63,7 @@ public class BeanFileBrowser extends CommonTableView<Pair<Path, BeanFile>> {
     }
 
     @Override
-    protected ObservableList<Pair<Path, BeanFile>> getSourceItems() {
+    public ObservableList<Pair<Path, BeanFile>> getSourceItems() {
         return source;
     }
 

@@ -62,14 +62,14 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
                     final Object[] args = new Object[method.getParameterCount()];
                     final Parameter[] parameters = method.getParameters();
                     for (int i = 0; i < args.length; i++) {
-                        final MethodParameter methodParameter = new MethodParameter(method, i);
+                        final MethodParameter parameter = new MethodParameter(method, i);
                         final Autowired autowired = parameters[i].getAnnotation(Autowired.class);
                         final boolean required = autowired != null && autowired.required();
-                        final DependencyDescriptor descriptor = new DependencyDescriptor(methodParameter, required, eager);
+                        final DependencyDescriptor descriptor = new DependencyDescriptor(parameter, required, eager);
                         try {
                             args[i] = f.resolveDependency(descriptor, null);
                         } catch (Exception x) {
-                            throw new BeanInstantiationException(bean.getClass(), "Unable to autowire " + methodParameter, x);
+                            throw new BeanInstantiationException(bean.getClass(), "Unable to autowire " + parameter, x);
                         }
                     }
                     try {

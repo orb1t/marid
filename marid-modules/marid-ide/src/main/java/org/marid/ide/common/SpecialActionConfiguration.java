@@ -61,7 +61,7 @@ public class SpecialActionConfiguration {
     public FxAction removeAction() {
         return new FxAction("mod", "mod", "Edit")
                 .bindText("Remove")
-                .setAccelerator(KeyCombination.valueOf("Ctrl+D"))
+                .setAccelerator(KeyCombination.valueOf("F8"))
                 .setIcon(D_MINUS_BOX)
                 .setDisabled(true);
     }

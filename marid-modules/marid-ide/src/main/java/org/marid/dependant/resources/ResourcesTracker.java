@@ -129,6 +129,10 @@ public class ResourcesTracker implements Closeable, LogSupport {
         thread.start();
     }
 
+    public Path resolve(String path) {
+        return resourcesPath.resolve(path);
+    }
+
     @Override
     public void close() throws IOException {
         watchService.close();
