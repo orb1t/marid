@@ -41,7 +41,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
 
@@ -120,11 +119,11 @@ public class BeanListTable extends CommonTableView<BeanData> {
             final MaridContextMenu contextMenu = actions.contextMenu(Collections::emptyMap);
             contextMenu.addOnPreShow(menu -> {
                 final BeanListActions beanListActions = beanListActionsProvider.getObject();
-                final Type type = beanListActions.profile.getType(row.getItem()).orElse(null);
-                if (type == null) {
+                final ResolvableType type = row.getItem().getType(beanListActions.profile);
+                if (type == ResolvableType.NONE) {
                     return;
                 }
-                final Class<?> rawType = ResolvableType.forType(type).getRawClass();
+                final Class<?> rawType = type.getRawClass();
                 menu.getItems().add(new SeparatorMenuItem());
                 menu.getItems().addAll(beanListActions.factoryItems(rawType, row.getItem()));
                 menu.getItems().addAll(beanListActions.editors(rawType, row.getItem()));

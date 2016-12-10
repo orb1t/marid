@@ -30,8 +30,7 @@ import org.marid.spring.xml.props.DProps;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
-import java.lang.reflect.Type;
+import org.springframework.core.ResolvableType;
 
 import static org.marid.l10n.L10n.s;
 
@@ -43,7 +42,7 @@ import static org.marid.l10n.L10n.s;
 public class PropEditorConfiguration {
 
     public DProps props;
-    public Type type;
+    public ResolvableType type;
 
     @Bean
     public DProps props() {
@@ -51,7 +50,7 @@ public class PropEditorConfiguration {
     }
 
     @Bean
-    public Type type() {
+    public ResolvableType type() {
         return type;
     }
 

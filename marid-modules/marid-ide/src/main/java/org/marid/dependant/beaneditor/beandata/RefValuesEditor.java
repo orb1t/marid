@@ -33,9 +33,8 @@ import org.marid.spring.xml.collection.DValue;
 import org.marid.spring.xml.ref.DRef;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ResolvableType;
 
-import java.lang.reflect.Type;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
@@ -48,9 +47,9 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
  */
 public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
 
-    private final Function<String, Optional<? extends Type>> typeFunc;
+    private final Function<String, ResolvableType> typeFunc;
 
-    public RefValuesEditor(ObservableList<T> items, Function<String, Optional<? extends Type>> typeFunc) {
+    public RefValuesEditor(ObservableList<T> items, Function<String, ResolvableType> typeFunc) {
         super(items);
         this.typeFunc = typeFunc;
         setEditable(false);
@@ -109,10 +108,9 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
             row.disableProperty().bind(row.itemProperty().isNull());
             row.setContextMenu(new MaridContextMenu(m -> {
                 if (row.getItem() != null) {
-                    final Type type = typeFunc.apply(row.getItem().getName()).orElse(null);
-                    final Type typeArg = type == null ? Object.class : type;
+                    final ResolvableType type = typeFunc.apply(row.getItem().getName());
                     m.getItems().clear();
-                    items.getObject(row.getItem().data, typeArg).addTo(m.getItems());
+                    items.getObject(row.getItem().data, type).addTo(m.getItems());
                 }
             }));
             return row;

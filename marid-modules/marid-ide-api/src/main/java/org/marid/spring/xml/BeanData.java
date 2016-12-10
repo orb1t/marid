@@ -22,16 +22,21 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.marid.ide.project.ProfileInfo;
 import org.marid.spring.xml.collection.DCollection;
 import org.marid.spring.xml.collection.DElement;
 import org.marid.spring.xml.meta.Meta;
 import org.marid.util.MaridCollections;
+import org.springframework.core.ResolvableType;
 
 import javax.xml.bind.annotation.*;
+import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.IntStream.range;
+import static org.marid.util.Reflections.parameterName;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -189,5 +194,28 @@ public final class BeanData extends DElement<BeanData> {
         return beanArgs.stream()
                 .filter(a -> a.name.isEqualTo(name).get())
                 .findAny();
+    }
+
+    public ResolvableType getType(ProfileInfo profileInfo) {
+        if (isFactoryBean()) {
+            return profileInfo.getConstructor(this).map(e -> forMethodReturnType((Method) e)).orElse(NONE);
+        } else {
+            return profileInfo.getClass(type.get()).map(ResolvableType::forClass).orElse(NONE);
+        }
+    }
+
+    public ResolvableType getArgType(ProfileInfo profileInfo, String name) {
+        return profileInfo.getConstructor(this)
+                .flatMap(e -> Stream.of(e.getParameters()).filter(p -> parameterName(p).equals(name)).findAny())
+                .map(p -> ResolvableType.forType(p.getParameterizedType()))
+                .orElse(NONE);
+    }
+
+    public ResolvableType getPropType(ProfileInfo profileInfo, String name) {
+        return profileInfo.getPropertyDescriptors(this)
+                .filter(d -> d.getName().equals(name))
+                .findAny()
+                .map(p -> forMethodParameter(p.getWriteMethod(), 0))
+                .orElse(NONE);
     }
 }

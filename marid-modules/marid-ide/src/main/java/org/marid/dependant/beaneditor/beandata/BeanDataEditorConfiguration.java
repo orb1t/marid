@@ -59,12 +59,12 @@ public class BeanDataEditorConfiguration {
 
     @Bean
     public RefValuesEditor<BeanArg> beanArgsEditor(BeanData beanData, ProjectProfile profile) {
-        return new RefValuesEditor<>(beanData.beanArgs, name -> profile.getArgType(beanData, name));
+        return new RefValuesEditor<>(beanData.beanArgs, name -> beanData.getArgType(profile, name));
     }
 
     @Bean
     public RefValuesEditor<BeanProp> beanPropsEditor(BeanData beanData, ProjectProfile profile) {
-        return new RefValuesEditor<>(beanData.properties, name -> profile.getPropType(beanData, name));
+        return new RefValuesEditor<>(beanData.properties, name -> beanData.getPropType(profile, name));
     }
 
     @Bean

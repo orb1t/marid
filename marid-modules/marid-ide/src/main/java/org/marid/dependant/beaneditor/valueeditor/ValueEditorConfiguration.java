@@ -27,8 +27,7 @@ import org.marid.spring.xml.collection.DValue;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.lang.reflect.Type;
+import org.springframework.core.ResolvableType;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -37,10 +36,10 @@ import java.lang.reflect.Type;
 public class ValueEditorConfiguration {
 
     public DValue value;
-    public Type type;
+    public ResolvableType type;
 
     @Bean
-    public Type type() {
+    public ResolvableType type() {
         return type;
     }
 

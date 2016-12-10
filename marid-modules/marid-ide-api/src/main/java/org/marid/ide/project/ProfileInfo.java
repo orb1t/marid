@@ -142,37 +142,6 @@ public interface ProfileInfo {
         }
     }
 
-    default Optional<? extends Type> getType(BeanData data) {
-        if (data.isFactoryBean()) {
-            return getConstructor(data).map(e -> ((Method) e).getGenericReturnType());
-        } else {
-            return getClass(data.type.get());
-        }
-    }
-
-    default Optional<? extends Type> getArgType(BeanData data, String name) {
-        final Optional<? extends Executable> c = getConstructor(data);
-        if (c.isPresent()) {
-            final Optional<Parameter> parameter = Stream.of(c.get().getParameters())
-                    .filter(p -> Reflections.parameterName(p).equals(name))
-                    .findAny();
-            if (parameter.isPresent()) {
-                return Optional.of(parameter.get().getParameterizedType());
-            }
-        }
-        return Optional.empty();
-    }
-
-    default Optional<? extends Type> getPropType(BeanData data, String name) {
-        final Optional<PropertyDescriptor> pd = getPropertyDescriptors(data)
-                .filter(d -> d.getName().equals(name))
-                .findAny();
-        if (pd.isPresent()) {
-            return Optional.of(pd.get().getWriteMethod().getGenericParameterTypes()[0]);
-        }
-        return Optional.empty();
-    }
-
     default void updateBeanDataConstructorArgs(BeanData data, Parameter[] parameters) {
         final List<BeanArg> args = Stream.of(parameters)
                 .map(p -> {

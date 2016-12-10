@@ -32,9 +32,9 @@ import org.marid.spring.xml.collection.DValue;
 import org.marid.spring.xml.props.DProps;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Type;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -52,7 +52,7 @@ public class ListEditor extends ListView<DElement<?>> {
     }
 
     @Autowired
-    public void initRowFactory(Type type, ObjectProvider<ValueMenuItems> items) {
+    public void initRowFactory(ResolvableType type, ObjectProvider<ValueMenuItems> items) {
         setCellFactory(param -> new TextFieldListCell<DElement<?>>() {
             @Override
             public void updateItem(DElement<?> item, boolean empty) {

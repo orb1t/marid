@@ -27,8 +27,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.ResolvableType;
 
-import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
@@ -39,7 +39,7 @@ import java.util.Map;
 public class ListEditorConfiguration {
 
     public DCollection<?> collection;
-    public Type type;
+    public ResolvableType type;
 
     @Bean
     public DCollection<?> collection() {
@@ -47,7 +47,7 @@ public class ListEditorConfiguration {
     }
 
     @Bean
-    public Type type() {
+    public ResolvableType type() {
         return type;
     }
 

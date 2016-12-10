@@ -23,7 +23,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.BeanListActions;
 import org.marid.dependant.beaneditor.BeanMetaInfoProvider;
@@ -44,11 +43,8 @@ import org.marid.spring.xml.ref.DRef;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.core.ResolvableType;
 
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import static java.beans.Introspector.decapitalize;
@@ -65,9 +61,9 @@ public class ValueMenuItems {
 
     private final List<MenuItem> items = new ArrayList<>();
     private final WritableValue<DElement<?>> element;
-    private final Type type;
+    private final ResolvableType type;
 
-    public ValueMenuItems(WritableValue<DElement<?>> element, Type type) {
+    public ValueMenuItems(WritableValue<DElement<?>> element, ResolvableType type) {
         this.element = element;
         this.type = type;
     }
@@ -102,8 +98,7 @@ public class ValueMenuItems {
     public void initRefValue(BeanMetaInfoProvider metaInfoProvider) {
         final List<MenuItem> refItems = new ArrayList<>();
         final BeanMetaInfoProvider.BeansMetaInfo metaInfo = metaInfoProvider.profileMetaInfo();
-        final ResolvableType resolvableType = ResolvableType.forType(type);
-        for (final BeanDefinitionHolder h : metaInfo.beans(resolvableType)) {
+        for (final BeanDefinitionHolder h : metaInfo.beans(type)) {
             final String name = h.getBeanName();
             final MenuItem item = new MenuItem(name, glyphIcon(FontIcon.M_BEENHERE, 16));
             item.setOnAction(event -> {
@@ -128,7 +123,7 @@ public class ValueMenuItems {
     public void initNewBean(BeanMetaInfoProvider provider, BeanListActions actions) {
         final List<MenuItem> refItems = new ArrayList<>();
         final BeanMetaInfoProvider.BeansMetaInfo metaInfo = provider.metaInfo();
-        metaInfo.beans(ResolvableType.forType(type)).forEach(h -> {
+        metaInfo.beans(type).forEach(h -> {
             final MenuItem item = new MenuItem(h.getBeanName(), glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
             item.setOnAction(event -> {
                 final BeanData data = actions.insertItem(h.getBeanName(), h.getBeanDefinition(), metaInfo);
@@ -151,8 +146,8 @@ public class ValueMenuItems {
 
     @OrderedInit(5)
     public void initNewBean(ProjectProfile profile, BeanListActions actions) {
-        if (type instanceof Class<?>) {
-            final Class<?> c = (Class<?>) type;
+        if (type != ResolvableType.NONE) {
+            final Class<?> c = type.getRawClass();
             if ((c.getModifiers() & (INTERFACE | PRIVATE | PROTECTED | ABSTRACT)) == 0) {
                 final MenuItem item = new MenuItem("New bean from class", glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
                 item.setOnAction(event -> {
@@ -172,7 +167,7 @@ public class ValueMenuItems {
 
     @OrderedInit(6)
     public void initPropertiesEdit(IdeDependants dependants) {
-        if (type != null && TypeUtils.isAssignable(type, Properties.class)) {
+        if (ResolvableType.forClass(Properties.class).isAssignableFrom(type)) {
             final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon(M_MODE_EDIT, 16));
             mi.setOnAction(e -> {
                 if (!(element.getValue() instanceof DProps)) {
@@ -190,19 +185,14 @@ public class ValueMenuItems {
 
     @OrderedInit(7)
     public void initListEdit(IdeDependants dependants) {
-        if (type != null && TypeUtils.isAssignable(type, List.class)) {
+        if (ResolvableType.forClass(List.class).isAssignableFrom(type)) {
             final MenuItem mi = new MenuItem(s("Edit list..."), glyphIcon(M_MODE_EDIT, 16));
             mi.setOnAction(event -> {
                 if (!(element.getValue() instanceof DList)) {
                     final DList list = new DList();
-                    final Map<TypeVariable<?>, Type> map = TypeUtils.getTypeArguments(type, List.class);
-                    if (map != null) {
-                        map.forEach((v, t) -> {
-                            final Class<?> rawType = TypeUtils.getRawType(v, t);
-                            if (rawType != null) {
-                                list.valueType.setValue(rawType.getName());
-                            }
-                        });
+                    final ResolvableType[] generics = type.as(List.class).getGenerics();
+                    if (generics.length > 0 && generics[0] != ResolvableType.NONE) {
+                        list.valueType.set(generics[0].getRawClass().getName());
                     }
                     element.setValue(list);
                 }
@@ -218,15 +208,13 @@ public class ValueMenuItems {
 
     @OrderedInit(8)
     public void initArrayEdit(IdeDependants dependants) {
-        if (type != null && TypeUtils.isArrayType(type)) {
+        if (type.isArray()) {
             final MenuItem mi = new MenuItem(s("Edit array..."), glyphIcon(M_MODE_EDIT, 16));
             mi.setOnAction(event -> {
                 if (!(element.getValue() instanceof DArray)) {
                     final DArray list = new DArray();
-                    final Type componentType = TypeUtils.getArrayComponentType(type);
-                    final Class<?> rawType = TypeUtils.getRawType(componentType, null);
-                    if (rawType != null) {
-                        list.valueType.setValue(rawType.getName());
+                    if (type.getComponentType() != ResolvableType.NONE) {
+                        list.valueType.setValue(type.getComponentType().getRawClass().getName());
                     }
                     element.setValue(list);
                 }

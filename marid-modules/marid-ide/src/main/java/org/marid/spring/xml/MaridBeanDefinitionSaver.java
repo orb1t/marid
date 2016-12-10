@@ -23,7 +23,6 @@ import org.marid.misc.Calls;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -43,8 +42,6 @@ public class MaridBeanDefinitionSaver {
     }
 
     public static void write(OutputStream outputStream, BeanFile beanFile) throws IOException {
-        final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
         try {
             final Marshaller marshaller = CONTEXT.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
