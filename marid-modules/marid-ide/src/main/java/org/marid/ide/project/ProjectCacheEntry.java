@@ -23,6 +23,7 @@ import org.marid.misc.Calls;
 import org.marid.misc.Casts;
 
 import javax.annotation.Nonnull;
+import java.beans.Introspector;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -62,6 +63,7 @@ public class ProjectCacheEntry implements AutoCloseable, LogSupport {
     public void update() throws Exception {
         close();
         classLoader = classLoader();
+        Introspector.flushCaches();
     }
 
     public Optional<Class<?>> getClass(String type) {

@@ -170,13 +170,13 @@ public class ValueMenuItems {
         if (ResolvableType.forClass(Properties.class).isAssignableFrom(type)) {
             final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon(M_MODE_EDIT, 16));
             mi.setOnAction(e -> {
-                if (!(element.getValue() instanceof DProps)) {
-                    element.setValue(new DProps());
+                final DProps props;
+                if (element.getValue() instanceof DProps) {
+                    props = (DProps) element.getValue();
+                } else {
+                    element.setValue(props = new DProps());
                 }
-                dependants.start("propsEditor", PropEditorConfiguration.class, c -> {
-                    c.props = (DProps) element.getValue();
-                    c.type = type;
-                });
+                dependants.start("propsEditor", PropEditorConfiguration.class, c -> c.props = props);
             });
             items.add(mi);
             items.add(new SeparatorMenuItem());
@@ -188,13 +188,15 @@ public class ValueMenuItems {
         if (ResolvableType.forClass(List.class).isAssignableFrom(type)) {
             final MenuItem mi = new MenuItem(s("Edit list..."), glyphIcon(M_MODE_EDIT, 16));
             mi.setOnAction(event -> {
-                if (!(element.getValue() instanceof DList)) {
-                    final DList list = new DList();
-                    final ResolvableType[] generics = type.as(List.class).getGenerics();
-                    if (generics.length > 0 && generics[0] != ResolvableType.NONE) {
-                        list.valueType.set(generics[0].getRawClass().getName());
-                    }
-                    element.setValue(list);
+                final DList list;
+                if (element.getValue() instanceof DList) {
+                    list = (DList) element.getValue();
+                } else {
+                    element.setValue(list = new DList());
+                }
+                final ResolvableType[] generics = type.as(List.class).getGenerics();
+                if (generics.length > 0 && generics[0] != ResolvableType.NONE) {
+                    list.valueType.set(generics[0].getRawClass().getName());
                 }
                 dependants.start("listEditor", ListEditorConfiguration.class, c -> {
                     c.collection = (DList) element.getValue();
@@ -211,15 +213,17 @@ public class ValueMenuItems {
         if (type.isArray()) {
             final MenuItem mi = new MenuItem(s("Edit array..."), glyphIcon(M_MODE_EDIT, 16));
             mi.setOnAction(event -> {
-                if (!(element.getValue() instanceof DArray)) {
-                    final DArray list = new DArray();
-                    if (type.getComponentType() != ResolvableType.NONE) {
-                        list.valueType.setValue(type.getComponentType().getRawClass().getName());
-                    }
-                    element.setValue(list);
+                final DArray array;
+                if (element.getValue() instanceof DArray) {
+                    array = (DArray) element.getValue();
+                } else {
+                    element.setValue(array = new DArray());
+                }
+                if (type.getComponentType() != ResolvableType.NONE) {
+                    array.valueType.setValue(type.getComponentType().getRawClass().getName());
                 }
                 dependants.start("arrayEditor", ListEditorConfiguration.class, c -> {
-                    c.collection = (DArray) element.getValue();
+                    c.collection = array;
                     c.type = type;
                 });
             });

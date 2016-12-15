@@ -16,16 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.beandata;
+package org.marid.hmi.screen;
+
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.marid.test.NormalTests;
+
+import java.beans.IntrospectionException;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
-public interface BeanEditor {
+@Category({NormalTests.class})
+public class HmiScreenBeanInfoTest {
 
-    boolean isCompatibe(BeanEditorContext beanEditorContext);
-
-    String getName();
-
-    void run(BeanEditorContext context);
+    @Test
+    public void propertyTest() throws IntrospectionException {
+    }
 }

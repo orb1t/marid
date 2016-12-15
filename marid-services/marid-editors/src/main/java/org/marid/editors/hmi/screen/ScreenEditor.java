@@ -18,28 +18,18 @@
 
 package org.marid.editors.hmi.screen;
 
-import org.marid.hmi.screen.HmiScreen;
-import org.marid.spring.beandata.BeanEditor;
 import org.marid.spring.beandata.BeanEditorContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ScreenEditor implements BeanEditor {
+@Configuration("HMI Screen Editor")
+public class ScreenEditor {
 
-    @Override
-    public boolean isCompatibe(BeanEditorContext beanEditorContext) {
-        return HmiScreen.class.isAssignableFrom(beanEditorContext.getType());
-    }
-
-    @Override
-    public String getName() {
-        return "Screen Editor";
-    }
-
-    @Override
-    public void run(BeanEditorContext context) {
-        final ScreenEditorStage stage = new ScreenEditorStage(context);
-        stage.show();
+    @Bean(initMethod = "show", destroyMethod = "close")
+    public ScreenEditorStage stage(BeanEditorContext beanEditorContext) {
+        return new ScreenEditorStage(beanEditorContext);
     }
 }

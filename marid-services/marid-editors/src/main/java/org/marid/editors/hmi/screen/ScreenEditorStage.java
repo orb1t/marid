@@ -36,6 +36,7 @@ import org.marid.logging.LogSupport;
 import org.marid.spring.beandata.BeanEditorContext;
 import org.marid.spring.xml.BeanProp;
 import org.marid.spring.xml.collection.DValue;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.net.URL;
@@ -45,6 +46,7 @@ import java.nio.file.Paths;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component
 public class ScreenEditorStage extends Stage implements LogSupport {
 
     final BeanEditorContext context;

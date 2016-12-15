@@ -16,30 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.editors.window.common;
+package org.marid.hmi.screen;
 
-import javafx.stage.Window;
-import org.marid.spring.beandata.BeanEditor;
-import org.marid.spring.beandata.BeanEditorContext;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.marid.test.NormalTests;
+
+import java.beans.BeanInfo;
+import java.beans.Introspector;
 
 /**
  * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
-public class WindowCommonEditor implements BeanEditor {
+@Category({NormalTests.class})
+public class HmiScreenBeanInfoTest {
 
-    @Override
-    public boolean isCompatibe(BeanEditorContext beanEditorContext) {
-        return Window.class.isAssignableFrom(beanEditorContext.getType());
-    }
-
-    @Override
-    public String getName() {
-        return "Common window configuration editor";
-    }
-
-    @Override
-    public void run(BeanEditorContext context) {
-        final WindowCommonEditorStage stage = new WindowCommonEditorStage(context.getBeanData());
-        stage.show();
+    @Test
+    public void testDescriptor() throws Exception {
+        final BeanInfo beanInfo = Introspector.getBeanInfo(HmiScreen.class);
+        System.out.println(beanInfo);
     }
 }

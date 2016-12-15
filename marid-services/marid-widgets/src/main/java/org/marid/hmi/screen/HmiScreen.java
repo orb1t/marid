@@ -18,24 +18,42 @@
 
 package org.marid.hmi.screen;
 
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.NoSuchFileException;
+import java.io.UncheckedIOException;
 import java.util.Scanner;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class HmiScreen extends StackPane {
+public class HmiScreen extends BorderPane {
 
-    private final WebView webView = new WebView();
+    private final WebView webView;
 
     public HmiScreen() {
-        getChildren().add(webView);
+        setCenter(webView = new WebView());
         webView.getEngine().setJavaScriptEnabled(true);
+    }
+
+    public void setRelativeUrl(String url) {
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        try (final InputStream is = requireNonNull(classLoader.getResourceAsStream(url))) {
+            try (final Scanner scanner = new Scanner(is, "UTF-8")) {
+                final StringBuilder builder = new StringBuilder();
+                while (scanner.hasNextLine()) {
+                    builder.append(scanner.nextLine());
+                    builder.append('\n');
+                }
+                webView.getEngine().loadContent(builder.toString(), "image/svg+xml");
+            }
+        } catch (IOException x) {
+            throw new UncheckedIOException(x);
+        }
     }
 
     public double getZoom() {
@@ -50,20 +68,7 @@ public class HmiScreen extends StackPane {
         webView.getEngine().load(url);
     }
 
-    public void setRelativeLocation(String relativeUrl) throws IOException {
-        try (final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(relativeUrl)) {
-            if (is != null) {
-                try (final Scanner scanner = new Scanner(is, "UTF-8")) {
-                    final StringBuilder builder = new StringBuilder();
-                    while (scanner.hasNextLine()) {
-                        builder.append(scanner.nextLine());
-                        builder.append('\n');
-                    }
-                    webView.getEngine().loadContent(builder.toString(), "image/svg+xml");
-                }
-            } else {
-                throw new NoSuchFileException(relativeUrl);
-            }
-        }
+    public WebView getWebView() {
+        return webView;
     }
 }

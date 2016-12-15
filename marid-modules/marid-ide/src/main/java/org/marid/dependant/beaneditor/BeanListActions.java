@@ -20,12 +20,15 @@ package org.marid.dependant.beaneditor;
 
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import org.marid.Ide;
+import org.marid.IdeDependants;
 import org.marid.ide.project.ProfileInfo;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
-import org.marid.spring.beandata.BeanEditor;
 import org.marid.spring.beandata.BeanEditorContext;
 import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
@@ -40,17 +43,26 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueH
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
+import java.beans.BeanDescriptor;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.net.URLClassLoader;
+import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
@@ -62,11 +74,13 @@ public class BeanListActions {
 
     final ProjectProfile profile;
 
+    private final IdeDependants dependants;
     private final BeanListTable table;
 
     @Autowired
-    public BeanListActions(ProjectProfile profile, BeanListTable table) {
+    public BeanListActions(ProjectProfile profile, IdeDependants dependants, BeanListTable table) {
         this.profile = profile;
+        this.dependants = dependants;
         this.table = table;
     }
 
@@ -159,28 +173,28 @@ public class BeanListActions {
 
     public List<MenuItem> factoryItems(Class<?> type, BeanData beanData) {
         final List<MenuItem> items = new ArrayList<>();
-        final Set<Method> getters = Stream.of(type.getMethods())
+        final Set<Method> getters = of(type.getMethods())
                 .filter(m -> m.getReturnType() != void.class)
                 .filter(m -> m.getDeclaringClass() != Object.class)
                 .filter(m -> m.getParameterCount() == 0)
                 .sorted(Comparator.comparing(Method::getName))
                 .filter(m -> m.getName().startsWith("get") || m.getName().startsWith("is"))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        final Set<Method> producers = Stream.of(type.getMethods())
+        final Set<Method> producers = of(type.getMethods())
                 .filter(m -> m.getReturnType() != void.class)
                 .filter(m -> m.getDeclaringClass() != Object.class)
                 .filter(m -> m.getParameterCount() == 0)
                 .filter(m -> !getters.contains(m))
                 .sorted(Comparator.comparing(Method::getName))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        final Set<Method> parameterizedProducers = Stream.of(type.getMethods())
+        final Set<Method> parameterizedProducers = of(type.getMethods())
                 .filter(m -> m.getReturnType() != void.class)
                 .filter(m -> m.getDeclaringClass() != Object.class)
                 .filter(m -> m.getParameterCount() > 0)
                 .sorted(Comparator.comparing(Method::getName))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         final Function<Method, MenuItem> menuItemFunction = method -> {
-            final String name = Stream.of(method.getParameters())
+            final String name = of(method.getParameters())
                     .map(Parameter::getParameterizedType)
                     .map(t -> {
                         if (t instanceof Class<?>) {
@@ -230,20 +244,45 @@ public class BeanListActions {
     }
 
     public List<MenuItem> editors(Class<?> type, BeanData beanData) {
-        final List<MenuItem> items = new ArrayList<>();
-        final URLClassLoader classLoader = profile.getClassLoader();
-        final BeanEditorContext beanEditorContext = new BeanEditorContextImpl(type, beanData);
-        for (final BeanEditor editor : ServiceLoader.load(BeanEditor.class, classLoader)) {
-            if (editor.isCompatibe(beanEditorContext)) {
-                final MenuItem menuItem = new MenuItem(s(editor.getName()));
-                menuItem.setOnAction(event -> {
-                    profile.updateBeanData(beanData);
-                    editor.run(beanEditorContext);
-                });
-                items.add(menuItem);
+        try {
+            final BeanInfo beanInfo = Introspector.getBeanInfo(type);
+            final BeanInfo[] additional = beanInfo.getAdditionalBeanInfo();
+            final Set<BeanDescriptor> set = concat(of(beanInfo), additional == null ? Stream.empty() : of(additional))
+                    .map(BeanInfo::getBeanDescriptor)
+                    .filter(d -> d != null && d.getCustomizerClass() != null)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            if (set.isEmpty()) {
+                return Collections.emptyList();
+            } else {
+                final BeanEditorContext beanEditorContext = new BeanEditorContextImpl(type, beanData);
+                return set.stream()
+                        .map(d -> {
+                            final Class<?> t = d.getCustomizerClass();
+                            final Configuration c = t.getAnnotation(Configuration.class);
+                            final String title = c.value().isEmpty() ? t.getSimpleName() : c.value();
+                            final URL url = (URL) d.getValue("icon16");
+                            final MenuItem menuItem = new MenuItem();
+                            menuItem.textProperty().bind(ls(title));
+                            if (url != null) {
+                                menuItem.setGraphic(new ImageView(new Image(url.toExternalForm())));
+                            }
+                            menuItem.setOnAction(event -> {
+                                profile.updateBeanData(beanData);
+                                dependants.start(t, title, ctx -> {
+                                    ctx.setClassLoader(profile.getClassLoader());
+                                    ctx.getBeanFactory().registerSingleton("context", beanEditorContext);
+                                });
+                            });
+                            return menuItem;
+                        })
+                        .reduce(new ArrayList<>(singleton(new SeparatorMenuItem())), (a, e) -> {
+                            a.add(e);
+                            return a;
+                        }, (a1, a2) -> a2);
             }
+        } catch (IntrospectionException x) {
+            return Collections.emptyList();
         }
-        return items;
     }
 
     private class BeanEditorContextImpl implements BeanEditorContext {
