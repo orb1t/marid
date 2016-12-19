@@ -18,6 +18,8 @@
 
 package org.marid.ide.project;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -36,6 +38,7 @@ import org.marid.logging.LogSupport;
 import org.marid.spring.xml.BeanFile;
 import org.marid.spring.xml.MaridBeanDefinitionLoader;
 import org.marid.spring.xml.MaridBeanDefinitionSaver;
+import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -46,7 +49,9 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -56,7 +61,7 @@ import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProjectProfile implements LogSupport, ProfileInfo {
+public class ProjectProfile implements LogSupport, ProfileInfo, Observable {
 
     final Model model;
     final Path path;
@@ -75,6 +80,8 @@ public class ProjectProfile implements LogSupport, ProfileInfo {
     final ObservableList<Pair<Path, BeanFile>> beanFiles;
     final ProjectCacheEntry cacheEntry;
     final BooleanProperty hmi;
+
+    private final List<InvalidationListener> invalidationListeners = new CopyOnWriteArrayList<>();
 
     ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -118,6 +125,14 @@ public class ProjectProfile implements LogSupport, ProfileInfo {
             name += "_new";
         }
         return name;
+    }
+
+    void update() throws Exception {
+        cacheEntry.update();
+        invalidationListeners.forEach(listener -> {
+            ResolvableType.clearCache();
+            listener.invalidated(this);
+        });
     }
 
     private void init() {
@@ -338,5 +353,15 @@ public class ProjectProfile implements LogSupport, ProfileInfo {
     @Override
     public String toString() {
         return getName();
+    }
+
+    @Override
+    public void addListener(InvalidationListener listener) {
+        invalidationListeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(InvalidationListener listener) {
+        invalidationListeners.remove(listener);
     }
 }

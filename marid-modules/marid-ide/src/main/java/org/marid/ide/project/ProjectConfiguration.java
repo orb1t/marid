@@ -80,7 +80,7 @@ public class ProjectConfiguration implements LogSupport {
                     mavenBuilder.getObject().build(profile, result -> {
                         try {
                             log(INFO, "[{0}] Built {1}", profile, result);
-                            profile.cacheEntry.update();
+                            profile.update();
                             log(INFO, "[{0}] Updated", profile);
                         } catch (Exception x) {
                             log(WARNING, "Unable to update cache {0}", x, profile);
