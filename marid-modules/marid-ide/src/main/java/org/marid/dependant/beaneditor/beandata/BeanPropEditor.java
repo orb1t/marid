@@ -26,7 +26,7 @@ import javafx.scene.control.TableView;
 import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.spring.annotation.OrderedInit;
-import org.marid.spring.xml.RefValue;
+import org.marid.spring.xml.BeanProp;
 import org.marid.spring.xml.collection.DCollection;
 import org.marid.spring.xml.collection.DElement;
 import org.marid.spring.xml.collection.DValue;
@@ -45,11 +45,11 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
+public class BeanPropEditor extends TableView<BeanProp> {
 
     private final Function<String, ResolvableType> typeFunc;
 
-    public RefValuesEditor(ObservableList<T> items, Function<String, ResolvableType> typeFunc) {
+    public BeanPropEditor(ObservableList<BeanProp> items, Function<String, ResolvableType> typeFunc) {
         super(items);
         this.typeFunc = typeFunc;
         setEditable(false);
@@ -59,7 +59,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
 
     @OrderedInit(1)
     public void nameColumn() {
-        final TableColumn<T, String> col = new TableColumn<>();
+        final TableColumn<BeanProp, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Name"));
         col.setPrefWidth(200);
         col.setMaxWidth(400);
@@ -69,7 +69,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
 
     @OrderedInit(2)
     public void typeColumn() {
-        final TableColumn<T, String> col = new TableColumn<>();
+        final TableColumn<BeanProp, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Type"));
         col.setPrefWidth(250);
         col.setMaxWidth(520);
@@ -79,7 +79,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
 
     @OrderedInit(3)
     public void valueColumn() {
-        final TableColumn<T, Label> col = new TableColumn<>();
+        final TableColumn<BeanProp, Label> col = new TableColumn<>();
         col.textProperty().bind(ls("Value"));
         col.setPrefWidth(500);
         col.setMaxWidth(1500);
@@ -104,7 +104,7 @@ public class RefValuesEditor<T extends RefValue<T>> extends TableView<T> {
     @Autowired
     public void initContextMenu(ObjectProvider<ValueMenuItems> items) {
         setRowFactory(param -> {
-            final TableRow<T> row = new TableRow<>();
+            final TableRow<BeanProp> row = new TableRow<>();
             row.disableProperty().bind(row.itemProperty().isNull());
             row.setContextMenu(new MaridContextMenu(m -> {
                 if (row.getItem() != null) {

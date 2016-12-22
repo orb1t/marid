@@ -18,6 +18,7 @@
 
 package org.marid.beans;
 
+import javafx.beans.NamedArg;
 import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nonnull;
@@ -46,12 +47,16 @@ public class BeanIntrospector {
         final List<ResolvableType> types = new ArrayList<>(Collections.singletonList(type));
         final Class<?> descriptorClass = loadClass(classLoader, type.getRawClass().getName() + "Descriptor");
         if (descriptorClass != null) {
-            final ResolvableType descriptorType = resolve(descriptorClass, type);
-            types.add(descriptorType);
-            for (final Type itf : descriptorClass.getGenericInterfaces()) {
-                final ResolvableType itfType = ResolvableType.forType(itf);
-                if (itfType.getRawClass().isAnnotationPresent(Info.class)) {
-                    types.add(ResolvableType.forType(itf, descriptorType));
+            final ResolvableType descriptorType = type.hasGenerics()
+                    ? ResolvableType.forClassWithGenerics(descriptorClass, type.getGenerics())
+                    : ResolvableType.forClass(descriptorClass);
+            if (type.isAssignableFrom(descriptorType)) {
+                types.add(descriptorType);
+                for (final Type itf : descriptorClass.getGenericInterfaces()) {
+                    final ResolvableType itfType = ResolvableType.forType(itf);
+                    if (itfType.getRawClass().isAnnotationPresent(Info.class)) {
+                        types.add(ResolvableType.forType(itf, descriptorType));
+                    }
                 }
             }
         }
@@ -62,15 +67,9 @@ public class BeanIntrospector {
         final String desc = classInfos.stream().map(i -> i.description).filter(Objects::nonNull).findAny().orElse(null);
         final String icon = classInfos.stream().map(i -> i.icon).filter(Objects::nonNull).findAny().orElse(null);
         final Class<?> editor = classInfos.stream().map(i -> i.editor).filter(Objects::nonNull).findAny().orElse(null);
-        final ConstructorInfo[] cs = of(head.constructorInfos).map(c -> merge(c, tail)).toArray(ConstructorInfo[]::new);
-        final MethodInfo[] ms = of(head.methodInfos).map(m -> merge(m, tail)).toArray(MethodInfo[]::new);
+        final MethodInfo[] cs = of(head.constructorInfos).map(c -> cm(c, tail)).toArray(MethodInfo[]::new);
+        final MethodInfo[] ms = of(head.methodInfos).map(m -> mm(m, tail)).toArray(MethodInfo[]::new);
         return new ClassInfo(head.name, head.type, title, desc, icon, editor, cs, ms);
-    }
-
-    private static ResolvableType resolve(@Nonnull Class<?> rawClass, @Nonnull ResolvableType type) {
-        return type.hasGenerics()
-                ? ResolvableType.forClassWithGenerics(rawClass, type.getGenerics())
-                : ResolvableType.forClass(rawClass);
     }
 
     private static Class<?> loadClass(ClassLoader classLoader, String name) {
@@ -95,17 +94,6 @@ public class BeanIntrospector {
         return range(0, p1.length).mapToObj(i -> merge(p1[i], p2[i])).toArray(TypeInfo[]::new);
     }
 
-    private static ConstructorInfo merge(@Nonnull ConstructorInfo c1, @Nonnull ConstructorInfo c2) {
-        return new ConstructorInfo(
-                c1.name,
-                c1.type,
-                c2.title != null ? c2.title : c1.title,
-                c2.description != null ? c2.description : c1.description,
-                c2.icon != null ? c2.icon : c1.icon,
-                c2.editor != null ? c2.editor : c1.editor,
-                merge(c1.parameters, c2.parameters));
-    }
-
     private static MethodInfo merge(@Nonnull MethodInfo m1, @Nonnull MethodInfo m2) {
         return new MethodInfo(
                 m1.name,
@@ -117,30 +105,38 @@ public class BeanIntrospector {
                 merge(m1.parameters, m2.parameters));
     }
 
-    private static MethodInfo merge(@Nonnull MethodInfo info, @Nonnull List<ClassInfo> classInfos) {
+    private static MethodInfo mm(@Nonnull MethodInfo info, @Nonnull List<ClassInfo> classInfos) {
         return classInfos.stream()
                 .flatMap(c -> of(c.methodInfos))
-                .filter(info::equals)
+                .filter(m -> m.name.equals(info.name))
+                .filter(m -> info.parameters.length == m.parameters.length)
+                .filter(m -> range(0, m.parameters.length)
+                        .allMatch(i -> m.parameters[i].type.getRawClass() == info.parameters[i].type.getRawClass()))
                 .reduce(info, BeanIntrospector::merge);
     }
 
-    private static ConstructorInfo merge(@Nonnull ConstructorInfo info, @Nonnull List<ClassInfo> classInfos) {
+    private static MethodInfo cm(@Nonnull MethodInfo info, @Nonnull List<ClassInfo> classInfos) {
         return classInfos.stream()
                 .flatMap(c -> of(c.constructorInfos))
-                .filter(info::equals)
+                .filter(m -> info.parameters.length == m.parameters.length)
+                .filter(m -> range(0, m.parameters.length)
+                        .allMatch(i -> m.parameters[i].type.getRawClass() == info.parameters[i].type.getRawClass()))
                 .reduce(info, BeanIntrospector::merge);
     }
 
     private static TypeInfo p(@Nonnull Parameter parameter, @Nonnull ResolvableType type) {
         final Info info = parameter.getAnnotation(Info.class);
         final ResolvableType paramType = forType(parameter.getParameterizedType(), type);
-        return new TypeInfo(parameter.getName(), paramType, title(info), desc(info), icon(info), editor(info));
+        final String name = parameter.isAnnotationPresent(NamedArg.class)
+                ? parameter.getAnnotation(NamedArg.class).value()
+                : parameter.getName();
+        return new TypeInfo(name, paramType, title(info), desc(info), icon(info), editor(info));
     }
 
-    private static ConstructorInfo c(@Nonnull Constructor<?> constructor, @Nonnull ResolvableType type) {
+    private static MethodInfo c(@Nonnull Constructor<?> constructor, @Nonnull ResolvableType type) {
         final Info info = constructor.getAnnotation(Info.class);
         final TypeInfo[] ps = of(constructor.getParameters()).map(p -> p(p, type)).toArray(TypeInfo[]::new);
-        return new ConstructorInfo("init", type, title(info), desc(info), icon(info), editor(info), ps);
+        return new MethodInfo("init", type, title(info), desc(info), icon(info), editor(info), ps);
     }
 
     private static MethodInfo m(@Nonnull Method method, @Nonnull ResolvableType type) {
@@ -153,7 +149,7 @@ public class BeanIntrospector {
     private static ClassInfo classInfo(@Nonnull ResolvableType type) {
         final Class<?> rc = type.getRawClass();
         final Info info = rc.getAnnotation(Info.class);
-        final ConstructorInfo[] cs = of(rc.getConstructors()).map(c -> c(c, type)).toArray(ConstructorInfo[]::new);
+        final MethodInfo[] cs = of(rc.getConstructors()).map(c -> c(c, type)).toArray(MethodInfo[]::new);
         final MethodInfo[] ms = of(rc.getMethods()).map(m -> m(m, type)).toArray(MethodInfo[]::new);
         return new ClassInfo(rc.getName(), type, title(info), desc(info), icon(info), editor(info), cs, ms);
     }

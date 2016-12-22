@@ -18,6 +18,7 @@
 
 package org.marid.spring.xml.props;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.spring.xml.AbstractData;
@@ -35,8 +36,9 @@ public final class DPropEntry extends AbstractData<DPropEntry> {
     public final StringProperty value = new SimpleStringProperty(this, "value");
 
     public DPropEntry() {
-        key.addListener(this::invalidate);
-        value.addListener(this::invalidate);
+        final InvalidationListener invalidationListener = o -> invalidate();
+        key.addListener(invalidationListener);
+        value.addListener(invalidationListener);
     }
 
     @XmlAttribute(name = "key")

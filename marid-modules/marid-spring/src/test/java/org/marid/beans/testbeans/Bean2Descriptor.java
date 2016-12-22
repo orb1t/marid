@@ -16,14 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml;
+package org.marid.beans.testbeans;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import org.marid.beans.Info;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
-@XmlRootElement(name = "constructor-arg")
-public final class BeanArg extends RefValue<BeanArg> {
+public class Bean2Descriptor<T> extends Bean2<T> {
 
+    public Bean2Descriptor(@Info(title = "argument") T arg) {
+        super(arg);
+    }
+
+    @Info(description = "X getter")
+    @Override
+    T getX() {
+        return super.getX();
+    }
 }

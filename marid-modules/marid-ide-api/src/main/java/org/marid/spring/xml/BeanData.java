@@ -18,6 +18,7 @@
 
 package org.marid.spring.xml;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -42,7 +43,7 @@ import static org.springframework.core.ResolvableType.*;
  * @author Dmitry Ovchinnikov
  */
 @XmlRootElement(name = "bean")
-@XmlSeeAlso({BeanProp.class, BeanArg.class, DCollection.class, Meta.class})
+@XmlSeeAlso({BeanProp.class, DCollection.class, Meta.class})
 @XmlAccessorType(XmlAccessType.NONE)
 public final class BeanData extends DElement<BeanData> {
 
@@ -54,23 +55,24 @@ public final class BeanData extends DElement<BeanData> {
     public final StringProperty factoryMethod = new SimpleStringProperty(this, "factory-method");
     public final StringProperty lazyInit = new SimpleStringProperty(this, "lazy-init", "default");
 
-    public final ObservableList<BeanArg> beanArgs = MaridCollections.list();
+    public final ObservableList<BeanProp> beanArgs = MaridCollections.list();
     public final ObservableList<BeanProp> properties = MaridCollections.list();
 
     public final ObservableList<String> initTriggers = FXCollections.observableArrayList();
     public final ObservableList<String> destroyTriggers = FXCollections.observableArrayList();
 
     public BeanData() {
-        type.addListener(this::invalidate);
-        name.addListener(this::invalidate);
-        initMethod.addListener(this::invalidate);
-        destroyMethod.addListener(this::invalidate);
-        factoryMethod.addListener(this::invalidate);
-        factoryBean.addListener(this::invalidate);
-        lazyInit.addListener(this::invalidate);
+        final InvalidationListener invalidationListener = o -> invalidate();
+        type.addListener(invalidationListener);
+        name.addListener(invalidationListener);
+        initMethod.addListener(invalidationListener);
+        destroyMethod.addListener(invalidationListener);
+        factoryMethod.addListener(invalidationListener);
+        factoryBean.addListener(invalidationListener);
+        lazyInit.addListener(invalidationListener);
 
-        beanArgs.addListener(this::invalidate);
-        properties.addListener(this::invalidate);
+        beanArgs.addListener(invalidationListener);
+        properties.addListener(invalidationListener);
     }
 
     @XmlAttribute(name = "class")
@@ -137,11 +139,11 @@ public final class BeanData extends DElement<BeanData> {
     }
 
     @XmlElement(name = "constructor-arg")
-    public BeanArg[] getBeanArgs() {
-        return beanArgs.stream().filter(a -> !a.isEmpty()).toArray(BeanArg[]::new);
+    public BeanProp[] getBeanArgs() {
+        return beanArgs.stream().filter(a -> !a.isEmpty()).toArray(BeanProp[]::new);
     }
 
-    public void setBeanArgs(BeanArg[] beanArgs) {
+    public void setBeanArgs(BeanProp[] beanArgs) {
         this.beanArgs.addAll(beanArgs);
     }
 
@@ -190,7 +192,7 @@ public final class BeanData extends DElement<BeanData> {
                 .findAny();
     }
 
-    public Optional<BeanArg> arg(String name) {
+    public Optional<BeanProp> arg(String name) {
         return beanArgs.stream()
                 .filter(a -> a.name.isEqualTo(name).get())
                 .findAny();

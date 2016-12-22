@@ -36,7 +36,7 @@ public final class DValue extends DElement<DValue> {
     public final StringProperty value = new SimpleStringProperty(this, "value");
 
     public DValue() {
-        value.addListener(this::invalidate);
+        value.addListener(o -> invalidate());
     }
 
     public DValue(String value) {

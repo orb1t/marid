@@ -38,13 +38,13 @@ import static java.util.stream.Stream.of;
 public class ClassInfo extends TypeInfo {
 
     @Nonnull
-    public final ConstructorInfo[] constructorInfos;
+    public final MethodInfo[] constructorInfos;
 
     @Nonnull
     public final MethodInfo[] methodInfos;
 
     @Nonnull
-    public final PropertyInfo[] propertyInfos;
+    public final TypeInfo[] propertyInfos;
 
     public ClassInfo(@Nonnull String name,
                      @Nonnull ResolvableType type,
@@ -52,7 +52,7 @@ public class ClassInfo extends TypeInfo {
                      @Nullable String description,
                      @Nullable String icon,
                      @Nullable Class<?> editor,
-                     @Nonnull ConstructorInfo[] constructorInfos,
+                     @Nonnull MethodInfo[] constructorInfos,
                      @Nonnull MethodInfo[] methodInfos) {
         super(name, type, title, description, icon, editor);
         this.constructorInfos = constructorInfos;
@@ -68,7 +68,7 @@ public class ClassInfo extends TypeInfo {
         }
         propertyInfos = properties.entrySet().stream()
                 .map(e -> merge(e.getKey(), e.getValue()))
-                .toArray(PropertyInfo[]::new);
+                .toArray(TypeInfo[]::new);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ClassInfo extends TypeInfo {
         consumer.accept("properties", of(propertyInfos).collect(toCollection(LinkedHashSet::new)));
     }
 
-    private static PropertyInfo merge(String pName, MethodInfo[] methodInfos) {
+    private static TypeInfo merge(String pName, MethodInfo[] methodInfos) {
         final ResolvableType pType = methodInfos[0] != null ? methodInfos[0].type : methodInfos[1].type;
         final Function<Function<MethodInfo, String>, String> func = f -> {
             if (methodInfos[0] != null && f.apply(methodInfos[0]) != null) {
@@ -101,6 +101,6 @@ public class ClassInfo extends TypeInfo {
         } else {
             pEditor = null;
         }
-        return new PropertyInfo(pName, pType, pTitle, pDesc, pIcon, pEditor);
+        return new TypeInfo(pName, pType, pTitle, pDesc, pIcon, pEditor);
     }
 }

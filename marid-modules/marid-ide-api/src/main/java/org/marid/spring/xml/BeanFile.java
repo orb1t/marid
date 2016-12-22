@@ -18,6 +18,7 @@
 
 package org.marid.spring.xml;
 
+import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
 import org.marid.util.MaridCollections;
 
@@ -35,7 +36,8 @@ public final class BeanFile extends AbstractData<BeanFile> {
     public final ObservableList<BeanData> beans = MaridCollections.list();
 
     public BeanFile() {
-        beans.addListener(this::invalidate);
+        final InvalidationListener invalidationListener = o -> invalidate();
+        beans.addListener(invalidationListener);
     }
 
     public Stream<BeanData> allBeans() {

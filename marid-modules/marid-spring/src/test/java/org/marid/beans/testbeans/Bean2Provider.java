@@ -16,26 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.beans;
-
-import org.springframework.core.ResolvableType;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+package org.marid.beans.testbeans;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-public class ConstructorInfo extends MethodInfo {
+public class Bean2Provider {
 
-    public ConstructorInfo(@Nonnull String name,
-                           @Nonnull ResolvableType type,
-                           @Nullable String title,
-                           @Nullable String description,
-                           @Nullable String icon,
-                           @Nullable Class<?> editor,
-                           @Nonnull TypeInfo[] parameters) {
-        super(name, type, title, description, icon, editor, parameters);
+    public static Bean2<Integer> bean2() {
+        return null;
     }
 }

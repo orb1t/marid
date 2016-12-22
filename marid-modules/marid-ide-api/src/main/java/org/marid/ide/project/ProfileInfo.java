@@ -20,11 +20,10 @@ package org.marid.ide.project;
 
 import javafx.collections.ObservableList;
 import javafx.util.Pair;
-import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanFile;
 import org.marid.spring.xml.BeanProp;
-import org.marid.util.Reflections;
+import org.springframework.core.ResolvableType;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -44,6 +43,7 @@ import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.marid.util.Reflections.parameterName;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -98,6 +98,16 @@ public interface ProfileInfo {
         }
     }
 
+    default ResolvableType getType(BeanData data) {
+        if (data.isFactoryBean()) {
+            final Executable method = getConstructor(data).orElse(null);
+            return method == null ? NONE : forType(((Method) method).getGenericReturnType());
+        } else {
+            final Class<?> type = getClass(data.type.get()).orElse(null);
+            return type == null ? NONE : forClass(type);
+        }
+    }
+
     default Stream<? extends Executable> getConstructors(BeanData data) {
         if (data.isFactoryBean()) {
             if (data.factoryBean.isNotEmpty().get()) {
@@ -143,16 +153,16 @@ public interface ProfileInfo {
     }
 
     default void updateBeanDataConstructorArgs(BeanData data, Parameter[] parameters) {
-        final List<BeanArg> args = Stream.of(parameters)
+        final List<BeanProp> args = Stream.of(parameters)
                 .map(p -> {
-                    final Optional<BeanArg> found = data.beanArgs.stream()
+                    final Optional<BeanProp> found = data.beanArgs.stream()
                             .filter(a -> a.name.isEqualTo(parameterName(p)).get())
                             .findFirst();
                     if (found.isPresent()) {
                         found.get().type.set(p.getType().getName());
                         return found.get();
                     } else {
-                        final BeanArg arg = new BeanArg();
+                        final BeanProp arg = new BeanProp();
                         arg.name.set(parameterName(p));
                         arg.type.set(p.getType().getName());
                         return arg;
@@ -174,9 +184,7 @@ public interface ProfileInfo {
                 updateBeanDataConstructorArgs(data, executables.get(0).getParameters());
             } else {
                 final Optional<? extends Executable> executable = getConstructor(data);
-                if (executable.isPresent()) {
-                    updateBeanDataConstructorArgs(data, executable.get().getParameters());
-                }
+                executable.ifPresent(e -> updateBeanDataConstructorArgs(data, e.getParameters()));
             }
         }
 

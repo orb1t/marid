@@ -86,7 +86,7 @@ public class BeanDataDetails {
     }
 
     @Bean
-    @Order(3)
+    @Order(4)
     @Qualifier("beanData")
     public Tab detailsTab() {
         final BorderPane pane = new BorderPane();
@@ -100,7 +100,7 @@ public class BeanDataDetails {
     }
 
     @Bean
-    @Order(4)
+    @Order(5)
     @Qualifier("beanData")
     public Tab initTriggersTab() {
         final BorderPane pane = triggersPane(beanData.initTriggers);
@@ -109,7 +109,7 @@ public class BeanDataDetails {
     }
 
     @Bean
-    @Order(5)
+    @Order(6)
     @Qualifier("beanData")
     public Tab destroyTriggersTab() {
         final BorderPane pane = triggersPane(beanData.destroyTriggers);

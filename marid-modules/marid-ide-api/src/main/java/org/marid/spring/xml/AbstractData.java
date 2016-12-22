@@ -128,7 +128,7 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Externa
         }
     }
 
-    protected void invalidate(Observable observable) {
+    public void invalidate() {
         for (final InvalidationListener listener : listeners) {
             listener.invalidated(this);
         }

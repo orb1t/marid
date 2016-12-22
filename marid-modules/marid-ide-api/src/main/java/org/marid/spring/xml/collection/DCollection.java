@@ -18,6 +18,7 @@
 
 package org.marid.spring.xml.collection;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
@@ -38,8 +39,9 @@ public abstract class DCollection<T extends DCollection<T>> extends DElement<T> 
     public final ObservableList<DElement<?>> elements = MaridCollections.list();
 
     public DCollection() {
-        valueType.addListener(this::invalidate);
-        elements.addListener(this::invalidate);
+        final InvalidationListener invalidationListener = o -> invalidate();
+        valueType.addListener(invalidationListener);
+        elements.addListener(invalidationListener);
     }
 
     @XmlAttribute(name = "value-type")

@@ -18,12 +18,72 @@
 
 package org.marid.spring.xml;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import org.marid.spring.xml.collection.DCollection;
+import org.marid.spring.xml.collection.DElement;
+
+import javax.xml.bind.annotation.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "property")
-public final class BeanProp extends RefValue<BeanProp> {
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlSeeAlso({DCollection.class})
+public class BeanProp extends AbstractData<BeanProp> {
 
+    public final StringProperty name = new SimpleStringProperty(this, "name");
+    public final StringProperty type = new SimpleStringProperty(this, "type");
+
+    public final ObjectProperty<DElement<?>> data = new SimpleObjectProperty<>(this, "data");
+
+    public BeanProp() {
+        final InvalidationListener invalidationListener = o -> invalidate();
+        data.addListener((observable, oldValue, newValue) -> {
+            if (oldValue != null) {
+                oldValue.removeListener(invalidationListener);
+            }
+            if (newValue != null) {
+                newValue.addListener(invalidationListener);
+            }
+        });
+        name.addListener(invalidationListener);
+        type.addListener(invalidationListener);
+
+        data.addListener(invalidationListener);
+    }
+
+    @XmlAttribute(name = "name")
+    public String getName() {
+        return name.get();
+    }
+
+    public void setName(String name) {
+        this.name.set(name);
+    }
+
+    @XmlAttribute(name = "type")
+    public String getType() {
+        return type.isEmpty().get() ? null : type.get();
+    }
+
+    public void setType(String type) {
+        this.type.set(type);
+    }
+
+    @XmlAnyElement(lax = true)
+    public DElement<?> getData() {
+        return data.get();
+    }
+
+    public void setData(DElement<?> data) {
+        this.data.set(data);
+    }
+
+    public boolean isEmpty() {
+        return data.isNull().get();
+    }
 }

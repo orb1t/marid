@@ -37,7 +37,7 @@ public final class DRef extends DElement<DRef> {
     public final StringProperty ref = new SimpleStringProperty(this, "value");
 
     public DRef() {
-        ref.addListener(this::invalidate);
+        ref.addListener(o -> invalidate());
     }
 
     @XmlAttribute(name = "bean")

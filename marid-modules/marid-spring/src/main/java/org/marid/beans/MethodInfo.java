@@ -24,13 +24,17 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.beans.Introspector;
 import java.util.Arrays;
+import java.util.Formattable;
+import java.util.Formatter;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-public class MethodInfo extends TypeInfo {
+public class MethodInfo extends TypeInfo implements Formattable {
 
     @Nonnull
     public final TypeInfo[] parameters;
@@ -85,21 +89,9 @@ public class MethodInfo extends TypeInfo {
     }
 
     @Override
-    public int hashCode() {
-        return Arrays.hashCode(parameters);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (obj.getClass() != getClass()) {
-            return false;
-        }
-        return Arrays.equals(parameters, ((MethodInfo) obj).parameters);
+    public void formatTo(Formatter formatter, int flags, int width, int precision) {
+        formatter.format("%s", Stream.of(parameters)
+                .map(i -> i.name + ": " + i.type)
+                .collect(Collectors.joining(",", name + "(", ")")));
     }
 }

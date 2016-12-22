@@ -30,7 +30,6 @@ import org.marid.ide.project.ProfileInfo;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.beandata.BeanEditorContext;
-import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
 import org.marid.spring.xml.collection.DValue;
@@ -100,7 +99,7 @@ public class BeanListActions {
 
         if (def.getConstructorArgumentValues() != null) {
             for (final ValueHolder holder : def.getConstructorArgumentValues().getGenericArgumentValues()) {
-                final BeanArg beanArg = new BeanArg();
+                final BeanProp beanArg = new BeanProp();
                 beanArg.name.set(holder.getName());
                 beanArg.type.set(holder.getType());
                 if (holder.getValue() instanceof TypedStringValue) {
@@ -215,7 +214,7 @@ public class BeanListActions {
                 newBeanData.factoryBean.set(beanData.name.get());
                 newBeanData.factoryMethod.set(method.getName());
                 for (final Parameter parameter : method.getParameters()) {
-                    final BeanArg arg = new BeanArg();
+                    final BeanProp arg = new BeanProp();
                     arg.name.set(Reflections.parameterName(parameter));
                     arg.type.set(parameter.getType().getName());
                     newBeanData.beanArgs.add(arg);

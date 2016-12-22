@@ -22,7 +22,6 @@ import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -68,28 +67,18 @@ public class TypeInfo {
     protected void map(BiConsumer<String, Object> consumer) {
         consumer.accept("name", name);
         consumer.accept("type", type);
-    }
-
-    @Override
-    public int hashCode() {
-        return type.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
+        if (title != null) {
+            consumer.accept("title", title);
         }
-        if (obj == null) {
-            return false;
+        if (description != null) {
+            consumer.accept("description", description);
         }
-        if (obj.getClass() != getClass()) {
-            return false;
+        if (icon != null) {
+            consumer.accept("icon", icon);
         }
-        final TypeInfo that = (TypeInfo) obj;
-        final Type thisType = this.type.getType();
-        final Type thatType = that.type.getType();
-        return thisType.equals(thatType);
+        if (editor != null) {
+            consumer.accept("editor", editor.getName());
+        }
     }
 
     @Override

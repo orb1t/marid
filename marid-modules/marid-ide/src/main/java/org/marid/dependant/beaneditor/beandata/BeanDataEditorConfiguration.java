@@ -21,24 +21,17 @@ package org.marid.dependant.beaneditor.beandata;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.marid.Ide;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.action.FxAction;
 import org.marid.jfx.panes.MaridScrollPane;
-import org.marid.jfx.toolbar.MaridToolbar;
-import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
-import org.marid.spring.xml.BeanProp;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
-
-import java.util.Map;
 
 import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -47,7 +40,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@Import({BeanDataActions.class, BeanDataDetails.class})
+@Import({BeanDataDetails.class, BeanInfo.class, ConstructorList.class})
 public class BeanDataEditorConfiguration {
 
     public BeanData data;
@@ -58,31 +51,34 @@ public class BeanDataEditorConfiguration {
     }
 
     @Bean
-    public RefValuesEditor<BeanArg> beanArgsEditor(BeanData beanData, ProjectProfile profile) {
-        return new RefValuesEditor<>(beanData.beanArgs, name -> beanData.getArgType(profile, name));
+    public BeanPropEditor beanArgsEditor(BeanData beanData, ProjectProfile profile) {
+        return new BeanPropEditor(beanData.beanArgs, name -> beanData.getArgType(profile, name));
     }
 
     @Bean
-    public RefValuesEditor<BeanProp> beanPropsEditor(BeanData beanData, ProjectProfile profile) {
-        return new RefValuesEditor<>(beanData.properties, name -> beanData.getPropType(profile, name));
+    public BeanPropEditor beanPropsEditor(BeanData beanData, ProjectProfile profile) {
+        return new BeanPropEditor(beanData.properties, name -> beanData.getPropType(profile, name));
     }
 
     @Bean
     @Qualifier("beanData")
     @Order(1)
-    public Tab beanArgsTab(RefValuesEditor<BeanArg> editor) {
+    public Tab beanArgsTab(BeanPropEditor beanArgsEditor, ConstructorList constructorList) {
         final Tab tab = new Tab();
-        tab.setContent(new MaridScrollPane(editor));
-        tab.textProperty().bind(ls("Constructor arguments"));
+        final BorderPane borderPane = new BorderPane();
+        borderPane.setCenter(new MaridScrollPane(beanArgsEditor));
+        borderPane.setBottom(constructorList);
+        tab.setContent(borderPane);
+        tab.textProperty().bind(ls("Parameters"));
         return tab;
     }
 
     @Bean
     @Qualifier("beanData")
     @Order(2)
-    public Tab beanPropsTab(RefValuesEditor<BeanProp> editor) {
+    public Tab beanPropsTab(BeanPropEditor beanPropsEditor) {
         final Tab tab = new Tab();
-        tab.setContent(new MaridScrollPane(editor));
+        tab.setContent(new MaridScrollPane(beanPropsEditor));
         tab.textProperty().bind(ls("Properties"));
         return tab;
     }
@@ -94,26 +90,11 @@ public class BeanDataEditorConfiguration {
         return tabPane;
     }
 
-    @Bean
-    public ToolBar beanDataEditorToolbar(@Qualifier("beanData") Map<String, FxAction> actionMap) {
-        return new MaridToolbar(actionMap);
-    }
-
-    @Bean
-    public BorderPane sceneRoot(TabPane beanDataEditorTabs, ToolBar beanDataEditorToolbar) {
-        return new BorderPane(beanDataEditorTabs, beanDataEditorToolbar, null, null, null);
-    }
-
-    @Bean
-    public Scene simpleBeanConfigurerScene(BorderPane sceneRoot) {
-        return new Scene(sceneRoot, 1024, 768);
-    }
-
     @Bean(initMethod = "show")
-    public Stage simpleBeanConfigurerStage(Scene simpleBeanConfigurerScene) {
+    public Stage simpleBeanConfigurerStage(TabPane beanDataEditorTabs) {
         final Stage stage = new Stage();
         stage.initOwner(Ide.primaryStage);
-        stage.setScene(simpleBeanConfigurerScene);
+        stage.setScene(new Scene(beanDataEditorTabs, 1024, 768));
         stage.titleProperty().bind(ls("Bean editor"));
         return stage;
     }

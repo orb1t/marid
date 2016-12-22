@@ -21,13 +21,17 @@ package org.marid.beans;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.beans.testbeans.Bean1;
+import org.marid.beans.testbeans.Bean2;
+import org.marid.beans.testbeans.Bean2Provider;
 import org.marid.test.NormalTests;
 
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.marid.beans.BeanIntrospector.classInfo;
 import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.forMethodReturnType;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -45,5 +49,13 @@ public class BeanIntrospectorTest {
         assertEquals("x", classInfo.title);
         assertEquals(BigInteger.class, classInfo.editor);
         assertEquals("constructor 1", classInfo.constructorInfos[0].description);
+    }
+
+    @Test
+    public void bean2Test() throws Exception {
+        final Method providerMethod = Bean2Provider.class.getMethod("bean2");
+        final ClassInfo classInfo = classInfo(Bean2.class.getClassLoader(), forMethodReturnType(providerMethod));
+        assertEquals(1, classInfo.constructorInfos.length);
+        assertEquals("argument", classInfo.constructorInfos[0].parameters[0].title);
     }
 }

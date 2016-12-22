@@ -18,6 +18,7 @@
 
 package org.marid.spring.xml.props;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
@@ -38,8 +39,9 @@ public final class DProps extends DElement<DProps> {
     public final ObservableList<DPropEntry> entries = MaridCollections.list();
 
     public DProps() {
-        valueType.addListener(this::invalidate);
-        entries.addListener(this::invalidate);
+        final InvalidationListener invalidationListener = o -> invalidate();
+        valueType.addListener(invalidationListener);
+        entries.addListener(invalidationListener);
     }
 
     @XmlAttribute(name = "value-type")
