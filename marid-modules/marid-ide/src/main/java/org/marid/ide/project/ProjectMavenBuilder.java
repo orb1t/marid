@@ -57,7 +57,6 @@ public class ProjectMavenBuilder extends URLStreamHandler implements LogSupport 
 
     @Autowired
     public ProjectMavenBuilder(IdeCommons commons, FxAction projectBuildAction) throws Exception {
-        commons.urlHandlerFactory.register("mvn", this);
         this.projectBuildAction = projectBuildAction;
         final String resource = String.format("marid-maven-%s.zip", commons.ideValues.implementationVersion);
         final URL baseUrl = requireNonNull(Ide.classLoader.getResource(resource), "marid-maven is not found");
@@ -67,8 +66,9 @@ public class ProjectMavenBuilder extends URLStreamHandler implements LogSupport 
                 .map(ZipEntry::getName)
                 .collect(Collectors.toSet());
         final List<URL> urls = new ArrayList<>(jars.size());
+        commons.urlHandlerFactory.register("mvn", this);
         for (final String jar : jars) {
-            urls.add(new URL("mvn://localhost/" + jar));
+            urls.add(new URL("mvn:///" + jar));
         }
         classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
     }
