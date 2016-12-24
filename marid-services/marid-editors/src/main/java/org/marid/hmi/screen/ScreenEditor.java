@@ -16,23 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.beandata;
+package org.marid.hmi.screen;
 
-import javafx.stage.Stage;
-import org.marid.ide.project.ProfileInfo;
-import org.marid.spring.xml.BeanData;
-import org.springframework.core.ResolvableType;
+import org.marid.spring.beandata.BeanEditorContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface BeanEditorContext {
+@Configuration("HMI Screen Editor")
+public class ScreenEditor {
 
-    BeanData getBeanData();
-
-    ResolvableType getType();
-
-    ProfileInfo getProfileInfo();
-
-    Stage getPrimaryStage();
+    @Bean(initMethod = "show", destroyMethod = "close")
+    public ScreenEditorStage stage(BeanEditorContext beanEditorContext) {
+        return new ScreenEditorStage(beanEditorContext);
+    }
 }

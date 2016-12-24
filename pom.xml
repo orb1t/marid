@@ -301,7 +301,7 @@
 
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>2.10</version>
+                    <version>3.0.0</version>
                     <configuration>
                         <useJvmChmod>true</useJvmChmod>
                     </configuration>
@@ -347,7 +347,7 @@
 
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>3.0.0</version>
                     <configuration>
                         <useJvmChmod>true</useJvmChmod>
                         <appendAssemblyId>false</appendAssemblyId>
@@ -358,24 +358,13 @@
 
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.0.2</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>1.5.0</version>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-antrun-plugin</artifactId>
-                    <version>1.8</version>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>appassembler-maven-plugin</artifactId>
-                    <version>2.0.0</version>
                 </plugin>
 
                 <plugin>
@@ -387,6 +376,24 @@
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <dependencyConvergence/>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <artifactId>maven-changelog-plugin</artifactId>
             </plugin>
@@ -436,7 +443,7 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
                 <type>pom</type>
-                <version>4.3.4.RELEASE</version>
+                <version>4.3.5.RELEASE</version>
                 <scope>import</scope>
             </dependency>
 
@@ -507,7 +514,7 @@
 
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.6</version>
                 <configuration>
                     <locales>en</locales>
                     <inputEncoding>UTF-8</inputEncoding>

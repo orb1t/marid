@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.editors.hmi.screen;
+package org.marid.hmi.screen;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.DoubleProperty;

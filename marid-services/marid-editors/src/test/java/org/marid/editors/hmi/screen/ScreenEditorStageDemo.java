@@ -21,6 +21,7 @@ package org.marid.editors.hmi.screen;
 import javafx.application.Application;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.marid.hmi.screen.ScreenEditorStage;
 import org.marid.ide.project.ProfileInfo;
 import org.marid.spring.beandata.BeanEditorContext;
 import org.marid.spring.xml.BeanData;

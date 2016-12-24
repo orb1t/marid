@@ -16,25 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.hmi.screen;
+package org.marid.beans;
 
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.marid.test.NormalTests;
-
-import java.beans.BeanInfo;
-import java.beans.Introspector;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Category({NormalTests.class})
-public class HmiScreenBeanInfoTest {
+@Target({ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Values {
 
-    @Test
-    public void testDescriptor() throws Exception {
-        final BeanInfo beanInfo = Introspector.getBeanInfo(HmiScreen.class);
-        System.out.println(beanInfo);
-    }
+    String[] value();
 }

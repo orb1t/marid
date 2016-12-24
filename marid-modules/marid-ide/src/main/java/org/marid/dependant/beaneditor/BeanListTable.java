@@ -126,7 +126,7 @@ public class BeanListTable extends CommonTableView<BeanData> {
                 final Class<?> rawType = type.getRawClass();
                 menu.getItems().add(new SeparatorMenuItem());
                 menu.getItems().addAll(beanListActions.factoryItems(rawType, row.getItem()));
-                menu.getItems().addAll(beanListActions.editors(rawType, row.getItem()));
+                menu.getItems().addAll(beanListActions.editors(type, row.getItem()));
             });
             row.setContextMenu(contextMenu);
             return row;

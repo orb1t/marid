@@ -33,6 +33,7 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-embedder</artifactId>
+            <optional>true</optional>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
@@ -79,11 +80,13 @@
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-connector-basic</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-transport-wagon</artifactId>
+            <optional>true</optional>
             <exclusions>
                 <exclusion>
                     <groupId>org.codehaus.plexus</groupId>
@@ -96,17 +99,20 @@
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-transport-http</artifactId>
             <version>1.0.2.v20150114</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-transport-file</artifactId>
             <version>1.0.2.v20150114</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <!-- provided dependencies -->

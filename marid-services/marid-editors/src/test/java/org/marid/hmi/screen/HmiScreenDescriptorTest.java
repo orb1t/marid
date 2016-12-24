@@ -16,23 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.beandata;
+package org.marid.hmi.screen;
 
-import javafx.stage.Stage;
-import org.marid.ide.project.ProfileInfo;
-import org.marid.spring.xml.BeanData;
-import org.springframework.core.ResolvableType;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.marid.test.NormalTests;
+
+import java.beans.BeanInfo;
+import java.beans.Introspector;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
-public interface BeanEditorContext {
+@Category({NormalTests.class})
+public class HmiScreenDescriptorTest {
 
-    BeanData getBeanData();
-
-    ResolvableType getType();
-
-    ProfileInfo getProfileInfo();
-
-    Stage getPrimaryStage();
+    @Test
+    public void testDescriptor() throws Exception {
+        final BeanInfo beanInfo = Introspector.getBeanInfo(HmiScreen.class);
+        System.out.println(beanInfo);
+    }
 }

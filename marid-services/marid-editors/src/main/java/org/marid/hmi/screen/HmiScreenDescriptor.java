@@ -16,20 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.editors.hmi.screen;
+package org.marid.hmi.screen;
 
-import org.marid.spring.beandata.BeanEditorContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.marid.beans.Info;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
-@Configuration("HMI Screen Editor")
-public class ScreenEditor {
+@Info(editor = ScreenEditor.class, description = "HMI Screen Editor")
+public class HmiScreenDescriptor extends HmiScreen {
 
-    @Bean(initMethod = "show", destroyMethod = "close")
-    public ScreenEditorStage stage(BeanEditorContext beanEditorContext) {
-        return new ScreenEditorStage(beanEditorContext);
+    @Info(description = "Sets a relative URL of a SVG file")
+    @Override
+    public void setRelativeUrl(String url) {
+        super.setRelativeUrl(url);
     }
 }
