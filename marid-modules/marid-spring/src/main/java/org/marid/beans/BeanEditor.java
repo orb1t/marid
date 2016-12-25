@@ -16,20 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.hmi.screen;
+package org.marid.beans;
 
-import org.marid.beans.Info;
+import javax.annotation.Nonnull;
+import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Info(editor = ScreenEditor.class, description = "HMI Screen Editor")
-public class HmiScreenDescriptor extends HmiScreen {
+public interface BeanEditor<T> {
 
-    @Info(description = "Sets a relative URL of a SVG file")
-    @Override
-    public void setRelativeUrl(String url) {
-        super.setRelativeUrl(url);
-    }
+    @Nonnull
+    Set<Class<? extends T>> editors(@Nonnull Class<T> type);
 }

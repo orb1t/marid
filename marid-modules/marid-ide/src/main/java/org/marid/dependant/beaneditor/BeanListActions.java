@@ -21,17 +21,11 @@ package org.marid.dependant.beaneditor;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.stage.Stage;
-import org.marid.Ide;
 import org.marid.IdeDependants;
 import org.marid.beans.BeanIntrospector;
 import org.marid.beans.ClassInfo;
-import org.marid.beans.MethodInfo;
-import org.marid.beans.TypeInfo;
-import org.marid.ide.project.ProfileInfo;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
-import org.marid.spring.beandata.BeanEditorContext;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
 import org.marid.spring.xml.collection.DValue;
@@ -44,21 +38,19 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueH
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.of;
-import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.jfx.LocalizedStrings.fls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
@@ -240,78 +232,30 @@ public class BeanListActions {
     }
 
     public List<MenuItem> editors(ResolvableType type, BeanData beanData) {
-        final ClassInfo classInfo = BeanIntrospector.classInfo(profile.getClassLoader(), type);
-        final Class<?>[] beanArgs = profile.getConstructor(beanData)
-                .map(Executable::getParameterTypes)
-                .orElse(new Class<?>[0]);
-        final Set<TypeInfo> editors = new HashSet<>();
-        if (classInfo.editor != null) {
-            editors.add(classInfo);
-        }
-        for (final MethodInfo constructor : classInfo.constructorInfos) {
-            if (constructor.editor == null) {
-                continue;
-            }
-            final Class<?>[] args = of(constructor.parameters).map(c -> c.type.getRawClass()).toArray(Class[]::new);
-            if (Arrays.equals(args, beanArgs)) {
-                editors.add(constructor);
-            }
-        }
-        if (editors.isEmpty()) {
-            return Collections.emptyList();
-        } else {
-            final BeanEditorContext beanEditorContext = new BeanEditorContextImpl(type, beanData);
-            return editors.stream()
-                    .map(d -> {
-                        final Class<?> t = Objects.requireNonNull(d.editor);
-                        final Configuration c = t.getAnnotation(Configuration.class);
-                        final String title = c.value().isEmpty() ? t.getSimpleName() : c.value();
-                        final MenuItem menuItem = new MenuItem();
-                        menuItem.textProperty().bind(ls(title));
-                        menuItem.setOnAction(event -> {
-                            profile.updateBeanData(beanData);
-                            dependants.start(t, title, ctx -> {
-                                ctx.setClassLoader(profile.getClassLoader());
-                                ctx.getBeanFactory().registerSingleton("context", beanEditorContext);
-                            });
+        final List<ClassInfo> classInfos = BeanIntrospector.classInfos(profile.getClassLoader(), type);
+        final List<MenuItem> menuItems = classInfos.stream()
+                .filter(classInfo -> !classInfo.editors.isEmpty())
+                .map(classInfo -> {
+                    final MenuItem menuItem = new MenuItem();
+                    final String title = classInfo.title != null ? classInfo.title : classInfo.name;
+                    menuItem.textProperty().bind(fls("Edit: %s", title));
+                    menuItem.setOnAction(event -> {
+                        profile.updateBeanData(beanData);
+                        dependants.start(classInfo.editors.get(0), "editor", c -> {
+                            c.getBeanFactory().registerSingleton("beanData", beanData);
+                            c.getBeanFactory().registerSingleton("beanType", type);
+                            for (int i = 1; i < classInfo.editors.size(); i++) {
+                                c.register(classInfo.editors.get(i));
+                            }
                         });
-                        return menuItem;
-                    })
-                    .reduce(new ArrayList<>(singleton(new SeparatorMenuItem())), (a, e) -> {
-                        a.add(e);
-                        return a;
-                    }, (a1, a2) -> a2);
-        }
-    }
-
-    private class BeanEditorContextImpl implements BeanEditorContext {
-
-        private final ResolvableType type;
-        private final BeanData beanData;
-
-        private BeanEditorContextImpl(ResolvableType type, BeanData beanData) {
-            this.type = type;
-            this.beanData = beanData;
-        }
-
-        @Override
-        public BeanData getBeanData() {
-            return beanData;
-        }
-
-        @Override
-        public ResolvableType getType() {
-            return type;
-        }
-
-        @Override
-        public ProfileInfo getProfileInfo() {
-            return profile;
-        }
-
-        @Override
-        public Stage getPrimaryStage() {
-            return Ide.primaryStage;
+                    });
+                    return menuItem;
+                })
+                .collect(Collectors.toList());
+        if (menuItems.isEmpty()) {
+            return menuItems;
+        } else {
+            return Stream.concat(Stream.of(new SeparatorMenuItem()), menuItems.stream()).collect(Collectors.toList());
         }
     }
 }

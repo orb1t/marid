@@ -22,7 +22,9 @@ import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -47,21 +49,25 @@ public class TypeInfo {
     @Nullable
     public final String icon;
 
-    @Nullable
-    public final Class<?> editor;
+    @Nonnull
+    public final List<Class<?>> editors;
 
     public TypeInfo(@Nonnull String name,
                     @Nonnull ResolvableType type,
                     @Nullable String title,
                     @Nullable String description,
                     @Nullable String icon,
-                    @Nullable Class<?> editor) {
+                    @Nonnull List<Class<?>> editors) {
         this.name = name;
         this.type = type;
         this.title = title;
         this.description = description;
         this.icon = icon;
-        this.editor = editor;
+        this.editors = editors;
+    }
+
+    public TypeInfo(@Nonnull String name, @Nonnull ResolvableType type) {
+        this(name, type, null, null, null, Collections.emptyList());
     }
 
     protected void map(BiConsumer<String, Object> consumer) {
@@ -76,8 +82,8 @@ public class TypeInfo {
         if (icon != null) {
             consumer.accept("icon", icon);
         }
-        if (editor != null) {
-            consumer.accept("editor", editor.getName());
+        if (!editors.isEmpty()) {
+            consumer.accept("editors", editors);
         }
     }
 

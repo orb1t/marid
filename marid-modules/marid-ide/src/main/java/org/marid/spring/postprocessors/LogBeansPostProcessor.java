@@ -45,7 +45,11 @@ public class LogBeansPostProcessor implements DestructionAwareBeanPostProcessor,
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        log(INFO, "Initialized {0}", beanName);
+        if (beanName != null) {
+            log(INFO, "Initialized {0}", beanName);
+        } else {
+            log(INFO, "Initialized {0}", bean);
+        }
         return bean;
     }
 

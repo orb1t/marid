@@ -27,9 +27,11 @@ import org.marid.test.NormalTests;
 
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.marid.beans.BeanIntrospector.classInfo;
+import static org.marid.beans.BeanIntrospector.classInfos;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.ResolvableType.forMethodReturnType;
 
@@ -42,19 +44,23 @@ public class BeanIntrospectorTest {
 
     @Test
     public void bean1Test() {
-        final ClassInfo classInfo = classInfo(Bean1.class.getClassLoader(), forClass(Bean1.class));
+        final List<ClassInfo> classInfos = classInfos(Bean1.class.getClassLoader(), forClass(Bean1.class));
+        assertEquals(1, classInfos.size());
+        final ClassInfo classInfo = classInfos.get(0);
         assertEquals(2, classInfo.constructorInfos.length);
         assertEquals("init", classInfo.constructorInfos[0].name);
         assertEquals("d", classInfo.description);
         assertEquals("x", classInfo.title);
-        assertEquals(BigInteger.class, classInfo.editor);
+        assertEquals(Collections.singletonList(BigInteger.class), classInfo.editors);
         assertEquals("constructor 1", classInfo.constructorInfos[0].description);
     }
 
     @Test
     public void bean2Test() throws Exception {
         final Method providerMethod = Bean2Provider.class.getMethod("bean2");
-        final ClassInfo classInfo = classInfo(Bean2.class.getClassLoader(), forMethodReturnType(providerMethod));
+        final List<ClassInfo> classInfos = classInfos(Bean2.class.getClassLoader(), forMethodReturnType(providerMethod));
+        assertEquals(1, classInfos.size());
+        final ClassInfo classInfo = classInfos.get(0);
         assertEquals(1, classInfo.constructorInfos.length);
         assertEquals("argument", classInfo.constructorInfos[0].parameters[0].title);
     }

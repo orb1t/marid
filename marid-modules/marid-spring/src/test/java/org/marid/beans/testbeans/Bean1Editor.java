@@ -16,26 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.beans;
+package org.marid.beans.testbeans;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.marid.beans.BeanEditor;
+
+import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.PARAMETER, ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR})
-public @interface Info {
-
-    Class<?>[] editors() default {};
-
-    String icon() default "";
-
-    String description() default "";
-
-    String title() default "";
+public class Bean1Editor implements BeanEditor<Bean1> {
+    @Nonnull
+    @Override
+    public Set<Class<? extends Bean1>> editors(@Nonnull Class<Bean1> type) {
+        return Collections.singleton(Bean1Descriptor.class);
+    }
 }

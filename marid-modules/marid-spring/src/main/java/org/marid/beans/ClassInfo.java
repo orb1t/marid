@@ -22,9 +22,7 @@ import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -51,10 +49,10 @@ public class ClassInfo extends TypeInfo {
                      @Nullable String title,
                      @Nullable String description,
                      @Nullable String icon,
-                     @Nullable Class<?> editor,
+                     @Nonnull List<Class<?>> editors,
                      @Nonnull MethodInfo[] constructorInfos,
                      @Nonnull MethodInfo[] methodInfos) {
-        super(name, type, title, description, icon, editor);
+        super(name, type, title, description, icon, editors);
         this.constructorInfos = constructorInfos;
         this.methodInfos = methodInfos;
 
@@ -93,14 +91,11 @@ public class ClassInfo extends TypeInfo {
         final String pTitle = func.apply(i -> i.title);
         final String pDesc = func.apply(i -> i.description);
         final String pIcon = func.apply(i -> i.icon);
-        final Class<?> pEditor;
-        if (methodInfos[0] != null && methodInfos[0].editor != null) {
-            pEditor = methodInfos[0].editor;
-        } else if (methodInfos[1] != null && methodInfos[1].editor != null) {
-            pEditor = methodInfos[1].editor;
-        } else {
-            pEditor = null;
-        }
-        return new TypeInfo(pName, pType, pTitle, pDesc, pIcon, pEditor);
+        final List<List<Class<?>>> editorList = Arrays.asList(
+                methodInfos[0] != null ? methodInfos[0].editors : Collections.emptyList(),
+                methodInfos[1] != null ? methodInfos[1].editors : Collections.emptyList()
+        );
+        final List<Class<?>> editors = BeanIntrospector.merge(editorList.get(0), editorList.get(1));
+        return new TypeInfo(pName, pType, pTitle, pDesc, pIcon, editors);
     }
 }

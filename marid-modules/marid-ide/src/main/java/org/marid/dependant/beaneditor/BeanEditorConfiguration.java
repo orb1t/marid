@@ -20,7 +20,6 @@ package org.marid.dependant.beaneditor;
 
 import javafx.collections.ListChangeListener;
 import javafx.util.Pair;
-import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,7 @@ import java.nio.file.Path;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@Import({BeanEditorTab.class, BeanListConfiguration.class, ValueMenuItems.class})
+@Import({BeanEditorTab.class, BeanListConfiguration.class})
 public class BeanEditorConfiguration {
 
     public Path beanFilePath;

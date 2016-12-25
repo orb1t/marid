@@ -26,14 +26,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.of;
+import static org.springframework.core.ResolvableType.NONE;
 import static org.springframework.core.ResolvableType.forType;
 
 /**
@@ -43,41 +40,74 @@ import static org.springframework.core.ResolvableType.forType;
 public class BeanIntrospector {
 
     @Nonnull
-    public static ClassInfo classInfo(@Nonnull ClassLoader classLoader, @Nonnull ResolvableType type) {
-        final List<ResolvableType> types = new ArrayList<>(Collections.singletonList(type));
-        final Class<?> descriptorClass = loadClass(classLoader, type.getRawClass().getName() + "Descriptor");
-        if (descriptorClass != null) {
-            final ResolvableType descriptorType = type.hasGenerics()
-                    ? ResolvableType.forClassWithGenerics(descriptorClass, type.getGenerics())
-                    : ResolvableType.forClass(descriptorClass);
-            if (type.isAssignableFrom(descriptorType)) {
-                types.add(descriptorType);
-                for (final Type itf : descriptorClass.getGenericInterfaces()) {
-                    final ResolvableType itfType = ResolvableType.forType(itf);
-                    if (itfType.getRawClass().isAnnotationPresent(Info.class)) {
-                        types.add(ResolvableType.forType(itf, descriptorType));
+    @SuppressWarnings("unchecked")
+    public static List<ClassInfo> classInfos(@Nonnull ClassLoader classLoader, @Nonnull ResolvableType type) {
+        final List<ClassInfo> classInfos = new ArrayList<>();
+        for (final BeanEditor beanEditor : ServiceLoader.load(BeanEditor.class, classLoader)) {
+            final ResolvableType beanEditorType = ResolvableType.forClass(BeanEditor.class, beanEditor.getClass());
+            final ResolvableType p = beanEditorType.getGeneric(0);
+            if (p == NONE || p.getRawClass() == null || !p.getRawClass().isAssignableFrom(type.getRawClass())) {
+                continue;
+            }
+            final Set<Class<?>> editorClasses = beanEditor.editors(type.getRawClass());
+            if (editorClasses.isEmpty()) {
+                continue;
+            }
+            final List<ResolvableType> types = new ArrayList<>();
+            types.add(type);
+            if (type.hasGenerics()) {
+                for (final Class<?> c: editorClasses) {
+                    final ResolvableType tc = ResolvableType.forClassWithGenerics(c, type.getGenerics());
+                    types.add(tc);
+                    for (final Type itf : c.getGenericInterfaces()) {
+                        final ResolvableType itfType = ResolvableType.forType(itf, tc);
+                        if (itfType.getRawClass().isAnnotationPresent(Info.class)) {
+                            types.add(itfType);
+                        }
+                    }
+                }
+            } else {
+                for (final Class<?> c : editorClasses) {
+                    types.add(ResolvableType.forClass(c));
+                    for (final Class<?> itf : c.getInterfaces()) {
+                        if (itf.isAnnotationPresent(Info.class)) {
+                            types.add(ResolvableType.forClass(itf));
+                        }
                     }
                 }
             }
+            classInfos.add(types.stream()
+                    .map(BeanIntrospector::classInfo)
+                    .reduce(BeanIntrospector::merge)
+                    .orElseThrow(IllegalStateException::new));
         }
-        final List<ClassInfo> classInfos = types.stream().map(BeanIntrospector::classInfo).collect(toList());
-        final ClassInfo head = classInfos.get(0);
-        final List<ClassInfo> tail = classInfos.subList(1, classInfos.size());
-        final String title = classInfos.stream().map(i -> i.title).filter(Objects::nonNull).findAny().orElse(null);
-        final String desc = classInfos.stream().map(i -> i.description).filter(Objects::nonNull).findAny().orElse(null);
-        final String icon = classInfos.stream().map(i -> i.icon).filter(Objects::nonNull).findAny().orElse(null);
-        final Class<?> editor = classInfos.stream().map(i -> i.editor).filter(Objects::nonNull).findAny().orElse(null);
-        final MethodInfo[] cs = of(head.constructorInfos).map(c -> cm(c, tail)).toArray(MethodInfo[]::new);
-        final MethodInfo[] ms = of(head.methodInfos).map(m -> mm(m, tail)).toArray(MethodInfo[]::new);
-        return new ClassInfo(head.name, head.type, title, desc, icon, editor, cs, ms);
+        return classInfos.isEmpty() ? Collections.emptyList() : classInfos;
     }
 
-    private static Class<?> loadClass(ClassLoader classLoader, String name) {
-        try {
-            return classLoader.loadClass(name);
-        } catch (ClassNotFoundException x) {
-            return null;
+    public static ClassInfo merge(@Nonnull ClassInfo c1, @Nonnull ClassInfo c2) {
+        return new ClassInfo(
+                c1.name,
+                c1.type,
+                c1.title != null ? c1.title : c2.title,
+                c1.description != null ? c1.description : c2.description,
+                c1.icon != null ? c1.icon : c2.icon,
+                merge(c1.editors, c2.editors),
+                of(c1.constructorInfos).map(c -> merge(c, c2.constructorInfos)).toArray(MethodInfo[]::new),
+                of(c1.methodInfos).map(m -> merge(m, c2.methodInfos)).toArray(MethodInfo[]::new)
+        );
+    }
+
+    static List<Class<?>> merge(List<Class<?>> e1, List<Class<?>> e2) {
+        if (e1.isEmpty()) {
+            return e2;
         }
+        if (e2.isEmpty()) {
+            return e1;
+        }
+        final List<Class<?>> result = new ArrayList<>(e1.size() + e2.size());
+        result.addAll(e1);
+        result.addAll(e2);
+        return result;
     }
 
     private static TypeInfo merge(@Nonnull TypeInfo i1, @Nonnull TypeInfo i2) {
@@ -87,7 +117,7 @@ public class BeanIntrospector {
                 i2.title != null ? i2.title : i1.title,
                 i2.description != null ? i2.description : i1.description,
                 i2.icon != null ? i2.icon : i1.icon,
-                i2.editor != null ? i2.editor : i1.editor);
+                merge(i1.editors, i2.editors));
     }
 
     private static TypeInfo[] merge(TypeInfo[] p1, TypeInfo[] p2) {
@@ -98,30 +128,25 @@ public class BeanIntrospector {
         return new MethodInfo(
                 m1.name,
                 m1.type,
-                m2.title != null ? m2.title : m1.title,
-                m2.description != null ? m2.description : m1.description,
-                m2.icon != null ? m2.icon : m1.icon,
-                m2.editor != null ? m2.editor : m1.editor,
+                m1.title != null ? m1.title : m2.title,
+                m1.description != null ? m1.description : m2.description,
+                m1.icon != null ? m1.icon : m2.icon,
+                merge(m1.editors, m2.editors),
                 merge(m1.parameters, m2.parameters));
     }
 
-    private static MethodInfo mm(@Nonnull MethodInfo info, @Nonnull List<ClassInfo> classInfos) {
-        return classInfos.stream()
-                .flatMap(c -> of(c.methodInfos))
-                .filter(m -> m.name.equals(info.name))
-                .filter(m -> info.parameters.length == m.parameters.length)
-                .filter(m -> range(0, m.parameters.length)
-                        .allMatch(i -> m.parameters[i].type.getRawClass() == info.parameters[i].type.getRawClass()))
-                .reduce(info, BeanIntrospector::merge);
+    private static boolean methodEquals(@Nonnull MethodInfo m1, @Nonnull MethodInfo m2) {
+        if (m1.name.equals(m2.name)) {
+            final Class<?>[] t1 = of(m1.parameters).map(t -> t.type.getRawClass()).toArray(Class[]::new);
+            final Class<?>[] t2 = of(m2.parameters).map(t -> t.type.getRawClass()).toArray(Class[]::new);
+            return Arrays.equals(t1, t2);
+        } else {
+            return false;
+        }
     }
 
-    private static MethodInfo cm(@Nonnull MethodInfo info, @Nonnull List<ClassInfo> classInfos) {
-        return classInfos.stream()
-                .flatMap(c -> of(c.constructorInfos))
-                .filter(m -> info.parameters.length == m.parameters.length)
-                .filter(m -> range(0, m.parameters.length)
-                        .allMatch(i -> m.parameters[i].type.getRawClass() == info.parameters[i].type.getRawClass()))
-                .reduce(info, BeanIntrospector::merge);
+    private static MethodInfo merge(@Nonnull MethodInfo methodInfo, @Nonnull MethodInfo[] methodInfos) {
+        return of(methodInfos).filter(i -> methodEquals(methodInfo, i)).reduce(methodInfo, BeanIntrospector::merge);
     }
 
     private static TypeInfo p(@Nonnull Parameter parameter, @Nonnull ResolvableType type) {
@@ -166,7 +191,7 @@ public class BeanIntrospector {
         return info != null && !info.icon().isEmpty() ? info.icon() : null;
     }
 
-    private static Class<?> editor(Info info) {
-        return info != null && info.editor() != Object.class ? info.editor() : null;
+    private static List<Class<?>> editor(Info info) {
+        return info == null || info.editors().length == 0 ? Collections.emptyList() : Arrays.asList(info.editors());
     }
 }

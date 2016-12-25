@@ -18,46 +18,55 @@
 
 package org.marid.dependant.beaneditor.beandata;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.scene.control.ComboBox;
-import org.marid.beans.MethodInfo;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.converter.MaridConverter;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
+import org.marid.util.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.lang.reflect.Executable;
-import java.util.Arrays;
+import java.lang.reflect.Parameter;
 import java.util.stream.Stream;
 
-import static java.util.stream.Stream.of;
+import static java.util.stream.Collectors.joining;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
 @Component
-public class ConstructorList extends ComboBox<MethodInfo> {
+public class ConstructorList extends ComboBox<Executable> implements InvalidationListener {
+
+    private final BeanData beanData;
+    private final ProjectProfile profile;
 
     @Autowired
-    public ConstructorList(BeanData beanData, BeanInfo beanInfo, ProjectProfile profile) {
-        super(beanInfo.constructors);
+    public ConstructorList(BeanData beanData, ProjectProfile profile) {
+        this.beanData = beanData;
+        this.profile = profile;
         setEditable(false);
         setMaxWidth(Double.MAX_VALUE);
-        setConverter(new MaridConverter<>("%s"));
+        setConverter(new MaridConverter<>(this::format));
         setOnAction(event -> {
-            final MethodInfo methodInfo = getSelectionModel().getSelectedItem();
-            if (methodInfo != null) {
-                beanData.beanArgs.setAll(Stream.of(methodInfo.parameters)
+            final Executable constructor = getSelectionModel().getSelectedItem();
+            if (constructor != null) {
+                beanData.beanArgs.setAll(Stream.of(constructor.getParameters())
                         .map(p -> {
                             final BeanProp old = beanData.beanArgs.stream()
-                                    .filter(a -> p.name.equals(a.getName()))
+                                    .filter(a -> Reflections.parameterName(p).equals(a.getName()))
                                     .findAny()
                                     .orElse(null);
                             final BeanProp beanProp = new BeanProp();
-                            beanProp.setName(old != null ? old.getName() : p.name);
-                            beanProp.setType(p.type.getRawClass().getName());
+                            beanProp.setName(old != null ? old.getName() : p.getName());
+                            beanProp.setType(p.getType().getName());
                             if (old != null) {
                                 beanProp.setData(old.getData());
                             }
@@ -66,15 +75,52 @@ public class ConstructorList extends ComboBox<MethodInfo> {
                         .toArray(BeanProp[]::new));
             }
         });
-        final Executable executable = profile.getConstructor(beanData).orElse(null);
-        if (executable != null) {
-            for (final MethodInfo methodInfo : getItems()) {
-                final Class<?>[] ts = of(methodInfo.parameters).map(m -> m.type.getRawClass()).toArray(Class[]::new);
-                if (Arrays.equals(ts, executable.getParameterTypes())) {
-                    getSelectionModel().select(methodInfo);
-                    break;
+    }
+
+    @PostConstruct
+    private void init() {
+        invalidated(profile);
+        profile.addListener(this);
+    }
+
+    @PreDestroy
+    private void destroy() {
+        profile.removeListener(this);
+    }
+
+    private String format(Executable executable) {
+        return Stream.of(executable.getParameters()).map(p -> p.getName() + ": " + type(p)).collect(joining(", "));
+    }
+
+    private String type(Parameter parameter) {
+        if (parameter.getType().isPrimitive()) {
+            return parameter.getType().getName();
+        } else if (parameter.getType().getPackage() == null) {
+            return parameter.getType().getName();
+        } else {
+            final ResolvableType resolvableType = ResolvableType.forType(parameter.getParameterizedType());
+            if (resolvableType.hasGenerics()) {
+                return resolvableType.toString();
+            } else {
+                if (isSimpleClass(parameter.getType())) {
+                    return parameter.getType().getSimpleName();
+                } else {
+                    return resolvableType.toString();
                 }
             }
+        }
+    }
+
+    private boolean isSimpleClass(Class<?> type) {
+        return type.getPackage().getName().matches("java[.](util|net)[.].+");
+    }
+
+    @Override
+    public void invalidated(Observable observable) {
+        getItems().setAll(profile.getConstructors(beanData).toArray(Executable[]::new));
+        final Executable executable = profile.getConstructor(beanData).orElse(null);
+        if (executable != null) {
+            getSelectionModel().select(executable);
         }
     }
 }

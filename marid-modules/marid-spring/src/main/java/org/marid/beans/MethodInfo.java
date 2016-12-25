@@ -23,9 +23,11 @@ import org.springframework.core.ResolvableType;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.beans.Introspector;
+import java.lang.reflect.Executable;
 import java.util.Arrays;
 import java.util.Formattable;
 import java.util.Formatter;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,9 +46,9 @@ public class MethodInfo extends TypeInfo implements Formattable {
                       @Nullable String title,
                       @Nullable String description,
                       @Nullable String icon,
-                      @Nullable Class<?> editor,
+                      @Nonnull List<Class<?>> editors,
                       @Nonnull TypeInfo[] parameters) {
-        super(name, type, title, description, icon, editor);
+        super(name, type, title, description, icon, editors);
         this.parameters = parameters;
     }
 
@@ -86,6 +88,19 @@ public class MethodInfo extends TypeInfo implements Formattable {
         } else {
             return null;
         }
+    }
+
+    public boolean matches(Executable executable) {
+        final Class<?>[] parameters = executable.getParameterTypes();
+        if (parameters.length != this.parameters.length) {
+            return false;
+        }
+        for (int i = 0; i < parameters.length; i++) {
+            if (!parameters[i].equals(this.parameters[i].type.getRawClass())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

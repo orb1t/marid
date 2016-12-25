@@ -27,7 +27,7 @@ import java.math.BigInteger;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Info(editor = BigInteger.class, description = "d")
+@Info(editors = BigInteger.class, description = "d")
 public class Bean1Descriptor extends Bean1 implements Bean1Template {
 
     @Info(description = "constructor 1")
@@ -47,6 +47,6 @@ public class Bean1Descriptor extends Bean1 implements Bean1Template {
         return null;
     }
 
-    public void update(Integer z, @Info(editor = Long.class) Long h) {
+    public void update(Integer z, @Info(editors = Long.class) Long h) {
     }
 }

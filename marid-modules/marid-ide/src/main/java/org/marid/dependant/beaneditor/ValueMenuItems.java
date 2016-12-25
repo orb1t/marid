@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.valuemenu;
+package org.marid.dependant.beaneditor;
 
 import javafx.beans.value.WritableValue;
 import javafx.scene.control.ContextMenu;
@@ -24,15 +24,13 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.BeanListActions;
-import org.marid.dependant.beaneditor.BeanMetaInfoProvider;
+import org.marid.beans.TypeInfo;
 import org.marid.dependant.beaneditor.listeditor.ListEditorConfiguration;
 import org.marid.dependant.beaneditor.propeditor.PropEditorConfiguration;
 import org.marid.dependant.beaneditor.valueeditor.ValueEditorConfiguration;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.annotation.OrderedInit;
-import org.marid.spring.annotation.PrototypeComponent;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.collection.DArray;
 import org.marid.spring.xml.collection.DElement;
@@ -56,16 +54,17 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov
  */
-@PrototypeComponent
 public class ValueMenuItems {
 
     private final List<MenuItem> items = new ArrayList<>();
     private final WritableValue<DElement<?>> element;
     private final ResolvableType type;
+    private final List<TypeInfo> editors;
 
-    public ValueMenuItems(WritableValue<DElement<?>> element, ResolvableType type) {
+    public ValueMenuItems(WritableValue<DElement<?>> element, ResolvableType type, List<TypeInfo> editors) {
         this.element = element;
         this.type = type;
+        this.editors = editors;
     }
 
     @OrderedInit(1)
@@ -230,6 +229,11 @@ public class ValueMenuItems {
             items.add(mi);
             items.add(new SeparatorMenuItem());
         }
+    }
+
+    @OrderedInit(9)
+    public void initEditor(IdeDependants dependants) {
+
     }
 
     public void addTo(ContextMenu contextMenu) {

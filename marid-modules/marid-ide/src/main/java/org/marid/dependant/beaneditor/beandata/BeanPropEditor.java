@@ -18,24 +18,31 @@
 
 package org.marid.dependant.beaneditor.beandata;
 
-import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import org.marid.dependant.beaneditor.valuemenu.ValueMenuItems;
+import org.marid.beans.BeanIntrospector;
+import org.marid.beans.ClassInfo;
+import org.marid.beans.MethodInfo;
+import org.marid.beans.TypeInfo;
+import org.marid.dependant.beaneditor.ValueMenuItems;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.spring.annotation.OrderedInit;
+import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
 import org.marid.spring.xml.collection.DCollection;
 import org.marid.spring.xml.collection.DElement;
 import org.marid.spring.xml.collection.DValue;
 import org.marid.spring.xml.ref.DRef;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.ResolvableType;
 
-import java.util.function.Function;
+import java.lang.reflect.Executable;
+import java.util.ArrayList;
+import java.util.List;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -47,11 +54,13 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
  */
 public class BeanPropEditor extends TableView<BeanProp> {
 
-    private final Function<String, ResolvableType> typeFunc;
+    private final BeanData beanData;
+    private final boolean args;
 
-    public BeanPropEditor(ObservableList<BeanProp> items, Function<String, ResolvableType> typeFunc) {
-        super(items);
-        this.typeFunc = typeFunc;
+    public BeanPropEditor(BeanData beanData, boolean args) {
+        super(args ? beanData.beanArgs : beanData.properties);
+        this.beanData = beanData;
+        this.args = args;
         setEditable(false);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
@@ -102,16 +111,46 @@ public class BeanPropEditor extends TableView<BeanProp> {
     }
 
     @Autowired
-    public void initContextMenu(ObjectProvider<ValueMenuItems> items) {
+    public void initContextMenu(ProjectProfile profile, AutowireCapableBeanFactory factory) {
         setRowFactory(param -> {
             final TableRow<BeanProp> row = new TableRow<>();
             row.disableProperty().bind(row.itemProperty().isNull());
             row.setContextMenu(new MaridContextMenu(m -> {
-                if (row.getItem() != null) {
-                    final ResolvableType type = typeFunc.apply(row.getItem().getName());
-                    m.getItems().clear();
-                    items.getObject(row.getItem().data, type).addTo(m.getItems());
+                final BeanProp prop = row.getItem();
+                if (prop == null) {
+                    return;
                 }
+                final ResolvableType beanType = profile.getType(beanData);
+                final List<TypeInfo> editors = new ArrayList<>();
+                for (final ClassInfo classInfo : BeanIntrospector.classInfos(profile.getClassLoader(), beanType)) {
+                    if (args) {
+                        final Executable c = profile.getConstructor(beanData).orElse(null);
+                        for (final MethodInfo methodInfo : classInfo.constructorInfos) {
+                            if (methodInfo.matches(c)) {
+                                for (final TypeInfo typeInfo : methodInfo.parameters) {
+                                    if (typeInfo.name.equals(prop.getName())) {
+                                        editors.add(typeInfo);
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    } else {
+                        for (final TypeInfo typeInfo : classInfo.propertyInfos) {
+                            if (typeInfo.name.equals(prop.getName())) {
+                                editors.add(typeInfo);
+                                break;
+                            }
+                        }
+                    }
+                }
+                final ResolvableType type = args
+                        ? beanData.getArgType(profile, prop.getName())
+                        : beanData.getPropType(profile, prop.getName());
+                final ValueMenuItems menuItems = new ValueMenuItems(prop.data, type, editors);
+                factory.initializeBean(menuItems, null);
+                menuItems.addTo(m);
             }));
             return row;
         });

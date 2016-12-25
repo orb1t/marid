@@ -48,7 +48,7 @@ public class WindowAndDialogPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (context.isSingleton(beanName)) {
+        if (beanName != null && matches(bean) && context.isSingleton(beanName)) {
             if (bean instanceof Dialog<?>) {
                 final Dialog<?> dialog = (Dialog<?>) bean;
                 dialog.showingProperty().addListener((observable, oldValue, newValue) -> {
@@ -68,6 +68,10 @@ public class WindowAndDialogPostProcessor implements BeanPostProcessor {
             }
         }
         return bean;
+    }
+
+    private static boolean matches(Object bean) {
+        return bean instanceof Dialog || bean instanceof Window;
     }
 
     private void closeIfNecessary() {

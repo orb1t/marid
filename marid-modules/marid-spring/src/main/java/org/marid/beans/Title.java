@@ -16,20 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.hmi.screen;
+package org.marid.beans;
 
-import org.marid.spring.beandata.BeanEditorContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
-@Configuration("HMI Screen Editor")
-public class ScreenEditor {
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Title {
 
-    @Bean(initMethod = "show", destroyMethod = "close")
-    public ScreenEditorStage stage(BeanEditorContext beanEditorContext) {
-        return new ScreenEditorStage(beanEditorContext);
-    }
+    String value();
 }

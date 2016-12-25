@@ -18,29 +18,20 @@
 
 package org.marid.editors.hmi.screen;
 
-import org.marid.spring.xml.BeanData;
-import org.marid.spring.xml.BeanProp;
-import org.marid.spring.xml.collection.DElement;
+import org.marid.beans.Info;
+import org.marid.editors.url.RelativeUrlEditor;
+import org.marid.hmi.screen.HmiScreen;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
-public interface DemoUtils {
+@Info(title = "HMI Screen")
+public class HmiScreenDescriptor extends HmiScreen {
 
-    static BeanProp prop(BeanData beanData, String name, Class<?> type, DElement<?> value) {
-        return beanData.property(name)
-                .map(p -> {
-                    p.type.set(type.getName());
-                    p.data.set(value);
-                    return p;
-                })
-                .orElseGet(() -> {
-                    final BeanProp prop = new BeanProp();
-                    prop.data.set(value);
-                    prop.name.set(name);
-                    prop.type.set(type.getName());
-                    beanData.properties.add(prop);
-                    return prop;
-                });
+    @Info(description = "Sets a relative URL of a SVG file", editors = RelativeUrlEditor.class)
+    @Override
+    public void setRelativeUrl(String url) {
+        super.setRelativeUrl(url);
     }
 }

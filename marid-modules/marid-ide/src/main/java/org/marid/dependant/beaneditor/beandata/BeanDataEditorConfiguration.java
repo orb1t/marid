@@ -24,7 +24,6 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.marid.Ide;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.xml.BeanData;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,7 +39,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@Import({BeanDataDetails.class, BeanInfo.class, ConstructorList.class})
+@Import({BeanDataDetails.class, ConstructorList.class})
 public class BeanDataEditorConfiguration {
 
     public BeanData data;
@@ -51,13 +50,13 @@ public class BeanDataEditorConfiguration {
     }
 
     @Bean
-    public BeanPropEditor beanArgsEditor(BeanData beanData, ProjectProfile profile) {
-        return new BeanPropEditor(beanData.beanArgs, name -> beanData.getArgType(profile, name));
+    public BeanPropEditor beanArgsEditor() {
+        return new BeanPropEditor(data, true);
     }
 
     @Bean
-    public BeanPropEditor beanPropsEditor(BeanData beanData, ProjectProfile profile) {
-        return new BeanPropEditor(beanData.properties, name -> beanData.getPropType(profile, name));
+    public BeanPropEditor beanPropsEditor() {
+        return new BeanPropEditor(data, false);
     }
 
     @Bean
