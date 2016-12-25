@@ -115,6 +115,12 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- provided dependencies -->
         <dependency>
             <groupId>org.marid</groupId>
