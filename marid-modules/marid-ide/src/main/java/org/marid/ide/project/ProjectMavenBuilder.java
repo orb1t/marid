@@ -20,7 +20,7 @@ package org.marid.ide.project;
 
 import javafx.application.Platform;
 import org.marid.Ide;
-import org.marid.ide.common.IdeCommons;
+import org.marid.ide.common.IdeUrlHandlerFactory;
 import org.marid.jfx.action.FxAction;
 import org.marid.logging.LogSupport;
 import org.marid.maven.ProjectBuilder;
@@ -36,14 +36,15 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
-import java.util.*;
+import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.logging.LogRecord;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import static java.util.Objects.requireNonNull;
+import static org.marid.misc.Calls.func;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -56,21 +57,13 @@ public class ProjectMavenBuilder extends URLStreamHandler implements LogSupport 
     private final ZipFile zip;
 
     @Autowired
-    public ProjectMavenBuilder(IdeCommons commons, FxAction projectBuildAction) throws Exception {
+    public ProjectMavenBuilder(IdeUrlHandlerFactory urlHandlerFactory, FxAction projectBuildAction) throws Exception {
         this.projectBuildAction = projectBuildAction;
-        final String resource = String.format("marid-maven-%s.zip", commons.ideValues.implementationVersion);
-        final URL baseUrl = requireNonNull(Ide.classLoader.getResource(resource), "marid-maven is not found");
+        final URL baseUrl = requireNonNull(Ide.classLoader.getResource("marid-maven.zip"), "marid-maven is not found");
         zip = new ZipFile(new File(baseUrl.toURI()));
-        final Set<String> jars = zip.stream()
-                .filter(e -> e.getName().endsWith(".jar"))
-                .map(ZipEntry::getName)
-                .collect(Collectors.toSet());
-        final List<URL> urls = new ArrayList<>(jars.size());
-        commons.urlHandlerFactory.register("mvn", this);
-        for (final String jar : jars) {
-            urls.add(new URL("mvn:///" + jar));
-        }
-        classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
+        urlHandlerFactory.register("mvn", this);
+        final URL[] urls = zip.stream().map(func(e -> () -> new URL("mvn:///" + e.getName()))).toArray(URL[]::new);
+        classLoader = new URLClassLoader(urls);
     }
 
     @PreDestroy
@@ -80,14 +73,14 @@ public class ProjectMavenBuilder extends URLStreamHandler implements LogSupport 
         }
     }
 
-    public Thread build(ProjectProfile profile, Consumer<Map<String, Object>> resultConsumer, Consumer<LogRecord> logConsumer) {
+    Thread build(ProjectProfile profile, Consumer<Map<String, Object>> consumer, Consumer<LogRecord> logConsumer) {
         final Thread thread = new Thread(() -> {
             Platform.runLater(() -> projectBuildAction.setDisabled(true));
             for (final ProjectBuilderFactory factory : ServiceLoader.load(ProjectBuilderFactory.class)) {
                 final ProjectBuilder projectBuilder = factory.newBuilder(profile.getPath(), logConsumer)
                         .goals("clean", "install")
                         .profiles("conf");
-                projectBuilder.build(resultConsumer);
+                projectBuilder.build(consumer);
             }
             Platform.runLater(() -> projectBuildAction.setDisabled(false));
         });

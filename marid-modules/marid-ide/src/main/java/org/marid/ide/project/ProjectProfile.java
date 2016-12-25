@@ -18,6 +18,7 @@
 
 package org.marid.ide.project;
 
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -131,7 +132,7 @@ public class ProjectProfile implements LogSupport, ProfileInfo, Observable {
         cacheEntry.update();
         invalidationListeners.forEach(listener -> {
             ResolvableType.clearCache();
-            listener.invalidated(this);
+            Platform.runLater(() -> listener.invalidated(this));
         });
     }
 

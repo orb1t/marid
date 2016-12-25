@@ -19,6 +19,8 @@
 package org.marid.misc;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
@@ -40,6 +42,21 @@ public interface Calls {
 
     static <T> T call(@Nonnull Callable<T> func) {
         return call(func, IllegalStateException::new);
+    }
+
+    static <T, R> Function<T, R> func(Function<T, Callable<R>> function) {
+        return arg -> {
+            final Callable<R> callable = function.apply(arg);
+            try {
+                return callable.call();
+            } catch (RuntimeException x) {
+                throw x;
+            } catch (IOException x) {
+                throw new UncheckedIOException(x);
+            } catch (Exception x) {
+                throw new IllegalStateException(x);
+            }
+        };
     }
 
     static void callWithTime(@Nonnull Runnable task, Consumer<Duration> durationConsumer) {

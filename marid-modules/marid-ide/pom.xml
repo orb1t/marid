@@ -71,6 +71,7 @@
                         </goals>
                         <phase>process-resources</phase>
                         <configuration>
+                            <stripVersion>true</stripVersion>
                             <outputDirectory>${project.build.directory}/classes</outputDirectory>
                             <artifactItems>
                                 <artifactItem>
