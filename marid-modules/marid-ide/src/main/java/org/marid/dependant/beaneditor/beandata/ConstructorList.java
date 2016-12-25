@@ -100,8 +100,6 @@ public class ConstructorList extends ComboBox<Executable> implements Invalidatio
     private String type(Parameter parameter) {
         if (parameter.getType().isPrimitive()) {
             return parameter.getType().getName();
-        } else if (parameter.getType().getPackage() == null) {
-            return parameter.getType().getName();
         } else {
             final ResolvableType resolvableType = ResolvableType.forType(parameter.getParameterizedType());
             if (resolvableType.hasGenerics()) {
@@ -117,6 +115,9 @@ public class ConstructorList extends ComboBox<Executable> implements Invalidatio
     }
 
     private boolean isSimpleClass(Class<?> type) {
+        if (type.getPackage() == null) {
+            return true;
+        }
         switch (type.getPackage().getName()) {
             case "java.lang":
             case "java.net":
