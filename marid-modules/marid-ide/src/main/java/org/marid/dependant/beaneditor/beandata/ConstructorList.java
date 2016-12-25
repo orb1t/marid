@@ -89,7 +89,12 @@ public class ConstructorList extends ComboBox<Executable> implements Invalidatio
     }
 
     private String format(Executable executable) {
-        return Stream.of(executable.getParameters()).map(p -> p.getName() + ": " + type(p)).collect(joining(", "));
+        final Parameter[] parameters = executable.getParameters();
+        if (parameters.length == 0) {
+            return "()";
+        } else {
+            return Stream.of(parameters).map(p -> p.getName() + ": " + type(p)).collect(joining(", "));
+        }
     }
 
     private String type(Parameter parameter) {
@@ -112,7 +117,14 @@ public class ConstructorList extends ComboBox<Executable> implements Invalidatio
     }
 
     private boolean isSimpleClass(Class<?> type) {
-        return type.getPackage().getName().matches("java[.](util|net)[.].+");
+        switch (type.getPackage().getName()) {
+            case "java.lang":
+            case "java.net":
+            case "java.util":
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override
