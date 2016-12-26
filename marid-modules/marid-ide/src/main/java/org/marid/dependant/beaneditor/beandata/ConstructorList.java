@@ -57,23 +57,27 @@ public class ConstructorList extends ComboBox<Executable> implements Invalidatio
         setConverter(new MaridConverter<>(this::format));
         setOnAction(event -> {
             final Executable constructor = getSelectionModel().getSelectedItem();
-            if (constructor != null) {
-                beanData.beanArgs.setAll(Stream.of(constructor.getParameters())
-                        .map(p -> {
-                            final BeanProp old = beanData.beanArgs.stream()
-                                    .filter(a -> Reflections.parameterName(p).equals(a.getName()))
-                                    .findAny()
-                                    .orElse(null);
-                            final BeanProp beanProp = new BeanProp();
-                            beanProp.setName(old != null ? old.getName() : p.getName());
-                            beanProp.setType(p.getType().getName());
-                            if (old != null) {
-                                beanProp.setData(old.getData());
-                            }
-                            return beanData;
-                        })
-                        .toArray(BeanProp[]::new));
+            if (constructor == null) {
+                return;
             }
+            final BeanProp[] props = Stream.of(constructor.getParameters())
+                    .map(p -> {
+                        final BeanProp beanProp = new BeanProp();
+                        beanData.beanArgs.stream()
+                                .filter(a -> Reflections.parameterName(p).equals(a.getName()))
+                                .peek(a -> {
+                                    beanProp.setData(a.getData());
+                                    beanProp.setName(a.getName());
+                                })
+                                .findAny()
+                                .orElseGet(() -> {
+                                    beanProp.setName(p.getName());
+                                    return null;
+                                });
+                        return beanData;
+                    })
+                    .toArray(BeanProp[]::new);
+            beanData.beanArgs.setAll(props);
         });
     }
 

@@ -18,29 +18,42 @@
 
 package org.marid.editors.url;
 
+import javafx.beans.value.WritableValue;
 import javafx.stage.FileChooser;
-import org.marid.beans.Title;
+import javafx.stage.FileChooser.ExtensionFilter;
 import org.marid.ide.project.ProfileInfo;
+import org.marid.spring.xml.collection.DElement;
+import org.marid.spring.xml.collection.DValue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
 @Configuration
-@Title("Relative URL editor")
 public class RelativeUrlEditor {
 
-    @Autowired
-    public void init(ProfileInfo profileInfo) {
+    @Bean
+    public FileChooser chooser(ProfileInfo profileInfo, List<ExtensionFilter> filters) {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(profileInfo.getSrcMainResources().toFile());
-        final File file = fileChooser.showOpenDialog(null);
-        if (file != null) {
+        fileChooser.getExtensionFilters().addAll(filters);
+        return fileChooser;
+    }
 
+    @Autowired
+    public void init(FileChooser fileChooser, WritableValue<DElement<?>> value) {
+        final Path basePath = fileChooser.getInitialDirectory().toPath();
+        final File file = fileChooser.showOpenDialog(null);
+        if (file != null && file.toPath().startsWith(basePath)) {
+            final Path relative = basePath.relativize(file.toPath());
+            value.setValue(new DValue(relative.toString()));
         }
     }
 }

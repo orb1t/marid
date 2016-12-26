@@ -47,6 +47,7 @@ import java.util.Properties;
 
 import static java.beans.Introspector.decapitalize;
 import static java.lang.reflect.Modifier.*;
+import static org.marid.jfx.LocalizedStrings.fls;
 import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
@@ -232,8 +233,28 @@ public class ValueMenuItems {
     }
 
     @OrderedInit(9)
-    public void initEditor(IdeDependants dependants) {
-
+    public void initEditor(IdeDependants dependants, ProjectProfile profile) {
+        if (editors.isEmpty()) {
+            return;
+        }
+        for (final TypeInfo editor : editors) {
+            if (editor.editors.isEmpty()) {
+                continue;
+            }
+            final MenuItem menuItem = new MenuItem();
+            menuItem.textProperty().bind(fls("Edit: %s", editor.title == null ? editor.name : editor.title));
+            menuItem.setOnAction(event -> {
+                final Class<?>[] classes = editor.editors.toArray(new Class<?>[editor.editors.size()]);
+                dependants.start("editor", context -> {
+                    context.setClassLoader(profile.getClassLoader());
+                    context.register(classes);
+                    context.getBeanFactory().registerSingleton("element", element);
+                    context.getBeanFactory().registerSingleton("editor", editor);
+                    context.getBeanFactory().registerSingleton("valueType", type);
+                });
+            });
+            items.add(menuItem);
+        }
     }
 
     public void addTo(ContextMenu contextMenu) {

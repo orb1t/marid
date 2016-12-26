@@ -16,20 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.beans;
+package org.marid.editors.url;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javafx.stage.FileChooser.ExtensionFilter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Title {
+@Configuration
+public class SvgFilters {
 
-    String value();
+    @Bean
+    @Order(1)
+    public ExtensionFilter svgExtensionFilter() {
+        return new ExtensionFilter(s("SVG files"), "*.svg");
+    }
+
+    @Bean
+    @Order(2)
+    public ExtensionFilter svgzExtensionFilter() {
+        return new ExtensionFilter(s("Compressed SVG files"), "*.svgz");
+    }
 }

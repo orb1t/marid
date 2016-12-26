@@ -241,12 +241,10 @@ public class BeanListActions {
                     menuItem.textProperty().bind(fls("Edit: %s", title));
                     menuItem.setOnAction(event -> {
                         profile.updateBeanData(beanData);
-                        dependants.start(classInfo.editors.get(0), "editor", c -> {
+                        dependants.start("editor", c -> {
                             c.getBeanFactory().registerSingleton("beanData", beanData);
                             c.getBeanFactory().registerSingleton("beanType", type);
-                            for (int i = 1; i < classInfo.editors.size(); i++) {
-                                c.register(classInfo.editors.get(i));
-                            }
+                            c.register(classInfo.editors.toArray(new Class<?>[classInfo.editors.size()]));
                         });
                     });
                     return menuItem;

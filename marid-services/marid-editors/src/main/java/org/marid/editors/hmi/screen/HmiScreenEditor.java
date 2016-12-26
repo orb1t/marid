@@ -18,21 +18,21 @@
 
 package org.marid.editors.hmi.screen;
 
-import org.marid.beans.Info;
-import org.marid.editors.url.RelativeUrlEditor;
-import org.marid.editors.url.SvgFilters;
+import org.marid.beans.BeanEditor;
 import org.marid.hmi.screen.HmiScreen;
+
+import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Info(title = "HMI Screen", icon = "org/marid/hmi/screen/screen32.png")
-public class HmiScreenDescriptor extends HmiScreen {
-
-    @Info(description = "Sets a relative URL of a SVG file", editors = {RelativeUrlEditor.class, SvgFilters.class})
+public class HmiScreenEditor implements BeanEditor<HmiScreen> {
+    @Nonnull
     @Override
-    public void setRelativeUrl(String url) {
-        super.setRelativeUrl(url);
+    public Set<Class<? extends HmiScreen>> editors(@Nonnull Class<HmiScreen> type) {
+        return Collections.singleton(HmiScreenDescriptor.class);
     }
 }

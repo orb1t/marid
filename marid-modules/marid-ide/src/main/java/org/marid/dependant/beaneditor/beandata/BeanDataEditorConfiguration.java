@@ -39,7 +39,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@Import({BeanDataDetails.class, ConstructorList.class})
+@Import({BeanDataDetails.class, ConstructorList.class, BeanUpdater.class})
 public class BeanDataEditorConfiguration {
 
     public BeanData data;

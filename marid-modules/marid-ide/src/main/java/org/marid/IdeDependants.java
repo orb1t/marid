@@ -49,8 +49,7 @@ public class IdeDependants {
     }
 
     @SafeVarargs
-    public final AnnotationConfigApplicationContext start(Class<?> configuration,
-                                                          String name,
+    public final AnnotationConfigApplicationContext start(String name,
                                                           Consumer<AnnotationConfigApplicationContext>... consumers) {
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         final AtomicReference<ApplicationListener<?>> listenerRef = new AtomicReference<>();
@@ -66,7 +65,7 @@ public class IdeDependants {
         context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
         context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
         context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
-        context.register(IdeDependants.class, configuration);
+        context.register(IdeDependants.class);
         context.setParent(parent);
         context.setDisplayName(name);
         parent.addApplicationListener(listenerRef.get());
@@ -79,11 +78,23 @@ public class IdeDependants {
     }
 
     @SafeVarargs
+    public final AnnotationConfigApplicationContext start(Class<?> configuration,
+                                                          String name,
+                                                          Consumer<AnnotationConfigApplicationContext>... consumers) {
+        return start(name, context -> {
+            context.register(configuration);
+            for (final Consumer<AnnotationConfigApplicationContext> consumer : consumers) {
+                consumer.accept(context);
+            }
+        });
+    }
+
+    @SafeVarargs
     public final <T> AnnotationConfigApplicationContext start(String name,
                                                               Class<T> configuration,
                                                               Consumer<T> configurationConsumer,
                                                               Consumer<AnnotationConfigApplicationContext>... consumers) {
-        return start(configuration, name, context -> {
+        return start(name, context -> {
             final CglibSubclassingInstantiationStrategy is = new CglibSubclassingInstantiationStrategy() {
                 @Override
                 public Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner) {
@@ -103,6 +114,7 @@ public class IdeDependants {
                     return object;
                 }
             };
+            context.register(configuration);
             ((DefaultListableBeanFactory) context.getBeanFactory()).setInstantiationStrategy(is);
             for (final Consumer<AnnotationConfigApplicationContext> contextConsumer : consumers) {
                 contextConsumer.accept(context);

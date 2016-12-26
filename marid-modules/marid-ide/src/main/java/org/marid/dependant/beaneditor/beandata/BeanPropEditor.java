@@ -116,6 +116,7 @@ public class BeanPropEditor extends TableView<BeanProp> {
             final TableRow<BeanProp> row = new TableRow<>();
             row.disableProperty().bind(row.itemProperty().isNull());
             row.setContextMenu(new MaridContextMenu(m -> {
+                m.getItems().clear();
                 final BeanProp prop = row.getItem();
                 if (prop == null) {
                     return;
