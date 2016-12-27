@@ -35,4 +35,6 @@ import java.lang.annotation.Target;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Bean
 public @interface PrototypeBean {
+
+    String[] value() default {};
 }

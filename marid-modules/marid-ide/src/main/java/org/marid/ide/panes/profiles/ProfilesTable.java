@@ -105,8 +105,7 @@ public class ProfilesTable extends TableView<ProjectProfile> implements LogSuppo
         editAction.on(this, action -> {
             action.setEventHandler(event -> {
                 final ProjectProfile profile = projectManager.getProfile();
-                final String name = profile.getName();
-                dependants.start(name, ResourcesConfiguration.class, c -> c.profile = profile);
+                dependants.start(ResourcesConfiguration.class, profile.getName());
             });
             action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });

@@ -50,10 +50,8 @@ import static org.marid.l10n.L10n.s;
 @ComponentScan(basePackageClasses = {ProjectConfigConfiguration.class})
 public class ProjectConfigConfiguration {
 
-    public ProjectProfile profile;
-
     @Bean
-    public ProjectProfile profile() {
+    public ProjectProfile profile(ProjectProfile profile) {
         return profile;
     }
 

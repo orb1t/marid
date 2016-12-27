@@ -42,20 +42,18 @@ import static org.marid.jfx.LocalizedStrings.ls;
 @Import({BeanDataDetails.class, ConstructorList.class, BeanUpdater.class})
 public class BeanDataEditorConfiguration {
 
-    public BeanData data;
-
     @Bean
-    public BeanData data() {
-        return data;
+    public BeanData data(BeanData $data) {
+        return $data;
     }
 
     @Bean
-    public BeanPropEditor beanArgsEditor() {
+    public BeanPropEditor beanArgsEditor(BeanData data) {
         return new BeanPropEditor(data, true);
     }
 
     @Bean
-    public BeanPropEditor beanPropsEditor() {
+    public BeanPropEditor beanPropsEditor(BeanData data) {
         return new BeanPropEditor(data, false);
     }
 

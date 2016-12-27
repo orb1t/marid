@@ -35,16 +35,13 @@ import org.springframework.core.ResolvableType;
 @Configuration
 public class ValueEditorConfiguration {
 
-    public DValue value;
-    public ResolvableType type;
-
     @Bean
-    public ResolvableType type() {
+    public ResolvableType type(ResolvableType type) {
         return type;
     }
 
     @Bean
-    public DValue value() {
+    public DValue value(DValue value) {
         return value;
     }
 

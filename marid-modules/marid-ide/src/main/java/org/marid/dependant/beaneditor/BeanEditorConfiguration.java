@@ -36,17 +36,9 @@ import java.nio.file.Path;
 @Import({BeanEditorTab.class, BeanListConfiguration.class})
 public class BeanEditorConfiguration {
 
-    public Path beanFilePath;
-    public ProjectProfile profile;
-
     @Bean
-    public Path beanFilePath() {
-        return beanFilePath;
-    }
-
-    @Bean
-    public ProjectProfile profile() {
-        return profile;
+    public Path beanFilePath(Path $beanFilePath) {
+        return $beanFilePath;
     }
 
     @Bean

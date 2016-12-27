@@ -137,9 +137,9 @@ public class BeanListTable extends CommonTableView<BeanData> {
     private void initEditAction(FxAction editAction, IdeDependants dependants) {
         editAction.on(this, action -> {
             action.setEventHandler(event -> dependants.start(
-                    "beanDataEditor",
                     BeanDataEditorConfiguration.class,
-                    c -> c.data = getSelectionModel().getSelectedItem()
+                    "beanDataEditor",
+                    c -> c.getBeanFactory().registerSingleton("$data", getSelectionModel().getSelectedItem())
             ));
             action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });

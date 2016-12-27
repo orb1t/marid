@@ -42,15 +42,11 @@ public class ProjectConfiguration implements LogSupport {
     @Bean
     @IdeAction
     @Qualifier("profile")
-    public FxAction projectSetupAction(IdeDependants dependants, ProjectManager projectManager) {
+    public FxAction projectSetupAction(IdeDependants dependants) {
         return new FxAction("projectSetup", "setup", "Project")
                 .bindText(ls("Project setup..."))
                 .setIcon(O_TOOLS)
-                .setEventHandler(event -> dependants.start(
-                        "projectEditor",
-                        ProjectConfigConfiguration.class,
-                        c -> c.profile = projectManager.getProfile()
-                ));
+                .setEventHandler(event -> dependants.start(ProjectConfigConfiguration.class, "projectEditor"));
     }
 
     @Bean
@@ -93,15 +89,11 @@ public class ProjectConfiguration implements LogSupport {
     @Bean
     @IdeAction
     @Qualifier("profile")
-    public FxAction projectRunAction(IdeDependants dependants, ProjectManager projectManager) {
+    public FxAction projectRunAction(IdeDependants dependants) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F5"))
                 .bindText(ls("Run"))
                 .setIcon(F_PLAY)
-                .setEventHandler(event -> dependants.start(
-                        "projectRunner",
-                        ProjectRunnerConfiguration.class,
-                        c -> c.profile = projectManager.getProfile()
-                ));
+                .setEventHandler(event -> dependants.start(ProjectRunnerConfiguration.class, "projectRunner"));
     }
 }

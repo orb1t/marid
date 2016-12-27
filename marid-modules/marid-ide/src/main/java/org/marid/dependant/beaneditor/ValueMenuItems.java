@@ -85,9 +85,9 @@ public class ValueMenuItems {
             if (!(element.getValue() instanceof DValue)) {
                 element.setValue(new DValue());
             }
-            dependants.start("valueEditor", ValueEditorConfiguration.class, c -> {
-                c.value = (DValue) element.getValue();
-                c.type = type;
+            dependants.start(ValueEditorConfiguration.class, "valueEditor", c -> {
+                c.getBeanFactory().registerSingleton("value", element.getValue());
+                c.getBeanFactory().registerSingleton("type", type);
             });
         });
         items.add(mi);
@@ -176,7 +176,8 @@ public class ValueMenuItems {
                 } else {
                     element.setValue(props = new DProps());
                 }
-                dependants.start("propsEditor", PropEditorConfiguration.class, c -> c.props = props);
+                dependants.start(PropEditorConfiguration.class, "propsEditor", c ->
+                        c.getBeanFactory().registerSingleton("props", props));
             });
             items.add(mi);
             items.add(new SeparatorMenuItem());
@@ -198,9 +199,9 @@ public class ValueMenuItems {
                 if (generics.length > 0 && generics[0] != ResolvableType.NONE) {
                     list.valueType.set(generics[0].getRawClass().getName());
                 }
-                dependants.start("listEditor", ListEditorConfiguration.class, c -> {
-                    c.collection = (DList) element.getValue();
-                    c.type = type;
+                dependants.start(ListEditorConfiguration.class, "listEditor", c -> {
+                    c.getBeanFactory().registerSingleton("collection", element.getValue());
+                    c.getBeanFactory().registerSingleton("type", type);
                 });
             });
             items.add(mi);
@@ -222,9 +223,9 @@ public class ValueMenuItems {
                 if (type.getComponentType() != ResolvableType.NONE) {
                     array.valueType.setValue(type.getComponentType().getRawClass().getName());
                 }
-                dependants.start("arrayEditor", ListEditorConfiguration.class, c -> {
-                    c.collection = array;
-                    c.type = type;
+                dependants.start(ListEditorConfiguration.class, "arrayEditor", c -> {
+                    c.getBeanFactory().registerSingleton("collection", array);
+                    c.getBeanFactory().registerSingleton("type", type);
                 });
             });
             items.add(mi);

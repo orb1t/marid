@@ -40,9 +40,9 @@ import java.util.List;
 public class RelativeUrlEditor {
 
     @Bean
-    public FileChooser chooser(ProfileInfo profileInfo, List<ExtensionFilter> filters) {
+    public FileChooser chooser(ProfileInfo profile, List<ExtensionFilter> filters) {
         final FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(profileInfo.getSrcMainResources().toFile());
+        fileChooser.setInitialDirectory(profile.getSrcMainResources().toFile());
         fileChooser.getExtensionFilters().addAll(filters);
         return fileChooser;
     }

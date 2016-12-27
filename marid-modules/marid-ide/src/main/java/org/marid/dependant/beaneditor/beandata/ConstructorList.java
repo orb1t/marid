@@ -49,8 +49,8 @@ public class ConstructorList extends ComboBox<Executable> implements Invalidatio
     private final ProjectProfile profile;
 
     @Autowired
-    public ConstructorList(BeanData beanData, ProjectProfile profile) {
-        this.beanData = beanData;
+    public ConstructorList(BeanData data, ProjectProfile profile) {
+        this.beanData = data;
         this.profile = profile;
         setEditable(false);
         setMaxWidth(Double.MAX_VALUE);
@@ -63,7 +63,7 @@ public class ConstructorList extends ComboBox<Executable> implements Invalidatio
             final BeanProp[] props = Stream.of(constructor.getParameters())
                     .map(p -> {
                         final BeanProp beanProp = new BeanProp();
-                        beanData.beanArgs.stream()
+                        data.beanArgs.stream()
                                 .filter(a -> Reflections.parameterName(p).equals(a.getName()))
                                 .peek(a -> {
                                     beanProp.setData(a.getData());
@@ -74,10 +74,10 @@ public class ConstructorList extends ComboBox<Executable> implements Invalidatio
                                     beanProp.setName(p.getName());
                                     return null;
                                 });
-                        return beanData;
+                        return data;
                     })
                     .toArray(BeanProp[]::new);
-            beanData.beanArgs.setAll(props);
+            data.beanArgs.setAll(props);
         });
     }
 

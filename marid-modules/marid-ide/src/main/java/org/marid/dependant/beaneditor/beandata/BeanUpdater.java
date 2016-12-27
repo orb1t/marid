@@ -36,9 +36,9 @@ public class BeanUpdater implements InvalidationListener, AutoCloseable {
     private final BeanData beanData;
 
     @Autowired
-    public BeanUpdater(ProjectProfile profile, BeanData beanData) {
+    public BeanUpdater(ProjectProfile profile, BeanData data) {
         this.profile = profile;
-        this.beanData = beanData;
+        this.beanData = data;
         invalidated(profile);
         profile.addListener(this);
     }

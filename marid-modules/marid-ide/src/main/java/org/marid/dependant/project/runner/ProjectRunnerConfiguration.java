@@ -30,10 +30,8 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackageClasses = {ProjectRunnerConfiguration.class})
 public class ProjectRunnerConfiguration {
 
-    public ProjectProfile profile;
-
     @Bean
-    public ProjectProfile profile() {
+    public ProjectProfile profile(ProjectProfile profile) {
         return profile;
     }
 }

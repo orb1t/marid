@@ -95,9 +95,7 @@ public class BeanFileBrowserActions {
 
     public void launchBeanEditor(ActionEvent event) {
         final Path path = browser.getObject().getSelectionModel().getSelectedItem().getKey();
-        dependants.start("beanEditor", BeanEditorConfiguration.class, c -> {
-            c.profile = getProfile();
-            c.beanFilePath = path;
-        });
+        dependants.start(BeanEditorConfiguration.class, "beanEditor", c ->
+                c.getBeanFactory().registerSingleton("$beanFilePath", path));
     }
 }

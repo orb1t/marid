@@ -21,17 +21,12 @@ package org.marid;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.support.CglibSubclassingInstantiationStrategy;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Constructor;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -76,37 +71,6 @@ public class IdeDependants {
         start(name, context -> {
             context.register(conf);
             Stream.of(consumers).forEach(c -> c.accept(context));
-        });
-    }
-
-    @SafeVarargs
-    public final <T> void start(String name,
-                                Class<T> conf,
-                                Consumer<T> confConsumer,
-                                Consumer<AnnotationConfigApplicationContext>... consumers) {
-        start(name, context -> {
-            context.register(conf);
-            Stream.of(consumers).forEach(c -> c.accept(context));
-            final DefaultListableBeanFactory factory = context.getDefaultListableBeanFactory();
-            factory.setInstantiationStrategy(new CglibSubclassingInstantiationStrategy() {
-                @Override
-                public Object instantiate(RootBeanDefinition d, String n, BeanFactory o, Constructor c, Object... a) {
-                    final Object result = super.instantiate(d, n, o, c, a);
-                    if (conf.isInstance(result)) {
-                        confConsumer.accept(conf.cast(result));
-                    }
-                    return result;
-                }
-
-                @Override
-                public Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner) {
-                    final Object result = super.instantiate(bd, beanName, owner);
-                    if (conf.isInstance(result)) {
-                        confConsumer.accept(conf.cast(result));
-                    }
-                    return result;
-                }
-            });
         });
     }
 

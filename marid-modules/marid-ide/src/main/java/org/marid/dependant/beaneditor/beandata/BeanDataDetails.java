@@ -72,17 +72,17 @@ public class BeanDataDetails {
     private final List<String> oldDestroyTriggers;
 
     @Autowired
-    public BeanDataDetails(BeanData beanData, ProjectProfile profile) {
-        this.beanData = beanData;
+    public BeanDataDetails(BeanData data, ProjectProfile profile) {
+        this.beanData = data;
         this.profile = profile;
         this.lazy = lazyCombo();
         this.initMethod = initMethodCombo();
         this.destroyMethod = destroyMethodCombo();
-        this.oldLazy = beanData.lazyInit.get();
-        this.oldInitMethod = beanData.initMethod.get();
-        this.oldDestroyMethod = beanData.destroyMethod.get();
-        this.oldInitTriggers = new ArrayList<>(beanData.initTriggers);
-        this.oldDestroyTriggers = new ArrayList<>(beanData.destroyTriggers);
+        this.oldLazy = data.lazyInit.get();
+        this.oldInitMethod = data.initMethod.get();
+        this.oldDestroyMethod = data.destroyMethod.get();
+        this.oldInitTriggers = new ArrayList<>(data.initTriggers);
+        this.oldDestroyTriggers = new ArrayList<>(data.destroyTriggers);
     }
 
     @Bean
