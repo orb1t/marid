@@ -32,8 +32,8 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Constructor;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -49,76 +49,64 @@ public class IdeDependants {
     }
 
     @SafeVarargs
-    public final AnnotationConfigApplicationContext start(String name,
-                                                          Consumer<AnnotationConfigApplicationContext>... consumers) {
+    public final void start(String name, Consumer<AnnotationConfigApplicationContext>... consumers) {
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        final AtomicReference<ApplicationListener<?>> listenerRef = new AtomicReference<>();
-        listenerRef.set(event -> {
-            if (event instanceof ContextClosedEvent) {
-                final ContextClosedEvent contextClosedEvent = (ContextClosedEvent) event;
-                if (contextClosedEvent.getApplicationContext() == parent) {
-                    parent.getApplicationListeners().remove(listenerRef.get());
-                    context.close();
-                }
-            }
-        });
         context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
         context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
         context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
         context.register(IdeDependants.class);
         context.setParent(parent);
         context.setDisplayName(name);
-        parent.addApplicationListener(listenerRef.get());
-        for (final Consumer<AnnotationConfigApplicationContext> contextConsumer : consumers) {
-            contextConsumer.accept(context);
-        }
+        parent.addApplicationListener(new ApplicationListener<ContextClosedEvent>() {
+            @Override
+            public void onApplicationEvent(ContextClosedEvent event) {
+                if (event.getApplicationContext() == parent) {
+                    parent.getApplicationListeners().remove(this);
+                    context.close();
+                }
+            }
+        });
+        Stream.of(consumers).forEach(c -> c.accept(context));
         context.refresh();
         context.start();
-        return context;
     }
 
     @SafeVarargs
-    public final AnnotationConfigApplicationContext start(Class<?> configuration,
-                                                          String name,
-                                                          Consumer<AnnotationConfigApplicationContext>... consumers) {
-        return start(name, context -> {
-            context.register(configuration);
-            for (final Consumer<AnnotationConfigApplicationContext> consumer : consumers) {
-                consumer.accept(context);
-            }
+    public final void start(Class<?> conf, String name, Consumer<AnnotationConfigApplicationContext>... consumers) {
+        start(name, context -> {
+            context.register(conf);
+            Stream.of(consumers).forEach(c -> c.accept(context));
         });
     }
 
     @SafeVarargs
-    public final <T> AnnotationConfigApplicationContext start(String name,
-                                                              Class<T> configuration,
-                                                              Consumer<T> configurationConsumer,
-                                                              Consumer<AnnotationConfigApplicationContext>... consumers) {
-        return start(name, context -> {
-            final CglibSubclassingInstantiationStrategy is = new CglibSubclassingInstantiationStrategy() {
+    public final <T> void start(String name,
+                                Class<T> conf,
+                                Consumer<T> confConsumer,
+                                Consumer<AnnotationConfigApplicationContext>... consumers) {
+        start(name, context -> {
+            context.register(conf);
+            Stream.of(consumers).forEach(c -> c.accept(context));
+            final DefaultListableBeanFactory factory = context.getDefaultListableBeanFactory();
+            factory.setInstantiationStrategy(new CglibSubclassingInstantiationStrategy() {
                 @Override
-                public Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner) {
-                    final Object object = super.instantiate(bd, beanName, owner);
-                    if (configuration.isInstance(object)) {
-                        configurationConsumer.accept(configuration.cast(object));
+                public Object instantiate(RootBeanDefinition d, String n, BeanFactory o, Constructor c, Object... a) {
+                    final Object result = super.instantiate(d, n, o, c, a);
+                    if (conf.isInstance(result)) {
+                        confConsumer.accept(conf.cast(result));
                     }
-                    return object;
+                    return result;
                 }
 
                 @Override
-                public Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner, Constructor<?> ctor, Object... args) {
-                    final Object object = super.instantiate(bd, beanName, owner, ctor, args);
-                    if (configuration.isInstance(object)) {
-                        configurationConsumer.accept(configuration.cast(object));
+                public Object instantiate(RootBeanDefinition bd, String beanName, BeanFactory owner) {
+                    final Object result = super.instantiate(bd, beanName, owner);
+                    if (conf.isInstance(result)) {
+                        confConsumer.accept(conf.cast(result));
                     }
-                    return object;
+                    return result;
                 }
-            };
-            context.register(configuration);
-            ((DefaultListableBeanFactory) context.getBeanFactory()).setInstantiationStrategy(is);
-            for (final Consumer<AnnotationConfigApplicationContext> contextConsumer : consumers) {
-                contextConsumer.accept(context);
-            }
+            });
         });
     }
 
