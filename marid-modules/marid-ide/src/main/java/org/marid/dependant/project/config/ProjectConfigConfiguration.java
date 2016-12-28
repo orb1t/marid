@@ -27,10 +27,13 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import org.apache.maven.model.Model;
+import org.marid.dependant.project.ProjectParams;
 import org.marid.dependant.project.config.deps.DependenciesEditor;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.panes.MaridScrollPane;
+import org.marid.spring.dependant.DependantConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -38,6 +41,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 
 import java.util.List;
 
@@ -48,11 +52,16 @@ import static org.marid.l10n.L10n.s;
  */
 @Configuration
 @ComponentScan(basePackageClasses = {ProjectConfigConfiguration.class})
-public class ProjectConfigConfiguration {
+public class ProjectConfigConfiguration extends DependantConfiguration<ProjectParams> {
+
+    @Autowired
+    public ProjectConfigConfiguration(Environment environment) {
+        super(environment);
+    }
 
     @Bean
-    public ProjectProfile profile(ProjectProfile profile) {
-        return profile;
+    public ProjectProfile profile() {
+        return param().profile;
     }
 
     @Bean

@@ -16,26 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.dependant;
+package org.marid.dependant.project;
 
-import org.springframework.core.env.Environment;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.marid.ide.project.ProjectProfile;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-public abstract class DependantConfiguration<T> {
+public class ProjectParams {
 
-    public static final String PARAM = "param";
+    public final ProjectProfile profile;
 
-    private final Environment environment;
-
-    public DependantConfiguration(Environment environment) {
-        this.environment = environment;
+    public ProjectParams(ProjectProfile profile) {
+        this.profile = profile;
     }
 
-    @SuppressWarnings("unchecked")
-    public T param() {
-        return (T) environment.getProperty(PARAM, Object.class);
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 }

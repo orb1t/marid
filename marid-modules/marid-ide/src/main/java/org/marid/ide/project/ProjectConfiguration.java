@@ -20,6 +20,7 @@ package org.marid.ide.project;
 
 import javafx.scene.input.KeyCombination;
 import org.marid.IdeDependants;
+import org.marid.dependant.project.ProjectParams;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
 import org.marid.jfx.action.FxAction;
@@ -42,14 +43,17 @@ public class ProjectConfiguration implements LogSupport {
     @Bean
     @IdeAction
     @Qualifier("profile")
-    public FxAction projectSetupAction(IdeDependants dependants) {
+    public FxAction projectSetupAction(IdeDependants dependants, ProjectManager projectManager) {
         return new FxAction("projectSetup", "setup", "Project")
                 .bindText(ls("Project setup..."))
                 .setIcon(O_TOOLS)
-                .setEventHandler(event -> dependants.start(ProjectConfigConfiguration.class, context -> {
-                    context.setId("projectConfiguration");
-                    context.setDisplayName("Project Configuration");
-                }));
+                .setEventHandler(event -> {
+                    final ProjectProfile profile = projectManager.getProfile();
+                    dependants.start(ProjectConfigConfiguration.class, new ProjectParams(profile), context -> {
+                        context.setId("projectConfiguration");
+                        context.setDisplayName("Project Configuration");
+                    });
+                });
     }
 
     @Bean
@@ -92,14 +96,17 @@ public class ProjectConfiguration implements LogSupport {
     @Bean
     @IdeAction
     @Qualifier("profile")
-    public FxAction projectRunAction(IdeDependants dependants) {
+    public FxAction projectRunAction(IdeDependants dependants, ProjectManager projectManager) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F5"))
                 .bindText(ls("Run"))
                 .setIcon(F_PLAY)
-                .setEventHandler(event -> dependants.start(ProjectRunnerConfiguration.class, context -> {
-                    context.setId("projectRunner");
-                    context.setDisplayName("Project Runner");
-                }));
+                .setEventHandler(event -> {
+                    final ProjectProfile profile = projectManager.getProfile();
+                    dependants.start(ProjectRunnerConfiguration.class, new ProjectParams(profile), context -> {
+                        context.setId("projectRunner");
+                        context.setDisplayName("Project Runner");
+                    });
+                });
     }
 }

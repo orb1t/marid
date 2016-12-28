@@ -18,20 +18,29 @@
 
 package org.marid.dependant.project.runner;
 
+import org.marid.dependant.project.ProjectParams;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.spring.dependant.DependantConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
 @ComponentScan(basePackageClasses = {ProjectRunnerConfiguration.class})
-public class ProjectRunnerConfiguration {
+public class ProjectRunnerConfiguration extends DependantConfiguration<ProjectParams> {
+
+    @Autowired
+    public ProjectRunnerConfiguration(Environment environment) {
+        super(environment);
+    }
 
     @Bean
-    public ProjectProfile profile(ProjectProfile profile) {
-        return profile;
+    public ProjectProfile profile() {
+        return param().profile;
     }
 }
