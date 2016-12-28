@@ -26,7 +26,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.IdePrefs;
 import org.marid.logging.LogSupport;
-import org.marid.spring.annotation.PrototypeBean;
 import org.marid.spring.xml.collection.DCollection;
 import org.marid.spring.xml.collection.DElement;
 import org.marid.spring.xml.ref.DRef;
@@ -73,11 +72,10 @@ public class ProjectManager implements LogSupport {
         IdePrefs.PREFERENCES.put("profile", getProfile().getName());
     }
 
-    boolean isPresent() {
+    private boolean isPresent() {
         return Files.isDirectory(getProfile().getPath());
     }
 
-    @PrototypeBean("profile")
     public ProjectProfile getProfile() {
         return profile.get();
     }

@@ -18,8 +18,6 @@
 
 package org.marid.ide.configurations;
 
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import org.marid.IdeDependants;
 import org.marid.dependant.iconviewer.IconViewerConfiguration;
 import org.marid.dependant.log.LogConfiguration;
@@ -44,26 +42,22 @@ public class ToolsConfiguration {
         return new FxAction(null, "icons", "Tools")
                 .setIcon(M_OPEN_IN_BROWSER)
                 .bindText(ls("Icon viewer"))
-                .setEventHandler(event -> dependants.start(IconViewerConfiguration.class, "iconViewer"));
+                .setEventHandler(event -> dependants.start(IconViewerConfiguration.class, context -> {
+                    context.setId("iconViewer");
+                    context.setDisplayName("Icon Viewer");
+                }));
     }
 
     @Bean
     @IdeAction
-    public FxAction monitorAction(IdeDependants dependants, TabPane ideTabPane) {
+    public FxAction monitorAction(IdeDependants dependants) {
         return new FxAction(null, "monitor", "Tools")
                 .setIcon(M_GRAPHIC_EQ)
                 .bindText(ls("System monitor"))
-                .setEventHandler(event -> {
-                    final Tab tab = ideTabPane.getTabs().stream()
-                            .filter(t -> "monitor".equals(t.getId()))
-                            .findFirst()
-                            .orElse(null);
-                    if (tab != null) {
-                        ideTabPane.getSelectionModel().select(tab);
-                    } else {
-                        dependants.start(MonitorConfiguration.class, "monitor");
-                    }
-                });
+                .setEventHandler(event -> dependants.start(MonitorConfiguration.class, context -> {
+                    context.setId("monitor");
+                    context.setDisplayName("Monitor");
+                }));
     }
 
     @Bean
@@ -81,6 +75,9 @@ public class ToolsConfiguration {
         return new FxAction("log", "log", "Tools")
                 .setIcon(M_VIEW_LIST)
                 .bindText(ls("Show logs"))
-                .setEventHandler(event -> dependants.start(LogConfiguration.class, "logViewer"));
+                .setEventHandler(event -> dependants.start(LogConfiguration.class, context -> {
+                    context.setId("logViewer");
+                    context.setDisplayName("Log Viewer");
+                }));
     }
 }

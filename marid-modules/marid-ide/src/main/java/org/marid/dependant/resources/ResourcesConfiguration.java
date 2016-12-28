@@ -31,11 +31,13 @@ import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.logging.LogSupport;
+import org.marid.spring.dependant.DependantConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
+import org.springframework.core.env.Environment;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -55,12 +57,16 @@ import static org.marid.l10n.L10n.s;
         BeanFileBrowserActions.class,
         ResourcesTab.class
 })
-public class ResourcesConfiguration implements LogSupport {
+public class ResourcesConfiguration extends DependantConfiguration<ResourcesParams> implements LogSupport {
 
-    @Primary
+    @Autowired
+    public ResourcesConfiguration(Environment environment) {
+        super(environment);
+    }
+
     @Bean
-    public ProjectProfile profile(ProjectProfile profile) {
-        return profile;
+    public ProjectProfile profile() {
+        return param().profile;
     }
 
     @Bean

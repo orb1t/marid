@@ -26,8 +26,11 @@ import javafx.scene.control.SeparatorMenuItem;
 import org.marid.IdeDependants;
 import org.marid.beans.TypeInfo;
 import org.marid.dependant.beaneditor.listeditor.ListEditorConfiguration;
+import org.marid.dependant.beaneditor.listeditor.ListEditorParams;
 import org.marid.dependant.beaneditor.propeditor.PropEditorConfiguration;
+import org.marid.dependant.beaneditor.propeditor.PropEditorParams;
 import org.marid.dependant.beaneditor.valueeditor.ValueEditorConfiguration;
+import org.marid.dependant.beaneditor.valueeditor.ValueEditorParams;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.annotation.OrderedInit;
@@ -82,12 +85,15 @@ public class ValueMenuItems {
     public void initEditValue(IdeDependants dependants) {
         final MenuItem mi = new MenuItem(s("Edit value..."), glyphIcon(M_MODE_EDIT, 16));
         mi.setOnAction(event -> {
-            if (!(element.getValue() instanceof DValue)) {
-                element.setValue(new DValue());
+            final DValue value;
+            if (element.getValue() instanceof DValue) {
+                value = (DValue) element.getValue();
+            } else {
+                element.setValue(value = new DValue());
             }
-            dependants.start(ValueEditorConfiguration.class, "valueEditor", c -> {
-                c.getBeanFactory().registerSingleton("value", element.getValue());
-                c.getBeanFactory().registerSingleton("type", type);
+            dependants.start(ValueEditorConfiguration.class, new ValueEditorParams(type, value), context -> {
+                context.setId("valueEditor");
+                context.setDisplayName("Value Editor");
             });
         });
         items.add(mi);
@@ -176,8 +182,10 @@ public class ValueMenuItems {
                 } else {
                     element.setValue(props = new DProps());
                 }
-                dependants.start(PropEditorConfiguration.class, "propsEditor", c ->
-                        c.getBeanFactory().registerSingleton("props", props));
+                dependants.start(PropEditorConfiguration.class, new PropEditorParams(props), context -> {
+                    context.setId("propEditor");
+                    context.setDisplayName("Properties Editor");
+                });
             });
             items.add(mi);
             items.add(new SeparatorMenuItem());
@@ -199,9 +207,9 @@ public class ValueMenuItems {
                 if (generics.length > 0 && generics[0] != ResolvableType.NONE) {
                     list.valueType.set(generics[0].getRawClass().getName());
                 }
-                dependants.start(ListEditorConfiguration.class, "listEditor", c -> {
-                    c.getBeanFactory().registerSingleton("collection", element.getValue());
-                    c.getBeanFactory().registerSingleton("type", type);
+                dependants.start(ListEditorConfiguration.class, new ListEditorParams(type, list), context -> {
+                    context.setId("listEditor");
+                    context.setDisplayName("List Editor");
                 });
             });
             items.add(mi);
@@ -223,9 +231,9 @@ public class ValueMenuItems {
                 if (type.getComponentType() != ResolvableType.NONE) {
                     array.valueType.setValue(type.getComponentType().getRawClass().getName());
                 }
-                dependants.start(ListEditorConfiguration.class, "arrayEditor", c -> {
-                    c.getBeanFactory().registerSingleton("collection", array);
-                    c.getBeanFactory().registerSingleton("type", type);
+                dependants.start(ListEditorConfiguration.class, new ListEditorParams(type, array), context -> {
+                    context.setId("arrayEditor");
+                    context.setDisplayName("Array Editor");
                 });
             });
             items.add(mi);
@@ -246,7 +254,9 @@ public class ValueMenuItems {
             menuItem.textProperty().bind(fls("Edit: %s", editor.title == null ? editor.name : editor.title));
             menuItem.setOnAction(event -> {
                 final Class<?>[] classes = editor.editors.toArray(new Class<?>[editor.editors.size()]);
-                dependants.start("editor", context -> {
+                dependants.start(context -> {
+                    context.setId("editor");
+                    context.setDisplayName("Value Editor");
                     context.setClassLoader(profile.getClassLoader());
                     context.register(classes);
                     context.getBeanFactory().registerSingleton("element", element);

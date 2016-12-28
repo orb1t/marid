@@ -24,6 +24,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import org.marid.IdeDependants;
 import org.marid.dependant.resources.ResourcesConfiguration;
+import org.marid.dependant.resources.ResourcesParams;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
@@ -105,7 +106,10 @@ public class ProfilesTable extends TableView<ProjectProfile> implements LogSuppo
         editAction.on(this, action -> {
             action.setEventHandler(event -> {
                 final ProjectProfile profile = projectManager.getProfile();
-                dependants.start(ResourcesConfiguration.class, profile.getName());
+                dependants.start(ResourcesConfiguration.class, new ResourcesParams(profile), context -> {
+                    context.setId("resourcesEditor");
+                    context.setDisplayName("Resources Editor");
+                });
             });
             action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });

@@ -25,6 +25,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
+import org.marid.dependant.beaneditor.beandata.BeanDataEditorParams;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.panes.main.IdeToolbar;
 import org.marid.ide.project.ProjectManager;
@@ -135,13 +136,14 @@ public class BeanListTable extends CommonTableView<BeanData> {
 
     @Autowired
     private void initEditAction(FxAction editAction, IdeDependants dependants) {
-        editAction.on(this, action -> {
-            action.setEventHandler(event -> dependants.start(
-                    BeanDataEditorConfiguration.class,
-                    "beanDataEditor",
-                    c -> c.getBeanFactory().registerSingleton("$data", getSelectionModel().getSelectedItem())
-            ));
-            action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
+        editAction.on(this, a -> {
+            final BeanData data = getSelectionModel().getSelectedItem();
+            final Class<BeanDataEditorConfiguration> conf = BeanDataEditorConfiguration.class;
+            a.setEventHandler(e -> dependants.start(conf, new BeanDataEditorParams(data), c -> {
+                c.setId("beanDataEditor");
+                c.setDisplayName("Bean Data Editor");
+            }));
+            a.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });
     }
 

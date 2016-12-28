@@ -18,23 +18,34 @@
 
 package org.marid;
 
+import com.google.common.collect.ImmutableMap;
+import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component("dependants")
 public class IdeDependants {
+
+    private static final List<AnnotationConfigApplicationContext> CONTEXTS = new CopyOnWriteArrayList<>();
 
     private final AnnotationConfigApplicationContext parent;
 
@@ -43,15 +54,24 @@ public class IdeDependants {
         this.parent = parent;
     }
 
-    @SafeVarargs
-    public final void start(String name, Consumer<AnnotationConfigApplicationContext>... consumers) {
+    public void start(Consumer<AnnotationConfigApplicationContext> consumer) {
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
         context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
         context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
         context.register(IdeDependants.class);
         context.setParent(parent);
-        context.setDisplayName(name);
+        context.addApplicationListener(e -> {
+            if (e instanceof ApplicationContextEvent) {
+                if (((ApplicationContextEvent) e).getApplicationContext() == context) {
+                    if (e instanceof ContextClosedEvent) {
+                        CONTEXTS.remove(context);
+                    } else if (e instanceof ContextStartedEvent) {
+                        CONTEXTS.add(context);
+                    }
+                }
+            }
+        });
         parent.addApplicationListener(new ApplicationListener<ContextClosedEvent>() {
             @Override
             public void onApplicationEvent(ContextClosedEvent event) {
@@ -61,17 +81,32 @@ public class IdeDependants {
                 }
             }
         });
-        Stream.of(consumers).forEach(c -> c.accept(context));
+        consumer.accept(context);
         context.refresh();
         context.start();
     }
 
-    @SafeVarargs
-    public final void start(Class<?> conf, String name, Consumer<AnnotationConfigApplicationContext>... consumers) {
-        start(name, context -> {
+    public final void start(Class<?> conf, Consumer<AnnotationConfigApplicationContext> consumer) {
+        start(context -> {
             context.register(conf);
-            Stream.of(consumers).forEach(c -> c.accept(context));
+            consumer.accept(context);
         });
+    }
+
+    public <T> void start(Class<? extends DependantConfiguration<T>> conf, T param, Consumer<AnnotationConfigApplicationContext> consumer) {
+        start(context -> {
+            final Map<String, Object> map = ImmutableMap.of(DependantConfiguration.PARAM, param);
+            context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("paramMap", map));
+            context.register(conf);
+            consumer.accept(context);
+        });
+    }
+
+    public static List<AnnotationConfigApplicationContext> getMatched(Object param) {
+        return CONTEXTS.stream()
+                .filter(c -> c.containsBean(DependantConfiguration.PARAM))
+                .filter(c -> Objects.equals(param, c.getBean(DependantConfiguration.PARAM)))
+                .collect(Collectors.toList());
     }
 
     @Override

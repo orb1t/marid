@@ -20,11 +20,11 @@ package org.marid.dependant.resources.beanfiles;
 
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TextInputDialog;
 import javafx.util.Pair;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.BeanEditorConfiguration;
+import org.marid.dependant.beaneditor.BeanEditorParams;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.BeanFile;
@@ -46,17 +46,14 @@ public class BeanFileBrowserActions {
     private final ObjectProvider<BeanFileBrowser> browser;
     private final ObservableValue<ProjectProfile> projectProfileObservableValue;
     private final IdeDependants dependants;
-    private final ObjectProvider<TabPane> ideTabPane;
 
     @Autowired
     public BeanFileBrowserActions(ObjectProvider<BeanFileBrowser> browser,
                                   ProjectManager manager,
-                                  IdeDependants dependants,
-                                  ObjectProvider<TabPane> ideTabPane) {
+                                  IdeDependants dependants) {
         this.browser = browser;
         this.projectProfileObservableValue = manager.profileProperty();
         this.dependants = dependants;
-        this.ideTabPane = ideTabPane;
     }
 
     public ProjectProfile getProfile() {
@@ -89,13 +86,11 @@ public class BeanFileBrowserActions {
         }
     }
 
-    public void onDelete(ActionEvent event) {
-        getProfile().getBeanFiles().removeAll(browser.getObject().getSelectionModel().getSelectedItems());
-    }
-
     public void launchBeanEditor(ActionEvent event) {
         final Path path = browser.getObject().getSelectionModel().getSelectedItem().getKey();
-        dependants.start(BeanEditorConfiguration.class, "beanEditor", c ->
-                c.getBeanFactory().registerSingleton("$beanFilePath", path));
+        dependants.start(BeanEditorConfiguration.class, new BeanEditorParams(path), context -> {
+            context.setId("beanEditor");
+            context.setDisplayName("Bean Editor");
+        });
     }
 }

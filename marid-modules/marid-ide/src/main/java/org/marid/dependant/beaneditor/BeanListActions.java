@@ -241,7 +241,9 @@ public class BeanListActions {
                     menuItem.textProperty().bind(fls("Edit: %s", title));
                     menuItem.setOnAction(event -> {
                         profile.updateBeanData(beanData);
-                        dependants.start("editor", c -> {
+                        dependants.start(c -> {
+                            c.setId("editor");
+                            c.setDisplayName("Editor of Bean");
                             c.getBeanFactory().registerSingleton("beanData", beanData);
                             c.getBeanFactory().registerSingleton("beanType", type);
                             c.register(classInfo.editors.toArray(new Class<?>[classInfo.editors.size()]));

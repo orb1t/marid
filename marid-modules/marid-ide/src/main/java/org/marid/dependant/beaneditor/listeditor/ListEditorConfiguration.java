@@ -22,12 +22,15 @@ import javafx.scene.control.ToolBar;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.toolbar.MaridToolbar;
+import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.collection.DCollection;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
 
 import java.util.Map;
 
@@ -36,19 +39,21 @@ import java.util.Map;
  */
 @Configuration
 @Import({ListEditor.class})
-public class ListEditorConfiguration {
+public class ListEditorConfiguration extends DependantConfiguration<ListEditorParams> {
 
-    public DCollection<?> collection;
-    public ResolvableType type;
+    @Autowired
+    public ListEditorConfiguration(Environment environment) {
+        super(environment);
+    }
 
     @Bean
     public DCollection<?> collection() {
-        return collection;
+        return param().collection;
     }
 
     @Bean
     public ResolvableType type() {
-        return type;
+        return param().type;
     }
 
     @Bean

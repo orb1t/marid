@@ -40,6 +40,9 @@ public class SettingsManager {
         return new FxAction("settings", "settings", "Tools")
                 .setIcon(O_SETTINGS)
                 .bindText(ls("Settings..."))
-                .setEventHandler(event -> dependants.start(SettingsConfiguration.class, "settingsEditor"));
+                .setEventHandler(event -> dependants.start(SettingsConfiguration.class, context -> {
+                    context.setId("settingsEditor");
+                    context.setDisplayName("Settings Editor");
+                }));
     }
 }

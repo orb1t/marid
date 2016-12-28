@@ -26,10 +26,13 @@ import org.marid.Ide;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
+import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.props.DProps;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 
 import static org.marid.l10n.L10n.s;
 
@@ -38,13 +41,11 @@ import static org.marid.l10n.L10n.s;
  */
 @Configuration
 @Import({PropActions.class, PropTable.class})
-public class PropEditorConfiguration {
+public class PropEditorConfiguration extends DependantConfiguration<PropEditorParams> {
 
-    public DProps props;
-
-    @Bean
-    public DProps props() {
-        return props;
+    @Autowired
+    public PropEditorConfiguration(Environment environment) {
+        super(environment);
     }
 
     @Bean
@@ -66,5 +67,10 @@ public class PropEditorConfiguration {
         stage.setTitle(s("Properties"));
         stage.setScene(new Scene(propEditorPane, 800, 600));
         return stage;
+    }
+
+    @Bean
+    public DProps props() {
+        return param().props;
     }
 }

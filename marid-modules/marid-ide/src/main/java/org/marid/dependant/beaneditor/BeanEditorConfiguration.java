@@ -21,11 +21,13 @@ package org.marid.dependant.beaneditor;
 import javafx.collections.ListChangeListener;
 import javafx.util.Pair;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 
 import java.nio.file.Path;
 
@@ -34,11 +36,16 @@ import java.nio.file.Path;
  */
 @Configuration
 @Import({BeanEditorTab.class, BeanListConfiguration.class})
-public class BeanEditorConfiguration {
+public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorParams> {
+
+    @Autowired
+    public BeanEditorConfiguration(Environment environment) {
+        super(environment);
+    }
 
     @Bean
-    public Path beanFilePath(Path $beanFilePath) {
-        return $beanFilePath;
+    public Path beanFilePath() {
+        return param().beanFilePath;
     }
 
     @Bean

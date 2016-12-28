@@ -23,26 +23,34 @@ import javafx.scene.control.TextArea;
 import org.marid.Ide;
 import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.panes.MaridScrollPane;
+import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.collection.DValue;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-public class ValueEditorConfiguration {
+public class ValueEditorConfiguration extends DependantConfiguration<ValueEditorParams> {
 
-    @Bean
-    public ResolvableType type(ResolvableType type) {
-        return type;
+    @Autowired
+    public ValueEditorConfiguration(Environment environment) {
+        super(environment);
     }
 
     @Bean
-    public DValue value(DValue value) {
-        return value;
+    public ResolvableType type() {
+        return param().type;
+    }
+
+    @Bean
+    public DValue value() {
+        return param().value;
     }
 
     @Bean
