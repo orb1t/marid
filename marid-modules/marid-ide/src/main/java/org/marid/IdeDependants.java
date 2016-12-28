@@ -39,6 +39,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static org.marid.spring.dependant.DependantConfiguration.PARAM;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -95,7 +97,7 @@ public class IdeDependants {
 
     public <T> void start(Class<? extends DependantConfiguration<T>> conf, T param, Consumer<AnnotationConfigApplicationContext> consumer) {
         start(context -> {
-            final Map<String, Object> map = ImmutableMap.of(DependantConfiguration.PARAM, param);
+            final Map<String, Object> map = ImmutableMap.of(PARAM, param);
             context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("paramMap", map));
             context.register(conf);
             consumer.accept(context);
@@ -104,8 +106,7 @@ public class IdeDependants {
 
     public static List<AnnotationConfigApplicationContext> getMatched(Object param) {
         return CONTEXTS.stream()
-                .filter(c -> c.containsBean(DependantConfiguration.PARAM))
-                .filter(c -> Objects.equals(param, c.getBean(DependantConfiguration.PARAM)))
+                .filter(c -> Objects.equals(param, c.getEnvironment().getProperty(PARAM, Object.class)))
                 .collect(Collectors.toList());
     }
 
