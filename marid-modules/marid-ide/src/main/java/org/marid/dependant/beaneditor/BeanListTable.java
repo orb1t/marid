@@ -27,7 +27,6 @@ import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorParams;
 import org.marid.ide.common.SpecialActions;
-import org.marid.ide.panes.main.IdeToolbar;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.idefx.controls.CommonTableView;
@@ -38,12 +37,10 @@ import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.Map;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 
@@ -158,10 +155,5 @@ public class BeanListTable extends CommonTableView<BeanData> {
                 getItems().add(beanData);
             });
         });
-    }
-
-    @Autowired
-    private void initToolbar(IdeToolbar toolbar, @Qualifier("beanList") Map<String, FxAction> actionMap) {
-        toolbar.on(this, () -> actionMap);
     }
 }

@@ -61,10 +61,10 @@ public class Ide extends Application {
         Ide.ide = this;
         rootLogger.addHandler(ideLogHandler = new IdeLogHandler());
         classLoader = Thread.currentThread().getContextClassLoader();
-        context.setDisplayName(Ide.class.getName());
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
-        context.setClassLoader(Thread.currentThread().getContextClassLoader());
+        context.setId("root");
+        context.setDisplayName("Root Context");
         context.register(IdeContext.class);
         context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
         context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());

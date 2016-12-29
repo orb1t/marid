@@ -18,9 +18,12 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.collections.ListChangeListener;
+import javafx.util.Pair;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.tabs.IdeTab;
 import org.marid.jfx.panes.MaridScrollPane;
+import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -60,5 +63,22 @@ public class BeanEditorTab extends IdeTab {
         }
         final BeanEditorTab that = (BeanEditorTab) obj;
         return that.beanFilePath.equals(beanFilePath) && profile.getName().equals(that.profile.getName());
+    }
+
+    @Autowired
+    private void init(ProjectProfile profile) {
+        final ListChangeListener<Pair<Path, BeanFile>> changeListener = c -> {
+            while (c.next()) {
+                if (c.wasRemoved()) {
+                    c.getRemoved().forEach(e -> {
+                        if (e.getKey().equals(beanFilePath)) {
+                            getTabPane().getTabs().remove(this);
+                        }
+                    });
+                }
+            }
+        };
+        profile.getBeanFiles().addListener(changeListener);
+        setOnCloseRequest(event -> profile.getBeanFiles().removeListener(changeListener));
     }
 }

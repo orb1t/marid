@@ -61,6 +61,8 @@ public class IdeDependants {
         context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
         context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
         context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
+        context.setAllowBeanDefinitionOverriding(false);
+        context.setAllowCircularReferences(false);
         context.register(IdeDependants.class);
         context.setParent(parent);
         context.addApplicationListener(e -> {
