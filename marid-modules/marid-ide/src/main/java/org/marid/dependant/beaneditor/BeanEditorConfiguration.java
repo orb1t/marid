@@ -100,9 +100,19 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
                 });
     }
 
+    /*
+     * Steps to reproduce:
+     *
+     * (1) Import the maven project
+     * (2) Configure the spring facet (from src/main/dev-resources/META-INF/dev/application.xml)
+     * (3) Look at actionMap parameter.
+     */
+
     @Bean(initMethod = "run")
     public Runnable toolbarInitializer(IdeToolbar toolbar,
                                        BeanListTable table,
+                                       // highlights "beanList" string:
+                                       // "Could not autowire. Qualified bean must be of Map<String, FxAction> type"
                                        @Qualifier("beanList") Map<String, FxAction> actionMap) {
         return () -> toolbar.on(table, () -> actionMap);
     }
