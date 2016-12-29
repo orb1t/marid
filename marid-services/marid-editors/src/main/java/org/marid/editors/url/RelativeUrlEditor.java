@@ -24,9 +24,11 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import org.marid.ide.project.ProfileInfo;
 import org.marid.spring.xml.collection.DElement;
 import org.marid.spring.xml.collection.DValue;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.support.GenericApplicationContext;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -47,13 +49,26 @@ public class RelativeUrlEditor {
         return fileChooser;
     }
 
-    @Autowired
-    public void init(FileChooser fileChooser, WritableValue<DElement<?>> value) {
-        final Path basePath = fileChooser.getInitialDirectory().toPath();
-        final File file = fileChooser.showOpenDialog(null);
-        if (file != null && file.toPath().startsWith(basePath)) {
-            final Path relative = basePath.relativize(file.toPath());
-            value.setValue(new DValue(relative.toString()));
-        }
+    @Bean
+    public ApplicationListener<ContextStartedEvent> startListener(FileChooser chooser, WritableValue<DElement<?>> value) {
+        final Path basePath = chooser.getInitialDirectory().toPath();
+        return new ApplicationListener<ContextStartedEvent>() {
+            @Override
+            public void onApplicationEvent(ContextStartedEvent event) {
+                final GenericApplicationContext context = (GenericApplicationContext) event.getApplicationContext();
+                context.getApplicationListeners().remove(this);
+                try {
+                    final File file = chooser.showOpenDialog(null);
+                    if (file != null && file.toPath().startsWith(basePath)) {
+                        final Path relative = basePath.relativize(file.toPath());
+                        value.setValue(new DValue(relative.toString()));
+                    }
+                } finally {
+                    if (context.isActive()) {
+                        context.close();
+                    }
+                }
+            }
+        };
     }
 }
