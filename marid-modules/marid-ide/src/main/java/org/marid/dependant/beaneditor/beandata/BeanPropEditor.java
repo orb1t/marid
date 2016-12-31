@@ -147,8 +147,8 @@ public class BeanPropEditor extends TableView<BeanProp> {
                     }
                 }
                 final ResolvableType type = args
-                        ? beanData.getArgType(profile, prop.getName())
-                        : beanData.getPropType(profile, prop.getName());
+                        ? profile.getArgType(beanData, prop.getName())
+                        : profile.getPropType(beanData, prop.getName());
                 final ValueMenuItems menuItems = new ValueMenuItems(prop.data, type, editors);
                 factory.initializeBean(menuItems, null);
                 menuItems.addTo(m);

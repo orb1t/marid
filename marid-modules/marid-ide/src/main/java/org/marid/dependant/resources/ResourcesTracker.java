@@ -129,6 +129,10 @@ public class ResourcesTracker implements Closeable, LogSupport {
         thread.start();
     }
 
+    public Path getResourcesPath() {
+        return resourcesPath;
+    }
+
     public Path resolve(String path) {
         return resourcesPath.resolve(path);
     }

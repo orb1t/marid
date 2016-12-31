@@ -36,33 +36,44 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.dependant.project.config.CommonTab;
 import org.marid.logging.LogSupport;
-import org.marid.spring.xml.BeanFile;
-import org.marid.spring.xml.MaridBeanDefinitionLoader;
-import org.marid.spring.xml.MaridBeanDefinitionSaver;
+import org.marid.spring.xml.*;
 import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nonnull;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.*;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Stream.of;
 import static org.apache.commons.lang3.SystemUtils.USER_HOME;
+import static org.marid.util.Reflections.parameterName;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProjectProfile implements LogSupport, ProfileInfo, Observable {
+public class ProjectProfile implements LogSupport, Observable {
 
     final Model model;
     final Path path;
@@ -108,19 +119,16 @@ public class ProjectProfile implements LogSupport, ProfileInfo, Observable {
         hmi.addListener((observable, oldValue, newValue) -> setHmi(newValue));
     }
 
-    @Override
     public URLClassLoader getClassLoader() {
         return cacheEntry.getClassLoader();
     }
 
-    @Override
     public boolean containsBean(String name) {
         return beanFiles.stream()
                 .map(Pair::getValue)
                 .anyMatch(f -> f.allBeans().anyMatch(b -> b.nameProperty().isEqualTo(name).get()));
     }
 
-    @Override
     public String generateBeanName(String name) {
         while (containsBean(name)) {
             name += "_new";
@@ -148,7 +156,6 @@ public class ProjectProfile implements LogSupport, ProfileInfo, Observable {
         return hmi;
     }
 
-    @Override
     public boolean isHmi() {
         return model.getDependencies().stream().anyMatch(CommonTab::isHmi);
     }
@@ -222,7 +229,6 @@ public class ProjectProfile implements LogSupport, ProfileInfo, Observable {
         return list;
     }
 
-    @Override
     public ObservableList<Pair<Path, BeanFile>> getBeanFiles() {
         return beanFiles;
     }
@@ -231,53 +237,43 @@ public class ProjectProfile implements LogSupport, ProfileInfo, Observable {
         return model;
     }
 
-    @Override
     public Path getPath() {
         return path;
     }
 
-    @Override
     public Path getPomFile() {
         return pomFile;
     }
 
-    @Override
     public Path getRepository() {
         return repository;
     }
 
-    @Override
     public Path getBeansDirectory() {
         return beansDirectory;
     }
 
-    @Override
     public Path getSrc() {
         return src;
     }
 
-    @Override
     public Path getSrcMainResources() {
         return srcMainResources;
     }
 
-    @Override
     public Path getTarget() {
         return target;
     }
 
-    @Override
     public String getName() {
         return path.getFileName().toString();
     }
 
     @Nonnull
-    @Override
     public Logger logger() {
         return logger;
     }
 
-    @Override
     public Optional<Class<?>> getClass(String type) {
         return cacheEntry.getClass(type);
     }
@@ -325,7 +321,6 @@ public class ProjectProfile implements LogSupport, ProfileInfo, Observable {
         }
     }
 
-    @Override
     public void save() {
         createFileStructure();
         savePomFile();
@@ -364,5 +359,149 @@ public class ProjectProfile implements LogSupport, ProfileInfo, Observable {
     @Override
     public void removeListener(InvalidationListener listener) {
         invalidationListeners.remove(listener);
+    }
+
+    public Optional<BeanData> findBean(String name) {
+        return getBeanFiles().stream()
+                .map(Pair::getValue)
+                .flatMap(BeanFile::allBeans)
+                .filter(b -> name.equals(b.getName()))
+                .findAny();
+    }
+
+    public Optional<Class<?>> getClass(BeanData data) {
+        if (data.isFactoryBean()) {
+            return getConstructor(data).map(e -> ((Method) e).getReturnType());
+        } else {
+            return getClass(data.type.get());
+        }
+    }
+
+    public Stream<? extends Executable> getConstructors(BeanData data) {
+        if (data.isFactoryBean()) {
+            if (data.factoryBean.isNotEmpty().get()) {
+                return getBeanFiles().stream()
+                        .flatMap(e -> e.getValue().allBeans())
+                        .filter(b -> data.factoryBean.isEqualTo(b.nameProperty()).get())
+                        .map(this::getClass)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .flatMap(t -> of(t.getMethods()))
+                        .filter(m -> m.getReturnType() != void.class)
+                        .filter(m -> data.factoryMethod.isEqualTo(m.getName()).get())
+                        .sorted(comparingInt(Method::getParameterCount));
+            } else {
+                return getClass(data.type.get())
+                        .map(type -> of(type.getMethods())
+                                .filter(m -> Modifier.isStatic(m.getModifiers()))
+                                .filter(m -> m.getReturnType() != void.class)
+                                .filter(m -> data.factoryMethod.isEqualTo(m.getName()).get())
+                                .sorted(comparingInt(Method::getParameterCount)))
+                        .orElse(Stream.empty());
+            }
+        } else {
+            return getClass(data)
+                    .map(c -> of(c.getConstructors()).sorted(comparingInt(Constructor::getParameterCount)))
+                    .orElseGet(Stream::empty);
+        }
+    }
+
+    public Optional<? extends Executable> getConstructor(BeanData data) {
+        final List<? extends Executable> executables = getConstructors(data).collect(toList());
+        switch (executables.size()) {
+            case 0:
+                return Optional.empty();
+            case 1:
+                return Optional.of(executables.get(0));
+            default:
+                final Class<?>[] types = data.beanArgs.stream()
+                        .map(a -> getClass(a.type.get()).orElse(Object.class))
+                        .toArray(Class<?>[]::new);
+                return executables.stream().filter(m -> Arrays.equals(types, m.getParameterTypes())).findFirst();
+        }
+    }
+
+    public void updateBeanDataConstructorArgs(BeanData data, Parameter[] parameters) {
+        final List<BeanProp> args = of(parameters)
+                .map(p -> {
+                    final Optional<BeanProp> found = data.beanArgs.stream()
+                            .filter(a -> a.name.isEqualTo(parameterName(p)).get())
+                            .findFirst();
+                    if (found.isPresent()) {
+                        found.get().type.set(p.getType().getName());
+                        return found.get();
+                    } else {
+                        final BeanProp arg = new BeanProp();
+                        arg.name.set(parameterName(p));
+                        arg.type.set(p.getType().getName());
+                        return arg;
+                    }
+                })
+                .collect(toList());
+        data.beanArgs.clear();
+        data.beanArgs.addAll(args);
+    }
+
+    public void updateBeanData(BeanData data) {
+        final Class<?> type = getClass(data).orElse(null);
+        if (type == null) {
+            return;
+        }
+        final List<Executable> executables = getConstructors(data).collect(toList());
+        if (!executables.isEmpty()) {
+            if (executables.size() == 1) {
+                updateBeanDataConstructorArgs(data, executables.get(0).getParameters());
+            } else {
+                final Optional<? extends Executable> executable = getConstructor(data);
+                executable.ifPresent(e -> updateBeanDataConstructorArgs(data, e.getParameters()));
+            }
+        }
+
+        final List<PropertyDescriptor> propertyDescriptors = getPropertyDescriptors(data).collect(toList());
+        final Map<String, BeanProp> pmap = data.properties.stream().collect(toMap(e -> e.name.get(), e -> e));
+        data.properties.clear();
+        for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+            final BeanProp prop = pmap.computeIfAbsent(propertyDescriptor.getName(), n -> {
+                final BeanProp property = new BeanProp();
+                property.name.set(n);
+                return property;
+            });
+            prop.type.set(propertyDescriptor.getPropertyType().getName());
+            data.properties.add(prop);
+        }
+    }
+
+    public Stream<PropertyDescriptor> getPropertyDescriptors(BeanData data) {
+        final Class<?> type = getClass(data).orElse(Object.class);
+        try {
+            final BeanInfo beanInfo = Introspector.getBeanInfo(type);
+            return of(beanInfo.getPropertyDescriptors())
+                    .filter(d -> d.getWriteMethod() != null);
+        } catch (IntrospectionException x) {
+            return Stream.empty();
+        }
+    }
+
+    public ResolvableType getType(BeanData beanData) {
+        if (beanData.isFactoryBean()) {
+            return getConstructor(beanData).map(e -> forMethodReturnType((Method) e)).orElse(NONE);
+        } else {
+            return getClass(beanData.type.get()).map(ResolvableType::forClass).orElse(NONE);
+        }
+    }
+
+    public ResolvableType getArgType(BeanData beanData, String name) {
+        return getConstructor(beanData)
+                .flatMap(e -> of(e.getParameters()).filter(p -> parameterName(p).equals(name)).findAny())
+                .map(p -> ResolvableType.forType(p.getParameterizedType()))
+                .orElse(NONE);
+    }
+
+    public ResolvableType getPropType(BeanData beanData, String name) {
+        return getPropertyDescriptors(beanData)
+                .filter(d -> d.getName().equals(name))
+                .findAny()
+                .map(p -> forMethodParameter(p.getWriteMethod(), 0))
+                .orElse(NONE);
     }
 }

@@ -117,7 +117,7 @@ public class BeanListTable extends CommonTableView<BeanData> {
             final MaridContextMenu contextMenu = actions.contextMenu(Collections::emptyMap);
             contextMenu.addOnPreShow(menu -> {
                 final BeanListActions beanListActions = beanListActionsProvider.getObject();
-                final ResolvableType type = row.getItem().getType(beanListActions.profile);
+                final ResolvableType type = beanListActions.profile.getType(row.getItem());
                 if (type == ResolvableType.NONE) {
                     return;
                 }

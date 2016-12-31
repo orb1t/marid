@@ -18,57 +18,105 @@
 
 package org.marid.editors.url;
 
-import javafx.beans.value.WritableValue;
-import javafx.stage.FileChooser;
+import javafx.collections.ObservableList;
+import javafx.scene.Scene;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser.ExtensionFilter;
-import org.marid.ide.project.ProfileInfo;
-import org.marid.spring.xml.collection.DElement;
-import org.marid.spring.xml.collection.DValue;
-import org.springframework.context.ApplicationListener;
+import javafx.stage.Stage;
+import org.marid.dependant.resources.ResourcesTracker;
+import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.panes.MaridScrollPane;
+import org.marid.jfx.tree.TreeUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.annotation.Import;
 
-import java.io.File;
+import java.nio.file.FileSystem;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.util.List;
+
+import static java.util.Comparator.comparingInt;
+import static org.marid.jfx.LocalizedStrings.fls;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
 @Configuration
+@Import({ResourcesTracker.class})
 public class RelativeUrlEditor {
 
     @Bean
-    public FileChooser chooser(ProfileInfo profile, List<ExtensionFilter> filters) {
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(profile.getSrcMainResources().toFile());
-        fileChooser.getExtensionFilters().addAll(filters);
-        return fileChooser;
+    public Path resourcesPath(ResourcesTracker tracker) {
+        return tracker.getResourcesPath();
     }
 
     @Bean
-    public ApplicationListener<ContextStartedEvent> startListener(FileChooser chooser, WritableValue<DElement<?>> value) {
-        final Path basePath = chooser.getInitialDirectory().toPath();
-        return new ApplicationListener<ContextStartedEvent>() {
-            @Override
-            public void onApplicationEvent(ContextStartedEvent event) {
-                final GenericApplicationContext context = (GenericApplicationContext) event.getApplicationContext();
-                context.getApplicationListeners().remove(this);
-                try {
-                    final File file = chooser.showOpenDialog(null);
-                    if (file != null && file.toPath().startsWith(basePath)) {
-                        final Path relative = basePath.relativize(file.toPath());
-                        value.setValue(new DValue(relative.toString()));
-                    }
-                } finally {
-                    if (context.isActive()) {
-                        context.close();
-                    }
-                }
-            }
-        };
+    public PathMatcher urlFilter(List<ExtensionFilter> filters, Path resourcesPath) {
+        final FileSystem fileSystem = resourcesPath.getFileSystem();
+        return filters.stream()
+                .flatMap(f -> f.getExtensions().stream())
+                .map(pattern -> fileSystem.getPathMatcher("glob:" + pattern))
+                .reduce((m1, m2) -> p -> m1.matches(p) || m2.matches(p))
+                .orElse(p -> false);
+    }
+
+    @Bean
+    public Data resources(PathMatcher pathMatcher, ResourcesTracker tracker) {
+        return new Data(tracker.resources.filtered(pathMatcher::matches));
+    }
+
+    @Bean
+    public TreeView<Item> resourceTree(Data data, Path resourcesPath) {
+        final TreeView<Item> tree = new TreeView<>(new TreeItem<>(new Item(resourcesPath)));
+        tree.setShowRoot(true);
+        data.list.forEach(path -> {
+            final TreeItem<Item> min = TreeUtils.treeStream(tree)
+                    .min(comparingInt(p -> resourcesPath.relativize(p.getValue().path).getNameCount()))
+                    .orElseThrow(IllegalStateException::new);
+            min.getChildren().add(new TreeItem<>(new Item(path)));
+        });
+        return tree;
+    }
+
+    @Bean
+    public BorderPane borderPane(TreeView<Item> tree) {
+        final BorderPane pane = new BorderPane();
+        pane.setCenter(new MaridScrollPane(tree));
+        return pane;
+    }
+
+    @Bean(initMethod = "show")
+    public Stage stage(ProjectProfile profile, BorderPane borderPane) {
+        final Stage stage = new Stage();
+        stage.titleProperty().bind(fls("[%s] Relative URL selection", profile.getName()));
+        stage.setScene(new Scene(borderPane, 800, 600));
+        return stage;
+    }
+}
+
+class Item {
+
+    final Path path;
+
+    Item(Path path) {
+        this.path = path;
+    }
+
+    @Override
+    public String toString() {
+        return path.getFileName().toString();
+    }
+}
+
+class Data {
+
+    final ObservableList<Path> list;
+
+    Data(ObservableList<Path> list) {
+        this.list = list;
     }
 }
