@@ -33,7 +33,9 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -62,6 +64,14 @@ public class ResourcesTracker implements Closeable, LogSupport {
         final boolean windows = PlatformUtil.isWindows();
         if (windows) {
             resourcesPath.register(watchService, kinds, ExtendedWatchEventModifier.FILE_TREE);
+        } else {
+            final Set<Path> directories;
+            try (final Stream<Path> files = Files.walk(resourcesPath)) {
+                directories = files.filter(Files::isDirectory).collect(Collectors.toSet());
+            }
+            for (final Path directory : directories) {
+                directory.register(watchService, kinds);
+            }
         }
         try (final Stream<Path> files = Files.walk(resourcesPath)) {
             files.filter(Files::isRegularFile).forEach(resources::add);

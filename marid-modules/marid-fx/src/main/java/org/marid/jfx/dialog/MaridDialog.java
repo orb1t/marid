@@ -25,10 +25,10 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.stage.Modality;
 import javafx.stage.Window;
-import org.marid.l10n.L10n;
+import org.marid.jfx.LocalizedStrings;
 
-import java.util.Locale;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE;
@@ -52,13 +52,22 @@ public class MaridDialog<T> extends Dialog<T> {
         this(node.getScene().getWindow(), buttonTypes);
     }
 
+    public MaridDialog(Modality modality) {
+        initModality(modality);
+    }
+
+    public MaridDialog<T> content(Node content) {
+        getDialogPane().setContent(content);
+        return this;
+    }
+
     public MaridDialog<T> title(ObservableValue<String> title) {
         titleProperty().bind(title);
         return this;
     }
 
     public MaridDialog<T> title(String title, Object... args) {
-        setTitle(L10n.s(Locale.getDefault(), title, args));
+        titleProperty().bind(LocalizedStrings.ls(title, args));
         return this;
     }
 
@@ -93,5 +102,18 @@ public class MaridDialog<T> extends Dialog<T> {
 
     public MaridDialog<T> result(Supplier<T> okSupplier) {
         return result(okSupplier, () -> null);
+    }
+
+    public MaridDialog<T> on(Consumer<ButtonType> buttonTypeConsumer) {
+        setResultConverter(buttonType -> {
+            buttonTypeConsumer.accept(buttonType);
+            return null;
+        });
+        return this;
+    }
+
+    public MaridDialog<T> resizable(boolean value) {
+        setResizable(value);
+        return this;
     }
 }

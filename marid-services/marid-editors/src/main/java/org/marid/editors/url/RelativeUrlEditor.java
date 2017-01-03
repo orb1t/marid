@@ -18,35 +18,36 @@
 
 package org.marid.editors.url;
 
+import javafx.beans.value.WritableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.scene.Scene;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.Stage;
+import javafx.stage.Modality;
 import org.marid.dependant.resources.ResourcesTracker;
-import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.tree.TreeUtils;
+import org.marid.spring.xml.collection.DElement;
+import org.marid.spring.xml.collection.DValue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
-import java.nio.file.FileSystem;
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.List;
 
 import static java.util.Comparator.comparingInt;
-import static org.marid.jfx.LocalizedStrings.fls;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
 @Configuration
-@Import({ResourcesTracker.class})
 public class RelativeUrlEditor {
 
     @Bean
@@ -56,45 +57,61 @@ public class RelativeUrlEditor {
 
     @Bean
     public PathMatcher urlFilter(List<ExtensionFilter> filters, Path resourcesPath) {
-        final FileSystem fileSystem = resourcesPath.getFileSystem();
         return filters.stream()
                 .flatMap(f -> f.getExtensions().stream())
-                .map(pattern -> fileSystem.getPathMatcher("glob:" + pattern))
-                .reduce((m1, m2) -> p -> m1.matches(p) || m2.matches(p))
-                .orElse(p -> false);
+                .map(pattern -> resourcesPath.getFileSystem().getPathMatcher("glob:" + pattern))
+                .reduce((f1, f2) -> p -> f1.matches(p) || f2.matches(p))
+                .orElse(p -> true);
     }
 
     @Bean
     public Data resources(PathMatcher pathMatcher, ResourcesTracker tracker) {
-        return new Data(tracker.resources.filtered(pathMatcher::matches));
+        return new Data(tracker.resources.filtered(p -> pathMatcher.matches(p.getFileName())));
     }
 
     @Bean
     public TreeView<Item> resourceTree(Data data, Path resourcesPath) {
         final TreeView<Item> tree = new TreeView<>(new TreeItem<>(new Item(resourcesPath)));
         tree.setShowRoot(true);
-        data.list.forEach(path -> {
-            final TreeItem<Item> min = TreeUtils.treeStream(tree)
-                    .min(comparingInt(p -> resourcesPath.relativize(p.getValue().path).getNameCount()))
-                    .orElseThrow(IllegalStateException::new);
-            min.getChildren().add(new TreeItem<>(new Item(path)));
-        });
+        data.list.forEach(path -> Utils.add(tree, path));
         return tree;
     }
 
     @Bean
-    public BorderPane borderPane(TreeView<Item> tree) {
-        final BorderPane pane = new BorderPane();
-        pane.setCenter(new MaridScrollPane(tree));
-        return pane;
+    public ListChangeListener<Path> resourcesChangeListener(TreeView<Item> tree, Data data) {
+        final ListChangeListener<Path> listener = c -> {
+            tree.getRoot().getChildren().clear();
+            data.list.forEach(path -> Utils.add(tree, path));
+        };
+        data.list.addListener(listener);
+        return listener;
+    }
+
+    @Bean
+    public AutoCloseable resourceChangeListenerUnsubscriber(Data data, ListChangeListener<Path> listener) {
+        return () -> data.list.removeListener(listener);
     }
 
     @Bean(initMethod = "show")
-    public Stage stage(ProjectProfile profile, BorderPane borderPane) {
-        final Stage stage = new Stage();
-        stage.titleProperty().bind(fls("[%s] Relative URL selection", profile.getName()));
-        stage.setScene(new Scene(borderPane, 800, 600));
-        return stage;
+    public Dialog<Boolean> stage(TreeView<Item> tree, WritableValue<DElement<?>> value) {
+        return new MaridDialog<Boolean>(Modality.NONE)
+                .title("URL editor")
+                .content(new MaridScrollPane(tree))
+                .resizable(true)
+                .on(type -> {
+                    final TreeItem<Item> selectedItem = tree.getSelectionModel().getSelectedItem();
+                    if (selectedItem == null) {
+                        return;
+                    }
+                    switch (type.getButtonData()) {
+                        case APPLY:
+                            final URI uri = selectedItem.getValue().path.toUri();
+                            final URI rootUri = tree.getRoot().getValue().path.toUri();
+                            value.setValue(new DValue(rootUri.relativize(uri).toString()));
+                            break;
+                    }
+                })
+                .buttonTypes(ButtonType.CANCEL, ButtonType.APPLY);
     }
 }
 
@@ -118,5 +135,29 @@ class Data {
 
     Data(ObservableList<Path> list) {
         this.list = list;
+    }
+}
+
+class Utils {
+
+    private static int relativeDistance(TreeItem<Item> item, Path path) {
+        if (path.startsWith(item.getValue().path)) {
+            return item.getValue().path.relativize(path).getNameCount();
+        } else {
+            return Integer.MAX_VALUE;
+        }
+    }
+
+    static void add(TreeView<Item> tree, Path path) {
+        TreeUtils.treeStream(tree)
+                .min(comparingInt(p -> relativeDistance(p, path)))
+                .ifPresent(e -> {
+                    for (final Path p : e.getValue().path.relativize(path)) {
+                        final TreeItem<Item> newItem = new TreeItem<>(new Item(p));
+                        e.getChildren().add(newItem);
+                        e.setExpanded(true);
+                        e = newItem;
+                    }
+                });
     }
 }
