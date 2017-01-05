@@ -23,9 +23,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.context.expression.BeanFactoryResolver;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -46,11 +46,11 @@ public class MaridBeanPostProcessor implements LogSupport, DestructionAwareBeanP
     private static final Pattern INIT_ATTR = Pattern.compile("init(\\d+)");
     private static final Pattern DESTROY_ATTR = Pattern.compile("destroy(\\d+)");
 
-    private final GenericApplicationContext context;
+    private final ConfigurableListableBeanFactory beanFactory;
     private final SpelExpressionParser expressionParser;
 
-    public MaridBeanPostProcessor(GenericApplicationContext context) {
-        this.context = context;
+    public MaridBeanPostProcessor(ConfigurableListableBeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
         this.expressionParser = new SpelExpressionParser();
     }
 
@@ -87,9 +87,9 @@ public class MaridBeanPostProcessor implements LogSupport, DestructionAwareBeanP
     private void applyTriggers(String type, Object bean, String beanName, Pattern attrPattern) throws BeansException {
         final BeanDefinition beanDefinition;
         try {
-            beanDefinition = context.getBeanDefinition(beanName);
+            beanDefinition = beanFactory.getBeanDefinition(beanName);
         } catch (NoSuchBeanDefinitionException x) {
-            throw new BeanInitializationException("No such bean exception", x);
+            return; // internal bean
         }
         final String[] attributeNames = beanDefinition.attributeNames();
         if (attributeNames.length == 0) {
@@ -108,7 +108,7 @@ public class MaridBeanPostProcessor implements LogSupport, DestructionAwareBeanP
         }
         final Map<Integer, Object> results = new TreeMap<>();
         final StandardEvaluationContext evaluationContext = new StandardEvaluationContext(bean);
-        evaluationContext.setBeanResolver(new BeanFactoryResolver(context));
+        evaluationContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
         evaluationContext.setVariable("results", results);
         for (final Map.Entry<Integer, String> entry : indexedAttributes.entrySet()) {
             final String attr = entry.getValue();

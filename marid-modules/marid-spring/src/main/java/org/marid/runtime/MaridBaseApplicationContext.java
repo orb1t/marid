@@ -28,8 +28,10 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 public class MaridBaseApplicationContext extends GenericXmlApplicationContext {
 
     public MaridBaseApplicationContext(ClassLoader classLoader) {
-        getBeanFactory().addBeanPostProcessor(new MaridBeanPostProcessor(this));
-        getBeanFactory().addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+        addBeanFactoryPostProcessor(beanFactory -> {
+            beanFactory.addBeanPostProcessor(new MaridBeanPostProcessor(beanFactory));
+            beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+        });
         setClassLoader(classLoader);
         setAllowCircularReferences(false);
         setValidating(false);
