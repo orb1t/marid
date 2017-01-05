@@ -18,7 +18,6 @@
 
 package org.marid.editors.url;
 
-import javafx.beans.value.WritableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ButtonType;
@@ -27,12 +26,14 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
+import org.marid.Ide;
 import org.marid.dependant.resources.ResourcesTracker;
 import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.tree.TreeUtils;
-import org.marid.spring.xml.collection.DElement;
+import org.marid.spring.contexts.ValueEditorContext;
 import org.marid.spring.xml.collection.DValue;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -50,6 +51,13 @@ import static java.util.Comparator.comparingInt;
 @Configuration
 public class RelativeUrlEditor {
 
+    private final ValueEditorContext context;
+
+    @Autowired(required = false)
+    public RelativeUrlEditor(ValueEditorContext context) {
+        this.context = context;
+    }
+
     @Bean
     public Path resourcesPath(ResourcesTracker tracker) {
         return tracker.getResourcesPath();
@@ -60,13 +68,13 @@ public class RelativeUrlEditor {
         return filters.stream()
                 .flatMap(f -> f.getExtensions().stream())
                 .map(pattern -> resourcesPath.getFileSystem().getPathMatcher("glob:" + pattern))
-                .reduce((f1, f2) -> p -> f1.matches(p) || f2.matches(p))
+                .reduce((f1, f2) -> p -> f1.matches(p.getFileName()) || f2.matches(p.getFileName()))
                 .orElse(p -> true);
     }
 
     @Bean
     public Data resources(PathMatcher pathMatcher, ResourcesTracker tracker) {
-        return new Data(tracker.resources.filtered(p -> pathMatcher.matches(p.getFileName())));
+        return new Data(tracker.resources.filtered(pathMatcher::matches));
     }
 
     @Bean
@@ -93,8 +101,8 @@ public class RelativeUrlEditor {
     }
 
     @Bean(initMethod = "show")
-    public Dialog<Boolean> stage(TreeView<Item> tree, WritableValue<DElement<?>> value) {
-        return new MaridDialog<Boolean>(Modality.NONE)
+    public Dialog<Boolean> stage(TreeView<Item> tree) {
+        return new MaridDialog<Boolean>(Modality.NONE, Ide.primaryStage, ButtonType.CANCEL, ButtonType.APPLY)
                 .title("URL editor")
                 .content(new MaridScrollPane(tree))
                 .resizable(true)
@@ -107,11 +115,11 @@ public class RelativeUrlEditor {
                         case APPLY:
                             final URI uri = selectedItem.getValue().path.toUri();
                             final URI rootUri = tree.getRoot().getValue().path.toUri();
-                            value.setValue(new DValue(rootUri.relativize(uri).toString()));
+                            context.element.setValue(new DValue(rootUri.relativize(uri).toString()));
                             break;
                     }
                 })
-                .buttonTypes(ButtonType.CANCEL, ButtonType.APPLY);
+                .with((d, p) -> d.initOwner(Ide.primaryStage));
     }
 }
 

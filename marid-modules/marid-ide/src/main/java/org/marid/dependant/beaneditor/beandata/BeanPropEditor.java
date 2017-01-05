@@ -101,6 +101,8 @@ public class BeanPropEditor extends TableView<BeanProp> {
                 label.setGraphic(glyphIcon(M_TEXT_FORMAT, 16));
             } else if (element instanceof DCollection) {
                 label.setGraphic(glyphIcon(M_LIST, 16));
+            } else if (element instanceof BeanData) {
+                label.setGraphic(glyphIcon(M_ALBUM, 16));
             }
             if (element != null) {
                 label.setText(element.toString());

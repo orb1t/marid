@@ -21,7 +21,7 @@ package org.marid.dependant.beaneditor.listeditor;
 import javafx.beans.value.WritableValue;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
-import org.marid.ide.project.ProjectProfile;
+import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.menu.MaridContextMenu;
@@ -36,6 +36,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -53,7 +54,7 @@ public class ListEditor extends ListView<DElement<?>> {
     }
 
     @Autowired
-    public void initRowFactory(ResolvableType type, ProjectProfile profile, AutowireCapableBeanFactory factory) {
+    public void initRowFactory(ResolvableType type, AutowireCapableBeanFactory factory) {
         setCellFactory(param -> new TextFieldListCell<DElement<?>>() {
             @Override
             public void updateItem(DElement<?> item, boolean empty) {
@@ -76,10 +77,13 @@ public class ListEditor extends ListView<DElement<?>> {
                     }
                     setContextMenu(new MaridContextMenu(m -> {
                         m.getItems().clear();
-                        final Consumer<DElement<?>> consumer = e -> getItems().set(getIndex(), e);
-                        final Supplier<DElement<?>> supplier = () -> getItems().get(getIndex());
-                        final WritableValue<DElement<?>> value = new WritableValueImpl<>(consumer, supplier);
-                        // TODO: implement
+                        final int index = getIndex();
+                        final Consumer<DElement<?>> consumer = e -> getItems().set(index, e);
+                        final Supplier<DElement<?>> supplier = () -> getItems().get(index);
+                        final WritableValue<DElement<?>> element = new WritableValueImpl<>(consumer, supplier);
+                        final ValueMenuItems items = new ValueMenuItems(element, type, Collections.emptyList());
+                        factory.initializeBean(items, null);
+                        items.addTo(m);
                     }));
                 }
             }

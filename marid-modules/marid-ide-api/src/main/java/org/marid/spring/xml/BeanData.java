@@ -27,16 +27,12 @@ import org.marid.spring.xml.collection.DCollection;
 import org.marid.spring.xml.collection.DElement;
 import org.marid.spring.xml.meta.Meta;
 import org.marid.util.MaridCollections;
-import org.springframework.core.ResolvableType;
 
 import javax.xml.bind.annotation.*;
-import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.IntStream.range;
-import static org.marid.util.Reflections.parameterName;
-import static org.springframework.core.ResolvableType.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -130,11 +126,11 @@ public final class BeanData extends DElement<BeanData> {
 
     @XmlAttribute(name = "lazy-init")
     public String getLazyInit() {
-        return lazyInit.get();
+        return lazyInit.isEqualTo("default").get() ? null : lazyInit.get();
     }
 
     public void setLazyInit(String lazyInit) {
-        this.lazyInit.set(lazyInit);
+        this.lazyInit.set(lazyInit == null ? "default" : lazyInit);
     }
 
     @XmlElement(name = "constructor-arg")
@@ -195,5 +191,10 @@ public final class BeanData extends DElement<BeanData> {
         return beanArgs.stream()
                 .filter(a -> a.name.isEqualTo(name).get())
                 .findAny();
+    }
+
+    @Override
+    public String toString() {
+        return name.get();
     }
 }

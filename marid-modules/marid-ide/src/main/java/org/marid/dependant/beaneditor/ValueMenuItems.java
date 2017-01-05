@@ -25,6 +25,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import org.marid.IdeDependants;
 import org.marid.beans.TypeInfo;
+import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
+import org.marid.dependant.beaneditor.beandata.BeanDataEditorParams;
 import org.marid.dependant.beaneditor.listeditor.ListEditorConfiguration;
 import org.marid.dependant.beaneditor.listeditor.ListEditorParams;
 import org.marid.dependant.beaneditor.propeditor.PropEditorConfiguration;
@@ -34,6 +36,7 @@ import org.marid.dependant.beaneditor.valueeditor.ValueEditorParams;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.annotation.OrderedInit;
+import org.marid.spring.contexts.ValueEditorContext;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.collection.DArray;
 import org.marid.spring.xml.collection.DElement;
@@ -51,6 +54,7 @@ import java.util.Properties;
 import static java.beans.Introspector.decapitalize;
 import static java.lang.reflect.Modifier.*;
 import static org.marid.jfx.LocalizedStrings.fls;
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
@@ -152,23 +156,37 @@ public class ValueMenuItems {
 
     @OrderedInit(5)
     public void initNewBean(ProjectProfile profile, BeanListActions actions) {
-        if (type != ResolvableType.NONE) {
-            final Class<?> c = type.getRawClass();
-            if ((c.getModifiers() & (INTERFACE | PRIVATE | PROTECTED | ABSTRACT)) == 0) {
-                final MenuItem item = new MenuItem("New bean from class", glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
-                item.setOnAction(event -> {
-                    final BeanData data = new BeanData();
-                    data.name.setValue(profile.generateBeanName(decapitalize(c.getSimpleName())));
-                    data.type.setValue(c.getName());
-                    actions.insertItem(data);
-                    final DRef ref = new DRef();
-                    ref.setBean(data.getName());
-                    element.setValue(ref);
-                });
-                items.add(item);
-                items.add(new SeparatorMenuItem());
-            }
+        if (type == ResolvableType.NONE) {
+            return;
         }
+        final Class<?> c = type.getRawClass();
+        if ((c.getModifiers() & (INTERFACE | PRIVATE | PROTECTED | ABSTRACT)) != 0) {
+            return;
+        }
+        {
+            final MenuItem item = new MenuItem("New bean", glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
+            item.setOnAction(event -> {
+                final BeanData data = new BeanData();
+                data.name.setValue(profile.generateBeanName(decapitalize(c.getSimpleName())));
+                data.type.setValue(c.getName());
+                actions.insertItem(data);
+                final DRef ref = new DRef();
+                ref.setBean(data.getName());
+                element.setValue(ref);
+            });
+            items.add(item);
+        }
+        {
+            final MenuItem item = new MenuItem("Embedded bean", glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
+            item.setOnAction(event -> {
+                final BeanData data = new BeanData();
+                data.name.setValue(profile.generateBeanName(decapitalize(c.getSimpleName())));
+                data.type.setValue(c.getName());
+                element.setValue(data);
+            });
+            items.add(item);
+        }
+        items.add(new SeparatorMenuItem());
     }
 
     @OrderedInit(6)
@@ -246,6 +264,7 @@ public class ValueMenuItems {
         if (editors.isEmpty()) {
             return;
         }
+        final int size = items.size();
         for (final TypeInfo editor : editors) {
             if (editor.editors.isEmpty()) {
                 continue;
@@ -259,13 +278,30 @@ public class ValueMenuItems {
                     context.setDisplayName("Value Editor");
                     context.setClassLoader(profile.getClassLoader());
                     context.register(classes);
-                    context.getBeanFactory().registerSingleton("element", element);
-                    context.getBeanFactory().registerSingleton("editor", editor);
-                    context.getBeanFactory().registerSingleton("valueType", type);
+                    context.getBeanFactory().registerSingleton("$ctx", new ValueEditorContext(element, editor, type));
                 });
             });
             items.add(menuItem);
         }
+        if (items.size() > size) {
+            items.add(new SeparatorMenuItem());
+        }
+    }
+
+    @OrderedInit(10)
+    public void initBeanEditor(IdeDependants dependants) {
+        if (!(element.getValue() instanceof BeanData)) {
+            return;
+        }
+        final BeanDataEditorParams params = new BeanDataEditorParams((BeanData) element.getValue());
+        final MenuItem menuItem = new MenuItem();
+        menuItem.textProperty().bind(ls("Edit bean"));
+        menuItem.setOnAction(event -> dependants.start(BeanDataEditorConfiguration.class, params, c -> {
+            c.setId("beanDataEditor");
+            c.setDisplayName("Bean Data Editor");
+        }));
+        items.add(menuItem);
+        items.add(new SeparatorMenuItem());
     }
 
     public void addTo(ContextMenu contextMenu) {

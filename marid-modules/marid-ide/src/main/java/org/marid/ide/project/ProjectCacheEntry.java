@@ -28,7 +28,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,8 +45,8 @@ import static java.nio.file.Files.isDirectory;
 public class ProjectCacheEntry implements AutoCloseable, LogSupport {
 
     private final ProjectProfile profile;
-    private final Map<String, Class<?>> classMap = new HashMap<>();
-    private URLClassLoader classLoader;
+    private final Map<String, Class<?>> classMap = new ConcurrentHashMap<>();
+    private volatile URLClassLoader classLoader;
 
     public ProjectCacheEntry(ProjectProfile profile) {
         this.profile = profile;
@@ -59,7 +63,7 @@ public class ProjectCacheEntry implements AutoCloseable, LogSupport {
         return classLoader;
     }
 
-    void update() throws Exception {
+    void update() {
         close();
         classLoader = classLoader();
     }

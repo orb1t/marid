@@ -18,8 +18,6 @@
 
 package org.marid.dependant.beaneditor.beandata;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.scene.control.ComboBox;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.converter.MaridConverter;
@@ -31,7 +29,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.util.stream.Stream;
@@ -43,7 +40,7 @@ import static java.util.stream.Collectors.joining;
  * @since 0.8
  */
 @Component
-public class ConstructorList extends ComboBox<Executable> implements InvalidationListener {
+public class ConstructorList extends ComboBox<Executable> {
 
     private final BeanData beanData;
     private final ProjectProfile profile;
@@ -79,17 +76,6 @@ public class ConstructorList extends ComboBox<Executable> implements Invalidatio
                     .toArray(BeanProp[]::new);
             data.beanArgs.setAll(props);
         });
-    }
-
-    @PostConstruct
-    private void init() {
-        invalidated(profile);
-        profile.addListener(this);
-    }
-
-    @PreDestroy
-    private void destroy() {
-        profile.removeListener(this);
     }
 
     private String format(Executable executable) {
@@ -132,8 +118,8 @@ public class ConstructorList extends ComboBox<Executable> implements Invalidatio
         }
     }
 
-    @Override
-    public void invalidated(Observable observable) {
+    @PostConstruct
+    public void update() {
         getItems().setAll(profile.getConstructors(beanData).toArray(Executable[]::new));
         final Executable executable = profile.getConstructor(beanData).orElse(null);
         if (executable != null) {

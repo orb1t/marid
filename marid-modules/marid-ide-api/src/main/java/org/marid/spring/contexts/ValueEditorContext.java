@@ -16,33 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beandata;
+package org.marid.spring.contexts;
 
-import org.marid.ide.project.ProjectProfile;
-import org.marid.spring.xml.BeanData;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
+import javafx.beans.value.WritableValue;
+import org.marid.beans.TypeInfo;
+import org.marid.spring.xml.collection.DElement;
+import org.springframework.core.ResolvableType;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Component
-public class BeanUpdater {
+public class ValueEditorContext {
 
-    private final ProjectProfile profile;
-    private final BeanData beanData;
+    public final WritableValue<DElement<?>> element;
+    public final TypeInfo typeInfo;
+    public final ResolvableType type;
 
-    @Autowired
-    public BeanUpdater(ProjectProfile profile, BeanData data) {
-        this.profile = profile;
-        this.beanData = data;
-    }
-
-    @PostConstruct
-    public void update() {
-        profile.updateBeanData(beanData);
+    public ValueEditorContext(WritableValue<DElement<?>> element, TypeInfo typeInfo, ResolvableType type) {
+        this.element = element;
+        this.typeInfo = typeInfo;
+        this.type = type;
     }
 }

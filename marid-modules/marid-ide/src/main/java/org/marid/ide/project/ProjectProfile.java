@@ -19,8 +19,6 @@
 package org.marid.ide.project;
 
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -57,7 +55,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -73,7 +70,7 @@ import static org.springframework.core.ResolvableType.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProjectProfile implements LogSupport, Observable {
+public class ProjectProfile implements LogSupport {
 
     final Model model;
     final Path path;
@@ -92,8 +89,6 @@ public class ProjectProfile implements LogSupport, Observable {
     final ObservableList<Pair<Path, BeanFile>> beanFiles;
     final ProjectCacheEntry cacheEntry;
     final BooleanProperty hmi;
-
-    private final List<InvalidationListener> invalidationListeners = new CopyOnWriteArrayList<>();
 
     ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -138,10 +133,7 @@ public class ProjectProfile implements LogSupport, Observable {
 
     void update() throws Exception {
         cacheEntry.update();
-        invalidationListeners.forEach(listener -> {
-            ResolvableType.clearCache();
-            Platform.runLater(() -> listener.invalidated(this));
-        });
+        Platform.runLater(ResolvableType::clearCache);
     }
 
     private void init() {
@@ -349,16 +341,6 @@ public class ProjectProfile implements LogSupport, Observable {
     @Override
     public String toString() {
         return getName();
-    }
-
-    @Override
-    public void addListener(InvalidationListener listener) {
-        invalidationListeners.add(listener);
-    }
-
-    @Override
-    public void removeListener(InvalidationListener listener) {
-        invalidationListeners.remove(listener);
     }
 
     public Optional<BeanData> findBean(String name) {

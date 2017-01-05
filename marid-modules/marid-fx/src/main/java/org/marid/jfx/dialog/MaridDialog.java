@@ -39,21 +39,21 @@ import static javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE;
 public class MaridDialog<T> extends Dialog<T> {
 
     public MaridDialog(Window parent, ButtonType... buttonTypes) {
-        initOwner(parent);
-        initModality(Modality.WINDOW_MODAL);
-        if (buttonTypes.length == 0) {
-            getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CLOSE);
-        } else {
-            getDialogPane().getButtonTypes().addAll(buttonTypes);
-        }
+        this(Modality.WINDOW_MODAL, parent, buttonTypes);
     }
 
     public MaridDialog(Node node, ButtonType... buttonTypes) {
         this(node.getScene().getWindow(), buttonTypes);
     }
 
-    public MaridDialog(Modality modality) {
+    public MaridDialog(Modality modality, Window window, ButtonType... buttonTypes) {
+        initOwner(window);
         initModality(modality);
+        if (buttonTypes.length == 0) {
+            getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CLOSE);
+        } else {
+            getDialogPane().getButtonTypes().addAll(buttonTypes);
+        }
     }
 
     public MaridDialog<T> content(Node content) {
