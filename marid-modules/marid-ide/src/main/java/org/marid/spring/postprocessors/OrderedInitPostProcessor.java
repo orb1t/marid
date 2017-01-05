@@ -22,10 +22,10 @@ import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.MethodParameter;
 
@@ -39,10 +39,10 @@ import java.util.stream.Stream;
  */
 public class OrderedInitPostProcessor implements BeanPostProcessor {
 
-    private final AnnotationConfigApplicationContext context;
+    private final AutowireCapableBeanFactory autowireCapableBeanFactory;
 
-    public OrderedInitPostProcessor(AnnotationConfigApplicationContext context) {
-        this.context = context;
+    public OrderedInitPostProcessor(AutowireCapableBeanFactory autowireCapableBeanFactory) {
+        this.autowireCapableBeanFactory = autowireCapableBeanFactory;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        final DefaultListableBeanFactory f = new DefaultListableBeanFactory(context.getAutowireCapableBeanFactory());
+        final DefaultListableBeanFactory f = new DefaultListableBeanFactory(autowireCapableBeanFactory);
         Stream.of(bean.getClass().getMethods())
                 .filter(m -> m.isAnnotationPresent(OrderedInit.class))
                 .sorted(Comparator.comparing(Method::getName))

@@ -58,9 +58,11 @@ public class IdeDependants {
 
     public void start(Consumer<AnnotationConfigApplicationContext> consumer) {
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
-        context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
-        context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
+        context.addBeanFactoryPostProcessor(beanFactory -> {
+            beanFactory.addBeanPostProcessor(new OrderedInitPostProcessor(context.getAutowireCapableBeanFactory()));
+            beanFactory.addBeanPostProcessor(new LogBeansPostProcessor());
+            beanFactory.addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
+        });
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
         context.register(IdeDependants.class);

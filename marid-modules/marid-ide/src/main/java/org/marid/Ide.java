@@ -66,8 +66,10 @@ public class Ide extends Application {
         context.setId("root");
         context.setDisplayName("Root Context");
         context.register(IdeContext.class);
-        context.getBeanFactory().addBeanPostProcessor(new OrderedInitPostProcessor(context));
-        context.getBeanFactory().addBeanPostProcessor(new LogBeansPostProcessor());
+        context.addBeanFactoryPostProcessor(beanFactory -> {
+            beanFactory.addBeanPostProcessor(new OrderedInitPostProcessor(context.getAutowireCapableBeanFactory()));
+            beanFactory.addBeanPostProcessor(new LogBeansPostProcessor());
+        });
         context.refresh();
         context.start();
         context.getBean(IdePane.class);
