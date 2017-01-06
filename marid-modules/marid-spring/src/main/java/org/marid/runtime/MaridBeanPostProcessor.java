@@ -21,7 +21,6 @@ package org.marid.runtime;
 import org.marid.logging.LogSupport;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
@@ -79,18 +78,15 @@ public class MaridBeanPostProcessor implements LogSupport, DestructionAwareBeanP
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        applyTriggers("init", bean, beanName, INIT_ATTR);
+        if (beanFactory.containsBeanDefinition(beanName)) {
+            applyTriggers("init", bean, beanName, INIT_ATTR);
+        }
         log(INFO, "Initialized {0}", beanName);
         return bean;
     }
 
     private void applyTriggers(String type, Object bean, String beanName, Pattern attrPattern) throws BeansException {
-        final BeanDefinition beanDefinition;
-        try {
-            beanDefinition = beanFactory.getBeanDefinition(beanName);
-        } catch (NoSuchBeanDefinitionException x) {
-            return; // internal bean
-        }
+        final BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
         final String[] attributeNames = beanDefinition.attributeNames();
         if (attributeNames.length == 0) {
             return;
