@@ -19,6 +19,7 @@
 package org.marid.beans;
 
 import javafx.beans.NamedArg;
+import org.marid.logging.Log;
 import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nonnull;
@@ -27,6 +28,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.logging.Level;
 
 import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.of;
@@ -44,42 +46,46 @@ public class BeanIntrospector {
     public static List<ClassInfo> classInfos(@Nonnull ClassLoader classLoader, @Nonnull ResolvableType type) {
         final List<ClassInfo> classInfos = new ArrayList<>();
         for (final BeanEditor beanEditor : ServiceLoader.load(BeanEditor.class, classLoader)) {
-            final ResolvableType beanEditorType = ResolvableType.forClass(BeanEditor.class, beanEditor.getClass());
-            final ResolvableType p = beanEditorType.getGeneric(0);
-            if (p == NONE || p.getRawClass() == null || !p.getRawClass().isAssignableFrom(type.getRawClass())) {
-                continue;
-            }
-            final Set<Class<?>> editorClasses = beanEditor.editors(type.getRawClass());
-            if (editorClasses.isEmpty()) {
-                continue;
-            }
-            final List<ResolvableType> types = new ArrayList<>();
-            types.add(type);
-            if (type.hasGenerics()) {
-                for (final Class<?> c: editorClasses) {
-                    final ResolvableType tc = ResolvableType.forClassWithGenerics(c, type.getGenerics());
-                    types.add(tc);
-                    for (final Type itf : c.getGenericInterfaces()) {
-                        final ResolvableType itfType = ResolvableType.forType(itf, tc);
-                        if (itfType.getRawClass().isAnnotationPresent(Info.class)) {
-                            types.add(itfType);
+            try {
+                final ResolvableType beanEditorType = ResolvableType.forClass(BeanEditor.class, beanEditor.getClass());
+                final ResolvableType p = beanEditorType.getGeneric(0);
+                if (p == NONE || p.getRawClass() == null || !p.getRawClass().isAssignableFrom(type.getRawClass())) {
+                    continue;
+                }
+                final Set<Class<?>> editorClasses = beanEditor.editors(type.getRawClass());
+                if (editorClasses.isEmpty()) {
+                    continue;
+                }
+                final List<ResolvableType> types = new ArrayList<>();
+                types.add(type);
+                if (type.hasGenerics()) {
+                    for (final Class<?> c : editorClasses) {
+                        final ResolvableType tc = ResolvableType.forClassWithGenerics(c, type.getGenerics());
+                        types.add(tc);
+                        for (final Type itf : c.getGenericInterfaces()) {
+                            final ResolvableType itfType = ResolvableType.forType(itf, tc);
+                            if (itfType.getRawClass().isAnnotationPresent(Info.class)) {
+                                types.add(itfType);
+                            }
+                        }
+                    }
+                } else {
+                    for (final Class<?> c : editorClasses) {
+                        types.add(ResolvableType.forClass(c));
+                        for (final Class<?> itf : c.getInterfaces()) {
+                            if (itf.isAnnotationPresent(Info.class)) {
+                                types.add(ResolvableType.forClass(itf));
+                            }
                         }
                     }
                 }
-            } else {
-                for (final Class<?> c : editorClasses) {
-                    types.add(ResolvableType.forClass(c));
-                    for (final Class<?> itf : c.getInterfaces()) {
-                        if (itf.isAnnotationPresent(Info.class)) {
-                            types.add(ResolvableType.forClass(itf));
-                        }
-                    }
-                }
+                classInfos.add(types.stream()
+                        .map(BeanIntrospector::classInfo)
+                        .reduce(BeanIntrospector::merge)
+                        .orElseThrow(IllegalStateException::new));
+            } catch (TypeNotPresentException x) {
+                Log.log(Level.FINE, "{0} is not loaded", beanEditor);
             }
-            classInfos.add(types.stream()
-                    .map(BeanIntrospector::classInfo)
-                    .reduce(BeanIntrospector::merge)
-                    .orElseThrow(IllegalStateException::new));
         }
         return classInfos.isEmpty() ? Collections.emptyList() : classInfos;
     }
