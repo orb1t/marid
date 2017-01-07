@@ -166,7 +166,7 @@ public class BeanListTable extends CommonTableView<BeanData> {
             action.setEventHandler(e -> {
                 final BeanData data = getSelectionModel().getSelectedItem();
                 final TextInputDialog nameDialog = new TextInputDialog(data.getName());
-                nameDialog.setResizable(true);
+                nameDialog.getDialogPane().setPrefWidth(800);
                 nameDialog.titleProperty().bind(ls("Rename bean"));
                 nameDialog.showAndWait().ifPresent(value -> {
                     if (Objects.equals(value, data.getName())) {
