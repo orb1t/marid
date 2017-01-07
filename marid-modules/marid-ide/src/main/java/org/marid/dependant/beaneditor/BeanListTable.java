@@ -21,6 +21,7 @@ package org.marid.dependant.beaneditor;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.IdeDependants;
@@ -41,6 +42,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.Objects;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 
@@ -155,6 +157,28 @@ public class BeanListTable extends CommonTableView<BeanData> {
                 beanData.type.set(Object.class.getName());
                 getItems().add(beanData);
             });
+        });
+    }
+
+    @Autowired
+    private void initRename(FxAction renameAction, ProjectProfile profile) {
+        renameAction.on(this, action -> {
+            action.setEventHandler(e -> {
+                final BeanData data = getSelectionModel().getSelectedItem();
+                final TextInputDialog nameDialog = new TextInputDialog(data.getName());
+                nameDialog.setResizable(true);
+                nameDialog.titleProperty().bind(ls("Rename bean"));
+                nameDialog.showAndWait().ifPresent(value -> {
+                    if (Objects.equals(value, data.getName())) {
+                        return;
+                    }
+                    final String oldName = data.getName();
+                    final String newName = profile.generateBeanName(value);
+                    data.setName(newName);
+                    ProjectManager.onBeanNameChange(profile, oldName, newName);
+                });
+            });
+            action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });
     }
 }

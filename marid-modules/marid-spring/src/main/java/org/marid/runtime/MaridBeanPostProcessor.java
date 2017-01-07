@@ -62,7 +62,9 @@ public class MaridBeanPostProcessor implements LogSupport, DestructionAwareBeanP
     @Override
     public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
         log(INFO, "Destroying {0}", beanName);
-        applyTriggers("destroy", bean, beanName, DESTROY_ATTR);
+        if (beanName != null && beanFactory.containsBeanDefinition(beanName)) {
+            applyTriggers(bean, beanName, DESTROY_ATTR);
+        }
     }
 
     @Override
@@ -78,14 +80,14 @@ public class MaridBeanPostProcessor implements LogSupport, DestructionAwareBeanP
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (beanFactory.containsBeanDefinition(beanName)) {
-            applyTriggers("init", bean, beanName, INIT_ATTR);
+        if (beanName != null && beanFactory.containsBeanDefinition(beanName)) {
+            applyTriggers(bean, beanName, INIT_ATTR);
         }
         log(INFO, "Initialized {0}", beanName);
         return bean;
     }
 
-    private void applyTriggers(String type, Object bean, String beanName, Pattern attrPattern) throws BeansException {
+    private void applyTriggers(Object bean, String beanName, Pattern attrPattern) throws BeansException {
         final BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
         final String[] attributeNames = beanDefinition.attributeNames();
         if (attributeNames.length == 0) {
@@ -118,7 +120,7 @@ public class MaridBeanPostProcessor implements LogSupport, DestructionAwareBeanP
                 final Object value = expression.getValue(evaluationContext);
                 results.put(index, value);
             } catch (BeansException x) {
-                throw new BeanInitializationException(type + " trigger " + index + " error", x);
+                throw new BeanInitializationException(attrPattern.pattern() + " trigger " + index + " error", x);
             }
         }
     }
