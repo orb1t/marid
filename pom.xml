@@ -336,7 +336,7 @@
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <goals>deploy</goals>
-                        <username>eosms</username>
+                        <username>MaridProject</username>
                     </configuration>
                 </plugin>
 
