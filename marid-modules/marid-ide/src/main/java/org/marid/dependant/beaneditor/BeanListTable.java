@@ -134,12 +134,13 @@ public class BeanListTable extends CommonTableView<BeanData> {
     @Autowired
     private void initEditAction(FxAction editAction, IdeDependants dependants) {
         editAction.on(this, a -> {
-            final BeanData data = getSelectionModel().getSelectedItem();
-            final Class<BeanDataEditorConfiguration> conf = BeanDataEditorConfiguration.class;
-            a.setEventHandler(e -> dependants.start(conf, new BeanDataEditorParams(data), c -> {
-                c.setId("beanDataEditor");
-                c.setDisplayName("Bean Data Editor");
-            }));
+            a.setEventHandler(e -> {
+                final BeanData data = getSelectionModel().getSelectedItem();
+                dependants.start(BeanDataEditorConfiguration.class, new BeanDataEditorParams(data), c -> {
+                    c.setId("beanDataEditor");
+                    c.setDisplayName("Bean Data Editor");
+                });
+            });
             a.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });
     }

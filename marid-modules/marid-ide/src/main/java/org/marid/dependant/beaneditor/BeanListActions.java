@@ -18,6 +18,7 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -26,15 +27,12 @@ import org.marid.beans.BeanIntrospector;
 import org.marid.beans.ClassInfo;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
-import org.marid.spring.xml.BeanArg;
-import org.marid.spring.xml.BeanData;
-import org.marid.spring.xml.BeanProp;
-import org.marid.spring.xml.DValue;
-import org.marid.spring.xml.DRef;
+import org.marid.spring.xml.*;
 import org.marid.util.Reflections;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -73,6 +71,16 @@ public class BeanListActions {
         this.table = table;
     }
 
+    private void setData(ObjectProperty<DElement<?>> element, Object value) {
+        if (value instanceof TypedStringValue) {
+            final TypedStringValue typedStringValue = (TypedStringValue) value;
+            element.set(new DValue(typedStringValue.getValue()));
+        } else if (value instanceof BeanDefinitionHolder) {
+            final BeanDefinitionHolder holder = (BeanDefinitionHolder) value;
+            element.set(beanData(holder.getBeanName(), holder.getBeanDefinition()));
+        }
+    }
+
     public BeanData beanData(String name, BeanDefinition def) {
         final BeanData beanData = new BeanData();
         beanData.name.set(profile.generateBeanName(name));
@@ -92,9 +100,7 @@ public class BeanListActions {
                 final BeanArg beanArg = new BeanArg();
                 beanArg.name.set(holder.getName());
                 beanArg.type.set(holder.getType());
-                if (holder.getValue() instanceof TypedStringValue) {
-                    beanArg.data.set(new DValue(((TypedStringValue) holder.getValue()).getValue()));
-                }
+                setData(beanArg.data, holder.getValue());
                 beanData.beanArgs.add(beanArg);
             }
         }
@@ -103,9 +109,7 @@ public class BeanListActions {
             for (final PropertyValue propertyValue : def.getPropertyValues().getPropertyValueList()) {
                 final BeanProp property = new BeanProp();
                 property.name.set(propertyValue.getName());
-                if (propertyValue.getValue() instanceof TypedStringValue) {
-                    property.data.set(new DValue(((TypedStringValue) propertyValue.getValue()).getValue()));
-                }
+                setData(property.data, propertyValue.getValue());
                 beanData.properties.add(property);
             }
         }

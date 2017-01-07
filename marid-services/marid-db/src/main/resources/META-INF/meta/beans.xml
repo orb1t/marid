@@ -38,18 +38,14 @@
         <meta key="icon" value="P_ADD"/>
     </bean>
 
-    <bean name="hsqldbProperties" class="org.marid.db.hsqldb.HsqldbProperties">
-        <description>HSQLDB database properties</description>
-
-        <property name="directory" value="${user.home}/data"/>
-
-        <meta key="icon" value="P_ADD"/>
-    </bean>
-
     <bean name="hsqldbDatabase" class="org.marid.db.hsqldb.HsqldbDatabase">
         <description>HSQLDB database</description>
 
-        <constructor-arg name="properties" ref="hsqldbProperties"/>
+        <constructor-arg name="properties">
+            <bean name="hsqldbProperties" class="org.marid.db.hsqldb.HsqldbProperties">
+                <property name="directory" value="${user.home}/data"/>
+            </bean>
+        </constructor-arg>
 
         <meta key="ICON" value="P_ADD"/>
     </bean>
