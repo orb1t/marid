@@ -19,6 +19,7 @@
 package org.marid.dependant.beaneditor.beandata;
 
 import javafx.scene.control.ComboBox;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.converter.MaridConverter;
 import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -47,7 +49,6 @@ public class ConstructorList extends ComboBox<Executable> {
         setEditable(false);
         setMaxWidth(Double.MAX_VALUE);
         setConverter(new MaridConverter<>(this::format));
-        getSelectionModel().select(data.constructor.get());
         setOnAction(event -> ofNullable(getSelectionModel().getSelectedItem()).ifPresent(c -> {
             final BeanArg[] args = Stream.of(c.getParameters()).map(p -> data.beanArgs.stream()
                     .filter(a -> Reflections.parameterName(p).equals(a.getName()))
@@ -62,6 +63,18 @@ public class ConstructorList extends ComboBox<Executable> {
                     .toArray(BeanArg[]::new);
             data.beanArgs.setAll(args);
         }));
+    }
+
+    @Autowired
+    private void init(ProjectProfile profile, BeanData beanData) {
+        profile.updateBeanData(beanData);
+        profile.getConstructor(beanData).ifPresent(c -> {
+            for (final Executable executable : getItems()) {
+                if (Arrays.equals(c.getParameterTypes(), executable.getParameterTypes())) {
+                    getSelectionModel().select(executable);
+                }
+            }
+        });
     }
 
     private String format(Executable executable) {

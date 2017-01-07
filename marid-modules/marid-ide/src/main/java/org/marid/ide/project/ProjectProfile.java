@@ -433,13 +433,9 @@ public class ProjectProfile implements LogSupport {
         if (!executables.isEmpty()) {
             if (executables.size() == 1) {
                 updateBeanDataConstructorArgs(data, executables.get(0).getParameters());
-                data.constructor.set(executables.get(0));
             } else {
                 final Optional<? extends Executable> executable = getConstructor(data);
-                executable.ifPresent(e -> {
-                    updateBeanDataConstructorArgs(data, e.getParameters());
-                    data.constructor.set(e);
-                });
+                executable.ifPresent(e -> updateBeanDataConstructorArgs(data, e.getParameters()));
             }
         }
 

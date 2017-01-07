@@ -55,7 +55,6 @@ public final class BeanData extends DElement<BeanData> {
     public final ObservableList<String> initTriggers = FXCollections.observableArrayList();
     public final ObservableList<String> destroyTriggers = FXCollections.observableArrayList();
 
-    public final transient ObjectProperty<Executable> constructor = new SimpleObjectProperty<>(this, "constructor");
     public final transient ObservableList<Executable> constructors = FXCollections.observableArrayList();
 
     @XmlAttribute(name = "class")

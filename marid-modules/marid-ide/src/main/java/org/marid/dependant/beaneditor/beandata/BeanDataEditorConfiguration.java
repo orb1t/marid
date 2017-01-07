@@ -24,7 +24,6 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.marid.Ide;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.BeanData;
@@ -54,11 +53,6 @@ public class BeanDataEditorConfiguration extends DependantConfiguration<BeanData
     @Bean
     public BeanData data() {
         return param().beanData;
-    }
-
-    @Bean(initMethod = "run")
-    public Runnable beanDataUpdater(ProjectProfile profile, BeanData beanData) {
-        return () -> profile.updateBeanData(beanData);
     }
 
     @Bean
