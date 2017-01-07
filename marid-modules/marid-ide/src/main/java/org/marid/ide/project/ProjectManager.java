@@ -26,9 +26,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.IdePrefs;
 import org.marid.logging.LogSupport;
-import org.marid.spring.xml.collection.DCollection;
-import org.marid.spring.xml.collection.DElement;
-import org.marid.spring.xml.ref.DRef;
+import org.marid.spring.xml.DCollection;
+import org.marid.spring.xml.DElement;
+import org.marid.spring.xml.DRef;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -112,9 +112,8 @@ public class ProjectManager implements LogSupport {
             if (beanData.factoryBean.isEqualTo(oldName).get()) {
                 beanData.factoryBean.set(newName);
             }
-            Stream.concat(beanData.beanArgs.stream(), beanData.properties.stream())
-                    .map(b -> b.data.get())
-                    .forEach(d -> onBeanNameChange(d, oldName, newName));
+            beanData.beanArgs.forEach(a -> onBeanNameChange(a.getData(), oldName, newName));
+            beanData.properties.forEach(p -> onBeanNameChange(p.getData(), oldName, newName));
         }));
     }
 

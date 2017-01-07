@@ -27,7 +27,7 @@ import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.spring.dependant.DependantConfiguration;
-import org.marid.spring.xml.props.DProps;
+import org.marid.spring.xml.DProps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

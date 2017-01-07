@@ -23,8 +23,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.spring.annotation.OrderedInit;
-import org.marid.spring.xml.props.DPropEntry;
-import org.marid.spring.xml.props.DProps;
+import org.marid.spring.xml.DPropEntry;
+import org.marid.spring.xml.DProps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

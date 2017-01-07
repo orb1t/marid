@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.collection;
+package org.marid.spring.xml;
 
-import org.marid.spring.xml.AbstractData;
+import javafx.beans.Observable;
 
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -29,4 +29,6 @@ import javax.xml.bind.annotation.XmlTransient;
 public abstract class DElement<T extends DElement<T>> extends AbstractData<T> {
 
     public abstract boolean isEmpty();
+
+    public abstract Observable[] observables();
 }

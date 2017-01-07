@@ -38,12 +38,12 @@ import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.contexts.ValueEditorContext;
 import org.marid.spring.xml.BeanData;
-import org.marid.spring.xml.collection.DArray;
-import org.marid.spring.xml.collection.DElement;
-import org.marid.spring.xml.collection.DList;
-import org.marid.spring.xml.collection.DValue;
-import org.marid.spring.xml.props.DProps;
-import org.marid.spring.xml.ref.DRef;
+import org.marid.spring.xml.DArray;
+import org.marid.spring.xml.DElement;
+import org.marid.spring.xml.DList;
+import org.marid.spring.xml.DValue;
+import org.marid.spring.xml.DProps;
+import org.marid.spring.xml.DRef;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.core.ResolvableType;
 

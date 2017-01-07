@@ -20,7 +20,7 @@ package org.marid.dependant.beaneditor.valueeditor;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.marid.spring.xml.collection.DValue;
+import org.marid.spring.xml.DValue;
 import org.springframework.core.ResolvableType;
 
 /**

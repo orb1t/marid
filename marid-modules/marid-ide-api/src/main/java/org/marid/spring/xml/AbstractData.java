@@ -18,8 +18,6 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.Property;
 import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
@@ -31,7 +29,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import static java.lang.reflect.Modifier.isStatic;
 import static java.lang.reflect.Modifier.isTransient;
@@ -42,19 +39,7 @@ import static java.util.stream.Collectors.toMap;
  * @author Dmitry Ovchinnikov
  */
 @XmlTransient
-public abstract class AbstractData<T extends AbstractData<T>> implements Externalizable, Observable, Cloneable {
-
-    private final Set<InvalidationListener> listeners = new CopyOnWriteArraySet<>();
-
-    @Override
-    public void addListener(InvalidationListener listener) {
-        listeners.add(listener);
-    }
-
-    @Override
-    public void removeListener(InvalidationListener listener) {
-        listeners.remove(listener);
-    }
+public abstract class AbstractData<T extends AbstractData<T>> implements Externalizable, Cloneable {
 
     @SuppressWarnings({"CloneDoesntCallSuperClone", "unchecked"})
     @Override
@@ -125,12 +110,6 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Externa
             return toSerializable(((Property<?>) o).getValue());
         } else {
             throw new IllegalArgumentException("Not serializable value " + o);
-        }
-    }
-
-    public void invalidate() {
-        for (final InvalidationListener listener : listeners) {
-            listener.invalidated(this);
         }
     }
 }

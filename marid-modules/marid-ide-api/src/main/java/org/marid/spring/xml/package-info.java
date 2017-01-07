@@ -16,33 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beandata;
-
-import org.marid.ide.project.ProjectProfile;
-import org.marid.spring.xml.BeanData;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Component
-public class BeanUpdater {
+@XmlSchema(
+        namespace = "http://www.springframework.org/schema/beans",
+        elementFormDefault = XmlNsForm.QUALIFIED
+)
+package org.marid.spring.xml;
 
-    private final ProjectProfile profile;
-    private final BeanData beanData;
+import javax.xml.bind.annotation.XmlNsForm;
+import javax.xml.bind.annotation.XmlSchema;
 
-    @Autowired
-    public BeanUpdater(ProjectProfile profile, BeanData data) {
-        this.profile = profile;
-        this.beanData = data;
-    }
-
-    @PostConstruct
-    public void update() {
-        profile.updateBeanData(beanData);
-    }
-}

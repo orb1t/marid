@@ -24,7 +24,7 @@ import org.marid.Ide;
 import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
-import org.marid.spring.xml.collection.DValue;
+import org.marid.spring.xml.DValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;

@@ -20,7 +20,7 @@ package org.marid.dependant.beaneditor.propeditor;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.marid.spring.xml.props.DProps;
+import org.marid.spring.xml.DProps;
 
 /**
  * @author Dmitry Ovchinnikov.

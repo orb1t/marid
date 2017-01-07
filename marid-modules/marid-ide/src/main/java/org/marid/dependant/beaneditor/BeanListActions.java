@@ -26,10 +26,11 @@ import org.marid.beans.BeanIntrospector;
 import org.marid.beans.ClassInfo;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
+import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
-import org.marid.spring.xml.collection.DValue;
-import org.marid.spring.xml.ref.DRef;
+import org.marid.spring.xml.DValue;
+import org.marid.spring.xml.DRef;
 import org.marid.util.Reflections;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +89,7 @@ public class BeanListActions {
 
         if (def.getConstructorArgumentValues() != null) {
             for (final ValueHolder holder : def.getConstructorArgumentValues().getGenericArgumentValues()) {
-                final BeanProp beanArg = new BeanProp();
+                final BeanArg beanArg = new BeanArg();
                 beanArg.name.set(holder.getName());
                 beanArg.type.set(holder.getType());
                 if (holder.getValue() instanceof TypedStringValue) {
@@ -203,7 +204,7 @@ public class BeanListActions {
                 newBeanData.factoryBean.set(beanData.name.get());
                 newBeanData.factoryMethod.set(method.getName());
                 for (final Parameter parameter : method.getParameters()) {
-                    final BeanProp arg = new BeanProp();
+                    final BeanArg arg = new BeanArg();
                     arg.name.set(Reflections.parameterName(parameter));
                     arg.type.set(parameter.getType().getName());
                     newBeanData.beanArgs.add(arg);

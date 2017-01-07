@@ -37,18 +37,17 @@ import static org.junit.Assert.assertEquals;
 @RunWith(JUnitParamsRunner.class)
 public class SerializeTest {
 
-    private static BeanProp property(String name, String type, String ref, String value) {
+    private static BeanProp property(String name, String ref, String value) {
         final BeanProp property = new BeanProp();
         property.name.set(name);
-        property.type.set(type);
         return property;
     }
 
     public Object[][] propParams() {
         return new Object[][] {
-                {property("x", "y", "a", null)},
-                {property("x", null, "z", null)},
-                {property(null, null, "a", "abcdef")}
+                {property("x", "y", null)},
+                {property("x", null, null)},
+                {property(null, null, "abcdef")}
         };
     }
 
@@ -63,7 +62,6 @@ public class SerializeTest {
         try (final ObjectInputStream ois = new ObjectInputStream(is)) {
             final BeanProp cloned = (BeanProp) ois.readObject();
             assertEquals(property.name.get(), cloned.name.get());
-            assertEquals(property.type.get(), cloned.type.get());
         }
     }
 }

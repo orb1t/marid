@@ -32,7 +32,7 @@ import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.tree.TreeUtils;
 import org.marid.spring.contexts.ValueEditorContext;
-import org.marid.spring.xml.collection.DValue;
+import org.marid.spring.xml.DValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

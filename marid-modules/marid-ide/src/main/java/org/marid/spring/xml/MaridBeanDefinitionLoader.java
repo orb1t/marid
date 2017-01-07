@@ -18,11 +18,12 @@
 
 package org.marid.spring.xml;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -31,15 +32,14 @@ import java.nio.file.Path;
 public class MaridBeanDefinitionLoader {
 
     public static BeanFile load(Path path) throws IOException {
-        try (final InputStream inputStream = Files.newInputStream(path)) {
-            return load(inputStream);
-        }
+        return load(new StreamSource(path.toFile()));
     }
 
-    public static BeanFile load(InputStream stream) throws IOException {
+    public static BeanFile load(Source stream) throws IOException {
         try {
             final Unmarshaller unmarshaller = MaridBeanDefinitionSaver.CONTEXT.createUnmarshaller();
-            return (BeanFile) unmarshaller.unmarshal(stream);
+            final JAXBElement<BeanFile> element = unmarshaller.unmarshal(stream, BeanFile.class);
+            return element.getValue();
         } catch (JAXBException x) {
             throw new IOException(x);
         }

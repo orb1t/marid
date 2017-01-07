@@ -20,7 +20,7 @@ package org.marid.spring.contexts;
 
 import javafx.beans.value.WritableValue;
 import org.marid.beans.TypeInfo;
-import org.marid.spring.xml.collection.DElement;
+import org.marid.spring.xml.DElement;
 import org.springframework.core.ResolvableType;
 
 /**

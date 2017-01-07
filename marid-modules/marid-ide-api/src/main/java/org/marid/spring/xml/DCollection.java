@@ -16,33 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.props;
+package org.marid.spring.xml;
 
-import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.marid.spring.xml.collection.DElement;
-import org.marid.util.MaridCollections;
 
 import javax.xml.bind.annotation.*;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "props")
-@XmlSeeAlso({DPropEntry.class})
+@XmlSeeAlso({DList.class, DArray.class, DValue.class, DProps.class, DRef.class})
 @XmlAccessorType(XmlAccessType.NONE)
-public final class DProps extends DElement<DProps> {
+public abstract class DCollection<T extends DCollection<T>> extends DElement<T> {
 
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type");
-    public final ObservableList<DPropEntry> entries = MaridCollections.list();
-
-    public DProps() {
-        final InvalidationListener invalidationListener = o -> invalidate();
-        valueType.addListener(invalidationListener);
-        entries.addListener(invalidationListener);
-    }
+    public final ObservableList<DElement<?>> elements = FXCollections.observableArrayList(DElement::observables);
 
     @XmlAttribute(name = "value-type")
     public String getValueType() {
@@ -53,22 +45,23 @@ public final class DProps extends DElement<DProps> {
         this.valueType.set(valueType);
     }
 
-    @XmlElement(name = "prop")
-    public DPropEntry[] getEntries() {
-        return entries.stream().filter(e -> !e.isEmpty()).toArray(DPropEntry[]::new);
+    @XmlAnyElement(lax = true)
+    public DElement<?>[] getElements() {
+        return elements.stream().filter(e -> !e.isEmpty()).toArray(DElement[]::new);
     }
 
-    public void setEntries(DPropEntry[] entries) {
-        this.entries.addAll(entries);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return false;
+    public void setElements(DElement<?>[] elements) {
+        this.elements.addAll(elements);
     }
 
     @Override
     public String toString() {
-        return String.format("Props(%d)", entries.size());
+        final String className = getClass().getSimpleName().substring(1);
+        return className + "(" + elements.size() + ")";
+    }
+
+    @Override
+    public Observable[] observables() {
+        return new Observable[] {valueType, elements};
     }
 }

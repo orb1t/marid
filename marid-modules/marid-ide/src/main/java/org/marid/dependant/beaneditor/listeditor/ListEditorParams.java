@@ -20,7 +20,7 @@ package org.marid.dependant.beaneditor.listeditor;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.marid.spring.xml.collection.DCollection;
+import org.marid.spring.xml.DCollection;
 import org.springframework.core.ResolvableType;
 
 /**

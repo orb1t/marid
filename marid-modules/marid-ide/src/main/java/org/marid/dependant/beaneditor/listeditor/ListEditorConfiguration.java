@@ -23,7 +23,7 @@ import org.marid.jfx.action.FxAction;
 import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.toolbar.MaridToolbar;
 import org.marid.spring.dependant.DependantConfiguration;
-import org.marid.spring.xml.collection.DCollection;
+import org.marid.spring.xml.DCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;

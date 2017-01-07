@@ -24,6 +24,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.marid.Ide;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.BeanData;
@@ -42,7 +43,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@Import({BeanDataDetails.class, ConstructorList.class, BeanUpdater.class})
+@Import({BeanDataDetails.class, ConstructorList.class, BeanArgEditor.class, BeanPropEditor.class})
 public class BeanDataEditorConfiguration extends DependantConfiguration<BeanDataEditorParams> {
 
     @Autowired
@@ -55,23 +56,18 @@ public class BeanDataEditorConfiguration extends DependantConfiguration<BeanData
         return param().beanData;
     }
 
-    @Bean
-    public BeanPropEditor beanArgsEditor(BeanData data) {
-        return new BeanPropEditor(data, true);
-    }
-
-    @Bean
-    public BeanPropEditor beanPropsEditor(BeanData data) {
-        return new BeanPropEditor(data, false);
+    @Bean(initMethod = "run")
+    public Runnable beanDataUpdater(ProjectProfile profile, BeanData beanData) {
+        return () -> profile.updateBeanData(beanData);
     }
 
     @Bean
     @Qualifier("beanData")
     @Order(1)
-    public Tab beanArgsTab(BeanPropEditor beanArgsEditor, ConstructorList constructorList) {
+    public Tab beanArgsTab(BeanArgEditor beanArgEditor, ConstructorList constructorList) {
         final Tab tab = new Tab();
         final BorderPane borderPane = new BorderPane();
-        borderPane.setCenter(new MaridScrollPane(beanArgsEditor));
+        borderPane.setCenter(new MaridScrollPane(beanArgEditor));
         borderPane.setBottom(constructorList);
         tab.setContent(borderPane);
         tab.textProperty().bind(ls("Parameters"));
@@ -81,9 +77,9 @@ public class BeanDataEditorConfiguration extends DependantConfiguration<BeanData
     @Bean
     @Qualifier("beanData")
     @Order(2)
-    public Tab beanPropsTab(BeanPropEditor beanPropsEditor) {
+    public Tab beanPropsTab(BeanPropEditor beanPropEditor) {
         final Tab tab = new Tab();
-        tab.setContent(new MaridScrollPane(beanPropsEditor));
+        tab.setContent(new MaridScrollPane(beanPropEditor));
         tab.textProperty().bind(ls("Properties"));
         return tab;
     }

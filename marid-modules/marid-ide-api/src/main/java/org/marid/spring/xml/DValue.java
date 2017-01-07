@@ -16,38 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.props;
+package org.marid.spring.xml;
 
-import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.spring.xml.AbstractData;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
- * @author Dmitry Ovchinnikov.
+ * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "prop")
+@XmlRootElement(name = "value")
 @XmlAccessorType(XmlAccessType.NONE)
-public final class DPropEntry extends AbstractData<DPropEntry> {
+public final class DValue extends DElement<DValue> {
 
-    public final StringProperty key = new SimpleStringProperty(this, "key");
     public final StringProperty value = new SimpleStringProperty(this, "value");
 
-    public DPropEntry() {
-        final InvalidationListener invalidationListener = o -> invalidate();
-        key.addListener(invalidationListener);
-        value.addListener(invalidationListener);
+    public DValue() {
     }
 
-    @XmlAttribute(name = "key")
-    public String getKey() {
-        return key.get();
-    }
-
-    public void setKey(String key) {
-        this.key.set(key);
+    public DValue(String value) {
+        this.value.set(value);
     }
 
     @XmlValue
@@ -59,7 +52,18 @@ public final class DPropEntry extends AbstractData<DPropEntry> {
         this.value.set(value);
     }
 
+    @Override
     public boolean isEmpty() {
-        return key.isEmpty().get() && value.isEmpty().get();
+        return value.isEmpty().get();
+    }
+
+    @Override
+    public Observable[] observables() {
+        return new Observable[] {value};
+    }
+
+    @Override
+    public String toString() {
+        return getValue();
     }
 }

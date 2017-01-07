@@ -27,13 +27,15 @@ import javafx.beans.property.StringProperty;
 import javax.xml.bind.annotation.*;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
-@XmlAccessorType(XmlAccessType.NONE)
 @XmlSeeAlso({DCollection.class})
-public class BeanProp extends AbstractData<BeanProp> {
+@XmlAccessorType(XmlAccessType.NONE)
+public class BeanArg extends AbstractData<BeanArg> {
 
     public final StringProperty name = new SimpleStringProperty(this, "name");
+    public final StringProperty type = new SimpleStringProperty(this, "type");
     public final ObjectProperty<DElement<?>> data = new SimpleObjectProperty<>(this, "data");
 
     @XmlAttribute(name = "name")
@@ -43,6 +45,15 @@ public class BeanProp extends AbstractData<BeanProp> {
 
     public void setName(String name) {
         this.name.set(name);
+    }
+
+    @XmlAttribute(name = "type")
+    public String getType() {
+        return type.isEmpty().get() ? null : type.get();
+    }
+
+    public void setType(String type) {
+        this.type.set(type);
     }
 
     @XmlAnyElement(lax = true)
@@ -59,6 +70,6 @@ public class BeanProp extends AbstractData<BeanProp> {
     }
 
     public Observable[] observables() {
-        return new Observable[] {name, data};
+        return new Observable[] {name, type, data};
     }
 }

@@ -21,12 +21,17 @@ package org.marid.spring.xml;
 import org.marid.misc.Calls;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
+
+import static javax.xml.bind.Marshaller.JAXB_ENCODING;
+import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,17 +41,17 @@ public class MaridBeanDefinitionSaver {
     static final JAXBContext CONTEXT = Calls.call(() -> JAXBContext.newInstance(BeanFile.class));
 
     public static void write(Path path, BeanFile beanFile) throws IOException {
-        try (final OutputStream outputStream = Files.newOutputStream(path)) {
-            write(outputStream, beanFile);
-        }
+        write(new StreamResult(path.toFile()), beanFile);
     }
 
-    public static void write(OutputStream outputStream, BeanFile beanFile) throws IOException {
+    public static void write(Result result, BeanFile beanFile) throws IOException {
         try {
             final Marshaller marshaller = CONTEXT.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
-            marshaller.marshal(beanFile, outputStream);
+            marshaller.setProperty(JAXB_FORMATTED_OUTPUT, true);
+            marshaller.setProperty(JAXB_ENCODING, "UTF-8");
+            final QName name = new QName("http://www.springframework.org/schema/beans", "beans");
+            final JAXBElement<BeanFile> element = new JAXBElement<>(name, BeanFile.class, beanFile);
+            marshaller.marshal(element, result);
         } catch (JAXBException x) {
             throw new IOException(x);
         }

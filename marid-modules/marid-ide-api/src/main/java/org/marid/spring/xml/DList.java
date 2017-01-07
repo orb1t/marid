@@ -16,15 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.collection;
+package org.marid.spring.xml;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@XmlRootElement(name = "array")
-public final class DArray extends DCollection<DArray> {
+@XmlRootElement(name = "list")
+@XmlAccessorType(XmlAccessType.NONE)
+public final class DList extends DCollection<DList> {
 
     @Override
     public boolean isEmpty() {

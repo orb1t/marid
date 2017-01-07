@@ -24,41 +24,39 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import org.marid.beans.BeanIntrospector;
 import org.marid.beans.ClassInfo;
+import org.marid.beans.MethodInfo;
 import org.marid.beans.TypeInfo;
 import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.spring.annotation.OrderedInit;
+import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
-import org.marid.spring.xml.BeanProp;
-import org.marid.spring.xml.DCollection;
-import org.marid.spring.xml.DElement;
-import org.marid.spring.xml.DValue;
-import org.marid.spring.xml.DRef;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Executable;
 import java.util.ArrayList;
 import java.util.List;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
+import static org.marid.dependant.beaneditor.beandata.BeanPropEditor.label;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.*;
-import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
 @Component
-public class BeanPropEditor extends TableView<BeanProp> {
+public class BeanArgEditor extends TableView<BeanArg> {
 
     private final BeanData beanData;
 
     @Autowired
-    public BeanPropEditor(BeanData beanData) {
-        super(beanData.properties);
+    public BeanArgEditor(BeanData beanData) {
+        super(beanData.beanArgs);
         this.beanData = beanData;
         setEditable(false);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
@@ -67,7 +65,7 @@ public class BeanPropEditor extends TableView<BeanProp> {
 
     @OrderedInit(1)
     public void nameColumn() {
-        final TableColumn<BeanProp, String> col = new TableColumn<>();
+        final TableColumn<BeanArg, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Name"));
         col.setPrefWidth(200);
         col.setMaxWidth(400);
@@ -76,70 +74,56 @@ public class BeanPropEditor extends TableView<BeanProp> {
     }
 
     @OrderedInit(2)
-    public void typeColumn(ProjectProfile profile) {
-        final TableColumn<BeanProp, String> col = new TableColumn<>();
+    public void typeColumn() {
+        final TableColumn<BeanArg, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Type"));
         col.setPrefWidth(250);
         col.setMaxWidth(520);
-        col.setCellValueFactory(param -> createObjectBinding(() -> {
-            final ResolvableType type = profile.getPropType(beanData, param.getValue().getName());
-            return type == ResolvableType.NONE ? "?" : type.toString();
-        }, param.getValue().observables()));
+        col.setCellValueFactory(param -> param.getValue().type);
         getColumns().add(col);
     }
 
     @OrderedInit(3)
     public void valueColumn() {
-        final TableColumn<BeanProp, Label> col = new TableColumn<>();
+        final TableColumn<BeanArg, Label> col = new TableColumn<>();
         col.textProperty().bind(ls("Value"));
         col.setPrefWidth(500);
         col.setMaxWidth(1500);
         col.setCellValueFactory(p -> {
-            final BeanProp prop = p.getValue();
-            return createObjectBinding(() -> label(prop.getData()), prop.observables());
+            final BeanArg arg = p.getValue();
+            return createObjectBinding(() -> label(arg.getData()), arg.observables());
         });
         getColumns().add(col);
-    }
-
-    static Label label(DElement<?> element) {
-        final Label label = new Label();
-        if (element instanceof DRef) {
-            label.setGraphic(glyphIcon(M_LINK, 16));
-        } else if (element instanceof DValue) {
-            label.setGraphic(glyphIcon(M_TEXT_FORMAT, 16));
-        } else if (element instanceof DCollection) {
-            label.setGraphic(glyphIcon(M_LIST, 16));
-        } else if (element instanceof BeanData) {
-            label.setGraphic(glyphIcon(M_ALBUM, 16));
-        }
-        if (element != null) {
-            label.setText(element.toString());
-        }
-        return label;
     }
 
     @Autowired
     public void initContextMenu(ProjectProfile profile, AutowireCapableBeanFactory factory) {
         setRowFactory(param -> {
-            final TableRow<BeanProp> row = new TableRow<>();
+            final TableRow<BeanArg> row = new TableRow<>();
             row.disableProperty().bind(row.itemProperty().isNull());
             row.setContextMenu(new MaridContextMenu(m -> {
                 m.getItems().clear();
-                final BeanProp prop = row.getItem();
+                final BeanArg prop = row.getItem();
                 if (prop == null) {
                     return;
                 }
                 final ResolvableType beanType = profile.getType(beanData);
                 final List<TypeInfo> editors = new ArrayList<>();
                 for (final ClassInfo classInfo : BeanIntrospector.classInfos(profile.getClassLoader(), beanType)) {
-                    for (final TypeInfo typeInfo : classInfo.propertyInfos) {
-                        if (typeInfo.name.equals(prop.getName())) {
-                            editors.add(typeInfo);
-                            break;
+                        final Executable c = profile.getConstructor(beanData).orElse(null);
+                        for (final MethodInfo methodInfo : classInfo.constructorInfos) {
+                            if (methodInfo.matches(c)) {
+                                for (final TypeInfo typeInfo : methodInfo.parameters) {
+                                    if (typeInfo.name.equals(prop.getName())) {
+                                        editors.add(typeInfo);
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
                         }
-                    }
                 }
-                final ResolvableType type = profile.getPropType(beanData, prop.getName());
+                final ResolvableType type = profile.getArgType(beanData, prop.getName());
                 final ValueMenuItems menuItems = new ValueMenuItems(prop.data, type, editors);
                 factory.initializeBean(menuItems, null);
                 menuItems.addTo(m);

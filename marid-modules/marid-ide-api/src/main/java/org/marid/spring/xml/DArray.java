@@ -16,24 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.util;
+package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
-import java.util.List;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface MaridCollections {
+@XmlRootElement(name = "array")
+public final class DArray extends DCollection<DArray> {
 
-    static <E extends Observable> ObservableList<E> list(List<E> list) {
-        return FXCollections.observableList(list, e -> new Observable[] {e});
-    }
-
-    static <E extends Observable> ObservableList<E> list() {
-        return FXCollections.observableArrayList(e -> new Observable[] {e});
+    @Override
+    public boolean isEmpty() {
+        return false;
     }
 }

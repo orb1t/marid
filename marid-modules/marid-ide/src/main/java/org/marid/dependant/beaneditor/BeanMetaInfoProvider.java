@@ -34,6 +34,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
@@ -86,7 +87,7 @@ public class BeanMetaInfoProvider implements LogSupport {
         for (final Pair<Path, BeanFile> pair : profile.getBeanFiles()) {
             final ByteArrayOutputStream os = new ByteArrayOutputStream();
             try {
-                MaridBeanDefinitionSaver.write(os, pair.getValue());
+                MaridBeanDefinitionSaver.write(new StreamResult(os), pair.getValue());
                 resources.add(new ByteArrayResource(os.toByteArray(), pair.getKey().toString()));
             } catch (Exception x) {
                 log(WARNING, "Unable to save {0}", x, pair.getKey());

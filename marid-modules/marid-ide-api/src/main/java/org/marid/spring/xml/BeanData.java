@@ -18,17 +18,16 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.marid.spring.xml.collection.DCollection;
-import org.marid.spring.xml.collection.DElement;
-import org.marid.spring.xml.meta.Meta;
-import org.marid.util.MaridCollections;
 
 import javax.xml.bind.annotation.*;
+import java.lang.reflect.Executable;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -50,25 +49,14 @@ public final class BeanData extends DElement<BeanData> {
     public final StringProperty factoryMethod = new SimpleStringProperty(this, "factory-method");
     public final StringProperty lazyInit = new SimpleStringProperty(this, "lazy-init", "default");
 
-    public final ObservableList<BeanProp> beanArgs = MaridCollections.list();
-    public final ObservableList<BeanProp> properties = MaridCollections.list();
+    public final ObservableList<BeanArg> beanArgs = FXCollections.observableArrayList(BeanArg::observables);
+    public final ObservableList<BeanProp> properties = FXCollections.observableArrayList(BeanProp::observables);
 
     public final ObservableList<String> initTriggers = FXCollections.observableArrayList();
     public final ObservableList<String> destroyTriggers = FXCollections.observableArrayList();
 
-    public BeanData() {
-        final InvalidationListener invalidationListener = o -> invalidate();
-        type.addListener(invalidationListener);
-        name.addListener(invalidationListener);
-        initMethod.addListener(invalidationListener);
-        destroyMethod.addListener(invalidationListener);
-        factoryMethod.addListener(invalidationListener);
-        factoryBean.addListener(invalidationListener);
-        lazyInit.addListener(invalidationListener);
-
-        beanArgs.addListener(invalidationListener);
-        properties.addListener(invalidationListener);
-    }
+    public final transient ObjectProperty<Executable> constructor = new SimpleObjectProperty<>(this, "constructor");
+    public final transient ObservableList<Executable> constructors = FXCollections.observableArrayList();
 
     @XmlAttribute(name = "class")
     public String getType() {
@@ -134,12 +122,12 @@ public final class BeanData extends DElement<BeanData> {
     }
 
     @XmlElement(name = "constructor-arg")
-    public BeanProp[] getBeanArgs() {
-        return beanArgs.stream().filter(a -> !a.isEmpty()).toArray(BeanProp[]::new);
+    public BeanArg[] getBeanArgs() {
+        return beanArgs.stream().filter(a -> !a.isEmpty()).toArray(BeanArg[]::new);
     }
 
-    public void setBeanArgs(BeanProp[] beanArgs) {
-        this.beanArgs.addAll(beanArgs);
+    public void setBeanArgs(BeanArg[] beanArgs) {
+        this.beanArgs.setAll(beanArgs);
     }
 
     @XmlElement(name = "property")
@@ -148,7 +136,7 @@ public final class BeanData extends DElement<BeanData> {
     }
 
     public void setBeanProps(BeanProp[] beanProps) {
-        this.properties.addAll(beanProps);
+        this.properties.setAll(beanProps);
     }
 
     @XmlAnyElement(lax = true)
@@ -187,10 +175,27 @@ public final class BeanData extends DElement<BeanData> {
                 .findAny();
     }
 
-    public Optional<BeanProp> arg(String name) {
+    public Optional<BeanArg> arg(String name) {
         return beanArgs.stream()
                 .filter(a -> a.name.isEqualTo(name).get())
                 .findAny();
+    }
+
+    @Override
+    public Observable[] observables() {
+        return new Observable[] {
+                type,
+                name,
+                initMethod,
+                destroyMethod,
+                factoryBean,
+                factoryMethod,
+                lazyInit,
+                beanArgs,
+                properties,
+                initTriggers,
+                destroyTriggers
+        };
     }
 
     @Override

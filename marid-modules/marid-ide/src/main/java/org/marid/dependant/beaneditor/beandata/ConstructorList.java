@@ -19,20 +19,19 @@
 package org.marid.dependant.beaneditor.beandata;
 
 import javafx.scene.control.ComboBox;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.converter.MaridConverter;
+import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
-import org.marid.spring.xml.BeanProp;
 import org.marid.util.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 
 /**
@@ -42,40 +41,27 @@ import static java.util.stream.Collectors.joining;
 @Component
 public class ConstructorList extends ComboBox<Executable> {
 
-    private final BeanData beanData;
-    private final ProjectProfile profile;
-
     @Autowired
-    public ConstructorList(BeanData data, ProjectProfile profile) {
-        this.beanData = data;
-        this.profile = profile;
+    public ConstructorList(BeanData data) {
+        super(data.constructors);
         setEditable(false);
         setMaxWidth(Double.MAX_VALUE);
         setConverter(new MaridConverter<>(this::format));
-        setOnAction(event -> {
-            final Executable constructor = getSelectionModel().getSelectedItem();
-            if (constructor == null) {
-                return;
-            }
-            final BeanProp[] props = Stream.of(constructor.getParameters())
-                    .map(p -> {
-                        final BeanProp beanProp = new BeanProp();
-                        data.beanArgs.stream()
-                                .filter(a -> Reflections.parameterName(p).equals(a.getName()))
-                                .peek(a -> {
-                                    beanProp.setData(a.getData());
-                                    beanProp.setName(a.getName());
-                                })
-                                .findAny()
-                                .orElseGet(() -> {
-                                    beanProp.setName(p.getName());
-                                    return null;
-                                });
-                        return data;
-                    })
-                    .toArray(BeanProp[]::new);
-            data.beanArgs.setAll(props);
-        });
+        getSelectionModel().select(data.constructor.get());
+        setOnAction(event -> ofNullable(getSelectionModel().getSelectedItem()).ifPresent(c -> {
+            final BeanArg[] args = Stream.of(c.getParameters()).map(p -> data.beanArgs.stream()
+                    .filter(a -> Reflections.parameterName(p).equals(a.getName()))
+                    .peek(a -> a.setType(p.getType().getName()))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        final BeanArg beanArg = new BeanArg();
+                        beanArg.setName(Reflections.parameterName(p));
+                        beanArg.setType(p.getType().getName());
+                        return beanArg;
+                    }))
+                    .toArray(BeanArg[]::new);
+            data.beanArgs.setAll(args);
+        }));
     }
 
     private String format(Executable executable) {
@@ -115,15 +101,6 @@ public class ConstructorList extends ComboBox<Executable> {
                 return true;
             default:
                 return false;
-        }
-    }
-
-    @PostConstruct
-    public void update() {
-        getItems().setAll(profile.getConstructors(beanData).toArray(Executable[]::new));
-        final Executable executable = profile.getConstructor(beanData).orElse(null);
-        if (executable != null) {
-            getSelectionModel().select(executable);
         }
     }
 }

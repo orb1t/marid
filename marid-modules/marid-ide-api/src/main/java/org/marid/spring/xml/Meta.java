@@ -16,11 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.ref;
-
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import org.marid.spring.xml.collection.DElement;
+package org.marid.spring.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -30,32 +26,21 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * @author Dmitry Ovchinnikov
  */
+@XmlRootElement(name = "meta")
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "ref")
-public final class DRef extends DElement<DRef> {
+public class Meta {
 
-    public final StringProperty ref = new SimpleStringProperty(this, "value");
+    @XmlAttribute(name = "key")
+    public String key;
 
-    public DRef() {
-        ref.addListener(o -> invalidate());
+    @XmlAttribute(name = "value")
+    public String value;
+
+    public Meta() {
     }
 
-    @XmlAttribute(name = "bean")
-    public String getBean() {
-        return ref.isEmpty().get() ? null : ref.get();
-    }
-
-    public void setBean(String bean) {
-        ref.set(bean);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return ref.isEmpty().get();
-    }
-
-    @Override
-    public String toString() {
-        return getBean();
+    public Meta(String key, String value) {
+        this.key = key;
+        this.value = value;
     }
 }

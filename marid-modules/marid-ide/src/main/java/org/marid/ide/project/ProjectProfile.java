@@ -404,24 +404,23 @@ public class ProjectProfile implements LogSupport {
     }
 
     public void updateBeanDataConstructorArgs(BeanData data, Parameter[] parameters) {
-        final List<BeanProp> args = of(parameters)
+        final List<BeanArg> args = of(parameters)
                 .map(p -> {
-                    final Optional<BeanProp> found = data.beanArgs.stream()
+                    final Optional<BeanArg> found = data.beanArgs.stream()
                             .filter(a -> a.name.isEqualTo(parameterName(p)).get())
                             .findFirst();
                     if (found.isPresent()) {
                         found.get().type.set(p.getType().getName());
                         return found.get();
                     } else {
-                        final BeanProp arg = new BeanProp();
+                        final BeanArg arg = new BeanArg();
                         arg.name.set(parameterName(p));
                         arg.type.set(p.getType().getName());
                         return arg;
                     }
                 })
                 .collect(toList());
-        data.beanArgs.clear();
-        data.beanArgs.addAll(args);
+        data.beanArgs.setAll(args);
     }
 
     public void updateBeanData(BeanData data) {
@@ -430,12 +429,17 @@ public class ProjectProfile implements LogSupport {
             return;
         }
         final List<Executable> executables = getConstructors(data).collect(toList());
+        data.constructors.setAll(executables);
         if (!executables.isEmpty()) {
             if (executables.size() == 1) {
                 updateBeanDataConstructorArgs(data, executables.get(0).getParameters());
+                data.constructor.set(executables.get(0));
             } else {
                 final Optional<? extends Executable> executable = getConstructor(data);
-                executable.ifPresent(e -> updateBeanDataConstructorArgs(data, e.getParameters()));
+                executable.ifPresent(e -> {
+                    updateBeanDataConstructorArgs(data, e.getParameters());
+                    data.constructor.set(e);
+                });
             }
         }
 
@@ -448,7 +452,6 @@ public class ProjectProfile implements LogSupport {
                 property.name.set(n);
                 return property;
             });
-            prop.type.set(propertyDescriptor.getPropertyType().getName());
             data.properties.add(prop);
         }
     }

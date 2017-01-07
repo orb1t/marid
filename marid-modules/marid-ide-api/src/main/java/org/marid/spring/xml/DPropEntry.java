@@ -16,32 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml.collection;
+package org.marid.spring.xml;
 
+import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.*;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
  */
-@XmlRootElement(name = "value")
+@XmlRootElement(name = "prop")
 @XmlAccessorType(XmlAccessType.NONE)
-public final class DValue extends DElement<DValue> {
+public final class DPropEntry extends AbstractData<DPropEntry> {
 
+    public final StringProperty key = new SimpleStringProperty(this, "key");
     public final StringProperty value = new SimpleStringProperty(this, "value");
 
-    public DValue() {
-        value.addListener(o -> invalidate());
+    @XmlAttribute(name = "key")
+    public String getKey() {
+        return key.get();
     }
 
-    public DValue(String value) {
-        this();
-        this.value.set(value);
+    public void setKey(String key) {
+        this.key.set(key);
     }
 
     @XmlValue
@@ -53,13 +52,11 @@ public final class DValue extends DElement<DValue> {
         this.value.set(value);
     }
 
-    @Override
     public boolean isEmpty() {
-        return value.isEmpty().get();
+        return key.isEmpty().get() && value.isEmpty().get();
     }
 
-    @Override
-    public String toString() {
-        return getValue();
+    Observable[] observables() {
+        return new Observable[] {key, value};
     }
 }
