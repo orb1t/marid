@@ -22,6 +22,7 @@ import javafx.collections.ListChangeListener;
 import javafx.util.Pair;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.tabs.IdeTab;
+import org.marid.idefx.controls.IdeShapes;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,8 @@ public class BeanEditorTab extends IdeTab {
 
     @Autowired
     public BeanEditorTab(ProjectProfile profile, BeanListTable table, Path beanFilePath) {
-        super(new MaridScrollPane(table), "[%s]: %s", profile, profile.getBeansDirectory().relativize(beanFilePath));
+        super(new MaridScrollPane(table), "%s", profile.getBeansDirectory().relativize(beanFilePath));
+        setGraphic(IdeShapes.fileNode(profile, beanFilePath, 16));
         this.profile = profile;
         this.beanFilePath = beanFilePath;
     }

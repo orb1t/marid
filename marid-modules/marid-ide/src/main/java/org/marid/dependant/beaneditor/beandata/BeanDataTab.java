@@ -16,35 +16,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.resources;
+package org.marid.dependant.beaneditor.beandata;
 
 import javafx.scene.control.TabPane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.tabs.IdeTab;
 import org.marid.idefx.controls.IdeShapes;
+import org.marid.spring.xml.BeanData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
 @Component
-public class ResourcesTab extends IdeTab {
+public class BeanDataTab extends IdeTab {
 
     private final ProjectProfile profile;
+    private final BeanData data;
 
-    public ResourcesTab(ProjectProfile profile, TabPane resourcesTabPane) {
-        super(resourcesTabPane, "%s", profile);
-        setGraphic(IdeShapes.profileNode(profile, 16));
+    @Autowired
+    public BeanDataTab(@Qualifier("beanData") TabPane beanDataEditorsTabs, ProjectProfile profile, BeanData data) {
+        super(beanDataEditorsTabs, "[%s] %s", profile.getName(), data.getName());
+        setGraphic(IdeShapes.beanNode(profile, data, 16));
         this.profile = profile;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof ResourcesTab && ((ResourcesTab) obj).profile.equals(profile);
+        this.data = data;
     }
 
     @Override
     public int hashCode() {
-        return profile.hashCode();
+        return Objects.hash(profile.getName(), data.getName());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || obj.getClass() != getClass()) {
+            return false;
+        }
+        final BeanDataTab that = (BeanDataTab) obj;
+        return profile.getName().equals(that.profile.getName()) && data.name.isEqualTo(that.data.name).get();
     }
 }

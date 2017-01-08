@@ -31,6 +31,7 @@ import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.idefx.controls.CommonTableView;
+import org.marid.idefx.controls.IdeShapes;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.spring.annotation.OrderedInit;
@@ -56,7 +57,6 @@ public class BeanListTable extends CommonTableView<BeanData> {
     public BeanListTable(BeanFile beanFile) {
         super(beanFile.beans);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
-        setEditable(true);
     }
 
     @OrderedInit(1)
@@ -66,16 +66,19 @@ public class BeanListTable extends CommonTableView<BeanData> {
         col.setCellValueFactory(param -> param.getValue().name);
         col.setCellFactory(param -> new TextFieldTableCell<BeanData, String>(new DefaultStringConverter()) {
             @Override
-            public void commitEdit(String newValue) {
-                final String oldValue = getItem();
-                newValue = profile.generateBeanName(newValue);
-                super.commitEdit(newValue);
-                ProjectManager.onBeanNameChange(profile, oldValue, newValue);
+            public void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    final int index = getIndex();
+                    final BeanData data = getItems().get(index);
+                    setGraphic(IdeShapes.beanNode(data, 16));
+                }
             }
         });
         col.setPrefWidth(250);
         col.setMaxWidth(450);
-        col.setEditable(true);
         getColumns().add(col);
     }
 
@@ -96,6 +99,22 @@ public class BeanListTable extends CommonTableView<BeanData> {
         final TableColumn<BeanData, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Factory bean"));
         col.setCellValueFactory(param -> param.getValue().factoryBean);
+        col.setCellFactory(param -> new TextFieldTableCell<BeanData, String>(new DefaultStringConverter()) {
+            @Override
+            public void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    final BeanData data = getItems().get(getIndex());
+                    if (data.factoryBean.isEmpty().get()) {
+                        setGraphic(null);
+                    } else {
+                        setGraphic(IdeShapes.ref(data.factoryBean.get(), 16));
+                    }
+                }
+            }
+        });
         col.setPrefWidth(250);
         col.setMaxWidth(450);
         getColumns().add(col);

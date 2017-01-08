@@ -27,14 +27,10 @@ import org.marid.beans.ClassInfo;
 import org.marid.beans.TypeInfo;
 import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.idefx.controls.IdeShapes;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.spring.annotation.OrderedInit;
-import org.marid.spring.xml.BeanData;
-import org.marid.spring.xml.BeanProp;
-import org.marid.spring.xml.DCollection;
-import org.marid.spring.xml.DElement;
-import org.marid.spring.xml.DValue;
-import org.marid.spring.xml.DRef;
+import org.marid.spring.xml.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.ResolvableType;
@@ -45,7 +41,8 @@ import java.util.List;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.*;
+import static org.marid.jfx.icons.FontIcon.M_LIST;
+import static org.marid.jfx.icons.FontIcon.M_TEXT_FORMAT;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -104,13 +101,15 @@ public class BeanPropEditor extends TableView<BeanProp> {
     static Label label(DElement<?> element) {
         final Label label = new Label();
         if (element instanceof DRef) {
-            label.setGraphic(glyphIcon(M_LINK, 16));
+            final DRef ref = (DRef) element;
+            label.setGraphic(IdeShapes.ref(ref, 16));
         } else if (element instanceof DValue) {
             label.setGraphic(glyphIcon(M_TEXT_FORMAT, 16));
         } else if (element instanceof DCollection) {
             label.setGraphic(glyphIcon(M_LIST, 16));
         } else if (element instanceof BeanData) {
-            label.setGraphic(glyphIcon(M_ALBUM, 16));
+            final BeanData data = (BeanData) element;
+            label.setGraphic(IdeShapes.beanNode(data, 16));
         }
         if (element != null) {
             label.setText(element.toString());

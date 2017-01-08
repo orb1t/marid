@@ -22,6 +22,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.converter.DefaultStringConverter;
 import org.marid.IdeDependants;
 import org.marid.dependant.resources.ResourcesConfiguration;
 import org.marid.dependant.resources.ResourcesParams;
@@ -29,6 +31,7 @@ import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectSaver;
+import org.marid.idefx.controls.IdeShapes;
 import org.marid.jfx.action.FxAction;
 import org.marid.logging.LogSupport;
 import org.marid.spring.annotation.OrderedInit;
@@ -78,6 +81,19 @@ public class ProfilesTable extends TableView<ProjectProfile> implements LogSuppo
         column.setPrefWidth(400);
         column.setMaxWidth(2000);
         column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getName()));
+        column.setCellFactory(param -> new TextFieldTableCell<ProjectProfile, String>(new DefaultStringConverter()) {
+            @Override
+            public void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    final int index = getIndex();
+                    final ProjectProfile profile = getItems().get(index);
+                    setGraphic(IdeShapes.profileNode(profile, 16));
+                }
+            }
+        });
         getColumns().add(column);
     }
 

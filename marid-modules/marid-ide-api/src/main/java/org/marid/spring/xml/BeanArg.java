@@ -25,6 +25,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 import javax.xml.bind.annotation.*;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -37,6 +38,23 @@ public class BeanArg extends AbstractData<BeanArg> {
     public final StringProperty name = new SimpleStringProperty(this, "name");
     public final StringProperty type = new SimpleStringProperty(this, "type");
     public final ObjectProperty<DElement<?>> data = new SimpleObjectProperty<>(this, "data");
+
+    public BeanArg() {
+        data.addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                Stream.of(newValue.observables()).forEach(o -> o.addListener(this::onInvalidate));
+            }
+            if (oldValue != null) {
+                Stream.of(oldValue.observables()).forEach(o -> o.removeListener(this::onInvalidate));
+            }
+        });
+    }
+
+    private void onInvalidate(Observable observable) {
+        final DElement<?> element = data.get();
+        data.set(null);
+        data.set(element);
+    }
 
     @XmlAttribute(name = "name")
     public String getName() {

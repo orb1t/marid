@@ -21,11 +21,11 @@ package org.marid.ide.tabs;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import org.marid.jfx.props.Props;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 
@@ -34,11 +34,11 @@ import static org.marid.jfx.LocalizedStrings.ls;
  */
 public class IdeTab extends Tab {
 
-    @Autowired
-    protected IdeTabPane ideTabPane;
+    @Resource
+    protected transient IdeTabPane ideTabPane;
 
-    @Autowired
-    protected AnnotationConfigApplicationContext context;
+    @Resource
+    protected transient AnnotationConfigApplicationContext context;
 
     public IdeTab(Node content, String text, Object...args) {
         super(null, content);

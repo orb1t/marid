@@ -25,6 +25,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import org.marid.IdeDependants;
 import org.marid.beans.TypeInfo;
+import org.marid.dependant.beaneditor.BeanMetaInfoProvider.BeansMetaInfo;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorParams;
 import org.marid.dependant.beaneditor.listeditor.ListEditorConfiguration;
@@ -37,13 +38,7 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.contexts.ValueEditorContext;
-import org.marid.spring.xml.BeanData;
-import org.marid.spring.xml.DArray;
-import org.marid.spring.xml.DElement;
-import org.marid.spring.xml.DList;
-import org.marid.spring.xml.DValue;
-import org.marid.spring.xml.DProps;
-import org.marid.spring.xml.DRef;
+import org.marid.spring.xml.*;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.core.ResolvableType;
 
@@ -107,7 +102,7 @@ public class ValueMenuItems {
     @OrderedInit(3)
     public void initRefValue(BeanMetaInfoProvider metaInfoProvider) {
         final List<MenuItem> refItems = new ArrayList<>();
-        final BeanMetaInfoProvider.BeansMetaInfo metaInfo = metaInfoProvider.profileMetaInfo();
+        final BeansMetaInfo metaInfo = metaInfoProvider.profileMetaInfo();
         for (final BeanDefinitionHolder h : metaInfo.beans(type)) {
             final String name = h.getBeanName();
             final MenuItem item = new MenuItem(name, glyphIcon(FontIcon.M_BEENHERE, 16));
@@ -132,7 +127,7 @@ public class ValueMenuItems {
     @OrderedInit(4)
     public void initNewBean(BeanMetaInfoProvider provider, BeanListActions actions) {
         final List<MenuItem> refItems = new ArrayList<>();
-        final BeanMetaInfoProvider.BeansMetaInfo metaInfo = provider.metaInfo();
+        final BeansMetaInfo metaInfo = provider.metaInfo();
         metaInfo.beans(type).forEach(h -> {
             final MenuItem item = new MenuItem(h.getBeanName(), glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
             item.setOnAction(event -> {
@@ -147,7 +142,7 @@ public class ValueMenuItems {
             if (refItems.get(refItems.size() - 1) instanceof SeparatorMenuItem) {
                 refItems.remove(refItems.size() - 1);
             }
-            final Menu menu = new Menu(s("New bean"), glyphIcon(M_ACCOUNT_BALANCE, 16));
+            final Menu menu = new Menu(s("New bean from template"), glyphIcon(M_ACCOUNT_BALANCE, 16));
             menu.getItems().addAll(refItems);
             items.add(menu);
             items.add(new SeparatorMenuItem());
@@ -164,7 +159,7 @@ public class ValueMenuItems {
             return;
         }
         {
-            final MenuItem item = new MenuItem("New bean", glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
+            final MenuItem item = new MenuItem("New bean from class", glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
             item.setOnAction(event -> {
                 final BeanData data = new BeanData();
                 data.name.setValue(profile.generateBeanName(decapitalize(c.getSimpleName())));
@@ -177,7 +172,7 @@ public class ValueMenuItems {
             items.add(item);
         }
         {
-            final MenuItem item = new MenuItem("Embedded bean", glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
+            final MenuItem item = new MenuItem("New in-place bean", glyphIcon(FontIcon.M_ACCOUNT_BALANCE, 16));
             item.setOnAction(event -> {
                 final BeanData data = new BeanData();
                 data.name.setValue(profile.generateBeanName(decapitalize(c.getSimpleName())));

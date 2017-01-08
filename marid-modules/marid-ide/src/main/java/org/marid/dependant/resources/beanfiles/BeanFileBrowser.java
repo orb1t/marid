@@ -23,11 +23,14 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Pair;
+import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.idefx.controls.CommonTableView;
+import org.marid.idefx.controls.IdeShapes;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.BeanFile;
@@ -76,6 +79,19 @@ public class BeanFileBrowser extends CommonTableView<Pair<Path, BeanFile>> {
         col.setCellValueFactory(param -> {
             final Path path = projectManager.getProfile().getBeansDirectory().relativize(param.getValue().getKey());
             return new SimpleStringProperty(path.toString());
+        });
+        col.setCellFactory(param -> new TextFieldTableCell<Pair<Path, BeanFile>, String>(new DefaultStringConverter()) {
+            @Override
+            public void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    final int index = getIndex();
+                    final Pair<Path, BeanFile> pair = getItems().get(index);
+                    setGraphic(IdeShapes.fileNode(pair.getKey(), 16));
+                }
+            }
         });
         getColumns().add(col);
     }

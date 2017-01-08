@@ -18,12 +18,11 @@
 
 package org.marid.dependant.beaneditor.beandata;
 
-import javafx.scene.Scene;
+import javafx.beans.binding.Bindings;
+import javafx.geometry.Side;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
-import org.marid.Ide;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.BeanData;
@@ -42,7 +41,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@Import({BeanDataDetails.class, ConstructorList.class, BeanArgEditor.class, BeanPropEditor.class})
+@Import({BeanDataDetails.class, ConstructorList.class, BeanArgEditor.class, BeanPropEditor.class, BeanDataTab.class})
 public class BeanDataEditorConfiguration extends DependantConfiguration<BeanDataEditorParams> {
 
     @Autowired
@@ -58,39 +57,34 @@ public class BeanDataEditorConfiguration extends DependantConfiguration<BeanData
     @Bean
     @Qualifier("beanData")
     @Order(1)
-    public Tab beanArgsTab(BeanArgEditor beanArgEditor, ConstructorList constructorList) {
+    public Tab beanArgsTab(BeanArgEditor beanArgEditor, ConstructorList constructorList, BeanData beanData) {
         final Tab tab = new Tab();
         final BorderPane borderPane = new BorderPane();
         borderPane.setCenter(new MaridScrollPane(beanArgEditor));
         borderPane.setBottom(constructorList);
         tab.setContent(borderPane);
         tab.textProperty().bind(ls("Parameters"));
+        tab.disableProperty().bind(Bindings.isEmpty(beanData.beanArgs));
         return tab;
     }
 
     @Bean
     @Qualifier("beanData")
     @Order(2)
-    public Tab beanPropsTab(BeanPropEditor beanPropEditor) {
+    public Tab beanPropsTab(BeanPropEditor beanPropEditor, BeanData beanData) {
         final Tab tab = new Tab();
         tab.setContent(new MaridScrollPane(beanPropEditor));
         tab.textProperty().bind(ls("Properties"));
+        tab.disableProperty().bind(Bindings.isEmpty(beanData.properties));
         return tab;
     }
 
     @Bean
+    @Qualifier("beanData")
     public TabPane beanDataEditorTabs(@Qualifier("beanData") Tab[] tabs) {
         final TabPane tabPane = new TabPane(tabs);
+        tabPane.setSide(Side.BOTTOM);
         tabPane.setTabClosingPolicy(UNAVAILABLE);
         return tabPane;
-    }
-
-    @Bean(initMethod = "show")
-    public Stage simpleBeanConfigurerStage(TabPane beanDataEditorTabs) {
-        final Stage stage = new Stage();
-        stage.initOwner(Ide.primaryStage);
-        stage.setScene(new Scene(beanDataEditorTabs, 1024, 768));
-        stage.titleProperty().bind(ls("Bean editor"));
-        return stage;
     }
 }
