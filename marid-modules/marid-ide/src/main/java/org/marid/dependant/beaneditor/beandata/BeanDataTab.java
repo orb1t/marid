@@ -18,6 +18,7 @@
 
 package org.marid.dependant.beaneditor.beandata;
 
+import javafx.beans.Observable;
 import javafx.scene.control.TabPane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.tabs.IdeTab;
@@ -27,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.Objects;
 
 /**
@@ -42,9 +45,23 @@ public class BeanDataTab extends IdeTab {
     @Autowired
     public BeanDataTab(@Qualifier("beanData") TabPane beanDataEditorsTabs, ProjectProfile profile, BeanData data) {
         super(beanDataEditorsTabs, "[%s] %s", profile.getName(), data.getName());
-        setGraphic(IdeShapes.beanNode(profile, data, 16));
         this.profile = profile;
         this.data = data;
+    }
+
+    private void onChangeName(Observable observable) {
+        setGraphic(IdeShapes.beanNode(profile, data, 16));
+    }
+
+    @PostConstruct
+    private void init() {
+        onChangeName(data.name);
+        data.name.addListener(this::onChangeName);
+    }
+
+    @PreDestroy
+    private void destroy() {
+        data.name.removeListener(this::onChangeName);
     }
 
     @Override

@@ -32,8 +32,6 @@ import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import static javafx.beans.binding.Bindings.createObjectBinding;
-
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
@@ -57,9 +55,7 @@ public interface IdeShapes {
     }
 
     static Circle beanNode(BeanData beanData, int size) {
-        final Circle circle = new Circle(size / 2, color(Objects.hash(beanData.getName())));
-        circle.fillProperty().bind(createObjectBinding(() -> color(Objects.hash(beanData.getName())), beanData.name));
-        return circle;
+        return new Circle(size / 2, color(Objects.hash(beanData.getName())));
     }
 
     static HBox beanNode(ProjectProfile profile, BeanData beanData, int size) {
