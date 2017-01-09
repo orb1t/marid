@@ -40,10 +40,11 @@ public interface IdeShapes {
 
     static Color color(int hash) {
         final ByteBuffer buffer = ByteBuffer.allocate(4).putInt(0, hash);
-        final double red = (buffer.get(0) & 0xFF) / 255.0;
-        final double green = (buffer.get(1) & 0xFF) / 255.0;
-        final double blue = (buffer.get(2) & 0xFF) / 255.0;
-        return new Color(1 - red, 1 - green, 1 - blue, 1.0);
+        final double red = Byte.toUnsignedInt(buffer.get(0)) / 255.0;
+        final double green = Byte.toUnsignedInt(buffer.get(1)) / 255.0;
+        final double blue = Byte.toUnsignedInt(buffer.get(2)) / 255.0;
+        final double opacity = Byte.toUnsignedInt(buffer.get(3)) / (2.0 * 255.0);
+        return new Color(1 - red, 1 - green, 1 - blue, 1 - opacity);
     }
 
     static Circle ref(DRef ref, int size) {
@@ -67,7 +68,8 @@ public interface IdeShapes {
     }
 
     static Pane fileNode(Path path, int size) {
-        final Rectangle node = new Rectangle(size - 4, size - 4, color(path.hashCode()));
+        final double h = size / Math.sqrt(2);
+        final Rectangle node = new Rectangle(h, h, color(path.hashCode()));
         node.setRotate(45);
         return new StackPane(node);
     }
