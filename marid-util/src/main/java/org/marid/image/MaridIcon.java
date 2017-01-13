@@ -102,6 +102,7 @@ public class MaridIcon {
         final BufferedImage image = getImage(size, color);
         final File file = new File("marid." + format.toLowerCase());
         ImageIO.write(image, format, file);
-        System.out.println(file.getAbsolutePath() + " " + file.exists());
+        System.out.println(file.getAbsolutePath());
+        Desktop.getDesktop().open(file);
     }
 }

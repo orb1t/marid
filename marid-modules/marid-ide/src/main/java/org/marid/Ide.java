@@ -27,6 +27,7 @@ import org.jboss.logmanager.LogManager;
 import org.marid.ide.logging.IdeConsoleLogHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
+import org.marid.image.MaridIconFx;
 import org.marid.preloader.IdePreloader;
 import org.marid.spring.event.IdeStartedEvent;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
@@ -36,12 +37,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 import static java.util.Optional.ofNullable;
-import static java.util.stream.IntStream.of;
-import static javafx.scene.paint.Color.GREEN;
 import static org.marid.IdePrefs.PREFERENCES;
-import static org.marid.jfx.FxMaridIcon.maridIcon;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -84,8 +83,8 @@ public class Ide extends Application {
         primaryStage.setMinHeight(550.0);
         primaryStage.setTitle("Marid IDE");
         primaryStage.setScene(new Scene(idePane, 1024, 768));
-        primaryStage.getIcons().addAll(of(16, 24, 32).mapToObj(n -> maridIcon(n, GREEN)).toArray(Image[]::new));
         primaryStage.setMaximized(true);
+        primaryStage.getIcons().addAll(IntStream.of(24, 32).mapToObj(MaridIconFx::getIcon).toArray(Image[]::new));
         primaryStage.show();
     }
 

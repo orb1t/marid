@@ -18,6 +18,7 @@
 
 package org.marid.idefx.controls;
 
+import com.google.common.primitives.Ints;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -28,9 +29,11 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.DRef;
 
-import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.Objects;
+
+import static java.lang.Byte.toUnsignedInt;
+import static java.util.stream.IntStream.range;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -39,12 +42,9 @@ import java.util.Objects;
 public interface IdeShapes {
 
     static Color color(int hash) {
-        final ByteBuffer buffer = ByteBuffer.allocate(4).putInt(0, hash);
-        final double red = Byte.toUnsignedInt(buffer.get(0)) / 255.0;
-        final double green = Byte.toUnsignedInt(buffer.get(1)) / 255.0;
-        final double blue = Byte.toUnsignedInt(buffer.get(2)) / 255.0;
-        final double opacity = Byte.toUnsignedInt(buffer.get(3)) / (2.0 * 255.0);
-        return new Color(1 - red, 1 - green, 1 - blue, 1 - opacity);
+        final byte[] h = Ints.toByteArray(Integer.reverse(hash));
+        final double[] d = range(0, h.length).mapToDouble(i -> toUnsignedInt(h[i]) / 255.0).toArray();
+        return new Color(d[0], d[1], d[2], 1 - d[3] / 2.0);
     }
 
     static Circle ref(DRef ref, int size) {

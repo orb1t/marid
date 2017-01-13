@@ -29,23 +29,21 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
-import javafx.scene.effect.Light;
-import javafx.scene.effect.Lighting;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.marid.Ide;
 import org.marid.IdePrefs;
-import org.marid.jfx.FxMaridIcon;
+import org.marid.image.MaridIconFx;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static javafx.scene.paint.Color.GREEN;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
 import static org.marid.misc.Builder.build;
@@ -90,7 +88,6 @@ public class IdePreloader extends Preloader {
 
     private GridPane preloaderPane() {
         final GridPane gridPane = new GridPane();
-        gridPane.setEffect(new Lighting(new Light.Spot(10, 10, 1000, 0.5, new Color(1.0, 1.0, 1.0, 1.0))));
         gridPane.setPadding(new Insets(10, 10, 10, 10));
         gridPane.setHgap(10);
         gridPane.setVgap(10);
@@ -114,7 +111,7 @@ public class IdePreloader extends Preloader {
             rc.setFillHeight(true);
             rc.setVgrow(Priority.NEVER);
         }));
-        gridPane.addRow(0, new ImageView(FxMaridIcon.maridIcon(64, Color.GREEN)), titleBox());
+        gridPane.addRow(0, new ImageView(MaridIconFx.getImage(64, GREEN)), titleBox());
         gridPane.add(logScrollPane, 0, 1, 2, 1);
         gridPane.add(progressBar, 0, 2, 2, 1);
         return gridPane;
@@ -159,7 +156,7 @@ public class IdePreloader extends Preloader {
         this.primaryStage = primaryStage;
         Application.setUserAgentStylesheet(IdePrefs.PREFERENCES.get("style", STYLESHEET_MODENA));
         primaryStage.initStyle(StageStyle.UNDECORATED);
-        primaryStage.setScene(new Scene(preloaderPane(), 800, 800, true));
+        primaryStage.setScene(new Scene(preloaderPane(), 600, 600, true));
         primaryStage.show();
     }
 }

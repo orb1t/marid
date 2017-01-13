@@ -32,7 +32,7 @@ import java.util.stream.IntStream;
 import static java.util.logging.Level.SEVERE;
 import static java.util.stream.Collectors.toList;
 import static javafx.scene.paint.Color.GREEN;
-import static org.marid.jfx.FxMaridIcon.maridIcon;
+import static org.marid.image.MaridIconFx.getImage;
 import static org.marid.logging.Log.log;
 import static org.marid.misc.Casts.cast;
 
@@ -57,7 +57,7 @@ public class HmiApplication extends Application {
         context.start();
         primaryStage.setScene(new Scene(pane, 800, 600));
         primaryStage.setAlwaysOnTop(true);
-        primaryStage.getIcons().addAll(IntStream.of(16, 24, 32).mapToObj(s -> maridIcon(s, GREEN)).collect(toList()));
+        primaryStage.getIcons().addAll(IntStream.of(16, 24, 32).mapToObj(s -> getImage(s, GREEN)).collect(toList()));
         primaryStage.setOnCloseRequest(event -> Platform.exit());
         primaryStage.setIconified(true);
         primaryStage.show();
