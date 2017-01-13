@@ -24,7 +24,6 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.jboss.logmanager.LogManager;
-import org.marid.ide.logging.IdeConsoleLogHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
@@ -94,11 +93,17 @@ public class Ide extends Application {
     }
 
     public static void main(String... args) throws Exception {
+        // logging manager
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
+
+        // root logger
         rootLogger = Logger.getLogger("");
         rootLogger.setLevel(Level.parse(PREFERENCES.get("logLevel", Level.INFO.getName())));
+
+        // locale
         ofNullable(PREFERENCES.get("locale", null)).map(Locale::forLanguageTag).ifPresent(Locale::setDefault);
-        rootLogger.addHandler(new IdeConsoleLogHandler());
+
+        // launch application
         LauncherImpl.launchApplication(Ide.class, IdePreloader.class, args);
     }
 }
