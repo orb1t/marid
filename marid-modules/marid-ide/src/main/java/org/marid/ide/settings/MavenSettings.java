@@ -43,7 +43,7 @@ public class MavenSettings extends AbstractSettings {
     }
 
     public String getDependencyPluginVersion() {
-        return preferences.get("dependencyPluginVersion", "2.10");
+        return preferences.get("dependencyPluginVersion", "3.0.0");
     }
 
     public void setDependencyPluginVersion(String value) {
@@ -51,7 +51,7 @@ public class MavenSettings extends AbstractSettings {
     }
 
     public String getCompilerPluginVersion() {
-        return preferences.get("compilerPluginVersion", "3.5.1");
+        return preferences.get("compilerPluginVersion", "3.6.0");
     }
 
     public void setCompilerPluginVersion(String value) {
@@ -59,7 +59,7 @@ public class MavenSettings extends AbstractSettings {
     }
 
     public String getEclipseCompilerVersion() {
-        return preferences.get("eclipseCompilerVersion", "2.7");
+        return preferences.get("eclipseCompilerVersion", "2.8.1");
     }
 
     public void setEclipseCompilerVersion(String value) {
@@ -67,7 +67,7 @@ public class MavenSettings extends AbstractSettings {
     }
 
     public String getJarPluginVersion() {
-        return preferences.get("jarPluginVersion", "2.6");
+        return preferences.get("jarPluginVersion", "3.0.2");
     }
 
     public void setJarPluginVersion(String value) {
@@ -75,7 +75,7 @@ public class MavenSettings extends AbstractSettings {
     }
 
     public String getResourcesPluginVersion() {
-        return preferences.get("resourcesPluginVersion", "3.0.1");
+        return preferences.get("resourcesPluginVersion", "3.0.2");
     }
 
     public void setResourcesPluginVersion(String value) {

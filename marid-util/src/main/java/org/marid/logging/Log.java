@@ -56,7 +56,7 @@ public class Log {
 
     private static class SecurityPublicClassContext extends SecurityManager {
         @Override
-        public Class[] getClassContext() {
+        public Class<?>[] getClassContext() {
             return super.getClassContext();
         }
     }

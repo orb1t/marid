@@ -18,10 +18,15 @@
 
 package org.marid.dependant.project.config;
 
+import javafx.beans.binding.BooleanBinding;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Spinner;
 import org.apache.maven.model.Model;
 import org.marid.jfx.panes.GenericGridPane;
+import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -35,14 +40,73 @@ import java.util.Properties;
 @Order(2)
 public class PropertiesTab extends GenericGridPane {
 
+    private final Properties properties;
+
     @Autowired
     public PropertiesTab(Model model) {
         setId("Properties");
-        final Properties properties = model.getProperties();
-        addTextField(properties, "Marid version", "marid.runtime.version", System.getProperty("implementation.version"));
+        properties = model.getProperties();
     }
 
-    private void addTextField(Properties properties, String text, String key, String defaultValue) {
-        addTextField(text, () -> properties.getProperty(key, defaultValue), value -> properties.setProperty(key, value));
+    @OrderedInit(1)
+    public void initMaridVersion(@Value("${implementation.version}") String version) {
+        addTextField("Marid version",
+                () -> properties.getProperty("marid.runtime.version", version),
+                v -> properties.setProperty("marid.runtime.version", v));
+        addSeparator();
+    }
+
+    @OrderedInit(2)
+    public void initDebug() {
+        final CheckBox debugCheckBox = addBooleanField("Debug",
+                () -> "true".equals(properties.getProperty("marid.debug")),
+                v -> {
+                    if (v) {
+                        properties.setProperty("marid.debug", "true");
+                    } else {
+                        properties.remove("marid.debug");
+                    }
+                });
+        final CheckBox debugServerCheckBox = addBooleanField("Server mode",
+                () -> "true".equals(properties.getProperty("marid.debug.server", "true")),
+                v -> {
+                    if (v) {
+                        properties.remove("marid.debug.server");
+                    } else {
+                        properties.setProperty("marid.debug.server", "n");
+                    }
+                });
+        final CheckBox debugSuspendCheckBox = addBooleanField("Suspend mode",
+                () -> "true".equals(properties.getProperty("marid.debug.suspend")),
+                v -> {
+                    if (v) {
+                        properties.setProperty("marid.debug.suspend", "y");
+                    } else {
+                        properties.remove("marid.debug.suspend");
+                    }
+                });
+        final Spinner<Integer> debugPortSpinner = addIntField("Debug port",
+                () -> Integer.parseInt(properties.getProperty("marid.debug.port", "5005")),
+                v -> {
+                    if (v == 5005) {
+                        properties.remove("marid.debug.port");
+                    } else {
+                        properties.setProperty("marid.debug.port", Integer.toString(v));
+                    }
+                }, 5000, 65535, 1);
+        final Spinner<Integer> debugTimeout = addIntField("Debug socket timeout",
+                () -> Integer.parseInt(properties.getProperty("marid.debug.timeout", "30000")) / 1000,
+                v -> {
+                    if (v == 30) {
+                        properties.remove("marid.debug.timeout");
+                    } else {
+                        properties.setProperty("marid.debug.timeout", Integer.toString(v * 1000));
+                    }
+                }, 1, 180, 1);
+        final BooleanBinding disabled = debugCheckBox.selectedProperty().not();
+        debugServerCheckBox.disableProperty().bind(disabled);
+        debugSuspendCheckBox.disableProperty().bind(disabled);
+        debugPortSpinner.disableProperty().bind(disabled);
+        debugTimeout.disableProperty().bind(disabled);
     }
 }

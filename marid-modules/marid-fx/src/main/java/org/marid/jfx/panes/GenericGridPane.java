@@ -68,7 +68,7 @@ public class GenericGridPane extends GridPane {
         return checkBox;
     }
 
-    public Spinner addIntField(String text, Supplier<Integer> supplier, Consumer<Integer> consumer, int low, int high, int step) {
+    public Spinner<Integer> addIntField(String text, Supplier<Integer> supplier, Consumer<Integer> consumer, int low, int high, int step) {
         final Spinner<Integer> spinner = new Spinner<>(low, high, supplier.get(), step);
         spinner.setEditable(true);
         spinner.valueProperty().addListener((observable, oldValue, newValue) -> consumer.accept(newValue));

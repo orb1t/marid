@@ -22,8 +22,8 @@ import javafx.application.Platform;
 import javafx.scene.control.*;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
+import org.apache.maven.model.Model;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.settings.DebugSettings;
 import org.marid.ide.settings.JavaSettings;
 import org.marid.io.ProcessManager;
 import org.marid.jfx.icons.FontIcon;
@@ -37,12 +37,11 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
@@ -59,9 +58,7 @@ public class ProjectRunnerPane extends BorderPane implements LogSupport {
     final PrintStream printStream;
 
     @Autowired
-    public ProjectRunnerPane(ProjectProfile profile,
-                             JavaSettings javaSettings,
-                             DebugSettings debugSettings) throws IOException {
+    public ProjectRunnerPane(ProjectProfile profile, JavaSettings javaSettings) throws IOException {
         this.profile = profile;
         final ScrollPane outPane = new ScrollPane(out);
         final ScrollPane errPane = new ScrollPane(err);
@@ -74,7 +71,7 @@ public class ProjectRunnerPane extends BorderPane implements LogSupport {
                 new Tab(L10n.s("Error output"), errPane));
         tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
         tabPane.setFocusTraversable(false);
-        process = process(javaSettings, debugSettings);
+        process = process(javaSettings);
         printStream = new PrintStream(process.getOutputStream(), true);
         processManager = new ProcessManager(profile.getName(), process, consumer(out), consumer(err), 65536, 1L, MINUTES);
         final Thread watchThread = new Thread(null, () -> {
@@ -115,19 +112,31 @@ public class ProjectRunnerPane extends BorderPane implements LogSupport {
         return listView;
     }
 
-    private Process process(JavaSettings javaSettings, DebugSettings debugSettings) throws IOException {
+    private Process process(JavaSettings javaSettings) throws IOException {
         final List<String> args = new ArrayList<>();
         args.add(javaSettings.getJavaExecutable());
         Collections.addAll(args, javaSettings.getJavaArguments());
-        if (debugSettings.isDebug()) {
-            args.add(String.format("-Xrunjdwp:transport=dt_socket,server=y,suspend=%s,address=%d,timeout=%d",
-                    debugSettings.isSuspend() ? 'y' : 'n',
-                    debugSettings.getPort(),
-                    30_000L
-            ));
+        final Model model = profile.getModel();
+        final Properties properties = model.getProperties();
+        final String debug = properties.getProperty("marid.debug", "false");
+        if ("true".equals(debug)) {
+            final String port = properties.getProperty("marid.debug.port", "5005");
+            final String timeout = properties.getProperty("marid.debug.timeout", "30000");
+            final String suspend = properties.getProperty("marid.debug.suspend", "n");
+            final String server = properties.getProperty("marid.debug.server", "y");
+            final Map<String, String> params = new LinkedHashMap<>();
+            params.put("transport", "dt_socket");
+            params.put("server", server);
+            params.put("suspend", suspend);
+            params.put("address", port);
+            params.put("timeout", timeout);
+            final String arg = params.entrySet().stream()
+                    .map(e -> e.getKey() + "=" + e.getValue())
+                    .collect(Collectors.joining(",", "-agentlib:jdwp=", ""));
+            args.add(arg);
         }
         args.add("-jar");
-        args.add(String.format("%s-%s.jar", profile.getModel().getArtifactId(), profile.getModel().getVersion()));
+        args.add(format("%s-%s.jar", profile.getModel().getArtifactId(), profile.getModel().getVersion()));
         final ProcessBuilder processBuilder = new ProcessBuilder(args).directory(profile.getTarget().toFile());
         log(INFO, "Running {0} in {1}", String.join(" ", processBuilder.command()), processBuilder.directory());
         return processBuilder.start();

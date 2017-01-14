@@ -323,6 +323,7 @@
                     <configuration>
                         <showWarnings>true</showWarnings>
                         <showDeprecation>true</showDeprecation>
+                        <optimize>true</optimize>
                         <compilerArgs>
                             <arg>-Xlint:unchecked</arg>
                             <arg>-parameters</arg>
