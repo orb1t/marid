@@ -536,7 +536,7 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations-java5</artifactId>
             <scope>provided</scope>
-            <version>LATEST</version>
+            <version>15.0</version>
         </dependency>
     </dependencies>
 
