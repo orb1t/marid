@@ -33,12 +33,12 @@ import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.io.InputStream;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
-import static java.util.Optional.ofNullable;
 import static org.marid.IdePrefs.PREFERENCES;
 
 /**
@@ -96,12 +96,23 @@ public class Ide extends Application {
         // logging manager
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
 
+        // console logger
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader.getResource("logging.properties") == null) {
+            try (final InputStream inputStream = classLoader.getResourceAsStream("logging/default.properties")) {
+                LogManager.getLogManager().readConfiguration(inputStream);
+            }
+        }
+
         // root logger
         rootLogger = Logger.getLogger("");
         rootLogger.setLevel(Level.parse(PREFERENCES.get("logLevel", Level.INFO.getName())));
 
         // locale
-        ofNullable(PREFERENCES.get("locale", null)).map(Locale::forLanguageTag).ifPresent(Locale::setDefault);
+        final String locale = PREFERENCES.get("locale", null);
+        if (locale != null) {
+            Locale.setDefault(Locale.forLanguageTag(locale));
+        }
 
         // launch application
         LauncherImpl.launchApplication(Ide.class, IdePreloader.class, args);

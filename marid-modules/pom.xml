@@ -71,19 +71,6 @@
                             <version>${project.version}</version>
                         </dependency>
                     </dependencies>
-                    <executions>
-                        <execution>
-                            <id>make-dist</id>
-                            <goals>
-                                <goal>single</goal>
-                            </goals>
-                            <configuration>
-                                <descriptorRefs>
-                                    <descriptorRef>marid</descriptorRef>
-                                </descriptorRefs>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

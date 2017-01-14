@@ -46,6 +46,7 @@
                         </manifest>
                         <manifestEntries>
                             <JavaFX-Version>8.0</JavaFX-Version>
+                            <JavaFX-Preloader-Class>org.marid.preloader.IdePreloader</JavaFX-Preloader-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -88,14 +89,34 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>make-dist</id>
+                        <id>make-zip</id>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <phase>package</phase>
                         <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>marid</descriptorRef>
+                            </descriptorRefs>
                             <formats>
                                 <format>zip</format>
+                            </formats>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>make-dir</id>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <skipAssembly>${marid.release}</skipAssembly>
+                            <attach>false</attach>
+                            <descriptorRefs>
+                                <descriptorRef>marid</descriptorRef>
+                            </descriptorRefs>
+                            <formats>
                                 <format>dir</format>
                             </formats>
                         </configuration>
