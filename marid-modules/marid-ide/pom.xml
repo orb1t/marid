@@ -99,6 +99,7 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
+                            <skipAssembly>${marid.development}</skipAssembly>
                             <descriptorRefs>
                                 <descriptorRef>marid</descriptorRef>
                             </descriptorRefs>

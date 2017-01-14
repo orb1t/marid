@@ -111,6 +111,7 @@
 
             <properties>
                 <marid.release>true</marid.release>
+                <marid.development>false</marid.development>
             </properties>
         </profile>
 
@@ -125,6 +126,7 @@
 
             <properties>
                 <marid.release>false</marid.release>
+                <marid.development>true</marid.development>
             </properties>
 
             <build>
