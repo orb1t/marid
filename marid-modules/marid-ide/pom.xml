@@ -90,46 +90,6 @@
             </plugin>
 
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>make-zip</id>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <skipAssembly>${marid.development}</skipAssembly>
-                            <descriptorRefs>
-                                <descriptorRef>marid</descriptorRef>
-                            </descriptorRefs>
-                            <formats>
-                                <format>zip</format>
-                            </formats>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>make-dir</id>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <skipAssembly>${marid.release}</skipAssembly>
-                            <attach>false</attach>
-                            <descriptorRefs>
-                                <descriptorRef>marid</descriptorRef>
-                            </descriptorRefs>
-                            <formats>
-                                <format>dir</format>
-                            </formats>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
@@ -152,4 +112,71 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>make-zip</id>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <phase>package</phase>
+                                <configuration>
+                                    <descriptorRefs>
+                                        <descriptorRef>marid</descriptorRef>
+                                    </descriptorRefs>
+                                    <formats>
+                                        <format>zip</format>
+                                    </formats>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>development</id>
+
+            <activation>
+                <property>
+                    <name>!marid.release</name>
+                </property>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>make-dir</id>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <phase>package</phase>
+                                <configuration>
+                                    <attach>false</attach>
+                                    <descriptorRefs>
+                                        <descriptorRef>marid</descriptorRef>
+                                    </descriptorRefs>
+                                    <formats>
+                                        <format>dir</format>
+                                    </formats>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
