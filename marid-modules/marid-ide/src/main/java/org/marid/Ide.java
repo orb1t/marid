@@ -18,7 +18,6 @@
 
 package org.marid;
 
-import com.sun.javafx.application.LauncherImpl;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -27,7 +26,6 @@ import org.jboss.logmanager.LogManager;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
-import org.marid.preloader.IdePreloader;
 import org.marid.spring.event.IdeStartedEvent;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
@@ -58,7 +56,6 @@ public class Ide extends Application {
     public void init() throws Exception {
         Ide.ide = this;
         rootLogger.addHandler(ideLogHandler = new IdeLogHandler());
-        classLoader = Thread.currentThread().getContextClassLoader();
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
         context.setId("root");
@@ -92,15 +89,17 @@ public class Ide extends Application {
         context.close();
     }
 
-    public static void main(String... args) throws Exception {
+    static {
         // logging manager
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
 
         // console logger
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader.getResource("logging.properties") == null) {
             try (final InputStream inputStream = classLoader.getResourceAsStream("logging/default.properties")) {
                 LogManager.getLogManager().readConfiguration(inputStream);
+            } catch (Exception x) {
+                throw new IllegalStateException(x);
             }
         }
 
@@ -113,8 +112,5 @@ public class Ide extends Application {
         if (locale != null) {
             Locale.setDefault(Locale.forLanguageTag(locale));
         }
-
-        // launch application
-        LauncherImpl.launchApplication(Ide.class, IdePreloader.class, args);
     }
 }
