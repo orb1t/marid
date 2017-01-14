@@ -9,6 +9,10 @@
 
     <artifactId>marid-ide</artifactId>
 
+    <properties>
+        <marid.debug.opts>transport=dt_socket,server=y,suspend=n,address=5005</marid.debug.opts>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.marid</groupId>
@@ -137,6 +141,7 @@
                             <executable>java</executable>
                             <workingDirectory>${project.build.directory}/${project.build.finalName}</workingDirectory>
                             <arguments>
+                                <argument>-agentlib:jdwp=${marid.debug.opts}</argument>
                                 <argument>-jar</argument>
                                 <argument>lib/${project.build.finalName}.jar</argument>
                             </arguments>
