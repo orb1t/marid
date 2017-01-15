@@ -198,7 +198,6 @@
                                 <descriptor>src/assembly/zip.xml</descriptor>
                             </descriptors>
                             <outputDirectory>${project.build.directory}</outputDirectory>
-                            <recompressZippedFiles>false</recompressZippedFiles>
                         </configuration>
                     </execution>
                 </executions>
