@@ -18,6 +18,7 @@
 
 package org.marid.ide.project;
 
+import com.google.common.io.ByteStreams;
 import javafx.application.Platform;
 import org.marid.Ide;
 import org.marid.ide.common.IdeUrlHandlerFactory;
@@ -28,22 +29,22 @@ import org.marid.maven.ProjectBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.logging.LogRecord;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
-import static java.util.Objects.requireNonNull;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.marid.misc.Calls.func;
 
 /**
@@ -54,23 +55,24 @@ public class ProjectMavenBuilder extends URLStreamHandler implements LogSupport 
 
     private final URLClassLoader classLoader;
     private final FxAction projectBuildAction;
-    private final ZipFile zip;
+    private final Map<String, byte[]> zipData = new HashMap<>();
 
     @Autowired
     public ProjectMavenBuilder(IdeUrlHandlerFactory urlHandlerFactory, FxAction projectBuildAction) throws Exception {
         this.projectBuildAction = projectBuildAction;
-        final URL baseUrl = requireNonNull(Ide.classLoader.getResource("marid-maven.zip"), "marid-maven is not found");
-        zip = new ZipFile(new File(baseUrl.toURI()));
-        urlHandlerFactory.register("mvn", this);
-        final URL[] urls = zip.stream().map(func(e -> () -> new URL("mvn:///" + e.getName()))).toArray(URL[]::new);
-        classLoader = new URLClassLoader(urls);
-    }
-
-    @PreDestroy
-    private void destroy() throws IOException {
-        try (final ZipFile z = zip; final URLClassLoader u = classLoader) {
-            log(INFO, "Closing {0} and {1}", z, u);
+        try (final InputStream is = Ide.classLoader.getResourceAsStream("marid-maven.zip")) {
+            if (is == null) {
+                throw new IllegalStateException("marid-maven.zip is not found");
+            }
+            try (final ZipInputStream stream = new ZipInputStream(is, UTF_8)) {
+                for (ZipEntry entry = stream.getNextEntry(); entry != null; entry = stream.getNextEntry()) {
+                    zipData.put(entry.getName(), ByteStreams.toByteArray(stream));
+                }
+            }
         }
+        urlHandlerFactory.register("mvn", this);
+        final URL[] urls = zipData.keySet().stream().map(func(e -> () -> new URL("mvn:///" + e))).toArray(URL[]::new);
+        classLoader = new URLClassLoader(urls);
     }
 
     Thread build(ProjectProfile profile, Consumer<Map<String, Object>> consumer, Consumer<LogRecord> logConsumer) {
@@ -91,22 +93,20 @@ public class ProjectMavenBuilder extends URLStreamHandler implements LogSupport 
 
     @Override
     protected URLConnection openConnection(URL url) throws IOException {
+        final byte[] data = zipData.get(url.getFile().substring(1));
         return new URLConnection(url) {
-
-            private ZipEntry entry = zip.getEntry(url.getFile().substring(1));
-
             @Override
             public void connect() throws IOException {
             }
 
             @Override
             public InputStream getInputStream() throws IOException {
-                return zip.getInputStream(entry);
+                return new ByteArrayInputStream(data);
             }
 
             @Override
             public int getContentLength() {
-                return entry == null ? -1 : (int) entry.getSize();
+                return data.length;
             }
         };
     }

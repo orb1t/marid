@@ -186,13 +186,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.marid</groupId>
-                        <artifactId>marid-assemblies</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
                 <executions>
                     <execution>
                         <id>make-marid-maven-zip</id>
@@ -201,9 +194,11 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>maven</descriptorRef>
-                            </descriptorRefs>
+                            <descriptors>
+                                <descriptor>src/assembly/zip.xml</descriptor>
+                            </descriptors>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <recompressZippedFiles>false</recompressZippedFiles>
                         </configuration>
                     </execution>
                 </executions>
