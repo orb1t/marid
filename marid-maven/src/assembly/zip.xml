@@ -33,6 +33,24 @@
         <dependencySet>
             <useProjectArtifact>true</useProjectArtifact>
             <useTransitiveDependencies>true</useTransitiveDependencies>
+            <scope>provided</scope>
+            <excludes>
+                <exclude>com.google.guava:guava</exclude>
+                <exclude>org.apache.commons:commons-lang3</exclude>
+                <exclude>org.apache.maven:maven-artifact</exclude>
+                <exclude>org.apache.maven:maven-builder-support</exclude>
+                <exclude>org.apache.maven:maven-model</exclude>
+                <exclude>org.apache.maven:maven-model-builder</exclude>
+                <exclude>org.codehaus.plexus:plexus-component-annotations</exclude>
+                <exclude>org.codehaus.plexus:plexus-interpolation</exclude>
+                <exclude>org.codehaus.plexus:plexus-utils</exclude>
+                <exclude>*:jsr250-api</exclude>
+                <exclude>*:jsr305</exclude>
+                <exclude>com.google.code.findbugs:annotations</exclude>
+                <exclude>org.jetbrains:annotations-java5</exclude>
+                <exclude>*:commons-cli</exclude>
+            </excludes>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
         </dependencySet>
     </dependencySets>
 </assembly>
