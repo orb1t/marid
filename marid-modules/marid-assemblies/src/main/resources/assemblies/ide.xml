@@ -22,10 +22,6 @@
 
     <id>distr</id>
 
-    <formats>
-        <format>zip</format>
-    </formats>
-
     <includeBaseDirectory>false</includeBaseDirectory>
 
     <fileSets>
@@ -47,7 +43,7 @@
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>org.marid:marid-assemblies:jar</include>
+                <include>org.marid:marid-assemblies</include>
             </includes>
             <sources>
                 <includeModuleDirectory>false</includeModuleDirectory>

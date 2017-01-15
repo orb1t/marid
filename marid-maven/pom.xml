@@ -201,11 +201,8 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <formats>
-                                <format>zip</format>
-                            </formats>
                             <descriptorRefs>
-                                <descriptorRef>marid-maven</descriptorRef>
+                                <descriptorRef>maven</descriptorRef>
                             </descriptorRefs>
                         </configuration>
                     </execution>

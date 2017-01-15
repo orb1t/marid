@@ -130,7 +130,7 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <descriptorRefs>
-                                        <descriptorRef>marid</descriptorRef>
+                                        <descriptorRef>ide</descriptorRef>
                                     </descriptorRefs>
                                     <formats>
                                         <format>zip</format>
@@ -166,7 +166,7 @@
                                 <configuration>
                                     <attach>false</attach>
                                     <descriptorRefs>
-                                        <descriptorRef>marid</descriptorRef>
+                                        <descriptorRef>ide</descriptorRef>
                                     </descriptorRefs>
                                     <formats>
                                         <format>dir</format>

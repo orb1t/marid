@@ -29,7 +29,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
-import javafx.scene.effect.SepiaTone;
+import javafx.scene.effect.Blend;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.effect.Bloom;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
@@ -89,7 +91,7 @@ public class IdePreloader extends Preloader {
 
     private GridPane preloaderPane() {
         final GridPane gridPane = new GridPane();
-        gridPane.setEffect(new SepiaTone());
+        gridPane.setEffect(new Blend(BlendMode.DARKEN, new Bloom(0.97), new Bloom(0.96)));
         gridPane.setPadding(new Insets(10, 10, 10, 10));
         gridPane.setHgap(10);
         gridPane.setVgap(10);
