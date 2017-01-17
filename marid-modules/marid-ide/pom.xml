@@ -135,9 +135,9 @@
                                 </goals>
                                 <phase>package</phase>
                                 <configuration>
-                                    <descriptorRefs>
-                                        <descriptorRef>ide</descriptorRef>
-                                    </descriptorRefs>
+                                    <descriptors>
+                                        <descriptor>src/assembly/ide.xml</descriptor>
+                                    </descriptors>
                                     <formats>
                                         <format>zip</format>
                                     </formats>
@@ -171,9 +171,9 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <attach>false</attach>
-                                    <descriptorRefs>
-                                        <descriptorRef>ide</descriptorRef>
-                                    </descriptorRefs>
+                                    <descriptors>
+                                        <descriptor>src/assembly/ide.xml</descriptor>
+                                    </descriptors>
                                     <formats>
                                         <format>dir</format>
                                     </formats>

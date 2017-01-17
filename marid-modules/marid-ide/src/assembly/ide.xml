@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2014 Dmitry Ovchinnikov
+  ~ Copyright (c) 2016 Dmitry Ovchinnikov
   ~ Marid, the free data acquisition and visualization software
   ~
   ~ This program is free software: you can redistribute it and/or modify
@@ -29,37 +29,25 @@
             <directory>src/main/ext</directory>
             <outputDirectory>ext</outputDirectory>
         </fileSet>
+
+        <fileSet>
+            <directory>src/assembly/logs</directory>
+            <outputDirectory>logs</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <filtered>true</filtered>
+            <fileMode>0777</fileMode>
+            <directory>src/assembly/marid</directory>
+            <outputDirectory>.</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <dependencySets>
         <dependencySet>
-            <outputDirectory>/lib</outputDirectory>
+            <outputDirectory>lib</outputDirectory>
             <useProjectArtifact>true</useProjectArtifact>
             <useTransitiveDependencies>true</useTransitiveDependencies>
         </dependencySet>
     </dependencySets>
-
-    <moduleSets>
-        <moduleSet>
-            <useAllReactorProjects>true</useAllReactorProjects>
-            <includes>
-                <include>org.marid:marid-assemblies</include>
-            </includes>
-            <sources>
-                <includeModuleDirectory>false</includeModuleDirectory>
-                <fileSets>
-                    <fileSet>
-                        <filtered>true</filtered>
-                        <fileMode>0777</fileMode>
-                        <directory>src/main/resources/marid</directory>
-                    </fileSet>
-
-                    <fileSet>
-                        <directory>src/main/resources/logs</directory>
-                        <outputDirectory>logs</outputDirectory>
-                    </fileSet>
-                </fileSets>
-            </sources>
-        </moduleSet>
-    </moduleSets>
 </assembly>
