@@ -38,7 +38,7 @@ public class SpecialActionConfiguration {
     @Qualifier("specialAction")
     public FxAction editAction() {
         return new FxAction("edit", "ed", "Edit")
-                .bindText("Edit...")
+                .bindText("Edit")
                 .setAccelerator(KeyCombination.valueOf("F4"))
                 .setIcon(M_EDIT)
                 .setDisabled(true);
