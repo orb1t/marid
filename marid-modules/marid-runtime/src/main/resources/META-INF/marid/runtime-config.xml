@@ -18,5 +18,5 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans">
 
-    <bean class="org.marid.runtime.RuntimeCloseAction"/>
+    <bean class="org.marid.runtime.RuntimeCloseAction" autowire="constructor" autowire-candidate="default"/>
 </beans>

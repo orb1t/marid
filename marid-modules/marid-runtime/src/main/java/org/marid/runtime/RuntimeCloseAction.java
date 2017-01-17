@@ -18,7 +18,6 @@
 
 package org.marid.runtime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
@@ -28,7 +27,6 @@ public class RuntimeCloseAction implements MaridCloseAction {
 
     private final GenericApplicationContext context;
 
-    @Autowired
     public RuntimeCloseAction(GenericApplicationContext context) {
         this.context = context;
     }
