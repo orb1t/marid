@@ -32,6 +32,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Properties;
 
+import static org.marid.jfx.props.Props.value;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -50,9 +52,9 @@ public class PropertiesTab extends GenericGridPane {
 
     @OrderedInit(1)
     public void initMaridVersion(@Value("${implementation.version}") String version) {
-        addTextField("Marid version",
+        addTextField("Marid version", value(
                 () -> properties.getProperty("marid.runtime.version", version),
-                v -> properties.setProperty("marid.runtime.version", v));
+                v -> properties.setProperty("marid.runtime.version", v)));
         addSeparator();
     }
 

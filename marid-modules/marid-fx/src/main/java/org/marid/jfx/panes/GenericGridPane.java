@@ -18,6 +18,7 @@
 
 package org.marid.jfx.panes;
 
+import javafx.beans.value.WritableObjectValue;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Separator;
@@ -51,9 +52,9 @@ public class GenericGridPane extends GridPane {
         return getChildren().stream().mapToInt(c -> c instanceof Separator ? 2 : 1).sum() / 2;
     }
 
-    public TextField addTextField(String text, Supplier<String> supplier, Consumer<String> consumer) {
-        final TextField textField = new TextField(supplier.get());
-        textField.textProperty().addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
+    public TextField addTextField(String text, WritableObjectValue<String> value) {
+        final TextField textField = new TextField(value.get());
+        textField.textProperty().addListener((observable, oldValue, newValue) -> value.set(newValue));
         final MaridLabel label = new MaridLabel().format("%s: ", text);
         addRow(getNextRowIndex(), label, textField);
         return textField;

@@ -29,23 +29,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class MavenTab extends GenericGridPane implements SettingsEditor {
 
-    private final MavenSettings mavenSettings;
+    private final MavenSettings pref;
 
     @Autowired
-    public MavenTab(MavenSettings mavenSettings) {
-        this.mavenSettings = mavenSettings;
-        addTextField("Releases update policy by default", mavenSettings::getReleaseUpdatePolicy, mavenSettings::setReleaseUpdatePolicy);
-        addTextField("Snapshots update policy by default", mavenSettings::getSnapshotUpdatePolicy, mavenSettings::setSnapshotUpdatePolicy);
+    public MavenTab(MavenSettings pref) {
+        this.pref = pref;
+        addTextField("Releases update policy by default", pref.releaseUpdatePolicy);
+        addTextField("Snapshot update policy by default", pref.snapshotUpdatePolicy);
         addSeparator();
-        addTextField("Dependency plugin version", mavenSettings::getDependencyPluginVersion, mavenSettings::setDependencyPluginVersion);
-        addTextField("Compiler plugin version", mavenSettings::getCompilerPluginVersion, mavenSettings::setCompilerPluginVersion);
-        addTextField("Eclipse compiler version", mavenSettings::getEclipseCompilerVersion, mavenSettings::setEclipseCompilerVersion);
-        addTextField("JAR plugin version", mavenSettings::getJarPluginVersion, mavenSettings::setJarPluginVersion);
-        addTextField("Resources plugin version", mavenSettings::getResourcesPluginVersion, mavenSettings::setResourcesPluginVersion);
+        addTextField("Dependency plugin version", pref.dependencyPluginVersion);
+        addTextField("Compiler plugin version", pref.compilerPluginVersion);
+        addTextField("Eclipse compiler version", pref.eclipseCompilerVersion);
+        addTextField("JAR plugin version", pref.jarPluginVersion);
+        addTextField("Resources plugin version", pref.resourcesPluginVersion);
     }
 
     @Override
     public MavenSettings getSettings() {
-        return mavenSettings;
+        return pref;
     }
 }

@@ -18,7 +18,10 @@
 
 package org.marid.ide.settings;
 
+import javafx.beans.value.WritableObjectValue;
 import org.springframework.stereotype.Component;
+
+import static org.marid.jfx.props.Props.string;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -26,61 +29,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class MavenSettings extends AbstractSettings {
 
-    public String getSnapshotUpdatePolicy() {
-        return preferences.get("snapshotUpdatePolicy", null);
-    }
-
-    public void setSnapshotUpdatePolicy(String value) {
-        preferences.put("snapshotUpdatePolicy", value);
-    }
-
-    public String getReleaseUpdatePolicy() {
-        return preferences.get("releaseUpdatePolicy", null);
-    }
-
-    public void setReleaseUpdatePolicy(String value) {
-        preferences.put("releaseUpdatePolicy", value);
-    }
-
-    public String getDependencyPluginVersion() {
-        return preferences.get("dependencyPluginVersion", "3.0.0");
-    }
-
-    public void setDependencyPluginVersion(String value) {
-        preferences.put("dependencyPluginVersion", value);
-    }
-
-    public String getCompilerPluginVersion() {
-        return preferences.get("compilerPluginVersion", "3.6.0");
-    }
-
-    public void setCompilerPluginVersion(String value) {
-        preferences.put("compilerPluginVersion", value);
-    }
-
-    public String getEclipseCompilerVersion() {
-        return preferences.get("eclipseCompilerVersion", "2.8.1");
-    }
-
-    public void setEclipseCompilerVersion(String value) {
-        preferences.put("eclipseCompilerVersion", value);
-    }
-
-    public String getJarPluginVersion() {
-        return preferences.get("jarPluginVersion", "3.0.2");
-    }
-
-    public void setJarPluginVersion(String value) {
-        preferences.put("jarPluginVersion", value);
-    }
-
-    public String getResourcesPluginVersion() {
-        return preferences.get("resourcesPluginVersion", "3.0.2");
-    }
-
-    public void setResourcesPluginVersion(String value) {
-        preferences.put("resourcesPluginVersion", value);
-    }
+    public final WritableObjectValue<String> snapshotUpdatePolicy = string(preferences, "snapshotUpdatePolicy", null);
+    public final WritableObjectValue<String> releaseUpdatePolicy = string(preferences, "releaseUpdatePolicy", null);
+    public final WritableObjectValue<String> dependencyPluginVersion = string(preferences, "dependencyPluginVersion", "3.0.0");
+    public final WritableObjectValue<String> compilerPluginVersion = string(preferences, "compilerPluginVersion", "3.6.1");
+    public final WritableObjectValue<String> eclipseCompilerVersion = string(preferences, "eclipseCompilerVersion", "2.8.1");
+    public final WritableObjectValue<String> jarPluginVersion = string(preferences, "jarPluginVersion", "3.0.2");
+    public final WritableObjectValue<String> resourcesPluginVersion = string(preferences, "resourcesPluginVersion", "3.0.2");
+    public final WritableObjectValue<String> repositoryUrl = string(preferences, "repositoryUrl", "repo1.maven.apache.org/maven2/");
 
     @Override
     public String getName() {

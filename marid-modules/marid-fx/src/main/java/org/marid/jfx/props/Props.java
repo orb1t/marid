@@ -19,12 +19,15 @@
 package org.marid.jfx.props;
 
 import javafx.beans.property.*;
+import javafx.beans.value.WritableObjectValue;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 
+import javax.annotation.Nonnull;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.prefs.Preferences;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,6 +44,20 @@ public interface Props {
         final BooleanProperty property = new SimpleBooleanProperty(supplier.getAsBoolean());
         property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
         return property;
+    }
+
+    static <T> WritableObjectValue<T> value(Supplier<T> supplier, Consumer<T> consumer) {
+        return new WritableValueImpl<>(consumer, supplier);
+    }
+
+    static WritableObjectValue<String> string(@Nonnull Preferences node, @Nonnull String key, String defaultValue) {
+        return value(() -> node.get(key, defaultValue), v -> {
+            if (v == null || v.isEmpty()) {
+                node.remove(key);
+            } else {
+                node.put(key, v);
+            }
+        });
     }
 
     static <E extends Event> void addHandler(Property<EventHandler<E>> property, EventHandler<E> handler) {

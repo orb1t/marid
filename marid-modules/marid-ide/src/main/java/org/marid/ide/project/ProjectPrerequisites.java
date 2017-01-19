@@ -121,11 +121,11 @@ public class ProjectPrerequisites {
             final Plugin plugin = new Plugin();
             model.getBuild().getPlugins().add(plugin);
             plugin.setArtifactId("maven-compiler-plugin");
-            plugin.setVersion(mavenSettings.getCompilerPluginVersion());
+            plugin.setVersion(mavenSettings.compilerPluginVersion.get());
             final Dependency dependency = new Dependency();
             dependency.setGroupId("org.codehaus.plexus");
             dependency.setArtifactId("plexus-compiler-eclipse");
-            dependency.setVersion(mavenSettings.getEclipseCompilerVersion());
+            dependency.setVersion(mavenSettings.eclipseCompilerVersion.get());
             plugin.getDependencies().add(dependency);
             final Xpp3Dom configuration = new Xpp3Dom("configuration");
             plugin.setConfiguration(configuration);
@@ -136,7 +136,7 @@ public class ProjectPrerequisites {
             model.getBuild().getPlugins().removeIf(p -> "maven-jar-plugin".equals(p.getArtifactId()));
             final Plugin plugin = new Plugin();
             plugin.setArtifactId("maven-jar-plugin");
-            plugin.setVersion(mavenSettings.getJarPluginVersion());
+            plugin.setVersion(mavenSettings.jarPluginVersion.get());
             model.getBuild().getPlugins().add(plugin);
             final Xpp3Dom configuration = new Xpp3Dom("configuration");
             plugin.setConfiguration(configuration);
@@ -165,7 +165,7 @@ public class ProjectPrerequisites {
                         model.getBuild().getPlugins().add(plugin);
                         return plugin;
                     });
-            dependencyPlugin.setVersion(mavenSettings.getDependencyPluginVersion());
+            dependencyPlugin.setVersion(mavenSettings.dependencyPluginVersion.get());
             final PluginExecution copyDependenciesExecution = dependencyPlugin.getExecutions().stream()
                     .filter(e -> "copy-deps".equals(e.getId()))
                     .findAny()
@@ -194,7 +194,7 @@ public class ProjectPrerequisites {
                         model.getBuild().getPlugins().add(plugin);
                         return plugin;
                     });
-            resourcesPlugin.setVersion(mavenSettings.getResourcesPluginVersion());
+            resourcesPlugin.setVersion(mavenSettings.resourcesPluginVersion.get());
         }
 
         private void applyRuntimeDependency() {
