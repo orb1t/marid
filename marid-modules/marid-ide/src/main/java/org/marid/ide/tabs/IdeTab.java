@@ -21,7 +21,7 @@ package org.marid.ide.tabs;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import org.marid.jfx.props.Props;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -38,7 +38,7 @@ public class IdeTab extends Tab {
     protected transient IdeTabPane ideTabPane;
 
     @Resource
-    protected transient AnnotationConfigApplicationContext context;
+    protected transient GenericApplicationContext context;
 
     public IdeTab(Node content, String text, Object...args) {
         super(null, content);

@@ -29,7 +29,9 @@ import org.marid.image.MaridIconFx;
 import org.marid.spring.event.IdeStartedEvent;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.StandardReflectionParameterNameDiscoverer;
 
 import java.io.InputStream;
 import java.util.Locale;
@@ -44,7 +46,7 @@ import static org.marid.IdePrefs.PREFERENCES;
  */
 public class Ide extends Application {
 
-    private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+    private final GenericApplicationContext context = new GenericApplicationContext();
 
     public static Stage primaryStage;
     public static Ide ide;
@@ -60,11 +62,13 @@ public class Ide extends Application {
         context.setAllowCircularReferences(false);
         context.setId("root");
         context.setDisplayName("Root Context");
-        context.register(IdeContext.class);
+        context.getDefaultListableBeanFactory().setParameterNameDiscoverer(new StandardReflectionParameterNameDiscoverer());
         context.addBeanFactoryPostProcessor(beanFactory -> {
             beanFactory.addBeanPostProcessor(new OrderedInitPostProcessor(context.getAutowireCapableBeanFactory()));
             beanFactory.addBeanPostProcessor(new LogBeansPostProcessor());
         });
+        final AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(context);
+        reader.register(IdeContext.class);
         context.refresh();
         context.start();
         context.getBean(IdePane.class);

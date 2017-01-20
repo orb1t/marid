@@ -35,8 +35,8 @@ import static org.springframework.context.support.AbstractApplicationContext.LIF
 /**
  * @author Dmitry Ovchinnikov
  */
-@Lazy
 @Configuration
+@Lazy
 @EnableScheduling
 @PropertySource({"meta.properties", "ide.properties"})
 @Import({IdeDependants.class})

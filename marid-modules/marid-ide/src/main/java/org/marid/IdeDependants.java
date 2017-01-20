@@ -29,6 +29,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.stereotype.Component;
 
@@ -49,10 +50,10 @@ public class IdeDependants {
 
     private static final List<AnnotationConfigApplicationContext> CONTEXTS = new CopyOnWriteArrayList<>();
 
-    private final AnnotationConfigApplicationContext parent;
+    private final GenericApplicationContext parent;
 
     @Autowired
-    public IdeDependants(AnnotationConfigApplicationContext parent) {
+    public IdeDependants(GenericApplicationContext parent) {
         this.parent = parent;
     }
 
