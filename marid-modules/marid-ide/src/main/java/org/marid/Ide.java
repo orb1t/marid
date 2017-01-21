@@ -31,7 +31,6 @@ import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.StandardReflectionParameterNameDiscoverer;
 
 import java.io.InputStream;
 import java.util.Locale;
@@ -62,7 +61,6 @@ public class Ide extends Application {
         context.setAllowCircularReferences(false);
         context.setId("root");
         context.setDisplayName("Root Context");
-        context.getDefaultListableBeanFactory().setParameterNameDiscoverer(new StandardReflectionParameterNameDiscoverer());
         context.addBeanFactoryPostProcessor(beanFactory -> {
             beanFactory.addBeanPostProcessor(new OrderedInitPostProcessor(context.getAutowireCapableBeanFactory()));
             beanFactory.addBeanPostProcessor(new LogBeansPostProcessor());

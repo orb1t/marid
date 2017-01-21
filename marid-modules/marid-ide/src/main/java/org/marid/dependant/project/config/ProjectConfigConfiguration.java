@@ -26,9 +26,11 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.marid.dependant.project.ProjectParams;
-import org.marid.dependant.project.config.deps.DependenciesEditor;
+import org.marid.dependant.project.config.deps.DependenciesPane;
+import org.marid.dependant.project.config.deps.RepositoryDependencies;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.panes.MaridScrollPane;
@@ -72,19 +74,20 @@ public class ProjectConfigConfiguration extends DependantConfiguration<ProjectPa
     @Bean
     @Qualifier("projectConf")
     @Order(4)
-    public DependenciesEditor mainDependencyEditor(Model model) {
-        return new DependenciesEditor("Dependencies", model.getDependencies());
+    public DependenciesPane mainDependencyEditor(Model model, RepositoryDependencies dependencies) {
+        return new DependenciesPane("Dependencies", model.getDependencies(), dependencies.getDependencies());
     }
 
     @Bean
     @Qualifier("projectConf")
     @Order(5)
-    public DependenciesEditor confDependencyEditor(Model model) {
-        return new DependenciesEditor("Configuration dependencies", model.getProfiles().stream()
+    public DependenciesPane confDependencyEditor(Model model, RepositoryDependencies dependencies) {
+        final List<Dependency> list = model.getProfiles().stream()
                 .filter(p -> "conf".equals(p.getId()))
                 .findAny()
                 .orElseThrow(IllegalStateException::new)
-                .getDependencies());
+                .getDependencies();
+        return new DependenciesPane("Configuration dependencies", list, dependencies.getConfigurationDependencies());
     }
 
     @Bean
