@@ -35,7 +35,7 @@ public interface Proto {
 
     Proto getParent();
 
-    Map<String, ? extends Proto> getChildren();
+    Map<String, ? extends Proto> getDrivers();
 
     static LinkedList<String> path(Proto proto) {
         final LinkedList<String> path = new LinkedList<>();

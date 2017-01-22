@@ -28,35 +28,28 @@ import static org.marid.logging.Log.log;
  */
 public class StdProtoIO implements ProtoIO, Closeable {
 
-    private final PushbackInputStream pushbackInputStream;
-    private final DataInputStream dataInputStream;
-    private final DataOutputStream dataOutputStream;
+    private final InputStream inputStream;
+    private final OutputStream outputStream;
 
-    public StdProtoIO(InputStream inputStream, OutputStream outputStream, int pushbackSize) throws IOException {
-        this.pushbackInputStream = new PushbackInputStream(inputStream, pushbackSize);
-        this.dataInputStream = new DataInputStream(pushbackInputStream);
-        this.dataOutputStream = new DataOutputStream(outputStream);
+    public StdProtoIO(InputStream inputStream, OutputStream outputStream) throws IOException {
+        this.inputStream = inputStream;
+        this.outputStream = outputStream;
     }
 
     @Override
     public void close() throws IOException {
-        try (final InputStream is = dataInputStream; final OutputStream os = dataOutputStream) {
+        try (final InputStream is = inputStream; final OutputStream os = outputStream) {
             log(Level.CONFIG, "Closing {0} and {1}", is, os);
         }
     }
 
     @Override
-    public PushbackInputStream getPushbackInputStream() {
-        return pushbackInputStream;
+    public InputStream getInputStream() {
+        return inputStream;
     }
 
     @Override
-    public DataInputStream getDataInputStream() {
-        return dataInputStream;
-    }
-
-    @Override
-    public DataOutputStream getDataOutputStream() {
-        return dataOutputStream;
+    public OutputStream getOutputStream() {
+        return outputStream;
     }
 }

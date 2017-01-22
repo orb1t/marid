@@ -20,26 +20,49 @@ package org.marid.proto.io;
 
 import org.marid.io.IOBiConsumer;
 import org.marid.io.IOBiFunction;
-import org.marid.io.IOCloseable;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
-public interface ProtoIO extends IOCloseable {
+public class HalfDuplexProtoIO implements ProtoIO {
 
-    InputStream getInputStream();
+    private final ProtoIO delegate;
 
-    OutputStream getOutputStream();
-
-    default void doWith(IOBiConsumer<InputStream, OutputStream> consumer) throws IOException {
-        consumer.accept(getInputStream(), getOutputStream());
+    public HalfDuplexProtoIO(ProtoIO delegate) {
+        this.delegate = delegate;
     }
 
-    default <T> T call(IOBiFunction<InputStream, OutputStream, T> function) throws IOException {
-        return function.apply(getInputStream(), getOutputStream());
+    @Override
+    public InputStream getInputStream() {
+        return delegate.getInputStream();
+    }
+
+    @Override
+    public OutputStream getOutputStream() {
+        return delegate.getOutputStream();
+    }
+
+    @Override
+    public void doWith(IOBiConsumer<InputStream, OutputStream> consumer) throws IOException {
+        synchronized (delegate) {
+            ProtoIO.super.doWith(consumer);
+        }
+    }
+
+    @Override
+    public <T> T call(IOBiFunction<InputStream, OutputStream, T> function) throws IOException {
+        synchronized (delegate) {
+            return ProtoIO.super.call(function);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        delegate.close();
     }
 }

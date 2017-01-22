@@ -18,33 +18,42 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans">
 
-    <bean name="protoRoot" class="org.marid.proto.StdProtoRoot" abstract="true">
+    <bean name="protoRoot" class="org.marid.proto.StdProtoRoot">
         <description>Protocol infrastructure root</description>
 
         <constructor-arg name="id" value="root"/>
         <constructor-arg name="name" value="root"/>
     </bean>
 
-    <bean name="modbusFloatCodec" class="org.marid.proto.modbus.ModbusFloatCodec" abstract="true">
+    <bean name="modbusFloatCodec" class="org.marid.proto.modbus.ModbusFloatCodec">
         <description>MODBUS float value codec</description>
 
         <constructor-arg name="order" value="ABCD"/>
     </bean>
 
-    <bean name="modbusIntCodec" class="org.marid.proto.modbus.ModbusIntCodec" abstract="true">
+    <bean name="modbusIntCodec" class="org.marid.proto.modbus.ModbusIntCodec">
         <description>MODBUS integer value codec</description>
 
         <constructor-arg name="order" value="ABCD"/>
     </bean>
 
-    <bean name="modbusIntArrayCodec" class="org.marid.proto.modbus.ModbusIntArrayCodec" abstract="true">
+    <bean name="modbusIntArrayCodec" class="org.marid.proto.modbus.ModbusIntArrayCodec">
         <description>MODBUS int array coded</description>
 
         <constructor-arg name="order" value="ABCD"/>
     </bean>
 
-    <bean name="protoHealthMonitor" class="org.marid.proto.health.StdProtoBusHealthMonitor" abstract="true">
+    <bean name="protoHealthMonitor" class="org.marid.proto.health.StdProtoBusHealthMonitor">
         <description>Protocol infrastructure health monitor</description>
 
+        <constructor-arg name="bus" value="#{null}"/>
+        <constructor-arg name="scheduler">
+            <bean name="executor" class="java.util.concurrent.ScheduledThreadPoolExecutor">
+                <constructor-arg name="corePoolSize" value="1"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg name="props">
+            <bean name="props" class="org.marid.proto.health.StdProtoBusHealthMonitorProps"/>
+        </constructor-arg>
     </bean>
 </beans>

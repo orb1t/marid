@@ -98,8 +98,7 @@ public class ModbusTest {
     public void test() throws Exception {
         try (final StdProtoRoot root = new StdProtoRoot("root", "root")) {
             final StdProtoBusProps busProps = new StdProtoBusProps();
-            final int pushback = busProps.getPushbackSize();
-            final IOSupplier<ProtoIO> ioProvider = () -> new StdProtoSocketIO(new Socket(getLocalHost(), port), pushback);
+            final IOSupplier<ProtoIO> ioProvider = () -> new StdProtoSocketIO(new Socket(getLocalHost(), port));
             final StdProtoBus bus = root.bus("bus1", "bus1", ioProvider, busProps);
             final ModbusTcpDriverProps modbusTcpDriverProps = new ModbusTcpDriverProps();
             modbusTcpDriverProps.setDelay(0L);

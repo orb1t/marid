@@ -38,7 +38,7 @@ public class StdProtoRoot extends StdProto implements ProtoRoot {
     }
 
     @Override
-    public Map<String, StdProtoBus> getChildren() {
+    public Map<String, StdProtoBus> getDrivers() {
         return children;
     }
 

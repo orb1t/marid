@@ -24,6 +24,8 @@ import org.marid.proto.ProtoDriver;
 import org.marid.proto.StdProto;
 
 import javax.annotation.PostConstruct;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.StreamCorruptedException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -41,8 +43,6 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
     private final char slaveAndFunc;
     private final char address;
     private final char count;
-    private final long timeout;
-    private final long errorTimeout;
     private final long delay;
     private final long period;
     private final TimeUnit timeUnit;
@@ -54,13 +54,11 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
         super(id, name);
         this.bus = bus;
         this.consumer = consumer;
-        this.bus.getChildren().put(id, Casts.cast(this));
-        this.transactionIdentifier = (char) bus.getChildren().size();
+        this.bus.getDrivers().put(id, Casts.cast(this));
+        this.transactionIdentifier = (char) bus.getDrivers().size();
         this.slaveAndFunc = allocate(2).put(0, (byte) props.getUnitId()).put(1, (byte) props.getFunc()).getChar(0);
         this.address = (char) props.getAddress();
         this.count = (char) props.getCount();
-        this.timeout = props.getTimeout();
-        this.errorTimeout = props.getErrorTimeout();
         this.delay = props.getDelay();
         this.period = props.getPeriod();
         this.timeUnit = props.getTimeUnit();
@@ -73,26 +71,27 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
             return;
         }
         task = bus.getTaskRunner().schedule((b, ch) -> ch.doWith((is, os) -> {
-            os.writeChar(transactionIdentifier);
-            os.writeChar(0);
-            os.writeChar(6);
-            os.writeChar(slaveAndFunc);
-            os.writeChar(address);
-            os.writeChar(count);
-            final char ti = is.readChar();
+            final DataOutputStream output = new DataOutputStream(os);
+            output.writeChar(transactionIdentifier);
+            output.writeChar(0);
+            output.writeChar(6);
+            output.writeChar(slaveAndFunc);
+            output.writeChar(address);
+            output.writeChar(count);
+            final DataInputStream input = new DataInputStream(is);
+            final char ti = input.readChar();
             if (ti != transactionIdentifier) {
-                ch.getPushbackInputStream().unread(2);
                 throw new StreamCorruptedException("Invalid transaction identifier: " + (int) ti);
             }
-            final char pi = is.readChar();
+            final char pi = input.readChar();
             if (pi != 0) {
                 throw new StreamCorruptedException("Invalid protocol: " + (int) pi);
             }
-            final char size = is.readChar();
+            final char size = input.readChar();
             if (size != 3 + 2 * count) {
                 throw new StreamCorruptedException("Incorrect size: " + (int) size);
             }
-            final char saf = is.readChar();
+            final char saf = input.readChar();
             if (saf != slaveAndFunc) {
                 throw new StreamCorruptedException("Incorrect slave and func: " + Integer.toHexString(saf));
             }
@@ -100,18 +99,13 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
             if (n / 2 != count) {
                 throw new StreamCorruptedException("Incorrect bytes count: " + n);
             }
-            final char[] data = new char[count];
+            final byte[] data = new byte[count * 2];
+            input.readFully(data);
+            final char[] result = new char[count];
             for (int i = 0; i < count; i++) {
-                data[i] = is.readChar();
+                result[i] = (char) (Byte.toUnsignedInt(data[i * 2]) * 256 + Byte.toUnsignedInt(data[i * 2 + 1]));
             }
-            for (int len = is.available(); len > 0; len = is.available()) {
-                final byte[] buf = new byte[len];
-                final int c = is.read(buf);
-                if (c < 0) {
-                    break;
-                }
-            }
-            consumer.accept(data);
+            consumer.accept(result);
         }), delay, period, timeUnit, false);
     }
 

@@ -28,8 +28,8 @@ public class StdProtoSocketIO extends StdProtoIO {
 
     private final Socket socket;
 
-    public StdProtoSocketIO(Socket socket, int pushbackSize) throws IOException {
-        super(socket.getInputStream(), socket.getOutputStream(), pushbackSize);
+    public StdProtoSocketIO(Socket socket) throws IOException {
+        super(socket.getInputStream(), socket.getOutputStream());
         this.socket = socket;
     }
 

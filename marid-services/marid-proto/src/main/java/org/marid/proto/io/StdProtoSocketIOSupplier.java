@@ -36,7 +36,6 @@ public class StdProtoSocketIOSupplier implements IOSupplier<StdProtoSocketIO> {
     private int port;
     private int connectTimeout;
     private InetAddress address;
-    private int pushbackSize = 16;
     private int soTimeout;
     private Boolean keepAlive;
 
@@ -58,7 +57,7 @@ public class StdProtoSocketIOSupplier implements IOSupplier<StdProtoSocketIO> {
         } else {
             throw new ConnectException("Invalid socket configuration");
         }
-        return new StdProtoSocketIO(socket, pushbackSize);
+        return new StdProtoSocketIO(socket);
     }
 
     public InetSocketAddress getSocketAddress() {
@@ -99,14 +98,6 @@ public class StdProtoSocketIOSupplier implements IOSupplier<StdProtoSocketIO> {
 
     public void setAddress(InetAddress address) {
         this.address = address;
-    }
-
-    public int getPushbackSize() {
-        return pushbackSize;
-    }
-
-    public void setPushbackSize(int pushbackSize) {
-        this.pushbackSize = pushbackSize;
     }
 
     public int getSoTimeout() {

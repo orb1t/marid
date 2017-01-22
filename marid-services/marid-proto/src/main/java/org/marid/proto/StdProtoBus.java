@@ -34,7 +34,7 @@ public class StdProtoBus extends StdProto implements ProtoBus {
 
     private final StdProtoRoot root;
     private final IOSupplier<? extends ProtoIO> ioProvider;
-    private final Map<String, ProtoDriver> children = new LinkedHashMap<>();
+    private final Map<String, ProtoDriver> drivers = new LinkedHashMap<>();
     private final long terminationTimeout;
 
     final ScheduledThreadPoolExecutor scheduler;
@@ -45,7 +45,7 @@ public class StdProtoBus extends StdProto implements ProtoBus {
     StdProtoBus(StdProtoRoot root, String id, String name, IOSupplier<? extends ProtoIO> ioProvider, StdProtoBusProps p) {
         super(id, name);
         this.root = root;
-        this.root.getChildren().put(id, this);
+        this.root.getDrivers().put(id, this);
         this.ioProvider = ioProvider;
         this.scheduler = new ScheduledThreadPoolExecutor(p.getThreadCount(), r -> {
             final String threadName = root.getId() + "/" + id;
@@ -59,7 +59,7 @@ public class StdProtoBus extends StdProto implements ProtoBus {
     @Override
     public void close() throws IOException {
         scheduler.shutdown();
-        final IOException exception = Proto.close(children);
+        final IOException exception = Proto.close(drivers);
         try {
             scheduler.awaitTermination(terminationTimeout, TimeUnit.MILLISECONDS);
         } catch (Exception x) {
@@ -86,7 +86,7 @@ public class StdProtoBus extends StdProto implements ProtoBus {
             if (io != null) {
                 io.closeSafely();
             }
-            io = ioProvider.get();
+            io = null;
         }
     }
 
@@ -105,9 +105,13 @@ public class StdProtoBus extends StdProto implements ProtoBus {
         return root;
     }
 
-    @Override
-    public Map<String, ProtoDriver> getChildren() {
-        return children;
+    public Map<String, ProtoDriver> getDrivers() {
+        return drivers;
+    }
+
+    public void setDrivers(Map<String, ProtoDriver> driverMap) {
+        drivers.clear();
+        drivers.putAll(driverMap);
     }
 
     @Override

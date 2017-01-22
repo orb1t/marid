@@ -30,8 +30,7 @@ public interface ProtoDriver extends Proto, Closeable {
     @Override
     ProtoBus getParent();
 
-    @Override
-    default Map<String, ? extends Proto> getChildren() {
+    default Map<String, ? extends Proto> getDrivers() {
         return Collections.emptyMap();
     }
 
