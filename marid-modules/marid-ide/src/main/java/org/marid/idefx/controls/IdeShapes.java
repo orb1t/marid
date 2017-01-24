@@ -19,7 +19,6 @@
 package org.marid.idefx.controls;
 
 import com.google.common.primitives.Ints;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -27,6 +26,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.DMap;
 import org.marid.spring.xml.DRef;
 
 import java.nio.file.Path;
@@ -59,12 +59,13 @@ public interface IdeShapes {
         return new Circle(size / 2, color(Objects.hash(beanData.getName())));
     }
 
-    static HBox beanNode(ProjectProfile profile, BeanData beanData, int size) {
-        return new HBox(4, profileNode(profile, size), beanNode(beanData, size));
-    }
-
     static Rectangle profileNode(ProjectProfile profile, int size) {
         return new Rectangle(size, size, color(Objects.hash(profile.getName())));
+    }
+
+    static Circle map(String name, int size) {
+        final Circle circle = new Circle(size / 2, color(name.hashCode()));
+        return circle;
     }
 
     static Pane fileNode(Path path, int size) {
@@ -72,9 +73,5 @@ public interface IdeShapes {
         final Rectangle node = new Rectangle(h, h, color(path.hashCode()));
         node.setRotate(45);
         return new StackPane(node);
-    }
-
-    static HBox fileNode(ProjectProfile profile, Path path, int size) {
-        return new HBox(4, profileNode(profile, size), fileNode(path, size));
     }
 }

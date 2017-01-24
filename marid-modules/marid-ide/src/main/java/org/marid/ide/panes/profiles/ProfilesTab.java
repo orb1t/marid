@@ -23,6 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.jfx.icons.FontIcon.O_BOOK;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -32,7 +36,7 @@ public class ProfilesTab extends IdeTab {
 
     @Autowired
     public ProfilesTab(ProfilesTable table) {
-        super(table, "Profiles");
+        super(table, ls("Profiles"), () -> glyphIcon(O_BOOK, 16));
         setClosable(false);
     }
 }

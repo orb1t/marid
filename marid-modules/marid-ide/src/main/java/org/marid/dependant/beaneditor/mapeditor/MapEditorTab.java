@@ -16,14 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beandata;
+package org.marid.dependant.beaneditor.mapeditor;
 
-import javafx.scene.control.TabPane;
+import javafx.beans.value.ObservableStringValue;
 import org.marid.ide.tabs.IdeTab;
 import org.marid.idefx.controls.IdeShapes;
-import org.marid.spring.xml.BeanData;
+import org.marid.jfx.panes.MaridScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static javafx.beans.binding.Bindings.createStringBinding;
@@ -33,11 +32,11 @@ import static javafx.beans.binding.Bindings.createStringBinding;
  * @since 0.8
  */
 @Component
-public class BeanDataTab extends IdeTab {
+public class MapEditorTab extends IdeTab {
 
     @Autowired
-    public BeanDataTab(@Qualifier("beanData") TabPane beanDataEditorsTabs, BeanData data) {
-        super(beanDataEditorsTabs, createStringBinding(data::getName, data.name), () -> IdeShapes.beanNode(data, 16));
-        addNodeObservables(data.observables());
+    public MapEditorTab(MapEditorTable table, ObservableStringValue name) {
+        super(new MaridScrollPane(table), createStringBinding(name::get, name), () -> IdeShapes.map(name.get(), 16));
+        addNodeObservables(name);
     }
 }

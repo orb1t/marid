@@ -16,28 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beandata;
+package org.marid.dependant.beaneditor.mapeditor;
 
-import javafx.scene.control.TabPane;
-import org.marid.ide.tabs.IdeTab;
-import org.marid.idefx.controls.IdeShapes;
-import org.marid.spring.xml.BeanData;
+import org.marid.idefx.controls.CommonTableView;
+import org.marid.spring.xml.DMap;
+import org.marid.spring.xml.DMapEntry;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
-
-import static javafx.beans.binding.Bindings.createStringBinding;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
 @Component
-public class BeanDataTab extends IdeTab {
+public class MapEditorTable extends CommonTableView<DMapEntry> {
+
+    private final ResolvableType keyType;
+    private final ResolvableType valueType;
 
     @Autowired
-    public BeanDataTab(@Qualifier("beanData") TabPane beanDataEditorsTabs, BeanData data) {
-        super(beanDataEditorsTabs, createStringBinding(data::getName, data.name), () -> IdeShapes.beanNode(data, 16));
-        addNodeObservables(data.observables());
+    public MapEditorTable(DMap map, ResolvableType keyType, ResolvableType valueType) {
+        super(map.entries);
+        this.keyType = keyType;
+        this.valueType = valueType;
+        setEditable(true);
+        setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
     }
 }

@@ -29,6 +29,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.jfx.icons.FontIcon.O_GRAPH;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -65,6 +69,6 @@ public class MonitorConfiguration implements LogSupport {
 
     @Bean
     public IdeTab tab(GridPane monitorGridPane) {
-        return new IdeTab(monitorGridPane, "Monitor");
+        return new IdeTab(monitorGridPane, ls("Monitor"), () -> glyphIcon(O_GRAPH, 16));
     }
 }

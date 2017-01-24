@@ -18,17 +18,20 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.beans.binding.StringBinding;
 import javafx.collections.ListChangeListener;
 import javafx.util.Pair;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.tabs.IdeTab;
-import org.marid.idefx.controls.IdeShapes;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
+
+import static javafx.beans.binding.Bindings.createStringBinding;
+import static org.marid.idefx.controls.IdeShapes.fileNode;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -41,30 +44,9 @@ public class BeanEditorTab extends IdeTab {
 
     @Autowired
     public BeanEditorTab(ProjectProfile profile, BeanListTable table, Path beanFilePath) {
-        super(new MaridScrollPane(table), "%s", profile.getBeansDirectory().relativize(beanFilePath));
-        setGraphic(IdeShapes.fileNode(profile, beanFilePath, 16));
+        super(new MaridScrollPane(table), fileName(profile, beanFilePath), () -> fileNode(beanFilePath, 16));
         this.profile = profile;
         this.beanFilePath = beanFilePath;
-    }
-
-    @Override
-    public int hashCode() {
-        return profile.getName().hashCode() ^ beanFilePath.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (obj.getClass() != getClass()) {
-            return false;
-        }
-        final BeanEditorTab that = (BeanEditorTab) obj;
-        return that.beanFilePath.equals(beanFilePath) && profile.getName().equals(that.profile.getName());
     }
 
     @Autowired
@@ -82,5 +64,10 @@ public class BeanEditorTab extends IdeTab {
         };
         profile.getBeanFiles().addListener(changeListener);
         setOnCloseRequest(event -> profile.getBeanFiles().removeListener(changeListener));
+    }
+
+    private static StringBinding fileName(ProjectProfile profile, Path beanFilePath) {
+        final Path relativePath = profile.getBeansDirectory().relativize(beanFilePath);
+        return createStringBinding(relativePath::toString);
     }
 }

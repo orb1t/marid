@@ -27,41 +27,53 @@ import javafx.collections.ObservableList;
 import javax.xml.bind.annotation.*;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
-@XmlSeeAlso({DList.class, DArray.class, DValue.class, DProps.class, DRef.class, DMap.class})
+@XmlRootElement(name = "map")
+@XmlSeeAlso({DMapEntry.class})
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class DCollection<T extends DCollection<T>> extends DElement<T> {
+public class DMap extends DElement<DMap> {
 
+    public final StringProperty keyType = new SimpleStringProperty(this, "key-type");
     public final StringProperty valueType = new SimpleStringProperty(this, "value-type");
-    public final ObservableList<DElement<?>> elements = FXCollections.observableArrayList(DElement::observables);
+    public final ObservableList<DMapEntry> entries = FXCollections.observableArrayList(DMapEntry::observables);
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
+    public Observable[] observables() {
+        return new Observable[] {keyType, valueType, entries};
+    }
+
+    @XmlAttribute(name = "key-type")
+    public String getKeyType() {
+        return keyType.get();
+    }
+
+    public void setKeyType(String keyType) {
+        this.keyType.set(keyType);
+    }
 
     @XmlAttribute(name = "value-type")
     public String getValueType() {
-        return valueType.isEmpty().get() ? null : valueType.get();
+        return valueType.get();
     }
 
     public void setValueType(String valueType) {
         this.valueType.set(valueType);
     }
 
-    @XmlAnyElement(lax = true)
-    public DElement<?>[] getElements() {
-        return elements.stream().filter(e -> !e.isEmpty()).toArray(DElement[]::new);
-    }
-
-    public void setElements(DElement<?>[] elements) {
-        this.elements.addAll(elements);
+    @XmlElement(name = "entry")
+    public DMapEntry[] getEntries() {
+        return entries.toArray(new DMapEntry[entries.size()]);
     }
 
     @Override
     public String toString() {
-        final String className = getClass().getSimpleName().substring(1);
-        return className + "(" + elements.size() + ")";
-    }
-
-    @Override
-    public Observable[] observables() {
-        return new Observable[] {valueType, elements};
+        return String.format("Map<%s,%s>(%d)", keyType.get(), valueType.get(), entries.size());
     }
 }

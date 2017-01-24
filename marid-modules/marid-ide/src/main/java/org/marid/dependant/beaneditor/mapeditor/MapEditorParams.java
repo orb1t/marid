@@ -16,28 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.beandata;
+package org.marid.dependant.beaneditor.mapeditor;
 
-import javafx.scene.control.TabPane;
-import org.marid.ide.tabs.IdeTab;
-import org.marid.idefx.controls.IdeShapes;
-import org.marid.spring.xml.BeanData;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
-
-import static javafx.beans.binding.Bindings.createStringBinding;
+import javafx.beans.value.ObservableStringValue;
+import org.marid.spring.xml.DMap;
+import org.springframework.core.ResolvableType;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Component
-public class BeanDataTab extends IdeTab {
+public class MapEditorParams {
 
-    @Autowired
-    public BeanDataTab(@Qualifier("beanData") TabPane beanDataEditorsTabs, BeanData data) {
-        super(beanDataEditorsTabs, createStringBinding(data::getName, data.name), () -> IdeShapes.beanNode(data, 16));
-        addNodeObservables(data.observables());
+    public final ResolvableType keyType;
+    public final ResolvableType valueType;
+    public final DMap map;
+    public final ObservableStringValue name;
+
+    public MapEditorParams(ResolvableType keyType, ResolvableType valueType, DMap map, ObservableStringValue name) {
+        this.keyType = keyType;
+        this.valueType = valueType;
+        this.map = map;
+        this.name = name;
     }
 }

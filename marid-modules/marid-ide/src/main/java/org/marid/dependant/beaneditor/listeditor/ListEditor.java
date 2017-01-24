@@ -18,6 +18,7 @@
 
 package org.marid.dependant.beaneditor.listeditor;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.WritableValue;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
@@ -26,20 +27,17 @@ import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.jfx.props.WritableValueImpl;
-import org.marid.spring.xml.DCollection;
-import org.marid.spring.xml.DElement;
-import org.marid.spring.xml.DList;
-import org.marid.spring.xml.DValue;
-import org.marid.spring.xml.DProps;
+import org.marid.spring.xml.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static java.util.Collections.emptyList;
+import static javafx.beans.binding.Bindings.createStringBinding;
 import static org.marid.jfx.LocalizedStrings.fls;
 
 /**
@@ -81,7 +79,7 @@ public class ListEditor extends ListView<DElement<?>> {
                         final Consumer<DElement<?>> consumer = e -> getItems().set(index, e);
                         final Supplier<DElement<?>> supplier = () -> getItems().get(index);
                         final WritableValue<DElement<?>> element = new WritableValueImpl<>(consumer, supplier);
-                        final ValueMenuItems items = new ValueMenuItems(element, type, Collections.emptyList());
+                        final ValueMenuItems items = new ValueMenuItems(element, type, emptyList(), createStringBinding(() -> "element"));
                         factory.initializeBean(items, null);
                         items.addTo(m);
                     }));

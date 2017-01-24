@@ -18,6 +18,7 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.WritableValue;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
@@ -30,6 +31,8 @@ import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorParams;
 import org.marid.dependant.beaneditor.listeditor.ListEditorConfiguration;
 import org.marid.dependant.beaneditor.listeditor.ListEditorParams;
+import org.marid.dependant.beaneditor.mapeditor.MapEditorConfiguration;
+import org.marid.dependant.beaneditor.mapeditor.MapEditorParams;
 import org.marid.dependant.beaneditor.propeditor.PropEditorConfiguration;
 import org.marid.dependant.beaneditor.propeditor.PropEditorParams;
 import org.marid.dependant.beaneditor.valueeditor.ValueEditorConfiguration;
@@ -44,6 +47,7 @@ import org.springframework.core.ResolvableType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import static java.beans.Introspector.decapitalize;
@@ -63,11 +67,16 @@ public class ValueMenuItems {
     private final WritableValue<DElement<?>> element;
     private final ResolvableType type;
     private final List<TypeInfo> editors;
+    private final ObservableStringValue name;
 
-    public ValueMenuItems(WritableValue<DElement<?>> element, ResolvableType type, List<TypeInfo> editors) {
+    public ValueMenuItems(WritableValue<DElement<?>> element,
+                          ResolvableType type,
+                          List<TypeInfo> editors,
+                          ObservableStringValue name) {
         this.element = element;
         this.type = type;
         this.editors = editors;
+        this.name = name;
     }
 
     @OrderedInit(1)
@@ -247,6 +256,33 @@ public class ValueMenuItems {
                 dependants.start(ListEditorConfiguration.class, new ListEditorParams(type, array), context -> {
                     context.setId("arrayEditor");
                     context.setDisplayName("Array Editor");
+                });
+            });
+            items.add(mi);
+            items.add(new SeparatorMenuItem());
+        }
+    }
+
+    @OrderedInit(9)
+    public void initMapEdit(IdeDependants dependants) {
+        if (ResolvableType.forClass(Map.class).isAssignableFrom(type)) {
+            final MenuItem mi = new MenuItem(s("Edit map..."), glyphIcon(M_PARTY_MODE, 16));
+            mi.setOnAction(event -> {
+                final DMap map;
+                if (element.getValue() instanceof DMap) {
+                    map = (DMap) element.getValue();
+                } else {
+                    element.setValue(map = new DMap());
+                }
+                final ResolvableType[] generics = type.as(Map.class).getGenerics();
+                if (generics.length == 2) {
+                    map.setKeyType(generics[0].getRawClass().getName());
+                    map.setValueType(generics[1].getRawClass().getName());
+                }
+                final MapEditorParams params = new MapEditorParams(generics[0], generics[1], map, name);
+                dependants.start(MapEditorConfiguration.class, params, c -> {
+                    c.setId("mapEditor");
+                    c.setDisplayName("Map Editor");
                 });
             });
             items.add(mi);

@@ -41,8 +41,7 @@ import java.util.List;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.M_LIST;
-import static org.marid.jfx.icons.FontIcon.M_TEXT_FORMAT;
+import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -110,6 +109,8 @@ public class BeanPropEditor extends TableView<BeanProp> {
         } else if (element instanceof BeanData) {
             final BeanData data = (BeanData) element;
             label.setGraphic(IdeShapes.beanNode(data, 16));
+        } else if (element instanceof DMap) {
+            label.setGraphic(glyphIcon(M_MAP, 16));
         }
         if (element != null) {
             label.setText(element.toString());
@@ -139,7 +140,7 @@ public class BeanPropEditor extends TableView<BeanProp> {
                     }
                 }
                 final ResolvableType type = profile.getPropType(beanData, prop.getName());
-                final ValueMenuItems menuItems = new ValueMenuItems(prop.data, type, editors);
+                final ValueMenuItems menuItems = new ValueMenuItems(prop.data, type, editors, prop.name);
                 factory.initializeBean(menuItems, null);
                 menuItems.addTo(m);
             }));

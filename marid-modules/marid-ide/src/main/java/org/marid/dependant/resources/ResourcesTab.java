@@ -21,8 +21,10 @@ package org.marid.dependant.resources;
 import javafx.scene.control.TabPane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.tabs.IdeTab;
-import org.marid.idefx.controls.IdeShapes;
 import org.springframework.stereotype.Component;
+
+import static javafx.beans.binding.Bindings.createStringBinding;
+import static org.marid.idefx.controls.IdeShapes.profileNode;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -30,21 +32,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ResourcesTab extends IdeTab {
 
-    private final ProjectProfile profile;
-
     public ResourcesTab(ProjectProfile profile, TabPane resourcesTabPane) {
-        super(resourcesTabPane, "%s", profile);
-        setGraphic(IdeShapes.profileNode(profile, 16));
-        this.profile = profile;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof ResourcesTab && ((ResourcesTab) obj).profile.equals(profile);
-    }
-
-    @Override
-    public int hashCode() {
-        return profile.hashCode();
+        super(resourcesTabPane, createStringBinding(profile::getName), () -> profileNode(profile, 16));
     }
 }
