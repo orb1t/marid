@@ -18,7 +18,6 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.util.Pair;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.logging.LogSupport;
 import org.marid.spring.xml.BeanFile;
@@ -37,7 +36,6 @@ import org.springframework.stereotype.Component;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 import java.net.URLClassLoader;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -84,13 +82,13 @@ public class BeanMetaInfoProvider implements LogSupport {
         reader.setValidating(false);
         reader.setBeanClassLoader(classLoader);
         final List<Resource> resources = new ArrayList<>();
-        for (final Pair<Path, BeanFile> pair : profile.getBeanFiles()) {
+        for (final BeanFile file : profile.getBeanFiles()) {
             final ByteArrayOutputStream os = new ByteArrayOutputStream();
             try {
-                MaridBeanDefinitionSaver.write(new StreamResult(os), pair.getValue());
-                resources.add(new ByteArrayResource(os.toByteArray(), pair.getKey().toString()));
+                MaridBeanDefinitionSaver.write(new StreamResult(os), file);
+                resources.add(new ByteArrayResource(os.toByteArray(), file.toString()));
             } catch (Exception x) {
-                log(WARNING, "Unable to save {0}", x, pair.getKey());
+                log(WARNING, "Unable to save {0}", x, file);
             }
         }
         reader.loadBeanDefinitions(resources.toArray(new Resource[resources.size()]));

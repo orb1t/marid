@@ -20,8 +20,7 @@ package org.marid.dependant.beaneditor;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import java.nio.file.Path;
+import org.marid.spring.xml.BeanFile;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -29,10 +28,10 @@ import java.nio.file.Path;
  */
 public class BeanEditorParams {
 
-    public final Path beanFilePath;
+    public final BeanFile beanFile;
 
-    public BeanEditorParams(Path beanFilePath) {
-        this.beanFilePath = beanFilePath;
+    public BeanEditorParams(BeanFile beanFile) {
+        this.beanFile = beanFile;
     }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")

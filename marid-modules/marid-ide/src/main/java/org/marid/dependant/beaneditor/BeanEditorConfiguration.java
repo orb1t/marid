@@ -19,9 +19,7 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.scene.control.ButtonType;
-import javafx.util.Pair;
 import org.marid.ide.panes.main.IdeToolbar;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.icons.FontIcon;
@@ -37,7 +35,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -65,18 +62,8 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
     }
 
     @Bean
-    public Path beanFilePath() {
-        return param().beanFilePath;
-    }
-
-    @Bean
-    public BeanFile beanFile(Path beanFilePath, ProjectProfile profile) {
-        return profile.getBeanFiles()
-                .stream()
-                .filter(e -> e.getKey().equals(beanFilePath))
-                .map(Pair::getValue)
-                .findAny()
-                .orElse(null);
+    public BeanFile beanFile() {
+        return param().beanFile;
     }
 
     @Bean

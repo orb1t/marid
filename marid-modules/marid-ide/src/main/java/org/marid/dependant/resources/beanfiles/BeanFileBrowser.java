@@ -24,10 +24,8 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.util.Pair;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.ide.common.SpecialActions;
-import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.idefx.controls.CommonTableView;
 import org.marid.idefx.controls.IdeShapes;
@@ -44,43 +42,41 @@ import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.List;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+import static javafx.beans.binding.Bindings.createStringBinding;
 import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanFileBrowser extends CommonTableView<Pair<Path, BeanFile>> {
+public class BeanFileBrowser extends CommonTableView<BeanFile> {
 
-    private final ObservableList<Pair<Path, BeanFile>> source;
+    private final ObservableList<BeanFile> source;
 
     @Autowired
     public BeanFileBrowser(ProjectProfile profile) {
-        super(profile.getBeanFiles().sorted(Comparator.comparing(Pair::getKey)));
+        super(profile.getBeanFiles().sorted(BeanFile.asc()));
         source = profile.getBeanFiles();
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         setTableMenuButtonVisible(true);
     }
 
     @Override
-    public ObservableList<Pair<Path, BeanFile>> getSourceItems() {
+    public ObservableList<BeanFile> getSourceItems() {
         return source;
     }
 
     @OrderedInit(1)
-    public void fileColumn(ProjectManager projectManager) {
-        final TableColumn<Pair<Path, BeanFile>, String> col = new TableColumn<>();
+    public void fileColumn() {
+        final TableColumn<BeanFile, String> col = new TableColumn<>();
         col.textProperty().bind(ls("File"));
         col.setPrefWidth(600);
         col.setMaxWidth(2000);
-        col.setCellValueFactory(param -> {
-            final Path path = projectManager.getProfile().getBeansDirectory().relativize(param.getValue().getKey());
-            return new SimpleStringProperty(path.toString());
-        });
-        col.setCellFactory(param -> new TextFieldTableCell<Pair<Path, BeanFile>, String>(new DefaultStringConverter()) {
+        col.setCellValueFactory(param -> createStringBinding(() -> param.getValue().getFilePath(), param.getValue().path));
+        col.setCellFactory(param -> new TextFieldTableCell<BeanFile, String>(new DefaultStringConverter()) {
             @Override
             public void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -88,8 +84,8 @@ public class BeanFileBrowser extends CommonTableView<Pair<Path, BeanFile>> {
                     setGraphic(null);
                 } else {
                     final int index = getIndex();
-                    final Pair<Path, BeanFile> pair = getItems().get(index);
-                    setGraphic(IdeShapes.fileNode(pair.getKey(), 16));
+                    final BeanFile file = getItems().get(index);
+                    setGraphic(IdeShapes.fileNode(file, 16));
                 }
             }
         });
@@ -97,14 +93,14 @@ public class BeanFileBrowser extends CommonTableView<Pair<Path, BeanFile>> {
     }
 
     @OrderedInit(2)
-    public void dateColumn() {
-        final TableColumn<Pair<Path, BeanFile>, String> col = new TableColumn<>();
+    public void dateColumn(ProjectProfile profile) {
+        final TableColumn<BeanFile, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Date"));
         col.setPrefWidth(250);
         col.setMaxWidth(300);
         col.setStyle("-fx-alignment: baseline-right");
         col.setCellValueFactory(param -> {
-            final Path path = param.getValue().getKey();
+            final Path path = param.getValue().path(profile.getBeansDirectory());
             try {
                 final FileTime fileTime = Files.getLastModifiedTime(path);
                 final Instant instant = fileTime.toInstant();
@@ -117,17 +113,18 @@ public class BeanFileBrowser extends CommonTableView<Pair<Path, BeanFile>> {
     }
 
     @OrderedInit(3)
-    public void beanCountColumn(ProjectManager projectManager) {
-        final TableColumn<Pair<Path, BeanFile>, Integer> col = new TableColumn<>();
+    public void beanCountColumn(ProjectProfile profile) {
+        final TableColumn<BeanFile, Integer> col = new TableColumn<>();
         col.textProperty().bind(ls("Bean count"));
         col.setPrefWidth(250);
         col.setMaxWidth(250);
         col.setStyle("-fx-alignment: baseline-right");
         col.setCellValueFactory(param -> {
-            final Path path = param.getValue().getKey();
-            return new SimpleObjectProperty<>(projectManager.getProfile().getBeanFiles().stream()
-                    .filter(e -> e.getKey().startsWith(path))
-                    .mapToInt(e -> e.getValue().beans.size())
+            final List<String> path = param.getValue().path;
+            return new SimpleObjectProperty<>(profile.getBeanFiles().stream()
+                    .filter(e -> e.path.size() >= path.size())
+                    .filter(e -> e.path.subList(0, path.size()).equals(path))
+                    .mapToInt(e -> e.beans.size())
                     .sum());
         });
         getColumns().add(col);
@@ -136,7 +133,7 @@ public class BeanFileBrowser extends CommonTableView<Pair<Path, BeanFile>> {
     @Autowired
     private void initRowFactory(SpecialActions specialActions) {
         setRowFactory(v -> {
-            final TableRow<Pair<Path, BeanFile>> row = new TableRow<>();
+            final TableRow<BeanFile> row = new TableRow<>();
             row.disableProperty().bind(row.itemProperty().isNull());
             row.setContextMenu(specialActions.contextMenu(Collections::emptyMap));
             return row;

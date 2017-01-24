@@ -108,7 +108,7 @@ public class ProjectManager implements LogSupport {
     }
 
     public static void onBeanNameChange(ProjectProfile profile, String oldName, String newName) {
-        profile.getBeanFiles().forEach(beanFile -> beanFile.getValue().beans.forEach(beanData -> {
+        profile.getBeanFiles().forEach(beanFile -> beanFile.beans.forEach(beanData -> {
             if (beanData.factoryBean.isEqualTo(oldName).get()) {
                 beanData.factoryBean.set(newName);
             }

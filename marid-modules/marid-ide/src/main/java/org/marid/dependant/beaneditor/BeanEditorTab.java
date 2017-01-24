@@ -18,17 +18,12 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.beans.binding.StringBinding;
-import javafx.collections.ListChangeListener;
-import javafx.util.Pair;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.tabs.IdeTab;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.nio.file.Path;
 
 import static javafx.beans.binding.Bindings.createStringBinding;
 import static org.marid.idefx.controls.IdeShapes.fileNode;
@@ -40,34 +35,12 @@ import static org.marid.idefx.controls.IdeShapes.fileNode;
 public class BeanEditorTab extends IdeTab {
 
     public final ProjectProfile profile;
-    public final Path beanFilePath;
+    public final BeanFile file;
 
     @Autowired
-    public BeanEditorTab(ProjectProfile profile, BeanListTable table, Path beanFilePath) {
-        super(new MaridScrollPane(table), fileName(profile, beanFilePath), () -> fileNode(beanFilePath, 16));
+    public BeanEditorTab(ProjectProfile profile, BeanListTable table, BeanFile file) {
+        super(new MaridScrollPane(table), createStringBinding(file::getFilePath, file.path), () -> fileNode(file, 16));
         this.profile = profile;
-        this.beanFilePath = beanFilePath;
-    }
-
-    @Autowired
-    private void init(ProjectProfile profile) {
-        final ListChangeListener<Pair<Path, BeanFile>> changeListener = c -> {
-            while (c.next()) {
-                if (c.wasRemoved()) {
-                    c.getRemoved().forEach(e -> {
-                        if (e.getKey().equals(beanFilePath)) {
-                            getTabPane().getTabs().remove(this);
-                        }
-                    });
-                }
-            }
-        };
-        profile.getBeanFiles().addListener(changeListener);
-        setOnCloseRequest(event -> profile.getBeanFiles().removeListener(changeListener));
-    }
-
-    private static StringBinding fileName(ProjectProfile profile, Path beanFilePath) {
-        final Path relativePath = profile.getBeansDirectory().relativize(beanFilePath);
-        return createStringBinding(relativePath::toString);
+        this.file = file;
     }
 }

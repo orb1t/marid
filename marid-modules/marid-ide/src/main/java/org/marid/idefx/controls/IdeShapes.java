@@ -26,10 +26,9 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.BeanData;
-import org.marid.spring.xml.DMap;
+import org.marid.spring.xml.BeanFile;
 import org.marid.spring.xml.DRef;
 
-import java.nio.file.Path;
 import java.util.Objects;
 
 import static java.lang.Byte.toUnsignedInt;
@@ -68,9 +67,9 @@ public interface IdeShapes {
         return circle;
     }
 
-    static Pane fileNode(Path path, int size) {
+    static Pane fileNode(BeanFile file, int size) {
         final double h = size / Math.sqrt(2);
-        final Rectangle node = new Rectangle(h, h, color(path.hashCode()));
+        final Rectangle node = new Rectangle(h, h, color(file.getFilePath().hashCode()));
         node.setRotate(45);
         return new StackPane(node);
     }

@@ -23,7 +23,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.util.Pair;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
@@ -86,7 +85,7 @@ public class ProjectProfile implements LogSupport {
     final Path beansDirectory;
     final Path repository;
     final Logger logger;
-    final ObservableList<Pair<Path, BeanFile>> beanFiles;
+    final ObservableList<BeanFile> beanFiles;
     final ProjectCacheEntry cacheEntry;
     final BooleanProperty hmi;
 
@@ -120,7 +119,6 @@ public class ProjectProfile implements LogSupport {
 
     public boolean containsBean(String name) {
         return beanFiles.stream()
-                .map(Pair::getValue)
                 .anyMatch(f -> f.allBeans().anyMatch(b -> b.nameProperty().isEqualTo(name).get()));
     }
 
@@ -200,17 +198,20 @@ public class ProjectProfile implements LogSupport {
         return model;
     }
 
-    private ObservableList<Pair<Path, BeanFile>> loadBeanFiles() {
-        final ObservableList<Pair<Path, BeanFile>> list = FXCollections.observableArrayList();
+    private ObservableList<BeanFile> loadBeanFiles() {
+        final ObservableList<BeanFile> list = FXCollections.observableArrayList();
         try (final Stream<Path> stream = Files.walk(beansDirectory)) {
             stream.filter(p -> p.getFileName().toString().endsWith(".xml"))
                     .map(p -> {
+                        final BeanFile template = BeanFile.beanFile(getBeansDirectory(), p);
                         try {
-                            return new Pair<>(p, MaridBeanDefinitionLoader.load(p));
+                            final BeanFile file = MaridBeanDefinitionLoader.load(p);
+                            file.path.setAll(template.path);
+                            return file;
                         } catch (Exception x) {
                             log(WARNING, "Unable to load {0}", x, p);
-                            return new Pair<>(p, new BeanFile());
                         }
+                        return template;
                     })
                     .forEach(list::add);
         } catch (IOException x) {
@@ -221,7 +222,7 @@ public class ProjectProfile implements LogSupport {
         return list;
     }
 
-    public ObservableList<Pair<Path, BeanFile>> getBeanFiles() {
+    public ObservableList<BeanFile> getBeanFiles() {
         return beanFiles;
     }
 
@@ -303,12 +304,14 @@ public class ProjectProfile implements LogSupport {
             log(WARNING, "Unable to clean beans directory", x);
             return;
         }
-        for (final Pair<Path, BeanFile> entry : beanFiles) {
+        final Path base = getBeansDirectory();
+        for (final BeanFile file : beanFiles) {
+            final Path path = file.path(base);
             try {
-                Files.createDirectories(entry.getKey().getParent());
-                MaridBeanDefinitionSaver.write(entry.getKey(), entry.getValue());
+                Files.createDirectories(path.getParent());
+                MaridBeanDefinitionSaver.write(path, file);
             } catch (Exception x) {
-                log(WARNING, "Unable to save {0}", x, entry.getKey());
+                log(WARNING, "Unable to save {0}", x, path);
             }
         }
     }
@@ -343,14 +346,6 @@ public class ProjectProfile implements LogSupport {
         return getName();
     }
 
-    public Optional<BeanData> findBean(String name) {
-        return getBeanFiles().stream()
-                .map(Pair::getValue)
-                .flatMap(BeanFile::allBeans)
-                .filter(b -> name.equals(b.getName()))
-                .findAny();
-    }
-
     public Optional<Class<?>> getClass(BeanData data) {
         if (data.isFactoryBean()) {
             return getConstructor(data).map(e -> ((Method) e).getReturnType());
@@ -363,7 +358,7 @@ public class ProjectProfile implements LogSupport {
         if (data.isFactoryBean()) {
             if (data.factoryBean.isNotEmpty().get()) {
                 return getBeanFiles().stream()
-                        .flatMap(e -> e.getValue().allBeans())
+                        .flatMap(BeanFile::allBeans)
                         .filter(b -> data.factoryBean.isEqualTo(b.nameProperty()).get())
                         .map(this::getClass)
                         .filter(Optional::isPresent)

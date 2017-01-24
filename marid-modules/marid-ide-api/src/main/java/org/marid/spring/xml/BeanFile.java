@@ -22,6 +22,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import javax.xml.bind.annotation.*;
+import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -32,6 +35,7 @@ import java.util.stream.Stream;
 @XmlAccessorType(XmlAccessType.NONE)
 public final class BeanFile extends AbstractData<BeanFile> {
 
+    public final ObservableList<String> path = FXCollections.observableArrayList();
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList(BeanData::observables);
 
     public Stream<BeanData> allBeans() {
@@ -47,5 +51,36 @@ public final class BeanFile extends AbstractData<BeanFile> {
 
     public void setBeans(BeanData[] beans) {
         this.beans.addAll(beans);
+    }
+
+    public Path path(Path base) {
+        return path.stream().reduce(base, Path::resolve, (a1, a2) -> a2);
+    }
+
+    public String getFilePath() {
+        return path.stream().collect(Collectors.joining("/"));
+    }
+
+    public static Comparator<BeanFile> asc() {
+        return (f1, f2) -> {
+            final int min = Math.min(f1.path.size(), f2.path.size());
+            for (int i = 0; i < min; i++) {
+                final String p1 = f1.path.get(i);
+                final String p2 = f2.path.get(i);
+                final int c = p1.compareTo(p2);
+                if (c != 0) {
+                    return c;
+                }
+            }
+            return Integer.compare(f1.path.size(), f2.path.size());
+        };
+    }
+
+    public static BeanFile beanFile(Path basePath, Path path) {
+        final BeanFile file = new BeanFile();
+        for (final Path p : basePath.relativize(path)) {
+            file.path.add(p.toString());
+        }
+        return file;
     }
 }

@@ -18,14 +18,11 @@
 
 package org.marid.dependant.resources.beanfiles;
 
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TextInputDialog;
-import javafx.util.Pair;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.BeanEditorConfiguration;
 import org.marid.dependant.beaneditor.BeanEditorParams;
-import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.ObjectProvider;
@@ -44,20 +41,18 @@ import static org.marid.l10n.L10n.s;
 public class BeanFileBrowserActions {
 
     private final ObjectProvider<BeanFileBrowser> browser;
-    private final ObservableValue<ProjectProfile> projectProfileObservableValue;
+    private final ProjectProfile profile;
     private final IdeDependants dependants;
 
     @Autowired
-    public BeanFileBrowserActions(ObjectProvider<BeanFileBrowser> browser,
-                                  ProjectManager manager,
-                                  IdeDependants dependants) {
+    public BeanFileBrowserActions(ObjectProvider<BeanFileBrowser> browser, ProjectProfile profile, IdeDependants dependants) {
         this.browser = browser;
-        this.projectProfileObservableValue = manager.profileProperty();
+        this.profile = profile;
         this.dependants = dependants;
     }
 
     public ProjectProfile getProfile() {
-        return projectProfileObservableValue.getValue();
+        return profile;
     }
 
     public void onFileAdd(ActionEvent event) {
@@ -68,12 +63,13 @@ public class BeanFileBrowserActions {
         if (value.isPresent()) {
             final String name = value.get().endsWith(".xml") ? value.get() : value.get() + ".xml";
             final Path path = getProfile().getBeansDirectory().resolve(name);
-            getProfile().getBeanFiles().add(new Pair<>(path, new BeanFile()));
+            getProfile().getBeanFiles().add(BeanFile.beanFile(getProfile().getBeansDirectory(), path));
         }
     }
 
     public void onRename(ActionEvent event) {
-        final Path path = browser.getObject().getSelectionModel().getSelectedItem().getKey();
+        final BeanFile beanFile = browser.getObject().getSelectionModel().getSelectedItem();
+        final Path path = beanFile.path(profile.getBeansDirectory());
         final String fileName = path.getFileName().toString();
         final String defaultValue = fileName.substring(0, fileName.length() - 4);
         final TextInputDialog dialog = new TextInputDialog(defaultValue);
@@ -82,13 +78,14 @@ public class BeanFileBrowserActions {
         final Optional<String> value = dialog.showAndWait();
         if (value.isPresent()) {
             final Path newPath = path.getParent().resolve(value.get().endsWith(".xml") ? value.get() : value.get() + ".xml");
-            getProfile().getBeanFiles().filtered(p -> p.getKey().equals(path)).replaceAll(p -> new Pair<>(newPath, p.getValue()));
+            final BeanFile template = BeanFile.beanFile(profile.getBeansDirectory(), newPath);
+            beanFile.path.setAll(template.path);
         }
     }
 
     public void launchBeanEditor(ActionEvent event) {
-        final Path path = browser.getObject().getSelectionModel().getSelectedItem().getKey();
-        dependants.start(BeanEditorConfiguration.class, new BeanEditorParams(path), context -> {
+        final BeanFile beanFile = browser.getObject().getSelectionModel().getSelectedItem();
+        dependants.start(BeanEditorConfiguration.class, new BeanEditorParams(beanFile), context -> {
             context.setId("beanEditor");
             context.setDisplayName("Bean Editor");
         });
