@@ -32,8 +32,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -51,6 +51,7 @@ public class IdeTab extends Tab {
     protected transient GenericApplicationContext context;
 
     private final List<Observable> nodeObservables = new ArrayList<>();
+    private final List<StringBinding> texts = new ArrayList<>();
 
     public IdeTab(@Nonnull Node content, @Nonnull StringBinding text, @Nonnull Supplier<Node> node) {
         setContent(content);
@@ -63,13 +64,14 @@ public class IdeTab extends Tab {
     }
 
     private void updateGraphic(Observable observable) {
-        final LinkedList<Supplier<Node>> suppliers = new LinkedList<>();
+        final List<Supplier<Node>> suppliers = new ArrayList<>();
         for (ApplicationContext c = context; c != null; c = c.getParent()) {
             final IdeTabKey k = c.getBean("$ideTabKey", IdeTabKey.class);
-            suppliers.addFirst(k.graphicBinding);
+            suppliers.add(0, k.graphicBinding);
+            texts.add(0, k.textBinding);
         }
         if (suppliers.size() > 1) {
-            suppliers.removeFirst();
+            suppliers.remove(0);
         }
         setGraphic(suppliers.stream().reduce(new HBox(4), (b, e) -> {
             b.getChildren().add(e.get());
@@ -114,6 +116,8 @@ public class IdeTab extends Tab {
             return false;
         }
         final IdeTab that = (IdeTab) obj;
-        return this.key.equals(that.key);
+        final String[] thisKeys = this.texts.stream().map(StringBinding::get).toArray(String[]::new);
+        final String[] thatKeys = that.texts.stream().map(StringBinding::get).toArray(String[]::new);
+        return Arrays.equals(thisKeys, thatKeys);
     }
 }
