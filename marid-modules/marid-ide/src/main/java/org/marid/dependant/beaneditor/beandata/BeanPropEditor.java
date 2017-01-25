@@ -97,7 +97,7 @@ public class BeanPropEditor extends TableView<BeanProp> {
         getColumns().add(col);
     }
 
-    static Label label(DElement<?> element) {
+    public static Label label(DElement<?> element) {
         final Label label = new Label();
         if (element instanceof DRef) {
             final DRef ref = (DRef) element;

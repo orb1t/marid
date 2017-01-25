@@ -18,12 +18,27 @@
 
 package org.marid.dependant.beaneditor.mapeditor;
 
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.converter.DefaultStringConverter;
+import org.marid.dependant.beaneditor.ValueMenuItems;
+import org.marid.dependant.beaneditor.beandata.BeanPropEditor;
 import org.marid.idefx.controls.CommonTableView;
+import org.marid.jfx.action.FxAction;
+import org.marid.jfx.menu.MaridContextMenu;
+import org.marid.spring.annotation.OrderedInit;
+import org.marid.spring.xml.DElement;
 import org.marid.spring.xml.DMap;
 import org.marid.spring.xml.DMapEntry;
+import org.marid.spring.xml.DValue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
+
+import static java.util.Collections.emptyList;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -32,15 +47,75 @@ import org.springframework.stereotype.Component;
 @Component
 public class MapEditorTable extends CommonTableView<DMapEntry> {
 
-    private final ResolvableType keyType;
-    private final ResolvableType valueType;
-
     @Autowired
-    public MapEditorTable(DMap map, ResolvableType keyType, ResolvableType valueType) {
+    public MapEditorTable(DMap map) {
         super(map.entries);
-        this.keyType = keyType;
-        this.valueType = valueType;
         setEditable(true);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
+    }
+
+    @OrderedInit(1)
+    public void nameColumn() {
+        final TableColumn<DMapEntry, String> column = new TableColumn<>();
+        column.setCellValueFactory(param -> param.getValue().key);
+        column.setEditable(true);
+        column.setMinWidth(100);
+        column.setMaxWidth(500);
+        column.setPrefWidth(300);
+        column.setCellFactory(c -> new TextFieldTableCell<>(new DefaultStringConverter()));
+        getColumns().add(column);
+    }
+
+    @OrderedInit(2)
+    public void valueColumn() {
+        final TableColumn<DMapEntry, DElement<?>> column = new TableColumn<>();
+        column.setCellValueFactory(param -> param.getValue().value);
+        column.setEditable(false);
+        column.setMinWidth(300);
+        column.setMaxWidth(2000);
+        column.setPrefWidth(400);
+        column.setCellFactory(c -> new TableCell<DMapEntry, DElement<?>>() {
+            @Override
+            protected void updateItem(DElement<?> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(BeanPropEditor.label(item));
+                }
+            }
+        });
+        getColumns().add(column);
+    }
+
+    @Autowired
+    private void onAdd(FxAction addAction, DMap map) {
+        addAction.on(this, a -> {
+            a.setEventHandler(event -> {
+                final DMapEntry entry = new DMapEntry();
+                entry.key.set("key");
+                entry.value.set(new DValue("#{null}"));
+                map.entries.add(entry);
+            });
+        });
+    }
+
+    @Autowired
+    private void initRowFactory(ResolvableType valueType, AutowireCapableBeanFactory factory) {
+        setRowFactory(v -> {
+            final TableRow<DMapEntry> row = new TableRow<>();
+            row.disableProperty().bind(row.itemProperty().isNull());
+            row.setContextMenu(new MaridContextMenu(m -> {
+                m.getItems().clear();
+                final DMapEntry entry = row.getItem();
+                if (entry == null) {
+                    return;
+                }
+                final ValueMenuItems menuItems = new ValueMenuItems(entry.value, valueType, emptyList(), entry.key);
+                factory.initializeBean(menuItems, null);
+                menuItems.addTo(m);
+            }));
+            return row;
+        });
     }
 }
