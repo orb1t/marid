@@ -56,4 +56,14 @@
             <bean name="props" class="org.marid.proto.health.StdProtoBusHealthMonitorProps"/>
         </constructor-arg>
     </bean>
+
+    <bean class="org.marid.proto.modbus.ModbusTcpDriver" name="modbusTcpDriver">
+        <constructor-arg name="bus" value="#{null}"/>
+        <constructor-arg name="consumer" value="#{null}"/>
+        <constructor-arg name="id" value="drv1"/>
+        <constructor-arg name="name" value="Driver 1"/>
+        <constructor-arg name="props">
+            <bean class="org.marid.proto.modbus.ModbusTcpDriverProps" name="driverProps"/>
+        </constructor-arg>
+    </bean>
 </beans>

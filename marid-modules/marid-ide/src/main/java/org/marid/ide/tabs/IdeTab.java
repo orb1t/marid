@@ -50,6 +50,7 @@ public class IdeTab extends Tab {
     @Resource
     protected transient GenericApplicationContext context;
 
+    private final List<Supplier<Node>> suppliers = new ArrayList<>();
     private final List<Observable> nodeObservables = new ArrayList<>();
     private final List<StringBinding> texts = new ArrayList<>();
 
@@ -64,15 +65,6 @@ public class IdeTab extends Tab {
     }
 
     private void updateGraphic(Observable observable) {
-        final List<Supplier<Node>> suppliers = new ArrayList<>();
-        for (ApplicationContext c = context; c != null; c = c.getParent()) {
-            final IdeTabKey k = c.getBean("$ideTabKey", IdeTabKey.class);
-            suppliers.add(0, k.graphicBinding);
-            texts.add(0, k.textBinding);
-        }
-        if (suppliers.size() > 1) {
-            suppliers.remove(0);
-        }
         setGraphic(suppliers.stream().reduce(new HBox(4), (b, e) -> {
             b.getChildren().add(e.get());
             return b;
@@ -82,6 +74,14 @@ public class IdeTab extends Tab {
     @PostConstruct
     private void init() {
         context.getBeanFactory().registerSingleton("$ideTabKey", key);
+        for (ApplicationContext c = context; c != null; c = c.getParent()) {
+            final IdeTabKey k = c.getBean("$ideTabKey", IdeTabKey.class);
+            suppliers.add(0, k.graphicBinding);
+            texts.add(0, k.textBinding);
+        }
+        if (suppliers.size() > 1) {
+            suppliers.remove(0);
+        }
         updateGraphic(this.graphicProperty());
         nodeObservables.forEach(o -> o.addListener(this::updateGraphic));
 
