@@ -25,9 +25,12 @@ import javafx.scene.control.SeparatorMenuItem;
 import org.marid.IdeDependants;
 import org.marid.beans.BeanIntrospector;
 import org.marid.beans.ClassInfo;
+import org.marid.dependant.beaneditor.BeanMetaInfoProvider.BeansMetaInfo;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.idefx.controls.IdeShapes;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.xml.*;
+import org.marid.util.MethodUtils;
 import org.marid.util.Reflections;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +45,12 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Stream.of;
 import static org.marid.jfx.LocalizedStrings.fls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
@@ -59,16 +61,20 @@ import static org.marid.l10n.L10n.s;
 @Component
 public class BeanListActions {
 
-    final ProjectProfile profile;
-
+    private final ProjectProfile profile;
     private final IdeDependants dependants;
-    private final BeanListTable table;
+    private final BeanFile beanFile;
+    private final BeanMetaInfoProvider metaInfoProvider;
 
     @Autowired
-    public BeanListActions(ProjectProfile profile, IdeDependants dependants, BeanListTable table) {
+    public BeanListActions(ProjectProfile profile,
+                           IdeDependants dependants,
+                           BeanFile beanFile,
+                           BeanMetaInfoProvider metaInfoProvider) {
         this.profile = profile;
         this.dependants = dependants;
-        this.table = table;
+        this.beanFile = beanFile;
+        this.metaInfoProvider = metaInfoProvider;
     }
 
     private void setData(ObjectProperty<DElement<?>> element, Object value) {
@@ -118,7 +124,7 @@ public class BeanListActions {
         return beanData;
     }
 
-    public BeanData insertItem(String name, BeanDefinition def, BeanMetaInfoProvider.BeansMetaInfo metaInfo) {
+    public BeanData insertItem(String name, BeanDefinition def, BeansMetaInfo metaInfo) {
         final BeanData beanData = beanData(name, def);
         profile.updateBeanData(beanData);
         if (def.getConstructorArgumentValues() != null) {
@@ -161,79 +167,83 @@ public class BeanListActions {
     }
 
     public void insertItem(BeanData beanData) {
-        table.getItems().add(beanData);
+        beanFile.beans.add(beanData);
     }
 
-    public List<MenuItem> factoryItems(Class<?> type, BeanData beanData) {
-        final List<MenuItem> items = new ArrayList<>();
-        final Set<Method> getters = of(type.getMethods())
-                .filter(m -> m.getReturnType() != void.class)
-                .filter(m -> m.getDeclaringClass() != Object.class)
-                .filter(m -> m.getParameterCount() == 0)
-                .sorted(Comparator.comparing(Method::getName))
-                .filter(m -> m.getName().startsWith("get") || m.getName().startsWith("is"))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        final Set<Method> producers = of(type.getMethods())
-                .filter(m -> m.getReturnType() != void.class)
-                .filter(m -> m.getDeclaringClass() != Object.class)
-                .filter(m -> m.getParameterCount() == 0)
-                .filter(m -> !getters.contains(m))
-                .sorted(Comparator.comparing(Method::getName))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        final Set<Method> parameterizedProducers = of(type.getMethods())
-                .filter(m -> m.getReturnType() != void.class)
-                .filter(m -> m.getDeclaringClass() != Object.class)
-                .filter(m -> m.getParameterCount() > 0)
-                .sorted(Comparator.comparing(Method::getName))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        final Function<Method, MenuItem> menuItemFunction = method -> {
-            final String name = of(method.getParameters())
-                    .map(Parameter::getParameterizedType)
-                    .map(t -> {
-                        if (t instanceof Class<?>) {
-                            final Class<?> klass = (Class<?>) t;
-                            if (klass.getName().startsWith("java.lang.")) {
-                                return klass.getSimpleName();
-                            }
-                            return klass.getName();
-                        } else {
-                            return t.toString();
-                        }
-                    })
-                    .collect(joining(",", method.getName() + "(", ") : " + method.getGenericReturnType()));
-            final MenuItem menuItem = new MenuItem(name, glyphIcon(FontIcon.M_MEMORY, 16));
-            menuItem.setOnAction(ev -> {
-                final BeanData newBeanData = new BeanData();
-                newBeanData.name.set(profile.generateBeanName(method.getName()));
-                newBeanData.factoryBean.set(beanData.name.get());
-                newBeanData.factoryMethod.set(method.getName());
-                for (final Parameter parameter : method.getParameters()) {
-                    final BeanArg arg = new BeanArg();
-                    arg.name.set(Reflections.parameterName(parameter));
-                    arg.type.set(parameter.getType().getName());
-                    newBeanData.beanArgs.add(arg);
+    private MenuItem item(Method method, BeanData beanData) {
+        final MenuItem menuItem = new MenuItem(MethodUtils.methodText(method), glyphIcon(FontIcon.M_MEMORY, 16));
+        menuItem.setOnAction(ev -> {
+            final BeanData newBeanData = new BeanData();
+            newBeanData.name.set(profile.generateBeanName(method.getName()));
+            newBeanData.factoryBean.set(beanData.name.get());
+            newBeanData.factoryMethod.set(method.getName());
+            for (final Parameter parameter : method.getParameters()) {
+                final BeanArg arg = new BeanArg();
+                arg.name.set(Reflections.parameterName(parameter));
+                arg.type.set(parameter.getType().getName());
+                newBeanData.beanArgs.add(arg);
+            }
+            beanFile.beans.add(newBeanData);
+            profile.updateBeanData(newBeanData);
+        });
+        return menuItem;
+    }
+
+    public List<MenuItem> factoryItems(ResolvableType resolvableType, BeanData beanData) {
+        final Class<?> type = resolvableType.getRawClass();
+        final Menu getters = new Menu(s("Getters"));
+        final Menu producers = new Menu(s("Producers"));
+        final Menu parameterizedProducers = new Menu(s("Parameterized producers"));
+        final Menu related = new Menu(s("Related"));
+        for (final Method method : type.getMethods()) {
+            if (method.getReturnType() == void.class || method.getDeclaringClass() == Object.class) {
+                continue;
+            }
+            if (method.getParameterCount() == 0) {
+                if (method.getName().startsWith("get") || method.getName().startsWith("is")) {
+                    getters.getItems().add(item(method, beanData));
+                } else {
+                    producers.getItems().add(item(method, beanData));
                 }
-                table.getItems().add(newBeanData);
-                profile.updateBeanData(newBeanData);
-            });
-            return menuItem;
-        };
-        if (!getters.isEmpty()) {
-            final Menu menu = new Menu(s("Getters"));
-            getters.forEach(method -> menu.getItems().add(menuItemFunction.apply(method)));
-            items.add(menu);
+            } else {
+                parameterizedProducers.getItems().add(item(method, beanData));
+            }
         }
-        if (!producers.isEmpty()) {
-            final Menu menu = new Menu(s("Producers"));
-            producers.forEach(method -> menu.getItems().add(menuItemFunction.apply(method)));
-            items.add(menu);
+        final BeansMetaInfo metaInfo = metaInfoProvider.metaInfo();
+        for (final BeanDefinitionHolder holder : metaInfo.beans()) {
+            final String name = holder.getBeanName();
+            final BeanDefinition definition = holder.getBeanDefinition();
+            for (final ValueHolder valueHolder : definition.getConstructorArgumentValues().getGenericArgumentValues()) {
+                final String typeText = valueHolder.getType();
+                if (typeText == null) {
+                    continue;
+                }
+                try {
+                    final Class<?> c = Class.forName(typeText, false, metaInfo.getClassLoader());
+                    if (!c.isAssignableFrom(type)) {
+                        continue;
+                    }
+                } catch (Exception x) {
+                    continue;
+                }
+                final MenuItem menuItem = new MenuItem(name, IdeShapes.ref(name, 16));
+                menuItem.setOnAction(event -> {
+                    final BeanData data = insertItem(name, definition, metaInfo);
+                    data.beanArgs
+                            .filtered(a -> Objects.equals(a.getName(), valueHolder.getName()))
+                            .forEach(a -> {
+                                final DRef ref = new DRef();
+                                ref.setBean(beanData.getName());
+                                a.setData(ref);
+                            });
+                });
+                related.getItems().add(menuItem);
+            }
         }
-        if (!parameterizedProducers.isEmpty()) {
-            final Menu menu = new Menu(s("Parameterized producers"));
-            parameterizedProducers.forEach(method -> menu.getItems().add(menuItemFunction.apply(method)));
-            items.add(menu);
-        }
-        return items;
+        return Stream.of(getters, producers, parameterizedProducers, related)
+                .filter(m -> !m.getItems().isEmpty())
+                .peek(m -> m.getItems().sort(Comparator.comparing(MenuItem::getText)))
+                .collect(Collectors.toList());
     }
 
     public List<MenuItem> editors(ResolvableType type, BeanData beanData) {

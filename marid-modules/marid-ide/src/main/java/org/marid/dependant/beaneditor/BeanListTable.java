@@ -37,7 +37,6 @@ import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanFile;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
@@ -131,20 +130,18 @@ public class BeanListTable extends CommonTableView<BeanData> {
     }
 
     @Autowired
-    public void initRowFactory(SpecialActions actions, ObjectProvider<BeanListActions> beanListActionsProvider) {
+    public void initRowFactory(SpecialActions actions, BeanListActions beanListActions, ProjectProfile profile) {
         setRowFactory(view -> {
             final TableRow<BeanData> row = new TableRow<>();
             row.disableProperty().bind(row.itemProperty().isNull());
             final MaridContextMenu contextMenu = actions.contextMenu(Collections::emptyMap);
             contextMenu.addOnPreShow(menu -> {
-                final BeanListActions beanListActions = beanListActionsProvider.getObject();
-                final ResolvableType type = beanListActions.profile.getType(row.getItem());
+                final ResolvableType type = profile.getType(row.getItem());
                 if (type == ResolvableType.NONE) {
                     return;
                 }
-                final Class<?> rawType = type.getRawClass();
                 menu.getItems().add(new SeparatorMenuItem());
-                menu.getItems().addAll(beanListActions.factoryItems(rawType, row.getItem()));
+                menu.getItems().addAll(beanListActions.factoryItems(type, row.getItem()));
                 menu.getItems().addAll(beanListActions.editors(type, row.getItem()));
             });
             row.setContextMenu(contextMenu);

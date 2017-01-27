@@ -58,7 +58,7 @@
     </bean>
 
     <bean class="org.marid.proto.modbus.ModbusTcpDriver" name="modbusTcpDriver">
-        <constructor-arg name="bus" value="#{null}"/>
+        <constructor-arg name="bus" value="#{null}" type="org.marid.proto.ProtoBus"/>
         <constructor-arg name="consumer" value="#{null}"/>
         <constructor-arg name="id" value="drv1"/>
         <constructor-arg name="name" value="Driver 1"/>

@@ -22,10 +22,13 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.maven.model.Dependency;
 
+import javax.annotation.Resources;
+
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
+@Resources({})
 public final class Artifact {
 
     public final String groupId;
