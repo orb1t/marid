@@ -21,7 +21,6 @@ package org.marid.ide.configurations;
 import javafx.application.Platform;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.marid.jfx.icons.FontIcon.D_EXIT_TO_APP;
@@ -31,9 +30,8 @@ import static org.marid.jfx.icons.FontIcon.D_EXIT_TO_APP;
  * @since 0.8
  */
 @Configuration
-public class SystemConfiguration {
+public class ApplicationConfiguration {
 
-    @Bean
     @IdeAction
     public FxAction exitAction() {
         return new FxAction(null, "x", "Application")

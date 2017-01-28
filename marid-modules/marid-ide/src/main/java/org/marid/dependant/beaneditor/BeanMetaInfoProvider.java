@@ -37,7 +37,6 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -112,10 +111,11 @@ public class BeanMetaInfoProvider implements LogSupport {
         }
 
         public List<BeanDefinitionHolder> beans(ResolvableType resolvableType) {
-            if (Object.class.equals(resolvableType.getRawClass())) {
-                return Collections.emptyList();
-            }
             return beans(beanFactory.getBeanNamesForType(resolvableType));
+        }
+
+        public ClassLoader getClassLoader() {
+            return beanFactory.getBeanClassLoader();
         }
 
         private List<BeanDefinitionHolder> beans(String... names) {

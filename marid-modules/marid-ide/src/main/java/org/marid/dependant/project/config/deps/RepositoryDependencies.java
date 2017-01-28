@@ -18,49 +18,45 @@
 
 package org.marid.dependant.project.config.deps;
 
+import com.mongodb.client.MongoDatabase;
 import org.apache.maven.model.Dependency;
+import org.marid.ide.model.Artifact;
 import org.marid.ide.project.ProjectProfile;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
 @Repository
-public class RepositoryDependencies extends JdbcDaoSupport {
+public class RepositoryDependencies {
 
+    private final MongoDatabase database;
     private final ProjectProfile profile;
 
     @Autowired
-    public RepositoryDependencies(DataSource dataSource, ProjectProfile profile) {
+    public RepositoryDependencies(MongoDatabase maridDb, ProjectProfile profile) {
         this.profile = profile;
-        setDataSource(dataSource);
-    }
-
-    private static Dependency dependency(ResultSet rs, int row) throws SQLException {
-        final Dependency dependency = new Dependency();
-        dependency.setGroupId(rs.getString(2));
-        dependency.setArtifactId(rs.getString(1));
-        dependency.setVersion(rs.getString(3));
-        return dependency;
+        this.database = maridDb;
     }
 
     public List<Dependency> getDependencies() {
-        final String sql = profile.isHmi()
-                ? "select ARTIFACT_ID, GROUP_ID, VERSION from ARTIFACTS where !CONF"
-                : "select ARTIFACT_ID, GROUP_ID, VERSION from ARTIFACTS where !CONF and !UI";
-        return getJdbcTemplate().query(sql, RepositoryDependencies::dependency);
+        final boolean hmi = profile.isHmi();
+        return StreamSupport.stream(database.getCollection("artifacts", Artifact.class).find().spliterator(), false)
+                .filter(a -> hmi ? !a.conf : !a.conf && !a.hmi)
+                .map(Artifact::toDependency)
+                .collect(Collectors.toList());
     }
 
     public List<Dependency> getConfigurationDependencies() {
-        final String sql = "select ARTIFACT_ID, GROUP_ID, VERSION from ARTIFACTS where CONF";
-        return getJdbcTemplate().query(sql, RepositoryDependencies::dependency);
+        return StreamSupport.stream(database.getCollection("artifacts", Artifact.class).find().spliterator(), false)
+                .filter(a -> a.conf)
+                .map(Artifact::toDependency)
+                .collect(Collectors.toList());
     }
 }

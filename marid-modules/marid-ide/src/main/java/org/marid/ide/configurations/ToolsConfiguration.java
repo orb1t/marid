@@ -24,7 +24,6 @@ import org.marid.dependant.log.LogConfiguration;
 import org.marid.dependant.monitor.MonitorConfiguration;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -36,7 +35,6 @@ import static org.marid.jfx.icons.FontIcon.*;
 @Configuration
 public class ToolsConfiguration {
 
-    @Bean
     @IdeAction
     public FxAction iconViewerAction(IdeDependants dependants) {
         return new FxAction(null, "icons", "Tools")
@@ -48,7 +46,6 @@ public class ToolsConfiguration {
                 }));
     }
 
-    @Bean
     @IdeAction
     public FxAction monitorAction(IdeDependants dependants) {
         return new FxAction(null, "monitor", "Tools")
@@ -60,7 +57,6 @@ public class ToolsConfiguration {
                 }));
     }
 
-    @Bean
     @IdeAction
     public FxAction garbageCollectAction() {
         return new FxAction(null, "monitor", "Tools")
@@ -69,7 +65,6 @@ public class ToolsConfiguration {
                 .setEventHandler(event -> System.gc());
     }
 
-    @Bean
     @IdeAction
     public FxAction showLogsAction(IdeDependants dependants) {
         return new FxAction("log", "log", "Tools")
