@@ -18,14 +18,20 @@
 
 package org.marid.ide.status;
 
-import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import org.marid.ide.logging.IdeLogHandler;
+import org.marid.l10n.L10n;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.logging.LogRecord;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,22 +44,23 @@ public class IdeStatusBar extends GridPane {
     private final IdeStatusProfile profile;
 
     @Autowired
-    public IdeStatusBar(IdeStatusTimer timer, IdeStatusProfile profile) {
-        addRow(0, label, separator(), this.profile = profile, separator(), this.timer = timer);
+    public IdeStatusBar(IdeStatusTimer timer, IdeStatusProfile profile, IdeLogHandler logHandler, IdeIndicators indicators) {
+        setHgap(5);
+        addRow(0, label, separator(), this.profile = profile, separator(), indicators, separator(), this.timer = timer);
         setHgrow(label, Priority.SOMETIMES);
+        label.textProperty().bind(Bindings.createObjectBinding(() -> {
+            final ObservableList<LogRecord> records = logHandler.getLogRecords();
+            if (records.isEmpty()) {
+                return null;
+            } else {
+                final LogRecord record = records.get(records.size() - 1);
+                return L10n.m(record.getMessage(), record.getParameters());
+            }
+        }, logHandler.getLogRecords()));
+        setPadding(new Insets(5));
     }
 
     private Separator separator() {
-        final Separator separator = new Separator(Orientation.VERTICAL);
-        separator.setMinWidth(10.0);
-        return separator;
-    }
-
-    public void setText(String text) {
-        if (Platform.isFxApplicationThread()) {
-            label.setText(text);
-        } else {
-            Platform.runLater(() -> label.setText(text));
-        }
+        return new Separator(Orientation.VERTICAL);
     }
 }
