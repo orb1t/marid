@@ -19,6 +19,7 @@
 package org.marid.ide.panes.main;
 
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import org.marid.ide.status.IdeStatusBar;
 import org.marid.ide.tabs.IdeTabPane;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,19 @@ import org.springframework.stereotype.Component;
 public class IdePane extends BorderPane {
 
     @Autowired
-    public IdePane(IdeTabPane ideTabPane, IdeMenuToolbarPane ideMenuToolbarPane, IdeStatusBar ideStatusBar) {
-        super(ideTabPane, ideMenuToolbarPane, null, ideStatusBar, null);
+    private void center(IdeTabPane ideTabPane) {
+        setCenter(ideTabPane);
+    }
+
+    @Autowired
+    private void top(IdeMenu ideMenu, IdeToolbar toolbar) {
+        final BorderPane menuPane = new BorderPane();
+        menuPane.setCenter(ideMenu);
+        setTop(new VBox(menuPane, toolbar));
+    }
+
+    @Autowired
+    private void bottom(IdeStatusBar statusBar) {
+        setBottom(statusBar);
     }
 }
