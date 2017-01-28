@@ -39,14 +39,11 @@ import java.util.logging.LogRecord;
 @Component
 public class IdeStatusBar extends GridPane {
 
-    private final Label label = new Label();
-    private final IdeStatusTimer timer;
-    private final IdeStatusProfile profile;
-
     @Autowired
-    public IdeStatusBar(IdeStatusTimer timer, IdeStatusProfile profile, IdeLogHandler logHandler, IdeIndicators indicators) {
+    public IdeStatusBar(IdeStatusProfile profile, IdeLogHandler logHandler, IdeIndicators indicators) {
         setHgap(5);
-        addRow(0, label, separator(), this.profile = profile, separator(), indicators, separator(), this.timer = timer);
+        final Label label = new Label();
+        addRow(0, label, separator(), profile, separator(), indicators);
         setHgrow(label, Priority.SOMETIMES);
         label.textProperty().bind(Bindings.createObjectBinding(() -> {
             final ObservableList<LogRecord> records = logHandler.getLogRecords();

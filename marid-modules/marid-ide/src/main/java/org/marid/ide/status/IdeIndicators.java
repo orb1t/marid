@@ -19,33 +19,55 @@
 package org.marid.ide.status;
 
 import javafx.application.Platform;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.layout.VBox;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Separator;
+import javafx.scene.layout.HBox;
+import org.marid.spring.annotation.OrderedInit;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
+
+import static org.marid.jfx.icons.FontIcon.D_TELEVISION;
+import static org.marid.jfx.icons.FontIcon.O_CLOCK;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
 @Component
-public class IdeIndicators extends VBox {
+public class IdeIndicators extends HBox {
 
     private final List<Callable<Runnable>> updateTasks = new ArrayList<>();
 
-    @PostConstruct
-    private void initCpuLoad() throws Exception {
+    @Autowired
+    public IdeIndicators() {
+        super(5);
+        setAlignment(Pos.CENTER_LEFT);
+    }
+
+    @OrderedInit(1)
+    public void initCpuLoad() throws Exception {
         final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         final ObjectName osObjectName = new ObjectName("java.lang", "type", "OperatingSystem");
         final MBeanInfo beanInfo = server.getMBeanInfo(osObjectName);
@@ -54,13 +76,45 @@ public class IdeIndicators extends VBox {
                 .findFirst()
                 .orElse(null);
         if (processCpuLoadAttribute != null) {
-            final ProgressIndicator cpuIndicator = new ProgressIndicator();
+            final ProgressBar indicator = new ProgressBar(0);
             updateTasks.add(() -> {
                 final Number value = (Number) server.getAttribute(osObjectName, "ProcessCpuLoad");
-                return () -> cpuIndicator.setProgress(value.doubleValue());
+                return () -> indicator.setProgress(value.doubleValue());
             });
-            getChildren().add(cpuIndicator);
+            add(glyphIcon(D_TELEVISION, 16), indicator);
         }
+    }
+
+    @OrderedInit(2)
+    public void initDateTime() throws Exception {
+        final Label timeLabel = new Label("", glyphIcon(O_CLOCK, 16));
+        final DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder()
+                .appendValue(ChronoField.YEAR, 4)
+                .appendLiteral('-')
+                .appendValue(ChronoField.MONTH_OF_YEAR, 2)
+                .appendLiteral('-')
+                .appendValue(ChronoField.DAY_OF_MONTH)
+                .appendLiteral(' ')
+                .appendValue(ChronoField.HOUR_OF_DAY, 2)
+                .appendLiteral(':')
+                .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+                .appendLiteral(':')
+                .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+                .toFormatter();
+        updateTasks.add(() -> {
+            final ZonedDateTime now = Instant.now().atZone(ZoneId.systemDefault());
+            final String time = now.format(timeFormatter);
+            return () -> timeLabel.setText(time);
+        });
+        timeLabel.setMaxHeight(Double.MAX_VALUE);
+        add(timeLabel);
+    }
+
+    private void add(Node... nodes) {
+        if (!getChildren().isEmpty()) {
+            getChildren().add(new Separator(Orientation.VERTICAL));
+        }
+        getChildren().addAll(nodes);
     }
 
     @Scheduled(fixedDelay = 1_000L)
