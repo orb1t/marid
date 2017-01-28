@@ -102,15 +102,10 @@ public class BeanListTable extends CommonTableView<BeanData> {
             @Override
             public void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
+                if (empty || item == null) {
                     setGraphic(null);
                 } else {
-                    final BeanData data = getItems().get(getIndex());
-                    if (data.factoryBean.isEmpty().get()) {
-                        setGraphic(null);
-                    } else {
-                        setGraphic(IdeShapes.ref(data.factoryBean.get(), 16));
-                    }
+                    setGraphic(IdeShapes.ref(item, 16));
                 }
             }
         });

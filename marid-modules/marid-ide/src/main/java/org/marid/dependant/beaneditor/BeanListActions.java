@@ -189,26 +189,8 @@ public class BeanListActions {
         return menuItem;
     }
 
-    public List<MenuItem> factoryItems(ResolvableType resolvableType, BeanData beanData) {
-        final Class<?> type = resolvableType.getRawClass();
-        final Menu getters = new Menu(s("Getters"));
-        final Menu producers = new Menu(s("Producers"));
-        final Menu parameterizedProducers = new Menu(s("Parameterized producers"));
+    public Menu related(Class<?> type, BeanData beanData) {
         final Menu related = new Menu(s("Related"));
-        for (final Method method : type.getMethods()) {
-            if (method.getReturnType() == void.class || method.getDeclaringClass() == Object.class) {
-                continue;
-            }
-            if (method.getParameterCount() == 0) {
-                if (method.getName().startsWith("get") || method.getName().startsWith("is")) {
-                    getters.getItems().add(item(method, beanData));
-                } else {
-                    producers.getItems().add(item(method, beanData));
-                }
-            } else {
-                parameterizedProducers.getItems().add(item(method, beanData));
-            }
-        }
         final BeansMetaInfo metaInfo = metaInfoProvider.metaInfo();
         for (final BeanDefinitionHolder holder : metaInfo.beans()) {
             final String name = holder.getBeanName();
@@ -240,7 +222,29 @@ public class BeanListActions {
                 related.getItems().add(menuItem);
             }
         }
-        return Stream.of(getters, producers, parameterizedProducers, related)
+        return related;
+    }
+
+    public List<MenuItem> factoryItems(ResolvableType resolvableType, BeanData beanData) {
+        final Class<?> type = resolvableType.getRawClass();
+        final Menu getters = new Menu(s("Getters"));
+        final Menu producers = new Menu(s("Producers"));
+        final Menu parameterizedProducers = new Menu(s("Parameterized producers"));
+        for (final Method method : type.getMethods()) {
+            if (method.getReturnType() == void.class || method.getDeclaringClass() == Object.class) {
+                continue;
+            }
+            if (method.getParameterCount() == 0) {
+                if (method.getName().startsWith("get") || method.getName().startsWith("is")) {
+                    getters.getItems().add(item(method, beanData));
+                } else {
+                    producers.getItems().add(item(method, beanData));
+                }
+            } else {
+                parameterizedProducers.getItems().add(item(method, beanData));
+            }
+        }
+        return Stream.of(getters, producers, parameterizedProducers, related(type, beanData))
                 .filter(m -> !m.getItems().isEmpty())
                 .peek(m -> m.getItems().sort(Comparator.comparing(MenuItem::getText)))
                 .collect(Collectors.toList());
