@@ -18,9 +18,12 @@
 
 package org.marid.ide.status;
 
+import javafx.application.Platform;
 import javafx.geometry.Orientation;
+import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
-import org.controlsfx.control.StatusBar;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,17 +31,29 @@ import org.springframework.stereotype.Component;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeStatusBar extends StatusBar {
+public class IdeStatusBar extends GridPane {
+
+    private final Label label = new Label();
+    private final IdeStatusTimer timer;
+    private final IdeStatusProfile profile;
 
     @Autowired
-    public IdeStatusBar(IdeStatusTimer ideStatusTimer, IdeStatusProfile ideStatusProfile) {
-        setText("Marid Version 0.8");
-        getRightItems().addAll(separator(), ideStatusProfile, separator(), ideStatusTimer);
+    public IdeStatusBar(IdeStatusTimer timer, IdeStatusProfile profile) {
+        addRow(0, label, separator(), this.profile = profile, separator(), this.timer = timer);
+        setHgrow(label, Priority.SOMETIMES);
     }
 
     private Separator separator() {
         final Separator separator = new Separator(Orientation.VERTICAL);
         separator.setMinWidth(10.0);
         return separator;
+    }
+
+    public void setText(String text) {
+        if (Platform.isFxApplicationThread()) {
+            label.setText(text);
+        } else {
+            Platform.runLater(() -> label.setText(text));
+        }
     }
 }

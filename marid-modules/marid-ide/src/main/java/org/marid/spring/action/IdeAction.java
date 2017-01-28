@@ -19,6 +19,7 @@
 package org.marid.spring.action;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,5 +33,6 @@ import static java.lang.annotation.ElementType.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({METHOD, TYPE, FIELD, PARAMETER, ANNOTATION_TYPE})
 @Qualifier
+@Bean
 public @interface IdeAction {
 }

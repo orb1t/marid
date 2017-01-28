@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.model;
+package org.marid.ide.model.codec;
 
 import org.bson.BsonReader;
 import org.bson.BsonWriter;

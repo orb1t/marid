@@ -22,7 +22,6 @@ import org.marid.IdeDependants;
 import org.marid.dependant.settings.SettingsConfiguration;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -34,7 +33,6 @@ import static org.marid.jfx.icons.FontIcon.O_SETTINGS;
 @Configuration
 public class SettingsManager {
 
-    @Bean
     @IdeAction
     public FxAction settingsAction(IdeDependants dependants) {
         return new FxAction("settings", "settings", "Tools")

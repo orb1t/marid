@@ -21,7 +21,6 @@ import javafx.scene.input.KeyCombination;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.marid.jfx.icons.FontIcon.*;
@@ -33,7 +32,6 @@ import static org.marid.jfx.icons.FontIcon.*;
 @Configuration
 public class SpecialActionConfiguration {
 
-    @Bean
     @IdeAction
     @Qualifier("specialAction")
     public FxAction editAction() {
@@ -44,7 +42,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean
     @IdeAction
     @Qualifier("specialAction")
     public FxAction addAction() {
@@ -55,7 +52,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean
     @IdeAction
     @Qualifier("specialAction")
     public FxAction removeAction() {
@@ -66,7 +62,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean
     @IdeAction
     @Qualifier("specialAction")
     public FxAction cutAction() {
@@ -77,7 +72,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean
     @IdeAction
     @Qualifier("specialAction")
     public FxAction copyAction() {
@@ -88,7 +82,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean
     @IdeAction
     @Qualifier("specialAction")
     public FxAction pasteAction() {
@@ -99,7 +92,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean
     @IdeAction
     @Qualifier("specialAction")
     public FxAction clearAllAction() {
@@ -109,7 +101,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean
     @IdeAction
     @Qualifier("specialAction")
     public FxAction renameAction() {
@@ -120,7 +111,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean
     @IdeAction
     @Qualifier("specialAction")
     public FxAction selectAllAction() {

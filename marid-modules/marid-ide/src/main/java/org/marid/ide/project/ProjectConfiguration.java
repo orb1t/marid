@@ -28,7 +28,6 @@ import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -40,7 +39,6 @@ import static org.marid.jfx.icons.FontIcon.*;
 @Configuration
 public class ProjectConfiguration implements LogSupport {
 
-    @Bean
     @IdeAction
     @Qualifier("profile")
     public FxAction projectSetupAction(IdeDependants dependants, ProjectManager projectManager) {
@@ -56,7 +54,6 @@ public class ProjectConfiguration implements LogSupport {
                 });
     }
 
-    @Bean
     @IdeAction
     @Qualifier("profile")
     public FxAction projectSaveAction(ObjectFactory<ProjectSaver> projectSaver, ProjectManager projectManager) {
@@ -67,7 +64,6 @@ public class ProjectConfiguration implements LogSupport {
                 .setEventHandler(event -> projectSaver.getObject().save(projectManager.getProfile()));
     }
 
-    @Bean
     @IdeAction
     @Qualifier("profile")
     public FxAction projectBuildAction(ObjectFactory<ProjectMavenBuilder> mavenBuilder,
@@ -93,7 +89,6 @@ public class ProjectConfiguration implements LogSupport {
                 .setDisabled(false);
     }
 
-    @Bean
     @IdeAction
     @Qualifier("profile")
     public FxAction projectRunAction(IdeDependants dependants, ProjectManager projectManager) {
