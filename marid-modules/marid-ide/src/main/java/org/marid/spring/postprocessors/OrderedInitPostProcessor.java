@@ -24,7 +24,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.DependencyDescriptor;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.MethodParameter;
@@ -52,7 +51,6 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        final DefaultListableBeanFactory f = new DefaultListableBeanFactory(context);
         Stream.of(bean.getClass().getMethods())
                 .filter(m -> m.isAnnotationPresent(OrderedInit.class))
                 .sorted(Comparator.comparing(Method::getName))
@@ -71,7 +69,7 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
                         final boolean required = autowired != null && autowired.required();
                         final DependencyDescriptor descriptor = new DependencyDescriptor(parameter, required, eager);
                         try {
-                            args[i] = f.resolveDependency(descriptor, null);
+                            args[i] = context.getAutowireCapableBeanFactory().resolveDependency(descriptor, null);
                         } catch (Exception x) {
                             throw new BeanInstantiationException(bean.getClass(), "Unable to autowire " + parameter, x);
                         }
@@ -79,7 +77,7 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
                     try {
                         final Object result = method.invoke(bean, args);
                         if (result != null) {
-                            f.registerSingleton(method.getName(), result);
+                            context.getBeanFactory().registerSingleton(method.getName(), result);
                         }
                     } catch (Exception x) {
                         throw new BeanInstantiationException(bean.getClass(), method.toString(), x);

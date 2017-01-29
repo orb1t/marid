@@ -24,8 +24,8 @@ import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.support.GenericApplicationContext;
@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -67,21 +68,16 @@ public class IdeDependants {
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
         context.register(IdeDependants.class);
-        context.addApplicationListener(e -> {
-            if (e instanceof ApplicationContextEvent) {
-                if (e instanceof ContextClosedEvent) {
-                    CONTEXTS.remove(context);
-                } else if (e instanceof ContextStartedEvent) {
-                    CONTEXTS.add(context);
-                }
-            }
+        final ApplicationListener<ContextClosedEvent> closedListener = event -> CONTEXTS.remove(context);
+        final ApplicationListener<ContextStartedEvent> startedListener = event -> CONTEXTS.add(context);
+        context.addApplicationListener(closedListener);
+        context.addApplicationListener(startedListener);
+        final AtomicReference<ApplicationListener<ContextClosedEvent>> closedRef = new AtomicReference<>();
+        closedRef.set(event -> {
+            context.close();
+            parent.getApplicationListeners().remove(closedRef.get());
         });
-        parent.addApplicationListener(event -> {
-            if (event instanceof ContextClosedEvent) {
-                parent.getApplicationListeners().remove(this);
-                context.close();
-            }
-        });
+        parent.addApplicationListener(closedRef.get());
         consumer.accept(context);
         context.refresh();
         context.start();
