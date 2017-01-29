@@ -19,7 +19,9 @@
 package org.marid.ide.project;
 
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import javafx.util.Pair;
+import org.marid.jfx.LocalizedStrings;
 import org.marid.logging.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -28,7 +30,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.stream.Stream;
 
+import static java.util.stream.Stream.of;
 import static org.marid.ide.project.ProfileReflections.listeners;
+import static org.marid.ide.project.ProfileReflections.observableStream;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -49,8 +53,9 @@ public class ProjectGarbageCollector implements LogSupport {
     public void collect() throws Exception {
         Platform.runLater(() -> {
             for (final ProjectProfile profile : manager.getProfiles()) {
-                final int collected = ProfileReflections.observableStream(profile)
-                        .flatMap(p -> Stream.of(p.getValue()))
+                final Stream<Observable> predefined = of(LocalizedStrings.LOCALE);
+                final Stream<Observable> project = observableStream(profile).flatMap(p -> of(p.getValue()));
+                final int collected = Stream.concat(predefined, project)
                         .map(o -> new Pair<>(o, listeners(o)))
                         .mapToInt(p -> ProfileReflections.collect(p.getKey(), p.getValue()))
                         .sum();

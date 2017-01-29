@@ -18,13 +18,17 @@
 
 package org.marid.jfx;
 
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
-import javafx.beans.binding.StringBinding;
+import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
+import java.util.Collection;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import static org.marid.l10n.L10n.s;
@@ -36,45 +40,66 @@ public class LocalizedStrings {
 
     public static final ObjectProperty<Locale> LOCALE = new SimpleObjectProperty<>(Locale.getDefault());
 
-    public static StringBinding ls(String text, Object... args) {
+    public static ObservableValue<String> ls(String text, Object... args) {
         return new LocalizedStringValue(() -> s(LOCALE.get(), text, args));
     }
 
-    public static StringBinding fls(String format, String text, Object... args) {
+    public static ObservableValue<String> fls(String format, String text, Object... args) {
         return new LocalizedStringValue(() -> {
             final String v = s(text, args);
             return String.format(LOCALE.get(), format, v);
         });
     }
 
-    private static final class LocalizedStringValue extends StringBinding {
+    private static final class LocalizedStringValue implements ObservableValue<String> {
 
         private final Supplier<String> supplier;
         private final InvalidationListener listener;
+        private final WeakInvalidationListener weakInvalidationListener;
+        private final Collection<InvalidationListener> invalidationListeners = new ConcurrentLinkedQueue<>();
+        private final Collection<ChangeListener<? super String>> changeListeners = new ConcurrentLinkedQueue<>();
+        private final AtomicReference<String> ref;
 
         private LocalizedStringValue(Supplier<String> supplier) {
             this.supplier = supplier;
+            this.ref = new AtomicReference<>(getValue());
             this.listener = o -> invalidate();
-            LOCALE.addListener(listener);
+            this.weakInvalidationListener = new WeakInvalidationListener(listener);
+            LOCALE.addListener(weakInvalidationListener);
         }
 
         @Override
-        protected String computeValue() {
+        public void addListener(ChangeListener<? super String> listener) {
+            changeListeners.add(listener);
+        }
+
+        @Override
+        public void removeListener(ChangeListener<? super String> listener) {
+            changeListeners.remove(listener);
+        }
+
+        @Override
+        public String getValue() {
             return supplier.get();
         }
 
         @Override
-        protected void finalize() throws Throwable {
-            try {
-                Platform.runLater(this::dispose);
-            } finally {
-                super.finalize();
-            }
+        public void addListener(InvalidationListener listener) {
+            invalidationListeners.add(listener);
         }
 
         @Override
-        public void dispose() {
-            LOCALE.removeListener(listener);
+        public void removeListener(InvalidationListener listener) {
+            invalidationListeners.remove(listener);
+        }
+
+        private void invalidate() {
+            final String old = ref.get();
+            final String nev = getValue();
+            if (ref.compareAndSet(old, nev)) {
+                changeListeners.forEach(l -> l.changed(this, old, nev));
+                invalidationListeners.forEach(l -> l.invalidated(this));
+            }
         }
     }
 }

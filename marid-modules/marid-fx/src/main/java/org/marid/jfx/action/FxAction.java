@@ -83,7 +83,7 @@ public final class FxAction {
         return text;
     }
 
-    public FxAction bindText(ObservableStringValue value) {
+    public FxAction bindText(ObservableValue<String> value) {
         if (text == null) {
             text = new SimpleStringProperty();
         }
