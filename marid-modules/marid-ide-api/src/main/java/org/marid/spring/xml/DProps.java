@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 @XmlAccessorType(XmlAccessType.NONE)
 public final class DProps extends DElement<DProps> {
 
-    public final StringProperty valueType = new SimpleStringProperty(this, "value-type");
+    public final StringProperty valueType = new SimpleStringProperty(null, "value-type");
     public final ObservableList<DPropEntry> entries = FXCollections.observableArrayList(DPropEntry::observables);
 
     @XmlAttribute(name = "value-type")

@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class DCollection<T extends DCollection<T>> extends DElement<T> {
 
-    public final StringProperty valueType = new SimpleStringProperty(this, "value-type");
+    public final StringProperty valueType = new SimpleStringProperty(null, "value-type");
     public final ObservableList<DElement<?>> elements = FXCollections.observableArrayList(DElement::observables);
 
     @XmlAttribute(name = "value-type")

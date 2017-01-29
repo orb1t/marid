@@ -35,8 +35,8 @@ import java.util.stream.Stream;
 @XmlAccessorType(XmlAccessType.NONE)
 public class DMapEntry extends AbstractData<DMapEntry> {
 
-    public final StringProperty key = new SimpleStringProperty(this, "key");
-    public final ObjectProperty<DElement<?>> value = new SimpleObjectProperty<>(this, "value");
+    public final StringProperty key = new SimpleStringProperty(null, "key");
+    public final ObjectProperty<DElement<?>> value = new SimpleObjectProperty<>(null, "value");
 
     @XmlAttribute
     public String getKey() {

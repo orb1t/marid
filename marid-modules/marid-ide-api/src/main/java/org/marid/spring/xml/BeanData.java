@@ -39,13 +39,13 @@ import static java.util.stream.IntStream.range;
 @XmlAccessorType(XmlAccessType.NONE)
 public final class BeanData extends DElement<BeanData> {
 
-    public final StringProperty type = new SimpleStringProperty(this, "class");
-    public final StringProperty name = new SimpleStringProperty(this, "name");
-    public final StringProperty initMethod = new SimpleStringProperty(this, "init-method");
-    public final StringProperty destroyMethod = new SimpleStringProperty(this, "destroy-method");
-    public final StringProperty factoryBean = new SimpleStringProperty(this, "factory-bean");
-    public final StringProperty factoryMethod = new SimpleStringProperty(this, "factory-method");
-    public final StringProperty lazyInit = new SimpleStringProperty(this, "lazy-init", "default");
+    public final StringProperty type = new SimpleStringProperty(null, "class");
+    public final StringProperty name = new SimpleStringProperty(null, "name");
+    public final StringProperty initMethod = new SimpleStringProperty(null, "init-method");
+    public final StringProperty destroyMethod = new SimpleStringProperty(null, "destroy-method");
+    public final StringProperty factoryBean = new SimpleStringProperty(null, "factory-bean");
+    public final StringProperty factoryMethod = new SimpleStringProperty(null, "factory-method");
+    public final StringProperty lazyInit = new SimpleStringProperty(null, "lazy-init", "default");
 
     public final ObservableList<BeanArg> beanArgs = FXCollections.observableArrayList(BeanArg::observables);
     public final ObservableList<BeanProp> properties = FXCollections.observableArrayList(BeanProp::observables);

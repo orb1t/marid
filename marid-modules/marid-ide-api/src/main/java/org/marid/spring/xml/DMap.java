@@ -36,8 +36,8 @@ import java.util.stream.Stream;
 @XmlAccessorType(XmlAccessType.NONE)
 public class DMap extends DElement<DMap> {
 
-    public final StringProperty keyType = new SimpleStringProperty(this, "key-type");
-    public final StringProperty valueType = new SimpleStringProperty(this, "value-type");
+    public final StringProperty keyType = new SimpleStringProperty(null, "key-type");
+    public final StringProperty valueType = new SimpleStringProperty(null, "value-type");
     public final ObservableList<DMapEntry> entries = FXCollections.observableArrayList(DMapEntry::observables);
 
     @Override

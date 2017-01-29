@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 @XmlAccessorType(XmlAccessType.NONE)
 public final class DValue extends DElement<DValue> {
 
-    public final StringProperty value = new SimpleStringProperty(this, "value");
+    public final StringProperty value = new SimpleStringProperty(null, "value");
 
     public DValue() {
     }

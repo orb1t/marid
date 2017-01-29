@@ -32,8 +32,8 @@ import java.util.stream.Stream;
 @XmlAccessorType(XmlAccessType.NONE)
 public final class DPropEntry extends AbstractData<DPropEntry> {
 
-    public final StringProperty key = new SimpleStringProperty(this, "key");
-    public final StringProperty value = new SimpleStringProperty(this, "value");
+    public final StringProperty key = new SimpleStringProperty(null, "key");
+    public final StringProperty value = new SimpleStringProperty(null, "value");
 
     @XmlAttribute(name = "key")
     public String getKey() {
