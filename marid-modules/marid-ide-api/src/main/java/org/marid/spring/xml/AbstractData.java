@@ -18,6 +18,7 @@
 
 package org.marid.spring.xml;
 
+import javafx.beans.Observable;
 import javafx.beans.property.Property;
 import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
@@ -29,6 +30,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import static java.lang.reflect.Modifier.isStatic;
 import static java.lang.reflect.Modifier.isTransient;
@@ -112,4 +114,8 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Externa
             throw new IllegalArgumentException("Not serializable value " + o);
         }
     }
+
+    public abstract Observable[] observables();
+
+    public abstract Stream<? extends AbstractData<?>> stream();
 }

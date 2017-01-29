@@ -21,6 +21,7 @@ package org.marid.misc;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -37,5 +38,9 @@ public interface Iterables {
         } else {
             return Optional.ofNullable(list.get(list.size() - 1));
         }
+    }
+
+    static <E> Stream<E> stream(Class<E> type, Stream<?> stream) {
+        return stream.filter(type::isInstance).map(type::cast);
     }
 }

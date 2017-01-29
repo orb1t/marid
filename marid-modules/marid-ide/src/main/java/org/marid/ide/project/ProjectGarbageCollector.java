@@ -16,15 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.xml;
+package org.marid.ide.project;
 
-import javax.xml.bind.annotation.XmlTransient;
+import org.springframework.stereotype.Service;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
-@XmlTransient
-public abstract class DElement<T extends DElement<T>> extends AbstractData<T> {
+@Service
+public class ProjectGarbageCollector {
 
-    public abstract boolean isEmpty();
+
 }

@@ -19,8 +19,6 @@
 package org.marid.spring.xml;
 
 import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -59,7 +57,7 @@ public final class BeanData extends DElement<BeanData> {
 
     @XmlAttribute(name = "class")
     public String getType() {
-        return type.isEmpty().get() ? null : type.get();
+        return type.get() == null || type.get().isEmpty() ? null : type.get();
     }
 
     public void setType(String type) {
@@ -68,7 +66,7 @@ public final class BeanData extends DElement<BeanData> {
 
     @XmlAttribute(name = "name")
     public String getName() {
-        return name.isEmpty().get() ? null : name.get();
+        return name.get() == null || name.get().isEmpty() ? null : name.get();
     }
 
     public void setName(String name) {
@@ -77,7 +75,7 @@ public final class BeanData extends DElement<BeanData> {
 
     @XmlAttribute(name = "init-method")
     public String getInitMethod() {
-        return initMethod.isEmpty().get() ? null : initMethod.get();
+        return initMethod.get() == null || initMethod.get().isEmpty() ? null : initMethod.get();
     }
 
     public void setInitMethod(String initMethod) {
@@ -86,7 +84,7 @@ public final class BeanData extends DElement<BeanData> {
 
     @XmlAttribute(name = "destroy-method")
     public String getDestroyMethod() {
-        return destroyMethod.isEmpty().get() ? null : destroyMethod.get();
+        return destroyMethod.get() == null || destroyMethod.get().isEmpty() ? null : destroyMethod.get();
     }
 
     public void setDestroyMethod(String destroyMethod) {
@@ -95,7 +93,7 @@ public final class BeanData extends DElement<BeanData> {
 
     @XmlAttribute(name = "factory-bean")
     public String getFactoryBean() {
-        return factoryBean.isEmpty().get() ? null : factoryBean.get();
+        return factoryBean.get() == null || factoryBean.get().isEmpty() ? null : factoryBean.get();
     }
 
     public void setFactoryBean(String factoryBean) {
@@ -104,7 +102,7 @@ public final class BeanData extends DElement<BeanData> {
 
     @XmlAttribute(name = "factory-method")
     public String getFactoryMethod() {
-        return factoryMethod.isEmpty().get() ? null : factoryMethod.get();
+        return factoryMethod.get() == null || factoryMethod.get().isEmpty() ? null : factoryMethod.get();
     }
 
     public void setFactoryMethod(String factoryMethod) {
@@ -113,7 +111,7 @@ public final class BeanData extends DElement<BeanData> {
 
     @XmlAttribute(name = "lazy-init")
     public String getLazyInit() {
-        return lazyInit.isEqualTo("default").get() ? null : lazyInit.get();
+        return "default".equals(lazyInit.get()) ? null : lazyInit.get();
     }
 
     public void setLazyInit(String lazyInit) {
@@ -157,7 +155,7 @@ public final class BeanData extends DElement<BeanData> {
     }
 
     public boolean isFactoryBean() {
-        return factoryBean.isNotEmpty().get() || factoryMethod.isNotEmpty().get();
+        return factoryBean.get() != null && !factoryBean.get().isEmpty() || factoryMethod.get() != null && !factoryMethod.get().isEmpty();
     }
 
     public StringProperty nameProperty() {
@@ -165,24 +163,30 @@ public final class BeanData extends DElement<BeanData> {
     }
 
     public boolean isEmpty() {
-        return (type.isEmpty().get() && factoryMethod.isEmpty().get()) || name.isEmpty().get();
+        if (name.get() == null || name.get().isEmpty()) {
+            return true;
+        }
+        if ((type.get() == null || type.get().isEmpty()) && (factoryMethod.get() == null || factoryMethod.get().isEmpty())) {
+            return true;
+        }
+        return false;
     }
 
     public Optional<BeanProp> property(String name) {
         return properties.stream()
-                .filter(p -> p.name.isEqualTo(name).get())
+                .filter(p -> name.equals(p.getName()))
                 .findAny();
     }
 
     public Optional<BeanArg> arg(String name) {
         return beanArgs.stream()
-                .filter(a -> a.name.isEqualTo(name).get())
+                .filter(a -> name.equals(a.getName()))
                 .findAny();
     }
 
     @Override
     public Observable[] observables() {
-        return new Observable[] {
+        return new Observable[]{
                 type,
                 name,
                 initMethod,
@@ -193,8 +197,14 @@ public final class BeanData extends DElement<BeanData> {
                 beanArgs,
                 properties,
                 initTriggers,
-                destroyTriggers
+                destroyTriggers,
+                constructors
         };
+    }
+
+    @Override
+    public Stream<? extends AbstractData<?>> stream() {
+        return Stream.concat(beanArgs.stream(), properties.stream());
     }
 
     @Override

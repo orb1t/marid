@@ -25,6 +25,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import javax.xml.bind.annotation.*;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -49,6 +50,11 @@ public class DMap extends DElement<DMap> {
         return new Observable[] {keyType, valueType, entries};
     }
 
+    @Override
+    public Stream<? extends AbstractData<?>> stream() {
+        return entries.stream();
+    }
+
     @XmlAttribute(name = "key-type")
     public String getKeyType() {
         return keyType.get();
@@ -69,7 +75,11 @@ public class DMap extends DElement<DMap> {
 
     @XmlElement(name = "entry")
     public DMapEntry[] getEntries() {
-        return entries.toArray(new DMapEntry[entries.size()]);
+        return entries.stream().filter(e -> !e.isEmpty()).toArray(DMapEntry[]::new);
+    }
+
+    public void setEntries(DMapEntry[] entries) {
+        this.entries.setAll(entries);
     }
 
     @Override

@@ -25,6 +25,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import javax.xml.bind.annotation.*;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,7 +39,7 @@ public abstract class DCollection<T extends DCollection<T>> extends DElement<T> 
 
     @XmlAttribute(name = "value-type")
     public String getValueType() {
-        return valueType.isEmpty().get() ? null : valueType.get();
+        return valueType.get() == null || valueType.get().isEmpty() ? null : valueType.get();
     }
 
     public void setValueType(String valueType) {
@@ -63,5 +64,10 @@ public abstract class DCollection<T extends DCollection<T>> extends DElement<T> 
     @Override
     public Observable[] observables() {
         return new Observable[] {valueType, elements};
+    }
+
+    @Override
+    public Stream<? extends AbstractData<?>> stream() {
+        return elements.stream();
     }
 }

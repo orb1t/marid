@@ -23,6 +23,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 import javax.xml.bind.annotation.*;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -53,10 +54,22 @@ public final class DPropEntry extends AbstractData<DPropEntry> {
     }
 
     public boolean isEmpty() {
-        return key.isEmpty().get() && value.isEmpty().get();
+        if (key.get() == null || key.get().isEmpty()) {
+            return true;
+        }
+        if (value.get() == null || value.get().isEmpty()) {
+            return true;
+        }
+        return false;
     }
 
-    Observable[] observables() {
+    @Override
+    public Observable[] observables() {
         return new Observable[] {key, value};
+    }
+
+    @Override
+    public Stream<? extends AbstractData<?>> stream() {
+        return Stream.empty();
     }
 }

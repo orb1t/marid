@@ -18,6 +18,7 @@
 
 package org.marid.spring.xml;
 
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -82,5 +83,15 @@ public final class BeanFile extends AbstractData<BeanFile> {
             file.path.add(p.toString());
         }
         return file;
+    }
+
+    @Override
+    public Observable[] observables() {
+        return new Observable[] {path, beans};
+    }
+
+    @Override
+    public Stream<? extends AbstractData<?>> stream() {
+        return beans.stream();
     }
 }

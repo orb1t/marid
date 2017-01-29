@@ -25,6 +25,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 import javax.xml.bind.annotation.*;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -57,5 +58,21 @@ public class DMapEntry extends AbstractData<DMapEntry> {
 
     public Observable[] observables() {
         return new Observable[] {key, value};
+    }
+
+    public boolean isEmpty() {
+        if (key.get() == null || key.get().isEmpty()) {
+            return true;
+        }
+        if (value.get() == null) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Stream<? extends AbstractData<?>> stream() {
+        final DElement<?> element = value.get();
+        return element == null ? Stream.empty() : Stream.of(element);
     }
 }

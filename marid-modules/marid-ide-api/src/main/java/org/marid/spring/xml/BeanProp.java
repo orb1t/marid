@@ -26,6 +26,7 @@ import javafx.beans.property.StringProperty;
 import org.marid.spring.util.InvalidationUtils;
 
 import javax.xml.bind.annotation.*;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -34,8 +35,8 @@ import javax.xml.bind.annotation.*;
 @XmlSeeAlso({DCollection.class})
 public class BeanProp extends AbstractData<BeanProp> {
 
-    public final StringProperty name = new SimpleStringProperty(this, "name");
-    public final ObjectProperty<DElement<?>> data = new SimpleObjectProperty<>(this, "data");
+    public final StringProperty name = new SimpleStringProperty(null, "name");
+    public final ObjectProperty<DElement<?>> data = new SimpleObjectProperty<>(null, "data");
 
     public BeanProp() {
         InvalidationUtils.installChangeListener(data);
@@ -60,10 +61,21 @@ public class BeanProp extends AbstractData<BeanProp> {
     }
 
     public boolean isEmpty() {
-        return data.isNull().get();
+        return data.get() == null;
     }
 
     public Observable[] observables() {
         return new Observable[] {name, data};
+    }
+
+    @Override
+    public Stream<? extends AbstractData<?>> stream() {
+        final DElement<?> element = data.get();
+        return element == null ? Stream.empty() : Stream.of(element);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Prop(%s,%s)", getName(), getData());
     }
 }

@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -54,12 +55,17 @@ public final class DValue extends DElement<DValue> {
 
     @Override
     public boolean isEmpty() {
-        return value.isEmpty().get();
+        return value.get() == null || value.get().isEmpty();
     }
 
     @Override
     public Observable[] observables() {
         return new Observable[] {value};
+    }
+
+    @Override
+    public Stream<? extends AbstractData<?>> stream() {
+        return Stream.empty();
     }
 
     @Override

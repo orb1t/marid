@@ -25,6 +25,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import javax.xml.bind.annotation.*;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -39,7 +40,7 @@ public final class DProps extends DElement<DProps> {
 
     @XmlAttribute(name = "value-type")
     public String getValueType() {
-        return valueType.isEmpty().get() ? null : valueType.get();
+        return valueType.get() == null || valueType.get().isEmpty() ? null : valueType.get();
     }
 
     public void setValueType(String valueType) {
@@ -63,6 +64,11 @@ public final class DProps extends DElement<DProps> {
     @Override
     public Observable[] observables() {
         return new Observable[] {valueType, entries};
+    }
+
+    @Override
+    public Stream<? extends AbstractData<?>> stream() {
+        return entries.stream();
     }
 
     @Override

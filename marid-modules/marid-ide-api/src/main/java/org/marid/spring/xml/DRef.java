@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -34,11 +35,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "ref")
 public final class DRef extends DElement<DRef> {
 
-    public final StringProperty ref = new SimpleStringProperty(this, "value");
+    public final StringProperty ref = new SimpleStringProperty(null, "value");
 
     @XmlAttribute(name = "bean")
     public String getBean() {
-        return ref.isEmpty().get() ? null : ref.get();
+        return isEmpty() ? null : ref.get();
     }
 
     public void setBean(String bean) {
@@ -47,12 +48,17 @@ public final class DRef extends DElement<DRef> {
 
     @Override
     public boolean isEmpty() {
-        return ref.isEmpty().get();
+        return ref.get() == null || ref.get().isEmpty();
     }
 
     @Override
     public Observable[] observables() {
         return new Observable[] {ref};
+    }
+
+    @Override
+    public Stream<? extends AbstractData<?>> stream() {
+        return Stream.empty();
     }
 
     @Override
