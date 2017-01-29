@@ -24,7 +24,6 @@ import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.context.event.ContextClosedEvent;
@@ -60,32 +59,27 @@ public class IdeDependants {
     public void start(Consumer<AnnotationConfigApplicationContext> consumer) {
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         context.addBeanFactoryPostProcessor(beanFactory -> {
-            beanFactory.addBeanPostProcessor(new OrderedInitPostProcessor(context.getAutowireCapableBeanFactory()));
+            beanFactory.addBeanPostProcessor(new OrderedInitPostProcessor(context));
             beanFactory.addBeanPostProcessor(new LogBeansPostProcessor());
             beanFactory.addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
+            beanFactory.setParentBeanFactory(parent.getDefaultListableBeanFactory());
         });
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
         context.register(IdeDependants.class);
-        context.setParent(parent);
         context.addApplicationListener(e -> {
             if (e instanceof ApplicationContextEvent) {
-                if (((ApplicationContextEvent) e).getApplicationContext() == context) {
-                    if (e instanceof ContextClosedEvent) {
-                        CONTEXTS.remove(context);
-                    } else if (e instanceof ContextStartedEvent) {
-                        CONTEXTS.add(context);
-                    }
+                if (e instanceof ContextClosedEvent) {
+                    CONTEXTS.remove(context);
+                } else if (e instanceof ContextStartedEvent) {
+                    CONTEXTS.add(context);
                 }
             }
         });
-        parent.addApplicationListener(new ApplicationListener<ContextClosedEvent>() {
-            @Override
-            public void onApplicationEvent(ContextClosedEvent event) {
-                if (event.getApplicationContext() == parent) {
-                    parent.getApplicationListeners().remove(this);
-                    context.close();
-                }
+        parent.addApplicationListener(event -> {
+            if (event instanceof ContextClosedEvent) {
+                parent.getApplicationListeners().remove(this);
+                context.close();
             }
         });
         consumer.accept(context);

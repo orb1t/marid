@@ -52,10 +52,11 @@ public class ProfileMonitorConfiguration extends DependantConfiguration<ProjectP
     }
 
     @Bean(initMethod = "show")
-    public Stage stage(ProfileObjectTree tree) {
+    public Stage stage(ProfileObjectTree tree, ProjectProfile profile) {
         final Stage stage = new Stage();
         stage.initOwner(Ide.primaryStage);
         stage.setScene(new Scene(new MaridScrollPane(tree), 1200, 800));
+        stage.setTitle(profile.getName());
         return stage;
     }
 }

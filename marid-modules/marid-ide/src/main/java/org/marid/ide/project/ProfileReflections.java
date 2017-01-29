@@ -19,14 +19,23 @@
 package org.marid.ide.project;
 
 import javafx.beans.Observable;
+import javafx.beans.WeakListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.util.Pair;
 import org.marid.spring.xml.AbstractData;
 
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.marid.misc.Iterables.stream;
@@ -40,7 +49,7 @@ public class ProfileReflections {
 
     public static Stream<Pair<AbstractData<?>, Observable[]>> observableStream(ProjectProfile profile) {
         return profile.getBeanFiles().stream()
-                .flatMap(f -> dataStream(f.stream()))
+                .flatMap(f -> Stream.concat(Stream.of(f), dataStream(f.stream())))
                 .map(d -> {
                     final Observable[] observables = observableStream(of(d.observables())).toArray(Observable[]::new);
                     return new Pair<>(d, observables);
@@ -70,27 +79,67 @@ public class ProfileReflections {
         });
     }
 
-    public static int countListeners(Observable observable) {
-        final AtomicInteger count = new AtomicInteger();
+    public static List<Object> listeners(Observable observable) {
+        final List<Object> listeners = new ArrayList<>();
         doWithFields(observable.getClass(), field -> {
             field.setAccessible(true);
             final Object helper = field.get(observable);
             if (helper == null) {
                 return;
             }
+            final Consumer<Object[]> add = v -> of(v).filter(Objects::nonNull).forEach(listeners::add);
             doWithFields(helper.getClass(), f -> {
-                if (f.getName().equals("listener")) {
-                    f.setAccessible(true);
-                    final Object listener = f.get(helper);
-                    if (listener != null) {
-                        count.incrementAndGet();
+                switch (f.getName()) {
+                    case "invalidationListeners":
+                    case "changeListeners":
+                        f.setAccessible(true);
+                        ofNullable(f.get(helper)).ifPresent(v -> add.accept((Object[]) v));
+                        break;
+                    case "listener": {
+                        f.setAccessible(true);
+                        add.accept(new Object[]{f.get(helper)});
+                        break;
                     }
-                } else if (f.getName().equals("invalidationSize") || f.getName().equals("changeSize")) {
-                    f.setAccessible(true);
-                    count.addAndGet(f.getInt(helper));
                 }
             });
         }, field -> field.getName().toLowerCase().endsWith("helper"));
+        return listeners;
+    }
+
+    public static int collect(Observable observable, List<Object> listeners) {
+        final AtomicInteger count = new AtomicInteger();
+        for (final Object listener : listeners) {
+            final AtomicBoolean remove = new AtomicBoolean();
+            if (listener instanceof WeakListener) {
+                final WeakListener weak = (WeakListener) listener;
+                remove.set(weak.wasGarbageCollected());
+            } else {
+                doWithFields(listener.getClass(), f -> {
+                    f.setAccessible(true);
+                    final WeakReference ref = (WeakReference) f.get(listener);
+                    remove.set(ref.get() == null);
+                }, f -> WeakReference.class.isAssignableFrom(f.getType()));
+            }
+            if (remove.get()) {
+                for (final Method method : observable.getClass().getMethods()) {
+                    if (!method.getName().equals("removeListener")) {
+                        continue;
+                    }
+                    if (method.getParameterCount() != 1) {
+                        continue;
+                    }
+                    if (!method.getParameterTypes()[0].isAssignableFrom(listener.getClass())) {
+                        continue;
+                    }
+                    try {
+                        method.invoke(observable, listener);
+                        count.incrementAndGet();
+                    } catch (ReflectiveOperationException x) {
+                        throw new IllegalStateException(x);
+                    }
+                }
+            }
+        }
         return count.get();
     }
 }

@@ -16,41 +16,50 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.tabs;
+package org.marid.jfx.list;
 
-import javafx.beans.value.ObservableValue;
-import javafx.scene.Node;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 
-import java.util.function.Supplier;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-public class IdeTabKey {
+public class EmptyListChange<E> extends ListChangeListener.Change<E> {
 
-    public final ObservableValue<String> textBinding;
-    public final Supplier<Node> graphicBinding;
-
-    public IdeTabKey(ObservableValue<String> textBinding, Supplier<Node> graphicBinding) {
-        this.textBinding = textBinding;
-        this.graphicBinding = graphicBinding;
+    public EmptyListChange(ObservableList<E> list) {
+        super(list);
     }
 
     @Override
-    public int hashCode() {
-        return textBinding.getValue().hashCode();
+    public boolean next() {
+        return false;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || obj.getClass() != getClass()) {
-            return false;
-        }
-        final IdeTabKey that = (IdeTabKey) obj;
-        return this.textBinding.getValue().equals(that.textBinding.getValue());
+    public void reset() {
+    }
+
+    @Override
+    public int getFrom() {
+        return 0;
+    }
+
+    @Override
+    public int getTo() {
+        return 0;
+    }
+
+    @Override
+    public List<E> getRemoved() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    protected int[] getPermutation() {
+        return new int[0];
     }
 }

@@ -75,7 +75,7 @@ public class BeanFileBrowser extends CommonTableView<BeanFile> {
         col.textProperty().bind(ls("File"));
         col.setPrefWidth(600);
         col.setMaxWidth(2000);
-        col.setCellValueFactory(param -> createStringBinding(() -> param.getValue().getFilePath(), param.getValue().path));
+        col.setCellValueFactory(p -> createStringBinding(() -> p.getValue().getFilePath(), p.getValue().path));
         col.setCellFactory(param -> new TextFieldTableCell<BeanFile, String>(new DefaultStringConverter()) {
             @Override
             public void updateItem(String item, boolean empty) {

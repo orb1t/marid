@@ -19,12 +19,12 @@
 package org.marid.ide.tabs;
 
 import javafx.beans.Observable;
-import javafx.beans.binding.StringBinding;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.HBox;
 import org.marid.jfx.props.Props;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
 
 import javax.annotation.Nonnull;
@@ -52,9 +52,9 @@ public class IdeTab extends Tab {
 
     private final List<Supplier<Node>> suppliers = new ArrayList<>();
     private final List<Observable> nodeObservables = new ArrayList<>();
-    private final List<StringBinding> texts = new ArrayList<>();
+    private final List<ObservableValue<String>> texts = new ArrayList<>();
 
-    public IdeTab(@Nonnull Node content, @Nonnull StringBinding text, @Nonnull Supplier<Node> node) {
+    public IdeTab(@Nonnull Node content, @Nonnull ObservableValue<String> text, @Nonnull Supplier<Node> node) {
         setContent(content);
         textProperty().bind(text);
         this.key = new IdeTabKey(text, node);
@@ -74,7 +74,9 @@ public class IdeTab extends Tab {
     @PostConstruct
     private void init() {
         context.getBeanFactory().registerSingleton("$ideTabKey", key);
-        for (ApplicationContext c = context; c != null; c = c.getParent()) {
+
+        final DefaultListableBeanFactory f = context.getDefaultListableBeanFactory();
+        for (DefaultListableBeanFactory c = f; c != null; c = (DefaultListableBeanFactory) c.getParentBeanFactory()) {
             final IdeTabKey k = c.getBean("$ideTabKey", IdeTabKey.class);
             suppliers.add(0, k.graphicBinding);
             texts.add(0, k.textBinding);
@@ -116,8 +118,8 @@ public class IdeTab extends Tab {
             return false;
         }
         final IdeTab that = (IdeTab) obj;
-        final String[] thisKeys = this.texts.stream().map(StringBinding::get).toArray(String[]::new);
-        final String[] thatKeys = that.texts.stream().map(StringBinding::get).toArray(String[]::new);
+        final String[] thisKeys = this.texts.stream().map(ObservableValue::getValue).toArray(String[]::new);
+        final String[] thatKeys = that.texts.stream().map(ObservableValue::getValue).toArray(String[]::new);
         return Arrays.equals(thisKeys, thatKeys);
     }
 }

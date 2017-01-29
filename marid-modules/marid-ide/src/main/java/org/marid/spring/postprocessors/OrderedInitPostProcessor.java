@@ -22,11 +22,11 @@ import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.MethodParameter;
 
 import java.lang.reflect.Method;
@@ -39,10 +39,10 @@ import java.util.stream.Stream;
  */
 public class OrderedInitPostProcessor implements BeanPostProcessor {
 
-    private final AutowireCapableBeanFactory autowireCapableBeanFactory;
+    private final GenericApplicationContext context;
 
-    public OrderedInitPostProcessor(AutowireCapableBeanFactory autowireCapableBeanFactory) {
-        this.autowireCapableBeanFactory = autowireCapableBeanFactory;
+    public OrderedInitPostProcessor(GenericApplicationContext context) {
+        this.context = context;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        final DefaultListableBeanFactory f = new DefaultListableBeanFactory(autowireCapableBeanFactory);
+        final DefaultListableBeanFactory f = new DefaultListableBeanFactory(context);
         Stream.of(bean.getClass().getMethods())
                 .filter(m -> m.isAnnotationPresent(OrderedInit.class))
                 .sorted(Comparator.comparing(Method::getName))
@@ -62,6 +62,10 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
                     final Object[] args = new Object[method.getParameterCount()];
                     final Parameter[] parameters = method.getParameters();
                     for (int i = 0; i < args.length; i++) {
+                        if (parameters[i].getType().isAssignableFrom(GenericApplicationContext.class)) {
+                            args[i] = context;
+                            continue;
+                        }
                         final MethodParameter parameter = new MethodParameter(method, i);
                         final Autowired autowired = parameters[i].getAnnotation(Autowired.class);
                         final boolean required = autowired != null && autowired.required();

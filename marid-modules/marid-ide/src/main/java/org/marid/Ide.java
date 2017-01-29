@@ -62,7 +62,7 @@ public class Ide extends Application {
         context.setId("root");
         context.setDisplayName("Root Context");
         context.addBeanFactoryPostProcessor(beanFactory -> {
-            beanFactory.addBeanPostProcessor(new OrderedInitPostProcessor(context.getAutowireCapableBeanFactory()));
+            beanFactory.addBeanPostProcessor(new OrderedInitPostProcessor(context));
             beanFactory.addBeanPostProcessor(new LogBeansPostProcessor());
         });
         final AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(context);

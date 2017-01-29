@@ -18,14 +18,46 @@
 
 package org.marid.ide.project;
 
+import javafx.application.Platform;
+import javafx.util.Pair;
+import org.marid.logging.LogSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import java.util.stream.Stream;
+
+import static org.marid.ide.project.ProfileReflections.listeners;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
 @Service
-public class ProjectGarbageCollector {
+@Lazy(false)
+public class ProjectGarbageCollector implements LogSupport {
 
+    private final ProjectManager manager;
 
+    @Autowired
+    public ProjectGarbageCollector(ProjectManager manager) {
+        this.manager = manager;
+    }
+
+    @Scheduled(fixedDelay = 10_000L, initialDelay = 10_000L)
+    public void collect() throws Exception {
+        Platform.runLater(() -> {
+            for (final ProjectProfile profile : manager.getProfiles()) {
+                final int collected = ProfileReflections.observableStream(profile)
+                        .flatMap(p -> Stream.of(p.getValue()))
+                        .map(o -> new Pair<>(o, listeners(o)))
+                        .mapToInt(p -> ProfileReflections.collect(p.getKey(), p.getValue()))
+                        .sum();
+                if (collected > 0) {
+                    log(INFO, "Collected {0} listeners in {1}", collected, profile);
+                }
+            }
+        });
+    }
 }

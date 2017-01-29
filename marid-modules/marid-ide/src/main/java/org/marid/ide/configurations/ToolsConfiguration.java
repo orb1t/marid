@@ -62,7 +62,10 @@ public class ToolsConfiguration {
         return new FxAction(null, "monitor", "Tools")
                 .setIcon(M_CHEVRON_LEFT)
                 .bindText(ls("Run garbage collection"))
-                .setEventHandler(event -> System.gc());
+                .setEventHandler(event -> {
+                    System.gc();
+                    System.runFinalization();
+                });
     }
 
     @IdeAction

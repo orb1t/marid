@@ -37,6 +37,13 @@ public final class DRef extends DElement<DRef> {
 
     public final StringProperty ref = new SimpleStringProperty(null, "value");
 
+    public DRef() {
+    }
+
+    public DRef(String value) {
+        ref.set(value);
+    }
+
     @XmlAttribute(name = "bean")
     public String getBean() {
         return isEmpty() ? null : ref.get();
