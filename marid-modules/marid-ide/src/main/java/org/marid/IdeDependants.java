@@ -19,11 +19,17 @@
 package org.marid;
 
 import com.google.common.collect.ImmutableMap;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.SelectionModel;
+import javafx.scene.control.Tab;
+import javafx.stage.Window;
+import org.marid.ide.tabs.IdeTab;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
@@ -34,11 +40,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.marid.spring.dependant.DependantConfiguration.PARAM;
 
@@ -57,7 +62,7 @@ public class IdeDependants {
         this.parent = parent;
     }
 
-    public void start(Consumer<AnnotationConfigApplicationContext> consumer) {
+    public boolean start(Consumer<AnnotationConfigApplicationContext> consumer) {
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         context.addBeanFactoryPostProcessor(beanFactory -> {
             beanFactory.addBeanPostProcessor(new OrderedInitPostProcessor(context));
@@ -81,28 +86,42 @@ public class IdeDependants {
         consumer.accept(context);
         context.refresh();
         context.start();
+        return true;
     }
 
-    public final void start(Class<?> conf, Consumer<AnnotationConfigApplicationContext> consumer) {
-        start(context -> {
+    public final boolean start(Class<?> conf, Consumer<AnnotationConfigApplicationContext> consumer) {
+        return start(context -> {
             context.register(conf);
             consumer.accept(context);
         });
     }
 
-    public <T> void start(Class<? extends DependantConfiguration<T>> conf, T param, Consumer<AnnotationConfigApplicationContext> consumer) {
-        start(context -> {
-            final Map<String, Object> map = ImmutableMap.of(PARAM, param);
-            context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("paramMap", map));
-            context.register(conf);
-            consumer.accept(context);
-        });
+    public <T> boolean start(Class<? extends DependantConfiguration<T>> conf, T param, Consumer<AnnotationConfigApplicationContext> consumer) {
+        return getMatched(param).findAny().map(IdeDependants::activate)
+                .orElseGet(() -> {
+                    start(context -> {
+                        final Map<String, Object> map = ImmutableMap.of(PARAM, param);
+                        final MapPropertySource propertySource = new MapPropertySource("paramMap", map);
+                        context.getEnvironment().getPropertySources().addFirst(propertySource);
+                        context.register(conf);
+                        consumer.accept(context);
+                    });
+                    return false;
+                });
     }
 
-    public static List<AnnotationConfigApplicationContext> getMatched(Object param) {
-        return CONTEXTS.stream()
-                .filter(c -> Objects.equals(param, c.getEnvironment().getProperty(PARAM, Object.class)))
-                .collect(Collectors.toList());
+    private static Stream<AnnotationConfigApplicationContext> getMatched(Object param) {
+        return CONTEXTS.stream().filter(c -> param.equals(c.getEnvironment().getProperty(PARAM, Object.class)));
+    }
+
+    private static boolean activate(ApplicationContext context) {
+        context.getBeansOfType(IdeTab.class, false, false).forEach((name, tab) -> {
+            final SelectionModel<Tab> selectionModel = tab.getTabPane().getSelectionModel();
+            selectionModel.select(tab);
+        });
+        context.getBeansOfType(Window.class, false, false).forEach((name, win) -> win.requestFocus());
+        context.getBeansOfType(Dialog.class, false, false).forEach((name, win) -> win.show());
+        return true;
     }
 
     @Override

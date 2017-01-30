@@ -87,13 +87,7 @@ public class IdeTab extends Tab {
         updateGraphic(this.graphicProperty());
         nodeObservables.forEach(o -> o.addListener(this::updateGraphic));
 
-        final int index = ideTabPane.getTabs().indexOf(this);
-        if (index >= 0) {
-            ideTabPane.getTabs().remove(index);
-            ideTabPane.getTabs().add(index, this);
-        } else {
-            ideTabPane.getTabs().add(this);
-        }
+        ideTabPane.getTabs().add(this);
         ideTabPane.getSelectionModel().select(this);
         Props.addHandler(onClosedProperty(), event -> context.close());
     }
