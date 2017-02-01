@@ -35,6 +35,7 @@ import javax.annotation.PreDestroy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.Collections.binarySearch;
@@ -109,7 +110,7 @@ public class ProjectManager implements LogSupport {
 
     public static void onBeanNameChange(ProjectProfile profile, String oldName, String newName) {
         profile.getBeanFiles().forEach(beanFile -> beanFile.beans.forEach(beanData -> {
-            if (beanData.factoryBean.isEqualTo(oldName).get()) {
+            if (Objects.equals(beanData.getFactoryBean(), oldName)) {
                 beanData.factoryBean.set(newName);
             }
             beanData.beanArgs.forEach(a -> onBeanNameChange(a.getData(), oldName, newName));
@@ -120,7 +121,7 @@ public class ProjectManager implements LogSupport {
     private static void onBeanNameChange(DElement<?> element, String oldName, String newName) {
         if (element instanceof DRef) {
             final DRef ref = (DRef) element;
-            if (ref.ref.isEqualTo(oldName).get()) {
+            if (Objects.equals(ref.getBean(), oldName)) {
                 ref.ref.set(newName);
             }
         } else if (element instanceof DCollection<?>) {

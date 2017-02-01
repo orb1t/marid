@@ -18,11 +18,11 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
 import javafx.beans.property.Property;
 import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import org.marid.jfx.beans.FxObservable;
 
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.*;
@@ -115,7 +115,9 @@ public abstract class AbstractData<T extends AbstractData<T>> implements Externa
         }
     }
 
-    public abstract Observable[] observables();
+    public abstract FxObservable[] observables();
+
+    public abstract Stream<FxObservable> observableStream();
 
     public abstract Stream<? extends AbstractData<?>> stream();
 }

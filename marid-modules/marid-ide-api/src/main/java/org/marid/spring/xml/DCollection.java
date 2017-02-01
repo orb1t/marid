@@ -18,11 +18,9 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import org.marid.jfx.beans.FxList;
+import org.marid.jfx.beans.FxObservable;
+import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
 import java.util.stream.Stream;
@@ -34,8 +32,8 @@ import java.util.stream.Stream;
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class DCollection<T extends DCollection<T>> extends DElement<T> {
 
-    public final StringProperty valueType = new SimpleStringProperty(null, "value-type");
-    public final ObservableList<DElement<?>> elements = FXCollections.observableArrayList(DElement::observables);
+    public final FxString valueType = new FxString(null, "value-type");
+    public final FxList<DElement<?>> elements = new FxList<>(DElement::observables);
 
     @XmlAttribute(name = "value-type")
     public String getValueType() {
@@ -62,8 +60,13 @@ public abstract class DCollection<T extends DCollection<T>> extends DElement<T> 
     }
 
     @Override
-    public Observable[] observables() {
-        return new Observable[] {valueType, elements};
+    public FxObservable[] observables() {
+        return new FxObservable[] {valueType, elements};
+    }
+
+    @Override
+    public Stream<FxObservable> observableStream() {
+        return Stream.of(observables());
     }
 
     @Override

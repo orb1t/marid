@@ -24,7 +24,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.idefx.controls.CommonTableView;
+import org.marid.jfx.controls.CommonTableView;
 import org.marid.jfx.action.FxAction;
 import org.marid.logging.LogSupport;
 import org.marid.spring.annotation.OrderedInit;

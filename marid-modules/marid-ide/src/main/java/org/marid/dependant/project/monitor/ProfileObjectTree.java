@@ -19,27 +19,24 @@
 package org.marid.dependant.project.monitor;
 
 import javafx.application.Platform;
-import javafx.beans.Observable;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.apache.commons.lang3.tuple.Triple;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.beans.FxObservable;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.AbstractData;
 import org.marid.spring.xml.DRef;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
-import static org.marid.ide.project.ProfileReflections.listeners;
-import static org.marid.ide.project.ProfileReflections.observableStream;
+import static java.util.stream.Collectors.toList;
 import static org.marid.jfx.LocalizedStrings.LOCALE;
 import static org.marid.jfx.LocalizedStrings.ls;
 
@@ -47,7 +44,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-public class ProfileObjectTree extends TableView<Triple<? extends AbstractData<?>, Observable, List<Object>>> {
+public class ProfileObjectTree extends TableView<Triple<AbstractData<?>, FxObservable, List<?>>> {
 
     private final ProjectProfile profile;
 
@@ -60,7 +57,7 @@ public class ProfileObjectTree extends TableView<Triple<? extends AbstractData<?
 
     @OrderedInit(1)
     public void classColumn() {
-        final TableColumn<Triple<? extends AbstractData<?>, Observable, List<Object>>, String> col = new TableColumn<>();
+        final TableColumn<Triple<AbstractData<?>, FxObservable, List<?>>, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Type"));
         col.setPrefWidth(100);
         col.setMaxWidth(200);
@@ -70,7 +67,7 @@ public class ProfileObjectTree extends TableView<Triple<? extends AbstractData<?
 
     @OrderedInit(2)
     public void dataColumn() {
-        final TableColumn<Triple<? extends AbstractData<?>, Observable, List<Object>>, String> col = new TableColumn<>();
+        final TableColumn<Triple<AbstractData<?>, FxObservable, List<?>>, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Data"));
         col.setPrefWidth(300);
         col.setMaxWidth(500);
@@ -80,7 +77,7 @@ public class ProfileObjectTree extends TableView<Triple<? extends AbstractData<?
 
     @OrderedInit(3)
     public void observableColumn() {
-        final TableColumn<Triple<? extends AbstractData<?>, Observable, List<Object>>, String> col = new TableColumn<>();
+        final TableColumn<Triple<AbstractData<?>, FxObservable, List<?>>, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Observable object"));
         col.setPrefWidth(300);
         col.setMaxWidth(500);
@@ -90,7 +87,7 @@ public class ProfileObjectTree extends TableView<Triple<? extends AbstractData<?
 
     @OrderedInit(4)
     public void countColumn() {
-        final TableColumn<Triple<? extends AbstractData<?>, Observable, List<Object>>, Number> col = new TableColumn<>();
+        final TableColumn<Triple<AbstractData<?>, FxObservable, List<?>>, Number> col = new TableColumn<>();
         col.textProperty().bind(ls("Count"));
         col.setPrefWidth(60);
         col.setMaxWidth(100);
@@ -100,7 +97,7 @@ public class ProfileObjectTree extends TableView<Triple<? extends AbstractData<?
 
     @OrderedInit(5)
     public void listenersColumn() {
-        final TableColumn<Triple<? extends AbstractData<?>, Observable, List<Object>>, String> col = new TableColumn<>();
+        final TableColumn<Triple<AbstractData<?>, FxObservable, List<?>>, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Listeners"));
         col.setPrefWidth(600);
         col.setMaxWidth(1000);
@@ -113,11 +110,19 @@ public class ProfileObjectTree extends TableView<Triple<? extends AbstractData<?
 
     @Scheduled(fixedDelay = 1_000L)
     public void update() {
-        final List<Triple<? extends AbstractData<?>, Observable, List<Object>>> list = observableStream(profile)
-                .sorted(Comparator.comparing(k -> k.getKey().getClass().getName()))
-                .flatMap(p -> Stream.of(p.getValue()).map(v -> Triple.of(p.getKey(), v, listeners(v))))
-                .collect(Collectors.toList());
-        list.add(Triple.of(new DRef("locale"), LOCALE, listeners(LOCALE)));
+        final List<Triple<AbstractData<?>, FxObservable, List<?>>> list = profile.getBeanFiles().stream()
+                .flatMap(ProfileObjectTree::stream)
+                .flatMap(d -> d.observableStream().map(o -> {
+                    final List<?> listeners = o.listeners().collect(toList());
+                    return Triple.<AbstractData<?>, FxObservable, List<?>>of(d, o, listeners);
+                }))
+                .collect(toList());
+
+        list.add(Triple.of(new DRef("locale"), LOCALE, LOCALE.listeners().collect(toList())));
         Platform.runLater(() -> getItems().setAll(list));
+    }
+
+    private static Stream<? extends AbstractData<?>> stream(AbstractData<?> data) {
+        return Stream.concat(Stream.of(data), data.stream().flatMap(ProfileObjectTree::stream));
     }
 }

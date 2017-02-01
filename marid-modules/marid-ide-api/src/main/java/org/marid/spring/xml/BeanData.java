@@ -18,11 +18,9 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import org.marid.jfx.beans.FxList;
+import org.marid.jfx.beans.FxObservable;
+import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
 import java.lang.reflect.Executable;
@@ -39,21 +37,18 @@ import static java.util.stream.IntStream.range;
 @XmlAccessorType(XmlAccessType.NONE)
 public final class BeanData extends DElement<BeanData> {
 
-    public final StringProperty type = new SimpleStringProperty(null, "class");
-    public final StringProperty name = new SimpleStringProperty(null, "name");
-    public final StringProperty initMethod = new SimpleStringProperty(null, "init-method");
-    public final StringProperty destroyMethod = new SimpleStringProperty(null, "destroy-method");
-    public final StringProperty factoryBean = new SimpleStringProperty(null, "factory-bean");
-    public final StringProperty factoryMethod = new SimpleStringProperty(null, "factory-method");
-    public final StringProperty lazyInit = new SimpleStringProperty(null, "lazy-init", "default");
-
-    public final ObservableList<BeanArg> beanArgs = FXCollections.observableArrayList(BeanArg::observables);
-    public final ObservableList<BeanProp> properties = FXCollections.observableArrayList(BeanProp::observables);
-
-    public final ObservableList<String> initTriggers = FXCollections.observableArrayList();
-    public final ObservableList<String> destroyTriggers = FXCollections.observableArrayList();
-
-    public final transient ObservableList<Executable> constructors = FXCollections.observableArrayList();
+    public final FxString type = new FxString(null, "class");
+    public final FxString name = new FxString(null, "name");
+    public final FxString initMethod = new FxString(null, "init-method");
+    public final FxString destroyMethod = new FxString(null, "destroy-method");
+    public final FxString factoryBean = new FxString(null, "factory-bean");
+    public final FxString factoryMethod = new FxString(null, "factory-method");
+    public final FxString lazyInit = new FxString(null, "lazy-init", "default");
+    public final FxList<BeanArg> beanArgs = new FxList<>(BeanArg::observables);
+    public final FxList<BeanProp> properties = new FxList<>(BeanProp::observables);
+    public final FxList<String> initTriggers = new FxList<>();
+    public final FxList<String> destroyTriggers = new FxList<>();
+    public final transient FxList<Executable> constructors = new FxList<>();
 
     @XmlAttribute(name = "class")
     public String getType() {
@@ -158,10 +153,6 @@ public final class BeanData extends DElement<BeanData> {
         return factoryBean.get() != null && !factoryBean.get().isEmpty() || factoryMethod.get() != null && !factoryMethod.get().isEmpty();
     }
 
-    public StringProperty nameProperty() {
-        return name;
-    }
-
     public boolean isEmpty() {
         if (name.get() == null || name.get().isEmpty()) {
             return true;
@@ -185,8 +176,8 @@ public final class BeanData extends DElement<BeanData> {
     }
 
     @Override
-    public Observable[] observables() {
-        return new Observable[]{
+    public FxObservable[] observables() {
+        return new FxObservable[]{
                 type,
                 name,
                 initMethod,
@@ -200,6 +191,11 @@ public final class BeanData extends DElement<BeanData> {
                 destroyTriggers,
                 constructors
         };
+    }
+
+    @Override
+    public Stream<FxObservable> observableStream() {
+        return Stream.of(observables());
     }
 
     @Override

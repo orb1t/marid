@@ -18,9 +18,8 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import org.marid.jfx.beans.FxObservable;
+import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -35,7 +34,7 @@ import java.util.stream.Stream;
 @XmlRootElement(name = "ref")
 public final class DRef extends DElement<DRef> {
 
-    public final StringProperty ref = new SimpleStringProperty(null, "value");
+    public final FxString ref = new FxString(null, "value");
 
     public DRef() {
     }
@@ -59,8 +58,13 @@ public final class DRef extends DElement<DRef> {
     }
 
     @Override
-    public Observable[] observables() {
-        return new Observable[] {ref};
+    public FxObservable[] observables() {
+        return new FxObservable[] {ref};
+    }
+
+    @Override
+    public Stream<FxObservable> observableStream() {
+        return Stream.of(ref);
     }
 
     @Override

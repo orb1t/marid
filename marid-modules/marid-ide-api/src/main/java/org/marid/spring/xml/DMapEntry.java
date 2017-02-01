@@ -18,14 +18,15 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import org.marid.jfx.beans.FxObject;
+import org.marid.jfx.beans.FxObservable;
+import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
 import java.util.stream.Stream;
+
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -35,8 +36,8 @@ import java.util.stream.Stream;
 @XmlAccessorType(XmlAccessType.NONE)
 public class DMapEntry extends AbstractData<DMapEntry> {
 
-    public final StringProperty key = new SimpleStringProperty(null, "key");
-    public final ObjectProperty<DElement<?>> value = new SimpleObjectProperty<>(null, "value");
+    public final FxString key = new FxString(null, "key");
+    public final FxObject<DElement<?>> value = new FxObject<>(null, "value");
 
     @XmlAttribute
     public String getKey() {
@@ -56,8 +57,16 @@ public class DMapEntry extends AbstractData<DMapEntry> {
         this.value.set(value);
     }
 
-    public Observable[] observables() {
-        return new Observable[] {key, value};
+    public FxObservable[] observables() {
+        final DElement<?> e = value.get();
+        return e == null
+                ? new FxObservable[] {key, value}
+                : concat(observableStream(), of(e.observables())).toArray(FxObservable[]::new);
+    }
+
+    @Override
+    public Stream<FxObservable> observableStream() {
+        return of(key, value);
     }
 
     public boolean isEmpty() {
@@ -73,6 +82,6 @@ public class DMapEntry extends AbstractData<DMapEntry> {
     @Override
     public Stream<? extends AbstractData<?>> stream() {
         final DElement<?> element = value.get();
-        return element == null ? Stream.empty() : Stream.of(element);
+        return element == null ? Stream.empty() : of(element);
     }
 }

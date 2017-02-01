@@ -34,7 +34,7 @@ import org.marid.ide.panes.main.IdeToolbar;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectSaver;
-import org.marid.idefx.controls.IdeShapes;
+import org.marid.jfx.controls.IdeShapes;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.logging.LogSupport;

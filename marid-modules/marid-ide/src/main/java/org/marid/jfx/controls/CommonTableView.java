@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.idefx.controls;
+package org.marid.jfx.controls;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;

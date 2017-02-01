@@ -20,10 +20,10 @@ package org.marid.jfx;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.WeakInvalidationListener;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
+import org.marid.jfx.beans.FxObject;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -38,7 +38,7 @@ import static org.marid.l10n.L10n.s;
  */
 public class LocalizedStrings {
 
-    public static final ObjectProperty<Locale> LOCALE = new SimpleObjectProperty<>(Locale.getDefault());
+    public static final FxObject<Locale> LOCALE = new FxObject<>(null, "locale", Locale.getDefault());
 
     public static ObservableValue<String> ls(String text, Object... args) {
         return new LocalizedStringValue(() -> s(LOCALE.get(), text, args));
@@ -51,7 +51,7 @@ public class LocalizedStrings {
         });
     }
 
-    private static final class LocalizedStringValue implements ObservableValue<String> {
+    private static final class LocalizedStringValue implements ObservableStringValue {
 
         private final Supplier<String> supplier;
         private final InvalidationListener listener;
@@ -100,6 +100,11 @@ public class LocalizedStrings {
                 changeListeners.forEach(l -> l.changed(this, old, nev));
                 invalidationListeners.forEach(l -> l.invalidated(this));
             }
+        }
+
+        @Override
+        public String get() {
+            return getValue();
         }
     }
 }

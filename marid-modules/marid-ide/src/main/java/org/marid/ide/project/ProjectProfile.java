@@ -50,10 +50,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -118,8 +115,7 @@ public class ProjectProfile implements LogSupport {
     }
 
     public boolean containsBean(String name) {
-        return beanFiles.stream()
-                .anyMatch(f -> f.allBeans().anyMatch(b -> b.nameProperty().isEqualTo(name).get()));
+        return beanFiles.stream().anyMatch(f -> f.allBeans().anyMatch(b -> name.equals(b.getName())));
     }
 
     public String generateBeanName(String name) {
@@ -356,26 +352,16 @@ public class ProjectProfile implements LogSupport {
 
     public Stream<? extends Executable> getConstructors(BeanData data) {
         if (data.isFactoryBean()) {
-            if (data.factoryBean.isNotEmpty().get()) {
-                return getBeanFiles().stream()
-                        .flatMap(BeanFile::allBeans)
-                        .filter(b -> data.factoryBean.isEqualTo(b.nameProperty()).get())
-                        .map(this::getClass)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .flatMap(t -> of(t.getMethods()))
-                        .filter(m -> m.getReturnType() != void.class)
-                        .filter(m -> data.factoryMethod.isEqualTo(m.getName()).get())
-                        .sorted(comparingInt(Method::getParameterCount));
-            } else {
-                return getClass(data.type.get())
-                        .map(type -> of(type.getMethods())
-                                .filter(m -> Modifier.isStatic(m.getModifiers()))
-                                .filter(m -> m.getReturnType() != void.class)
-                                .filter(m -> data.factoryMethod.isEqualTo(m.getName()).get())
-                                .sorted(comparingInt(Method::getParameterCount)))
-                        .orElse(Stream.empty());
-            }
+            return getBeanFiles().stream()
+                    .flatMap(BeanFile::allBeans)
+                    .filter(b -> Objects.equals(data.getFactoryBean(), b.getName()))
+                    .map(this::getClass)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .flatMap(t -> of(t.getMethods()))
+                    .filter(m -> m.getReturnType() != void.class)
+                    .filter(m -> m.getName().equals(data.getFactoryMethod()))
+                    .sorted(comparingInt(Method::getParameterCount));
         } else {
             return getClass(data)
                     .map(c -> of(c.getConstructors()).sorted(comparingInt(Constructor::getParameterCount)))
@@ -402,7 +388,7 @@ public class ProjectProfile implements LogSupport {
         final List<BeanArg> args = of(parameters)
                 .map(p -> {
                     final Optional<BeanArg> found = data.beanArgs.stream()
-                            .filter(a -> a.name.isEqualTo(parameterName(p)).get())
+                            .filter(a -> parameterName(p).equals(a.getName()))
                             .findFirst();
                     if (found.isPresent()) {
                         found.get().type.set(p.getType().getName());

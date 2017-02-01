@@ -16,27 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.mapeditor;
+package org.marid.jfx.beans;
 
-import javafx.beans.value.ObservableStringValue;
-import org.marid.ide.tabs.IdeTab;
-import org.marid.jfx.controls.IdeShapes;
-import org.marid.jfx.panes.MaridScrollPane;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import static javafx.beans.binding.Bindings.createStringBinding;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.beans.value.WritableObjectValue;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Component
-public class MapEditorTab extends IdeTab {
+public class ForwardingWritableObjectValue<T, V extends ObservableObjectValue<T> & WritableObjectValue<T>>
+        extends ForwardingWritableValue<T, V> implements ObservableObjectValue<T>, WritableObjectValue<T> {
 
-    @Autowired
-    public MapEditorTab(MapEditorTable table, ObservableStringValue name) {
-        super(new MaridScrollPane(table), createStringBinding(name::get, name), () -> IdeShapes.map(name.get(), 16));
-        addNodeObservables(name);
+    public ForwardingWritableObjectValue(V delegate) {
+        super(delegate);
+    }
+
+    @Override
+    public T get() {
+        return delegate.get();
+    }
+
+    @Override
+    public void set(T value) {
+        delegate.set(value);
     }
 }

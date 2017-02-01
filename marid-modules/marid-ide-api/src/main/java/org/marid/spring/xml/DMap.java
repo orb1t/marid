@@ -18,11 +18,9 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import org.marid.jfx.beans.FxList;
+import org.marid.jfx.beans.FxObservable;
+import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
 import java.util.stream.Stream;
@@ -36,9 +34,9 @@ import java.util.stream.Stream;
 @XmlAccessorType(XmlAccessType.NONE)
 public class DMap extends DElement<DMap> {
 
-    public final StringProperty keyType = new SimpleStringProperty(null, "key-type");
-    public final StringProperty valueType = new SimpleStringProperty(null, "value-type");
-    public final ObservableList<DMapEntry> entries = FXCollections.observableArrayList(DMapEntry::observables);
+    public final FxString keyType = new FxString(null, "key-type");
+    public final FxString valueType = new FxString(null, "value-type");
+    public final FxList<DMapEntry> entries = new FxList<>(DMapEntry::observables);
 
     @Override
     public boolean isEmpty() {
@@ -46,8 +44,13 @@ public class DMap extends DElement<DMap> {
     }
 
     @Override
-    public Observable[] observables() {
-        return new Observable[] {keyType, valueType, entries};
+    public FxObservable[] observables() {
+        return new FxObservable[] {keyType, valueType, entries};
+    }
+
+    @Override
+    public Stream<FxObservable> observableStream() {
+        return Stream.of(observables());
     }
 
     @Override

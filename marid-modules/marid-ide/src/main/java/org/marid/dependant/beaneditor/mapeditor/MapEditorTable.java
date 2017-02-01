@@ -25,7 +25,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.dependant.beaneditor.beandata.BeanPropEditor;
-import org.marid.idefx.controls.CommonTableView;
+import org.marid.jfx.controls.CommonTableView;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.spring.annotation.OrderedInit;

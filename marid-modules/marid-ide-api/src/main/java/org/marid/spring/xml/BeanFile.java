@@ -18,9 +18,8 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import org.marid.jfx.beans.FxList;
+import org.marid.jfx.beans.FxObservable;
 
 import javax.xml.bind.annotation.*;
 import java.nio.file.Path;
@@ -36,8 +35,8 @@ import java.util.stream.Stream;
 @XmlAccessorType(XmlAccessType.NONE)
 public final class BeanFile extends AbstractData<BeanFile> {
 
-    public final ObservableList<String> path = FXCollections.observableArrayList();
-    public final ObservableList<BeanData> beans = FXCollections.observableArrayList(BeanData::observables);
+    public final FxList<String> path = new FxList<>();
+    public final FxList<BeanData> beans = new FxList<>(BeanData::observables);
 
     public Stream<BeanData> allBeans() {
         final Stream.Builder<BeanData> builder = Stream.builder();
@@ -86,8 +85,13 @@ public final class BeanFile extends AbstractData<BeanFile> {
     }
 
     @Override
-    public Observable[] observables() {
-        return new Observable[] {path, beans};
+    public FxObservable[] observables() {
+        return new FxObservable[] {path, beans};
+    }
+
+    @Override
+    public Stream<FxObservable> observableStream() {
+        return Stream.of(observables());
     }
 
     @Override

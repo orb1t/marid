@@ -16,27 +16,43 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.mapeditor;
+package org.marid.jfx.beans;
 
-import javafx.beans.value.ObservableStringValue;
-import org.marid.ide.tabs.IdeTab;
-import org.marid.jfx.controls.IdeShapes;
-import org.marid.jfx.panes.MaridScrollPane;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import static javafx.beans.binding.Bindings.createStringBinding;
+import javafx.beans.value.ObservableIntegerValue;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Component
-public class MapEditorTab extends IdeTab {
+public class ForwardingIntegerValue extends ForwardingObservableValue<Number, ObservableIntegerValue>
+        implements ObservableIntegerValue {
 
-    @Autowired
-    public MapEditorTab(MapEditorTable table, ObservableStringValue name) {
-        super(new MaridScrollPane(table), createStringBinding(name::get, name), () -> IdeShapes.map(name.get(), 16));
-        addNodeObservables(name);
+    public ForwardingIntegerValue(ObservableIntegerValue delegate) {
+        super(delegate);
+    }
+
+    @Override
+    public int intValue() {
+        return delegate.intValue();
+    }
+
+    @Override
+    public long longValue() {
+        return delegate.longValue();
+    }
+
+    @Override
+    public float floatValue() {
+        return delegate.floatValue();
+    }
+
+    @Override
+    public double doubleValue() {
+        return delegate.doubleValue();
+    }
+
+    @Override
+    public int get() {
+        return delegate.get();
     }
 }

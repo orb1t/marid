@@ -20,7 +20,7 @@ package org.marid.dependant.beaneditor.beandata;
 
 import javafx.scene.control.TabPane;
 import org.marid.ide.tabs.IdeTab;
-import org.marid.idefx.controls.IdeShapes;
+import org.marid.jfx.controls.IdeShapes;
 import org.marid.spring.xml.BeanData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

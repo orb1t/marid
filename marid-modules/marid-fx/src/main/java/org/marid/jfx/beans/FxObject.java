@@ -16,27 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.mapeditor;
+package org.marid.jfx.beans;
 
-import javafx.beans.value.ObservableStringValue;
-import org.marid.ide.tabs.IdeTab;
-import org.marid.jfx.controls.IdeShapes;
-import org.marid.jfx.panes.MaridScrollPane;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import static javafx.beans.binding.Bindings.createStringBinding;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Component
-public class MapEditorTab extends IdeTab {
+public class FxObject<T> extends ForwardingProperty<T, Property<T>> {
 
-    @Autowired
-    public MapEditorTab(MapEditorTable table, ObservableStringValue name) {
-        super(new MaridScrollPane(table), createStringBinding(name::get, name), () -> IdeShapes.map(name.get(), 16));
-        addNodeObservables(name);
+    public FxObject(Property<T> delegate) {
+        super(delegate);
+    }
+
+    public FxObject(Object bean, String name, T initialValue) {
+        this(new SimpleObjectProperty<>(bean, name, initialValue));
+    }
+
+    public FxObject(Object bean, String name) {
+        this(new SimpleObjectProperty<>(bean, name));
     }
 }

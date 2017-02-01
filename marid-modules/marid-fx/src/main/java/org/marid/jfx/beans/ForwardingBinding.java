@@ -16,27 +16,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor.mapeditor;
+package org.marid.jfx.beans;
 
-import javafx.beans.value.ObservableStringValue;
-import org.marid.ide.tabs.IdeTab;
-import org.marid.jfx.controls.IdeShapes;
-import org.marid.jfx.panes.MaridScrollPane;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import static javafx.beans.binding.Bindings.createStringBinding;
+import javafx.beans.binding.Binding;
+import javafx.collections.ObservableList;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Component
-public class MapEditorTab extends IdeTab {
+public class ForwardingBinding<T, V extends Binding<T>> extends ForwardingObservableValue<T, V> implements Binding<T> {
 
-    @Autowired
-    public MapEditorTab(MapEditorTable table, ObservableStringValue name) {
-        super(new MaridScrollPane(table), createStringBinding(name::get, name), () -> IdeShapes.map(name.get(), 16));
-        addNodeObservables(name);
+    public ForwardingBinding(V delegate) {
+        super(delegate);
+    }
+
+    @Override
+    public boolean isValid() {
+        return delegate.isValid();
+    }
+
+    @Override
+    public void invalidate() {
+        delegate.invalidate();
+    }
+
+    @Override
+    public ObservableList<?> getDependencies() {
+        return delegate.getDependencies();
+    }
+
+    @Override
+    public void dispose() {
+        delegate.dispose();
     }
 }

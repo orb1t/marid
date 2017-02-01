@@ -18,15 +18,15 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import org.marid.spring.util.InvalidationUtils;
+import org.marid.jfx.beans.FxObject;
+import org.marid.jfx.beans.FxObservable;
+import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
 import java.util.stream.Stream;
+
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,12 +35,8 @@ import java.util.stream.Stream;
 @XmlSeeAlso({DCollection.class})
 public class BeanProp extends AbstractData<BeanProp> {
 
-    public final StringProperty name = new SimpleStringProperty(null, "name");
-    public final ObjectProperty<DElement<?>> data = new SimpleObjectProperty<>(null, "data");
-
-    public BeanProp() {
-        InvalidationUtils.installChangeListener(data);
-    }
+    public final FxString name = new FxString(null, "name");
+    public final FxObject<DElement<?>> data = new FxObject<>(null, "data");
 
     @XmlAttribute(name = "name")
     public String getName() {
@@ -64,14 +60,22 @@ public class BeanProp extends AbstractData<BeanProp> {
         return data.get() == null;
     }
 
-    public Observable[] observables() {
-        return new Observable[] {name, data};
+    public FxObservable[] observables() {
+        final DElement<?> e = data.get();
+        return e == null
+                ? new FxObservable[] {name, data}
+                : concat(observableStream(), of(e.observables())).toArray(FxObservable[]::new);
+    }
+
+    @Override
+    public Stream<FxObservable> observableStream() {
+        return of(name, data);
     }
 
     @Override
     public Stream<? extends AbstractData<?>> stream() {
         final DElement<?> element = data.get();
-        return element == null ? Stream.empty() : Stream.of(element);
+        return element == null ? Stream.empty() : of(element);
     }
 
     @Override

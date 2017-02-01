@@ -18,11 +18,9 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import org.marid.jfx.beans.FxList;
+import org.marid.jfx.beans.FxObservable;
+import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
 import java.util.stream.Stream;
@@ -35,8 +33,8 @@ import java.util.stream.Stream;
 @XmlAccessorType(XmlAccessType.NONE)
 public final class DProps extends DElement<DProps> {
 
-    public final StringProperty valueType = new SimpleStringProperty(null, "value-type");
-    public final ObservableList<DPropEntry> entries = FXCollections.observableArrayList(DPropEntry::observables);
+    public final FxString valueType = new FxString(null, "value-type");
+    public final FxList<DPropEntry> entries = new FxList<>(DPropEntry::observables);
 
     @XmlAttribute(name = "value-type")
     public String getValueType() {
@@ -62,8 +60,13 @@ public final class DProps extends DElement<DProps> {
     }
 
     @Override
-    public Observable[] observables() {
-        return new Observable[] {valueType, entries};
+    public FxObservable[] observables() {
+        return new FxObservable[] {valueType, entries};
+    }
+
+    @Override
+    public Stream<FxObservable> observableStream() {
+        return Stream.of(observables());
     }
 
     @Override

@@ -30,6 +30,13 @@
     <dependencies>
         <dependency>
             <groupId>org.marid</groupId>
+            <artifactId>marid-fx</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.marid</groupId>
             <artifactId>marid-spring</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>

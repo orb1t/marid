@@ -18,7 +18,7 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -27,7 +27,7 @@ import org.marid.beans.BeanIntrospector;
 import org.marid.beans.ClassInfo;
 import org.marid.dependant.beaneditor.BeanMetaInfoProvider.BeansMetaInfo;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.idefx.controls.IdeShapes;
+import org.marid.jfx.controls.IdeShapes;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.xml.*;
 import org.marid.util.MethodUtils;
@@ -77,13 +77,13 @@ public class BeanListActions {
         this.metaInfoProvider = metaInfoProvider;
     }
 
-    private void setData(ObjectProperty<DElement<?>> element, Object value) {
+    private void setData(Property<DElement<?>> element, Object value) {
         if (value instanceof TypedStringValue) {
             final TypedStringValue typedStringValue = (TypedStringValue) value;
-            element.set(new DValue(typedStringValue.getValue()));
+            element.setValue(new DValue(typedStringValue.getValue()));
         } else if (value instanceof BeanDefinitionHolder) {
             final BeanDefinitionHolder holder = (BeanDefinitionHolder) value;
-            element.set(beanData(holder.getBeanName(), holder.getBeanDefinition()));
+            element.setValue(beanData(holder.getBeanName(), holder.getBeanDefinition()));
         }
     }
 
@@ -133,7 +133,7 @@ public class BeanListActions {
                     final RuntimeBeanReference reference = (RuntimeBeanReference) valueHolder.getValue();
                     final BeanDefinition beanDefinition = metaInfo.getBeanDefinition(reference.getBeanName());
                     insertItem(reference.getBeanName(), beanDefinition, metaInfo);
-                    beanData.beanArgs.filtered(a -> a.name.isEqualTo(valueHolder.getName()).get()).forEach(a -> {
+                    beanData.beanArgs.filtered(a -> Objects.equals(a.getName(), valueHolder.getName())).forEach(a -> {
                         final DRef ref = new DRef();
                         ref.setBean(reference.getBeanName());
                         a.data.setValue(ref);
@@ -147,7 +147,7 @@ public class BeanListActions {
                     final RuntimeBeanReference reference = (RuntimeBeanReference) propertyValue.getValue();
                     final BeanDefinition beanDefinition = metaInfo.getBeanDefinition(reference.getBeanName());
                     insertItem(reference.getBeanName(), beanDefinition, metaInfo);
-                    beanData.properties.filtered(a -> a.name.isEqualTo(propertyValue.getName()).get()).forEach(p -> {
+                    beanData.properties.filtered(a -> Objects.equals(a.getName(), propertyValue.getName())).forEach(p -> {
                         final DRef ref = new DRef();
                         ref.setBean(reference.getBeanName());
                         p.data.setValue(ref);

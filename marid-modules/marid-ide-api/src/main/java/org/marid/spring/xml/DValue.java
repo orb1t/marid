@@ -18,9 +18,8 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import org.marid.jfx.beans.FxObservable;
+import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -35,7 +34,7 @@ import java.util.stream.Stream;
 @XmlAccessorType(XmlAccessType.NONE)
 public final class DValue extends DElement<DValue> {
 
-    public final StringProperty value = new SimpleStringProperty(null, "value");
+    public final FxString value = new FxString(null, "value");
 
     public DValue() {
     }
@@ -59,8 +58,13 @@ public final class DValue extends DElement<DValue> {
     }
 
     @Override
-    public Observable[] observables() {
-        return new Observable[] {value};
+    public FxObservable[] observables() {
+        return new FxObservable[] {value};
+    }
+
+    @Override
+    public Stream<FxObservable> observableStream() {
+        return Stream.of(value);
     }
 
     @Override
