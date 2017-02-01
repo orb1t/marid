@@ -55,13 +55,18 @@ public class FxList<E> extends ForwardingList<E> implements ObservableList<E>, F
         this(FXCollections.observableArrayList());
     }
 
-    private void onInvalidate(Observable observable) {
+    private void clean() {
         FxCleaner.clean(invalidationListeners);
+        FxCleaner.clean(changeListeners);
+    }
+
+    private void onInvalidate(Observable observable) {
+        clean();
         invalidationListeners.forEach(l -> l.invalidated(observable));
     }
 
     private void onChange(ListChangeListener.Change<? extends E> change) {
-        FxCleaner.clean(changeListeners);
+        clean();
         changeListeners.forEach(l -> l.onChanged(change));
     }
 
@@ -72,56 +77,62 @@ public class FxList<E> extends ForwardingList<E> implements ObservableList<E>, F
 
     @Override
     public void addListener(ListChangeListener<? super E> listener) {
-        FxCleaner.clean(changeListeners);
+        clean();
         changeListeners.add(listener);
     }
 
     @Override
     public void removeListener(ListChangeListener<? super E> listener) {
         changeListeners.remove(listener);
-        FxCleaner.clean(changeListeners);
+        clean();
     }
 
     @Override
     public boolean addAll(E[] elements) {
+        clean();
         return delegate.addAll(elements);
     }
 
     @Override
     public boolean setAll(E[] elements) {
+        clean();
         return delegate.setAll(elements);
     }
 
     @Override
     public boolean setAll(Collection<? extends E> col) {
+        clean();
         return delegate.setAll(col);
     }
 
     @Override
     public boolean removeAll(E[] elements) {
+        clean();
         return delegate.removeAll(elements);
     }
 
     @Override
     public boolean retainAll(E[] elements) {
+        clean();
         return delegate.retainAll(elements);
     }
 
     @Override
     public void remove(int from, int to) {
+        clean();
         delegate.remove(from, to);
     }
 
     @Override
     public void addListener(InvalidationListener listener) {
-        FxCleaner.clean(invalidationListeners);
+        clean();
         invalidationListeners.add(listener);
     }
 
     @Override
     public void removeListener(InvalidationListener listener) {
         invalidationListeners.remove(listener);
-        FxCleaner.clean(invalidationListeners);
+        clean();
     }
 
     @Override

@@ -33,10 +33,12 @@ class FxCleaner {
 
     private static final MaridClassValue<Field> LISTENER_FIELDS = new MaridClassValue<>(type -> {
         try {
-            for (final Field field : type.getDeclaredFields()) {
-                if (field.getType() == WeakReference.class) {
-                    field.setAccessible(true);
-                    return () -> field;
+            for (Class<?> c = type; c != null && c != Object.class; c = c.getSuperclass()) {
+                for (final Field field : c.getDeclaredFields()) {
+                    if (field.getType() == WeakReference.class) {
+                        field.setAccessible(true);
+                        return () -> field;
+                    }
                 }
             }
             return () -> null;

@@ -45,43 +45,49 @@ public class ForwardingObservableValue<T, V extends ObservableValue<T>>
         delegate.addListener(this::onChange);
     }
 
-    private void onUpdate(Observable observable) {
+    private void clean() {
         FxCleaner.clean(invalidationListeners);
+        FxCleaner.clean(changeListeners);
+    }
+
+    private void onUpdate(Observable observable) {
+        clean();
         invalidationListeners.forEach(l -> l.invalidated(observable));
     }
 
     private void onChange(ObservableValue<? extends T> observable, T oldValue, T newValue) {
-        FxCleaner.clean(changeListeners);
+        clean();
         changeListeners.forEach(l -> l.changed(observable, oldValue, newValue));
     }
 
     @Override
     public void addListener(ChangeListener<? super T> listener) {
-        FxCleaner.clean(changeListeners);
+        clean();
         changeListeners.add(listener);
     }
 
     @Override
     public void removeListener(ChangeListener<? super T> listener) {
         changeListeners.remove(listener);
-        FxCleaner.clean(changeListeners);
+        clean();
     }
 
     @Override
     public T getValue() {
+        clean();
         return delegate.getValue();
     }
 
     @Override
     public void addListener(InvalidationListener listener) {
-        FxCleaner.clean(invalidationListeners);
+        clean();
         invalidationListeners.add(listener);
     }
 
     @Override
     public void removeListener(InvalidationListener listener) {
         invalidationListeners.remove(listener);
-        FxCleaner.clean(invalidationListeners);
+        clean();
     }
 
     @Override

@@ -20,12 +20,17 @@ package org.marid.dependant.project.monitor;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.collections.FXCollections;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.apache.commons.lang3.tuple.Triple;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.FxObservable;
+import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.AbstractData;
 import org.marid.spring.xml.DRef;
@@ -33,12 +38,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.marid.jfx.LocalizedStrings.LOCALE;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -97,13 +104,27 @@ public class ProfileObjectTree extends TableView<Triple<AbstractData<?>, FxObser
 
     @OrderedInit(5)
     public void listenersColumn() {
-        final TableColumn<Triple<AbstractData<?>, FxObservable, List<?>>, String> col = new TableColumn<>();
+        final TableColumn<Triple<AbstractData<?>, FxObservable, List<?>>, Label> col = new TableColumn<>();
         col.textProperty().bind(ls("Listeners"));
         col.setPrefWidth(600);
         col.setMaxWidth(1000);
         col.setCellValueFactory(p -> {
             final String text = p.getValue().getRight().stream().map(o -> o.getClass().getName()).collect(joining(","));
-            return new SimpleStringProperty(text);
+            final Label label = new Label(text);
+            final ContextMenu contextMenu = new ContextMenu();
+            final MenuItem menuItem = new MenuItem(s("Details"));
+            menuItem.setOnAction(event -> {
+                final ListView<String> listView = new ListView<>(p.getValue().getRight().stream()
+                        .map(Object::toString)
+                        .collect(Collectors.toCollection(FXCollections::observableArrayList)));
+                final Stage stage = new Stage(StageStyle.UTILITY);
+                stage.setTitle(s("Details"));
+                stage.setScene(new Scene(new MaridScrollPane(listView), 800, 800));
+                stage.show();
+            });
+            contextMenu.getItems().add(menuItem);
+            label.setContextMenu(contextMenu);
+            return new SimpleObjectProperty<>(label);
         });
         getColumns().add(col);
     }

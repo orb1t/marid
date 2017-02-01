@@ -20,10 +20,7 @@ package org.marid.dependant.beaneditor;
 
 import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.WritableValue;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.*;
 import org.marid.IdeDependants;
 import org.marid.beans.TypeInfo;
 import org.marid.dependant.beaneditor.BeanMetaInfoProvider.BeansMetaInfo;
@@ -324,14 +321,28 @@ public class ValueMenuItems {
         if (!(element.getValue() instanceof BeanData)) {
             return;
         }
-        final BeanDataEditorParams params = new BeanDataEditorParams((BeanData) element.getValue());
-        final MenuItem menuItem = new MenuItem();
-        menuItem.textProperty().bind(ls("Edit bean"));
-        menuItem.setOnAction(event -> dependants.start(BeanDataEditorConfiguration.class, params, c -> {
-            c.setId("beanDataEditor");
-            c.setDisplayName("Bean Data Editor");
-        }));
-        items.add(menuItem);
+        final BeanData beanData = (BeanData) element.getValue();
+        {
+            final BeanDataEditorParams params = new BeanDataEditorParams(beanData);
+            final MenuItem menuItem = new MenuItem();
+            menuItem.textProperty().bind(ls("Edit bean"));
+            menuItem.setOnAction(event -> dependants.start(BeanDataEditorConfiguration.class, params, c -> {
+                c.setId("beanDataEditor");
+                c.setDisplayName("Bean Data Editor");
+            }));
+            items.add(menuItem);
+        }
+        {
+            final MenuItem menuItem = new MenuItem();
+            menuItem.textProperty().bind(ls("Rename bean name"));
+            menuItem.setOnAction(event -> {
+                final TextInputDialog dialog = new TextInputDialog(beanData.getName());
+                dialog.setTitle(s("Rename bean name"));
+                dialog.setHeaderText(s("New bean name") + ":");
+                dialog.showAndWait().map(String::trim).filter(s -> !s.isEmpty()).ifPresent(beanData::setName);
+            });
+            items.add(menuItem);
+        }
         items.add(new SeparatorMenuItem());
     }
 
