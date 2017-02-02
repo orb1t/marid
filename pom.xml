@@ -441,6 +441,11 @@
                     <version>2.3</version>
                     <configuration>
                         <generateBackupPoms>false</generateBackupPoms>
+                        <excludes>
+                            <exclude>de.jensd:fontawesomefx</exclude>
+                            <exclude>org.eclipse.aether:aether-transport-http</exclude>
+                            <exclude>org.eclipse.aether:aether-transport-file</exclude>
+                        </excludes>
                     </configuration>
                 </plugin>
             </plugins>
