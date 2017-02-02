@@ -446,6 +446,8 @@
                             <exclude>org.eclipse.aether:aether-transport-http</exclude>
                             <exclude>org.eclipse.aether:aether-transport-file</exclude>
                         </excludes>
+                        <updateDependencies>true</updateDependencies>
+                        <updatePropertyVersions>true</updatePropertyVersions>
                     </configuration>
                 </plugin>
             </plugins>
