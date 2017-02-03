@@ -21,16 +21,11 @@ package org.marid;
 import org.marid.ide.common.IdeValues;
 import org.marid.ide.logging.IdeLogHandler;
 import org.springframework.beans.factory.InjectionPoint;
-import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.annotation.*;
-import org.springframework.context.support.DefaultLifecycleProcessor;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.prefs.Preferences;
-
-import static org.springframework.context.support.AbstractApplicationContext.LIFECYCLE_PROCESSOR_BEAN_NAME;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -52,19 +47,9 @@ public class IdeContext {
         return Ide.ideLogHandler;
     }
 
-    @Bean(name = LIFECYCLE_PROCESSOR_BEAN_NAME)
-    public LifecycleProcessor lifecycleProcessor() {
-        return new DefaultLifecycleProcessor();
-    }
-
     @Bean(destroyMethod = "shutdown")
-    public ScheduledThreadPoolExecutor taskExecutor() {
+    public ScheduledThreadPoolExecutor scheduledExecutorService() {
         return new ScheduledThreadPoolExecutor(1);
-    }
-
-    @Bean
-    public ConcurrentTaskScheduler taskScheduler(ScheduledThreadPoolExecutor taskExecutor) {
-        return new ConcurrentTaskScheduler(taskExecutor);
     }
 
     @Bean
