@@ -16,27 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.dependant;
+package org.marid.dependant.beaneditor.veluemenu;
 
-import org.springframework.context.ApplicationContext;
+import javafx.beans.value.ObservableStringValue;
+import javafx.beans.value.WritableValue;
+import org.marid.spring.xml.DElement;
 import org.springframework.core.ResolvableType;
-
-import javax.annotation.Resource;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-public abstract class DependantConfiguration<T> {
+public class ValueParams {
 
-    protected T param;
+    public final WritableValue<DElement<?>> element;
+    public final ResolvableType type;
+    public final ObservableStringValue name;
 
-    @SuppressWarnings("unchecked")
-    @Resource
-    private void init(ApplicationContext context) {
-        final ResolvableType type = ResolvableType.forClass(DependantConfiguration.class, getClass());
-        final ResolvableType generic = type.getGeneric(0);
-        final Class<?> c = generic.getRawClass();
-        param = (T) context.getBean(c);
+    public ValueParams(WritableValue<DElement<?>> element, ResolvableType type, ObservableStringValue name) {
+        this.element = element;
+        this.type = type;
+        this.name = name;
     }
 }

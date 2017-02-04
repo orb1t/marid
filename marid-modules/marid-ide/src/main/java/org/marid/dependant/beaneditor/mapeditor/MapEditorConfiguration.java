@@ -21,12 +21,10 @@ package org.marid.dependant.beaneditor.mapeditor;
 import javafx.beans.value.ObservableStringValue;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.DMap;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.env.Environment;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -36,28 +34,23 @@ import org.springframework.core.env.Environment;
 @Import({MapEditorTable.class, MapEditorTab.class})
 public class MapEditorConfiguration extends DependantConfiguration<MapEditorParams> {
 
-    @Autowired
-    public MapEditorConfiguration(Environment environment) {
-        super(environment);
-    }
-
     @Bean
     public ResolvableType keyType() {
-        return param().keyType;
+        return param.keyType;
     }
 
     @Bean
     public ResolvableType valueType() {
-        return param().valueType;
+        return param.valueType;
     }
 
     @Bean
     public ObservableStringValue name() {
-        return param().name;
+        return param.name;
     }
 
     @Bean
     public DMap map() {
-        return param().map;
+        return param.map;
     }
 }

@@ -16,27 +16,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.dependant;
+package org.marid.spring.beans;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.ResolvableType;
-
-import javax.annotation.Resource;
+import org.marid.misc.Casts;
+import org.springframework.beans.factory.FactoryBean;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-public abstract class DependantConfiguration<T> {
+public class ConditionalBean<T> implements FactoryBean<T> {
 
-    protected T param;
+    private final Class<T> type;
+    private final T bean;
 
-    @SuppressWarnings("unchecked")
-    @Resource
-    private void init(ApplicationContext context) {
-        final ResolvableType type = ResolvableType.forClass(DependantConfiguration.class, getClass());
-        final ResolvableType generic = type.getGeneric(0);
-        final Class<?> c = generic.getRawClass();
-        param = (T) context.getBean(c);
+    public ConditionalBean(Class<T> type, T bean) {
+        this.type = type;
+        this.bean = bean;
+    }
+
+    public ConditionalBean(T bean) {
+        this(bean == null ? null : Casts.cast(bean.getClass()), bean);
+    }
+
+    @Override
+    public T getObject() throws Exception {
+        return bean;
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return bean == null ? null : type;
+    }
+
+    @Override
+    public boolean isSingleton() {
+        return true;
     }
 }

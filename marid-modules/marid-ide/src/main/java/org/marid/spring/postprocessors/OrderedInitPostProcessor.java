@@ -53,8 +53,9 @@ public class OrderedInitPostProcessor implements BeanPostProcessor {
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         Stream.of(bean.getClass().getMethods())
                 .filter(m -> m.isAnnotationPresent(OrderedInit.class))
-                .sorted(Comparator.comparing(Method::getName))
-                .sorted(Comparator.comparingInt(m -> m.getAnnotation(OrderedInit.class).value()))
+                .sorted(Comparator
+                        .<Method>comparingInt(m -> m.getAnnotation(OrderedInit.class).value())
+                        .thenComparing(Method::getName))
                 .forEachOrdered(method -> {
                     final boolean eager = !method.isAnnotationPresent(Lazy.class);
                     final Object[] args = new Object[method.getParameterCount()];

@@ -25,12 +25,10 @@ import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.DValue;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.env.Environment;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,19 +36,14 @@ import org.springframework.core.env.Environment;
 @Configuration
 public class ValueEditorConfiguration extends DependantConfiguration<ValueEditorParams> {
 
-    @Autowired
-    public ValueEditorConfiguration(Environment environment) {
-        super(environment);
-    }
-
     @Bean
     public ResolvableType type() {
-        return param().type;
+        return param.type;
     }
 
     @Bean
     public DValue value() {
-        return param().value;
+        return param.value;
     }
 
     @Bean

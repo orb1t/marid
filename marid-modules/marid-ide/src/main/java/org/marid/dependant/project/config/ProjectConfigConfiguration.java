@@ -35,7 +35,6 @@ import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +42,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 
 import java.util.List;
 
@@ -56,14 +54,9 @@ import static org.marid.l10n.L10n.s;
 @ComponentScan(basePackageClasses = {ProjectConfigConfiguration.class})
 public class ProjectConfigConfiguration extends DependantConfiguration<ProjectParams> {
 
-    @Autowired
-    public ProjectConfigConfiguration(Environment environment) {
-        super(environment);
-    }
-
     @Bean
     public ProjectProfile profile() {
-        return param().profile;
+        return param.profile;
     }
 
     @Bean

@@ -26,13 +26,11 @@ import javafx.scene.layout.BorderPane;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.BeanData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 
 import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -44,14 +42,9 @@ import static org.marid.jfx.LocalizedStrings.ls;
 @Import({BeanDataDetails.class, ConstructorList.class, BeanArgEditor.class, BeanPropEditor.class, BeanDataTab.class})
 public class BeanDataEditorConfiguration extends DependantConfiguration<BeanDataEditorParams> {
 
-    @Autowired
-    public BeanDataEditorConfiguration(Environment environment) {
-        super(environment);
-    }
-
     @Bean
     public BeanData data() {
-        return param().beanData;
+        return param.beanData;
     }
 
     @Bean

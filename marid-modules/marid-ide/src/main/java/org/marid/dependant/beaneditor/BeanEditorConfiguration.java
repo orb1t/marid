@@ -27,13 +27,11 @@ import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 
 import java.util.List;
 import java.util.Map;
@@ -56,14 +54,9 @@ import static org.marid.l10n.L10n.s;
 })
 public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorParams> {
 
-    @Autowired
-    public BeanEditorConfiguration(Environment environment) {
-        super(environment);
-    }
-
     @Bean
     public BeanFile beanFile() {
-        return param().beanFile;
+        return param.beanFile;
     }
 
     @Bean

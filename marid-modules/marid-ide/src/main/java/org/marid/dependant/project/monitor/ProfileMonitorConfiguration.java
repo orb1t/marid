@@ -25,11 +25,9 @@ import org.marid.dependant.project.ProjectParams;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -41,14 +39,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Import({ProfileObjectTree.class})
 public class ProfileMonitorConfiguration extends DependantConfiguration<ProjectParams> {
 
-    @Autowired
-    public ProfileMonitorConfiguration(Environment environment) {
-        super(environment);
-    }
-
     @Bean
     public ProjectProfile profile() {
-        return param().profile;
+        return param.profile;
     }
 
     @Bean(initMethod = "show")
