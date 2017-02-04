@@ -22,12 +22,12 @@ import javafx.scene.Node;
 import javafx.scene.control.Control;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.menu.MaridContextMenu;
-import org.marid.jfx.menu.MaridMenu;
+import org.marid.jfx.menu.MaridMenus;
 import org.marid.jfx.toolbar.MaridToolbar;
 import org.marid.spring.action.IdeAction;
-import org.marid.spring.event.IdeStartedEvent;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +50,7 @@ public class IdeToolbar extends MaridToolbar {
     }
 
     @EventListener
-    private void onIdeStart(IdeStartedEvent event) {
+    private void onIdeStart(ContextStartedEvent event) {
         init(menuActionsFactory.getObject());
     }
 
@@ -72,7 +72,7 @@ public class IdeToolbar extends MaridToolbar {
         on((Node) control, actionMapSupplier);
         control.setContextMenu(new MaridContextMenu(menu -> {
             menu.getItems().clear();
-            control.setContextMenu(new MaridMenu(actionMapSupplier.get()).toContextMenu());
+            menu.getItems().addAll(MaridMenus.contextMenu(actionMapSupplier.get()));
         }));
     }
 }

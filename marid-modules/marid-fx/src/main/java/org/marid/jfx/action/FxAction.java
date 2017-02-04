@@ -30,6 +30,9 @@ import org.intellij.lang.annotations.MagicConstant;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.icons.FontIcon;
 
+import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -40,6 +43,7 @@ public final class FxAction {
     private final String toolbarGroup;
     private final String group;
     private final String menu;
+    private Map<String, FxAction> children;
     private StringProperty text;
     private ObjectProperty<KeyCombination> accelerator;
     private StringProperty icon;
@@ -49,18 +53,22 @@ public final class FxAction {
     private BooleanProperty selected;
     private EventHandler<ActionEvent> eventHandler;
 
-    public FxAction(String toolbarGroup, String group, String menu) {
+    public FxAction(@Nonnull String toolbarGroup, @Nonnull String group, @Nonnull String menu) {
         this.toolbarGroup = toolbarGroup;
         this.group = group;
         this.menu = menu;
     }
 
-    public FxAction(String toolbarGroup) {
-        this(toolbarGroup, null, null);
+    public FxAction(@Nonnull String toolbarGroup) {
+        this.toolbarGroup = toolbarGroup;
+        this.group = null;
+        this.menu = null;
     }
 
-    public FxAction(String group, String menu) {
-        this(null, group, menu);
+    public FxAction(@Nonnull String group, @Nonnull String menu) {
+        this.toolbarGroup = null;
+        this.group = group;
+        this.menu = menu;
     }
 
     public String getToolbarGroup() {
@@ -144,7 +152,7 @@ public final class FxAction {
     }
 
     public boolean getDisabled() {
-        return disabled == null ? null : disabled.get();
+        return disabled != null && disabled.get();
     }
 
     public FxAction setDisabled(boolean disabled) {
@@ -225,7 +233,7 @@ public final class FxAction {
     }
 
     public boolean getSelected() {
-        return selected == null ? null : selected.get();
+        return selected != null && selected.get();
     }
 
     public BooleanProperty selectedProperty() {
@@ -238,6 +246,34 @@ public final class FxAction {
         }
         selected.bind(value);
         return this;
+    }
+
+    public FxAction setChildren(Map<String, FxAction> actions) {
+        if (children == null) {
+            children = new HashMap<>(actions);
+        }
+        return this;
+    }
+
+    public FxAction addChild(String name, FxAction action) {
+        if (children == null) {
+            children = new HashMap<>();
+        }
+        children.put(name, action);
+        return this;
+    }
+
+    public FxAction addChildren(Map<String, FxAction> actions) {
+        if (children == null) {
+            children = new HashMap<>(actions);
+        } else {
+            children.putAll(actions);
+        }
+        return this;
+    }
+
+    public Map<String, FxAction> getChildren() {
+        return children;
     }
 
     public FxAction on(Node node, Consumer<FxAction> on) {

@@ -37,7 +37,7 @@ public class ToolsConfiguration {
 
     @IdeAction
     public FxAction iconViewerAction(IdeDependants dependants) {
-        return new FxAction(null, "icons", "Tools")
+        return new FxAction("icons", "Tools")
                 .setIcon(M_OPEN_IN_BROWSER)
                 .bindText(ls("Icon viewer"))
                 .setEventHandler(event -> dependants.start(IconViewerConfiguration.class, context -> {
@@ -48,7 +48,7 @@ public class ToolsConfiguration {
 
     @IdeAction
     public FxAction monitorAction(IdeDependants dependants) {
-        return new FxAction(null, "monitor", "Tools")
+        return new FxAction("monitor", "Tools")
                 .setIcon(M_GRAPHIC_EQ)
                 .bindText(ls("System monitor"))
                 .setEventHandler(event -> dependants.start(MonitorConfiguration.class, context -> {
@@ -59,7 +59,7 @@ public class ToolsConfiguration {
 
     @IdeAction
     public FxAction garbageCollectAction() {
-        return new FxAction(null, "monitor", "Tools")
+        return new FxAction("monitor", "Tools")
                 .setIcon(M_CHEVRON_LEFT)
                 .bindText(ls("Run garbage collection"))
                 .setEventHandler(event -> {

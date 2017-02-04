@@ -18,22 +18,18 @@
 
 package org.marid.ide.common;
 
-import javafx.collections.ObservableList;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.menu.MaridContextMenu;
-import org.marid.jfx.menu.MaridMenu;
-import org.marid.misc.UnionMap;
+import org.marid.jfx.menu.MaridMenus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
-
-import static org.marid.misc.Iterables.last;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,14 +46,11 @@ public class SpecialActions {
 
     public MaridContextMenu contextMenu(Supplier<Map<String, FxAction>> additionalItemsSupplier) {
         return new MaridContextMenu(m -> {
-            final ObservableList<MenuItem> items = m.getItems();
-            items.clear();
-            final MaridMenu maridMenu = new MaridMenu(UnionMap.of(actionMap, additionalItemsSupplier.get()));
-            for (final Menu menu : maridMenu.getMenus()) {
-                items.addAll(menu.getItems());
-                items.add(new SeparatorMenuItem());
-            }
-            last(items).filter(SeparatorMenuItem.class::isInstance).ifPresent(items::remove);
+            m.getItems().clear();
+            final Map<String, FxAction> add = additionalItemsSupplier.get();
+            final Set<String> keys = Sets.union(actionMap.keySet(), add.keySet());
+            final Map<String, FxAction> map = Maps.asMap(keys, k -> actionMap.getOrDefault(k, add.get(k)));
+            m.getItems().addAll(MaridMenus.contextMenu(map));
         });
     }
 }

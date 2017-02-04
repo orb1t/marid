@@ -26,7 +26,6 @@ import org.jboss.logmanager.LogManager;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
-import org.marid.spring.event.IdeStartedEvent;
 import org.marid.spring.postprocessors.LogBeansPostProcessor;
 import org.marid.spring.postprocessors.OrderedInitPostProcessor;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
@@ -75,7 +74,6 @@ public class Ide extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Ide.primaryStage = primaryStage;
-        context.publishEvent(new IdeStartedEvent(this));
         final IdePane idePane = context.getBean(IdePane.class);
         primaryStage.setMinWidth(750.0);
         primaryStage.setMinHeight(550.0);

@@ -19,66 +19,83 @@
 package org.marid.jfx.menu;
 
 import javafx.beans.binding.Bindings;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import org.marid.jfx.action.FxAction;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.8
  */
-public class MaridMenu extends MenuBar {
+public interface MaridMenus {
 
-    public MaridMenu() {
-        setMaxWidth(Double.MAX_VALUE);
-    }
-
-    public MaridMenu(Map<String, FxAction> actionMap) {
-        this();
-        init(actionMap);
-    }
-
-    protected void init(Map<String, FxAction> actionMap) {
+    static List<Menu> menus(Map<String, FxAction> actionMap) {
         final Map<String, Map<String, Map<String, MenuItem>>> itemMap = new TreeMap<>();
         actionMap.forEach((id, action) -> {
-            if (action.getGroup() == null) {
+            if (action.getMenu() == null) {
                 return;
             }
+
             final MenuItem menuItem;
             if (action.selectedProperty() != null) {
                 final CheckMenuItem checkMenuItem = new CheckMenuItem();
                 checkMenuItem.selectedProperty().bindBidirectional(action.selectedProperty());
                 menuItem = checkMenuItem;
+            } else if (action.getChildren() != null) {
+                final Menu menu = new Menu();
+                final List<Menu> subMenus = menus(action.getChildren());
+                switch (subMenus.size()) {
+                    case 0:
+                        return;
+                    case 1:
+                        menu.getItems().addAll(subMenus.get(0).getItems());
+                        break;
+                    default:
+                        menu.getItems().addAll(subMenus);
+                        break;
+                }
+                menuItem = menu;
             } else {
                 menuItem = new MenuItem();
             }
+
             if (action.textProperty() != null) {
                 menuItem.textProperty().bind(action.textProperty());
             }
             if (action.iconProperty() != null) {
                 menuItem.graphicProperty().bind(Bindings.createObjectBinding(() -> {
-                    if (action.getIcon() == null) {
-                        return null;
-                    } else {
-                        return glyphIcon(action.getIcon(), 16);
-                    }
+                    final String icon = action.getIcon();
+                    return icon != null ? glyphIcon(icon, 16) : null;
                 }, action.iconProperty()));
             }
-            menuItem.setAccelerator(action.getAccelerator());
-            menuItem.setOnAction(event -> action.getEventHandler().handle(event));
-            if (action.disabledProperty() != null) {
-                menuItem.disableProperty().bindBidirectional(action.disabledProperty());
+            if (action.acceleratorProperty() != null) {
+                menuItem.acceleratorProperty().bind(action.acceleratorProperty());
+            }
+
+            if (!(menuItem instanceof Menu)) {
+                menuItem.setOnAction(event -> action.getEventHandler().handle(event));
+                if (action.disabledProperty() != null) {
+                    menuItem.disableProperty().bindBidirectional(action.disabledProperty());
+                }
             }
             itemMap
                     .computeIfAbsent(action.getMenu(), k -> new TreeMap<>())
                     .computeIfAbsent(action.getGroup(), k -> new TreeMap<>())
-                    .put(action.getText(), menuItem);
+                    .put(id, menuItem);
         });
+        final List<Menu> menus = new ArrayList<>();
         itemMap.forEach((menu, groupMap) -> {
             final Menu m = new Menu();
             m.textProperty().bind(ls(menu));
@@ -89,19 +106,17 @@ public class MaridMenu extends MenuBar {
             if (!m.getItems().isEmpty()) {
                 m.getItems().remove(m.getItems().size() - 1);
             }
-            getMenus().add(m);
+            menus.add(m);
         });
+        return menus;
     }
 
-    public ContextMenu toContextMenu() {
-        final ContextMenu contextMenu = new ContextMenu();
+    static MenuItem[] contextMenu(Map<String, FxAction> actionMap) {
         final AtomicBoolean first = new AtomicBoolean(true);
-        getMenus().forEach(menu -> {
-            if (!first.compareAndSet(true, false)) {
-                contextMenu.getItems().add(new SeparatorMenuItem());
-            }
-            contextMenu.getItems().addAll(menu.getItems());
-        });
-        return contextMenu;
+        return menus(actionMap).stream()
+                .flatMap(m -> first.compareAndSet(true, false)
+                        ? m.getItems().stream()
+                        : Stream.concat(Stream.of(new SeparatorMenuItem()), m.getItems().stream()))
+                .toArray(MenuItem[]::new);
     }
 }

@@ -57,7 +57,7 @@ public class ProjectConfiguration implements LogSupport {
     @IdeAction
     @Qualifier("profile")
     public FxAction projectSaveAction(ObjectFactory<ProjectSaver> projectSaver, ProjectManager projectManager) {
-        return new FxAction(null, "io", "Project")
+        return new FxAction("io", "Project")
                 .setAccelerator(KeyCombination.valueOf("F2"))
                 .bindText(ls("Save"))
                 .setIcon(F_SAVE)

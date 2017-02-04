@@ -34,7 +34,7 @@ public class ApplicationConfiguration {
 
     @IdeAction
     public FxAction exitAction() {
-        return new FxAction(null, "x", "Application")
+        return new FxAction("x", "Application")
                 .bindText("Exit")
                 .setIcon(D_EXIT_TO_APP)
                 .setEventHandler(event -> Platform.exit());

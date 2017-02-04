@@ -34,7 +34,7 @@ public class WindowConfiguration {
 
     @IdeAction
     public FxAction alwaysOnTopAction() {
-        return new FxAction(null, "ops", "Window")
+        return new FxAction("ops", "Window")
                 .bindText("Always on top")
                 .setIcon(D_BORDER_TOP)
                 .setSelected(false)
