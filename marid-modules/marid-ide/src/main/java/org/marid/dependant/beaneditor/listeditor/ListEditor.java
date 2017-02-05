@@ -18,7 +18,6 @@
 
 package org.marid.dependant.beaneditor.listeditor;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.WritableValue;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
@@ -36,7 +35,6 @@ import org.springframework.stereotype.Component;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static java.util.Collections.emptyList;
 import static javafx.beans.binding.Bindings.createStringBinding;
 import static org.marid.jfx.LocalizedStrings.fls;
 
@@ -79,7 +77,7 @@ public class ListEditor extends ListView<DElement<?>> {
                         final Consumer<DElement<?>> consumer = e -> getItems().set(index, e);
                         final Supplier<DElement<?>> supplier = () -> getItems().get(index);
                         final WritableValue<DElement<?>> element = new WritableValueImpl<>(consumer, supplier);
-                        final ValueMenuItems items = new ValueMenuItems(element, type, emptyList(), createStringBinding(() -> "element"));
+                        final ValueMenuItems items = new ValueMenuItems(element, type, createStringBinding(() -> "element"));
                         factory.initializeBean(items, null);
                         items.addTo(m);
                     }));

@@ -63,17 +63,17 @@ public class ValueMenuItems {
     private final List<MenuItem> items = new ArrayList<>();
     private final WritableValue<DElement<?>> element;
     private final ResolvableType type;
-    private final List<TypeInfo> editors;
+    private final List<TypeInfo> editors = new ArrayList<>();
     private final ObservableStringValue name;
 
-    public ValueMenuItems(WritableValue<DElement<?>> element,
-                          ResolvableType type,
-                          List<TypeInfo> editors,
-                          ObservableStringValue name) {
+    public ValueMenuItems(WritableValue<DElement<?>> element, ResolvableType type, ObservableStringValue name) {
         this.element = element;
         this.type = type;
-        this.editors = editors;
         this.name = name;
+    }
+
+    public void addEditor(TypeInfo typeInfo) {
+        editors.add(typeInfo);
     }
 
     @OrderedInit(1)

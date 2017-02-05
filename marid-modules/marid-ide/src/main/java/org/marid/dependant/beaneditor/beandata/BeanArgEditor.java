@@ -38,8 +38,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Executable;
-import java.util.ArrayList;
-import java.util.List;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.dependant.beaneditor.beandata.BeanPropEditor.label;
@@ -104,15 +102,18 @@ public class BeanArgEditor extends TableView<BeanArg> {
                 if (prop == null) {
                     return;
                 }
+
+                final ResolvableType type = profile.getArgType(beanData, prop.getName());
+                final ValueMenuItems menuItems = new ValueMenuItems(prop.data, type, prop.name);
+
                 final ResolvableType beanType = profile.getType(beanData);
-                final List<TypeInfo> editors = new ArrayList<>();
                 for (final ClassInfo classInfo : BeanIntrospector.classInfos(profile.getClassLoader(), beanType)) {
                         final Executable c = profile.getConstructor(beanData).orElse(null);
                         for (final MethodInfo methodInfo : classInfo.constructorInfos) {
                             if (methodInfo.matches(c)) {
                                 for (final TypeInfo typeInfo : methodInfo.parameters) {
                                     if (typeInfo.name.equals(prop.getName())) {
-                                        editors.add(typeInfo);
+                                        menuItems.addEditor(typeInfo);
                                         break;
                                     }
                                 }
@@ -120,8 +121,6 @@ public class BeanArgEditor extends TableView<BeanArg> {
                             }
                         }
                 }
-                final ResolvableType type = profile.getArgType(beanData, prop.getName());
-                final ValueMenuItems menuItems = new ValueMenuItems(prop.data, type, editors, prop.name);
                 factory.initializeBean(menuItems, null);
                 menuItems.addTo(m);
             }));

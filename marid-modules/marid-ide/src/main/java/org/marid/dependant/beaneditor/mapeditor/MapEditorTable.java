@@ -25,8 +25,8 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.dependant.beaneditor.beandata.BeanPropEditor;
-import org.marid.jfx.controls.CommonTableView;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.controls.CommonTableView;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.DElement;
@@ -37,8 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
-
-import static java.util.Collections.emptyList;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -111,7 +109,7 @@ public class MapEditorTable extends CommonTableView<DMapEntry> {
                 if (entry == null) {
                     return;
                 }
-                final ValueMenuItems menuItems = new ValueMenuItems(entry.value, valueType, emptyList(), entry.key);
+                final ValueMenuItems menuItems = new ValueMenuItems(entry.value, valueType, entry.key);
                 factory.initializeBean(menuItems, null);
                 menuItems.addTo(m);
             }));

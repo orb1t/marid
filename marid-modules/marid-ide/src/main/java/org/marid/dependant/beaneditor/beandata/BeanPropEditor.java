@@ -36,9 +36,6 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.*;
@@ -129,18 +126,20 @@ public class BeanPropEditor extends TableView<BeanProp> {
                 if (prop == null) {
                     return;
                 }
+
+                final ResolvableType type = profile.getPropType(beanData, prop.getName());
+                final ValueMenuItems menuItems = new ValueMenuItems(prop.data, type, prop.name);
+
                 final ResolvableType beanType = profile.getType(beanData);
-                final List<TypeInfo> editors = new ArrayList<>();
                 for (final ClassInfo classInfo : BeanIntrospector.classInfos(profile.getClassLoader(), beanType)) {
                     for (final TypeInfo typeInfo : classInfo.propertyInfos) {
                         if (typeInfo.name.equals(prop.getName())) {
-                            editors.add(typeInfo);
+                            menuItems.addEditor(typeInfo);
                             break;
                         }
                     }
                 }
-                final ResolvableType type = profile.getPropType(beanData, prop.getName());
-                final ValueMenuItems menuItems = new ValueMenuItems(prop.data, type, editors, prop.name);
+
                 factory.initializeBean(menuItems, null);
                 menuItems.addTo(m);
             }));

@@ -19,10 +19,7 @@
 package org.marid.ide.panes.main;
 
 import javafx.scene.Node;
-import javafx.scene.control.Control;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.menu.MaridContextMenu;
-import org.marid.jfx.menu.MaridMenus;
 import org.marid.jfx.toolbar.MaridToolbar;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -66,13 +63,5 @@ public class IdeToolbar extends MaridToolbar {
                 nodes.clear();
             }
         });
-    }
-
-    public void on(Control control, Supplier<Map<String, FxAction>> actionMapSupplier) {
-        on((Node) control, actionMapSupplier);
-        control.setContextMenu(new MaridContextMenu(menu -> {
-            menu.getItems().clear();
-            menu.getItems().addAll(MaridMenus.contextMenu(actionMapSupplier.get()));
-        }));
     }
 }
