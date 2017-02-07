@@ -42,5 +42,6 @@ public class BeanEditorTab extends IdeTab {
         super(new MaridScrollPane(table), createStringBinding(file::getFilePath, file.path), () -> fileNode(file, 16));
         this.profile = profile;
         this.file = file;
+        addNodeObservables(file.path);
     }
 }

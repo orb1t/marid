@@ -71,7 +71,11 @@ public class IdeTab extends Tab {
             final Map<String, IdeTab> tabMap = c.getBeansOfType(IdeTab.class);
             for (final Map.Entry<String, IdeTab> tabEntry : tabMap.entrySet()) {
                 if (c.containsLocalBean(tabEntry.getKey())) {
-                    final IdeTabKey k = tabEntry.getValue().key;
+                    final IdeTab tab = tabEntry.getValue();
+                    if (c != f) {
+                        nodeObservables.addAll(0, tab.nodeObservables);
+                    }
+                    final IdeTabKey k = tab.key;
                     suppliers.add(0, k.graphicBinding);
                     texts.add(0, k.textBinding);
                 }
@@ -80,6 +84,7 @@ public class IdeTab extends Tab {
         if (suppliers.size() > 1) {
             suppliers.remove(0);
         }
+        System.out.println(nodeObservables);
         graphicProperty().bind(createObjectBinding(() -> suppliers.stream().reduce(new HBox(4), (b, e) -> {
             b.getChildren().add(e.get());
             return b;
