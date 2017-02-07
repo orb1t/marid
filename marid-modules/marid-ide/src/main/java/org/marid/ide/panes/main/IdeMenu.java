@@ -20,7 +20,7 @@ package org.marid.ide.panes.main;
 
 import javafx.scene.control.MenuBar;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.menu.MaridMenus;
+import org.marid.jfx.action.MaridActions;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +45,6 @@ public class IdeMenu extends MenuBar {
 
     @EventListener
     private void onIdeStart(ContextStartedEvent event) {
-        getMenus().addAll(MaridMenus.menus(menuActionsFactory.getObject()));
+        getMenus().addAll(MaridActions.menus(menuActionsFactory.getObject()));
     }
 }

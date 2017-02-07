@@ -22,7 +22,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.menu.MaridContextMenu;
-import org.marid.jfx.menu.MaridMenus;
+import org.marid.jfx.action.MaridActions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -50,7 +50,7 @@ public class SpecialActions {
             final Map<String, FxAction> add = additionalItemsSupplier.get();
             final Set<String> keys = Sets.union(actionMap.keySet(), add.keySet());
             final Map<String, FxAction> map = Maps.asMap(keys, k -> actionMap.getOrDefault(k, add.get(k)));
-            m.getItems().addAll(MaridMenus.contextMenu(map));
+            m.getItems().addAll(MaridActions.contextMenu(map));
         });
     }
 }

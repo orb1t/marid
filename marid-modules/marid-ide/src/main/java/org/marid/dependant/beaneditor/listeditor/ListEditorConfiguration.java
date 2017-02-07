@@ -20,8 +20,8 @@ package org.marid.dependant.beaneditor.listeditor;
 
 import javafx.scene.control.ToolBar;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.list.MaridListActions;
-import org.marid.jfx.toolbar.MaridToolbar;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.DCollection;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -63,6 +63,6 @@ public class ListEditorConfiguration extends DependantConfiguration<ListEditorPa
 
     @Bean
     public ToolBar listEditorToolbar(@Qualifier("listEditor") Map<String, FxAction> actionMap) {
-        return new MaridToolbar(actionMap);
+        return new ToolBar(MaridActions.toolbar(actionMap));
     }
 }

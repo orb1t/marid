@@ -16,22 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.jfx.menu;
+package org.marid.jfx.action;
 
+import de.jensd.fx.glyphs.GlyphIcon;
 import javafx.beans.binding.Bindings;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import org.marid.jfx.action.FxAction;
+import javafx.beans.property.StringProperty;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
@@ -39,7 +41,7 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-public interface MaridMenus {
+public interface MaridActions {
 
     static List<Menu> menus(Map<String, FxAction> actionMap) {
         final Map<String, Map<String, Map<String, MenuItem>>> itemMap = new TreeMap<>();
@@ -116,7 +118,38 @@ public interface MaridMenus {
         return menus(actionMap).stream()
                 .flatMap(m -> first.compareAndSet(true, false)
                         ? m.getItems().stream()
-                        : Stream.concat(Stream.of(new SeparatorMenuItem()), m.getItems().stream()))
+                        : concat(of(new SeparatorMenuItem()), m.getItems().stream()))
                 .toArray(MenuItem[]::new);
+    }
+
+    static Node[] toolbar(Map<String, FxAction> actionMap) {
+        final Map<String, Map<String, FxAction>> sorted = actionMap.entrySet().stream()
+                .filter(e -> e.getValue().getToolbarGroup() != null)
+                .collect(groupingBy(
+                        e -> e.getValue().getToolbarGroup(),
+                        TreeMap::new,
+                        toMap(Map.Entry::getKey, Map.Entry::getValue, (a1, a2) -> a2, TreeMap::new))
+                );
+        return sorted.values().stream()
+                .flatMap(v -> concat(of(new Separator()), v.values().stream()
+                        .map(a -> {
+                            final GlyphIcon<?> icon = a.getIcon() != null ? glyphIcon(a.getIcon(), 20) : null;
+                            final Button button = new Button(null, icon);
+                            button.setFocusTraversable(false);
+                            button.setOnAction(event -> a.getEventHandler().handle(event));
+                            if (a.disabledProperty() != null) {
+                                button.disableProperty().bindBidirectional(a.disabledProperty());
+                            }
+                            final StringProperty hintText = a.hintProperty() != null
+                                    ? a.hintProperty()
+                                    : a.textProperty();
+                            if (hintText != null) {
+                                final Tooltip tooltip = new Tooltip();
+                                tooltip.textProperty().bind(hintText);
+                                button.setTooltip(tooltip);
+                            }
+                            return button;
+                        })))
+                .toArray(Node[]::new);
     }
 }

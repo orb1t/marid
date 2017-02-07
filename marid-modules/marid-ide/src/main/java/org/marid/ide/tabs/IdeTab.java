@@ -25,17 +25,17 @@ import javafx.scene.control.Tab;
 import javafx.scene.layout.HBox;
 import org.marid.jfx.props.Props;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.context.support.GenericApplicationContext;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
+
+import static javafx.beans.binding.Bindings.createObjectBinding;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -64,28 +64,26 @@ public class IdeTab extends Tab {
         Collections.addAll(nodeObservables, observables);
     }
 
-    private void updateGraphic(Observable observable) {
-        setGraphic(suppliers.stream().reduce(new HBox(4), (b, e) -> {
-            b.getChildren().add(e.get());
-            return b;
-        }, (b1, b2) -> b2));
-    }
-
-    @PostConstruct
-    private void init() {
-        context.getBeanFactory().registerSingleton("$ideTabKey", key);
-
+    @EventListener
+    private void init(ContextStartedEvent contextStartedEvent) {
         final DefaultListableBeanFactory f = context.getDefaultListableBeanFactory();
         for (DefaultListableBeanFactory c = f; c != null; c = (DefaultListableBeanFactory) c.getParentBeanFactory()) {
-            final IdeTabKey k = c.getBean("$ideTabKey", IdeTabKey.class);
-            suppliers.add(0, k.graphicBinding);
-            texts.add(0, k.textBinding);
+            final Map<String, IdeTab> tabMap = c.getBeansOfType(IdeTab.class);
+            for (final Map.Entry<String, IdeTab> tabEntry : tabMap.entrySet()) {
+                if (c.containsLocalBean(tabEntry.getKey())) {
+                    final IdeTabKey k = tabEntry.getValue().key;
+                    suppliers.add(0, k.graphicBinding);
+                    texts.add(0, k.textBinding);
+                }
+            }
         }
         if (suppliers.size() > 1) {
             suppliers.remove(0);
         }
-        updateGraphic(this.graphicProperty());
-        nodeObservables.forEach(o -> o.addListener(this::updateGraphic));
+        graphicProperty().bind(createObjectBinding(() -> suppliers.stream().reduce(new HBox(4), (b, e) -> {
+            b.getChildren().add(e.get());
+            return b;
+        }, (b1, b2) -> b2), nodeObservables.toArray(new Observable[nodeObservables.size()])));
 
         ideTabPane.getTabs().add(this);
         ideTabPane.getSelectionModel().select(this);
@@ -94,7 +92,6 @@ public class IdeTab extends Tab {
 
     @PreDestroy
     private void destroy() {
-        nodeObservables.forEach(o -> o.removeListener(this::updateGraphic));
         ideTabPane.getTabs().remove(this);
     }
 
