@@ -18,6 +18,7 @@
 
 package org.marid.ide.panes.profiles;
 
+import com.google.common.collect.ImmutableMap;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.*;
@@ -25,8 +26,6 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.IdeDependants;
-import org.marid.dependant.project.ProjectParams;
-import org.marid.dependant.project.monitor.ProfileMonitorConfiguration;
 import org.marid.dependant.resources.ResourcesConfiguration;
 import org.marid.dependant.resources.ResourcesParams;
 import org.marid.ide.common.SpecialActions;
@@ -34,9 +33,8 @@ import org.marid.ide.panes.main.IdeToolbar;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectSaver;
-import org.marid.jfx.controls.IdeShapes;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.icons.FontIcon;
+import org.marid.jfx.controls.IdeShapes;
 import org.marid.logging.LogSupport;
 import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +43,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -173,17 +170,7 @@ public class ProfilesTable extends TableView<ProjectProfile> implements LogSuppo
     }
 
     @Autowired
-    private void initMonitor(IdeToolbar toolbar, IdeDependants dependants) {
-        toolbar.on(this, () -> Collections.singletonMap("monitor", new FxAction("")
-                .bindText("Show profile monitor")
-                .setIcon(FontIcon.D_MONITOR_MULTIPLE)
-                .setEventHandler(event -> {
-                    final ProjectProfile profile = getSelectionModel().getSelectedItem();
-                    dependants.start(ProfileMonitorConfiguration.class, new ProjectParams(profile), c -> {
-                        c.setId("profileMonitor");
-                        c.setDisplayName("Profile Monitor");
-                    });
-                })
-        ));
+    private void initMonitor(IdeToolbar toolbar, FxAction profileMonitor) {
+        toolbar.on(this, () -> ImmutableMap.of("profileMonitor", profileMonitor));
     }
 }

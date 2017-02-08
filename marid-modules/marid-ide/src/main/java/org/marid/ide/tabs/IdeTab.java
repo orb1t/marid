@@ -84,7 +84,6 @@ public class IdeTab extends Tab {
         if (suppliers.size() > 1) {
             suppliers.remove(0);
         }
-        System.out.println(nodeObservables);
         graphicProperty().bind(createObjectBinding(() -> suppliers.stream().reduce(new HBox(4), (b, e) -> {
             b.getChildren().add(e.get());
             return b;

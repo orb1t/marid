@@ -22,12 +22,16 @@ import javafx.scene.input.KeyCombination;
 import org.marid.IdeDependants;
 import org.marid.dependant.project.ProjectParams;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
+import org.marid.dependant.project.monitor.ProfileMonitorConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
+import org.marid.ide.panes.profiles.ProfilesTable;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.icons.FontIcon;
 import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -101,6 +105,21 @@ public class ProjectConfiguration implements LogSupport {
                     dependants.start(ProjectRunnerConfiguration.class, new ProjectParams(profile), context -> {
                         context.setId("projectRunner");
                         context.setDisplayName("Project Runner");
+                    });
+                });
+    }
+
+    @Bean
+    @Qualifier("profile")
+    public FxAction profileMonitor(IdeDependants dependants, ObjectFactory<ProfilesTable> table) {
+        return new FxAction("monitor", "mon", "Project")
+                .bindText("Show profile monitor")
+                .setIcon(FontIcon.D_MONITOR_MULTIPLE)
+                .setEventHandler(event -> {
+                    final ProjectProfile profile = table.getObject().getSelectionModel().getSelectedItem();
+                    dependants.start(ProfileMonitorConfiguration.class, new ProjectParams(profile), c -> {
+                        c.setId("profileMonitor");
+                        c.setDisplayName("Profile Monitor");
                     });
                 });
     }
