@@ -31,7 +31,6 @@
     <modules>
         <module>marid-proto</module>
         <module>marid-db</module>
-        <module>marid-web</module>
         <module>marid-editors</module>
         <module>marid-widgets</module>
     </modules>

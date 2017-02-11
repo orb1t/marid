@@ -20,7 +20,7 @@ package org.marid.dependant.beaneditor.mapeditor;
 
 import javafx.beans.value.ObservableStringValue;
 import org.marid.ide.tabs.IdeTab;
-import org.marid.jfx.controls.IdeShapes;
+import org.marid.ide.common.IdeShapes;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -30,7 +30,7 @@
     <dependencies>
         <dependency>
             <groupId>org.marid</groupId>
-            <artifactId>marid-db-api</artifactId>
+            <artifactId>marid-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 

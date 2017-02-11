@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static javafx.beans.binding.Bindings.createStringBinding;
-import static org.marid.jfx.controls.IdeShapes.fileNode;
+import static org.marid.ide.common.IdeShapes.fileNode;
 
 /**
  * @author Dmitry Ovchinnikov.

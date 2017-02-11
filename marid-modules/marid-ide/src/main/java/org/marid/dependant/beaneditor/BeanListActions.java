@@ -27,7 +27,7 @@ import org.marid.beans.BeanIntrospector;
 import org.marid.beans.ClassInfo;
 import org.marid.dependant.beaneditor.BeanMetaInfoProvider.BeansMetaInfo;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.controls.IdeShapes;
+import org.marid.ide.common.IdeShapes;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.xml.*;
 import org.marid.util.MethodUtils;

@@ -34,7 +34,7 @@ import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectSaver;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.controls.IdeShapes;
+import org.marid.ide.common.IdeShapes;
 import org.marid.logging.LogSupport;
 import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;

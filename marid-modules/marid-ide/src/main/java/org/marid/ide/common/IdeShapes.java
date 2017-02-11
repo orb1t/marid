@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.jfx.controls;
+package org.marid.ide.common;
 
 import com.google.common.primitives.Ints;
 import javafx.scene.layout.Pane;

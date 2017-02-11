@@ -27,7 +27,7 @@ import org.marid.beans.ClassInfo;
 import org.marid.beans.TypeInfo;
 import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.controls.IdeShapes;
+import org.marid.ide.common.IdeShapes;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.*;

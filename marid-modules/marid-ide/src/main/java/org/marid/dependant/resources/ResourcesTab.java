@@ -24,7 +24,7 @@ import org.marid.ide.tabs.IdeTab;
 import org.springframework.stereotype.Component;
 
 import static javafx.beans.binding.Bindings.createStringBinding;
-import static org.marid.jfx.controls.IdeShapes.profileNode;
+import static org.marid.ide.common.IdeShapes.profileNode;
 
 /**
  * @author Dmitry Ovchinnikov
