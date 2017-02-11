@@ -18,9 +18,7 @@
 
 package org.marid.dependant.resources;
 
-import com.sun.javafx.PlatformUtil;
-import com.sun.javafx.application.PlatformImpl;
-import com.sun.nio.file.ExtendedWatchEventModifier;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.ide.project.ProjectProfile;
@@ -61,17 +59,12 @@ public class ResourcesTracker implements Closeable, LogSupport {
     @PostConstruct
     private void start() throws IOException {
         final WatchEvent.Kind<?>[] kinds = {ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY};
-        final boolean windows = PlatformUtil.isWindows();
-        if (windows) {
-            resourcesPath.register(watchService, kinds, ExtendedWatchEventModifier.FILE_TREE);
-        } else {
-            final Set<Path> directories;
-            try (final Stream<Path> files = Files.walk(resourcesPath)) {
-                directories = files.filter(Files::isDirectory).collect(Collectors.toSet());
-            }
-            for (final Path directory : directories) {
-                directory.register(watchService, kinds);
-            }
+        final Set<Path> directories;
+        try (final Stream<Path> files = Files.walk(resourcesPath)) {
+            directories = files.filter(Files::isDirectory).collect(Collectors.toSet());
+        }
+        for (final Path directory : directories) {
+            directory.register(watchService, kinds);
         }
         try (final Stream<Path> files = Files.walk(resourcesPath)) {
             files.filter(Files::isRegularFile).forEach(resources::add);
@@ -92,16 +85,14 @@ public class ResourcesTracker implements Closeable, LogSupport {
                     final Path path = ((Path) watchKey.watchable()).resolve((Path) event.context());
                     final WatchEvent.Kind<?> kind = event.kind();
                     if (kind.equals(ENTRY_DELETE)) {
-                        PlatformImpl.runAndWait(() -> resources.remove(path));
-                        if (!windows) {
-                            final WatchKey wk = watchKeyMap.remove(path);
-                            if (wk != null) {
-                                wk.cancel();
-                            }
+                        Platform.runLater(() -> resources.remove(path));
+                        final WatchKey wk = watchKeyMap.remove(path);
+                        if (wk != null) {
+                            wk.cancel();
                         }
                     } else if (kind.equals(ENTRY_CREATE)) {
                         if (Files.isRegularFile(path)) {
-                            PlatformImpl.runAndWait(() -> {
+                            Platform.runLater(() -> {
                                 final int index = resources.indexOf(path);
                                 if (index < 0) {
                                     resources.add(path);
@@ -112,18 +103,16 @@ public class ResourcesTracker implements Closeable, LogSupport {
                             });
                         } else if (Files.isDirectory(path)) {
                             try {
-                                if (!windows) {
-                                    final WatchKey old = watchKeyMap.put(path, path.register(watchService, kinds));
-                                    if (old != null) {
-                                        old.cancel();
-                                    }
+                                final WatchKey old = watchKeyMap.put(path, path.register(watchService, kinds));
+                                if (old != null) {
+                                    old.cancel();
                                 }
                             } catch (IOException ioException) {
                                 log(WARNING, "Unable to register {0}", ioException, path);
                             }
                         }
                     } else if (kind.equals(ENTRY_MODIFY)) {
-                        PlatformImpl.runAndWait(() -> {
+                        Platform.runLater(() -> {
                             final int index = resources.indexOf(path);
                             if (index >= 0) {
                                 final Path p = resources.remove(index);
