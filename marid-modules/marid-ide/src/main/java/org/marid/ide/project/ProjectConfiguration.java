@@ -18,13 +18,13 @@
 
 package org.marid.ide.project;
 
+import javafx.beans.binding.BooleanBinding;
 import javafx.scene.input.KeyCombination;
 import org.marid.IdeDependants;
 import org.marid.dependant.project.ProjectParams;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.monitor.ProfileMonitorConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
-import org.marid.ide.panes.profiles.ProfilesTable;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.logging.LogSupport;
@@ -45,7 +45,9 @@ public class ProjectConfiguration implements LogSupport {
 
     @IdeAction
     @Qualifier("profile")
-    public FxAction projectSetupAction(IdeDependants dependants, ProjectManager projectManager) {
+    public FxAction projectSetupAction(IdeDependants dependants,
+                                       ProjectManager projectManager,
+                                       BooleanBinding projectDisabled) {
         return new FxAction("projectSetup", "setup", "Project")
                 .bindText(ls("Project setup..."))
                 .setIcon(O_TOOLS)
@@ -55,24 +57,29 @@ public class ProjectConfiguration implements LogSupport {
                         context.setId("projectConfiguration");
                         context.setDisplayName("Project Configuration");
                     });
-                });
+                })
+                .bindDisabled(projectDisabled);
     }
 
     @IdeAction
     @Qualifier("profile")
-    public FxAction projectSaveAction(ObjectFactory<ProjectSaver> projectSaver, ProjectManager projectManager) {
+    public FxAction projectSaveAction(ObjectFactory<ProjectSaver> projectSaver,
+                                      ProjectManager projectManager,
+                                      BooleanBinding projectDisabled) {
         return new FxAction("io", "Project")
                 .setAccelerator(KeyCombination.valueOf("F2"))
                 .bindText(ls("Save"))
                 .setIcon(F_SAVE)
-                .setEventHandler(event -> projectSaver.getObject().save(projectManager.getProfile()));
+                .setEventHandler(event -> projectSaver.getObject().save(projectManager.getProfile()))
+                .bindDisabled(projectDisabled);
     }
 
     @IdeAction
     @Qualifier("profile")
     public FxAction projectBuildAction(ObjectFactory<ProjectMavenBuilder> mavenBuilder,
                                        ObjectFactory<ProjectSaver> projectSaver,
-                                       ProjectManager projectManager) {
+                                       ProjectManager projectManager,
+                                       BooleanBinding projectDisabled) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F9"))
                 .bindText(ls("Build"))
@@ -90,12 +97,14 @@ public class ProjectConfiguration implements LogSupport {
                         }
                     }, profile.logger()::log);
                 })
-                .setDisabled(false);
+                .bindDisabled(projectDisabled);
     }
 
     @IdeAction
     @Qualifier("profile")
-    public FxAction projectRunAction(IdeDependants dependants, ProjectManager projectManager) {
+    public FxAction projectRunAction(IdeDependants dependants,
+                                     ProjectManager projectManager,
+                                     BooleanBinding projectDisabled) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F5"))
                 .bindText(ls("Run"))
@@ -106,21 +115,25 @@ public class ProjectConfiguration implements LogSupport {
                         context.setId("projectRunner");
                         context.setDisplayName("Project Runner");
                     });
-                });
+                })
+                .bindDisabled(projectDisabled);
     }
 
     @Bean
     @Qualifier("profile")
-    public FxAction profileMonitor(IdeDependants dependants, ObjectFactory<ProfilesTable> table) {
+    public FxAction profileMonitor(IdeDependants dependants,
+                                   ProjectManager projectManager,
+                                   BooleanBinding projectDisabled) {
         return new FxAction("monitor", "mon", "Project")
                 .bindText("Show profile monitor")
                 .setIcon(FontIcon.D_MONITOR_MULTIPLE)
                 .setEventHandler(event -> {
-                    final ProjectProfile profile = table.getObject().getSelectionModel().getSelectedItem();
+                    final ProjectProfile profile = projectManager.getProfile();
                     dependants.start(ProfileMonitorConfiguration.class, new ProjectParams(profile), c -> {
                         c.setId("profileMonitor");
                         c.setDisplayName("Profile Monitor");
                     });
-                });
+                })
+                .bindDisabled(projectDisabled);
     }
 }

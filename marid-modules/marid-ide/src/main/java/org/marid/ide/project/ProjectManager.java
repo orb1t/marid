@@ -34,11 +34,13 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PreDestroy;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.Collections.binarySearch;
+import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,31 +52,20 @@ public class ProjectManager implements LogSupport {
     private final ObservableList<ProjectProfile> profiles = FXCollections.observableArrayList();
 
     public ProjectManager() {
-        profile.set(new ProjectProfile(IdePrefs.PREFERENCES.get("profile", "default")));
-        if (!isPresent()) {
-            profile.set(new ProjectProfile("default"));
-        }
-        profiles.add(profile.get());
-        final Path profilesDir = getProfile().getPath().getParent();
+        final Path profilesDir = Paths.get(USER_HOME, "marid", "profiles");
         try (final Stream<Path> stream = Files.list(profilesDir)) {
-            stream
-                    .filter(p -> Files.isDirectory(p) && !profilesDir.equals(p))
-                    .filter(p -> !p.getFileName().toString().equals(profile.get().getName()))
-                    .map(p -> new ProjectProfile(p.getFileName().toString()))
-                    .forEach(profiles::add);
+            stream.map(p -> new ProjectProfile(p.getFileName().toString())).forEach(profiles::add);
         } catch (Exception x) {
             log(WARNING, "Unable to enumerate profiles", x);
         }
         profiles.sort(Comparator.comparing(ProjectProfile::getName));
+        final String profileName = IdePrefs.PREFERENCES.get("profile", null);
+        profiles.stream().filter(p -> p.getName().equals(profileName)).findAny().ifPresent(profile::set);
     }
 
     @PreDestroy
     private void savePrefs() {
         IdePrefs.PREFERENCES.put("profile", getProfile().getName());
-    }
-
-    private boolean isPresent() {
-        return Files.isDirectory(getProfile().getPath());
     }
 
     public ProjectProfile getProfile() {

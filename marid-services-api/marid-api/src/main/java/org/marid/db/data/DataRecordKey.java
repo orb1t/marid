@@ -18,8 +18,6 @@
 
 package org.marid.db.data;
 
-import javax.annotation.Nonnull;
-import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -28,9 +26,9 @@ import java.util.Objects;
 public final class DataRecordKey {
 
     private final long tag;
-    private final Instant timestamp;
+    private final long timestamp;
 
-    public DataRecordKey(long tag, @Nonnull Instant timestamp) {
+    public DataRecordKey(long tag, long timestamp) {
         this.tag = tag;
         this.timestamp = timestamp;
     }
@@ -39,8 +37,7 @@ public final class DataRecordKey {
         return tag;
     }
 
-    @Nonnull
-    public Instant getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
@@ -53,7 +50,7 @@ public final class DataRecordKey {
     public boolean equals(Object obj) {
         if (obj instanceof DataRecordKey) {
             final DataRecordKey that = (DataRecordKey) obj;
-            return tag == that.tag && timestamp.equals(that.timestamp);
+            return tag == that.tag && timestamp == that.timestamp;
         } else {
             return false;
         }

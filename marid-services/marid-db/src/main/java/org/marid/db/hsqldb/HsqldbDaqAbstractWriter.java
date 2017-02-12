@@ -28,7 +28,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,12 +42,12 @@ abstract class HsqldbDaqAbstractWriter<T extends Serializable> extends HsqldbDaq
     }
 
     @Override
-    public long delete(Instant from, Instant to) {
+    public long delete(long from, long to) {
         final String sql = "delete from " + table + " where TS >= ? and TS < ?";
         try (final Connection c = dataSource.getConnection(); final PreparedStatement s = c.prepareStatement(sql)) {
             c.setAutoCommit(true);
-            s.setTimestamp(1, new Timestamp(from.toEpochMilli()));
-            s.setTimestamp(2, new Timestamp(to.toEpochMilli()));
+            s.setTimestamp(1, new Timestamp(from));
+            s.setTimestamp(2, new Timestamp(to));
             return s.executeUpdate();
         } catch (SQLException x) {
             throw new IllegalStateException(x);
@@ -56,13 +55,13 @@ abstract class HsqldbDaqAbstractWriter<T extends Serializable> extends HsqldbDaq
     }
 
     @Override
-    public long delete(long[] tags, Instant from, Instant to) {
+    public long delete(long[] tags, long from, long to) {
         final String sql = "delete from " + table + " where TAG in (unnest(?)) and TS >= ? and TS < ?";
         try (final Connection c = dataSource.getConnection(); final PreparedStatement s = c.prepareStatement(sql)) {
             c.setAutoCommit(true);
             s.setObject(1, tags);
-            s.setTimestamp(2, new Timestamp(from.toEpochMilli()));
-            s.setTimestamp(3, new Timestamp(to.toEpochMilli()));
+            s.setTimestamp(2, new Timestamp(from));
+            s.setTimestamp(3, new Timestamp(to));
             return s.executeUpdate();
         } catch (SQLException x) {
             throw new IllegalStateException(x);
@@ -73,7 +72,7 @@ abstract class HsqldbDaqAbstractWriter<T extends Serializable> extends HsqldbDaq
         try (final PreparedStatement s = c.prepareStatement(sql)) {
             for (final DataRecord<T> dataRecord : dataRecords) {
                 s.setLong(1, dataRecord.getTag());
-                s.setTimestamp(2, new Timestamp(dataRecord.getTimestamp().toEpochMilli()));
+                s.setTimestamp(2, new Timestamp(dataRecord.getTimestamp()));
                 setValue(s, 3, dataRecord.getValue());
                 s.addBatch();
             }

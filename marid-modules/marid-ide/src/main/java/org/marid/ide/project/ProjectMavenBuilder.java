@@ -19,11 +19,13 @@
 package org.marid.ide.project;
 
 import javafx.application.Platform;
-import org.marid.jfx.action.FxAction;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import org.marid.logging.LogSupport;
 import org.marid.maven.MavenProjectBuilder;
 import org.marid.maven.ProjectBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -36,23 +38,23 @@ import java.util.logging.LogRecord;
 @Component
 public class ProjectMavenBuilder implements LogSupport {
 
-    private final FxAction projectBuildAction;
-
-    @Autowired
-    public ProjectMavenBuilder(FxAction projectBuildAction) throws Exception {
-        this.projectBuildAction = projectBuildAction;
-    }
+    private final BooleanProperty buildState = new SimpleBooleanProperty(false);
 
     Thread build(ProjectProfile profile, Consumer<Map<String, Object>> consumer, Consumer<LogRecord> logConsumer) {
         final Thread thread = new Thread(() -> {
-            Platform.runLater(() -> projectBuildAction.setDisabled(true));
+            Platform.runLater(() -> buildState.set(true));
             final ProjectBuilder projectBuilder = new MavenProjectBuilder(profile.getPath(), logConsumer)
                     .goals("clean", "install")
                     .profiles("conf");
             projectBuilder.build(consumer);
-            Platform.runLater(() -> projectBuildAction.setDisabled(false));
+            Platform.runLater(() -> buildState.set(false));
         });
         thread.start();
         return thread;
+    }
+
+    @Bean
+    public BooleanBinding projectDisabled(ProjectManager projectManager) {
+        return projectManager.profileProperty().isNull().or(buildState);
     }
 }

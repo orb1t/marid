@@ -26,7 +26,6 @@ import org.marid.logging.LogSupport;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.time.Instant;
 import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.ThreadLocalRandom;
@@ -58,7 +57,7 @@ public class RandomNumericDaqGenerator implements LogSupport {
     @PostConstruct
     public void start() {
         timer.schedule(new MaridTimerTask(task -> {
-            final Instant t = Instant.now();
+            final long t = System.currentTimeMillis();
             final double v = ThreadLocalRandom.current().nextDouble(min, max);
             final Set<DataRecordKey> result = numericWriter.merge(singletonList(new DataRecord<>(tag, t, v)), true);
             if (!result.isEmpty()) {

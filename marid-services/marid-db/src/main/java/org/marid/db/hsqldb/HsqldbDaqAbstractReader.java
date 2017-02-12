@@ -47,11 +47,11 @@ public abstract class HsqldbDaqAbstractReader<T extends Serializable> implements
     }
 
     @Override
-    public long[] tags(Instant from, Instant to) {
+    public long[] tags(long from, long to) {
         final String sql = "select distinct TAG from " + table + " where TS >= ? and TS < ?";
         try (final Connection c = dataSource.getConnection(); final PreparedStatement s = c.prepareStatement(sql)) {
-            s.setTimestamp(1, new Timestamp(from.toEpochMilli()));
-            s.setTimestamp(2, new Timestamp(to.toEpochMilli()));
+            s.setTimestamp(1, new Timestamp(from));
+            s.setTimestamp(2, new Timestamp(to));
             final LongStream.Builder builder = LongStream.builder();
             try (final ResultSet rs = s.executeQuery()) {
                 while (rs.next()) {
@@ -65,11 +65,11 @@ public abstract class HsqldbDaqAbstractReader<T extends Serializable> implements
     }
 
     @Override
-    public long tagCount(Instant from, Instant to) {
+    public long tagCount(long from, long to) {
         final String sql = "select count(distinct TAG) from " + table + " where TS >= ? and TS < ?";
         try (final Connection c = dataSource.getConnection(); final PreparedStatement s = c.prepareStatement(sql)) {
-            s.setTimestamp(1, new Timestamp(from.toEpochMilli()));
-            s.setTimestamp(2, new Timestamp(to.toEpochMilli()));
+            s.setTimestamp(1, new Timestamp(from));
+            s.setTimestamp(2, new Timestamp(to));
             try (final ResultSet rs = s.executeQuery()) {
                 return rs.next() ? rs.getLong(1) : 0L;
             }
@@ -79,14 +79,14 @@ public abstract class HsqldbDaqAbstractReader<T extends Serializable> implements
     }
 
     @Override
-    public DataRecord<T> fetchRecord(long tag, Instant instant) {
+    public DataRecord<T> fetchRecord(long tag, long instant) {
         final String sql = "select * from " + table + " where TAG = ? and TS = ?";
         try (final Connection c = dataSource.getConnection(); final PreparedStatement s = c.prepareStatement(sql)) {
             s.setLong(1, tag);
-            s.setTimestamp(2, new Timestamp(instant.toEpochMilli()));
+            s.setTimestamp(2, new Timestamp(instant));
             try (final ResultSet rs = s.executeQuery()) {
                 if (rs.next()) {
-                    final Instant ts = Instant.ofEpochMilli(rs.getTimestamp(2).getTime());
+                    final long ts = rs.getTimestamp(2).getTime();
                     final T value = getValue(rs, 3);
                     return new DataRecord<>(tag, ts, value);
                 } else {
@@ -99,17 +99,17 @@ public abstract class HsqldbDaqAbstractReader<T extends Serializable> implements
     }
 
     @Override
-    public List<DataRecord<T>> fetchRecords(long[] tags, Instant from, Instant to) {
+    public List<DataRecord<T>> fetchRecords(long[] tags, long from, long to) {
         final String sql = "select * from " + table + " where TAG in (unnest(?)) and TS >= ? and TS < ?";
         try (final Connection c = dataSource.getConnection(); final PreparedStatement s = c.prepareStatement(sql)) {
             final List<DataRecord<T>> result = new ArrayList<>();
             s.setObject(1, LongStream.of(tags).boxed().toArray(Long[]::new));
-            s.setTimestamp(2, new Timestamp(from.toEpochMilli()));
-            s.setTimestamp(3, new Timestamp(to.toEpochMilli()));
+            s.setTimestamp(2, new Timestamp(from));
+            s.setTimestamp(3, new Timestamp(to));
             try (final ResultSet rs = s.executeQuery()) {
                 while (rs.next()) {
                     final long tag = rs.getLong(1);
-                    final Instant ts = Instant.ofEpochMilli(rs.getTimestamp(2).getTime());
+                    final long ts = rs.getTimestamp(2).getTime();
                     final T value = getValue(rs, 3);
                     result.add(new DataRecord<>(tag, ts, value));
                 }
@@ -121,12 +121,12 @@ public abstract class HsqldbDaqAbstractReader<T extends Serializable> implements
     }
 
     @Override
-    public Map<Long, String> hash(Instant from, Instant to, boolean includeData, String algorithm) {
+    public Map<Long, String> hash(long from, long to, boolean includeData, String algorithm) {
         final String sql = "select * from " + table + " where TS >= ? and TS < ? order by TAG, TS";
         try (final Connection c = dataSource.getConnection(); final PreparedStatement s = c.prepareStatement(sql)) {
             final Map<Long, MessageDigest> digestMap = new TreeMap<>();
-            s.setTimestamp(1, new Timestamp(from.toEpochMilli()));
-            s.setTimestamp(2, new Timestamp(to.toEpochMilli()));
+            s.setTimestamp(1, new Timestamp(from));
+            s.setTimestamp(2, new Timestamp(to));
             try (final ResultSet rs = s.executeQuery()) {
                 while (rs.next()) {
                     final Long tag = rs.getLong(1);

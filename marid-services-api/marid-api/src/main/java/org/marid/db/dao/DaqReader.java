@@ -21,7 +21,6 @@ package org.marid.db.dao;
 import org.marid.db.data.DataRecord;
 
 import java.io.Serializable;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +39,7 @@ public interface DaqReader<T extends Serializable> extends DaqMXBean, AutoClosea
      * @param to Upper bound (exclusive).
      * @return Tag set.
      */
-    long[] tags(Instant from, Instant to);
+    long[] tags(long from, long to);
 
     /**
      * Get tag count within the given time range.
@@ -48,7 +47,7 @@ public interface DaqReader<T extends Serializable> extends DaqMXBean, AutoClosea
      * @param to Upper bound (exclusive).
      * @return Tag count.
      */
-    long tagCount(Instant from, Instant to);
+    long tagCount(long from, long to);
 
     /**
      * Get a tag record by tag and timestamp.
@@ -56,7 +55,7 @@ public interface DaqReader<T extends Serializable> extends DaqMXBean, AutoClosea
      * @param instant Timestamp.
      * @return Data record.
      */
-    DataRecord<T> fetchRecord(long tag, Instant instant);
+    DataRecord<T> fetchRecord(long tag, long instant);
 
     /**
      * Fetches all the records within the given time range.
@@ -65,7 +64,7 @@ public interface DaqReader<T extends Serializable> extends DaqMXBean, AutoClosea
      * @param to Upper bound (exclusive).
      * @return Fetched records.
      */
-    List<DataRecord<T>> fetchRecords(long[] tags, Instant from, Instant to);
+    List<DataRecord<T>> fetchRecords(long[] tags, long from, long to);
 
     /**
      * Hashes record range.
@@ -75,5 +74,5 @@ public interface DaqReader<T extends Serializable> extends DaqMXBean, AutoClosea
      * @param algorithm Digest algorithm (e.g. SHA-1 or MD5).
      * @return Hashes.
      */
-    Map<Long, String> hash(Instant from, Instant to, boolean includeData, String algorithm);
+    Map<Long, String> hash(long from, long to, boolean includeData, String algorithm);
 }

@@ -21,7 +21,6 @@ package org.marid.db.data;
 import javax.annotation.Nonnull;
 import java.beans.ConstructorProperties;
 import java.io.Serializable;
-import java.time.Instant;
 import java.util.Arrays;
 
 import static java.lang.String.format;
@@ -29,14 +28,14 @@ import static java.lang.String.format;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public final class DataRecord<T extends Serializable> {
+public final class DataRecord<T extends Serializable> implements Serializable {
 
     private final long tag;
-    private final Instant timestamp;
+    private final long timestamp;
     private final T value;
 
     @ConstructorProperties({"tag", "timestamp", "value"})
-    public DataRecord(long tag, Instant timestamp, @Nonnull T value) {
+    public DataRecord(long tag, long timestamp, @Nonnull T value) {
         this.tag = tag;
         this.timestamp = timestamp;
         this.value = value;
@@ -46,7 +45,7 @@ public final class DataRecord<T extends Serializable> {
         return tag;
     }
 
-    public Instant getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
@@ -81,6 +80,6 @@ public final class DataRecord<T extends Serializable> {
         if (val.length() > 100) {
             val = val.substring(0, 100) + "...]";
         }
-        return format("(%d, %s, %s)", tag, timestamp, val);
+        return format("(%d, %tc, %s)", tag, timestamp, val);
     }
 }

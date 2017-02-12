@@ -22,7 +22,6 @@ import org.marid.db.data.DataRecord;
 import org.marid.db.data.DataRecordKey;
 
 import java.io.Serializable;
-import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -37,7 +36,7 @@ public interface DaqWriter<T extends Serializable> extends DaqReader<T> {
      * @param to Upper bound (exclusive).
      * @return Count of removed records.
      */
-    long delete(Instant from, Instant to);
+    long delete(long from, long to);
 
     /**
      * Clears data within the time range for the given tags.
@@ -46,7 +45,7 @@ public interface DaqWriter<T extends Serializable> extends DaqReader<T> {
      * @param to Upper bound (exclusive).
      * @return Count of removed records.
      */
-    long delete(long[] tags, Instant from, Instant to);
+    long delete(long[] tags, long from, long to);
 
     /**
      * Merges data.

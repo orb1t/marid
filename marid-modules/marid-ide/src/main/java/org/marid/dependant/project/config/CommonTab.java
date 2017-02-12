@@ -20,7 +20,6 @@ package org.marid.dependant.project.config;
 
 import javafx.beans.value.WritableObjectValue;
 import javafx.scene.control.TextField;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
 import org.controlsfx.control.Notifications;

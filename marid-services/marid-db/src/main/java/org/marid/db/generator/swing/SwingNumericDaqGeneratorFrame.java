@@ -36,7 +36,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.net.URL;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,7 +68,7 @@ class SwingNumericDaqGeneratorFrame extends JFrame implements LogSupport {
         initColumns();
         timer = new Timer((int) periodSpinner.getValue(), e -> {
             final ArrayList<DataRecord<Double>> records = new ArrayList<>();
-            model.visitTagInfos(tagInfo -> records.add(new DataRecord<>(tagInfo.tag, Instant.now(), (double) tagInfo.value)));
+            model.visitTagInfos(tagInfo -> records.add(new DataRecord<>(tagInfo.tag, System.currentTimeMillis(), (double) tagInfo.value)));
             records.forEach(record -> log(INFO, "Generated {0}", record));
             numericWriter.merge(records, true);
         });

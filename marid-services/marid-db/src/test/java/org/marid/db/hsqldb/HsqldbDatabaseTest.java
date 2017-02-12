@@ -33,10 +33,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import static java.util.Comparator.naturalOrder;
+import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.*;
 
@@ -48,8 +47,8 @@ import static org.junit.Assert.*;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
 
-    private final Instant from = Instant.parse("2000-01-01T00:00:00Z");
-    private final Instant to = Instant.parse("2000-01-01T00:10:00Z");
+    private final long from = Instant.parse("2000-01-01T00:00:00Z").toEpochMilli();
+    private final long to = Instant.parse("2000-01-01T00:10:00Z").toEpochMilli();
 
     @Autowired
     private NumericWriter numericWriter;
@@ -57,9 +56,9 @@ public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void test_01_Insert() {
         final List<DataRecord<Double>> expected = new ArrayList<>();
-        for (long t = from.getEpochSecond(); t < to.getEpochSecond(); t += 10L) {
+        for (long t = from / 1000L; t < to / 1000L; t += 10L) {
             final Instant instant = Instant.ofEpochSecond(t);
-            final DataRecord<Double> record = new DataRecord<>(0, instant, 3.3);
+            final DataRecord<Double> record = new DataRecord<>(0, instant.toEpochMilli(), 3.3);
             expected.add(record);
         }
         final Set<DataRecordKey> insertResult = numericWriter.merge(expected, true);
@@ -68,16 +67,16 @@ public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
                 insertResult.stream().map(DataRecordKey::getTimestamp).collect(toSet()));
         final List<DataRecord<Double>> actual = numericWriter.fetchRecords(new long[] {0L}, from, to);
         assertEquals(actual, expected);
-        final Instant max = expected.stream().map(DataRecord::getTimestamp).max(naturalOrder()).get();
+        final long max = expected.stream().mapToLong(DataRecord::getTimestamp).max().orElse(0L);
         final List<DataRecord<Double>> actualMinus1 = numericWriter.fetchRecords(new long[] {0L}, from, max);
         assertEquals(expected.size() - 1, actualMinus1.size());
     }
 
     @Test
     public void test_02_Merge() {
-        final Instant t1 = Instant.parse("2000-01-01T00:00:10Z");
-        final Instant t2 = Instant.parse("2000-01-01T00:00:40Z");
-        final Instant t3 = Instant.parse("2000-01-01T00:00:50Z");
+        final long t1 = Instant.parse("2000-01-01T00:00:10Z").toEpochMilli();
+        final long t2 = Instant.parse("2000-01-01T00:00:40Z").toEpochMilli();
+        final long t3 = Instant.parse("2000-01-01T00:00:50Z").toEpochMilli();
         final List<DataRecord<Double>> records = ImmutableList.of(
                 new DataRecord<>(0, t1, 2.3),
                 new DataRecord<>(0, t2, 3.4),
@@ -91,8 +90,8 @@ public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void test_03_Delete() {
-        final Instant tf = Instant.parse("2000-01-01T00:00:10Z");
-        final Instant tt = Instant.parse("2000-01-01T00:00:40Z");
+        final long tf = Instant.parse("2000-01-01T00:00:10Z").toEpochMilli();
+        final long tt = Instant.parse("2000-01-01T00:00:40Z").toEpochMilli();
         assertEquals(3L, numericWriter.delete(tf, tt));
     }
 
@@ -104,8 +103,8 @@ public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void test_05_HashCodesNotIncludingData() {
         final Map<Long, String> hashBefore = numericWriter.hash(from, to, false, "MD5");
-        final Instant t = Instant.parse("2000-01-01T00:00:50Z");
-        assertEquals(1L, numericWriter.delete(t, t.plusSeconds(1L)));
+        final long t = Instant.parse("2000-01-01T00:00:50Z").toEpochMilli();
+        assertEquals(1L, numericWriter.delete(t, t + 1000L));
         final Map<Long, String> hashAfter = numericWriter.hash(from, to, false, "MD5");
         assertNotEquals(hashBefore, hashAfter);
     }
@@ -113,9 +112,9 @@ public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void test_06_Tags() {
         final List<DataRecord<Double>> expected = new ArrayList<>();
-        for (long t = from.getEpochSecond(); t < to.getEpochSecond(); t += 10L) {
+        for (long t = from / 1000L; t < to / 1000L; t += 10L) {
             final Instant instant = Instant.ofEpochSecond(t);
-            final DataRecord<Double> record = new DataRecord<>(1, instant, 3.3);
+            final DataRecord<Double> record = new DataRecord<>(1, instant.toEpochMilli(), 3.3);
             expected.add(record);
         }
         final Set<DataRecordKey> insertResult = numericWriter.merge(expected, true);
@@ -130,7 +129,7 @@ public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void test_07_DeleteAll() {
-        assertEquals(56L + 60L, numericWriter.delete(from, from.plus(1L, ChronoUnit.DAYS)));
+        assertEquals(56L + 60L, numericWriter.delete(from, from + DAYS.toMillis(1L)));
         assertEquals(Collections.emptyList(), numericWriter.fetchRecords(new long[] {0L, 1L}, from, to));
         assertEquals(0L, numericWriter.getRecordCount());
     }
