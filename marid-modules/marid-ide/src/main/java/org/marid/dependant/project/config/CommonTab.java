@@ -71,12 +71,4 @@ public class CommonTab extends GenericGridPane {
         });
         return textField;
     }
-
-    public static boolean isRuntime(Dependency dependency) {
-        return "org.marid".equals(dependency.getGroupId()) && "marid-runtime".equals(dependency.getArtifactId());
-    }
-
-    public static boolean isHmi(Dependency dependency) {
-        return "org.marid".equals(dependency.getGroupId()) && "marid-hmi".equals(dependency.getArtifactId());
-    }
 }

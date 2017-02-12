@@ -25,7 +25,6 @@ import org.marid.ide.settings.MavenSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Properties;
 
 import static java.util.Collections.singletonList;
@@ -145,11 +144,7 @@ public class ProjectPrerequisites {
             final Xpp3Dom manifest = new Xpp3Dom("manifest");
             archive.addChild(manifest);
             addChild(manifest, "addClasspath", "true");
-            if (model.getDependencies().stream().anyMatch(d -> is(d, "org.marid", "marid-hmi"))) {
-                addChild(manifest, "mainClass", "org.marid.hmi.HmiLauncher");
-            } else {
-                addChild(manifest, "mainClass", "org.marid.runtime.MaridLauncher");
-            }
+            addChild(manifest, "mainClass", "org.marid.runtime.MaridLauncher");
             addChild(manifest, "classpathPrefix", "lib");
             final Xpp3Dom manifestEntries = new Xpp3Dom("manifestEntries");
             archive.addChild(manifestEntries);
@@ -198,29 +193,17 @@ public class ProjectPrerequisites {
         }
 
         private void applyRuntimeDependency() {
-            final List<Dependency> dependencies = model.getDependencies();
-            final Dependency runtimeDependency = dependencies.stream()
+            final Dependency runtimeDependency = model.getDependencies().stream()
                     .filter(d -> is(d, "org.marid", "marid-runtime"))
                     .findFirst()
-                    .orElse(null);
-            final Dependency hmiDependency = dependencies.stream()
-                    .filter(d -> is(d, "org.marid", "marid-hmi"))
-                    .findFirst()
-                    .orElse(null);
-            final Dependency dependency;
-            if (runtimeDependency != null && hmiDependency != null) {
-                dependencies.remove(runtimeDependency);
-                dependency = hmiDependency;
-            } else if (runtimeDependency == null && hmiDependency == null) {
-                dependencies.add(dependency = new Dependency());
-                dependency.setGroupId("org.marid");
-                dependency.setArtifactId("marid-runtime");
-            } else if (runtimeDependency == null) {
-                dependency = hmiDependency;
-            } else {
-                dependency = runtimeDependency;
-            }
-            dependency.setVersion("${marid.runtime.version}");
+                    .orElseGet(() -> {
+                        final Dependency dependency = new Dependency();
+                        dependency.setGroupId("org.marid");
+                        dependency.setArtifactId("marid-runtime");
+                        model.getDependencies().add(dependency);
+                        return dependency;
+                    });
+            runtimeDependency.setVersion("${marid.runtime.version}");
         }
 
         private void addChild(Xpp3Dom parent, String tag, String value) {

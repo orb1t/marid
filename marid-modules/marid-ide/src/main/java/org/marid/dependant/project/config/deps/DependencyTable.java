@@ -72,9 +72,7 @@ public class DependencyTable extends TableView<Dependency> {
             final ComboBoxTableCell<Dependency, String> cell = new ComboBoxTableCell<>(
                     "marid-db",
                     "marid-editors",
-                    "marid-proto",
-                    "marid-web",
-                    "marid-widgets"
+                    "marid-proto"
             );
             cell.setComboBoxEditable(true);
             return cell;
@@ -113,11 +111,7 @@ public class DependencyTable extends TableView<Dependency> {
         if (!"org.marid".equals(dependency.getGroupId())) {
             return true;
         }
-        if (dependency.getArtifactId() == null) {
-            return true;
-        }
         switch (dependency.getArtifactId()) {
-            case "marid-hmi":
             case "marid-runtime":
                 return false;
         }

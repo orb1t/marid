@@ -18,18 +18,18 @@
 
 package org.marid.dependant.resources.beanfiles;
 
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
+import org.marid.ide.common.IdeShapes;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.control.CommonTableView;
-import org.marid.ide.common.IdeShapes;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.control.CommonTableView;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,11 +121,11 @@ public class BeanFileBrowser extends CommonTableView<BeanFile> {
         col.setStyle("-fx-alignment: baseline-right");
         col.setCellValueFactory(param -> {
             final List<String> path = param.getValue().path;
-            return new SimpleObjectProperty<>(profile.getBeanFiles().stream()
+            return Bindings.createObjectBinding(() -> profile.getBeanFiles().stream()
                     .filter(e -> e.path.size() >= path.size())
                     .filter(e -> e.path.subList(0, path.size()).equals(path))
                     .mapToInt(e -> e.beans.size())
-                    .sum());
+                    .sum(), profile.getBeanFiles());
         });
         getColumns().add(col);
     }

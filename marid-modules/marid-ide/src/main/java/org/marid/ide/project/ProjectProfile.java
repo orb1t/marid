@@ -19,11 +19,7 @@
 package org.marid.ide.project;
 
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
 import org.apache.maven.model.Profile;
@@ -31,7 +27,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.marid.dependant.project.config.CommonTab;
+import org.marid.jfx.beans.FxList;
 import org.marid.logging.LogSupport;
 import org.marid.spring.xml.*;
 import org.springframework.core.ResolvableType;
@@ -44,7 +40,10 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -82,9 +81,8 @@ public class ProjectProfile implements LogSupport {
     final Path beansDirectory;
     final Path repository;
     final Logger logger;
-    final ObservableList<BeanFile> beanFiles;
+    final FxList<BeanFile> beanFiles;
     final ProjectCacheEntry cacheEntry;
-    final BooleanProperty hmi;
 
     ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -106,8 +104,6 @@ public class ProjectProfile implements LogSupport {
         beanFiles = loadBeanFiles();
         init();
         cacheEntry = new ProjectCacheEntry(this);
-        hmi = new SimpleBooleanProperty(isHmi());
-        hmi.addListener((observable, oldValue, newValue) -> setHmi(newValue));
     }
 
     public URLClassLoader getClassLoader() {
@@ -138,42 +134,6 @@ public class ProjectProfile implements LogSupport {
         }
     }
 
-    public BooleanProperty hmiProperty() {
-        return hmi;
-    }
-
-    public boolean isHmi() {
-        return model.getDependencies().stream().anyMatch(CommonTab::isHmi);
-    }
-
-    private boolean setHmi(boolean hmi) {
-        if (hmi) {
-            if (model.getDependencies().stream().anyMatch(CommonTab::isHmi)) {
-                return false;
-            } else {
-                model.getDependencies().removeIf(CommonTab::isRuntime);
-                final Dependency dependency = new Dependency();
-                dependency.setGroupId("org.marid");
-                dependency.setArtifactId("marid-hmi");
-                dependency.setVersion("${marid.runtime.version}");
-                model.getDependencies().add(dependency);
-                return true;
-            }
-        } else {
-            if (model.getDependencies().stream().anyMatch(CommonTab::isRuntime)) {
-                return false;
-            } else {
-                model.getDependencies().removeIf(CommonTab::isHmi);
-                final Dependency dependency = new Dependency();
-                dependency.setGroupId("org.marid");
-                dependency.setArtifactId("marid-runtime");
-                dependency.setVersion("${marid.runtime.version}");
-                model.getDependencies().add(dependency);
-                return true;
-            }
-        }
-    }
-
     private Model loadModel() {
         try (final InputStream is = Files.newInputStream(pomFile)) {
             final MavenXpp3Reader reader = new MavenXpp3Reader();
@@ -194,8 +154,8 @@ public class ProjectProfile implements LogSupport {
         return model;
     }
 
-    private ObservableList<BeanFile> loadBeanFiles() {
-        final ObservableList<BeanFile> list = FXCollections.observableArrayList();
+    private FxList<BeanFile> loadBeanFiles() {
+        final FxList<BeanFile> list = new FxList<>(BeanFile::observables);
         try (final Stream<Path> stream = Files.walk(beansDirectory)) {
             stream.filter(p -> p.getFileName().toString().endsWith(".xml"))
                     .map(p -> {
@@ -218,7 +178,7 @@ public class ProjectProfile implements LogSupport {
         return list;
     }
 
-    public ObservableList<BeanFile> getBeanFiles() {
+    public FxList<BeanFile> getBeanFiles() {
         return beanFiles;
     }
 

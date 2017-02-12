@@ -47,10 +47,9 @@ public class CodecConfiguration {
             final String artifactId = r.readString("artifact-id");
             final String groupId = r.readString("group-id");
             final String version = r.readString("version");
-            final boolean hmi = r.readBoolean("hmi");
             final boolean conf = r.readBoolean("conf");
             r.readEndDocument();
-            return new Artifact(groupId, artifactId, version, hmi, conf);
+            return new Artifact(groupId, artifactId, version, conf);
         });
     }
 

@@ -46,9 +46,8 @@ public class RepositoryDependencies {
     }
 
     public List<Dependency> getDependencies() {
-        final boolean hmi = profile.isHmi();
         return StreamSupport.stream(database.getCollection("artifacts", Artifact.class).find().spliterator(), false)
-                .filter(a -> hmi ? !a.conf : !a.conf && !a.hmi)
+                .filter(a -> !a.conf)
                 .map(Artifact::toDependency)
                 .collect(Collectors.toList());
     }

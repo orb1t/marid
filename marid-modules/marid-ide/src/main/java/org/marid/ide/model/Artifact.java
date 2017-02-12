@@ -31,14 +31,12 @@ public final class Artifact {
     public final String groupId;
     public final String artifactId;
     public final String version;
-    public final boolean hmi;
     public final boolean conf;
 
-    public Artifact(String groupId, String artifactId, String version, boolean hmi, boolean conf) {
+    public Artifact(String groupId, String artifactId, String version, boolean conf) {
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;
-        this.hmi = hmi;
         this.conf = conf;
     }
 

@@ -19,22 +19,23 @@
 package org.marid.ide.panes.profiles;
 
 import com.google.common.collect.ImmutableMap;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.IdeDependants;
 import org.marid.dependant.resources.ResourcesConfiguration;
 import org.marid.dependant.resources.ResourcesParams;
+import org.marid.ide.common.IdeShapes;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.panes.main.IdeToolbar;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectSaver;
 import org.marid.jfx.action.FxAction;
-import org.marid.ide.common.IdeShapes;
 import org.marid.logging.LogSupport;
 import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static javafx.beans.binding.Bindings.createObjectBinding;
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
@@ -100,13 +102,19 @@ public class ProfilesTable extends TableView<ProjectProfile> implements LogSuppo
     }
 
     @OrderedInit(2)
-    public void initHmiColumn() {
-        final TableColumn<ProjectProfile, Boolean> column = new TableColumn<>();
-        column.textProperty().bind(ls("HMI"));
+    public void initBeansColumn() {
+        final TableColumn<ProjectProfile, Integer> column = new TableColumn<>();
+        column.textProperty().bind(ls("Beans"));
         column.setMaxWidth(70);
-        column.setCellFactory(param -> new CheckBoxTableCell<>());
-        column.setCellValueFactory(param -> param.getValue().hmiProperty());
+        column.setCellValueFactory(ProfilesTable::beanCount);
         getColumns().add(column);
+    }
+
+    private static ObjectBinding<Integer> beanCount(CellDataFeatures<ProjectProfile, Integer> features) {
+        return createObjectBinding(
+                () -> features.getValue().getBeanFiles().stream().mapToInt(f -> f.beans.size()).sum(),
+                features.getValue().getBeanFiles()
+        );
     }
 
     @Autowired
