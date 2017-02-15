@@ -27,6 +27,8 @@ import javax.annotation.PostConstruct;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.StreamCorruptedException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -125,5 +127,15 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
     @Override
     public ProtoBus getParent() {
         return bus;
+    }
+
+    @Override
+    public String toString() {
+        final Map<String, String> map = new LinkedHashMap<>();
+        map.put("tid", String.format("%04X", (int) transactionIdentifier));
+        map.put("sf", String.format("%04X", (int) slaveAndFunc));
+        map.put("addr", String.format("%04X", (int) address));
+        map.put("count", String.format("%04X", (int) count));
+        return super.toString() + map;
     }
 }

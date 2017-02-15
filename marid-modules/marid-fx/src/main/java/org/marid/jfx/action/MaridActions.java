@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
@@ -43,13 +44,12 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
  */
 public interface MaridActions {
 
-    static List<Menu> menus(Map<String, FxAction> actionMap) {
+    static Menu[] menus(Map<String, FxAction> actionMap) {
         final Map<String, Map<String, Map<String, MenuItem>>> itemMap = new TreeMap<>();
         actionMap.forEach((id, action) -> {
             if (action.getMenu() == null) {
                 return;
             }
-
             final MenuItem menuItem;
             if (action.selectedProperty() != null) {
                 final CheckMenuItem checkMenuItem = new CheckMenuItem();
@@ -57,12 +57,12 @@ public interface MaridActions {
                 menuItem = checkMenuItem;
             } else if (action.getChildren() != null) {
                 final Menu menu = new Menu();
-                final List<Menu> subMenus = menus(action.getChildren());
-                switch (subMenus.size()) {
+                final Menu[] subMenus = menus(action.getChildren());
+                switch (subMenus.length) {
                     case 0:
                         return;
                     case 1:
-                        menu.getItems().addAll(subMenus.get(0).getItems());
+                        menu.getItems().addAll(subMenus[0].getItems());
                         break;
                     default:
                         menu.getItems().addAll(subMenus);
@@ -110,12 +110,12 @@ public interface MaridActions {
             }
             menus.add(m);
         });
-        return menus;
+        return menus.toArray(new Menu[menus.size()]);
     }
 
     static MenuItem[] contextMenu(Map<String, FxAction> actionMap) {
         final AtomicBoolean first = new AtomicBoolean(true);
-        return menus(actionMap).stream()
+        return Stream.of(menus(actionMap))
                 .flatMap(m -> first.compareAndSet(true, false)
                         ? m.getItems().stream()
                         : concat(of(new SeparatorMenuItem()), m.getItems().stream()))
@@ -131,7 +131,7 @@ public interface MaridActions {
                         toMap(Map.Entry::getKey, Map.Entry::getValue, (a1, a2) -> a2, TreeMap::new))
                 );
         return sorted.values().stream()
-                .flatMap(v -> concat(of(new Separator()), v.values().stream()
+                .flatMap(v -> concat(v.values().stream()
                         .map(a -> {
                             final GlyphIcon<?> icon = a.getIcon() != null ? glyphIcon(a.getIcon(), 20) : null;
                             final Button button = new Button(null, icon);
@@ -149,7 +149,7 @@ public interface MaridActions {
                                 button.setTooltip(tooltip);
                             }
                             return button;
-                        })))
+                        }), of(new Separator())))
                 .toArray(Node[]::new);
     }
 }
