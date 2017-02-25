@@ -18,8 +18,6 @@
 
 package org.marid.jfx.action;
 
-import de.jensd.fx.glyphs.GlyphIcon;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -35,6 +33,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
+import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
@@ -77,7 +76,7 @@ public interface MaridActions {
                 menuItem.textProperty().bind(action.textProperty());
             }
             if (action.iconProperty() != null) {
-                menuItem.graphicProperty().bind(Bindings.createObjectBinding(() -> {
+                menuItem.graphicProperty().bind(createObjectBinding(() -> {
                     final String icon = action.getIcon();
                     return icon != null ? glyphIcon(icon, 16) : null;
                 }, action.iconProperty()));
@@ -133,19 +132,22 @@ public interface MaridActions {
         return sorted.values().stream()
                 .flatMap(v -> concat(v.values().stream()
                         .map(a -> {
-                            final GlyphIcon<?> icon = a.getIcon() != null ? glyphIcon(a.getIcon(), 20) : null;
-                            final Button button = new Button(null, icon);
+                            final Button button = new Button();
                             button.setFocusTraversable(false);
                             button.setOnAction(event -> a.getEventHandler().handle(event));
                             if (a.disabledProperty() != null) {
                                 button.disableProperty().bindBidirectional(a.disabledProperty());
                             }
-                            final StringProperty hintText = a.hintProperty() != null
-                                    ? a.hintProperty()
-                                    : a.textProperty();
-                            if (hintText != null) {
+                            if (a.iconProperty() != null) {
+                                button.graphicProperty().bind(createObjectBinding(
+                                        () -> glyphIcon(a.getIcon(), 20),
+                                        a.iconProperty())
+                                );
+                            }
+                            final StringProperty hint = a.hintProperty() != null ? a.hintProperty() : a.textProperty();
+                            if (hint != null) {
                                 final Tooltip tooltip = new Tooltip();
-                                tooltip.textProperty().bind(hintText);
+                                tooltip.textProperty().bind(hint);
                                 button.setTooltip(tooltip);
                             }
                             return button;

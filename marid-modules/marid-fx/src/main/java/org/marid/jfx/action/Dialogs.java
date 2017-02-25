@@ -16,26 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.annotation;
+package org.marid.jfx.action;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+import java.io.File;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.9
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Scope(SCOPE_PROTOTYPE)
-@Component
-public @interface PrototypeComponent {
+public interface Dialogs {
 
-    String value() default "";
+    static File overrideExt(File original, String ext) {
+        return original == null
+                ? null
+                : original.getName().endsWith(ext)
+                ? original
+                : new File(original.getParentFile(), original.getName() + ext);
+    }
 }

@@ -16,26 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.annotation;
+package org.marid.dependant.modbus.devices.info;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.9
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Scope(SCOPE_PROTOTYPE)
-@Component
-public @interface PrototypeComponent {
-
-    String value() default "";
+@XmlRootElement(name = "barometer")
+public class BarometerInfo extends AbstractDeviceInfo {
 }

@@ -34,7 +34,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.Map;
+
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -43,6 +47,12 @@ import java.util.Map;
 @Configuration
 @ComponentScan(basePackageClasses = {ModbusSourceConfiguration.class})
 public class ModbusSourceConfiguration {
+
+    @Bean(initMethod = "mkdirs")
+    @Modbus
+    public File baseDir() {
+        return Paths.get(System.getProperty("user.home"), "marid", "modbus").toFile();
+    }
 
     @Bean
     @Modbus
@@ -70,12 +80,19 @@ public class ModbusSourceConfiguration {
         return new Image("http://icons.iconarchive.com/icons/icons8/windows-8/32/Industry-Robot-icon.png");
     }
 
+    @Bean
+    @Modbus
+    public Image image24() {
+        return new Image("http://icons.iconarchive.com/icons/icons8/windows-8/24/Industry-Robot-icon.png");
+    }
+
     @Bean(initMethod = "show")
     @Modbus
     public Stage modbusStage(@Modbus BorderPane modbusRoot, @Modbus Image[] images) {
         final Stage stage = new Stage(StageStyle.DECORATED);
         stage.getIcons().addAll(images);
         stage.setScene(new Scene(modbusRoot, 1024, 768));
+        stage.titleProperty().bind(ls("MODBUS devices"));
         return stage;
     }
 }

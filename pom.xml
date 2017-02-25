@@ -526,13 +526,13 @@
             <dependency>
                 <groupId>org.jboss.logmanager</groupId>
                 <artifactId>jboss-logmanager</artifactId>
-                <version>2.0.4.Final</version>
+                <version>2.0.5.Final</version>
             </dependency>
 
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-parent</artifactId>
-                <version>1.7.22</version>
+                <version>1.7.24</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -540,7 +540,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
-                <version>1.7.22</version>
+                <version>1.7.24</version>
             </dependency>
 
             <dependency>
@@ -554,7 +554,7 @@
             <dependency>
                 <groupId>org.mariadb.jdbc</groupId>
                 <artifactId>mariadb-java-client</artifactId>
-                <version>1.5.7</version>
+                <version>1.5.8</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

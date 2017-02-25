@@ -16,26 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.annotation;
+package org.marid.dependant.modbus.devices.infos;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
+import org.marid.dependant.modbus.devices.AbstractDevice;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+import javax.xml.bind.annotation.*;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.9
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Scope(SCOPE_PROTOTYPE)
-@Component
-public @interface PrototypeComponent {
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement(name = "devices")
+@XmlSeeAlso({DeviceEntry.class})
+public class DeviceInfos {
 
-    String value() default "";
+    @XmlElement
+    public DeviceEntry[] entries;
+
+    public DeviceInfos() {
+    }
+
+    public DeviceInfos(AbstractDevice<?>... devices) {
+        entries = new DeviceEntry[devices.length];
+        for (int i = 0; i < devices.length; i++) {
+            final DeviceEntry entry = new DeviceEntry();
+            entry.type = devices[i].getClass().getName();
+            entry.info = devices[i].getInfo();
+            entries[i] = entry;
+        }
+    }
 }

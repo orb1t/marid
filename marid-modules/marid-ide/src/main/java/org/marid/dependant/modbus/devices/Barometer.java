@@ -16,24 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.jfx.copy;
+package org.marid.dependant.modbus.devices;
 
-import javafx.scene.input.TransferMode;
+import eu.hansolo.medusa.Gauge;
+import javafx.scene.paint.Color;
+import org.marid.dependant.modbus.devices.info.BarometerInfo;
+import org.marid.spring.annotation.PrototypeComponent;
+
+import static eu.hansolo.medusa.Gauge.SkinType.KPI;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.9
  */
-public class CopyData<N, E> {
+@PrototypeComponent
+public class Barometer extends AbstractDevice<BarometerInfo> {
 
-    public final TransferMode transferMode;
-    public final TransferMode[] transferModes;
-    public final N node;
-    public final E element;
-
-    public CopyData(TransferMode transferMode, N node, E element, TransferMode... transferModes) {
-        this.transferMode = transferMode;
-        this.node = node;
-        this.element = element;
-        this.transferModes = transferModes;
+    public Barometer() {
+        super(new Gauge(KPI));
+        gauge.setForegroundBaseColor(new Color(0.5, 0.5, 0.5, 1.0));
+        gauge.setBarColor(new Color(0.7, 0.8, 0.9, 1.0));
     }
 }
