@@ -22,6 +22,7 @@ import eu.hansolo.medusa.Gauge;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
@@ -32,9 +33,12 @@ import org.marid.jfx.converter.MaridConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ResolvableType;
 
+import javax.annotation.PostConstruct;
 import java.util.Optional;
 import java.util.function.DoubleFunction;
 
+import static java.lang.Integer.parseInt;
+import static java.lang.String.format;
 import static org.marid.jfx.icons.FontIcon.D_CLOSE_BOX;
 import static org.marid.jfx.icons.FontIcon.D_TOOLTIP_EDIT;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
@@ -69,7 +73,7 @@ public abstract class AbstractDevice<I extends AbstractDeviceInfo> extends VBox 
         getChildren().add(bottomBox = new VBox(4,
                 slider = new Slider(),
                 addressBox = new HBox(4,
-                        address = new Spinner<>(0, 65535, 0),
+                        address = new Spinner<>(),
                         codecs = new ComboBox<>()
                 ))
         );
@@ -87,6 +91,14 @@ public abstract class AbstractDevice<I extends AbstractDeviceInfo> extends VBox 
         VBox.setVgrow(gauge, Priority.ALWAYS);
         HBox.setHgrow(address, Priority.ALWAYS);
         HBox.setHgrow(title, Priority.ALWAYS);
+    }
+
+    @PostConstruct
+    private void initAddress() {
+        final SpinnerValueFactory<Integer> valueFactory = new IntegerSpinnerValueFactory(0, 65535, 0);
+        valueFactory.setConverter(new MaridConverter<>(i -> format("%04X", i), s -> parseInt(s, 16)));
+        address.setValueFactory(valueFactory);
+        address.setEditable(true);
     }
 
     @Autowired
