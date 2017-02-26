@@ -16,16 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.maven;
+package org.marid.dependant.modbus.devices;
 
-import java.nio.file.Path;
-import java.util.function.Consumer;
-import java.util.logging.LogRecord;
+import javafx.stage.Stage;
+import org.marid.dependant.modbus.devices.info.ThermometerInfo;
+import org.marid.spring.annotation.PrototypeComponent;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.9
  */
-public interface ProjectBuilderFactory {
+@PrototypeComponent
+public class ThermometerEditor extends AbstractDeviceEditor<ThermometerInfo, Thermometer> {
 
-    ProjectBuilder newBuilder(Path projectPath, Consumer<LogRecord> logRecordConsumer);
+    public ThermometerEditor(Thermometer device, Stage stage) {
+        super(device, stage);
+    }
 }

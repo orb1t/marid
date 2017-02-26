@@ -24,9 +24,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 
 import javax.annotation.Nonnull;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.prefs.Preferences;
 
 /**
@@ -42,6 +40,18 @@ public interface Props {
 
     static BooleanProperty boolProp(BooleanSupplier supplier, Consumer<Boolean> consumer) {
         final BooleanProperty property = new SimpleBooleanProperty(supplier.getAsBoolean());
+        property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
+        return property;
+    }
+
+    static IntegerProperty intProp(IntSupplier supplier, IntConsumer consumer) {
+        final IntegerProperty property = new SimpleIntegerProperty(supplier.getAsInt());
+        property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue.intValue()));
+        return property;
+    }
+
+    static <T> ObjectProperty<T> prop(Supplier<T> supplier, Consumer<T> consumer) {
+        final ObjectProperty<T> property = new SimpleObjectProperty<>(supplier.get());
         property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
         return property;
     }

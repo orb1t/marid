@@ -16,28 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.jfx.props;
+package org.marid.dependant.modbus.devices;
 
-import javafx.beans.property.StringProperty;
-
-import static org.marid.jfx.LocalizedStrings.fls;
-import static org.marid.jfx.LocalizedStrings.ls;
+import javafx.stage.Stage;
+import org.marid.dependant.modbus.devices.info.BarometerInfo;
+import org.marid.spring.annotation.PrototypeComponent;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.9
  */
-@SuppressWarnings("unchecked")
-public interface LocalizedTexts<T extends LocalizedTexts<T>> {
+@PrototypeComponent
+public class BarometerEditor extends AbstractDeviceEditor<BarometerInfo, Barometer> {
 
-    StringProperty textProperty();
-
-    default T text(String text, Object... args) {
-        textProperty().bind(ls(text, args));
-        return (T) this;
-    }
-
-    default T format(String format, String text, Object... args) {
-        textProperty().bind(fls(format, text, args));
-        return (T) this;
+    public BarometerEditor(Barometer device, Stage stage) {
+        super(device, stage);
     }
 }

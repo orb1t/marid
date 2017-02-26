@@ -19,11 +19,7 @@
 package org.marid.jfx.panes;
 
 import javafx.beans.value.WritableObjectValue;
-import javafx.scene.Node;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Separator;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import org.marid.jfx.control.MaridLabel;
@@ -33,8 +29,7 @@ import java.util.function.Supplier;
 
 import static java.lang.Double.MAX_VALUE;
 import static javafx.geometry.HPos.LEFT;
-import static javafx.scene.layout.Priority.NEVER;
-import static javafx.scene.layout.Priority.SOMETIMES;
+import static javafx.scene.layout.Priority.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -55,6 +50,8 @@ public class GenericGridPane extends GridPane {
     public TextField addTextField(String text, WritableObjectValue<String> value) {
         final TextField textField = new TextField(value.get());
         textField.textProperty().addListener((observable, oldValue, newValue) -> value.set(newValue));
+        setHgrow(textField, ALWAYS);
+        textField.setMaxWidth(Double.MAX_VALUE);
         final MaridLabel label = new MaridLabel().format("%s: ", text);
         addRow(getNextRowIndex(), label, textField);
         return textField;
@@ -64,6 +61,8 @@ public class GenericGridPane extends GridPane {
         final CheckBox checkBox = new CheckBox();
         checkBox.setSelected(supplier.get());
         checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
+        checkBox.setMaxWidth(Double.MAX_VALUE);
+        setHgrow(checkBox, ALWAYS);
         final MaridLabel label = new MaridLabel().format("%s: ", text);
         addRow(getNextRowIndex(), label, checkBox);
         return checkBox;
@@ -73,14 +72,18 @@ public class GenericGridPane extends GridPane {
         final Spinner<Integer> spinner = new Spinner<>(low, high, supplier.get(), step);
         spinner.setEditable(true);
         spinner.valueProperty().addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
+        spinner.setMaxWidth(Double.MAX_VALUE);
+        setHgrow(spinner, ALWAYS);
         final MaridLabel label = new MaridLabel().format("%s: ", text);
         addRow(getNextRowIndex(), label, spinner);
         return spinner;
     }
 
-    public <T extends Node> T addControl(String text, Supplier<T> nodeSupplier) {
+    public <T extends Control> T addControl(String text, Supplier<T> nodeSupplier) {
         final MaridLabel label = new MaridLabel().format("%s: ", text);
         final T node = nodeSupplier.get();
+        node.setMaxWidth(Double.MAX_VALUE);
+        setHgrow(node, ALWAYS);
         addRow(getNextRowIndex(), label, node);
         return node;
     }

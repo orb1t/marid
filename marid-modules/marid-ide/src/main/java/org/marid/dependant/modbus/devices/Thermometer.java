@@ -44,4 +44,9 @@ public class Thermometer extends AbstractDevice<ThermometerInfo> {
         gauge.setBorderPaint(Color.WHITE);
         gauge.setForegroundPaint(Color.WHITE);
     }
+
+    @Override
+    public Class<ThermometerEditor> getEditor() {
+        return ThermometerEditor.class;
+    }
 }

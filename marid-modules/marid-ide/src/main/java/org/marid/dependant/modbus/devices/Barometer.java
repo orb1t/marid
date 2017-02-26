@@ -37,4 +37,9 @@ public class Barometer extends AbstractDevice<BarometerInfo> {
         gauge.setForegroundBaseColor(new Color(0.5, 0.5, 0.5, 1.0));
         gauge.setBarColor(new Color(0.7, 0.8, 0.9, 1.0));
     }
+
+    @Override
+    public Class<BarometerEditor> getEditor() {
+        return BarometerEditor.class;
+    }
 }
