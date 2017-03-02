@@ -44,12 +44,5 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.marid</groupId>
-            <artifactId>marid-web</artifactId>
-            <version>${project.version}</version>
-            <optional>true</optional>
-        </dependency>
     </dependencies>
 </project>

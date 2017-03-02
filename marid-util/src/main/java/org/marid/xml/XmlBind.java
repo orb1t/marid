@@ -46,8 +46,7 @@ public class XmlBind {
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         return null;
     }));
-    public static final Consumer<Unmarshaller> DEFAULT_INPUT = unmarshaller -> {
-    };
+    public static final Consumer<Unmarshaller> DEFAULT_INPUT = unmarshaller -> {};
 
     public static <T, R> void save(Class<?> type,
                                    R bean,
