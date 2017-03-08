@@ -18,13 +18,14 @@
 
 package org.marid.dependant.modbus.devices.info;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlAttribute;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.9
  */
-@XmlRootElement(name = "thermometer")
-public class ThermometerInfo extends FloatDeviceInfo {
+public abstract class FloatDeviceInfo extends AbstractDeviceInfo {
 
+    @XmlAttribute
+    public float value;
 }

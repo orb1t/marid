@@ -31,10 +31,10 @@ import static eu.hansolo.medusa.Gauge.SkinType.LCD;
  * @since 0.9
  */
 @PrototypeComponent
-public class Thermometer extends AbstractDevice<ThermometerInfo> {
+public class Thermometer extends AbstractGaugeDevice<ThermometerInfo> {
 
     public Thermometer() {
-        super(new Gauge(LCD));
+        super(new Gauge(LCD), ThermometerInfo.class);
         gauge.setLcdDesign(LcdDesign.LIGHTGREEN_BLACK);
         gauge.setDecimals(1);
         gauge.setTickLabelDecimals(1);

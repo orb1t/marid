@@ -20,6 +20,7 @@ package org.marid.dependant.modbus;
 
 import javafx.geometry.Insets;
 import javafx.scene.layout.FlowPane;
+import javafx.stage.Stage;
 import org.marid.dependant.modbus.devices.AbstractDevice;
 import org.marid.dependant.modbus.devices.infos.DeviceEntry;
 import org.marid.dependant.modbus.devices.infos.DeviceInfos;
@@ -54,6 +55,7 @@ public class ModbusPane extends FlowPane implements LogSupport {
                 .toArray(AbstractDevice[]::new));
         try {
             XmlBind.save(infos, file, XmlBind.FORMATTED_OUTPUT, Marshaller::marshal);
+            initTitle(file);
         } catch (Exception x) {
             log(WARNING, "Unable to save {0}", x, file);
         }
@@ -70,8 +72,20 @@ public class ModbusPane extends FlowPane implements LogSupport {
                 bean.setInfo(entry.info);
                 getChildren().add(bean);
             }
+            initTitle(file);
         } catch (Exception x) {
             log(WARNING, "Unable to load {0}", x, file);
         }
+    }
+
+    private void initTitle(File file) {
+        if (getScene() == null) {
+            return;
+        }
+        if (getScene().getWindow() == null) {
+            return;
+        }
+        final Stage stage = (Stage) getScene().getWindow();
+        stage.setTitle(String.format("MODBUS: %s", file.getName()));
     }
 }

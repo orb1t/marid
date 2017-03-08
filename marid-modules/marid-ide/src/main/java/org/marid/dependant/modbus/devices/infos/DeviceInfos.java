@@ -37,7 +37,7 @@ public class DeviceInfos {
     public DeviceInfos() {
     }
 
-    public DeviceInfos(AbstractDevice<?>... devices) {
+    public DeviceInfos(AbstractDevice<?, ?>... devices) {
         entries = new DeviceEntry[devices.length];
         for (int i = 0; i < devices.length; i++) {
             final DeviceEntry entry = new DeviceEntry();

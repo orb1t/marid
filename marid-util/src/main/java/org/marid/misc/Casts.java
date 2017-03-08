@@ -29,29 +29,4 @@ public interface Casts {
     static <T> T cast(@Nullable Object object) {
         return (T) object;
     }
-
-    static Class<?> primitiveType(String type) {
-        switch (type) {
-            case "":
-                return null;
-            case "int":
-                return int.class;
-            case "double":
-                return double.class;
-            case "float":
-                return float.class;
-            case "byte":
-                return byte.class;
-            case "boolean":
-                return boolean.class;
-            case "char":
-                return char.class;
-            case "void":
-                return void.class;
-            case "long":
-                return long.class;
-            default:
-                return null;
-        }
-    }
 }

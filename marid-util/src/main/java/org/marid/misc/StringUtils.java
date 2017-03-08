@@ -22,23 +22,25 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.function.Predicate;
 
 import static java.lang.Character.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class StringUtils {
+public interface StringUtils {
 
-    public static String capitalize(String text) {
+    static String capitalize(String text) {
         return text.isEmpty() ? text : text.substring(0, 1).toUpperCase() + text.substring(1);
     }
 
-    public static String decapitalize(String text) {
+    static String decapitalize(String text) {
         return text.isEmpty() ? text : text.substring(0, 1).toLowerCase() + text.substring(1);
     }
 
-    public static String delimited(char delimiter, String... array) {
+    static String delimited(char delimiter, String... array) {
         int count = 0;
         for (String s : array) {
             if (count > 0) {
@@ -61,7 +63,7 @@ public class StringUtils {
         return String.valueOf(buf);
     }
 
-    public static String delimited(String delimiter, String... array) {
+    static String delimited(String delimiter, String... array) {
         int n = delimiter.length();
         int count = 0;
         for (String s : array) {
@@ -86,7 +88,7 @@ public class StringUtils {
         return String.valueOf(buf);
     }
 
-    public static String delimited(char delimiter, Object... array) {
+    static String delimited(char delimiter, Object... array) {
         String[] a = new String[array.length];
         for (int i = 0; i < a.length; i++) {
             a[i] = String.valueOf(array[i]);
@@ -110,7 +112,7 @@ public class StringUtils {
         return String.valueOf(buf);
     }
 
-    public static String delimited(String delimiter, Object... array) {
+    static String delimited(String delimiter, Object... array) {
         String[] a = new String[array.length];
         for (int i = 0; i < a.length; i++) {
             a[i] = String.valueOf(array[i]);
@@ -136,11 +138,11 @@ public class StringUtils {
         return String.valueOf(buf);
     }
 
-    public static int atoi(byte[] buf, int off, int len) {
+    static int atoi(byte[] buf, int off, int len) {
         return Integer.parseInt(new String(buf, off, len, StandardCharsets.ISO_8859_1));
     }
 
-    public static String camelToText(String camel) {
+    static String camelToText(String camel) {
         final StringBuilder builder = new StringBuilder(camel.length());
         final int[] cps = camel.trim().codePoints().toArray();
         for (int i = 0; i < cps.length; i++) {
@@ -155,7 +157,7 @@ public class StringUtils {
         return builder.toString();
     }
 
-    public static String constantToText(String constant) {
+    static String constantToText(String constant) {
         final String[] parts = constant.split("_");
         for (int i = 0; i < parts.length; i++) {
             parts[i] = parts[i].toLowerCase();
@@ -166,7 +168,7 @@ public class StringUtils {
         return String.join(" ", parts);
     }
 
-    public static String substitute(String text) {
+    static String substitute(String text) {
         String result = text;
         for (final String key : System.getProperties().stringPropertyNames()) {
             result = result.replace("${" + key + "}", System.getProperty(key));
@@ -174,7 +176,7 @@ public class StringUtils {
         return result;
     }
 
-    public static String urlEncode(String text) {
+    static String urlEncode(String text) {
         try {
             return URLEncoder.encode(text, "UTF-8");
         } catch (UnsupportedEncodingException x) {
@@ -182,11 +184,15 @@ public class StringUtils {
         }
     }
 
-    public static String urlDecode(String text) {
+    static String urlDecode(String text) {
         try {
             return URLDecoder.decode(text, "UTF-8");
         } catch (UnsupportedEncodingException x) {
             throw new IllegalStateException(x);
         }
+    }
+
+    static Predicate<Path> pathEndsWith(String suffix) {
+        return p -> p.getFileName().toString().endsWith(suffix);
     }
 }

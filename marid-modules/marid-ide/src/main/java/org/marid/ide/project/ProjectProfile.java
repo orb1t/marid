@@ -19,7 +19,7 @@
 package org.marid.ide.project;
 
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
 import org.apache.maven.model.Profile;
@@ -29,6 +29,7 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.jfx.beans.FxList;
 import org.marid.logging.LogSupport;
+import org.marid.misc.Urls;
 import org.marid.spring.xml.*;
 import org.springframework.core.ResolvableType;
 
@@ -44,12 +45,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -67,22 +70,23 @@ import static org.springframework.core.ResolvableType.*;
  */
 public class ProjectProfile implements LogSupport {
 
-    final Model model;
-    final Path path;
-    final Path pomFile;
-    final Path src;
-    final Path target;
-    final Path srcMain;
-    final Path srcTest;
-    final Path srcMainJava;
-    final Path srcMainResources;
-    final Path srcTestJava;
-    final Path srcTestResources;
-    final Path beansDirectory;
-    final Path repository;
-    final Logger logger;
-    final FxList<BeanFile> beanFiles;
-    final ProjectCacheEntry cacheEntry;
+    private final Model model;
+    private final Path path;
+    private final Path pomFile;
+    private final Path src;
+    private final Path target;
+    private final Path srcMain;
+    private final Path srcTest;
+    private final Path srcMainJava;
+    private final Path srcMainResources;
+    private final Path srcTestJava;
+    private final Path srcTestResources;
+    private final Path beansDirectory;
+    private final Path repository;
+    private final Logger logger;
+    private final FxList<BeanFile> beanFiles;
+    private final Map<String, Class<?>> classMap = new ConcurrentHashMap<>();
+    private volatile URLClassLoader classLoader;
 
     ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -103,11 +107,17 @@ public class ProjectProfile implements LogSupport {
         createFileStructure();
         beanFiles = loadBeanFiles();
         init();
-        cacheEntry = new ProjectCacheEntry(this);
+        classLoader = classLoader();
     }
 
     public URLClassLoader getClassLoader() {
-        return cacheEntry.getClassLoader();
+        return classLoader;
+    }
+
+    private URLClassLoader classLoader() {
+        try (final Stream<URL> urls = Urls.classpath(target.resolve("lib"), target.resolve("classes"))) {
+            return new URLClassLoader(urls.toArray(URL[]::new));
+        }
     }
 
     public boolean containsBean(String name) {
@@ -121,8 +131,18 @@ public class ProjectProfile implements LogSupport {
         return name;
     }
 
+    private void close() {
+        classMap.clear();
+        try (final URLClassLoader classLoader = this.classLoader) {
+            log(INFO, "Closing a class loader {0}", classLoader);
+        } catch (IOException x) {
+            log(WARNING, "Class loader close error", x);
+        }
+    }
+
     void update() throws Exception {
-        cacheEntry.update();
+        close();
+        classLoader = classLoader();
         Platform.runLater(ResolvableType::clearCache);
     }
 
@@ -224,7 +244,11 @@ public class ProjectProfile implements LogSupport {
     }
 
     public Optional<Class<?>> getClass(String type) {
-        return cacheEntry.getClass(type);
+        try {
+            return Optional.of(ClassUtils.getClass(classLoader, type, false));
+        } catch (Exception x) {
+            return Optional.empty();
+        }
     }
 
     private void createFileStructure() {
@@ -280,7 +304,7 @@ public class ProjectProfile implements LogSupport {
 
     void delete() {
         try {
-            cacheEntry.close();
+            close();
             FileUtils.deleteDirectory(path.toFile());
         } catch (Exception x) {
             log(WARNING, "Unable to delete {0}", x, getName());

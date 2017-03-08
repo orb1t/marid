@@ -82,7 +82,7 @@ public class ProjectPrerequisites {
             properties.setProperty("project.reporting.outputEncoding", "UTF-8");
             properties.setProperty("maven.compiler.source", "1.8");
             properties.setProperty("maven.compiler.target", "1.8");
-            properties.setProperty("marid.runtime.version", ideValues.implementationVersion);
+            properties.setProperty("marid.version", ideValues.implementationVersion);
         }
 
         private void applyBuild() {
@@ -203,7 +203,7 @@ public class ProjectPrerequisites {
                         model.getDependencies().add(dependency);
                         return dependency;
                     });
-            runtimeDependency.setVersion("${marid.runtime.version}");
+            runtimeDependency.setVersion("${marid.version}");
         }
 
         private void addChild(Xpp3Dom parent, String tag, String value) {

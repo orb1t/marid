@@ -18,66 +18,70 @@
 
 package org.marid.dependant.modbus.devices;
 
-import eu.hansolo.medusa.Gauge;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.Slider;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.marid.dependant.modbus.ModbusPane;
 import org.marid.dependant.modbus.annotation.Modbus;
+import org.marid.dependant.modbus.codec.CodecManager;
+import org.marid.dependant.modbus.codec.ModbusCodec;
 import org.marid.dependant.modbus.devices.info.AbstractDeviceInfo;
+import org.marid.jfx.converter.MaridConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.ResolvableType;
 
 import javax.annotation.PostConstruct;
 
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.D_CLOSE_BOX;
 import static org.marid.jfx.icons.FontIcon.D_TOOLTIP_EDIT;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
-import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.9
  */
-public abstract class AbstractDevice<I extends AbstractDeviceInfo> extends VBox {
+public abstract class AbstractDevice<I extends AbstractDeviceInfo, T> extends BorderPane {
 
-    protected final HBox titleBox;
-    protected final TextField title;
-    protected final Button editButton;
-    protected final Button closeButton;
-    protected final Slider slider;
-    protected final Gauge gauge;
+    final Class<I> deviceInfoType;
+    final Class<T> type;
+    final HBox titleBox;
+    final TextField title;
+    final Button editButton;
+    final Button closeButton;
+    final HBox addressBox;
+    final Label address;
+    final ComboBox<ModbusCodec<T>> codec;
 
-    protected int address;
-    protected String codec;
-
-    public AbstractDevice(Gauge gauge) {
-        super(5);
+    AbstractDevice(Class<I> deviceInfoType, Class<T> type) {
+        this.deviceInfoType = deviceInfoType;
+        this.type = type;
         setBackground(new Background(new BackgroundFill(new Color(0.5, 0.5, 0.5, 0.2), null, null)));
-        getChildren().add(titleBox = new HBox(4,
+        setTop(titleBox = new HBox(4,
                 title = new TextField(),
                 editButton = new Button(),
-                closeButton = new Button())
+                closeButton = new Button()));
+        setBottom(addressBox = new HBox(4,
+                address = new Label("0000"),
+                codec = new ComboBox<>())
         );
-        getChildren().add(this.gauge = gauge);
-        getChildren().add(slider = new Slider());
         setPadding(new Insets(5));
         titleBox.setAlignment(Pos.BASELINE_LEFT);
-        slider.maxProperty().bindBidirectional(gauge.maxValueProperty());
-        slider.minProperty().bindBidirectional(gauge.minValueProperty());
-        slider.valueProperty().bindBidirectional(gauge.valueProperty());
-        slider.majorTickUnitProperty().bindBidirectional(gauge.majorTickSpaceProperty());
-        slider.setShowTickMarks(true);
-        title.setText(s(getClass().getSimpleName()));
+        titleBox.setPadding(new Insets(4));
+        addressBox.setAlignment(Pos.BASELINE_LEFT);
+        addressBox.setPadding(new Insets(4));
+        title.textProperty().bind(ls(getClass().getSimpleName()));
         editButton.setGraphic(glyphIcon(D_TOOLTIP_EDIT, 16));
-        VBox.setVgrow(gauge, Priority.ALWAYS);
         HBox.setHgrow(title, Priority.ALWAYS);
+        HBox.setHgrow(codec, Priority.ALWAYS);
+        codec.setMaxWidth(Double.MAX_VALUE);
+        codec.setConverter(new MaridConverter<>(ModbusCodec::getName));
     }
 
     @PostConstruct
@@ -91,12 +95,15 @@ public abstract class AbstractDevice<I extends AbstractDeviceInfo> extends VBox 
         editButton.setOnAction(event -> ctx.getBean(getEditor(), this, stage).showAndWait().ifPresent(this::setInfo));
     }
 
-    @SuppressWarnings("unchecked")
+    @Autowired
+    private void initCodec(CodecManager codecManager) {
+        codec.setItems(codecManager.getCodecs(type));
+        codec.getSelectionModel().select(0);
+    }
+
     private I newInfo() {
-        final ResolvableType type = ResolvableType.forClass(AbstractDevice.class, getClass());
-        final ResolvableType arg = type.getGeneric(0);
         try {
-            return (I) arg.getRawClass().newInstance();
+            return deviceInfoType.newInstance();
         } catch (Exception x) {
             throw new IllegalStateException(x);
         }
@@ -104,15 +111,15 @@ public abstract class AbstractDevice<I extends AbstractDeviceInfo> extends VBox 
 
     public I getInfo() {
         final I info = newInfo();
-        info.address = address;
-        info.codec = codec;
+        info.address = Integer.parseInt(address.getText(), 16);
+        info.codec = codec.getSelectionModel().getSelectedItem().getName();
         return info;
     }
 
     public void setInfo(I info) {
-        address = info.address;
-        codec = info.codec;
+        address.setText(String.format("%04X", info.address));
+        codec.getItems().stream().filter(e -> e.getName().equals(info.codec)).forEach(codec.getSelectionModel()::select);
     }
 
-    public abstract Class<? extends AbstractDeviceEditor<I, ? extends AbstractDevice<I>>> getEditor();
+    public abstract Class<? extends AbstractDeviceEditor<I, T, ? extends AbstractDevice<I, T>>> getEditor();
 }

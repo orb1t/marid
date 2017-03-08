@@ -25,5 +25,5 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @since 0.9
  */
 @XmlRootElement(name = "barometer")
-public class BarometerInfo extends AbstractDeviceInfo {
+public class BarometerInfo extends FloatDeviceInfo {
 }

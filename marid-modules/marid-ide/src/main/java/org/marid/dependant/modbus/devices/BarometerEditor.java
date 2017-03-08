@@ -27,7 +27,7 @@ import org.marid.spring.annotation.PrototypeComponent;
  * @since 0.9
  */
 @PrototypeComponent
-public class BarometerEditor extends AbstractDeviceEditor<BarometerInfo, Barometer> {
+public class BarometerEditor extends AbstractDeviceEditor<BarometerInfo, Float, Barometer> {
 
     public BarometerEditor(Barometer device, Stage stage) {
         super(device, stage);

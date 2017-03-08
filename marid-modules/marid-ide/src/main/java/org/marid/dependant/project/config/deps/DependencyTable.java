@@ -87,7 +87,7 @@ public class DependencyTable extends TableView<Dependency> {
         final TableColumn<Dependency, String> col = new TableColumn<>("version");
         col.setCellValueFactory(param -> Props.stringProp(param.getValue()::getVersion, param.getValue()::setVersion));
         col.setCellFactory(param -> {
-            final ComboBoxTableCell<Dependency, String> cell = new ComboBoxTableCell<>("${marid.runtime.version}");
+            final ComboBoxTableCell<Dependency, String> cell = new ComboBoxTableCell<>("${marid.version}");
             cell.setComboBoxEditable(true);
             return cell;
         });

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Dmitry Ovchinnikov
+ * Copyright (c) 2016 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,24 +16,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.io;
+package org.marid.dependant.modbus.codec;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.zip.Deflater;
-import java.util.zip.GZIPOutputStream;
+import com.google.common.primitives.Ints;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.9
  */
-public class GzipOutputStream extends GZIPOutputStream {
+@Component
+public class FloatCodec extends ModbusCodec<Float> {
 
-    public GzipOutputStream(OutputStream out, int size, boolean syncFlush) throws IOException {
-        super(out, size, syncFlush);
-        def.setLevel(Deflater.BEST_COMPRESSION);
+    @NotNull
+    @Override
+    public String getName() {
+        return "Float";
     }
 
-    public OutputStream getOut() {
-        return out;
+    @NotNull
+    @Override
+    public byte[] encode(@NotNull Float value) {
+        return Ints.toByteArray(Float.floatToIntBits(value));
+    }
+
+    @NotNull
+    @Override
+    public Float decode(@NotNull byte[] value) {
+        return Float.intBitsToFloat(Ints.fromByteArray(value));
+    }
+
+    @Override
+    public int getSize() {
+        return 4;
     }
 }

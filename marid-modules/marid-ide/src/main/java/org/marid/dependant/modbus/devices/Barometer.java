@@ -30,10 +30,10 @@ import static eu.hansolo.medusa.Gauge.SkinType.KPI;
  * @since 0.9
  */
 @PrototypeComponent
-public class Barometer extends AbstractDevice<BarometerInfo> {
+public class Barometer extends AbstractGaugeDevice<BarometerInfo> {
 
     public Barometer() {
-        super(new Gauge(KPI));
+        super(new Gauge(KPI), BarometerInfo.class);
         gauge.setForegroundBaseColor(new Color(0.5, 0.5, 0.5, 1.0));
         gauge.setBarColor(new Color(0.7, 0.8, 0.9, 1.0));
     }

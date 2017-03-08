@@ -24,17 +24,13 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Spinner;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.Pair;
-import org.marid.dependant.modbus.codec.CodecManager;
+import org.marid.dependant.modbus.codec.ModbusCodec;
 import org.marid.dependant.modbus.devices.info.AbstractDeviceInfo;
 import org.marid.jfx.converter.MaridConverter;
 import org.marid.jfx.panes.GenericGridPane;
 import org.marid.jfx.panes.MaridScrollPane;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import java.util.function.DoubleFunction;
-import java.util.stream.IntStream;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
@@ -44,16 +40,17 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov.
  * @since 0.9
  */
-public class AbstractDeviceEditor<I extends AbstractDeviceInfo, T extends AbstractDevice<I>> extends Dialog<I> {
+public class AbstractDeviceEditor<I extends AbstractDeviceInfo, E, T extends AbstractDevice<I, E>> extends Dialog<I> {
 
     protected final T device;
     protected final I info;
     protected final GenericGridPane table = new GenericGridPane();
     protected final Spinner<Integer> address;
-    protected final ComboBox<Pair<String, DoubleFunction<byte[]>>> codecs = new ComboBox<>();
+    protected final ComboBox<ModbusCodec<E>> codecs;
 
     public AbstractDeviceEditor(T device, Stage stage) {
         this.device = device;
+        this.codecs = new ComboBox<>(device.codec.getItems());
         this.info = device.getInfo();
         this.address = new Spinner<>(0, 65535, info.address);
         initOwner(stage);
@@ -81,19 +78,15 @@ public class AbstractDeviceEditor<I extends AbstractDeviceInfo, T extends Abstra
         table.addControl("Address", () -> address);
     }
 
-    @Autowired
-    private void initCodecs(CodecManager codecManager) {
-        codecs.setItems(codecManager.getCodecs());
-        codecs.setConverter(new MaridConverter<>(Pair::getKey));
-        codecs.getSelectionModel().select(IntStream.range(0, codecs.getItems().size())
-                .filter(i -> codecs.getItems().get(i).getKey().equals(info.codec))
-                .findFirst()
-                .orElse(0));
+    @PostConstruct
+    private void initCodecs() {
+        codecs.setConverter(new MaridConverter<>(ModbusCodec::getName));
+        codecs.getSelectionModel().select(device.codec.getSelectionModel().getSelectedIndex());
         table.addControl("Codec", () -> codecs);
     }
 
     protected void accept() {
-        info.codec = codecs.getSelectionModel().getSelectedItem().getKey();
+        info.codec = codecs.getSelectionModel().getSelectedItem().getName();
         info.address = address.getValue();
     }
 }

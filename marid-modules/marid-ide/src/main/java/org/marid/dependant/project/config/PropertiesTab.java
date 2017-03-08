@@ -53,8 +53,8 @@ public class PropertiesTab extends GenericGridPane {
     @OrderedInit(1)
     public void initMaridVersion(@Value("${implementation.version}") String version) {
         addTextField("Marid version", value(
-                () -> properties.getProperty("marid.runtime.version", version),
-                v -> properties.setProperty("marid.runtime.version", v)));
+                () -> properties.getProperty("marid.version", version),
+                v -> properties.setProperty("marid.version", v)));
         addSeparator();
     }
 

@@ -24,7 +24,6 @@ import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
 import java.lang.reflect.Executable;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.IntStream.range;
@@ -161,18 +160,6 @@ public final class BeanData extends DElement<BeanData> {
             return true;
         }
         return false;
-    }
-
-    public Optional<BeanProp> property(String name) {
-        return properties.stream()
-                .filter(p -> name.equals(p.getName()))
-                .findAny();
-    }
-
-    public Optional<BeanArg> arg(String name) {
-        return beanArgs.stream()
-                .filter(a -> name.equals(a.getName()))
-                .findAny();
     }
 
     @Override

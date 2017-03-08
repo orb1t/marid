@@ -27,7 +27,7 @@ import org.marid.spring.annotation.PrototypeComponent;
  * @since 0.9
  */
 @PrototypeComponent
-public class ThermometerEditor extends AbstractDeviceEditor<ThermometerInfo, Thermometer> {
+public class ThermometerEditor extends AbstractDeviceEditor<ThermometerInfo, Float, Thermometer> {
 
     public ThermometerEditor(Thermometer device, Stage stage) {
         super(device, stage);
