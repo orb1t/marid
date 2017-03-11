@@ -18,6 +18,7 @@
 
 package org.marid.dependant.modbus.devices;
 
+import com.digitalpetri.modbus.FunctionCode;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -38,6 +39,7 @@ import org.springframework.context.support.GenericApplicationContext;
 
 import javax.annotation.PostConstruct;
 
+import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.D_CLOSE_BOX;
 import static org.marid.jfx.icons.FontIcon.D_TOOLTIP_EDIT;
@@ -57,6 +59,7 @@ public abstract class AbstractDevice<I extends AbstractDeviceInfo, T> extends Bo
     final Button closeButton;
     final HBox addressBox;
     final Label address;
+    final ComboBox<FunctionCode> functions;
     final ComboBox<ModbusCodec<T>> codec;
 
     AbstractDevice(Class<I> deviceInfoType, Class<T> type) {
@@ -69,6 +72,7 @@ public abstract class AbstractDevice<I extends AbstractDeviceInfo, T> extends Bo
                 closeButton = new Button()));
         setBottom(addressBox = new HBox(4,
                 address = new Label("0000"),
+                functions = new ComboBox<>(observableArrayList(FunctionCode.values())),
                 codec = new ComboBox<>())
         );
         setPadding(new Insets(5));
@@ -80,6 +84,8 @@ public abstract class AbstractDevice<I extends AbstractDeviceInfo, T> extends Bo
         editButton.setGraphic(glyphIcon(D_TOOLTIP_EDIT, 16));
         HBox.setHgrow(title, Priority.ALWAYS);
         HBox.setHgrow(codec, Priority.ALWAYS);
+        functions.getSelectionModel().select(0);
+        functions.setConverter(new MaridConverter<>(f -> String.format("%02X", f.getCode())));
         codec.setMaxWidth(Double.MAX_VALUE);
         codec.setConverter(new MaridConverter<>(ModbusCodec::getName));
     }
@@ -111,15 +117,27 @@ public abstract class AbstractDevice<I extends AbstractDeviceInfo, T> extends Bo
 
     public I getInfo() {
         final I info = newInfo();
-        info.address = Integer.parseInt(address.getText(), 16);
-        info.codec = codec.getSelectionModel().getSelectedItem().getName();
+        info.address = getAddress();
+        info.codec = codec.getValue().getName();
+        info.function = functions.getValue();
         return info;
     }
 
     public void setInfo(I info) {
         address.setText(String.format("%04X", info.address));
-        codec.getItems().stream().filter(e -> e.getName().equals(info.codec)).forEach(codec.getSelectionModel()::select);
+        codec.getItems().filtered(e -> e.getName().equals(info.codec)).forEach(codec.getSelectionModel()::select);
+        functions.getSelectionModel().select(info.function);
     }
+
+    public int getAddress() {
+        return Integer.parseInt(address.getText(), 16);
+    }
+
+    public FunctionCode getFunctionCode() {
+        return functions.getValue();
+    }
+
+    public abstract byte[] getData();
 
     public abstract Class<? extends AbstractDeviceEditor<I, T, ? extends AbstractDevice<I, T>>> getEditor();
 }

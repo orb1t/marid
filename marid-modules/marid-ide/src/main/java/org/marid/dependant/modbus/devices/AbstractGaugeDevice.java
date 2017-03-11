@@ -22,6 +22,7 @@ import eu.hansolo.medusa.Gauge;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Slider;
+import org.marid.dependant.modbus.codec.ModbusCodec;
 import org.marid.dependant.modbus.devices.info.FloatDeviceInfo;
 
 /**
@@ -58,5 +59,11 @@ abstract class AbstractGaugeDevice<I extends FloatDeviceInfo> extends AbstractDe
         final I info = super.getInfo();
         info.value = (float) gauge.getValue();
         return info;
+    }
+
+    @Override
+    public byte[] getData() {
+        final ModbusCodec<Float> codec = this.codec.getValue();
+        return codec.encode((float) gauge.getValue());
     }
 }

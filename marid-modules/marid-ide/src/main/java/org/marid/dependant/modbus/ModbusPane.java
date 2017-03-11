@@ -18,14 +18,19 @@
 
 package org.marid.dependant.modbus;
 
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import org.marid.dependant.modbus.devices.AbstractDevice;
+import org.marid.dependant.modbus.devices.info.AbstractDeviceInfo;
 import org.marid.dependant.modbus.devices.infos.DeviceEntry;
 import org.marid.dependant.modbus.devices.infos.DeviceInfos;
+import org.marid.dependant.modbus.repo.ModbusConfig;
 import org.marid.logging.LogSupport;
+import org.marid.misc.Casts;
 import org.marid.xml.XmlBind;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.stereotype.Component;
 
@@ -41,10 +46,13 @@ import java.io.File;
 public class ModbusPane extends FlowPane implements LogSupport {
 
     private final AutowireCapableBeanFactory factory;
+    private final ModbusConfig config;
 
-    public ModbusPane(AutowireCapableBeanFactory factory) {
+    @Autowired
+    public ModbusPane(AutowireCapableBeanFactory factory, ModbusConfig config) {
         super(10, 10);
         this.factory = factory;
+        this.config = config;
         setPadding(new Insets(10));
     }
 
@@ -53,6 +61,7 @@ public class ModbusPane extends FlowPane implements LogSupport {
                 .filter(AbstractDevice.class::isInstance)
                 .map(AbstractDevice.class::cast)
                 .toArray(AbstractDevice[]::new));
+        config.initDevices(infos);
         try {
             XmlBind.save(infos, file, XmlBind.FORMATTED_OUTPUT, Marshaller::marshal);
             initTitle(file);
@@ -61,21 +70,25 @@ public class ModbusPane extends FlowPane implements LogSupport {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void load(File file) {
         try {
             final DeviceInfos infos = XmlBind.load(DeviceInfos.class, file, Unmarshaller::unmarshal);
             getChildren().clear();
             for (final DeviceEntry entry : infos.entries) {
                 final Class<?> c = Class.forName(entry.type);
-                final AbstractDevice bean = (AbstractDevice) factory.createBean(c);
-                bean.setInfo(entry.info);
+                final AbstractDevice<?, ?> bean = (AbstractDevice<?, ?>) factory.createBean(c);
+                bean.setInfo(Casts.cast(entry.info));
                 getChildren().add(bean);
             }
             initTitle(file);
+            config.restoreDevices(infos);
         } catch (Exception x) {
             log(WARNING, "Unable to load {0}", x, file);
         }
+    }
+
+    public <I extends AbstractDeviceInfo, T> void add(AbstractDevice<I, T> device) {
+        getChildren().add(device);
     }
 
     private void initTitle(File file) {
@@ -86,6 +99,6 @@ public class ModbusPane extends FlowPane implements LogSupport {
             return;
         }
         final Stage stage = (Stage) getScene().getWindow();
-        stage.setTitle(String.format("MODBUS: %s", file.getName()));
+        stage.titleProperty().bind(Bindings.createObjectBinding(() -> String.format("MODBUS: %s", file.getName())));
     }
 }

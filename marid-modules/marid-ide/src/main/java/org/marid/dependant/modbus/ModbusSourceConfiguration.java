@@ -18,25 +18,33 @@
 
 package org.marid.dependant.modbus;
 
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.marid.dependant.modbus.annotation.DeviceIcon;
 import org.marid.dependant.modbus.annotation.Modbus;
+import org.marid.dependant.modbus.devices.AbstractDevice;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.panes.MaridScrollPane;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.GenericApplicationContext;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 
@@ -56,8 +64,31 @@ public class ModbusSourceConfiguration {
 
     @Bean
     @Modbus
-    public ToolBar modbusToolbar(@Modbus Map<String, FxAction> actionMap) {
+    public ToolBar topToolbar(@Modbus Map<String, FxAction> actionMap) {
         return new ToolBar(MaridActions.toolbar(actionMap));
+    }
+
+    @Bean
+    @Modbus
+    public ToolBar bottomToolbar(GenericApplicationContext context, ModbusPane pane) {
+        final String[] beanNames = context.getBeanNamesForType(AbstractDevice.class, true, false);
+        return new ToolBar(Stream.of(beanNames)
+                .map(name -> {
+                    final Button button = new Button();
+                    final DeviceIcon icon = context.findAnnotationOnBean(name, DeviceIcon.class);
+                    if (icon != null) {
+                        button.setGraphic(FontIcons.glyphIcon(icon.value(), 20));
+                    }
+                    final Tooltip tooltip = new Tooltip();
+                    tooltip.textProperty().bind(ls(name));
+                    button.setTooltip(tooltip);
+                    button.setOnAction(event -> {
+                        final AbstractDevice<?, ?> device = context.getBean(name, AbstractDevice.class);
+                        pane.add(device);
+                    });
+                    return button;
+                })
+                .toArray(Node[]::new));
     }
 
     @Bean
@@ -68,10 +99,17 @@ public class ModbusSourceConfiguration {
 
     @Bean
     @Modbus
-    public BorderPane modbusRoot(@Modbus ToolBar toolbar,
+    public BorderPane modbusRoot(@Modbus ToolBar topToolbar,
                                  @Modbus MenuBar menuBar,
-                                 ModbusPane modbusPane) {
-        return new BorderPane(new MaridScrollPane(modbusPane), new VBox(menuBar, toolbar), null, null, null);
+                                 ModbusPane modbusPane,
+                                 @Modbus ToolBar bottomToolbar) {
+        return new BorderPane(
+                new MaridScrollPane(modbusPane),
+                new VBox(menuBar, topToolbar),
+                null,
+                bottomToolbar,
+                null
+        );
     }
 
     @Bean

@@ -16,33 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.modbus.devices.info;
+package org.marid.dependant.modbus.repo;
 
-import com.digitalpetri.modbus.FunctionCode;
-import org.marid.dependant.modbus.codec.FloatCodec;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import org.marid.dependant.modbus.devices.infos.DeviceInfos;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.9
  */
-@XmlAccessorType(XmlAccessType.NONE)
-@XmlSeeAlso({
-        BarometerInfo.class,
-        ThermometerInfo.class
-})
-public abstract class AbstractDeviceInfo {
+@Repository
+public class ModbusConfig {
 
-    @XmlAttribute
-    public int address = 0;
+    public final StringProperty host = new SimpleStringProperty("0.0.0.0");
+    public final IntegerProperty port = new SimpleIntegerProperty(10502);
 
-    @XmlAttribute
-    public String codec = new FloatCodec().getName();
+    public void initDevices(DeviceInfos deviceInfos) {
+        deviceInfos.host = host.get();
+        deviceInfos.port = port.get();
+    }
 
-    @XmlAttribute
-    public FunctionCode function = FunctionCode.ReadHoldingRegisters;
+    public void restoreDevices(DeviceInfos deviceInfos) {
+        host.set(deviceInfos.host);
+        port.set(deviceInfos.port);
+    }
 }

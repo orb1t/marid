@@ -19,12 +19,16 @@
 package org.marid.dependant.modbus;
 
 import javafx.beans.binding.Bindings;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToolBar;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import org.marid.dependant.modbus.annotation.Modbus;
-import org.marid.dependant.modbus.devices.Barometer;
-import org.marid.dependant.modbus.devices.Thermometer;
+import org.marid.dependant.modbus.repo.ModbusConfig;
+import org.marid.dependant.modbus.repo.ModbusService;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
 import org.springframework.beans.factory.ObjectFactory;
@@ -33,6 +37,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 
+import static org.marid.jfx.LocalizedStrings.fls;
 import static org.marid.jfx.action.Dialogs.overrideExt;
 import static org.marid.l10n.L10n.s;
 
@@ -92,19 +97,41 @@ public class ModbusActions {
 
     @Bean
     @Modbus
-    public FxAction addThermometer(ModbusPane modbusPane, ObjectFactory<Thermometer> thermometer) {
-        return new FxAction("devices", "devices", "Library")
-                .bindText("Thermometer")
-                .setIcon(FontIcon.W_THERMOMETER)
-                .setEventHandler(event -> modbusPane.getChildren().add(thermometer.getObject()));
+    public FxAction runAction(ModbusService service) {
+        return new FxAction("run", "service", "Service")
+                .bindText("Run")
+                .setIcon(FontIcon.D_PLAY)
+                .setEventHandler(event -> service.start())
+                .bindDisabled(service.activeProperty());
     }
 
     @Bean
     @Modbus
-    public FxAction addBarometer(ModbusPane modbusPane, ObjectFactory<Barometer> barometer) {
-        return new FxAction("devices", "devices", "Library")
-                .bindText("Barometer")
-                .setIcon(FontIcon.W_BAROMETER)
-                .setEventHandler(event -> modbusPane.getChildren().add(barometer.getObject()));
+    public FxAction stopAction(ModbusService service) {
+        return new FxAction("run", "service", "Service")
+                .bindText("Stop")
+                .setIcon(FontIcon.D_STOP)
+                .setEventHandler(event -> service.stop())
+                .bindDisabled(service.activeProperty().not());
+    }
+
+    @Bean(initMethod = "run")
+    public Runnable init(@Modbus ToolBar topToolbar, ModbusConfig config) {
+        return () -> {
+            final Label hostLabel = new Label();
+            hostLabel.textProperty().bind(fls("%s: ", "Host"));
+
+            final TextField hostField = new TextField();
+            hostField.textProperty().bindBidirectional(config.host);
+
+            final Label portLabel = new Label();
+            portLabel.textProperty().bind(fls("  %s: ", "Port"));
+
+            final Spinner<Number> portSpinner = new Spinner<>(0, 65535, config.port.get());
+            portSpinner.getValueFactory().valueProperty().bindBidirectional(config.port);
+            portSpinner.setEditable(true);
+
+            topToolbar.getItems().addAll(hostLabel, hostField, portLabel, portSpinner);
+        };
     }
 }

@@ -18,6 +18,7 @@
 
 package org.marid.dependant.modbus.devices;
 
+import com.digitalpetri.modbus.FunctionCode;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
@@ -34,6 +35,7 @@ import javax.annotation.PostConstruct;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
+import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -47,6 +49,7 @@ public class AbstractDeviceEditor<I extends AbstractDeviceInfo, E, T extends Abs
     protected final GenericGridPane table = new GenericGridPane();
     protected final Spinner<Integer> address;
     protected final ComboBox<ModbusCodec<E>> codecs;
+    protected final ComboBox<FunctionCode> functions = new ComboBox<>(observableArrayList(FunctionCode.values()));
 
     public AbstractDeviceEditor(T device, Stage stage) {
         this.device = device;
@@ -85,8 +88,15 @@ public class AbstractDeviceEditor<I extends AbstractDeviceInfo, E, T extends Abs
         table.addControl("Codec", () -> codecs);
     }
 
+    @PostConstruct
+    private void initFuncs() {
+        functions.getSelectionModel().select(info.function);
+        table.addControl("Function", () -> functions);
+    }
+
     protected void accept() {
         info.codec = codecs.getSelectionModel().getSelectedItem().getName();
         info.address = address.getValue();
+        info.function = functions.getSelectionModel().getSelectedItem();
     }
 }

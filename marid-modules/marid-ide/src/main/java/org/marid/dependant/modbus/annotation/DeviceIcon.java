@@ -16,33 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.modbus.devices.info;
+package org.marid.dependant.modbus.annotation;
 
-import com.digitalpetri.modbus.FunctionCode;
-import org.marid.dependant.modbus.codec.FloatCodec;
+import org.intellij.lang.annotations.MagicConstant;
+import org.marid.jfx.icons.FontIcon;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlSeeAlso;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.9
  */
-@XmlAccessorType(XmlAccessType.NONE)
-@XmlSeeAlso({
-        BarometerInfo.class,
-        ThermometerInfo.class
-})
-public abstract class AbstractDeviceInfo {
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DeviceIcon {
 
-    @XmlAttribute
-    public int address = 0;
-
-    @XmlAttribute
-    public String codec = new FloatCodec().getName();
-
-    @XmlAttribute
-    public FunctionCode function = FunctionCode.ReadHoldingRegisters;
+    @MagicConstant(valuesFromClass = FontIcon.class)
+    String value();
 }

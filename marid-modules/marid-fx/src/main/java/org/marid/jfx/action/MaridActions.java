@@ -18,14 +18,21 @@
 
 package org.marid.jfx.action;
 
+import com.google.common.collect.ComputationException;
+import com.google.common.util.concurrent.UncheckedTimeoutException;
+import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
@@ -153,5 +160,54 @@ public interface MaridActions {
                             return button;
                         }), of(new Separator())))
                 .toArray(Node[]::new);
+    }
+
+    static <T> T execute(Callable<T> task, long timeout, TimeUnit timeUnit) throws UncheckedTimeoutException {
+        if (Platform.isFxApplicationThread()) {
+            try {
+                return task.call();
+            } catch (Exception x) {
+                throw new ComputationException(x);
+            }
+        } else {
+            final SynchronousQueue<Pair<T, Throwable>> queue = new SynchronousQueue<>();
+            Platform.runLater(() -> {
+                try {
+                    final T result;
+                    try {
+                        result = task.call();
+                    } catch (Throwable x) {
+                        queue.put(new Pair<>(null, x));
+                        return;
+                    }
+                    queue.put(new Pair<>(result, null));
+                } catch (InterruptedException x) {
+                    queue.offer(new Pair<>(null, x));
+                }
+            });
+            final Pair<T, Throwable> pair;
+            try {
+                pair = queue.poll(timeout, timeUnit);
+            } catch (InterruptedException x) {
+                throw new UncheckedTimeoutException("Interrupted", x);
+            }
+            if (pair == null) {
+                throw new UncheckedTimeoutException("Timeout exceeded");
+            } else if (pair.getKey() != null) {
+                return pair.getKey();
+            } else if (pair.getValue() instanceof RuntimeException) {
+                throw (RuntimeException) pair.getValue();
+            } else if (pair.getValue() instanceof Exception) {
+                throw new ComputationException(pair.getValue());
+            } else if (pair.getValue() instanceof Error) {
+                throw (Error) pair.getValue();
+            } else {
+                throw new IllegalStateException("Unknown error", pair.getValue());
+            }
+        }
+    }
+
+    static <T> T execute(Callable<T> task) {
+        return execute(task, 1L, TimeUnit.MINUTES);
     }
 }

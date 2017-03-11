@@ -31,6 +31,12 @@ import javax.xml.bind.annotation.*;
 @XmlSeeAlso({DeviceEntry.class})
 public class DeviceInfos {
 
+    @XmlAttribute
+    public String host;
+
+    @XmlAttribute
+    public int port;
+
     @XmlElement
     public DeviceEntry[] entries;
 
