@@ -83,6 +83,7 @@ public class ModbusService implements LogSupport, ServiceRequestHandler {
             active.set(true);
         } catch (Exception x) {
             log(WARNING, "Unable to listen {0}:{1}", x, config.host.get(), config.port.get());
+            stop();
         }
     }
 

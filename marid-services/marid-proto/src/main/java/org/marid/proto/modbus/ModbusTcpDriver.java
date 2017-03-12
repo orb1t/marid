@@ -27,7 +27,9 @@ import javax.annotation.PostConstruct;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.StreamCorruptedException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -48,14 +50,13 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
     private final long delay;
     private final long period;
     private final TimeUnit timeUnit;
-    private final Consumer<char[]> consumer;
+    private final ArrayList<Consumer<byte[]>> consumers = new ArrayList<>();
 
     private ScheduledFuture<?> task;
 
-    public ModbusTcpDriver(ProtoBus bus, String id, String name, ModbusTcpDriverProps props, Consumer<char[]> consumer) {
+    public ModbusTcpDriver(ProtoBus bus, String id, String name, ModbusTcpDriverProps props) {
         super(id, name);
         this.bus = bus;
-        this.consumer = consumer;
         this.bus.getDrivers().put(id, Casts.cast(this));
         this.transactionIdentifier = (char) bus.getDrivers().size();
         this.slaveAndFunc = allocate(2).put(0, (byte) props.getUnitId()).put(1, (byte) props.getFunc()).getChar(0);
@@ -103,11 +104,7 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
             }
             final byte[] data = new byte[count * 2];
             input.readFully(data);
-            final char[] result = new char[count];
-            for (int i = 0; i < count; i++) {
-                result[i] = (char) (Byte.toUnsignedInt(data[i * 2]) * 256 + Byte.toUnsignedInt(data[i * 2 + 1]));
-            }
-            consumer.accept(result);
+            consumers.forEach(c -> c.accept(data));
         }), delay, period, timeUnit, false);
     }
 
@@ -127,6 +124,16 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
     @Override
     public ProtoBus getParent() {
         return bus;
+    }
+
+    public void setConsumers(List<Consumer<byte[]>> consumers) {
+        this.consumers.clear();
+        this.consumers.addAll(consumers);
+        this.consumers.trimToSize();
+    }
+
+    public List<Consumer<byte[]>> getConsumers() {
+        return consumers;
     }
 
     @Override

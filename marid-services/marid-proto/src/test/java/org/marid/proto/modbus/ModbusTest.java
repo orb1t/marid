@@ -37,6 +37,8 @@ import org.marid.test.NormalTests;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -105,15 +107,16 @@ public class ModbusTest {
             modbusTcpDriverProps.setPeriod(1L);
             modbusTcpDriverProps.setAddress(0);
             modbusTcpDriverProps.setUnitId(1);
-            final BlockingQueue<char[]> queue = new LinkedBlockingQueue<>();
-            final ModbusTcpDriver driver = new ModbusTcpDriver(bus, "drv", "drv", modbusTcpDriverProps, queue::add);
+            final BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();
+            final ModbusTcpDriver driver = new ModbusTcpDriver(bus, "drv", "drv", modbusTcpDriverProps);
+            driver.setConsumers(Collections.singletonList(queue::add));
             driver.start();
-            final char[] data = queue.poll(10L, TimeUnit.SECONDS);
+            final byte[] data = queue.poll(10L, TimeUnit.SECONDS);
             if (data == null) {
                 throw new TimeoutException();
             }
-            assertEquals(1, data.length);
-            assertEquals(6890, data[0]);
+            assertEquals(2, data.length);
+            assertEquals(6890, ByteBuffer.wrap(data).asCharBuffer().charAt(0));
         }
     }
 }

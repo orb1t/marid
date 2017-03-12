@@ -38,12 +38,6 @@ public final class BeanFile extends AbstractData<BeanFile> {
     public final FxList<String> path = new FxList<>();
     public final FxList<BeanData> beans = new FxList<>(BeanData::observables);
 
-    public Stream<BeanData> allBeans() {
-        final Stream.Builder<BeanData> builder = Stream.builder();
-        beans.forEach(builder::add);
-        return builder.build();
-    }
-
     @XmlElement(name = "bean")
     public BeanData[] getBeans() {
         return beans.stream().filter(b -> !b.isEmpty()).toArray(BeanData[]::new);

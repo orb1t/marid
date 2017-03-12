@@ -149,7 +149,13 @@ public final class BeanData extends DElement<BeanData> {
     }
 
     public boolean isFactoryBean() {
-        return factoryBean.get() != null && !factoryBean.get().isEmpty() || factoryMethod.get() != null && !factoryMethod.get().isEmpty();
+        if (factoryBean.get() != null && !factoryBean.get().isEmpty()) {
+            return factoryMethod.get() != null && !factoryMethod.get().isEmpty();
+        } else if (factoryMethod.get() != null && !factoryMethod.get().isEmpty()) {
+            return type.get() != null && !type.get().isEmpty();
+        } else {
+            return false;
+        }
     }
 
     public boolean isEmpty() {

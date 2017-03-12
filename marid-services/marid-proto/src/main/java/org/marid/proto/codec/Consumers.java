@@ -16,14 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.proto.modbus;
+package org.marid.proto.codec;
+
+import java.util.function.Consumer;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.9
  */
-public interface ModbusCodec<T> {
+public interface Consumers {
 
-    T decode(byte[] data);
+    static Consumer<byte[]> doubleConsumer(Consumer<Double> consumer, Codec<Double> doubleCodec) {
+        return data -> consumer.accept(doubleCodec.decode(data));
+    }
 
-    byte[] encode(T data);
+    static Consumer<byte[]> floatConsumer(Consumer<Float> consumer, Codec<Float> floatCodec) {
+        return data -> consumer.accept(floatCodec.decode(data));
+    }
+
+    static Consumer<byte[]> intConsumer(Consumer<Integer> consumer, Codec<Integer> integerCodec) {
+        return data -> consumer.accept(integerCodec.decode(data));
+    }
 }

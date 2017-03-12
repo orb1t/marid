@@ -84,7 +84,7 @@ public abstract class AbstractDevice<I extends AbstractDeviceInfo, T> extends Bo
         editButton.setGraphic(glyphIcon(D_TOOLTIP_EDIT, 16));
         HBox.setHgrow(title, Priority.ALWAYS);
         HBox.setHgrow(codec, Priority.ALWAYS);
-        functions.getSelectionModel().select(0);
+        functions.getSelectionModel().select(FunctionCode.ReadHoldingRegisters);
         functions.setConverter(new MaridConverter<>(f -> String.format("%02X", f.getCode())));
         codec.setMaxWidth(Double.MAX_VALUE);
         codec.setConverter(new MaridConverter<>(ModbusCodec::getName));

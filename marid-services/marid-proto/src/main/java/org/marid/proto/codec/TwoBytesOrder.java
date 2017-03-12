@@ -16,32 +16,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.proto.modbus;
-
-import static java.util.Arrays.copyOfRange;
-import static java.util.stream.IntStream.range;
+package org.marid.proto.codec;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ModbusIntArrayCodec implements ModbusCodec<int[]> {
+public enum TwoBytesOrder implements Codec<byte[]> {
 
-    private final ModbusIntCodec codec;
+    ABCD(0, 1, 2, 3),
+    BADC(1, 0, 3, 2),
+    DCBA(3, 2, 1, 0),
+    CDAB(2, 3, 0, 1);
 
-    public ModbusIntArrayCodec(ModbusTwoRegisterOrder order) {
-        this.codec = new ModbusIntCodec(order);
+    private final int[] indices;
+
+    TwoBytesOrder(int... indices) {
+        this.indices = indices;
     }
 
     @Override
-    public int[] decode(byte[] data) {
-        return range(0, data.length / 4).map(i -> codec.decode(copyOfRange(data, 4 * i, 4 * i + 4))).toArray();
+    public byte[] decode(byte[] data) {
+        final byte[] res = new byte[4];
+        for (int i = 0; i < indices.length; i++) {
+            res[i] = data[indices[i]];
+        }
+        return res;
     }
 
     @Override
-    public byte[] encode(int[] data) {
-        final byte[] res = new byte[data.length * 4];
-        for (int i = 0; i < data.length; i++) {
-            System.arraycopy(codec.encode(data[i]), 0, res, 4 * i, 4);
+    public byte[] encode(byte[] data) {
+        final byte[] res = new byte[4];
+        for (int i = 0; i < indices.length; i++) {
+            res[indices[i]] = data[i];
         }
         return res;
     }

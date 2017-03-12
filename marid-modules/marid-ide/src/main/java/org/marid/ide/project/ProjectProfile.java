@@ -41,10 +41,7 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -121,7 +118,7 @@ public class ProjectProfile implements LogSupport {
     }
 
     public boolean containsBean(String name) {
-        return beanFiles.stream().anyMatch(f -> f.allBeans().anyMatch(b -> name.equals(b.getName())));
+        return beanFiles.stream().anyMatch(f -> f.beans.stream().anyMatch(b -> name.equals(b.getName())));
     }
 
     public String generateBeanName(String name) {
@@ -334,20 +331,39 @@ public class ProjectProfile implements LogSupport {
         }
     }
 
+    public ResolvableType getType(BeanData beanData) {
+        if (beanData.isFactoryBean()) {
+            return getConstructor(beanData).map(e -> forMethodReturnType((Method) e)).orElse(NONE);
+        } else {
+            return getClass(beanData.type.get()).map(ResolvableType::forClass).orElse(NONE);
+        }
+    }
+
     public Stream<? extends Executable> getConstructors(BeanData data) {
         if (data.isFactoryBean()) {
-            return getBeanFiles().stream()
-                    .flatMap(BeanFile::allBeans)
-                    .filter(b -> Objects.equals(data.getFactoryBean(), b.getName()))
-                    .map(this::getClass)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .flatMap(t -> of(t.getMethods()))
-                    .filter(m -> m.getReturnType() != void.class)
-                    .filter(m -> m.getName().equals(data.getFactoryMethod()))
-                    .sorted(comparingInt(Method::getParameterCount));
+            if (data.getFactoryBean() != null) {
+                return getBeanFiles().stream()
+                        .flatMap(file -> file.beans.stream())
+                        .filter(b -> Objects.equals(data.getFactoryBean(), b.getName()))
+                        .map(this::getClass)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .flatMap(t -> of(t.getMethods()))
+                        .filter(m -> m.getReturnType() != void.class)
+                        .filter(m -> m.getName().equals(data.getFactoryMethod()))
+                        .sorted(comparingInt(Method::getParameterCount));
+            } else {
+                return getClass(data.type.get())
+                        .map(t -> Stream.of(t.getMethods())
+                                .filter(m -> Modifier.isStatic(m.getModifiers()))
+                                .filter(m -> m.getReturnType() != void.class)
+                                .filter(m -> m.getName().equals(data.getFactoryMethod()))
+                                .sorted(Comparator.comparingInt(Method::getParameterCount))
+                        )
+                        .orElse(Stream.empty());
+            }
         } else {
-            return getClass(data)
+            return getClass(data.type.get())
                     .map(c -> of(c.getConstructors()).sorted(comparingInt(Constructor::getParameterCount)))
                     .orElseGet(Stream::empty);
         }
@@ -364,7 +380,9 @@ public class ProjectProfile implements LogSupport {
                 final Class<?>[] types = data.beanArgs.stream()
                         .map(a -> getClass(a.type.get()).orElse(Object.class))
                         .toArray(Class<?>[]::new);
-                return executables.stream().filter(m -> Arrays.equals(types, m.getParameterTypes())).findFirst();
+                return executables.stream()
+                        .filter(m -> Arrays.equals(types, m.getParameterTypes()))
+                        .findFirst();
         }
     }
 
@@ -425,14 +443,6 @@ public class ProjectProfile implements LogSupport {
                     .filter(d -> d.getWriteMethod() != null);
         } catch (IntrospectionException x) {
             return Stream.empty();
-        }
-    }
-
-    public ResolvableType getType(BeanData beanData) {
-        if (beanData.isFactoryBean()) {
-            return getConstructor(beanData).map(e -> forMethodReturnType((Method) e)).orElse(NONE);
-        } else {
-            return getClass(beanData.type.get()).map(ResolvableType::forClass).orElse(NONE);
         }
     }
 

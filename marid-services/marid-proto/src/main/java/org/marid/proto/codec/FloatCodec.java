@@ -16,28 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.proto.modbus;
+package org.marid.proto.codec;
 
 import java.nio.ByteBuffer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ModbusIntCodec implements ModbusCodec<Integer> {
+public class FloatCodec implements Codec<Float> {
 
-    private final ModbusTwoRegisterOrder order;
-
-    public ModbusIntCodec(ModbusTwoRegisterOrder order) {
-        this.order = order;
+    @Override
+    public Float decode(byte[] data) {
+        return ByteBuffer.wrap(data).getFloat(0);
     }
 
     @Override
-    public Integer decode(byte[] data) {
-        return ByteBuffer.wrap(order.decode(data)).getInt(0);
-    }
-
-    @Override
-    public byte[] encode(Integer data) {
-        return order.encode(ByteBuffer.allocate(4).putInt(0, data).array());
+    public byte[] encode(Float data) {
+        return ByteBuffer.allocate(4).putFloat(0, data).array();
     }
 }

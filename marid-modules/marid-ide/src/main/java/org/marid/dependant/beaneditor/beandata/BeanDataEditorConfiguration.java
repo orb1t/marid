@@ -19,7 +19,6 @@
 package org.marid.dependant.beaneditor.beandata;
 
 import javafx.beans.binding.Bindings;
-import javafx.geometry.Side;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
@@ -76,7 +75,6 @@ public class BeanDataEditorConfiguration extends DependantConfiguration<BeanData
     @Qualifier("beanData")
     public TabPane beanDataEditorTabs(@Qualifier("beanData") Tab[] tabs) {
         final TabPane tabPane = new TabPane(tabs);
-        tabPane.setSide(Side.BOTTOM);
         tabPane.setTabClosingPolicy(UNAVAILABLE);
         return tabPane;
     }

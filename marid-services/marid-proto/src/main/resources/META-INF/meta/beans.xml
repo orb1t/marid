@@ -25,22 +25,57 @@
         <constructor-arg name="name" value="root"/>
     </bean>
 
-    <bean name="modbusFloatCodec" class="org.marid.proto.modbus.ModbusFloatCodec">
-        <description>MODBUS float value codec</description>
-
-        <constructor-arg name="order" value="ABCD"/>
+    <bean name="floatCodec" class="org.marid.proto.codec.FloatCodec">
+        <description>Float value codec</description>
     </bean>
 
-    <bean name="modbusIntCodec" class="org.marid.proto.modbus.ModbusIntCodec">
-        <description>MODBUS integer value codec</description>
-
-        <constructor-arg name="order" value="ABCD"/>
+    <bean name="intCodec" class="org.marid.proto.codec.IntCodec">
+        <description>Integer value codec</description>
     </bean>
 
-    <bean name="modbusIntArrayCodec" class="org.marid.proto.modbus.ModbusIntArrayCodec">
-        <description>MODBUS int array coded</description>
+    <bean name="ABCD" class="org.marid.proto.codec.TwoBytesOrder" factory-method="valueOf">
+        <description>Two byte ABCD codec</description>
 
-        <constructor-arg name="order" value="ABCD"/>
+        <constructor-arg name="name" value="ABCD"/>
+    </bean>
+
+    <bean name="BADC" class="org.marid.proto.codec.TwoBytesOrder" factory-method="valueOf">
+        <description>Two byte BADC codec</description>
+
+        <constructor-arg name="name" value="BADC"/>
+    </bean>
+
+    <bean name="DCBA" class="org.marid.proto.codec.TwoBytesOrder" factory-method="valueOf">
+        <description>Two byte DCBA codec</description>
+
+        <constructor-arg name="name" value="DCBA"/>
+    </bean>
+
+    <bean name="CDAB" class="org.marid.proto.codec.TwoBytesOrder" factory-method="valueOf">
+        <description>Two byte DCBA codec</description>
+
+        <constructor-arg name="name" value="CDAB"/>
+    </bean>
+
+    <bean name="doubleConsumer" class="org.marid.proto.codec.Consumers" factory-method="doubleConsumer">
+        <description>Double consumer</description>
+
+        <constructor-arg name="consumer" value="#{null}"/>
+        <constructor-arg name="doubleCodec" value="#{null}"/>
+    </bean>
+
+    <bean name="floatConsumer" class="org.marid.proto.codec.Consumers" factory-method="floatConsumer">
+        <description>Float consumer</description>
+
+        <constructor-arg name="consumer" value="#{null}"/>
+        <constructor-arg name="floatCodec" value="#{null}"/>
+    </bean>
+
+    <bean name="intConsumer" class="org.marid.proto.codec.Consumers" factory-method="intConsumer">
+        <description>Integer consumer</description>
+
+        <constructor-arg name="consumer" value="#{null}"/>
+        <constructor-arg name="integerCodec" value="#{null}"/>
     </bean>
 
     <bean name="protoHealthMonitor" class="org.marid.proto.health.StdProtoBusHealthMonitor">
@@ -58,8 +93,9 @@
     </bean>
 
     <bean class="org.marid.proto.modbus.ModbusTcpDriver" name="modbusTcpDriver">
+        <description>MODBUS TCP driver</description>
+
         <constructor-arg name="bus" value="#{null}" type="org.marid.proto.ProtoBus"/>
-        <constructor-arg name="consumer" value="#{null}"/>
         <constructor-arg name="id" value="drv1"/>
         <constructor-arg name="name" value="Driver 1"/>
         <constructor-arg name="props">

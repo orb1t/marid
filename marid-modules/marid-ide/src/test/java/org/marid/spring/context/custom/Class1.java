@@ -16,37 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.proto.modbus;
+package org.marid.spring.context.custom;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.9
  */
-public enum ModbusTwoRegisterOrder {
+public class Class1 implements Callable<Boolean> {
 
-    ABCD(0, 1, 2, 3),
-    BADC(1, 0, 3, 2),
-    DCBA(3, 2, 1, 0),
-    CDAB(2, 3, 0, 1);
+    public static final AtomicInteger COUNTER = new AtomicInteger();
 
-    private final int[] indices;
-
-    ModbusTwoRegisterOrder(int... indices) {
-        this.indices = indices;
+    public Class1() {
+        COUNTER.incrementAndGet();
     }
 
-    public byte[] decode(byte[] data) {
-        final byte[] res = new byte[4];
-        for (int i = 0; i < indices.length; i++) {
-            res[i] = data[indices[i]];
-        }
-        return res;
-    }
-
-    public byte[] encode(byte[] data) {
-        final byte[] res = new byte[4];
-        for (int i = 0; i < indices.length; i++) {
-            res[indices[i]] = data[i];
-        }
-        return res;
+    @Override
+    public Boolean call() throws Exception {
+        return COUNTER.get() == 0L;
     }
 }

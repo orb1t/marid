@@ -18,6 +18,8 @@
 
 package org.marid.dependant.beaneditor.listeditor;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.WritableValue;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
@@ -32,11 +34,13 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static javafx.beans.binding.Bindings.createStringBinding;
 import static org.marid.jfx.LocalizedStrings.fls;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.forType;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -77,12 +81,23 @@ public class ListEditor extends ListView<DElement<?>> {
                         final Consumer<DElement<?>> consumer = e -> getItems().set(index, e);
                         final Supplier<DElement<?>> supplier = () -> getItems().get(index);
                         final WritableValue<DElement<?>> element = new WritableValueImpl<>(consumer, supplier);
-                        final ValueMenuItems items = new ValueMenuItems(element, type, createStringBinding(() -> "element"));
+                        final ObservableStringValue name = new SimpleStringProperty("element");
+                        final ResolvableType elementType = elementType(type);
+                        final ValueMenuItems items = new ValueMenuItems(element, elementType, name);
                         factory.initializeBean(items, null);
                         items.addTo(m);
                     }));
                 }
             }
         });
+    }
+
+    private ResolvableType elementType(ResolvableType type) {
+        if (type.isArray()) {
+            return type.getComponentType();
+        } else {
+            final ResolvableType collectionType = forType(type.getType(), forClass(Collection.class));
+            return collectionType.getGeneric(0);
+        }
     }
 }
