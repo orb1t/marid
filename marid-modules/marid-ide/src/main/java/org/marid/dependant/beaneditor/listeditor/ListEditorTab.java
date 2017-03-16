@@ -19,32 +19,23 @@
 package org.marid.dependant.beaneditor.listeditor;
 
 import javafx.beans.value.ObservableStringValue;
-import org.marid.spring.dependant.DependantConfiguration;
-import org.marid.spring.xml.DCollection;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.core.ResolvableType;
+import org.marid.ide.tabs.IdeTab;
+import org.marid.jfx.panes.MaridScrollPane;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import static org.marid.jfx.icons.FontIcon.D_VIEW_LIST;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov.
+ * @since 0.9
  */
-@Configuration
-@Import({ListEditor.class, ListEditorTab.class})
-public class ListEditorConfiguration extends DependantConfiguration<ListEditorParams> {
+@Component
+public class ListEditorTab extends IdeTab {
 
-    @Bean
-    public DCollection<?> collection() {
-        return param.collection;
-    }
-
-    @Bean
-    public ResolvableType type() {
-        return param.type;
-    }
-
-    @Bean
-    public ObservableStringValue name() {
-        return param.name;
+    @Autowired
+    public ListEditorTab(ListEditor editor, ObservableStringValue name) {
+        super(new MaridScrollPane(editor), name, () -> glyphIcon(D_VIEW_LIST, 16));
     }
 }

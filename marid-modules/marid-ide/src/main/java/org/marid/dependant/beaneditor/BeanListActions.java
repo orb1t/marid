@@ -48,9 +48,11 @@ import java.lang.reflect.Parameter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static org.marid.jfx.LocalizedStrings.fls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
@@ -77,17 +79,17 @@ public class BeanListActions {
         this.metaInfoProvider = metaInfoProvider;
     }
 
-    private void setData(Property<DElement<?>> element, Object value) {
+    private void setData(Property<DElement<?>> element, Object value, BeansMetaInfo metaInfo, boolean insertRefs) {
         if (value instanceof TypedStringValue) {
             final TypedStringValue typedStringValue = (TypedStringValue) value;
             element.setValue(new DValue(typedStringValue.getValue()));
         } else if (value instanceof BeanDefinitionHolder) {
             final BeanDefinitionHolder holder = (BeanDefinitionHolder) value;
-            element.setValue(beanData(holder.getBeanName(), holder.getBeanDefinition()));
+            element.setValue(beanData(holder.getBeanName(), holder.getBeanDefinition(), metaInfo, insertRefs));
         }
     }
 
-    public BeanData beanData(String name, BeanDefinition def) {
+    public BeanData beanData(String name, BeanDefinition def, BeansMetaInfo metaInfo, boolean insertRefs) {
         final BeanData beanData = new BeanData();
         beanData.name.set(profile.generateBeanName(name));
         beanData.factoryBean.set(def.getFactoryBeanName());
@@ -106,17 +108,49 @@ public class BeanListActions {
                 final BeanArg beanArg = new BeanArg();
                 beanArg.name.set(holder.getName());
                 beanArg.type.set(holder.getType());
-                setData(beanArg.data, holder.getValue());
+                setData(beanArg.data, holder.getValue(), metaInfo, insertRefs);
                 beanData.beanArgs.add(beanArg);
+
+                if (holder.getValue() instanceof RuntimeBeanReference) {
+                    final RuntimeBeanReference reference = (RuntimeBeanReference) holder.getValue();
+                    final BeanDefinition beanDefinition = metaInfo.getBeanDefinition(reference.getBeanName());
+                    beanData.beanArgs.stream()
+                            .filter(a -> holder.getName().equals(a.getName()))
+                            .findFirst()
+                            .ifPresent(a -> {
+                                if (insertRefs) {
+                                    insertItem(reference.getBeanName(), beanDefinition, metaInfo);
+                                    a.data.set(new DRef(reference.getBeanName()));
+                                } else {
+                                    a.data.set(beanData(reference.getBeanName(), beanDefinition, metaInfo, false));
+                                }
+                            });
+                }
             }
         }
 
         if (def.getPropertyValues() != null) {
-            for (final PropertyValue propertyValue : def.getPropertyValues().getPropertyValueList()) {
+            for (final PropertyValue holder : def.getPropertyValues().getPropertyValueList()) {
                 final BeanProp property = new BeanProp();
-                property.name.set(propertyValue.getName());
-                setData(property.data, propertyValue.getValue());
+                property.name.set(holder.getName());
+                setData(property.data, holder.getValue(), metaInfo, insertRefs);
                 beanData.properties.add(property);
+
+                if (holder.getValue() instanceof RuntimeBeanReference) {
+                    final RuntimeBeanReference reference = (RuntimeBeanReference) holder.getValue();
+                    final BeanDefinition beanDefinition = metaInfo.getBeanDefinition(reference.getBeanName());
+                    beanData.properties.stream()
+                            .filter(p -> holder.getName().equals(p.getName()))
+                            .findFirst()
+                            .ifPresent(p -> {
+                                if (insertRefs) {
+                                    insertItem(reference.getBeanName(), beanDefinition, metaInfo);
+                                    p.data.set(new DRef(reference.getBeanName()));
+                                } else {
+                                    p.data.set(beanData(reference.getBeanName(), beanDefinition, metaInfo, false));
+                                }
+                            });
+                }
             }
         }
 
@@ -125,49 +159,16 @@ public class BeanListActions {
     }
 
     public BeanData insertItem(String name, BeanDefinition def, BeansMetaInfo metaInfo) {
-        final BeanData beanData = beanData(name, def);
-        profile.updateBeanData(beanData);
-        if (def.getConstructorArgumentValues() != null) {
-            for (final ValueHolder valueHolder : def.getConstructorArgumentValues().getGenericArgumentValues()) {
-                if (valueHolder.getValue() instanceof RuntimeBeanReference) {
-                    final RuntimeBeanReference reference = (RuntimeBeanReference) valueHolder.getValue();
-                    final BeanDefinition beanDefinition = metaInfo.getBeanDefinition(reference.getBeanName());
-                    insertItem(reference.getBeanName(), beanDefinition, metaInfo);
-                    beanData.beanArgs.filtered(a -> Objects.equals(a.getName(), valueHolder.getName())).forEach(a -> {
-                        final DRef ref = new DRef();
-                        ref.setBean(reference.getBeanName());
-                        a.data.setValue(ref);
-                    });
-                }
-            }
-        }
-        if (def.getPropertyValues() != null && def.getPropertyValues().getPropertyValues() != null) {
-            for (final PropertyValue propertyValue : def.getPropertyValues().getPropertyValues()) {
-                if (propertyValue.getValue() instanceof RuntimeBeanReference) {
-                    final RuntimeBeanReference reference = (RuntimeBeanReference) propertyValue.getValue();
-                    final BeanDefinition beanDefinition = metaInfo.getBeanDefinition(reference.getBeanName());
-                    insertItem(reference.getBeanName(), beanDefinition, metaInfo);
-                    beanData.properties.filtered(a -> Objects.equals(a.getName(), propertyValue.getName())).forEach(p -> {
-                        final DRef ref = new DRef();
-                        ref.setBean(reference.getBeanName());
-                        p.data.setValue(ref);
-                    });
-                }
-            }
-        }
-        insertItem(beanData);
-        if (def.getFactoryBeanName() != null) {
-            name = def.getFactoryBeanName();
-            def = metaInfo.getBeanDefinition(name);
-            if (def != null && !profile.containsBean(name)) {
-                insertItem(name, def, metaInfo);
-            }
-        }
+        final BeanData beanData = insertItem(beanData(name, def, metaInfo, true));
+        ofNullable(def.getFactoryBeanName())
+                .filter(f -> !profile.containsBean(f))
+                .ifPresent(f -> ofNullable(metaInfo.getBeanDefinition(f)).ifPresent(d -> insertItem(f, d, metaInfo)));
         return beanData;
     }
 
-    public void insertItem(BeanData beanData) {
+    public BeanData insertItem(BeanData beanData) {
         beanFile.beans.add(beanData);
+        return beanData;
     }
 
     private MenuItem item(Method method, BeanData beanData) {

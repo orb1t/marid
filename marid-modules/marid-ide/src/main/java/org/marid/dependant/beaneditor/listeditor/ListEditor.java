@@ -18,14 +18,18 @@
 
 package org.marid.dependant.beaneditor.listeditor;
 
+import com.google.common.collect.ImmutableMap;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.WritableValue;
-import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
 import org.marid.dependant.beaneditor.ValueMenuItems;
+import org.marid.ide.panes.main.IdeToolbar;
+import org.marid.jfx.action.FxAction;
+import org.marid.jfx.control.CommonListView;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
+import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.jfx.props.WritableValueImpl;
 import org.marid.spring.xml.*;
@@ -46,7 +50,7 @@ import static org.springframework.core.ResolvableType.forType;
  * @author Dmitry Ovchinnikov.
  */
 @Component
-public class ListEditor extends ListView<DElement<?>> {
+public class ListEditor extends CommonListView<DElement<?>> {
 
     @Autowired
     public ListEditor(DCollection<?> collection) {
@@ -99,5 +103,18 @@ public class ListEditor extends ListView<DElement<?>> {
             final ResolvableType collectionType = forType(type.getType(), forClass(Collection.class));
             return collectionType.getGeneric(0);
         }
+    }
+
+    @Autowired
+    private void initAddAction(FxAction addAction) {
+        addAction.on(this, action -> action.setEventHandler(event -> getItems().add(new DValue("#{null}"))));
+    }
+
+    @Autowired
+    private void initToolbar(IdeToolbar toolbar) {
+        toolbar.on(this, () -> ImmutableMap.of(
+                "up", MaridListActions.upAction(this),
+                "down", MaridListActions.downAction(this)
+        ));
     }
 }

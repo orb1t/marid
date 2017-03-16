@@ -18,6 +18,7 @@
 
 package org.marid.dependant.beaneditor.listeditor;
 
+import javafx.beans.value.ObservableStringValue;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.marid.spring.xml.DCollection;
@@ -31,10 +32,12 @@ public class ListEditorParams {
 
     public final transient ResolvableType type;
     public final DCollection<?> collection;
+    public final ObservableStringValue name;
 
-    public ListEditorParams(ResolvableType type, DCollection<?> collection) {
+    public ListEditorParams(ResolvableType type, DCollection<?> collection, ObservableStringValue name) {
         this.type = type;
         this.collection = collection;
+        this.name = name;
     }
 
     @Override

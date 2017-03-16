@@ -33,6 +33,12 @@
         <description>Integer value codec</description>
     </bean>
 
+    <bean name="doubleCodec" class="org.marid.proto.codec.DoubleCodec">
+        <description>Double value coidec</description>
+
+        <constructor-arg name="size" value="4"/>
+    </bean>
+
     <bean name="ABCD" class="org.marid.proto.codec.TwoBytesOrder" factory-method="valueOf">
         <description>Two byte ABCD codec</description>
 
@@ -61,21 +67,21 @@
         <description>Double consumer</description>
 
         <constructor-arg name="consumer" value="#{null}"/>
-        <constructor-arg name="doubleCodec" value="#{null}"/>
+        <constructor-arg name="doubleCodec" ref="doubleCodec"/>
     </bean>
 
     <bean name="floatConsumer" class="org.marid.proto.codec.Consumers" factory-method="floatConsumer">
         <description>Float consumer</description>
 
         <constructor-arg name="consumer" value="#{null}"/>
-        <constructor-arg name="floatCodec" value="#{null}"/>
+        <constructor-arg name="floatCodec" ref="floatCodec"/>
     </bean>
 
     <bean name="intConsumer" class="org.marid.proto.codec.Consumers" factory-method="intConsumer">
         <description>Integer consumer</description>
 
         <constructor-arg name="consumer" value="#{null}"/>
-        <constructor-arg name="integerCodec" value="#{null}"/>
+        <constructor-arg name="integerCodec" ref="intCodec"/>
     </bean>
 
     <bean name="protoHealthMonitor" class="org.marid.proto.health.StdProtoBusHealthMonitor">

@@ -36,10 +36,6 @@ public class DoubleCodec implements Codec<Double> {
         }
     }
 
-    public DoubleCodec() {
-        this(8);
-    }
-
     @Override
     public Double decode(byte[] data) {
         switch (data.length) {
