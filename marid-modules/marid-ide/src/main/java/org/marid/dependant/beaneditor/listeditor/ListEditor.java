@@ -63,12 +63,11 @@ public class ListEditor extends CommonListView<DElement<?>> {
             @Override
             public void updateItem(DElement<?> item, boolean empty) {
                 super.updateItem(item, empty);
+                textProperty().unbind();
                 if (item == null || empty) {
-                    textProperty().unbind();
                     setContextMenu(null);
                     setGraphic(null);
                 } else {
-                    textProperty().unbind();
                     if (item instanceof DValue) {
                         setText(((DValue) item).getValue());
                         setGraphic(FontIcons.glyphIcon(FontIcon.D_COMMENT_TEXT, 16));
