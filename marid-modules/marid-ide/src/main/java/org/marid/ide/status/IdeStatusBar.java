@@ -18,32 +18,45 @@
 
 package org.marid.ide.status;
 
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Separator;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import org.marid.ide.logging.IdeLogHandler;
-import org.marid.l10n.L10n;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.Callable;
 import java.util.logging.LogRecord;
+
+import static javafx.geometry.Orientation.VERTICAL;
+import static org.marid.l10n.L10n.m;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeStatusBar extends GridPane {
+public class IdeStatusBar extends HBox {
+
+    private final Label label = new Label();
 
     @Autowired
-    public IdeStatusBar(IdeStatusProfile profile, IdeLogHandler logHandler, IdeIndicators indicators) {
-        setHgap(5);
-        final Label label = new Label();
-        addRow(0, label, separator(), profile, separator(), indicators);
+    public IdeStatusBar(IdeStatusProfile profile, IdeLogHandler logHandler) {
+        super(5);
+        setAlignment(Pos.CENTER_LEFT);
+        setHgrow(label, Priority.SOMETIMES);
+        getChildren().addAll(label, new Separator(VERTICAL), profile, new Separator(VERTICAL));
+        label.setTextOverrun(OverrunStyle.ELLIPSIS);
         setHgrow(label, Priority.SOMETIMES);
         label.textProperty().bind(Bindings.createObjectBinding(() -> {
             final ObservableList<LogRecord> records = logHandler.getLogRecords();
@@ -51,13 +64,24 @@ public class IdeStatusBar extends GridPane {
                 return null;
             } else {
                 final LogRecord record = records.get(records.size() - 1);
-                return L10n.m(record.getMessage(), record.getParameters());
+                return m(record.getMessage(), record.getParameters());
             }
         }, logHandler.getLogRecords()));
         setPadding(new Insets(5));
     }
 
-    private Separator separator() {
-        return new Separator(Orientation.VERTICAL);
+    @EventListener
+    private void onStart(ContextStartedEvent event) {
+        final Observable[] observables = getChildren().stream()
+                .skip(1L)
+                .filter(Control.class::isInstance)
+                .map(Control.class::cast)
+                .map(Region::widthProperty)
+                .toArray(Observable[]::new);
+        final Callable<Double> width = () -> getChildren().stream()
+                .skip(1L)
+                .mapToDouble(c -> c.prefWidth(getHeight()))
+                .reduce(getWidth() - getPadding().getLeft() - getPadding().getRight(), (a, e) -> a - e - 5);
+        label.maxWidthProperty().bind(Bindings.createDoubleBinding(width, observables));
     }
 }

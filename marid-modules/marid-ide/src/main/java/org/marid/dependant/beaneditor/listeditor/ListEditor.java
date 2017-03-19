@@ -67,6 +67,7 @@ public class ListEditor extends CommonListView<DElement<?>> {
                 if (item == null || empty) {
                     setContextMenu(null);
                     setGraphic(null);
+                    setText(null);
                 } else {
                     if (item instanceof DValue) {
                         setText(((DValue) item).getValue());

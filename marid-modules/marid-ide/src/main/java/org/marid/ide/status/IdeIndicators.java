@@ -20,16 +20,15 @@ package org.marid.ide.status;
 
 import javafx.application.Platform;
 import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Separator;
-import javafx.scene.layout.HBox;
 import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
@@ -55,15 +54,16 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Component
-public class IdeIndicators extends HBox {
+@Service
+@Lazy(false)
+public class IdeIndicators {
 
     private final List<Callable<Runnable>> updateTasks = new ArrayList<>();
+    private final IdeStatusBar statusBar;
 
     @Autowired
-    public IdeIndicators() {
-        super(5);
-        setAlignment(Pos.CENTER_LEFT);
+    public IdeIndicators(IdeStatusBar statusBar) {
+        this.statusBar = statusBar;
     }
 
     @OrderedInit(1)
@@ -111,10 +111,10 @@ public class IdeIndicators extends HBox {
     }
 
     private void add(Node... nodes) {
-        if (!getChildren().isEmpty()) {
-            getChildren().add(new Separator(Orientation.VERTICAL));
+        if (!statusBar.getChildren().isEmpty()) {
+            statusBar.getChildren().add(new Separator(Orientation.VERTICAL));
         }
-        getChildren().addAll(nodes);
+        statusBar.getChildren().addAll(nodes);
     }
 
     @Scheduled(fixedDelay = 1_000L)
