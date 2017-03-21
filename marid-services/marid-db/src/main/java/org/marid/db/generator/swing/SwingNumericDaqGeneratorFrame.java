@@ -21,7 +21,6 @@ package org.marid.db.generator.swing;
 import org.marid.db.dao.NumericWriter;
 import org.marid.db.data.DataRecord;
 import org.marid.db.generator.swing.SwingNumericDaqGeneratorModel.TagInfo;
-import org.marid.logging.LogSupport;
 import org.marid.xml.XmlBind;
 
 import javax.swing.*;
@@ -41,14 +40,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static java.util.logging.Level.INFO;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static org.marid.l10n.L10n.s;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-class SwingNumericDaqGeneratorFrame extends JFrame implements LogSupport {
+class SwingNumericDaqGeneratorFrame extends JFrame {
 
     private final SwingNumericDaqGeneratorModel model = new SwingNumericDaqGeneratorModel();
     private final JTable table = new JTable(model);

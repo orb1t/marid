@@ -18,7 +18,7 @@
 
 package org.marid.runtime;
 
-import org.marid.logging.LogSupport;
+import org.marid.logging.Logs;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -29,19 +29,21 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.logging.Level.INFO;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridBeanPostProcessor implements LogSupport, DestructionAwareBeanPostProcessor {
+public class MaridBeanPostProcessor implements DestructionAwareBeanPostProcessor {
 
     private static final Logger LOGGER = Logger.getLogger("marid");
+    private static final Logs LOGS = () -> LOGGER;
     private static final Pattern INIT_ATTR = Pattern.compile("init(\\d+)");
     private static final Pattern DESTROY_ATTR = Pattern.compile("destroy(\\d+)");
 
@@ -53,15 +55,9 @@ public class MaridBeanPostProcessor implements LogSupport, DestructionAwareBeanP
         this.expressionParser = new SpelExpressionParser();
     }
 
-    @Nonnull
-    @Override
-    public Logger logger() {
-        return LOGGER;
-    }
-
     @Override
     public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
-        log(INFO, "Destroying {0}", beanName);
+        LOGS.log(INFO, "Destroying {0}", beanName);
         if (beanName != null && beanFactory.containsBeanDefinition(beanName)) {
             applyTriggers(bean, beanName, DESTROY_ATTR);
         }
@@ -74,7 +70,7 @@ public class MaridBeanPostProcessor implements LogSupport, DestructionAwareBeanP
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        log(INFO, "Initializing {0}", beanName);
+        LOGS.log(INFO, "Initializing {0}", beanName);
         return bean;
     }
 
@@ -83,7 +79,7 @@ public class MaridBeanPostProcessor implements LogSupport, DestructionAwareBeanP
         if (beanName != null && beanFactory.containsBeanDefinition(beanName)) {
             applyTriggers(bean, beanName, INIT_ATTR);
         }
-        log(INFO, "Initialized {0}", beanName);
+        LOGS.log(INFO, "Initialized {0}", beanName);
         return bean;
     }
 

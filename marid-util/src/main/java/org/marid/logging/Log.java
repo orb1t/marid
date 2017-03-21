@@ -18,6 +18,9 @@
 
 package org.marid.logging;
 
+import org.intellij.lang.annotations.MagicConstant;
+import org.marid.cache.MaridClassValue;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandles;
@@ -30,8 +33,23 @@ import java.util.logging.Logger;
  */
 public class Log {
 
-    public static void log(@Nonnull Level level, @Nonnull String message, @Nullable Throwable thrown, @Nonnull Object... args) {
-        final Logger logger = Logging.LOGGER_CLASS_VALUE.get(caller());
+    private static final ClassValue<Logger> LOGGER_CLASS_VALUE = new MaridClassValue<>(c -> () -> {
+        final String name = c.getName();
+        final int index = name.indexOf("$$");
+        final String loggerName;
+        if (index >= 0) {
+            loggerName = name.substring(0, index);
+        } else {
+            loggerName = name;
+        }
+        return Logger.getLogger(loggerName);
+    });
+
+    public static void log(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+                           @Nonnull String message,
+                           @Nullable Throwable thrown,
+                           @Nonnull Object... args) {
+        final Logger logger = LOGGER_CLASS_VALUE.get(caller());
         final LogRecord record = new LogRecord(level, message);
         record.setLoggerName(logger.getName());
         record.setSourceClassName(null);
@@ -40,8 +58,10 @@ public class Log {
         logger.log(record);
     }
 
-    public static void log(@Nonnull Level level, @Nonnull String message, @Nonnull Object... args) {
-        final Logger logger = Logging.LOGGER_CLASS_VALUE.get(caller());
+    public static void log(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+                           @Nonnull String message,
+                           @Nonnull Object... args) {
+        final Logger logger = LOGGER_CLASS_VALUE.get(caller());
         final LogRecord record = new LogRecord(level, message);
         record.setLoggerName(logger.getName());
         record.setSourceClassName(null);

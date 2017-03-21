@@ -22,7 +22,6 @@ import org.marid.concurrent.MaridTimerTask;
 import org.marid.db.dao.NumericWriter;
 import org.marid.db.data.DataRecord;
 import org.marid.db.data.DataRecordKey;
-import org.marid.logging.LogSupport;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -30,14 +29,15 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 import static java.util.Collections.singletonList;
+import static java.util.logging.Level.INFO;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class RandomNumericDaqGenerator implements LogSupport {
+public class RandomNumericDaqGenerator {
 
     private final NumericWriter numericWriter;
     private final long tag;
@@ -61,7 +61,7 @@ public class RandomNumericDaqGenerator implements LogSupport {
             final double v = ThreadLocalRandom.current().nextDouble(min, max);
             final Set<DataRecordKey> result = numericWriter.merge(singletonList(new DataRecord<>(tag, t, v)), true);
             if (!result.isEmpty()) {
-                log(Level.INFO, "Generated {0} {1} {2}", tag, t, v);
+                log(INFO, "Generated {0} {1} {2}", tag, t, v);
             }
         }), periodMillis, periodMillis);
     }

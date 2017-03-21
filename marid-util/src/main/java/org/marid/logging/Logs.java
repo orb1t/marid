@@ -18,6 +18,8 @@
 
 package org.marid.logging;
 
+import org.intellij.lang.annotations.MagicConstant;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.logging.Level;
@@ -27,24 +29,15 @@ import java.util.logging.Logger;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public interface LogSupport {
-
-    Level INFO = Level.INFO;
-    Level SEVERE = Level.SEVERE;
-    Level WARNING = Level.WARNING;
-    Level FINE = Level.FINE;
-    Level FINER = Level.FINER;
-    Level FINEST = Level.FINEST;
-    Level CONFIG = Level.CONFIG;
-    Level ALL = Level.ALL;
-    Level OFF = Level.OFF;
+public interface Logs {
 
     @Nonnull
-    default Logger logger() {
-        return Logging.LOGGER_CLASS_VALUE.get(getClass());
-    }
+    Logger logger();
 
-    default void log(@Nonnull Level level, @Nonnull String message, @Nullable Throwable thrown, @Nonnull Object... args) {
+    default void log(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+                     @Nonnull String message,
+                     @Nullable Throwable thrown,
+                     @Nonnull Object... args) {
         final Logger logger = logger();
         final LogRecord record = new LogRecord(level, message);
         record.setLoggerName(logger.getName());
@@ -54,7 +47,9 @@ public interface LogSupport {
         logger.log(record);
     }
 
-    default void log(@Nonnull Level level, @Nonnull String message, @Nonnull Object... args) {
+    default void log(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+                     @Nonnull String message,
+                     @Nonnull Object... args) {
         final Logger logger = logger();
         final LogRecord record = new LogRecord(level, message);
         record.setLoggerName(logger.getName());

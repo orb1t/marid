@@ -19,6 +19,7 @@
 package org.marid.proto;
 
 import org.marid.io.IOSupplier;
+import org.marid.logging.Logs;
 import org.marid.proto.io.ProtoIO;
 
 import java.io.IOException;
@@ -26,6 +27,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+
+import static java.util.logging.Level.WARNING;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,7 +54,9 @@ public class StdProtoBus extends StdProto implements ProtoBus {
         this.scheduler = new ScheduledThreadPoolExecutor(p.getThreadCount(), r -> {
             final String threadName = root.getId() + "/" + id;
             final Thread thread = new Thread(root.getThreadGroup(), r, threadName, p.getStackSize());
-            thread.setUncaughtExceptionHandler((t, e) -> log(WARNING, "Uncaught exception in {0}", e, t));
+            final Logger logger = Logger.getLogger(toString());
+            final Logs logs = () -> logger;
+            thread.setUncaughtExceptionHandler((t, e) -> logs.log(WARNING, "Uncaught exception in {0}", e, t));
             return thread;
         });
         this.terminationTimeout = p.getTerminationTimeout();

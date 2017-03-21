@@ -22,7 +22,6 @@ import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import org.marid.logging.LogSupport;
 import org.marid.maven.MavenProjectBuilder;
 import org.marid.maven.ProjectBuilder;
 import org.springframework.context.annotation.Bean;
@@ -36,7 +35,7 @@ import java.util.logging.LogRecord;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ProjectMavenBuilder implements LogSupport {
+public class ProjectMavenBuilder {
 
     private final BooleanProperty buildState = new SimpleBooleanProperty(false);
 

@@ -27,21 +27,23 @@ import org.marid.dependant.project.monitor.ProfileMonitorConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
-import org.marid.logging.LogSupport;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.*;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-public class ProjectConfiguration implements LogSupport {
+public class ProjectConfiguration {
 
     @IdeAction
     @Qualifier("profile")

@@ -22,7 +22,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.logging.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,12 +36,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.nio.file.StandardWatchEventKinds.*;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ResourcesTracker implements Closeable, LogSupport {
+public class ResourcesTracker implements Closeable {
 
     public final ObservableList<Path> resources = FXCollections.observableArrayList();
 

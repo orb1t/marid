@@ -24,9 +24,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.control.CommonTableView;
 import org.marid.jfx.action.FxAction;
-import org.marid.logging.LogSupport;
+import org.marid.jfx.control.CommonTableView;
 import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,7 +43,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ResourcesTable extends CommonTableView<Path> implements LogSupport {
+public class ResourcesTable extends CommonTableView<Path> {
 
     private final ResourcesTracker resourcesTracker;
 

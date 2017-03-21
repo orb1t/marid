@@ -18,15 +18,17 @@
 
 package org.marid.spring.postprocessors;
 
-import org.marid.logging.LogSupport;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.core.Ordered;
 
+import static java.util.logging.Level.INFO;
+import static org.marid.logging.Log.log;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-public class LogBeansPostProcessor implements DestructionAwareBeanPostProcessor, LogSupport, Ordered {
+public class LogBeansPostProcessor implements DestructionAwareBeanPostProcessor, Ordered {
 
     @Override
     public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {

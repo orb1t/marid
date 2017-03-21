@@ -21,7 +21,6 @@ package org.marid.ide.panes.main;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import org.marid.ide.status.IdeStatusBar;
-import org.marid.ide.tabs.IdeTabPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,8 +31,8 @@ import org.springframework.stereotype.Component;
 public class IdePane extends BorderPane {
 
     @Autowired
-    private void center(IdeTabPane ideTabPane) {
-        setCenter(ideTabPane);
+    private void center(IdeSplitPane pane) {
+        setCenter(pane);
     }
 
     @Autowired

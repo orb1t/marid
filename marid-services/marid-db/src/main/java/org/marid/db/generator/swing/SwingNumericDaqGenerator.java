@@ -19,7 +19,6 @@
 package org.marid.db.generator.swing;
 
 import org.marid.db.dao.NumericWriter;
-import org.marid.logging.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
@@ -31,7 +30,7 @@ import java.awt.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class SwingNumericDaqGenerator implements LogSupport {
+public class SwingNumericDaqGenerator {
 
     private final NumericWriter numericWriter;
 

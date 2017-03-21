@@ -20,7 +20,6 @@ package org.marid.dependant.modbus.codec;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.marid.logging.LogSupport;
 import org.marid.misc.Casts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -30,7 +29,7 @@ import org.springframework.stereotype.Repository;
  * @since 0.9
  */
 @Repository
-public class CodecManager implements LogSupport {
+public class CodecManager {
 
     private final ObservableList<ModbusCodec<?>> codecs;
 

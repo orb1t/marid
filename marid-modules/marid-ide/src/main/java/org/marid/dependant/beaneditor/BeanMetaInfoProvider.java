@@ -19,7 +19,6 @@
 package org.marid.dependant.beaneditor;
 
 import org.marid.ide.project.ProjectProfile;
-import org.marid.logging.LogSupport;
 import org.marid.spring.xml.BeanFile;
 import org.marid.spring.xml.MaridBeanDefinitionSaver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +40,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanMetaInfoProvider implements LogSupport {
+public class BeanMetaInfoProvider {
 
     private final ProjectProfile profile;
 

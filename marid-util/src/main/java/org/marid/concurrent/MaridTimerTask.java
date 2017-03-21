@@ -18,16 +18,17 @@
 
 package org.marid.concurrent;
 
-import org.marid.logging.LogSupport;
-
 import javax.annotation.Nonnull;
 import java.util.TimerTask;
 import java.util.function.Consumer;
 
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
+
 /**
  * @author Dmitry Ovchinnikov.
  */
-public final class MaridTimerTask extends TimerTask implements LogSupport {
+public final class MaridTimerTask extends TimerTask {
 
     private final Consumer<MaridTimerTask> task;
 

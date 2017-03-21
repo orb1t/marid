@@ -27,7 +27,6 @@ import org.marid.dependant.modbus.devices.info.AbstractDeviceInfo;
 import org.marid.dependant.modbus.devices.infos.DeviceEntry;
 import org.marid.dependant.modbus.devices.infos.DeviceInfos;
 import org.marid.dependant.modbus.repo.ModbusConfig;
-import org.marid.logging.LogSupport;
 import org.marid.misc.Casts;
 import org.marid.xml.XmlBind;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,12 +37,15 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
+
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
 @Component
-public class ModbusPane extends FlowPane implements LogSupport {
+public class ModbusPane extends FlowPane {
 
     private final AutowireCapableBeanFactory factory;
     private final ModbusConfig config;

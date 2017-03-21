@@ -38,7 +38,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.marid.dependant.modbus.ModbusPane;
 import org.marid.dependant.modbus.devices.AbstractDevice;
 import org.marid.jfx.action.MaridActions;
-import org.marid.logging.LogSupport;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
@@ -48,13 +47,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.9
  */
 @Service
-public class ModbusService implements LogSupport, ServiceRequestHandler {
+public class ModbusService implements ServiceRequestHandler {
 
     private final ModbusPane pane;
     private final ModbusConfig config;

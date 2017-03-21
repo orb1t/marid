@@ -23,7 +23,6 @@ import org.hsqldb.DatabaseManager;
 import org.hsqldb.jdbc.JDBCSessionDataSource;
 import org.hsqldb.server.Server;
 import org.hsqldb.server.ServerConstants;
-import org.marid.logging.LogSupport;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -44,11 +43,14 @@ import java.util.stream.Collectors;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-public final class HsqldbDatabase implements Closeable, LogSupport {
+public final class HsqldbDatabase implements Closeable {
 
     private final Server server;
     private final File directory;

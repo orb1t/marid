@@ -25,10 +25,11 @@ import javafx.collections.ObservableList;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.IdePrefs;
-import org.marid.logging.LogSupport;
+import org.marid.logging.Logs;
 import org.marid.spring.xml.DCollection;
 import org.marid.spring.xml.DElement;
 import org.marid.spring.xml.DRef;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -40,23 +41,25 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.Collections.binarySearch;
+import static java.util.logging.Level.WARNING;
 import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ProjectManager implements LogSupport {
+public class ProjectManager {
 
     private final ObjectProperty<ProjectProfile> profile = new SimpleObjectProperty<>();
     private final ObservableList<ProjectProfile> profiles = FXCollections.observableArrayList();
 
-    public ProjectManager() {
+    @Autowired
+    public ProjectManager(Logs logs) {
         final Path profilesDir = Paths.get(USER_HOME, "marid", "profiles");
         try (final Stream<Path> stream = Files.list(profilesDir)) {
             stream.map(p -> new ProjectProfile(p.getFileName().toString())).forEach(profiles::add);
         } catch (Exception x) {
-            log(WARNING, "Unable to enumerate profiles", x);
+            logs.log(WARNING, "Unable to enumerate profiles", x);
         }
         profiles.sort(Comparator.comparing(ProjectProfile::getName));
         final String profileName = IdePrefs.PREFERENCES.get("profile", null);

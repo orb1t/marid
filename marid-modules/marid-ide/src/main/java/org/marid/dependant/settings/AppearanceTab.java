@@ -24,22 +24,23 @@ import org.marid.IdePrefs;
 import org.marid.ide.settings.AppearanceSettings;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.panes.GenericGridPane;
-import org.marid.logging.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
+import static java.util.logging.Level.INFO;
 import static javafx.application.Application.STYLESHEET_CASPIAN;
 import static javafx.application.Application.STYLESHEET_MODENA;
 import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.Ide.ideLogHandler;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class AppearanceTab extends GenericGridPane implements SettingsEditor, LogSupport {
+public class AppearanceTab extends GenericGridPane implements SettingsEditor {
 
     private final AppearanceSettings appearanceSettings;
 

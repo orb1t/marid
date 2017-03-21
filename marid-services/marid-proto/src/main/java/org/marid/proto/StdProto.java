@@ -18,12 +18,10 @@
 
 package org.marid.proto;
 
-import org.marid.logging.LogSupport;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class StdProto implements Proto, LogSupport {
+public abstract class StdProto implements Proto {
 
     private final String id;
     private final String name;

@@ -30,7 +30,6 @@ import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10n;
-import org.marid.logging.LogSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,12 +42,15 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ProjectRunnerPane extends BorderPane implements LogSupport {
+public class ProjectRunnerPane extends BorderPane {
 
     final ProjectProfile profile;
     final ListView<String> out = listView();

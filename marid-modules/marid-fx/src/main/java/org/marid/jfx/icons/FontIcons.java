@@ -29,13 +29,14 @@ import de.jensd.fx.glyphs.octicons.OctIcon;
 import de.jensd.fx.glyphs.octicons.OctIconView;
 import de.jensd.fx.glyphs.weathericons.WeatherIcon;
 import de.jensd.fx.glyphs.weathericons.WeatherIconView;
+import org.intellij.lang.annotations.MagicConstant;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class FontIcons {
 
-    public static GlyphIcon<?> glyphIcon(String type, Number size) {
+    public static GlyphIcon<?> glyphIcon(@MagicConstant(valuesFromClass = FontIcon.class) String type, Number size) {
         GlyphIcon<?> icon;
         if (type == null || type.isEmpty()) {
             icon = new FontAwesomeIconView(FontAwesomeIcon.SMILE_ALT);
@@ -71,7 +72,7 @@ public class FontIcons {
         return icon;
     }
 
-    public static GlyphIcon<?> glyphIcon(String type) {
+    public static GlyphIcon<?> glyphIcon(@MagicConstant(valuesFromClass = FontIcon.class) String type) {
         return glyphIcon(type, 0);
     }
 }

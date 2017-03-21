@@ -30,7 +30,6 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.panes.MaridScrollPane;
-import org.marid.logging.LogSupport;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -42,7 +41,10 @@ import java.nio.file.Files;
 import java.util.List;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
 import static org.marid.l10n.L10n.s;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -55,7 +57,7 @@ import static org.marid.l10n.L10n.s;
         BeanFileBrowserActions.class,
         ResourcesTab.class
 })
-public class ResourcesConfiguration extends DependantConfiguration<ResourcesParams> implements LogSupport {
+public class ResourcesConfiguration extends DependantConfiguration<ResourcesParams> {
 
     @Bean
     public ProjectProfile profile() {

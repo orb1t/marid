@@ -23,7 +23,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import org.marid.ide.tabs.IdeTab;
-import org.marid.logging.LogSupport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -39,7 +38,7 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 @Configuration
 @EnableScheduling
 @Import({ClassLoadingWidget.class, MemoryWidget.class, OperatingSystemWidget.class, ThreadWidget.class})
-public class MonitorConfiguration implements LogSupport {
+public class MonitorConfiguration {
 
     @Bean
     public GridPane monitorGridPane() {
