@@ -16,25 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.status;
+package org.marid.maven;
 
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.layout.HBox;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class IdeStatusBar extends HBox {
+public interface ProjectBuilder {
 
-    @Autowired
-    public IdeStatusBar(IdeStatusProfile profile) {
-        super(5);
-        getChildren().add(profile);
-        setPadding(new Insets(5));
-        setAlignment(Pos.CENTER_RIGHT);
-    }
+    ProjectBuilder goals(String... args);
+
+    ProjectBuilder profiles(String... args);
+
+    void build(Consumer<MavenBuildResult> resultConsumer);
 }

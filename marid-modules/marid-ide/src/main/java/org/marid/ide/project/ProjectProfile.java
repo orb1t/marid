@@ -28,7 +28,6 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.jfx.beans.FxList;
-import org.marid.logging.Logs;
 import org.marid.misc.Urls;
 import org.marid.spring.xml.*;
 import org.springframework.core.ResolvableType;
@@ -60,6 +59,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.of;
 import static org.apache.commons.lang3.SystemUtils.USER_HOME;
+import static org.marid.logging.Log.log;
 import static org.marid.util.Reflections.parameterName;
 import static org.springframework.core.ResolvableType.*;
 
@@ -82,7 +82,6 @@ public class ProjectProfile {
     private final Path beansDirectory;
     private final Path repository;
     private final Logger logger;
-    private final Logs logs;
     private final FxList<BeanFile> beanFiles;
     private final Map<String, Class<?>> classMap = new ConcurrentHashMap<>();
     private volatile URLClassLoader classLoader;
@@ -101,7 +100,6 @@ public class ProjectProfile {
         beansDirectory = srcMainResources.resolve("META-INF").resolve("marid");
         repository = path.resolve(".repo");
         logger = Logger.getLogger(getName());
-        logs = () -> logger;
         model = loadModel();
         model.setModelVersion("4.0.0");
         createFileStructure();
@@ -134,9 +132,9 @@ public class ProjectProfile {
     private void close() {
         classMap.clear();
         try (final URLClassLoader classLoader = this.classLoader) {
-            logs.log(INFO, "Closing a class loader {0}", classLoader);
+            log(logger, INFO, "Closing a class loader {0}", classLoader);
         } catch (IOException x) {
-            logs.log(WARNING, "Class loader close error", x);
+            log(logger, WARNING, "Class loader close error", x);
         }
     }
 
@@ -159,11 +157,11 @@ public class ProjectProfile {
             final MavenXpp3Reader reader = new MavenXpp3Reader();
             return reader.read(is);
         } catch (NoSuchFileException x) {
-            logs.log(FINEST, "There is no {0} file", x.getFile());
+            // nop
         } catch (IOException x) {
-            logs.log(WARNING, "Unable to read pom.xml", x);
+            log(logger, WARNING, "Unable to read pom.xml", x);
         } catch (XmlPullParserException x) {
-            logs.log(WARNING, "Unable to parse pom.xml", x);
+            log(logger, WARNING, "Unable to parse pom.xml", x);
         }
         final Model model = new Model();
         model.setOrganization(new Organization());
@@ -185,15 +183,15 @@ public class ProjectProfile {
                             file.path.setAll(template.path);
                             return file;
                         } catch (Exception x) {
-                            logs.log(WARNING, "Unable to load {0}", x, p);
+                            log(logger, WARNING, "Unable to load {0}", x, p);
                         }
                         return template;
                     })
                     .forEach(list::add);
         } catch (IOException x) {
-            logs.log(WARNING, "Unable to load bean files", x);
+            log(logger, WARNING, "Unable to load bean files", x);
         } catch (Exception x) {
-            logs.log(SEVERE, "Unknown error", x);
+            log(logger, SEVERE, "Unknown error", x);
         }
         return list;
     }
@@ -264,7 +262,7 @@ public class ProjectProfile {
                 }
             }
         } catch (Exception x) {
-            logs.log(WARNING, "Unable to create file structure", x);
+            log(logger, WARNING, "Unable to create file structure", x);
         }
     }
 
@@ -273,7 +271,7 @@ public class ProjectProfile {
             final MavenXpp3Writer writer = new MavenXpp3Writer();
             writer.write(os, model);
         } catch (IOException x) {
-            logs.log(WARNING, "Unable to save {0}", x, pomFile);
+            log(logger, WARNING, "Unable to save {0}", x, pomFile);
         }
     }
 
@@ -281,7 +279,7 @@ public class ProjectProfile {
         try {
             FileUtils.cleanDirectory(getBeansDirectory().toFile());
         } catch (IOException x) {
-            logs.log(WARNING, "Unable to clean beans directory", x);
+            log(logger, WARNING, "Unable to clean beans directory", x);
             return;
         }
         final Path base = getBeansDirectory();
@@ -291,7 +289,7 @@ public class ProjectProfile {
                 Files.createDirectories(path.getParent());
                 MaridBeanDefinitionSaver.write(path, file);
             } catch (Exception x) {
-                logs.log(WARNING, "Unable to save {0}", x, path);
+                log(logger, WARNING, "Unable to save {0}", x, path);
             }
         }
     }
@@ -307,7 +305,7 @@ public class ProjectProfile {
             close();
             FileUtils.deleteDirectory(path.toFile());
         } catch (Exception x) {
-            logs.log(WARNING, "Unable to delete {0}", x, getName());
+            log(logger, WARNING, "Unable to delete {0}", x, getName());
         }
     }
 

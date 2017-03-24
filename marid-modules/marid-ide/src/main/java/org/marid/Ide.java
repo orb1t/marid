@@ -67,13 +67,13 @@ public class Ide extends Application {
         final AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(context);
         reader.register(IdeContext.class);
         context.refresh();
-        context.start();
         context.getBean(IdePane.class);
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         Ide.primaryStage = primaryStage;
+        context.start();
         final IdePane idePane = context.getBean(IdePane.class);
         primaryStage.setMinWidth(750.0);
         primaryStage.setMinHeight(550.0);

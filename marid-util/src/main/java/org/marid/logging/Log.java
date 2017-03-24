@@ -49,7 +49,28 @@ public class Log {
                            @Nonnull String message,
                            @Nullable Throwable thrown,
                            @Nonnull Object... args) {
-        final Logger logger = LOGGER_CLASS_VALUE.get(caller());
+        log(LOGGER_CLASS_VALUE.get(caller(3)), level, message, thrown, args);
+    }
+
+    public static void log(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+                           @Nonnull String message,
+                           @Nonnull Object... args) {
+        log(LOGGER_CLASS_VALUE.get(caller(3)), level, message, args);
+    }
+
+    public static void log(int depth,
+                           @Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+                           @Nonnull String message,
+                           @Nullable Throwable thrown,
+                           @Nonnull Object... args) {
+        log(LOGGER_CLASS_VALUE.get(caller(depth)), level, message, thrown, args);
+    }
+
+    public static void log(@Nonnull Logger logger,
+                           @Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+                           @Nonnull String message,
+                           @Nullable Throwable thrown,
+                           @Nonnull Object... args) {
         final LogRecord record = new LogRecord(level, message);
         record.setLoggerName(logger.getName());
         record.setSourceClassName(null);
@@ -58,20 +79,16 @@ public class Log {
         logger.log(record);
     }
 
-    public static void log(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+    public static void log(@Nonnull Logger logger,
+                           @Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
                            @Nonnull String message,
                            @Nonnull Object... args) {
-        final Logger logger = LOGGER_CLASS_VALUE.get(caller());
-        final LogRecord record = new LogRecord(level, message);
-        record.setLoggerName(logger.getName());
-        record.setSourceClassName(null);
-        record.setParameters(args);
-        logger.log(record);
+        log(logger, level, message, null, args);
     }
 
-    private static Class<?> caller() {
+    private static Class<?> caller(int depth) {
         final Class<?>[] classes = new SecurityPublicClassContext().getClassContext();
-        return classes.length > 3 ? classes[3] : MethodHandles.lookup().lookupClass();
+        return classes.length > depth ? classes[depth] : MethodHandles.lookup().lookupClass();
     }
 
     private static class SecurityPublicClassContext extends SecurityManager {

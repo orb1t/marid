@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -55,8 +56,7 @@ public class StdProtoBus extends StdProto implements ProtoBus {
             final String threadName = root.getId() + "/" + id;
             final Thread thread = new Thread(root.getThreadGroup(), r, threadName, p.getStackSize());
             final Logger logger = Logger.getLogger(toString());
-            final Logs logs = () -> logger;
-            thread.setUncaughtExceptionHandler((t, e) -> logs.log(WARNING, "Uncaught exception in {0}", e, t));
+            thread.setUncaughtExceptionHandler((t, e) -> log(logger, WARNING, "Uncaught exception in {0}", e, t));
             return thread;
         });
         this.terminationTimeout = p.getTerminationTimeout();

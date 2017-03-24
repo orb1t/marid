@@ -18,7 +18,15 @@
 
 package org.marid.ide.logging;
 
+import javafx.event.EventHandler;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.WindowEvent;
+import org.marid.Ide;
+import org.marid.jfx.panes.MaridScrollPane;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -27,4 +35,23 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class IdeLogPane extends BorderPane {
+
+    @Autowired
+    public void initCenter(IdeLogView logView, GenericApplicationContext context) {
+        final MaridScrollPane scrollPane = new MaridScrollPane(logView);
+        setCenter(scrollPane);
+        context.addApplicationListener(new ApplicationListener<ContextStartedEvent>() {
+            @Override
+            public void onApplicationEvent(ContextStartedEvent event) {
+                context.getApplicationListeners().remove(this);
+                Ide.primaryStage.addEventHandler(WindowEvent.WINDOW_SHOWN, new EventHandler<WindowEvent>() {
+                    @Override
+                    public void handle(WindowEvent event) {
+                        Ide.primaryStage.removeEventHandler(WindowEvent.WINDOW_SHOWN, this);
+                        logView.scrollTo(logView.getItems().size() - 1);
+                    }
+                });
+            }
+        });
+    }
 }

@@ -18,17 +18,27 @@
 
 package org.marid.maven;
 
-import java.util.Map;
-import java.util.function.Consumer;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.util.List;
 
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.9
  */
-public interface ProjectBuilder {
+public class MavenBuildResult {
 
-    ProjectBuilder goals(String... args);
+    public final long time;
+    public final List<Throwable> exceptions;
 
-    ProjectBuilder profiles(String... args);
+    public MavenBuildResult(long time, List<Throwable> exceptions) {
+        this.time = time;
+        this.exceptions = exceptions;
+    }
 
-    void build(Consumer<Map<String, Object>> resultConsumer);
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
 }

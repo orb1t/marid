@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Configuration;
 
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
+import static org.marid.ide.IdeNotifications.n;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.logging.Log.log;
@@ -91,11 +92,18 @@ public class ProjectConfiguration {
                     projectSaver.getObject().save(profile);
                     mavenBuilder.getObject().build(profile, result -> {
                         try {
-                            log(INFO, "[{0}] Built {1}", profile, result);
+                            final Throwable thrown;
+                            if (!result.exceptions.isEmpty()) {
+                                thrown = new Exception("Build error");
+                                result.exceptions.forEach(thrown::addSuppressed);
+                            } else {
+                                thrown = null;
+                            }
+                            n(INFO, "[{0}] Built in {1}s", thrown, profile, result.time / 1000f);
                             profile.update();
                             log(INFO, "[{0}] Updated", profile);
                         } catch (Exception x) {
-                            log(WARNING, "Unable to update cache {0}", x, profile);
+                            n(WARNING, "Unable to update cache {0}", x, profile);
                         }
                     }, profile.logger()::log);
                 })

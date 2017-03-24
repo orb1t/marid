@@ -21,7 +21,6 @@ package org.marid.proto;
 import org.marid.io.IOBiConsumer;
 import org.marid.io.IOBiFunction;
 import org.marid.io.IOConsumer;
-import org.marid.logging.Logs;
 import org.marid.proto.io.ProtoIO;
 
 import java.util.concurrent.Future;
@@ -31,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -87,8 +87,7 @@ public class StdProtoBusTaskRunner implements ProtoBusTaskRunner<StdProtoBus> {
                 bus.health.failedTransactionCount.incrementAndGet();
                 bus.health.lastFailedTransactionTimestamp.set(System.currentTimeMillis());
                 final Logger logger = Logger.getLogger(bus.toString());
-                final Logs logs = () -> logger;
-                logs.log(WARNING, "Error", x);
+                log(logger, WARNING, "Error", x);
             }
         }
     }

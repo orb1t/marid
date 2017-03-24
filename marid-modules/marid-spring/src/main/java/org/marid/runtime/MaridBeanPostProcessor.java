@@ -36,6 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.logging.Level.INFO;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -43,7 +44,6 @@ import static java.util.logging.Level.INFO;
 public class MaridBeanPostProcessor implements DestructionAwareBeanPostProcessor {
 
     private static final Logger LOGGER = Logger.getLogger("marid");
-    private static final Logs LOGS = () -> LOGGER;
     private static final Pattern INIT_ATTR = Pattern.compile("init(\\d+)");
     private static final Pattern DESTROY_ATTR = Pattern.compile("destroy(\\d+)");
 
@@ -57,7 +57,7 @@ public class MaridBeanPostProcessor implements DestructionAwareBeanPostProcessor
 
     @Override
     public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
-        LOGS.log(INFO, "Destroying {0}", beanName);
+        log(LOGGER, INFO, "Destroying {0}", beanName);
         if (beanName != null && beanFactory.containsBeanDefinition(beanName)) {
             applyTriggers(bean, beanName, DESTROY_ATTR);
         }
@@ -70,7 +70,7 @@ public class MaridBeanPostProcessor implements DestructionAwareBeanPostProcessor
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        LOGS.log(INFO, "Initializing {0}", beanName);
+        log(LOGGER, INFO, "Initializing {0}", beanName);
         return bean;
     }
 
@@ -79,7 +79,7 @@ public class MaridBeanPostProcessor implements DestructionAwareBeanPostProcessor
         if (beanName != null && beanFactory.containsBeanDefinition(beanName)) {
             applyTriggers(bean, beanName, INIT_ATTR);
         }
-        LOGS.log(INFO, "Initialized {0}", beanName);
+        log(LOGGER, INFO, "Initialized {0}", beanName);
         return bean;
     }
 

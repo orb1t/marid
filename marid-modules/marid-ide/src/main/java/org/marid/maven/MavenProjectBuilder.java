@@ -18,7 +18,6 @@
 
 package org.marid.maven;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import org.apache.maven.Maven;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
@@ -134,7 +133,7 @@ public class MavenProjectBuilder implements ProjectBuilder {
     }
 
     @Override
-    public void build(Consumer<Map<String, Object>> consumer) {
+    public void build(Consumer<MavenBuildResult> consumer) {
         PlexusContainer plexusContainer = null;
         try {
             plexusContainer = buildPlexusContainer();
@@ -142,9 +141,10 @@ public class MavenProjectBuilder implements ProjectBuilder {
             final Maven maven = plexusContainer.lookup(Maven.class);
             Thread.currentThread().setContextClassLoader(plexusContainer.getContainerRealm());
             final MavenExecutionResult result = maven.execute(mavenExecutionRequest);
-            consumer.accept(ImmutableMap.of(
-                    "time", result.getBuildSummary(result.getProject()).getTime(),
-                    "exceptions", result.getExceptions()));
+            consumer.accept(new MavenBuildResult(
+                    result.getBuildSummary(result.getProject()).getTime(),
+                    result.getExceptions())
+            );
         } catch (Exception x) {
             final LogRecord record = new LogRecord(Level.WARNING, "Unable to execute maven");
             record.setThrown(x);
