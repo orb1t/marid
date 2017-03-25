@@ -18,9 +18,10 @@
 
 package org.marid.dependant.resources;
 
-import javafx.scene.control.TabPane;
+import javafx.scene.control.SplitPane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.tabs.IdeTab;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static javafx.beans.binding.Bindings.createStringBinding;
@@ -32,7 +33,8 @@ import static org.marid.ide.common.IdeShapes.profileNode;
 @Component
 public class ResourcesTab extends IdeTab {
 
-    public ResourcesTab(ProjectProfile profile, TabPane resourcesTabPane) {
-        super(resourcesTabPane, createStringBinding(profile::getName), () -> profileNode(profile, 16));
+    @Autowired
+    public ResourcesTab(ProjectProfile profile, SplitPane resourcesSplitPane) {
+        super(resourcesSplitPane, createStringBinding(profile::getName), () -> profileNode(profile, 16));
     }
 }

@@ -18,14 +18,11 @@
 
 package org.marid.dependant.resources;
 
-import javafx.geometry.Side;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.geometry.Orientation;
+import javafx.scene.control.SplitPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import org.marid.Ide;
-import org.marid.dependant.resources.beanfiles.BeanFileBrowser;
-import org.marid.dependant.resources.beanfiles.BeanFileBrowserActions;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
@@ -33,8 +30,8 @@ import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -50,13 +47,7 @@ import static org.marid.logging.Log.log;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@Import({
-        ResourcesTable.class,
-        ResourcesTracker.class,
-        BeanFileBrowser.class,
-        BeanFileBrowserActions.class,
-        ResourcesTab.class
-})
+@ComponentScan(basePackageClasses = {ResourcesConfiguration.class})
 public class ResourcesConfiguration extends DependantConfiguration<ResourcesParams> {
 
     @Bean
@@ -65,14 +56,13 @@ public class ResourcesConfiguration extends DependantConfiguration<ResourcesPara
     }
 
     @Bean
-    public TabPane resourcesTabPane(ResourcesTable resourcesTable, BeanFileBrowser fileBrowser) {
-        final TabPane tabPane = new TabPane(
-                new Tab(s("Bean files"), new MaridScrollPane(fileBrowser)),
-                new Tab(s("Resource files"), new MaridScrollPane(resourcesTable))
+    public SplitPane resourcesSplitPane(ResourcesTable resourcesTable, BeanFileBrowser fileBrowser) {
+        final SplitPane splitPane = new SplitPane(
+                new MaridScrollPane(fileBrowser),
+                new MaridScrollPane(resourcesTable)
         );
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        tabPane.setSide(Side.BOTTOM);
-        return tabPane;
+        splitPane.setOrientation(Orientation.VERTICAL);
+        return splitPane;
     }
 
     @Bean
