@@ -56,6 +56,7 @@ public class IdeSplitPane extends SplitPane {
         this.divider = getDividers().get(0);
         setOrientation(Orientation.VERTICAL);
         setDividerPositions(0);
+        setFocusTraversable(false);
     }
 
     @EventListener

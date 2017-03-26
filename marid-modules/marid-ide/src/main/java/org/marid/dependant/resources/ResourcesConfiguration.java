@@ -58,6 +58,7 @@ public class ResourcesConfiguration extends DependantConfiguration<ResourcesPara
     public SplitPane resourcesSplitPane(ResourcesTable resourcesTable, BeanFileBrowser fileBrowser) {
         final SplitPane splitPane = new SplitPane(fileBrowser, resourcesTable);
         splitPane.setOrientation(Orientation.VERTICAL);
+        splitPane.setFocusTraversable(true);
         return splitPane;
     }
 
