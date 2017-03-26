@@ -41,7 +41,7 @@ public class ListDialog<T> extends Dialog<T> {
         initModality(Modality.APPLICATION_MODAL);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         Node node = listView = new ListView<>(list);
-        getDialogPane().setContent(new MaridScrollPane(node));
+        getDialogPane().setContent(MaridScrollPane.createMaridScrollPane(node));
         setResultConverter(t -> t.getButtonData() == OK_DONE ? listView.getSelectionModel().getSelectedItem() : null);
     }
 

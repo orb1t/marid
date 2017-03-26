@@ -21,12 +21,10 @@ package org.marid.dependant.iconviewer;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.marid.ide.panes.main.IdePane;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.l10n.L10n;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
@@ -44,12 +42,11 @@ public class IconViewer extends Stage {
         super(StageStyle.UNIFIED);
         initOwner(idePane.getScene().getWindow());
         setTitle(L10n.s("Icon viewer"));
-        final ScrollPane scrollPane = new MaridScrollPane(table);
-        final BorderPane pane = new BorderPane(scrollPane);
+        final BorderPane pane = new BorderPane(table);
         pane.setPrefSize(800, 600);
         final Label countLabel = new Label(L10n.s("Icon count: %d", table.getItems().size()));
         pane.setBottom(countLabel);
-        BorderPane.setMargin(scrollPane, new Insets(10, 10, 5, 10));
+        BorderPane.setMargin(table, new Insets(10, 10, 5, 10));
         BorderPane.setMargin(countLabel, new Insets(5, 10, 10, 10));
         setScene(new Scene(pane));
     }

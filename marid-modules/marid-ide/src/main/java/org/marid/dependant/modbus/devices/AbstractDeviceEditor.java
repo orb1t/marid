@@ -59,7 +59,7 @@ public class AbstractDeviceEditor<I extends AbstractDeviceInfo, E, T extends Abs
         initOwner(stage);
         initModality(Modality.WINDOW_MODAL);
         getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
-        getDialogPane().setContent(new MaridScrollPane(table));
+        getDialogPane().setContent(MaridScrollPane.createMaridScrollPane(table));
         setTitle(s(device.getClass().getSimpleName()));
         setResultConverter(t -> {
             switch (t.getButtonData()) {

@@ -27,7 +27,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.layout.BorderPane;
 import org.apache.maven.model.Dependency;
 import org.marid.jfx.converter.MaridConverter;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.util.Dependencies;
 
@@ -70,7 +69,7 @@ public class DependenciesPane extends BorderPane {
 
     @PostConstruct
     private void initTable() {
-        setCenter(new MaridScrollPane(dependencyTable));
+        setCenter(dependencyTable);
     }
 
     @PostConstruct

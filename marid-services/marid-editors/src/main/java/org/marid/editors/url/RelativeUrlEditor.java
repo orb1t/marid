@@ -104,7 +104,7 @@ public class RelativeUrlEditor {
     public Dialog<Boolean> stage(TreeView<Item> tree) {
         return new MaridDialog<Boolean>(Modality.NONE, Ide.primaryStage, ButtonType.CANCEL, ButtonType.APPLY)
                 .title("URL editor")
-                .content(new MaridScrollPane(tree))
+                .content(MaridScrollPane.createMaridScrollPane(tree))
                 .resizable(true)
                 .on(type -> {
                     final TreeItem<Item> selectedItem = tree.getSelectionModel().getSelectedItem();

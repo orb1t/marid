@@ -104,7 +104,7 @@ public class ModbusSourceConfiguration {
                                  ModbusPane modbusPane,
                                  @Modbus ToolBar bottomToolbar) {
         return new BorderPane(
-                new MaridScrollPane(modbusPane),
+                MaridScrollPane.createMaridScrollPane(modbusPane),
                 new VBox(menuBar, topToolbar),
                 null,
                 bottomToolbar,

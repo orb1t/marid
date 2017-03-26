@@ -88,7 +88,7 @@ public class ProjectConfigConfiguration extends DependantConfiguration<ProjectPa
         final TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         for (final Node node : nodes) {
-            final Tab tab = new Tab(s(node.getId()), new MaridScrollPane(node));
+            final Tab tab = new Tab(s(node.getId()), MaridScrollPane.createMaridScrollPane(node));
             ((Region) tab.getContent()).setPadding(new Insets(10, 0, 10, 0));
             tab.getContent().setStyle("-fx-background-color: -fx-background");
             tabPane.getTabs().add(tab);

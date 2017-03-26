@@ -91,7 +91,7 @@ public class BeanDataDetails {
     @Qualifier("beanData")
     public Tab detailsTab() {
         final BorderPane pane = new BorderPane();
-        pane.setCenter(new MaridScrollPane(propertiesGridPane()));
+        pane.setCenter(MaridScrollPane.createMaridScrollPane(propertiesGridPane()));
         pane.setBottom(buttonPane(event -> {
             beanData.lazyInit.set(oldLazy);
             beanData.initMethod.set(oldInitMethod);
@@ -174,7 +174,7 @@ public class BeanDataDetails {
                 .build();
         final ToolBar toolBar = new ToolBar(MaridActions.toolbar(actionMap));
         pane.setTop(toolBar);
-        pane.setCenter(new MaridScrollPane(triggerList));
+        pane.setCenter(triggerList);
         return pane;
     }
 

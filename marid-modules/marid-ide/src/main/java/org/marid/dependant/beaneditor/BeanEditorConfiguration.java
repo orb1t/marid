@@ -23,7 +23,6 @@ import org.marid.ide.panes.main.IdeToolbar;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.dialog.MaridDialog;
 import org.marid.jfx.icons.FontIcon;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.ObjectProvider;
@@ -72,7 +71,7 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
                             .title("Bean browser")
                             .with((d, p) -> d.setResizable(true))
                             .result(table.getSelectionModel()::getSelectedItems)
-                            .with((d, p) -> p.setContent(new MaridScrollPane(table)))
+                            .with((d, p) -> p.setContent(table))
                             .showAndWait()
                             .ifPresent(entries -> entries.forEach(e -> {
                                 beanListActions.insertItem(e.getBeanName(), e.getBeanDefinition(), table.metaInfo);

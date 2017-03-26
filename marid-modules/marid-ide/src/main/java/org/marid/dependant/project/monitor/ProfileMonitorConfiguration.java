@@ -23,7 +23,6 @@ import javafx.stage.Stage;
 import org.marid.Ide;
 import org.marid.dependant.project.ProjectParams;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,7 +47,7 @@ public class ProfileMonitorConfiguration extends DependantConfiguration<ProjectP
     public Stage stage(ProfileObjectTree tree, ProjectProfile profile) {
         final Stage stage = new Stage();
         stage.initOwner(Ide.primaryStage);
-        stage.setScene(new Scene(new MaridScrollPane(tree), 1200, 800));
+        stage.setScene(new Scene(tree, 1200, 800));
         stage.setTitle(profile.getName());
         return stage;
     }

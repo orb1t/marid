@@ -24,7 +24,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.marid.Ide;
 import org.marid.jfx.icons.FontIcon;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.DProps;
@@ -50,7 +49,7 @@ public class PropEditorConfiguration extends DependantConfiguration<PropEditorPa
 
     @Bean
     public BorderPane propEditorPane(PropTable propTable, ToolBar propEditorToolbar) {
-        return new BorderPane(new MaridScrollPane(propTable), propEditorToolbar, null, null, null);
+        return new BorderPane(propTable, propEditorToolbar, null, null, null);
     }
 
     @Bean(initMethod = "show")

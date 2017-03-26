@@ -22,7 +22,6 @@ import javafx.beans.binding.Bindings;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.BeanData;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,7 +51,7 @@ public class BeanDataEditorConfiguration extends DependantConfiguration<BeanData
     public Tab beanArgsTab(BeanArgEditor beanArgEditor, ConstructorList constructorList, BeanData beanData) {
         final Tab tab = new Tab();
         final BorderPane borderPane = new BorderPane();
-        borderPane.setCenter(new MaridScrollPane(beanArgEditor));
+        borderPane.setCenter(beanArgEditor);
         borderPane.setBottom(constructorList);
         tab.setContent(borderPane);
         tab.textProperty().bind(ls("Parameters"));
@@ -65,7 +64,7 @@ public class BeanDataEditorConfiguration extends DependantConfiguration<BeanData
     @Order(2)
     public Tab beanPropsTab(BeanPropEditor beanPropEditor, BeanData beanData) {
         final Tab tab = new Tab();
-        tab.setContent(new MaridScrollPane(beanPropEditor));
+        tab.setContent(beanPropEditor);
         tab.textProperty().bind(ls("Properties"));
         tab.disableProperty().bind(Bindings.isEmpty(beanData.properties));
         return tab;

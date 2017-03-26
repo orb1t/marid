@@ -26,7 +26,6 @@ import org.marid.Ide;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -57,10 +56,7 @@ public class ResourcesConfiguration extends DependantConfiguration<ResourcesPara
 
     @Bean
     public SplitPane resourcesSplitPane(ResourcesTable resourcesTable, BeanFileBrowser fileBrowser) {
-        final SplitPane splitPane = new SplitPane(
-                new MaridScrollPane(fileBrowser),
-                new MaridScrollPane(resourcesTable)
-        );
+        final SplitPane splitPane = new SplitPane(fileBrowser, resourcesTable);
         splitPane.setOrientation(Orientation.VERTICAL);
         return splitPane;
     }

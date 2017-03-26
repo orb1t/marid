@@ -20,7 +20,6 @@ package org.marid.dependant.beaneditor;
 
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.tabs.IdeTab;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,7 +38,7 @@ public class BeanEditorTab extends IdeTab {
 
     @Autowired
     public BeanEditorTab(ProjectProfile profile, BeanListTable table, BeanFile file) {
-        super(new MaridScrollPane(table), createStringBinding(file::getFilePath, file.path), () -> fileNode(file, 16));
+        super(table, createStringBinding(file::getFilePath, file.path), () -> fileNode(file, 16));
         this.profile = profile;
         this.file = file;
         addNodeObservables(file.path);

@@ -19,9 +19,8 @@
 package org.marid.dependant.beaneditor.mapeditor;
 
 import javafx.beans.value.ObservableStringValue;
-import org.marid.ide.tabs.IdeTab;
 import org.marid.ide.common.IdeShapes;
-import org.marid.jfx.panes.MaridScrollPane;
+import org.marid.ide.tabs.IdeTab;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +35,7 @@ public class MapEditorTab extends IdeTab {
 
     @Autowired
     public MapEditorTab(MapEditorTable table, ObservableStringValue name) {
-        super(new MaridScrollPane(table), createStringBinding(name::get, name), () -> IdeShapes.map(name.get(), 16));
+        super(table, createStringBinding(name::get, name), () -> IdeShapes.map(name.get(), 16));
         addNodeObservables(name);
     }
 }

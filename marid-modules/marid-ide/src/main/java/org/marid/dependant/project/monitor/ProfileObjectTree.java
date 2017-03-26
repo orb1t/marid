@@ -30,7 +30,6 @@ import javafx.stage.StageStyle;
 import org.apache.commons.lang3.tuple.Triple;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.FxObservable;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.AbstractData;
 import org.marid.spring.xml.DRef;
@@ -119,7 +118,7 @@ public class ProfileObjectTree extends TableView<Triple<AbstractData<?>, FxObser
                         .collect(Collectors.toCollection(FXCollections::observableArrayList)));
                 final Stage stage = new Stage(StageStyle.UTILITY);
                 stage.setTitle(s("Details"));
-                stage.setScene(new Scene(new MaridScrollPane(listView), 800, 800));
+                stage.setScene(new Scene(listView, 800, 800));
                 stage.show();
             });
             contextMenu.getItems().add(menuItem);

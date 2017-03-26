@@ -24,7 +24,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.marid.Ide;
 import org.marid.IdePrefs;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -96,7 +95,7 @@ public class LogConfiguration {
     @Qualifier("log")
     @Bean
     public BorderPane logPane(@Qualifier("log") MenuBar menuBar, LoggingTable table) {
-        return new BorderPane(new MaridScrollPane(table), menuBar, null, null, null);
+        return new BorderPane(table, menuBar, null, null, null);
     }
 
     @Qualifier("log")

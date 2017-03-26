@@ -24,12 +24,13 @@ import javafx.scene.control.ScrollPane;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public class MaridScrollPane extends ScrollPane {
+public class MaridScrollPane {
 
-    public MaridScrollPane(Node node) {
-        super(node);
-        setFitToHeight(true);
-        setFitToWidth(true);
-        setStyle("-fx-background-color: transparent");
+    public static ScrollPane createMaridScrollPane(Node node) {
+        final ScrollPane scrollPane = new ScrollPane(node);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background-color: transparent");
+        return scrollPane;
     }
 }

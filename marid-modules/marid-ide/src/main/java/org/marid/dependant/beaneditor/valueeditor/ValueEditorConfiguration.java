@@ -57,7 +57,7 @@ public class ValueEditorConfiguration extends DependantConfiguration<ValueEditor
         return new MaridDialog<String>(Ide.primaryStage)
                 .title("Value editor")
                 .preferredSize(800, 600)
-                .with((d, p) -> p.setContent(new MaridScrollPane(area)))
+                .with((d, p) -> p.setContent(MaridScrollPane.createMaridScrollPane(area)))
                 .result(() -> {
                     final String v = area.getText();
                     value.setValue(v);

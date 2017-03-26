@@ -20,7 +20,6 @@ package org.marid.dependant.beaneditor.listeditor;
 
 import javafx.beans.value.ObservableStringValue;
 import org.marid.ide.tabs.IdeTab;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +35,6 @@ public class ListEditorTab extends IdeTab {
 
     @Autowired
     public ListEditorTab(ListEditor editor, ObservableStringValue name) {
-        super(new MaridScrollPane(editor), name, () -> glyphIcon(D_VIEW_LIST, 16));
+        super(editor, name, () -> glyphIcon(D_VIEW_LIST, 16));
     }
 }
