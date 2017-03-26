@@ -33,7 +33,7 @@ import org.marid.dependant.project.config.deps.DependenciesPane;
 import org.marid.dependant.project.config.deps.RepositoryDependencies;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.panes.MaridScrollPane;
+import org.marid.jfx.control.MaridControls;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
@@ -88,7 +88,7 @@ public class ProjectConfigConfiguration extends DependantConfiguration<ProjectPa
         final TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         for (final Node node : nodes) {
-            final Tab tab = new Tab(s(node.getId()), MaridScrollPane.createMaridScrollPane(node));
+            final Tab tab = new Tab(s(node.getId()), MaridControls.createMaridScrollPane(node));
             ((Region) tab.getContent()).setPadding(new Insets(10, 0, 10, 0));
             tab.getContent().setStyle("-fx-background-color: -fx-background");
             tabPane.getTabs().add(tab);

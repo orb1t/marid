@@ -27,9 +27,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.marid.dependant.modbus.codec.ModbusCodec;
 import org.marid.dependant.modbus.devices.info.AbstractDeviceInfo;
+import org.marid.jfx.control.MaridControls;
 import org.marid.jfx.converter.MaridConverter;
 import org.marid.jfx.panes.GenericGridPane;
-import org.marid.jfx.panes.MaridScrollPane;
 
 import javax.annotation.PostConstruct;
 
@@ -59,7 +59,7 @@ public class AbstractDeviceEditor<I extends AbstractDeviceInfo, E, T extends Abs
         initOwner(stage);
         initModality(Modality.WINDOW_MODAL);
         getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
-        getDialogPane().setContent(MaridScrollPane.createMaridScrollPane(table));
+        getDialogPane().setContent(MaridControls.createMaridScrollPane(table));
         setTitle(s(device.getClass().getSimpleName()));
         setResultConverter(t -> {
             switch (t.getButtonData()) {

@@ -31,9 +31,9 @@ import javafx.scene.layout.HBox;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
+import org.marid.jfx.control.MaridControls;
 import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.panes.GenericGridPane;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.xml.BeanData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -91,7 +91,7 @@ public class BeanDataDetails {
     @Qualifier("beanData")
     public Tab detailsTab() {
         final BorderPane pane = new BorderPane();
-        pane.setCenter(MaridScrollPane.createMaridScrollPane(propertiesGridPane()));
+        pane.setCenter(MaridControls.createMaridScrollPane(propertiesGridPane()));
         pane.setBottom(buttonPane(event -> {
             beanData.lazyInit.set(oldLazy);
             beanData.initMethod.set(oldInitMethod);

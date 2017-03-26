@@ -34,8 +34,8 @@ import org.marid.dependant.modbus.annotation.Modbus;
 import org.marid.dependant.modbus.devices.AbstractDevice;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
+import org.marid.jfx.control.MaridControls;
 import org.marid.jfx.icons.FontIcons;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -104,7 +104,7 @@ public class ModbusSourceConfiguration {
                                  ModbusPane modbusPane,
                                  @Modbus ToolBar bottomToolbar) {
         return new BorderPane(
-                MaridScrollPane.createMaridScrollPane(modbusPane),
+                MaridControls.createMaridScrollPane(modbusPane),
                 new VBox(menuBar, topToolbar),
                 null,
                 bottomToolbar,

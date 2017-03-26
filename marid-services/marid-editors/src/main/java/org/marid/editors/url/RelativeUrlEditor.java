@@ -28,8 +28,8 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
 import org.marid.Ide;
 import org.marid.dependant.resources.ResourcesTracker;
+import org.marid.jfx.control.MaridControls;
 import org.marid.jfx.dialog.MaridDialog;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.jfx.tree.TreeUtils;
 import org.marid.spring.contexts.ValueEditorContext;
 import org.marid.spring.xml.DValue;
@@ -104,7 +104,7 @@ public class RelativeUrlEditor {
     public Dialog<Boolean> stage(TreeView<Item> tree) {
         return new MaridDialog<Boolean>(Modality.NONE, Ide.primaryStage, ButtonType.CANCEL, ButtonType.APPLY)
                 .title("URL editor")
-                .content(MaridScrollPane.createMaridScrollPane(tree))
+                .content(MaridControls.createMaridScrollPane(tree))
                 .resizable(true)
                 .on(type -> {
                     final TreeItem<Item> selectedItem = tree.getSelectionModel().getSelectedItem();

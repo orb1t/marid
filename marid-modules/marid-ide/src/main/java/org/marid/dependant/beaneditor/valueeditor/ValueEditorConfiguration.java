@@ -21,8 +21,8 @@ package org.marid.dependant.beaneditor.valueeditor;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextArea;
 import org.marid.Ide;
+import org.marid.jfx.control.MaridControls;
 import org.marid.jfx.dialog.MaridDialog;
-import org.marid.jfx.panes.MaridScrollPane;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.DValue;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -57,7 +57,7 @@ public class ValueEditorConfiguration extends DependantConfiguration<ValueEditor
         return new MaridDialog<String>(Ide.primaryStage)
                 .title("Value editor")
                 .preferredSize(800, 600)
-                .with((d, p) -> p.setContent(MaridScrollPane.createMaridScrollPane(area)))
+                .with((d, p) -> p.setContent(MaridControls.createMaridScrollPane(area)))
                 .result(() -> {
                     final String v = area.getText();
                     value.setValue(v);
