@@ -23,6 +23,7 @@ import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
+import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -39,7 +40,7 @@ public class ForwardingObservableValue<T, V extends ObservableValue<T>>
     private final List<InvalidationListener> invalidationListeners = new LinkedList<>();
     private final List<ChangeListener<? super T>> changeListeners = new LinkedList<>();
 
-    public ForwardingObservableValue(V delegate) {
+    public ForwardingObservableValue(@Nonnull V delegate) {
         this.delegate = delegate;
         delegate.addListener(this::onUpdate);
         delegate.addListener(this::onChange);
@@ -88,6 +89,18 @@ public class ForwardingObservableValue<T, V extends ObservableValue<T>>
     public void removeListener(InvalidationListener listener) {
         invalidationListeners.remove(listener);
         clean();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null && (
+                obj == this || obj instanceof ForwardingObservableValue
+                        && ((ForwardingObservableValue) obj).delegate.equals(delegate));
+    }
+
+    @Override
+    public int hashCode() {
+        return delegate.hashCode();
     }
 
     @Override

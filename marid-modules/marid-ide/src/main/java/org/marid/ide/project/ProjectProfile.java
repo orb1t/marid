@@ -48,7 +48,6 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -83,7 +82,6 @@ public class ProjectProfile {
     private final Path repository;
     private final Logger logger;
     private final FxList<BeanFile> beanFiles;
-    private final Map<String, Class<?>> classMap = new ConcurrentHashMap<>();
     private volatile URLClassLoader classLoader;
 
     ProjectProfile(String name) {
@@ -130,7 +128,6 @@ public class ProjectProfile {
     }
 
     private void close() {
-        classMap.clear();
         try (final URLClassLoader classLoader = this.classLoader) {
             log(logger, INFO, "Closing a class loader {0}", classLoader);
         } catch (IOException x) {

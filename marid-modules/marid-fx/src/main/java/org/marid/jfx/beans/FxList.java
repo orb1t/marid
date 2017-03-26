@@ -25,6 +25,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,7 +43,7 @@ public class FxList<E> extends ForwardingList<E> implements ObservableList<E>, F
     private final List<InvalidationListener> invalidationListeners = new LinkedList<>();
     private final List<ListChangeListener<? super E>> changeListeners = new LinkedList<>();
 
-    public FxList(ObservableList<E> delegate) {
+    public FxList(@Nonnull ObservableList<E> delegate) {
         this.delegate = delegate;
         delegate.addListener(this::onInvalidate);
         delegate.addListener(this::onChange);
@@ -138,5 +140,16 @@ public class FxList<E> extends ForwardingList<E> implements ObservableList<E>, F
     @Override
     public Stream<?> listeners() {
         return Stream.concat(invalidationListeners.stream(), changeListeners.stream());
+    }
+
+    @Override
+    public int hashCode() {
+        return delegate.hashCode();
+    }
+
+    @Override
+    public boolean equals(@Nullable Object object) {
+        return object != null
+                && (object == this || object instanceof FxList && ((FxList) object).delegate.equals(delegate));
     }
 }
