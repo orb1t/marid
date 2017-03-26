@@ -21,7 +21,6 @@ package org.marid.ide.status;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,11 +29,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class IdeStatusBar extends HBox {
 
-    @Autowired
-    public IdeStatusBar(IdeStatusProfile profile) {
+    public IdeStatusBar() {
         super(5);
-        getChildren().add(profile);
         setPadding(new Insets(5));
         setAlignment(Pos.CENTER_RIGHT);
+        setFocusTraversable(false);
     }
 }

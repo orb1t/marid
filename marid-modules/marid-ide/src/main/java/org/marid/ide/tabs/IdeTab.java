@@ -55,9 +55,9 @@ public class IdeTab extends Tab {
     private final List<ObservableValue<String>> texts = new ArrayList<>();
 
     public IdeTab(@Nonnull Node content, @Nonnull ObservableValue<String> text, @Nonnull Supplier<Node> node) {
+        this.key = new IdeTabKey(text, node);
         setContent(content);
         textProperty().bind(text);
-        this.key = new IdeTabKey(text, node);
     }
 
     public void addNodeObservables(Observable... observables) {

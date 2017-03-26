@@ -29,5 +29,6 @@ public class IdeTabPane extends TabPane {
 
     public IdeTabPane() {
         setTabClosingPolicy(TabClosingPolicy.ALL_TABS);
+        setFocusTraversable(false);
     }
 }

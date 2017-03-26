@@ -19,11 +19,12 @@
 package org.marid.ide.status;
 
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.Separator;
+import javafx.scene.control.*;
+import org.marid.ide.project.ProjectManager;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -67,6 +68,17 @@ public class IdeIndicators {
     }
 
     @OrderedInit(1)
+    public void initProfile(ProjectManager manager) {
+        final ComboBox<ProjectProfile> combo = new ComboBox<>(manager.getProfiles());
+        final SelectionModel<ProjectProfile> selection = combo.getSelectionModel();
+        selection.select(manager.getProfile());
+        final ObjectProperty<ProjectProfile> profile = manager.profileProperty();
+        profile.addListener((observable, oldValue, newValue) -> selection.select(newValue));
+        selection.selectedItemProperty().addListener((observable, oldValue, newValue) -> profile.set(newValue));
+        add(combo);
+    }
+
+    @OrderedInit(2)
     public void initCpuLoad() throws Exception {
         final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         final ObjectName osObjectName = new ObjectName("java.lang", "type", "OperatingSystem");
@@ -85,7 +97,7 @@ public class IdeIndicators {
         }
     }
 
-    @OrderedInit(2)
+    @OrderedInit(3)
     public void initDateTime() throws Exception {
         final Label timeLabel = new Label("", glyphIcon(O_CLOCK, 16));
         final DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder()
