@@ -41,7 +41,7 @@ public class JavaSettings extends AbstractSettings {
     }
 
     public void setJavaArguments(String[] arguments) {
-        preferences.put("javaArguments", String.join("\\000", arguments));
+        preferences.put("javaArguments", String.join("\000", arguments));
     }
 
     @Override
