@@ -37,11 +37,11 @@ public class JavaSettings extends AbstractSettings {
     }
 
     public String[] getJavaArguments() {
-        return Optional.ofNullable(preferences.get("javaArguments", null)).map(s -> s.split("\000")).orElse(new String[0]);
+        return Optional.ofNullable(preferences.get("javaArguments", null)).map(s -> s.split("\\000")).orElse(new String[0]);
     }
 
     public void setJavaArguments(String[] arguments) {
-        preferences.put("javaArguments", String.join("\\000", (CharSequence[]) arguments));
+        preferences.put("javaArguments", String.join("\\000", arguments));
     }
 
     @Override
