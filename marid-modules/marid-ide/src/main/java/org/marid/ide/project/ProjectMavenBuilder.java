@@ -22,6 +22,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import org.marid.logging.Logs;
 import org.marid.maven.MavenBuildResult;
 import org.marid.maven.MavenProjectBuilder;
 import org.marid.maven.ProjectBuilder;
@@ -29,7 +30,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
-import java.util.logging.LogRecord;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,18 +38,22 @@ import java.util.logging.LogRecord;
 public class ProjectMavenBuilder {
 
     private final BooleanProperty buildState = new SimpleBooleanProperty(false);
+    private final Logs log;
 
-    Thread build(ProjectProfile profile, Consumer<MavenBuildResult> consumer, Consumer<LogRecord> logConsumer) {
+    public ProjectMavenBuilder(Logs log) {
+        this.log = log;
+    }
+
+    void build(ProjectProfile profile, Consumer<MavenBuildResult> consumer) {
         final Thread thread = new Thread(() -> {
             Platform.runLater(() -> buildState.set(true));
-            final ProjectBuilder projectBuilder = new MavenProjectBuilder(profile.getPath(), logConsumer)
+            final ProjectBuilder projectBuilder = new MavenProjectBuilder(profile.getPath())
                     .goals("clean", "install")
                     .profiles("conf");
             projectBuilder.build(consumer);
             Platform.runLater(() -> buildState.set(false));
         });
         thread.start();
-        return thread;
     }
 
     @Bean

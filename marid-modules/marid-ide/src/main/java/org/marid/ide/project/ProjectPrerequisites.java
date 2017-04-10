@@ -46,7 +46,6 @@ public class ProjectPrerequisites {
 
     public void apply(ProjectProfile profile) {
         final Builder builder = new Builder(profile);
-        builder.applyPrerequisites();
         builder.applyProperties();
         builder.applyBuild();
         builder.applyPluginManagement();
@@ -68,12 +67,6 @@ public class ProjectPrerequisites {
 
         private Builder(ProjectProfile profile) {
             model = profile.getModel();
-        }
-
-        private void applyPrerequisites() {
-            final Prerequisites prerequisites = new Prerequisites();
-            prerequisites.setMaven("3.3");
-            model.setPrerequisites(prerequisites);
         }
 
         private void applyProperties() {

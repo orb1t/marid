@@ -105,7 +105,7 @@ public class ProjectConfiguration {
                         } catch (Exception x) {
                             n(WARNING, "Unable to update cache {0}", x, profile);
                         }
-                    }, profile.logger()::log);
+                    });
                 })
                 .bindDisabled(projectDisabled);
     }
