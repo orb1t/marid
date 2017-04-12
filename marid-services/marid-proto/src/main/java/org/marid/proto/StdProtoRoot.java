@@ -18,9 +18,6 @@
 
 package org.marid.proto;
 
-import org.marid.io.IOSupplier;
-import org.marid.proto.io.ProtoIO;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -38,15 +35,11 @@ public class StdProtoRoot extends StdProto implements ProtoRoot {
     }
 
     @Override
-    public Map<String, StdProtoBus> getDrivers() {
+    public Map<String, StdProtoBus> getItems() {
         return children;
     }
 
     public ThreadGroup getThreadGroup() {
         return threadGroup;
-    }
-
-    public StdProtoBus bus(String id, String name, IOSupplier<? extends ProtoIO> ioProvider, StdProtoBusProps props) {
-        return new StdProtoBus(this, id, name, ioProvider, props);
     }
 }

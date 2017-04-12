@@ -25,6 +25,17 @@
         <constructor-arg name="name" value="root"/>
     </bean>
 
+    <bean name="protoBus" class="org.marid.proto.StdProtoBus">
+        <description>Protocol Bus</description>
+
+        <constructor-arg name="root" ref="protoRoot"/>
+        <constructor-arg name="id" value="bus"/>
+        <constructor-arg name="name" value="bus"/>
+        <constructor-arg name="p">
+            <bean name="props" class="org.marid.proto.StdProtoBusProps"/>
+        </constructor-arg>
+    </bean>
+
     <bean name="floatCodec" class="org.marid.proto.codec.FloatCodec">
         <description>Float value codec</description>
     </bean>
@@ -37,30 +48,6 @@
         <description>Double value coidec</description>
 
         <constructor-arg name="size" value="4"/>
-    </bean>
-
-    <bean name="ABCD" class="org.marid.proto.codec.TwoBytesOrder" factory-method="valueOf">
-        <description>Two byte ABCD codec</description>
-
-        <constructor-arg name="name" value="ABCD"/>
-    </bean>
-
-    <bean name="BADC" class="org.marid.proto.codec.TwoBytesOrder" factory-method="valueOf">
-        <description>Two byte BADC codec</description>
-
-        <constructor-arg name="name" value="BADC"/>
-    </bean>
-
-    <bean name="DCBA" class="org.marid.proto.codec.TwoBytesOrder" factory-method="valueOf">
-        <description>Two byte DCBA codec</description>
-
-        <constructor-arg name="name" value="DCBA"/>
-    </bean>
-
-    <bean name="CDAB" class="org.marid.proto.codec.TwoBytesOrder" factory-method="valueOf">
-        <description>Two byte DCBA codec</description>
-
-        <constructor-arg name="name" value="CDAB"/>
     </bean>
 
     <bean name="doubleConsumer" class="org.marid.proto.codec.Consumers" factory-method="doubleConsumer">

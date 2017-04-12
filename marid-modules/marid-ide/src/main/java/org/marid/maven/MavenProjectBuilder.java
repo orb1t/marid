@@ -60,8 +60,7 @@ public class MavenProjectBuilder implements ProjectBuilder {
         argList.addAll(goals);
         final String[] args = argList.toArray(new String[argList.size()]);
         final List<Throwable> exceptions = new ArrayList<>();
-        final MaridMavenCliRequest request = new MaridMavenCliRequest(args, null)
-                .directory(projectPath);
+        final MaridMavenCliRequest request = new MaridMavenCliRequest(args, null).directory(projectPath);
         final MavenCli cli = new MavenCli(null);
         try {
             cli.doMain(request);

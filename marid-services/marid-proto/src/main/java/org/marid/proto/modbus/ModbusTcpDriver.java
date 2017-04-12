@@ -57,8 +57,8 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
     public ModbusTcpDriver(ProtoBus bus, String id, String name, ModbusTcpDriverProps props) {
         super(id, name);
         this.bus = bus;
-        this.bus.getDrivers().put(id, Casts.cast(this));
-        this.transactionIdentifier = (char) bus.getDrivers().size();
+        this.bus.getItems().put(id, Casts.cast(this));
+        this.transactionIdentifier = (char) bus.getItems().size();
         this.slaveAndFunc = allocate(2).put(0, (byte) props.getUnitId()).put(1, (byte) props.getFunc()).getChar(0);
         this.address = (char) props.getAddress();
         this.count = (char) props.getCount();

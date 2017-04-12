@@ -32,11 +32,11 @@ public interface ProtoRoot extends Proto, Closeable {
         return null;
     }
 
-    Map<String, ? extends ProtoBus> getDrivers();
+    Map<String, ? extends ProtoBus> getItems();
 
     @Override
     default void close() throws IOException {
-        final IOException exception = Proto.close(getDrivers());
+        final IOException exception = Proto.close(getItems());
         if (exception.getSuppressed().length > 0) {
             throw exception;
         }

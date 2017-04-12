@@ -19,7 +19,6 @@
 package org.marid.proto;
 
 import org.marid.io.IOSupplier;
-import org.marid.logging.Logs;
 import org.marid.proto.io.ProtoIO;
 
 import java.io.IOException;
@@ -47,11 +46,11 @@ public class StdProtoBus extends StdProto implements ProtoBus {
 
     volatile ProtoIO io;
 
-    StdProtoBus(StdProtoRoot root, String id, String name, IOSupplier<? extends ProtoIO> ioProvider, StdProtoBusProps p) {
+    public StdProtoBus(StdProtoRoot root, String id, String name, StdProtoBusProps p) {
         super(id, name);
         this.root = root;
-        this.root.getDrivers().put(id, this);
-        this.ioProvider = ioProvider;
+        this.root.getItems().put(id, this);
+        this.ioProvider = p.getIoSupplier();
         this.scheduler = new ScheduledThreadPoolExecutor(p.getThreadCount(), r -> {
             final String threadName = root.getId() + "/" + id;
             final Thread thread = new Thread(root.getThreadGroup(), r, threadName, p.getStackSize());
@@ -111,13 +110,9 @@ public class StdProtoBus extends StdProto implements ProtoBus {
         return root;
     }
 
-    public Map<String, ProtoDriver> getDrivers() {
+    @Override
+    public Map<String, ProtoDriver> getItems() {
         return drivers;
-    }
-
-    public void setDrivers(Map<String, ProtoDriver> driverMap) {
-        drivers.clear();
-        drivers.putAll(driverMap);
     }
 
     @Override

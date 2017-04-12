@@ -31,7 +31,7 @@ public interface ProtoBus extends Proto, Closeable {
     @Override
     ProtoRoot getParent();
 
-    Map<String, ? extends ProtoDriver> getDrivers();
+    Map<String, ? extends ProtoDriver> getItems();
 
     ProtoBusTaskRunner<? extends ProtoBus> getTaskRunner();
 
