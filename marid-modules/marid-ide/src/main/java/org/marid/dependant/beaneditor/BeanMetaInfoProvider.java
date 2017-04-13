@@ -116,10 +116,6 @@ public class BeanMetaInfoProvider {
             return beans(beanFactory.getBeanNamesForType(resolvableType));
         }
 
-        public ClassLoader getClassLoader() {
-            return beanFactory.getBeanClassLoader();
-        }
-
         private List<BeanDefinitionHolder> beans(String... names) {
             return Stream.of(names)
                     .map(name -> new BeanDefinitionHolder(beanFactory.getBeanDefinition(name), name))

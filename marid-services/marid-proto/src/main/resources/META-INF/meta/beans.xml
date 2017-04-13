@@ -28,7 +28,7 @@
     <bean name="protoBus" class="org.marid.proto.StdProtoBus">
         <description>Protocol Bus</description>
 
-        <constructor-arg name="root" ref="protoRoot"/>
+        <constructor-arg name="root" type="org.marid.proto.StdProtoRoot" value="#{null}"/>
         <constructor-arg name="id" value="bus"/>
         <constructor-arg name="name" value="bus"/>
         <constructor-arg name="p">
@@ -75,11 +75,6 @@
         <description>Protocol infrastructure health monitor</description>
 
         <constructor-arg name="bus" value="#{null}"/>
-        <constructor-arg name="scheduler">
-            <bean name="executor" class="java.util.concurrent.ScheduledThreadPoolExecutor">
-                <constructor-arg name="corePoolSize" value="1"/>
-            </bean>
-        </constructor-arg>
         <constructor-arg name="props">
             <bean name="props" class="org.marid.proto.health.StdProtoBusHealthMonitorProps"/>
         </constructor-arg>

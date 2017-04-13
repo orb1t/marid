@@ -201,12 +201,8 @@ public class BeanListActions {
                 if (typeText == null) {
                     continue;
                 }
-                try {
-                    final Class<?> c = Class.forName(typeText, false, metaInfo.getClassLoader());
-                    if (!c.isAssignableFrom(type)) {
-                        continue;
-                    }
-                } catch (Exception x) {
+                final Optional<Class<?>> co = profile.getClass(typeText);
+                if (!co.isPresent() || !co.get().isAssignableFrom(type)) {
                     continue;
                 }
                 final MenuItem menuItem = new MenuItem(name, IdeShapes.ref(name, 16));

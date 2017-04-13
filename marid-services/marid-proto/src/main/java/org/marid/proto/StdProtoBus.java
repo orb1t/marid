@@ -96,7 +96,7 @@ public class StdProtoBus extends StdProto implements ProtoBus {
     }
 
     void init() {
-        if (io == null) {
+        if (io == null && ioProvider != null) {
             synchronized (this) {
                 if (io == null) {
                     io = ioProvider.get();
