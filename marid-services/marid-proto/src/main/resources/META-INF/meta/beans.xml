@@ -71,6 +71,13 @@
         <constructor-arg name="integerCodec" ref="intCodec"/>
     </bean>
 
+    <bean name="decoder" class="org.marid.proto.codec.Consumers" factory-method="decoder">
+        <description>Decoder</description>
+
+        <constructor-arg name="target" value="#{null}"/>
+        <constructor-arg name="order" value="ABCD"/>
+    </bean>
+
     <bean name="protoHealthMonitor" class="org.marid.proto.health.StdProtoBusHealthMonitor">
         <description>Protocol infrastructure health monitor</description>
 

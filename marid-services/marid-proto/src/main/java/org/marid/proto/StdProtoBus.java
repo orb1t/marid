@@ -28,6 +28,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.logging.Level.WARNING;
 import static org.marid.logging.Log.log;
 
@@ -50,7 +51,7 @@ public class StdProtoBus extends StdProto implements ProtoBus {
         super(id, name);
         this.root = root;
         this.root.getItems().put(id, this);
-        this.ioProvider = p.getIoSupplier();
+        this.ioProvider = requireNonNull(p.getIoSupplier(), "IO supplier is null");
         this.scheduler = new ScheduledThreadPoolExecutor(p.getThreadCount(), r -> {
             final String threadName = root.getId() + "/" + id;
             final Thread thread = new Thread(root.getThreadGroup(), r, threadName, p.getStackSize());

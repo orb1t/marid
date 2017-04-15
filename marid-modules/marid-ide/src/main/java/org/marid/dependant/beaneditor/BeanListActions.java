@@ -26,8 +26,8 @@ import org.marid.IdeDependants;
 import org.marid.beans.BeanIntrospector;
 import org.marid.beans.ClassInfo;
 import org.marid.dependant.beaneditor.BeanMetaInfoProvider.BeansMetaInfo;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.common.IdeShapes;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.xml.*;
 import org.marid.util.MethodUtils;
@@ -48,7 +48,6 @@ import java.lang.reflect.Parameter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -190,31 +189,22 @@ public class BeanListActions {
         return menuItem;
     }
 
-    public Menu related(Class<?> type, BeanData beanData) {
+    public Menu related(ResolvableType type, BeanData beanData) {
         final Menu related = new Menu(s("Related"));
         final BeansMetaInfo metaInfo = metaInfoProvider.metaInfo();
         for (final BeanDefinitionHolder holder : metaInfo.beans()) {
             final String name = holder.getBeanName();
             final BeanDefinition definition = holder.getBeanDefinition();
-            for (final ValueHolder valueHolder : definition.getConstructorArgumentValues().getGenericArgumentValues()) {
-                final String typeText = valueHolder.getType();
-                if (typeText == null) {
-                    continue;
-                }
-                final Optional<Class<?>> co = profile.getClass(typeText);
-                if (!co.isPresent() || !co.get().isAssignableFrom(type)) {
-                    continue;
-                }
+            final String relatedArg = metaInfo.related(definition, type, profile);
+            if (relatedArg != null) {
                 final MenuItem menuItem = new MenuItem(name, IdeShapes.ref(name, 16));
                 menuItem.setOnAction(event -> {
                     final BeanData data = insertItem(name, definition, metaInfo);
-                    data.beanArgs
-                            .filtered(a -> Objects.equals(a.getName(), valueHolder.getName()))
-                            .forEach(a -> {
-                                final DRef ref = new DRef();
-                                ref.setBean(beanData.getName());
-                                a.setData(ref);
-                            });
+                    data.beanArgs.filtered(a -> Objects.equals(a.getName(), relatedArg)).forEach(a -> {
+                        final DRef ref = new DRef();
+                        ref.setBean(beanData.getName());
+                        a.setData(ref);
+                    });
                 });
                 related.getItems().add(menuItem);
             }
@@ -241,7 +231,7 @@ public class BeanListActions {
                 parameterizedProducers.getItems().add(item(method, beanData));
             }
         }
-        return Stream.of(getters, producers, parameterizedProducers, related(type, beanData))
+        return Stream.of(getters, producers, parameterizedProducers, related(resolvableType, beanData))
                 .filter(m -> !m.getItems().isEmpty())
                 .peek(m -> m.getItems().sort(Comparator.comparing(MenuItem::getText)))
                 .collect(Collectors.toList());

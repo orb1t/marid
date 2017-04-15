@@ -37,4 +37,17 @@ public interface Consumers {
     static Consumer<byte[]> intConsumer(Consumer<Integer> consumer, Codec<Integer> integerCodec) {
         return data -> consumer.accept(integerCodec.decode(data));
     }
+
+    static Consumer<byte[]> decoder(Consumer<byte[]> target, TwoBytesOrder order) {
+        return src -> {
+            final byte[] dst = new byte[src.length];
+            for (int i = 0; i < src.length; i += 2) {
+                final byte[] source = {src[i], src[i + 1]};
+                final byte[] dest = order.decode(source);
+                dst[i] = dest[0];
+                dst[i + 1] = dest[1];
+            }
+            target.accept(dst);
+        };
+    }
 }

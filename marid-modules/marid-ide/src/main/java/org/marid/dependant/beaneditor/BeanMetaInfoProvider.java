@@ -19,6 +19,7 @@
 package org.marid.dependant.beaneditor;
 
 import org.marid.ide.project.ProjectProfile;
+import org.marid.spring.beans.MaridBeanUtils;
 import org.marid.spring.xml.BeanFile;
 import org.marid.spring.xml.MaridBeanDefinitionSaver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ import org.springframework.stereotype.Component;
 
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,6 +118,24 @@ public class BeanMetaInfoProvider {
 
         public List<BeanDefinitionHolder> beans(ResolvableType resolvableType) {
             return beans(beanFactory.getBeanNamesForType(resolvableType));
+        }
+
+        public String related(BeanDefinition definition, ResolvableType type, ProjectProfile profile) {
+            final Executable constructor = MaridBeanUtils.constructor(definition, beanFactory, profile);
+            if (constructor != null) {
+                for (int i = 0; i < constructor.getParameterCount(); i++) {
+                    final ResolvableType parameterType;
+                    if (constructor instanceof Constructor<?>) {
+                        parameterType = ResolvableType.forConstructorParameter((Constructor<?>) constructor, i);
+                    } else {
+                        parameterType = ResolvableType.forMethodParameter((Method) constructor, i);
+                    }
+                    if (parameterType.isAssignableFrom(type)) {
+                        return constructor.getParameters()[i].getName();
+                    }
+                }
+            }
+            return null;
         }
 
         private List<BeanDefinitionHolder> beans(String... names) {
