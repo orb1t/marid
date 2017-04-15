@@ -96,8 +96,8 @@ public class BeanFileBrowser extends CommonTableView<BeanFile> {
     public void dateColumn(ProjectProfile profile) {
         final TableColumn<BeanFile, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Date"));
-        col.setPrefWidth(250);
-        col.setMaxWidth(300);
+        col.setPrefWidth(300);
+        col.setMaxWidth(550);
         col.setStyle("-fx-alignment: baseline-right");
         col.setCellValueFactory(param -> {
             final Path path = param.getValue().path(profile.getBeansDirectory());
@@ -116,8 +116,8 @@ public class BeanFileBrowser extends CommonTableView<BeanFile> {
     public void beanCountColumn(ProjectProfile profile) {
         final TableColumn<BeanFile, Integer> col = new TableColumn<>();
         col.textProperty().bind(ls("Bean count"));
-        col.setPrefWidth(250);
-        col.setMaxWidth(250);
+        col.setPrefWidth(300);
+        col.setMaxWidth(550);
         col.setStyle("-fx-alignment: baseline-right");
         col.setCellValueFactory(param -> {
             final List<String> path = param.getValue().path;

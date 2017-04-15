@@ -106,7 +106,8 @@ public class ProfilesTable extends TableView<ProjectProfile> {
     public void initBeansColumn() {
         final TableColumn<ProjectProfile, Integer> column = new TableColumn<>();
         column.textProperty().bind(ls("Beans"));
-        column.setMaxWidth(70);
+        column.setPrefWidth(100);
+        column.setMaxWidth(150);
         column.setCellValueFactory(ProfilesTable::beanCount);
         getColumns().add(column);
     }

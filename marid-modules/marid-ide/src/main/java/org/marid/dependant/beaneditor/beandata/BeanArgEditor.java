@@ -18,6 +18,7 @@
 
 package org.marid.dependant.beaneditor.beandata;
 
+import javafx.beans.binding.Bindings;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -72,12 +73,15 @@ public class BeanArgEditor extends TableView<BeanArg> {
     }
 
     @OrderedInit(2)
-    public void typeColumn() {
+    public void typeColumn(ProjectProfile profile) {
         final TableColumn<BeanArg, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Type"));
         col.setPrefWidth(250);
         col.setMaxWidth(520);
-        col.setCellValueFactory(param -> param.getValue().type);
+        col.setCellValueFactory(param -> Bindings.createObjectBinding(() -> {
+            final ResolvableType type = profile.getArgType(beanData, param.getValue().getName());
+            return type == ResolvableType.NONE ? "?" : type.toString();
+        }));
         getColumns().add(col);
     }
 
