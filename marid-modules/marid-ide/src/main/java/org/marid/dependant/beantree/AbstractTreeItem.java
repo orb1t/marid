@@ -16,38 +16,52 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beantree.data;
+package org.marid.dependant.beantree;
 
 import javafx.beans.value.ObservableValue;
-import org.marid.jfx.action.FxAction;
-import org.marid.spring.xml.BeanFile;
-
-import javax.xml.soap.Node;
-import java.util.Map;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.TreeItem;
+import org.marid.misc.Casts;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class FileTreeItemInfo implements TreeItemInfo {
+public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
 
-    private final BeanFile file;
-
-    public FileTreeItemInfo(BeanFile file) {
-        this.file = file;
+    public AbstractTreeItem(T value) {
+        super(value);
     }
 
-    @Override
-    public Map<String, FxAction> getActions() {
+    public T get() {
+        return Casts.cast(getValue());
+    }
+
+    public abstract ObservableValue<String> name();
+
+    public abstract ObservableValue<Node> icon();
+
+    public abstract ObservableValue<String> type();
+
+    public abstract ObservableValue<String> text();
+
+    public abstract ObservableValue<ContextMenu> menu();
+
+    public EventHandler<ActionEvent> onEdit() {
         return null;
     }
 
-    @Override
-    public ObservableValue<String> getText() {
+    public EventHandler<ActionEvent> onAdd() {
         return null;
     }
 
-    @Override
-    public ObservableValue<Node> getIcon() {
+    public EventHandler<ActionEvent> onRemove() {
+        return null;
+    }
+
+    public EventHandler<ActionEvent> onClear() {
         return null;
     }
 }

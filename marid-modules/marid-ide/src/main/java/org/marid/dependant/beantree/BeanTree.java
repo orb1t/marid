@@ -18,18 +18,16 @@
 
 package org.marid.dependant.beantree;
 
-import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
-import org.marid.dependant.beantree.data.FileTreeItemInfo;
-import org.marid.dependant.beantree.data.TreeItemInfo;
 import org.marid.spring.xml.BeanFile;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanTree extends TreeTableView<TreeItemInfo> {
+public class BeanTree extends TreeTableView<Object> {
 
     public BeanTree(BeanFile file) {
-        super(new TreeItem<>(new FileTreeItemInfo(file)));
+        super(new FileTreeItem(file));
+        getRoot().getChildren().add(new FileTreeItem(file));
     }
 }
