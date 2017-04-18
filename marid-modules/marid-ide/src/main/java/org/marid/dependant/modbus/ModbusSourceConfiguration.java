@@ -38,8 +38,8 @@ import org.marid.jfx.control.MaridControls;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -52,7 +52,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Configuration
+@Component
 @ComponentScan(basePackageClasses = {ModbusSourceConfiguration.class})
 public class ModbusSourceConfiguration {
 

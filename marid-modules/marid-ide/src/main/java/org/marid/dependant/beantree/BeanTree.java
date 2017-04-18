@@ -19,15 +19,20 @@
 package org.marid.dependant.beantree;
 
 import javafx.scene.control.TreeTableView;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.BeanFile;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component
 public class BeanTree extends TreeTableView<Object> {
 
-    public BeanTree(BeanFile file) {
-        super(new FileTreeItem(file));
-        getRoot().getChildren().add(new FileTreeItem(file));
+    @Autowired
+    public BeanTree(ProjectProfile profile, BeanFile file) {
+        super(new FileTreeItem(profile, file));
+        setShowRoot(true);
     }
 }

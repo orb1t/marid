@@ -23,7 +23,7 @@ import org.marid.dependant.modbus.ModbusSourceConfiguration;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.action.IdeAction;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 
@@ -31,7 +31,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Configuration
+@Component
 public class IOConfiguration {
 
     @IdeAction

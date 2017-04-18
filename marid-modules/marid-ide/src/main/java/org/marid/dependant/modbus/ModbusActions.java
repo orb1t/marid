@@ -33,7 +33,7 @@ import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 
@@ -45,7 +45,7 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Configuration
+@Component
 public class ModbusActions {
 
     @Bean

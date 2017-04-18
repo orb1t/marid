@@ -21,7 +21,7 @@ package org.marid.ide.configurations;
 import javafx.application.Platform;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.icons.FontIcon.D_EXIT_TO_APP;
 
@@ -29,7 +29,7 @@ import static org.marid.jfx.icons.FontIcon.D_EXIT_TO_APP;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Configuration
+@Component
 public class ApplicationConfiguration {
 
     @IdeAction

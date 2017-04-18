@@ -25,8 +25,8 @@ import org.marid.ide.model.Artifact;
 import org.marid.ide.model.codec.ReadOnlyCodec;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ import java.util.List;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Configuration
+@Component
 @Lazy
 public class CodecConfiguration {
 

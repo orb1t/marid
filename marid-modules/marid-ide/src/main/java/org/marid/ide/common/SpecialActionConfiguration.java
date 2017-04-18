@@ -21,7 +21,8 @@ import javafx.scene.input.KeyCombination;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.icons.FontIcon.*;
 
@@ -29,9 +30,20 @@ import static org.marid.jfx.icons.FontIcon.*;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Configuration
+@Component
 public class SpecialActionConfiguration {
 
+    public static final String EDIT = "editAction";
+    public static final String ADD = "addAction";
+    public static final String REMOVE = "removeAction";
+    public static final String CUT = "cutAction";
+    public static final String COPY = "copyAction";
+    public static final String PASTE = "pasteAction";
+    public static final String CLEAR_ALL = "clearAllAction";
+    public static final String RENAME = "renameAction";
+    public static final String SELECT_ALL = "selectAllAction";
+
+    @Bean(name = EDIT)
     @IdeAction
     @Qualifier("specialAction")
     public FxAction editAction() {
@@ -42,6 +54,7 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
+    @Bean(name = ADD)
     @IdeAction
     @Qualifier("specialAction")
     public FxAction addAction() {
@@ -52,6 +65,7 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
+    @Bean(name = REMOVE)
     @IdeAction
     @Qualifier("specialAction")
     public FxAction removeAction() {
@@ -62,6 +76,7 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
+    @Bean(name = CUT)
     @IdeAction
     @Qualifier("specialAction")
     public FxAction cutAction() {
@@ -72,6 +87,7 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
+    @Bean(name = COPY)
     @IdeAction
     @Qualifier("specialAction")
     public FxAction copyAction() {
@@ -82,6 +98,7 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
+    @Bean(name = PASTE)
     @IdeAction
     @Qualifier("specialAction")
     public FxAction pasteAction() {
@@ -92,6 +109,7 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
+    @Bean(name = CLEAR_ALL)
     @IdeAction
     @Qualifier("specialAction")
     public FxAction clearAllAction() {
@@ -101,6 +119,7 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
+    @Bean(name = RENAME)
     @IdeAction
     @Qualifier("specialAction")
     public FxAction renameAction() {
@@ -111,6 +130,7 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
+    @Bean(name = SELECT_ALL)
     @IdeAction
     @Qualifier("specialAction")
     public FxAction selectAllAction() {

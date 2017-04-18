@@ -21,7 +21,7 @@ package org.marid.dependant.beantree;
 import javafx.beans.binding.Binding;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
-import javafx.scene.control.ContextMenu;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.BeanFile;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
@@ -35,13 +35,15 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
  */
 public class FileTreeItem extends AbstractTreeItem<BeanFile> {
 
+    private final ProjectProfile profile;
     private final Binding<String> name;
     private final Binding<Node> icon;
     private final ObservableValue<String> type;
     private final ObservableValue<String> text;
 
-    public FileTreeItem(BeanFile value) {
+    public FileTreeItem(ProjectProfile projectProfile, BeanFile value) {
         super(value);
+        profile = projectProfile;
         name = createStringBinding(() -> value.path.get(value.path.size() - 1), value.observables());
         icon = createObjectBinding(() -> glyphIcon(F_FILE, 20));
         text = createStringBinding(value::getFilePath, value.observables());
@@ -68,8 +70,7 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
         return text;
     }
 
-    @Override
-    public ObservableValue<ContextMenu> menu() {
-        return null;
+    public ProjectProfile getProfile() {
+        return profile;
     }
 }

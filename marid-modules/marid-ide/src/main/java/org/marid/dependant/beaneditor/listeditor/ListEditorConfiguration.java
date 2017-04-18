@@ -22,14 +22,14 @@ import javafx.beans.value.ObservableStringValue;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.DCollection;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.ResolvableType;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Configuration
+@Component
 @Import({ListEditor.class, ListEditorTab.class})
 public class ListEditorConfiguration extends DependantConfiguration<ListEditorParams> {
 

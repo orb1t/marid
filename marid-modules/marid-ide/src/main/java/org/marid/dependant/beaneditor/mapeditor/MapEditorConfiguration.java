@@ -22,15 +22,15 @@ import javafx.beans.value.ObservableStringValue;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.DMap;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.ResolvableType;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Configuration
+@Component
 @Import({MapEditorTable.class, MapEditorTab.class})
 public class MapEditorConfiguration extends DependantConfiguration<MapEditorParams> {
 

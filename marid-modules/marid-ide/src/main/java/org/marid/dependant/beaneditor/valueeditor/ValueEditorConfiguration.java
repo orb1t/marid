@@ -27,13 +27,13 @@ import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.DValue;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ResolvableType;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
+@Component
 public class ValueEditorConfiguration extends DependantConfiguration<ValueEditorParams> {
 
     @Bean

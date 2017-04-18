@@ -21,8 +21,10 @@ package org.marid;
 import org.marid.ide.common.IdeValues;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.logging.Logs;
+import org.marid.spring.dependant.IdeClassFilter;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -30,6 +32,7 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+import static org.springframework.context.annotation.FilterType.CUSTOM;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,7 +41,7 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @EnableScheduling
 @PropertySource({"meta.properties", "ide.properties"})
 @Import({IdeDependants.class})
-@ComponentScan(basePackages = {"org.marid.ide"}, lazyInit = true)
+@ComponentScan(basePackages = {"org.marid"}, lazyInit = true, excludeFilters = {@Filter(type = CUSTOM, classes = {IdeClassFilter.class})})
 public class IdeContext {
 
     @Bean

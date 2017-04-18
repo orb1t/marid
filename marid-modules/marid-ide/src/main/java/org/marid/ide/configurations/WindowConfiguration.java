@@ -22,14 +22,14 @@ import javafx.scene.control.CheckMenuItem;
 import org.marid.Ide;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.icons.FontIcon.D_BORDER_TOP;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
+@Component
 public class WindowConfiguration {
 
     @IdeAction

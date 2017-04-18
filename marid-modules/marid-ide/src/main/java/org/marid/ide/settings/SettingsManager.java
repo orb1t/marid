@@ -22,7 +22,7 @@ import org.marid.IdeDependants;
 import org.marid.dependant.settings.SettingsConfiguration;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.O_SETTINGS;
@@ -30,7 +30,7 @@ import static org.marid.jfx.icons.FontIcon.O_SETTINGS;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
+@Component
 public class SettingsManager {
 
     @IdeAction

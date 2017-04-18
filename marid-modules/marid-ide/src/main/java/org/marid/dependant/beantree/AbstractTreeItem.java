@@ -18,25 +18,52 @@
 
 package org.marid.dependant.beantree;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TreeItem;
+import org.intellij.lang.annotations.MagicConstant;
+import org.marid.ide.common.SpecialActionConfiguration;
+import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.FxAction;
+import org.marid.jfx.action.MaridActions;
+import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.misc.Casts;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
 
+    private final Map<String, FxAction> specialActions = new HashMap<>();
+    private final Map<String, FxAction> additionalActions = new HashMap<>();
+    private final MaridContextMenu contextMenu;
+
     public AbstractTreeItem(T value) {
         super(value);
+        contextMenu = new MaridContextMenu(m -> {
+            m.getItems().clear();
+            final Set<String> keys = Sets.union(specialActions.keySet(), additionalActions.keySet());
+            final Map<String, FxAction> map = Maps.asMap(keys, k -> specialActions.getOrDefault(k, additionalActions.get(k)));
+            m.getItems().addAll(MaridActions.contextMenu(map));
+        });
     }
 
     public T get() {
         return Casts.cast(getValue());
+    }
+
+    protected void specialAction(@MagicConstant(valuesFromClass = SpecialActionConfiguration.class) String name, FxAction action) {
+        specialActions.put(name, action);
+    }
+
+    protected void action(String name, FxAction action) {
+        additionalActions.put(name, action);
     }
 
     public abstract ObservableValue<String> name();
@@ -47,21 +74,16 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
 
     public abstract ObservableValue<String> text();
 
-    public abstract ObservableValue<ContextMenu> menu();
-
-    public EventHandler<ActionEvent> onEdit() {
-        return null;
+    public MaridContextMenu getContextMenu() {
+        return contextMenu;
     }
 
-    public EventHandler<ActionEvent> onAdd() {
-        return null;
-    }
-
-    public EventHandler<ActionEvent> onRemove() {
-        return null;
-    }
-
-    public EventHandler<ActionEvent> onClear() {
-        return null;
+    public ProjectProfile getProfile() {
+        for (TreeItem<Object> item = this; item != null; item = item.getParent()) {
+            if (item instanceof FileTreeItem) {
+                return ((FileTreeItem) item).getProfile();
+            }
+        }
+        throw new IllegalStateException("No root");
     }
 }

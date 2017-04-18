@@ -25,15 +25,15 @@ import org.marid.dependant.project.ProjectParams;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@Configuration
+@Component
 @EnableScheduling
 @Import({ProfileObjectTree.class})
 public class ProfileMonitorConfiguration extends DependantConfiguration<ProjectParams> {

@@ -30,7 +30,7 @@ import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -45,7 +45,7 @@ import static org.marid.logging.Log.log;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
+@Component
 @ComponentScan(basePackageClasses = {ResourcesConfiguration.class})
 public class ResourcesConfiguration extends DependantConfiguration<ResourcesParams> {
 

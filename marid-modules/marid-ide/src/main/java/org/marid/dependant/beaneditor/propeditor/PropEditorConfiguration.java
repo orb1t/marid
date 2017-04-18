@@ -28,15 +28,15 @@ import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.DProps;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.stereotype.Component;
 
 import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Configuration
+@Component
 @Import({PropActions.class, PropTable.class})
 public class PropEditorConfiguration extends DependantConfiguration<PropEditorParams> {
 

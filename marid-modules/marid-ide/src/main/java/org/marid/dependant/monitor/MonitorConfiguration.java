@@ -24,9 +24,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import org.marid.ide.tabs.IdeTab;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.O_GRAPH;
@@ -35,7 +35,7 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
+@Component
 @EnableScheduling
 @Import({ClassLoadingWidget.class, MemoryWidget.class, OperatingSystemWidget.class, ThreadWidget.class})
 public class MonitorConfiguration {

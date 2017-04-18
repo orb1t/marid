@@ -31,7 +31,7 @@ import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
@@ -43,7 +43,7 @@ import static org.marid.logging.Log.log;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
+@Component
 public class ProjectConfiguration {
 
     @IdeAction

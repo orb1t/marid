@@ -39,9 +39,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -50,7 +50,7 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
+@Component
 @ComponentScan(basePackageClasses = {ProjectConfigConfiguration.class})
 public class ProjectConfigConfiguration extends DependantConfiguration<ProjectParams> {
 

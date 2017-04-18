@@ -24,7 +24,7 @@ import org.marid.dependant.log.LogConfiguration;
 import org.marid.dependant.monitor.MonitorConfiguration;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.*;
@@ -32,7 +32,7 @@ import static org.marid.jfx.icons.FontIcon.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
+@Component
 public class ToolsConfiguration {
 
     @IdeAction

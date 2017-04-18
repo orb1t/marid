@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Dmitry Ovchinnikov
+ * Copyright (c) 2017 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,24 +16,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.project.runner;
+package org.marid.dependant.beantree;
 
-import org.marid.dependant.project.ProjectParams;
-import org.marid.ide.project.ProjectProfile;
+import javafx.beans.value.ObservableValue;
+import org.marid.dependant.beaneditor.BeanEditorParams;
+import org.marid.ide.tabs.IdeTab;
 import org.marid.spring.dependant.DependantConfiguration;
+import org.marid.spring.xml.BeanFile;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
+
+import static javafx.beans.binding.Bindings.createStringBinding;
+import static org.marid.ide.common.IdeShapes.fileNode;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-@ComponentScan(basePackageClasses = {ProjectRunnerConfiguration.class})
-public class ProjectRunnerConfiguration extends DependantConfiguration<ProjectParams> {
+@ComponentScan
+public class BeanTreeConfiguration extends DependantConfiguration<BeanEditorParams> {
 
     @Bean
-    public ProjectProfile profile() {
-        return param.profile;
+    public BeanFile beanFile() {
+        return param.beanFile;
+    }
+
+    @Bean
+    public IdeTab tab(BeanTree tree, BeanFile file) {
+        final ObservableValue<String> text = createStringBinding(file::getFilePath, file.path);
+        final IdeTab tab = new IdeTab(tree, text, () -> fileNode(file, 16));
+        tab.addNodeObservables(file.path);
+        return tab;
     }
 }

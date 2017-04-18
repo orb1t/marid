@@ -20,9 +20,10 @@ package org.marid.ide.common;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.intellij.lang.annotations.MagicConstant;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.jfx.action.MaridActions;
+import org.marid.jfx.menu.MaridContextMenu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -42,6 +43,10 @@ public class SpecialActions {
     @Autowired
     public SpecialActions(@Qualifier("specialAction") Map<String, FxAction> actionMap) {
         this.actionMap = actionMap;
+    }
+
+    public FxAction getAction(@MagicConstant(valuesFromClass = SpecialActionConfiguration.class) String name) {
+        return actionMap.get(name);
     }
 
     public MaridContextMenu contextMenu(Supplier<Map<String, FxAction>> additionalItemsSupplier) {

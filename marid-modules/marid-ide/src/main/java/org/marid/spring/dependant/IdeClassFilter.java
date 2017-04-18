@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Dmitry Ovchinnikov
+ * Copyright (c) 2017 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.settings;
+package org.marid.spring.dependant;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.stereotype.Component;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.filter.TypeFilter;
+
+import java.io.IOException;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-@ComponentScan(basePackageClasses = {SettingsConfiguration.class})
-public class SettingsConfiguration {
+public class IdeClassFilter implements TypeFilter {
 
+    @Override
+    public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
+        final String className = metadataReader.getClassMetadata().getClassName();
+        return !className.startsWith("org.marid.ide");
+    }
 }
