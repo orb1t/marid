@@ -41,7 +41,7 @@ import static org.springframework.context.annotation.FilterType.CUSTOM;
 @EnableScheduling
 @PropertySource({"meta.properties", "ide.properties"})
 @Import({IdeDependants.class})
-@ComponentScan(basePackages = {"org.marid"}, lazyInit = true, excludeFilters = {@Filter(type = CUSTOM, classes = {IdeClassFilter.class})})
+@ComponentScan(lazyInit = true, excludeFilters = {@Filter(type = CUSTOM, classes = {IdeClassFilter.class})})
 public class IdeContext {
 
     @Bean
