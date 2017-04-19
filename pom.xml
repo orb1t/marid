@@ -497,7 +497,7 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
                 <type>pom</type>
-                <version>4.3.7.RELEASE</version>
+                <version>4.3.8.RELEASE</version>
                 <scope>import</scope>
             </dependency>
 
@@ -531,12 +531,6 @@
                 <version>1.7.25</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jcl-over-slf4j</artifactId>
-                <version>1.7.25</version>
             </dependency>
 
             <dependency>
