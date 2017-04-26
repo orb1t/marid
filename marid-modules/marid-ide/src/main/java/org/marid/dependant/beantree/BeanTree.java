@@ -20,6 +20,7 @@ package org.marid.dependant.beantree;
 
 import javafx.scene.control.TreeTableView;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,5 +35,9 @@ public class BeanTree extends TreeTableView<Object> {
     public BeanTree(ProjectProfile profile, BeanFile file) {
         super(new FileTreeItem(profile, file));
         setShowRoot(true);
+    }
+
+    @OrderedInit(1)
+    public void nameColumn() {
     }
 }
