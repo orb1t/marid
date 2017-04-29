@@ -22,10 +22,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.core.annotation.Order;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 
@@ -47,7 +47,8 @@ public class BeanBrowserTable extends TableView<BeanDefinitionHolder> {
         getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
-    @OrderedInit(1)
+    @Order(1)
+    @Autowired
     public void nameColumn() {
         final TableColumn<BeanDefinitionHolder, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Name"));
@@ -57,7 +58,8 @@ public class BeanBrowserTable extends TableView<BeanDefinitionHolder> {
         getColumns().add(col);
     }
 
-    @OrderedInit(2)
+    @Order(2)
+    @Autowired
     public void typeColumn() {
         final TableColumn<BeanDefinitionHolder, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Type"));
@@ -67,7 +69,8 @@ public class BeanBrowserTable extends TableView<BeanDefinitionHolder> {
         getColumns().add(col);
     }
 
-    @OrderedInit(3)
+    @Order(3)
+    @Autowired
     public void descriptionColumn() {
         final TableColumn<BeanDefinitionHolder, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Description"));

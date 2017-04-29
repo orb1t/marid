@@ -23,7 +23,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import org.apache.maven.model.Model;
 import org.marid.jfx.panes.GenericGridPane;
-import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,7 +49,8 @@ public class PropertiesTab extends GenericGridPane {
         properties = model.getProperties();
     }
 
-    @OrderedInit(1)
+    @Order(1)
+    @Autowired
     public void initMaridVersion(@Value("${implementation.version}") String version) {
         addTextField("Marid version", value(
                 () -> properties.getProperty("marid.version", version),
@@ -58,7 +58,8 @@ public class PropertiesTab extends GenericGridPane {
         addSeparator();
     }
 
-    @OrderedInit(2)
+    @Order(2)
+    @Autowired
     public void initDebug() {
         final CheckBox debugCheckBox = addBooleanField("Debug",
                 () -> "true".equals(properties.getProperty("marid.debug")),

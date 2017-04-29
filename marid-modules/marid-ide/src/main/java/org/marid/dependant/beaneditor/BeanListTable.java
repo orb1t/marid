@@ -27,18 +27,18 @@ import javafx.util.converter.DefaultStringConverter;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorParams;
+import org.marid.ide.common.IdeShapes;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.control.CommonTableView;
-import org.marid.ide.common.IdeShapes;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.control.CommonTableView;
 import org.marid.jfx.menu.MaridContextMenu;
-import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -58,7 +58,8 @@ public class BeanListTable extends CommonTableView<BeanData> {
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
     }
 
-    @OrderedInit(1)
+    @Order(1)
+    @Autowired
     public void nameColumn(ProjectProfile profile) {
         final TableColumn<BeanData, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Name"));
@@ -81,7 +82,8 @@ public class BeanListTable extends CommonTableView<BeanData> {
         getColumns().add(col);
     }
 
-    @OrderedInit(2)
+    @Order(2)
+    @Autowired
     public void typeColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Type"));
@@ -93,7 +95,8 @@ public class BeanListTable extends CommonTableView<BeanData> {
         getColumns().add(col);
     }
 
-    @OrderedInit(3)
+    @Order(3)
+    @Autowired
     public void factoryBeanColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Factory bean"));
@@ -114,7 +117,8 @@ public class BeanListTable extends CommonTableView<BeanData> {
         getColumns().add(col);
     }
 
-    @OrderedInit(4)
+    @Order(4)
+    @Autowired
     public void factoryMethodColumn() {
         final TableColumn<BeanData, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Factory method"));

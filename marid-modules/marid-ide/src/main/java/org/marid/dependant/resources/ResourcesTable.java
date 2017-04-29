@@ -26,9 +26,9 @@ import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.control.CommonTableView;
-import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
@@ -60,7 +60,8 @@ public class ResourcesTable extends CommonTableView<Path> {
         return !items.contains(resourcesTracker.resolve("logging.properties"));
     }
 
-    @OrderedInit(1)
+    @Order(1)
+    @Autowired
     public void initPath(ProjectProfile profile) {
         final TableColumn<Path, String> column = new TableColumn<>();
         column.textProperty().bind(ls("Path"));
@@ -77,7 +78,8 @@ public class ResourcesTable extends CommonTableView<Path> {
         getColumns().add(column);
     }
 
-    @OrderedInit(2)
+    @Order(2)
+    @Autowired
     public void initSize() {
         final TableColumn<Path, String> column = new TableColumn<>();
         column.textProperty().bind(ls("Size"));

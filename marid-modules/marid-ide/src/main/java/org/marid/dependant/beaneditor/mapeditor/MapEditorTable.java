@@ -28,7 +28,6 @@ import org.marid.dependant.beaneditor.beandata.BeanPropEditor;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.control.CommonTableView;
 import org.marid.jfx.menu.MaridContextMenu;
-import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.DElement;
 import org.marid.spring.xml.DMap;
 import org.marid.spring.xml.DMapEntry;
@@ -36,6 +35,7 @@ import org.marid.spring.xml.DValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
@@ -52,7 +52,8 @@ public class MapEditorTable extends CommonTableView<DMapEntry> {
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
     }
 
-    @OrderedInit(1)
+    @Order(1)
+    @Autowired
     public void nameColumn() {
         final TableColumn<DMapEntry, String> column = new TableColumn<>();
         column.setCellValueFactory(param -> param.getValue().key);
@@ -64,7 +65,8 @@ public class MapEditorTable extends CommonTableView<DMapEntry> {
         getColumns().add(column);
     }
 
-    @OrderedInit(2)
+    @Order(2)
+    @Autowired
     public void valueColumn() {
         final TableColumn<DMapEntry, DElement<?>> column = new TableColumn<>();
         column.setCellValueFactory(param -> param.getValue().value);

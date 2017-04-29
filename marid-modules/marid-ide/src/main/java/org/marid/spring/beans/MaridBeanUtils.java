@@ -18,7 +18,11 @@
 
 package org.marid.spring.beans;
 
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtConstructor;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
@@ -29,8 +33,8 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
+import static java.util.stream.Stream.of;
 import static org.springframework.core.ResolvableType.NONE;
 
 /**
@@ -46,7 +50,7 @@ public interface MaridBeanUtils {
                 .map(ValueHolder::getName)
                 .sorted()
                 .toArray(String[]::new);
-        final Predicate<Executable> argMatcher = e -> Arrays.equals(argNames, Stream.of(e.getParameters())
+        final Predicate<Executable> argMatcher = e -> Arrays.equals(argNames, of(e.getParameters())
                 .map(Parameter::getName)
                 .sorted()
                 .toArray(String[]::new));
@@ -61,7 +65,7 @@ public interface MaridBeanUtils {
             if (factoryBeanType == NONE) {
                 return null;
             } else {
-                return Stream.of(factoryBeanType.getClass().getMethods())
+                return of(factoryBeanType.getClass().getMethods())
                         .filter(m -> factoryMethodName.equals(m.getName()))
                         .filter(m -> m.getParameterCount() == argumentValues.getArgumentCount())
                         .filter(argMatcher)
@@ -70,7 +74,7 @@ public interface MaridBeanUtils {
             }
         } else {
             return profile.getClass(className)
-                    .flatMap(cl -> Stream.of(cl.getConstructors())
+                    .flatMap(cl -> of(cl.getConstructors())
                             .filter(c -> c.getParameterCount() == argumentValues.getArgumentCount())
                             .filter(argMatcher)
                             .findAny()
@@ -87,7 +91,7 @@ public interface MaridBeanUtils {
                 .map(ValueHolder::getName)
                 .sorted()
                 .toArray(String[]::new);
-        final Predicate<Executable> argMatcher = e -> Arrays.equals(argNames, Stream.of(e.getParameters())
+        final Predicate<Executable> argMatcher = e -> Arrays.equals(argNames, of(e.getParameters())
                 .map(Parameter::getName)
                 .sorted()
                 .toArray(String[]::new));
@@ -102,7 +106,7 @@ public interface MaridBeanUtils {
             if (factoryBeanType == NONE) {
                 return NONE;
             } else {
-                return Stream.of(factoryBeanType.getClass().getMethods())
+                return of(factoryBeanType.getClass().getMethods())
                         .filter(m -> factoryMethodName.equals(m.getName()))
                         .filter(m -> m.getParameterCount() == argumentValues.getArgumentCount())
                         .filter(argMatcher)
@@ -113,5 +117,13 @@ public interface MaridBeanUtils {
         } else {
             return profile.getClass(className).map(ResolvableType::forClass).orElse(NONE);
         }
+    }
+
+    static void prepareInjectionMetadata() throws Exception {
+        final ClassPool classPool = ClassPool.getDefault();
+        final CtClass type = classPool.get("org.springframework.beans.factory.annotation.InjectionMetadata");
+        final CtConstructor constructor = type.getConstructors()[0];
+        constructor.insertAfter(String.format("%s.sort($2);", MaridCommonPostProcessor.class.getName()));
+        type.toClass();
     }
 }

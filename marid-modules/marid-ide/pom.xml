@@ -28,6 +28,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.21.0-GA</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.marid</groupId>
             <artifactId>marid-ide-api</artifactId>
             <version>${project.version}</version>

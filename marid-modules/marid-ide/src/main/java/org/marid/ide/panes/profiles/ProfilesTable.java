@@ -36,9 +36,9 @@ import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectSaver;
 import org.marid.jfx.action.FxAction;
-import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -78,7 +78,8 @@ public class ProfilesTable extends TableView<ProjectProfile> {
         });
     }
 
-    @OrderedInit(1)
+    @Order(1)
+    @Autowired
     public void initNameColumn() {
         final TableColumn<ProjectProfile, String> column = new TableColumn<>();
         column.textProperty().bind(ls("Name"));
@@ -102,7 +103,8 @@ public class ProfilesTable extends TableView<ProjectProfile> {
         getColumns().add(column);
     }
 
-    @OrderedInit(2)
+    @Order(2)
+    @Autowired
     public void initBeansColumn() {
         final TableColumn<ProjectProfile, Integer> column = new TableColumn<>();
         column.textProperty().bind(ls("Beans"));

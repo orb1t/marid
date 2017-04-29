@@ -30,12 +30,12 @@ import org.marid.beans.TypeInfo;
 import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.menu.MaridContextMenu;
-import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Executable;
@@ -62,7 +62,8 @@ public class BeanArgEditor extends TableView<BeanArg> {
         setTableMenuButtonVisible(true);
     }
 
-    @OrderedInit(1)
+    @Order(1)
+    @Autowired
     public void nameColumn() {
         final TableColumn<BeanArg, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Name"));
@@ -72,7 +73,8 @@ public class BeanArgEditor extends TableView<BeanArg> {
         getColumns().add(col);
     }
 
-    @OrderedInit(2)
+    @Order(2)
+    @Autowired
     public void typeColumn(ProjectProfile profile) {
         final TableColumn<BeanArg, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Type"));
@@ -85,7 +87,8 @@ public class BeanArgEditor extends TableView<BeanArg> {
         getColumns().add(col);
     }
 
-    @OrderedInit(3)
+    @Order(3)
+    @Autowired
     public void valueColumn() {
         final TableColumn<BeanArg, Label> col = new TableColumn<>();
         col.textProperty().bind(ls("Value"));

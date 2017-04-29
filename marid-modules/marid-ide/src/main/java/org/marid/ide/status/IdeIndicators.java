@@ -25,9 +25,9 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.spring.annotation.OrderedInit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -67,7 +67,8 @@ public class IdeIndicators {
         this.statusBar = statusBar;
     }
 
-    @OrderedInit(1)
+    @Order(1)
+    @Autowired
     public void initProfile(ProjectManager manager) {
         final ComboBox<ProjectProfile> combo = new ComboBox<>(manager.getProfiles());
         final SelectionModel<ProjectProfile> selection = combo.getSelectionModel();
@@ -78,7 +79,8 @@ public class IdeIndicators {
         add(combo);
     }
 
-    @OrderedInit(2)
+    @Order(2)
+    @Autowired
     public void initCpuLoad() throws Exception {
         final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         final ObjectName osObjectName = new ObjectName("java.lang", "type", "OperatingSystem");
@@ -97,7 +99,8 @@ public class IdeIndicators {
         }
     }
 
-    @OrderedInit(3)
+    @Order(3)
+    @Autowired
     public void initDateTime() throws Exception {
         final Label timeLabel = new Label("", glyphIcon(O_CLOCK, 16));
         final DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder()

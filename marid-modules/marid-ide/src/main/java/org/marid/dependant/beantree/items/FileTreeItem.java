@@ -16,18 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beantree;
+package org.marid.dependant.beantree.items;
 
-import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
+import org.marid.ide.common.IdeShapes;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.BeanFile;
 
-import static javafx.beans.binding.Bindings.createObjectBinding;
-import static javafx.beans.binding.Bindings.createStringBinding;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.F_FILE;
+import static org.marid.jfx.icons.FontIcon.D_FILE;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -36,38 +35,32 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 public class FileTreeItem extends AbstractTreeItem<BeanFile> {
 
     private final ProjectProfile profile;
-    private final Binding<String> name;
-    private final Binding<Node> icon;
+    private final ObservableValue<String> name;
     private final ObservableValue<String> type;
-    private final ObservableValue<String> text;
 
-    public FileTreeItem(ProjectProfile projectProfile, BeanFile value) {
-        super(value);
-        profile = projectProfile;
-        name = createStringBinding(() -> value.path.get(value.path.size() - 1), value.observables());
-        icon = createObjectBinding(() -> glyphIcon(F_FILE, 20));
-        text = createStringBinding(value::getFilePath, value.observables());
+    public FileTreeItem(ProjectProfile profile, BeanFile file) {
+        super(file);
+        setGraphic(glyphIcon(D_FILE, 20));
+        this.profile = profile;
+
+        name = Bindings.createStringBinding(() -> file.path.get(file.path.size() - 1), file.path);
         type = ls("file");
+        valueProperty().bind(Bindings.createStringBinding(file::getFilePath, file.path));
     }
 
     @Override
-    public ObservableValue<String> name() {
+    public ObservableValue<String> getName() {
         return name;
     }
 
     @Override
-    public ObservableValue<Node> icon() {
-        return icon;
-    }
-
-    @Override
-    public ObservableValue<String> type() {
+    public ObservableValue<String> getType() {
         return type;
     }
 
     @Override
-    public ObservableValue<String> text() {
-        return text;
+    public Node getValueGraphic() {
+        return IdeShapes.fileNode(getElem(), 20);
     }
 
     public ProjectProfile getProfile() {

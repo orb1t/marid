@@ -22,12 +22,14 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import javassist.ClassPool;
+import javassist.CtClass;
 import org.jboss.logmanager.LogManager;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
-import org.marid.spring.postprocessors.LogBeansPostProcessor;
-import org.marid.spring.postprocessors.OrderedInitPostProcessor;
+import org.marid.spring.beans.MaridBeanUtils;
+import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 
@@ -60,10 +62,7 @@ public class Ide extends Application {
         context.setAllowCircularReferences(false);
         context.setId("root");
         context.setDisplayName("Root Context");
-        context.addBeanFactoryPostProcessor(beanFactory -> {
-            beanFactory.addBeanPostProcessor(new OrderedInitPostProcessor(context));
-            beanFactory.addBeanPostProcessor(new LogBeansPostProcessor());
-        });
+        context.getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
         final AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(context);
         reader.register(IdeContext.class);
         context.refresh();
@@ -111,6 +110,13 @@ public class Ide extends Application {
         final String locale = PREFERENCES.get("locale", null);
         if (locale != null) {
             Locale.setDefault(Locale.forLanguageTag(locale));
+        }
+
+        // InjectionMetadata
+        try {
+            MaridBeanUtils.prepareInjectionMetadata();
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
         }
     }
 }

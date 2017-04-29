@@ -37,11 +37,12 @@ import org.marid.dependant.beaneditor.valueeditor.ValueEditorConfiguration;
 import org.marid.dependant.beaneditor.valueeditor.ValueEditorParams;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
-import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.contexts.ValueEditorContext;
 import org.marid.spring.xml.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.Order;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,7 +89,8 @@ public class ValueMenuItems {
         }
     }
 
-    @OrderedInit(1)
+    @Order(1)
+    @Autowired
     public void initClearItem() {
         if (element.getValue() != null) {
             final MenuItem clearItem = new MenuItem(s("Clear value"), glyphIcon(M_CLEAR, 16));
@@ -98,7 +100,8 @@ public class ValueMenuItems {
         }
     }
 
-    @OrderedInit(2)
+    @Order(2)
+    @Autowired
     public void initEditValue(IdeDependants dependants) {
         final MenuItem mi = new MenuItem(s("Edit value..."), glyphIcon(M_MODE_EDIT, 16));
         mi.setOnAction(event -> {
@@ -112,7 +115,8 @@ public class ValueMenuItems {
         items.add(new SeparatorMenuItem());
     }
 
-    @OrderedInit(3)
+    @Order(3)
+    @Autowired
     public void initRefValue(BeanMetaInfoProvider metaInfoProvider) {
         MenuItem[] refItems = new MenuItem[0];
         final BeansMetaInfo metaInfo = metaInfoProvider.profileMetaInfo();
@@ -128,7 +132,8 @@ public class ValueMenuItems {
         }
     }
 
-    @OrderedInit(4)
+    @Order(4)
+    @Autowired
     public void initNewBean(BeanMetaInfoProvider provider, BeanListActions actions) {
         MenuItem[] refItems = new MenuItem[0];
         MenuItem[] embItems = new MenuItem[0];
@@ -155,7 +160,8 @@ public class ValueMenuItems {
         }
     }
 
-    @OrderedInit(5)
+    @Order(5)
+    @Autowired
     public void initNewBean(ProjectProfile profile, BeanListActions actions) {
         final Class<?> c = type.getRawClass();
         if (c == null || (c.getModifiers() & (INTERFACE | PRIVATE | PROTECTED | ABSTRACT)) != 0) {
@@ -185,7 +191,8 @@ public class ValueMenuItems {
         items.add(new SeparatorMenuItem());
     }
 
-    @OrderedInit(6)
+    @Order(6)
+    @Autowired
     public void initPropertiesEdit(IdeDependants dependants) {
         if (ResolvableType.forClass(Properties.class).isAssignableFrom(type)) {
             final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon(M_MODE_EDIT, 16));
@@ -201,7 +208,8 @@ public class ValueMenuItems {
         }
     }
 
-    @OrderedInit(7)
+    @Order(7)
+    @Autowired
     public void initListEdit(IdeDependants dependants) {
         if (ResolvableType.forClass(List.class).isAssignableFrom(type)) {
             final MenuItem mi = new MenuItem(s("Edit list..."), glyphIcon(M_MODE_EDIT, 16));
@@ -221,7 +229,8 @@ public class ValueMenuItems {
         }
     }
 
-    @OrderedInit(8)
+    @Order(8)
+    @Autowired
     public void initArrayEdit(IdeDependants dependants) {
         if (type.isArray()) {
             final MenuItem mi = new MenuItem(s("Edit array..."), glyphIcon(M_MODE_EDIT, 16));
@@ -240,7 +249,8 @@ public class ValueMenuItems {
         }
     }
 
-    @OrderedInit(9)
+    @Order(9)
+    @Autowired
     public void initMapEdit(IdeDependants dependants) {
         if (ResolvableType.forClass(Map.class).isAssignableFrom(type)) {
             final MenuItem mi = new MenuItem(s("Edit map..."), glyphIcon(M_PARTY_MODE, 16));
@@ -262,7 +272,8 @@ public class ValueMenuItems {
         }
     }
 
-    @OrderedInit(9)
+    @Order(10)
+    @Autowired
     public void initEditor(IdeDependants dependants, ProjectProfile profile) {
         if (editors.isEmpty()) {
             return;
@@ -291,7 +302,8 @@ public class ValueMenuItems {
         }
     }
 
-    @OrderedInit(10)
+    @Order(11)
+    @Autowired
     public void initBeanEditor(IdeDependants dependants) {
         if (!(element.getValue() instanceof BeanData)) {
             return;

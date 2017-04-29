@@ -30,10 +30,10 @@ import javafx.stage.StageStyle;
 import org.apache.commons.lang3.tuple.Triple;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.FxObservable;
-import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.AbstractData;
 import org.marid.spring.xml.DRef;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
@@ -61,7 +61,8 @@ public class ProfileObjectTree extends TableView<Triple<AbstractData<?>, FxObser
         setEditable(false);
     }
 
-    @OrderedInit(1)
+    @Order(1)
+    @Autowired
     public void classColumn() {
         final TableColumn<Triple<AbstractData<?>, FxObservable, List<?>>, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Type"));
@@ -71,7 +72,8 @@ public class ProfileObjectTree extends TableView<Triple<AbstractData<?>, FxObser
         getColumns().add(col);
     }
 
-    @OrderedInit(2)
+    @Order(2)
+    @Autowired
     public void dataColumn() {
         final TableColumn<Triple<AbstractData<?>, FxObservable, List<?>>, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Data"));
@@ -81,7 +83,8 @@ public class ProfileObjectTree extends TableView<Triple<AbstractData<?>, FxObser
         getColumns().add(col);
     }
 
-    @OrderedInit(3)
+    @Order(3)
+    @Autowired
     public void observableColumn() {
         final TableColumn<Triple<AbstractData<?>, FxObservable, List<?>>, String> col = new TableColumn<>();
         col.textProperty().bind(ls("Observable object"));
@@ -91,7 +94,8 @@ public class ProfileObjectTree extends TableView<Triple<AbstractData<?>, FxObser
         getColumns().add(col);
     }
 
-    @OrderedInit(4)
+    @Order(4)
+    @Autowired
     public void countColumn() {
         final TableColumn<Triple<AbstractData<?>, FxObservable, List<?>>, Number> col = new TableColumn<>();
         col.textProperty().bind(ls("Count"));
@@ -101,7 +105,8 @@ public class ProfileObjectTree extends TableView<Triple<AbstractData<?>, FxObser
         getColumns().add(col);
     }
 
-    @OrderedInit(5)
+    @Order(5)
+    @Autowired
     public void listenersColumn() {
         final TableColumn<Triple<AbstractData<?>, FxObservable, List<?>>, Label> col = new TableColumn<>();
         col.textProperty().bind(ls("Listeners"));

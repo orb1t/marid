@@ -24,8 +24,7 @@ import javafx.scene.control.Tab;
 import javafx.stage.Window;
 import org.marid.ide.tabs.IdeTab;
 import org.marid.spring.dependant.DependantConfiguration;
-import org.marid.spring.postprocessors.LogBeansPostProcessor;
-import org.marid.spring.postprocessors.OrderedInitPostProcessor;
+import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -58,12 +57,9 @@ public class IdeDependants {
 
     public GenericApplicationContext start(Consumer<AnnotationConfigApplicationContext> consumer) {
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        context.addBeanFactoryPostProcessor(beanFactory -> {
-            beanFactory.addBeanPostProcessor(new OrderedInitPostProcessor(context));
-            beanFactory.addBeanPostProcessor(new LogBeansPostProcessor());
-            beanFactory.addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
-            beanFactory.setParentBeanFactory(parent.getDefaultListableBeanFactory());
-        });
+        context.getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
+        context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
+        context.getBeanFactory().setParentBeanFactory(parent.getDefaultListableBeanFactory());
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
         context.register(IdeDependants.class);

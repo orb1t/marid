@@ -22,10 +22,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
-import org.marid.spring.annotation.OrderedInit;
 import org.marid.spring.xml.DPropEntry;
 import org.marid.spring.xml.DProps;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -41,7 +41,8 @@ public class PropTable extends TableView<DPropEntry> {
         super(props.entries);
     }
 
-    @OrderedInit(1)
+    @Order(1)
+    @Autowired
     public void keyColumn() {
         final TableColumn<DPropEntry, String> column = new TableColumn<>();
         column.textProperty().bind(ls("Key"));
@@ -52,7 +53,8 @@ public class PropTable extends TableView<DPropEntry> {
         getColumns().add(column);
     }
 
-    @OrderedInit(2)
+    @Order(2)
+    @Autowired
     public void valueColumn() {
         final TableColumn<DPropEntry, String> column = new TableColumn<>();
         column.textProperty().bind(ls("Value"));
