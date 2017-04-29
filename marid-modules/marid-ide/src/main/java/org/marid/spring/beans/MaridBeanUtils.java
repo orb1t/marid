@@ -18,11 +18,7 @@
 
 package org.marid.spring.beans;
 
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtConstructor;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
@@ -117,13 +113,5 @@ public interface MaridBeanUtils {
         } else {
             return profile.getClass(className).map(ResolvableType::forClass).orElse(NONE);
         }
-    }
-
-    static void prepareInjectionMetadata() throws Exception {
-        final ClassPool classPool = ClassPool.getDefault();
-        final CtClass type = classPool.get("org.springframework.beans.factory.annotation.InjectionMetadata");
-        final CtConstructor constructor = type.getConstructors()[0];
-        constructor.insertAfter(String.format("%s.sort($2);", MaridCommonPostProcessor.class.getName()));
-        type.toClass();
     }
 }
