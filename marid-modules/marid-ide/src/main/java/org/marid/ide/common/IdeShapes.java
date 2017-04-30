@@ -19,8 +19,8 @@
 package org.marid.ide.common;
 
 import com.google.common.primitives.Ints;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -67,10 +67,10 @@ public interface IdeShapes {
         return circle;
     }
 
-    static Pane fileNode(BeanFile file, int size) {
+    static Node fileNode(BeanFile file, int size) {
         final double h = size / Math.sqrt(2);
         final Rectangle node = new Rectangle(h, h, color(file.getFilePath().hashCode()));
         node.setRotate(45);
-        return new StackPane(node);
+        return new Group(node);
     }
 }

@@ -19,32 +19,34 @@
 package org.marid.dependant.beantree.items;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
-import org.marid.spring.xml.BeanFile;
+import org.marid.ide.common.IdeShapes;
+import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.LocalizedStrings;
+import org.marid.jfx.icons.FontIcon;
+import org.marid.jfx.icons.FontIcons;
 
 import java.util.stream.Collectors;
-
-import static org.marid.ide.common.IdeShapes.fileNode;
-import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class FileTreeItem extends AbstractTreeItem<BeanFile> {
+public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
 
     private final ObservableValue<String> name;
     private final ObservableValue<String> type;
 
-    public FileTreeItem(BeanFile file) {
-        super(file, file.observables());
+    public ProjectTreeItem(ProjectProfile elem) {
+        super(elem, elem.getBeanFiles());
+        name = new SimpleStringProperty(elem.getName());
+        type = LocalizedStrings.ls("profile");
 
-        name = Bindings.createStringBinding(file::getFilePath, file.path);
-        type = ls("file");
+        valueProperty().bind(Bindings.createObjectBinding(() -> elem, elem.getBeanFiles()));
+        graphicProperty().bind(Bindings.createObjectBinding(() -> IdeShapes.profileNode(elem, 20)));
 
-        graphicProperty().bind(Bindings.createObjectBinding(() -> fileNode(file, 20), file.observables()));
-
-        getChildren().addAll(file.beans.stream().map(BeanTreeItem::new).collect(Collectors.toList()));
+        getChildren().addAll(elem.getBeanFiles().stream().map(FileTreeItem::new).collect(Collectors.toList()));
         setExpanded(true);
     }
 
@@ -60,11 +62,11 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
 
     @Override
     public ObservableValue<Node> valueGraphic() {
-        return Bindings.createObjectBinding(() -> null);
+        return Bindings.createObjectBinding(() -> FontIcons.glyphIcon(FontIcon.M_PANORAMA, 20));
     }
 
     @Override
     public ObservableValue<String> valueText() {
-        return Bindings.createStringBinding(elem::getFilePath, elem.observables());
+        return Bindings.createStringBinding(() -> null);
     }
 }

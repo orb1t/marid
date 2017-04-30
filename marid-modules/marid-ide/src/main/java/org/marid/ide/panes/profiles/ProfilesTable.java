@@ -27,8 +27,8 @@ import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 import org.marid.IdeDependants;
-import org.marid.dependant.resources.ResourcesConfiguration;
-import org.marid.dependant.resources.ResourcesParams;
+import org.marid.dependant.beantree.BeanTreeConfiguration;
+import org.marid.dependant.beantree.BeanTreeParam;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.panes.main.IdeToolbar;
@@ -136,9 +136,9 @@ public class ProfilesTable extends TableView<ProjectProfile> {
         editAction.on(this, action -> {
             action.setEventHandler(event -> {
                 final ProjectProfile profile = projectManager.getProfile();
-                dependants.start(ResourcesConfiguration.class, new ResourcesParams(profile), context -> {
-                    context.setId("resourcesEditor");
-                    context.setDisplayName("Resources Editor");
+                dependants.start(BeanTreeConfiguration.class, new BeanTreeParam(profile), context -> {
+                    context.setId("treeEditor");
+                    context.setDisplayName("Tree Editor");
                 });
             });
             action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());

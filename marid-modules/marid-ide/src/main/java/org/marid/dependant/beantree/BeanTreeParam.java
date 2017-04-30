@@ -18,32 +18,29 @@
 
 package org.marid.dependant.beantree;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.tabs.IdeTab;
-import org.marid.spring.dependant.DependantConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.stereotype.Component;
-
-import static org.marid.ide.common.IdeShapes.profileNode;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-@ComponentScan
-public class BeanTreeConfiguration extends DependantConfiguration<BeanTreeParam> {
+public class BeanTreeParam {
 
-    @Bean
-    public ProjectProfile profile() {
-        return param.profile;
+    public final ProjectProfile profile;
+
+    public BeanTreeParam(ProjectProfile profile) {
+        this.profile = profile;
     }
 
-    @Bean
-    public IdeTab tab(BeanTree tree, ProjectProfile profile) {
-        final ObservableValue<String> text = new SimpleStringProperty(profile.getName());
-        return new IdeTab(tree, text, () -> profileNode(profile, 16));
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 }

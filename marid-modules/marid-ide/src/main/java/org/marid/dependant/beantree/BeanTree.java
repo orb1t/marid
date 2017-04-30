@@ -18,16 +18,17 @@
 
 package org.marid.dependant.beantree;
 
+import javafx.beans.binding.Bindings;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import org.marid.dependant.beantree.items.AbstractTreeItem;
-import org.marid.dependant.beantree.items.FileTreeItem;
+import org.marid.dependant.beantree.items.ProjectTreeItem;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.menu.MaridContextMenu;
-import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -41,8 +42,8 @@ import static org.marid.jfx.LocalizedStrings.ls;
 public class BeanTree extends TreeTableView<Object> {
 
     @Autowired
-    public BeanTree(BeanFile file, ProjectProfile profile) {
-        super(new FileTreeItem(profile, file));
+    public BeanTree(ProjectProfile profile) {
+        super(new ProjectTreeItem(profile));
         setShowRoot(true);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
     }
@@ -74,21 +75,21 @@ public class BeanTree extends TreeTableView<Object> {
     @Order(3)
     @Autowired
     public void valueColumn(SpecialActions specialActions) {
-        final TreeTableColumn<Object, Object> column = new TreeTableColumn<>();
+        final TreeTableColumn<Object, TreeItem<Object>> column = new TreeTableColumn<>();
         column.textProperty().bind(ls("Value"));
-        column.setCellValueFactory(f -> f.getValue().valueProperty());
+        column.setCellValueFactory(f -> Bindings.createObjectBinding(f::getValue));
         column.setCellFactory(f -> {
-            final TreeTableCell<Object, Object> cell = new TreeTableCell<Object, Object>() {
+            final TreeTableCell<Object, TreeItem<Object>> cell = new TreeTableCell<Object, TreeItem<Object>>() {
                 @Override
-                protected void updateItem(Object item, boolean empty) {
+                protected void updateItem(TreeItem<Object> item, boolean empty) {
                     super.updateItem(item, empty);
-                    if (empty) {
-                        setText(null);
-                        setGraphic(null);
+                    if (empty || item == null) {
+                        textProperty().unbind();
+                        graphicProperty().unbind();
                     } else {
-                        final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) getTreeTableRow().getTreeItem();
-                        setText(treeItem.getValue().toString());
-                        setGraphic(treeItem.getValueGraphic());
+                        final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) item;
+                        textProperty().bind(treeItem.valueText());
+                        graphicProperty().bind(treeItem.valueGraphic());
                     }
                 }
             };

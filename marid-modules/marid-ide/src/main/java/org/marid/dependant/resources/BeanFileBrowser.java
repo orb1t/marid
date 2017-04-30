@@ -25,9 +25,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
-import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.BeanEditorParams;
-import org.marid.dependant.beantree.BeanTreeConfiguration;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
@@ -35,9 +32,6 @@ import org.marid.jfx.action.FxAction;
 import org.marid.jfx.control.CommonTableView;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -47,8 +41,8 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static javafx.beans.binding.Bindings.createStringBinding;
@@ -140,11 +134,11 @@ public class BeanFileBrowser extends CommonTableView<BeanFile> {
     }
 
     @Autowired
-    private void initRowFactory(SpecialActions specialActions, @Lazy @Qualifier("fileBrowser") Map<String, FxAction> actionMap) {
+    private void initRowFactory(SpecialActions specialActions) {
         setRowFactory(v -> {
             final TableRow<BeanFile> row = new TableRow<>();
             row.disableProperty().bind(row.itemProperty().isNull());
-            row.setContextMenu(specialActions.contextMenu(() -> actionMap));
+            row.setContextMenu(specialActions.contextMenu(Collections::emptyMap));
             return row;
         });
     }
@@ -168,17 +162,5 @@ public class BeanFileBrowser extends CommonTableView<BeanFile> {
             action.setEventHandler(actions::onRename);
             action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });
-    }
-
-    @Bean
-    @Qualifier("fileBrowser")
-    public FxAction treeAction(IdeDependants dependants) {
-        return new FxAction("tree", "tree")
-                .bindText("Tree")
-                .setEventHandler(event -> {
-                    final BeanFile file = getSelectionModel().getSelectedItem();
-                    dependants.start(BeanTreeConfiguration.class, new BeanEditorParams(file), c -> {});
-                })
-                .bindDisabled(Bindings.isEmpty(getSelectionModel().getSelectedItems()));
     }
 }

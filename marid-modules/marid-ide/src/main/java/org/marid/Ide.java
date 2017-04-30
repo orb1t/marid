@@ -29,7 +29,6 @@ import org.jboss.logmanager.LogManager;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
-import org.marid.spring.beans.MaridBeanUtils;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
@@ -116,10 +115,11 @@ public class Ide extends Application {
         // InjectionMetadata
         try {
             final ClassPool classPool = ClassPool.getDefault();
-            final CtClass type = classPool.get("org.springframework.beans.factory.annotation.InjectionMetadata");
-            final CtConstructor constructor = type.getConstructors()[0];
+
+            final CtClass imType = classPool.get("org.springframework.beans.factory.annotation.InjectionMetadata");
+            final CtConstructor constructor = imType.getConstructors()[0];
             constructor.insertAfter(String.format("%s.sort($2);", MaridCommonPostProcessor.class.getName()));
-            type.toClass();
+            imType.toClass();
         } catch (Exception x) {
             throw new IllegalStateException(x);
         }

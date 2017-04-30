@@ -18,13 +18,13 @@
 
 package org.marid.dependant.beantree.items;
 
+import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
-import org.marid.spring.xml.BeanFile;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -35,22 +35,22 @@ import java.util.TreeMap;
  */
 public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
 
-    private final T elem;
+    public final T elem;
+    public final Observable[] observables;
     public final Map<String, FxAction> actionMap = new TreeMap<>();
 
-    public AbstractTreeItem(T elem) {
+    public AbstractTreeItem(T elem, Observable... observables) {
         this.elem = elem;
-    }
-
-    public T getElem() {
-        return elem;
+        this.observables = observables;
     }
 
     public abstract ObservableValue<String> getName();
 
     public abstract ObservableValue<String> getType();
 
-    public abstract Node getValueGraphic();
+    public abstract ObservableValue<Node> valueGraphic();
+
+    public abstract ObservableValue<String> valueText();
 
     public void edit(TreeTableView<Object> view, Object value) {
     }
@@ -65,10 +65,6 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
     }
 
     public ProjectProfile getProfile() {
-        return find(FileTreeItem.class).getProfile();
-    }
-
-    public BeanFile getFile() {
-        return find(FileTreeItem.class).getElem();
+        return find(ProjectTreeItem.class).elem;
     }
 }

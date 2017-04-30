@@ -24,6 +24,7 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
+import javax.annotation.Generated;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,6 +71,7 @@ public class MaridCommonPostProcessor implements DestructionAwareBeanPostProcess
         return Ordered.HIGHEST_PRECEDENCE;
     }
 
+    @Generated("UsedByIde")
     public static void sort(Collection<InjectedElement> elements) {
         if (elements == null || elements.isEmpty()) {
             return;
