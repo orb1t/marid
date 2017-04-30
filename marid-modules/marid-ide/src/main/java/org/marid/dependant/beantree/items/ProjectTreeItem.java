@@ -27,8 +27,7 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
-
-import java.util.stream.Collectors;
+import org.marid.spring.xml.BeanFile;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -37,6 +36,7 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
 
     private final ObservableValue<String> name;
     private final ObservableValue<String> type;
+    private final ListSynchronizer<BeanFile, FileTreeItem> listSynchronizer;
 
     public ProjectTreeItem(ProjectProfile elem) {
         super(elem, elem.getBeanFiles());
@@ -46,7 +46,7 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
         valueProperty().bind(Bindings.createObjectBinding(() -> elem, elem.getBeanFiles()));
         graphicProperty().bind(Bindings.createObjectBinding(() -> IdeShapes.profileNode(elem, 20)));
 
-        getChildren().addAll(elem.getBeanFiles().stream().map(FileTreeItem::new).collect(Collectors.toList()));
+        listSynchronizer = new ListSynchronizer<>(elem.getBeanFiles(), getChildren(), FileTreeItem::new);
         setExpanded(true);
     }
 

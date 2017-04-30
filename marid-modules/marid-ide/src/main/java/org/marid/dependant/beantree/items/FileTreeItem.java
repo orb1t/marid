@@ -21,9 +21,8 @@ package org.marid.dependant.beantree.items;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
+import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanFile;
-
-import java.util.stream.Collectors;
 
 import static org.marid.ide.common.IdeShapes.fileNode;
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -35,6 +34,7 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
 
     private final ObservableValue<String> name;
     private final ObservableValue<String> type;
+    private final ListSynchronizer<BeanData, BeanTreeItem> listSynchronizer;
 
     public FileTreeItem(BeanFile file) {
         super(file, file.observables());
@@ -44,7 +44,7 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
 
         graphicProperty().bind(Bindings.createObjectBinding(() -> fileNode(file, 20), file.observables()));
 
-        getChildren().addAll(file.beans.stream().map(BeanTreeItem::new).collect(Collectors.toList()));
+        listSynchronizer = new ListSynchronizer<>(file.beans, getChildren(), BeanTreeItem::new);
         setExpanded(true);
     }
 

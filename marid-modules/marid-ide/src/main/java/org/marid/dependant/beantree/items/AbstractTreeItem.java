@@ -20,15 +20,20 @@ package org.marid.dependant.beantree.items;
 
 import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.collections.WeakListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
+import org.marid.misc.Casts;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
+import java.util.function.Function;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -66,5 +71,30 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
 
     public ProjectProfile getProfile() {
         return find(ProjectTreeItem.class).elem;
+    }
+
+    protected static class ListSynchronizer<F, T extends AbstractTreeItem<F>> implements ListChangeListener<F> {
+
+        private final ObservableList<T> target;
+        private final WeakListChangeListener<F> listener;
+        private final Function<F, T> mapper;
+
+        protected ListSynchronizer(ObservableList<F> source, ObservableList<? super T> target, Function<F, T> mapper) {
+            this.target = Casts.cast(target);
+            this.mapper = mapper;
+            source.stream().map(mapper).forEach(target::add);
+            source.addListener(this.listener = new WeakListChangeListener<>(this));
+        }
+
+        @Override
+        public void onChanged(Change<? extends F> c) {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    c.getAddedSubList().stream().map(mapper).forEach(target::add);
+                } else if (c.wasRemoved()) {
+                    target.removeIf(e -> c.getList().contains(e.elem));
+                }
+            }
+        }
     }
 }
