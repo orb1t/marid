@@ -22,9 +22,6 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtConstructor;
 import org.jboss.logmanager.LogManager;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
@@ -112,16 +109,6 @@ public class Ide extends Application {
             Locale.setDefault(Locale.forLanguageTag(locale));
         }
 
-        // InjectionMetadata
-        try {
-            final ClassPool classPool = ClassPool.getDefault();
-
-            final CtClass imType = classPool.get("org.springframework.beans.factory.annotation.InjectionMetadata");
-            final CtConstructor constructor = imType.getConstructors()[0];
-            constructor.insertAfter(String.format("%s.sort($2);", MaridCommonPostProcessor.class.getName()));
-            imType.toClass();
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
+        MaridCommonPostProcessor.replaceInjectedMetadata();
     }
 }

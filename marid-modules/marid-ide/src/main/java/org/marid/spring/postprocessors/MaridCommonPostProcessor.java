@@ -18,11 +18,13 @@
 
 package org.marid.spring.postprocessors;
 
+import org.springframework.asm.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.InjectionMetadata.InjectedElement;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.objenesis.instantiator.basic.ClassDefinitionUtils;
 
 import javax.annotation.Generated;
 import java.lang.reflect.AnnotatedElement;
@@ -32,6 +34,8 @@ import java.util.List;
 
 import static java.util.logging.Level.INFO;
 import static org.marid.logging.Log.log;
+import static org.springframework.asm.Opcodes.ALOAD;
+import static org.springframework.asm.Opcodes.INVOKESTATIC;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -102,5 +106,35 @@ public class MaridCommonPostProcessor implements DestructionAwareBeanPostProcess
         });
         elements.clear();
         elements.addAll(list);
+    }
+
+    public static void replaceInjectedMetadata() {
+        final String className = "org.springframework.beans.factory.annotation.InjectionMetadata";
+        final String owner = MaridCommonPostProcessor.class.getName().replace('.', '/');
+        try {
+            final ClassReader r = new ClassReader(className);
+            final ClassWriter w = new ClassWriter(r, ClassWriter.COMPUTE_FRAMES);
+            r.accept(new ClassVisitor(Opcodes.ASM5, w) {
+                @Override
+                public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] xs) {
+                    final MethodVisitor v = super.visitMethod(access, name, desc, signature, xs);
+                    if (v != null && "<init>".equals(name)) {
+                        return new MethodVisitor(Opcodes.ASM5, v) {
+                            @Override
+                            public void visitCode() {
+                                super.visitCode();
+                                mv.visitVarInsn(ALOAD, 2);
+                                mv.visitMethodInsn(INVOKESTATIC, owner, "sort", "(Ljava/util/Collection;)V", false);
+                            }
+                        };
+                    } else {
+                        return v;
+                    }
+                }
+            }, 0);
+            ClassDefinitionUtils.defineClass(className, w.toByteArray(), ClassLoader.getSystemClassLoader());
+        } catch (Exception x) {
+            throw new IllegalStateException(x);
+        }
     }
 }

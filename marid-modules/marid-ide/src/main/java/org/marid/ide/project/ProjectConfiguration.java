@@ -25,6 +25,8 @@ import org.marid.dependant.project.ProjectParams;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.monitor.ProfileMonitorConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
+import org.marid.dependant.resources.ResourcesConfiguration;
+import org.marid.dependant.resources.ResourcesParams;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.action.IdeAction;
@@ -48,14 +50,12 @@ public class ProjectConfiguration {
 
     @IdeAction
     @Qualifier("profile")
-    public FxAction projectSetupAction(IdeDependants dependants,
-                                       ProjectManager projectManager,
-                                       BooleanBinding projectDisabled) {
+    public FxAction projectSetup(IdeDependants dependants, ProjectManager manager, BooleanBinding projectDisabled) {
         return new FxAction("projectSetup", "setup", "Project")
                 .bindText(ls("Project setup..."))
                 .setIcon(O_TOOLS)
                 .setEventHandler(event -> {
-                    final ProjectProfile profile = projectManager.getProfile();
+                    final ProjectProfile profile = manager.getProfile();
                     dependants.start(ProjectConfigConfiguration.class, new ProjectParams(profile), context -> {
                         context.setId("projectConfiguration");
                         context.setDisplayName("Project Configuration");
@@ -67,13 +67,13 @@ public class ProjectConfiguration {
     @IdeAction
     @Qualifier("profile")
     public FxAction projectSaveAction(ObjectFactory<ProjectSaver> projectSaver,
-                                      ProjectManager projectManager,
+                                      ProjectManager manager,
                                       BooleanBinding projectDisabled) {
         return new FxAction("io", "Project")
                 .setAccelerator(KeyCombination.valueOf("F2"))
                 .bindText(ls("Save"))
                 .setIcon(F_SAVE)
-                .setEventHandler(event -> projectSaver.getObject().save(projectManager.getProfile()))
+                .setEventHandler(event -> projectSaver.getObject().save(manager.getProfile()))
                 .bindDisabled(projectDisabled);
     }
 
@@ -112,15 +112,13 @@ public class ProjectConfiguration {
 
     @IdeAction
     @Qualifier("profile")
-    public FxAction projectRunAction(IdeDependants dependants,
-                                     ProjectManager projectManager,
-                                     BooleanBinding projectDisabled) {
+    public FxAction projectRunAction(IdeDependants dependants, ProjectManager manager, BooleanBinding projectDisabled) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F5"))
                 .bindText(ls("Run"))
                 .setIcon(F_PLAY)
                 .setEventHandler(event -> {
-                    final ProjectProfile profile = projectManager.getProfile();
+                    final ProjectProfile profile = manager.getProfile();
                     dependants.start(ProjectRunnerConfiguration.class, new ProjectParams(profile), context -> {
                         context.setId("projectRunner");
                         context.setDisplayName("Project Runner");
@@ -131,17 +129,31 @@ public class ProjectConfiguration {
 
     @Bean
     @Qualifier("profile")
-    public FxAction profileMonitor(IdeDependants dependants,
-                                   ProjectManager projectManager,
-                                   BooleanBinding projectDisabled) {
+    public FxAction profileMonitor(IdeDependants dependants, ProjectManager manager, BooleanBinding projectDisabled) {
         return new FxAction("monitor", "mon", "Project")
                 .bindText("Show profile monitor")
                 .setIcon(FontIcon.D_MONITOR_MULTIPLE)
                 .setEventHandler(event -> {
-                    final ProjectProfile profile = projectManager.getProfile();
+                    final ProjectProfile profile = manager.getProfile();
                     dependants.start(ProfileMonitorConfiguration.class, new ProjectParams(profile), c -> {
                         c.setId("profileMonitor");
                         c.setDisplayName("Profile Monitor");
+                    });
+                })
+                .bindDisabled(projectDisabled);
+    }
+
+    @Bean
+    @Qualifier("profile")
+    public FxAction profileEdit(IdeDependants dependants, ProjectManager manager, BooleanBinding projectDisabled) {
+        return new FxAction("projectResources", "pr", "Project")
+                .bindText(ls("Resources"))
+                .setIcon(M_MODE_EDIT)
+                .setEventHandler(event -> {
+                    final ProjectProfile profile = manager.getProfile();
+                    dependants.start(ResourcesConfiguration.class, new ResourcesParams(profile), context -> {
+                        context.setId("projectResources");
+                        context.setDisplayName("Project Resources");
                     });
                 })
                 .bindDisabled(projectDisabled);
