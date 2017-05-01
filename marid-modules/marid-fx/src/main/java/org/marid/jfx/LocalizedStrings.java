@@ -18,18 +18,13 @@
 
 package org.marid.jfx;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.WeakInvalidationListener;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableStringValue;
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import org.marid.jfx.beans.FxObject;
 
-import java.util.Collection;
 import java.util.Locale;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static org.marid.l10n.L10n.s;
 
@@ -41,70 +36,23 @@ public class LocalizedStrings {
     public static final FxObject<Locale> LOCALE = new FxObject<>(null, "locale", Locale.getDefault());
 
     public static ObservableValue<String> ls(String text, Object... args) {
-        return new LocalizedStringValue(() -> s(LOCALE.get(), text, args));
+        return Bindings.createStringBinding(() -> s(LOCALE.get(), text, args), LOCALE);
     }
 
     public static ObservableValue<String> fls(String format, String text, Object... args) {
-        return new LocalizedStringValue(() -> {
-            final String v = s(text, args);
-            return String.format(LOCALE.get(), format, v);
-        });
+        return Bindings.createStringBinding(() -> String.format(format, s(LOCALE.get(), text, args)), LOCALE);
     }
 
-    private static final class LocalizedStringValue implements ObservableStringValue {
-
-        private final Supplier<String> supplier;
-        private final InvalidationListener listener;
-        private final WeakInvalidationListener weakInvalidationListener;
-        private final Collection<InvalidationListener> invalidationListeners = new ConcurrentLinkedQueue<>();
-        private final Collection<ChangeListener<? super String>> changeListeners = new ConcurrentLinkedQueue<>();
-        private final AtomicReference<String> ref;
-
-        private LocalizedStringValue(Supplier<String> supplier) {
-            this.supplier = supplier;
-            this.ref = new AtomicReference<>(getValue());
-            this.listener = o -> invalidate();
-            this.weakInvalidationListener = new WeakInvalidationListener(listener);
-            LOCALE.addListener(weakInvalidationListener);
-        }
-
-        @Override
-        public void addListener(ChangeListener<? super String> listener) {
-            changeListeners.add(listener);
-        }
-
-        @Override
-        public void removeListener(ChangeListener<? super String> listener) {
-            changeListeners.remove(listener);
-        }
-
-        @Override
-        public String getValue() {
-            return supplier.get();
-        }
-
-        @Override
-        public void addListener(InvalidationListener listener) {
-            invalidationListeners.add(listener);
-        }
-
-        @Override
-        public void removeListener(InvalidationListener listener) {
-            invalidationListeners.remove(listener);
-        }
-
-        private void invalidate() {
-            final String old = ref.get();
-            final String nev = getValue();
-            if (ref.compareAndSet(old, nev)) {
-                changeListeners.forEach(l -> l.changed(this, old, nev));
-                invalidationListeners.forEach(l -> l.invalidated(this));
-            }
-        }
-
-        @Override
-        public String get() {
-            return getValue();
-        }
+    public static ObservableValue<String> fs(String text, Object... args) {
+        final Observable[] observables = Stream.concat(
+                Stream.of(LOCALE),
+                Stream.of(args).filter(Observable.class::isInstance).map(Observable.class::cast)
+        ).toArray(Observable[]::new);
+        return Bindings.createStringBinding(() -> {
+            final Object[] params = Stream.of(args)
+                    .map(o -> o instanceof ObservableValue<?> ? ((ObservableValue<?>) o).getValue() : o)
+                    .toArray();
+            return s(LOCALE.get(), text, params);
+        }, observables);
     }
 }

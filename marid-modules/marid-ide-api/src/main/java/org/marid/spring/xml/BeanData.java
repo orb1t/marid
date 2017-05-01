@@ -26,8 +26,6 @@ import javax.xml.bind.annotation.*;
 import java.lang.reflect.Executable;
 import java.util.stream.Stream;
 
-import static java.util.stream.IntStream.range;
-
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -45,8 +43,6 @@ public final class BeanData extends DElement<BeanData> {
     public final FxString lazyInit = new FxString(null, "lazy-init", "default");
     public final FxList<BeanArg> beanArgs = new FxList<>(BeanArg::observables);
     public final FxList<BeanProp> properties = new FxList<>(BeanProp::observables);
-    public final FxList<String> initTriggers = new FxList<>();
-    public final FxList<String> destroyTriggers = new FxList<>();
     public final transient FxList<Executable> constructors = new FxList<>();
 
     @XmlAttribute(name = "class")
@@ -130,24 +126,6 @@ public final class BeanData extends DElement<BeanData> {
         this.properties.setAll(beanProps);
     }
 
-    @XmlAnyElement(lax = true)
-    public Meta[] getMeta() {
-        return Stream.concat(
-                range(0, initTriggers.size()).mapToObj(i -> new Meta("init" + i, initTriggers.get(i))),
-                range(0, destroyTriggers.size()).mapToObj(i -> new Meta("destroy" + i, destroyTriggers.get(i)))
-        ).toArray(Meta[]::new);
-    }
-
-    public void setMeta(Meta[] metas) {
-        for (final Meta meta : metas) {
-            if (meta.key.startsWith("init")) {
-                initTriggers.add(meta.value);
-            } else if (meta.key.startsWith("destroy")) {
-                destroyTriggers.add(meta.value);
-            }
-        }
-    }
-
     public boolean isFactoryBean() {
         if (factoryBean.get() != null && !factoryBean.get().isEmpty()) {
             return factoryMethod.get() != null && !factoryMethod.get().isEmpty();
@@ -180,8 +158,6 @@ public final class BeanData extends DElement<BeanData> {
                 lazyInit,
                 beanArgs,
                 properties,
-                initTriggers,
-                destroyTriggers,
                 constructors
         };
     }

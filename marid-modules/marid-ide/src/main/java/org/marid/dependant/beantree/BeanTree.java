@@ -23,6 +23,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
+import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.dependant.beantree.items.AbstractTreeItem;
 import org.marid.dependant.beantree.items.ProjectTreeItem;
 import org.marid.ide.common.SpecialActions;
@@ -30,6 +31,7 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -41,9 +43,12 @@ import static org.marid.jfx.LocalizedStrings.ls;
 @Component
 public class BeanTree extends TreeTableView<Object> {
 
+    private final AutowireCapableBeanFactory beanFactory;
+
     @Autowired
-    public BeanTree(ProjectProfile profile) {
+    public BeanTree(ProjectProfile profile, AutowireCapableBeanFactory beanFactory) {
         super(new ProjectTreeItem(profile));
+        this.beanFactory = beanFactory;
         setShowRoot(true);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
     }
@@ -86,6 +91,8 @@ public class BeanTree extends TreeTableView<Object> {
                     if (empty || item == null) {
                         textProperty().unbind();
                         graphicProperty().unbind();
+                        setText(null);
+                        setGraphic(null);
                     } else {
                         final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) item;
                         textProperty().bind(treeItem.valueText());
@@ -97,6 +104,10 @@ public class BeanTree extends TreeTableView<Object> {
                 final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) cell.getTreeTableRow().getTreeItem();
                 m.getItems().clear();
                 m.getItems().addAll(MaridActions.contextMenu(treeItem.actionMap));
+                final ValueMenuItems valueMenuItems = treeItem.valueMenuItems(beanFactory);
+                if (valueMenuItems != null) {
+                    valueMenuItems.addTo(m);
+                }
             }));
             cell.selectedProperty().addListener((observable, oldValue, newValue) -> {
                 if (newValue) {

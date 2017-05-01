@@ -27,17 +27,27 @@ import org.marid.ide.common.IdeShapes;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
+import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.BeanProp;
+import org.marid.util.MethodUtils;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class BeanTreeItem extends AbstractTreeItem<BeanData> {
 
+    private final ListSynchronizer<BeanArg, ArgumentTreeItem> argsSynchronizer;
+    private final ListSynchronizer<BeanProp, PropertyTreeItem> propsSynchronizer;
+
     public BeanTreeItem(BeanData elem) {
-        super(elem, elem.observables());
+        super(elem);
         valueProperty().bind(Bindings.createObjectBinding(() -> elem, elem.observables()));
         graphicProperty().bind(Bindings.createObjectBinding(() -> IdeShapes.beanNode(elem, 20), elem.observables()));
+
+        argsSynchronizer = new ListSynchronizer<>(elem.beanArgs, getChildren(), ArgumentTreeItem::new);
+        propsSynchronizer = new ListSynchronizer<>(elem.properties, getChildren(), PropertyTreeItem::new);
+        setExpanded(true);
     }
 
     @Override
@@ -48,7 +58,7 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
     @Override
     public ObservableValue<String> getType() {
         final ProjectProfile profile = getProfile();
-        return Bindings.createStringBinding(() -> profile.getType(elem).toString(), elem.observables());
+        return Bindings.createStringBinding(() -> MethodUtils.readableType(profile.getType(elem)), elem.observables());
     }
 
     @Override

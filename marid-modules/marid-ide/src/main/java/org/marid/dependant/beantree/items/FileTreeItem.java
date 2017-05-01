@@ -21,11 +21,18 @@ package org.marid.dependant.beantree.items;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import org.marid.spring.beans.MaridBeanUtils;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanFile;
 
 import static org.marid.ide.common.IdeShapes.fileNode;
+import static org.marid.jfx.LocalizedStrings.fs;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.jfx.icons.FontIcon.D_STAR_CIRCLE;
+import static org.marid.jfx.icons.FontIcon.D_STAR_OUTLINE;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -37,7 +44,7 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
     private final ListSynchronizer<BeanData, BeanTreeItem> listSynchronizer;
 
     public FileTreeItem(BeanFile file) {
-        super(file, file.observables());
+        super(file);
 
         name = Bindings.createStringBinding(file::getFilePath, file.path);
         type = ls("file");
@@ -60,11 +67,29 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
 
     @Override
     public ObservableValue<Node> valueGraphic() {
-        return Bindings.createObjectBinding(() -> null);
+        return Bindings.createObjectBinding(() -> {
+            final HBox box = new HBox(10);
+            {
+                {
+                    final Label label = new Label();
+                    label.setGraphic(glyphIcon(D_STAR_CIRCLE, 20));
+                    label.textProperty().bind(fs("%s: %d", ls("Beans"), elem.beans.size()));
+                    box.getChildren().add(label);
+                }
+                {
+                    final Label label = new Label();
+                    label.setGraphic(glyphIcon(D_STAR_OUTLINE, 20));
+                    final long count = elem.beans.stream().flatMap(MaridBeanUtils::beans).count();
+                    label.textProperty().bind(fs("%s: %d", ls("Internal Beans"), count));
+                    box.getChildren().add(label);
+                }
+            }
+            return box;
+        }, elem.observables());
     }
 
     @Override
     public ObservableValue<String> valueText() {
-        return Bindings.createStringBinding(elem::getFilePath, elem.observables());
+        return Bindings.createStringBinding(() -> null);
     }
 }

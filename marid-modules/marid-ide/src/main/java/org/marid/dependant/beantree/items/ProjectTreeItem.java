@@ -22,12 +22,18 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.LocalizedStrings;
-import org.marid.jfx.icons.FontIcon;
-import org.marid.jfx.icons.FontIcons;
+import org.marid.spring.beans.MaridBeanUtils;
 import org.marid.spring.xml.BeanFile;
+
+import static org.marid.jfx.LocalizedStrings.fs;
+import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.jfx.icons.FontIcon.*;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -39,7 +45,7 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
     private final ListSynchronizer<BeanFile, FileTreeItem> listSynchronizer;
 
     public ProjectTreeItem(ProjectProfile elem) {
-        super(elem, elem.getBeanFiles());
+        super(elem);
         name = new SimpleStringProperty(elem.getName());
         type = LocalizedStrings.ls("profile");
 
@@ -62,7 +68,33 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
 
     @Override
     public ObservableValue<Node> valueGraphic() {
-        return Bindings.createObjectBinding(() -> FontIcons.glyphIcon(FontIcon.M_PANORAMA, 20));
+        return Bindings.createObjectBinding(() -> {
+            final HBox box = new HBox(10);
+            {
+                final Label label = new Label();
+                label.setGraphic(glyphIcon(D_FILE, 20));
+                label.textProperty().bind(fs("%s: %d", ls("Files"), elem.getBeanFiles().size()));
+                box.getChildren().add(label);
+            }
+            {
+                final Label label = new Label();
+                label.setGraphic(glyphIcon(D_STAR_CIRCLE, 20));
+                final int beanCount = elem.getBeanFiles().stream().mapToInt(f -> f.beans.size()).sum();
+                label.textProperty().bind(fs("%s: %d", ls("Beans"), beanCount));
+                box.getChildren().add(label);
+            }
+            {
+                final Label label = new Label();
+                label.setGraphic(glyphIcon(D_STAR_OUTLINE, 20));
+                final long count = elem.getBeanFiles().stream()
+                        .flatMap(f -> f.beans.stream())
+                        .flatMap(MaridBeanUtils::beans)
+                        .count();
+                label.textProperty().bind(fs("%s: %d", ls("Internal Beans"), count));
+                box.getChildren().add(label);
+            }
+            return box;
+        }, elem.getBeanFiles());
     }
 
     @Override

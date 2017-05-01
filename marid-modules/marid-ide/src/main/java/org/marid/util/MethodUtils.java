@@ -18,8 +18,11 @@
 
 package org.marid.util;
 
+import org.springframework.core.ResolvableType;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.of;
@@ -45,5 +48,10 @@ public interface MethodUtils {
                     }
                 })
                 .collect(joining(",", method.getName() + "(", ") : " + method.getGenericReturnType()));
+    }
+
+    static String readableType(ResolvableType type) {
+        return Stream.of("java.util.function.", "java.util.", "java.lang.", "java.io.", "java.nio.")
+                .reduce(type.toString(), (a, e) -> a.replace(e, ""));
     }
 }

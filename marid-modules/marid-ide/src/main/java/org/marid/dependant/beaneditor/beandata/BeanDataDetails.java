@@ -18,21 +18,19 @@
 
 package org.marid.dependant.beaneditor.beandata;
 
-import com.google.common.collect.ImmutableMap;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.action.FxAction;
-import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.control.MaridControls;
-import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.panes.GenericGridPane;
 import org.marid.spring.xml.BeanData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +42,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.marid.jfx.icons.FontIcon.D_WINDOW_RESTORE;
@@ -69,8 +63,6 @@ public class BeanDataDetails {
     private final String oldLazy;
     private final String oldInitMethod;
     private final String oldDestroyMethod;
-    private final List<String> oldInitTriggers;
-    private final List<String> oldDestroyTriggers;
 
     @Autowired
     public BeanDataDetails(BeanData data, ProjectProfile profile) {
@@ -82,8 +74,6 @@ public class BeanDataDetails {
         this.oldLazy = data.lazyInit.get();
         this.oldInitMethod = data.initMethod.get();
         this.oldDestroyMethod = data.destroyMethod.get();
-        this.oldInitTriggers = new ArrayList<>(data.initTriggers);
-        this.oldDestroyTriggers = new ArrayList<>(data.destroyTriggers);
     }
 
     @Bean
@@ -98,24 +88,6 @@ public class BeanDataDetails {
             beanData.destroyMethod.set(oldDestroyMethod);
         }));
         return new Tab(s("Details"), pane);
-    }
-
-    @Bean
-    @Order(5)
-    @Qualifier("beanData")
-    public Tab initTriggersTab() {
-        final BorderPane pane = triggersPane(beanData.initTriggers);
-        pane.setBottom(buttonPane(event -> beanData.initTriggers.setAll(oldInitTriggers)));
-        return new Tab(s("Init triggers"), pane);
-    }
-
-    @Bean
-    @Order(6)
-    @Qualifier("beanData")
-    public Tab destroyTriggersTab() {
-        final BorderPane pane = triggersPane(beanData.destroyTriggers);
-        pane.setBottom(buttonPane(event -> beanData.destroyTriggers.setAll(oldDestroyTriggers)));
-        return new Tab(s("Destroy triggers"), pane);
     }
 
     private ComboBox<String> lazyCombo() {
@@ -154,28 +126,6 @@ public class BeanDataDetails {
         gridPane.addControl("Init method", () -> initMethod);
         gridPane.addControl("Destroy method", () -> destroyMethod);
         return gridPane;
-    }
-
-    private BorderPane triggersPane(ObservableList<String> triggers) {
-        final BorderPane pane = new BorderPane();
-        final ListView<String> triggerList = new ListView<>(triggers);
-        triggerList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        final Map<String, FxAction> actionMap = ImmutableMap.<String, FxAction>builder()
-                .put("addButton", MaridListActions.addAction("Add trigger...", event -> {
-                    final TextInputDialog dialog = new TextInputDialog();
-                    dialog.setTitle(s("Add trigger"));
-                    final Optional<String> result = dialog.showAndWait();
-                    result.ifPresent(triggers::add);
-                }))
-                .put("Delete", MaridListActions.removeAction(triggerList))
-                .put("Clear", MaridListActions.clearAction(triggerList))
-                .put("Up", MaridListActions.upAction(triggerList))
-                .put("Down", MaridListActions.downAction(triggerList))
-                .build();
-        final ToolBar toolBar = new ToolBar(MaridActions.toolbar(actionMap));
-        pane.setTop(toolBar);
-        pane.setCenter(triggerList);
-        return pane;
     }
 
     private ComboBox<String> methodCombo() {

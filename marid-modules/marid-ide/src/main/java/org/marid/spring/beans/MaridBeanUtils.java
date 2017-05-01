@@ -19,6 +19,10 @@
 package org.marid.spring.beans;
 
 import org.marid.ide.project.ProjectProfile;
+import org.marid.spring.xml.BeanArg;
+import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.BeanProp;
+import org.marid.spring.xml.DElement;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
@@ -28,8 +32,11 @@ import org.springframework.core.ResolvableType;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
+import static java.util.stream.Stream.empty;
 import static java.util.stream.Stream.of;
 import static org.springframework.core.ResolvableType.NONE;
 
@@ -113,5 +120,15 @@ public interface MaridBeanUtils {
         } else {
             return profile.getClass(className).map(ResolvableType::forClass).orElse(NONE);
         }
+    }
+
+    static Stream<BeanData> beans(BeanData beanData) {
+        final Function<DElement<?>, Stream<BeanData>> f = d -> d instanceof BeanData
+                ? Stream.concat(Stream.of((BeanData) d), beans((BeanData) d))
+                : empty();
+        return Stream.concat(
+                beanData.beanArgs.stream().map(BeanArg::getData).flatMap(f),
+                beanData.properties.stream().map(BeanProp::getData).flatMap(f)
+        );
     }
 }
