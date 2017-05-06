@@ -24,10 +24,12 @@ import org.springframework.beans.factory.annotation.InjectionMetadata.InjectedEl
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.objenesis.instantiator.basic.ClassDefinitionUtils;
 
 import javax.annotation.Generated;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -132,7 +134,15 @@ public class MaridCommonPostProcessor implements DestructionAwareBeanPostProcess
                     }
                 }
             }, 0);
-            ClassDefinitionUtils.defineClass(className, w.toByteArray(), ClassLoader.getSystemClassLoader());
+            final ProtectionDomain pd = MaridCommonPostProcessor.class.getProtectionDomain();
+            final Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
+            final Field unsafeField = unsafeClass.getDeclaredField("theUnsafe");
+            unsafeField.setAccessible(true);
+            final Method defineClassMethod = unsafeClass.getMethod("defineClass",
+                    String.class, byte[].class, int.class, int.class, ClassLoader.class, ProtectionDomain.class);
+            final Object unsafe = unsafeField.get(null);
+            final byte[] code = w.toByteArray();
+            defineClassMethod.invoke(unsafe, className, code, 0, code.length, ClassLoader.getSystemClassLoader(), pd);
         } catch (Exception x) {
             throw new IllegalStateException(x);
         }

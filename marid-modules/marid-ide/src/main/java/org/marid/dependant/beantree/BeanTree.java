@@ -19,14 +19,10 @@
 package org.marid.dependant.beantree;
 
 import javafx.beans.binding.Bindings;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
+import javafx.scene.control.*;
 import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.dependant.beantree.items.AbstractTreeItem;
 import org.marid.dependant.beantree.items.ProjectTreeItem;
-import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.menu.MaridContextMenu;
@@ -43,14 +39,13 @@ import static org.marid.jfx.LocalizedStrings.ls;
 @Component
 public class BeanTree extends TreeTableView<Object> {
 
-    private final AutowireCapableBeanFactory beanFactory;
-
     @Autowired
     public BeanTree(ProjectProfile profile, AutowireCapableBeanFactory beanFactory) {
         super(new ProjectTreeItem(profile));
-        this.beanFactory = beanFactory;
         setShowRoot(true);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
+        beanFactory.initializeBean(getRoot(), null);
+        beanFactory.autowireBean(getRoot());
     }
 
     @Order(1)
@@ -79,47 +74,56 @@ public class BeanTree extends TreeTableView<Object> {
 
     @Order(3)
     @Autowired
-    public void valueColumn(SpecialActions specialActions) {
+    public void valueColumn() {
         final TreeTableColumn<Object, TreeItem<Object>> column = new TreeTableColumn<>();
         column.textProperty().bind(ls("Value"));
         column.setCellValueFactory(f -> Bindings.createObjectBinding(f::getValue));
-        column.setCellFactory(f -> {
-            final TreeTableCell<Object, TreeItem<Object>> cell = new TreeTableCell<Object, TreeItem<Object>>() {
-                @Override
-                protected void updateItem(TreeItem<Object> item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty || item == null) {
-                        textProperty().unbind();
-                        graphicProperty().unbind();
-                        setText(null);
-                        setGraphic(null);
-                    } else {
-                        final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) item;
-                        textProperty().bind(treeItem.valueText());
-                        graphicProperty().bind(treeItem.valueGraphic());
-                    }
+        column.setCellFactory(f -> new TreeTableCell<Object, TreeItem<Object>>() {
+            @Override
+            protected void updateItem(TreeItem<Object> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    textProperty().unbind();
+                    graphicProperty().unbind();
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) item;
+                    textProperty().bind(treeItem.valueText());
+                    graphicProperty().bind(treeItem.valueGraphic());
                 }
-            };
-            cell.setContextMenu(new MaridContextMenu(m -> {
-                final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) cell.getTreeTableRow().getTreeItem();
-                m.getItems().clear();
-                m.getItems().addAll(MaridActions.contextMenu(treeItem.actionMap));
-                final ValueMenuItems valueMenuItems = treeItem.valueMenuItems(beanFactory);
-                if (valueMenuItems != null) {
-                    valueMenuItems.addTo(m);
-                }
-            }));
-            cell.selectedProperty().addListener((observable, oldValue, newValue) -> {
-                if (newValue) {
-                    final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) cell.getTreeTableRow().getTreeItem();
-
-                }
-            });
-            return cell;
+            }
         });
         column.setMinWidth(300);
         column.setPrefWidth(700);
         column.setMaxWidth(2000);
         getColumns().add(column);
+    }
+
+    @Autowired
+    private void initRow() {
+        setRowFactory(v -> {
+            final TreeTableRow<Object> row = new TreeTableRow<>();
+            row.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) row.getTreeItem();
+                if (treeItem != null) {
+                    treeItem.focused.set(newValue);
+                }
+            });
+            row.setContextMenu(new MaridContextMenu(m -> {
+                final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) row.getTreeItem();
+                m.getItems().clear();
+                if (treeItem == null) {
+                    return;
+                }
+                m.getItems().addAll(MaridActions.contextMenu(treeItem.actionMap));
+                final ValueMenuItems valueMenuItems = treeItem.valueMenuItems.get();
+                if (valueMenuItems != null) {
+                    valueMenuItems.addTo(m);
+                }
+            }));
+            row.setLineSpacing(1.0);
+            return row;
+        });
     }
 }

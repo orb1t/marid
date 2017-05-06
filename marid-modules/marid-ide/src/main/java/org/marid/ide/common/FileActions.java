@@ -16,17 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.resources;
+package org.marid.ide.common;
 
-import javafx.event.ActionEvent;
 import javafx.scene.control.TextInputDialog;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.BeanEditorConfiguration;
 import org.marid.dependant.beaneditor.BeanEditorParams;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.BeanFile;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
@@ -38,37 +35,21 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanFileBrowserActions {
+public class FileActions {
 
-    private final ObjectProvider<BeanFileBrowser> browser;
-    private final ProjectProfile profile;
-    private final IdeDependants dependants;
-
-    @Autowired
-    public BeanFileBrowserActions(ObjectProvider<BeanFileBrowser> browser, ProjectProfile profile, IdeDependants dependants) {
-        this.browser = browser;
-        this.profile = profile;
-        this.dependants = dependants;
-    }
-
-    public ProjectProfile getProfile() {
-        return profile;
-    }
-
-    public void onFileAdd(ActionEvent event) {
+    public void addFile(ProjectProfile profile) {
         final TextInputDialog dialog = new TextInputDialog("file");
         dialog.setTitle(s("New file"));
         dialog.setHeaderText(s("Enter file name") + ":");
         final Optional<String> value = dialog.showAndWait();
         if (value.isPresent()) {
             final String name = value.get().endsWith(".xml") ? value.get() : value.get() + ".xml";
-            final Path path = getProfile().getBeansDirectory().resolve(name);
-            getProfile().getBeanFiles().add(BeanFile.beanFile(getProfile().getBeansDirectory(), path));
+            final Path path = profile.getBeansDirectory().resolve(name);
+            profile.getBeanFiles().add(BeanFile.beanFile(profile.getBeansDirectory(), path));
         }
     }
 
-    public void onRename(ActionEvent event) {
-        final BeanFile beanFile = browser.getObject().getSelectionModel().getSelectedItem();
+    public void renameFile(ProjectProfile profile, BeanFile beanFile) {
         final Path path = beanFile.path(profile.getBeansDirectory());
         final String fileName = path.getFileName().toString();
         final String defaultValue = fileName.substring(0, fileName.length() - 4);
@@ -83,8 +64,7 @@ public class BeanFileBrowserActions {
         }
     }
 
-    public void launchBeanEditor(ActionEvent event) {
-        final BeanFile beanFile = browser.getObject().getSelectionModel().getSelectedItem();
+    public void launchBeanEditor(BeanFile beanFile, IdeDependants dependants) {
         dependants.start(BeanEditorConfiguration.class, new BeanEditorParams(beanFile), context -> {
             context.setId("beanEditor");
             context.setDisplayName("Bean Editor");

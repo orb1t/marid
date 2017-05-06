@@ -23,12 +23,17 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import org.jetbrains.annotations.NotNull;
+import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
 import org.marid.util.MethodUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
 
 import static java.lang.Integer.compare;
@@ -38,6 +43,7 @@ import static java.util.Optional.ofNullable;
  * @author Dmitry Ovchinnikov
  */
 @Order(1)
+@Configurable
 public class ArgumentTreeItem extends AbstractTreeItem<BeanArg> implements Comparable<AbstractTreeItem<?>> {
 
     public ArgumentTreeItem(BeanArg elem) {
@@ -86,5 +92,16 @@ public class ArgumentTreeItem extends AbstractTreeItem<BeanArg> implements Compa
             final Order o2 = o.getClass().getAnnotation(Order.class);
             return compare(ofNullable(o1).map(Order::value).orElse(0), ofNullable(o2).map(Order::value).orElse(0));
         }
+    }
+
+    @Autowired
+    private void initValueMenuItems(ProjectProfile profile, AutowireCapableBeanFactory beanFactory) {
+        valueMenuItems.bind(Bindings.createObjectBinding(() -> {
+            final BeanData beanData = find(BeanTreeItem.class).elem;
+            final ResolvableType type = profile.getArgType(beanData, elem.getName());
+            final ValueMenuItems menuItems = new ValueMenuItems(elem.data, type, elem.name);
+            beanFactory.autowireBean(menuItems);
+            return menuItems;
+        }, elem.observables()));
     }
 }

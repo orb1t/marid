@@ -18,6 +18,8 @@
 
 package org.marid.dependant.beantree.items;
 
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -26,9 +28,11 @@ import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import org.marid.dependant.beaneditor.ValueMenuItems;
+import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.misc.Casts;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import java.util.Comparator;
@@ -44,9 +48,16 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
 
     public final T elem;
     public final Map<String, FxAction> actionMap = new TreeMap<>();
+    public final SimpleBooleanProperty focused = new SimpleBooleanProperty();
+    public final SimpleObjectProperty<ValueMenuItems> valueMenuItems = new SimpleObjectProperty<>();
 
     public AbstractTreeItem(T elem) {
         this.elem = elem;
+        parentProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) {
+                focused.set(false);
+            }
+        });
     }
 
     public abstract ObservableValue<String> getName();
@@ -73,8 +84,35 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
         return find(ProjectTreeItem.class).elem;
     }
 
-    public ValueMenuItems valueMenuItems(AutowireCapableBeanFactory beanFactory) {
-        return null;
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[" + elem + "]";
+    }
+
+    @Autowired
+    private void init(AutowireCapableBeanFactory beanFactory, SpecialActions specialActions) {
+        getChildren().forEach(o -> {
+            beanFactory.initializeBean(o, null);
+            beanFactory.autowireBean(o);
+        });
+        getChildren().addListener((ListChangeListener<TreeItem<Object>>) c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    c.getAddedSubList().forEach(o -> {
+                        beanFactory.initializeBean(o, null);
+                        beanFactory.autowireBean(o);
+                    });
+                } else if (c.wasRemoved()) {
+                    c.getRemoved().forEach(beanFactory::destroyBean);
+                }
+            }
+        });
+        focused.addListener((observable, oldValue, newValue) -> actionMap.forEach((key, value) -> {
+            final FxAction action = specialActions.getAction(key);
+            if (action != null) {
+                value.copy(action, newValue);
+            }
+        }));
     }
 
     protected static class ListSynchronizer<F, T extends AbstractTreeItem<F>> implements ListChangeListener<F> {
@@ -97,7 +135,7 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
                     c.getAddedSubList().stream().map(mapper).forEach(target::add);
                     sort();
                 } else if (c.wasRemoved()) {
-                    target.removeIf(e -> c.getList().contains(e.elem));
+                    target.removeIf(e -> c.getRemoved().contains(e.elem));
                 }
             }
         }

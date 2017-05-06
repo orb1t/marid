@@ -23,9 +23,16 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import org.marid.ide.common.FileActions;
+import org.marid.ide.common.SpecialActionConfiguration;
+import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.FxAction;
+import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.beans.MaridBeanUtils;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanFile;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 
 import static org.marid.ide.common.IdeShapes.fileNode;
 import static org.marid.jfx.LocalizedStrings.fs;
@@ -37,6 +44,7 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Configurable
 public class FileTreeItem extends AbstractTreeItem<BeanFile> {
 
     private final ObservableValue<String> name;
@@ -70,19 +78,17 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
         return Bindings.createObjectBinding(() -> {
             final HBox box = new HBox(10);
             {
-                {
-                    final Label label = new Label();
-                    label.setGraphic(glyphIcon(D_STAR_CIRCLE, 20));
-                    label.textProperty().bind(fs("%s: %d", ls("Beans"), elem.beans.size()));
-                    box.getChildren().add(label);
-                }
-                {
-                    final Label label = new Label();
-                    label.setGraphic(glyphIcon(D_STAR_OUTLINE, 20));
-                    final long count = elem.beans.stream().flatMap(MaridBeanUtils::beans).count();
-                    label.textProperty().bind(fs("%s: %d", ls("Internal Beans"), count));
-                    box.getChildren().add(label);
-                }
+                final Label label = new Label();
+                label.setGraphic(glyphIcon(D_STAR_CIRCLE, 20));
+                label.textProperty().bind(fs("%s: %d", ls("Beans"), elem.beans.size()));
+                box.getChildren().add(label);
+            }
+            {
+                final Label label = new Label();
+                label.setGraphic(glyphIcon(D_STAR_OUTLINE, 20));
+                final long count = elem.beans.stream().flatMap(MaridBeanUtils::beans).count();
+                label.textProperty().bind(fs("%s: %d", ls("Inner Beans"), count));
+                box.getChildren().add(label);
             }
             return box;
         }, elem.observables());
@@ -91,5 +97,25 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
     @Override
     public ObservableValue<String> valueText() {
         return Bindings.createStringBinding(() -> null);
+    }
+
+    @Autowired
+    private void initRename(ProjectProfile profile, FileActions actions, FxAction renameAction) {
+        actionMap.put(SpecialActionConfiguration.RENAME, new FxAction("op", "rename")
+                .setEventHandler(event -> actions.renameFile(profile, elem))
+                .setAccelerator(renameAction.getAccelerator())
+                .setIcon(FontIcon.O_DIFF_RENAMED)
+                .bindText("Rename file")
+        );
+    }
+
+    @Autowired
+    private void initRemove(ProjectProfile profile, FxAction removeAction) {
+        actionMap.put(SpecialActionConfiguration.REMOVE, new FxAction("op", "remove")
+                .setEventHandler(event -> profile.getBeanFiles().remove(elem))
+                .setAccelerator(removeAction.getAccelerator())
+                .setIcon(FontIcon.D_TABLE_ROW_REMOVE)
+                .bindText("Remove file")
+        );
     }
 }

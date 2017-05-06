@@ -24,11 +24,16 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import org.marid.ide.common.FileActions;
 import org.marid.ide.common.IdeShapes;
+import org.marid.ide.common.SpecialActionConfiguration;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.LocalizedStrings;
+import org.marid.jfx.action.FxAction;
 import org.marid.spring.beans.MaridBeanUtils;
 import org.marid.spring.xml.BeanFile;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 
 import static org.marid.jfx.LocalizedStrings.fs;
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -38,6 +43,7 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Configurable
 public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
 
     private final ObservableValue<String> name;
@@ -90,7 +96,7 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
                         .flatMap(f -> f.beans.stream())
                         .flatMap(MaridBeanUtils::beans)
                         .count();
-                label.textProperty().bind(fs("%s: %d", ls("Internal Beans"), count));
+                label.textProperty().bind(fs("%s: %d", ls("Inner Beans"), count));
                 box.getChildren().add(label);
             }
             return box;
@@ -100,5 +106,15 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
     @Override
     public ObservableValue<String> valueText() {
         return Bindings.createStringBinding(() -> null);
+    }
+
+    @Autowired
+    private void initAdd(FileActions fileActions, ProjectProfile profile, FxAction addAction) {
+        actionMap.put(SpecialActionConfiguration.ADD, new FxAction("children", "add")
+                .setEventHandler(event -> fileActions.addFile(profile))
+                .bindText("Add file")
+                .setIcon(M_ADD_BOX)
+                .setAccelerator(addAction.getAccelerator())
+        );
     }
 }

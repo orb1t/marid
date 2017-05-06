@@ -25,6 +25,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
+import org.marid.IdeDependants;
+import org.marid.ide.common.FileActions;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
@@ -144,22 +146,22 @@ public class BeanFileBrowser extends CommonTableView<BeanFile> {
     }
 
     @Autowired
-    private void initEdit(BeanFileBrowserActions actions, FxAction editAction) {
+    private void initEdit(FileActions fileActions, FxAction editAction, IdeDependants dependants) {
         editAction.on(this, action -> {
-            action.setEventHandler(actions::launchBeanEditor);
+            action.setEventHandler(event -> fileActions.launchBeanEditor(getSelectionModel().getSelectedItem(), dependants));
             action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });
     }
 
     @Autowired
-    private void initAdd(BeanFileBrowserActions actions, FxAction addAction) {
-        addAction.on(this, action -> action.setEventHandler(actions::onFileAdd));
+    private void initAdd(FileActions fileActions, FxAction addAction, ProjectProfile profile) {
+        addAction.on(this, action -> action.setEventHandler(event -> fileActions.addFile(profile)));
     }
 
     @Autowired
-    private void initRename(BeanFileBrowserActions actions, FxAction renameAction) {
+    private void initRename(FileActions fileActions, FxAction renameAction, ProjectProfile profile) {
         renameAction.on(this, action -> {
-            action.setEventHandler(actions::onRename);
+            action.setEventHandler(event -> fileActions.renameFile(profile, getSelectionModel().getSelectedItem()));
             action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });
     }

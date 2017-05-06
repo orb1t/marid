@@ -40,6 +40,7 @@ import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.contexts.ValueEditorContext;
 import org.marid.spring.xml.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
@@ -61,6 +62,7 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Configurable
 public class ValueMenuItems {
 
     private final List<MenuItem> items = new ArrayList<>();

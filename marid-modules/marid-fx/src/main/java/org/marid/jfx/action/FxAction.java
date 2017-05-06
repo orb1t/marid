@@ -276,8 +276,8 @@ public final class FxAction {
         return children;
     }
 
-    public FxAction on(Node node, Consumer<FxAction> on) {
-        node.focusedProperty().addListener((observable, oldValue, newValue) -> {
+    public FxAction on(ObservableValue<Boolean> focusedProperty, Consumer<FxAction> on) {
+        focusedProperty.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 on.accept(this);
                 if (!disabledProperty().isBound()) {
@@ -291,5 +291,25 @@ public final class FxAction {
             }
         });
         return this;
+    }
+
+    public FxAction on(Node node, Consumer<FxAction> on) {
+        return on(node.focusedProperty(), on);
+    }
+
+    public void copy(FxAction action, boolean focused) {
+        if (action.disabledProperty() != null && action.disabledProperty().isBound()) {
+            action.disabledProperty().unbind();
+        }
+        action.setEventHandler(getEventHandler());
+        if (focused) {
+            if (disabledProperty() != null) {
+                action.disabledProperty().bind(disabledProperty());
+            } else {
+                action.setDisabled(false);
+            }
+        } else {
+            action.setDisabled(true);
+        }
     }
 }
