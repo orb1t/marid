@@ -22,7 +22,6 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import org.jboss.logmanager.LogManager;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
@@ -30,13 +29,11 @@ import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 
-import java.io.InputStream;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import static org.marid.IdePrefs.PREFERENCES;
+import static org.marid.ide.logging.IdeLogConfig.ROOT_LOGGER;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -47,14 +44,13 @@ public class Ide extends Application {
 
     public static Stage primaryStage;
     public static Ide ide;
-    public static Logger rootLogger;
     public static ClassLoader classLoader;
     public static IdeLogHandler ideLogHandler;
 
     @Override
     public void init() throws Exception {
         Ide.ide = this;
-        rootLogger.addHandler(ideLogHandler = new IdeLogHandler());
+        ROOT_LOGGER.addHandler(ideLogHandler = new IdeLogHandler());
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
         context.setId("root");
@@ -86,22 +82,9 @@ public class Ide extends Application {
     }
 
     static {
-        // logging manager
-        System.setProperty("java.util.logging.manager", LogManager.class.getName());
-
         // console logger
         classLoader = Thread.currentThread().getContextClassLoader();
-        if (classLoader.getResource("logging.properties") == null) {
-            try (final InputStream inputStream = classLoader.getResourceAsStream("logging/default.properties")) {
-                LogManager.getLogManager().readConfiguration(inputStream);
-            } catch (Exception x) {
-                throw new IllegalStateException(x);
-            }
-        }
-
-        // root logger
-        rootLogger = Logger.getLogger("");
-        rootLogger.setLevel(Level.parse(PREFERENCES.get("logLevel", Level.INFO.getName())));
+        System.setProperty("java.util.logging.config.class", "org.marid.ide.logging.IdeLogConfig");
 
         // locale
         final String locale = PREFERENCES.get("locale", null);

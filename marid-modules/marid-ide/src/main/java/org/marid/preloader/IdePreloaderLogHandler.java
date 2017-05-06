@@ -19,9 +19,8 @@
 package org.marid.preloader;
 
 import javafx.scene.text.Text;
-import org.jboss.logmanager.formatters.PatternFormatter;
-import org.marid.Ide;
 import org.marid.concurrent.MaridTimerTask;
+import org.marid.logging.LambdaFormatter;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -29,6 +28,9 @@ import java.util.Timer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
+
+import static org.marid.ide.logging.IdeLogConfig.ROOT_LOGGER;
+import static org.marid.l10n.L10n.m;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,7 +43,7 @@ public class IdePreloaderLogHandler extends Handler {
 
     IdePreloaderLogHandler(IdePreloader preloader) {
         this.preloader = preloader;
-        setFormatter(new PatternFormatter("%m%n"));
+        setFormatter(new LambdaFormatter(r -> m(r.getMessage(), r.getParameters()) + System.lineSeparator()));
         timer.schedule(new MaridTimerTask(task -> flush()), 100L, 30L);
     }
 
@@ -74,6 +76,6 @@ public class IdePreloaderLogHandler extends Handler {
     public void close() {
         timer.cancel();
         flush();
-        Ide.rootLogger.removeHandler(this);
+        ROOT_LOGGER.removeHandler(this);
     }
 }

@@ -38,7 +38,6 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.marid.Ide;
 import org.marid.IdePrefs;
 import org.marid.image.MaridIconFx;
 
@@ -47,6 +46,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static javafx.scene.paint.Color.GREEN;
+import static org.marid.ide.logging.IdeLogConfig.ROOT_LOGGER;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
 import static org.marid.misc.Builder.build;
@@ -141,7 +141,7 @@ public class IdePreloader extends Preloader {
     public void handleStateChangeNotification(StateChangeNotification info) {
         switch (info.getType()) {
             case BEFORE_INIT:
-                Ide.rootLogger.addHandler(logHandler);
+                ROOT_LOGGER.addHandler(logHandler);
                 publishText(new Text(m("Loader initialized") + System.lineSeparator()));
                 break;
             case BEFORE_LOAD:
