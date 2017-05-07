@@ -34,6 +34,8 @@ import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
+import javax.annotation.PreDestroy;
+
 import static org.marid.ide.common.IdeShapes.fileNode;
 import static org.marid.jfx.LocalizedStrings.fs;
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -117,5 +119,10 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
                 .setIcon(FontIcon.D_TABLE_ROW_REMOVE)
                 .bindText("Remove file")
         );
+    }
+
+    @PreDestroy
+    private void destroy() {
+        listSynchronizer.destroy();
     }
 }

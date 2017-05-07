@@ -23,12 +23,17 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import org.jetbrains.annotations.NotNull;
+import org.marid.IdeDependants;
+import org.marid.dependant.valuemenu.ValuesConfiguration;
+import org.marid.dependant.valuemenu.ValuesParams;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
 import org.marid.util.MethodUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.core.annotation.Order;
 
 import static java.lang.Integer.compare;
@@ -38,6 +43,7 @@ import static java.util.Optional.ofNullable;
  * @author Dmitry Ovchinnikov
  */
 @Order(2)
+@Configurable
 public class PropertyTreeItem extends AbstractTreeItem<BeanProp> implements Comparable<AbstractTreeItem<?>> {
 
     public PropertyTreeItem(BeanProp elem) {
@@ -86,5 +92,13 @@ public class PropertyTreeItem extends AbstractTreeItem<BeanProp> implements Comp
             final Order o2 = o.getClass().getAnnotation(Order.class);
             return compare(ofNullable(o1).map(Order::value).orElse(0), ofNullable(o2).map(Order::value).orElse(0));
         }
+    }
+
+    @Autowired
+    private void initValueMenuItems(ProjectProfile profile, IdeDependants dependants) {
+        menu.set(items -> {
+            final ValuesParams params = new ValuesParams(profile, elem, items);
+            dependants.start(ValuesConfiguration.class, params, f -> {}).close();
+        });
     }
 }

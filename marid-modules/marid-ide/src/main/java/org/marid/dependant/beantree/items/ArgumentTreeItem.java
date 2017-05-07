@@ -22,8 +22,9 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import org.jetbrains.annotations.NotNull;
-import org.marid.dependant.beaneditor.ValueMenuItems;
+import org.marid.IdeDependants;
+import org.marid.dependant.valuemenu.ValuesConfiguration;
+import org.marid.dependant.valuemenu.ValuesParams;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
@@ -32,9 +33,9 @@ import org.marid.spring.xml.BeanData;
 import org.marid.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
+
+import javax.annotation.Nonnull;
 
 import static java.lang.Integer.compare;
 import static java.util.Optional.ofNullable;
@@ -80,7 +81,7 @@ public class ArgumentTreeItem extends AbstractTreeItem<BeanArg> implements Compa
     }
 
     @Override
-    public int compareTo(@NotNull AbstractTreeItem<?> o) {
+    public int compareTo(@Nonnull AbstractTreeItem<?> o) {
         if (o instanceof ArgumentTreeItem) {
             final ArgumentTreeItem i = (ArgumentTreeItem) o;
             final BeanData beanData = find(BeanTreeItem.class).elem;
@@ -95,13 +96,10 @@ public class ArgumentTreeItem extends AbstractTreeItem<BeanArg> implements Compa
     }
 
     @Autowired
-    private void initValueMenuItems(ProjectProfile profile, AutowireCapableBeanFactory beanFactory) {
-        valueMenuItems.bind(Bindings.createObjectBinding(() -> {
-            final BeanData beanData = find(BeanTreeItem.class).elem;
-            final ResolvableType type = profile.getArgType(beanData, elem.getName());
-            final ValueMenuItems menuItems = new ValueMenuItems(elem.data, type, elem.name);
-            beanFactory.autowireBean(menuItems);
-            return menuItems;
-        }, elem.observables()));
+    private void initValueMenuItems(ProjectProfile profile, IdeDependants dependants) {
+        menu.set(items -> {
+            final ValuesParams params = new ValuesParams(profile, elem, items);
+            dependants.start(ValuesConfiguration.class, params, f -> {}).close();
+        });
     }
 }

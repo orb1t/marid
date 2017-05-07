@@ -35,6 +35,8 @@ import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
+import javax.annotation.PreDestroy;
+
 import static org.marid.jfx.LocalizedStrings.fs;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcon.*;
@@ -116,5 +118,10 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
                 .setIcon(M_ADD_BOX)
                 .setAccelerator(addAction.getAccelerator())
         );
+    }
+
+    @PreDestroy
+    private void destroy() {
+        listSynchronizer.destroy();
     }
 }

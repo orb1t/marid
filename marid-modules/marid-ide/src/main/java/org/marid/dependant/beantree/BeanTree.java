@@ -20,7 +20,6 @@ package org.marid.dependant.beantree;
 
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.*;
-import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.dependant.beantree.items.AbstractTreeItem;
 import org.marid.dependant.beantree.items.ProjectTreeItem;
 import org.marid.ide.project.ProjectProfile;
@@ -117,10 +116,7 @@ public class BeanTree extends TreeTableView<Object> {
                     return;
                 }
                 m.getItems().addAll(MaridActions.contextMenu(treeItem.actionMap));
-                final ValueMenuItems valueMenuItems = treeItem.valueMenuItems.get();
-                if (valueMenuItems != null) {
-                    valueMenuItems.addTo(m);
-                }
+                treeItem.menu.get().accept(m.getItems());
             }));
             row.setLineSpacing(1.0);
             return row;

@@ -22,6 +22,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import org.marid.dependant.valuemenu.BeanMetaInfoProvider;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;

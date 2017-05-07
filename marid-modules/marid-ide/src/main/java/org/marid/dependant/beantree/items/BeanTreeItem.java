@@ -32,6 +32,8 @@ import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
 import org.marid.util.MethodUtils;
 
+import javax.annotation.PreDestroy;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -85,5 +87,11 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
             }
             return box;
         }, elem.observables());
+    }
+
+    @PreDestroy
+    private void destroy() {
+        argsSynchronizer.destroy();
+        propsSynchronizer.destroy();
     }
 }

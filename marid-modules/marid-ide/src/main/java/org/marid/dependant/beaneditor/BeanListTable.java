@@ -27,6 +27,7 @@ import javafx.util.converter.DefaultStringConverter;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorParams;
+import org.marid.dependant.valuemenu.BeanListActions;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;

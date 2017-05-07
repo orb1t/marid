@@ -20,6 +20,8 @@ package org.marid.dependant.beaneditor;
 
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.BorderPane;
+import org.marid.dependant.valuemenu.BeanListActions;
+import org.marid.dependant.valuemenu.BeanMetaInfoProvider;
 import org.marid.ide.panes.main.IdeToolbar;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.dialog.MaridDialog;

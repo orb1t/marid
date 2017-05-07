@@ -53,7 +53,7 @@ public class IdeLogConfig extends Handler {
             formatter.flush();
             builder.append(level(record.getLevel()));
             builder.append(' ');
-            builder.append(abbreviate(record.getLoggerName(), 36));
+            builder.append(abbreviate(record.getLoggerName()));
             builder.append(' ');
             m(Locale.getDefault(), record.getMessage(), builder, record.getParameters());
             builder.append(System.lineSeparator());
@@ -68,6 +68,7 @@ public class IdeLogConfig extends Handler {
 
     @Override
     public void flush() {
+        System.out.flush();
     }
 
     @Override
@@ -87,16 +88,16 @@ public class IdeLogConfig extends Handler {
         }
     }
 
-    private static char[] abbreviate(String logger, int width) {
-        final char[] result = new char[width];
+    private static char[] abbreviate(String logger) {
+        final char[] result = new char[64];
         if (logger != null) {
             final int pos = logger.lastIndexOf('.');
             final int offset = pos >= 0 ? pos + 1 : 0;
-            final int len = Math.min(logger.length() - offset, width);
+            final int len = Math.min(logger.length() - offset, result.length);
             for (int i = 0; i < len; i++) {
                 result[i] = logger.charAt(i + offset);
             }
-            Arrays.fill(result, len, width, ' ');
+            Arrays.fill(result, len, result.length, ' ');
         } else {
             Arrays.fill(result, ' ');
         }

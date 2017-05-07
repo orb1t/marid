@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Dmitry Ovchinnikov
+ * Copyright (c) 2017 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,17 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor;
+package org.marid.dependant.valuemenu;
 
 import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.WritableValue;
-import javafx.scene.control.*;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextInputDialog;
 import org.apache.commons.lang3.ArrayUtils;
 import org.marid.IdeDependants;
 import org.marid.beans.TypeInfo;
-import org.marid.dependant.valuemenu.BeanListActions;
-import org.marid.dependant.valuemenu.BeanMetaInfoProvider;
-import org.marid.dependant.valuemenu.BeanMetaInfoProvider.BeansMetaInfo;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorParams;
 import org.marid.dependant.beaneditor.listeditor.ListEditorConfiguration;
@@ -42,10 +42,11 @@ import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.contexts.ValueEditorContext;
 import org.marid.spring.xml.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,8 +65,8 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configurable
-public class ValueMenuItems {
+@Component
+public class ValueMenuFiller {
 
     private final List<MenuItem> items = new ArrayList<>();
     private final WritableValue<DElement<?>> element;
@@ -73,14 +74,17 @@ public class ValueMenuItems {
     private final List<TypeInfo> editors = new ArrayList<>();
     private final ObservableStringValue name;
 
-    public ValueMenuItems(WritableValue<DElement<?>> element, ResolvableType type, ObservableStringValue name) {
+    @Autowired
+    public ValueMenuFiller(WritableValue<DElement<?>> element, ResolvableType type, ObservableStringValue name) {
         this.element = element;
         this.type = type;
         this.name = name;
     }
 
-    public void addEditor(TypeInfo typeInfo) {
-        editors.add(typeInfo);
+    @Order(0)
+    @Autowired
+    public void editors(GenericApplicationContext context) {
+        editors.addAll(context.getBeansOfType(TypeInfo.class).values());
     }
 
     private <T extends DElement<?>> T value(Class<T> type, Supplier<T> supplier) {
@@ -123,7 +127,7 @@ public class ValueMenuItems {
     @Autowired
     public void initRefValue(BeanMetaInfoProvider metaInfoProvider) {
         MenuItem[] refItems = new MenuItem[0];
-        final BeansMetaInfo metaInfo = metaInfoProvider.profileMetaInfo();
+        final BeanMetaInfoProvider.BeansMetaInfo metaInfo = metaInfoProvider.profileMetaInfo();
         for (final BeanDefinitionHolder h : metaInfo.beans(type)) {
             final String name = h.getBeanName();
             final MenuItem item = new MenuItem(name, glyphIcon(FontIcon.M_BEENHERE, 16));
@@ -141,7 +145,7 @@ public class ValueMenuItems {
     public void initNewBean(BeanMetaInfoProvider provider, BeanListActions actions) {
         MenuItem[] refItems = new MenuItem[0];
         MenuItem[] embItems = new MenuItem[0];
-        final BeansMetaInfo metaInfo = provider.metaInfo();
+        final BeanMetaInfoProvider.BeansMetaInfo metaInfo = provider.metaInfo();
         for (final BeanDefinitionHolder h : metaInfo.beans(type)) {
             final MenuItem refItem = new MenuItem(h.getBeanName(), glyphIcon(M_ACCOUNT_BALANCE, 16));
             refItem.setOnAction(event -> {
@@ -335,14 +339,6 @@ public class ValueMenuItems {
             items.add(menuItem);
         }
         items.add(new SeparatorMenuItem());
-    }
-
-    public void addTo(ContextMenu contextMenu) {
-        addTo(contextMenu.getItems());
-    }
-
-    public void addTo(Menu menu) {
-        addTo(menu.getItems());
     }
 
     public void addTo(List<MenuItem> menuItems) {

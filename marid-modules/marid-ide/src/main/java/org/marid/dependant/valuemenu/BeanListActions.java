@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Dmitry Ovchinnikov
+ * Copyright (c) 2017 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor;
+package org.marid.dependant.valuemenu;
 
 import javafx.beans.property.Property;
 import javafx.scene.control.Menu;
@@ -25,7 +25,7 @@ import javafx.scene.control.SeparatorMenuItem;
 import org.marid.IdeDependants;
 import org.marid.beans.BeanIntrospector;
 import org.marid.beans.ClassInfo;
-import org.marid.dependant.beaneditor.BeanMetaInfoProvider.BeansMetaInfo;
+import org.marid.dependant.valuemenu.BeanMetaInfoProvider.BeansMetaInfo;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;

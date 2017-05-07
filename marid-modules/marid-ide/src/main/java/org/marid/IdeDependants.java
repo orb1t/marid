@@ -70,7 +70,7 @@ public class IdeDependants {
         final AtomicReference<ApplicationListener<ContextClosedEvent>> closedRef = new AtomicReference<>();
         closedRef.set(event -> {
             context.close();
-            parent.getApplicationListeners().remove(closedRef.get());
+            parent.getApplicationListeners().remove(closedRef.getAndSet(null));
         });
         parent.addApplicationListener(closedRef.get());
         consumer.accept(context);
