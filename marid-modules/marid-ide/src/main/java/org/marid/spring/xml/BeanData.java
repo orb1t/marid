@@ -18,13 +18,12 @@
 
 package org.marid.spring.xml;
 
+import javafx.beans.Observable;
 import org.marid.jfx.beans.FxList;
-import org.marid.jfx.beans.FxObservable;
 import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
 import java.lang.reflect.Executable;
-import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,9 +40,21 @@ public final class BeanData extends DElement<BeanData> {
     public final FxString factoryBean = new FxString(null, "factory-bean");
     public final FxString factoryMethod = new FxString(null, "factory-method");
     public final FxString lazyInit = new FxString(null, "lazy-init", "default");
-    public final FxList<BeanArg> beanArgs = new FxList<>(BeanArg::observables);
-    public final FxList<BeanProp> properties = new FxList<>(BeanProp::observables);
+    public final FxList<BeanArg> beanArgs = new FxList<>(a -> new Observable[] {a});
+    public final FxList<BeanProp> properties = new FxList<>(p -> new Observable[] {p});
     public final transient FxList<Executable> constructors = new FxList<>();
+
+    public BeanData() {
+        type.addListener(this::fireInvalidate);
+        name.addListener(this::fireInvalidate);
+        initMethod.addListener(this::fireInvalidate);
+        destroyMethod.addListener(this::fireInvalidate);
+        factoryBean.addListener(this::fireInvalidate);
+        factoryMethod.addListener(this::fireInvalidate);
+        lazyInit.addListener(this::fireInvalidate);
+        beanArgs.addListener(this::fireInvalidate);
+        properties.addListener(this::fireInvalidate);
+    }
 
     @XmlAttribute(name = "class")
     public String getType() {
@@ -144,27 +155,6 @@ public final class BeanData extends DElement<BeanData> {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public FxObservable[] observables() {
-        return new FxObservable[]{
-                type,
-                name,
-                initMethod,
-                destroyMethod,
-                factoryBean,
-                factoryMethod,
-                lazyInit,
-                beanArgs,
-                properties,
-                constructors
-        };
-    }
-
-    @Override
-    public Stream<FxObservable> observableStream() {
-        return Stream.of(observables());
     }
 
     @Override

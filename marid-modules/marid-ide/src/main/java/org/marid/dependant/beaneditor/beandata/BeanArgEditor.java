@@ -94,7 +94,7 @@ public class BeanArgEditor extends TableView<BeanArg> {
         col.textProperty().bind(ls("Value"));
         col.setPrefWidth(500);
         col.setMaxWidth(1500);
-        col.setCellValueFactory(p -> createObjectBinding(() -> label(p.getValue().getData()), p.getValue().observables()));
+        col.setCellValueFactory(p -> createObjectBinding(() -> label(p.getValue().getData()), p.getValue()));
         getColumns().add(col);
     }
 

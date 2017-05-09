@@ -18,12 +18,11 @@
 
 package org.marid.spring.xml;
 
+import javafx.beans.Observable;
 import org.marid.jfx.beans.FxList;
-import org.marid.jfx.beans.FxObservable;
 import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
-import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -34,7 +33,12 @@ import java.util.stream.Stream;
 public final class DProps extends DElement<DProps> {
 
     public final FxString valueType = new FxString(null, "value-type");
-    public final FxList<DPropEntry> entries = new FxList<>(DPropEntry::observables);
+    public final FxList<DPropEntry> entries = new FxList<>(p -> new Observable[] {p});
+
+    public DProps() {
+        valueType.addListener(this::fireInvalidate);
+        entries.addListener(this::fireInvalidate);
+    }
 
     @XmlAttribute(name = "value-type")
     public String getValueType() {
@@ -57,16 +61,6 @@ public final class DProps extends DElement<DProps> {
     @Override
     public boolean isEmpty() {
         return false;
-    }
-
-    @Override
-    public FxObservable[] observables() {
-        return new FxObservable[] {valueType, entries};
-    }
-
-    @Override
-    public Stream<FxObservable> observableStream() {
-        return Stream.of(observables());
     }
 
     @Override

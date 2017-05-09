@@ -19,8 +19,8 @@
 package org.marid.dependant.beaneditor.beandata;
 
 import javafx.scene.control.TabPane;
-import org.marid.ide.tabs.IdeTab;
 import org.marid.ide.common.IdeShapes;
+import org.marid.ide.tabs.IdeTab;
 import org.marid.spring.xml.BeanData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,6 +38,6 @@ public class BeanDataTab extends IdeTab {
     @Autowired
     public BeanDataTab(@Qualifier("beanData") TabPane beanDataEditorsTabs, BeanData data) {
         super(beanDataEditorsTabs, createStringBinding(data::getName, data.name), () -> IdeShapes.beanNode(data, 16));
-        addNodeObservables(data.observables());
+        addNodeObservables(data);
     }
 }

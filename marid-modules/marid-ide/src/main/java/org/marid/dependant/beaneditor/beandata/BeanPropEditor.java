@@ -26,8 +26,8 @@ import org.marid.beans.BeanIntrospector;
 import org.marid.beans.ClassInfo;
 import org.marid.beans.TypeInfo;
 import org.marid.dependant.beaneditor.ValueMenuItems;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.common.IdeShapes;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.marid.spring.xml.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +79,7 @@ public class BeanPropEditor extends TableView<BeanProp> {
         col.setCellValueFactory(param -> createObjectBinding(() -> {
             final ResolvableType type = profile.getPropType(beanData, param.getValue().getName());
             return type == ResolvableType.NONE ? "?" : type.toString();
-        }, param.getValue().observables()));
+        }, param.getValue()));
         getColumns().add(col);
     }
 
@@ -92,7 +92,7 @@ public class BeanPropEditor extends TableView<BeanProp> {
         col.setMaxWidth(1500);
         col.setCellValueFactory(p -> {
             final BeanProp prop = p.getValue();
-            return createObjectBinding(() -> label(prop.getData()), prop.observables());
+            return createObjectBinding(() -> label(prop.getData()), prop);
         });
         getColumns().add(col);
     }

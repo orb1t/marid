@@ -19,14 +19,9 @@
 package org.marid.spring.xml;
 
 import org.marid.jfx.beans.FxObject;
-import org.marid.jfx.beans.FxObservable;
 import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
-import java.util.stream.Stream;
-
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.of;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -37,6 +32,19 @@ public class BeanProp extends AbstractData<BeanProp> {
 
     public final FxString name = new FxString(null, "name");
     public final FxObject<DElement<?>> data = new FxObject<>(null, "data");
+
+    public BeanProp() {
+        name.addListener(this::fireInvalidate);
+        data.addListener((observable, oldValue, newValue) -> {
+            fireInvalidate(observable);
+            if (oldValue != null) {
+                oldValue.removeListener(this::fireInvalidate);
+            }
+            if (newValue != null) {
+                newValue.addListener(this::fireInvalidate);
+            }
+        });
+    }
 
     @XmlAttribute(name = "name")
     public String getName() {
@@ -58,18 +66,6 @@ public class BeanProp extends AbstractData<BeanProp> {
 
     public boolean isEmpty() {
         return data.get() == null;
-    }
-
-    public FxObservable[] observables() {
-        final DElement<?> e = data.get();
-        return e == null
-                ? new FxObservable[] {name, data}
-                : concat(observableStream(), of(e.observables())).toArray(FxObservable[]::new);
-    }
-
-    @Override
-    public Stream<FxObservable> observableStream() {
-        return of(name, data);
     }
 
     @Override

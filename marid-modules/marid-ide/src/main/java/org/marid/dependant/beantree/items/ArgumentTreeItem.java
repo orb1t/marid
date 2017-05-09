@@ -65,17 +65,17 @@ public class ArgumentTreeItem extends AbstractTreeItem<BeanArg> implements Compa
             final ProjectProfile profile = getProfile();
             final BeanData data = find(BeanTreeItem.class).elem;
             return MethodUtils.readableType(profile.getArgType(data, elem.getName()));
-        }, elem.observables());
+        }, elem);
     }
 
     @Override
     public ObservableValue<Node> valueGraphic() {
-        return Bindings.createObjectBinding(() -> itemGraphic(elem.getData()), elem.observables());
+        return Bindings.createObjectBinding(() -> itemGraphic(elem.getData()), elem);
     }
 
     @Override
     public ObservableValue<String> valueText() {
-        return Bindings.createStringBinding(() -> itemText(elem.getData()), elem.observables());
+        return Bindings.createStringBinding(() -> itemText(elem.getData()), elem);
     }
 
     @Override

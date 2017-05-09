@@ -64,17 +64,17 @@ public class PropertyTreeItem extends AbstractTreeItem<BeanProp> implements Comp
             final ProjectProfile profile = getProfile();
             final BeanData data = find(BeanTreeItem.class).elem;
             return MethodUtils.readableType(profile.getPropType(data, elem.getName()));
-        }, elem.observables());
+        }, elem);
     }
 
     @Override
     public ObservableValue<Node> valueGraphic() {
-        return Bindings.createObjectBinding(() -> itemGraphic(elem.getData()), elem.observables());
+        return Bindings.createObjectBinding(() -> itemGraphic(elem.getData()), elem);
     }
 
     @Override
     public ObservableValue<String> valueText() {
-        return Bindings.createStringBinding(() -> itemText(elem.getData()), elem.observables());
+        return Bindings.createStringBinding(() -> itemText(elem.getData()), elem);
     }
 
     @Override

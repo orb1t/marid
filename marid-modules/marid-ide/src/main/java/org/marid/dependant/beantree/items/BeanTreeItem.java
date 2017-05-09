@@ -44,8 +44,8 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
 
     public BeanTreeItem(BeanData elem) {
         super(elem);
-        valueProperty().bind(Bindings.createObjectBinding(() -> elem, elem.observables()));
-        graphicProperty().bind(Bindings.createObjectBinding(() -> IdeShapes.beanNode(elem, 20), elem.observables()));
+        valueProperty().bind(Bindings.createObjectBinding(() -> elem, elem));
+        graphicProperty().bind(Bindings.createObjectBinding(() -> IdeShapes.beanNode(elem, 20), elem));
 
         argsSynchronizer = new ListSynchronizer<>(elem.beanArgs, getChildren(), ArgumentTreeItem::new);
         propsSynchronizer = new ListSynchronizer<>(elem.properties, getChildren(), PropertyTreeItem::new);
@@ -60,7 +60,7 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
     @Override
     public ObservableValue<String> getType() {
         final ProjectProfile profile = getProfile();
-        return Bindings.createStringBinding(() -> MethodUtils.readableType(profile.getType(elem)), elem.observables());
+        return Bindings.createStringBinding(() -> MethodUtils.readableType(profile.getType(elem)), elem);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
                 }
             }
             return null;
-        }, elem.observables());
+        }, elem);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
                 box.getChildren().add(icon);
             }
             return box;
-        }, elem.observables());
+        }, elem);
     }
 
     @PreDestroy

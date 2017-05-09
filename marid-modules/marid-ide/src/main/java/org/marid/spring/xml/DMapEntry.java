@@ -19,14 +19,9 @@
 package org.marid.spring.xml;
 
 import org.marid.jfx.beans.FxObject;
-import org.marid.jfx.beans.FxObservable;
 import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
-import java.util.stream.Stream;
-
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.of;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -38,6 +33,11 @@ public class DMapEntry extends AbstractData<DMapEntry> {
 
     public final FxString key = new FxString(null, "key");
     public final FxObject<DElement<?>> value = new FxObject<>(null, "value");
+
+    public DMapEntry() {
+        key.addListener(this::fireInvalidate);
+        value.addListener(this::fireInvalidate);
+    }
 
     @XmlAttribute
     public String getKey() {
@@ -55,18 +55,6 @@ public class DMapEntry extends AbstractData<DMapEntry> {
 
     public void setValue(DElement<?> value) {
         this.value.set(value);
-    }
-
-    public FxObservable[] observables() {
-        final DElement<?> e = value.get();
-        return e == null
-                ? new FxObservable[] {key, value}
-                : concat(observableStream(), of(e.observables())).toArray(FxObservable[]::new);
-    }
-
-    @Override
-    public Stream<FxObservable> observableStream() {
-        return of(key, value);
     }
 
     public boolean isEmpty() {

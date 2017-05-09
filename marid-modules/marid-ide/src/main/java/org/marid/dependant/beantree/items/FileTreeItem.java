@@ -59,7 +59,7 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
         name = Bindings.createStringBinding(file::getFilePath, file.path);
         type = ls("file");
 
-        graphicProperty().bind(Bindings.createObjectBinding(() -> fileNode(file, 20), file.observables()));
+        graphicProperty().bind(Bindings.createObjectBinding(() -> fileNode(file, 20), file));
 
         listSynchronizer = new ListSynchronizer<>(file.beans, getChildren(), BeanTreeItem::new);
         setExpanded(true);
@@ -93,7 +93,7 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
                 box.getChildren().add(label);
             }
             return box;
-        }, elem.observables());
+        }, elem);
     }
 
     @Override

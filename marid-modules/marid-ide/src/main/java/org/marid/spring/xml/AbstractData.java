@@ -23,7 +23,6 @@ import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import org.marid.jfx.beans.AbstractObservable;
-import org.marid.jfx.beans.FxObservable;
 
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.*;
@@ -31,7 +30,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.stream.Stream;
 
 import static java.lang.reflect.Modifier.isStatic;
 import static java.lang.reflect.Modifier.isTransient;
@@ -115,8 +113,4 @@ public abstract class AbstractData<T extends AbstractData<T>> extends AbstractOb
             throw new IllegalArgumentException("Not serializable value " + o);
         }
     }
-
-    public abstract FxObservable[] observables();
-
-    public abstract Stream<FxObservable> observableStream();
 }

@@ -18,14 +18,12 @@
 
 package org.marid.spring.xml;
 
-import org.marid.jfx.beans.FxObservable;
 import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
-import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -37,10 +35,12 @@ public final class DValue extends DElement<DValue> {
     public final FxString value = new FxString(null, "value");
 
     public DValue() {
+        this(null);
     }
 
     public DValue(String value) {
         this.value.set(value);
+        this.value.addListener(this::fireInvalidate);
     }
 
     @XmlValue
@@ -55,16 +55,6 @@ public final class DValue extends DElement<DValue> {
     @Override
     public boolean isEmpty() {
         return value.get() == null || value.get().isEmpty();
-    }
-
-    @Override
-    public FxObservable[] observables() {
-        return new FxObservable[] {value};
-    }
-
-    @Override
-    public Stream<FxObservable> observableStream() {
-        return Stream.of(value);
     }
 
     @Override

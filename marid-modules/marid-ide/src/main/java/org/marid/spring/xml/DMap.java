@@ -18,12 +18,11 @@
 
 package org.marid.spring.xml;
 
+import javafx.beans.Observable;
 import org.marid.jfx.beans.FxList;
-import org.marid.jfx.beans.FxObservable;
 import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
-import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -36,21 +35,17 @@ public class DMap extends DElement<DMap> {
 
     public final FxString keyType = new FxString(null, "key-type");
     public final FxString valueType = new FxString(null, "value-type");
-    public final FxList<DMapEntry> entries = new FxList<>(DMapEntry::observables);
+    public final FxList<DMapEntry> entries = new FxList<>(e -> new Observable[] {e});
+
+    public DMap() {
+        keyType.addListener(this::fireInvalidate);
+        valueType.addListener(this::fireInvalidate);
+        entries.addListener(this::fireInvalidate);
+    }
 
     @Override
     public boolean isEmpty() {
         return false;
-    }
-
-    @Override
-    public FxObservable[] observables() {
-        return new FxObservable[] {keyType, valueType, entries};
-    }
-
-    @Override
-    public Stream<FxObservable> observableStream() {
-        return Stream.of(observables());
     }
 
     @XmlAttribute(name = "key-type")

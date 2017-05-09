@@ -45,8 +45,8 @@ public abstract class AbstractObservable implements Observable {
         listeners.remove(listener);
     }
 
-    protected void fireInvalidate() {
+    protected void fireInvalidate(Observable observable) {
         FxCleaner.clean(listeners);
-        listeners.forEach(l -> l.invalidated(this));
+        listeners.forEach(l -> l.invalidated(observable));
     }
 }

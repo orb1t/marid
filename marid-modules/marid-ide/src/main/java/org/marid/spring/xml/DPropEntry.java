@@ -18,11 +18,9 @@
 
 package org.marid.spring.xml;
 
-import org.marid.jfx.beans.FxObservable;
 import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
-import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -33,6 +31,11 @@ public final class DPropEntry extends AbstractData<DPropEntry> {
 
     public final FxString key = new FxString(null, "key");
     public final FxString value = new FxString(null, "value");
+
+    public DPropEntry() {
+        key.addListener(this::fireInvalidate);
+        value.addListener(this::fireInvalidate);
+    }
 
     @XmlAttribute(name = "key")
     public String getKey() {
@@ -60,15 +63,5 @@ public final class DPropEntry extends AbstractData<DPropEntry> {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public FxObservable[] observables() {
-        return new FxObservable[] {key, value};
-    }
-
-    @Override
-    public Stream<FxObservable> observableStream() {
-        return Stream.of(observables());
     }
 }

@@ -20,6 +20,7 @@ package org.marid.ide.project;
 
 import com.google.common.io.MoreFiles;
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
@@ -169,7 +170,7 @@ public class ProjectProfile {
     }
 
     private FxList<BeanFile> loadBeanFiles() {
-        final FxList<BeanFile> list = new FxList<>(BeanFile::observables);
+        final FxList<BeanFile> list = new FxList<>(f -> new Observable[] {f});
         try (final Stream<Path> stream = Files.walk(beansDirectory)) {
             stream.filter(p -> p.getFileName().toString().endsWith(".xml"))
                     .map(p -> {

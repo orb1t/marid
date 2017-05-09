@@ -18,12 +18,11 @@
 
 package org.marid.spring.xml;
 
+import javafx.beans.Observable;
 import org.marid.jfx.beans.FxList;
-import org.marid.jfx.beans.FxObservable;
 import org.marid.jfx.beans.FxString;
 
 import javax.xml.bind.annotation.*;
-import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -33,7 +32,12 @@ import java.util.stream.Stream;
 public abstract class DCollection<T extends DCollection<T>> extends DElement<T> {
 
     public final FxString valueType = new FxString(null, "value-type");
-    public final FxList<DElement<?>> elements = new FxList<>(DElement::observables);
+    public final FxList<DElement<?>> elements = new FxList<>(e -> new Observable[] {e});
+
+    public DCollection() {
+        valueType.addListener(this::fireInvalidate);
+        elements.addListener(this::fireInvalidate);
+    }
 
     @XmlAttribute(name = "value-type")
     public String getValueType() {
@@ -57,15 +61,5 @@ public abstract class DCollection<T extends DCollection<T>> extends DElement<T> 
     public String toString() {
         final String className = getClass().getSimpleName().substring(1);
         return className + "(" + elements.size() + ")";
-    }
-
-    @Override
-    public FxObservable[] observables() {
-        return new FxObservable[] {valueType, elements};
-    }
-
-    @Override
-    public Stream<FxObservable> observableStream() {
-        return Stream.of(observables());
     }
 }

@@ -18,14 +18,13 @@
 
 package org.marid.spring.xml;
 
+import javafx.beans.Observable;
 import org.marid.jfx.beans.FxList;
-import org.marid.jfx.beans.FxObservable;
 
 import javax.xml.bind.annotation.*;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,7 +35,12 @@ import java.util.stream.Stream;
 public final class BeanFile extends AbstractData<BeanFile> {
 
     public final FxList<String> path = new FxList<>();
-    public final FxList<BeanData> beans = new FxList<>(BeanData::observables);
+    public final FxList<BeanData> beans = new FxList<>(d -> new Observable[] {d});
+
+    public BeanFile() {
+        path.addListener(this::fireInvalidate);
+        beans.addListener(this::fireInvalidate);
+    }
 
     @XmlElement(name = "bean")
     public BeanData[] getBeans() {
@@ -76,16 +80,6 @@ public final class BeanFile extends AbstractData<BeanFile> {
             file.path.add(p.toString());
         }
         return file;
-    }
-
-    @Override
-    public FxObservable[] observables() {
-        return new FxObservable[] {path, beans};
-    }
-
-    @Override
-    public Stream<FxObservable> observableStream() {
-        return Stream.of(observables());
     }
 
     @Override
