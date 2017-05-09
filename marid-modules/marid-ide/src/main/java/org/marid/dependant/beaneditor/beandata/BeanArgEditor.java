@@ -129,6 +129,7 @@ public class BeanArgEditor extends TableView<BeanArg> {
                         }
                 }
                 factory.initializeBean(menuItems, null);
+                factory.autowireBean(menuItems);
                 menuItems.addTo(m);
             }));
             return row;

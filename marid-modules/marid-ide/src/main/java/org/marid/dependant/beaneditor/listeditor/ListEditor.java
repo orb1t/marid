@@ -89,6 +89,7 @@ public class ListEditor extends CommonListView<DElement<?>> {
                         final ResolvableType elementType = elementType(type);
                         final ValueMenuItems items = new ValueMenuItems(element, elementType, name);
                         factory.initializeBean(items, null);
+                        factory.autowireBean(items);
                         items.addTo(m);
                     }));
                 }

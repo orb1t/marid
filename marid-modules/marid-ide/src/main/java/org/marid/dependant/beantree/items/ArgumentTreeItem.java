@@ -97,7 +97,7 @@ public class ArgumentTreeItem extends AbstractTreeItem<BeanArg> implements Compa
     private void initValueMenuItems(ProjectProfile profile, IdeDependants dependants) {
         menu.set(items -> {
             final ValuesParams params = new ValuesParams(profile, elem, items);
-            dependants.start(ValuesConfiguration.class, params, f -> {}).close();
+            dependants.start(ValuesConfiguration.class, params, f -> {});
         });
     }
 }

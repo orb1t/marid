@@ -18,6 +18,7 @@
 
 package org.marid;
 
+import javafx.application.Platform;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.Tab;
@@ -27,6 +28,8 @@ import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
@@ -34,7 +37,10 @@ import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -46,7 +52,7 @@ import java.util.stream.Stream;
 @Component("dependants")
 public class IdeDependants {
 
-    private static final List<AnnotationConfigApplicationContext> CONTEXTS = new CopyOnWriteArrayList<>();
+    private static final List<WeakReference<GenericApplicationContext>> CONTEXTS = new CopyOnWriteArrayList<>();
 
     private final GenericApplicationContext parent;
 
@@ -56,17 +62,35 @@ public class IdeDependants {
     }
 
     public GenericApplicationContext start(Consumer<AnnotationConfigApplicationContext> consumer) {
-        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext() {
+            @Override
+            protected void finalize() throws Throwable {
+                Platform.runLater(this::close);
+            }
+        };
         context.getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
         context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
         context.getBeanFactory().setParentBeanFactory(parent.getDefaultListableBeanFactory());
         context.setAllowBeanDefinitionOverriding(false);
         context.setAllowCircularReferences(false);
         context.register(IdeDependants.class);
-        final ApplicationListener<ContextClosedEvent> closedListener = event -> CONTEXTS.remove(context);
-        final ApplicationListener<ContextStartedEvent> startedListener = event -> CONTEXTS.add(context);
-        context.addApplicationListener(closedListener);
-        context.addApplicationListener(startedListener);
+        final WeakReference<GenericApplicationContext> contextRef = new WeakReference<>(context);
+        context.addApplicationListener(new ApplicationListener<ApplicationEvent>() {
+            @Override
+            public void onApplicationEvent(ApplicationEvent event) {
+                System.gc();
+                if (event instanceof ContextClosedEvent) {
+                    CONTEXTS.removeIf(c -> c.get() == null || c.get() == contextRef.get());
+                    final ApplicationContext ctx = ((ContextClosedEvent) event).getApplicationContext();
+                    ((GenericApplicationContext) ctx).getApplicationListeners().remove(this);
+                } else if (event instanceof ContextStartedEvent) {
+                    CONTEXTS.removeIf(c -> c.get() == null);
+                    CONTEXTS.add(contextRef);
+                } else {
+                    CONTEXTS.removeIf(c -> c.get() == null);
+                }
+            }
+        });
         final AtomicReference<ApplicationListener<ContextClosedEvent>> closedRef = new AtomicReference<>();
         closedRef.set(event -> {
             context.close();
@@ -95,8 +119,8 @@ public class IdeDependants {
                 }));
     }
 
-    private static Stream<AnnotationConfigApplicationContext> getMatched(Object param) {
-        return CONTEXTS.stream().filter(c -> {
+    private static Stream<GenericApplicationContext> getMatched(Object param) {
+        return CONTEXTS.stream().map(Reference::get).filter(Objects::nonNull).filter(c -> {
             if (c.containsBean("params")) {
                 final Object params = c.getBean("params");
                 return params.equals(param);

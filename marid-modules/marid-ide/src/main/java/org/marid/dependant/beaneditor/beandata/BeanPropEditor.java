@@ -144,6 +144,7 @@ public class BeanPropEditor extends TableView<BeanProp> {
                 }
 
                 factory.initializeBean(menuItems, null);
+                factory.autowireBean(menuItems);
                 menuItems.addTo(m);
             }));
             return row;
