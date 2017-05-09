@@ -59,7 +59,6 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.of;
 import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 import static org.marid.logging.Log.log;
-import static org.marid.util.Reflections.parameterName;
 import static org.springframework.core.ResolvableType.*;
 
 /**
@@ -388,14 +387,14 @@ public class ProjectProfile {
         final List<BeanArg> args = of(parameters)
                 .map(p -> {
                     final Optional<BeanArg> found = data.beanArgs.stream()
-                            .filter(a -> parameterName(p).equals(a.getName()))
+                            .filter(a -> p.getName().equals(a.getName()))
                             .findFirst();
                     if (found.isPresent()) {
                         found.get().type.set(p.getType().getName());
                         return found.get();
                     } else {
                         final BeanArg arg = new BeanArg();
-                        arg.name.set(parameterName(p));
+                        arg.name.set(p.getName());
                         arg.type.set(p.getType().getName());
                         return arg;
                     }
@@ -446,7 +445,7 @@ public class ProjectProfile {
 
     public ResolvableType getArgType(BeanData beanData, String name) {
         return getConstructor(beanData)
-                .flatMap(e -> of(e.getParameters()).filter(p -> parameterName(p).equals(name)).findAny())
+                .flatMap(e -> of(e.getParameters()).filter(p -> p.getName().equals(name)).findAny())
                 .map(p -> ResolvableType.forType(p.getParameterizedType()))
                 .orElse(NONE);
     }

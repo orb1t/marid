@@ -23,7 +23,6 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.converter.MaridConverter;
 import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
-import org.marid.util.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
@@ -51,12 +50,12 @@ public class ConstructorList extends ComboBox<Executable> {
         setConverter(new MaridConverter<>(this::format));
         setOnAction(event -> ofNullable(getSelectionModel().getSelectedItem()).ifPresent(c -> {
             final BeanArg[] args = Stream.of(c.getParameters()).map(p -> data.beanArgs.stream()
-                    .filter(a -> Reflections.parameterName(p).equals(a.getName()))
+                    .filter(a -> p.getName().equals(a.getName()))
                     .peek(a -> a.setType(p.getType().getName()))
                     .findFirst()
                     .orElseGet(() -> {
                         final BeanArg beanArg = new BeanArg();
-                        beanArg.setName(Reflections.parameterName(p));
+                        beanArg.setName(p.getName());
                         beanArg.setType(p.getType().getName());
                         return beanArg;
                     }))

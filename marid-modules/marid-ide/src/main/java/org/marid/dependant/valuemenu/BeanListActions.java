@@ -31,7 +31,6 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.xml.*;
 import org.marid.util.MethodUtils;
-import org.marid.util.Reflections;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -179,7 +178,7 @@ public class BeanListActions {
             newBeanData.factoryMethod.set(method.getName());
             for (final Parameter parameter : method.getParameters()) {
                 final BeanArg arg = new BeanArg();
-                arg.name.set(Reflections.parameterName(parameter));
+                arg.name.set(parameter.getName());
                 arg.type.set(parameter.getType().getName());
                 newBeanData.beanArgs.add(arg);
             }
