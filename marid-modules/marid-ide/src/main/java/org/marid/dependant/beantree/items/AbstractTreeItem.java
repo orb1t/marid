@@ -133,6 +133,7 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
     @PreDestroy
     private void destroy() {
         destroyActions.forEach(Runnable::run);
+        destroyActions.clear();
     }
 
     protected static class ListSynchronizer<F, T extends AbstractTreeItem<F>> implements ListChangeListener<F> {

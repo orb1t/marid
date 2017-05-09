@@ -77,7 +77,7 @@ public class ArgumentTreeItem extends AbstractTreeItem<BeanArg> implements Compa
 
     @Override
     public ObservableValue<String> valueText() {
-        return Bindings.createStringBinding(() -> null);
+        return Bindings.createStringBinding(elem::toString, elem.observables());
     }
 
     @Override

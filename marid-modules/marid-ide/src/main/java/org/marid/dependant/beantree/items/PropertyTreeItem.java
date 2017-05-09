@@ -76,7 +76,7 @@ public class PropertyTreeItem extends AbstractTreeItem<BeanProp> implements Comp
 
     @Override
     public ObservableValue<String> valueText() {
-        return Bindings.createStringBinding(() -> null);
+        return Bindings.createStringBinding(elem::toString, elem.observables());
     }
 
     @Override

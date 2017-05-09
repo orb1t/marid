@@ -49,7 +49,17 @@ public class MaridCommonPostProcessor implements DestructionAwareBeanPostProcess
 
     @Override
     public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
-        log(INFO, "Destructing {0}", beanName);
+        if (beanName == null) {
+            if (bean != null) {
+                try {
+                    log(INFO, "Destructing {0}", bean);
+                } catch (Exception x) {
+                    log(INFO, "Destructing {0}", bean.getClass().getSimpleName());
+                }
+            }
+        } else {
+            log(INFO, "Destructing {0}", beanName);
+        }
     }
 
     @Override
