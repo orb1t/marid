@@ -18,13 +18,11 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
 import javafx.beans.property.Property;
 import javafx.beans.value.WritableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
-import javafx.collections.ObservableSet;
+import org.marid.jfx.beans.AbstractObservable;
 import org.marid.jfx.beans.FxObservable;
 
 import javax.xml.bind.annotation.XmlTransient;
@@ -44,9 +42,7 @@ import static java.util.stream.Collectors.toMap;
  * @author Dmitry Ovchinnikov
  */
 @XmlTransient
-public abstract class AbstractData<T extends AbstractData<T>> implements Externalizable, Cloneable {
-
-    protected final ObservableSet<Observable> observables = FXCollections.observableSet(new HashSet<>());
+public abstract class AbstractData<T extends AbstractData<T>> extends AbstractObservable implements Externalizable, Cloneable {
 
     @SuppressWarnings({"CloneDoesntCallSuperClone", "unchecked"})
     @Override

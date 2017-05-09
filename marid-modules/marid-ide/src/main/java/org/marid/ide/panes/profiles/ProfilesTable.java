@@ -18,7 +18,6 @@
 
 package org.marid.ide.panes.profiles;
 
-import com.google.common.collect.ImmutableMap;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -31,7 +30,6 @@ import org.marid.dependant.beantree.BeanTreeConfiguration;
 import org.marid.dependant.beantree.BeanTreeParam;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.common.SpecialActions;
-import org.marid.ide.panes.main.IdeToolbar;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectSaver;
@@ -179,10 +177,5 @@ public class ProfilesTable extends TableView<ProjectProfile> {
             });
             action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });
-    }
-
-    @Autowired
-    private void initMonitor(IdeToolbar toolbar, FxAction profileMonitor) {
-        toolbar.on(this, () -> ImmutableMap.of("profileMonitor", profileMonitor));
     }
 }
