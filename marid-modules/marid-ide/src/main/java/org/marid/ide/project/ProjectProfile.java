@@ -18,6 +18,7 @@
 
 package org.marid.ide.project;
 
+import com.google.common.io.MoreFiles;
 import javafx.application.Platform;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.maven.model.Model;
@@ -25,7 +26,6 @@ import org.apache.maven.model.Organization;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
-import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.jfx.beans.FxList;
 import org.marid.misc.Urls;
@@ -273,7 +273,7 @@ public class ProjectProfile {
 
     private void saveBeanFiles() {
         try {
-            FileUtils.cleanDirectory(getBeansDirectory().toFile());
+            MoreFiles.deleteDirectoryContents(getBeansDirectory());
         } catch (IOException x) {
             log(logger, WARNING, "Unable to clean beans directory", x);
             return;
@@ -299,7 +299,7 @@ public class ProjectProfile {
     void delete() {
         try {
             close();
-            FileUtils.deleteDirectory(path.toFile());
+            MoreFiles.deleteRecursively(path);
         } catch (Exception x) {
             log(logger, WARNING, "Unable to delete {0}", x, getName());
         }

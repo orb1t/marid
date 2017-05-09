@@ -21,7 +21,6 @@ package org.marid.dependant.beantree.items;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import org.jetbrains.annotations.NotNull;
 import org.marid.IdeDependants;
 import org.marid.dependant.valuemenu.ValuesConfiguration;
@@ -38,6 +37,8 @@ import org.springframework.core.annotation.Order;
 
 import static java.lang.Integer.compare;
 import static java.util.Optional.ofNullable;
+import static org.marid.dependant.beantree.items.TreeItemUtils.itemGraphic;
+import static org.marid.dependant.beantree.items.TreeItemUtils.itemText;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -68,15 +69,12 @@ public class PropertyTreeItem extends AbstractTreeItem<BeanProp> implements Comp
 
     @Override
     public ObservableValue<Node> valueGraphic() {
-        return Bindings.createObjectBinding(() -> {
-            final Label label = new Label();
-            return label;
-        }, elem.data);
+        return Bindings.createObjectBinding(() -> itemGraphic(elem.getData()), elem.observables());
     }
 
     @Override
     public ObservableValue<String> valueText() {
-        return Bindings.createStringBinding(elem::toString, elem.observables());
+        return Bindings.createStringBinding(() -> itemText(elem.getData()), elem.observables());
     }
 
     @Override
