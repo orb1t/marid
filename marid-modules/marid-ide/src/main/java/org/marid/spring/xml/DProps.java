@@ -70,11 +70,6 @@ public final class DProps extends DElement<DProps> {
     }
 
     @Override
-    public Stream<? extends AbstractData<?>> stream() {
-        return entries.stream();
-    }
-
-    @Override
     public String toString() {
         return String.format("Props(%d)", entries.size());
     }

@@ -68,11 +68,6 @@ public final class DRef extends DElement<DRef> {
     }
 
     @Override
-    public Stream<? extends AbstractData<?>> stream() {
-        return Stream.empty();
-    }
-
-    @Override
     public String toString() {
         return getBean();
     }

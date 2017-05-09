@@ -68,11 +68,6 @@ public final class DValue extends DElement<DValue> {
     }
 
     @Override
-    public Stream<? extends AbstractData<?>> stream() {
-        return Stream.empty();
-    }
-
-    @Override
     public String toString() {
         return getValue();
     }

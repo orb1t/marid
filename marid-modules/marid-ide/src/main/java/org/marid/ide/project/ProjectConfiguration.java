@@ -23,12 +23,10 @@ import javafx.scene.input.KeyCombination;
 import org.marid.IdeDependants;
 import org.marid.dependant.project.ProjectParams;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
-import org.marid.dependant.project.monitor.ProfileMonitorConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
 import org.marid.dependant.resources.ResourcesConfiguration;
 import org.marid.dependant.resources.ResourcesParams;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -122,22 +120,6 @@ public class ProjectConfiguration {
                     dependants.start(ProjectRunnerConfiguration.class, new ProjectParams(profile), context -> {
                         context.setId("projectRunner");
                         context.setDisplayName("Project Runner");
-                    });
-                })
-                .bindDisabled(projectDisabled);
-    }
-
-    @Bean
-    @Qualifier("profile")
-    public FxAction profileMonitor(IdeDependants dependants, ProjectManager manager, BooleanBinding projectDisabled) {
-        return new FxAction("monitor", "mon", "Project")
-                .bindText("Show profile monitor")
-                .setIcon(FontIcon.D_MONITOR_MULTIPLE)
-                .setEventHandler(event -> {
-                    final ProjectProfile profile = manager.getProfile();
-                    dependants.start(ProfileMonitorConfiguration.class, new ProjectParams(profile), c -> {
-                        c.setId("profileMonitor");
-                        c.setDisplayName("Profile Monitor");
                     });
                 })
                 .bindDisabled(projectDisabled);

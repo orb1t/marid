@@ -78,10 +78,4 @@ public class DMapEntry extends AbstractData<DMapEntry> {
         }
         return false;
     }
-
-    @Override
-    public Stream<? extends AbstractData<?>> stream() {
-        final DElement<?> element = value.get();
-        return element == null ? Stream.empty() : of(element);
-    }
 }

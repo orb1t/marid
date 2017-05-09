@@ -168,11 +168,6 @@ public final class BeanData extends DElement<BeanData> {
     }
 
     @Override
-    public Stream<? extends AbstractData<?>> stream() {
-        return Stream.concat(beanArgs.stream(), properties.stream());
-    }
-
-    @Override
     public String toString() {
         return name.get();
     }

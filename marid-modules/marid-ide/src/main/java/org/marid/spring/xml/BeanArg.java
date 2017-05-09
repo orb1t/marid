@@ -84,12 +84,6 @@ public class BeanArg extends AbstractData<BeanArg> {
     }
 
     @Override
-    public Stream<? extends AbstractData<?>> stream() {
-        final DElement<?> element = data.get();
-        return element == null ? Stream.empty() : of(element);
-    }
-
-    @Override
     public String toString() {
         return String.format("Arg(%s,%s,%s)", getName(), getType(), getData());
     }

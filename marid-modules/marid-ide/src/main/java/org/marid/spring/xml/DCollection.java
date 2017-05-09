@@ -68,9 +68,4 @@ public abstract class DCollection<T extends DCollection<T>> extends DElement<T> 
     public Stream<FxObservable> observableStream() {
         return Stream.of(observables());
     }
-
-    @Override
-    public Stream<? extends AbstractData<?>> stream() {
-        return elements.stream();
-    }
 }

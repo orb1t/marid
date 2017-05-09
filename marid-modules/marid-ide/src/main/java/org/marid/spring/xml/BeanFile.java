@@ -89,11 +89,6 @@ public final class BeanFile extends AbstractData<BeanFile> {
     }
 
     @Override
-    public Stream<? extends AbstractData<?>> stream() {
-        return beans.stream();
-    }
-
-    @Override
     public String toString() {
         return String.format("BeanFile(%s,%d)", getFilePath(), beans.size());
     }

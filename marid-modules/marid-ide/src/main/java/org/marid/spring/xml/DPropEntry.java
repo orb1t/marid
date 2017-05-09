@@ -71,9 +71,4 @@ public final class DPropEntry extends AbstractData<DPropEntry> {
     public Stream<FxObservable> observableStream() {
         return Stream.of(observables());
     }
-
-    @Override
-    public Stream<? extends AbstractData<?>> stream() {
-        return Stream.empty();
-    }
 }

@@ -73,12 +73,6 @@ public class BeanProp extends AbstractData<BeanProp> {
     }
 
     @Override
-    public Stream<? extends AbstractData<?>> stream() {
-        final DElement<?> element = data.get();
-        return element == null ? Stream.empty() : of(element);
-    }
-
-    @Override
     public String toString() {
         return String.format("Prop(%s,%s)", getName(), getData());
     }

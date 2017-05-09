@@ -53,11 +53,6 @@ public class DMap extends DElement<DMap> {
         return Stream.of(observables());
     }
 
-    @Override
-    public Stream<? extends AbstractData<?>> stream() {
-        return entries.stream();
-    }
-
     @XmlAttribute(name = "key-type")
     public String getKeyType() {
         return keyType.get();
