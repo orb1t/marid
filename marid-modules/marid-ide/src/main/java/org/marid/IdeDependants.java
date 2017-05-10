@@ -78,7 +78,6 @@ public class IdeDependants {
         context.addApplicationListener(new ApplicationListener<ApplicationEvent>() {
             @Override
             public void onApplicationEvent(ApplicationEvent event) {
-                System.gc();
                 if (event instanceof ContextClosedEvent) {
                     CONTEXTS.removeIf(c -> c.get() == null || c.get() == contextRef.get());
                     final ApplicationContext ctx = ((ContextClosedEvent) event).getApplicationContext();
@@ -93,8 +92,14 @@ public class IdeDependants {
         });
         final AtomicReference<ApplicationListener<ContextClosedEvent>> closedRef = new AtomicReference<>();
         closedRef.set(event -> {
-            context.close();
-            parent.getApplicationListeners().remove(closedRef.getAndSet(null));
+            try {
+                final GenericApplicationContext child = contextRef.get();
+                if (child != null) {
+                    child.close();
+                }
+            } finally {
+                parent.getApplicationListeners().remove(closedRef.getAndSet(null));
+            }
         });
         parent.addApplicationListener(closedRef.get());
         consumer.accept(context);
