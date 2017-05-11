@@ -22,12 +22,12 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import org.marid.IdeDependants.MainContext;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
-import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.Locale;
 import java.util.stream.IntStream;
@@ -40,24 +40,18 @@ import static org.marid.ide.logging.IdeLogConfig.ROOT_LOGGER;
  */
 public class Ide extends Application {
 
-    private final GenericApplicationContext context = new GenericApplicationContext();
+    private final AnnotationConfigApplicationContext context = new MainContext();
 
     public static Stage primaryStage;
     public static Ide ide;
-    public static ClassLoader classLoader;
-    public static IdeLogHandler ideLogHandler;
+    public static final IdeLogHandler ideLogHandler;
 
     @Override
     public void init() throws Exception {
         Ide.ide = this;
-        ROOT_LOGGER.addHandler(ideLogHandler = new IdeLogHandler());
-        context.setAllowBeanDefinitionOverriding(false);
-        context.setAllowCircularReferences(false);
         context.setId("root");
         context.setDisplayName("Root Context");
-        context.getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
-        final AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(context);
-        reader.register(IdeContext.class);
+        context.register(IdeContext.class);
         context.refresh();
         context.getBean(IdePane.class);
     }
@@ -83,7 +77,6 @@ public class Ide extends Application {
 
     static {
         // console logger
-        classLoader = Thread.currentThread().getContextClassLoader();
         System.setProperty("java.util.logging.config.class", "org.marid.ide.logging.IdeLogConfig");
 
         // locale
@@ -93,5 +86,7 @@ public class Ide extends Application {
         }
 
         MaridCommonPostProcessor.replaceInjectedMetadata();
+
+        ROOT_LOGGER.addHandler(ideLogHandler = new IdeLogHandler());
     }
 }
