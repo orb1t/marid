@@ -19,8 +19,12 @@
 package org.marid.spring.xml;
 
 import org.marid.jfx.beans.FxString;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -63,5 +67,17 @@ public final class DPropEntry extends AbstractData<DPropEntry> {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void loadFrom(Document document, Element element) {
+        ofNullable(element.getAttribute("key")).ifPresent(key::set);
+        ofNullable(element.getTextContent()).filter(s -> !s.isEmpty()).ifPresent(value::set);
+    }
+
+    @Override
+    public void writeTo(Document document, Element element) {
+        ofNullable(key.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("key", e));
+        ofNullable(value.get()).filter(s -> !s.isEmpty()).ifPresent(element::setTextContent);
     }
 }

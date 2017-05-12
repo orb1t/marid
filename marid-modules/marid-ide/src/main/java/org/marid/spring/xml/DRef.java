@@ -19,11 +19,15 @@
 package org.marid.spring.xml;
 
 import org.marid.jfx.beans.FxString;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -60,5 +64,15 @@ public final class DRef extends DElement<DRef> {
     @Override
     public String toString() {
         return getBean();
+    }
+
+    @Override
+    public void loadFrom(Document document, Element element) {
+        ofNullable(element.getAttribute("bean")).ifPresent(ref::set);
+    }
+
+    @Override
+    public void writeTo(Document document, Element element) {
+        ofNullable(ref.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("bean", e));
     }
 }

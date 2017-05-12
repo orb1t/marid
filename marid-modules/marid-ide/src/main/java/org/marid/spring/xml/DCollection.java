@@ -21,8 +21,14 @@ package org.marid.spring.xml;
 import javafx.beans.Observable;
 import org.marid.jfx.beans.FxList;
 import org.marid.jfx.beans.FxString;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
+import java.util.Objects;
+
+import static java.util.Optional.ofNullable;
+import static org.marid.misc.Iterables.nodes;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -61,5 +67,17 @@ public abstract class DCollection<T extends DCollection<T>> extends DElement<T> 
     public String toString() {
         final String className = getClass().getSimpleName().substring(1);
         return className + "(" + elements.size() + ")";
+    }
+
+    @Override
+    public void loadFrom(Document document, Element element) {
+        ofNullable(element.getAttribute("value-type")).ifPresent(valueType::set);
+        nodes(element, Element.class).map(e -> read(document, e)).filter(Objects::nonNull).forEach(elements::add);
+    }
+
+    @Override
+    public void writeTo(Document document, Element element) {
+        ofNullable(valueType.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("value-type", e));
+        elements.stream().filter(e -> !e.isEmpty()).forEach(e -> write(document, element, e));
     }
 }

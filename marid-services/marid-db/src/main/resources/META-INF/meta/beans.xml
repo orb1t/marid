@@ -30,14 +30,6 @@
         <meta key="icon" value="P_ADD"/>
     </bean>
 
-    <bean name="swingNumericDaqGenerator" class="org.marid.db.generator.swing.SwingNumericDaqGenerator">
-        <description>SWING numeric DAQ generator</description>
-
-        <constructor-arg name="numericWriter" ref="numericWriter"/>
-
-        <meta key="icon" value="P_ADD"/>
-    </bean>
-
     <bean name="hsqldbDatabase" class="org.marid.db.hsqldb.HsqldbDatabase">
         <description>HSQLDB database</description>
 

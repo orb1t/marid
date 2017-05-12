@@ -20,11 +20,15 @@ package org.marid.spring.xml;
 
 import javafx.beans.Observable;
 import org.marid.jfx.beans.FxList;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.stream.Collectors;
+
+import static org.marid.misc.Iterables.nodes;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -85,5 +89,23 @@ public final class BeanFile extends AbstractData<BeanFile> {
     @Override
     public String toString() {
         return String.format("BeanFile(%s,%d)", getFilePath(), beans.size());
+    }
+
+    @Override
+    public void loadFrom(Document document, Element element) {
+        nodes(element, Element.class).filter(e -> "bean".equals(e.getTagName())).forEach(e -> {
+            final BeanData beanData = new BeanData();
+            beanData.loadFrom(document, e);
+            beans.add(beanData);
+        });
+    }
+
+    @Override
+    public void writeTo(Document document, Element element) {
+        beans.stream().filter(b -> !b.isEmpty()).forEach(b -> {
+            final Element e = document.createElement("bean");
+            b.writeTo(document, e);
+            element.appendChild(e);
+        });
     }
 }

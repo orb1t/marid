@@ -32,10 +32,11 @@ import org.marid.dependant.modbus.ModbusPane;
 import org.marid.dependant.modbus.annotation.Modbus;
 import org.marid.dependant.modbus.codec.CodecManager;
 import org.marid.dependant.modbus.codec.ModbusCodec;
-import org.marid.dependant.modbus.devices.info.AbstractDeviceInfo;
 import org.marid.jfx.converter.MaridConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.annotation.PostConstruct;
 
@@ -49,9 +50,8 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
  * @author Dmitry Ovchinnikov.
  * @since 0.9
  */
-public abstract class AbstractDevice<I extends AbstractDeviceInfo, T> extends BorderPane {
+public abstract class AbstractDevice<T> extends BorderPane {
 
-    final Class<I> deviceInfoType;
     final Class<T> type;
     final HBox titleBox;
     final TextField title;
@@ -62,8 +62,7 @@ public abstract class AbstractDevice<I extends AbstractDeviceInfo, T> extends Bo
     final ComboBox<FunctionCode> functions;
     final ComboBox<ModbusCodec<T>> codec;
 
-    AbstractDevice(Class<I> deviceInfoType, Class<T> type) {
-        this.deviceInfoType = deviceInfoType;
+    AbstractDevice(Class<T> type) {
         this.type = type;
         setBackground(new Background(new BackgroundFill(new Color(0.5, 0.5, 0.5, 0.2), null, null)));
         setTop(titleBox = new HBox(4,
@@ -98,35 +97,13 @@ public abstract class AbstractDevice<I extends AbstractDeviceInfo, T> extends Bo
 
     @Autowired
     private void initEditButton(@Modbus Stage stage, GenericApplicationContext ctx) {
-        editButton.setOnAction(event -> ctx.getBean(getEditor(), this, stage).showAndWait().ifPresent(this::setInfo));
+        editButton.setOnAction(event -> ctx.getBean(getEditor(), this, stage).showAndWait());
     }
 
     @Autowired
     private void initCodec(CodecManager codecManager) {
         codec.setItems(codecManager.getCodecs(type));
         codec.getSelectionModel().select(0);
-    }
-
-    private I newInfo() {
-        try {
-            return deviceInfoType.newInstance();
-        } catch (Exception x) {
-            throw new IllegalStateException(x);
-        }
-    }
-
-    public I getInfo() {
-        final I info = newInfo();
-        info.address = getAddress();
-        info.codec = codec.getValue().getName();
-        info.function = functions.getValue();
-        return info;
-    }
-
-    public void setInfo(I info) {
-        address.setText(String.format("%04X", info.address));
-        codec.getItems().filtered(e -> e.getName().equals(info.codec)).forEach(codec.getSelectionModel()::select);
-        functions.getSelectionModel().select(info.function);
     }
 
     public int getAddress() {
@@ -139,5 +116,21 @@ public abstract class AbstractDevice<I extends AbstractDeviceInfo, T> extends Bo
 
     public abstract byte[] getData();
 
-    public abstract Class<? extends AbstractDeviceEditor<I, T, ? extends AbstractDevice<I, T>>> getEditor();
+    public abstract Class<? extends AbstractDeviceEditor<T, ? extends AbstractDevice<T>>> getEditor();
+
+    public void writeTo(Document document, Element element) {
+        element.setAttribute("address", address.getText());
+        element.setAttribute("func", functions.getSelectionModel().getSelectedItem().name());
+        element.setAttribute("codec", codec.getSelectionModel().getSelectedItem().getName());
+    }
+
+    public void loadFrom(Document document, Element element) {
+        address.setText(element.getAttribute("address"));
+        functions.getItems().stream()
+                .filter(f -> f.name().equals(element.getAttribute("func")))
+                .forEach(e -> functions.getSelectionModel().select(e));
+        codec.getItems().stream()
+                .filter(c -> c.getName().equals(element.getAttribute("codec")))
+                .forEach(e -> codec.getSelectionModel().select(e));
+    }
 }

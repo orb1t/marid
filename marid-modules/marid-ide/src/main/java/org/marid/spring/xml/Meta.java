@@ -18,29 +18,43 @@
 
 package org.marid.spring.xml;
 
+import org.marid.jfx.beans.FxString;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @XmlRootElement(name = "meta")
 @XmlAccessorType(XmlAccessType.NONE)
-public class Meta {
+public class Meta extends AbstractData<Meta> {
 
-    @XmlAttribute(name = "key")
-    public String key;
-
-    @XmlAttribute(name = "value")
-    public String value;
+    public final FxString key = new FxString(null, "key");
+    public final FxString value = new FxString(null, "value");
 
     public Meta() {
     }
 
     public Meta(String key, String value) {
-        this.key = key;
-        this.value = value;
+        this.key.set(key);
+        this.value.set(value);
+    }
+
+    @Override
+    public void loadFrom(Document document, Element element) {
+        ofNullable(element.getAttribute("key")).ifPresent(key::set);
+        ofNullable(element.getAttribute("value")).ifPresent(value::set);
+    }
+
+    @Override
+    public void writeTo(Document document, Element element) {
+        ofNullable(key.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("key", e));
+        ofNullable(value.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("value", e));
     }
 }

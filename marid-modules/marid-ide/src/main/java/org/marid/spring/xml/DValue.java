@@ -19,11 +19,15 @@
 package org.marid.spring.xml;
 
 import org.marid.jfx.beans.FxString;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -60,5 +64,15 @@ public final class DValue extends DElement<DValue> {
     @Override
     public String toString() {
         return getValue();
+    }
+
+    @Override
+    public void loadFrom(Document document, Element element) {
+        ofNullable(element.getAttribute("value")).ifPresent(value::set);
+    }
+
+    @Override
+    public void writeTo(Document document, Element element) {
+        ofNullable(value.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("value", e));
     }
 }

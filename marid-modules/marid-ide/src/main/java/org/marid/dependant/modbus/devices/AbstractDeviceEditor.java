@@ -26,7 +26,6 @@ import javafx.scene.control.Spinner;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.marid.dependant.modbus.codec.ModbusCodec;
-import org.marid.dependant.modbus.devices.info.AbstractDeviceInfo;
 import org.marid.jfx.control.MaridControls;
 import org.marid.jfx.converter.MaridConverter;
 import org.marid.jfx.panes.GenericGridPane;
@@ -42,10 +41,9 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov.
  * @since 0.9
  */
-public class AbstractDeviceEditor<I extends AbstractDeviceInfo, E, T extends AbstractDevice<I, E>> extends Dialog<I> {
+public class AbstractDeviceEditor<E, T extends AbstractDevice<E>> extends Dialog<Boolean> {
 
     protected final T device;
-    protected final I info;
     protected final GenericGridPane table = new GenericGridPane();
     protected final Spinner<Integer> address;
     protected final ComboBox<ModbusCodec<E>> codecs;
@@ -54,8 +52,7 @@ public class AbstractDeviceEditor<I extends AbstractDeviceInfo, E, T extends Abs
     public AbstractDeviceEditor(T device, Stage stage) {
         this.device = device;
         this.codecs = new ComboBox<>(device.codec.getItems());
-        this.info = device.getInfo();
-        this.address = new Spinner<>(0, 65535, info.address);
+        this.address = new Spinner<>(0, 65535, device.getAddress());
         initOwner(stage);
         initModality(Modality.WINDOW_MODAL);
         getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
@@ -65,8 +62,7 @@ public class AbstractDeviceEditor<I extends AbstractDeviceInfo, E, T extends Abs
             switch (t.getButtonData()) {
                 case APPLY:
                     accept();
-                    device.setInfo(info);
-                    return info;
+                    return true;
                 default:
                     return null;
             }
@@ -90,13 +86,13 @@ public class AbstractDeviceEditor<I extends AbstractDeviceInfo, E, T extends Abs
 
     @PostConstruct
     private void initFuncs() {
-        functions.getSelectionModel().select(info.function);
+        functions.getSelectionModel().select(device.getFunctionCode());
         table.addControl("Function", () -> functions);
     }
 
     protected void accept() {
-        info.codec = codecs.getSelectionModel().getSelectedItem().getName();
-        info.address = address.getValue();
-        info.function = functions.getSelectionModel().getSelectedItem();
+        device.address.setText(String.format("%04X", address.getValue()));
+        device.codec.getSelectionModel().select(codecs.getSelectionModel().getSelectedItem());
+        device.functions.getSelectionModel().select(functions.getSelectionModel().getSelectedItem());
     }
 }

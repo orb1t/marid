@@ -21,8 +21,13 @@ package org.marid.spring.xml;
 import javafx.beans.Observable;
 import org.marid.jfx.beans.FxList;
 import org.marid.jfx.beans.FxString;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
+
+import static java.util.Optional.ofNullable;
+import static org.marid.misc.Iterables.nodes;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -66,5 +71,25 @@ public final class DProps extends DElement<DProps> {
     @Override
     public String toString() {
         return String.format("Props(%d)", entries.size());
+    }
+
+    @Override
+    public void loadFrom(Document document, Element element) {
+        ofNullable(element.getAttribute("value-type")).ifPresent(valueType::set);
+        nodes(element, Element.class).filter(e -> "entry".equals(e.getTagName())).forEach(e -> {
+            final DPropEntry entry = new DPropEntry();
+            entry.loadFrom(document, e);
+            entries.add(entry);
+        });
+    }
+
+    @Override
+    public void writeTo(Document document, Element element) {
+        ofNullable(valueType.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("value-type", e));
+        entries.stream().filter(e -> !e.isEmpty()).forEach(e -> {
+            final Element el = document.createElement("entry");
+            e.writeTo(document, el);
+            element.appendChild(el);
+        });
     }
 }

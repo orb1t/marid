@@ -19,7 +19,6 @@
 package org.marid.dependant.modbus.devices;
 
 import javafx.stage.Stage;
-import org.marid.dependant.modbus.devices.info.ThermometerInfo;
 import org.marid.spring.annotation.PrototypeComponent;
 
 /**
@@ -27,7 +26,7 @@ import org.marid.spring.annotation.PrototypeComponent;
  * @since 0.9
  */
 @PrototypeComponent
-public class ThermometerEditor extends AbstractDeviceEditor<ThermometerInfo, Float, Thermometer> {
+public class ThermometerEditor extends AbstractDeviceEditor<Float, Thermometer> {
 
     public ThermometerEditor(Thermometer device, Stage stage) {
         super(device, stage);

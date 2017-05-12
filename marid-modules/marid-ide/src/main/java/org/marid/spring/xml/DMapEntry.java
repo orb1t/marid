@@ -20,8 +20,15 @@ package org.marid.spring.xml;
 
 import org.marid.jfx.beans.FxObject;
 import org.marid.jfx.beans.FxString;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
+import java.util.Objects;
+
+import static java.util.Optional.ofNullable;
+import static org.marid.misc.Iterables.nodes;
+import static org.marid.spring.xml.DElement.read;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -65,5 +72,17 @@ public class DMapEntry extends AbstractData<DMapEntry> {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void loadFrom(Document document, Element element) {
+        ofNullable(element.getAttribute("key")).ifPresent(key::set);
+        nodes(element, Element.class).map(e -> read(document, e)).filter(Objects::nonNull).forEach(value::set);
+    }
+
+    @Override
+    public void writeTo(Document document, Element element) {
+        ofNullable(key.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("key", e));
+        ofNullable(value.get()).filter(e -> !e.isEmpty()).ifPresent(value::set);
     }
 }

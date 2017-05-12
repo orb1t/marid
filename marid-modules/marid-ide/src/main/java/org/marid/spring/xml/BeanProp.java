@@ -20,8 +20,16 @@ package org.marid.spring.xml;
 
 import org.marid.jfx.beans.FxObject;
 import org.marid.jfx.beans.FxString;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
+import java.util.Objects;
+
+import static java.util.Optional.ofNullable;
+import static org.marid.misc.Iterables.nodes;
+import static org.marid.spring.xml.DElement.read;
+import static org.marid.spring.xml.DElement.write;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -71,5 +79,17 @@ public class BeanProp extends AbstractData<BeanProp> {
     @Override
     public String toString() {
         return String.format("Prop(%s,%s)", getName(), getData());
+    }
+
+    @Override
+    public void loadFrom(Document document, Element element) {
+        ofNullable(element.getAttribute("name")).ifPresent(name::set);
+        nodes(element, Element.class).map(e -> read(document, e)).filter(Objects::nonNull).forEach(data::set);
+    }
+
+    @Override
+    public void writeTo(Document document, Element element) {
+        ofNullable(name.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("name", e));
+        ofNullable(data.get()).filter(e -> !e.isEmpty()).ifPresent(e -> write(document, element, e));
     }
 }

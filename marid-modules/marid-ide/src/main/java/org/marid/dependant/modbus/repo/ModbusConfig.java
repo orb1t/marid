@@ -22,7 +22,6 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.dependant.modbus.devices.infos.DeviceInfos;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -34,14 +33,4 @@ public class ModbusConfig {
 
     public final StringProperty host = new SimpleStringProperty("0.0.0.0");
     public final IntegerProperty port = new SimpleIntegerProperty(10502);
-
-    public void initDevices(DeviceInfos deviceInfos) {
-        deviceInfos.host = host.get();
-        deviceInfos.port = port.get();
-    }
-
-    public void restoreDevices(DeviceInfos deviceInfos) {
-        host.set(deviceInfos.host);
-        port.set(deviceInfos.port);
-    }
 }

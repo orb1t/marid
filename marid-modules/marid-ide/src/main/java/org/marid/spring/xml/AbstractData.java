@@ -23,6 +23,8 @@ import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import org.marid.jfx.beans.AbstractObservable;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.*;
@@ -41,6 +43,10 @@ import static java.util.stream.Collectors.toMap;
  */
 @XmlTransient
 public abstract class AbstractData<T extends AbstractData<T>> extends AbstractObservable implements Externalizable, Cloneable {
+
+    public abstract void loadFrom(Document document, Element element);
+
+    public abstract void writeTo(Document document, Element element);
 
     @SuppressWarnings({"CloneDoesntCallSuperClone", "unchecked"})
     @Override

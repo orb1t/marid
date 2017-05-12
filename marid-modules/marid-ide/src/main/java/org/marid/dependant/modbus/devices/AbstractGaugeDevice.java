@@ -23,19 +23,18 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Slider;
 import org.marid.dependant.modbus.codec.ModbusCodec;
-import org.marid.dependant.modbus.devices.info.FloatDeviceInfo;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.9
  */
-abstract class AbstractGaugeDevice<I extends FloatDeviceInfo> extends AbstractDevice<I, Float> {
+abstract class AbstractGaugeDevice extends AbstractDevice<Float> {
 
     final Gauge gauge;
     final Slider slider;
 
-    AbstractGaugeDevice(Gauge gauge, Class<I> deviceInfoType) {
-        super(deviceInfoType, Float.class);
+    AbstractGaugeDevice(Gauge gauge) {
+        super(Float.class);
         setCenter(this.gauge = gauge);
         setRight(this.slider = new Slider());
         slider.setShowTickMarks(true);
@@ -46,19 +45,6 @@ abstract class AbstractGaugeDevice<I extends FloatDeviceInfo> extends AbstractDe
         slider.valueProperty().bindBidirectional(gauge.valueProperty());
         slider.majorTickUnitProperty().bindBidirectional(gauge.majorTickSpaceProperty());
         gauge.setKeepAspect(true);
-    }
-
-    @Override
-    public void setInfo(I info) {
-        super.setInfo(info);
-        gauge.setValue(info.value);
-    }
-
-    @Override
-    public I getInfo() {
-        final I info = super.getInfo();
-        info.value = (float) gauge.getValue();
-        return info;
     }
 
     @Override

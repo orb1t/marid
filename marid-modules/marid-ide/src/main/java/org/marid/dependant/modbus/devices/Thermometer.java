@@ -22,7 +22,6 @@ import eu.hansolo.medusa.Gauge;
 import eu.hansolo.medusa.LcdDesign;
 import javafx.scene.paint.Color;
 import org.marid.dependant.modbus.annotation.DeviceIcon;
-import org.marid.dependant.modbus.devices.info.ThermometerInfo;
 import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.annotation.PrototypeComponent;
 
@@ -34,10 +33,10 @@ import static eu.hansolo.medusa.Gauge.SkinType.LCD;
  */
 @PrototypeComponent
 @DeviceIcon(FontIcon.W_THERMOMETER)
-public class Thermometer extends AbstractGaugeDevice<ThermometerInfo> {
+public class Thermometer extends AbstractGaugeDevice {
 
     public Thermometer() {
-        super(new Gauge(LCD), ThermometerInfo.class);
+        super(new Gauge(LCD));
         gauge.setLcdDesign(LcdDesign.LIGHTGREEN_BLACK);
         gauge.setDecimals(1);
         gauge.setTickLabelDecimals(1);
