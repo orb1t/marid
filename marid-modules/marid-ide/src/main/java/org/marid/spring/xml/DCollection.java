@@ -27,6 +27,7 @@ import org.w3c.dom.Element;
 import javax.xml.bind.annotation.*;
 import java.util.Objects;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.marid.misc.Iterables.nodes;
 
@@ -71,7 +72,7 @@ public abstract class DCollection<T extends DCollection<T>> extends DElement<T> 
 
     @Override
     public void loadFrom(Document document, Element element) {
-        ofNullable(element.getAttribute("value-type")).ifPresent(valueType::set);
+        of(element.getAttribute("value-type")).filter(s -> !s.isEmpty()).ifPresent(valueType::set);
         nodes(element, Element.class).map(e -> read(document, e)).filter(Objects::nonNull).forEach(elements::add);
     }
 

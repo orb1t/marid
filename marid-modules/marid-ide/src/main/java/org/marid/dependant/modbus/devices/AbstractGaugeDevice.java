@@ -23,6 +23,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Slider;
 import org.marid.dependant.modbus.codec.ModbusCodec;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import static java.lang.Double.parseDouble;
+import static java.util.Optional.of;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -51,5 +56,17 @@ abstract class AbstractGaugeDevice extends AbstractDevice<Float> {
     public byte[] getData() {
         final ModbusCodec<Float> codec = this.codec.getValue();
         return codec.encode((float) gauge.getValue());
+    }
+
+    @Override
+    public void loadFrom(Document document, Element element) {
+        super.loadFrom(document, element);
+        of(element.getAttribute("value")).filter(s -> !s.isEmpty()).ifPresent(v -> slider.setValue(parseDouble(v)));
+    }
+
+    @Override
+    public void writeTo(Document document, Element element) {
+        super.writeTo(document, element);
+        element.setAttribute("value", Double.toString(slider.getValue()));
     }
 }

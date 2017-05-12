@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -68,7 +69,7 @@ public final class DValue extends DElement<DValue> {
 
     @Override
     public void loadFrom(Document document, Element element) {
-        ofNullable(element.getAttribute("value")).ifPresent(value::set);
+        of(element.getAttribute("value")).filter(s -> !s.isEmpty()).ifPresent(value::set);
     }
 
     @Override

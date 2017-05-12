@@ -26,6 +26,7 @@ import org.w3c.dom.Element;
 import javax.xml.bind.annotation.*;
 import java.util.Objects;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.marid.misc.Iterables.nodes;
 import static org.marid.spring.xml.DElement.read;
@@ -76,7 +77,7 @@ public class DMapEntry extends AbstractData<DMapEntry> {
 
     @Override
     public void loadFrom(Document document, Element element) {
-        ofNullable(element.getAttribute("key")).ifPresent(key::set);
+        of(element.getAttribute("key")).filter(f -> !f.isEmpty()).ifPresent(key::set);
         nodes(element, Element.class).map(e -> read(document, e)).filter(Objects::nonNull).forEach(value::set);
     }
 

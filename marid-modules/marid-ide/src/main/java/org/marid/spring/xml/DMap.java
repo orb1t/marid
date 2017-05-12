@@ -21,12 +21,12 @@ package org.marid.spring.xml;
 import javafx.beans.Observable;
 import org.marid.jfx.beans.FxList;
 import org.marid.jfx.beans.FxString;
-import org.marid.misc.Iterables;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.marid.misc.Iterables.nodes;
 
@@ -88,8 +88,8 @@ public class DMap extends DElement<DMap> {
 
     @Override
     public void loadFrom(Document document, Element element) {
-        ofNullable(element.getAttribute("key-type")).ifPresent(keyType::set);
-        ofNullable(element.getAttribute("value-type")).ifPresent(valueType::set);
+        of(element.getAttribute("key-type")).filter(s -> !s.isEmpty()).ifPresent(keyType::set);
+        of(element.getAttribute("value-type")).filter(s -> !s.isEmpty()).ifPresent(valueType::set);
         nodes(element, Element.class).filter(e -> "entry".equals(e.getTagName())).forEach(e -> {
             final DMapEntry entry = new DMapEntry();
             entry.loadFrom(document, e);

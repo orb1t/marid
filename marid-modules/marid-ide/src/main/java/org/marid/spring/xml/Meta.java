@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -48,8 +49,8 @@ public class Meta extends AbstractData<Meta> {
 
     @Override
     public void loadFrom(Document document, Element element) {
-        ofNullable(element.getAttribute("key")).ifPresent(key::set);
-        ofNullable(element.getAttribute("value")).ifPresent(value::set);
+        of(element.getAttribute("key")).filter(s -> !s.isEmpty()).ifPresent(key::set);
+        of(element.getAttribute("value")).filter(s -> !s.isEmpty()).ifPresent(value::set);
     }
 
     @Override

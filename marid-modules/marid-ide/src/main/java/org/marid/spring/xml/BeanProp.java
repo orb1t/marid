@@ -26,6 +26,7 @@ import org.w3c.dom.Element;
 import javax.xml.bind.annotation.*;
 import java.util.Objects;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.marid.misc.Iterables.nodes;
 import static org.marid.spring.xml.DElement.read;
@@ -83,7 +84,7 @@ public class BeanProp extends AbstractData<BeanProp> {
 
     @Override
     public void loadFrom(Document document, Element element) {
-        ofNullable(element.getAttribute("name")).ifPresent(name::set);
+        of(element.getAttribute("name")).filter(f -> !f.isEmpty()).ifPresent(name::set);
         nodes(element, Element.class).map(e -> read(document, e)).filter(Objects::nonNull).forEach(data::set);
     }
 

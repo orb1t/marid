@@ -24,8 +24,6 @@ import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import org.marid.dependant.modbus.devices.AbstractDevice;
 import org.marid.dependant.modbus.repo.ModbusConfig;
-import org.marid.misc.Iterables;
-import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
@@ -42,8 +40,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 
+import static java.util.Optional.of;
 import static java.util.logging.Level.WARNING;
 import static org.marid.logging.Log.log;
+import static org.marid.misc.Iterables.nodes;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -69,13 +69,17 @@ public class ModbusPane extends FlowPane {
         try {
             final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             final Document document = documentBuilder.newDocument();
-            document.appendChild(document.createElement("devices"));
+            final Element root = document.createElement("devices");
+            root.setAttribute("host", config.host.get());
+            root.setAttribute("port", Integer.toString(config.port.get()));
+            document.appendChild(root);
             getChildren().stream()
                     .filter(AbstractDevice.class::isInstance)
                     .map(AbstractDevice.class::cast)
                     .forEach(d -> {
-                        final PrototypeComponent c = d.getClass().getAnnotation(PrototypeComponent.class);
-                        final Element element = document.createElement(c.value());
+                        final String name = d.getProperties().get("name").toString();
+                        final Element element = document.createElement("device");
+                        element.setAttribute("name", name);
                         d.writeTo(document, element);
                         document.getDocumentElement().appendChild(element);
                     });
@@ -92,12 +96,14 @@ public class ModbusPane extends FlowPane {
         try {
             final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             final Document document = documentBuilder.parse(file);
-            for (final Element element : Iterables.nodes(document.getDocumentElement(), Element.class, e -> true)) {
-                final String tag = element.getTagName();
-                final AbstractDevice<?> device = factory.getBean(tag, AbstractDevice.class);
+            final Element root = document.getDocumentElement();
+            for (final Element element : nodes(root, Element.class, e -> "device".equals(e.getTagName()))) {
+                final AbstractDevice<?> device = factory.getBean(element.getAttribute("name"), AbstractDevice.class);
                 device.loadFrom(document, element);
                 getChildren().add(device);
             }
+            of(root.getAttribute("host")).filter(s -> !s.isEmpty()).ifPresent(config.host::set);
+            of(root.getAttribute("port")).filter(s -> !s.isEmpty()).map(Integer::valueOf).ifPresent(config.port::set);
             initTitle(file);
         } catch (Exception x) {
             log(WARNING, "Unable to load {0}", x, file);

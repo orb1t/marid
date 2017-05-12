@@ -24,6 +24,7 @@ import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -71,7 +72,7 @@ public final class DPropEntry extends AbstractData<DPropEntry> {
 
     @Override
     public void loadFrom(Document document, Element element) {
-        ofNullable(element.getAttribute("key")).ifPresent(key::set);
+        of(element.getAttribute("key")).filter(s -> !s.isEmpty()).ifPresent(key::set);
         ofNullable(element.getTextContent()).filter(s -> !s.isEmpty()).ifPresent(value::set);
     }
 

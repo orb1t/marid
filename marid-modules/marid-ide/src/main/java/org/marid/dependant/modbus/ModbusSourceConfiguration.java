@@ -84,6 +84,7 @@ public class ModbusSourceConfiguration {
                     button.setTooltip(tooltip);
                     button.setOnAction(event -> {
                         final AbstractDevice<?> device = context.getBean(name, AbstractDevice.class);
+                        device.getProperties().put("name", name);
                         pane.add(device);
                     });
                     return button;

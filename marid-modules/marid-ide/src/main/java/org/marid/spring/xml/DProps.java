@@ -26,6 +26,7 @@ import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.*;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.marid.misc.Iterables.nodes;
 
@@ -75,7 +76,7 @@ public final class DProps extends DElement<DProps> {
 
     @Override
     public void loadFrom(Document document, Element element) {
-        ofNullable(element.getAttribute("value-type")).ifPresent(valueType::set);
+        of(element.getAttribute("value-type")).filter(s -> !s.isEmpty()).ifPresent(valueType::set);
         nodes(element, Element.class).filter(e -> "entry".equals(e.getTagName())).forEach(e -> {
             final DPropEntry entry = new DPropEntry();
             entry.loadFrom(document, e);

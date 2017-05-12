@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -68,7 +69,7 @@ public final class DRef extends DElement<DRef> {
 
     @Override
     public void loadFrom(Document document, Element element) {
-        ofNullable(element.getAttribute("bean")).ifPresent(ref::set);
+        of(element.getAttribute("bean")).filter(s -> !s.isEmpty()).ifPresent(ref::set);
     }
 
     @Override

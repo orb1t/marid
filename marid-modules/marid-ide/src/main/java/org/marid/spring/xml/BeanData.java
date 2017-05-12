@@ -27,6 +27,7 @@ import org.w3c.dom.Element;
 import javax.xml.bind.annotation.*;
 import java.lang.reflect.Executable;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.marid.misc.Iterables.nodes;
 
@@ -170,13 +171,13 @@ public final class BeanData extends DElement<BeanData> {
 
     @Override
     public void loadFrom(Document document, Element element) {
-        ofNullable(element.getAttribute("class")).ifPresent(type::set);
-        ofNullable(element.getAttribute("name")).ifPresent(name::set);
-        ofNullable(element.getAttribute("init-method")).ifPresent(initMethod::set);
-        ofNullable(element.getAttribute("destroy-method")).ifPresent(destroyMethod::set);
-        ofNullable(element.getAttribute("factory-bean")).ifPresent(factoryBean::set);
-        ofNullable(element.getAttribute("factory-method")).ifPresent(factoryMethod::set);
-        ofNullable(element.getAttribute("lazy-init")).ifPresent(lazyInit::set);
+        of(element.getAttribute("class")).filter(s -> !s.isEmpty()).ifPresent(type::set);
+        of(element.getAttribute("name")).filter(s -> !s.isEmpty()).ifPresent(name::set);
+        of(element.getAttribute("init-method")).filter(s -> !s.isEmpty()).ifPresent(initMethod::set);
+        of(element.getAttribute("destroy-method")).filter(s -> !s.isEmpty()).ifPresent(destroyMethod::set);
+        of(element.getAttribute("factory-bean")).filter(s -> !s.isEmpty()).ifPresent(factoryBean::set);
+        of(element.getAttribute("factory-method")).filter(s -> !s.isEmpty()).ifPresent(factoryMethod::set);
+        of(element.getAttribute("lazy-init")).filter(s -> !s.isEmpty()).ifPresent(lazyInit::set);
         nodes(element, Element.class).filter(e -> "constructor-arg".equals(e.getTagName())).forEach(e -> {
             final BeanArg arg = new BeanArg();
             arg.loadFrom(document, e);
