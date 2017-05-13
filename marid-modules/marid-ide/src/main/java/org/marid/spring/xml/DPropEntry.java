@@ -22,16 +22,12 @@ import org.marid.jfx.beans.FxString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.*;
-
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@XmlRootElement(name = "prop")
-@XmlAccessorType(XmlAccessType.NONE)
 public final class DPropEntry extends AbstractData<DPropEntry> {
 
     public final FxString key = new FxString(null, "key");
@@ -42,7 +38,6 @@ public final class DPropEntry extends AbstractData<DPropEntry> {
         value.addListener(this::fireInvalidate);
     }
 
-    @XmlAttribute(name = "key")
     public String getKey() {
         return key.get();
     }
@@ -51,7 +46,6 @@ public final class DPropEntry extends AbstractData<DPropEntry> {
         this.key.set(key);
     }
 
-    @XmlValue
     public String getValue() {
         return value.get();
     }

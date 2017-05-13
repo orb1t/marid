@@ -31,12 +31,15 @@ import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
 import org.marid.util.MethodUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 
 import javax.annotation.PreDestroy;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@Configurable
 public class BeanTreeItem extends AbstractTreeItem<BeanData> {
 
     private final ListSynchronizer<BeanArg, ArgumentTreeItem> argsSynchronizer;
@@ -93,5 +96,10 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
     private void destroy() {
         argsSynchronizer.destroy();
         propsSynchronizer.destroy();
+    }
+
+    @Autowired
+    private void initUpdateAction(ProjectProfile profile) {
+
     }
 }

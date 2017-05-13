@@ -23,7 +23,6 @@ import org.marid.jfx.beans.FxString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.*;
 import java.util.Objects;
 
 import static java.util.Optional.of;
@@ -35,8 +34,6 @@ import static org.marid.spring.xml.DElement.read;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@XmlRootElement(name = "entry")
-@XmlAccessorType(XmlAccessType.NONE)
 public class DMapEntry extends AbstractData<DMapEntry> {
 
     public final FxString key = new FxString(null, "key");
@@ -47,7 +44,6 @@ public class DMapEntry extends AbstractData<DMapEntry> {
         value.addListener(this::fireInvalidate);
     }
 
-    @XmlAttribute
     public String getKey() {
         return key.get();
     }
@@ -56,7 +52,6 @@ public class DMapEntry extends AbstractData<DMapEntry> {
         this.key.set(key);
     }
 
-    @XmlAnyElement(lax = true)
     public DElement<?> getValue() {
         return value.get();
     }

@@ -18,15 +18,9 @@
 
 package org.marid.spring.xml;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * @author Dmitry Ovchinnikov.
  */
-@XmlRootElement(name = "list")
-@XmlAccessorType(XmlAccessType.NONE)
 public final class DList extends DCollection<DList> {
 
     @Override

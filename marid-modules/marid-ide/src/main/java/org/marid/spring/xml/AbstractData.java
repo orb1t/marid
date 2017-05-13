@@ -26,7 +26,6 @@ import org.marid.jfx.beans.AbstractObservable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.XmlTransient;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -41,7 +40,6 @@ import static java.util.stream.Collectors.toMap;
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlTransient
 public abstract class AbstractData<T extends AbstractData<T>> extends AbstractObservable implements Externalizable, Cloneable {
 
     public abstract void loadFrom(Document document, Element element);

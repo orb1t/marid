@@ -22,19 +22,12 @@ import org.marid.jfx.beans.FxString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlValue;
-
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "value")
-@XmlAccessorType(XmlAccessType.NONE)
 public final class DValue extends DElement<DValue> {
 
     public final FxString value = new FxString(null, "value");
@@ -48,7 +41,6 @@ public final class DValue extends DElement<DValue> {
         this.value.addListener(this::fireInvalidate);
     }
 
-    @XmlValue
     public String getValue() {
         return value.get();
     }

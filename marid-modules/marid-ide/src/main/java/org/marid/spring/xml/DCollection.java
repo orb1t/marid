@@ -24,7 +24,6 @@ import org.marid.jfx.beans.FxString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.*;
 import java.util.Objects;
 
 import static java.util.Optional.of;
@@ -34,8 +33,6 @@ import static org.marid.misc.Iterables.nodes;
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlSeeAlso({DList.class, DArray.class, DValue.class, DProps.class, DRef.class, DMap.class})
-@XmlAccessorType(XmlAccessType.NONE)
 public abstract class DCollection<T extends DCollection<T>> extends DElement<T> {
 
     public final FxString valueType = new FxString(null, "value-type");
@@ -46,7 +43,6 @@ public abstract class DCollection<T extends DCollection<T>> extends DElement<T> 
         elements.addListener(this::fireInvalidate);
     }
 
-    @XmlAttribute(name = "value-type")
     public String getValueType() {
         return valueType.get() == null || valueType.get().isEmpty() ? null : valueType.get();
     }
@@ -55,7 +51,6 @@ public abstract class DCollection<T extends DCollection<T>> extends DElement<T> 
         this.valueType.set(valueType);
     }
 
-    @XmlAnyElement(lax = true)
     public DElement<?>[] getElements() {
         return elements.stream().filter(e -> !e.isEmpty()).toArray(DElement[]::new);
     }

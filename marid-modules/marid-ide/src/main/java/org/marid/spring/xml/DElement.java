@@ -21,12 +21,9 @@ package org.marid.spring.xml;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.XmlTransient;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlTransient
 public abstract class DElement<T extends DElement<T>> extends AbstractData<T> {
 
     public abstract boolean isEmpty();

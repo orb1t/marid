@@ -22,18 +22,12 @@ import org.marid.jfx.beans.FxString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "meta")
-@XmlAccessorType(XmlAccessType.NONE)
 public class Meta extends AbstractData<Meta> {
 
     public final FxString key = new FxString(null, "key");

@@ -23,7 +23,6 @@ import org.marid.jfx.beans.FxList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.*;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -33,9 +32,6 @@ import static org.marid.misc.Iterables.nodes;
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "beans")
-@XmlSeeAlso({BeanData.class})
-@XmlAccessorType(XmlAccessType.NONE)
 public final class BeanFile extends AbstractData<BeanFile> {
 
     public final FxList<String> path = new FxList<>();
@@ -46,7 +42,6 @@ public final class BeanFile extends AbstractData<BeanFile> {
         beans.addListener(this::fireInvalidate);
     }
 
-    @XmlElement(name = "bean")
     public BeanData[] getBeans() {
         return beans.stream().filter(b -> !b.isEmpty()).toArray(BeanData[]::new);
     }

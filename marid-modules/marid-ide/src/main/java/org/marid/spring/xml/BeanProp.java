@@ -23,7 +23,6 @@ import org.marid.jfx.beans.FxString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.*;
 import java.util.Objects;
 
 import static java.util.Optional.of;
@@ -35,8 +34,6 @@ import static org.marid.spring.xml.DElement.write;
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlAccessorType(XmlAccessType.NONE)
-@XmlSeeAlso({DCollection.class})
 public class BeanProp extends AbstractData<BeanProp> {
 
     public final FxString name = new FxString(null, "name");
@@ -55,7 +52,6 @@ public class BeanProp extends AbstractData<BeanProp> {
         });
     }
 
-    @XmlAttribute(name = "name")
     public String getName() {
         return name.get();
     }
@@ -64,7 +60,6 @@ public class BeanProp extends AbstractData<BeanProp> {
         this.name.set(name);
     }
 
-    @XmlAnyElement(lax = true)
     public DElement<?> getData() {
         return data.get();
     }

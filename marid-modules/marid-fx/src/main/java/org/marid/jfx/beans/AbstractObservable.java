@@ -21,14 +21,12 @@ package org.marid.jfx.beans;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 
-import javax.xml.bind.annotation.XmlTransient;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlTransient
 public abstract class AbstractObservable implements Observable {
 
     protected final Set<InvalidationListener> listeners = new CopyOnWriteArraySet<>();

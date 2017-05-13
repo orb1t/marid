@@ -22,19 +22,12 @@ import org.marid.jfx.beans.FxString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "ref")
 public final class DRef extends DElement<DRef> {
 
     public final FxString ref = new FxString(null, "value");
@@ -48,7 +41,6 @@ public final class DRef extends DElement<DRef> {
         ref.addListener(this::fireInvalidate);
     }
 
-    @XmlAttribute(name = "bean")
     public String getBean() {
         return isEmpty() ? null : ref.get();
     }

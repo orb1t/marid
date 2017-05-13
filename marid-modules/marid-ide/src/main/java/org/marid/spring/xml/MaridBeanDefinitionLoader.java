@@ -18,13 +18,19 @@
 
 package org.marid.spring.xml;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
 import java.nio.file.Path;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -32,15 +38,20 @@ import java.nio.file.Path;
 public class MaridBeanDefinitionLoader {
 
     public static BeanFile load(Path path) throws IOException {
-        return load(new StreamSource(path.toFile()));
+        try (final Reader reader = Files.newBufferedReader(path, UTF_8)) {
+            return load(reader);
+        }
     }
 
-    public static BeanFile load(Source stream) throws IOException {
+    public static BeanFile load(Reader reader) throws IOException {
+        final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
-            final Unmarshaller unmarshaller = MaridBeanDefinitionSaver.CONTEXT.createUnmarshaller();
-            final JAXBElement<BeanFile> element = unmarshaller.unmarshal(stream, BeanFile.class);
-            return element.getValue();
-        } catch (JAXBException x) {
+            final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            final Document document = documentBuilder.parse(new InputSource(reader));
+            final BeanFile beanFile = new BeanFile();
+            beanFile.loadFrom(document, document.getDocumentElement());
+            return beanFile;
+        } catch (ParserConfigurationException | SAXException x) {
             throw new IOException(x);
         }
     }

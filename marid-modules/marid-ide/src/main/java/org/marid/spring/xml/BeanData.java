@@ -24,7 +24,6 @@ import org.marid.jfx.beans.FxString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.*;
 import java.lang.reflect.Executable;
 
 import static java.util.Optional.of;
@@ -34,9 +33,6 @@ import static org.marid.misc.Iterables.nodes;
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "bean")
-@XmlSeeAlso({BeanProp.class, DCollection.class, Meta.class})
-@XmlAccessorType(XmlAccessType.NONE)
 public final class BeanData extends DElement<BeanData> {
 
     public final FxString type = new FxString(null, "class");
@@ -63,7 +59,6 @@ public final class BeanData extends DElement<BeanData> {
         properties.addListener(this::fireInvalidate);
     }
 
-    @XmlAttribute(name = "class")
     public String getType() {
         return type.get() == null || type.get().isEmpty() ? null : type.get();
     }
@@ -72,7 +67,6 @@ public final class BeanData extends DElement<BeanData> {
         this.type.set(type);
     }
 
-    @XmlAttribute(name = "name")
     public String getName() {
         return name.get() == null || name.get().isEmpty() ? null : name.get();
     }
@@ -81,7 +75,6 @@ public final class BeanData extends DElement<BeanData> {
         this.name.set(name);
     }
 
-    @XmlAttribute(name = "init-method")
     public String getInitMethod() {
         return initMethod.get() == null || initMethod.get().isEmpty() ? null : initMethod.get();
     }
@@ -90,7 +83,6 @@ public final class BeanData extends DElement<BeanData> {
         this.initMethod.set(initMethod);
     }
 
-    @XmlAttribute(name = "destroy-method")
     public String getDestroyMethod() {
         return destroyMethod.get() == null || destroyMethod.get().isEmpty() ? null : destroyMethod.get();
     }
@@ -99,7 +91,6 @@ public final class BeanData extends DElement<BeanData> {
         this.destroyMethod.set(destroyMethod);
     }
 
-    @XmlAttribute(name = "factory-bean")
     public String getFactoryBean() {
         return factoryBean.get() == null || factoryBean.get().isEmpty() ? null : factoryBean.get();
     }
@@ -108,7 +99,6 @@ public final class BeanData extends DElement<BeanData> {
         this.factoryBean.set(factoryBean);
     }
 
-    @XmlAttribute(name = "factory-method")
     public String getFactoryMethod() {
         return factoryMethod.get() == null || factoryMethod.get().isEmpty() ? null : factoryMethod.get();
     }
@@ -117,7 +107,6 @@ public final class BeanData extends DElement<BeanData> {
         this.factoryMethod.set(factoryMethod);
     }
 
-    @XmlAttribute(name = "lazy-init")
     public String getLazyInit() {
         return "default".equals(lazyInit.get()) ? null : lazyInit.get();
     }
@@ -126,7 +115,6 @@ public final class BeanData extends DElement<BeanData> {
         this.lazyInit.set(lazyInit == null ? "default" : lazyInit);
     }
 
-    @XmlElement(name = "constructor-arg")
     public BeanArg[] getBeanArgs() {
         return beanArgs.stream().filter(a -> !a.isEmpty()).toArray(BeanArg[]::new);
     }
@@ -135,7 +123,6 @@ public final class BeanData extends DElement<BeanData> {
         this.beanArgs.setAll(beanArgs);
     }
 
-    @XmlElement(name = "property")
     public BeanProp[] getBeanProps() {
         return properties.stream().filter(p -> !p.isEmpty()).toArray(BeanProp[]::new);
     }

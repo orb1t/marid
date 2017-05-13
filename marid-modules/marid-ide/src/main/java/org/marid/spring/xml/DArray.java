@@ -18,12 +18,9 @@
 
 package org.marid.spring.xml;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-@XmlRootElement(name = "array")
 public final class DArray extends DCollection<DArray> {
 
     @Override

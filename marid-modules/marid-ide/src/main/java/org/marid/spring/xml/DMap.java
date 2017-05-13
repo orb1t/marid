@@ -24,8 +24,6 @@ import org.marid.jfx.beans.FxString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.*;
-
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.marid.misc.Iterables.nodes;
@@ -34,9 +32,6 @@ import static org.marid.misc.Iterables.nodes;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-@XmlRootElement(name = "map")
-@XmlSeeAlso({DMapEntry.class})
-@XmlAccessorType(XmlAccessType.NONE)
 public class DMap extends DElement<DMap> {
 
     public final FxString keyType = new FxString(null, "key-type");
@@ -54,7 +49,6 @@ public class DMap extends DElement<DMap> {
         return false;
     }
 
-    @XmlAttribute(name = "key-type")
     public String getKeyType() {
         return keyType.get();
     }
@@ -63,7 +57,6 @@ public class DMap extends DElement<DMap> {
         this.keyType.set(keyType);
     }
 
-    @XmlAttribute(name = "value-type")
     public String getValueType() {
         return valueType.get();
     }
@@ -72,7 +65,6 @@ public class DMap extends DElement<DMap> {
         this.valueType.set(valueType);
     }
 
-    @XmlElement(name = "entry")
     public DMapEntry[] getEntries() {
         return entries.stream().filter(e -> !e.isEmpty()).toArray(DMapEntry[]::new);
     }

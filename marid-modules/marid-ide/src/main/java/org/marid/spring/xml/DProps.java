@@ -24,8 +24,6 @@ import org.marid.jfx.beans.FxString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.*;
-
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.marid.misc.Iterables.nodes;
@@ -33,9 +31,6 @@ import static org.marid.misc.Iterables.nodes;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@XmlRootElement(name = "props")
-@XmlSeeAlso({DPropEntry.class})
-@XmlAccessorType(XmlAccessType.NONE)
 public final class DProps extends DElement<DProps> {
 
     public final FxString valueType = new FxString(null, "value-type");
@@ -46,7 +41,6 @@ public final class DProps extends DElement<DProps> {
         entries.addListener(this::fireInvalidate);
     }
 
-    @XmlAttribute(name = "value-type")
     public String getValueType() {
         return valueType.get() == null || valueType.get().isEmpty() ? null : valueType.get();
     }
@@ -55,7 +49,6 @@ public final class DProps extends DElement<DProps> {
         this.valueType.set(valueType);
     }
 
-    @XmlElement(name = "prop")
     public DPropEntry[] getEntries() {
         return entries.stream().filter(e -> !e.isEmpty()).toArray(DPropEntry[]::new);
     }
