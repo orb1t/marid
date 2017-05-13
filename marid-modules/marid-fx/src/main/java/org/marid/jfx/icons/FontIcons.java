@@ -63,9 +63,8 @@ public class FontIcons {
         if (type == null || type.length() < 3) {
             return glyphIcon("F_SMILE_ALT", size);
         } else {
-            final Font font = new Font(family(type), size);
             final Text label = new Text();
-            label.setFont(font);
+            label.setFont(new Font(family(type), size));
             label.setText(SYMBOLS.getOrDefault(type, ""));
             return label;
         }
