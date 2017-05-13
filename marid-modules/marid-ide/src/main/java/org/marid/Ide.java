@@ -76,6 +76,7 @@ public class Ide extends Application {
     }
 
     static {
+        System.out.println(System.getProperties());
         // console logger
         System.setProperty("java.util.logging.config.class", "org.marid.ide.logging.IdeLogConfig");
 
