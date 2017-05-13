@@ -28,8 +28,8 @@ import javafx.collections.ObservableList;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -40,8 +40,8 @@ import java.util.stream.Stream;
 public class FxList<E> extends ForwardingList<E> implements ObservableList<E>, FxObservable {
 
     private final ObservableList<E> delegate;
-    private final List<InvalidationListener> invalidationListeners = new LinkedList<>();
-    private final List<ListChangeListener<? super E>> changeListeners = new LinkedList<>();
+    private final Collection<InvalidationListener> invalidationListeners = new ConcurrentLinkedQueue<>();
+    private final Collection<ListChangeListener<? super E>> changeListeners = new ConcurrentLinkedQueue<>();
 
     public FxList(@Nonnull ObservableList<E> delegate) {
         this.delegate = delegate;

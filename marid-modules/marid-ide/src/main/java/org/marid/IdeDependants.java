@@ -18,7 +18,6 @@
 
 package org.marid;
 
-import javafx.application.Platform;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.Tab;
@@ -27,18 +26,27 @@ import org.marid.ide.tabs.IdeTab;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.lang.ref.Cleaner;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -47,6 +55,7 @@ import java.util.function.Consumer;
 public class IdeDependants {
 
     private static final Collection<WeakReference<GenericApplicationContext>> CONTEXTS = new ConcurrentLinkedQueue<>();
+    private static final Cleaner CLEANER = Cleaner.create();
 
     private final GenericApplicationContext parent;
 
@@ -56,7 +65,50 @@ public class IdeDependants {
     }
 
     public GenericApplicationContext start(Consumer<AnnotationConfigApplicationContext> consumer) {
-        final AnnotationConfigApplicationContext context = new DependantContext(parent);
+        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
+        context.getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(context));
+        context.getBeanFactory().setParentBeanFactory(parent.getBeanFactory());
+        context.setAllowBeanDefinitionOverriding(false);
+        context.setAllowCircularReferences(false);
+        context.register(IdeDependants.class);
+        final WeakReference<GenericApplicationContext> ref = new WeakReference<>(context);
+        final AtomicReference<ApplicationListener<ApplicationEvent>> listenerRef = new AtomicReference<>();
+        listenerRef.set(event -> {
+            CONTEXTS.removeIf(c -> c.get() == null);
+            if (event instanceof ContextRefreshedEvent) {
+                CONTEXTS.add(ref);
+            } else if (event instanceof ContextClosedEvent) {
+                CONTEXTS.remove(ref);
+                final ContextClosedEvent ev = (ContextClosedEvent) event;
+                final GenericApplicationContext ctx = (GenericApplicationContext) ev.getApplicationContext();
+                ctx.getApplicationListeners().remove(listenerRef.getAndSet(null));
+            } else if (event instanceof ContextStartedEvent) {
+                final ContextStartedEvent ev = (ContextStartedEvent) event;
+                final GenericApplicationContext ctx = (GenericApplicationContext) ev.getApplicationContext();
+                CLEANER.register(ctx, () -> {
+                    final GenericApplicationContext c = ref.get();
+                    if (c != null) {
+                        c.close();
+                    } else {
+                        log(WARNING, "Unable to clean context");
+                    }
+                });
+            }
+        });
+        context.addApplicationListener(listenerRef.get());
+        final AtomicReference<ApplicationListener<ContextClosedEvent>> parentListenerRef = new AtomicReference<>();
+        parentListenerRef.set(event -> {
+            try {
+                final GenericApplicationContext ctx = ref.get();
+                if (ctx != null) {
+                    ctx.close();
+                }
+            } finally {
+                parent.getApplicationListeners().remove(parentListenerRef.getAndSet(null));
+            }
+        });
+        parent.addApplicationListener(parentListenerRef.get());
         consumer.accept(context);
         context.refresh();
         context.start();
@@ -104,53 +156,5 @@ public class IdeDependants {
     @Override
     public String toString() {
         return parent.toString();
-    }
-
-    static class MainContext extends AnnotationConfigApplicationContext {
-
-        MainContext() {
-            getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
-            setAllowBeanDefinitionOverriding(false);
-            setAllowCircularReferences(false);
-        }
-
-        @Override
-        protected void onClose() {
-            for (final WeakReference<GenericApplicationContext> ref : CONTEXTS) {
-                final GenericApplicationContext c = ref.get();
-                if (c != null && c.getBeanFactory().getParentBeanFactory() == getBeanFactory()) {
-                    c.close();
-                    return;
-                }
-            }
-        }
-    }
-
-    private static class DependantContext extends MainContext {
-
-        private final WeakReference<GenericApplicationContext> ref = new WeakReference<>(this);
-
-        private DependantContext(GenericApplicationContext parent) {
-            getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(this));
-            getBeanFactory().setParentBeanFactory(parent.getDefaultListableBeanFactory());
-            register(IdeDependants.class);
-        }
-
-        @Override
-        protected void onRefresh() throws BeansException {
-            CONTEXTS.removeIf(c -> c.get() == null);
-            CONTEXTS.add(ref);
-        }
-
-        @Override
-        protected void onClose() {
-            CONTEXTS.removeIf(c -> c.get() == null || c == ref);
-            super.onClose();
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            Platform.runLater(this::close);
-        }
     }
 }
