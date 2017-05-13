@@ -21,15 +21,15 @@ package org.marid.jfx.beans;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public abstract class AbstractObservable implements Observable {
 
-    protected final Collection<InvalidationListener> listeners = new ConcurrentLinkedQueue<>();
+    protected final Set<InvalidationListener> listeners = new CopyOnWriteArraySet<>();
 
     @Override
     public void addListener(InvalidationListener listener) {
@@ -39,12 +39,12 @@ public abstract class AbstractObservable implements Observable {
 
     @Override
     public void removeListener(InvalidationListener listener) {
-        listeners.remove(listener);
         FxCleaner.clean(listeners);
+        listeners.remove(listener);
     }
 
     protected void fireInvalidate(Observable observable) {
-        listeners.forEach(l -> l.invalidated(observable));
         FxCleaner.clean(listeners);
+        listeners.forEach(l -> l.invalidated(observable));
     }
 }

@@ -24,8 +24,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -37,8 +37,8 @@ public class ForwardingObservableValue<T, V extends ObservableValue<T>>
 
     protected final V delegate;
 
-    private final Collection<InvalidationListener> invalidationListeners = new ConcurrentLinkedQueue<>();
-    private final Collection<ChangeListener<? super T>> changeListeners = new ConcurrentLinkedQueue<>();
+    private final List<InvalidationListener> invalidationListeners = new LinkedList<>();
+    private final List<ChangeListener<? super T>> changeListeners = new LinkedList<>();
 
     public ForwardingObservableValue(@Nonnull V delegate) {
         this.delegate = delegate;

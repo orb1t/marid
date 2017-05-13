@@ -22,6 +22,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import org.marid.IdeDependants.MainContext;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
@@ -39,7 +40,7 @@ import static org.marid.ide.logging.IdeLogConfig.ROOT_LOGGER;
  */
 public class Ide extends Application {
 
-    private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+    private final AnnotationConfigApplicationContext context = new MainContext();
 
     public static Stage primaryStage;
     public static Ide ide;
@@ -48,9 +49,6 @@ public class Ide extends Application {
     @Override
     public void init() throws Exception {
         Ide.ide = this;
-        context.getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
-        context.setAllowCircularReferences(false);
-        context.setAllowBeanDefinitionOverriding(false);
         context.setId("root");
         context.setDisplayName("Root Context");
         context.register(IdeContext.class);
@@ -78,6 +76,7 @@ public class Ide extends Application {
     }
 
     static {
+        System.out.println(System.getProperties());
         // console logger
         System.setProperty("java.util.logging.config.class", "org.marid.ide.logging.IdeLogConfig");
 
@@ -90,9 +89,5 @@ public class Ide extends Application {
         MaridCommonPostProcessor.replaceInjectedMetadata();
 
         ROOT_LOGGER.addHandler(ideLogHandler = new IdeLogHandler());
-    }
-
-    public static void main(String... args) {
-        Application.launch(args);
     }
 }
