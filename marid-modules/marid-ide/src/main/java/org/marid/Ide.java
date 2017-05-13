@@ -89,4 +89,8 @@ public class Ide extends Application {
 
         ROOT_LOGGER.addHandler(ideLogHandler = new IdeLogHandler());
     }
+
+    public static void main(String... args) {
+        Application.launch(args);
+    }
 }
