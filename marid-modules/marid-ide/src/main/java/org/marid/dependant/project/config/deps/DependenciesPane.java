@@ -34,7 +34,6 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 import static javafx.beans.binding.Bindings.createBooleanBinding;
-import static org.marid.jfx.icons.FontIcon.*;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -82,10 +81,10 @@ public class DependenciesPane extends BorderPane {
         setBottom(new ToolbarBuilder()
                 .add(dependencyBox, b -> {})
                 .addSeparator()
-                .add("Add item", M_ADD, event -> dependencies.add(dependencyBox.getValue()), disabledAdd)
-                .add("Remove item", M_REMOVE, event -> dependencies.removeAll(selected), Bindings.isEmpty(selected))
+                .add("Add item", "M_ADD", event -> dependencies.add(dependencyBox.getValue()), disabledAdd)
+                .add("Remove item", "M_REMOVE", event -> dependencies.removeAll(selected), Bindings.isEmpty(selected))
                 .addSeparator()
-                .add("Clear all items", M_CLEAR_ALL, event -> dependencies.clear(), Bindings.isEmpty(dependencies))
+                .add("Clear all items", "M_CLEAR_ALL", event -> dependencies.clear(), Bindings.isEmpty(dependencies))
                 .build(t -> setMargin(t, new Insets(10, 0, 0, 0))));
     }
 }

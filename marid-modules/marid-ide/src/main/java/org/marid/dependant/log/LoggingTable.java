@@ -18,15 +18,14 @@
 
 package org.marid.dependant.log;
 
-import de.jensd.fx.glyphs.GlyphIcon;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.marid.Ide;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10n;
@@ -67,25 +66,25 @@ public class LoggingTable extends TableView<LogRecord> {
     public static IconDescriptor icon(Level level) {
         switch (level.intValue()) {
             case Integer.MAX_VALUE:
-                return new IconDescriptor(FontIcon.D_SELECT_OFF, "red");
+                return new IconDescriptor("D_SELECT_OFF", "red");
             case Integer.MIN_VALUE:
-                return new IconDescriptor(FontIcon.D_ARROW_ALL, "green");
+                return new IconDescriptor("D_ARROW_ALL", "green");
             case 1000:
-                return new IconDescriptor(FontIcon.M_ERROR, "red");
+                return new IconDescriptor("M_ERROR", "red");
             case 900:
-                return new IconDescriptor(FontIcon.F_WARNING, "orange");
+                return new IconDescriptor("F_WARNING", "orange");
             case 800:
-                return new IconDescriptor(FontIcon.F_INFO_CIRCLE, "blue");
+                return new IconDescriptor("F_INFO_CIRCLE", "blue");
             case 700:
-                return new IconDescriptor(FontIcon.M_CONTROL_POINT, "green");
+                return new IconDescriptor("M_CONTROL_POINT", "green");
             case 500:
-                return new IconDescriptor(FontIcon.D_BATTERY_60, "green");
+                return new IconDescriptor("D_BATTERY_60", "green");
             case 400:
-                return new IconDescriptor(FontIcon.D_BATTERY_80, "green");
+                return new IconDescriptor("D_BATTERY_80", "green");
             case 300:
-                return new IconDescriptor(FontIcon.D_BATTERY_CHARGING_100, "green");
+                return new IconDescriptor("D_BATTERY_CHARGING_100", "green");
             default:
-                return new IconDescriptor(FontIcon.D_BATTERY_UNKNOWN, "gray");
+                return new IconDescriptor("D_BATTERY_UNKNOWN", "gray");
         }
     }
 
@@ -175,10 +174,9 @@ public class LoggingTable extends TableView<LogRecord> {
             this.css = css;
         }
 
-        private GlyphIcon<?> getGlyphIcon() {
-            final GlyphIcon<?> glyphIcon = FontIcons.glyphIcon(icon);
+        private Node getGlyphIcon() {
+            final Node glyphIcon = FontIcons.glyphIcon(icon, 16);
             glyphIcon.setStyle("-fx-fill: " + css);
-            glyphIcon.setGlyphSize(16);
             return glyphIcon;
         }
     }

@@ -33,7 +33,6 @@ import javafx.scene.layout.BorderPane;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Repository;
 import org.apache.maven.model.RepositoryPolicy;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.props.Props;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -60,21 +59,21 @@ public class RepositoriesTab extends BorderPane {
                 .selectedItemProperty()
                 .isNull());
         setBottom(new ToolbarBuilder()
-                .add("Add item", FontIcon.M_ADD, event -> repositoryTable.getItems().add(new Repository()))
-                .add("Remove item", FontIcon.M_REMOVE, event -> {
+                .add("Add item", "M_ADD", event -> repositoryTable.getItems().add(new Repository()))
+                .add("Remove item", "M_REMOVE", event -> {
                     final int index = repositoryTable.getSelectionModel().getSelectedIndex();
                     if (index >= 0) {
                         repositoryTable.getItems().remove(index);
                     }
                 }, itemSelectionTrigger)
                 .addSeparator()
-                .add("Clear all items", FontIcon.M_CLEAR_ALL,
+                .add("Clear all items", "M_CLEAR_ALL",
                         event -> repositoryTable.getItems().clear(),
                         b -> b.disableProperty().bind(Bindings.size(repositoryTable.getItems()).isEqualTo(0)))
                 .addSeparator()
-                .add("Cut", FontIcon.M_CONTENT_CUT, event -> {}, itemSelectionTrigger)
-                .add("Copy", FontIcon.M_CONTENT_COPY, event -> {}, itemSelectionTrigger)
-                .add("Paste", FontIcon.M_CONTENT_PASTE, event -> {}, itemSelectionTrigger)
+                .add("Cut", "M_CONTENT_CUT", event -> {}, itemSelectionTrigger)
+                .add("Copy", "M_CONTENT_COPY", event -> {}, itemSelectionTrigger)
+                .add("Paste", "M_CONTENT_PASTE", event -> {}, itemSelectionTrigger)
                 .build(t -> setMargin(t,  new Insets(10, 0, 0, 0))));
     }
 

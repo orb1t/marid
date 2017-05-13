@@ -37,8 +37,6 @@ import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
 import static org.marid.dependant.log.LoggingTable.icon;
-import static org.marid.jfx.icons.FontIcon.M_BORDER_TOP;
-import static org.marid.jfx.icons.FontIcon.M_CLEAR_ALL;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
@@ -79,7 +77,7 @@ public class LogConfiguration {
     public Menu actionsMenu(LoggingFilter loggingFilter) {
         final Menu menu = new Menu(s("Actions"));
         {
-            final MenuItem menuItem = new MenuItem(s("Clear"), glyphIcon(M_CLEAR_ALL, 16));
+            final MenuItem menuItem = new MenuItem(s("Clear"), glyphIcon("M_CLEAR_ALL", 16));
             menuItem.setOnAction(event -> loggingFilter.clear());
             menu.getItems().add(menuItem);
         }
@@ -115,7 +113,7 @@ public class LogConfiguration {
         stage.setY(preferences.getDouble("y", stage.getY()));
         {
             actionsMenu.getItems().add(new SeparatorMenuItem());
-            final CheckMenuItem menuItem = new CheckMenuItem(s("Always on top"), glyphIcon(M_BORDER_TOP, 16));
+            final CheckMenuItem menuItem = new CheckMenuItem(s("Always on top"), glyphIcon("M_BORDER_TOP", 16));
             menuItem.setOnAction(event -> stage.setAlwaysOnTop(!stage.isAlwaysOnTop()));
             actionsMenu.getItems().add(menuItem);
         }

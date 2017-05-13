@@ -37,7 +37,6 @@ import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static org.marid.ide.IdeNotifications.n;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.logging.Log.log;
 
 /**
@@ -51,7 +50,7 @@ public class ProjectConfiguration {
     public FxAction projectSetup(IdeDependants dependants, ProjectManager manager, BooleanBinding projectDisabled) {
         return new FxAction("projectSetup", "setup", "Project")
                 .bindText(ls("Project setup..."))
-                .setIcon(O_TOOLS)
+                .setIcon("O_TOOLS")
                 .setEventHandler(event -> {
                     final ProjectProfile profile = manager.getProfile();
                     dependants.start(ProjectConfigConfiguration.class, new ProjectParams(profile), context -> {
@@ -70,7 +69,7 @@ public class ProjectConfiguration {
         return new FxAction("io", "Project")
                 .setAccelerator(KeyCombination.valueOf("F2"))
                 .bindText(ls("Save"))
-                .setIcon(F_SAVE)
+                .setIcon("F_SAVE")
                 .setEventHandler(event -> projectSaver.getObject().save(manager.getProfile()))
                 .bindDisabled(projectDisabled);
     }
@@ -84,7 +83,7 @@ public class ProjectConfiguration {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F9"))
                 .bindText(ls("Build"))
-                .setIcon(D_CLOCK_FAST)
+                .setIcon("D_CLOCK_FAST")
                 .setEventHandler(event -> {
                     final ProjectProfile profile = projectManager.getProfile();
                     projectSaver.getObject().save(profile);
@@ -114,7 +113,7 @@ public class ProjectConfiguration {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F5"))
                 .bindText(ls("Run"))
-                .setIcon(F_PLAY)
+                .setIcon("F_PLAY")
                 .setEventHandler(event -> {
                     final ProjectProfile profile = manager.getProfile();
                     dependants.start(ProjectRunnerConfiguration.class, new ProjectParams(profile), context -> {
@@ -130,7 +129,7 @@ public class ProjectConfiguration {
     public FxAction profileEdit(IdeDependants dependants, ProjectManager manager, BooleanBinding projectDisabled) {
         return new FxAction("projectResources", "pr", "Project")
                 .bindText(ls("Resources"))
-                .setIcon(M_MODE_EDIT)
+                .setIcon("M_MODE_EDIT")
                 .setEventHandler(event -> {
                     final ProjectProfile profile = manager.getProfile();
                     dependants.start(ResourcesConfiguration.class, new ResourcesParams(profile), context -> {

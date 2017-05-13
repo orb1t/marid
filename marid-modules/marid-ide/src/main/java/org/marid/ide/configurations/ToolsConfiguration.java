@@ -27,7 +27,6 @@ import org.marid.spring.action.IdeAction;
 import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,7 +37,7 @@ public class ToolsConfiguration {
     @IdeAction
     public FxAction iconViewerAction(IdeDependants dependants) {
         return new FxAction("icons", "Tools")
-                .setIcon(M_OPEN_IN_BROWSER)
+                .setIcon("M_OPEN_IN_BROWSER")
                 .bindText(ls("Icon viewer"))
                 .setEventHandler(event -> dependants.start(IconViewerConfiguration.class, context -> {
                     context.setId("iconViewer");
@@ -49,7 +48,7 @@ public class ToolsConfiguration {
     @IdeAction
     public FxAction monitorAction(IdeDependants dependants) {
         return new FxAction("monitor", "Tools")
-                .setIcon(M_GRAPHIC_EQ)
+                .setIcon("M_GRAPHIC_EQ")
                 .bindText(ls("System monitor"))
                 .setEventHandler(event -> dependants.start(MonitorConfiguration.class, context -> {
                     context.setId("monitor");
@@ -60,7 +59,7 @@ public class ToolsConfiguration {
     @IdeAction
     public FxAction garbageCollectAction() {
         return new FxAction("monitor", "Tools")
-                .setIcon(M_CHEVRON_LEFT)
+                .setIcon("M_CHEVRON_LEFT")
                 .bindText(ls("Run garbage collection"))
                 .setEventHandler(event -> {
                     System.gc();
@@ -71,7 +70,7 @@ public class ToolsConfiguration {
     @IdeAction
     public FxAction showLogsAction(IdeDependants dependants) {
         return new FxAction("log", "log", "Tools")
-                .setIcon(M_VIEW_LIST)
+                .setIcon("M_VIEW_LIST")
                 .bindText(ls("Show logs"))
                 .setEventHandler(event -> dependants.start(LogConfiguration.class, context -> {
                     context.setId("logViewer");

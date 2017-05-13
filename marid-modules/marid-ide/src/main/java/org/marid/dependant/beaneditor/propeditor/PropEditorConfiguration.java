@@ -23,7 +23,6 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.marid.Ide;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.DProps;
@@ -43,7 +42,7 @@ public class PropEditorConfiguration extends DependantConfiguration<PropEditorPa
     @Bean
     public ToolBar propEditorToolbar(PropTable propTable, PropActions propActions) {
         return new ToolbarBuilder()
-                .add("Add property", FontIcon.M_ADD, propActions::onAdd)
+                .add("Add property", "M_ADD", propActions::onAdd)
                 .build();
     }
 

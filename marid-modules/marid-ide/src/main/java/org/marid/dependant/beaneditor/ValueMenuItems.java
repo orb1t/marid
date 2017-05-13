@@ -24,9 +24,6 @@ import javafx.scene.control.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.marid.IdeDependants;
 import org.marid.beans.TypeInfo;
-import org.marid.dependant.valuemenu.BeanListActions;
-import org.marid.dependant.valuemenu.BeanMetaInfoProvider;
-import org.marid.dependant.valuemenu.BeanMetaInfoProvider.BeansMetaInfo;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorParams;
 import org.marid.dependant.beaneditor.listeditor.ListEditorConfiguration;
@@ -37,8 +34,10 @@ import org.marid.dependant.beaneditor.propeditor.PropEditorConfiguration;
 import org.marid.dependant.beaneditor.propeditor.PropEditorParams;
 import org.marid.dependant.beaneditor.valueeditor.ValueEditorConfiguration;
 import org.marid.dependant.beaneditor.valueeditor.ValueEditorParams;
+import org.marid.dependant.valuemenu.BeanListActions;
+import org.marid.dependant.valuemenu.BeanMetaInfoProvider;
+import org.marid.dependant.valuemenu.BeanMetaInfoProvider.BeansMetaInfo;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.contexts.ValueEditorContext;
 import org.marid.spring.xml.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +56,6 @@ import static java.beans.Introspector.decapitalize;
 import static java.lang.reflect.Modifier.*;
 import static org.marid.jfx.LocalizedStrings.fls;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
@@ -97,7 +95,7 @@ public class ValueMenuItems {
     @Autowired
     public void initClearItem() {
         if (element.getValue() != null) {
-            final MenuItem clearItem = new MenuItem(s("Clear value"), glyphIcon(M_CLEAR, 16));
+            final MenuItem clearItem = new MenuItem(s("Clear value"), glyphIcon("M_CLEAR", 16));
             clearItem.setOnAction(ev -> element.setValue(null));
             items.add(clearItem);
             items.add(new SeparatorMenuItem());
@@ -107,7 +105,7 @@ public class ValueMenuItems {
     @Order(2)
     @Autowired
     public void initEditValue(IdeDependants dependants) {
-        final MenuItem mi = new MenuItem(s("Edit value..."), glyphIcon(M_MODE_EDIT, 16));
+        final MenuItem mi = new MenuItem(s("Edit value..."), glyphIcon("M_MODE_EDIT", 16));
         mi.setOnAction(event -> {
             final DValue value = value(DValue.class, DValue::new);
             dependants.start(ValueEditorConfiguration.class, new ValueEditorParams(type, value), context -> {
@@ -126,12 +124,12 @@ public class ValueMenuItems {
         final BeansMetaInfo metaInfo = metaInfoProvider.profileMetaInfo();
         for (final BeanDefinitionHolder h : metaInfo.beans(type)) {
             final String name = h.getBeanName();
-            final MenuItem item = new MenuItem(name, glyphIcon(FontIcon.M_BEENHERE, 16));
+            final MenuItem item = new MenuItem(name, glyphIcon("M_BEENHERE", 16));
             item.setOnAction(event -> element.setValue(new DRef(name)));
             refItems = ArrayUtils.add(refItems, item);
         }
         if (refItems.length > 0) {
-            items.add(new Menu(s("Reference"), glyphIcon(M_LINK, 16), refItems));
+            items.add(new Menu(s("Reference"), glyphIcon("M_LINK", 16), refItems));
             items.add(new SeparatorMenuItem());
         }
     }
@@ -143,14 +141,14 @@ public class ValueMenuItems {
         MenuItem[] embItems = new MenuItem[0];
         final BeansMetaInfo metaInfo = provider.metaInfo();
         for (final BeanDefinitionHolder h : metaInfo.beans(type)) {
-            final MenuItem refItem = new MenuItem(h.getBeanName(), glyphIcon(M_ACCOUNT_BALANCE, 16));
+            final MenuItem refItem = new MenuItem(h.getBeanName(), glyphIcon("M_ACCOUNT_BALANCE", 16));
             refItem.setOnAction(event -> {
                 final BeanData data = actions.insertItem(h.getBeanName(), h.getBeanDefinition(), metaInfo);
                 element.setValue(new DRef(data.getName()));
             });
             refItems = ArrayUtils.add(refItems, refItem);
 
-            final MenuItem embItem = new MenuItem(h.getBeanName(), glyphIcon(D_ARCHIVE, 16));
+            final MenuItem embItem = new MenuItem(h.getBeanName(), glyphIcon("D_ARCHIVE", 16));
             embItem.setOnAction(event -> {
                 final BeanData data = actions.beanData(h.getBeanName(), h.getBeanDefinition(), metaInfo, false);
                 element.setValue(data);
@@ -158,8 +156,8 @@ public class ValueMenuItems {
             embItems = ArrayUtils.add(embItems, embItem);
         }
         if (refItems.length > 0) {
-            items.add(new Menu(s("New bean from template"), glyphIcon(M_ACCOUNT_BALANCE, 16), refItems));
-            items.add(new Menu(s("New in-place bean from template"), glyphIcon(D_ARCHIVE, 16), embItems));
+            items.add(new Menu(s("New bean from template"), glyphIcon("M_ACCOUNT_BALANCE", 16), refItems));
+            items.add(new Menu(s("New in-place bean from template"), glyphIcon("D_ARCHIVE", 16), embItems));
             items.add(new SeparatorMenuItem());
         }
     }
@@ -172,7 +170,7 @@ public class ValueMenuItems {
             return;
         }
         {
-            final MenuItem item = new MenuItem("New bean from class", glyphIcon(M_ACCOUNT_BALANCE, 16));
+            final MenuItem item = new MenuItem("New bean from class", glyphIcon("M_ACCOUNT_BALANCE", 16));
             item.setOnAction(event -> {
                 final BeanData data = new BeanData();
                 data.name.setValue(profile.generateBeanName(decapitalize(c.getSimpleName())));
@@ -183,7 +181,7 @@ public class ValueMenuItems {
             items.add(item);
         }
         {
-            final MenuItem item = new MenuItem("New in-place bean", glyphIcon(M_ACCOUNT_BALANCE, 16));
+            final MenuItem item = new MenuItem("New in-place bean", glyphIcon("M_ACCOUNT_BALANCE", 16));
             item.setOnAction(event -> {
                 final BeanData data = new BeanData();
                 data.name.setValue(profile.generateBeanName(decapitalize(c.getSimpleName())));
@@ -199,7 +197,7 @@ public class ValueMenuItems {
     @Autowired
     public void initPropertiesEdit(IdeDependants dependants) {
         if (ResolvableType.forClass(Properties.class).isAssignableFrom(type)) {
-            final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon(M_MODE_EDIT, 16));
+            final MenuItem mi = new MenuItem(s("Edit properties..."), glyphIcon("M_MODE_EDIT", 16));
             mi.setOnAction(e -> {
                 final DProps props = value(DProps.class, DProps::new);
                 dependants.start(PropEditorConfiguration.class, new PropEditorParams(props), context -> {
@@ -216,7 +214,7 @@ public class ValueMenuItems {
     @Autowired
     public void initListEdit(IdeDependants dependants) {
         if (ResolvableType.forClass(List.class).isAssignableFrom(type)) {
-            final MenuItem mi = new MenuItem(s("Edit list..."), glyphIcon(M_MODE_EDIT, 16));
+            final MenuItem mi = new MenuItem(s("Edit list..."), glyphIcon("M_MODE_EDIT", 16));
             mi.setOnAction(event -> {
                 final DList list = value(DList.class, DList::new);
                 final ResolvableType arg = type.as(List.class).getGeneric(0);
@@ -237,7 +235,7 @@ public class ValueMenuItems {
     @Autowired
     public void initArrayEdit(IdeDependants dependants) {
         if (type.isArray()) {
-            final MenuItem mi = new MenuItem(s("Edit array..."), glyphIcon(M_MODE_EDIT, 16));
+            final MenuItem mi = new MenuItem(s("Edit array..."), glyphIcon("M_MODE_EDIT", 16));
             mi.setOnAction(event -> {
                 final DArray array = value(DArray.class, DArray::new);
                 if (type.getComponentType() != ResolvableType.NONE) {
@@ -257,7 +255,7 @@ public class ValueMenuItems {
     @Autowired
     public void initMapEdit(IdeDependants dependants) {
         if (ResolvableType.forClass(Map.class).isAssignableFrom(type)) {
-            final MenuItem mi = new MenuItem(s("Edit map..."), glyphIcon(M_PARTY_MODE, 16));
+            final MenuItem mi = new MenuItem(s("Edit map..."), glyphIcon("M_PARTY_MODE", 16));
             mi.setOnAction(event -> {
                 final DMap map = value(DMap.class, DMap::new);
                 final ResolvableType[] generics = type.as(Map.class).getGenerics();

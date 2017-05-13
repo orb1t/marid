@@ -21,7 +21,6 @@ package org.marid.ide.configurations;
 import org.marid.IdeDependants;
 import org.marid.dependant.modbus.ModbusSourceConfiguration;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.action.IdeAction;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +36,7 @@ public class IOConfiguration {
     @IdeAction
     public FxAction modbusAction(IdeDependants dependants) {
         return new FxAction("modbus", "I/O")
-                .setIcon(FontIcon.M_DEVICES)
+                .setIcon("M_DEVICES")
                 .bindText(ls("MODBUS devices"))
                 .setEventHandler(event -> dependants.start(ModbusSourceConfiguration.class, context -> {
                     context.setId("modbus");

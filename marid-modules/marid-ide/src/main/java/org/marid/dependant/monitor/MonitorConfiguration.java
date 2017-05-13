@@ -29,7 +29,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.O_GRAPH;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -68,6 +67,6 @@ public class MonitorConfiguration {
 
     @Bean
     public IdeTab tab(GridPane monitorGridPane) {
-        return new IdeTab(monitorGridPane, ls("Monitor"), () -> glyphIcon(O_GRAPH, 16));
+        return new IdeTab(monitorGridPane, ls("Monitor"), () -> glyphIcon("O_GRAPH", 16));
     }
 }

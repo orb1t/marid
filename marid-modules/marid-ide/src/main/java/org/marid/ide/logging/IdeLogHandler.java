@@ -18,12 +18,9 @@
 
 package org.marid.ide.logging;
 
-import de.jensd.fx.glyphs.GlyphIcon;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import org.marid.IdePrefs;
-import org.marid.jfx.icons.FontIcon;
-import org.marid.jfx.icons.FontIcons;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.ArrayList;
@@ -32,7 +29,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 import static javafx.collections.FXCollections.observableArrayList;
@@ -93,21 +89,5 @@ public class IdeLogHandler extends Handler {
     @Override
     public void close() {
         recordConsumers.clear();
-    }
-
-    public static GlyphIcon<?> logIcon(Level level, int size) {
-        switch (level.getName()) {
-            case "WARNING":
-                return FontIcons.glyphIcon(FontIcon.F_WARNING, size);
-            case "ERROR":
-            case "SEVERE":
-                return FontIcons.glyphIcon(FontIcon.M_ERROR, size);
-            case "INFO":
-                return FontIcons.glyphIcon(FontIcon.M_INFO, size);
-            case "CONFIG":
-                return FontIcons.glyphIcon(FontIcon.M_ADJUST, size);
-            default:
-                return FontIcons.glyphIcon(FontIcon.M_FACE, size);
-        }
     }
 }

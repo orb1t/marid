@@ -28,7 +28,6 @@ import org.marid.beans.ClassInfo;
 import org.marid.dependant.valuemenu.BeanMetaInfoProvider.BeansMetaInfo;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.xml.*;
 import org.marid.util.MethodUtils;
 import org.springframework.beans.PropertyValue;
@@ -170,7 +169,7 @@ public class BeanListActions {
     }
 
     private MenuItem item(Method method, BeanData beanData) {
-        final MenuItem menuItem = new MenuItem(MethodUtils.methodText(method), glyphIcon(FontIcon.M_MEMORY, 16));
+        final MenuItem menuItem = new MenuItem(MethodUtils.methodText(method), glyphIcon("M_MEMORY", 16));
         menuItem.setOnAction(ev -> {
             final BeanData newBeanData = new BeanData();
             newBeanData.name.set(profile.generateBeanName(method.getName()));

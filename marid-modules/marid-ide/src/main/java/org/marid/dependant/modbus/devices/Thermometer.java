@@ -22,7 +22,6 @@ import eu.hansolo.medusa.Gauge;
 import eu.hansolo.medusa.LcdDesign;
 import javafx.scene.paint.Color;
 import org.marid.dependant.modbus.annotation.DeviceIcon;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.annotation.PrototypeComponent;
 
 import static eu.hansolo.medusa.Gauge.SkinType.LCD;
@@ -32,7 +31,7 @@ import static eu.hansolo.medusa.Gauge.SkinType.LCD;
  * @since 0.9
  */
 @PrototypeComponent
-@DeviceIcon(FontIcon.W_THERMOMETER)
+@DeviceIcon("W_THERMOMETER")
 public class Thermometer extends AbstractGaugeDevice {
 
     public Thermometer() {

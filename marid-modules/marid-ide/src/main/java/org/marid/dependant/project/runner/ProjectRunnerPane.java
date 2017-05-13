@@ -26,7 +26,6 @@ import org.apache.maven.model.Model;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.settings.JavaSettings;
 import org.marid.io.ProcessManager;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10n;
@@ -90,10 +89,10 @@ public class ProjectRunnerPane extends BorderPane {
         }, "watchThread", 96L * 1024L);
         watchThread.start();
         setTop(new ToolbarBuilder()
-                .add("Close", FontIcon.M_CLOSE, e -> printStream.println("close"))
-                .add("Exit", FontIcon.M_STOP, e -> printStream.println("exit"))
+                .add("Close", "M_CLOSE", e -> printStream.println("close"))
+                .add("Exit", "M_STOP", e -> printStream.println("exit"))
                 .addSeparator()
-                .add("Dump", FontIcon.M_LIST, e -> printStream.println("dump"))
+                .add("Dump", "M_LIST", e -> printStream.println("dump"))
                 .build());
         setCenter(tabPane);
     }

@@ -24,8 +24,6 @@ import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
 import org.springframework.stereotype.Component;
 
-import static org.marid.jfx.icons.FontIcon.D_BORDER_TOP;
-
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -36,7 +34,7 @@ public class WindowConfiguration {
     public FxAction alwaysOnTopAction() {
         return new FxAction("ops", "Window")
                 .bindText("Always on top")
-                .setIcon(D_BORDER_TOP)
+                .setIcon("D_BORDER_TOP")
                 .setSelected(false)
                 .setEventHandler(event -> {
                     final CheckMenuItem menuItem = (CheckMenuItem) event.getSource();

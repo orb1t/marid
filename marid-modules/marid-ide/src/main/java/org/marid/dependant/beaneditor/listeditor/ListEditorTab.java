@@ -23,7 +23,6 @@ import org.marid.ide.tabs.IdeTab;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.marid.jfx.icons.FontIcon.D_VIEW_LIST;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -35,6 +34,6 @@ public class ListEditorTab extends IdeTab {
 
     @Autowired
     public ListEditorTab(ListEditor editor, ObservableStringValue name) {
-        super(editor, name, () -> glyphIcon(D_VIEW_LIST, 16));
+        super(editor, name, () -> glyphIcon("D_VIEW_LIST", 16));
     }
 }

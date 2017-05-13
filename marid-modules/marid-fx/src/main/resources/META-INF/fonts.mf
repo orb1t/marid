@@ -1,0 +1,5 @@
+O = /O.ttf
+D = /D.ttf
+W = /W.ttf
+M = /M.ttf
+F = /F.ttf

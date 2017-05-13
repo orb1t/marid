@@ -18,14 +18,12 @@
 
 package org.marid.dependant.beantree.items;
 
-import de.jensd.fx.glyphs.GlyphIcon;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
@@ -85,7 +83,7 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
         return Bindings.createObjectBinding(() -> {
             final HBox box = new HBox(10);
             if (elem.isFactoryBean()) {
-                final GlyphIcon<?> icon = FontIcons.glyphIcon(FontIcon.D_LINK, 20);
+                final Node icon = FontIcons.glyphIcon("D_LINK", 20);
                 box.getChildren().add(icon);
             }
             return box;

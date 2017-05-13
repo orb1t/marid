@@ -23,7 +23,6 @@ import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
 import org.springframework.stereotype.Component;
 
-import static org.marid.jfx.icons.FontIcon.D_EXIT_TO_APP;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -36,7 +35,7 @@ public class ApplicationConfiguration {
     public FxAction exitAction() {
         return new FxAction("x", "Application")
                 .bindText("Exit")
-                .setIcon(D_EXIT_TO_APP)
+                .setIcon("D_EXIT_TO_APP")
                 .setEventHandler(event -> Platform.exit());
     }
 }

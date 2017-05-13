@@ -30,7 +30,6 @@ import org.marid.dependant.modbus.annotation.Modbus;
 import org.marid.dependant.modbus.repo.ModbusConfig;
 import org.marid.dependant.modbus.repo.ModbusService;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.icons.FontIcon;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -53,7 +52,7 @@ public class ModbusActions {
     public FxAction saveDevices(ModbusPane modbusPane, @Modbus File baseDir, @Modbus ObjectFactory<Stage> stage) {
         return new FxAction("ops", "ops", "File")
                 .bindText("Save")
-                .setIcon(FontIcon.D_CONTENT_SAVE)
+                .setIcon("D_CONTENT_SAVE")
                 .setEventHandler(event -> {
                     final FileChooser fileChooser = new FileChooser();
                     fileChooser.setInitialDirectory(baseDir);
@@ -72,7 +71,7 @@ public class ModbusActions {
     public FxAction loadDevices(ModbusPane modbusPane, @Modbus File baseDir, @Modbus ObjectFactory<Stage> stage) {
         return new FxAction("ops", "ops", "File")
                 .bindText("Open")
-                .setIcon(FontIcon.D_BOOK_OPEN)
+                .setIcon("D_BOOK_OPEN")
                 .setEventHandler(event -> {
                     final FileChooser fileChooser = new FileChooser();
                     fileChooser.setInitialDirectory(baseDir);
@@ -90,7 +89,7 @@ public class ModbusActions {
     public FxAction clearAll(ModbusPane modbusPane) {
         return new FxAction("remove", "ops", "Edit")
                 .bindText("Clear All")
-                .setIcon(FontIcon.M_CLEAR_ALL)
+                .setIcon("M_CLEAR_ALL")
                 .setEventHandler(event -> modbusPane.getChildren().clear())
                 .bindDisabled(Bindings.isEmpty(modbusPane.getChildren()));
     }
@@ -100,7 +99,7 @@ public class ModbusActions {
     public FxAction runAction(ModbusService service) {
         return new FxAction("run", "service", "Service")
                 .bindText("Run")
-                .setIcon(FontIcon.D_PLAY)
+                .setIcon("D_PLAY")
                 .setEventHandler(event -> service.start())
                 .bindDisabled(service.activeProperty());
     }
@@ -110,7 +109,7 @@ public class ModbusActions {
     public FxAction stopAction(ModbusService service) {
         return new FxAction("run", "service", "Service")
                 .bindText("Stop")
-                .setIcon(FontIcon.D_STOP)
+                .setIcon("D_STOP")
                 .setEventHandler(event -> service.stop())
                 .bindDisabled(service.activeProperty().not());
     }

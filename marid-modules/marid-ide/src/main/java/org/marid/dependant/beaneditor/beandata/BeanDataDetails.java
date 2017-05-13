@@ -44,7 +44,6 @@ import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-import static org.marid.jfx.icons.FontIcon.D_WINDOW_RESTORE;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 import static org.marid.misc.Builder.build;
@@ -113,7 +112,7 @@ public class BeanDataDetails {
         final HBox box = new HBox();
         box.setAlignment(Pos.BASELINE_RIGHT);
         box.setPadding(new Insets(10));
-        box.getChildren().add(build(new Button(s("Restore"), glyphIcon(D_WINDOW_RESTORE, 24)), b -> {
+        box.getChildren().add(build(new Button(s("Restore"), glyphIcon("D_WINDOW_RESTORE", 24)), b -> {
             b.setOnAction(restoreAction);
         }));
         return box;

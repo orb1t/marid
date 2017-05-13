@@ -39,7 +39,6 @@ import javax.annotation.PreDestroy;
 
 import static org.marid.jfx.LocalizedStrings.fs;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -80,20 +79,20 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
             final HBox box = new HBox(10);
             {
                 final Label label = new Label();
-                label.setGraphic(glyphIcon(D_FILE, 20));
+                label.setGraphic(glyphIcon("D_FILE", 20));
                 label.textProperty().bind(fs("%s: %d", ls("Files"), elem.getBeanFiles().size()));
                 box.getChildren().add(label);
             }
             {
                 final Label label = new Label();
-                label.setGraphic(glyphIcon(D_STAR_CIRCLE, 20));
+                label.setGraphic(glyphIcon("D_STAR_CIRCLE", 20));
                 final int beanCount = elem.getBeanFiles().stream().mapToInt(f -> f.beans.size()).sum();
                 label.textProperty().bind(fs("%s: %d", ls("Beans"), beanCount));
                 box.getChildren().add(label);
             }
             {
                 final Label label = new Label();
-                label.setGraphic(glyphIcon(D_STAR_OUTLINE, 20));
+                label.setGraphic(glyphIcon("D_STAR_OUTLINE", 20));
                 final long count = elem.getBeanFiles().stream()
                         .flatMap(f -> f.beans.stream())
                         .flatMap(MaridBeanUtils::beans)
@@ -115,7 +114,7 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
         actionMap.put(SpecialActionConfiguration.ADD, new FxAction("children", "add")
                 .setEventHandler(event -> fileActions.addFile(profile))
                 .bindText("Add file")
-                .setIcon(M_ADD_BOX)
+                .setIcon("M_ADD_BOX")
                 .setAccelerator(addAction.getAccelerator())
         );
     }

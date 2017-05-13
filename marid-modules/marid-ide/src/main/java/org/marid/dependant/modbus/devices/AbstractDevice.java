@@ -42,8 +42,6 @@ import javax.annotation.PostConstruct;
 
 import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.D_CLOSE_BOX;
-import static org.marid.jfx.icons.FontIcon.D_TOOLTIP_EDIT;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -80,7 +78,7 @@ public abstract class AbstractDevice<T> extends BorderPane {
         addressBox.setAlignment(Pos.BASELINE_LEFT);
         addressBox.setPadding(new Insets(4));
         title.textProperty().bind(ls(getClass().getSimpleName()));
-        editButton.setGraphic(glyphIcon(D_TOOLTIP_EDIT, 16));
+        editButton.setGraphic(glyphIcon("D_TOOLTIP_EDIT", 16));
         HBox.setHgrow(title, Priority.ALWAYS);
         HBox.setHgrow(codec, Priority.ALWAYS);
         functions.getSelectionModel().select(FunctionCode.ReadHoldingRegisters);
@@ -91,7 +89,7 @@ public abstract class AbstractDevice<T> extends BorderPane {
 
     @PostConstruct
     private void initCloseButton() {
-        closeButton.setGraphic(glyphIcon(D_CLOSE_BOX, 16));
+        closeButton.setGraphic(glyphIcon("D_CLOSE_BOX", 16));
         closeButton.setOnAction(event -> ((ModbusPane) getParent()).getChildren().remove(this));
     }
 

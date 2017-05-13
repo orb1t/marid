@@ -25,7 +25,6 @@ import org.marid.spring.action.IdeAction;
 import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.O_SETTINGS;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,7 +35,7 @@ public class SettingsManager {
     @IdeAction
     public FxAction settingsAction(IdeDependants dependants) {
         return new FxAction("settings", "settings", "Tools")
-                .setIcon(O_SETTINGS)
+                .setIcon("O_SETTINGS")
                 .bindText(ls("Settings..."))
                 .setEventHandler(event -> dependants.start(SettingsConfiguration.class, context -> {
                     context.setId("settingsEditor");

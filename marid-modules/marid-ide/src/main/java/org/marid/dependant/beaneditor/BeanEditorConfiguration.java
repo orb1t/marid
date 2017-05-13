@@ -25,7 +25,6 @@ import org.marid.dependant.valuemenu.BeanMetaInfoProvider;
 import org.marid.ide.panes.main.IdeToolbar;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.dialog.MaridDialog;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.ObjectProvider;
@@ -66,7 +65,7 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
     public FxAction browseAction(ObjectProvider<BeanBrowserTable> browserProvider, BeanListActions beanListActions) {
         return new FxAction("browse", "browse", "Edit")
                 .bindText("Browse...")
-                .setIcon(FontIcon.O_BROWSER)
+                .setIcon("O_BROWSER")
                 .setEventHandler(event -> {
                     final BeanBrowserTable table = browserProvider.getObject();
                     new MaridDialog<List<BeanDefinitionHolder>>(primaryStage, new ButtonType(s("Add"), OK_DONE), CANCEL)

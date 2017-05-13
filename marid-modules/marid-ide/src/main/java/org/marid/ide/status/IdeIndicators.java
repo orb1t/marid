@@ -47,8 +47,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
-import static org.marid.jfx.icons.FontIcon.D_TELEVISION;
-import static org.marid.jfx.icons.FontIcon.O_CLOCK;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -95,14 +93,14 @@ public class IdeIndicators {
                 final Number value = (Number) server.getAttribute(osObjectName, "ProcessCpuLoad");
                 return () -> indicator.setProgress(value.doubleValue());
             });
-            add(glyphIcon(D_TELEVISION, 16), indicator);
+            add(glyphIcon("D_TELEVISION", 16), indicator);
         }
     }
 
     @Order(3)
     @Autowired
     public void initDateTime() throws Exception {
-        final Label timeLabel = new Label("", glyphIcon(O_CLOCK, 16));
+        final Label timeLabel = new Label("", glyphIcon("O_CLOCK", 16));
         final DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder()
                 .appendValue(ChronoField.YEAR, 4)
                 .appendLiteral('-')

@@ -21,7 +21,6 @@ package org.marid.dependant.modbus.devices;
 import eu.hansolo.medusa.Gauge;
 import javafx.scene.paint.Color;
 import org.marid.dependant.modbus.annotation.DeviceIcon;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.annotation.PrototypeComponent;
 
 import static eu.hansolo.medusa.Gauge.SkinType.KPI;
@@ -31,7 +30,7 @@ import static eu.hansolo.medusa.Gauge.SkinType.KPI;
  * @since 0.9
  */
 @PrototypeComponent("Barometer")
-@DeviceIcon(FontIcon.W_BAROMETER)
+@DeviceIcon("W_BAROMETER")
 public class Barometer extends AbstractGaugeDevice {
 
     public Barometer() {

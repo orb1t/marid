@@ -26,7 +26,6 @@ import org.marid.IdeDependants;
 import org.marid.dependant.valuemenu.ValuesConfiguration;
 import org.marid.dependant.valuemenu.ValuesParams;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
@@ -50,7 +49,7 @@ public class PropertyTreeItem extends AbstractTreeItem<BeanProp> implements Comp
     public PropertyTreeItem(BeanProp elem) {
         super(elem);
 
-        setGraphic(FontIcons.glyphIcon(FontIcon.D_CLOUD_CIRCLE, 20));
+        setGraphic(FontIcons.glyphIcon("D_CLOUD_CIRCLE", 20));
     }
 
     @Override

@@ -18,9 +18,8 @@
 
 package org.marid.ide.logging;
 
-import de.jensd.fx.glyphs.GlyphIcon;
-import org.intellij.lang.annotations.MagicConstant;
-import org.marid.jfx.icons.FontIcon;
+import javafx.scene.Node;
+import org.jetbrains.annotations.PropertyKey;
 import org.marid.jfx.icons.FontIcons;
 
 import java.util.logging.Level;
@@ -30,35 +29,34 @@ import java.util.logging.Level;
  */
 public interface LogIconFactory {
 
-    static GlyphIcon<?> icon(Level level) {
+    static Node icon(Level level) {
         switch (level.intValue()) {
             case Integer.MAX_VALUE:
-                return icon(FontIcon.D_SELECT_OFF, "red");
+                return icon("D_SELECT_OFF", "red");
             case Integer.MIN_VALUE:
-                return icon(FontIcon.D_ARROW_ALL, "green");
+                return icon("D_ARROW_ALL", "green");
             case 1000:
-                return icon(FontIcon.M_ERROR, "red");
+                return icon("M_ERROR", "red");
             case 900:
-                return icon(FontIcon.F_WARNING, "orange");
+                return icon("F_WARNING", "orange");
             case 800:
-                return icon(FontIcon.F_INFO_CIRCLE, "blue");
+                return icon("F_INFO_CIRCLE", "blue");
             case 700:
-                return icon(FontIcon.M_CONTROL_POINT, "green");
+                return icon("M_CONTROL_POINT", "green");
             case 500:
-                return icon(FontIcon.D_BATTERY_60, "green");
+                return icon("D_BATTERY_60", "green");
             case 400:
-                return icon(FontIcon.D_BATTERY_80, "green");
+                return icon("D_BATTERY_80", "green");
             case 300:
-                return icon(FontIcon.D_BATTERY_CHARGING_100, "green");
+                return icon("D_BATTERY_CHARGING_100", "green");
             default:
-                return icon(FontIcon.D_BATTERY_UNKNOWN, "gray");
+                return icon("D_BATTERY_UNKNOWN", "gray");
         }
     }
 
-    static GlyphIcon<?> icon(@MagicConstant(valuesFromClass = FontIcon.class) String icon, String color) {
-        final GlyphIcon<?> glyphIcon = FontIcons.glyphIcon(icon);
+    static Node icon(@PropertyKey(resourceBundle = "fonts.meta") String icon, String color) {
+        final Node glyphIcon = FontIcons.glyphIcon(icon, 16);
         glyphIcon.setStyle("-fx-fill: " + color);
-        glyphIcon.setGlyphSize(16);
         return glyphIcon;
     }
 }

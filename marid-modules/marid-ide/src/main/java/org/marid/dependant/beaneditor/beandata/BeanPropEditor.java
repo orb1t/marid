@@ -38,7 +38,6 @@ import org.springframework.stereotype.Component;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.*;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -103,14 +102,14 @@ public class BeanPropEditor extends TableView<BeanProp> {
             final DRef ref = (DRef) element;
             label.setGraphic(IdeShapes.ref(ref, 16));
         } else if (element instanceof DValue) {
-            label.setGraphic(glyphIcon(M_TEXT_FORMAT, 16));
+            label.setGraphic(glyphIcon("M_TEXT_FORMAT", 16));
         } else if (element instanceof DCollection) {
-            label.setGraphic(glyphIcon(M_LIST, 16));
+            label.setGraphic(glyphIcon("M_LIST", 16));
         } else if (element instanceof BeanData) {
             final BeanData data = (BeanData) element;
             label.setGraphic(IdeShapes.beanNode(data, 16));
         } else if (element instanceof DMap) {
-            label.setGraphic(glyphIcon(M_MAP, 16));
+            label.setGraphic(glyphIcon("M_MAP", 16));
         }
         if (element != null) {
             label.setText(element.toString());

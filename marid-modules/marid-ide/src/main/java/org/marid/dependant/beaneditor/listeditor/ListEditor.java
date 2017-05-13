@@ -27,7 +27,6 @@ import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.ide.panes.main.IdeToolbar;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.control.CommonListView;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.menu.MaridContextMenu;
@@ -71,13 +70,13 @@ public class ListEditor extends CommonListView<DElement<?>> {
                 } else {
                     if (item instanceof DValue) {
                         setText(((DValue) item).getValue());
-                        setGraphic(FontIcons.glyphIcon(FontIcon.D_COMMENT_TEXT, 16));
+                        setGraphic(FontIcons.glyphIcon("D_COMMENT_TEXT", 16));
                     } else if (item instanceof DList) {
                         textProperty().bind(fls("<%s>", "List"));
-                        setGraphic(FontIcons.glyphIcon(FontIcon.M_LIST, 16));
+                        setGraphic(FontIcons.glyphIcon("M_LIST", 16));
                     } else if (item instanceof DProps) {
                         textProperty().bind(fls("<%s>", "Properties"));
-                        setGraphic(FontIcons.glyphIcon(FontIcon.D_VIEW_LIST, 16));
+                        setGraphic(FontIcons.glyphIcon("D_VIEW_LIST", 16));
                     }
                     setContextMenu(new MaridContextMenu(m -> {
                         m.getItems().clear();

@@ -26,9 +26,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCombination;
-import org.intellij.lang.annotations.MagicConstant;
+import org.jetbrains.annotations.PropertyKey;
 import org.marid.jfx.LocalizedStrings;
-import org.marid.jfx.icons.FontIcon;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -131,7 +130,7 @@ public final class FxAction {
         return icon == null ? null : icon.get();
     }
 
-    public FxAction setIcon(@MagicConstant(valuesFromClass = FontIcon.class) String icon) {
+    public FxAction setIcon(@PropertyKey(resourceBundle = "fonts.meta") String icon) {
         if (this.icon == null) {
             this.icon = new SimpleStringProperty();
         }

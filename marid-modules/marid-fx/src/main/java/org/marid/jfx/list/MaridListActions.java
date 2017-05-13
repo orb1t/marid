@@ -23,7 +23,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ListView;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.icons.FontIcon;
 
 import java.util.Comparator;
 import java.util.OptionalInt;
@@ -40,7 +39,7 @@ public interface MaridListActions {
                 .bindText(ls("Remove"))
                 .setEventHandler(event -> listView.getItems().removeAll(listView.getSelectionModel().getSelectedItems()))
                 .bindDisabled(Bindings.isEmpty(listView.getSelectionModel().getSelectedItems()))
-                .setIcon(FontIcon.M_REMOVE);
+                .setIcon("M_REMOVE");
     }
 
     static FxAction clearAction(ListView<?> listView) {
@@ -48,20 +47,20 @@ public interface MaridListActions {
                 .bindText(ls("Clear"))
                 .setEventHandler(event -> listView.getItems().clear())
                 .bindDisabled(Bindings.isEmpty(listView.getItems()))
-                .setIcon(FontIcon.M_CLEAR_ALL);
+                .setIcon("M_CLEAR_ALL");
     }
 
     static FxAction addAction(String text, EventHandler<ActionEvent> eventHandler) {
         return new FxAction("itemActions", "itemActions", "Actions")
                 .bindText(ls(text))
                 .setEventHandler(eventHandler)
-                .setIcon(FontIcon.M_ADD);
+                .setIcon("M_ADD");
     }
 
     static <T> FxAction upAction(ListView<T> listView) {
         return new FxAction("upDownActions", "upDownActions", "Actions")
                 .bindText(ls("Up"))
-                .setIcon(FontIcon.D_MENU_UP)
+                .setIcon("D_MENU_UP")
                 .setEventHandler(event -> {
                     final int[] indices = listView.getSelectionModel().getSelectedIndices()
                             .stream()
@@ -86,7 +85,7 @@ public interface MaridListActions {
     static <T> FxAction downAction(ListView<T> listView) {
         return new FxAction("upDownActions", "upDownActions", "Actions")
                 .bindText(ls("Down"))
-                .setIcon(FontIcon.D_MENU_DOWN)
+                .setIcon("D_MENU_DOWN")
                 .setEventHandler(event -> {
                     final int[] indices = listView.getSelectionModel().getSelectedIndices()
                             .stream()

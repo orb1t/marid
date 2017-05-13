@@ -26,21 +26,29 @@ import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import de.jensd.fx.glyphs.octicons.OctIcon;
 import de.jensd.fx.glyphs.weathericons.WeatherIcon;
 
+import java.io.BufferedWriter;
 import java.io.InputStream;
-import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Properties;
-import java.util.stream.Stream;
+import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class IconsGenerator {
 
-    @SuppressWarnings("unchecked")
+    private static final Map<String, Set<? extends GlyphIcons>> ICONS_MAP = ImmutableMap.of(
+            "O", EnumSet.allOf(OctIcon.class),
+            "M", EnumSet.allOf(MaterialIcon.class),
+            "D", EnumSet.allOf(MaterialDesignIcon.class),
+            "F", EnumSet.allOf(FontAwesomeIcon.class),
+            "W", EnumSet.allOf(WeatherIcon.class)
+    );
+
     public static void main(String... args) throws Exception {
         final Properties properties = new Properties();
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -48,30 +56,19 @@ public class IconsGenerator {
             properties.load(inputStream);
         }
         final Path baseDirPath = Paths.get(properties.getProperty("project.dir"));
-        final Path srcPath = baseDirPath.resolve("src").resolve("main").resolve("java");
-        final String pkg = FontIcons.class.getPackage().getName();
-        final Path iconsPath = Stream.of(pkg.split("[.]")).reduce(srcPath, Path::resolve, (p1, p2) -> p2);
-        final Map<String, Class<? extends Enum>> map = ImmutableMap.<String, Class<? extends Enum>>builder()
-                .put("O", OctIcon.class)
-                .put("M", MaterialIcon.class)
-                .put("D", MaterialDesignIcon.class)
-                .put("F", FontAwesomeIcon.class)
-                .put("W", WeatherIcon.class)
-                .build();
-        try (final PrintStream p = new PrintStream(iconsPath.resolve("FontIcon.java").toFile(), "UTF-8")) {
-            p.format("package %s;%n%n", pkg);
-            p.format("public interface FontIcon {%n%n");
-            for (final Map.Entry<String, Class<? extends Enum>> e : map.entrySet()) {
-                final String prefix = e.getKey();
-                final Class<? extends Enum> enumClass = e.getValue();
-                final EnumSet<?> set = EnumSet.allOf(enumClass);
-                for (final Object oIcon : set) {
-                    final GlyphIcons icon = (GlyphIcons) oIcon;
-                    final String key = prefix + "_" + icon.name();
-                    p.format("    String %s = \"%s\";%n", key, key);
+        final Path resources = baseDirPath.resolve("src").resolve("main").resolve("resources");
+        final Path meta = resources.resolve("fonts").resolve("meta.properties");
+        try (final BufferedWriter writer = Files.newBufferedWriter(meta)) {
+            for (final Map.Entry<String, Set<? extends GlyphIcons>> e : ICONS_MAP.entrySet()) {
+                for (final GlyphIcons icon : e.getValue()) {
+                    writer.write(e.getKey());
+                    writer.write('_');
+                    writer.write(icon.name());
+                    writer.write('=');
+                    writer.write(icon.unicodeToString());
+                    writer.newLine();
                 }
             }
-            p.format("}%n");
         }
     }
 }

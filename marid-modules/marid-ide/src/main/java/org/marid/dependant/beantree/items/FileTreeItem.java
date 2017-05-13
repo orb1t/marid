@@ -27,7 +27,6 @@ import org.marid.ide.common.FileActions;
 import org.marid.ide.common.SpecialActionConfiguration;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.beans.MaridBeanUtils;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanFile;
@@ -39,8 +38,6 @@ import javax.annotation.PreDestroy;
 import static org.marid.ide.common.IdeShapes.fileNode;
 import static org.marid.jfx.LocalizedStrings.fs;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcon.D_STAR_CIRCLE;
-import static org.marid.jfx.icons.FontIcon.D_STAR_OUTLINE;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -81,13 +78,13 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
             final HBox box = new HBox(10);
             {
                 final Label label = new Label();
-                label.setGraphic(glyphIcon(D_STAR_CIRCLE, 20));
+                label.setGraphic(glyphIcon("D_STAR_CIRCLE", 20));
                 label.textProperty().bind(fs("%s: %d", ls("Beans"), elem.beans.size()));
                 box.getChildren().add(label);
             }
             {
                 final Label label = new Label();
-                label.setGraphic(glyphIcon(D_STAR_OUTLINE, 20));
+                label.setGraphic(glyphIcon("D_STAR_OUTLINE", 20));
                 final long count = elem.beans.stream().flatMap(MaridBeanUtils::beans).count();
                 label.textProperty().bind(fs("%s: %d", ls("Inner Beans"), count));
                 box.getChildren().add(label);
@@ -106,7 +103,7 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
         actionMap.put(SpecialActionConfiguration.RENAME, new FxAction("op", "rename")
                 .setEventHandler(event -> actions.renameFile(profile, elem))
                 .setAccelerator(renameAction.getAccelerator())
-                .setIcon(FontIcon.O_DIFF_RENAMED)
+                .setIcon("O_DIFF_RENAMED")
                 .bindText("Rename file")
         );
     }
@@ -116,7 +113,7 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
         actionMap.put(SpecialActionConfiguration.REMOVE, new FxAction("op", "remove")
                 .setEventHandler(event -> profile.getBeanFiles().remove(elem))
                 .setAccelerator(removeAction.getAccelerator())
-                .setIcon(FontIcon.D_TABLE_ROW_REMOVE)
+                .setIcon("D_TABLE_ROW_REMOVE")
                 .bindText("Remove file")
         );
     }

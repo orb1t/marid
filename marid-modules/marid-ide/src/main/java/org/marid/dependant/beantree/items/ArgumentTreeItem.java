@@ -25,7 +25,6 @@ import org.marid.IdeDependants;
 import org.marid.dependant.valuemenu.ValuesConfiguration;
 import org.marid.dependant.valuemenu.ValuesParams;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
@@ -51,7 +50,7 @@ public class ArgumentTreeItem extends AbstractTreeItem<BeanArg> implements Compa
     public ArgumentTreeItem(BeanArg elem) {
         super(elem);
 
-        setGraphic(FontIcons.glyphIcon(FontIcon.D_ALBUM, 20));
+        setGraphic(FontIcons.glyphIcon("D_ALBUM", 20));
     }
 
     @Override

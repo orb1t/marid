@@ -25,7 +25,6 @@ import javafx.stage.FileChooser;
 import org.marid.Ide;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -67,7 +66,7 @@ public class ResourcesConfiguration extends DependantConfiguration<ResourcesPara
     public FxAction importAction(ProjectProfile profile) {
         return new FxAction("res", "res", "Edit")
                 .bindText("Import....")
-                .setIcon(FontIcon.D_IMPORT)
+                .setIcon("D_IMPORT")
                 .setEventHandler(event -> {
                     final FileChooser chooser = new FileChooser();
                     chooser.setTitle(s("Import files"));

@@ -18,19 +18,21 @@
 
 package org.marid.dependant.iconviewer;
 
-import de.jensd.fx.glyphs.GlyphIcon;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.scene.control.TableCell;
+import javafx.scene.Node;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import org.marid.jfx.icons.FontIcon;
 import org.marid.l10n.L10n;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
@@ -38,35 +40,39 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IconViewerTable extends TableView<Field> {
+public class IconViewerTable extends TableView<String> {
 
     public IconViewerTable() {
-        super(FXCollections.observableList(Arrays.asList(FontIcon.class.getFields())));
+        super(FXCollections.observableList(icons()));
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         {
-            final TableColumn<Field, String> column = new TableColumn<>(L10n.s("Name"));
+            final TableColumn<String, String> column = new TableColumn<>(L10n.s("Name"));
             column.setMinWidth(100);
             column.setPrefWidth(110);
             column.setMaxWidth(500);
-            column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getName()));
+            column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()));
             getColumns().add(column);
         }
         {
-            final TableColumn<Field, GlyphIcon<?>> column = new TableColumn<>(L10n.s("Icon"));
+            final TableColumn<String, Node> column = new TableColumn<>(L10n.s("Icon"));
             column.setMaxWidth(128);
             column.setPrefWidth(128);
             column.setMaxWidth(128);
-            column.setCellValueFactory(param -> new SimpleObjectProperty<>(glyphIcon(param.getValue().getName(), 32)));
-            column.setCellFactory(param -> new TableCell<Field, GlyphIcon<?>>() {
-                @Override
-                protected void updateItem(GlyphIcon<?> item, boolean empty) {
-                    super.updateItem(item, empty);
-                    setGraphic(item);
-                }
-            });
+            column.setCellValueFactory(param -> new SimpleObjectProperty<>(glyphIcon(param.getValue(), 32)));
             column.setSortable(false);
             column.setStyle("-fx-alignment: center");
             getColumns().add(column);
         }
+    }
+
+    private static List<String> icons() {
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        final Properties properties = new Properties();
+        try (final InputStream inputStream = classLoader.getResourceAsStream("fonts/meta.properties")) {
+            properties.load(inputStream);
+        } catch (IOException x) {
+            throw new UncheckedIOException(x);
+        }
+        return properties.stringPropertyNames().stream().sorted().collect(Collectors.toList());
     }
 }
