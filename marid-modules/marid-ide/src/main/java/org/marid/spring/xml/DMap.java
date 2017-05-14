@@ -18,9 +18,8 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import org.marid.jfx.beans.FxList;
-import org.marid.jfx.beans.FxString;
+import org.marid.jfx.beans.OOList;
+import org.marid.jfx.beans.OString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -34,9 +33,9 @@ import static org.marid.misc.Iterables.nodes;
  */
 public class DMap extends DElement<DMap> {
 
-    public final FxString keyType = new FxString(null, "key-type");
-    public final FxString valueType = new FxString(null, "value-type");
-    public final FxList<DMapEntry> entries = new FxList<>(e -> new Observable[] {e});
+    public final OString keyType = new OString("key-type");
+    public final OString valueType = new OString("value-type");
+    public final OOList<DMapEntry> entries = new OOList<>();
 
     public DMap() {
         keyType.addListener(this::fireInvalidate);

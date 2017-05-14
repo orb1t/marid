@@ -18,7 +18,7 @@
 
 package org.marid.spring.xml;
 
-import org.marid.jfx.beans.FxString;
+import org.marid.jfx.beans.OString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -30,15 +30,18 @@ import static java.util.Optional.ofNullable;
  */
 public class Meta extends AbstractData<Meta> {
 
-    public final FxString key = new FxString(null, "key");
-    public final FxString value = new FxString(null, "value");
+    public final OString key = new OString("key");
+    public final OString value = new OString("value");
 
     public Meta() {
+        this(null, null);
     }
 
     public Meta(String key, String value) {
         this.key.set(key);
         this.value.set(value);
+        this.key.addListener(this::fireInvalidate);
+        this.value.addListener(this::fireInvalidate);
     }
 
     @Override

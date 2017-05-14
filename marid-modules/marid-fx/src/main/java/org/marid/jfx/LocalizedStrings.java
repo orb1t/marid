@@ -21,7 +21,7 @@ package org.marid.jfx;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
-import org.marid.jfx.beans.FxObject;
+import org.marid.jfx.beans.OProp;
 
 import java.util.Locale;
 import java.util.stream.Stream;
@@ -33,7 +33,7 @@ import static org.marid.l10n.L10n.s;
  */
 public class LocalizedStrings {
 
-    public static final FxObject<Locale> LOCALE = new FxObject<>(null, "locale", Locale.getDefault());
+    public static final OProp<Locale> LOCALE = new OProp<>("locale", Locale.getDefault());
 
     public static ObservableValue<String> ls(String text, Object... args) {
         return Bindings.createStringBinding(() -> s(LOCALE.get(), text, args), LOCALE);

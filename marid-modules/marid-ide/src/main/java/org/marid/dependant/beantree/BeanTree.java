@@ -27,6 +27,9 @@ import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -121,5 +124,11 @@ public class BeanTree extends TreeTableView<Object> {
             row.setLineSpacing(1.0);
             return row;
         });
+    }
+
+    @EventListener
+    private void onDestroy(ContextClosedEvent event) {
+        final GenericApplicationContext context = (GenericApplicationContext) event.getApplicationContext();
+        ((ProjectTreeItem) getRoot()).destroy(context.getDefaultListableBeanFactory());
     }
 }

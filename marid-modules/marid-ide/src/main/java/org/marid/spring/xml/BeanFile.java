@@ -18,8 +18,8 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import org.marid.jfx.beans.FxList;
+import org.marid.jfx.beans.OList;
+import org.marid.jfx.beans.OOList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -34,8 +34,8 @@ import static org.marid.misc.Iterables.nodes;
  */
 public final class BeanFile extends AbstractData<BeanFile> {
 
-    public final FxList<String> path = new FxList<>();
-    public final FxList<BeanData> beans = new FxList<>(d -> new Observable[] {d});
+    public final OList<String> path = new OList<>();
+    public final OOList<BeanData> beans = new OOList<>();
 
     public BeanFile() {
         path.addListener(this::fireInvalidate);

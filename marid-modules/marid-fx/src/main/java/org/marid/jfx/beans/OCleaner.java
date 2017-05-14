@@ -18,39 +18,34 @@
 
 package org.marid.jfx.beans;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
+import javafx.application.Platform;
+import org.marid.concurrent.MaridTimerTask;
 
-import java.util.Collection;
+import java.lang.ref.WeakReference;
+import java.util.Timer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractObservable implements Observable, OCleanable {
+class OCleaner {
 
-    protected final Collection<InvalidationListener> listeners = new ConcurrentLinkedQueue<>();
+    private static final ConcurrentLinkedQueue<WeakReference<OCleanable>> CLEANABLES = new ConcurrentLinkedQueue<>();
+    private static final Timer TIMER = new Timer(true);
 
-    public AbstractObservable() {
-        OCleaner.register(this);
+    static {
+        TIMER.schedule(new MaridTimerTask(t -> CLEANABLES.removeIf(ref -> {
+            final OCleanable c = ref.get();
+            if (c == null) {
+                return true;
+            } else {
+                Platform.runLater(c::clean);
+                return false;
+            }
+        })), 60_000L, 60_000L);
     }
 
-    @Override
-    public void addListener(InvalidationListener listener) {
-        listeners.add(listener);
-    }
-
-    @Override
-    public void removeListener(InvalidationListener listener) {
-        listeners.remove(listener);
-    }
-
-    protected void fireInvalidate(Observable observable) {
-        listeners.forEach(l -> l.invalidated(observable));
-    }
-
-    @Override
-    public void clean() {
-        fireInvalidate(this);
+    public static void register(OCleanable cleanable) {
+        CLEANABLES.add(new WeakReference<>(cleanable));
     }
 }

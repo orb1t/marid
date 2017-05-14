@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Dmitry Ovchinnikov
+ * Copyright (c) 2017 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,23 +18,31 @@
 
 package org.marid.jfx.beans;
 
-import javafx.beans.value.ObservableValue;
-import javafx.beans.value.WritableObjectValue;
-import javafx.beans.value.WritableValue;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 
 /**
- * @author Dmitry Ovchinnikov.
- * @since 0.8
+ * @author Dmitry Ovchinnikov
  */
-public class ForwardingWritableValue<T, V extends ObservableValue<T> & WritableObjectValue<T>>
-        extends ForwardingObservableValue<T, V> implements WritableValue<T> {
+public class OOProp<T extends Observable> extends OProp<T> {
 
-    public ForwardingWritableValue(V delegate) {
-        super(delegate);
+    private final InvalidationListener listener = o -> fireChanged(false);
+
+    public OOProp(String name) {
+        super(name);
+    }
+
+    public OOProp(String name, T value) {
+        super(name, value);
     }
 
     @Override
-    public void setValue(T value) {
-        delegate.setValue(value);
+    protected void onChange(T oldValue, T newValue) {
+        if (oldValue != null) {
+            oldValue.removeListener(listener);
+        }
+        if (newValue != null) {
+            newValue.addListener(listener);
+        }
     }
 }

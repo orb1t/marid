@@ -33,8 +33,6 @@ import org.marid.jfx.action.FxAction;
 import org.marid.misc.Casts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 
 import javax.annotation.PreDestroy;
@@ -56,11 +54,6 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
 
     public AbstractTreeItem(T elem) {
         this.elem = elem;
-        parentProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == null) {
-                focused.set(false);
-            }
-        });
     }
 
     public abstract ObservableValue<String> getName();
@@ -95,33 +88,21 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
     @Autowired
     private void init(GenericApplicationContext context, SpecialActions specialActions) {
         final DefaultListableBeanFactory beanFactory = context.getDefaultListableBeanFactory();
-        final ObservableList<TreeItem<Object>> children = getChildren();
-        children.forEach(o -> {
-            beanFactory.initializeBean(o, null);
-            beanFactory.autowireBean(o);
-        });
-        final ListChangeListener<TreeItem<Object>> onChildrenChange = c -> {
+        final ListChangeListener<TreeItem<Object>> listChangeListener = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(o -> {
-                        beanFactory.initializeBean(o, null);
-                        beanFactory.autowireBean(o);
+                    c.getAddedSubList().forEach(e -> {
+                        beanFactory.autowireBean(e);
+                        beanFactory.initializeBean(e, null);
                     });
-                } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(beanFactory::destroyBean);
+                }
+                if (c.wasRemoved()) {
+                    c.getRemoved().forEach(e -> ((AbstractTreeItem<?>) e).destroy(beanFactory));
                 }
             }
         };
-        final ApplicationListener<ContextClosedEvent> closeListener = e -> {
-            children.forEach(beanFactory::destroyBean);
-            beanFactory.destroyBean(this);
-        };
-        context.addApplicationListener(closeListener);
-        children.addListener(onChildrenChange);
-        destroyActions.add(() -> {
-            context.getApplicationListeners().remove(closeListener);
-            children.removeListener(onChildrenChange);
-        });
+        getChildren().addListener(listChangeListener);
+        destroyActions.add(0, () -> getChildren().removeListener(listChangeListener));
         focused.addListener((observable, oldValue, newValue) -> actionMap.forEach((key, value) -> {
             final FxAction action = specialActions.getAction(key);
             if (action != null) {
@@ -136,7 +117,12 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
         destroyActions.clear();
     }
 
-    protected static class ListSynchronizer<F, T extends AbstractTreeItem<F>> implements ListChangeListener<F> {
+    public void destroy(DefaultListableBeanFactory factory) {
+        getChildren().clear();
+        factory.destroyBean(this);
+    }
+
+    protected static class ListSynchronizer<F, T extends AbstractTreeItem<F>> implements Runnable {
 
         private final ObservableList<F> source;
         private final ObservableList<T> target;
@@ -149,13 +135,23 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
             this.mapper = mapper;
             source.stream().map(mapper).forEach(target::add);
             sort();
-            source.addListener(sourceChangeListener = new WeakListChangeListener<>(this));
+            source.addListener(sourceChangeListener = new WeakListChangeListener<F>(this::onChanged));
         }
 
-        @Override
-        public void onChanged(Change<? extends F> c) {
+        private void onChanged(ListChangeListener.Change<? extends F> c) {
             while (c.next()) {
-                if (c.wasAdded()) {
+                if (c.wasReplaced() || c.wasUpdated()) {
+                    for (int i = c.getFrom(); i < c.getTo(); i++) {
+                        final F from = source.get(i);
+                        for (int j = 0; j < target.size(); j++) {
+                            final T to = target.get(j);
+                            if (to.elem.equals(from)) {
+                                target.set(j, mapper.apply(from));
+                            }
+                        }
+                    }
+                    sort();
+                } else if (c.wasAdded()) {
                     c.getAddedSubList().stream().map(mapper).forEach(target::add);
                     sort();
                 } else if (c.wasRemoved()) {
@@ -170,7 +166,8 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
             }
         }
 
-        protected void destroy() {
+        @Override
+        public void run() {
             source.removeListener(sourceChangeListener);
         }
     }

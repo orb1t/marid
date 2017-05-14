@@ -28,12 +28,10 @@ import org.marid.ide.common.SpecialActionConfiguration;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.beans.MaridBeanUtils;
-import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-
-import javax.annotation.PreDestroy;
+import org.springframework.context.support.GenericApplicationContext;
 
 import static org.marid.ide.common.IdeShapes.fileNode;
 import static org.marid.jfx.LocalizedStrings.fs;
@@ -48,7 +46,6 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
 
     private final ObservableValue<String> name;
     private final ObservableValue<String> type;
-    private final ListSynchronizer<BeanData, BeanTreeItem> listSynchronizer;
 
     public FileTreeItem(BeanFile file) {
         super(file);
@@ -57,9 +54,6 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
         type = ls("file");
 
         graphicProperty().bind(Bindings.createObjectBinding(() -> fileNode(file, 20), file));
-
-        listSynchronizer = new ListSynchronizer<>(file.beans, getChildren(), BeanTreeItem::new);
-        setExpanded(true);
     }
 
     @Override
@@ -118,8 +112,9 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
         );
     }
 
-    @PreDestroy
-    private void destroy() {
-        listSynchronizer.destroy();
+    @Autowired
+    private void init(GenericApplicationContext context) {
+        destroyActions.add(0, new ListSynchronizer<>(elem.beans, getChildren(), BeanTreeItem::new));
+        setExpanded(true);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Dmitry Ovchinnikov
+ * Copyright (c) 2017 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,15 +18,10 @@
 
 package org.marid.jfx.beans;
 
-import javafx.beans.property.DoubleProperty;
-
 /**
- * @author Dmitry Ovchinnikov.
- * @since 0.8
+ * @author Dmitry Ovchinnikov
  */
-public class ForwardingDoubleProperty extends ForwardingProperty<Number, DoubleProperty> {
+public interface OCleanable {
 
-    public ForwardingDoubleProperty(DoubleProperty delegate) {
-        super(delegate);
-    }
+    void clean();
 }

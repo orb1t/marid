@@ -18,7 +18,7 @@
 
 package org.marid.spring.xml;
 
-import org.marid.jfx.beans.FxString;
+import org.marid.jfx.beans.OString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -30,7 +30,7 @@ import static java.util.Optional.ofNullable;
  */
 public final class DValue extends DElement<DValue> {
 
-    public final FxString value = new FxString(null, "value");
+    public final OString value = new OString("value");
 
     public DValue() {
         this(null);

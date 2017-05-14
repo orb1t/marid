@@ -18,9 +18,8 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import org.marid.jfx.beans.FxList;
-import org.marid.jfx.beans.FxString;
+import org.marid.jfx.beans.OOList;
+import org.marid.jfx.beans.OString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -35,8 +34,8 @@ import static org.marid.misc.Iterables.nodes;
  */
 public abstract class DCollection<T extends DCollection<T>> extends DElement<T> {
 
-    public final FxString valueType = new FxString(null, "value-type");
-    public final FxList<DElement<?>> elements = new FxList<>(e -> new Observable[] {e});
+    public final OString valueType = new OString("value-type");
+    public final OOList<DElement<?>> elements = new OOList<>();
 
     public DCollection() {
         valueType.addListener(this::fireInvalidate);

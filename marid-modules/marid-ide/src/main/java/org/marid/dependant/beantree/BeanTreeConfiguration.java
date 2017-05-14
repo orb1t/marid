@@ -38,7 +38,9 @@ public class BeanTreeConfiguration extends DependantConfiguration<BeanTreeParam>
 
     @Bean
     public ProjectProfile profile() {
-        return param.profile;
+        final ProjectProfile profile = param.profile;
+        profile.getBeanFiles().forEach(f -> f.beans.forEach(profile::updateBeanData));
+        return profile;
     }
 
     @Bean

@@ -25,14 +25,11 @@ import javafx.scene.layout.HBox;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
-import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
-import org.marid.spring.xml.BeanProp;
 import org.marid.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-
-import javax.annotation.PreDestroy;
+import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -40,17 +37,10 @@ import javax.annotation.PreDestroy;
 @Configurable
 public class BeanTreeItem extends AbstractTreeItem<BeanData> {
 
-    private final ListSynchronizer<BeanArg, ArgumentTreeItem> argsSynchronizer;
-    private final ListSynchronizer<BeanProp, PropertyTreeItem> propsSynchronizer;
-
     public BeanTreeItem(BeanData elem) {
         super(elem);
         valueProperty().bind(Bindings.createObjectBinding(() -> elem, elem));
         graphicProperty().bind(Bindings.createObjectBinding(() -> IdeShapes.beanNode(elem, 20), elem));
-
-        argsSynchronizer = new ListSynchronizer<>(elem.beanArgs, getChildren(), ArgumentTreeItem::new);
-        propsSynchronizer = new ListSynchronizer<>(elem.properties, getChildren(), PropertyTreeItem::new);
-        setExpanded(true);
     }
 
     @Override
@@ -90,10 +80,11 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
         }, elem);
     }
 
-    @PreDestroy
-    private void destroy() {
-        argsSynchronizer.destroy();
-        propsSynchronizer.destroy();
+    @Autowired
+    private void init(GenericApplicationContext context) {
+        destroyActions.add(0, new ListSynchronizer<>(elem.beanArgs, getChildren(), ArgumentTreeItem::new));
+        destroyActions.add(0, new ListSynchronizer<>(elem.properties, getChildren(), PropertyTreeItem::new));
+        setExpanded(true);
     }
 
     @Autowired

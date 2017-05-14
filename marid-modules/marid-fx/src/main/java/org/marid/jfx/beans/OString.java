@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Dmitry Ovchinnikov
+ * Copyright (c) 2017 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,21 +18,19 @@
 
 package org.marid.jfx.beans;
 
-import javafx.beans.value.ObservableObjectValue;
+import javafx.beans.value.ObservableStringValue;
+import javafx.beans.value.WritableStringValue;
 
 /**
- * @author Dmitry Ovchinnikov.
- * @since 0.8
+ * @author Dmitry Ovchinnikov
  */
-public class ForwardingObservableObjectValue<T, V extends ObservableObjectValue<T>>
-        extends ForwardingObservableValue<T, V> implements ObservableObjectValue<T> {
+public class OString extends OProp<String> implements ObservableStringValue, WritableStringValue {
 
-    public ForwardingObservableObjectValue(V delegate) {
-        super(delegate);
+    public OString(String name) {
+        super(name);
     }
 
-    @Override
-    public T get() {
-        return delegate.get();
+    public OString(String name, String value) {
+        super(name, value);
     }
 }

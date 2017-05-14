@@ -20,7 +20,6 @@ package org.marid.ide.project;
 
 import com.google.common.io.MoreFiles;
 import javafx.application.Platform;
-import javafx.beans.Observable;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
@@ -28,7 +27,7 @@ import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.marid.jfx.beans.FxList;
+import org.marid.jfx.beans.OOList;
 import org.marid.misc.Urls;
 import org.marid.spring.xml.*;
 import org.springframework.core.ResolvableType;
@@ -81,7 +80,7 @@ public class ProjectProfile {
     private final Path beansDirectory;
     private final Path repository;
     private final Logger logger;
-    private final FxList<BeanFile> beanFiles;
+    private final OOList<BeanFile> beanFiles;
     private volatile URLClassLoader classLoader;
 
     ProjectProfile(String name) {
@@ -169,8 +168,8 @@ public class ProjectProfile {
         return model;
     }
 
-    private FxList<BeanFile> loadBeanFiles() {
-        final FxList<BeanFile> list = new FxList<>(f -> new Observable[] {f});
+    private OOList<BeanFile> loadBeanFiles() {
+        final OOList<BeanFile> list = new OOList<>();
         try (final Stream<Path> stream = Files.walk(beansDirectory)) {
             stream.filter(p -> p.getFileName().toString().endsWith(".xml"))
                     .map(p -> {
@@ -193,7 +192,7 @@ public class ProjectProfile {
         return list;
     }
 
-    public FxList<BeanFile> getBeanFiles() {
+    public OOList<BeanFile> getBeanFiles() {
         return beanFiles;
     }
 

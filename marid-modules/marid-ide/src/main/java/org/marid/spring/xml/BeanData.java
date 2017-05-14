@@ -18,9 +18,9 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import org.marid.jfx.beans.FxList;
-import org.marid.jfx.beans.FxString;
+import org.marid.jfx.beans.OList;
+import org.marid.jfx.beans.OOList;
+import org.marid.jfx.beans.OString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -35,17 +35,17 @@ import static org.marid.misc.Iterables.nodes;
  */
 public final class BeanData extends DElement<BeanData> {
 
-    public final FxString type = new FxString(null, "class");
-    public final FxString name = new FxString(null, "name");
-    public final FxString initMethod = new FxString(null, "init-method");
-    public final FxString destroyMethod = new FxString(null, "destroy-method");
-    public final FxString factoryBean = new FxString(null, "factory-bean");
-    public final FxString factoryMethod = new FxString(null, "factory-method");
-    public final FxString lazyInit = new FxString(null, "lazy-init", "default");
-    public final FxList<BeanArg> beanArgs = new FxList<>(a -> new Observable[] {a});
-    public final FxList<BeanProp> properties = new FxList<>(p -> new Observable[] {p});
-    public final FxList<Meta> meta = new FxList<>(p -> new Observable[] {p});
-    public final transient FxList<Executable> constructors = new FxList<>();
+    public final OString type = new OString("class");
+    public final OString name = new OString("name");
+    public final OString initMethod = new OString("init-method");
+    public final OString destroyMethod = new OString("destroy-method");
+    public final OString factoryBean = new OString("factory-bean");
+    public final OString factoryMethod = new OString("factory-method");
+    public final OString lazyInit = new OString("lazy-init", "default");
+    public final OOList<BeanArg> beanArgs = new OOList<>();
+    public final OOList<BeanProp> properties = new OOList<>();
+    public final OOList<Meta> meta = new OOList<>();
+    public final transient OList<Executable> constructors = new OList<>();
 
     public BeanData() {
         type.addListener(this::fireInvalidate);

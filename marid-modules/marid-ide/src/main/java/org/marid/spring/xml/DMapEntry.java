@@ -18,8 +18,8 @@
 
 package org.marid.spring.xml;
 
-import org.marid.jfx.beans.FxObject;
-import org.marid.jfx.beans.FxString;
+import org.marid.jfx.beans.OOProp;
+import org.marid.jfx.beans.OString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -36,8 +36,8 @@ import static org.marid.spring.xml.DElement.read;
  */
 public class DMapEntry extends AbstractData<DMapEntry> {
 
-    public final FxString key = new FxString(null, "key");
-    public final FxObject<DElement<?>> value = new FxObject<>(null, "value");
+    public final OString key = new OString("key");
+    public final OOProp<DElement<?>> value = new OOProp<>("value");
 
     public DMapEntry() {
         key.addListener(this::fireInvalidate);

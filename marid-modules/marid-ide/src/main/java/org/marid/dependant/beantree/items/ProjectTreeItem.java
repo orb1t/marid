@@ -31,11 +31,9 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.beans.MaridBeanUtils;
-import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-
-import javax.annotation.PreDestroy;
+import org.springframework.context.support.GenericApplicationContext;
 
 import static org.marid.jfx.LocalizedStrings.fs;
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -49,7 +47,6 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
 
     private final ObservableValue<String> name;
     private final ObservableValue<String> type;
-    private final ListSynchronizer<BeanFile, FileTreeItem> listSynchronizer;
 
     public ProjectTreeItem(ProjectProfile elem) {
         super(elem);
@@ -58,9 +55,6 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
 
         valueProperty().bind(Bindings.createObjectBinding(() -> elem, elem.getBeanFiles()));
         graphicProperty().bind(Bindings.createObjectBinding(() -> IdeShapes.profileNode(elem, 20)));
-
-        listSynchronizer = new ListSynchronizer<>(elem.getBeanFiles(), getChildren(), FileTreeItem::new);
-        setExpanded(true);
     }
 
     @Override
@@ -119,8 +113,9 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
         );
     }
 
-    @PreDestroy
-    private void destroy() {
-        listSynchronizer.destroy();
+    @Autowired
+    private void init(GenericApplicationContext context) {
+        destroyActions.add(new ListSynchronizer<>(elem.getBeanFiles(), getChildren(), FileTreeItem::new));
+        setExpanded(true);
     }
 }

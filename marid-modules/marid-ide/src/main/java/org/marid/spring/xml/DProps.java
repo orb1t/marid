@@ -18,9 +18,8 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.Observable;
-import org.marid.jfx.beans.FxList;
-import org.marid.jfx.beans.FxString;
+import org.marid.jfx.beans.OOList;
+import org.marid.jfx.beans.OString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -33,8 +32,8 @@ import static org.marid.misc.Iterables.nodes;
  */
 public final class DProps extends DElement<DProps> {
 
-    public final FxString valueType = new FxString(null, "value-type");
-    public final FxList<DPropEntry> entries = new FxList<>(p -> new Observable[] {p});
+    public final OString valueType = new OString("value-type");
+    public final OOList<DPropEntry> entries = new OOList<>();
 
     public DProps() {
         valueType.addListener(this::fireInvalidate);

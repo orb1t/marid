@@ -18,8 +18,8 @@
 
 package org.marid.spring.xml;
 
-import org.marid.jfx.beans.FxObject;
-import org.marid.jfx.beans.FxString;
+import org.marid.jfx.beans.OOProp;
+import org.marid.jfx.beans.OString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -37,22 +37,14 @@ import static org.marid.spring.xml.DElement.write;
  */
 public class BeanArg extends AbstractData<BeanArg> {
 
-    public final FxString name = new FxString(null, "name");
-    public final FxString type = new FxString(null, "type");
-    public final FxObject<DElement<?>> data = new FxObject<>(null, "data");
+    public final OString name = new OString("name");
+    public final OString type = new OString("type");
+    public final OOProp<DElement<?>> data = new OOProp<>("data");
 
     public BeanArg() {
         name.addListener(this::fireInvalidate);
         type.addListener(this::fireInvalidate);
-        data.addListener((observable, oldValue, newValue) -> {
-            fireInvalidate(observable);
-            if (oldValue != null) {
-                oldValue.removeListener(this::fireInvalidate);
-            }
-            if (newValue != null) {
-                newValue.addListener(this::fireInvalidate);
-            }
-        });
+        data.addListener(this::fireInvalidate);
     }
 
     public String getName() {
