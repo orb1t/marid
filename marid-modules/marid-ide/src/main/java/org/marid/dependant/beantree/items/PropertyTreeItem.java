@@ -67,13 +67,13 @@ public class PropertyTreeItem extends AbstractTreeItem<BeanProp> {
     }
 
     @Override
-    public ObservableValue<Node> valueGraphic() {
-        return Bindings.createObjectBinding(() -> itemGraphic(elem.getData()), elem);
+    public Node graphic() {
+        return itemGraphic(elem.getData());
     }
 
     @Override
-    public ObservableValue<String> valueText() {
-        return Bindings.createStringBinding(() -> itemText(elem.getData()), elem);
+    public String text() {
+        return itemText(elem.getData());
     }
 
     @Override

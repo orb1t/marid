@@ -64,29 +64,25 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
     }
 
     @Override
-    public ObservableValue<String> valueText() {
-        return Bindings.createObjectBinding(() -> {
-            if (elem.isFactoryBean()) {
-                if (elem.getFactoryBean() != null) {
-                    return String.format("%s.%s", elem.getFactoryBean(), elem.getFactoryMethod());
-                } else {
-                    return String.format("%s.%s", elem.getType(), elem.getFactoryMethod());
-                }
+    public String text() {
+        if (elem.isFactoryBean()) {
+            if (elem.getFactoryBean() != null) {
+                return String.format("%s.%s", elem.getFactoryBean(), elem.getFactoryMethod());
+            } else {
+                return String.format("%s.%s", elem.getType(), elem.getFactoryMethod());
             }
-            return null;
-        }, elem);
+        }
+        return null;
     }
 
     @Override
-    public ObservableValue<Node> valueGraphic() {
-        return Bindings.createObjectBinding(() -> {
-            final HBox box = new HBox(10);
-            if (elem.isFactoryBean()) {
-                final Node icon = FontIcons.glyphIcon("D_LINK", 20);
-                box.getChildren().add(icon);
-            }
-            return box;
-        }, elem);
+    public Node graphic() {
+        final HBox box = new HBox(10);
+        if (elem.isFactoryBean()) {
+            final Node icon = FontIcons.glyphIcon("D_LINK", 20);
+            box.getChildren().add(icon);
+        }
+        return box;
     }
 
     @Autowired

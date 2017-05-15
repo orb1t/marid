@@ -70,39 +70,37 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
     }
 
     @Override
-    public ObservableValue<Node> valueGraphic() {
-        return Bindings.createObjectBinding(() -> {
-            final HBox box = new HBox(10);
-            {
-                final Label label = new Label();
-                label.setGraphic(glyphIcon("D_FILE", 20));
-                label.textProperty().bind(fs("%s: %d", ls("Files"), elem.getBeanFiles().size()));
-                box.getChildren().add(label);
-            }
-            {
-                final Label label = new Label();
-                label.setGraphic(glyphIcon("D_STAR_CIRCLE", 20));
-                final int beanCount = elem.getBeanFiles().stream().mapToInt(f -> f.beans.size()).sum();
-                label.textProperty().bind(fs("%s: %d", ls("Beans"), beanCount));
-                box.getChildren().add(label);
-            }
-            {
-                final Label label = new Label();
-                label.setGraphic(glyphIcon("D_STAR_OUTLINE", 20));
-                final long count = elem.getBeanFiles().stream()
-                        .flatMap(f -> f.beans.stream())
-                        .flatMap(MaridBeanUtils::beans)
-                        .count();
-                label.textProperty().bind(fs("%s: %d", ls("Inner Beans"), count));
-                box.getChildren().add(label);
-            }
-            return box;
-        }, elem.getBeanFiles());
+    public Node graphic() {
+        final HBox box = new HBox(10);
+        {
+            final Label label = new Label();
+            label.setGraphic(glyphIcon("D_FILE", 20));
+            label.textProperty().bind(fs("%s: %d", ls("Files"), elem.getBeanFiles().size()));
+            box.getChildren().add(label);
+        }
+        {
+            final Label label = new Label();
+            label.setGraphic(glyphIcon("D_STAR_CIRCLE", 20));
+            final int beanCount = elem.getBeanFiles().stream().mapToInt(f -> f.beans.size()).sum();
+            label.textProperty().bind(fs("%s: %d", ls("Beans"), beanCount));
+            box.getChildren().add(label);
+        }
+        {
+            final Label label = new Label();
+            label.setGraphic(glyphIcon("D_STAR_OUTLINE", 20));
+            final long count = elem.getBeanFiles().stream()
+                    .flatMap(f -> f.beans.stream())
+                    .flatMap(MaridBeanUtils::beans)
+                    .count();
+            label.textProperty().bind(fs("%s: %d", ls("Inner Beans"), count));
+            box.getChildren().add(label);
+        }
+        return box;
     }
 
     @Override
-    public ObservableValue<String> valueText() {
-        return Bindings.createStringBinding(() -> null);
+    public String text() {
+        return null;
     }
 
     @Autowired

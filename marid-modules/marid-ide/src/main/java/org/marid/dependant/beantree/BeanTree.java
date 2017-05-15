@@ -19,7 +19,10 @@
 package org.marid.dependant.beantree;
 
 import javafx.beans.binding.Bindings;
-import javafx.scene.control.*;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableRow;
+import javafx.scene.control.TreeTableView;
 import org.marid.dependant.beantree.items.AbstractTreeItem;
 import org.marid.dependant.beantree.items.ProjectTreeItem;
 import org.marid.ide.project.ProjectProfile;
@@ -77,20 +80,19 @@ public class BeanTree extends TreeTableView<Object> {
     @Order(3)
     @Autowired
     public void valueColumn() {
-        final TreeTableColumn<Object, TreeItem<Object>> column = new TreeTableColumn<>();
+        final TreeTableColumn<Object, AbstractTreeItem<Object>> column = new TreeTableColumn<>();
         column.textProperty().bind(ls("Value"));
-        column.setCellValueFactory(f -> Bindings.createObjectBinding(f::getValue));
-        column.setCellFactory(f -> new TreeTableCell<Object, TreeItem<Object>>() {
+        column.setCellValueFactory(f -> Bindings.createObjectBinding(() -> (AbstractTreeItem<Object>) f.getValue()));
+        column.setCellFactory(f -> new TreeTableCell<Object, AbstractTreeItem<Object>>() {
             @Override
-            protected void updateItem(TreeItem<Object> item, boolean empty) {
+            protected void updateItem(AbstractTreeItem<Object> item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) item;
-                    setText(treeItem.valueText().getValue());
-                    setGraphic(treeItem.valueGraphic().getValue());
+                    setText(item.text());
+                    setGraphic(item.graphic());
                 }
             }
         });

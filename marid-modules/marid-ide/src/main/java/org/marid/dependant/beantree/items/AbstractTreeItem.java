@@ -60,9 +60,9 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> implements Co
 
     public abstract ObservableValue<String> getType();
 
-    public abstract ObservableValue<Node> valueGraphic();
+    public abstract Node graphic();
 
-    public abstract ObservableValue<String> valueText();
+    public abstract String text();
 
     public void edit(TreeTableView<Object> view, Object value) {
     }

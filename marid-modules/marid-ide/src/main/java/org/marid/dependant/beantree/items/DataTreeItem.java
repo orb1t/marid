@@ -18,13 +18,8 @@
 
 package org.marid.dependant.beantree.items;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.Node;
 import org.marid.spring.xml.DElement;
-
-import static org.marid.dependant.beantree.items.TreeItemUtils.itemGraphic;
-import static org.marid.dependant.beantree.items.TreeItemUtils.itemText;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -42,15 +37,5 @@ public abstract class DataTreeItem<T> extends AbstractTreeItem<T> {
     @Override
     public ObservableValue<String> getName() {
         return nameProperty();
-    }
-
-    @Override
-    public ObservableValue<Node> valueGraphic() {
-        return Bindings.createObjectBinding(() -> itemGraphic(elementProperty().getValue()), elementProperty());
-    }
-
-    @Override
-    public ObservableValue<String> valueText() {
-        return Bindings.createStringBinding(() -> itemText(elementProperty().getValue()), elementProperty());
     }
 }
