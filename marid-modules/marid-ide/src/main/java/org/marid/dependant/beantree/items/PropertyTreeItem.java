@@ -44,7 +44,7 @@ import static org.marid.dependant.beantree.items.TreeItemUtils.itemText;
  */
 @Order(2)
 @Configurable
-public class PropertyTreeItem extends AbstractTreeItem<BeanProp> implements Comparable<AbstractTreeItem<?>> {
+public class PropertyTreeItem extends AbstractTreeItem<BeanProp> {
 
     public PropertyTreeItem(BeanProp elem) {
         super(elem);

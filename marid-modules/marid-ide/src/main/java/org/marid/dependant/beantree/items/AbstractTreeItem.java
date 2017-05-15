@@ -44,7 +44,7 @@ import java.util.function.Function;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
+public abstract class AbstractTreeItem<T> extends TreeItem<Object> implements Comparable<AbstractTreeItem<?>> {
 
     public final T elem;
     public final Map<String, FxAction> actionMap = new TreeMap<>();
@@ -161,9 +161,7 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> {
         }
 
         private void sort() {
-            if (target.stream().allMatch(Comparable.class::isInstance)) {
-                target.sort(Casts.cast(Comparator.naturalOrder()));
-            }
+            target.sort(Comparator.naturalOrder());
         }
 
         @Override

@@ -35,6 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.support.GenericApplicationContext;
 
+import javax.annotation.Nonnull;
+
 import static org.marid.jfx.LocalizedStrings.fs;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
@@ -117,5 +119,10 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
     private void init(GenericApplicationContext context) {
         destroyActions.add(new ListSynchronizer<>(elem.getBeanFiles(), getChildren(), FileTreeItem::new));
         setExpanded(true);
+    }
+
+    @Override
+    public int compareTo(@Nonnull AbstractTreeItem<?> o) {
+        return 0;
     }
 }

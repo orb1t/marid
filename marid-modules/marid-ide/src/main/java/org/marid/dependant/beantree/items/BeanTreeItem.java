@@ -21,15 +21,24 @@ package org.marid.dependant.beantree.items;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
+import org.jetbrains.annotations.NotNull;
 import org.marid.ide.common.IdeShapes;
+import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanData;
 import org.marid.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.support.GenericApplicationContext;
+
+import java.util.Comparator;
+
+import static org.marid.ide.common.SpecialActionConfiguration.RENAME;
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -90,5 +99,37 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
     @Autowired
     private void initUpdateAction(ProjectProfile profile) {
 
+    }
+
+    @Autowired
+    private void initRenameAction(ProjectProfile profile) {
+        actionMap.put(RENAME, new FxAction("a", "Actions")
+                .bindText("Rename")
+                .setEventHandler(event -> {
+                    final TextInputDialog nameDialog = new TextInputDialog(elem.getName());
+                    nameDialog.getDialogPane().setPrefWidth(800);
+                    nameDialog.titleProperty().bind(ls("Rename bean"));
+                    nameDialog.showAndWait().ifPresent(value -> {
+                        if (value.equals(elem.getName())) {
+                            return;
+                        }
+                        final String oldName = elem.getName();
+                        final String newName = profile.generateBeanName(value);
+                        elem.setName(newName);
+                        ProjectManager.onBeanNameChange(profile, oldName, newName);
+                    });
+                })
+        );
+    }
+
+    @Override
+    public int compareTo(@NotNull AbstractTreeItem<?> o) {
+        if (o instanceof BeanTreeItem) {
+            final BeanTreeItem that = (BeanTreeItem) o;
+            final Comparator<String> c = Comparator.nullsFirst(String::compareTo);
+            return c.compare(this.elem.getName(), that.elem.getName());
+        } else {
+            return 0;
+        }
     }
 }

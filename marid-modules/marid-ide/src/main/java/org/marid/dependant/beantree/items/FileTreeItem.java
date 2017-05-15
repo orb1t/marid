@@ -33,6 +33,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.support.GenericApplicationContext;
 
+import javax.annotation.Nonnull;
+import java.util.Comparator;
+
 import static org.marid.ide.common.IdeShapes.fileNode;
 import static org.marid.jfx.LocalizedStrings.fs;
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -116,5 +119,16 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
     private void init(GenericApplicationContext context) {
         destroyActions.add(0, new ListSynchronizer<>(elem.beans, getChildren(), BeanTreeItem::new));
         setExpanded(true);
+    }
+
+    @Override
+    public int compareTo(@Nonnull AbstractTreeItem<?> o) {
+        if (o instanceof FileTreeItem) {
+            final FileTreeItem that = (FileTreeItem) o;
+            final Comparator<String> c = Comparator.nullsFirst(String::compareTo);
+            return c.compare(this.elem.getFilePath(), that.elem.getFilePath());
+        } else {
+            return 0;
+        }
     }
 }

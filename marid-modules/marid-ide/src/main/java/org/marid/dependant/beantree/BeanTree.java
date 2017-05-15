@@ -85,14 +85,12 @@ public class BeanTree extends TreeTableView<Object> {
             protected void updateItem(TreeItem<Object> item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
-                    textProperty().unbind();
-                    graphicProperty().unbind();
                     setText(null);
                     setGraphic(null);
                 } else {
                     final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) item;
-                    textProperty().bind(treeItem.valueText());
-                    graphicProperty().bind(treeItem.valueGraphic());
+                    setText(treeItem.valueText().getValue());
+                    setGraphic(treeItem.valueGraphic().getValue());
                 }
             }
         });
