@@ -25,7 +25,9 @@ import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import org.marid.dependant.beantree.items.AbstractTreeItem;
 import org.marid.dependant.beantree.items.ProjectTreeItem;
+import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,12 +82,12 @@ public class BeanTree extends TreeTableView<Object> {
     @Order(3)
     @Autowired
     public void valueColumn() {
-        final TreeTableColumn<Object, AbstractTreeItem<Object>> column = new TreeTableColumn<>();
+        final TreeTableColumn<Object, AbstractTreeItem<?>> column = new TreeTableColumn<>();
         column.textProperty().bind(ls("Value"));
-        column.setCellValueFactory(f -> Bindings.createObjectBinding(() -> (AbstractTreeItem<Object>) f.getValue()));
-        column.setCellFactory(f -> new TreeTableCell<Object, AbstractTreeItem<Object>>() {
+        column.setCellValueFactory(f -> Bindings.createObjectBinding(() -> (AbstractTreeItem<?>) f.getValue()));
+        column.setCellFactory(f -> new TreeTableCell<Object, AbstractTreeItem<?>>() {
             @Override
-            protected void updateItem(AbstractTreeItem<Object> item, boolean empty) {
+            protected void updateItem(AbstractTreeItem<?> item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
@@ -103,14 +105,17 @@ public class BeanTree extends TreeTableView<Object> {
     }
 
     @Autowired
-    private void initRow() {
+    private void initRow(SpecialActions specialActions) {
         setRowFactory(v -> {
             final TreeTableRow<Object> row = new TreeTableRow<>();
             row.focusedProperty().addListener((observable, oldValue, newValue) -> {
                 final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) row.getTreeItem();
-                if (treeItem != null) {
-                    treeItem.focused.set(newValue);
-                }
+                treeItem.actionMap.forEach((key, value) -> {
+                    final FxAction action = specialActions.getAction(key);
+                    if (action != null) {
+                        value.copy(action, newValue);
+                    }
+                });
             });
             row.setContextMenu(new MaridContextMenu(m -> {
                 final AbstractTreeItem<?> treeItem = (AbstractTreeItem<?>) row.getTreeItem();
@@ -119,7 +124,7 @@ public class BeanTree extends TreeTableView<Object> {
                     return;
                 }
                 m.getItems().addAll(MaridActions.contextMenu(treeItem.actionMap));
-                treeItem.menu.get().accept(m.getItems());
+                treeItem.menuConsumers.forEach(c -> c.accept(m.getItems()));
             }));
             row.setLineSpacing(1.0);
             return row;

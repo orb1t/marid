@@ -18,7 +18,6 @@
 
 package org.marid.dependant.beantree.items;
 
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -27,7 +26,6 @@ import javafx.scene.Node;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
-import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.misc.Casts;
@@ -37,7 +35,6 @@ import org.springframework.context.support.GenericApplicationContext;
 
 import javax.annotation.PreDestroy;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -48,9 +45,8 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> implements Co
 
     public final T elem;
     public final Map<String, FxAction> actionMap = new TreeMap<>();
-    public final SimpleBooleanProperty focused = new SimpleBooleanProperty();
-    public final AtomicReference<Consumer<ObservableList<MenuItem>>> menu = new AtomicReference<>(i -> {});
     public final List<Runnable> destroyActions = new ArrayList<>();
+    public final LinkedList<Consumer<ObservableList<MenuItem>>> menuConsumers = new LinkedList<>();
 
     public AbstractTreeItem(T elem) {
         this.elem = elem;
@@ -86,7 +82,7 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> implements Co
     }
 
     @Autowired
-    private void init(GenericApplicationContext context, SpecialActions specialActions) {
+    private void init(GenericApplicationContext context) {
         final DefaultListableBeanFactory beanFactory = context.getDefaultListableBeanFactory();
         final ListChangeListener<TreeItem<Object>> listChangeListener = c -> {
             while (c.next()) {
@@ -103,12 +99,6 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> implements Co
         };
         getChildren().addListener(listChangeListener);
         destroyActions.add(0, () -> getChildren().removeListener(listChangeListener));
-        focused.addListener((observable, oldValue, newValue) -> actionMap.forEach((key, value) -> {
-            final FxAction action = specialActions.getAction(key);
-            if (action != null) {
-                value.copy(action, newValue);
-            }
-        }));
     }
 
     @PreDestroy

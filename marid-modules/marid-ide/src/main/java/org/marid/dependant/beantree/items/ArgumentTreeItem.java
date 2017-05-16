@@ -28,6 +28,7 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.DElement;
 import org.marid.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -45,12 +46,22 @@ import static org.marid.dependant.beantree.items.TreeItemUtils.itemText;
  */
 @Order(1)
 @Configurable
-public class ArgumentTreeItem extends AbstractTreeItem<BeanArg> {
+public class ArgumentTreeItem extends DataTreeItem<BeanArg> {
 
     public ArgumentTreeItem(BeanArg elem) {
         super(elem);
 
         setGraphic(FontIcons.glyphIcon("D_ALBUM", 20));
+    }
+
+    @Override
+    public ObservableValue<String> nameProperty() {
+        return elem.name;
+    }
+
+    @Override
+    public ObservableValue<DElement<?>> elementProperty() {
+        return elem.data;
     }
 
     @Override
@@ -94,7 +105,7 @@ public class ArgumentTreeItem extends AbstractTreeItem<BeanArg> {
 
     @Autowired
     private void initValueMenuItems(ProjectProfile profile, IdeDependants dependants) {
-        menu.set(items -> {
+        menuConsumers.add(items -> {
             final ValuesParams params = new ValuesParams(profile, elem, items);
             dependants.start(ValuesConfiguration.class, params, f -> {});
         });

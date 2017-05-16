@@ -21,7 +21,6 @@ package org.marid.dependant.beantree.items;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
-import org.jetbrains.annotations.NotNull;
 import org.marid.IdeDependants;
 import org.marid.dependant.valuemenu.ValuesConfiguration;
 import org.marid.dependant.valuemenu.ValuesParams;
@@ -29,10 +28,13 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
+import org.marid.spring.xml.DElement;
 import org.marid.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.core.annotation.Order;
+
+import javax.annotation.Nonnull;
 
 import static java.lang.Integer.compare;
 import static java.util.Optional.ofNullable;
@@ -44,12 +46,22 @@ import static org.marid.dependant.beantree.items.TreeItemUtils.itemText;
  */
 @Order(2)
 @Configurable
-public class PropertyTreeItem extends AbstractTreeItem<BeanProp> {
+public class PropertyTreeItem extends DataTreeItem<BeanProp> {
 
     public PropertyTreeItem(BeanProp elem) {
         super(elem);
 
         setGraphic(FontIcons.glyphIcon("D_CLOUD_CIRCLE", 20));
+    }
+
+    @Override
+    public ObservableValue<String> nameProperty() {
+        return elem.name;
+    }
+
+    @Override
+    public ObservableValue<DElement<?>> elementProperty() {
+        return elem.data;
     }
 
     @Override
@@ -77,7 +89,7 @@ public class PropertyTreeItem extends AbstractTreeItem<BeanProp> {
     }
 
     @Override
-    public int compareTo(@NotNull AbstractTreeItem<?> o) {
+    public int compareTo(@Nonnull AbstractTreeItem<?> o) {
         if (o instanceof PropertyTreeItem) {
             final PropertyTreeItem i = (PropertyTreeItem) o;
             final BeanData beanData = find(BeanTreeItem.class).elem;
@@ -93,7 +105,7 @@ public class PropertyTreeItem extends AbstractTreeItem<BeanProp> {
 
     @Autowired
     private void initValueMenuItems(ProjectProfile profile, IdeDependants dependants) {
-        menu.set(items -> {
+        menuConsumers.add(items -> {
             final ValuesParams params = new ValuesParams(profile, elem, items);
             dependants.start(ValuesConfiguration.class, params, f -> {});
         });
