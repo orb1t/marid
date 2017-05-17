@@ -22,9 +22,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import org.marid.beans.BeanIntrospector;
-import org.marid.beans.ClassInfo;
-import org.marid.beans.TypeInfo;
 import org.marid.dependant.beaneditor.ValueMenuItems;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.project.ProjectProfile;
@@ -131,16 +128,6 @@ public class BeanPropEditor extends TableView<BeanProp> {
 
                 final ResolvableType type = profile.getPropType(beanData, prop.getName());
                 final ValueMenuItems menuItems = new ValueMenuItems(prop.data, type, prop.name);
-
-                final ResolvableType beanType = profile.getType(beanData);
-                for (final ClassInfo classInfo : BeanIntrospector.classInfos(profile.getClassLoader(), beanType)) {
-                    for (final TypeInfo typeInfo : classInfo.propertyInfos) {
-                        if (typeInfo.name.equals(prop.getName())) {
-                            menuItems.addEditor(typeInfo);
-                            break;
-                        }
-                    }
-                }
 
                 factory.initializeBean(menuItems, null);
                 factory.autowireBean(menuItems);

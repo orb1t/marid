@@ -21,10 +21,7 @@ package org.marid.dependant.valuemenu;
 import javafx.beans.property.Property;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
 import org.marid.IdeDependants;
-import org.marid.beans.BeanIntrospector;
-import org.marid.beans.ClassInfo;
 import org.marid.dependant.valuemenu.BeanMetaInfoProvider.BeansMetaInfo;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.project.ProjectProfile;
@@ -43,6 +40,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -50,7 +48,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
-import static org.marid.jfx.LocalizedStrings.fls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
@@ -236,30 +233,6 @@ public class BeanListActions {
     }
 
     public List<MenuItem> editors(ResolvableType type, BeanData beanData) {
-        final List<ClassInfo> classInfos = BeanIntrospector.classInfos(profile.getClassLoader(), type);
-        final List<MenuItem> menuItems = classInfos.stream()
-                .filter(classInfo -> !classInfo.editors.isEmpty())
-                .map(classInfo -> {
-                    final MenuItem menuItem = new MenuItem();
-                    final String title = classInfo.title != null ? classInfo.title : classInfo.name;
-                    menuItem.textProperty().bind(fls("Edit: %s", title));
-                    menuItem.setOnAction(event -> {
-                        profile.updateBeanData(beanData);
-                        dependants.start(c -> {
-                            c.setId("editor");
-                            c.setDisplayName("Editor of Bean");
-                            c.getBeanFactory().registerSingleton("beanData", beanData);
-                            c.getBeanFactory().registerSingleton("beanType", type);
-                            c.register(classInfo.editors.toArray(new Class<?>[classInfo.editors.size()]));
-                        });
-                    });
-                    return menuItem;
-                })
-                .collect(Collectors.toList());
-        if (menuItems.isEmpty()) {
-            return menuItems;
-        } else {
-            return Stream.concat(Stream.of(new SeparatorMenuItem()), menuItems.stream()).collect(Collectors.toList());
-        }
+        return Collections.emptyList();
     }
 }

@@ -26,7 +26,6 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextInputDialog;
 import org.apache.commons.lang3.ArrayUtils;
 import org.marid.IdeDependants;
-import org.marid.beans.TypeInfo;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorConfiguration;
 import org.marid.dependant.beaneditor.beandata.BeanDataEditorParams;
 import org.marid.dependant.beaneditor.listeditor.ListEditorConfiguration;
@@ -38,11 +37,9 @@ import org.marid.dependant.beaneditor.propeditor.PropEditorParams;
 import org.marid.dependant.beaneditor.valueeditor.ValueEditorConfiguration;
 import org.marid.dependant.beaneditor.valueeditor.ValueEditorParams;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.spring.contexts.ValueEditorContext;
 import org.marid.spring.xml.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -55,7 +52,6 @@ import java.util.function.Supplier;
 
 import static java.beans.Introspector.decapitalize;
 import static java.lang.reflect.Modifier.*;
-import static org.marid.jfx.LocalizedStrings.fls;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
@@ -69,7 +65,6 @@ public class ValueMenuFiller {
     private final List<MenuItem> items = new ArrayList<>();
     private final WritableValue<DElement<?>> element;
     private final ResolvableType type;
-    private final List<TypeInfo> editors = new ArrayList<>();
     private final ObservableStringValue name;
 
     @Autowired
@@ -77,12 +72,6 @@ public class ValueMenuFiller {
         this.element = element;
         this.type = type;
         this.name = name;
-    }
-
-    @Order(0)
-    @Autowired
-    public void editors(GenericApplicationContext context) {
-        editors.addAll(context.getBeansOfType(TypeInfo.class).values());
     }
 
     private <T extends DElement<?>> T value(Class<T> type, Supplier<T> supplier) {
@@ -274,36 +263,6 @@ public class ValueMenuFiller {
                 });
             });
             items.add(mi);
-            items.add(new SeparatorMenuItem());
-        }
-    }
-
-    @Order(10)
-    @Autowired
-    public void initEditor(IdeDependants dependants, ProjectProfile profile) {
-        if (editors.isEmpty()) {
-            return;
-        }
-        final int size = items.size();
-        for (final TypeInfo editor : editors) {
-            if (editor.editors.isEmpty()) {
-                continue;
-            }
-            final MenuItem menuItem = new MenuItem();
-            menuItem.textProperty().bind(fls("Edit: %s", editor.title == null ? editor.name : editor.title));
-            menuItem.setOnAction(event -> {
-                final Class<?>[] classes = editor.editors.toArray(new Class<?>[editor.editors.size()]);
-                dependants.start(context -> {
-                    context.setId("editor");
-                    context.setDisplayName("Value Editor");
-                    context.setClassLoader(profile.getClassLoader());
-                    context.register(classes);
-                    context.getBeanFactory().registerSingleton("$ctx", new ValueEditorContext(element, editor, type));
-                });
-            });
-            items.add(menuItem);
-        }
-        if (items.size() > size) {
             items.add(new SeparatorMenuItem());
         }
     }
