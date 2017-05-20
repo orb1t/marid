@@ -22,12 +22,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import org.marid.ide.status.IdeStatusBar;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
+@Lazy(false)
 public class IdePane extends BorderPane {
 
     @Autowired

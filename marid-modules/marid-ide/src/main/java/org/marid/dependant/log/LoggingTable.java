@@ -25,7 +25,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import org.marid.Ide;
+import org.marid.ide.logging.IdeLogHandler;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10n;
@@ -46,7 +46,7 @@ public class LoggingTable extends TableView<LogRecord> {
 
     @Autowired
     public LoggingTable(LoggingFilter loggingFilter) {
-        super(loggingFilter.filteredList(Ide.ideLogHandler.getLogRecords()));
+        super(loggingFilter.filteredList(IdeLogHandler.LOG_RECORDS));
         setTableMenuButtonVisible(true);
         final String columnDefaultStyle = "-fx-font-size: smaller";
         getColumns().add(levelColumn());

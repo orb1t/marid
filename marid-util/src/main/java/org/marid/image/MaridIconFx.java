@@ -34,6 +34,7 @@ import java.awt.*;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.IntStream;
 
 import static javafx.scene.paint.Color.GREEN;
 import static javafx.scene.paint.Color.web;
@@ -108,6 +109,10 @@ public class MaridIconFx {
 
     public static WritableImage getIcon(int size) {
         return getIcon(null, size, GREEN);
+    }
+
+    public static WritableImage[] getIcons(int... sizes) {
+        return IntStream.of(sizes).mapToObj(MaridIconFx::getIcon).toArray(WritableImage[]::new);
     }
 
     public static void main(String... args) throws Exception {

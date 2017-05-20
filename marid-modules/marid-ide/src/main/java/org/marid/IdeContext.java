@@ -19,17 +19,25 @@
 package org.marid;
 
 import org.marid.ide.common.IdeValues;
+import org.marid.ide.logging.IdeLogConsoleHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.logging.Logs;
 import org.marid.spring.dependant.IdeClassFilter;
+import org.marid.spring.postprocessors.MaridCommonPostProcessor;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InjectionPoint;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.*;
 import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import java.util.stream.Stream;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static org.springframework.context.annotation.FilterType.CUSTOM;
@@ -37,22 +45,12 @@ import static org.springframework.context.annotation.FilterType.CUSTOM;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Configuration
+@SpringBootApplication
+@ComponentScan(basePackages = "org.marid", excludeFilters = {@Filter(type = CUSTOM, value = IdeClassFilter.class)})
+@Import({IdeDependants.class, MaridCommonPostProcessor.class})
 @EnableScheduling
 @PropertySource({"meta.properties", "ide.properties"})
-@Import({IdeDependants.class})
-@ComponentScan(lazyInit = true, excludeFilters = {@Filter(type = CUSTOM, classes = {IdeClassFilter.class})})
-public class IdeContext {
-
-    @Bean
-    public Ide ide() {
-        return Ide.ide;
-    }
-
-    @Bean
-    public IdeLogHandler ideLogHandler() {
-        return Ide.ideLogHandler;
-    }
+public class IdeContext implements ApplicationContextAware {
 
     @Bean(destroyMethod = "shutdown")
     public ScheduledThreadPoolExecutor scheduledExecutorService() {
@@ -71,5 +69,30 @@ public class IdeContext {
     public Logs logs(InjectionPoint injectionPoint) {
         final Logger logger = Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
         return () -> logger;
+    }
+
+    @Bean
+    public IdeLogHandler ideLogHandler() {
+        return Stream.of(Logger.getLogger("").getHandlers())
+                .filter(IdeLogHandler.class::isInstance)
+                .map(IdeLogHandler.class::cast)
+                .findAny()
+                .orElseThrow(IllegalStateException::new);
+    }
+
+    @Bean
+    public IdeLogConsoleHandler ideLogConsoleHandler() {
+        return Stream.of(Logger.getLogger("").getHandlers())
+                .filter(IdeLogConsoleHandler.class::isInstance)
+                .map(IdeLogConsoleHandler.class::cast)
+                .findAny()
+                .orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        final GenericApplicationContext context = (GenericApplicationContext) applicationContext;
+        context.setAllowBeanDefinitionOverriding(false);
+        context.setAllowCircularReferences(false);
     }
 }

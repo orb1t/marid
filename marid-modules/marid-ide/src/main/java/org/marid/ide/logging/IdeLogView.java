@@ -18,42 +18,18 @@
 
 package org.marid.ide.logging;
 
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import org.marid.jfx.logging.LogComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.util.logging.LogRecord;
-
-import static org.marid.l10n.L10n.m;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeLogView extends ListView<LogRecord> {
+public class IdeLogView extends LogComponent {
 
     @Autowired
-    public IdeLogView(IdeLogHandler logHandler) {
-        super(logHandler.getLogRecords());
-        setStyle("-fx-font-size: 80%; -fx-font-family: monospace");
-    }
-
-    @PostConstruct
-    private void initCellFactory() {
-        setCellFactory(p -> new ListCell<LogRecord>() {
-            @Override
-            protected void updateItem(LogRecord item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    setText(m(item.getMessage(), item.getParameters()));
-                    setGraphic(LogIconFactory.icon(item.getLevel()));
-                }
-            }
-        });
+    public IdeLogView() {
+        super(IdeLogHandler.LOG_RECORDS);
     }
 }

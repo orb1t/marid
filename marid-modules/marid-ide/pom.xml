@@ -28,6 +28,22 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
             <groupId>org.marid</groupId>
             <artifactId>marid-ide-api</artifactId>
             <version>${project.version}</version>
@@ -57,17 +73,6 @@
             <groupId>org.apache.maven.wagon</groupId>
             <artifactId>wagon-http</artifactId>
             <classifier>shaded</classifier>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -106,7 +111,7 @@
                         </manifest>
                         <manifestEntries>
                             <JavaFX-Version>8.0</JavaFX-Version>
-                            <JavaFX-Preloader-Class>org.marid.preloader.IdePreloader</JavaFX-Preloader-Class>
+                            <!--<JavaFX-Preloader-Class>org.marid.preloader.IdePreloader</JavaFX-Preloader-Class>-->
                         </manifestEntries>
                     </archive>
                 </configuration>

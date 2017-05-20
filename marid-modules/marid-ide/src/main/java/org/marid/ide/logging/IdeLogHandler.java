@@ -18,76 +18,60 @@
 
 package org.marid.ide.logging;
 
-import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import org.marid.IdePrefs;
-import org.springframework.scheduling.annotation.Scheduled;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 import static javafx.collections.FXCollections.observableArrayList;
+import static javafx.collections.FXCollections.synchronizedObservableList;
+import static org.marid.IdePrefs.PREFERENCES;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class IdeLogHandler extends Handler {
 
-    private final ConcurrentLinkedQueue<LogRecord> queue = new ConcurrentLinkedQueue<>();
-    private final ObservableList<LogRecord> logRecords = observableArrayList();
-    private final List<Consumer<List<LogRecord>>> recordConsumers = new CopyOnWriteArrayList<>();
+    public static final ObservableList<LogRecord> LOG_RECORDS = synchronizedObservableList(observableArrayList());
 
-    public int getMaxLogRecords() {
-        return IdePrefs.PREFERENCES.getInt("maxLogRecords", 10_000);
+    private volatile int maxRecords;
+
+    public IdeLogHandler() {
+        maxRecords = PREFERENCES.getInt("maxLogRecords", 10_000);
     }
 
-    public void setMaxLogRecords(int maxLogRecords) {
-        IdePrefs.PREFERENCES.putInt("maxLogRecords", maxLogRecords);
+    public int getMaxRecords() {
+        return maxRecords;
+    }
+
+    public void setMaxRecords(int maxRecords) {
+        this.maxRecords = maxRecords;
     }
 
     @Override
     public void publish(LogRecord record) {
-        queue.add(record);
-    }
-
-    public ObservableList<LogRecord> getLogRecords() {
-        return logRecords;
-    }
-
-    public void addRecordCosnumer(Consumer<List<LogRecord>> logRecordsConsumer) {
-        recordConsumers.add(logRecordsConsumer);
-    }
-
-    public void removeRecordCosnumer(Consumer<List<LogRecord>> logRecordsConsumer) {
-        recordConsumers.remove(logRecordsConsumer);
-    }
-
-    @Override
-    @Scheduled(fixedDelay = 100L)
-    public void flush() {
-        if (!queue.isEmpty()) {
-            final List<LogRecord> records = new ArrayList<>();
-            queue.removeIf(records::add);
-            recordConsumers.forEach(c -> c.accept(records));
-            final int maxLogRecords = getMaxLogRecords();
-            Platform.runLater(() -> {
-                logRecords.addAll(records);
-                final int size = logRecords.size();
-                final int toRemove = size - maxLogRecords;
-                if (toRemove > 0) {
-                    logRecords.remove(0, toRemove);
+        LOG_RECORDS.add(record);
+        while (true) {
+            final int toDelete = LOG_RECORDS.size() - maxRecords;
+            if (toDelete > 0) {
+                try {
+                    LOG_RECORDS.subList(0, toDelete).clear();
+                    break;
+                } catch (IndexOutOfBoundsException x) {
+                    // ignore
                 }
-            });
+            } else {
+                break;
+            }
         }
     }
 
     @Override
+    public void flush() {
+    }
+
+    @Override
     public void close() {
-        recordConsumers.clear();
+        PREFERENCES.putInt("maxLogRecords", maxRecords);
     }
 }

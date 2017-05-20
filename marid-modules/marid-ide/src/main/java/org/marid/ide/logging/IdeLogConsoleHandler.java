@@ -27,43 +27,35 @@ import java.util.Locale;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
-import static org.marid.IdePrefs.PREFERENCES;
 import static org.marid.l10n.L10n.m;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class IdeLogConfig extends Handler {
-
-    public static final Logger ROOT_LOGGER;
-
-    static {
-        ROOT_LOGGER = Logger.getLogger("");
-        ROOT_LOGGER.setLevel(Level.parse(PREFERENCES.get("logLevel", Level.INFO.getName())));
-        ROOT_LOGGER.addHandler(new IdeLogConfig());
-    }
+public class IdeLogConsoleHandler extends Handler {
 
     @Override
     public void publish(LogRecord record) {
-        final StringBuffer builder = new StringBuffer();
-        try (final Formatter formatter = new Formatter(builder)) {
-            formatter.format("%tF %tT ", record.getMillis(), record.getMillis());
-            formatter.flush();
-            builder.append(level(record.getLevel()));
-            builder.append(' ');
-            builder.append(abbreviate(record.getLoggerName()));
-            builder.append(' ');
-            m(Locale.getDefault(), record.getMessage(), builder, record.getParameters());
-            builder.append(System.lineSeparator());
-            if (record.getThrown() != null) {
-                try (final PrintWriter printWriter = new PrintWriter(new AppendableWriter(builder))) {
-                    record.getThrown().printStackTrace(printWriter);
+        if (isLoggable(record)) {
+            final StringBuffer builder = new StringBuffer();
+            try (final Formatter formatter = new Formatter(builder)) {
+                formatter.format("%tF %tT ", record.getMillis(), record.getMillis());
+                formatter.flush();
+                builder.append(level(record.getLevel()));
+                builder.append(' ');
+                builder.append(abbreviate(record.getLoggerName()));
+                builder.append(' ');
+                m(Locale.getDefault(), record.getMessage(), builder, record.getParameters());
+                builder.append(System.lineSeparator());
+                if (record.getThrown() != null) {
+                    try (final PrintWriter printWriter = new PrintWriter(new AppendableWriter(builder))) {
+                        record.getThrown().printStackTrace(printWriter);
+                    }
                 }
             }
+            System.out.append(builder);
         }
-        System.out.append(builder);
     }
 
     @Override

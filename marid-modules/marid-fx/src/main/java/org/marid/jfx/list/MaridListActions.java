@@ -18,12 +18,15 @@
 
 package org.marid.jfx.list;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ListView;
 import org.marid.jfx.action.FxAction;
 
+import javax.annotation.Nonnull;
 import java.util.Comparator;
 import java.util.OptionalInt;
 
@@ -78,7 +81,7 @@ public interface MaridListActions {
                     final OptionalInt min = listView.getSelectionModel().getSelectedIndices().stream()
                             .mapToInt(Integer::intValue)
                             .min();
-                    return  (!min.isPresent() || min.getAsInt() <= 0);
+                    return (!min.isPresent() || min.getAsInt() <= 0);
                 }, listView.getSelectionModel().getSelectedIndices()));
     }
 
@@ -105,5 +108,30 @@ public interface MaridListActions {
                             .max();
                     return !max.isPresent() || max.getAsInt() >= listView.getItems().size() - 1;
                 }, listView.getSelectionModel().getSelectedIndices()));
+    }
+
+    static <E> Runnable autoScroll(@Nonnull ListView<E> listView) {
+        final ListChangeListener<E> listener = c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    final Runnable update = () -> {
+                        final int size = c.getList().size();
+                        final int selected = listView.getSelectionModel().getSelectedIndex();
+                        if (c.getAddedSize() + selected + 1 == size || selected < 0) {
+                            if (listView.isVisible()) {
+                                listView.scrollTo(size - 1);
+                            }
+                        }
+                    };
+                    if (Platform.isFxApplicationThread()) {
+                        update.run();
+                    } else {
+                        Platform.runLater(update);
+                    }
+                }
+            }
+        };
+        listView.getItems().addListener(listener);
+        return () -> listView.getItems().removeListener(listener);
     }
 }

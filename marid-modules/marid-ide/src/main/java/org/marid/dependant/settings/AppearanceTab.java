@@ -21,6 +21,7 @@ package org.marid.dependant.settings;
 import javafx.application.Application;
 import javafx.scene.control.ComboBox;
 import org.marid.IdePrefs;
+import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.settings.AppearanceSettings;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.panes.GenericGridPane;
@@ -33,7 +34,6 @@ import static java.util.logging.Level.INFO;
 import static javafx.application.Application.STYLESHEET_CASPIAN;
 import static javafx.application.Application.STYLESHEET_MODENA;
 import static javafx.collections.FXCollections.observableArrayList;
-import static org.marid.Ide.ideLogHandler;
 import static org.marid.logging.Log.log;
 
 /**
@@ -45,10 +45,10 @@ public class AppearanceTab extends GenericGridPane implements SettingsEditor {
     private final AppearanceSettings appearanceSettings;
 
     @Autowired
-    public AppearanceTab(AppearanceSettings appearanceSettings) {
+    public AppearanceTab(AppearanceSettings appearanceSettings, IdeLogHandler logHandler) {
         this.appearanceSettings = appearanceSettings;
         addControl("Locale", this::localeCombo);
-        addIntField("Max log records", ideLogHandler::getMaxLogRecords, ideLogHandler::setMaxLogRecords, 100, 100_000, 100);
+        addIntField("Max log records", logHandler::getMaxRecords, logHandler::setMaxRecords, 100, 100_000, 100);
         addSeparator();
         addControl("System stylesheet", this::styleSheetCombo);
     }

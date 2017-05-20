@@ -19,55 +19,71 @@
 package org.marid;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import org.marid.IdeDependants.MainContext;
+import javafx.stage.StageStyle;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
+import org.marid.jfx.list.MaridListActions;
+import org.marid.jfx.logging.LogComponent;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import java.util.Locale;
-import java.util.stream.IntStream;
+import java.util.concurrent.locks.LockSupport;
 
 import static org.marid.IdePrefs.PREFERENCES;
-import static org.marid.ide.logging.IdeLogConfig.ROOT_LOGGER;
+import static org.springframework.boot.SpringApplication.run;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class Ide extends Application {
 
-    private final AnnotationConfigApplicationContext context = new MainContext();
-
     public static Stage primaryStage;
-    public static Ide ide;
-    public static final IdeLogHandler ideLogHandler;
+
+    private volatile ConfigurableApplicationContext context;
 
     @Override
     public void init() throws Exception {
-        Ide.ide = this;
-        context.setId("root");
-        context.setDisplayName("Root Context");
-        context.register(IdeContext.class);
-        context.refresh();
-        context.getBean(IdePane.class);
+        final String[] args = getParameters().getRaw().toArray(new String[0]);
+        new Thread(() -> context = run(IdeContext.class, args)).start();
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         Ide.primaryStage = primaryStage;
-        context.start();
-        final IdePane idePane = context.getBean(IdePane.class);
-        primaryStage.setMinWidth(750.0);
-        primaryStage.setMinHeight(550.0);
-        primaryStage.setTitle("Marid IDE");
-        primaryStage.setScene(new Scene(idePane, 1024, 768));
-        primaryStage.setMaximized(true);
-        primaryStage.getIcons().addAll(IntStream.of(24, 32).mapToObj(MaridIconFx::getIcon).toArray(Image[]::new));
-        primaryStage.show();
+
+        final LogComponent logComponent = new LogComponent(IdeLogHandler.LOG_RECORDS);
+        final Runnable autoscrollUnregisterer = MaridListActions.autoScroll(logComponent);
+        final Stage splash = new Stage(StageStyle.UNDECORATED);
+        splash.setScene(new Scene(logComponent, 800, 800));
+        splash.show();
+
+        final Thread contextStartThread = new Thread(() -> {
+            while (context == null) {
+                LockSupport.parkNanos(100_000_000L);
+            }
+            Platform.runLater(() -> {
+                try {
+                    context.start();
+                    primaryStage.setMinWidth(750.0);
+                    primaryStage.setMinHeight(550.0);
+                    primaryStage.setTitle("Marid IDE");
+                    primaryStage.setScene(new Scene(context.getBean(IdePane.class), 1024, 768));
+                    primaryStage.getIcons().addAll(MaridIconFx.getIcons(24, 32));
+                    primaryStage.setMaximized(true);
+                    primaryStage.show();
+                    splash.hide();
+                } finally {
+                    autoscrollUnregisterer.run();
+                }
+            });
+        });
+        contextStartThread.setDaemon(true);
+        contextStartThread.start();
     }
 
     @Override
@@ -75,11 +91,7 @@ public class Ide extends Application {
         context.close();
     }
 
-    static {
-        System.out.println(System.getProperties());
-        // console logger
-        System.setProperty("java.util.logging.config.class", "org.marid.ide.logging.IdeLogConfig");
-
+    public static void main(String... args) throws Exception {
         // locale
         final String locale = PREFERENCES.get("locale", null);
         if (locale != null) {
@@ -88,6 +100,6 @@ public class Ide extends Application {
 
         MaridCommonPostProcessor.replaceInjectedMetadata();
 
-        ROOT_LOGGER.addHandler(ideLogHandler = new IdeLogHandler());
+        Application.launch(args);
     }
 }

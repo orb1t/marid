@@ -106,9 +106,9 @@ public class IdeDependants {
         return parent.toString();
     }
 
-    static class MainContext extends AnnotationConfigApplicationContext {
+    public static class MainContext extends AnnotationConfigApplicationContext {
 
-        MainContext() {
+        public MainContext() {
             getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
             setAllowBeanDefinitionOverriding(false);
             setAllowCircularReferences(false);

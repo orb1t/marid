@@ -61,11 +61,14 @@ public class IdeSplitPane extends SplitPane {
 
     @EventListener
     private void onStart(ContextStartedEvent event) {
-        primaryStage.addEventHandler(WINDOW_SHOWN, this::onShow);
+        if (primaryStage.isShowing()) {
+            applyDivider();
+        } else {
+            primaryStage.addEventHandler(WINDOW_SHOWN, this::onShow);
+        }
     }
 
-    private void onShow(WindowEvent event) {
-        primaryStage.removeEventHandler(WINDOW_SHOWN, this::onShow);
+    private void applyDivider() {
         final double dividerPos = preferences.getDouble("divider", DEFAULT_POSITION);
         divider.setPosition(dividerPos);
         divider.positionProperty().addListener((observable, oldValue, newValue) -> {
@@ -75,5 +78,10 @@ public class IdeSplitPane extends SplitPane {
                 preferences.putDouble("divider", newValue.doubleValue());
             }
         });
+    }
+
+    private void onShow(WindowEvent event) {
+        primaryStage.removeEventHandler(WINDOW_SHOWN, this::onShow);
+        applyDivider();
     }
 }
