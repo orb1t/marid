@@ -23,18 +23,9 @@
     <id>distr</id>
 
     <includeBaseDirectory>false</includeBaseDirectory>
+    <includeSiteDirectory>false</includeSiteDirectory>
 
     <fileSets>
-        <fileSet>
-            <directory>src/main/ext</directory>
-            <outputDirectory>ext</outputDirectory>
-        </fileSet>
-
-        <fileSet>
-            <directory>src/assembly/logs</directory>
-            <outputDirectory>logs</outputDirectory>
-        </fileSet>
-
         <fileSet>
             <filtered>true</filtered>
             <fileMode>0777</fileMode>
@@ -48,6 +39,7 @@
             <outputDirectory>lib</outputDirectory>
             <useProjectArtifact>true</useProjectArtifact>
             <useTransitiveDependencies>true</useTransitiveDependencies>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
         </dependencySet>
     </dependencySets>
 </assembly>
