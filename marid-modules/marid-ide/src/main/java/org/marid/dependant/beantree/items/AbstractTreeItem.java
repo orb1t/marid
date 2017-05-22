@@ -28,6 +28,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.beans.OCleaner;
 import org.marid.misc.Casts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -86,14 +87,14 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> implements Co
         final DefaultListableBeanFactory beanFactory = context.getDefaultListableBeanFactory();
         final ListChangeListener<TreeItem<Object>> listChangeListener = c -> {
             while (c.next()) {
+                if (c.wasRemoved()) {
+                    c.getRemoved().forEach(e -> ((AbstractTreeItem<?>) e).destroy(beanFactory));
+                }
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(e -> {
                         beanFactory.autowireBean(e);
                         beanFactory.initializeBean(e, null);
                     });
-                }
-                if (c.wasRemoved()) {
-                    c.getRemoved().forEach(e -> ((AbstractTreeItem<?>) e).destroy(beanFactory));
                 }
             }
         };
@@ -129,6 +130,9 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> implements Co
         }
 
         private void onChanged(ListChangeListener.Change<? extends F> c) {
+            if (OCleaner.cleaningInProcess) {
+                return;
+            }
             while (c.next()) {
                 if (c.wasReplaced() || c.wasUpdated()) {
                     for (int i = c.getFrom(); i < c.getTo(); i++) {

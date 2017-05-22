@@ -59,6 +59,8 @@ public class Ide extends Application {
         final LogComponent logComponent = new LogComponent(IdeLogHandler.LOG_RECORDS);
         final Runnable autoscrollUnregisterer = MaridListActions.autoScroll(logComponent);
         final Stage splash = new Stage(StageStyle.UNDECORATED);
+        splash.setTitle("Marid IDE");
+        splash.getIcons().addAll(MaridIconFx.getIcons(24, 32));
         splash.setScene(new Scene(logComponent, 800, 800));
         splash.show();
 
@@ -75,8 +77,9 @@ public class Ide extends Application {
                     primaryStage.setScene(new Scene(context.getBean(IdePane.class), 1024, 768));
                     primaryStage.getIcons().addAll(MaridIconFx.getIcons(24, 32));
                     primaryStage.setMaximized(true);
-                    primaryStage.show();
                     splash.hide();
+                    setUserAgentStylesheet(PREFERENCES.get("style", STYLESHEET_MODENA));
+                    primaryStage.show();
                 } finally {
                     autoscrollUnregisterer.run();
                 }
@@ -88,7 +91,9 @@ public class Ide extends Application {
 
     @Override
     public void stop() throws Exception {
-        context.close();
+        if (context != null) {
+            context.close();
+        }
     }
 
     public static void main(String... args) throws Exception {
