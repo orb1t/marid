@@ -21,7 +21,6 @@ package org.marid.dependant.beantree.items;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import org.marid.ide.common.FileActions;
@@ -30,6 +29,7 @@ import org.marid.ide.common.SpecialActionConfiguration;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.beans.ConstantValue;
 import org.marid.spring.beans.MaridBeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -69,40 +69,6 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
         return type;
     }
 
-    @Override
-    public Node graphic() {
-        final HBox box = new HBox(10);
-        {
-            final Label label = new Label();
-            label.setGraphic(glyphIcon("D_FILE", 20));
-            label.textProperty().bind(fs("%s: %d", ls("Files"), elem.getBeanFiles().size()));
-            box.getChildren().add(label);
-        }
-        {
-            final Label label = new Label();
-            label.setGraphic(glyphIcon("D_STAR_CIRCLE", 20));
-            final int beanCount = elem.getBeanFiles().stream().mapToInt(f -> f.beans.size()).sum();
-            label.textProperty().bind(fs("%s: %d", ls("Beans"), beanCount));
-            box.getChildren().add(label);
-        }
-        {
-            final Label label = new Label();
-            label.setGraphic(glyphIcon("D_STAR_OUTLINE", 20));
-            final long count = elem.getBeanFiles().stream()
-                    .flatMap(f -> f.beans.stream())
-                    .flatMap(MaridBeanUtils::beans)
-                    .count();
-            label.textProperty().bind(fs("%s: %d", ls("Inner Beans"), count));
-            box.getChildren().add(label);
-        }
-        return box;
-    }
-
-    @Override
-    public String text() {
-        return null;
-    }
-
     @Autowired
     private void initAdd(FileActions fileActions, ProjectProfile profile, FxAction addAction) {
         actionMap.put(SpecialActionConfiguration.ADD, new FxAction("children", "add")
@@ -117,6 +83,34 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
     private void init(GenericApplicationContext context) {
         destroyActions.add(new ListSynchronizer<>(elem.getBeanFiles(), getChildren(), FileTreeItem::new));
         setExpanded(true);
+
+        ConstantValue.bind(graphic, () -> {
+            final HBox box = new HBox(10);
+            {
+                final Label label = new Label();
+                label.setGraphic(glyphIcon("D_FILE", 20));
+                label.textProperty().bind(fs("%s: %d", ls("Files"), elem.getBeanFiles().size()));
+                box.getChildren().add(label);
+            }
+            {
+                final Label label = new Label();
+                label.setGraphic(glyphIcon("D_STAR_CIRCLE", 20));
+                final int beanCount = elem.getBeanFiles().stream().mapToInt(f -> f.beans.size()).sum();
+                label.textProperty().bind(fs("%s: %d", ls("Beans"), beanCount));
+                box.getChildren().add(label);
+            }
+            {
+                final Label label = new Label();
+                label.setGraphic(glyphIcon("D_STAR_OUTLINE", 20));
+                final long count = elem.getBeanFiles().stream()
+                        .flatMap(f -> f.beans.stream())
+                        .flatMap(MaridBeanUtils::beans)
+                        .count();
+                label.textProperty().bind(fs("%s: %d", ls("Inner Beans"), count));
+                box.getChildren().add(label);
+            }
+            return box;
+        });
     }
 
     @Override

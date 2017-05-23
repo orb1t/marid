@@ -16,25 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.logging;
+package org.marid.dependant.beantree.data;
 
-import java.util.function.Function;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
+import org.marid.spring.xml.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class LambdaFormatter extends Formatter {
+public class ItemTextFactory {
 
-    private final Function<LogRecord, String> formatter;
-
-    public LambdaFormatter(Function<LogRecord, String> formatter) {
-        this.formatter = formatter;
+    public static String itemText(DRef ref) {
+        return ref.getBean();
     }
 
-    @Override
-    public String format(LogRecord record) {
-        return formatter.apply(record);
+    public static String itemText(DValue value) {
+        return value.getValue();
+    }
+
+    public static String itemText(BeanData beanData) {
+        return beanData.getName();
+    }
+
+    public static String itemText(BeanField beanField) {
+        return beanField.getName();
+    }
+
+    public static String itemText(DCollection<?> collection) {
+        return "" + collection.elements.size();
     }
 }

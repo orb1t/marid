@@ -18,6 +18,8 @@
 
 package org.marid.dependant.beantree.items;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -48,6 +50,8 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> implements Co
     public final Map<String, FxAction> actionMap = new TreeMap<>();
     public final List<Runnable> destroyActions = new ArrayList<>();
     public final LinkedList<Consumer<ObservableList<MenuItem>>> menuConsumers = new LinkedList<>();
+    public final ObjectProperty<Node> graphic = new SimpleObjectProperty<>();
+    public final ObjectProperty<String> text = new SimpleObjectProperty<>();
 
     public AbstractTreeItem(T elem) {
         this.elem = elem;
@@ -56,10 +60,6 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> implements Co
     public abstract ObservableValue<String> getName();
 
     public abstract ObservableValue<String> getType();
-
-    public abstract Node graphic();
-
-    public abstract String text();
 
     public void edit(TreeTableView<Object> view, Object value) {
     }
@@ -104,6 +104,8 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> implements Co
 
     @PreDestroy
     private void destroy() {
+        graphic.unbind();
+        text.unbind();
         destroyActions.forEach(Runnable::run);
         destroyActions.clear();
     }

@@ -20,7 +20,6 @@ package org.marid.dependant.beantree.items;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.Node;
 import org.marid.IdeDependants;
 import org.marid.dependant.valuemenu.ValuesConfiguration;
 import org.marid.dependant.valuemenu.ValuesParams;
@@ -38,8 +37,6 @@ import javax.annotation.Nonnull;
 
 import static java.lang.Integer.compare;
 import static java.util.Optional.ofNullable;
-import static org.marid.dependant.beantree.items.TreeItemUtils.itemGraphic;
-import static org.marid.dependant.beantree.items.TreeItemUtils.itemText;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -76,16 +73,6 @@ public class PropertyTreeItem extends DataTreeItem<BeanProp> {
             final BeanData data = find(BeanTreeItem.class).elem;
             return MethodUtils.readableType(profile.getPropType(data, elem.getName()));
         }, elem);
-    }
-
-    @Override
-    public Node graphic() {
-        return itemGraphic(elem.getData());
-    }
-
-    @Override
-    public String text() {
-        return itemText(elem.getData());
     }
 
     @Override

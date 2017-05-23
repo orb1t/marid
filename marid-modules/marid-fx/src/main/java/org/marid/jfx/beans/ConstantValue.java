@@ -19,10 +19,9 @@
 package org.marid.jfx.beans;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableObjectValue;
-
-import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -55,7 +54,11 @@ public interface ConstantValue<T> extends ObservableObjectValue<T> {
         return () -> value;
     }
 
-    static <T> ConstantValue<T> value(Supplier<T> value) {
-        return value::get;
+    static <T> ConstantValue<T> value(ConstantValue<T> value) {
+        return value;
+    }
+
+    static <T> void bind(Property<T> property, ConstantValue<T> value) {
+        property.bind(value);
     }
 }

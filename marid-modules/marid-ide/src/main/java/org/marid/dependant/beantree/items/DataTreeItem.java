@@ -19,12 +19,26 @@
 package org.marid.dependant.beantree.items;
 
 import javafx.beans.value.ObservableValue;
+import org.marid.dependant.beantree.data.ItemTextFactory;
+import org.marid.ide.common.IdeShapes;
+import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.BeanField;
 import org.marid.spring.xml.DElement;
+import org.marid.spring.xml.DRef;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
+import java.lang.reflect.Method;
+
+import static org.marid.jfx.beans.ConstantValue.bind;
+import static org.springframework.util.ReflectionUtils.findMethod;
+import static org.springframework.util.ReflectionUtils.invokeMethod;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class DataTreeItem<T> extends AbstractTreeItem<T> {
+public abstract class DataTreeItem<T extends BeanField> extends AbstractTreeItem<T> {
 
     public DataTreeItem(T elem) {
         super(elem);
@@ -37,5 +51,32 @@ public abstract class DataTreeItem<T> extends AbstractTreeItem<T> {
     @Override
     public ObservableValue<String> getName() {
         return nameProperty();
+    }
+
+    @Autowired
+    private void init(@Qualifier("itemText") ObjectProvider<String> itemText) {
+        bind(graphic, () -> {
+            final DElement<?> element = elem.getData();
+            if (element instanceof DRef) {
+                return IdeShapes.ref(((DRef) element), 20);
+            } else if (element instanceof BeanData) {
+                return IdeShapes.beanNode(((BeanData) element), 20);
+            } else {
+                return null;
+            }
+        });
+        bind(text, () -> {
+            final DElement<?> element = elem.getData();
+            if (element == null) {
+                return null;
+            } else {
+                final Method method = findMethod(ItemTextFactory.class, "itemText", element.getClass());
+                if (method == null) {
+                    return null;
+                } else {
+                    return  (String) invokeMethod(method, null, element);
+                }
+            }
+        });
     }
 }

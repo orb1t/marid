@@ -51,8 +51,8 @@ public class BeanTree extends TreeTableView<Object> {
         super(new ProjectTreeItem(profile));
         setShowRoot(true);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
-        beanFactory.initializeBean(getRoot(), null);
         beanFactory.autowireBean(getRoot());
+        beanFactory.initializeBean(getRoot(), null);
     }
 
     @Order(1)
@@ -93,8 +93,8 @@ public class BeanTree extends TreeTableView<Object> {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    setText(item.text());
-                    setGraphic(item.graphic());
+                    setText(item.text.get());
+                    setGraphic(item.graphic.get());
                 }
             }
         });

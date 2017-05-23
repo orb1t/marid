@@ -39,6 +39,7 @@ import java.util.Comparator;
 
 import static org.marid.ide.common.SpecialActionConfiguration.RENAME;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.jfx.beans.ConstantValue.value;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -63,32 +64,29 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
         return Bindings.createStringBinding(() -> MethodUtils.readableType(profile.getType(elem)), elem);
     }
 
-    @Override
-    public String text() {
-        if (elem.isFactoryBean()) {
-            if (elem.getFactoryBean() != null) {
-                return String.format("%s.%s", elem.getFactoryBean(), elem.getFactoryMethod());
-            } else {
-                return String.format("%s.%s", elem.getType(), elem.getFactoryMethod());
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public Node graphic() {
-        final HBox box = new HBox(10);
-        if (elem.isFactoryBean()) {
-            final Node icon = FontIcons.glyphIcon("D_LINK", 20);
-            box.getChildren().add(icon);
-        }
-        return box;
-    }
-
     @Autowired
     private void init(GenericApplicationContext context) {
         destroyActions.add(0, new ListSynchronizer<>(elem.beanArgs, getChildren(), ArgumentTreeItem::new));
         destroyActions.add(0, new ListSynchronizer<>(elem.properties, getChildren(), PropertyTreeItem::new));
+        text.bind(value(() -> {
+            if (elem.isFactoryBean()) {
+                if (elem.getFactoryBean() != null) {
+                    return String.format("%s.%s", elem.getFactoryBean(), elem.getFactoryMethod());
+                } else {
+                    return String.format("%s.%s", elem.getType(), elem.getFactoryMethod());
+                }
+            } else {
+                return null;
+            }
+        }));
+        graphic.bind(value(() -> {
+            final HBox box = new HBox(10);
+            if (elem.isFactoryBean()) {
+                final Node icon = FontIcons.glyphIcon("D_LINK", 20);
+                box.getChildren().add(icon);
+            }
+            return box;
+        }));
         setExpanded(true);
     }
 

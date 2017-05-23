@@ -20,7 +20,6 @@ package org.marid.dependant.beantree.items;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import org.marid.ide.common.FileActions;
@@ -39,6 +38,7 @@ import java.util.Comparator;
 import static org.marid.ide.common.IdeShapes.fileNode;
 import static org.marid.jfx.LocalizedStrings.fs;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.jfx.beans.ConstantValue.bind;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -69,30 +69,6 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
         return type;
     }
 
-    @Override
-    public Node graphic() {
-        final HBox box = new HBox(10);
-        {
-            final Label label = new Label();
-            label.setGraphic(glyphIcon("D_STAR_CIRCLE", 20));
-            label.textProperty().bind(fs("%s: %d", ls("Beans"), elem.beans.size()));
-            box.getChildren().add(label);
-        }
-        {
-            final Label label = new Label();
-            label.setGraphic(glyphIcon("D_STAR_OUTLINE", 20));
-            final long count = elem.beans.stream().flatMap(MaridBeanUtils::beans).count();
-            label.textProperty().bind(fs("%s: %d", ls("Inner Beans"), count));
-            box.getChildren().add(label);
-        }
-        return box;
-    }
-
-    @Override
-    public String text() {
-        return null;
-    }
-
     @Autowired
     private void initRename(ProjectProfile profile, FileActions actions, FxAction renameAction) {
         actionMap.put(SpecialActionConfiguration.RENAME, new FxAction("op", "rename")
@@ -117,6 +93,24 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
     private void init(GenericApplicationContext context) {
         destroyActions.add(0, new ListSynchronizer<>(elem.beans, getChildren(), BeanTreeItem::new));
         setExpanded(true);
+
+        bind(graphic, () -> {
+            final HBox box = new HBox(10);
+            {
+                final Label label = new Label();
+                label.setGraphic(glyphIcon("D_STAR_CIRCLE", 20));
+                label.textProperty().bind(fs("%s: %d", ls("Beans"), elem.beans.size()));
+                box.getChildren().add(label);
+            }
+            {
+                final Label label = new Label();
+                label.setGraphic(glyphIcon("D_STAR_OUTLINE", 20));
+                final long count = elem.beans.stream().flatMap(MaridBeanUtils::beans).count();
+                label.textProperty().bind(fs("%s: %d", ls("Inner Beans"), count));
+                box.getChildren().add(label);
+            }
+            return box;
+        });
     }
 
     @Override
