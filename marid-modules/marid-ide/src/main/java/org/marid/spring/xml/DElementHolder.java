@@ -24,13 +24,13 @@ import javafx.beans.value.ObservableStringValue;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface BeanField {
+public interface DElementHolder {
 
-    DElement<?> getData();
+    DElement getData();
 
     String getName();
 
-    ObservableObjectValue<DElement<?>> dataProperty();
+    ObservableObjectValue<DElement> dataProperty();
 
     ObservableStringValue nameProperty();
 }

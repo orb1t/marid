@@ -31,10 +31,10 @@ import org.springframework.core.ResolvableType;
 public class ListEditorParams {
 
     public final transient ResolvableType type;
-    public final DCollection<?> collection;
+    public final DCollection collection;
     public final ObservableStringValue name;
 
-    public ListEditorParams(ResolvableType type, DCollection<?> collection, ObservableStringValue name) {
+    public ListEditorParams(ResolvableType type, DCollection collection, ObservableStringValue name) {
         this.type = type;
         this.collection = collection;
         this.name = name;

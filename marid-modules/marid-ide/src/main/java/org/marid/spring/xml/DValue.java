@@ -28,7 +28,7 @@ import static java.util.Optional.ofNullable;
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class DValue extends DElement<DValue> {
+public final class DValue extends DElement {
 
     public final OString value = new OString("value");
 

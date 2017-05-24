@@ -21,7 +21,7 @@ package org.marid.spring.xml;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public final class DList extends DCollection<DList> {
+public final class DList extends DCollection {
 
     @Override
     public boolean isEmpty() {

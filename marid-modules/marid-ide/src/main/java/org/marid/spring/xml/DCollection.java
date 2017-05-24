@@ -32,10 +32,10 @@ import static org.marid.misc.Iterables.nodes;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class DCollection<T extends DCollection<T>> extends DElement<T> {
+public abstract class DCollection extends DElement {
 
     public final OString valueType = new OString("value-type");
-    public final OOList<DElement<?>> elements = new OOList<>();
+    public final OOList<DElement> elements = new OOList<>();
 
     public DCollection() {
         valueType.addListener(this::fireInvalidate);
@@ -50,11 +50,11 @@ public abstract class DCollection<T extends DCollection<T>> extends DElement<T> 
         this.valueType.set(valueType);
     }
 
-    public DElement<?>[] getElements() {
+    public DElement[] getElements() {
         return elements.stream().filter(e -> !e.isEmpty()).toArray(DElement[]::new);
     }
 
-    public void setElements(DElement<?>[] elements) {
+    public void setElements(DElement[] elements) {
         this.elements.addAll(elements);
     }
 

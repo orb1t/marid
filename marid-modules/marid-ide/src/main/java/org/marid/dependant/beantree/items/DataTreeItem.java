@@ -18,65 +18,67 @@
 
 package org.marid.dependant.beantree.items;
 
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
+import org.marid.dependant.beantree.data.ItemGraphicFactory;
 import org.marid.dependant.beantree.data.ItemTextFactory;
-import org.marid.ide.common.IdeShapes;
-import org.marid.spring.xml.BeanData;
-import org.marid.spring.xml.BeanField;
+import org.marid.spring.xml.DCollection;
 import org.marid.spring.xml.DElement;
-import org.marid.spring.xml.DRef;
-import org.springframework.beans.factory.ObjectProvider;
+import org.marid.spring.xml.DElementHolder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.support.GenericApplicationContext;
 
-import java.lang.reflect.Method;
+import javax.annotation.PostConstruct;
+import java.util.function.Function;
 
 import static org.marid.jfx.beans.ConstantValue.bind;
-import static org.springframework.util.ReflectionUtils.findMethod;
-import static org.springframework.util.ReflectionUtils.invokeMethod;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class DataTreeItem<T extends BeanField> extends AbstractTreeItem<T> {
+public abstract class DataTreeItem<T extends DElementHolder> extends AbstractTreeItem<T> {
 
     public DataTreeItem(T elem) {
         super(elem);
     }
 
-    public abstract ObservableValue<String> nameProperty();
-
-    public abstract ObservableValue<DElement<?>> elementProperty();
-
     @Override
     public ObservableValue<String> getName() {
-        return nameProperty();
+        return elem.nameProperty();
+    }
+
+    @PostConstruct
+    private void init() {
+        bind(graphic, () -> ItemGraphicFactory.graphic(elem.dataProperty()));
+        bind(text, () -> ItemTextFactory.text(elem.dataProperty()));
     }
 
     @Autowired
-    private void init(@Qualifier("itemText") ObjectProvider<String> itemText) {
-        bind(graphic, () -> {
-            final DElement<?> element = elem.getData();
-            if (element instanceof DRef) {
-                return IdeShapes.ref(((DRef) element), 20);
-            } else if (element instanceof BeanData) {
-                return IdeShapes.beanNode(((BeanData) element), 20);
-            } else {
-                return null;
+    private void initChildren(GenericApplicationContext context) {
+        final ListChangeListener<DElement> listChangeListener = c -> {
+
+        };
+        final ChangeListener<DElement> listener = (observable, oldElement, newElement) -> {
+            if (oldElement == newElement) {
+                return;
             }
-        });
-        bind(text, () -> {
-            final DElement<?> element = elem.getData();
-            if (element == null) {
-                return null;
-            } else {
-                final Method method = findMethod(ItemTextFactory.class, "itemText", element.getClass());
-                if (method == null) {
+            if (oldElement instanceof DCollection) {
+                ((DCollection) oldElement).elements.removeListener(listChangeListener);
+            }
+            if (newElement instanceof DCollection) {
+                final DCollection collection = (DCollection) newElement;
+                final Function<DElement, DElementHolder> holderFunction = e -> {
                     return null;
-                } else {
-                    return  (String) invokeMethod(method, null, element);
-                }
+                };
+                getChildren().removeIf(item -> {
+                    context.getBeanFactory().destroyBean(item);
+                    return true;
+                });
+
             }
-        });
+        };
+        elem.dataProperty().addListener(listener);
+        destroyActions.add(() -> elem.dataProperty().removeListener(listener));
     }
 }

@@ -63,18 +63,18 @@ import static org.marid.l10n.L10n.s;
 public class ValueMenuFiller {
 
     private final List<MenuItem> items = new ArrayList<>();
-    private final WritableValue<DElement<?>> element;
+    private final WritableValue<DElement> element;
     private final ResolvableType type;
     private final ObservableStringValue name;
 
     @Autowired
-    public ValueMenuFiller(WritableValue<DElement<?>> element, ResolvableType type, ObservableStringValue name) {
+    public ValueMenuFiller(WritableValue<DElement> element, ResolvableType type, ObservableStringValue name) {
         this.element = element;
         this.type = type;
         this.name = name;
     }
 
-    private <T extends DElement<?>> T value(Class<T> type, Supplier<T> supplier) {
+    private <T extends DElement> T value(Class<T> type, Supplier<T> supplier) {
         if (type.isInstance(element.getValue())) {
             return type.cast(element.getValue());
         } else {

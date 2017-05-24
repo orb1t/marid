@@ -68,15 +68,15 @@ public class MapEditorTable extends CommonTableView<DMapEntry> {
     @Order(2)
     @Autowired
     public void valueColumn() {
-        final TableColumn<DMapEntry, DElement<?>> column = new TableColumn<>();
+        final TableColumn<DMapEntry, DElement> column = new TableColumn<>();
         column.setCellValueFactory(param -> param.getValue().value);
         column.setEditable(false);
         column.setMinWidth(300);
         column.setMaxWidth(2000);
         column.setPrefWidth(400);
-        column.setCellFactory(c -> new TableCell<DMapEntry, DElement<?>>() {
+        column.setCellFactory(c -> new TableCell<DMapEntry, DElement>() {
             @Override
-            protected void updateItem(DElement<?> item, boolean empty) {
+            protected void updateItem(DElement item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setGraphic(null);

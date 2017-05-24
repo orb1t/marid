@@ -123,7 +123,7 @@ public interface MaridBeanUtils {
     }
 
     static Stream<BeanData> beans(BeanData beanData) {
-        final Function<DElement<?>, Stream<BeanData>> f = d -> d instanceof BeanData
+        final Function<DElement, Stream<BeanData>> f = d -> d instanceof BeanData
                 ? Stream.concat(Stream.of((BeanData) d), beans((BeanData) d))
                 : empty();
         return Stream.concat(

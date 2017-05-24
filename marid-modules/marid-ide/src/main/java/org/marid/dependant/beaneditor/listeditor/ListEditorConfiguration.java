@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 public class ListEditorConfiguration extends DependantConfiguration<ListEditorParams> {
 
     @Bean
-    public DCollection<?> collection() {
+    public DCollection collection() {
         return param.collection;
     }
 

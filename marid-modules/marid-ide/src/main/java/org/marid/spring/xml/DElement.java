@@ -24,11 +24,11 @@ import org.w3c.dom.Element;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class DElement<T extends DElement<T>> extends AbstractData<T> {
+public abstract class DElement extends AbstractData {
 
     public abstract boolean isEmpty();
 
-    public static DElement<?> read(Document document, Element element) {
+    public static DElement read(Document document, Element element) {
         final String tag = element.getTagName();
         if (tag == null) {
             return null;
@@ -68,7 +68,7 @@ public abstract class DElement<T extends DElement<T>> extends AbstractData<T> {
         }
     }
 
-    public static void write(Document document, Element parent, DElement<?> element) {
+    public static void write(Document document, Element parent, DElement element) {
         final Element child;
         if (element instanceof DArray) {
              child = document.createElement("array");

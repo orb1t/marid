@@ -36,14 +36,14 @@ public class ValuesParams {
 
     public final ProjectProfile profile;
     public final BeanFile file;
-    public final WritableValue<DElement<?>> element;
+    public final WritableValue<DElement> element;
     public final ResolvableType type;
     public final ObservableStringValue name;
     public final ObservableList<MenuItem> menuItems;
 
     public ValuesParams(ProjectProfile profile,
                         BeanFile file,
-                        WritableValue<DElement<?>> element,
+                        WritableValue<DElement> element,
                         ResolvableType type,
                         ObservableStringValue name,
                         ObservableList<MenuItem> menuItems) {

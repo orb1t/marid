@@ -30,7 +30,7 @@ import static org.marid.misc.Iterables.nodes;
 /**
  * @author Dmitry Ovchinnikov.
  */
-public final class DProps extends DElement<DProps> {
+public final class DProps extends DElement {
 
     public final OString valueType = new OString("value-type");
     public final OOList<DPropEntry> entries = new OOList<>();

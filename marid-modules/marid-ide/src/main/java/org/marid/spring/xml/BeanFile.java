@@ -32,7 +32,7 @@ import static org.marid.misc.Iterables.nodes;
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class BeanFile extends AbstractData<BeanFile> {
+public final class BeanFile extends AbstractData {
 
     public final OList<String> path = new OList<>();
     public final OOList<BeanData> beans = new OOList<>();

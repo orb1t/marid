@@ -33,7 +33,7 @@ import static org.marid.misc.Iterables.nodes;
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class BeanData extends DElement<BeanData> {
+public final class BeanData extends DElement {
 
     public final OString type = new OString("class");
     public final OString name = new OString("name");

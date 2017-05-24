@@ -19,7 +19,11 @@
 package org.marid.dependant.beantree.data;
 
 import javafx.beans.value.ObservableValue;
-import org.marid.spring.xml.*;
+import javafx.scene.Node;
+import org.marid.ide.common.IdeShapes;
+import org.marid.spring.xml.BeanData;
+import org.marid.spring.xml.DElement;
+import org.marid.spring.xml.DRef;
 
 import java.util.Optional;
 
@@ -29,32 +33,20 @@ import static org.springframework.util.ReflectionUtils.invokeMethod;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ItemTextFactory {
+public interface ItemGraphicFactory {
 
-    static String text(DRef ref) {
-        return ref.getBean();
+    static Node graphic(DRef ref) {
+        return IdeShapes.ref(ref, 20);
     }
 
-    static String text(DValue value) {
-        return value.getValue();
+    static Node graphic(BeanData beanData) {
+        return IdeShapes.beanNode(beanData, 20);
     }
 
-    static String text(BeanData beanData) {
-        return beanData.getName();
-    }
-
-    static String text(DElementHolder DElementHolder) {
-        return DElementHolder.getName();
-    }
-
-    static String text(DCollection collection) {
-        return "" + collection.elements.size();
-    }
-
-    static String text(ObservableValue<DElement> element) {
+    static Node graphic(ObservableValue<DElement> element) {
         return Optional.ofNullable(element.getValue())
-                .flatMap(e -> Optional.ofNullable(findMethod(ItemTextFactory.class, "text", e.getClass()))
-                        .map(m -> (String) invokeMethod(m, null, e)))
+                .flatMap(e -> Optional.ofNullable(findMethod(ItemGraphicFactory.class, "graphic", e.getClass()))
+                        .map(m -> (Node) invokeMethod(m, null, e)))
                 .orElse(null);
     }
 }

@@ -27,7 +27,6 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
-import org.marid.spring.xml.DElement;
 import org.marid.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -49,16 +48,6 @@ public class PropertyTreeItem extends DataTreeItem<BeanProp> {
         super(elem);
 
         setGraphic(FontIcons.glyphIcon("D_CLOUD_CIRCLE", 20));
-    }
-
-    @Override
-    public ObservableValue<String> nameProperty() {
-        return elem.name;
-    }
-
-    @Override
-    public ObservableValue<DElement<?>> elementProperty() {
-        return elem.data;
     }
 
     @Override

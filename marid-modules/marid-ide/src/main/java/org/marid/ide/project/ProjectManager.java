@@ -112,15 +112,15 @@ public class ProjectManager {
         }));
     }
 
-    private static void onBeanNameChange(DElement<?> element, String oldName, String newName) {
+    private static void onBeanNameChange(DElement element, String oldName, String newName) {
         if (element instanceof DRef) {
             final DRef ref = (DRef) element;
             if (Objects.equals(ref.getBean(), oldName)) {
                 ref.ref.set(newName);
             }
-        } else if (element instanceof DCollection<?>) {
-            final DCollection<?> collection = (DCollection<?>) element;
-            for (final DElement<?> e : collection.elements) {
+        } else if (element instanceof DCollection) {
+            final DCollection collection = (DCollection) element;
+            for (final DElement e : collection.elements) {
                 onBeanNameChange(e, oldName, newName);
             }
         }

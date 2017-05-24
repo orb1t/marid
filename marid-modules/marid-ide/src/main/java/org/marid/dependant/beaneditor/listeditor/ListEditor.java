@@ -49,18 +49,18 @@ import static org.springframework.core.ResolvableType.forType;
  * @author Dmitry Ovchinnikov.
  */
 @Component
-public class ListEditor extends CommonListView<DElement<?>> {
+public class ListEditor extends CommonListView<DElement> {
 
     @Autowired
-    public ListEditor(DCollection<?> collection) {
+    public ListEditor(DCollection collection) {
         super(collection.elements);
     }
 
     @Autowired
     public void initRowFactory(ResolvableType type, AutowireCapableBeanFactory factory) {
-        setCellFactory(param -> new TextFieldListCell<DElement<?>>() {
+        setCellFactory(param -> new TextFieldListCell<DElement>() {
             @Override
-            public void updateItem(DElement<?> item, boolean empty) {
+            public void updateItem(DElement item, boolean empty) {
                 super.updateItem(item, empty);
                 textProperty().unbind();
                 if (item == null || empty) {
@@ -81,9 +81,9 @@ public class ListEditor extends CommonListView<DElement<?>> {
                     setContextMenu(new MaridContextMenu(m -> {
                         m.getItems().clear();
                         final int index = getIndex();
-                        final Consumer<DElement<?>> consumer = e -> getItems().set(index, e);
-                        final Supplier<DElement<?>> supplier = () -> getItems().get(index);
-                        final WritableValue<DElement<?>> element = new WritableValueImpl<>(consumer, supplier);
+                        final Consumer<DElement> consumer = e -> getItems().set(index, e);
+                        final Supplier<DElement> supplier = () -> getItems().get(index);
+                        final WritableValue<DElement> element = new WritableValueImpl<>(consumer, supplier);
                         final ObservableStringValue name = new SimpleStringProperty("element");
                         final ResolvableType elementType = elementType(type);
                         final ValueMenuItems items = new ValueMenuItems(element, elementType, name);

@@ -31,7 +31,7 @@ import static org.marid.misc.Iterables.nodes;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-public class DMap extends DElement<DMap> {
+public class DMap extends DElement {
 
     public final OString keyType = new OString("key-type");
     public final OString valueType = new OString("value-type");

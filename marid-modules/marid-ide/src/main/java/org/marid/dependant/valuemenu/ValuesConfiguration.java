@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 public class ValuesConfiguration extends DependantConfiguration<ValuesParams> {
 
     @Bean
-    public WritableValue<DElement<?>> element() {
+    public WritableValue<DElement> element() {
         return param.element;
     }
 

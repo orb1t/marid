@@ -28,7 +28,7 @@ import static java.util.Optional.ofNullable;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Meta extends AbstractData<Meta> {
+public class Meta extends AbstractData {
 
     public final OString key = new OString("key");
     public final OString value = new OString("value");

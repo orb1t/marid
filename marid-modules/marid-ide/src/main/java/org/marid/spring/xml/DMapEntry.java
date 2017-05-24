@@ -34,10 +34,10 @@ import static org.marid.spring.xml.DElement.read;
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
-public class DMapEntry extends AbstractData<DMapEntry> {
+public class DMapEntry extends AbstractData {
 
     public final OString key = new OString("key");
-    public final OOProp<DElement<?>> value = new OOProp<>("value");
+    public final OOProp<DElement> value = new OOProp<>("value");
 
     public DMapEntry() {
         key.addListener(this::fireInvalidate);
@@ -52,11 +52,11 @@ public class DMapEntry extends AbstractData<DMapEntry> {
         this.key.set(key);
     }
 
-    public DElement<?> getValue() {
+    public DElement getValue() {
         return value.get();
     }
 
-    public void setValue(DElement<?> value) {
+    public void setValue(DElement value) {
         this.value.set(value);
     }
 

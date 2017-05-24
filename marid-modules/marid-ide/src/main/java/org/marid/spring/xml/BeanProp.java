@@ -34,10 +34,10 @@ import static org.marid.spring.xml.DElement.write;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanProp extends AbstractData<BeanProp> implements BeanField {
+public class BeanProp extends AbstractData implements DElementHolder {
 
     public final OString name = new OString("name");
-    public final OOProp<DElement<?>> data = new OOProp<>("data");
+    public final OOProp<DElement> data = new OOProp<>("data");
 
     public BeanProp() {
         name.addListener(this::fireInvalidate);
@@ -54,11 +54,11 @@ public class BeanProp extends AbstractData<BeanProp> implements BeanField {
     }
 
     @Override
-    public DElement<?> getData() {
+    public DElement getData() {
         return data.get();
     }
 
-    public void setData(DElement<?> data) {
+    public void setData(DElement data) {
         this.data.set(data);
     }
 
@@ -72,7 +72,7 @@ public class BeanProp extends AbstractData<BeanProp> implements BeanField {
     }
 
     @Override
-    public OOProp<DElement<?>> dataProperty() {
+    public OOProp<DElement> dataProperty() {
         return data;
     }
 

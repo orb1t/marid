@@ -40,15 +40,14 @@ import static java.util.stream.Collectors.toMap;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractData<T extends AbstractData<T>> extends AbstractObservable implements Externalizable, Cloneable {
+public abstract class AbstractData extends AbstractObservable implements Externalizable, Cloneable {
 
     public abstract void loadFrom(Document document, Element element);
 
     public abstract void writeTo(Document document, Element element);
 
-    @SuppressWarnings({"CloneDoesntCallSuperClone", "unchecked"})
     @Override
-    public T clone() {
+    public AbstractData clone() {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (final ObjectOutputStream oos = new ObjectOutputStream(bos)) {
             oos.writeObject(this);
@@ -56,7 +55,7 @@ public abstract class AbstractData<T extends AbstractData<T>> extends AbstractOb
             throw new IllegalStateException(x);
         }
         try (final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
-            return (T) ois.readObject();
+            return (AbstractData) ois.readObject();
         } catch (IOException | ClassNotFoundException x) {
             throw new IllegalStateException(x);
         }

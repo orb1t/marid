@@ -73,7 +73,7 @@ public class BeanListActions {
         this.metaInfoProvider = metaInfoProvider;
     }
 
-    private void setData(Property<DElement<?>> element, Object value, BeansMetaInfo metaInfo, boolean insertRefs) {
+    private void setData(Property<DElement> element, Object value, BeansMetaInfo metaInfo, boolean insertRefs) {
         if (value instanceof TypedStringValue) {
             final TypedStringValue typedStringValue = (TypedStringValue) value;
             element.setValue(new DValue(typedStringValue.getValue()));

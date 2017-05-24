@@ -28,7 +28,7 @@ import static java.util.Optional.ofNullable;
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class DRef extends DElement<DRef> {
+public final class DRef extends DElement {
 
     public final OString ref = new OString("value");
 
