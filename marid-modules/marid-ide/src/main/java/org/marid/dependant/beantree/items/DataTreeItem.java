@@ -21,13 +21,18 @@ package org.marid.dependant.beantree.items;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
+import org.marid.IdeDependants;
 import org.marid.dependant.beantree.data.ItemGraphicFactory;
 import org.marid.dependant.beantree.data.ItemTextFactory;
+import org.marid.dependant.valuemenu.ValuesConfiguration;
+import org.marid.dependant.valuemenu.ValuesParams;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.DCollection;
 import org.marid.spring.xml.DElement;
 import org.marid.spring.xml.DElementHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.ResolvableType;
 
 import javax.annotation.PostConstruct;
 import java.util.function.Function;
@@ -80,5 +85,15 @@ public abstract class DataTreeItem<T extends DElementHolder> extends AbstractTre
         };
         elem.dataProperty().addListener(listener);
         destroyActions.add(() -> elem.dataProperty().removeListener(listener));
+    }
+
+    public abstract ResolvableType type();
+
+    @Autowired
+    private void initValueMenuItems(ProjectProfile profile, IdeDependants dependants) {
+        menuConsumers.add(items -> {
+            final ValuesParams params = new ValuesParams(profile, this, type(), items);
+            dependants.start(ValuesConfiguration.class, params, f -> {});
+        });
     }
 }

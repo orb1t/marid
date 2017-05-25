@@ -34,6 +34,7 @@ import org.marid.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.ResolvableType;
 
 import java.util.Comparator;
 
@@ -124,6 +125,16 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
             return c.compare(this.elem.getName(), that.elem.getName());
         } else {
             return 0;
+        }
+    }
+
+    public ResolvableType type() {
+        if (getParent() instanceof FileTreeItem) {
+            return getProfile().getType(elem);
+        } else if (getParent() instanceof DataTreeItem) {
+            return ((DataTreeItem<?>) getParent()).type();
+        } else {
+            return ResolvableType.NONE;
         }
     }
 }

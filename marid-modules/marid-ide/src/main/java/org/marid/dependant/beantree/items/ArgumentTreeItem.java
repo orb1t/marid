@@ -20,16 +20,13 @@ package org.marid.dependant.beantree.items;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
-import org.marid.IdeDependants;
-import org.marid.dependant.valuemenu.ValuesConfiguration;
-import org.marid.dependant.valuemenu.ValuesParams;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
 import org.marid.util.MethodUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
 
 import javax.annotation.Nonnull;
@@ -79,11 +76,8 @@ public class ArgumentTreeItem extends DataTreeItem<BeanArg> {
         }
     }
 
-    @Autowired
-    private void initValueMenuItems(ProjectProfile profile, IdeDependants dependants) {
-        menuConsumers.add(items -> {
-            final ValuesParams params = new ValuesParams(profile, elem, items);
-            dependants.start(ValuesConfiguration.class, params, f -> {});
-        });
+    @Override
+    public ResolvableType type() {
+        return null;
     }
 }

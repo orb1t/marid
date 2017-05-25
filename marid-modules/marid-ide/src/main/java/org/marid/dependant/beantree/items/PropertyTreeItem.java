@@ -20,16 +20,13 @@ package org.marid.dependant.beantree.items;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
-import org.marid.IdeDependants;
-import org.marid.dependant.valuemenu.ValuesConfiguration;
-import org.marid.dependant.valuemenu.ValuesParams;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
 import org.marid.util.MethodUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
 
 import javax.annotation.Nonnull;
@@ -56,6 +53,11 @@ public class PropertyTreeItem extends DataTreeItem<BeanProp> {
     }
 
     @Override
+    public ResolvableType type() {
+        return getProfile().getPropType(find(BeanTreeItem.class).elem, elem.getName());
+    }
+
+    @Override
     public ObservableValue<String> getType() {
         return Bindings.createStringBinding(() -> {
             final ProjectProfile profile = getProfile();
@@ -77,13 +79,5 @@ public class PropertyTreeItem extends DataTreeItem<BeanProp> {
             final Order o2 = o.getClass().getAnnotation(Order.class);
             return compare(ofNullable(o1).map(Order::value).orElse(0), ofNullable(o2).map(Order::value).orElse(0));
         }
-    }
-
-    @Autowired
-    private void initValueMenuItems(ProjectProfile profile, IdeDependants dependants) {
-        menuConsumers.add(items -> {
-            final ValuesParams params = new ValuesParams(profile, elem, items);
-            dependants.start(ValuesConfiguration.class, params, f -> {});
-        });
     }
 }

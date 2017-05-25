@@ -22,12 +22,12 @@ import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.control.MenuItem;
-import javafx.util.Pair;
+import org.marid.dependant.beantree.items.DataTreeItem;
+import org.marid.dependant.beantree.items.FileTreeItem;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.spring.xml.*;
+import org.marid.spring.xml.BeanFile;
+import org.marid.spring.xml.DElement;
 import org.springframework.core.ResolvableType;
-
-import java.util.Objects;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -56,58 +56,9 @@ public class ValuesParams {
     }
 
     public ValuesParams(ProjectProfile profile,
-                        BeanProp prop,
+                        DataTreeItem<?> item,
+                        ResolvableType type,
                         ObservableList<MenuItem> items) {
-        this.profile = profile;
-
-        final Pair<BeanFile, ResolvableType> fileAndType = profile.getBeanFiles().stream()
-                .map(f -> f.beans.stream()
-                        .map(b -> b.properties.stream()
-                                .filter(prop::equals)
-                                .map(p -> new Pair<>(f, profile.getPropType(b, p.getName())))
-                                .findFirst()
-                                .orElse(null)
-                        )
-                        .filter(Objects::nonNull)
-                        .findFirst()
-                        .orElse(null)
-                )
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElseThrow(IllegalStateException::new);
-
-        this.file = fileAndType.getKey();
-        this.type = fileAndType.getValue();
-        this.element = prop.data;
-        this.name = prop.name;
-        this.menuItems = items;
-    }
-
-    public ValuesParams(ProjectProfile profile,
-                        BeanArg arg,
-                        ObservableList<MenuItem> items) {
-        this.profile = profile;
-
-        final Pair<BeanFile, ResolvableType> fileAndType = profile.getBeanFiles().stream()
-                .map(f -> f.beans.stream()
-                        .map(b -> b.beanArgs.stream()
-                                .filter(arg::equals)
-                                .map(p -> new Pair<>(f, profile.getArgType(b, p.getName())))
-                                .findFirst()
-                                .orElse(null)
-                        )
-                        .filter(Objects::nonNull)
-                        .findFirst()
-                        .orElse(null)
-                )
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElseThrow(IllegalStateException::new);
-
-        this.file = fileAndType.getKey();
-        this.type = fileAndType.getValue();
-        this.element = arg.data;
-        this.name = arg.name;
-        this.menuItems = items;
+        this(profile, item.find(FileTreeItem.class).elem, item.elem.dataProperty(), type, item.elem.nameProperty(), items);
     }
 }

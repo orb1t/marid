@@ -18,8 +18,8 @@
 
 package org.marid.spring.xml;
 
-import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableStringValue;
+import org.marid.jfx.beans.OProp;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -30,7 +30,7 @@ public interface DElementHolder {
 
     String getName();
 
-    ObservableObjectValue<DElement> dataProperty();
+    OProp<DElement> dataProperty();
 
     ObservableStringValue nameProperty();
 }
