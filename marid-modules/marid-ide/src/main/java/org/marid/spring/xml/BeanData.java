@@ -18,12 +18,14 @@
 
 package org.marid.spring.xml;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.beans.OList;
 import org.marid.jfx.beans.OOList;
 import org.marid.jfx.beans.OString;
 import org.marid.misc.Calls;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -32,20 +34,23 @@ import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.*;
-import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
-import static java.util.Optional.of;
+import static java.util.Comparator.comparingInt;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Stream.of;
 import static org.marid.misc.Iterables.nodes;
 import static org.springframework.core.ResolvableType.forMethodParameter;
+import static org.springframework.core.ResolvableType.forMethodReturnType;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public final class BeanData extends DElement {
+
+    private static final ParameterNameDiscoverer PND = new DefaultParameterNameDiscoverer();
 
     public final OString type = new OString("class");
     public final OString name = new OString("name");
@@ -57,7 +62,6 @@ public final class BeanData extends DElement {
     public final OOList<BeanArg> beanArgs = new OOList<>();
     public final OOList<BeanProp> properties = new OOList<>();
     public final OOList<Meta> meta = new OOList<>();
-    public final transient OList<Executable> constructors = new OList<>();
 
     public BeanData() {
         type.addListener(this::fireInvalidate);
@@ -165,13 +169,13 @@ public final class BeanData extends DElement {
 
     @Override
     public void loadFrom(Document document, Element element) {
-        of(element.getAttribute("class")).filter(s -> !s.isEmpty()).ifPresent(type::set);
-        of(element.getAttribute("name")).filter(s -> !s.isEmpty()).ifPresent(name::set);
-        of(element.getAttribute("init-method")).filter(s -> !s.isEmpty()).ifPresent(initMethod::set);
-        of(element.getAttribute("destroy-method")).filter(s -> !s.isEmpty()).ifPresent(destroyMethod::set);
-        of(element.getAttribute("factory-bean")).filter(s -> !s.isEmpty()).ifPresent(factoryBean::set);
-        of(element.getAttribute("factory-method")).filter(s -> !s.isEmpty()).ifPresent(factoryMethod::set);
-        of(element.getAttribute("lazy-init")).filter(s -> !s.isEmpty()).ifPresent(lazyInit::set);
+        Optional.of(element.getAttribute("class")).filter(s -> !s.isEmpty()).ifPresent(type::set);
+        Optional.of(element.getAttribute("name")).filter(s -> !s.isEmpty()).ifPresent(name::set);
+        Optional.of(element.getAttribute("init-method")).filter(s -> !s.isEmpty()).ifPresent(initMethod::set);
+        Optional.of(element.getAttribute("destroy-method")).filter(s -> !s.isEmpty()).ifPresent(destroyMethod::set);
+        Optional.of(element.getAttribute("factory-bean")).filter(s -> !s.isEmpty()).ifPresent(factoryBean::set);
+        Optional.of(element.getAttribute("factory-method")).filter(s -> !s.isEmpty()).ifPresent(factoryMethod::set);
+        Optional.of(element.getAttribute("lazy-init")).filter(s -> !s.isEmpty()).ifPresent(lazyInit::set);
         nodes(element, Element.class).filter(e -> "constructor-arg".equals(e.getTagName())).forEach(e -> {
             final BeanArg arg = new BeanArg();
             arg.loadFrom(document, e);
@@ -215,25 +219,42 @@ public final class BeanData extends DElement {
         });
     }
 
+    private int argsMatchCount(String[] argNames, String[] actualNames) {
+        final String[] a1 = of(argNames).filter(n -> ArrayUtils.contains(actualNames, n)).toArray(String[]::new);
+        final String[] a2 = of(actualNames).filter(n -> ArrayUtils.contains(a1, n)).toArray(String[]::new);
+        final int n = Math.min(a1.length, a2.length);
+        for (int i = 0; i < n; i++) {
+            if (!a1[i].equals(a2[i])) {
+                return i;
+            }
+        }
+        return n;
+    }
+
     @Override
     protected void refresh(ProjectProfile profile, Set<Object> passed) {
         if (!passed.add(this)) {
             return;
         }
+        final String[] argNames = beanArgs.stream().map(BeanArg::getName).toArray(String[]::new);
+        final String[] actualNames;
         final Executable executable;
         final ResolvableType constructorType;
+        final int argMatches;
         if (!isFactoryBean()) {
             final Class<?> raw = profile.getClass(type.get()).orElse(null);
             if (raw == null) {
                 return;
             }
-            final Constructor<?>[] constructors = raw.getConstructors();
+            final Comparator<Constructor<?>> cc = comparingInt(c -> argsMatchCount(argNames, PND.getParameterNames(c)));
+            final Constructor<?>[] constructors = of(raw.getConstructors()).sorted(cc).toArray(Constructor<?>[]::new);
             if (constructors.length == 0) {
                 return;
             }
-            Arrays.sort(constructors, Comparator.comparingInt(c -> -c.getParameterCount()));
-            executable = constructors[0];
+            final Constructor<?> constructor = constructors[constructors.length - 1];
+            executable = constructor;
             constructorType = ResolvableType.forClass(raw);
+            argMatches = argsMatchCount(argNames, actualNames = PND.getParameterNames(constructor));
         } else if (getFactoryBean() != null && !getFactoryBean().isEmpty()) {
             final BeanData refBean = profile.getBeanFiles().stream()
                     .flatMap(f -> f.beans.stream())
@@ -251,50 +272,56 @@ public final class BeanData extends DElement {
             if (refClass == null) {
                 return;
             }
-            final Method[] methods = Stream.of(refClass.getMethods())
+            final Method[] methods = of(refClass.getMethods())
                     .filter(m -> !Modifier.isStatic(m.getModifiers()))
+                    .filter(m -> m.getName().equals(getFactoryMethod()))
+                    .sorted(comparingInt(m -> argsMatchCount(argNames, PND.getParameterNames(m))))
                     .toArray(Method[]::new);
             if (methods.length == 0) {
                 return;
             }
-            Arrays.sort(methods, Comparator.comparingInt(m -> -m.getParameterCount()));
-            executable = methods[0];
-            constructorType = ResolvableType.forMethodReturnType(methods[0], refClass);
+            final Method method = methods[methods.length - 1];
+            executable = method;
+            constructorType = forMethodReturnType(methods[0], refClass);
+            argMatches = argsMatchCount(argNames, actualNames = PND.getParameterNames(method));
         } else {
             final Class<?> raw = profile.getClass(type.get()).orElse(null);
             if (raw == null) {
                 return;
             }
-            final Method[] methods = Stream.of(raw.getMethods())
+            final Method[] methods = of(raw.getMethods())
                     .filter(m -> Modifier.isStatic(m.getModifiers()))
+                    .filter(m -> m.getName().equals(getFactoryMethod()))
+                    .sorted(comparingInt(m -> argsMatchCount(argNames, PND.getParameterNames(m))))
                     .toArray(Method[]::new);
             if (methods.length == 0) {
                 return;
             }
-            Arrays.sort(methods, Comparator.comparingInt(m -> -m.getParameterCount()));
-            executable = methods[0];
-            constructorType = ResolvableType.forMethodReturnType(methods[0], raw);
+            final Method method = methods[methods.length - 1];
+            executable = method;
+            constructorType = forMethodReturnType(methods[0], raw);
+            argMatches = argsMatchCount(argNames, actualNames = PND.getParameterNames(method));
         }
 
         final Parameter[] parameters = executable.getParameters();
-        for (int i = 0; i < executable.getParameterCount(); i++) {
-            final Parameter parameter = parameters[i];
-            final BeanArg arg = beanArgs.stream()
-                    .filter(a -> parameter.getName().equals(a.getName()))
-                    .findFirst()
-                    .orElseGet(() -> {
-                        final BeanArg beanArg = new BeanArg();
-                        beanArg.setName(parameter.getName());
-                        beanArgs.add(beanArg);
-                        return beanArg;
-                    });
-            arg.setType(parameter.getType().getName());
-            final MethodParameter mp = executable instanceof Constructor
-                    ? new MethodParameter((Constructor<?>) executable, i)
-                    : new MethodParameter((Method) executable, i);
-            arg.resolvableType.set(forMethodParameter(mp, constructorType));
-
-            arg.refresh(profile, passed);
+        beanArgs.removeIf(a -> of(parameters).noneMatch(p -> p.getName().equals(a.getName())));
+        beanArgs.remove(argMatches, beanArgs.size());
+        for (int i = 0; i < parameters.length; i++) {
+            if (i < beanArgs.size()) {
+                if (!actualNames[i].equals(beanArgs.get(i).getName())) {
+                    final BeanArg arg = new BeanArg();
+                    arg.setName(actualNames[i]);
+                    beanArgs.add(i, arg);
+                    arg.refresh(profile, passed);
+                } else {
+                    beanArgs.get(i).refresh(profile, passed);
+                }
+            } else {
+                final BeanArg arg = new BeanArg();
+                arg.setName(actualNames[i]);
+                beanArgs.add(arg);
+                arg.refresh(profile, passed);
+            }
         }
 
         final BeanInfo beanInfo = Calls.call(() -> Introspector.getBeanInfo(constructorType.getRawClass()));

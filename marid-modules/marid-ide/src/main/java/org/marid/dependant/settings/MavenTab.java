@@ -42,6 +42,7 @@ public class MavenTab extends GenericGridPane implements SettingsEditor {
         addTextField("Eclipse compiler version", pref.eclipseCompilerVersion);
         addTextField("JAR plugin version", pref.jarPluginVersion);
         addTextField("Resources plugin version", pref.resourcesPluginVersion);
+        addTextField("JDT version", pref.jdtVersion);
     }
 
     @Override

@@ -18,7 +18,6 @@
 
 package org.marid.runtime;
 
-import org.marid.logging.Logs;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.BeanDefinition;

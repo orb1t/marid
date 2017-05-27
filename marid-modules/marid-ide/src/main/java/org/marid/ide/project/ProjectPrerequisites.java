@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 import java.util.Properties;
 
 import static java.util.Collections.singletonList;
+import static org.marid.misc.Builder.build;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -110,18 +111,30 @@ public class ProjectPrerequisites {
 
         private void applyCompilerPlugin() {
             model.getBuild().getPlugins().removeIf(p -> "maven-compiler-plugin".equals(p.getArtifactId()));
-            final Plugin plugin = new Plugin();
-            model.getBuild().getPlugins().add(plugin);
-            plugin.setArtifactId("maven-compiler-plugin");
-            plugin.setVersion(mavenSettings.compilerPluginVersion.get());
-            final Dependency dependency = new Dependency();
-            dependency.setGroupId("org.codehaus.plexus");
-            dependency.setArtifactId("plexus-compiler-eclipse");
-            dependency.setVersion(mavenSettings.eclipseCompilerVersion.get());
-            plugin.getDependencies().add(dependency);
-            final Xpp3Dom configuration = new Xpp3Dom("configuration");
-            plugin.setConfiguration(configuration);
-            addChild(configuration, "compilerId", "eclipse");
+            model.getBuild().getPlugins().add(build(new Plugin(), plugin -> {
+                plugin.setArtifactId("maven-compiler-plugin");
+                plugin.setVersion(mavenSettings.compilerPluginVersion.get());
+                plugin.getDependencies().add(build(new Dependency(), dependency -> {
+                    dependency.setGroupId("org.codehaus.plexus");
+                    dependency.setArtifactId("plexus-compiler-eclipse");
+                    dependency.setVersion(mavenSettings.eclipseCompilerVersion.get());
+                    dependency.setScope("runtime");
+                    dependency.addExclusion(build(new Exclusion(), exclusion -> {
+                        exclusion.setGroupId("org.eclipse.jdt");
+                        exclusion.setArtifactId("org.eclipse.jdt.core");
+                    }));
+                }));
+                plugin.getDependencies().add(build(new Dependency(), dependency -> {
+                    dependency.setGroupId("org.eclipse.jdt");
+                    dependency.setArtifactId("org.eclipse.jdt.core");
+                    dependency.setVersion(mavenSettings.jdtVersion.get());
+                }));
+                plugin.setConfiguration(build(new Xpp3Dom("configuration"), configuration -> {
+                    addChild(configuration, "compilerId", "eclipse");
+                    addChild(configuration, "showWarnings", "true");
+                    addChild(configuration, "showDeprecation", "true");
+                }));
+            }));
         }
 
         private void applyJarPlugin() {

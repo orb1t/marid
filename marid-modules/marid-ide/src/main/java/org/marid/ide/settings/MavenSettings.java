@@ -36,6 +36,7 @@ public class MavenSettings extends AbstractSettings {
     public final WritableObjectValue<String> eclipseCompilerVersion = string(preferences, "eclipseCompilerVersion", "2.8.1");
     public final WritableObjectValue<String> jarPluginVersion = string(preferences, "jarPluginVersion", "3.0.2");
     public final WritableObjectValue<String> resourcesPluginVersion = string(preferences, "resourcesPluginVersion", "3.0.2");
+    public final WritableObjectValue<String> jdtVersion = string(preferences, "jdtVersion", "3.12.3");
     public final WritableObjectValue<String> repositoryUrl = string(preferences, "repositoryUrl", "repo1.maven.apache.org/maven2/");
 
     @Override
