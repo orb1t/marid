@@ -35,7 +35,6 @@ import org.marid.misc.Casts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.ResolvableType;
 
 import javax.annotation.PreDestroy;
 import java.util.*;
@@ -84,18 +83,20 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> implements Co
     }
 
     @Autowired
-    private void init(GenericApplicationContext context) {
+    private void init(GenericApplicationContext context, ProjectProfile profile) {
         final DefaultListableBeanFactory beanFactory = context.getDefaultListableBeanFactory();
         final ListChangeListener<TreeItem<Object>> listChangeListener = c -> {
             while (c.next()) {
                 if (c.wasRemoved()) {
                     c.getRemoved().forEach(e -> ((AbstractTreeItem<?>) e).destroy(beanFactory));
+                    profile.refresh();
                 }
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(e -> {
                         beanFactory.autowireBean(e);
                         beanFactory.initializeBean(e, null);
                     });
+                    profile.refresh();
                 }
             }
         };
@@ -115,8 +116,6 @@ public abstract class AbstractTreeItem<T> extends TreeItem<Object> implements Co
         getChildren().clear();
         factory.destroyBean(this);
     }
-
-    public abstract ResolvableType type();
 
     protected static class ListSynchronizer<F, T extends AbstractTreeItem<F>> implements Runnable {
 

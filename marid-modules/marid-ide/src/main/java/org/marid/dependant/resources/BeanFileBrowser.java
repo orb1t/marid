@@ -25,7 +25,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
-import org.marid.IdeDependants;
 import org.marid.ide.common.FileActions;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.common.SpecialActions;
@@ -142,14 +141,6 @@ public class BeanFileBrowser extends CommonTableView<BeanFile> {
             row.disableProperty().bind(row.itemProperty().isNull());
             row.setContextMenu(specialActions.contextMenu(Collections::emptyMap));
             return row;
-        });
-    }
-
-    @Autowired
-    private void initEdit(FileActions fileActions, FxAction editAction, IdeDependants dependants) {
-        editAction.on(this, action -> {
-            action.setEventHandler(event -> fileActions.launchBeanEditor(getSelectionModel().getSelectedItem(), dependants));
-            action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });
     }
 

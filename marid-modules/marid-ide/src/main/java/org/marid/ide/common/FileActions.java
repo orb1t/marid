@@ -19,9 +19,6 @@
 package org.marid.ide.common;
 
 import javafx.scene.control.TextInputDialog;
-import org.marid.IdeDependants;
-import org.marid.dependant.beaneditor.BeanEditorConfiguration;
-import org.marid.dependant.beaneditor.BeanEditorParams;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.xml.BeanFile;
 import org.springframework.stereotype.Component;
@@ -62,12 +59,5 @@ public class FileActions {
             final BeanFile template = BeanFile.beanFile(profile.getBeansDirectory(), newPath);
             beanFile.path.setAll(template.path);
         }
-    }
-
-    public void launchBeanEditor(BeanFile beanFile, IdeDependants dependants) {
-        dependants.start(BeanEditorConfiguration.class, new BeanEditorParams(beanFile), context -> {
-            context.setId("beanEditor");
-            context.setDisplayName("Bean Editor");
-        });
     }
 }

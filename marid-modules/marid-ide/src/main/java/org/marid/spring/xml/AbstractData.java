@@ -22,6 +22,7 @@ import javafx.beans.property.Property;
 import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.AbstractObservable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -99,6 +100,12 @@ public abstract class AbstractData extends AbstractObservable implements Externa
             }
         }
     }
+
+    public final void refresh(ProjectProfile profile) {
+        refresh(profile, Collections.newSetFromMap(new IdentityHashMap<>()));
+    }
+
+    protected abstract void refresh(ProjectProfile profile, Set<Object> passed);
 
     private Serializable toSerializable(Object o) {
         if (o == null || o instanceof Serializable) {

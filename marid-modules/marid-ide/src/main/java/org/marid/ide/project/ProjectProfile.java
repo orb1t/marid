@@ -29,37 +29,32 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.jfx.beans.OOList;
 import org.marid.misc.Urls;
-import org.marid.spring.xml.*;
+import org.marid.spring.xml.BeanFile;
+import org.marid.spring.xml.MaridBeanDefinitionLoader;
+import org.marid.spring.xml.MaridBeanDefinitionSaver;
 import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nonnull;
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static java.util.Comparator.comparingInt;
 import static java.util.logging.Level.*;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Stream.of;
 import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 import static org.marid.logging.Log.log;
-import static org.springframework.core.ResolvableType.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -137,7 +132,7 @@ public class ProjectProfile {
     void update() throws Exception {
         close();
         classLoader = classLoader();
-        Platform.runLater(ResolvableType::clearCache);
+        Platform.runLater(this::refresh);
     }
 
     private void init() {
@@ -320,141 +315,9 @@ public class ProjectProfile {
         return getName();
     }
 
-    public Optional<Class<?>> getClass(BeanData data) {
-        if (data.isFactoryBean()) {
-            return getConstructor(data).map(e -> ((Method) e).getReturnType());
-        } else {
-            return getClass(data.type.get());
-        }
-    }
-
-    public ResolvableType getType(BeanData beanData) {
-        if (beanData.isFactoryBean()) {
-            return getConstructor(beanData).map(e -> forMethodReturnType((Method) e)).orElse(NONE);
-        } else {
-            return getClass(beanData.type.get()).map(ResolvableType::forClass).orElse(NONE);
-        }
-    }
-
-    public Stream<? extends Executable> getConstructors(BeanData data) {
-        if (data.isFactoryBean()) {
-            if (data.getFactoryBean() != null) {
-                return getBeanFiles().stream()
-                        .flatMap(file -> file.beans.stream())
-                        .filter(b -> Objects.equals(data.getFactoryBean(), b.getName()))
-                        .map(this::getClass)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .flatMap(t -> of(t.getMethods()))
-                        .filter(m -> m.getReturnType() != void.class)
-                        .filter(m -> m.getName().equals(data.getFactoryMethod()))
-                        .sorted(comparingInt(Method::getParameterCount));
-            } else {
-                return getClass(data.type.get())
-                        .map(t -> Stream.of(t.getMethods())
-                                .filter(m -> Modifier.isStatic(m.getModifiers()))
-                                .filter(m -> m.getReturnType() != void.class)
-                                .filter(m -> m.getName().equals(data.getFactoryMethod()))
-                                .sorted(Comparator.comparingInt(Method::getParameterCount))
-                        )
-                        .orElse(Stream.empty());
-            }
-        } else {
-            return getClass(data.type.get())
-                    .map(c -> of(c.getConstructors()).sorted(comparingInt(Constructor::getParameterCount)))
-                    .orElseGet(Stream::empty);
-        }
-    }
-
-    public Optional<? extends Executable> getConstructor(BeanData data) {
-        final List<? extends Executable> executables = getConstructors(data).collect(toList());
-        switch (executables.size()) {
-            case 0:
-                return Optional.empty();
-            case 1:
-                return Optional.of(executables.get(0));
-            default:
-                final Class<?>[] types = data.beanArgs.stream()
-                        .map(a -> getClass(a.type.get()).orElse(Object.class))
-                        .toArray(Class<?>[]::new);
-                return executables.stream()
-                        .filter(m -> Arrays.equals(types, m.getParameterTypes()))
-                        .findFirst();
-        }
-    }
-
-    public void updateBeanDataConstructorArgs(BeanData data, Parameter[] parameters) {
-        final List<BeanArg> args = of(parameters)
-                .map(p -> {
-                    final Optional<BeanArg> found = data.beanArgs.stream()
-                            .filter(a -> p.getName().equals(a.getName()))
-                            .findFirst();
-                    if (found.isPresent()) {
-                        found.get().type.set(p.getType().getName());
-                        return found.get();
-                    } else {
-                        final BeanArg arg = new BeanArg();
-                        arg.name.set(p.getName());
-                        arg.type.set(p.getType().getName());
-                        return arg;
-                    }
-                })
-                .collect(toList());
-        data.beanArgs.setAll(args);
-    }
-
-    public void updateBeanData(BeanData data) {
-        final Class<?> type = getClass(data).orElse(null);
-        if (type == null) {
-            return;
-        }
-        final List<Executable> executables = getConstructors(data).collect(toList());
-        data.constructors.setAll(executables);
-        if (!executables.isEmpty()) {
-            if (executables.size() == 1) {
-                updateBeanDataConstructorArgs(data, executables.get(0).getParameters());
-            } else {
-                final Optional<? extends Executable> executable = getConstructor(data);
-                executable.ifPresent(e -> updateBeanDataConstructorArgs(data, e.getParameters()));
-            }
-        }
-
-        final List<PropertyDescriptor> propertyDescriptors = getPropertyDescriptors(data).collect(toList());
-        final Map<String, BeanProp> pmap = data.properties.stream().collect(toMap(e -> e.name.get(), e -> e));
-        data.properties.clear();
-        for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-            final BeanProp prop = pmap.computeIfAbsent(propertyDescriptor.getName(), n -> {
-                final BeanProp property = new BeanProp();
-                property.name.set(n);
-                return property;
-            });
-            data.properties.add(prop);
-        }
-    }
-
-    public Stream<PropertyDescriptor> getPropertyDescriptors(BeanData data) {
-        final Class<?> type = getClass(data).orElse(Object.class);
-        try {
-            final BeanInfo beanInfo = Introspector.getBeanInfo(type);
-            return of(beanInfo.getPropertyDescriptors())
-                    .filter(d -> d.getWriteMethod() != null);
-        } catch (IntrospectionException x) {
-            return Stream.empty();
-        }
-    }
-
-    public ResolvableType getArgType(BeanData beanData, String name) {
-        return getConstructor(beanData)
-                .flatMap(e -> of(e.getParameters()).filter(p -> p.getName().equals(name)).findAny())
-                .map(p -> ResolvableType.forType(p.getParameterizedType()))
-                .orElse(NONE);
-    }
-
-    public ResolvableType getPropType(BeanData beanData, String name) {
-        return getPropertyDescriptors(beanData)
-                .filter(d -> d.getName().equals(name))
-                .findAny()
-                .map(p -> forMethodParameter(p.getWriteMethod(), 0))
-                .orElse(NONE);
+    public void refresh() {
+        final Set<Object> passed = Collections.newSetFromMap(new IdentityHashMap<>());
+        ResolvableType.clearCache();
+        getBeanFiles().forEach(f -> f.refresh(this, passed));
     }
 }

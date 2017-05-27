@@ -18,13 +18,15 @@
 
 package org.marid.spring.xml;
 
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.OOList;
-import org.marid.jfx.beans.OString;
+import org.springframework.core.ResolvableType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
+import java.util.Properties;
+import java.util.Set;
+
 import static org.marid.misc.Iterables.nodes;
 
 /**
@@ -32,20 +34,11 @@ import static org.marid.misc.Iterables.nodes;
  */
 public final class DProps extends DElement {
 
-    public final OString valueType = new OString("value-type");
     public final OOList<DPropEntry> entries = new OOList<>();
 
     public DProps() {
-        valueType.addListener(this::fireInvalidate);
         entries.addListener(this::fireInvalidate);
-    }
-
-    public String getValueType() {
-        return valueType.get() == null || valueType.get().isEmpty() ? null : valueType.get();
-    }
-
-    public void setValueType(String valueType) {
-        this.valueType.set(valueType);
+        resolvableType.set(ResolvableType.forClass(Properties.class));
     }
 
     public DPropEntry[] getEntries() {
@@ -68,7 +61,6 @@ public final class DProps extends DElement {
 
     @Override
     public void loadFrom(Document document, Element element) {
-        of(element.getAttribute("value-type")).filter(s -> !s.isEmpty()).ifPresent(valueType::set);
         nodes(element, Element.class).filter(e -> "entry".equals(e.getTagName())).forEach(e -> {
             final DPropEntry entry = new DPropEntry();
             entry.loadFrom(document, e);
@@ -78,11 +70,14 @@ public final class DProps extends DElement {
 
     @Override
     public void writeTo(Document document, Element element) {
-        ofNullable(valueType.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("value-type", e));
         entries.stream().filter(e -> !e.isEmpty()).forEach(e -> {
             final Element el = document.createElement("entry");
             e.writeTo(document, el);
             element.appendChild(el);
         });
+    }
+
+    @Override
+    protected void refresh(ProjectProfile profile, Set<Object> passed) {
     }
 }

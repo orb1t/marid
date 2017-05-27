@@ -31,7 +31,6 @@ import org.marid.spring.xml.BeanFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nonnull;
 import java.util.Comparator;
@@ -112,11 +111,6 @@ public class FileTreeItem extends AbstractTreeItem<BeanFile> {
             }
             return box;
         });
-    }
-
-    @Override
-    public ResolvableType type() {
-        return null;
     }
 
     @Override

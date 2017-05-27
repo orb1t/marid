@@ -18,10 +18,15 @@
 
 package org.marid.spring.xml;
 
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.OOList;
 import org.marid.jfx.beans.OString;
+import org.springframework.core.ResolvableType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
@@ -97,5 +102,35 @@ public class DMap extends DElement {
             e.writeTo(document, el);
             element.appendChild(el);
         });
+    }
+
+    @Override
+    protected void refresh(ProjectProfile profile, Set<Object> passed) {
+        if (!passed.add(this)) {
+            return;
+        }
+        if (resolvableType.get() == ResolvableType.NONE) {
+            if (valueType.get() != null && !valueType.get().isEmpty()) {
+                final Class<?> k = profile.getClass(keyType.get()).orElse(String.class);
+                final Class<?> v = profile.getClass(valueType.get()).orElse(Object.class);
+                resolvableType.set(ResolvableType.forClassWithGenerics(Map.class, k, v));
+            }
+        } else {
+            if (!ResolvableType.forClass(Map.class).isAssignableFrom(resolvableType.get())) {
+                return;
+            }
+            final ResolvableType genericType = ResolvableType.forType(Map.class, resolvableType.get());
+            final ResolvableType k = genericType.getGeneric(0);
+            final ResolvableType v = genericType.getGeneric(1);
+            entries.forEach(e -> {
+                if (k != null && k != ResolvableType.NONE) {
+                    e.keyType.set(k);
+                }
+                if (v != null && v != ResolvableType.NONE) {
+                    e.valueType.set(v);
+                }
+                e.refresh(profile, passed);
+            });
+        }
     }
 }

@@ -18,12 +18,16 @@
 
 package org.marid.spring.xml;
 
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.OOProp;
+import org.marid.jfx.beans.OProp;
 import org.marid.jfx.beans.OString;
+import org.springframework.core.ResolvableType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.Objects;
+import java.util.Set;
 
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
@@ -35,6 +39,9 @@ import static org.marid.spring.xml.DElement.read;
  * @since 0.8
  */
 public class DMapEntry extends AbstractData {
+
+    public final OProp<ResolvableType> keyType = new OProp<>("keyType", ResolvableType.forClass(String.class));
+    public final OProp<ResolvableType> valueType = new OProp<>("valueType", ResolvableType.NONE);
 
     public final OString key = new OString("key");
     public final OOProp<DElement> value = new OOProp<>("value");
@@ -80,5 +87,15 @@ public class DMapEntry extends AbstractData {
     public void writeTo(Document document, Element element) {
         ofNullable(key.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("key", e));
         ofNullable(value.get()).filter(e -> !e.isEmpty()).ifPresent(value::set);
+    }
+
+    @Override
+    protected void refresh(ProjectProfile profile, Set<Object> passed) {
+        if (!passed.add(this)) {
+            return;
+        }
+        if (keyType.get() == ResolvableType.NONE) {
+            keyType.set(ResolvableType.forClass(String.class));
+        }
     }
 }

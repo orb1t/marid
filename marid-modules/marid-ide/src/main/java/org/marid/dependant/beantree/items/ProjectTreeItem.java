@@ -34,7 +34,6 @@ import org.marid.spring.beans.MaridBeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nonnull;
 
@@ -112,11 +111,6 @@ public class ProjectTreeItem extends AbstractTreeItem<ProjectProfile> {
             }
             return box;
         });
-    }
-
-    @Override
-    public ResolvableType type() {
-        return null;
     }
 
     @Override

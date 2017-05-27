@@ -18,6 +18,7 @@
 
 package org.marid.spring.xml;
 
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.OList;
 import org.marid.jfx.beans.OOList;
 import org.w3c.dom.Document;
@@ -25,6 +26,7 @@ import org.w3c.dom.Element;
 
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.marid.misc.Iterables.nodes;
@@ -82,11 +84,6 @@ public final class BeanFile extends AbstractData {
     }
 
     @Override
-    public String toString() {
-        return String.format("BeanFile(%s,%d)", getFilePath(), beans.size());
-    }
-
-    @Override
     public void loadFrom(Document document, Element element) {
         nodes(element, Element.class).filter(e -> "bean".equals(e.getTagName())).forEach(e -> {
             final BeanData beanData = new BeanData();
@@ -102,5 +99,17 @@ public final class BeanFile extends AbstractData {
             b.writeTo(document, e);
             element.appendChild(e);
         });
+    }
+
+    @Override
+    public void refresh(ProjectProfile profile, Set<Object> passed) {
+        if (passed.add(this)) {
+            beans.forEach(b -> b.refresh(profile, passed));
+        }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("BeanFile(%s,%d)", getFilePath(), beans.size());
     }
 }

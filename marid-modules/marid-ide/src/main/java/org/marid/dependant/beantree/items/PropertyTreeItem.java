@@ -18,21 +18,19 @@
 
 package org.marid.dependant.beantree.items;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanData;
 import org.marid.spring.xml.BeanProp;
-import org.marid.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
 
 import javax.annotation.Nonnull;
 
 import static java.lang.Integer.compare;
 import static java.util.Optional.ofNullable;
+import static javafx.beans.binding.Bindings.createStringBinding;
+import static org.marid.util.MethodUtils.readableType;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -53,17 +51,8 @@ public class PropertyTreeItem extends DataTreeItem<BeanProp> {
     }
 
     @Override
-    public ResolvableType type() {
-        return getProfile().getPropType(find(BeanTreeItem.class).elem, elem.getName());
-    }
-
-    @Override
     public ObservableValue<String> getType() {
-        return Bindings.createStringBinding(() -> {
-            final ProjectProfile profile = getProfile();
-            final BeanData data = find(BeanTreeItem.class).elem;
-            return MethodUtils.readableType(profile.getPropType(data, elem.getName()));
-        }, elem);
+        return createStringBinding(() -> readableType(elem.resolvableType.get()), elem, elem.resolvableType);
     }
 
     @Override

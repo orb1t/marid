@@ -18,6 +18,8 @@
 
 package org.marid.spring.xml;
 
+import org.marid.jfx.beans.OProp;
+import org.springframework.core.ResolvableType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -25,6 +27,8 @@ import org.w3c.dom.Element;
  * @author Dmitry Ovchinnikov
  */
 public abstract class DElement extends AbstractData {
+
+    public final OProp<ResolvableType> resolvableType = new OProp<>("resolvableType", ResolvableType.NONE);
 
     public abstract boolean isEmpty();
 

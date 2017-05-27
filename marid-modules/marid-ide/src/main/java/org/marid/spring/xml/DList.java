@@ -18,6 +18,13 @@
 
 package org.marid.spring.xml;
 
+import org.marid.ide.project.ProjectProfile;
+import org.springframework.core.ResolvableType;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
 /**
  * @author Dmitry Ovchinnikov.
  */
@@ -26,5 +33,25 @@ public final class DList extends DCollection {
     @Override
     public boolean isEmpty() {
         return false;
+    }
+
+    @Override
+    protected void refresh(ProjectProfile profile, Set<Object> passed) {
+        if (!passed.add(this)) {
+            return;
+        }
+        if (!ResolvableType.forClass(List.class).isAssignableFrom(resolvableType.get())) {
+            return;
+        }
+        final ResolvableType genericType = ResolvableType.forType(Collection.class, resolvableType.get());
+        final ResolvableType valueType = genericType.getGeneric(0);
+        if (valueType != null && valueType != ResolvableType.NONE) {
+            elements.forEach(e -> {
+                if (e != null) {
+                    e.resolvableType.set(valueType);
+                    e.refresh(profile, passed);
+                }
+            });
+        }
     }
 }

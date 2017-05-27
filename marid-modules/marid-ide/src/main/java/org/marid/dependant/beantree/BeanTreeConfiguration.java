@@ -36,11 +36,9 @@ import static org.marid.ide.common.IdeShapes.profileNode;
 @ComponentScan
 public class BeanTreeConfiguration extends DependantConfiguration<BeanTreeParam> {
 
-    @Bean
+    @Bean(initMethod = "refresh")
     public ProjectProfile profile() {
-        final ProjectProfile profile = param.profile;
-        profile.getBeanFiles().forEach(f -> f.beans.forEach(profile::updateBeanData));
-        return profile;
+        return param.profile;
     }
 
     @Bean

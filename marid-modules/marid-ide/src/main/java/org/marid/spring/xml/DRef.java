@@ -18,9 +18,12 @@
 
 package org.marid.spring.xml;
 
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.OString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.Set;
 
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
@@ -67,5 +70,9 @@ public final class DRef extends DElement {
     @Override
     public void writeTo(Document document, Element element) {
         ofNullable(ref.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("bean", e));
+    }
+
+    @Override
+    protected void refresh(ProjectProfile profile, Set<Object> passed) {
     }
 }

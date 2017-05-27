@@ -18,17 +18,29 @@
 
 package org.marid.spring.xml;
 
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.OList;
 import org.marid.jfx.beans.OOList;
 import org.marid.jfx.beans.OString;
+import org.marid.misc.Calls;
+import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.lang.reflect.Executable;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.marid.misc.Iterables.nodes;
+import static org.springframework.core.ResolvableType.forMethodParameter;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -152,11 +164,6 @@ public final class BeanData extends DElement {
     }
 
     @Override
-    public String toString() {
-        return name.get();
-    }
-
-    @Override
     public void loadFrom(Document document, Element element) {
         of(element.getAttribute("class")).filter(s -> !s.isEmpty()).ifPresent(type::set);
         of(element.getAttribute("name")).filter(s -> !s.isEmpty()).ifPresent(name::set);
@@ -206,5 +213,115 @@ public final class BeanData extends DElement {
             m.writeTo(document, e);
             element.appendChild(e);
         });
+    }
+
+    @Override
+    protected void refresh(ProjectProfile profile, Set<Object> passed) {
+        if (!passed.add(this)) {
+            return;
+        }
+        final Executable executable;
+        final ResolvableType constructorType;
+        if (!isFactoryBean()) {
+            final Class<?> raw = profile.getClass(type.get()).orElse(null);
+            if (raw == null) {
+                return;
+            }
+            final Constructor<?>[] constructors = raw.getConstructors();
+            if (constructors.length == 0) {
+                return;
+            }
+            Arrays.sort(constructors, Comparator.comparingInt(c -> -c.getParameterCount()));
+            executable = constructors[0];
+            constructorType = ResolvableType.forClass(raw);
+        } else if (getFactoryBean() != null && !getFactoryBean().isEmpty()) {
+            final BeanData refBean = profile.getBeanFiles().stream()
+                    .flatMap(f -> f.beans.stream())
+                    .filter(b -> getFactoryBean().equals(b.getName()))
+                    .findFirst()
+                    .orElse(null);
+            if (refBean == null) {
+                return;
+            }
+            refBean.refresh(profile, passed);
+            if (refBean.resolvableType.get() == ResolvableType.NONE) {
+                return;
+            }
+            final Class<?> refClass = refBean.resolvableType.get().getRawClass();
+            if (refClass == null) {
+                return;
+            }
+            final Method[] methods = Stream.of(refClass.getMethods())
+                    .filter(m -> !Modifier.isStatic(m.getModifiers()))
+                    .toArray(Method[]::new);
+            if (methods.length == 0) {
+                return;
+            }
+            Arrays.sort(methods, Comparator.comparingInt(m -> -m.getParameterCount()));
+            executable = methods[0];
+            constructorType = ResolvableType.forMethodReturnType(methods[0], refClass);
+        } else {
+            final Class<?> raw = profile.getClass(type.get()).orElse(null);
+            if (raw == null) {
+                return;
+            }
+            final Method[] methods = Stream.of(raw.getMethods())
+                    .filter(m -> Modifier.isStatic(m.getModifiers()))
+                    .toArray(Method[]::new);
+            if (methods.length == 0) {
+                return;
+            }
+            Arrays.sort(methods, Comparator.comparingInt(m -> -m.getParameterCount()));
+            executable = methods[0];
+            constructorType = ResolvableType.forMethodReturnType(methods[0], raw);
+        }
+
+        final Parameter[] parameters = executable.getParameters();
+        for (int i = 0; i < executable.getParameterCount(); i++) {
+            final Parameter parameter = parameters[i];
+            final BeanArg arg = beanArgs.stream()
+                    .filter(a -> parameter.getName().equals(a.getName()))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        final BeanArg beanArg = new BeanArg();
+                        beanArg.setName(parameter.getName());
+                        beanArgs.add(beanArg);
+                        return beanArg;
+                    });
+            arg.setType(parameter.getType().getName());
+            final MethodParameter mp = executable instanceof Constructor
+                    ? new MethodParameter((Constructor<?>) executable, i)
+                    : new MethodParameter((Method) executable, i);
+            arg.resolvableType.set(forMethodParameter(mp, constructorType));
+
+            arg.refresh(profile, passed);
+        }
+
+        final BeanInfo beanInfo = Calls.call(() -> Introspector.getBeanInfo(constructorType.getRawClass()));
+        final PropertyDescriptor[] props = beanInfo.getPropertyDescriptors();
+        for (final PropertyDescriptor property : props) {
+            if (property.getWriteMethod() != null) {
+                final BeanProp prop = properties.stream()
+                        .filter(p -> property.getName().equals(p.getName()))
+                        .findFirst()
+                        .orElseGet(() -> {
+                            final BeanProp beanProp = new BeanProp();
+                            beanProp.setName(property.getName());
+                            properties.add(beanProp);
+                            return beanProp;
+                        });
+                final MethodParameter mp = new MethodParameter(property.getWriteMethod(), 0);
+                prop.resolvableType.set(forMethodParameter(mp, constructorType));
+
+                prop.refresh(profile, passed);
+            }
+        }
+
+        resolvableType.set(constructorType);
+    }
+
+    @Override
+    public String toString() {
+        return name.get();
     }
 }

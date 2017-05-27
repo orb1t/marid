@@ -30,17 +30,16 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanData;
-import org.marid.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.ResolvableType;
 
 import java.util.Comparator;
 
 import static org.marid.ide.common.SpecialActionConfiguration.RENAME;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.beans.ConstantValue.value;
+import static org.marid.util.MethodUtils.readableType;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -61,8 +60,7 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
 
     @Override
     public ObservableValue<String> getType() {
-        final ProjectProfile profile = getProfile();
-        return Bindings.createStringBinding(() -> MethodUtils.readableType(profile.getType(elem)), elem);
+        return Bindings.createStringBinding(() -> readableType(elem.resolvableType.get()), elem, elem.resolvableType);
     }
 
     @Autowired
@@ -125,16 +123,6 @@ public class BeanTreeItem extends AbstractTreeItem<BeanData> {
             return c.compare(this.elem.getName(), that.elem.getName());
         } else {
             return 0;
-        }
-    }
-
-    public ResolvableType type() {
-        if (getParent() instanceof FileTreeItem) {
-            return getProfile().getType(elem);
-        } else if (getParent() instanceof DataTreeItem) {
-            return ((DataTreeItem<?>) getParent()).type();
-        } else {
-            return ResolvableType.NONE;
         }
     }
 }

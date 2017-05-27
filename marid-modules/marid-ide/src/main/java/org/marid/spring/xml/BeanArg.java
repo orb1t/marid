@@ -18,12 +18,16 @@
 
 package org.marid.spring.xml;
 
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.OOProp;
+import org.marid.jfx.beans.OProp;
 import org.marid.jfx.beans.OString;
+import org.springframework.core.ResolvableType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.Objects;
+import java.util.Set;
 
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
@@ -36,6 +40,8 @@ import static org.marid.spring.xml.DElement.write;
  * @since 0.8
  */
 public class BeanArg extends AbstractData implements DElementHolder {
+
+    public final OProp<ResolvableType> resolvableType = new OProp<>("resolvableType", ResolvableType.NONE);
 
     public final OString name = new OString("name");
     public final OString type = new OString("type");
@@ -99,6 +105,11 @@ public class BeanArg extends AbstractData implements DElementHolder {
         ofNullable(name.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("name", e));
         ofNullable(type.get()).filter(s -> !s.isEmpty()).ifPresent(e -> element.setAttribute("type", e));
         ofNullable(data.get()).filter(e -> !e.isEmpty()).ifPresent(e -> write(document, element, e));
+    }
+
+    @Override
+    protected void refresh(ProjectProfile profile, Set<Object> passed) {
+        refresh(resolvableType.get(), profile, passed);
     }
 
     @Override

@@ -19,7 +19,11 @@
 package org.marid.spring.xml;
 
 import javafx.beans.value.ObservableStringValue;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.OProp;
+import org.springframework.core.ResolvableType;
+
+import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -33,4 +37,14 @@ public interface DElementHolder {
     OProp<DElement> dataProperty();
 
     ObservableStringValue nameProperty();
+
+    default void refresh(ResolvableType type, ProjectProfile profile, Set<Object> passed) {
+        if (!passed.add(this)) {
+            return;
+        }
+        if (getData() != null) {
+            getData().resolvableType.set(type);
+            getData().refresh(profile, passed);
+        }
+    }
 }

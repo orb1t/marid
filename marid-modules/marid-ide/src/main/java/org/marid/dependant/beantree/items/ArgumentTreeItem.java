@@ -18,21 +18,19 @@
 
 package org.marid.dependant.beantree.items;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.spring.xml.BeanArg;
 import org.marid.spring.xml.BeanData;
-import org.marid.util.MethodUtils;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
 
 import javax.annotation.Nonnull;
 
 import static java.lang.Integer.compare;
 import static java.util.Optional.ofNullable;
+import static javafx.beans.binding.Bindings.createStringBinding;
+import static org.marid.util.MethodUtils.readableType;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -54,11 +52,7 @@ public class ArgumentTreeItem extends DataTreeItem<BeanArg> {
 
     @Override
     public ObservableValue<String> getType() {
-        return Bindings.createStringBinding(() -> {
-            final ProjectProfile profile = getProfile();
-            final BeanData data = find(BeanTreeItem.class).elem;
-            return MethodUtils.readableType(profile.getArgType(data, elem.getName()));
-        }, elem);
+        return createStringBinding(() -> readableType(elem.resolvableType.get()), elem, elem.resolvableType);
     }
 
     @Override
@@ -74,10 +68,5 @@ public class ArgumentTreeItem extends DataTreeItem<BeanArg> {
             final Order o2 = o.getClass().getAnnotation(Order.class);
             return compare(ofNullable(o1).map(Order::value).orElse(0), ofNullable(o2).map(Order::value).orElse(0));
         }
-    }
-
-    @Override
-    public ResolvableType type() {
-        return null;
     }
 }
