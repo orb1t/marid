@@ -24,8 +24,6 @@ import org.marid.IdeDependants;
 import org.marid.dependant.project.ProjectParams;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
-import org.marid.dependant.resources.ResourcesConfiguration;
-import org.marid.dependant.resources.ResourcesParams;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -132,10 +130,7 @@ public class ProjectConfiguration {
                 .setIcon("M_MODE_EDIT")
                 .setEventHandler(event -> {
                     final ProjectProfile profile = manager.getProfile();
-                    dependants.start(ResourcesConfiguration.class, new ResourcesParams(profile), context -> {
-                        context.setId("projectResources");
-                        context.setDisplayName("Project Resources");
-                    });
+
                 })
                 .bindDisabled(projectDisabled);
     }

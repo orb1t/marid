@@ -26,9 +26,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.IdePrefs;
 import org.marid.logging.Logs;
-import org.marid.spring.xml.DCollection;
-import org.marid.spring.xml.DElement;
-import org.marid.spring.xml.DRef;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +34,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.Collections.binarySearch;
@@ -99,30 +95,6 @@ public class ProjectManager {
     public void remove(ProjectProfile profile) {
         if (profiles.remove(profile)) {
             profile.delete();
-        }
-    }
-
-    public static void onBeanNameChange(ProjectProfile profile, String oldName, String newName) {
-        profile.getBeanFiles().forEach(beanFile -> beanFile.beans.forEach(beanData -> {
-            if (Objects.equals(beanData.getFactoryBean(), oldName)) {
-                beanData.factoryBean.set(newName);
-            }
-            beanData.beanArgs.forEach(a -> onBeanNameChange(a.getData(), oldName, newName));
-            beanData.properties.forEach(p -> onBeanNameChange(p.getData(), oldName, newName));
-        }));
-    }
-
-    private static void onBeanNameChange(DElement element, String oldName, String newName) {
-        if (element instanceof DRef) {
-            final DRef ref = (DRef) element;
-            if (Objects.equals(ref.getBean(), oldName)) {
-                ref.ref.set(newName);
-            }
-        } else if (element instanceof DCollection) {
-            final DCollection collection = (DCollection) element;
-            for (final DElement e : collection.elements) {
-                onBeanNameChange(e, oldName, newName);
-            }
         }
     }
 

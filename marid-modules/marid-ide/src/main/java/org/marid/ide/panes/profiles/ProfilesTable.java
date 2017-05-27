@@ -18,16 +18,11 @@
 
 package org.marid.ide.panes.profiles;
 
-import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.*;
-import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
-import org.marid.IdeDependants;
-import org.marid.dependant.beantree.BeanTreeConfiguration;
-import org.marid.dependant.beantree.BeanTreeParam;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.project.ProjectManager;
@@ -46,7 +41,6 @@ import java.util.Optional;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.logging.Level.WARNING;
-import static javafx.beans.binding.Bindings.createObjectBinding;
 import static javafx.scene.control.Alert.AlertType.CONFIRMATION;
 import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.control.ButtonType.YES;
@@ -94,29 +88,11 @@ public class ProfilesTable extends TableView<ProjectProfile> {
                 } else {
                     final int index = getIndex();
                     final ProjectProfile profile = getItems().get(index);
-                    setGraphic(IdeShapes.profileNode(profile, 16));
+                    setGraphic(IdeShapes.circle(profile.getName().hashCode(), 16));
                 }
             }
         });
         getColumns().add(column);
-    }
-
-    @Order(2)
-    @Autowired
-    public void initBeansColumn() {
-        final TableColumn<ProjectProfile, Integer> column = new TableColumn<>();
-        column.textProperty().bind(ls("Beans"));
-        column.setPrefWidth(100);
-        column.setMaxWidth(150);
-        column.setCellValueFactory(ProfilesTable::beanCount);
-        getColumns().add(column);
-    }
-
-    private static ObjectBinding<Integer> beanCount(CellDataFeatures<ProjectProfile, Integer> features) {
-        return createObjectBinding(
-                () -> features.getValue().getBeanFiles().stream().mapToInt(f -> f.beans.size()).sum(),
-                features.getValue().getBeanFiles()
-        );
     }
 
     @Autowired
@@ -126,20 +102,6 @@ public class ProfilesTable extends TableView<ProjectProfile> {
             row.disableProperty().bind(row.itemProperty().isNull());
             row.setContextMenu(specialActions.contextMenu(() -> actionMap));
             return row;
-        });
-    }
-
-    @Autowired
-    private void initEdit(IdeDependants dependants, ProjectManager projectManager, FxAction editAction) {
-        editAction.on(this, action -> {
-            action.setEventHandler(event -> {
-                final ProjectProfile profile = projectManager.getProfile();
-                dependants.start(BeanTreeConfiguration.class, new BeanTreeParam(profile), context -> {
-                    context.setId("treeEditor");
-                    context.setDisplayName("Tree Editor");
-                });
-            });
-            action.bindDisabled(getSelectionModel().selectedItemProperty().isNull());
         });
     }
 

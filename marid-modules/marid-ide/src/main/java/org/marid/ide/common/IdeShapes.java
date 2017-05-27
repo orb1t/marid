@@ -19,17 +19,8 @@
 package org.marid.ide.common;
 
 import com.google.common.primitives.Ints;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import org.marid.ide.project.ProjectProfile;
-import org.marid.spring.xml.BeanData;
-import org.marid.spring.xml.BeanFile;
-import org.marid.spring.xml.DRef;
-
-import java.util.Objects;
 
 import static java.lang.Byte.toUnsignedInt;
 import static java.util.stream.IntStream.range;
@@ -46,31 +37,7 @@ public interface IdeShapes {
         return new Color(d[0], d[1], d[2], 1 - d[3] / 2.0);
     }
 
-    static Circle ref(DRef ref, int size) {
-        return new Circle(size / 2, color(Objects.hash(ref.getBean())));
-    }
-
-    static Circle ref(String ref, int size) {
-        return new Circle(size / 2, color(Objects.hash(ref)));
-    }
-
-    static Circle beanNode(BeanData beanData, int size) {
-        return new Circle(size / 2, color(Objects.hash(beanData.getName())));
-    }
-
-    static Rectangle profileNode(ProjectProfile profile, int size) {
-        return new Rectangle(size, size, color(Objects.hash(profile.getName())));
-    }
-
-    static Circle map(String name, int size) {
-        final Circle circle = new Circle(size / 2, color(name.hashCode()));
-        return circle;
-    }
-
-    static Node fileNode(BeanFile file, int size) {
-        final double h = size / Math.sqrt(2);
-        final Rectangle node = new Rectangle(h, h, color(file.getFilePath().hashCode()));
-        node.setRotate(45);
-        return new Group(node);
+    static Circle circle(int hash, int size) {
+        return new Circle(size / 2, color(hash));
     }
 }

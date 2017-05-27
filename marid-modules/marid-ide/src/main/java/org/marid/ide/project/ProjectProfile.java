@@ -19,40 +19,25 @@
 package org.marid.ide.project;
 
 import com.google.common.io.MoreFiles;
-import javafx.application.Platform;
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.marid.jfx.beans.OOList;
-import org.marid.misc.Urls;
-import org.marid.spring.xml.BeanFile;
-import org.marid.spring.xml.MaridBeanDefinitionLoader;
-import org.marid.spring.xml.MaridBeanDefinitionSaver;
-import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Optional;
-import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static java.util.logging.Level.*;
+import static java.util.logging.Level.WARNING;
 import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 import static org.marid.logging.Log.log;
 
@@ -75,8 +60,6 @@ public class ProjectProfile {
     private final Path beansDirectory;
     private final Path repository;
     private final Logger logger;
-    private final OOList<BeanFile> beanFiles;
-    private volatile URLClassLoader classLoader;
 
     ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -95,44 +78,14 @@ public class ProjectProfile {
         model = loadModel();
         model.setModelVersion("4.0.0");
         createFileStructure();
-        beanFiles = loadBeanFiles();
         init();
-        classLoader = classLoader();
-    }
-
-    public URLClassLoader getClassLoader() {
-        return classLoader;
-    }
-
-    private URLClassLoader classLoader() {
-        try (final Stream<URL> urls = Urls.classpath(target.resolve("lib"), target.resolve("classes"))) {
-            return new URLClassLoader(urls.toArray(URL[]::new));
-        }
-    }
-
-    public boolean containsBean(String name) {
-        return beanFiles.stream().anyMatch(f -> f.beans.stream().anyMatch(b -> name.equals(b.getName())));
-    }
-
-    public String generateBeanName(String name) {
-        while (containsBean(name)) {
-            name += "_new";
-        }
-        return name;
     }
 
     private void close() {
-        try (final URLClassLoader classLoader = this.classLoader) {
-            log(logger, INFO, "Closing a class loader {0}", classLoader);
-        } catch (IOException x) {
-            log(logger, WARNING, "Class loader close error", x);
-        }
     }
 
     void update() throws Exception {
         close();
-        classLoader = classLoader();
-        Platform.runLater(this::refresh);
     }
 
     private void init() {
@@ -161,34 +114,6 @@ public class ProjectProfile {
         model.setGroupId("org.myproject");
         model.setVersion("1.0-SNAPSHOT");
         return model;
-    }
-
-    private OOList<BeanFile> loadBeanFiles() {
-        final OOList<BeanFile> list = new OOList<>();
-        try (final Stream<Path> stream = Files.walk(beansDirectory)) {
-            stream.filter(p -> p.getFileName().toString().endsWith(".xml"))
-                    .map(p -> {
-                        final BeanFile template = BeanFile.beanFile(getBeansDirectory(), p);
-                        try {
-                            final BeanFile file = MaridBeanDefinitionLoader.load(p);
-                            file.path.setAll(template.path);
-                            return file;
-                        } catch (Exception x) {
-                            log(logger, WARNING, "Unable to load {0}", x, p);
-                        }
-                        return template;
-                    })
-                    .forEach(list::add);
-        } catch (IOException x) {
-            log(logger, WARNING, "Unable to load bean files", x);
-        } catch (Exception x) {
-            log(logger, SEVERE, "Unknown error", x);
-        }
-        return list;
-    }
-
-    public OOList<BeanFile> getBeanFiles() {
-        return beanFiles;
     }
 
     public Model getModel() {
@@ -232,14 +157,6 @@ public class ProjectProfile {
         return logger;
     }
 
-    public Optional<Class<?>> getClass(String type) {
-        try {
-            return Optional.of(ClassUtils.getClass(classLoader, type, false));
-        } catch (Exception x) {
-            return Optional.empty();
-        }
-    }
-
     private void createFileStructure() {
         try {
             for (final Path dir : asList(srcMainJava, beansDirectory, srcTestJava, srcTestResources)) {
@@ -267,22 +184,7 @@ public class ProjectProfile {
     }
 
     private void saveBeanFiles() {
-        try {
-            MoreFiles.deleteDirectoryContents(getBeansDirectory());
-        } catch (IOException x) {
-            log(logger, WARNING, "Unable to clean beans directory", x);
-            return;
-        }
-        final Path base = getBeansDirectory();
-        for (final BeanFile file : beanFiles) {
-            final Path path = file.path(base);
-            try {
-                Files.createDirectories(path.getParent());
-                MaridBeanDefinitionSaver.write(path, file);
-            } catch (Exception x) {
-                log(logger, WARNING, "Unable to save {0}", x, path);
-            }
-        }
+
     }
 
     public void save() {
@@ -316,8 +218,5 @@ public class ProjectProfile {
     }
 
     public void refresh() {
-        final Set<Object> passed = Collections.newSetFromMap(new IdentityHashMap<>());
-        ResolvableType.clearCache();
-        getBeanFiles().forEach(f -> f.refresh(this, passed));
     }
 }
