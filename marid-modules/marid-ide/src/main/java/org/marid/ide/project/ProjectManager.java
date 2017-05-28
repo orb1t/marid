@@ -46,12 +46,13 @@ import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 @Component
 public class ProjectManager {
 
+    private final Path profilesDir;
     private final ObjectProperty<ProjectProfile> profile = new SimpleObjectProperty<>();
     private final ObservableList<ProjectProfile> profiles = FXCollections.observableArrayList();
 
     @Autowired
     public ProjectManager(Logs logs) {
-        final Path profilesDir = Paths.get(USER_HOME, "marid", "profiles");
+        profilesDir = Paths.get(USER_HOME, "marid", "profiles");
         try (final Stream<Path> stream = Files.list(profilesDir)) {
             stream.map(p -> new ProjectProfile(p.getFileName().toString())).forEach(profiles::add);
         } catch (Exception x) {
@@ -60,6 +61,10 @@ public class ProjectManager {
         profiles.sort(Comparator.comparing(ProjectProfile::getName));
         final String profileName = IdePrefs.PREFERENCES.get("profile", null);
         profiles.stream().filter(p -> p.getName().equals(profileName)).findAny().ifPresent(profile::set);
+    }
+
+    public Path getProfilesDir() {
+        return profilesDir;
     }
 
     @PreDestroy

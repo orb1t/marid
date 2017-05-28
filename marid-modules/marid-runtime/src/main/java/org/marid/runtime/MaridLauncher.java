@@ -18,9 +18,18 @@
 
 package org.marid.runtime;
 
+
 import org.jboss.logmanager.LogManager;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.env.SimpleCommandLinePropertySource;
+import org.jboss.weld.environment.se.Weld;
+import org.jboss.weld.environment.se.WeldContainer;
+
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.concurrent.locks.LockSupport;
+
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.SEVERE;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -28,16 +37,50 @@ import org.springframework.core.env.SimpleCommandLinePropertySource;
 public class MaridLauncher {
 
     public static void main(String... args) throws Exception {
+        // Use JBoss LogManager instead of JUL
         System.setProperty("java.util.logging.manager", LogManager.class.getName());
-        final GenericApplicationContext context = new MaridBaseApplicationContext();
-        context.registerShutdownHook();
-        context.getEnvironment().getPropertySources().addFirst(new SimpleCommandLinePropertySource(args));
+
+        // Weld container
+        final WeldContainer container;
         try {
-            context.refresh();
-            context.start();
-        } catch (Exception x) {
-            x.printStackTrace();
-            System.exit(3);
+            final Weld weld = new Weld(args.length > 0 ? args[0] : "marid");
+            container = weld.initialize();
+            log(INFO, "Initialized {0}", weld.getContainerId());
+        } catch (Exception e) {
+            log(SEVERE, "Container initialization failed", e);
+            return;
         }
+
+        // Input buffer
+        final StringBuilder buffer = new StringBuilder();
+        final Reader reader = new InputStreamReader(System.in);
+
+        // Command processing loop
+        COMMANDS:
+        while (container.isRunning() && !Thread.interrupted()) {
+            while (reader.ready()) {
+                final int c = reader.read();
+                if (c < 0) {
+                    log(SEVERE, "Broken pipe");
+                    break COMMANDS;
+                }
+                buffer.append((char) c);
+            }
+            final int i = buffer.indexOf(System.lineSeparator());
+            if (i >= 0) {
+                final String line = buffer.substring(0, i).trim();
+                buffer.delete(0, i + System.lineSeparator().length());
+                switch (line) {
+                    case "close":
+                        container.close();
+                        break;
+                    case "exit":
+                        container.close();
+                        break COMMANDS;
+                }
+            }
+            LockSupport.parkNanos(100_000_000L);
+        }
+        log(INFO, "Exited {0}", container.getId());
     }
 }

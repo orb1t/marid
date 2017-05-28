@@ -29,9 +29,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.marid</groupId>
-            <artifactId>marid-spring</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.jboss.weld.se</groupId>
+            <artifactId>weld-se-shaded</artifactId>
         </dependency>
 
         <dependency>
@@ -41,16 +40,8 @@
 
         <dependency>
             <groupId>org.marid</groupId>
-            <artifactId>marid-db</artifactId>
+            <artifactId>marid-util</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.marid</groupId>
-            <artifactId>marid-proto</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

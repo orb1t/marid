@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Dmitry Ovchinnikov
+ * Copyright (c) 2017 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,10 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.runtime;
+package org.marid.ide.panes.structure;
+
+import javafx.scene.control.TreeView;
+import org.marid.ide.project.ProjectManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.nio.file.Path;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface MaridCloseAction extends Runnable {
+@Component
+public class ProjectStructureTree extends TreeView<Path> {
+
+    private final ProjectManager projectManager;
+
+    @Autowired
+    public ProjectStructureTree(ProjectManager projectManager) {
+        this.projectManager = projectManager;
+    }
 }

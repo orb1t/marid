@@ -37,13 +37,7 @@
     <dependencies>
         <dependency>
             <groupId>org.marid</groupId>
-            <artifactId>marid-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.marid</groupId>
-            <artifactId>marid-spring</artifactId>
+            <artifactId>marid-runtime</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

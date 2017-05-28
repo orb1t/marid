@@ -22,7 +22,6 @@ import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import org.marid.logging.Logs;
 import org.marid.maven.MavenBuildResult;
 import org.marid.maven.MavenProjectBuilder;
 import org.marid.maven.ProjectBuilder;
@@ -38,11 +37,6 @@ import java.util.function.Consumer;
 public class ProjectMavenBuilder {
 
     private final BooleanProperty buildState = new SimpleBooleanProperty(false);
-    private final Logs log;
-
-    public ProjectMavenBuilder(Logs log) {
-        this.log = log;
-    }
 
     void build(ProjectProfile profile, Consumer<MavenBuildResult> consumer) {
         final Thread thread = new Thread(() -> {
