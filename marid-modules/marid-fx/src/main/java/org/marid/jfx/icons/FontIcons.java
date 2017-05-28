@@ -19,10 +19,12 @@
 package org.marid.jfx.icons;
 
 import javafx.scene.Node;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import org.jetbrains.annotations.PropertyKey;
 
+import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -59,8 +61,9 @@ public class FontIcons {
         }
     }
 
-    public static Text glyphIcon(@PropertyKey(resourceBundle = "fonts.meta") String type, double size) {
-        if (type == null || type.length() < 3) {
+    public static Text glyphIcon(@Nonnull @PropertyKey(resourceBundle = "fonts.meta") String type,
+                                 double size) {
+        if (type.length() < 3) {
             return glyphIcon("F_SMILE_ALT", size);
         } else {
             final Text label = new Text();
@@ -68,6 +71,14 @@ public class FontIcons {
             label.setText(SYMBOLS.getOrDefault(type, ""));
             return label;
         }
+    }
+
+    public static Text glyph(@Nonnull @PropertyKey(resourceBundle = "fonts.meta") String type,
+                             double size,
+                             @Nonnull Color color) {
+        final Text text = glyphIcon(type, size);
+        text.setStroke(color);
+        return text;
     }
 
     private static String family(String type) {

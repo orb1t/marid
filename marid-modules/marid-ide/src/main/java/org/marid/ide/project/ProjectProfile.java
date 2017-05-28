@@ -155,12 +155,28 @@ public class ProjectProfile {
         return src;
     }
 
+    public Path getSrcMain() {
+        return srcMain;
+    }
+
     public Path getSrcMainJava() {
         return srcMainJava;
     }
 
     public Path getSrcMainResources() {
         return srcMainResources;
+    }
+
+    public Path getSrcTest() {
+        return srcTest;
+    }
+
+    public Path getSrcTestJava() {
+        return srcTestJava;
+    }
+
+    public Path getSrcTestResources() {
+        return srcTestResources;
     }
 
     public Path getTarget() {

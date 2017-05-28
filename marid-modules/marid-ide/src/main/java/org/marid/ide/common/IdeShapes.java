@@ -20,7 +20,7 @@ package org.marid.ide.common;
 
 import com.google.common.primitives.Ints;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
+import javafx.scene.shape.*;
 
 import static java.lang.Byte.toUnsignedInt;
 import static java.util.stream.IntStream.range;
@@ -39,5 +39,23 @@ public interface IdeShapes {
 
     static Circle circle(int hash, int size) {
         return new Circle(size / 2, color(hash));
+    }
+
+    static Rectangle rect(int hash, int size) {
+        return new Rectangle(size, size, color(hash));
+    }
+
+    static Path javaFile(int hash, int size) {
+        final Path path = new Path(
+                new MoveTo(0, size / 2.0),
+                new LineTo(size / 2.0, size),
+                new LineTo(size, size / 2.0),
+                new LineTo(size / 2.0, 0),
+                new ClosePath()
+        );
+        final Color color = color(hash);
+        path.setStroke(color.darker());
+        path.setFill(color);
+        return path;
     }
 }

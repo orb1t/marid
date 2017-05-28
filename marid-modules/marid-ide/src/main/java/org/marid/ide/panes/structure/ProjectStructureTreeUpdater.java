@@ -66,6 +66,14 @@ public class ProjectStructureTreeUpdater implements Closeable {
         this.tree = tree;
         this.watchService = root.getFileSystem().newWatchService();
         process(root);
+        Platform.runLater(() -> collapse(tree.getRoot()));
+    }
+
+    private void collapse(TreeItem<Path> item) {
+        if (item.getChildren().stream().allMatch(i -> i.getChildren().isEmpty())) {
+            item.setExpanded(false);
+        }
+        item.getChildren().forEach(this::collapse);
     }
 
     @PostConstruct
@@ -123,6 +131,9 @@ public class ProjectStructureTreeUpdater implements Closeable {
                 try {
                     for (final WatchEvent<?> event : key.pollEvents()) {
                         final Path path = dir.resolve((Path) event.context());
+                        if (Files.isHidden(path)) {
+                            continue;
+                        }
                         if (event.kind() == ENTRY_CREATE) {
                             process(path);
                         } else if (event.kind() == ENTRY_DELETE) {
@@ -142,7 +153,11 @@ public class ProjectStructureTreeUpdater implements Closeable {
     }
 
     private void onAdd(Path path, TreeItem<Path> item) {
-        if (path.equals(item.getValue()) || !path.startsWith(item.getValue())) {
+        if (path.equals(item.getValue())) {
+            Event.fireEvent(item, new TreeModificationEvent<>(TreeItem.valueChangedEvent(), item));
+            return;
+        }
+        if (!path.startsWith(item.getValue())) {
             return;
         }
         if (item.getChildren().stream().map(TreeItem::getValue).anyMatch(path::startsWith)) {
