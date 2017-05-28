@@ -25,6 +25,8 @@ import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.marid.ide.model.MainJavaClass;
+import org.marid.jfx.beans.OList;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -60,6 +62,7 @@ public class ProjectProfile {
     private final Path beansDirectory;
     private final Path repository;
     private final Logger logger;
+    private final OList<MainJavaClass> mainJavaClasses = new OList<>();
 
     ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -81,11 +84,8 @@ public class ProjectProfile {
         init();
     }
 
-    private void close() {
-    }
-
-    void update() throws Exception {
-        close();
+    public OList<MainJavaClass> getMainJavaClasses() {
+        return mainJavaClasses;
     }
 
     private void init() {
@@ -138,6 +138,10 @@ public class ProjectProfile {
 
     public Path getSrc() {
         return src;
+    }
+
+    public Path getSrcMainJava() {
+        return srcMainJava;
     }
 
     public Path getSrcMainResources() {
@@ -195,7 +199,6 @@ public class ProjectProfile {
 
     void delete() {
         try {
-            close();
             MoreFiles.deleteRecursively(path);
         } catch (Exception x) {
             log(logger, WARNING, "Unable to delete {0}", x, getName());
@@ -215,8 +218,5 @@ public class ProjectProfile {
     @Override
     public String toString() {
         return getName();
-    }
-
-    public void refresh() {
     }
 }

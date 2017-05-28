@@ -35,7 +35,6 @@ import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static org.marid.ide.IdeNotifications.n;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -95,8 +94,6 @@ public class ProjectConfiguration {
                                 thrown = null;
                             }
                             n(INFO, "[{0}] Built in {1}s", thrown, profile, result.time / 1000f);
-                            profile.update();
-                            log(INFO, "[{0}] Updated", profile);
                         } catch (Exception x) {
                             n(WARNING, "Unable to update cache {0}", x, profile);
                         }

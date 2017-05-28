@@ -101,6 +101,20 @@ public class OList<E> extends ModifiableObservableListBase<E> implements OCleana
         }
     }
 
+    public void update(int from, int to) {
+        beginChange();
+        for (int i = from; i < to; i++) {
+            nextUpdate(i);
+        }
+        endChange();
+    }
+
+    public void update(int pos) {
+        beginChange();
+        nextUpdate(pos);
+        endChange();
+    }
+
     @Override
     public void clean() {
         fireChange(new EmptyListChange<>(this));
