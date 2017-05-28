@@ -18,6 +18,7 @@
 
 package org.marid.ide.panes.profiles;
 
+import org.marid.ide.panes.structure.ProjectStructureTree;
 import org.marid.ide.tabs.IdeTab;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -34,8 +35,8 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 public class ProfilesTab extends IdeTab {
 
     @Autowired
-    public ProfilesTab(ProfilesTable table) {
-        super(table, ls("Profiles"), () -> glyphIcon("O_BOOK", 16));
+    public ProfilesTab(ProjectStructureTree projectStructureTree) {
+        super(projectStructureTree, ls("Profiles"), () -> glyphIcon("O_BOOK", 16));
         setClosable(false);
     }
 }

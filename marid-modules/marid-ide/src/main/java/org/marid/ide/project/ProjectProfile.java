@@ -32,16 +32,21 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.function.BiFunction;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.logging.Level.WARNING;
 import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 import static org.marid.logging.Log.log;
+import static org.marid.misc.Builder.build;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -94,6 +99,16 @@ public class ProjectProfile {
             profile.setId("conf");
             model.getProfiles().add(profile);
         }
+
+        loadJavaClasses(mainJavaClasses, srcMainJava, MainJavaClass::new);
+    }
+
+    private <T> void loadJavaClasses(List<T> list, Path base, BiFunction<ProjectProfile, Path, T> mapper) {
+        try (final Stream<Path> files = Files.find(base, 128, (p, a) -> p.toString().endsWith(".java"))) {
+            files.forEach(p -> list.add(mapper.apply(this, p)));
+        } catch (IOException ioe) {
+            throw new UncheckedIOException(ioe);
+        }
     }
 
     private Model loadModel() {
@@ -107,13 +122,13 @@ public class ProjectProfile {
         } catch (XmlPullParserException x) {
             log(logger, WARNING, "Unable to parse pom.xml", x);
         }
-        final Model model = new Model();
-        model.setOrganization(new Organization());
-        model.setName(getName());
-        model.setArtifactId(getName());
-        model.setGroupId("org.myproject");
-        model.setVersion("1.0-SNAPSHOT");
-        return model;
+        return build(new Model(), model -> {
+            model.setOrganization(new Organization());
+            model.setName(getName());
+            model.setArtifactId(getName());
+            model.setGroupId("org.myproject");
+            model.setVersion("1.0-SNAPSHOT");
+        });
     }
 
     public Model getModel() {
@@ -187,14 +202,10 @@ public class ProjectProfile {
         }
     }
 
-    private void saveBeanFiles() {
-
-    }
-
     public void save() {
         createFileStructure();
         savePomFile();
-        saveBeanFiles();
+        mainJavaClasses.forEach(c -> c.save(this));
     }
 
     void delete() {
