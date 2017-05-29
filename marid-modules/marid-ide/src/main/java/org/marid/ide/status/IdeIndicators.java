@@ -22,7 +22,10 @@ import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.SelectionModel;
+import javafx.scene.control.Separator;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +34,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanInfo;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -45,7 +43,6 @@ import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.stream.Stream;
 
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
@@ -78,26 +75,6 @@ public class IdeIndicators {
     }
 
     @Order(2)
-    @Autowired
-    public void initCpuLoad() throws Exception {
-        final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        final ObjectName osObjectName = new ObjectName("java.lang", "type", "OperatingSystem");
-        final MBeanInfo beanInfo = server.getMBeanInfo(osObjectName);
-        final MBeanAttributeInfo processCpuLoadAttribute = Stream.of(beanInfo.getAttributes())
-                .filter(a -> "ProcessCpuLoad".equals(a.getName()))
-                .findFirst()
-                .orElse(null);
-        if (processCpuLoadAttribute != null) {
-            final ProgressBar indicator = new ProgressBar(0);
-            updateTasks.add(() -> {
-                final Number value = (Number) server.getAttribute(osObjectName, "ProcessCpuLoad");
-                return () -> indicator.setProgress(value.doubleValue());
-            });
-            add(glyphIcon("D_TELEVISION", 16), indicator);
-        }
-    }
-
-    @Order(3)
     @Autowired
     public void initDateTime() throws Exception {
         final Label timeLabel = new Label("", glyphIcon("O_CLOCK", 16));

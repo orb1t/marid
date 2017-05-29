@@ -84,17 +84,24 @@ public class ProjectStructureTreeUpdater implements Closeable {
     }
 
     private void process(Path path) throws IOException {
-        Platform.runLater(() -> onAdd(path, tree.getRoot()));
-        if (Files.isDirectory(path)) {
-            if (!watchKeyMap.containsKey(path)) {
-                watchKeyMap.put(path, path.register(watchService, EVENTS));
+        try {
+            if (Files.isHidden(path)) {
+                return;
             }
-            try (final Stream<Path> stream = Files.list(path)) {
-                final List<Path> paths = stream.collect(Collectors.toList());
-                for (final Path p : paths) {
-                    process(p);
+            Platform.runLater(() -> onAdd(path, tree.getRoot()));
+            if (Files.isDirectory(path)) {
+                if (!watchKeyMap.containsKey(path)) {
+                    watchKeyMap.put(path, path.register(watchService, EVENTS));
+                }
+                try (final Stream<Path> stream = Files.list(path)) {
+                    final List<Path> paths = stream.collect(Collectors.toList());
+                    for (final Path p : paths) {
+                        process(p);
+                    }
                 }
             }
+        } catch (NoSuchFileException x) {
+            // ignore
         }
     }
 
@@ -131,9 +138,6 @@ public class ProjectStructureTreeUpdater implements Closeable {
                 try {
                     for (final WatchEvent<?> event : key.pollEvents()) {
                         final Path path = dir.resolve((Path) event.context());
-                        if (Files.isHidden(path)) {
-                            continue;
-                        }
                         if (event.kind() == ENTRY_CREATE) {
                             process(path);
                         } else if (event.kind() == ENTRY_DELETE) {

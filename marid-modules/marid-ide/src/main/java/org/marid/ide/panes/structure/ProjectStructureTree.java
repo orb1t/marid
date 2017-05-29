@@ -25,14 +25,12 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import org.marid.ide.project.ProjectManager;
-import org.marid.io.IOFunction;
 import org.marid.jfx.beans.ConstantValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
@@ -85,19 +83,19 @@ public class ProjectStructureTree extends TreeTableView<Path> {
         column.textProperty().bind(ls("Size"));
         column.setCellValueFactory(e -> {
             final Path path = e.getValue().getValue();
-            final long size;
             try {
+                final long size;
                 if (Files.isDirectory(path)) {
                     try (final Stream<Path> stream = Files.walk(path)) {
-                        size = stream.map((IOFunction<Path, Long>) Files::size).mapToLong(Long::longValue).sum();
+                        size = stream.map(Path::toFile).mapToLong(File::length).sum();
                     }
                 } else {
-                    size = Files.size(path);
+                    size = path.toFile().length();
                 }
-            } catch (IOException x) {
-                throw new UncheckedIOException(x);
+                return ConstantValue.value(NumberFormat.getIntegerInstance().format(size));
+            } catch (Exception x) {
+                return ConstantValue.value("-1");
             }
-            return ConstantValue.value(NumberFormat.getIntegerInstance().format(size));
         });
         column.setCellFactory(e -> {
             final TreeTableCell<Path, String> cell = new TextFieldTreeTableCell<>();

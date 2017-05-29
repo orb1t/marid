@@ -30,11 +30,14 @@ import org.springframework.stereotype.Component;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
-import java.util.Arrays;
+import java.lang.reflect.Method;
+import java.util.function.DoubleSupplier;
 
+import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static org.marid.l10n.L10n.s;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -45,18 +48,36 @@ public class OperatingSystemWidget extends LineChart<Number, Number> {
 
     private final int count = 60;
     private final OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+    private final DoubleSupplier loadSupplier;
 
     public OperatingSystemWidget() {
         super(new NumberAxis(), new NumberAxis());
-        getData().addAll(Arrays.asList(
-                systemLoad()
-        ));
+        this.loadSupplier = loadSupplier();
+        getData().add(systemLoad());
         setAnimated(false);
     }
 
     @Autowired
     private void init(GridPane monitorGridPane) {
         monitorGridPane.add(this, 1, 0);
+    }
+
+    private DoubleSupplier loadSupplier() {
+        try {
+            final Method method = operatingSystemMXBean.getClass().getMethod("getProcessCpuLoad");
+            method.setAccessible(true);
+            method.invoke(operatingSystemMXBean);
+            return () -> {
+                try {
+                    return (double) method.invoke(operatingSystemMXBean);
+                } catch (ReflectiveOperationException x) {
+                    return operatingSystemMXBean.getSystemLoadAverage();
+                }
+            };
+        } catch (Throwable x) {
+            log(WARNING, "Unable to get lambda from OperatingSystemMXBean", x);
+            return operatingSystemMXBean::getSystemLoadAverage;
+        }
     }
 
     private Series<Number, Number> systemLoad() {
@@ -78,8 +99,7 @@ public class OperatingSystemWidget extends LineChart<Number, Number> {
 
     @Scheduled(fixedRate = 250L)
     private void tick() {
-        final double systemLoadAverage = operatingSystemMXBean.getSystemLoadAverage();
-        final Double[] values = {systemLoadAverage};
+        final Double[] values = {loadSupplier.getAsDouble()};
         Platform.runLater(() -> {
             for (int i = 0; i < getData().size(); i++) {
                 final Series<Number, Number> series = getData().get(i);
