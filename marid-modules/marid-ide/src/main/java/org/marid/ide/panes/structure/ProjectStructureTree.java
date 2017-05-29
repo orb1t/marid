@@ -19,10 +19,7 @@
 package org.marid.ide.panes.structure;
 
 import javafx.geometry.Pos;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import org.marid.ide.project.ProjectManager;
 import org.marid.jfx.beans.ConstantValue;
@@ -30,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -106,5 +104,13 @@ public class ProjectStructureTree extends TreeTableView<Path> {
         column.setMaxWidth(400);
         column.setMinWidth(200);
         getColumns().add(column);
+    }
+
+    @PostConstruct
+    private void initRowFactory() {
+        setRowFactory(param -> {
+            final TreeTableRow<Path> row = new TreeTableRow<>();
+            return row;
+        });
     }
 }

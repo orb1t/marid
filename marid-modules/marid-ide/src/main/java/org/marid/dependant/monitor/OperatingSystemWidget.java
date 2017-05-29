@@ -18,6 +18,7 @@
 
 package org.marid.dependant.monitor;
 
+import com.sun.management.OperatingSystemMXBean;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
@@ -29,15 +30,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
-import java.lang.reflect.Method;
 import java.util.function.DoubleSupplier;
 
-import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static org.marid.l10n.L10n.s;
-import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -47,7 +44,6 @@ import static org.marid.logging.Log.log;
 public class OperatingSystemWidget extends LineChart<Number, Number> {
 
     private final int count = 60;
-    private final OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
     private final DoubleSupplier loadSupplier;
 
     public OperatingSystemWidget() {
@@ -64,19 +60,10 @@ public class OperatingSystemWidget extends LineChart<Number, Number> {
 
     private DoubleSupplier loadSupplier() {
         try {
-            final Method method = operatingSystemMXBean.getClass().getMethod("getProcessCpuLoad");
-            method.setAccessible(true);
-            method.invoke(operatingSystemMXBean);
-            return () -> {
-                try {
-                    return (double) method.invoke(operatingSystemMXBean);
-                } catch (ReflectiveOperationException x) {
-                    return operatingSystemMXBean.getSystemLoadAverage();
-                }
-            };
-        } catch (Throwable x) {
-            log(WARNING, "Unable to get lambda from OperatingSystemMXBean", x);
-            return operatingSystemMXBean::getSystemLoadAverage;
+            Class.forName("com.sun.management.OperatingSystemMXBean");
+            return ((OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean())::getProcessCpuLoad;
+        } catch (Exception x) {
+            return ManagementFactory.getOperatingSystemMXBean()::getSystemLoadAverage;
         }
     }
 
