@@ -29,7 +29,7 @@ import java.util.Optional;
 public class JavaSettings extends AbstractSettings {
 
     public String getJavaExecutable() {
-        return preferences.get("javaExecutable", "java");
+        return preferences.get("javaExecutable", "");
     }
 
     public void setJavaExecutable(String value) {
