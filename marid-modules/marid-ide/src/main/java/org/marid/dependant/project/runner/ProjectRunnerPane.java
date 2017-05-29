@@ -115,8 +115,8 @@ public class ProjectRunnerPane extends BorderPane {
 
     private Process process(JavaSettings javaSettings) throws IOException {
         final List<String> args = new ArrayList<>();
-        args.add(ProcessHandle.current().info().command().orElse(javaSettings.getJavaExecutable()));
-        args.add("--permit-illegal-access");
+        final String javaExecutable = javaSettings.getJavaExecutable();
+        args.add(javaExecutable);
         Collections.addAll(args, javaSettings.getJavaArguments());
         final Model model = profile.getModel();
         final Properties properties = model.getProperties();
