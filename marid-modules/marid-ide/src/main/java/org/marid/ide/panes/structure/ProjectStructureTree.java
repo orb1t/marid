@@ -21,20 +21,27 @@ package org.marid.ide.panes.structure;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
+import org.marid.ide.panes.structure.editor.FileEditor;
 import org.marid.ide.project.ProjectManager;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.ConstantValue;
+import org.marid.jfx.menu.MaridContextMenu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -106,10 +113,37 @@ public class ProjectStructureTree extends TreeTableView<Path> {
         getColumns().add(column);
     }
 
-    @PostConstruct
-    private void initRowFactory() {
+    @Autowired
+    private void initRowFactory(ProjectManager projectManager, FileEditor... fileEditors) {
         setRowFactory(param -> {
             final TreeTableRow<Path> row = new TreeTableRow<>();
+            row.setContextMenu(new MaridContextMenu(m -> {
+                m.getItems().clear();
+
+                final Path file = row.getItem();
+                if (file == null) {
+                    return;
+                }
+
+                final ProjectProfile profile = projectManager.getProfiles().stream()
+                        .filter(p -> file.startsWith(p.getPath()))
+                        .findFirst()
+                        .orElse(null);
+
+                final Map<String, List<MenuItem>> map = new TreeMap<>();
+                for (final FileEditor editor : fileEditors) {
+                    if (editor.isEditable(profile, file)) {
+                        final MenuItem item = new MenuItem(s(editor.getName()), editor.getIcon());
+                        item.setOnAction(event -> editor.edit(profile, file));
+                        map.computeIfAbsent(editor.getGroup(), k -> new ArrayList<>()).add(item);
+                    }
+                }
+
+                map.values().forEach(items -> {
+                    m.getItems().addAll(items);
+                    m.getItems().add(new SeparatorMenuItem());
+                });
+            }));
             return row;
         });
     }

@@ -112,6 +112,7 @@ public class ProjectRunnerPane extends BorderPane {
         Tracks.track(listView, listView.getItems(), listView.getSelectionModel());
         return listView;
     }
+
     private Process process(JavaSettings javaSettings) throws IOException {
         final List<String> args = new ArrayList<>();
         args.add(javaSettings.getJavaExecutable());

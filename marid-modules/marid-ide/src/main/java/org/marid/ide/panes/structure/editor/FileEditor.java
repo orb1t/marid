@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Dmitry Ovchinnikov
+ * Copyright (c) 2017 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,27 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.profiles;
+package org.marid.ide.panes.structure.editor;
 
-import org.marid.ide.panes.structure.ProjectStructureTree;
-import org.marid.ide.tabs.IdeTab;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
+import javafx.scene.Node;
+import org.marid.ide.project.ProjectProfile;
 
-import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcons.glyphIcon;
+import javax.annotation.Nonnull;
+import java.nio.file.Path;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-@Lazy(false)
-public class ProfilesTab extends IdeTab {
+public interface FileEditor {
 
-    @Autowired
-    public ProfilesTab(ProjectStructureTree projectStructureTree) {
-        super(projectStructureTree, ls("Profiles"), () -> glyphIcon("O_BOOK", 16));
-        setClosable(false);
-    }
+    void edit(ProjectProfile profile, @Nonnull Path file);
+
+    boolean isEditable(ProjectProfile profile, @Nonnull Path file);
+
+    @Nonnull
+    String getName();
+
+    @Nonnull
+    Node getIcon();
+
+    @Nonnull
+    String getGroup();
 }
