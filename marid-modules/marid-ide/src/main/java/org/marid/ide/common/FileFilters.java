@@ -34,24 +34,24 @@ public class FileFilters {
     @Bean
     @Qualifier("java")
     public PathMatcher javaPathMatcher() {
-        return FileSystems.getDefault().getPathMatcher("glob:*.java");
+        return p -> FileSystems.getDefault().getPathMatcher("glob:*.java").matches(p.getFileName());
     }
 
     @Bean
     @Qualifier("jar")
     public PathMatcher jarPathMatcher() {
-        return FileSystems.getDefault().getPathMatcher("glob:*.jar");
+        return p -> FileSystems.getDefault().getPathMatcher("glob:*.jar").matches(p.getFileName());
     }
 
     @Bean
     @Qualifier("properties")
     public PathMatcher propertiesPathMatcher() {
-        return FileSystems.getDefault().getPathMatcher("glob:*.properties");
+        return p -> FileSystems.getDefault().getPathMatcher("glob:*.properties").matches(p.getFileName());
     }
 
     @Bean
     @Qualifier("lst")
     public PathMatcher confListPathMatcher() {
-        return FileSystems.getDefault().getPathMatcher("glob:*.lst");
+        return p -> FileSystems.getDefault().getPathMatcher("glob:*.lst").matches(p.getFileName());
     }
 }
