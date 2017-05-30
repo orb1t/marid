@@ -29,7 +29,6 @@ import org.marid.io.ProcessManager;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10n;
-import org.openjdk.jmh.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -113,11 +112,9 @@ public class ProjectRunnerPane extends BorderPane {
         Tracks.track(listView, listView.getItems(), listView.getSelectionModel());
         return listView;
     }
-
     private Process process(JavaSettings javaSettings) throws IOException {
         final List<String> args = new ArrayList<>();
-        final String javaExecutable = javaSettings.getJavaExecutable();
-        args.add(javaExecutable.isEmpty() ? Utils.getCurrentJvm() : javaExecutable);
+        args.add(javaSettings.getJavaExecutable());
         Collections.addAll(args, javaSettings.getJavaArguments());
         final Model model = profile.getModel();
         final Properties properties = model.getProperties();

@@ -20,6 +20,8 @@ package org.marid.ide.settings;
 
 import org.springframework.stereotype.Component;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 /**
@@ -28,8 +30,14 @@ import java.util.Optional;
 @Component
 public class JavaSettings extends AbstractSettings {
 
+    public final Path java = Paths.get(
+            System.getProperty("java.home"),
+            "bin",
+            "java" + (System.getProperty("os.name").contains("indows") ? ".exe" : "")
+    );
+
     public String getJavaExecutable() {
-        return preferences.get("javaExecutable", "");
+        return preferences.get("javaExecutable", java.toString());
     }
 
     public void setJavaExecutable(String value) {
