@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Collections.binarySearch;
@@ -74,6 +75,10 @@ public class ProjectManager {
 
     public ProjectProfile getProfile() {
         return profile.get();
+    }
+
+    public Optional<ProjectProfile> getProfile(Path path) {
+        return profiles.stream().filter(p -> path.startsWith(p.getPath())).findFirst();
     }
 
     public ObjectProperty<ProjectProfile> profileProperty() {

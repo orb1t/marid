@@ -21,7 +21,6 @@ package org.marid.ide.panes.structure.editor;
 import javafx.scene.Node;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
-import org.marid.ide.project.ProjectProfile;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -31,18 +30,34 @@ import java.util.Optional;
 
 import static java.util.logging.Level.WARNING;
 import static org.marid.ide.IdeNotifications.n;
-import static org.marid.jfx.LocalizedStrings.fls;
-import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class AddDirectoryEditor extends AbstractFileEditor {
+public class AddDirectoryEditor extends AbstractFileEditor<Path> {
 
     public AddDirectoryEditor() {
         super(Files::isDirectory);
+    }
+
+    @Override
+    protected void edit(@Nonnull Path file, @Nonnull Path context) {
+        final TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle(s("Add a directory"));
+        dialog.setContentText(s("Directory name") + ":");
+        final Optional<String> optionalDirectoryName = dialog.showAndWait();
+        if (optionalDirectoryName.isPresent()) {
+            final String dirName = optionalDirectoryName.get();
+            final Path path = file.resolve(dirName);
+            try {
+                Files.createDirectory(path);
+            } catch (Exception x) {
+                n(WARNING, "Unable to create a directory {0}", x, path);
+            }
+        }
     }
 
     @Nonnull
@@ -64,19 +79,7 @@ public class AddDirectoryEditor extends AbstractFileEditor {
     }
 
     @Override
-    public void edit(@Nonnull ProjectProfile profile, @Nonnull Path file) {
-        final TextInputDialog dialog = new TextInputDialog();
-        dialog.contentTextProperty().bind(fls("%s:", "Directory name"));
-        dialog.titleProperty().bind(ls("Add a directory"));
-        final Optional<String> optionalDirectoryName = dialog.showAndWait();
-        if (optionalDirectoryName.isPresent()) {
-            final String dirName = optionalDirectoryName.get();
-            final Path path = file.resolve(dirName);
-            try {
-                Files.createDirectory(path);
-            } catch (Exception x) {
-                n(WARNING, "Unable to create a directory {0}", x, path);
-            }
-        }
+    protected Path editorContext(@Nonnull Path path) {
+        return path;
     }
 }

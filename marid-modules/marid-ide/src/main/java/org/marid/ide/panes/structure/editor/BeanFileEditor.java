@@ -24,6 +24,8 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithPublicModifier;
 import javafx.scene.Node;
+import javafx.util.Pair;
+import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,16 +44,14 @@ import static org.marid.logging.Log.log;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanFileEditor extends AbstractFileEditor {
+public class BeanFileEditor extends AbstractFileEditor<Pair<ProjectProfile, CompilationUnit>> {
+
+    private final ProjectManager projectManager;
 
     @Autowired
-    public BeanFileEditor(@Qualifier("java") PathMatcher javaPathMatcher) {
+    public BeanFileEditor(@Qualifier("java") PathMatcher javaPathMatcher, ProjectManager projectManager) {
         super(javaPathMatcher);
-    }
-
-    @Override
-    public void edit(@Nonnull ProjectProfile profile, @Nonnull Path file) {
-
+        this.projectManager = projectManager;
     }
 
     @Nonnull
@@ -73,20 +73,36 @@ public class BeanFileEditor extends AbstractFileEditor {
     }
 
     @Override
-    protected boolean isEditable(@Nonnull Path path, @Nonnull ProjectProfile profile) {
+    protected Pair<ProjectProfile, CompilationUnit> editorContext(@Nonnull Path path) {
         try {
+            final ProjectProfile profile = projectManager.getProfile(path).orElse(null);
+            if (profile == null) {
+                return null;
+            }
             final CompilationUnit compilationUnit = JavaParser.parse(path);
-            return !compilationUnit.getTypes().isEmpty() && compilationUnit.getTypes().stream()
+            if (compilationUnit.getTypes().isEmpty()) {
+                return null;
+            }
+            if (compilationUnit.getTypes().stream()
                     .filter(ClassOrInterfaceDeclaration.class::isInstance)
                     .map(ClassOrInterfaceDeclaration.class::cast)
                     .filter(c -> !c.isInterface())
                     .filter(TypeDeclaration::isTopLevelType)
                     .filter(NodeWithPublicModifier::isPublic)
                     .filter(c -> c.isAnnotationPresent(Generated.class))
-                    .anyMatch(c -> !c.isFinal());
+                    .anyMatch(c -> !c.isFinal())) {
+                return new Pair<>(profile, compilationUnit);
+            } else {
+                return null;
+            }
         } catch (Exception x) {
             log(WARNING, "Unable to parse {0}", x, path);
-            return false;
+            return null;
         }
+    }
+
+    @Override
+    protected void edit(@Nonnull Path file, @Nonnull Pair<ProjectProfile, CompilationUnit> context) {
+
     }
 }

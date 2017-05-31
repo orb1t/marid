@@ -31,6 +31,7 @@ import org.marid.jfx.logging.LogComponent;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.awt.*;
 import java.util.Locale;
 import java.util.concurrent.locks.LockSupport;
 
@@ -42,12 +43,14 @@ import static org.springframework.boot.SpringApplication.run;
  */
 public class Ide extends Application {
 
+    public static Ide ide;
     public static Stage primaryStage;
 
     private volatile ConfigurableApplicationContext context;
 
     @Override
     public void init() throws Exception {
+        ide = this;
         final String[] args = getParameters().getRaw().toArray(new String[0]);
         new Thread(() -> context = run(IdeContext.class, args)).start();
     }
@@ -97,14 +100,19 @@ public class Ide extends Application {
     }
 
     public static void main(String... args) throws Exception {
+        // Desktop initialization
+        Desktop.isDesktopSupported();
+
         // locale
         final String locale = PREFERENCES.get("locale", null);
         if (locale != null) {
             Locale.setDefault(Locale.forLanguageTag(locale));
         }
 
+        // metadata proxying
         MaridCommonPostProcessor.replaceInjectedMetadata();
 
+        // launch application
         Application.launch(args);
     }
 }

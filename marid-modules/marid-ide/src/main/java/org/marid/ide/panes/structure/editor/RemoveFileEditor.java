@@ -38,7 +38,7 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class RemoveFileEditor extends AbstractFileEditor {
+public class RemoveFileEditor extends AbstractFileEditor<Path> {
 
     @Autowired
     public RemoveFileEditor(ProjectManager projectManager) {
@@ -67,11 +67,16 @@ public class RemoveFileEditor extends AbstractFileEditor {
     }
 
     @Override
-    public void edit(@Nonnull ProjectProfile profile, @Nonnull Path file) {
+    protected void edit(@Nonnull Path file, @Nonnull Path path) {
         try {
             Files.delete(file);
         } catch (Exception x) {
             n(WARNING, "Unable to delete {0}", x, file);
         }
+    }
+
+    @Override
+    protected Path editorContext(@Nonnull Path path) {
+        return path;
     }
 }

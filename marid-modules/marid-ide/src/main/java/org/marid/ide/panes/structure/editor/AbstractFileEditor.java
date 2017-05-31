@@ -18,8 +18,6 @@
 
 package org.marid.ide.panes.structure.editor;
 
-import org.marid.ide.project.ProjectProfile;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.Path;
@@ -30,7 +28,7 @@ import static java.util.stream.Stream.of;
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class AbstractFileEditor implements FileEditor {
+public abstract class AbstractFileEditor<T> implements FileEditor {
 
     private final PathMatcher pathMatcher;
 
@@ -38,15 +36,23 @@ public abstract class AbstractFileEditor implements FileEditor {
         pathMatcher = of(pathMatchers).reduce((m1, m2) -> p -> m1.matches(p) || m2.matches(p)).orElse(p -> true);
     }
 
-    @Override
-    public abstract void edit(@Nonnull ProjectProfile profile, @Nonnull Path file);
+    @Nullable
+    protected abstract T editorContext(@Nonnull Path path);
 
-    protected boolean isEditable(@Nonnull Path path, @Nonnull ProjectProfile profile) {
-        return true;
-    }
+    protected abstract void edit(@Nonnull Path path, @Nonnull T context);
 
+    @Nullable
     @Override
-    public final boolean isEditable(@Nullable ProjectProfile profile, @Nonnull Path file) {
-        return profile != null && pathMatcher.matches(file) && isEditable(file, profile);
+    public Runnable getEditAction(@Nonnull Path path) {
+        if (!pathMatcher.matches(path)) {
+            return null;
+        } else {
+            final T context = editorContext(path);
+            if (context != null) {
+                return () -> edit(path, context);
+            } else {
+                return null;
+            }
+        }
     }
 }

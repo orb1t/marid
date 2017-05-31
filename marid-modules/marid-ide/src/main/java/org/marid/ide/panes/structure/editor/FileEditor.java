@@ -19,9 +19,9 @@
 package org.marid.ide.panes.structure.editor;
 
 import javafx.scene.Node;
-import org.marid.ide.project.ProjectProfile;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 
 /**
@@ -29,9 +29,8 @@ import java.nio.file.Path;
  */
 public interface FileEditor {
 
-    void edit(ProjectProfile profile, @Nonnull Path file);
-
-    boolean isEditable(ProjectProfile profile, @Nonnull Path file);
+    @Nullable
+    Runnable getEditAction(@Nonnull Path path);
 
     @Nonnull
     String getName();

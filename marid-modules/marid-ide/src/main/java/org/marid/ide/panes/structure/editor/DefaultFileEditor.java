@@ -19,16 +19,18 @@
 package org.marid.ide.panes.structure.editor;
 
 import javafx.scene.Node;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicBoolean;
 
+import static java.awt.Desktop.Action.OPEN;
+import static java.awt.Desktop.getDesktop;
+import static java.awt.Desktop.isDesktopSupported;
 import static java.util.logging.Level.WARNING;
 import static org.marid.ide.IdeNotifications.n;
 
@@ -36,22 +38,22 @@ import static org.marid.ide.IdeNotifications.n;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class DefaultFileEditor extends AbstractFileEditor {
+public class DefaultFileEditor extends AbstractFileEditor<Desktop> {
 
     public DefaultFileEditor() {
-        super(Files::isRegularFile, Files::isWritable, Files::isReadable);
+        super(Files::isRegularFile);
     }
 
     @Nonnull
     @Override
     public String getName() {
-        return "Open file in OS-specific editor";
+        return "Open a file in a default browser";
     }
 
     @Nonnull
     @Override
     public Node getIcon() {
-        return FontIcons.glyphIcon("M_OPEN_WITH", 16);
+        return FontIcons.glyphIcon("M_OPEN_IN_BROWSER", 16);
     }
 
     @Nonnull
@@ -60,29 +62,20 @@ public class DefaultFileEditor extends AbstractFileEditor {
         return "file";
     }
 
+    @Nullable
     @Override
-    protected boolean isEditable(@Nonnull Path path, @Nonnull ProjectProfile profile) {
-        final AtomicBoolean desktopSupported = new AtomicBoolean();
-        try {
-            EventQueue.invokeAndWait(() -> desktopSupported.set(Desktop.isDesktopSupported()));
-        } catch (Exception x) {
-            return false;
-        }
-        return desktopSupported.get();
+    protected Desktop editorContext(@Nonnull Path path) {
+        return isDesktopSupported() && getDesktop().isSupported(OPEN) ? getDesktop() : null;
     }
 
     @Override
-    public void edit(@Nonnull ProjectProfile profile, @Nonnull Path file) {
-        try {
-            EventQueue.invokeLater(() -> {
-                try {
-                    Desktop.getDesktop().edit(file.toFile());
-                } catch (Exception x) {
-                    n(WARNING, "Unable to edit file {0}", x, file);
-                }
-            });
-        } catch (Exception x) {
-            n(WARNING, "Unable to edit file {0}", x, file);
-        }
+    protected void edit(@Nonnull Path path, @Nonnull Desktop context) {
+        EventQueue.invokeLater(() -> {
+            try {
+                context.open(path.toFile());
+            } catch (Exception e) {
+                n(WARNING, "Unable to edit {0}", e, path);
+            }
+        });
     }
 }

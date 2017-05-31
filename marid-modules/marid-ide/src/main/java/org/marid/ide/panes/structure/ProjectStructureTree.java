@@ -23,7 +23,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import org.marid.ide.panes.structure.editor.FileEditor;
 import org.marid.ide.project.ProjectManager;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.beans.ConstantValue;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,7 +113,7 @@ public class ProjectStructureTree extends TreeTableView<Path> {
     }
 
     @Autowired
-    private void initRowFactory(ProjectManager projectManager, FileEditor... fileEditors) {
+    private void initRowFactory(FileEditor... fileEditors) {
         setRowFactory(param -> {
             final TreeTableRow<Path> row = new TreeTableRow<>();
             row.setContextMenu(new MaridContextMenu(m -> {
@@ -125,16 +124,12 @@ public class ProjectStructureTree extends TreeTableView<Path> {
                     return;
                 }
 
-                final ProjectProfile profile = projectManager.getProfiles().stream()
-                        .filter(p -> file.startsWith(p.getPath()))
-                        .findFirst()
-                        .orElse(null);
-
                 final Map<String, List<MenuItem>> map = new TreeMap<>();
                 for (final FileEditor editor : fileEditors) {
-                    if (editor.isEditable(profile, file)) {
+                    final Runnable task = editor.getEditAction(file);
+                    if (task != null) {
                         final MenuItem item = new MenuItem(s(editor.getName()), editor.getIcon());
-                        item.setOnAction(event -> editor.edit(profile, file));
+                        item.setOnAction(event -> task.run());
                         map.computeIfAbsent(editor.getGroup(), k -> new ArrayList<>()).add(item);
                     }
                 }

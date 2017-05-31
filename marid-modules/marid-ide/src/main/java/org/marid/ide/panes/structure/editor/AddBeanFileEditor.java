@@ -25,8 +25,10 @@ import com.github.javaparser.printer.PrettyPrintVisitor;
 import com.github.javaparser.printer.PrettyPrinterConfiguration;
 import javafx.scene.Node;
 import javafx.scene.control.TextInputDialog;
+import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Generated;
@@ -46,10 +48,14 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class AddBeanFileEditor extends AbstractFileEditor {
+public class AddBeanFileEditor extends AbstractFileEditor<ProjectProfile> {
 
-    public AddBeanFileEditor() {
+    private final ProjectManager projectManager;
+
+    @Autowired
+    public AddBeanFileEditor(ProjectManager projectManager) {
         super(Files::isDirectory);
+        this.projectManager = projectManager;
     }
 
     @Nonnull
@@ -71,15 +77,14 @@ public class AddBeanFileEditor extends AbstractFileEditor {
     }
 
     @Override
-    protected boolean isEditable(@Nonnull Path path, @Nonnull ProjectProfile profile) {
-        if (!path.startsWith(profile.getSrcMainJava()) && !path.startsWith(profile.getSrcTestJava())) {
-            return false;
-        }
-        return super.isEditable(path, profile);
+    protected ProjectProfile editorContext(@Nonnull Path path) {
+        return projectManager.getProfile(path)
+                .filter(p -> path.startsWith(p.getSrcMainJava()) || path.startsWith(p.getSrcTestJava()))
+                .orElse(null);
     }
 
     @Override
-    public void edit(@Nonnull ProjectProfile profile, @Nonnull Path file) {
+    protected void edit(@Nonnull Path file, @Nonnull ProjectProfile profile) {
         final TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle(s("Add a bean file"));
         dialog.setContentText(s("Bean file name") + ": ");
