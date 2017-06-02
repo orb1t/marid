@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid;
+package org.marid.spring.postprocessors;
 
 import org.marid.misc.Builder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;

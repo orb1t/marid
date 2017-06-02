@@ -26,6 +26,7 @@ import javafx.stage.Window;
 import org.marid.ide.tabs.IdeTab;
 import org.marid.misc.Builder;
 import org.marid.spring.dependant.DependantConfiguration;
+import org.marid.spring.postprocessors.IdeAutowirePostProcessor;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.BeansException;

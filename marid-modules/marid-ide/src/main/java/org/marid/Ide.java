@@ -28,7 +28,7 @@ import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
 import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.logging.LogComponent;
-import org.marid.spring.postprocessors.MaridCommonPostProcessor;
+import org.marid.spring.postprocessors.IdeAppContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
