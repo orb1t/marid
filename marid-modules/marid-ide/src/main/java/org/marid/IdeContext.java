@@ -22,12 +22,13 @@ import org.marid.ide.common.IdeValues;
 import org.marid.ide.logging.IdeLogConsoleHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.logging.Logs;
-import org.marid.spring.dependant.IdeClassFilter;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.*;
-import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -36,13 +37,11 @@ import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
-import static org.springframework.context.annotation.FilterType.CUSTOM;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @SpringBootApplication
-@ComponentScan(basePackages = "org.marid", excludeFilters = {@Filter(type = CUSTOM, value = IdeClassFilter.class)})
 @Import({IdeDependants.class, MaridCommonPostProcessor.class})
 @EnableScheduling
 @PropertySource({"meta.properties", "ide.properties"})
