@@ -26,14 +26,12 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.InjectionMetadata;
-import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.BridgeMethodResolver;
@@ -51,7 +49,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Stream;
 
 import static java.util.logging.Level.WARNING;
@@ -64,7 +61,6 @@ public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcesso
     private ConfigurableListableBeanFactory beanFactory;
 
 	private final Set<Class<? extends Annotation>> autowiredAnnotationTypes = ImmutableSet.of(Autowired.class, Value.class);
-	private final Set<String> lookupMethodsChecked = new ConcurrentSkipListSet<>();
 	private final Map<Class<?>, Constructor<?>[]> candidateConstructorsCache = new ConcurrentHashMap<>(256);
 	private final Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
 
@@ -85,30 +81,6 @@ public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcesso
 	@Override
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass,
 														   String beanName) throws BeanCreationException {
-        if (lookupMethodsChecked.add(beanName)) {
-            try {
-                ReflectionUtils.doWithMethods(beanClass, method -> {
-                    Lookup lookup = method.getAnnotation(Lookup.class);
-                    if (lookup != null) {
-                        LookupOverride override = new LookupOverride(method, lookup.value());
-                        try {
-                            RootBeanDefinition mbd = (RootBeanDefinition) beanFactory.getMergedBeanDefinition(beanName);
-                            mbd.getMethodOverrides().addOverride(override);
-                        }
-                        catch (NoSuchBeanDefinitionException ex) {
-                            throw new BeanCreationException(beanName,
-                                    "Cannot apply @Lookup to beans without corresponding bean definition");
-                        }
-                    }
-                });
-            } catch (IllegalStateException ex) {
-                throw new BeanCreationException(beanName, "Lookup method resolution failed", ex);
-            } catch (NoClassDefFoundError err) {
-                throw new BeanCreationException(beanName, "Failed to introspect bean class [" + beanClass.getName() +
-                        "] for lookup method metadata: could not find class that it depends on", err);
-            }
-        }
-
         return candidateConstructorsCache.computeIfAbsent(beanClass, c -> {
             final Constructor<?>[] rawCandidates = beanClass.getDeclaredConstructors();
             final List<Constructor<?>> candidates = new ArrayList<>(rawCandidates.length);
@@ -135,7 +107,7 @@ public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcesso
                                         ". Found constructor with 'required' Autowired annotation already: " +
                                         requiredConstructor);
                     }
-                    boolean required = determineRequiredStatus(ann);
+                    boolean required = (!ann.containsKey("required") || ann.getBoolean("required"));
                     if (required) {
                         if (!candidates.isEmpty()) {
                             throw new BeanCreationException(beanName,
@@ -151,15 +123,11 @@ public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcesso
                 }
             }
             if (!candidates.isEmpty()) {
-                // Add default constructor to list of optional constructors, as fallback.
                 if (requiredConstructor == null) {
                     if (defaultConstructor != null) {
                         candidates.add(defaultConstructor);
                     } else if (candidates.size() == 1) {
-                        log(WARNING, "Inconsistent constructor declaration on bean with name '" + beanName +
-                                "': single autowire-marked constructor flagged as optional - " +
-                                "this constructor is effectively required since there is no " +
-                                "default constructor to fall back to: " + candidates.get(0));
+                        throw new BeanCreationException(beanName, "Invalid constructor " + candidates.get(0));
                     }
                 }
                 return candidates.toArray(new Constructor<?>[candidates.size()]);
@@ -219,7 +187,7 @@ public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcesso
                         log(WARNING, "Autowired annotation is not supported on static fields: {0}", field);
                         return;
                     }
-                    boolean required = determineRequiredStatus(ann);
+                    boolean required = (!ann.containsKey("required") || ann.getBoolean("required"));
                     currElements.add(new AutowiredFieldElement(field, required));
                 }
             });
@@ -234,7 +202,7 @@ public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcesso
                     if (Modifier.isStatic(method.getModifiers())) {
                         return;
                     }
-                    boolean required = determineRequiredStatus(ann);
+                    boolean required = (!ann.containsKey("required") || ann.getBoolean("required"));
                     PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
                     currElements.add(new AutowiredMethodElement(method, required, pd));
                 }
@@ -284,11 +252,7 @@ public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcesso
 		return null;
 	}
 
-	private boolean determineRequiredStatus(AnnotationAttributes ann) {
-		return (!ann.containsKey("required") ||	ann.getBoolean("required"));
-	}
-
-	private void registerDependentBeans(String beanName, Set<String> autowiredBeanNames) {
+    private void registerDependentBeans(String beanName, Set<String> autowiredBeanNames) {
 		if (beanName != null) {
 			for (String autowiredBeanName : autowiredBeanNames) {
 				if (beanFactory.containsBean(autowiredBeanName)) {
