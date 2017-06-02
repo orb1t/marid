@@ -38,8 +38,10 @@ import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcess
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.Order;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -187,32 +189,24 @@ public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcesso
 	}
 
 	private InjectionMetadata findAutowiringMetadata(String beanName, Class<?> clazz, PropertyValues pvs) {
-		// Fall back to class name as cache key, for backwards compatibility with custom callers.
-		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
-		// Quick check on the concurrent map first, with minimal locking.
-		InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
-		if (InjectionMetadata.needsRefresh(metadata, clazz)) {
-			synchronized (this.injectionMetadataCache) {
-				metadata = this.injectionMetadataCache.get(cacheKey);
-				if (InjectionMetadata.needsRefresh(metadata, clazz)) {
-					if (metadata != null) {
-						metadata.clear(pvs);
-					}
-					try {
-						metadata = buildAutowiringMetadata(clazz);
-						this.injectionMetadataCache.put(cacheKey, metadata);
-					} catch (NoClassDefFoundError err) {
-						throw new IllegalStateException("Failed to introspect bean class [" + clazz.getName() +
-								"] for autowiring metadata: could not find class that it depends on", err);
-					}
-				}
-			}
-		}
-		return metadata;
+		return injectionMetadataCache.compute(StringUtils.hasLength(beanName) ? beanName : clazz.getName(), (k, m) -> {
+            if (InjectionMetadata.needsRefresh(m, clazz)) {
+                if (m != null) {
+                    m.clear(pvs);
+                }
+                try {
+                    m = buildAutowiringMetadata(clazz);
+                } catch (NoClassDefFoundError err) {
+                    throw new IllegalStateException("Failed to introspect bean class [" + clazz.getName() +
+                            "] for autowiring metadata: could not find class that it depends on", err);
+                }
+            }
+            return m;
+        });
 	}
 
 	private InjectionMetadata buildAutowiringMetadata(final Class<?> clazz) {
-		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<>();
+		final List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
 		Class<?> targetClass = clazz;
 
 		do {
@@ -250,14 +244,37 @@ public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcesso
 			targetClass = targetClass.getSuperclass();
 		} while (targetClass != null && targetClass != Object.class);
 
-        MaridCommonPostProcessor.sort(elements);
+
+        elements.sort((ie1, ie2) -> {
+            if (ie1.getMember() instanceof AnnotatedElement && ie2.getMember() instanceof AnnotatedElement) {
+                final AnnotatedElement e1 = (AnnotatedElement) ie1.getMember();
+                final AnnotatedElement e2 = (AnnotatedElement) ie2.getMember();
+                final Order o1 = e1.getAnnotation(Order.class);
+                final Order o2 = e2.getAnnotation(Order.class);
+                if (o1 != null && o2 != null) {
+                    return Integer.compare(o1.value(), o2.value());
+                } else if (o1 == null && o2 == null) {
+                    return ie1.getMember().getName().compareTo(ie2.getMember().getName());
+                } else {
+                    final int i1 = o1 != null ? o1.value() : Ordered.LOWEST_PRECEDENCE;
+                    final int i2 = o2 != null ? o2.value() : Ordered.LOWEST_PRECEDENCE;
+                    return Integer.compare(i1, i2);
+                }
+            } else if (ie1.getMember() instanceof AnnotatedElement) {
+                return -1;
+            } else if (ie2.getMember() instanceof AnnotatedElement) {
+                return 1;
+            } else {
+                return ie1.getMember().getName().compareTo(ie2.getMember().getName());
+            }
+        });
 
 		return new InjectionMetadata(clazz, elements);
 	}
 
 	private AnnotationAttributes findAutowiredAnnotation(AccessibleObject ao) {
-		if (ao.getAnnotations().length > 0) {
-			for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
+	    if (ao.getAnnotations().length > 0) {
+			for (Class<? extends Annotation> type : autowiredAnnotationTypes) {
 				AnnotationAttributes attributes = AnnotatedElementUtils.getMergedAnnotationAttributes(ao, type);
 				if (attributes != null) {
 					return attributes;
@@ -274,8 +291,8 @@ public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcesso
 	private void registerDependentBeans(String beanName, Set<String> autowiredBeanNames) {
 		if (beanName != null) {
 			for (String autowiredBeanName : autowiredBeanNames) {
-				if (this.beanFactory.containsBean(autowiredBeanName)) {
-					this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
+				if (beanFactory.containsBean(autowiredBeanName)) {
+					beanFactory.registerDependentBean(autowiredBeanName, beanName);
 				}
 			}
 		}
@@ -283,8 +300,8 @@ public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcesso
 
 	private Object resolvedCachedArgument(String beanName, Object cachedArgument) {
 		if (cachedArgument instanceof DependencyDescriptor) {
-			DependencyDescriptor descriptor = (DependencyDescriptor) cachedArgument;
-			return this.beanFactory.resolveDependency(descriptor, beanName, null, null);
+			final DependencyDescriptor descriptor = (DependencyDescriptor) cachedArgument;
+			return beanFactory.resolveDependency(descriptor, beanName, null, null);
 		} else {
 			return cachedArgument;
 		}
