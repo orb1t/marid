@@ -22,7 +22,6 @@ import org.marid.ide.common.IdeValues;
 import org.marid.ide.logging.IdeLogConsoleHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.logging.Logs;
-import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -42,7 +41,7 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
  * @author Dmitry Ovchinnikov
  */
 @SpringBootApplication
-@Import({IdeDependants.class, MaridCommonPostProcessor.class})
+@Import({IdeDependants.class})
 @EnableScheduling
 @PropertySource({"meta.properties", "ide.properties"})
 public class IdeContext {
