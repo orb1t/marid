@@ -24,11 +24,13 @@ import javafx.scene.control.SelectionModel;
 import javafx.scene.control.Tab;
 import javafx.stage.Window;
 import org.marid.ide.tabs.IdeTab;
+import org.marid.misc.Builder;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
@@ -106,34 +108,17 @@ public class IdeDependants {
         return parent.toString();
     }
 
-    public static class MainContext extends AnnotationConfigApplicationContext {
-
-        public MainContext() {
-            getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
-            setAllowBeanDefinitionOverriding(false);
-            setAllowCircularReferences(false);
-        }
-
-        @Override
-        protected void onClose() {
-            for (final WeakReference<GenericApplicationContext> ref : CONTEXTS) {
-                final GenericApplicationContext c = ref.get();
-                if (c != null && c.getBeanFactory().getParentBeanFactory() == getBeanFactory()) {
-                    c.close();
-                    return;
-                }
-            }
-        }
-    }
-
-    private static class DependantContext extends MainContext {
+    private static class DependantContext extends AnnotationConfigApplicationContext {
 
         private final WeakReference<GenericApplicationContext> ref = new WeakReference<>(this);
 
         private DependantContext(GenericApplicationContext parent) {
+            super(Builder.build(new DefaultListableBeanFactory(), IdeAutowirePostProcessor::register));
+            setAllowBeanDefinitionOverriding(false);
+            setAllowCircularReferences(false);
             getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(this));
             getBeanFactory().setParentBeanFactory(parent.getDefaultListableBeanFactory());
-            register(IdeDependants.class);
+            register(IdeDependants.class, MaridCommonPostProcessor.class);
         }
 
         @Override
@@ -145,7 +130,13 @@ public class IdeDependants {
         @Override
         protected void onClose() {
             CONTEXTS.removeIf(c -> c.get() == null || c == ref);
-            super.onClose();
+            for (final WeakReference<GenericApplicationContext> ref : CONTEXTS) {
+                final GenericApplicationContext c = ref.get();
+                if (c != null && c.getBeanFactory().getParentBeanFactory() == getBeanFactory()) {
+                    c.close();
+                    return;
+                }
+            }
         }
 
         @Override

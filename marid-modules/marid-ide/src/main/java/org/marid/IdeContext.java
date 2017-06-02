@@ -24,14 +24,10 @@ import org.marid.ide.logging.IdeLogHandler;
 import org.marid.logging.Logs;
 import org.marid.spring.dependant.IdeClassFilter;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.*;
 import org.springframework.context.annotation.ComponentScan.Filter;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -50,7 +46,7 @@ import static org.springframework.context.annotation.FilterType.CUSTOM;
 @Import({IdeDependants.class, MaridCommonPostProcessor.class})
 @EnableScheduling
 @PropertySource({"meta.properties", "ide.properties"})
-public class IdeContext implements ApplicationContextAware {
+public class IdeContext {
 
     @Bean(destroyMethod = "shutdown")
     public ScheduledThreadPoolExecutor scheduledExecutorService() {
@@ -87,12 +83,5 @@ public class IdeContext implements ApplicationContextAware {
                 .map(IdeLogConsoleHandler.class::cast)
                 .findAny()
                 .orElseThrow(IllegalStateException::new);
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        final GenericApplicationContext context = (GenericApplicationContext) applicationContext;
-        context.setAllowBeanDefinitionOverriding(false);
-        context.setAllowCircularReferences(false);
     }
 }

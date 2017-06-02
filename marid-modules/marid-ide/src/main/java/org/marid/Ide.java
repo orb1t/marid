@@ -29,6 +29,7 @@ import org.marid.image.MaridIconFx;
 import org.marid.jfx.list.MaridListActions;
 import org.marid.jfx.logging.LogComponent;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
+import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.awt.*;
@@ -36,7 +37,6 @@ import java.util.Locale;
 import java.util.concurrent.locks.LockSupport;
 
 import static org.marid.IdePrefs.PREFERENCES;
-import static org.springframework.boot.SpringApplication.run;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -52,7 +52,11 @@ public class Ide extends Application {
     public void init() throws Exception {
         ide = this;
         final String[] args = getParameters().getRaw().toArray(new String[0]);
-        new Thread(() -> context = run(IdeContext.class, args)).start();
+        new Thread(() -> {
+            final SpringApplication application = new SpringApplication(IdeContext.class);
+            application.setApplicationContextClass(IdeAppContext.class);
+            context = application.run(args);
+        }).start();
     }
 
     @Override
@@ -108,9 +112,6 @@ public class Ide extends Application {
         if (locale != null) {
             Locale.setDefault(Locale.forLanguageTag(locale));
         }
-
-        // metadata proxying
-        MaridCommonPostProcessor.replaceInjectedMetadata();
 
         // launch application
         Application.launch(args);
