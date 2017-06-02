@@ -18,12 +18,14 @@
 
 package org.marid.spring.postprocessors;
 
-import com.google.common.collect.ImmutableSet;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.TypeConverter;
-import org.springframework.beans.factory.*;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.InjectionPoint;
+import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.InjectionMetadata;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,22 +53,26 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static java.util.logging.Level.WARNING;
 import static org.marid.logging.Log.log;
 import static org.springframework.context.annotation.AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME;
 
-public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-		implements MergedBeanDefinitionPostProcessor, BeanFactoryAware {
+public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcessorAdapter implements MergedBeanDefinitionPostProcessor {
 
-    private ConfigurableListableBeanFactory beanFactory;
-
-	private final Set<Class<? extends Annotation>> autowiredAnnotationTypes = ImmutableSet.of(Autowired.class, Value.class);
+    private final ConfigurableListableBeanFactory beanFactory;
+	private final List<Class<? extends Annotation>> autowiredAnnotationTypes = asList(Autowired.class, Value.class);
 	private final Map<Class<?>, Constructor<?>[]> candidateConstructorsCache = new ConcurrentHashMap<>(256);
 	private final Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
+
+	public IdeAutowirePostProcessor(ConfigurableListableBeanFactory beanFactory) {
+	    this.beanFactory = beanFactory;
+    }
 
 	public static void register(DefaultListableBeanFactory beanFactory) {
 	    final RootBeanDefinition definition = new RootBeanDefinition(IdeAutowirePostProcessor.class);
 	    definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+	    definition.getConstructorArgumentValues().addGenericArgumentValue(beanFactory);
 	    beanFactory.registerBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME, definition);
     }
 
@@ -79,11 +85,10 @@ public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcesso
 	}
 
 	@Override
-	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass,
-														   String beanName) throws BeanCreationException {
+	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeanCreationException {
         return candidateConstructorsCache.computeIfAbsent(beanClass, c -> {
             final Constructor<?>[] rawCandidates = beanClass.getDeclaredConstructors();
-            final List<Constructor<?>> candidates = new ArrayList<>(rawCandidates.length);
+            final ArrayList<Constructor<?>> candidates = new ArrayList<>(rawCandidates.length);
             Constructor<?> requiredConstructor = null;
             Constructor<?> defaultConstructor = null;
             for (Constructor<?> candidate : rawCandidates) {
@@ -269,11 +274,6 @@ public class IdeAutowirePostProcessor extends InstantiationAwareBeanPostProcesso
 		} else {
 			return cachedArgument;
 		}
-	}
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 	}
 
     private class AutowiredFieldElement extends InjectionMetadata.InjectedElement {
