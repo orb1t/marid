@@ -52,6 +52,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>java-symbol-solver-core</artifactId>
+            <version>0.5.5</version>
+        </dependency>
+
+        <dependency>
             <groupId>de.jensd</groupId>
             <artifactId>fontawesomefx</artifactId>
             <version>8.8</version>

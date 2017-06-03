@@ -22,10 +22,13 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import org.marid.ide.panes.structure.editor.FileEditor;
+import org.marid.ide.panes.structure.icons.FileIcons;
 import org.marid.ide.project.ProjectManager;
 import org.marid.jfx.beans.ConstantValue;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -141,5 +144,10 @@ public class ProjectStructureTree extends TreeTableView<Path> {
             }));
             return row;
         });
+    }
+
+    @EventListener
+    private void onStart(ContextStartedEvent event) {
+        getSelectionModel().select(getRoot());
     }
 }

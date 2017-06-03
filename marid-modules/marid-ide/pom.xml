@@ -69,12 +69,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.javaparser</groupId>
-            <artifactId>java-symbol-solver-core</artifactId>
-            <version>0.5.5</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>3.4.2</version>

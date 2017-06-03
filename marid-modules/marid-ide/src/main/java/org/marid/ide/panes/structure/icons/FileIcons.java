@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.structure;
+package org.marid.ide.panes.structure.icons;
 
 import javafx.scene.Node;
 import org.codehaus.plexus.util.FileUtils;
@@ -37,31 +37,31 @@ public class FileIcons {
         final String extension = FileUtils.extension(fileName);
         switch (extension) {
             case "java":
-                return IdeShapes.javaFile(path.hashCode(), 16);
+                return IdeShapes.javaFile(path.hashCode(), size);
             case "jar":
-                return FontIcons.glyphIcon("M_ARCHIVE", 16);
+                return FontIcons.glyphIcon("M_ARCHIVE", size);
             case "xml":
-                return FontIcons.glyphIcon("M_CODE", 16);
+                return FontIcons.glyphIcon("M_CODE", size);
             case "lst":
-                return FontIcons.glyphIcon("M_LIST", 16);
+                return FontIcons.glyphIcon("M_LIST", size);
             case "properties":
-                return FontIcons.glyphIcon("F_PARAGRAPH", 16);
+                return FontIcons.glyphIcon("F_PARAGRAPH", size);
             case "":
                 switch (fileName) {
                     case "profiles":
-                        return FontIcons.glyphIcon("M_FOLDER_SHARED", 16);
+                        return FontIcons.glyphIcon("M_FOLDER_SHARED", size);
                     case "src":
-                        return FontIcons.glyphIcon("O_LOCATION", 16);
+                        return FontIcons.glyphIcon("O_LOCATION", size);
                     case "main":
-                        return FontIcons.glyphIcon("M_MEMORY", 16);
+                        return FontIcons.glyphIcon("M_MEMORY", size);
                     case "test":
-                        return FontIcons.glyphIcon("M_BUG_REPORT", 16);
+                        return FontIcons.glyphIcon("M_BUG_REPORT", size);
                     case "java":
-                        return FontIcons.glyphIcon("F_CUBE", 16);
+                        return FontIcons.glyphIcon("F_CUBE", size);
                     case "resources":
-                        return FontIcons.glyphIcon("F_TH_LIST", 16);
+                        return FontIcons.glyphIcon("F_TH_LIST", size);
                     default:
-                        return FontIcons.glyphIcon("M_FOLDER", 16);
+                        return FontIcons.glyphIcon("M_FOLDER", size);
                 }
             default:
                 return null;

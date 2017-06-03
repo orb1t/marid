@@ -51,11 +51,13 @@ import static org.marid.l10n.L10n.s;
 public class AddBeanFileEditor extends AbstractFileEditor<ProjectProfile> {
 
     private final ProjectManager projectManager;
+    private final PrettyPrinterConfiguration prettyPrinterConfiguration;
 
     @Autowired
-    public AddBeanFileEditor(ProjectManager projectManager) {
+    public AddBeanFileEditor(ProjectManager projectManager, PrettyPrinterConfiguration prettyPrinterConfiguration) {
         super(Files::isDirectory);
         this.projectManager = projectManager;
+        this.prettyPrinterConfiguration = prettyPrinterConfiguration;
     }
 
     @Nonnull
@@ -107,10 +109,7 @@ public class AddBeanFileEditor extends AbstractFileEditor<ProjectProfile> {
         final ClassOrInterfaceDeclaration klass = compilationUnit.addClass(javaFileName, Modifier.PUBLIC);
         klass.addAnnotation(Generated.class);
 
-        final PrettyPrintVisitor visitor = new PrettyPrintVisitor(new PrettyPrinterConfiguration()
-                .setIndent("  ")
-                .setPrintComments(true)
-                .setEndOfLineCharacter("\n"));
+        final PrettyPrintVisitor visitor = new PrettyPrintVisitor(prettyPrinterConfiguration);
         compilationUnit.accept(visitor, null);
 
         final Path path = file.resolve(javaFileName + ".java");

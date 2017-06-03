@@ -118,8 +118,9 @@ public class IdeDependants {
             setAllowBeanDefinitionOverriding(false);
             setAllowCircularReferences(false);
             getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(this));
+            getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
             getBeanFactory().setParentBeanFactory(parent.getDefaultListableBeanFactory());
-            register(IdeDependants.class, MaridCommonPostProcessor.class);
+            register(IdeDependants.class);
         }
 
         @Override

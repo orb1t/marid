@@ -25,22 +25,16 @@ import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.marid.ide.model.MainJavaClass;
-import org.marid.jfx.beans.OList;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.function.BiFunction;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.logging.Level.WARNING;
@@ -67,7 +61,6 @@ public class ProjectProfile {
     private final Path beansDirectory;
     private final Path repository;
     private final Logger logger;
-    private final OList<MainJavaClass> mainJavaClasses = new OList<>();
 
     ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -89,25 +82,11 @@ public class ProjectProfile {
         init();
     }
 
-    public OList<MainJavaClass> getMainJavaClasses() {
-        return mainJavaClasses;
-    }
-
     private void init() {
         if (model.getProfiles().stream().noneMatch(p -> "conf".equals(p.getId()))) {
             final Profile profile = new Profile();
             profile.setId("conf");
             model.getProfiles().add(profile);
-        }
-
-        loadJavaClasses(mainJavaClasses, srcMainJava, MainJavaClass::new);
-    }
-
-    private <T> void loadJavaClasses(List<T> list, Path base, BiFunction<ProjectProfile, Path, T> mapper) {
-        try (final Stream<Path> files = Files.find(base, 128, (p, a) -> p.toString().endsWith(".java"))) {
-            files.forEach(p -> list.add(mapper.apply(this, p)));
-        } catch (IOException ioe) {
-            throw new UncheckedIOException(ioe);
         }
     }
 
@@ -221,7 +200,6 @@ public class ProjectProfile {
     public void save() {
         createFileStructure();
         savePomFile();
-        mainJavaClasses.forEach(c -> c.save(this));
     }
 
     void delete() {

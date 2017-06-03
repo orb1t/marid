@@ -16,26 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.structure;
+package org.marid.ide.common;
 
-import org.marid.ide.tabs.IdeTab;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+import com.github.javaparser.printer.PrettyPrinterConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-
-import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-@Lazy(false)
-public class ProfilesTab extends IdeTab {
+public class JavaParsers {
 
-    @Autowired
-    public ProfilesTab(ProjectStructureTree projectStructureTree) {
-        super(projectStructureTree, ls("Profiles"), () -> glyphIcon("O_BOOK", 16));
-        setClosable(false);
+    @Bean
+    public PrettyPrinterConfiguration prettyPrinterConfiguration() {
+        return new PrettyPrinterConfiguration()
+                .setIndent("  ")
+                .setPrintComments(true)
+                .setEndOfLineCharacter("\n");
     }
 }
