@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.structure.icons;
+package org.marid.ide.structure.icons;
 
 import javafx.scene.Node;
 import org.codehaus.plexus.util.FileUtils;

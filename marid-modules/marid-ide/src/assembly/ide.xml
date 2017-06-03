@@ -43,7 +43,7 @@
         </dependencySet>
 
         <dependencySet>
-            <outputDirectory>.</outputDirectory>
+            <fileMode>0777</fileMode>
             <useProjectArtifact>true</useProjectArtifact>
             <includes>
                 <include>org.marid:marid-ide</include>

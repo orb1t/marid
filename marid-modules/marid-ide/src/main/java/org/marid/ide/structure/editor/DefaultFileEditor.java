@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.structure.editor;
+package org.marid.ide.structure.editor;
 
 import javafx.scene.Node;
 import org.marid.jfx.icons.FontIcons;
@@ -47,7 +47,7 @@ public class DefaultFileEditor extends AbstractFileEditor<Desktop> {
     @Nonnull
     @Override
     public String getName() {
-        return "Open a file in a default browser";
+        return "Open a file in a default editor";
     }
 
     @Nonnull
