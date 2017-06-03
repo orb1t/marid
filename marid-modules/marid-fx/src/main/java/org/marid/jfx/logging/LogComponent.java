@@ -22,7 +22,7 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import org.marid.ide.logging.LogIconFactory;
+import org.marid.jfx.icons.IconFactory;
 
 import java.util.logging.LogRecord;
 
@@ -46,7 +46,7 @@ public class LogComponent extends ListView<LogRecord> {
                 } else {
                     if (Platform.isFxApplicationThread()) {
                         setText(m(item.getMessage(), item.getParameters()));
-                        setGraphic(LogIconFactory.icon(item.getLevel()));
+                        setGraphic(IconFactory.icon(item.getLevel()));
                     }
                 }
             }

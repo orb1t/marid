@@ -18,6 +18,7 @@
 
 package org.marid.ide.settings;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
@@ -41,7 +42,11 @@ public class JavaSettings extends AbstractSettings {
     }
 
     public void setJavaExecutable(String value) {
-        preferences.put("javaExecutable", value);
+        if (StringUtils.isBlank(value)) {
+            preferences.remove("javaExecutable");
+        } else {
+            preferences.put("javaExecutable", value);
+        }
     }
 
     public String[] getJavaArguments() {

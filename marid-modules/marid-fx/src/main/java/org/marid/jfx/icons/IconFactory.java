@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.logging;
+package org.marid.jfx.icons;
 
 import javafx.scene.Node;
 import org.jetbrains.annotations.PropertyKey;
@@ -27,7 +27,7 @@ import java.util.logging.Level;
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface LogIconFactory {
+public interface IconFactory {
 
     static Node icon(Level level) {
         switch (level.intValue()) {
