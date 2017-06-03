@@ -21,6 +21,9 @@ package org.marid.ide.panes.structure.editor;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.printer.PrettyPrintVisitor;
 import com.github.javaparser.printer.PrettyPrinterConfiguration;
 import javafx.scene.Node;
@@ -105,9 +108,10 @@ public class AddBeanFileEditor extends AbstractFileEditor<ProjectProfile> {
                 .collect(Collectors.joining("."));
 
         final CompilationUnit compilationUnit = new CompilationUnit(packageName);
+        compilationUnit.addImport(Generated.class);
 
         final ClassOrInterfaceDeclaration klass = compilationUnit.addClass(javaFileName, Modifier.PUBLIC);
-        klass.addAnnotation(Generated.class);
+        klass.addAnnotation(new SingleMemberAnnotationExpr(new Name("Generated"), new StringLiteralExpr("Marid")));
 
         final PrettyPrintVisitor visitor = new PrettyPrintVisitor(prettyPrinterConfiguration);
         compilationUnit.accept(visitor, null);

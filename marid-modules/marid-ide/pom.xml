@@ -94,6 +94,7 @@
                 <configuration>
                     <archive>
                         <manifest>
+                            <classpathPrefix>lib/</classpathPrefix>
                             <addClasspath>true</addClasspath>
                             <mainClass>org.marid.Ide</mainClass>
                         </manifest>

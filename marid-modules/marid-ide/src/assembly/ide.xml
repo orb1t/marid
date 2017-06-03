@@ -37,9 +37,17 @@
     <dependencySets>
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
-            <useProjectArtifact>true</useProjectArtifact>
+            <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveDependencies>true</useTransitiveDependencies>
-            <useTransitiveFiltering>true</useTransitiveFiltering>
+            <useProjectAttachments>true</useProjectAttachments>
+        </dependencySet>
+
+        <dependencySet>
+            <outputDirectory>.</outputDirectory>
+            <useProjectArtifact>true</useProjectArtifact>
+            <includes>
+                <include>org.marid:marid-ide</include>
+            </includes>
         </dependencySet>
     </dependencySets>
 </assembly>
