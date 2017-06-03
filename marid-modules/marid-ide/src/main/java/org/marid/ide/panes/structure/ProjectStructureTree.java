@@ -18,12 +18,18 @@
 
 package org.marid.ide.panes.structure;
 
+import javafx.application.Platform;
+import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.control.TreeItem.TreeModificationEvent;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
+import org.marid.ide.event.FileAddedEvent;
+import org.marid.ide.event.FileChangeEvent;
+import org.marid.ide.event.FileRemovedEvent;
+import org.marid.ide.project.ProjectManager;
 import org.marid.ide.structure.editor.FileEditor;
 import org.marid.ide.structure.icons.FileIcons;
-import org.marid.ide.project.ProjectManager;
 import org.marid.jfx.beans.ConstantValue;
 import org.marid.jfx.menu.MaridContextMenu;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,14 +42,13 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.logging.Level.WARNING;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.l10n.L10n.s;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -149,5 +154,67 @@ public class ProjectStructureTree extends TreeTableView<Path> {
     @EventListener
     private void onStart(ContextStartedEvent event) {
         getSelectionModel().select(getRoot());
+    }
+
+    @EventListener
+    private void onPathAdd(FileAddedEvent event) {
+        Platform.runLater(() -> onAdd(event.getSource(), getRoot()));
+    }
+
+    private void onAdd(Path path, TreeItem<Path> item) {
+        if (path.equals(item.getValue())) {
+            Event.fireEvent(item, new TreeModificationEvent<>(TreeItem.valueChangedEvent(), item));
+            return;
+        }
+        if (!path.startsWith(item.getValue())) {
+            return;
+        }
+        if (item.getChildren().stream().map(TreeItem::getValue).anyMatch(path::startsWith)) {
+            item.getChildren().forEach(e -> onAdd(path, e));
+        } else {
+            final TreeItem<Path> newPathItem = new TreeItem<>(path);
+            newPathItem.setExpanded(!path.getFileName().toString().equals("target"));
+            final Comparator<TreeItem<Path>> comparator = (i1, i2) -> {
+                if (Files.isDirectory(i1.getValue()) && Files.isDirectory(i2.getValue())) {
+                    return i1.getValue().compareTo(i2.getValue());
+                } else if (Files.isRegularFile(i1.getValue()) && Files.isRegularFile(i2.getValue())) {
+                    return i1.getValue().compareTo(i2.getValue());
+                } else if (Files.isDirectory(i1.getValue())) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            };
+            final int index = Collections.binarySearch(item.getChildren(), newPathItem, comparator);
+            if (index >= 0) {
+                log(WARNING, "Duplicate detected: {0}", path);
+            } else {
+                item.getChildren().add(-(index + 1), newPathItem);
+            }
+        }
+    }
+
+    @EventListener
+    private void onPathRemove(FileRemovedEvent event) {
+        Platform.runLater(() -> onDelete(event.getSource(), getRoot()));
+    }
+
+    private void onDelete(Path path, TreeItem<Path> item) {
+        if (!item.getChildren().removeIf(i -> i.getValue().equals(path))) {
+            item.getChildren().forEach(i -> onDelete(path, i));
+        }
+    }
+
+    @EventListener
+    private void onPathChange(FileChangeEvent event) {
+        Platform.runLater(() -> onChange(event.getSource(), getRoot()));
+    }
+
+    private void onChange(Path path, TreeItem<Path> item) {
+        if (path.equals(item.getValue())) {
+            Event.fireEvent(item, new TreeModificationEvent<>(TreeItem.valueChangedEvent(), item));
+        } else {
+            item.getChildren().forEach(e -> onChange(path, e));
+        }
     }
 }
