@@ -18,14 +18,12 @@
 
 package org.marid.ide.event;
 
-import org.springframework.context.ApplicationEvent;
-
 import java.nio.file.Path;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class FileRenamedEvent extends ApplicationEvent {
+public class FileRenamedEvent extends PropagatedEvent {
 
     private final Path target;
 

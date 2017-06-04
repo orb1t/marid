@@ -18,14 +18,17 @@
 
 package org.marid.ide.structure.editor;
 
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.marid.ide.event.FileRenamedEvent;
 import org.marid.ide.structure.syneditor.SynEditor;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -78,10 +81,22 @@ public class SynFileEditor extends AbstractFileEditor<Path> {
     @Override
     protected void edit(@Nonnull Path path, @Nonnull Path context) {
         final SynStage synStage = new SynStage(synEditorFactory.getObject());
+        synStage.setTitle(path.toString());
         synStage.synEditor.setPath(path);
         synStage.synEditor.load();
         pathMap.put(synStage, path);
         synStage.show();
+    }
+
+    @EventListener
+    private void onFileRename(FileRenamedEvent event) {
+        Platform.runLater(() -> pathMap.entrySet().forEach(e -> {
+            if (e.getValue().equals(event.getSource())) {
+                e.setValue(event.getTarget());
+                e.getKey().setTitle(event.getTarget().toString());
+                e.getKey().synEditor.setPath(event.getTarget());
+            }
+        }));
     }
 
     private static class SynStage extends Stage {

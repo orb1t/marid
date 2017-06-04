@@ -18,14 +18,12 @@
 
 package org.marid.ide.event;
 
-import org.springframework.context.ApplicationEvent;
-
 import java.nio.file.Path;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class FileRemovedEvent extends ApplicationEvent {
+public class FileRemovedEvent extends PropagatedEvent {
 
     public FileRemovedEvent(Path source) {
         super(source);

@@ -20,19 +20,12 @@ package org.marid.ide.event;
 
 import org.springframework.context.ApplicationEvent;
 
-import java.nio.file.Path;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-public class FileChangeEvent extends ApplicationEvent {
+public class PropagatedEvent extends ApplicationEvent {
 
-    public FileChangeEvent(Path source) {
+    public PropagatedEvent(Object source) {
         super(source);
-    }
-
-    @Override
-    public Path getSource() {
-        return (Path) super.getSource();
     }
 }

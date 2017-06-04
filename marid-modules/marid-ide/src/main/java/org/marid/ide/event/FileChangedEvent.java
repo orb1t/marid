@@ -23,9 +23,9 @@ import java.nio.file.Path;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class FileAddedEvent extends PropagatedEvent {
+public class FileChangedEvent extends PropagatedEvent {
 
-    public FileAddedEvent(Path source) {
+    public FileChangedEvent(Path source) {
         super(source);
     }
 

@@ -18,12 +18,8 @@
 
 package org.marid.ide.structure;
 
-import javafx.application.Platform;
-import javafx.event.Event;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeItem.TreeModificationEvent;
 import org.marid.ide.event.FileAddedEvent;
-import org.marid.ide.event.FileChangeEvent;
+import org.marid.ide.event.FileChangedEvent;
 import org.marid.ide.event.FileRemovedEvent;
 import org.marid.ide.project.ProjectManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,7 +134,7 @@ public class ProjectStructureUpdater implements Closeable {
                                 return result;
                             });
                         } else if (event.kind() == ENTRY_MODIFY) {
-                            eventPublisher.publishEvent(new FileChangeEvent(path));
+                            eventPublisher.publishEvent(new FileChangedEvent(path));
                         }
                     }
                 } finally {

@@ -25,7 +25,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.TreeItem.TreeModificationEvent;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import org.marid.ide.event.FileAddedEvent;
-import org.marid.ide.event.FileChangeEvent;
+import org.marid.ide.event.FileChangedEvent;
 import org.marid.ide.event.FileRemovedEvent;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.structure.editor.FileEditor;
@@ -206,7 +206,7 @@ public class ProjectStructureTree extends TreeTableView<Path> {
     }
 
     @EventListener
-    private void onPathChange(FileChangeEvent event) {
+    private void onPathChange(FileChangedEvent event) {
         Platform.runLater(() -> onChange(event.getSource(), getRoot()));
     }
 
