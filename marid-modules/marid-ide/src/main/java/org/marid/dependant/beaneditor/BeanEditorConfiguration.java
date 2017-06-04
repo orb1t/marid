@@ -18,15 +18,23 @@
 
 package org.marid.dependant.beaneditor;
 
+import org.marid.ide.event.FileRemovedEvent;
+import org.marid.ide.event.FileRenamedEvent;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.dependant.DependantConfiguration;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@Component
+@ComponentScan
 public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorParam> {
 
     @Bean
@@ -37,5 +45,23 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
     @Bean
     public ProjectProfile profile() {
         return param.profile;
+    }
+
+    @Bean
+    public ApplicationListener<FileRenamedEvent> renameListener(Path javaFile, GenericApplicationContext context) {
+        return event -> {
+            if (javaFile.equals(event.getSource())) {
+                context.close();
+            }
+        };
+    }
+
+    @Bean
+    public ApplicationListener<FileRemovedEvent> removeListener(Path javaFile, GenericApplicationContext context) {
+        return event -> {
+            if (javaFile.equals(event.getSource())) {
+                context.close();
+            }
+        };
     }
 }

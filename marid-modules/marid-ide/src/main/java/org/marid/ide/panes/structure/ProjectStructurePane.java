@@ -18,24 +18,21 @@
 
 package org.marid.ide.panes.structure;
 
-import org.marid.ide.tabs.IdeTab;
+import javafx.geometry.Insets;
+import javafx.scene.layout.BorderPane;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-
-import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-@Lazy(false)
-public class ProjectStructureTab extends IdeTab {
+public class ProjectStructurePane extends BorderPane {
 
     @Autowired
-    public ProjectStructureTab(ProjectStructurePane projectStructurePane) {
-        super(projectStructurePane, ls("Profiles"), () -> glyphIcon("O_BOOK", 16));
-        setClosable(false);
+    public ProjectStructurePane(ProjectStructureTree tree, ProjectStructureBreadCrumb crumb) {
+        setCenter(tree);
+        setBottom(crumb);
+        BorderPane.setMargin(crumb, new Insets(2));
     }
 }

@@ -18,11 +18,15 @@
 
 package org.marid.dependant.beaneditor;
 
+import com.github.javaparser.ast.body.MethodDeclaration;
 import javafx.scene.control.TreeTableView;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanEditor extends TreeTableView {
+@Component
+public class BeanEditor extends TreeTableView<MethodDeclaration> {
+
 
 }

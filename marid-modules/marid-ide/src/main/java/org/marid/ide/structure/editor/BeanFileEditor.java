@@ -25,6 +25,9 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithPublicModifier;
 import javafx.scene.Node;
 import javafx.util.Pair;
+import org.marid.IdeDependants;
+import org.marid.dependant.beaneditor.BeanEditorConfiguration;
+import org.marid.dependant.beaneditor.BeanEditorParam;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
@@ -47,11 +50,15 @@ import static org.marid.logging.Log.log;
 public class BeanFileEditor extends AbstractFileEditor<Pair<ProjectProfile, CompilationUnit>> {
 
     private final ProjectManager projectManager;
+    private final IdeDependants dependants;
 
     @Autowired
-    public BeanFileEditor(@Qualifier("java") PathMatcher javaPathMatcher, ProjectManager projectManager) {
+    public BeanFileEditor(@Qualifier("java") PathMatcher javaPathMatcher,
+                          ProjectManager projectManager,
+                          IdeDependants dependants) {
         super(javaPathMatcher);
         this.projectManager = projectManager;
+        this.dependants = dependants;
     }
 
     @Nonnull
@@ -103,6 +110,6 @@ public class BeanFileEditor extends AbstractFileEditor<Pair<ProjectProfile, Comp
 
     @Override
     protected void edit(@Nonnull Path file, @Nonnull Pair<ProjectProfile, CompilationUnit> context) {
-
+        dependants.start(BeanEditorConfiguration.class, new BeanEditorParam(context.getKey(), file), c -> {});
     }
 }

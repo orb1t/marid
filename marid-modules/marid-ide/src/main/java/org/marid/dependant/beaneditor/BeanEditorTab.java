@@ -16,26 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.structure;
+package org.marid.dependant.beaneditor;
 
+import org.marid.ide.common.IdeShapes;
+import org.marid.ide.project.ProjectManager;
 import org.marid.ide.tabs.IdeTab;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcons.glyphIcon;
+import java.nio.file.Path;
+
+import static org.marid.jfx.beans.ConstantValue.value;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-@Lazy(false)
-public class ProjectStructureTab extends IdeTab {
+public class BeanEditorTab extends IdeTab {
 
     @Autowired
-    public ProjectStructureTab(ProjectStructurePane projectStructurePane) {
-        super(projectStructurePane, ls("Profiles"), () -> glyphIcon("O_BOOK", 16));
-        setClosable(false);
+    public BeanEditorTab(BeanEditor editor, Path javaFile, ProjectManager projectManager) {
+        super(editor, value(() -> {
+            final Path relativePath = projectManager.getProfilesDir().relativize(javaFile);
+            return relativePath.toString();
+        }), () -> IdeShapes.javaFile(javaFile.hashCode(), 16));
     }
 }
