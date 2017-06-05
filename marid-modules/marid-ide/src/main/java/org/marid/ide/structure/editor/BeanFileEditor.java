@@ -24,10 +24,10 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithPublicModifier;
 import javafx.scene.Node;
-import javafx.util.Pair;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.BeanEditorConfiguration;
 import org.marid.dependant.beaneditor.BeanEditorParam;
+import org.marid.ide.model.TextFile;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
@@ -47,7 +47,7 @@ import static org.marid.logging.Log.log;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanFileEditor extends AbstractFileEditor<Pair<ProjectProfile, CompilationUnit>> {
+public class BeanFileEditor extends AbstractFileEditor<ProjectProfile> {
 
     private final ProjectManager projectManager;
     private final IdeDependants dependants;
@@ -80,7 +80,7 @@ public class BeanFileEditor extends AbstractFileEditor<Pair<ProjectProfile, Comp
     }
 
     @Override
-    protected Pair<ProjectProfile, CompilationUnit> editorContext(@Nonnull Path path) {
+    protected ProjectProfile editorContext(@Nonnull Path path) {
         try {
             final ProjectProfile profile = projectManager.getProfile(path).orElse(null);
             if (profile == null) {
@@ -98,7 +98,7 @@ public class BeanFileEditor extends AbstractFileEditor<Pair<ProjectProfile, Comp
                     .filter(NodeWithPublicModifier::isPublic)
                     .filter(c -> c.isAnnotationPresent(Generated.class))
                     .anyMatch(c -> !c.isFinal())) {
-                return new Pair<>(profile, compilationUnit);
+                return profile;
             } else {
                 return null;
             }
@@ -109,7 +109,7 @@ public class BeanFileEditor extends AbstractFileEditor<Pair<ProjectProfile, Comp
     }
 
     @Override
-    protected void edit(@Nonnull Path file, @Nonnull Pair<ProjectProfile, CompilationUnit> context) {
-        dependants.start(BeanEditorConfiguration.class, new BeanEditorParam(context.getKey(), file), c -> {});
+    protected void edit(@Nonnull Path file, @Nonnull ProjectProfile context) {
+        dependants.start(BeanEditorConfiguration.class, new BeanEditorParam(context, new TextFile(file)), c -> {});
     }
 }

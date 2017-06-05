@@ -22,9 +22,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.marid.ide.model.TextFile;
 import org.marid.ide.project.ProjectProfile;
-
-import java.nio.file.Path;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -32,9 +31,9 @@ import java.nio.file.Path;
 public class BeanEditorParam {
 
     public final ProjectProfile profile;
-    public final Path javaFile;
+    public final TextFile javaFile;
 
-    public BeanEditorParam(ProjectProfile profile, Path javaFile) {
+    public BeanEditorParam(ProjectProfile profile, TextFile javaFile) {
         this.profile = profile;
         this.javaFile = javaFile;
     }

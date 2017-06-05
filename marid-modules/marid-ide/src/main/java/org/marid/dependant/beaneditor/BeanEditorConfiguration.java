@@ -18,8 +18,10 @@
 
 package org.marid.dependant.beaneditor;
 
-import org.marid.ide.event.FileRemovedEvent;
-import org.marid.ide.event.FileRenamedEvent;
+import javafx.application.Platform;
+import org.marid.ide.event.TextFileRemovedEvent;
+import org.marid.ide.event.TextFileRenamedEvent;
+import org.marid.ide.model.TextFile;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.context.ApplicationListener;
@@ -27,8 +29,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
-
-import java.nio.file.Path;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,7 +38,7 @@ import java.nio.file.Path;
 public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorParam> {
 
     @Bean
-    public Path javaFile() {
+    public TextFile javaFile() {
         return param.javaFile;
     }
 
@@ -48,19 +48,19 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
     }
 
     @Bean
-    public ApplicationListener<FileRenamedEvent> renameListener(Path javaFile, GenericApplicationContext context) {
+    public ApplicationListener<TextFileRemovedEvent> removeListener(TextFile javaFile, GenericApplicationContext ctx) {
         return event -> {
-            if (javaFile.equals(event.getSource())) {
-                context.close();
+            if (javaFile.getPath().equals(event.getSource())) {
+                ctx.close();
             }
         };
     }
 
     @Bean
-    public ApplicationListener<FileRemovedEvent> removeListener(Path javaFile, GenericApplicationContext context) {
+    private ApplicationListener<TextFileRenamedEvent> renameListener(TextFile file) {
         return event -> {
-            if (javaFile.equals(event.getSource())) {
-                context.close();
+            if (file.getPath().equals(event.getSource())) {
+                Platform.runLater(() -> file.path.set(event.getTarget()));
             }
         };
     }

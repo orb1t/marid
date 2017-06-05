@@ -16,30 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.beaneditor;
-
-import javafx.beans.binding.Bindings;
-import org.marid.ide.common.IdeShapes;
-import org.marid.ide.model.TextFile;
-import org.marid.ide.project.ProjectManager;
-import org.marid.ide.tabs.IdeTab;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+package org.marid.ide.event;
 
 import java.nio.file.Path;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class BeanEditorTab extends IdeTab {
+public class TextFileRenamedEvent extends PropagatedEvent {
 
-    @Autowired
-    public BeanEditorTab(BeanEditor editor, TextFile javaFile, ProjectManager projectManager) {
-        super(editor, Bindings.createStringBinding(() -> {
-            final Path relativePath = projectManager.getProfilesDir().relativize(javaFile.getPath());
-            return relativePath.toString();
-        }, javaFile.path), () -> IdeShapes.javaFile(javaFile.hashCode(), 16));
-        addNodeObservables(javaFile.path);
+    private final Path target;
+
+    public TextFileRenamedEvent(Path source, Path target) {
+        super(source);
+        this.target = target;
+    }
+
+    @Override
+    public Path getSource() {
+        return (Path) super.getSource();
+    }
+
+    public Path getTarget() {
+        return target;
     }
 }
