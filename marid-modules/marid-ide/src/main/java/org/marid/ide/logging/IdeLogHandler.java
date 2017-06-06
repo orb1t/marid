@@ -18,13 +18,13 @@
 
 package org.marid.ide.logging;
 
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
-import static javafx.collections.FXCollections.observableArrayList;
-import static javafx.collections.FXCollections.synchronizedObservableList;
 import static org.marid.IdePrefs.PREFERENCES;
 
 /**
@@ -32,7 +32,7 @@ import static org.marid.IdePrefs.PREFERENCES;
  */
 public class IdeLogHandler extends Handler {
 
-    public static final ObservableList<LogRecord> LOG_RECORDS = synchronizedObservableList(observableArrayList());
+    public static final ObservableList<LogRecord> LOG_RECORDS = FXCollections.observableArrayList();
 
     private volatile int maxRecords;
 
@@ -50,20 +50,22 @@ public class IdeLogHandler extends Handler {
 
     @Override
     public void publish(LogRecord record) {
-        LOG_RECORDS.add(record);
-        while (true) {
-            final int toDelete = LOG_RECORDS.size() - maxRecords;
-            if (toDelete > 0) {
-                try {
-                    LOG_RECORDS.subList(0, toDelete).clear();
+        Platform.runLater(() -> {
+            LOG_RECORDS.add(record);
+            while (true) {
+                final int toDelete = LOG_RECORDS.size() - maxRecords;
+                if (toDelete > 0) {
+                    try {
+                        LOG_RECORDS.subList(0, toDelete).clear();
+                        break;
+                    } catch (IndexOutOfBoundsException x) {
+                        // ignore
+                    }
+                } else {
                     break;
-                } catch (IndexOutOfBoundsException x) {
-                    // ignore
                 }
-            } else {
-                break;
             }
-        }
+        });
     }
 
     @Override

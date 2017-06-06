@@ -39,15 +39,20 @@ public class LogComponent extends ListView<LogRecord> {
         setCellFactory(p -> new ListCell<LogRecord>() {
             @Override
             protected void updateItem(LogRecord item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                    setText(null);
-                } else {
-                    if (Platform.isFxApplicationThread()) {
+                final Runnable runnable = () -> {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setGraphic(null);
+                        setText(null);
+                    } else {
                         setText(m(item.getMessage(), item.getParameters()));
                         setGraphic(IconFactory.icon(item.getLevel()));
                     }
+                };
+                if (Platform.isFxApplicationThread()) {
+                    runnable.run();
+                } else {
+                    Platform.runLater(runnable);
                 }
             }
         });
