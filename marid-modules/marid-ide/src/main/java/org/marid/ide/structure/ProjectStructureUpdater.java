@@ -49,9 +49,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.nio.file.StandardWatchEventKinds.*;
-import static java.util.logging.Level.CONFIG;
-import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.WARNING;
+import static java.util.logging.Level.*;
 import static org.marid.logging.Log.log;
 
 /**
@@ -173,7 +171,6 @@ public class ProjectStructureUpdater implements Closeable {
                 }
             } else {
                 log(CONFIG, "Unregister {0}", dir);
-                key.cancel();
                 watchKeyMap.remove(dir);
             }
         }
