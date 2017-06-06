@@ -83,10 +83,6 @@ public class JavaTextFileUpdater {
                     updated.set(true);
                 }
             });
-            if (compilationUnit.getPackageDeclaration().map(p -> pkg.equals(p.getName().getIdentifier())).orElse(false)) {
-                compilationUnit.setPackageDeclaration(pkg);
-                updated.set(true);
-            }
             compilationUnit.getTypes().stream()
                     .filter(TypeDeclaration::isTopLevelType)
                     .findAny()
