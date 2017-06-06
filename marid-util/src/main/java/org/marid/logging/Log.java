@@ -86,6 +86,11 @@ public class Log {
         log(logger, level, message, null, args);
     }
 
+    public static boolean isLoggable(Level level) {
+        final Logger logger = LOGGER_CLASS_VALUE.get(caller(3));
+        return logger.isLoggable(level);
+    }
+
     private static Class<?> caller(int depth) {
         final Class<?>[] classes = new SecurityPublicClassContext().getClassContext();
         return classes.length > depth ? classes[depth] : MethodHandles.lookup().lookupClass();

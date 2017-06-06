@@ -23,11 +23,11 @@ import java.nio.file.Path;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TextFileRenamedEvent extends PropagatedEvent {
+public class TextFileMovedEvent extends PropagatedEvent {
 
     private final Path target;
 
-    public TextFileRenamedEvent(Path source, Path target) {
+    public TextFileMovedEvent(Path source, Path target) {
         super(source);
         this.target = target;
     }

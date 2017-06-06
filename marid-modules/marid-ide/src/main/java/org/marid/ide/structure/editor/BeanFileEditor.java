@@ -18,11 +18,6 @@
 
 package org.marid.ide.structure.editor;
 
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithPublicModifier;
 import javafx.scene.Node;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.BeanEditorConfiguration;
@@ -35,13 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-
-import static java.util.logging.Level.WARNING;
-import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -81,31 +72,7 @@ public class BeanFileEditor extends AbstractFileEditor<ProjectProfile> {
 
     @Override
     protected ProjectProfile editorContext(@Nonnull Path path) {
-        try {
-            final ProjectProfile profile = projectManager.getProfile(path).orElse(null);
-            if (profile == null) {
-                return null;
-            }
-            final CompilationUnit compilationUnit = JavaParser.parse(path);
-            if (compilationUnit.getTypes().isEmpty()) {
-                return null;
-            }
-            if (compilationUnit.getTypes().stream()
-                    .filter(ClassOrInterfaceDeclaration.class::isInstance)
-                    .map(ClassOrInterfaceDeclaration.class::cast)
-                    .filter(c -> !c.isInterface())
-                    .filter(TypeDeclaration::isTopLevelType)
-                    .filter(NodeWithPublicModifier::isPublic)
-                    .filter(c -> c.isAnnotationPresent(Generated.class))
-                    .anyMatch(c -> !c.isFinal())) {
-                return profile;
-            } else {
-                return null;
-            }
-        } catch (Exception x) {
-            log(WARNING, "Unable to parse {0}", x, path);
-            return null;
-        }
+        return projectManager.getProfile(path).orElse(null);
     }
 
     @Override

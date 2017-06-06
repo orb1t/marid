@@ -16,29 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.common;
+package org.marid.ide.event;
 
-import com.github.javaparser.printer.PrettyPrinter;
-import com.github.javaparser.printer.PrettyPrinterConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import java.nio.file.Path;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class JavaParsers {
+public class FileMovedEvent extends PropagatedEvent {
 
-    @Bean
-    public PrettyPrinterConfiguration prettyPrinterConfiguration() {
-        return new PrettyPrinterConfiguration()
-                .setIndent("  ")
-                .setPrintComments(true)
-                .setEndOfLineCharacter("\n");
+    private final Path target;
+
+    public FileMovedEvent(Path source, Path target) {
+        super(source);
+        this.target = target;
     }
 
-    @Bean
-    public PrettyPrinter prettyPrinter(PrettyPrinterConfiguration configuration) {
-        return new PrettyPrinter(configuration);
+    @Override
+    public Path getSource() {
+        return (Path) super.getSource();
+    }
+
+    public Path getTarget() {
+        return target;
     }
 }

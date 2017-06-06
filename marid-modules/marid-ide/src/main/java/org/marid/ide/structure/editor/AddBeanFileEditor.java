@@ -24,8 +24,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.printer.PrettyPrintVisitor;
-import com.github.javaparser.printer.PrettyPrinterConfiguration;
+import com.github.javaparser.printer.PrettyPrinter;
 import javafx.scene.Node;
 import javafx.scene.control.TextInputDialog;
 import org.marid.ide.project.ProjectManager;
@@ -42,7 +41,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.singletonList;
 import static java.util.logging.Level.WARNING;
 import static org.marid.ide.IdeNotifications.n;
 import static org.marid.l10n.L10n.s;
@@ -54,13 +52,13 @@ import static org.marid.l10n.L10n.s;
 public class AddBeanFileEditor extends AbstractFileEditor<ProjectProfile> {
 
     private final ProjectManager projectManager;
-    private final PrettyPrinterConfiguration prettyPrinterConfiguration;
+    private final PrettyPrinter prettyPrinter;
 
     @Autowired
-    public AddBeanFileEditor(ProjectManager projectManager, PrettyPrinterConfiguration prettyPrinterConfiguration) {
+    public AddBeanFileEditor(ProjectManager projectManager, PrettyPrinter prettyPrinter) {
         super(Files::isDirectory);
         this.projectManager = projectManager;
-        this.prettyPrinterConfiguration = prettyPrinterConfiguration;
+        this.prettyPrinter = prettyPrinter;
     }
 
     @Nonnull
@@ -113,12 +111,11 @@ public class AddBeanFileEditor extends AbstractFileEditor<ProjectProfile> {
         final ClassOrInterfaceDeclaration klass = compilationUnit.addClass(javaFileName, Modifier.PUBLIC);
         klass.addAnnotation(new SingleMemberAnnotationExpr(new Name("Generated"), new StringLiteralExpr("Marid")));
 
-        final PrettyPrintVisitor visitor = new PrettyPrintVisitor(prettyPrinterConfiguration);
-        compilationUnit.accept(visitor, null);
+        final String source = prettyPrinter.print(compilationUnit);
 
         final Path path = file.resolve(javaFileName + ".java");
         try {
-            Files.write(path, singletonList(visitor.getSource()), UTF_8);
+            Files.write(path, source.getBytes(UTF_8));
         } catch (Exception x) {
             n(WARNING, "Unable to save file {0}", x, file);
         }

@@ -20,7 +20,7 @@ package org.marid.dependant.beaneditor;
 
 import javafx.application.Platform;
 import org.marid.ide.event.TextFileRemovedEvent;
-import org.marid.ide.event.TextFileRenamedEvent;
+import org.marid.ide.event.TextFileMovedEvent;
 import org.marid.ide.model.TextFile;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.spring.dependant.DependantConfiguration;
@@ -51,13 +51,13 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
     public ApplicationListener<TextFileRemovedEvent> removeListener(TextFile javaFile, GenericApplicationContext ctx) {
         return event -> {
             if (javaFile.getPath().equals(event.getSource())) {
-                ctx.close();
+                Platform.runLater(ctx::close);
             }
         };
     }
 
     @Bean
-    private ApplicationListener<TextFileRenamedEvent> renameListener(TextFile file) {
+    private ApplicationListener<TextFileMovedEvent> renameListener(TextFile file) {
         return event -> {
             if (file.getPath().equals(event.getSource())) {
                 Platform.runLater(() -> file.path.set(event.getTarget()));

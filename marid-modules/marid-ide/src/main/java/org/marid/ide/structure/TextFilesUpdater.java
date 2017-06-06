@@ -18,28 +18,15 @@
 
 package org.marid.ide.structure;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.marid.ide.event.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.util.Arrays;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import static java.util.logging.Level.CONFIG;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -49,101 +36,33 @@ import java.util.concurrent.ConcurrentMap;
 public class TextFilesUpdater {
 
     private final ApplicationEventPublisher eventPublisher;
-    private final PathMatcher textFilesPathMatcher;
-    private final ConcurrentMap<Path, StampedHash> hashes = new ConcurrentHashMap<>();
 
     @Autowired
-    public TextFilesUpdater(ApplicationEventPublisher eventPublisher, @Qualifier("text-files") PathMatcher filter) {
+    public TextFilesUpdater(ApplicationEventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
-        this.textFilesPathMatcher = filter;
     }
 
-    @EventListener
+    @EventListener(condition = "@textFilePathMatcher.matches(#root.event.source)")
     private void onAdded(FileAddedEvent addedEvent) {
-        if (!textFilesPathMatcher.matches(addedEvent.getSource())) {
-            return;
-        }
-        final byte[] newHash = hash(addedEvent.getSource());
-        if (newHash == ArrayUtils.EMPTY_BYTE_ARRAY) {
-            onRemoved(new FileRemovedEvent(addedEvent.getSource()));
-            return;
-        }
-        final long now = System.currentTimeMillis();
-        final Path oldPath = hashes.entrySet().stream()
-                .filter(e -> now - e.getValue().timestamp < 500L)
-                .filter(e -> Arrays.equals(e.getValue().hash, newHash))
-                .findAny()
-                .map(Entry::getKey)
-                .orElse(null);
-        if (oldPath != null) {
-            hashes.remove(oldPath);
-            eventPublisher.publishEvent(new TextFileRenamedEvent(oldPath, addedEvent.getSource()));
-        } else {
-            eventPublisher.publishEvent(new TextFileAddedEvent(addedEvent.getSource()));
-        }
-        hashes.put(addedEvent.getSource(), new StampedHash(newHash, 0L));
+        log(CONFIG, "{0}", addedEvent);
+        eventPublisher.publishEvent(new TextFileChangedEvent(addedEvent.getSource()));
     }
 
-    @EventListener
+    @EventListener(condition = "@textFilePathMatcher.matches(#root.event.source)")
     private void onRemoved(FileRemovedEvent removedEvent) {
-        if (!textFilesPathMatcher.matches(removedEvent.getSource())) {
-            return;
-        }
-        hashes.entrySet().stream()
-                .filter(e -> e.getKey().equals(removedEvent.getSource()))
-                .forEach(e -> e.setValue(new StampedHash(e.getValue().hash, System.currentTimeMillis())));
+        log(CONFIG, "{0}", removedEvent);
+        eventPublisher.publishEvent(new TextFileRemovedEvent(removedEvent.getSource()));
     }
 
-    @EventListener
+    @EventListener(condition = "@textFilePathMatcher.matches(#root.event.source)")
     private void onChanged(FileChangedEvent changedEvent) {
-        if (!textFilesPathMatcher.matches(changedEvent.getSource())) {
-            return;
-        }
-        final StampedHash oldHash = hashes.get(changedEvent.getSource());
-        if (oldHash == null) {
-            return;
-        }
-        final byte[] newHash = hash(changedEvent.getSource());
-        if (newHash == ArrayUtils.EMPTY_BYTE_ARRAY) {
-            onRemoved(new FileRemovedEvent(changedEvent.getSource()));
-            return;
-        }
-        if (!Arrays.equals(newHash, oldHash.hash)) {
-            eventPublisher.publishEvent(new TextFileChangedEvent(changedEvent.getSource()));
-        }
+        log(CONFIG, "{0}", changedEvent);
+        eventPublisher.publishEvent(new TextFileChangedEvent(changedEvent.getSource()));
     }
 
-    private static byte[] hash(Path path) {
-        try (final InputStream inputStream = Files.newInputStream(path)) {
-            return DigestUtils.sha1(inputStream);
-        } catch (NoSuchFileException x) {
-            return ArrayUtils.EMPTY_BYTE_ARRAY;
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
-    }
-
-    @Scheduled(fixedDelay = 500L)
-    public void update() {
-        final long now = System.currentTimeMillis();
-        hashes.entrySet().removeIf(e -> {
-             if (e.getValue().timestamp > 0 && now - e.getValue().timestamp > 500L) {
-                 eventPublisher.publishEvent(new TextFileRemovedEvent(e.getKey()));
-                 return true;
-             } else {
-                 return false;
-             }
-        });
-    }
-
-    private static final class StampedHash {
-
-        private final byte[] hash;
-        private final long timestamp;
-
-        private StampedHash(byte[] hash, long timestamp) {
-            this.hash = hash;
-            this.timestamp = timestamp;
-        }
+    @EventListener(condition = "@textFilePathMatcher.matches(#root.event.source)")
+    private void onMoved(FileMovedEvent movedEvent) {
+        log(CONFIG, "{0}", movedEvent);
+        eventPublisher.publishEvent(new TextFileMovedEvent(movedEvent.getSource(), movedEvent.getTarget()));
     }
 }
