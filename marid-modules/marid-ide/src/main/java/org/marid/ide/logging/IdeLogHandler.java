@@ -52,18 +52,9 @@ public class IdeLogHandler extends Handler {
     public void publish(LogRecord record) {
         Platform.runLater(() -> {
             LOG_RECORDS.add(record);
-            while (true) {
-                final int toDelete = LOG_RECORDS.size() - maxRecords;
-                if (toDelete > 0) {
-                    try {
-                        LOG_RECORDS.subList(0, toDelete).clear();
-                        break;
-                    } catch (IndexOutOfBoundsException x) {
-                        // ignore
-                    }
-                } else {
-                    break;
-                }
+            final int maxRecords = this.maxRecords;
+            while (LOG_RECORDS.size() - maxRecords > 0) {
+                LOG_RECORDS.subList(0, LOG_RECORDS.size() - maxRecords).clear();
             }
         });
     }
