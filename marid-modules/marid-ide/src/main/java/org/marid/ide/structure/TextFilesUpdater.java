@@ -41,7 +41,7 @@ public class TextFilesUpdater {
 
     @EventListener(condition = "@textFilePathMatcher.matches(#root.event.source)")
     public void onAdded(FileAddedEvent addedEvent) {
-        eventPublisher.publishEvent(new TextFileChangedEvent(addedEvent.getSource()));
+        eventPublisher.publishEvent(new TextFileAddedEvent(addedEvent.getSource()));
     }
 
     @EventListener(condition = "@textFilePathMatcher.matches(#root.event.source)")

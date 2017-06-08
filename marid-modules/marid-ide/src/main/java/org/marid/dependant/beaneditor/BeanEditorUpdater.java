@@ -18,6 +18,9 @@
 
 package org.marid.dependant.beaneditor;
 
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -31,13 +34,19 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.binarySearch;
+import static java.util.Comparator.comparing;
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 @Service
 public class BeanEditorUpdater {
 
-    private final ObservableList<MethodDeclaration> methodDeclarations = FXCollections.observableArrayList();
+    private final ObservableList<MethodDeclaration> methods = FXCollections.observableArrayList();
     private final TextFile textFile;
 
     @Autowired
@@ -47,10 +56,38 @@ public class BeanEditorUpdater {
 
     @PostConstruct
     public void update() {
-
+        try {
+            final CompilationUnit compilationUnit = JavaParser.parse(textFile.getPath(), UTF_8);
+            compilationUnit.getTypes().stream()
+                    .filter(ClassOrInterfaceDeclaration.class::isInstance)
+                    .map(ClassOrInterfaceDeclaration.class::cast)
+                    .filter(t -> !t.isInterface())
+                    .findFirst()
+                    .ifPresent(t -> {
+                        methods.removeIf(d -> t.getMethods().stream()
+                                .noneMatch(m -> m.getNameAsString().equals(d.getNameAsString()))
+                        );
+                        t.getMethods().forEach(m -> {
+                            final int i = binarySearch(methods, m, comparing(MethodDeclaration::getNameAsString));
+                            if (i >= 0) {
+                                if (!m.equals(methods.get(i))) {
+                                    methods.set(i, m);
+                                }
+                            } else {
+                                methods.add(-(i + 1), m);
+                            }
+                        });
+                    });
+        } catch (Exception x) {
+            log(WARNING, "Unable to compile {0}", x, textFile);
+        }
     }
 
-    @EventListener(condition = "@javaFile.equals(#event.source)")
+    public ObservableList<MethodDeclaration> getMethods() {
+        return methods;
+    }
+
+    @EventListener(condition = "@javaFile.path.equals(#event.source)")
     public void onMove(TextFileMovedEvent event) {
         Platform.runLater(() -> {
             textFile.setPath(event.getTarget());
@@ -58,7 +95,7 @@ public class BeanEditorUpdater {
         });
     }
 
-    @EventListener(condition = "@javaFile.equals(#event.source)")
+    @EventListener(condition = "@javaFile.path.equals(#event.source)")
     public void onChange(TextFileChangedEvent event) {
         Platform.runLater(this::update);
     }

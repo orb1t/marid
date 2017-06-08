@@ -116,7 +116,14 @@ public class ProjectStructureUpdater implements Closeable {
     }
 
     private void onModify(Path path) throws IOException {
-        eventQueue.add(new FileChangedEvent(path));
+        try {
+            if (Files.isHidden(path)) {
+                return;
+            }
+            eventQueue.add(new FileChangedEvent(path));
+        } catch (NoSuchFileException x) {
+            // ignore
+        }
     }
 
     private void process() {
@@ -153,7 +160,7 @@ public class ProjectStructureUpdater implements Closeable {
                 }
             } else {
                 if (Files.notExists(dir)) {
-                    eventQueue.add(new FileRemovedEvent(dir));
+                    onDelete(dir);
                 }
             }
         }
