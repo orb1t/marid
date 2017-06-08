@@ -64,14 +64,11 @@ public class JavaTextFileUpdater {
         if (profile == null) {
             return;
         }
-        final Path path = renamedEvent.getTarget().startsWith(profile.getSrcMainJava())
-                ? profile.getSrcMainJava().relativize(renamedEvent.getTarget())
-                : renamedEvent.getTarget().startsWith(profile.getSrcTestJava())
-                ? profile.getSrcTestJava().relativize(renamedEvent.getTarget())
-                : null;
-        if (path == null) {
+        final Path javaBase = profile.getJavaBaseDir(renamedEvent.getTarget());
+        if (javaBase == null) {
             return;
         }
+        final Path path = javaBase.relativize(renamedEvent.getTarget());
         final String pkg = stream(path.getParent().spliterator(), false).map(Path::toString).collect(joining("."));
         final AtomicBoolean updated = new AtomicBoolean();
         try {

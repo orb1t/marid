@@ -26,7 +26,6 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -166,9 +165,14 @@ public class ProjectProfile {
         return path.getFileName().toString();
     }
 
-    @Nonnull
-    public Logger logger() {
-        return logger;
+    public Path getJavaBaseDir(Path javaFile) {
+        if (javaFile.startsWith(srcMainJava)) {
+            return srcMainJava;
+        } else if (javaFile.startsWith(srcTestJava)) {
+            return srcTestJava;
+        } else {
+            return null;
+        }
     }
 
     private void createFileStructure() {

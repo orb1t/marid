@@ -25,9 +25,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import static java.util.logging.Level.CONFIG;
-import static org.marid.logging.Log.log;
-
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -43,26 +40,22 @@ public class TextFilesUpdater {
     }
 
     @EventListener(condition = "@textFilePathMatcher.matches(#root.event.source)")
-    private void onAdded(FileAddedEvent addedEvent) {
-        log(CONFIG, "{0}", addedEvent);
+    public void onAdded(FileAddedEvent addedEvent) {
         eventPublisher.publishEvent(new TextFileChangedEvent(addedEvent.getSource()));
     }
 
     @EventListener(condition = "@textFilePathMatcher.matches(#root.event.source)")
-    private void onRemoved(FileRemovedEvent removedEvent) {
-        log(CONFIG, "{0}", removedEvent);
+    public void onRemoved(FileRemovedEvent removedEvent) {
         eventPublisher.publishEvent(new TextFileRemovedEvent(removedEvent.getSource()));
     }
 
     @EventListener(condition = "@textFilePathMatcher.matches(#root.event.source)")
-    private void onChanged(FileChangedEvent changedEvent) {
-        log(CONFIG, "{0}", changedEvent);
+    public void onChanged(FileChangedEvent changedEvent) {
         eventPublisher.publishEvent(new TextFileChangedEvent(changedEvent.getSource()));
     }
 
     @EventListener(condition = "@textFilePathMatcher.matches(#root.event.source)")
-    private void onMoved(FileMovedEvent movedEvent) {
-        log(CONFIG, "{0}", movedEvent);
+    public void onMoved(FileMovedEvent movedEvent) {
         eventPublisher.publishEvent(new TextFileMovedEvent(movedEvent.getSource(), movedEvent.getTarget()));
     }
 }

@@ -60,7 +60,6 @@ import static org.marid.logging.Log.log;
 public class ProjectStructureUpdater implements Closeable {
 
     private static final Kind<?>[] EVENTS = {ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY};
-    private static final Path TERMINATOR = Paths.get(Character.toString((char) 0xFFFF));
     private static final UUID EMPTY_FILE_ID = new UUID(0L, 0L);
 
     private final Path root;
@@ -123,7 +122,7 @@ public class ProjectStructureUpdater implements Closeable {
     }
 
     private void onDelete(Path path) throws IOException {
-        final Map<Path, WatchKey> subMap = watchKeyMap.subMap(path, path.resolve(TERMINATOR));
+        final Map<Path, WatchKey> subMap = watchKeyMap.subMap(path, path.resolve("\uFFFF"));
         subMap.values().forEach(WatchKey::cancel);
         subMap.clear();
         scheduledExecutorService.schedule(() -> {
