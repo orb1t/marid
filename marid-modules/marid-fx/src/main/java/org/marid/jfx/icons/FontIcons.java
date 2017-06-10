@@ -99,6 +99,6 @@ public class FontIcons {
     }
 
     public static Node glyphIcon(@PropertyKey(resourceBundle = "fonts.meta") String type) {
-        return glyphIcon(type, 0);
+        return glyphIcon(type, 16);
     }
 }

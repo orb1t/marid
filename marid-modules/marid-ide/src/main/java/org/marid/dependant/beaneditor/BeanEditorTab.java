@@ -19,14 +19,21 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.beans.binding.Bindings;
-import org.marid.ide.common.IdeShapes;
+import javafx.scene.layout.HBox;
 import org.marid.ide.model.TextFile;
 import org.marid.ide.project.ProjectManager;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.tabs.IdeTab;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
+import java.util.Objects;
+
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.IntStream.range;
+import static org.marid.ide.common.IdeShapes.circle;
+import static org.marid.ide.common.IdeShapes.javaFile;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,11 +42,21 @@ import java.nio.file.Path;
 public class BeanEditorTab extends IdeTab {
 
     @Autowired
-    public BeanEditorTab(BeanEditor editor, TextFile javaFile, ProjectManager projectManager) {
-        super(editor, Bindings.createStringBinding(() -> {
-            final Path relativePath = projectManager.getProfilesDir().relativize(javaFile.getPath());
-            return relativePath.toString();
-        }, javaFile.path), () -> IdeShapes.javaFile(javaFile.hashCode(), 16));
+    public BeanEditorTab(BeanEditorTable editor, TextFile javaFile, ProjectManager projectManager) {
+        super(
+                editor,
+                Bindings.createStringBinding(() -> projectManager.getProfile(javaFile.getPath())
+                        .map(p -> p.getJavaBaseDir(javaFile.getPath()))
+                        .filter(Objects::nonNull)
+                        .map(p -> p.relativize(javaFile.getPath()))
+                        .map(p -> range(0, p.getNameCount()).mapToObj(p::getName).map(Path::toString).collect(joining(".")))
+                        .orElseGet(() -> javaFile.getPath().toString()), javaFile.path),
+                () -> {
+                    final String profile = projectManager.getProfile(javaFile.getPath())
+                            .map(ProjectProfile::getName)
+                            .orElse("");
+                    return new HBox(3, circle(profile.hashCode(), 16), javaFile(javaFile.hashCode(), 16));
+                });
         addNodeObservables(javaFile.path);
     }
 }

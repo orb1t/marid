@@ -36,26 +36,17 @@ public class Utf8ResourceBundleControl extends ResourceBundle.Control {
     }
 
     @Override
-    public ResourceBundle newBundle(
-            String baseName,
-            Locale locale,
-            String format,
-            ClassLoader classLoader,
-            boolean reload
-    ) throws IllegalAccessException, InstantiationException, IOException {
-        return getResourceBundle(classLoader, toResourceName(toBundleName(baseName, locale), "properties"), reload);
+    public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader classLoader, boolean reload) throws IllegalAccessException, InstantiationException, IOException {
+        final ChainedPropertyResourceBundle bundle = new ChainedPropertyResourceBundle();
+        final String resource = toResourceName(toBundleName(baseName, locale), "properties");
+        for (final Enumeration<URL> e = classLoader.getResources(resource); e.hasMoreElements(); ) {
+            bundle.load(e.nextElement(), !reload);
+        }
+        return bundle;
     }
 
     @Override
     public List<String> getFormats(String baseName) {
         return FORMAT_PROPERTIES;
-    }
-
-    private ResourceBundle getResourceBundle(ClassLoader ld, String resourceName, boolean reload) throws IOException {
-        final ChainedPropertyResourceBundle bundle = new ChainedPropertyResourceBundle();
-        for (final Enumeration<URL> e = ld.getResources(resourceName); e.hasMoreElements(); ) {
-            bundle.load(e.nextElement(), !reload);
-        }
-        return bundle;
     }
 }

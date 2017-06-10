@@ -64,8 +64,8 @@ public class BeanEditorUpdater {
                     .filter(t -> !t.isInterface())
                     .findFirst()
                     .ifPresent(t -> {
-                        methods.removeIf(d -> t.getMethods().stream()
-                                .noneMatch(m -> m.getNameAsString().equals(d.getNameAsString()))
+                        methods.removeIf(d -> t.getMethods().stream().noneMatch(
+                                m -> m.getNameAsString().equals(d.getNameAsString()))
                         );
                         t.getMethods().forEach(m -> {
                             final int i = binarySearch(methods, m, comparing(MethodDeclaration::getNameAsString));

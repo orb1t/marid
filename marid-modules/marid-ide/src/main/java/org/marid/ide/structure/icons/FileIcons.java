@@ -47,21 +47,26 @@ public class FileIcons {
             case "properties":
                 return FontIcons.glyphIcon("F_PARAGRAPH", size);
             case "":
-                switch (fileName) {
+                switch (path.getParent().getFileName().toString()) {
                     case "profiles":
-                        return FontIcons.glyphIcon("M_FOLDER_SHARED", size);
-                    case "src":
-                        return FontIcons.glyphIcon("O_LOCATION", size);
-                    case "main":
-                        return FontIcons.glyphIcon("M_MEMORY", size);
-                    case "test":
-                        return FontIcons.glyphIcon("M_BUG_REPORT", size);
-                    case "java":
-                        return FontIcons.glyphIcon("F_CUBE", size);
-                    case "resources":
-                        return FontIcons.glyphIcon("F_TH_LIST", size);
+                        return IdeShapes.circle(fileName.hashCode(), 16);
                     default:
-                        return FontIcons.glyphIcon("M_FOLDER", size);
+                        switch (fileName) {
+                            case "profiles":
+                                return FontIcons.glyphIcon("M_FOLDER_SHARED", size);
+                            case "src":
+                                return FontIcons.glyphIcon("O_LOCATION", size);
+                            case "main":
+                                return FontIcons.glyphIcon("M_MEMORY", size);
+                            case "test":
+                                return FontIcons.glyphIcon("M_BUG_REPORT", size);
+                            case "java":
+                                return FontIcons.glyphIcon("F_CUBE", size);
+                            case "resources":
+                                return FontIcons.glyphIcon("F_TH_LIST", size);
+                            default:
+                                return FontIcons.glyphIcon("M_FOLDER", size);
+                        }
                 }
             default:
                 return null;

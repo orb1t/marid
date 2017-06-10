@@ -33,7 +33,7 @@ public class StandardMaridWeldInitializer implements WeldInitializer {
         weld.addBeanClass(MaridRuntime.class);
 
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        try (final InputStream stream = classLoader.getResourceAsStream("bean-classes.list")) {
+        try (final InputStream stream = classLoader.getResourceAsStream("bean-classes.lst")) {
             if (stream != null) {
                 try (final Scanner scanner = new Scanner(stream, "UTF-8")) {
                     while (scanner.hasNextLine()) {
@@ -42,6 +42,24 @@ public class StandardMaridWeldInitializer implements WeldInitializer {
                             continue;
                         }
                         weld.addBeanClass(Class.forName(line, true, classLoader));
+                    }
+                }
+            }
+        }
+
+        try (final InputStream stream = classLoader.getResourceAsStream("bean-packages.lst")) {
+            if (stream != null) {
+                try (final Scanner scanner = new Scanner(stream, "UTF-8")) {
+                    while (scanner.hasNextLine()) {
+                        final String line = scanner.nextLine().trim();
+                        if (line.isEmpty() || line.startsWith("#")) {
+                            continue;
+                        }
+                        if (line.endsWith("*")) {
+                            weld.addPackages(true, Package.getPackage(line.substring(0, line.length() - 1)));
+                        } else {
+                            weld.addPackages(false, Package.getPackage(line));
+                        }
                     }
                 }
             }

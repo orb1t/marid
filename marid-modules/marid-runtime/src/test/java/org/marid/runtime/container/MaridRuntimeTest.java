@@ -21,11 +21,13 @@ package org.marid.runtime.container;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.marid.runtime.MaridRuntime;
 import org.marid.test.ManualTests;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -39,7 +41,8 @@ public class MaridRuntimeTest {
     public static void init() {
         container = new Weld("testMarid")
                 .disableDiscovery()
-                .addBeanClass(Configuration1.class)
+                .addPackages(true, Configuration1.class)
+                .addBeanClass(MaridRuntime.class)
                 .initialize();
     }
 
@@ -51,6 +54,6 @@ public class MaridRuntimeTest {
     @Test
     public void testBean1() {
         final Integer bean1 = container.select(Integer.class).get();
-        Assert.assertEquals(1, bean1.intValue());
+        assertEquals(1, bean1.intValue());
     }
 }
