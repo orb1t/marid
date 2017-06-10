@@ -32,7 +32,7 @@ import org.marid.proto.StdProtoBusProps;
 import org.marid.proto.StdProtoRoot;
 import org.marid.proto.io.ProtoIO;
 import org.marid.proto.io.StdProtoSocketIO;
-import org.marid.test.NormalTests;
+import org.marid.test.SlowTests;
 
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
@@ -52,7 +52,7 @@ import static org.marid.logging.Log.log;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Category({NormalTests.class})
+@Category({SlowTests.class})
 public class ModbusTest {
 
     private static final SimpleProcessImage IMAGE = new SimpleProcessImage();
