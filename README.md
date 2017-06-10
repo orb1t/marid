@@ -1,0 +1,1 @@
+![Build Status](https://travis-ci.org/MaridProject/marid.svg?branch=master)
