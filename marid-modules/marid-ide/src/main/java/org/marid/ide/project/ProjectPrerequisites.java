@@ -114,23 +114,7 @@ public class ProjectPrerequisites {
             model.getBuild().getPlugins().add(build(new Plugin(), plugin -> {
                 plugin.setArtifactId("maven-compiler-plugin");
                 plugin.setVersion(mavenSettings.compilerPluginVersion.get());
-                plugin.getDependencies().add(build(new Dependency(), dependency -> {
-                    dependency.setGroupId("org.codehaus.plexus");
-                    dependency.setArtifactId("plexus-compiler-eclipse");
-                    dependency.setVersion(mavenSettings.eclipseCompilerVersion.get());
-                    dependency.setScope("runtime");
-                    dependency.addExclusion(build(new Exclusion(), exclusion -> {
-                        exclusion.setGroupId("org.eclipse.jdt");
-                        exclusion.setArtifactId("org.eclipse.jdt.core");
-                    }));
-                }));
-                plugin.getDependencies().add(build(new Dependency(), dependency -> {
-                    dependency.setGroupId("org.eclipse.jdt");
-                    dependency.setArtifactId("org.eclipse.jdt.core");
-                    dependency.setVersion(mavenSettings.jdtVersion.get());
-                }));
                 plugin.setConfiguration(build(new Xpp3Dom("configuration"), configuration -> {
-                    addChild(configuration, "compilerId", "eclipse");
                     addChild(configuration, "showWarnings", "true");
                     addChild(configuration, "showDeprecation", "true");
                 }));

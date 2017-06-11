@@ -22,6 +22,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -29,15 +30,19 @@ import org.marid.ide.event.TextFileChangedEvent;
 import org.marid.ide.event.TextFileMovedEvent;
 import org.marid.ide.model.TextFile;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Generated;
 import javax.annotation.PostConstruct;
+import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.binarySearch;
 import static java.util.Comparator.comparing;
 import static java.util.logging.Level.WARNING;
+import static java.util.stream.Collectors.toSet;
 import static org.marid.logging.Log.log;
 
 /**
@@ -46,7 +51,7 @@ import static org.marid.logging.Log.log;
 @Service
 public class BeanEditorUpdater {
 
-    private final ObservableList<MethodDeclaration> methods = FXCollections.observableArrayList();
+    private final ObservableList<MethodDeclaration> beans = FXCollections.observableArrayList();
     private final TextFile textFile;
 
     @Autowired
@@ -58,33 +63,36 @@ public class BeanEditorUpdater {
     public void update() {
         try {
             final CompilationUnit compilationUnit = JavaParser.parse(textFile.getPath(), UTF_8);
-            compilationUnit.getTypes().stream()
-                    .filter(ClassOrInterfaceDeclaration.class::isInstance)
-                    .map(ClassOrInterfaceDeclaration.class::cast)
-                    .filter(t -> !t.isInterface())
-                    .findFirst()
-                    .ifPresent(t -> {
-                        methods.removeIf(d -> t.getMethods().stream().noneMatch(
-                                m -> m.getNameAsString().equals(d.getNameAsString()))
-                        );
-                        t.getMethods().forEach(m -> {
-                            final int i = binarySearch(methods, m, comparing(MethodDeclaration::getNameAsString));
-                            if (i >= 0) {
-                                if (!m.equals(methods.get(i))) {
-                                    methods.set(i, m);
-                                }
-                            } else {
-                                methods.add(-(i + 1), m);
-                            }
-                        });
-                    });
+            for (final TypeDeclaration<?> typeDeclaration : compilationUnit.getTypes()) {
+                if (!typeDeclaration.isTopLevelType() || !(typeDeclaration instanceof ClassOrInterfaceDeclaration)) {
+                    continue;
+                }
+                final ClassOrInterfaceDeclaration t = (ClassOrInterfaceDeclaration) typeDeclaration;
+                final Set<MethodDeclaration> ms = t.getMethods().stream()
+                        .filter(m -> m.isAnnotationPresent(Bean.class))
+                        .filter(m -> m.isAnnotationPresent(Generated.class))
+                        .collect(toSet());
+                final Set<String> names = ms.stream().map(MethodDeclaration::getNameAsString).collect(toSet());
+                beans.removeIf(d -> !names.contains(d.getNameAsString()));
+                for (final MethodDeclaration m : ms) {
+                    final int i = binarySearch(beans, m, comparing(MethodDeclaration::getNameAsString));
+                    if (i >= 0) {
+                        if (!m.equals(beans.get(i))) {
+                            beans.set(i, m);
+                        }
+                    } else {
+                        beans.add(-(i + 1), m);
+                    }
+                }
+                break;
+            }
         } catch (Exception x) {
             log(WARNING, "Unable to compile {0}", x, textFile);
         }
     }
 
-    public ObservableList<MethodDeclaration> getMethods() {
-        return methods;
+    public ObservableList<MethodDeclaration> getBeans() {
+        return beans;
     }
 
     @EventListener(condition = "@javaFile.path.equals(#event.source)")

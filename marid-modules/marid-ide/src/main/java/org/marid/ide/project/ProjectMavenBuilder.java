@@ -22,13 +22,17 @@ import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import org.marid.ide.logging.IdeLogHandler;
 import org.marid.maven.MavenBuildResult;
 import org.marid.maven.MavenProjectBuilder;
 import org.marid.maven.ProjectBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -37,14 +41,28 @@ import java.util.function.Consumer;
 public class ProjectMavenBuilder {
 
     private final BooleanProperty buildState = new SimpleBooleanProperty(false);
+    private final IdeLogHandler ideLogHandler;
 
-    void build(ProjectProfile profile, Consumer<MavenBuildResult> consumer) {
+    @Autowired
+    public ProjectMavenBuilder(IdeLogHandler ideLogHandler) {
+        this.ideLogHandler = ideLogHandler;
+    }
+
+    void build(ProjectProfile profile, Configuration configuration) {
         final Thread thread = new Thread(() -> {
             Platform.runLater(() -> buildState.set(true));
             final ProjectBuilder projectBuilder = new MavenProjectBuilder(profile.getPath())
                     .goals("clean", "install")
                     .profiles("conf");
-            projectBuilder.build(consumer);
+            try {
+                final LogRecord logRecord = new LogRecord(Level.INFO, null);
+                final int threshold = configuration.level.intValue();
+                final int threadId = logRecord.getThreadID();
+                ideLogHandler.setFilter(r -> r.getThreadID() != threadId || r.getLevel().intValue() >= threshold);
+                projectBuilder.build(configuration.resultConsumer);
+            } finally {
+                ideLogHandler.setFilter(null);
+            }
             Platform.runLater(() -> buildState.set(false));
         });
         thread.start();
@@ -53,5 +71,29 @@ public class ProjectMavenBuilder {
     @Bean
     public BooleanBinding projectDisabled(ProjectManager projectManager) {
         return projectManager.profileProperty().isNull().or(buildState);
+    }
+
+    public static final class Configuration {
+
+        private Consumer<MavenBuildResult> resultConsumer = r -> {};
+        private Level level = Level.INFO;
+
+        public Consumer<MavenBuildResult> getResultConsumer() {
+            return resultConsumer;
+        }
+
+        public Configuration setResultConsumer(Consumer<MavenBuildResult> resultConsumer) {
+            this.resultConsumer = resultConsumer;
+            return this;
+        }
+
+        public Level getLevel() {
+            return level;
+        }
+
+        public Configuration setLevel(Level level) {
+            this.level = level;
+            return this;
+        }
     }
 }

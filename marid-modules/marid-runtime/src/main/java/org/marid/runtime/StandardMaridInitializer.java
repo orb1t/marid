@@ -18,20 +18,34 @@
 
 package org.marid.runtime;
 
-import org.jboss.weld.environment.se.Weld;
+import org.springframework.context.ApplicationContextException;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Scanner;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class StandardMaridWeldInitializer implements WeldInitializer {
+public class StandardMaridInitializer implements ApplicationContextInitializer<AnnotationConfigApplicationContext> {
 
     @Override
-    public void initialize(Weld weld) throws Exception {
-        weld.addBeanClass(MaridRuntime.class);
+    public void initialize(AnnotationConfigApplicationContext applicationContext) {
+        applicationContext.register(MaridRuntime.class);
 
+        try {
+            init(applicationContext);
+        } catch (IOException x) {
+            throw new UncheckedIOException(x);
+        } catch (ClassNotFoundException x) {
+            throw new ApplicationContextException("Unable to initialize " + applicationContext, x);
+        }
+    }
+
+    private void init(AnnotationConfigApplicationContext context) throws IOException, ClassNotFoundException {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         try (final InputStream stream = classLoader.getResourceAsStream("bean-classes.lst")) {
             if (stream != null) {
@@ -41,7 +55,8 @@ public class StandardMaridWeldInitializer implements WeldInitializer {
                         if (line.isEmpty() || line.startsWith("#")) {
                             continue;
                         }
-                        weld.addBeanClass(Class.forName(line, true, classLoader));
+
+                        context.register(Class.forName(line, true, classLoader));
                     }
                 }
             }
@@ -55,11 +70,7 @@ public class StandardMaridWeldInitializer implements WeldInitializer {
                         if (line.isEmpty() || line.startsWith("#")) {
                             continue;
                         }
-                        if (line.endsWith("*")) {
-                            weld.addPackages(true, Package.getPackage(line.substring(0, line.length() - 1)));
-                        } else {
-                            weld.addPackages(false, Package.getPackage(line));
-                        }
+                        context.scan(line.substring(0, line.length() - 1));
                     }
                 }
             }

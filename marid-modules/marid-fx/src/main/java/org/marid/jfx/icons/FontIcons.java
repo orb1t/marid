@@ -98,7 +98,7 @@ public class FontIcons {
         }
     }
 
-    public static Node glyphIcon(@PropertyKey(resourceBundle = "fonts.meta") String type) {
+    public static Text glyphIcon(@PropertyKey(resourceBundle = "fonts.meta") String type) {
         return glyphIcon(type, 16);
     }
 }

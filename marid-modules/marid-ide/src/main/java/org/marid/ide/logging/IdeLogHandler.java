@@ -50,13 +50,15 @@ public class IdeLogHandler extends Handler {
 
     @Override
     public void publish(LogRecord record) {
-        Platform.runLater(() -> {
-            LOG_RECORDS.add(record);
-            final int maxRecords = this.maxRecords;
-            while (LOG_RECORDS.size() - maxRecords > 0) {
-                LOG_RECORDS.subList(0, LOG_RECORDS.size() - maxRecords).clear();
-            }
-        });
+        if (isLoggable(record)) {
+            Platform.runLater(() -> {
+                LOG_RECORDS.add(record);
+                final int maxRecords = this.maxRecords;
+                while (LOG_RECORDS.size() - maxRecords > 0) {
+                    LOG_RECORDS.subList(0, LOG_RECORDS.size() - maxRecords).clear();
+                }
+            });
+        }
     }
 
     @Override

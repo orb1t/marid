@@ -22,15 +22,16 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import javafx.scene.Node;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
+import org.marid.ide.model.Annotations;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.beans.ConstantValue;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Singleton;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -40,7 +41,7 @@ public class BeanEditorTable extends TableView<MethodDeclaration> {
 
     @Autowired
     public BeanEditorTable(BeanEditorUpdater beanEditorUpdater) {
-        super(beanEditorUpdater.getMethods());
+        super(beanEditorUpdater.getBeans());
     }
 
     @Order(1)
@@ -60,18 +61,25 @@ public class BeanEditorTable extends TableView<MethodDeclaration> {
     public void column2() {
         final TableColumn<MethodDeclaration, Node> col = new TableColumn<>();
         col.textProperty().bind(LocalizedStrings.ls("Characteristics"));
-        col.setMinWidth(200);
-        col.setPrefWidth(350);
-        col.setMaxWidth(400);
+        col.setMinWidth(150);
+        col.setPrefWidth(175);
+        col.setMaxWidth(200);
         col.setCellValueFactory(param -> {
             final MethodDeclaration method = param.getValue();
             final HBox box = new HBox(3);
-            if (method.isAnnotationPresent(Singleton.class)) {
-                box.getChildren().add(FontIcons.glyphIcon("D_WHITE_BALANCE_SUNNY"));
+
+            if (Annotations.isLazy(method)) {
+                final Text node = FontIcons.glyphIcon("M_NAVIGATE_BEFORE");
+                Tooltip.install(node, new Tooltip("Lazy"));
+                box.getChildren().add(node);
             }
-            if (method.isAnnotationPresent("Startup")) {
-                box.getChildren().add(FontIcons.glyphIcon("D_PLAY"));
+
+            if (Annotations.isPrototype(method)) {
+                final Text node = FontIcons.glyphIcon("O_BOOK");
+                Tooltip.install(node, new Tooltip("Prototype"));
+                box.getChildren().add(node);
             }
+
             return ConstantValue.value(box);
         });
         getColumns().add(col);

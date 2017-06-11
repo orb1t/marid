@@ -20,15 +20,21 @@ package org.marid.runtime;
 
 
 import org.jboss.logmanager.LogManager;
-import org.jboss.weld.environment.se.Weld;
-import org.jboss.weld.environment.se.WeldContainer;
+import org.marid.misc.Casts;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.SimpleCommandLinePropertySource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePropertySource;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ServiceLoader;
 import java.util.TimeZone;
 import java.util.concurrent.locks.LockSupport;
 
+import static java.util.ServiceLoader.load;
 import static java.util.logging.Level.*;
 import static org.marid.logging.Log.log;
 
@@ -44,29 +50,36 @@ public class MaridLauncher {
         // Use UTC
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 
-        // Weld container
-        final WeldContainer container;
+        // Context
+        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        final ConfigurableEnvironment env = context.getEnvironment();
+        if (args.length > 0) {
+            env.getPropertySources().addAfter("commandLine", new SimpleCommandLinePropertySource(args));
+        }
+        {
+            final Resource applicationProperties = context.getResource("application.properties");
+            if (applicationProperties.exists()) {
+                env.getPropertySources().addAfter("application", new ResourcePropertySource(applicationProperties));
+            }
+        }
         try {
-            final Weld weld = new Weld().disableDiscovery();
-
-            for (final WeldInitializer weldInitializer : ServiceLoader.load(WeldInitializer.class)) {
+            for (final ApplicationContextInitializer<?> initializer : load(ApplicationContextInitializer.class)) {
+                final ApplicationContextInitializer<ConfigurableApplicationContext> i = Casts.cast(initializer);
                 try {
-                    weldInitializer.initialize(weld);
-                    log(INFO, "Processed {0}", weldInitializer.getClass().getSimpleName());
+                    i.initialize(context);
+                    log(INFO, "Processed {0}", initializer.getClass().getSimpleName());
                 } catch (Exception x) {
-                    log(SEVERE, "Unable to run {0}", x, weldInitializer);
+                    log(SEVERE, "Unable to run {0}", x, initializer);
                     return;
                 }
             }
 
-            container = weld.initialize();
+            context.refresh();
+            context.start();
         } catch (Exception e) {
             log(SEVERE, "Container initialization failed", e);
             return;
         }
-
-        // Initialize startup beans
-        log(INFO, "Initialized {0} classes", container.select(new StartupLiteral()).stream().count());
 
         // Input buffer
         final StringBuilder buffer = new StringBuilder();
@@ -75,7 +88,7 @@ public class MaridLauncher {
         // Command processing loop
         try {
             COMMANDS:
-            while (container.isRunning() && !Thread.interrupted()) {
+            while (context.isActive() && !Thread.interrupted()) {
                 while (reader.ready()) {
                     final int c = reader.read();
                     if (c < 0) {
@@ -101,7 +114,7 @@ public class MaridLauncher {
         } catch (Exception x) {
             log(WARNING, "Command processing error", x);
         } finally {
-            container.close();
+            context.close();
         }
     }
 }

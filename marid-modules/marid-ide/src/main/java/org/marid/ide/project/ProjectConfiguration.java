@@ -24,6 +24,7 @@ import org.marid.IdeDependants;
 import org.marid.dependant.project.ProjectParams;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
+import org.marid.ide.project.ProjectMavenBuilder.Configuration;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.action.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -84,20 +85,22 @@ public class ProjectConfiguration {
                 .setEventHandler(event -> {
                     final ProjectProfile profile = projectManager.getProfile();
                     projectSaver.getObject().save(profile);
-                    mavenBuilder.getObject().build(profile, result -> {
-                        try {
-                            final Throwable thrown;
-                            if (!result.exceptions.isEmpty()) {
-                                thrown = new Exception("Build error");
-                                result.exceptions.forEach(thrown::addSuppressed);
-                            } else {
-                                thrown = null;
-                            }
-                            n(INFO, "[{0}] Built in {1}s", thrown, profile, result.time / 1000f);
-                        } catch (Exception x) {
-                            n(WARNING, "Unable to update cache {0}", x, profile);
-                        }
-                    });
+                    mavenBuilder.getObject().build(profile, new Configuration()
+                            .setResultConsumer(result -> {
+                                try {
+                                    final Throwable thrown;
+                                    if (!result.exceptions.isEmpty()) {
+                                        thrown = new Exception("Build error");
+                                        result.exceptions.forEach(thrown::addSuppressed);
+                                    } else {
+                                        thrown = null;
+                                    }
+                                    n(INFO, "[{0}] Built in {1}s", thrown, profile, result.time / 1000f);
+                                } catch (Exception x) {
+                                    n(WARNING, "Unable to update cache {0}", x, profile);
+                                }
+                            })
+                    );
                 })
                 .bindDisabled(projectDisabled);
     }
