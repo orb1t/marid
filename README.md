@@ -14,7 +14,7 @@ Usage
 
 | Artifact | Link  |
 |----------|------:|
-| marid-ide | ![Maven](http://img.shields.io/maven-central/v/org.marid/marid-ide.svg?style=flat) |
-| marid-runtime | ![Maven](http://img.shields.io/maven-central/v/org.marid/marid-runtime.svg?style=flat) |
-| marid-fx | ![Maven](http://img.shields.io/maven-central/v/org.marid/marid-fx.svg?style=flat) |
-| marid-util | ![Maven](http://img.shields.io/maven-central/v/org.marid/marid-util.svg?style=flat) |
+| marid-ide | [![Maven](http://img.shields.io/maven-central/v/org.marid/marid-ide.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.marid/marid-ide) |
+| marid-runtime | [![Maven](http://img.shields.io/maven-central/v/org.marid/marid-runtime.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.marid/marid-runtime) |
+| marid-fx | [![Maven](http://img.shields.io/maven-central/v/org.marid/marid-fx.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.marid/marid-fx) |
+| marid-util | [![Maven](http://img.shields.io/maven-central/v/org.marid/marid-util.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.marid/marid-util) |
