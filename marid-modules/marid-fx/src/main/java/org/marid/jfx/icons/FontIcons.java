@@ -18,7 +18,6 @@
 
 package org.marid.jfx.icons;
 
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -83,18 +82,12 @@ public class FontIcons {
 
     private static String family(String type) {
         switch (type.charAt(0)) {
-            case 'O':
-                return "Octicons";
-            case 'D':
-                return "MaterialDesignIcons";
-            case 'M':
-                return "Material Icons";
-            case 'F':
-                return "FontAwesome";
-            case 'W':
-                return "Weather Icons";
-            default:
-                throw new IllegalArgumentException("Unsupported font symbol: " + type);
+            case 'O': return "Octicons";
+            case 'D': return "MaterialDesignIcons";
+            case 'M': return "Material Icons";
+            case 'F': return "FontAwesome";
+            case 'W': return "Weather Icons";
+            default: throw new IllegalArgumentException("Unsupported font symbol: " + type);
         }
     }
 

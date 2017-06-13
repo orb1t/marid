@@ -21,11 +21,13 @@ package org.marid.ide.model;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.common.collect.ImmutableMap;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -71,5 +73,21 @@ public interface Annotations {
                     }
                 })
                 .orElse(false);
+    }
+
+    static String value(NodeWithAnnotations<?> node) {
+        return node.getAnnotationByClass(Value.class)
+                .flatMap(a -> {
+                    final Map<String, Expression> map = getMembers(a);
+                    if (map.isEmpty()) {
+                        return Optional.empty();
+                    } else {
+                        final Expression e = map.get("value");
+                        return e instanceof StringLiteralExpr
+                                ? Optional.ofNullable(((StringLiteralExpr) e).getValue())
+                                : Optional.empty();
+                    }
+                })
+                .orElse(null);
     }
 }

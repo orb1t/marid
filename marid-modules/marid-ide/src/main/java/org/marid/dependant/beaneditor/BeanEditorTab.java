@@ -18,22 +18,15 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.beans.binding.Bindings;
-import javafx.scene.layout.HBox;
+import javafx.beans.value.ObservableStringValue;
+import javafx.scene.Node;
+import javafx.scene.control.SplitPane;
 import org.marid.ide.model.TextFile;
-import org.marid.ide.project.ProjectManager;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.tabs.IdeTab;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Path;
-import java.util.Objects;
-
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.IntStream.range;
-import static org.marid.ide.common.IdeShapes.circle;
-import static org.marid.ide.common.IdeShapes.javaFile;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -42,21 +35,11 @@ import static org.marid.ide.common.IdeShapes.javaFile;
 public class BeanEditorTab extends IdeTab {
 
     @Autowired
-    public BeanEditorTab(BeanEditorTable editor, TextFile javaFile, ProjectManager projectManager) {
-        super(
-                editor,
-                Bindings.createStringBinding(() -> projectManager.getProfile(javaFile.getPath())
-                        .map(p -> p.getJavaBaseDir(javaFile.getPath()))
-                        .filter(Objects::nonNull)
-                        .map(p -> p.relativize(javaFile.getPath()))
-                        .map(p -> range(0, p.getNameCount()).mapToObj(p::getName).map(Path::toString).collect(joining(".")))
-                        .orElseGet(() -> javaFile.getPath().toString()), javaFile.path),
-                () -> {
-                    final String profile = projectManager.getProfile(javaFile.getPath())
-                            .map(ProjectProfile::getName)
-                            .orElse("");
-                    return new HBox(3, circle(profile.hashCode(), 16), javaFile(javaFile.hashCode(), 16));
-                });
+    public BeanEditorTab(SplitPane beanSplitPane,
+                         ObservableStringValue beanEditorTabText,
+                         Supplier<Node> beanEditorGraphic,
+                         TextFile javaFile) {
+        super(beanSplitPane, beanEditorTabText, beanEditorGraphic);
         addNodeObservables(javaFile.path);
     }
 }

@@ -36,16 +36,11 @@ public class FileIcons {
         final String fileName = path.getFileName().toString();
         final String extension = FileUtils.extension(fileName);
         switch (extension) {
-            case "java":
-                return IdeShapes.javaFile(path.hashCode(), size);
-            case "jar":
-                return FontIcons.glyphIcon("M_ARCHIVE", size);
-            case "xml":
-                return FontIcons.glyphIcon("M_CODE", size);
-            case "lst":
-                return FontIcons.glyphIcon("M_LIST", size);
-            case "properties":
-                return FontIcons.glyphIcon("F_PARAGRAPH", size);
+            case "java": return IdeShapes.javaFile(path.hashCode(), size);
+            case "jar": return FontIcons.glyphIcon("M_ARCHIVE", size);
+            case "xml": return FontIcons.glyphIcon("M_CODE", size);
+            case "lst": return FontIcons.glyphIcon("M_LIST", size);
+            case "properties": return FontIcons.glyphIcon("D_CODE_ARRAY", size);
             case "":
                 switch (path.getParent().getFileName().toString()) {
                     case "profiles":
@@ -68,8 +63,7 @@ public class FileIcons {
                                 return FontIcons.glyphIcon("M_FOLDER", size);
                         }
                 }
-            default:
-                return null;
+            default: return null;
         }
     }
 }

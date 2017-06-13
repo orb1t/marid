@@ -187,6 +187,10 @@ public class ProjectProfile {
                     Files.copy(is, loggingProperties);
                 }
             }
+            final Path beansProperties = srcMainResources.resolve("beans.properties");
+            if (Files.notExists(beansProperties)) {
+                Files.createFile(beansProperties);
+            }
         } catch (Exception x) {
             log(logger, WARNING, "Unable to create file structure", x);
         }
