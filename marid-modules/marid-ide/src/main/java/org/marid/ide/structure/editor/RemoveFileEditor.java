@@ -19,7 +19,6 @@
 package org.marid.ide.structure.editor;
 
 import javafx.scene.Node;
-import javafx.scene.layout.HBox;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +56,7 @@ public class RemoveFileEditor extends AbstractFileEditor<Path> {
     @Nonnull
     @Override
     public Node getIcon() {
-        return new HBox(5, glyphIcon("M_FOLDER", 16), glyphIcon("M_REMOVE_CIRCLE", 16));
+        return glyphIcon("M_REMOVE_CIRCLE", 16);
     }
 
     @Nonnull

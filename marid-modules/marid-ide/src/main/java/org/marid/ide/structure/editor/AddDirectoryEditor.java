@@ -20,7 +20,6 @@ package org.marid.ide.structure.editor;
 
 import javafx.scene.Node;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.layout.HBox;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -69,7 +68,7 @@ public class AddDirectoryEditor extends AbstractFileEditor<Path> {
     @Nonnull
     @Override
     public Node getIcon() {
-        return new HBox(5, glyphIcon("M_FOLDER", 16), glyphIcon("M_ADD_CIRCLE", 16));
+        return glyphIcon("M_ADD_CIRCLE", 16);
     }
 
     @Nonnull
