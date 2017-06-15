@@ -21,6 +21,7 @@ package org.marid.ide.model;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.common.collect.ImmutableMap;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -77,6 +78,22 @@ public interface Annotations {
 
     static String value(NodeWithAnnotations<?> node) {
         return node.getAnnotationByClass(Value.class)
+                .flatMap(a -> {
+                    final Map<String, Expression> map = getMembers(a);
+                    if (map.isEmpty()) {
+                        return Optional.empty();
+                    } else {
+                        final Expression e = map.get("value");
+                        return e instanceof StringLiteralExpr
+                                ? Optional.ofNullable(((StringLiteralExpr) e).getValue())
+                                : Optional.empty();
+                    }
+                })
+                .orElse(null);
+    }
+
+    static String qualifier(NodeWithAnnotations<?> node) {
+        return node.getAnnotationByClass(Qualifier.class)
                 .flatMap(a -> {
                     final Map<String, Expression> map = getMembers(a);
                     if (map.isEmpty()) {

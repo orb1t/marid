@@ -21,7 +21,9 @@ package org.marid.dependant.beaneditor;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import javafx.beans.Observable;
+import javafx.geometry.Pos;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import org.marid.ide.model.Annotations;
 import org.marid.jfx.LocalizedStrings;
@@ -76,6 +78,15 @@ public class BeanParameterTable extends TableView<Parameter> {
         column.setMaxWidth(800);
         column.setCellValueFactory(param -> ConstantValue.value(Annotations.value(param.getValue())));
         getColumns().add(column);
+    }
+
+    @Autowired
+    private void initRowFactory() {
+        setRowFactory(param -> {
+            final TableRow<Parameter> row = new TableRow<>();
+            row.setAlignment(Pos.BASELINE_LEFT);
+            return row;
+        });
     }
 
     private void onSelect(Observable observable, MethodDeclaration oldValue, MethodDeclaration newValue) {

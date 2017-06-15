@@ -66,6 +66,7 @@ public class BeanEditorProperties {
             final EncodedResource resource = new EncodedResource(new FileSystemResource(beansProperties.toFile()));
             try {
                 final Properties properties = loadProperties(resource);
+                this.properties.clear();
                 for (final String key : properties.stringPropertyNames()) {
                     this.properties.put(key, properties.getProperty(key));
                 }
