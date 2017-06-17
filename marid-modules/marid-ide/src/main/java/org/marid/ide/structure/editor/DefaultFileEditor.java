@@ -18,8 +18,6 @@
 
 package org.marid.ide.structure.editor;
 
-import javafx.scene.Node;
-import org.marid.jfx.icons.FontIcons;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -52,8 +50,8 @@ public class DefaultFileEditor extends AbstractFileEditor<Desktop> {
 
     @Nonnull
     @Override
-    public Node getIcon() {
-        return FontIcons.glyphIcon("M_OPEN_IN_BROWSER", 16);
+    public String getIcon() {
+        return icon("M_OPEN_IN_BROWSER");
     }
 
     @Nonnull

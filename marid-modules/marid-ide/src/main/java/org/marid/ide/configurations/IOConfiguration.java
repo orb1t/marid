@@ -21,7 +21,7 @@ package org.marid.ide.configurations;
 import org.marid.IdeDependants;
 import org.marid.dependant.modbus.ModbusSourceConfiguration;
 import org.marid.jfx.action.FxAction;
-import org.marid.spring.action.IdeAction;
+import org.marid.spring.annotation.IdeAction;
 import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.LocalizedStrings.ls;

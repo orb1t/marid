@@ -18,7 +18,7 @@
 
 package org.marid.ide.structure.editor;
 
-import javafx.scene.Node;
+import org.jetbrains.annotations.PropertyKey;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,8 +36,17 @@ public interface FileEditor {
     String getName();
 
     @Nonnull
-    Node getIcon();
+    String getIcon();
 
     @Nonnull
     String getGroup();
+
+    @Nullable
+    default String getSpecialAction() {
+        return null;
+    }
+
+    default String icon(@PropertyKey(resourceBundle = "fonts.meta") String icon) {
+        return icon;
+    }
 }

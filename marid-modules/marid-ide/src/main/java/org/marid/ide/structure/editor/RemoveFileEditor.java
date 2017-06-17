@@ -18,7 +18,6 @@
 
 package org.marid.ide.structure.editor;
 
-import javafx.scene.Node;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,6 @@ import java.util.stream.Stream;
 
 import static java.util.logging.Level.WARNING;
 import static org.marid.ide.IdeNotifications.n;
-import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -55,8 +53,8 @@ public class RemoveFileEditor extends AbstractFileEditor<Path> {
 
     @Nonnull
     @Override
-    public Node getIcon() {
-        return glyphIcon("M_REMOVE_CIRCLE", 16);
+    public String getIcon() {
+        return icon("M_REMOVE_CIRCLE");
     }
 
     @Nonnull

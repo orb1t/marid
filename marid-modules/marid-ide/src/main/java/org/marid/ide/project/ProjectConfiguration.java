@@ -26,7 +26,7 @@ import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
 import org.marid.ide.project.ProjectMavenBuilder.Configuration;
 import org.marid.jfx.action.FxAction;
-import org.marid.spring.action.IdeAction;
+import org.marid.spring.annotation.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;

@@ -18,8 +18,8 @@
 package org.marid.ide.common;
 
 import javafx.scene.input.KeyCombination;
-import org.marid.jfx.action.FxAction;
-import org.marid.spring.action.IdeAction;
+import org.marid.spring.annotation.IdeAction;
+import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -31,108 +31,98 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpecialActionConfiguration {
 
-    public static final String EDIT = "editAction";
-    public static final String ADD = "addAction";
-    public static final String REMOVE = "removeAction";
-    public static final String CUT = "cutAction";
-    public static final String COPY = "copyAction";
-    public static final String PASTE = "pasteAction";
-    public static final String CLEAR_ALL = "clearAllAction";
-    public static final String RENAME = "renameAction";
-    public static final String SELECT_ALL = "selectAllAction";
-
-    @Bean(name = EDIT)
+    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
-    public FxAction editAction() {
-        return new FxAction("edit", "ed", "Edit")
+    public SpecialAction editAction() {
+        return new SpecialAction("edit", "ed", "Edit")
                 .bindText("Edit")
                 .setAccelerator(KeyCombination.valueOf("F4"))
                 .setIcon("M_EDIT")
                 .setDisabled(true);
     }
 
-    @Bean(name = ADD)
+    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
-    public FxAction addAction() {
-        return new FxAction("mod", "mod", "Edit")
+    public SpecialAction addAction() {
+        return new SpecialAction("mod", "mod", "Edit")
                 .bindText("Add")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+I"))
                 .setIcon("M_ADD_BOX")
                 .setDisabled(true);
     }
 
-    @Bean(name = REMOVE)
+    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
-    public FxAction removeAction() {
-        return new FxAction("mod", "mod", "Edit")
+    public SpecialAction removeAction() {
+        return new SpecialAction("mod", "mod", "Edit")
                 .bindText("Remove")
                 .setAccelerator(KeyCombination.valueOf("F8"))
                 .setIcon("D_MINUS_BOX")
                 .setDisabled(true);
     }
 
-    @Bean(name = CUT)
+    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
-    public FxAction cutAction() {
-        return new FxAction("cp", "cp", "Edit")
+    public SpecialAction cutAction() {
+        return new SpecialAction("cp", "cp", "Edit")
                 .bindText("Cut")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+X"))
                 .setIcon("M_CONTENT_CUT")
                 .setDisabled(true);
     }
 
-    @Bean(name = COPY)
+    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
-    public FxAction copyAction() {
-        return new FxAction("cp", "cp", "Edit")
+    public SpecialAction copyAction() {
+        return new SpecialAction("cp", "cp", "Edit")
                 .bindText("Copy")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+C"))
                 .setIcon("M_CONTENT_COPY")
                 .setDisabled(true);
     }
 
-    @Bean(name = PASTE)
+    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
-    public FxAction pasteAction() {
-        return new FxAction("cp", "cp", "Edit")
+    public SpecialAction pasteAction() {
+        return new SpecialAction("cp", "cp", "Edit")
                 .bindText("Paste")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+V"))
                 .setIcon("M_CONTENT_PASTE")
                 .setDisabled(true);
     }
 
-    @Bean(name = CLEAR_ALL)
+    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
-    public FxAction clearAllAction() {
-        return new FxAction("mod", "mod", "Edit")
+    public SpecialAction clearAllAction() {
+        return new SpecialAction("mod", "mod", "Edit")
                 .bindText("Clear All")
                 .setIcon("M_CLEAR_ALL")
                 .setDisabled(true);
     }
 
-    @Bean(name = RENAME)
+    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
-    public FxAction renameAction() {
-        return new FxAction("edit", "ed", "Edit")
+    public SpecialAction renameAction() {
+        return new SpecialAction("edit", "ed", "Edit")
                 .bindText("Rename")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+R"))
                 .setIcon("D_RENAME_BOX")
                 .setDisabled(true);
     }
 
-    @Bean(name = SELECT_ALL)
+    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
-    public FxAction selectAllAction() {
-        return new FxAction("sel", "sel", "Edit")
+    public SpecialAction selectAllAction() {
+        return new SpecialAction("sel", "sel", "Edit")
                 .bindText("Select All")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+A"))
                 .setIcon("D_SELECT_ALL")

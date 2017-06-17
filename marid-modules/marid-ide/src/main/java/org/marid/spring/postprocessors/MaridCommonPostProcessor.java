@@ -30,9 +30,6 @@ import static org.marid.logging.Log.log;
  */
 public class MaridCommonPostProcessor implements DestructionAwareBeanPostProcessor, Ordered {
 
-    public MaridCommonPostProcessor() {
-    }
-
     @Override
     public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
         if (beanName == null) {

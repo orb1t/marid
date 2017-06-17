@@ -20,7 +20,7 @@ package org.marid.ide.configurations;
 
 import javafx.application.Platform;
 import org.marid.jfx.action.FxAction;
-import org.marid.spring.action.IdeAction;
+import org.marid.spring.annotation.IdeAction;
 import org.springframework.stereotype.Component;
 
 

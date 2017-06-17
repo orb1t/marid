@@ -21,7 +21,7 @@ package org.marid.ide.settings;
 import org.marid.IdeDependants;
 import org.marid.dependant.settings.SettingsConfiguration;
 import org.marid.jfx.action.FxAction;
-import org.marid.spring.action.IdeAction;
+import org.marid.spring.annotation.IdeAction;
 import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.LocalizedStrings.ls;

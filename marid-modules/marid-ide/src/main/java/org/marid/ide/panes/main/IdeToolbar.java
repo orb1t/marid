@@ -18,22 +18,17 @@
 
 package org.marid.ide.panes.main;
 
-import javafx.scene.Node;
 import javafx.scene.control.ToolBar;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
-import org.marid.spring.action.IdeAction;
+import org.marid.spring.annotation.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -51,18 +46,5 @@ public class IdeToolbar extends ToolBar {
     @EventListener
     private void onIdeStart(ContextStartedEvent event) {
         getItems().addAll(MaridActions.toolbar(menuActionsFactory.getObject()));
-    }
-
-    public void on(Node node, Supplier<Map<String, FxAction>> actionMapSupplier) {
-        final List<Node> nodes = new ArrayList<>();
-        node.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                Collections.addAll(nodes, MaridActions.toolbar(actionMapSupplier.get()));
-                getItems().addAll(nodes);
-            } else {
-                getItems().removeAll(nodes);
-                nodes.clear();
-            }
-        });
     }
 }

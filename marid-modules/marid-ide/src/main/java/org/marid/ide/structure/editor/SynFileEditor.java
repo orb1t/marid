@@ -18,11 +18,9 @@
 
 package org.marid.ide.structure.editor;
 
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.marid.ide.structure.syneditor.SynEditor;
-import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -59,8 +57,8 @@ public class SynFileEditor extends AbstractFileEditor<Path> {
 
     @Nonnull
     @Override
-    public Node getIcon() {
-        return FontIcons.glyphIcon("F_FILE_TEXT_ALT", 16);
+    public String getIcon() {
+        return icon("F_FILE_TEXT_ALT");
     }
 
     @Nonnull

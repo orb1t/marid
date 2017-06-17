@@ -18,7 +18,6 @@
 
 package org.marid.ide.structure.editor;
 
-import javafx.scene.Node;
 import javafx.scene.control.TextInputDialog;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +28,6 @@ import java.util.Optional;
 
 import static java.util.logging.Level.WARNING;
 import static org.marid.ide.IdeNotifications.n;
-import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -67,8 +65,8 @@ public class AddDirectoryEditor extends AbstractFileEditor<Path> {
 
     @Nonnull
     @Override
-    public Node getIcon() {
-        return glyphIcon("M_ADD_CIRCLE", 16);
+    public String getIcon() {
+        return icon("M_ADD_CIRCLE");
     }
 
     @Nonnull

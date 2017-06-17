@@ -21,7 +21,6 @@ package org.marid.jfx.action;
 import com.google.common.collect.ComputationException;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
 import javafx.application.Platform;
-import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.util.Pair;
@@ -57,13 +56,13 @@ public interface MaridActions {
                 return;
             }
             final MenuItem menuItem;
-            if (action.selectedProperty() != null) {
+            if (action.getSelected() != null) {
                 final CheckMenuItem checkMenuItem = new CheckMenuItem();
-                checkMenuItem.selectedProperty().bindBidirectional(action.selectedProperty());
+                checkMenuItem.selectedProperty().bindBidirectional(action.selected);
                 menuItem = checkMenuItem;
-            } else if (action.getChildren() != null) {
+            } else if (!action.children.isEmpty()) {
                 final Menu menu = new Menu();
-                final Menu[] subMenus = menus(action.getChildren());
+                final Menu[] subMenus = menus(action.children);
                 switch (subMenus.length) {
                     case 0:
                         return;
@@ -78,25 +77,20 @@ public interface MaridActions {
             } else {
                 menuItem = new MenuItem();
             }
-
-            if (action.textProperty() != null) {
-                menuItem.textProperty().bind(action.textProperty());
-            }
-            if (action.iconProperty() != null) {
-                menuItem.graphicProperty().bind(createObjectBinding(() -> {
-                    final String icon = action.getIcon();
-                    return icon != null ? glyphIcon(icon, 16) : null;
-                }, action.iconProperty()));
-            }
-            if (action.acceleratorProperty() != null) {
-                menuItem.acceleratorProperty().bind(action.acceleratorProperty());
-            }
+            menuItem.textProperty().bind(action.text);
+            menuItem.graphicProperty().bind(createObjectBinding(() -> {
+                final String icon = action.getIcon();
+                return icon != null ? glyphIcon(icon, 16) : null;
+            }, action.icon));
+            menuItem.acceleratorProperty().bind(action.accelerator);
 
             if (!(menuItem instanceof Menu)) {
-                menuItem.setOnAction(event -> action.getEventHandler().handle(event));
-                if (action.disabledProperty() != null) {
-                    menuItem.disableProperty().bindBidirectional(action.disabledProperty());
-                }
+                menuItem.setOnAction(event -> {
+                    if (action.getEventHandler() != null) {
+                        action.getEventHandler().handle(event);
+                    }
+                });
+                menuItem.disableProperty().bindBidirectional(action.disabled);
             }
             itemMap
                     .computeIfAbsent(action.getMenu(), k -> new TreeMap<>())
@@ -141,22 +135,14 @@ public interface MaridActions {
                         .map(a -> {
                             final Button button = new Button();
                             button.setFocusTraversable(false);
-                            button.setOnAction(event -> a.getEventHandler().handle(event));
-                            if (a.disabledProperty() != null) {
-                                button.disableProperty().bindBidirectional(a.disabledProperty());
-                            }
-                            if (a.iconProperty() != null) {
-                                button.graphicProperty().bind(createObjectBinding(
-                                        () -> glyphIcon(a.getIcon(), 20),
-                                        a.iconProperty())
-                                );
-                            }
-                            final StringProperty hint = a.hintProperty() != null ? a.hintProperty() : a.textProperty();
-                            if (hint != null) {
-                                final Tooltip tooltip = new Tooltip();
-                                tooltip.textProperty().bind(hint);
-                                button.setTooltip(tooltip);
-                            }
+                            button.setOnAction(event -> {
+                                if (a.getEventHandler() != null) {
+                                    a.getEventHandler().handle(event);
+                                }
+                            });
+                            button.disableProperty().bindBidirectional(a.disabled);
+                            button.graphicProperty().bind(createObjectBinding(() -> glyphIcon(a.getIcon(), 20), a.icon));
+                            button.tooltipProperty().bind(createObjectBinding(a::getHint, a.hint));
                             return button;
                         }), of(new Separator())))
                 .toArray(Node[]::new);

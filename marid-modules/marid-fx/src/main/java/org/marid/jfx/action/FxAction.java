@@ -19,37 +19,36 @@
 package org.marid.jfx.action;
 
 import javafx.beans.property.*;
-import javafx.beans.value.ObservableBooleanValue;
-import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCombination;
 import org.jetbrains.annotations.PropertyKey;
 import org.marid.jfx.LocalizedStrings;
+import org.marid.jfx.beans.ConstantValue;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.TreeMap;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class FxAction {
+public class FxAction {
 
-    private final String toolbarGroup;
-    private final String group;
-    private final String menu;
-    private Map<String, FxAction> children;
-    private StringProperty text;
-    private ObjectProperty<KeyCombination> accelerator;
-    private StringProperty icon;
-    private StringProperty description;
-    private StringProperty hint;
-    private BooleanProperty disabled;
-    private BooleanProperty selected;
+    public final String toolbarGroup;
+    public final String group;
+    public final String menu;
+    public final Map<String, FxAction> children = new TreeMap<>();
+    public final StringProperty text = new SimpleStringProperty();
+    public final ObjectProperty<KeyCombination> accelerator = new SimpleObjectProperty<>();
+    public final StringProperty icon = new SimpleStringProperty();
+    public final StringProperty description = new SimpleStringProperty();
+    public final ObjectProperty<Tooltip> hint = new SimpleObjectProperty<>();
+    public final BooleanProperty disabled = new SimpleBooleanProperty();
+    public final ObjectProperty<Boolean> selected = new SimpleObjectProperty<>();
+
     private EventHandler<ActionEvent> eventHandler;
 
     public FxAction(@Nonnull String toolbarGroup, @Nonnull String group, @Nonnull String menu) {
@@ -83,17 +82,10 @@ public final class FxAction {
     }
 
     public String getText() {
-        return text == null ? null : text.get();
-    }
-
-    public StringProperty textProperty() {
-        return text;
+        return text.get();
     }
 
     public FxAction bindText(ObservableValue<String> value) {
-        if (text == null) {
-            text = new SimpleStringProperty();
-        }
         text.bind(value);
         return this;
     }
@@ -102,114 +94,59 @@ public final class FxAction {
         return bindText(LocalizedStrings.ls(format, args));
     }
 
-    public KeyCombination getAccelerator() {
-        return accelerator == null ? null : accelerator.get();
-    }
-
-    public FxAction setAccelerator(KeyCombination accelerator) {
-        if (this.accelerator == null) {
-            this.accelerator = new SimpleObjectProperty<>();
-        }
-        this.accelerator.set(accelerator);
-        return this;
-    }
-
-    public ObjectProperty<KeyCombination> acceleratorProperty() {
-        return accelerator;
+    public FxAction setAccelerator(KeyCombination value) {
+        return bindAccelerator(ConstantValue.value(value));
     }
 
     public FxAction bindAccelerator(ObservableValue<KeyCombination> value) {
-        if (accelerator == null) {
-            accelerator = new SimpleObjectProperty<>();
-        }
         accelerator.bind(value);
         return this;
     }
 
     public String getIcon() {
-        return icon == null ? null : icon.get();
+        return icon.get();
     }
 
-    public FxAction setIcon(@PropertyKey(resourceBundle = "fonts.meta") String icon) {
-        if (this.icon == null) {
-            this.icon = new SimpleStringProperty();
-        }
-        this.icon.set(icon);
-        return this;
+    public FxAction setIcon(@PropertyKey(resourceBundle = "fonts.meta") String value) {
+        return bindIcon(ConstantValue.value(value));
     }
 
-    public StringProperty iconProperty() {
-        return icon;
-    }
-
-    public FxAction bindIcon(ObservableStringValue value) {
-        if (icon == null) {
-            icon = new SimpleStringProperty();
-        }
+    public FxAction bindIcon(ObservableValue<String> value) {
         icon.bind(value);
         return this;
     }
 
     public boolean getDisabled() {
-        return disabled != null && disabled.get();
+        return disabled.get();
     }
 
-    public FxAction setDisabled(boolean disabled) {
-        if (this.disabled == null) {
-            this.disabled = new SimpleBooleanProperty();
-        }
-        this.disabled.set(disabled);
-        return this;
+    public FxAction setDisabled(boolean value) {
+        return bindDisabled(ConstantValue.value(value));
     }
 
-    public BooleanProperty disabledProperty() {
-        return disabled;
-    }
-
-    public FxAction bindDisabled(ObservableBooleanValue value) {
-        if (disabled == null) {
-            disabled = new SimpleBooleanProperty();
-        }
+    public FxAction bindDisabled(ObservableValue<Boolean> value) {
         disabled.bind(value);
         return this;
     }
 
     public String getDescription() {
-        return description == null ? null : description.get();
+        return description.get();
     }
 
-    public FxAction setDescription(String description) {
-        if (this.description == null) {
-            this.description = new SimpleStringProperty();
-        }
-        this.description.set(description);
-        return this;
+    public FxAction setDescription(String value) {
+        return bindDescription(ConstantValue.value(value));
     }
 
-    public StringProperty descriptionProperty() {
-        return description;
-    }
-
-    public FxAction bindDescription(ObservableStringValue value) {
-        if (description == null) {
-            description = new SimpleStringProperty();
-        }
+    public FxAction bindDescription(ObservableValue<String> value) {
         description.bind(value);
         return this;
     }
 
-    public String getHint() {
-        return hint == null ? null : hint.get();
+    public Tooltip getHint() {
+        return hint.get();
     }
 
-    public StringProperty hintProperty() {
-        return hint;
-    }
-
-    public FxAction bindHint(ObservableStringValue value) {
-        if (hint == null) {
-            hint = new SimpleStringProperty();
-        }
+    public FxAction bindHint(ObservableValue<Tooltip> value) {
         hint.bind(value);
         return this;
     }
@@ -223,92 +160,32 @@ public final class FxAction {
         return this;
     }
 
-    public FxAction setSelected(boolean selected) {
-        if (this.selected == null) {
-            this.selected = new SimpleBooleanProperty();
-        }
-        this.selected.set(selected);
-        return this;
+    public FxAction setSelected(Boolean value) {
+        return bindSelected(ConstantValue.value(value));
     }
 
-    public boolean getSelected() {
-        return selected != null && selected.get();
+    public Boolean getSelected() {
+        return selected.get();
     }
 
-    public BooleanProperty selectedProperty() {
-        return selected;
-    }
-
-    public FxAction bindSelected(ObservableBooleanValue value) {
-        if (selected == null) {
-            selected = new SimpleBooleanProperty();
-        }
+    public FxAction bindSelected(ObservableValue<Boolean> value) {
         selected.bind(value);
         return this;
     }
 
     public FxAction setChildren(Map<String, FxAction> actions) {
-        if (children == null) {
-            children = new HashMap<>(actions);
-        }
+        children.clear();
+        children.putAll(actions);
         return this;
     }
 
     public FxAction addChild(String name, FxAction action) {
-        if (children == null) {
-            children = new HashMap<>();
-        }
         children.put(name, action);
         return this;
     }
 
     public FxAction addChildren(Map<String, FxAction> actions) {
-        if (children == null) {
-            children = new HashMap<>(actions);
-        } else {
-            children.putAll(actions);
-        }
+        children.putAll(actions);
         return this;
-    }
-
-    public Map<String, FxAction> getChildren() {
-        return children;
-    }
-
-    public FxAction on(ObservableValue<Boolean> focusedProperty, Consumer<FxAction> on) {
-        focusedProperty.addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                on.accept(this);
-                if (!disabledProperty().isBound()) {
-                    setDisabled(false);
-                }
-            } else {
-                if (disabledProperty().isBound()) {
-                    disabledProperty().unbind();
-                }
-                setDisabled(true);
-            }
-        });
-        return this;
-    }
-
-    public FxAction on(Node node, Consumer<FxAction> on) {
-        return on(node.focusedProperty(), on);
-    }
-
-    public void copy(FxAction action, boolean focused) {
-        if (action.disabledProperty() != null && action.disabledProperty().isBound()) {
-            action.disabledProperty().unbind();
-        }
-        action.setEventHandler(getEventHandler());
-        if (focused) {
-            if (disabledProperty() != null) {
-                action.disabledProperty().bind(disabledProperty());
-            } else {
-                action.setDisabled(false);
-            }
-        } else {
-            action.setDisabled(true);
-        }
     }
 }

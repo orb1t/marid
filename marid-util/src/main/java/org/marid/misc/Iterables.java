@@ -21,9 +21,6 @@ package org.marid.misc;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
 import java.util.Spliterators;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -34,17 +31,6 @@ import java.util.stream.Stream;
  * @since 0.8
  */
 public interface Iterables {
-
-    static <E> Optional<E> last(List<E> list) {
-        if (list.isEmpty()) {
-            return Optional.empty();
-        } else if (list instanceof LinkedList<?>) {
-            final LinkedList<E> linkedList = (LinkedList<E>) list;
-            return Optional.ofNullable(linkedList.peekLast());
-        } else {
-            return Optional.ofNullable(list.get(list.size() - 1));
-        }
-    }
 
     static <E> Stream<E> stream(Class<E> type, Stream<?> stream) {
         return stream.filter(type::isInstance).map(type::cast);

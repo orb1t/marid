@@ -25,11 +25,9 @@ import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.printer.PrettyPrinter;
-import javafx.scene.Node;
 import javafx.scene.control.TextInputDialog;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -69,8 +67,8 @@ public class AddBeanFileEditor extends AbstractFileEditor<ProjectProfile> {
 
     @Nonnull
     @Override
-    public Node getIcon() {
-        return FontIcons.glyphIcon("M_SETTINGS_INPUT_COMPONENT", 16);
+    public String getIcon() {
+        return icon("M_SETTINGS_INPUT_COMPONENT");
     }
 
     @Nonnull

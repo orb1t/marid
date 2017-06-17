@@ -18,19 +18,25 @@
 
 package org.marid.ide.common;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import org.intellij.lang.annotations.MagicConstant;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Control;
+import javafx.util.Pair;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
-import org.marid.jfx.menu.MaridContextMenu;
+import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Supplier;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,24 +44,69 @@ import java.util.function.Supplier;
 @Component
 public class SpecialActions {
 
-    private final Map<String, FxAction> actionMap;
+    private final Map<String, SpecialAction> actionMap;
 
     @Autowired
-    public SpecialActions(@Qualifier("specialAction") Map<String, FxAction> actionMap) {
+    public SpecialActions(@Qualifier("specialAction") Map<String, SpecialAction> actionMap) {
         this.actionMap = actionMap;
     }
 
-    public FxAction getAction(@MagicConstant(valuesFromClass = SpecialActionConfiguration.class) String name) {
+    public void forEach(BiConsumer<String, FxAction> consumer) {
+        actionMap.forEach(consumer);
+    }
+
+    public FxAction get(String name) {
         return actionMap.get(name);
     }
 
-    public MaridContextMenu contextMenu(Supplier<Map<String, FxAction>> additionalItemsSupplier) {
-        return new MaridContextMenu(m -> {
-            m.getItems().clear();
-            final Map<String, FxAction> add = additionalItemsSupplier.get();
-            final Set<String> keys = Sets.union(actionMap.keySet(), add.keySet());
-            final Map<String, FxAction> map = Maps.asMap(keys, k -> actionMap.getOrDefault(k, add.get(k)));
-            m.getItems().addAll(MaridActions.contextMenu(map));
-        });
+    public <T extends Control> FxActions<T> actions(@Nullable FxActions<?> parent,
+                                                    @Nonnull T control,
+                                                    @Nonnull Function<T, Map<String, FxAction>> actions) {
+        return new FxActions<>(parent, control, actions);
+    }
+
+    public <T extends Control> FxActions<T> actions(@Nonnull T control,
+                                                    @Nonnull Function<T, Map<String, FxAction>> actions) {
+        return actions(null, control, actions);
+    }
+
+    public final class FxActions<T extends Control> {
+
+        private final FxActions<?> parent;
+        private final T control;
+        private final Function<T, Map<String, FxAction>> actions;
+
+        private FxActions(@Nullable FxActions<?> parent,
+                          @Nonnull T control,
+                          @Nonnull Function<T, Map<String, FxAction>> actions) {
+            this.parent = parent;
+            this.control = control;
+            this.actions = actions;
+        }
+
+        public Map<String, FxAction> actions() {
+            return actions.apply(control);
+        }
+
+        private Stream<Map<String, FxAction>> actionMapStream() {
+            return Stream.concat(parent == null ? Stream.empty() : parent.actionMapStream(), Stream.of(actions()));
+        }
+
+        public void setup() {
+            control.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                actionMap.values().forEach(SpecialAction::reset);
+                control.setContextMenu(null);
+                if (newValue) {
+                    final Map<String, FxAction> map = actionMapStream()
+                            .flatMap(m -> m.entrySet().stream())
+                            .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (v1, v2) -> v2, TreeMap::new));
+                    map.entrySet().stream()
+                            .map(e -> new Pair<>(actionMap.get(e.getKey()), e.getValue()))
+                            .filter(e -> e.getKey() != null)
+                            .forEach(e -> e.getKey().copy(e.getValue()));
+                    control.setContextMenu(new ContextMenu(MaridActions.contextMenu(map)));
+                }
+            });
+        }
     }
 }

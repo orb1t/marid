@@ -18,19 +18,18 @@
 
 package org.marid.ide.structure.editor;
 
-import javafx.scene.Node;
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.BeanEditorConfiguration;
 import org.marid.dependant.beaneditor.BeanEditorParam;
 import org.marid.ide.model.TextFile;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 
@@ -60,8 +59,8 @@ public class BeanFileEditor extends AbstractFileEditor<ProjectProfile> {
 
     @Nonnull
     @Override
-    public Node getIcon() {
-        return FontIcons.glyphIcon("M_APPS", 16);
+    public String getIcon() {
+        return icon("M_APPS");
     }
 
     @Nonnull
@@ -78,5 +77,11 @@ public class BeanFileEditor extends AbstractFileEditor<ProjectProfile> {
     @Override
     protected void edit(@Nonnull Path file, @Nonnull ProjectProfile context) {
         dependants.start(BeanEditorConfiguration.class, new BeanEditorParam(context, new TextFile(file)), c -> {});
+    }
+
+    @Nullable
+    @Override
+    public String getSpecialAction() {
+        return "editAction";
     }
 }
