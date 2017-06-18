@@ -28,11 +28,13 @@ import com.github.javaparser.printer.PrettyPrinter;
 import javafx.scene.control.TextInputDialog;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
@@ -51,12 +53,14 @@ public class AddBeanFileEditor extends AbstractFileEditor<ProjectProfile> {
 
     private final ProjectManager projectManager;
     private final PrettyPrinter prettyPrinter;
+    private final SpecialAction addAction;
 
     @Autowired
-    public AddBeanFileEditor(ProjectManager projectManager, PrettyPrinter prettyPrinter) {
+    public AddBeanFileEditor(ProjectManager projectManager, PrettyPrinter prettyPrinter, SpecialAction addAction) {
         super(Files::isDirectory);
         this.projectManager = projectManager;
         this.prettyPrinter = prettyPrinter;
+        this.addAction = addAction;
     }
 
     @Nonnull
@@ -117,5 +121,11 @@ public class AddBeanFileEditor extends AbstractFileEditor<ProjectProfile> {
         } catch (Exception x) {
             n(WARNING, "Unable to save file {0}", x, file);
         }
+    }
+
+    @Nullable
+    @Override
+    public SpecialAction getSpecialAction() {
+        return addAction;
     }
 }

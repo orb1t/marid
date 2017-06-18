@@ -19,9 +19,12 @@
 package org.marid.ide.structure.editor;
 
 import javafx.scene.control.TextInputDialog;
+import org.marid.jfx.action.SpecialAction;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -36,8 +39,12 @@ import static org.marid.l10n.L10n.s;
 @Component
 public class AddDirectoryEditor extends AbstractFileEditor<Path> {
 
-    public AddDirectoryEditor() {
+    private final SpecialAction addAction;
+
+    @Autowired
+    public AddDirectoryEditor(SpecialAction addAction) {
         super(Files::isDirectory);
+        this.addAction = addAction;
     }
 
     @Override
@@ -78,5 +85,11 @@ public class AddDirectoryEditor extends AbstractFileEditor<Path> {
     @Override
     protected Path editorContext(@Nonnull Path path) {
         return path;
+    }
+
+    @Nullable
+    @Override
+    public SpecialAction getSpecialAction() {
+        return addAction;
     }
 }

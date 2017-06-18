@@ -18,6 +18,8 @@
 
 package org.marid.ide.structure.editor;
 
+import org.marid.jfx.action.SpecialAction;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -38,8 +40,12 @@ import static org.marid.ide.IdeNotifications.n;
 @Component
 public class DefaultFileEditor extends AbstractFileEditor<Desktop> {
 
-    public DefaultFileEditor() {
+    private final SpecialAction editAction;
+
+    @Autowired
+    public DefaultFileEditor(SpecialAction editAction) {
         super(Files::isRegularFile);
+        this.editAction = editAction;
     }
 
     @Nonnull
@@ -75,5 +81,11 @@ public class DefaultFileEditor extends AbstractFileEditor<Desktop> {
                 n(WARNING, "Unable to edit {0}", e, path);
             }
         });
+    }
+
+    @Nullable
+    @Override
+    public SpecialAction getSpecialAction() {
+        return editAction;
     }
 }

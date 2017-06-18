@@ -24,6 +24,7 @@ import org.marid.dependant.beaneditor.BeanEditorParam;
 import org.marid.ide.model.TextFile;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -41,14 +42,17 @@ public class BeanFileEditor extends AbstractFileEditor<ProjectProfile> {
 
     private final ProjectManager projectManager;
     private final IdeDependants dependants;
+    private final SpecialAction editAction;
 
     @Autowired
     public BeanFileEditor(@Qualifier("java") PathMatcher javaPathMatcher,
                           ProjectManager projectManager,
-                          IdeDependants dependants) {
+                          IdeDependants dependants,
+                          SpecialAction editAction) {
         super(javaPathMatcher);
         this.projectManager = projectManager;
         this.dependants = dependants;
+        this.editAction = editAction;
     }
 
     @Nonnull
@@ -81,7 +85,7 @@ public class BeanFileEditor extends AbstractFileEditor<ProjectProfile> {
 
     @Nullable
     @Override
-    public String getSpecialAction() {
-        return "editAction";
+    public SpecialAction getSpecialAction() {
+        return editAction;
     }
 }

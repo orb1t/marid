@@ -22,13 +22,13 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.MapChangeListener;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.Pair;
 import org.marid.ide.model.Annotations;
 import org.marid.jfx.LocalizedStrings;
-import org.marid.jfx.beans.ConstantValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
@@ -55,7 +55,7 @@ public class BeanPropertyTable extends TableView<Pair<String, String>> {
         column.setMinWidth(150);
         column.setPrefWidth(250);
         column.setMaxWidth(500);
-        column.setCellValueFactory(p -> ConstantValue.value(p.getValue().getKey()));
+        column.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getKey()));
         getColumns().add(column);
     }
 
@@ -67,7 +67,7 @@ public class BeanPropertyTable extends TableView<Pair<String, String>> {
         column.setMinWidth(150);
         column.setPrefWidth(300);
         column.setMaxWidth(1000);
-        column.setCellValueFactory(p -> ConstantValue.value(p.getValue().getValue()));
+        column.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getValue()));
         getColumns().add(column);
     }
 

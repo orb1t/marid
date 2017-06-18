@@ -19,6 +19,7 @@
 package org.marid.ide.structure.editor;
 
 import org.jetbrains.annotations.PropertyKey;
+import org.marid.jfx.action.SpecialAction;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,7 +43,7 @@ public interface FileEditor {
     String getGroup();
 
     @Nullable
-    default String getSpecialAction() {
+    default SpecialAction getSpecialAction() {
         return null;
     }
 

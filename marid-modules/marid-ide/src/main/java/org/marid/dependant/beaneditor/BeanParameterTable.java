@@ -21,13 +21,13 @@ package org.marid.dependant.beaneditor;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import javafx.beans.Observable;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import org.marid.ide.model.Annotations;
 import org.marid.jfx.LocalizedStrings;
-import org.marid.jfx.beans.ConstantValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -52,7 +52,7 @@ public class BeanParameterTable extends TableView<Parameter> {
         column.setMinWidth(100);
         column.setPrefWidth(200);
         column.setMaxWidth(800);
-        column.setCellValueFactory(param -> ConstantValue.value(param.getValue().getNameAsString()));
+        column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getNameAsString()));
         getColumns().add(column);
     }
 
@@ -64,7 +64,7 @@ public class BeanParameterTable extends TableView<Parameter> {
         column.setMinWidth(200);
         column.setPrefWidth(300);
         column.setMaxWidth(800);
-        column.setCellValueFactory(param -> ConstantValue.value(param.getValue().getType().toString()));
+        column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getType().toString()));
         getColumns().add(column);
     }
 
@@ -76,7 +76,7 @@ public class BeanParameterTable extends TableView<Parameter> {
         column.setMinWidth(200);
         column.setPrefWidth(300);
         column.setMaxWidth(800);
-        column.setCellValueFactory(param -> ConstantValue.value(Annotations.value(param.getValue())));
+        column.setCellValueFactory(param -> new SimpleStringProperty(Annotations.value(param.getValue())));
         getColumns().add(column);
     }
 

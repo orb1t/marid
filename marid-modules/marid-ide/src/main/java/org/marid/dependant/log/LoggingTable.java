@@ -20,6 +20,7 @@ package org.marid.dependant.log;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.scene.Node;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
@@ -32,6 +33,7 @@ import org.marid.l10n.L10n;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -162,6 +164,11 @@ public class LoggingTable extends TableView<LogRecord> {
         col.setMaxWidth(Double.MAX_VALUE);
         col.setSortable(false);
         return col;
+    }
+
+    @PreDestroy
+    private void destroy() {
+        setItems(FXCollections.emptyObservableList());
     }
 
     public static class IconDescriptor {

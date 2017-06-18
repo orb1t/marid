@@ -18,7 +18,6 @@
 
 package org.marid.ide.configurations;
 
-import javafx.scene.control.CheckMenuItem;
 import org.marid.Ide;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.annotation.IdeAction;
@@ -35,10 +34,7 @@ public class WindowConfiguration {
         return new FxAction("ops", "Window")
                 .bindText("Always on top")
                 .setIcon("D_BORDER_TOP")
-                .setSelected(false)
-                .setEventHandler(event -> {
-                    final CheckMenuItem menuItem = (CheckMenuItem) event.getSource();
-                    Ide.primaryStage.setAlwaysOnTop(menuItem.isSelected());
-                });
+                .bindSelected(Ide.primaryStage.alwaysOnTopProperty())
+                .setEventHandler(event -> Ide.primaryStage.setAlwaysOnTop(!Ide.primaryStage.isAlwaysOnTop()));
     }
 }

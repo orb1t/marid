@@ -82,11 +82,6 @@ public class SpecialAction extends FxAction {
     }
 
     @Override
-    public SpecialAction setDescription(String value) {
-        return (SpecialAction) super.setDescription(value);
-    }
-
-    @Override
     public SpecialAction bindText(ObservableValue<String> value) {
         if (!sealed) text = value;
         return (SpecialAction) super.bindText(value);
@@ -122,11 +117,6 @@ public class SpecialAction extends FxAction {
     public SpecialAction bindSelected(ObservableValue<Boolean> value) {
         if (!sealed) selected = value;
         return (SpecialAction) super.bindSelected(value);
-    }
-
-    @Override
-    public SpecialAction setSelected(Boolean value) {
-        return (SpecialAction) super.setSelected(value);
     }
 
     private void unbindSelected() {
@@ -180,7 +170,7 @@ public class SpecialAction extends FxAction {
             if (selected != null) bindSelected(selected); else unbindSelected();
             if (hint != null) bindHint(hint); else unbindHint();
             if (icon != null) bindIcon(icon); else unbindIcon();
-            setEventHandler(null);
+            setEventHandler(eventHandler);
         }
     }
 
@@ -192,6 +182,6 @@ public class SpecialAction extends FxAction {
         bindSelected(action.selected);
         bindHint(action.hint);
         bindIcon(action.icon);
-        setEventHandler(action.getEventHandler());
+        setEventHandler(action.eventHandler);
     }
 }

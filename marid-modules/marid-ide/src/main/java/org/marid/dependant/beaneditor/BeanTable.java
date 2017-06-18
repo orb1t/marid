@@ -19,6 +19,7 @@
 package org.marid.dependant.beaneditor;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.marid.jfx.LocalizedStrings;
@@ -28,7 +29,6 @@ import org.springframework.stereotype.Component;
 
 import static org.marid.ide.model.Annotations.isLazy;
 import static org.marid.ide.model.Annotations.isPrototype;
-import static org.marid.jfx.beans.ConstantValue.value;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,7 +50,7 @@ public class BeanTable extends TableView<MethodDeclaration> {
         column.setMinWidth(200);
         column.setPrefWidth(250);
         column.setMaxWidth(800);
-        column.setCellValueFactory(param -> value(param.getValue().getNameAsString()));
+        column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getNameAsString()));
         getColumns().add(column);
     }
 
@@ -62,7 +62,7 @@ public class BeanTable extends TableView<MethodDeclaration> {
         column.setMinWidth(300);
         column.setPrefWidth(350);
         column.setMaxWidth(800);
-        column.setCellValueFactory(param -> value(param.getValue().getType().toString()));
+        column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getType().toString()));
         getColumns().add(column);
     }
 
@@ -73,7 +73,7 @@ public class BeanTable extends TableView<MethodDeclaration> {
         column.setMinWidth(20);
         column.setPrefWidth(24);
         column.setMaxWidth(28);
-        column.setCellValueFactory(param -> value(isLazy(param.getValue()) ? "\u25CF" : "\u25CB"));
+        column.setCellValueFactory(param -> new SimpleStringProperty(isLazy(param.getValue()) ? "\u25CF" : "\u25CB"));
         getColumns().add(column);
     }
 
@@ -84,7 +84,7 @@ public class BeanTable extends TableView<MethodDeclaration> {
         column.setMinWidth(20);
         column.setPrefWidth(24);
         column.setMaxWidth(28);
-        column.setCellValueFactory(param -> value(isPrototype(param.getValue()) ? "\u25CF" : "\u25CB"));
+        column.setCellValueFactory(param -> new SimpleStringProperty(isPrototype(param.getValue()) ? "\u25CF" : "\u25CB"));
         getColumns().add(column);
     }
 }

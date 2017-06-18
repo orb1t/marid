@@ -20,10 +20,12 @@ package org.marid.ide.structure.editor;
 
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -37,12 +39,15 @@ import static org.marid.ide.IdeNotifications.n;
 @Component
 public class RemoveFileEditor extends AbstractFileEditor<Path> {
 
+    private final SpecialAction removeAction;
+
     @Autowired
-    public RemoveFileEditor(ProjectManager projectManager) {
+    public RemoveFileEditor(ProjectManager projectManager, SpecialAction removeAction) {
         super(path -> Stream.concat(
                 Stream.of(projectManager.getProfilesDir()),
                 projectManager.getProfiles().stream().map(ProjectProfile::getPath)
         ).noneMatch(path::equals));
+        this.removeAction = removeAction;
     }
 
     @Nonnull
@@ -75,5 +80,11 @@ public class RemoveFileEditor extends AbstractFileEditor<Path> {
     @Override
     protected Path editorContext(@Nonnull Path path) {
         return path;
+    }
+
+    @Nullable
+    @Override
+    public SpecialAction getSpecialAction() {
+        return removeAction;
     }
 }

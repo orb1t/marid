@@ -18,6 +18,7 @@
 
 package org.marid.jfx.action;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -26,7 +27,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCombination;
 import org.jetbrains.annotations.PropertyKey;
 import org.marid.jfx.LocalizedStrings;
-import org.marid.jfx.beans.ConstantValue;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -49,7 +49,8 @@ public class FxAction {
     public final BooleanProperty disabled = new SimpleBooleanProperty();
     public final ObjectProperty<Boolean> selected = new SimpleObjectProperty<>();
 
-    private EventHandler<ActionEvent> eventHandler;
+    public EventHandler<ActionEvent> eventHandler;
+    public SpecialAction specialAction;
 
     public FxAction(@Nonnull String toolbarGroup, @Nonnull String group, @Nonnull String menu) {
         this.toolbarGroup = toolbarGroup;
@@ -95,7 +96,7 @@ public class FxAction {
     }
 
     public FxAction setAccelerator(KeyCombination value) {
-        return bindAccelerator(ConstantValue.value(value));
+        return bindAccelerator(Bindings.createObjectBinding(() -> value));
     }
 
     public FxAction bindAccelerator(ObservableValue<KeyCombination> value) {
@@ -108,7 +109,7 @@ public class FxAction {
     }
 
     public FxAction setIcon(@PropertyKey(resourceBundle = "fonts.meta") String value) {
-        return bindIcon(ConstantValue.value(value));
+        return bindIcon(Bindings.createStringBinding(() -> value));
     }
 
     public FxAction bindIcon(ObservableValue<String> value) {
@@ -121,7 +122,7 @@ public class FxAction {
     }
 
     public FxAction setDisabled(boolean value) {
-        return bindDisabled(ConstantValue.value(value));
+        return bindDisabled(Bindings.createBooleanBinding(() -> value));
     }
 
     public FxAction bindDisabled(ObservableValue<Boolean> value) {
@@ -131,10 +132,6 @@ public class FxAction {
 
     public String getDescription() {
         return description.get();
-    }
-
-    public FxAction setDescription(String value) {
-        return bindDescription(ConstantValue.value(value));
     }
 
     public FxAction bindDescription(ObservableValue<String> value) {
@@ -151,17 +148,14 @@ public class FxAction {
         return this;
     }
 
-    public EventHandler<ActionEvent> getEventHandler() {
-        return eventHandler;
-    }
-
     public FxAction setEventHandler(EventHandler<ActionEvent> eventHandler) {
         this.eventHandler = eventHandler;
         return this;
     }
 
-    public FxAction setSelected(Boolean value) {
-        return bindSelected(ConstantValue.value(value));
+    public FxAction setSpecialAction(SpecialAction value) {
+        specialAction = value;
+        return this;
     }
 
     public Boolean getSelected() {
@@ -187,5 +181,10 @@ public class FxAction {
     public FxAction addChildren(Map<String, FxAction> actions) {
         children.putAll(actions);
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s,%s,%s", group, toolbarGroup, menu);
     }
 }

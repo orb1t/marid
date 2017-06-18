@@ -21,6 +21,8 @@ package org.marid.jfx.action;
 import com.google.common.collect.ComputationException;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.util.Pair;
@@ -58,7 +60,9 @@ public interface MaridActions {
             final MenuItem menuItem;
             if (action.getSelected() != null) {
                 final CheckMenuItem checkMenuItem = new CheckMenuItem();
-                checkMenuItem.selectedProperty().bindBidirectional(action.selected);
+                final ChangeListener<Boolean> changeListener = (o, oV, nV) -> checkMenuItem.setSelected(nV);
+                checkMenuItem.setUserData(changeListener);
+                action.selected.addListener(new WeakChangeListener<>(changeListener));
                 menuItem = checkMenuItem;
             } else if (!action.children.isEmpty()) {
                 final Menu menu = new Menu();
@@ -85,12 +89,8 @@ public interface MaridActions {
             menuItem.acceleratorProperty().bind(action.accelerator);
 
             if (!(menuItem instanceof Menu)) {
-                menuItem.setOnAction(event -> {
-                    if (action.getEventHandler() != null) {
-                        action.getEventHandler().handle(event);
-                    }
-                });
-                menuItem.disableProperty().bindBidirectional(action.disabled);
+                menuItem.setOnAction(action.eventHandler);
+                menuItem.disableProperty().bind(action.disabled);
             }
             itemMap
                     .computeIfAbsent(action.getMenu(), k -> new TreeMap<>())
@@ -135,14 +135,13 @@ public interface MaridActions {
                         .map(a -> {
                             final Button button = new Button();
                             button.setFocusTraversable(false);
-                            button.setOnAction(event -> {
-                                if (a.getEventHandler() != null) {
-                                    a.getEventHandler().handle(event);
-                                }
-                            });
-                            button.disableProperty().bindBidirectional(a.disabled);
-                            button.graphicProperty().bind(createObjectBinding(() -> glyphIcon(a.getIcon(), 20), a.icon));
-                            button.tooltipProperty().bind(createObjectBinding(a::getHint, a.hint));
+                            button.setOnAction(a.eventHandler);
+                            button.disableProperty().bind(a.disabled);
+                            button.graphicProperty().bind(createObjectBinding(() -> {
+                                final String icon = a.getIcon();
+                                return icon == null ? null : glyphIcon(a.getIcon(), 20);
+                            }, a.icon));
+                            button.tooltipProperty().bind(a.hint);
                             return button;
                         }), of(new Separator())))
                 .toArray(Node[]::new);

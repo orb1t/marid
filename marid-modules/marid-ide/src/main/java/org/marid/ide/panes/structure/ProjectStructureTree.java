@@ -20,6 +20,7 @@ package org.marid.ide.panes.structure;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -35,7 +36,6 @@ import org.marid.ide.structure.editor.FileEditor;
 import org.marid.ide.structure.icons.FileIcons;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.beans.ConstantValue;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
@@ -111,9 +111,9 @@ public class ProjectStructureTree extends TreeTableView<Path> {
                 } else {
                     size = path.toFile().length();
                 }
-                return ConstantValue.value(NumberFormat.getIntegerInstance().format(size));
+                return new SimpleStringProperty(NumberFormat.getIntegerInstance().format(size));
             } catch (Exception x) {
-                return ConstantValue.value("-1");
+                return new SimpleStringProperty("-1");
             }
         });
         column.setCellFactory(e -> {
@@ -141,11 +141,11 @@ public class ProjectStructureTree extends TreeTableView<Path> {
                         fileEditors.forEach((name, editor) -> {
                             final Runnable task = editor.getEditAction(file);
                             if (task != null) {
-                                final String key = editor.getSpecialAction() != null ? editor.getSpecialAction() : name;
-                                map.put(key, new FxAction(editor.getGroup(), "Actions")
+                                map.put(name, new FxAction(name, editor.getGroup(), "Actions")
                                         .bindText(LocalizedStrings.ls(editor.getName()))
-                                        .bindIcon(ConstantValue.value(editor.getIcon()))
+                                        .bindIcon(new SimpleStringProperty(editor.getIcon()))
                                         .bindDisabled(Bindings.createBooleanBinding(() -> false))
+                                        .setSpecialAction(editor.getSpecialAction())
                                         .setEventHandler(e -> task.run())
                                 );
                             }

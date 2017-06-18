@@ -21,6 +21,7 @@ package org.marid.ide.structure.editor;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.marid.ide.structure.syneditor.SynEditor;
+import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,12 +42,15 @@ public class SynFileEditor extends AbstractFileEditor<Path> {
 
     private final ObjectProvider<SynEditor> synEditorFactory;
     private final Map<SynStage, Path> pathMap = new WeakHashMap<>();
+    private final SpecialAction editAction;
 
     @Autowired
     public SynFileEditor(@Qualifier("syn") PathMatcher synEditorMatcher,
-                         ObjectProvider<SynEditor> synEditorFactory) {
+                         ObjectProvider<SynEditor> synEditorFactory,
+                         SpecialAction editAction) {
         super(synEditorMatcher);
         this.synEditorFactory = synEditorFactory;
+        this.editAction = editAction;
     }
 
     @Nonnull
@@ -81,6 +85,12 @@ public class SynFileEditor extends AbstractFileEditor<Path> {
         synStage.synEditor.load();
         pathMap.put(synStage, path);
         synStage.show();
+    }
+
+    @Nullable
+    @Override
+    public SpecialAction getSpecialAction() {
+        return editAction;
     }
 
     private static class SynStage extends Stage {

@@ -20,7 +20,6 @@ package org.marid.ide.common;
 
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Control;
-import javafx.util.Pair;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.action.SpecialAction;
@@ -30,6 +29,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.awt.*;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -100,10 +102,23 @@ public class SpecialActions {
                     final Map<String, FxAction> map = actionMapStream()
                             .flatMap(m -> m.entrySet().stream())
                             .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (v1, v2) -> v2, TreeMap::new));
-                    map.entrySet().stream()
-                            .map(e -> new Pair<>(actionMap.get(e.getKey()), e.getValue()))
-                            .filter(e -> e.getKey() != null)
-                            .forEach(e -> e.getKey().copy(e.getValue()));
+                    final Map<SpecialAction, Map<String, FxAction>> specialActions = new IdentityHashMap<>();
+                    map.forEach((k, v) -> {
+                        if (v.specialAction != null) {
+                            specialActions.computeIfAbsent(v.specialAction, key -> new LinkedHashMap<>()).put(k, v);
+                        }
+                    });
+                    specialActions.forEach((k, v) -> {
+                        System.out.println(k + " " + v);
+                        k.copy(v.values().iterator().next());
+                        if (v.size() > 1) {
+                            k.setEventHandler(event -> {
+                                final ContextMenu contextMenu = new ContextMenu(MaridActions.contextMenu(v));
+                                final Point point = MouseInfo.getPointerInfo().getLocation();
+                                contextMenu.show(control, point.getX(), point.getY());
+                            });
+                        }
+                    });
                     control.setContextMenu(new ContextMenu(MaridActions.contextMenu(map)));
                 }
             });
