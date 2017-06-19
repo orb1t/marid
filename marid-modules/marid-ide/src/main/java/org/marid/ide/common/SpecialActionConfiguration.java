@@ -18,10 +18,9 @@
 package org.marid.ide.common;
 
 import javafx.scene.input.KeyCombination;
-import org.marid.spring.annotation.IdeAction;
 import org.marid.jfx.action.SpecialAction;
+import org.marid.spring.annotation.IdeAction;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,7 +30,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpecialActionConfiguration {
 
-    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
     public SpecialAction editAction() {
@@ -42,7 +40,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
     public SpecialAction addAction() {
@@ -53,7 +50,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
     public SpecialAction removeAction() {
@@ -64,7 +60,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
     public SpecialAction cutAction() {
@@ -75,7 +70,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
     public SpecialAction copyAction() {
@@ -86,7 +80,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
     public SpecialAction pasteAction() {
@@ -97,7 +90,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
     public SpecialAction clearAllAction() {
@@ -107,7 +99,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
     public SpecialAction renameAction() {
@@ -118,7 +109,6 @@ public class SpecialActionConfiguration {
                 .setDisabled(true);
     }
 
-    @Bean(initMethod = "seal")
     @IdeAction
     @Qualifier("specialAction")
     public SpecialAction selectAllAction() {

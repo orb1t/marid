@@ -18,27 +18,19 @@
 
 package org.marid.ide.common;
 
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Control;
+import javafx.scene.control.SelectionModel;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -61,67 +53,31 @@ public class SpecialActions {
         return actionMap.get(name);
     }
 
-    public <T extends Control> FxActions<T> actions(@Nullable FxActions<?> parent,
-                                                    @Nonnull T control,
-                                                    @Nonnull Function<T, Map<String, FxAction>> actions) {
-        return new FxActions<>(parent, control, actions);
-    }
-
-    public <T extends Control> FxActions<T> actions(@Nonnull T control,
-                                                    @Nonnull Function<T, Map<String, FxAction>> actions) {
-        return actions(null, control, actions);
-    }
-
-    public final class FxActions<T extends Control> {
-
-        private final FxActions<?> parent;
-        private final T control;
-        private final Function<T, Map<String, FxAction>> actions;
-
-        private FxActions(@Nullable FxActions<?> parent,
-                          @Nonnull T control,
+    public <T> void setup(@Nonnull SelectionModel<T> selectionModel,
                           @Nonnull Function<T, Map<String, FxAction>> actions) {
-            this.parent = parent;
-            this.control = control;
-            this.actions = actions;
-        }
-
-        public Map<String, FxAction> actions() {
-            return actions.apply(control);
-        }
-
-        private Stream<Map<String, FxAction>> actionMapStream() {
-            return Stream.concat(parent == null ? Stream.empty() : parent.actionMapStream(), Stream.of(actions()));
-        }
-
-        public void setup() {
-            control.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                actionMap.values().forEach(SpecialAction::reset);
-                control.setContextMenu(null);
-                if (newValue) {
-                    final Map<String, FxAction> map = actionMapStream()
-                            .flatMap(m -> m.entrySet().stream())
-                            .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (v1, v2) -> v2, TreeMap::new));
-                    final Map<SpecialAction, Map<String, FxAction>> specialActions = new IdentityHashMap<>();
-                    map.forEach((k, v) -> {
-                        if (v.specialAction != null) {
-                            specialActions.computeIfAbsent(v.specialAction, key -> new LinkedHashMap<>()).put(k, v);
-                        }
-                    });
-                    specialActions.forEach((k, v) -> {
-                        System.out.println(k + " " + v);
-                        k.copy(v.values().iterator().next());
-                        if (v.size() > 1) {
-                            k.setEventHandler(event -> {
-                                final ContextMenu contextMenu = new ContextMenu(MaridActions.contextMenu(v));
-                                final Point point = MouseInfo.getPointerInfo().getLocation();
-                                contextMenu.show(control, point.getX(), point.getY());
-                            });
-                        }
-                    });
-                    control.setContextMenu(new ContextMenu(MaridActions.contextMenu(map)));
+        selectionModel.selectedItemProperty().addListener((o, oV, nV) -> {
+            final Map<String, FxAction> map = actions.apply(nV);
+            final Map<SpecialAction, Map<String, FxAction>> specialActions = new IdentityHashMap<>();
+            map.forEach((k, v) -> {
+                if (v.specialAction != null) {
+                    specialActions.computeIfAbsent(v.specialAction, key -> new LinkedHashMap<>()).put(k, v);
                 }
             });
-        }
+            specialActions.forEach((k, v) -> {
+                if (v.size() == 1) {
+                    final FxAction action = v.values().iterator().next();
+                    k.copy(action);
+                    k.update();
+                } else {
+                    k.reset();
+                    k.children.putAll(v);
+                    k.update();
+                }
+            });
+            actionMap.values().stream().filter(v -> !specialActions.containsKey(v)).forEach(a -> {
+                a.reset();
+                a.update();
+            });
+        });
     }
 }

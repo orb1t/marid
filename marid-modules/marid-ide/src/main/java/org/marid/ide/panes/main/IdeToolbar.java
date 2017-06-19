@@ -45,6 +45,6 @@ public class IdeToolbar extends ToolBar {
 
     @EventListener
     private void onIdeStart(ContextStartedEvent event) {
-        getItems().addAll(MaridActions.toolbar(menuActionsFactory.getObject()));
+        MaridActions.initToolbar(menuActionsFactory.getObject(), this);
     }
 }

@@ -65,7 +65,7 @@ public class ModbusSourceConfiguration {
     @Bean
     @Modbus
     public ToolBar topToolbar(@Modbus Map<String, FxAction> actionMap) {
-        return new ToolBar(MaridActions.toolbar(actionMap));
+        return MaridActions.toolbar(actionMap);
     }
 
     @Bean

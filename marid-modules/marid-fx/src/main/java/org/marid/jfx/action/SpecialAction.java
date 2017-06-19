@@ -25,6 +25,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCombination;
 
 import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,7 +39,7 @@ public class SpecialAction extends FxAction {
     private ObservableValue<Tooltip> hint;
     private ObservableValue<Boolean> disabled;
     private ObservableValue<Boolean> selected;
-    private EventHandler<ActionEvent> eventHandler;
+    private ObservableValue<EventHandler<ActionEvent>> eventHandler;
 
     private boolean sealed;
 
@@ -60,11 +61,6 @@ public class SpecialAction extends FxAction {
         return (SpecialAction) super.bindAccelerator(value);
     }
 
-    private void unbindAccelerator() {
-        ((FxAction) this).accelerator.unbind();
-        ((FxAction) this).accelerator.set(null);
-    }
-
     @Override
     public SpecialAction setAccelerator(KeyCombination value) {
         return (SpecialAction) super.setAccelerator(value);
@@ -74,11 +70,6 @@ public class SpecialAction extends FxAction {
     public SpecialAction bindDescription(ObservableValue<String> value) {
         if (!sealed) description = value;
         return (SpecialAction) super.bindDescription(value);
-    }
-
-    private void unbindDescription() {
-        ((FxAction) this).description.unbind();
-        ((FxAction) this).description.set(null);
     }
 
     @Override
@@ -92,11 +83,6 @@ public class SpecialAction extends FxAction {
         return (SpecialAction) super.bindText(format, args);
     }
 
-    private void unbindText() {
-        ((FxAction) this).text.unbind();
-        ((FxAction) this).text.set(null);
-    }
-
     @Override
     public SpecialAction bindDisabled(ObservableValue<Boolean> value) {
         if (!sealed) disabled = value;
@@ -108,31 +94,16 @@ public class SpecialAction extends FxAction {
         return (SpecialAction) super.setDisabled(value);
     }
 
-    private void unbindDisabled() {
-        ((FxAction) this).disabled.unbind();
-        ((FxAction) this).disabled.set(false);
-    }
-
     @Override
     public SpecialAction bindSelected(ObservableValue<Boolean> value) {
         if (!sealed) selected = value;
         return (SpecialAction) super.bindSelected(value);
     }
 
-    private void unbindSelected() {
-        ((FxAction) this).selected.unbind();
-        ((FxAction) this).selected.set(null);
-    }
-
     @Override
     public SpecialAction bindHint(ObservableValue<Tooltip> value) {
         if (!sealed) hint = value;
         return (SpecialAction) super.bindHint(value);
-    }
-
-    private void unbindHint() {
-        ((FxAction) this).hint.unbind();
-        ((FxAction) this).hint.set(null);
     }
 
     @Override
@@ -146,42 +117,51 @@ public class SpecialAction extends FxAction {
         return (SpecialAction) super.setIcon(value);
     }
 
-    private void unbindIcon() {
-        ((FxAction) this).icon.unbind();
-        ((FxAction) this).icon.set(null);
+    @Override
+    public SpecialAction bindEventHandler(ObservableValue<EventHandler<ActionEvent>> value) {
+        if (!sealed) eventHandler = value;
+        return (SpecialAction) super.bindEventHandler(value);
     }
 
     @Override
     public SpecialAction setEventHandler(EventHandler<ActionEvent> value) {
-        if (!sealed) eventHandler = value;
         return (SpecialAction) super.setEventHandler(value);
     }
 
+    @PostConstruct
     public void seal() {
         sealed = true;
     }
 
     public void reset() {
         if (sealed) {
-            if (accelerator != null) bindAccelerator(accelerator); else unbindAccelerator();
-            if (description != null) bindDescription(description); else unbindDescription();
-            if (text != null) bindText(text); else unbindText();
-            if (disabled != null) bindDisabled(disabled); else unbindDisabled();
-            if (selected != null) bindSelected(selected); else unbindSelected();
-            if (hint != null) bindHint(hint); else unbindHint();
-            if (icon != null) bindIcon(icon); else unbindIcon();
-            setEventHandler(eventHandler);
+            super.accelerator = accelerator;
+            super.description = description;
+            super.text = text;
+            super.disabled = disabled;
+            super.selected = selected;
+            super.hint = hint;
+            super.icon = icon;
+            super.eventHandler = eventHandler;
+
+            children.clear();
         }
     }
 
     public void copy(FxAction action) {
-        bindAccelerator(action.accelerator);
-        bindDescription(action.description);
-        bindText(action.text);
-        bindDisabled(action.disabled);
-        bindSelected(action.selected);
-        bindHint(action.hint);
-        bindIcon(action.icon);
-        setEventHandler(action.eventHandler);
+        super.accelerator = action.accelerator;
+        super.description = action.description;
+        super.text = action.text;
+        super.disabled = action.disabled;
+        super.selected = action.selected;
+        super.hint = action.hint;
+        super.icon = action.icon;
+        super.eventHandler = action.eventHandler;
+
+        children.putAll(action.children);
+    }
+
+    public void update() {
+        fireInvalidate(this);
     }
 }

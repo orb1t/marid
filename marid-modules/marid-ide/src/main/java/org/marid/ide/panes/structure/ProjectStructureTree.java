@@ -19,7 +19,7 @@
 package org.marid.ide.panes.structure;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.Event;
 import javafx.geometry.Pos;
@@ -36,6 +36,7 @@ import org.marid.ide.structure.editor.FileEditor;
 import org.marid.ide.structure.icons.FileIcons;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.action.MaridActions;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
@@ -51,6 +52,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.logging.Level.WARNING;
@@ -129,30 +131,40 @@ public class ProjectStructureTree extends TreeTableView<Path> {
 
     @Autowired
     private void initRowFactory(Map<String, FileEditor> fileEditors, ObjectProvider<SpecialActions> specialActions) {
+        final Function<TreeItem<Path>, Map<String, FxAction>> function = item -> {
+            if (item == null) {
+                return Collections.emptyMap();
+            }
+            final Path file = item.getValue();
+            if (file == null) {
+                return Collections.emptyMap();
+            }
+            final TreeMap<String, FxAction> map = new TreeMap<>();
+            fileEditors.forEach((name, editor) -> {
+                final Runnable task = editor.getEditAction(file);
+                if (task != null) {
+                    map.put(name, new FxAction(name, editor.getGroup(), "Actions")
+                            .bindText(LocalizedStrings.ls(editor.getName()))
+                            .bindIcon(new SimpleStringProperty(editor.getIcon()))
+                            .bindDisabled(new SimpleBooleanProperty(false))
+                            .setSpecialAction(editor.getSpecialAction())
+                            .setEventHandler(e -> task.run())
+                    );
+                }
+            });
+            return map;
+        };
+        specialActions.getObject().setup(getSelectionModel(), function);
         setRowFactory(param -> {
             final TreeTableRow<Path> row = new TreeTableRow<>();
-            specialActions.getObject()
-                    .actions(row, r -> {
-                        final Path file = r.getItem();
-                        if (file == null) {
-                            return Collections.emptyMap();
-                        }
-                        final TreeMap<String, FxAction> map = new TreeMap<>();
-                        fileEditors.forEach((name, editor) -> {
-                            final Runnable task = editor.getEditAction(file);
-                            if (task != null) {
-                                map.put(name, new FxAction(name, editor.getGroup(), "Actions")
-                                        .bindText(LocalizedStrings.ls(editor.getName()))
-                                        .bindIcon(new SimpleStringProperty(editor.getIcon()))
-                                        .bindDisabled(Bindings.createBooleanBinding(() -> false))
-                                        .setSpecialAction(editor.getSpecialAction())
-                                        .setEventHandler(e -> task.run())
-                                );
-                            }
-                        });
-                        return map;
-                    })
-                    .setup();
+            row.focusedProperty().addListener((o, oV, nV) -> {
+                if (nV) {
+                    final Map<String, FxAction> actionMap = function.apply(row.getTreeItem());
+                    row.setContextMenu(new ContextMenu(MaridActions.contextMenu(actionMap)));
+                } else {
+                    row.setContextMenu(null);
+                }
+            });
             return row;
         });
     }

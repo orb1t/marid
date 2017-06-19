@@ -21,9 +21,6 @@ package org.marid.jfx.action;
 import com.google.common.collect.ComputationException;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.WeakChangeListener;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.util.Pair;
 
@@ -41,9 +38,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
-import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -57,15 +52,9 @@ public interface MaridActions {
             if (action.getMenu() == null) {
                 return;
             }
-            final MenuItem menuItem;
-            if (action.getSelected() != null) {
-                final CheckMenuItem checkMenuItem = new CheckMenuItem();
-                final ChangeListener<Boolean> changeListener = (o, oV, nV) -> checkMenuItem.setSelected(nV);
-                checkMenuItem.setUserData(changeListener);
-                action.selected.addListener(new WeakChangeListener<>(changeListener));
-                menuItem = checkMenuItem;
-            } else if (!action.children.isEmpty()) {
-                final Menu menu = new Menu();
+            final MenuItem menuItem = action.menuItem();
+            if (!action.children.isEmpty()) {
+                final Menu menu = (Menu) menuItem;
                 final Menu[] subMenus = menus(action.children);
                 switch (subMenus.length) {
                     case 0:
@@ -77,20 +66,6 @@ public interface MaridActions {
                         menu.getItems().addAll(subMenus);
                         break;
                 }
-                menuItem = menu;
-            } else {
-                menuItem = new MenuItem();
-            }
-            menuItem.textProperty().bind(action.text);
-            menuItem.graphicProperty().bind(createObjectBinding(() -> {
-                final String icon = action.getIcon();
-                return icon != null ? glyphIcon(icon, 16) : null;
-            }, action.icon));
-            menuItem.acceleratorProperty().bind(action.accelerator);
-
-            if (!(menuItem instanceof Menu)) {
-                menuItem.setOnAction(action.eventHandler);
-                menuItem.disableProperty().bind(action.disabled);
             }
             itemMap
                     .computeIfAbsent(action.getMenu(), k -> new TreeMap<>())
@@ -122,7 +97,7 @@ public interface MaridActions {
                 .toArray(MenuItem[]::new);
     }
 
-    static Node[] toolbar(Map<String, FxAction> actionMap) {
+    static void initToolbar(Map<String, FxAction> actionMap, ToolBar toolBar) {
         final Map<String, Map<String, FxAction>> sorted = actionMap.entrySet().stream()
                 .filter(e -> e.getValue().getToolbarGroup() != null)
                 .collect(groupingBy(
@@ -130,21 +105,15 @@ public interface MaridActions {
                         TreeMap::new,
                         toMap(Map.Entry::getKey, Map.Entry::getValue, (a1, a2) -> a2, TreeMap::new))
                 );
-        return sorted.values().stream()
-                .flatMap(v -> concat(v.values().stream()
-                        .map(a -> {
-                            final Button button = new Button();
-                            button.setFocusTraversable(false);
-                            button.setOnAction(a.eventHandler);
-                            button.disableProperty().bind(a.disabled);
-                            button.graphicProperty().bind(createObjectBinding(() -> {
-                                final String icon = a.getIcon();
-                                return icon == null ? null : glyphIcon(a.getIcon(), 20);
-                            }, a.icon));
-                            button.tooltipProperty().bind(a.hint);
-                            return button;
-                        }), of(new Separator())))
-                .toArray(Node[]::new);
+        sorted.values().stream()
+                .flatMap(v -> concat(v.values().stream().map(FxAction::button), of(new Separator())))
+                .forEach(toolBar.getItems()::add);
+    }
+
+    static ToolBar toolbar(Map<String, FxAction> actionMap) {
+        final ToolBar toolBar = new ToolBar();
+        initToolbar(actionMap, toolBar);
+        return toolBar;
     }
 
     static <T> T execute(Callable<T> task, long timeout, TimeUnit timeUnit) throws UncheckedTimeoutException {

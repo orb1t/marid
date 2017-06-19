@@ -18,38 +18,57 @@
 
 package org.marid.jfx.action;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.WeakInvalidationListener;
+import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.*;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.Button;
+import javafx.scene.control.*;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.text.Text;
 import org.jetbrains.annotations.PropertyKey;
 import org.marid.jfx.LocalizedStrings;
+import org.marid.jfx.beans.AbstractObservable;
 
 import javax.annotation.Nonnull;
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class FxAction {
+public class FxAction extends AbstractObservable {
 
     public final String toolbarGroup;
     public final String group;
     public final String menu;
-    public final Map<String, FxAction> children = new TreeMap<>();
-    public final StringProperty text = new SimpleStringProperty();
-    public final ObjectProperty<KeyCombination> accelerator = new SimpleObjectProperty<>();
-    public final StringProperty icon = new SimpleStringProperty();
-    public final StringProperty description = new SimpleStringProperty();
-    public final ObjectProperty<Tooltip> hint = new SimpleObjectProperty<>();
-    public final BooleanProperty disabled = new SimpleBooleanProperty();
-    public final ObjectProperty<Boolean> selected = new SimpleObjectProperty<>();
 
-    public EventHandler<ActionEvent> eventHandler;
+    public final Map<String, FxAction> children = new TreeMap<>();
+
+    protected ObservableValue<String> text;
+    protected ObservableValue<KeyCombination> accelerator;
+    protected ObservableValue<String> icon;
+    protected ObservableValue<String> description;
+    protected ObservableValue<Tooltip> hint;
+    protected ObservableValue<Boolean> disabled;
+    protected ObservableValue<Boolean> selected;
+    protected ObservableValue<EventHandler<ActionEvent>> eventHandler;
+
     public SpecialAction specialAction;
 
     public FxAction(@Nonnull String toolbarGroup, @Nonnull String group, @Nonnull String menu) {
@@ -83,11 +102,11 @@ public class FxAction {
     }
 
     public String getText() {
-        return text.get();
+        return text == null ? null : text.getValue();
     }
 
     public FxAction bindText(ObservableValue<String> value) {
-        text.bind(value);
+        text = value;
         return this;
     }
 
@@ -96,61 +115,73 @@ public class FxAction {
     }
 
     public FxAction setAccelerator(KeyCombination value) {
-        return bindAccelerator(Bindings.createObjectBinding(() -> value));
+        return bindAccelerator(new SimpleObjectProperty<>(value));
     }
 
     public FxAction bindAccelerator(ObservableValue<KeyCombination> value) {
-        accelerator.bind(value);
+        accelerator = value;
         return this;
     }
 
+    public KeyCombination getAccelerator() {
+        return accelerator == null ? null : accelerator.getValue();
+    }
+
     public String getIcon() {
-        return icon.get();
+        return icon == null ? null : icon.getValue();
     }
 
     public FxAction setIcon(@PropertyKey(resourceBundle = "fonts.meta") String value) {
-        return bindIcon(Bindings.createStringBinding(() -> value));
+        return bindIcon(new SimpleStringProperty(value));
     }
 
     public FxAction bindIcon(ObservableValue<String> value) {
-        icon.bind(value);
+        icon = value;
         return this;
     }
 
     public boolean getDisabled() {
-        return disabled.get();
+        return disabled == null ? false : disabled.getValue();
     }
 
     public FxAction setDisabled(boolean value) {
-        return bindDisabled(Bindings.createBooleanBinding(() -> value));
+        return bindDisabled(new SimpleBooleanProperty(value));
     }
 
     public FxAction bindDisabled(ObservableValue<Boolean> value) {
-        disabled.bind(value);
+        disabled = value;
         return this;
     }
 
     public String getDescription() {
-        return description.get();
+        return description == null ? null : description.getValue();
     }
 
     public FxAction bindDescription(ObservableValue<String> value) {
-        description.bind(value);
+        description = value;
         return this;
     }
 
     public Tooltip getHint() {
-        return hint.get();
+        return hint == null ? null : hint.getValue();
     }
 
     public FxAction bindHint(ObservableValue<Tooltip> value) {
-        hint.bind(value);
+        hint = value;
+        return this;
+    }
+
+    public FxAction bindEventHandler(ObservableValue<EventHandler<ActionEvent>> value) {
+        eventHandler = value;
         return this;
     }
 
     public FxAction setEventHandler(EventHandler<ActionEvent> eventHandler) {
-        this.eventHandler = eventHandler;
-        return this;
+        return bindEventHandler(new SimpleObjectProperty<>(eventHandler));
+    }
+
+    public EventHandler<ActionEvent> getEventHandler() {
+        return eventHandler == null ? null : eventHandler.getValue();
     }
 
     public FxAction setSpecialAction(SpecialAction value) {
@@ -159,11 +190,11 @@ public class FxAction {
     }
 
     public Boolean getSelected() {
-        return selected.get();
+        return selected == null ? null : selected.getValue();
     }
 
     public FxAction bindSelected(ObservableValue<Boolean> value) {
-        selected.bind(value);
+        selected = value;
         return this;
     }
 
@@ -181,6 +212,91 @@ public class FxAction {
     public FxAction addChildren(Map<String, FxAction> actions) {
         children.putAll(actions);
         return this;
+    }
+
+    public Binding<Text> icon(int size) {
+        return Bindings.createObjectBinding(() -> {
+            final String icon = getIcon();
+            return icon != null ? glyphIcon(icon, size) : null;
+        }, icon);
+    }
+
+    public MenuItem menuItem() {
+        final MenuItem item;
+        if (selected != null) {
+            final CheckMenuItem checkMenuItem = new CheckMenuItem();
+            item = checkMenuItem;
+            if (disabled != null) item.disableProperty().bind(disabled);
+            if (eventHandler != null) item.onActionProperty().bind(eventHandler);
+            if (accelerator != null) item.acceleratorProperty().bind(accelerator);
+            if (selected != null) checkMenuItem.selectedProperty().bind(selected);
+        } else if (!children.isEmpty()) {
+            final Menu menu = new Menu();
+            item = menu;
+            final Menu[] menus = MaridActions.menus(children);
+            for (int i = 0; i < menus.length; i++) {
+                if (i > 0) {
+                    menu.getItems().add(new SeparatorMenuItem());
+                }
+                final MenuItem[] items = menus[i].getItems().toArray(new MenuItem[0]);
+                menus[i].getItems().clear();
+                menu.getItems().addAll(items);
+            }
+        } else {
+            item = new MenuItem();
+            if (disabled != null) item.disableProperty().bind(disabled);
+            if (eventHandler != null) item.onActionProperty().bind(eventHandler);
+            if (accelerator != null) item.acceleratorProperty().bind(accelerator);
+        }
+        if (text != null) item.textProperty().bind(text);
+        if (icon != null) item.graphicProperty().bind(icon(16));
+        final AtomicReference<WeakInvalidationListener> listener = new AtomicReference<>();
+        final InvalidationListener updater = o -> {
+            removeListener(listener.get());
+            final ObservableList<MenuItem> items = item.getParentMenu() != null
+                    ? item.getParentMenu().getItems()
+                    : item.getParentPopup() != null
+                    ? item.getParentPopup().getItems()
+                    : FXCollections.emptyObservableList();
+            final int index = items.indexOf(item);
+            if (index >= 0) {
+                items.set(index, menuItem());
+            }
+        };
+        item.setUserData(updater);
+        listener.set(new WeakInvalidationListener(updater));
+        addListener(listener.get());
+        return item;
+    }
+
+    public Button button() {
+        final ArrayList<Runnable> updaters = new ArrayList<>();
+        final Button button = new Button();
+        button.setFocusTraversable(false);
+        updaters.add(() -> {
+            if (children.isEmpty()) {
+                button.disableProperty().unbind(); button.disableProperty().set(false);
+                button.onActionProperty().unbind(); button.onActionProperty().set(null);
+                if (disabled != null) button.disableProperty().bind(disabled);
+                if (eventHandler != null) button.onActionProperty().bind(eventHandler);
+            } else {
+                button.disableProperty().bind(Bindings.createBooleanBinding(() -> false));
+                button.onActionProperty().bind(Bindings.createObjectBinding(() -> event -> {
+                    final Point point = MouseInfo.getPointerInfo().getLocation();
+                    final ContextMenu contextMenu = new ContextMenu(MaridActions.contextMenu(children));
+                    contextMenu.show(button, point.getX(), point.getY());
+                }));
+            }
+            button.graphicProperty().unbind(); button.graphicProperty().set(null);
+            button.tooltipProperty().unbind(); button.tooltipProperty().set(null);
+            if (icon != null) button.graphicProperty().bind(icon(20));
+            if (hint != null) button.tooltipProperty().bind(hint);
+        });
+        final InvalidationListener updater = o -> updaters.forEach(Runnable::run);
+        button.setUserData(updater);
+        addListener(new WeakInvalidationListener(updater));
+        updater.invalidated(this);
+        return button;
     }
 
     @Override
