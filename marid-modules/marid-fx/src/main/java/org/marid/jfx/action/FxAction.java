@@ -25,15 +25,15 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.Button;
+import javafx.geometry.Side;
 import javafx.scene.control.*;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.text.Text;
 import org.jetbrains.annotations.PropertyKey;
@@ -41,7 +41,6 @@ import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.beans.AbstractObservable;
 
 import javax.annotation.Nonnull;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -123,10 +122,6 @@ public class FxAction extends AbstractObservable {
         return this;
     }
 
-    public KeyCombination getAccelerator() {
-        return accelerator == null ? null : accelerator.getValue();
-    }
-
     public String getIcon() {
         return icon == null ? null : icon.getValue();
     }
@@ -140,10 +135,6 @@ public class FxAction extends AbstractObservable {
         return this;
     }
 
-    public boolean getDisabled() {
-        return disabled == null ? false : disabled.getValue();
-    }
-
     public FxAction setDisabled(boolean value) {
         return bindDisabled(new SimpleBooleanProperty(value));
     }
@@ -153,17 +144,9 @@ public class FxAction extends AbstractObservable {
         return this;
     }
 
-    public String getDescription() {
-        return description == null ? null : description.getValue();
-    }
-
     public FxAction bindDescription(ObservableValue<String> value) {
         description = value;
         return this;
-    }
-
-    public Tooltip getHint() {
-        return hint == null ? null : hint.getValue();
     }
 
     public FxAction bindHint(ObservableValue<Tooltip> value) {
@@ -180,37 +163,13 @@ public class FxAction extends AbstractObservable {
         return bindEventHandler(new SimpleObjectProperty<>(eventHandler));
     }
 
-    public EventHandler<ActionEvent> getEventHandler() {
-        return eventHandler == null ? null : eventHandler.getValue();
-    }
-
     public FxAction setSpecialAction(SpecialAction value) {
         specialAction = value;
         return this;
     }
 
-    public Boolean getSelected() {
-        return selected == null ? null : selected.getValue();
-    }
-
     public FxAction bindSelected(ObservableValue<Boolean> value) {
         selected = value;
-        return this;
-    }
-
-    public FxAction setChildren(Map<String, FxAction> actions) {
-        children.clear();
-        children.putAll(actions);
-        return this;
-    }
-
-    public FxAction addChild(String name, FxAction action) {
-        children.put(name, action);
-        return this;
-    }
-
-    public FxAction addChildren(Map<String, FxAction> actions) {
-        children.putAll(actions);
         return this;
     }
 
@@ -226,10 +185,13 @@ public class FxAction extends AbstractObservable {
         if (selected != null) {
             final CheckMenuItem checkMenuItem = new CheckMenuItem();
             item = checkMenuItem;
-            if (disabled != null) item.disableProperty().bind(disabled);
             if (eventHandler != null) item.onActionProperty().bind(eventHandler);
-            if (accelerator != null) item.acceleratorProperty().bind(accelerator);
-            if (selected != null) checkMenuItem.selectedProperty().bind(selected);
+            if (selected != null) {
+                final ChangeListener<Boolean> selectedListener = (o, oV, nV) -> checkMenuItem.setSelected(nV);
+                checkMenuItem.setUserData(selectedListener);
+                selected.addListener(new WeakChangeListener<>(selectedListener));
+            }
+            if (disabled != null) item.disableProperty().bind(disabled);
         } else if (!children.isEmpty()) {
             final Menu menu = new Menu();
             item = menu;
@@ -244,10 +206,10 @@ public class FxAction extends AbstractObservable {
             }
         } else {
             item = new MenuItem();
-            if (disabled != null) item.disableProperty().bind(disabled);
             if (eventHandler != null) item.onActionProperty().bind(eventHandler);
-            if (accelerator != null) item.acceleratorProperty().bind(accelerator);
+            if (disabled != null) item.disableProperty().bind(disabled);
         }
+        if (accelerator != null) item.acceleratorProperty().bind(accelerator);
         if (text != null) item.textProperty().bind(text);
         if (icon != null) item.graphicProperty().bind(icon(16));
         final AtomicReference<WeakInvalidationListener> listener = new AtomicReference<>();
@@ -282,9 +244,8 @@ public class FxAction extends AbstractObservable {
             } else {
                 button.disableProperty().bind(Bindings.createBooleanBinding(() -> false));
                 button.onActionProperty().bind(Bindings.createObjectBinding(() -> event -> {
-                    final Point point = MouseInfo.getPointerInfo().getLocation();
                     final ContextMenu contextMenu = new ContextMenu(MaridActions.contextMenu(children));
-                    contextMenu.show(button, point.getX(), point.getY());
+                    contextMenu.show(button, Side.BOTTOM, 0, 0);
                 }));
             }
             button.graphicProperty().unbind(); button.graphicProperty().set(null);

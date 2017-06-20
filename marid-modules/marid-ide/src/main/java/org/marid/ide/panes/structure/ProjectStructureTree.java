@@ -37,7 +37,6 @@ import org.marid.ide.structure.icons.FileIcons;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
@@ -130,7 +129,7 @@ public class ProjectStructureTree extends TreeTableView<Path> {
     }
 
     @Autowired
-    private void initRowFactory(Map<String, FileEditor> fileEditors, ObjectProvider<SpecialActions> specialActions) {
+    private void initRowFactory(Map<String, FileEditor> fileEditors, SpecialActions specialActions) {
         final Function<TreeItem<Path>, Map<String, FxAction>> function = item -> {
             if (item == null) {
                 return Collections.emptyMap();
@@ -154,7 +153,7 @@ public class ProjectStructureTree extends TreeTableView<Path> {
             });
             return map;
         };
-        specialActions.getObject().setup(getSelectionModel(), function);
+        specialActions.setup(getSelectionModel(), function);
         setRowFactory(param -> {
             final TreeTableRow<Path> row = new TreeTableRow<>();
             row.focusedProperty().addListener((o, oV, nV) -> {
@@ -166,6 +165,11 @@ public class ProjectStructureTree extends TreeTableView<Path> {
                 }
             });
             return row;
+        });
+        focusedProperty().addListener((o, oV, nV) -> {
+            if (!nV) {
+                specialActions.reset();
+            }
         });
     }
 

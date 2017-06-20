@@ -149,14 +149,14 @@ public class SpecialAction extends FxAction {
     }
 
     public void copy(FxAction action) {
-        super.accelerator = action.accelerator;
-        super.description = action.description;
-        super.text = action.text;
-        super.disabled = action.disabled;
-        super.selected = action.selected;
-        super.hint = action.hint;
-        super.icon = action.icon;
-        super.eventHandler = action.eventHandler;
+        if (action.accelerator != null) super.accelerator = action.accelerator;
+        if (action.description != null) super.description = action.description;
+        if (action.text != null) super.text = action.text;
+        if (action.disabled != null) super.disabled = action.disabled;
+        if (action.selected != null) super.selected = action.selected;
+        if (action.hint != null) super.hint = action.hint;
+        if (action.icon != null) super.icon = action.icon;
+        if (action.eventHandler != null) super.eventHandler = action.eventHandler;
 
         children.putAll(action.children);
     }

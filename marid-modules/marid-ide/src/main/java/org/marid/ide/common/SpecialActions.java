@@ -66,6 +66,7 @@ public class SpecialActions {
             specialActions.forEach((k, v) -> {
                 if (v.size() == 1) {
                     final FxAction action = v.values().iterator().next();
+                    k.reset();
                     k.copy(action);
                     k.update();
                 } else {
@@ -78,6 +79,13 @@ public class SpecialActions {
                 a.reset();
                 a.update();
             });
+        });
+    }
+
+    public void reset() {
+        actionMap.values().forEach(a -> {
+            a.reset();
+            a.update();
         });
     }
 }
