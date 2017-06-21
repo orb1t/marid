@@ -26,6 +26,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.Separator;
+import org.marid.ide.panes.main.IdeStatusBar;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.springframework.beans.factory.annotation.Autowired;

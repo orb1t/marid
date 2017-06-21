@@ -16,11 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.dependant.repositories;
+package org.marid.ide.status;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class RepositoryConfiguration {
+public class IdeTaskResult {
 
+    private final long time;
+
+    public IdeTaskResult(long time) {
+        this.time = time;
+    }
 }

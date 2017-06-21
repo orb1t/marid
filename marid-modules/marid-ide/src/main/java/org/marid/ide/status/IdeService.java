@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Dmitry Ovchinnikov
+ * Copyright (c) 2017 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,35 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.ide.panes.main;
+package org.marid.ide.status;
 
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
+import javafx.concurrent.Service;
+import org.marid.ide.panes.main.IdeStatusBar;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-@Lazy(false)
-public class IdePane extends BorderPane {
+public abstract class IdeService<V> extends Service<V> {
 
-    @Autowired
-    private void center(IdeSplitPane pane) {
-        setCenter(pane);
-    }
+    private void init(IdeStatusBar statusBar) {
 
-    @Autowired
-    private void top(IdeMenu ideMenu, IdeToolbar toolbar) {
-        final BorderPane menuPane = new BorderPane();
-        menuPane.setCenter(ideMenu);
-        setTop(new VBox(menuPane, toolbar));
-    }
-
-    @Autowired
-    private void bottom(IdeStatusBar statusBar) {
-        setBottom(statusBar);
     }
 }
