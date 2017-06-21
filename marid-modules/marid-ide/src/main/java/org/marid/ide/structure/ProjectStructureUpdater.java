@@ -18,8 +18,8 @@
 
 package org.marid.ide.structure;
 
+import org.marid.ide.common.Directories;
 import org.marid.ide.event.*;
-import org.marid.ide.project.ProjectManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
@@ -67,8 +67,8 @@ public class ProjectStructureUpdater implements Closeable {
     private final ConcurrentLinkedQueue<PropagatedEvent> eventQueue = new ConcurrentLinkedQueue<>();
 
     @Autowired
-    public ProjectStructureUpdater(ProjectManager projectManager, ApplicationEventPublisher eventPublisher) throws IOException {
-        this.root = projectManager.getProfilesDir();
+    public ProjectStructureUpdater(Directories directories, ApplicationEventPublisher eventPublisher) throws IOException {
+        this.root = directories.getProfiles();
         this.eventPublisher = eventPublisher;
         this.watchService = root.getFileSystem().newWatchService();
     }

@@ -20,8 +20,6 @@ package org.marid.ide.structure.editor;
 
 import org.marid.ide.common.Directories;
 import org.marid.ide.project.ProjectManager;
-import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,63 +27,50 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.stream.Stream;
-
-import static java.util.logging.Level.WARNING;
-import static org.marid.ide.IdeNotifications.n;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class RemoveFileEditor extends AbstractFileEditor<Path> {
+public class RemoveProfileEditor extends AbstractFileEditor<Path> {
 
-    private final SpecialAction removeAction;
+    private final ProjectManager projectManager;
 
     @Autowired
-    public RemoveFileEditor(Directories directories, ProjectManager projectManager, SpecialAction removeAction) {
-        super(path -> Stream.concat(
-                Stream.of(directories.getProfiles()),
-                projectManager.getProfiles().stream().map(ProjectProfile::getPath)
-        ).noneMatch(path::equals));
-        this.removeAction = removeAction;
+    public RemoveProfileEditor(Directories directories, ProjectManager projectManager) {
+        super(p -> Files.isDirectory(p) && p.getParent().equals(directories.getProfiles()));
+        this.projectManager = projectManager;
     }
 
     @Nonnull
     @Override
     public String getName() {
-        return "Remove file";
+        return "Remove profile";
     }
 
     @Nonnull
     @Override
     public String getIcon() {
-        return icon("M_REMOVE_CIRCLE");
+        return icon("D_FOLDER_REMOVE");
     }
 
     @Nonnull
     @Override
     public String getGroup() {
-        return "file";
+        return "profile";
     }
 
-    @Override
-    protected void edit(@Nonnull Path file, @Nonnull Path path) {
-        try {
-            Files.delete(file);
-        } catch (Exception x) {
-            n(WARNING, "Unable to delete {0}", x, file);
-        }
-    }
-
+    @Nullable
     @Override
     protected Path editorContext(@Nonnull Path path) {
         return path;
     }
 
-    @Nullable
     @Override
-    public SpecialAction getSpecialAction() {
-        return removeAction;
+    protected void edit(@Nonnull Path path, @Nonnull Path context) {
+        projectManager.getProfiles().stream()
+                .filter(p -> p.getName().equals(context.getFileName().toString()))
+                .findFirst()
+                .ifPresent(projectManager::remove);
     }
 }

@@ -26,19 +26,18 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.TreeItem.TreeModificationEvent;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
+import org.marid.ide.common.Directories;
 import org.marid.ide.common.SpecialActions;
 import org.marid.ide.event.FileAddedEvent;
 import org.marid.ide.event.FileChangedEvent;
 import org.marid.ide.event.FileMovedEvent;
 import org.marid.ide.event.FileRemovedEvent;
-import org.marid.ide.project.ProjectManager;
 import org.marid.ide.structure.editor.FileEditor;
 import org.marid.ide.structure.icons.FileIcons;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -65,8 +64,8 @@ import static org.marid.logging.Log.log;
 public class ProjectStructureTree extends TreeTableView<Path> {
 
     @Autowired
-    public ProjectStructureTree(ProjectManager projectManager) {
-        super(new TreeItem<>(projectManager.getProfilesDir()));
+    public ProjectStructureTree(Directories directories) {
+        super(new TreeItem<>(directories.getProfiles()));
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         getRoot().setExpanded(true);
     }
@@ -171,11 +170,6 @@ public class ProjectStructureTree extends TreeTableView<Path> {
                 specialActions.reset();
             }
         });
-    }
-
-    @EventListener
-    private void onStart(ContextStartedEvent event) {
-        getSelectionModel().select(getRoot());
     }
 
     @EventListener

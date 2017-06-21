@@ -71,6 +71,8 @@ public class ProjectRunner extends Stage {
         setOnShowing(event -> {
             setX(preferences.getDouble("x", getX()));
             setY(preferences.getDouble("y", getY()));
+            setWidth(preferences.getDouble("width", 800));
+            setHeight(preferences.getDouble("height", 600));
         });
     }
 

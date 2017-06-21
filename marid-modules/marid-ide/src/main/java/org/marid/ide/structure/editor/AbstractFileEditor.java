@@ -30,7 +30,6 @@ import static java.util.stream.Stream.of;
  */
 public abstract class AbstractFileEditor<T> implements FileEditor {
 
-
     private final PathMatcher pathMatcher;
 
     public AbstractFileEditor(@Nonnull PathMatcher... pathMatchers) {

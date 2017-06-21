@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Dmitry Ovchinnikov
+ * Copyright (c) 2017 Dmitry Ovchinnikov
  * Marid, the free data acquisition and visualization software
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,25 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.marid.spring.context.custom;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
+package org.marid.dependant.repositories;
 
 /**
- * @author Dmitry Ovchinnikov.
- * @since 0.9
+ * @author Dmitry Ovchinnikov
  */
-public class Class1 implements Callable<Boolean> {
+public class RepositoryConfiguration {
 
-    public static final AtomicInteger COUNTER = new AtomicInteger();
-
-    public Class1() {
-        COUNTER.incrementAndGet();
-    }
-
-    @Override
-    public Boolean call() throws Exception {
-        return COUNTER.get() == 0L;
-    }
 }
