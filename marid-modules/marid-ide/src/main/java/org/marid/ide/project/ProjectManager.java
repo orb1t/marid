@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -58,8 +59,15 @@ public class ProjectManager {
             stream.map(p -> new ProjectProfile(p.getFileName().toString())).forEach(profiles::add);
         }
         profiles.sort(Comparator.comparing(ProjectProfile::getName));
+    }
+
+    @PostConstruct
+    private void init() {
         final String profileName = IdePrefs.PREFERENCES.get("profile", null);
         profiles.stream().filter(p -> p.getName().equals(profileName)).findAny().ifPresent(profile::set);
+        if (profile.get() == null && !profiles.isEmpty()) {
+            profile.set(profiles.get(0));
+        }
     }
 
     @PreDestroy

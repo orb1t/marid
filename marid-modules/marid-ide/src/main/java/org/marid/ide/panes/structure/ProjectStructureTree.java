@@ -32,6 +32,7 @@ import org.marid.ide.event.FileAddedEvent;
 import org.marid.ide.event.FileChangedEvent;
 import org.marid.ide.event.FileMovedEvent;
 import org.marid.ide.event.FileRemovedEvent;
+import org.marid.ide.project.ProjectManager;
 import org.marid.ide.structure.editor.FileEditor;
 import org.marid.ide.structure.icons.FileIcons;
 import org.marid.jfx.LocalizedStrings;
@@ -168,6 +169,17 @@ public class ProjectStructureTree extends TreeTableView<Path> {
         focusedProperty().addListener((o, oV, nV) -> {
             if (!nV) {
                 specialActions.reset();
+            }
+        });
+    }
+
+    @Autowired
+    private void initProfileSelector(ProjectManager projectManager) {
+        getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> {
+            if (nV != null) {
+                projectManager.getProfile(nV.getValue())
+                        .filter(p -> !p.equals(projectManager.getProfile()))
+                        .ifPresent(p -> projectManager.profileProperty().set(p));
             }
         });
     }
