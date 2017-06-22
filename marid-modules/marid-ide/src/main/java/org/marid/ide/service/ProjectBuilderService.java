@@ -24,7 +24,6 @@ import org.marid.ide.common.IdeShapes;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.service.ProjectBuilderService.BuilderGraphic;
 import org.marid.ide.status.IdeService;
 import org.marid.maven.MavenProjectBuilder;
 import org.marid.maven.ProjectBuilder;
@@ -37,30 +36,19 @@ import javax.annotation.Nonnull;
  * @author Dmitry Ovchinnikov
  */
 @PrototypeComponent
-public class ProjectBuilderService extends IdeService<BuilderGraphic> {
+public class ProjectBuilderService extends IdeService<HBox> {
 
     private final IdeLogHandler logHandler;
-    private final ProjectManager projectManager;
+    private final ProjectProfile profile;
 
     @Autowired
     public ProjectBuilderService(IdeLogHandler logHandler, ProjectManager projectManager) {
         this.logHandler = logHandler;
-        this.projectManager = projectManager;
+        this.profile = projectManager.getProfile();
 
-        setOnRunning(event -> {
-            final BuilderTask task = (BuilderTask) event.getSource();
-            task.profile.enabledProperty().set(false);
-        });
-
-        setOnFailed(event -> {
-            final BuilderTask task = (BuilderTask) event.getSource();
-            task.profile.enabledProperty().set(true);
-        });
-
-        setOnSucceeded(event -> {
-            final BuilderTask task = (BuilderTask) event.getSource();
-            task.profile.enabledProperty().set(true);
-        });
+        setOnRunning(event -> profile.enabledProperty().set(false));
+        setOnFailed(event -> profile.enabledProperty().set(true));
+        setOnSucceeded(event -> profile.enabledProperty().set(true));
     }
 
     @Override
@@ -69,8 +57,6 @@ public class ProjectBuilderService extends IdeService<BuilderGraphic> {
     }
 
     private class BuilderTask extends IdeTask {
-
-        private final ProjectProfile profile = projectManager.getProfile();
 
         private BuilderTask() {
             updateTitle(profile.getName());
@@ -93,20 +79,13 @@ public class ProjectBuilderService extends IdeService<BuilderGraphic> {
 
         @Nonnull
         @Override
-        protected BuilderGraphic createGraphic() {
-            return new BuilderGraphic(profile);
+        protected HBox createGraphic() {
+            return new HBox(IdeShapes.circle(profile.hashCode(), 16));
         }
 
         @Override
         protected ContextMenu contextMenu() {
             return new ContextMenu();
-        }
-    }
-
-    class BuilderGraphic extends HBox {
-
-        BuilderGraphic(ProjectProfile profile) {
-            super(IdeShapes.circle(profile.hashCode(), 16));
         }
     }
 }

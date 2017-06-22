@@ -105,6 +105,7 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
                 final MenuItem cancelItem = new MenuItem();
                 cancelItem.setGraphic(FontIcons.glyphIcon("D_CLOSE_CIRCLE"));
                 cancelItem.textProperty().bind(ls("Cancel"));
+                cancelItem.setOnAction(event -> cancel());
                 Platform.runLater(() -> {
                     graphic.set(node);
                     button.setContextMenu(contextMenu);

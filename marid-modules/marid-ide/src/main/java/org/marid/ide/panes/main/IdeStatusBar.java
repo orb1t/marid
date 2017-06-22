@@ -21,7 +21,9 @@ package org.marid.ide.panes.main;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import org.marid.ide.project.ProjectManager;
@@ -48,14 +50,27 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 public class IdeStatusBar extends BorderPane {
 
     private final HBox right;
-    private final ToolBar toolBar;
+    private final ScrollPane scrollPane;
+    private final HBox toolBar;
 
     public IdeStatusBar() {
+        setPadding(new Insets(5, 5, 5, 5));
         setFocusTraversable(false);
-        setCenter(toolBar = new ToolBar());
+
+        setCenter(scrollPane = new ScrollPane(toolBar = new HBox(5)));
         setRight(right = new HBox(10));
-        BorderPane.setMargin(toolBar, new Insets(5, 5, 5, 5));
-        BorderPane.setMargin(right, new Insets(5, 5, 5, 5));
+
+        setMargin(toolBar, new Insets(0, 5, 0, 5));
+        setMargin(right, new Insets(0, 5, 0, 5));
+
+        right.setAlignment(Pos.CENTER_RIGHT);
+        toolBar.setAlignment(Pos.CENTER_LEFT);
+
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setPannable(true);
+        scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
+        scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
     }
 
     @Order(1)
@@ -97,10 +112,11 @@ public class IdeStatusBar extends BorderPane {
     }
 
     public void add(Button button) {
-        toolBar.getItems().add(button);
+        toolBar.getChildren().add(button);
+        HBox.setMargin(button, new Insets(0, 5, 0, 5));
     }
 
     public void remove(Button button) {
-        toolBar.getItems().remove(button);
+        toolBar.getChildren().remove(button);
     }
 }

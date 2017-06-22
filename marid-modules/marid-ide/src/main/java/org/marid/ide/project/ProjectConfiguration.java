@@ -25,7 +25,7 @@ import org.marid.IdeDependants;
 import org.marid.dependant.project.ProjectParams;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
-import org.marid.ide.project.ProjectMavenBuilder.Configuration;
+import org.marid.ide.service.ProjectBuilderService;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.annotation.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -33,9 +33,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.WARNING;
-import static org.marid.ide.IdeNotifications.n;
 import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
@@ -80,7 +77,7 @@ public class ProjectConfiguration {
 
     @IdeAction
     @Qualifier("profile")
-    public FxAction projectBuildAction(ObjectFactory<ProjectMavenBuilder> mavenBuilder,
+    public FxAction projectBuildAction(ObjectFactory<ProjectBuilderService> mavenBuilder,
                                        ObjectFactory<ProjectSaver> projectSaver,
                                        ProjectManager projectManager,
                                        BooleanBinding projectDisabled) {
@@ -91,22 +88,7 @@ public class ProjectConfiguration {
                 .setEventHandler(event -> {
                     final ProjectProfile profile = projectManager.getProfile();
                     projectSaver.getObject().save(profile);
-                    mavenBuilder.getObject().build(profile, new Configuration()
-                            .setResultConsumer(result -> {
-                                try {
-                                    final Throwable thrown;
-                                    if (!result.exceptions.isEmpty()) {
-                                        thrown = new Exception("Build error");
-                                        result.exceptions.forEach(thrown::addSuppressed);
-                                    } else {
-                                        thrown = null;
-                                    }
-                                    n(INFO, "[{0}] Built in {1}s", thrown, profile, result.time / 1000f);
-                                } catch (Exception x) {
-                                    n(WARNING, "Unable to update cache {0}", x, profile);
-                                }
-                            })
-                    );
+                    mavenBuilder.getObject().start();
                 })
                 .bindDisabled(projectDisabled);
     }
