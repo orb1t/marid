@@ -18,15 +18,104 @@
 
 package org.marid.ide.status;
 
+import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tooltip;
+import javafx.scene.effect.MotionBlur;
 import org.marid.ide.panes.main.IdeStatusBar;
+import org.marid.jfx.icons.FontIcons;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.annotation.Nonnull;
+import java.time.Duration;
+import java.util.function.Consumer;
+
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
+import static javafx.beans.binding.Bindings.createObjectBinding;
+import static org.marid.ide.IdeNotifications.n;
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public abstract class IdeService<V> extends Service<V> {
+public abstract class IdeService<V extends Node> extends Service<Duration> {
 
+    private final SimpleObjectProperty<V> graphic = new SimpleObjectProperty<>();
+    private Button button;
+
+    @Autowired
     private void init(IdeStatusBar statusBar) {
+        addEventHandler(WorkerStateEvent.WORKER_STATE_RUNNING, event -> {
+            button = new Button();
+            button.textProperty().bind(titleProperty());
+            button.graphicProperty().bind(graphic);
+            button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(getMessage()), messageProperty()));
+            statusBar.add(button);
+        });
+        addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, event -> {
+            statusBar.remove(button);
+            button = null;
+            n(INFO, "{0} succeeded in {1}", event.getSource().getTitle(), event.getSource().getValue());
+        });
+        addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, event -> {
+            statusBar.remove(button);
+            button = null;
+            n(WARNING, "{0} failed", event.getSource().getException(), event.getSource().getTitle());
+        });
+        addEventHandler(WorkerStateEvent.WORKER_STATE_CANCELLED, event -> {
+            button.setDisable(true);
+            button.setEffect(new MotionBlur(0.1, 0.1));
+        });
+    }
 
+    @Override
+    protected abstract IdeTask createTask();
+
+    protected abstract class IdeTask extends Task<Duration> {
+
+        protected abstract void execute() throws Exception;
+
+        @Nonnull
+        protected abstract V createGraphic();
+
+        protected abstract ContextMenu contextMenu();
+
+        protected void updateGraphic(Consumer<V> consumer) {
+            if (Platform.isFxApplicationThread()) {
+                consumer.accept(graphic.get());
+            } else {
+                Platform.runLater(() -> consumer.accept(graphic.get()));
+            }
+        }
+
+        @Override
+        protected Duration call() throws Exception {
+            final long startTime = System.nanoTime();
+            {
+                final V node = createGraphic();
+                final ContextMenu contextMenu = contextMenu();
+                final MenuItem cancelItem = new MenuItem();
+                cancelItem.setGraphic(FontIcons.glyphIcon("D_CLOSE_CIRCLE"));
+                cancelItem.textProperty().bind(ls("Cancel"));
+                Platform.runLater(() -> {
+                    graphic.set(node);
+                    button.setContextMenu(contextMenu);
+                });
+            }
+            try {
+                execute();
+            } finally {
+                Platform.runLater(() -> graphic.set(null));
+            }
+            return Duration.ofNanos(System.nanoTime() - startTime);
+        }
     }
 }

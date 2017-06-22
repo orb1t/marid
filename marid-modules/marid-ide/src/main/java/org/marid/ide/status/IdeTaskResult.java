@@ -18,14 +18,16 @@
 
 package org.marid.ide.status;
 
+import javax.xml.soap.Node;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public class IdeTaskResult {
 
-    private final long time;
+    public final Node graphic;
 
-    public IdeTaskResult(long time) {
-        this.time = time;
+    public IdeTaskResult(Node graphic) {
+        this.graphic = graphic;
     }
 }

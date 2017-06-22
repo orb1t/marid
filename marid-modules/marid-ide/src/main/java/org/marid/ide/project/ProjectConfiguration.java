@@ -18,6 +18,7 @@
 
 package org.marid.ide.project;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.scene.input.KeyCombination;
 import org.marid.IdeDependants;
@@ -42,6 +43,11 @@ import static org.marid.jfx.LocalizedStrings.ls;
  */
 @Component
 public class ProjectConfiguration {
+
+    @Bean
+    public BooleanBinding projectDisabled(ProjectManager manager) {
+        return Bindings.selectBoolean(manager.profileProperty(), "enabled").not();
+    }
 
     @IdeAction
     @Qualifier("profile")
@@ -118,19 +124,6 @@ public class ProjectConfiguration {
                         context.setId("projectRunner");
                         context.setDisplayName("Project Runner");
                     });
-                })
-                .bindDisabled(projectDisabled);
-    }
-
-    @Bean
-    @Qualifier("profile")
-    public FxAction profileEdit(IdeDependants dependants, ProjectManager manager, BooleanBinding projectDisabled) {
-        return new FxAction("projectResources", "pr", "Project")
-                .bindText(ls("Resources"))
-                .setIcon("M_MODE_EDIT")
-                .setEventHandler(event -> {
-                    final ProjectProfile profile = manager.getProfile();
-
                 })
                 .bindDisabled(projectDisabled);
     }

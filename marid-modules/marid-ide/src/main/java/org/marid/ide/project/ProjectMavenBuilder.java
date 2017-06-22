@@ -19,15 +19,11 @@
 package org.marid.ide.project;
 
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.maven.MavenBuildResult;
 import org.marid.maven.MavenProjectBuilder;
 import org.marid.maven.ProjectBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
@@ -40,7 +36,6 @@ import java.util.logging.LogRecord;
 @Component
 public class ProjectMavenBuilder {
 
-    private final BooleanProperty buildState = new SimpleBooleanProperty(false);
     private final IdeLogHandler ideLogHandler;
 
     @Autowired
@@ -50,7 +45,7 @@ public class ProjectMavenBuilder {
 
     void build(ProjectProfile profile, Configuration configuration) {
         final Thread thread = new Thread(() -> {
-            Platform.runLater(() -> buildState.set(true));
+            Platform.runLater(() -> profile.enabledProperty().set(false));
             final ProjectBuilder projectBuilder = new MavenProjectBuilder(profile.getPath())
                     .goals("clean", "install")
                     .profiles("conf");
@@ -63,14 +58,9 @@ public class ProjectMavenBuilder {
             } finally {
                 ideLogHandler.setFilter(null);
             }
-            Platform.runLater(() -> buildState.set(false));
+            Platform.runLater(() -> profile.enabledProperty().set(true));
         });
         thread.start();
-    }
-
-    @Bean
-    public BooleanBinding projectDisabled(ProjectManager projectManager) {
-        return projectManager.profileProperty().isNull().or(buildState);
     }
 
     public static final class Configuration {

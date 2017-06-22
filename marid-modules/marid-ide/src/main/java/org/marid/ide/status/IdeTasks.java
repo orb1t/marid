@@ -18,12 +18,9 @@
 
 package org.marid.ide.status;
 
-import java.util.concurrent.ThreadPoolExecutor;
-
 /**
  * @author Dmitry Ovchinnikov
  */
 public class IdeTasks {
-
 
 }

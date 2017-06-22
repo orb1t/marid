@@ -19,6 +19,8 @@
 package org.marid.ide.project;
 
 import com.google.common.io.MoreFiles;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
 import org.apache.maven.model.Profile;
@@ -60,6 +62,7 @@ public class ProjectProfile {
     private final Path beansDirectory;
     private final Path repository;
     private final Logger logger;
+    private final BooleanProperty enabled;
 
     ProjectProfile(String name) {
         path = Paths.get(USER_HOME, "marid", "profiles", name);
@@ -79,6 +82,7 @@ public class ProjectProfile {
         model.setModelVersion("4.0.0");
         createFileStructure();
         init();
+        enabled = new SimpleBooleanProperty(true);
     }
 
     private void init() {
@@ -173,6 +177,10 @@ public class ProjectProfile {
         } else {
             return null;
         }
+    }
+
+    public BooleanProperty enabledProperty() {
+        return enabled;
     }
 
     private void createFileStructure() {
