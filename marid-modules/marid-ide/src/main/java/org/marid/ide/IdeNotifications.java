@@ -19,6 +19,7 @@
 package org.marid.ide;
 
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import org.controlsfx.control.Notifications;
 import org.intellij.lang.annotations.MagicConstant;
 import org.marid.Ide;
@@ -61,7 +62,8 @@ public class IdeNotifications  {
         final Notifications notifications = Notifications.create()
                 .text(text)
                 .title(s(level.getName()))
-                .darkStyle();
+                .darkStyle()
+                .position(Pos.TOP_RIGHT);
         final Runnable task = () -> {
             notifications.owner(Ide.primaryStage);
             switch (level.getName()) {

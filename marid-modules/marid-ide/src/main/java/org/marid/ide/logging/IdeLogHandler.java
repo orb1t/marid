@@ -22,9 +22,12 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
+import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static org.marid.IdePrefs.PREFERENCES;
 import static org.marid.logging.Log.log;
@@ -37,6 +40,7 @@ public class IdeLogHandler extends Handler {
     public static final ObservableList<LogRecord> LOG_RECORDS = FXCollections.observableArrayList();
 
     private volatile int maxRecords;
+    private final Set<Integer> blockedThreadIds = new ConcurrentSkipListSet<>();
 
     public IdeLogHandler() {
         maxRecords = PREFERENCES.getInt("maxLogRecords", 10_000);
@@ -65,11 +69,26 @@ public class IdeLogHandler extends Handler {
     }
 
     @Override
+    public boolean isLoggable(LogRecord record) {
+        return super.isLoggable(record) && !blockedThreadIds.contains(record.getThreadID());
+    }
+
+    @Override
     public void flush() {
     }
 
     @Override
     public void close() {
         PREFERENCES.putInt("maxLogRecords", maxRecords);
+    }
+
+    public int registerBlockedThreadId() {
+        final LogRecord record = new LogRecord(INFO, null);
+        blockedThreadIds.add(record.getThreadID());
+        return record.getThreadID();
+    }
+
+    public void unregisterBlockedThreadId(int threadId) {
+        blockedThreadIds.remove(threadId);
     }
 }

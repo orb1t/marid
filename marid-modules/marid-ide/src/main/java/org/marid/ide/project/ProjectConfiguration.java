@@ -88,7 +88,31 @@ public class ProjectConfiguration {
                 .setEventHandler(event -> {
                     final ProjectProfile profile = projectManager.getProfile();
                     projectSaver.getObject().save(profile);
-                    mavenBuilder.getObject().start();
+                    mavenBuilder.getObject()
+                            .setProfile(profile)
+                            .start();
+                })
+                .bindDisabled(projectDisabled);
+    }
+
+    @IdeAction
+    @Qualifier("profile")
+    public FxAction projectBuildAllAction(ObjectFactory<ProjectBuilderService> mavenBuilder,
+                                          ObjectFactory<ProjectSaver> projectSaver,
+                                          ProjectManager projectManager,
+                                          BooleanBinding projectDisabled) {
+        return new FxAction("pb", "Project")
+                .setAccelerator(KeyCombination.valueOf("Shift+F9"))
+                .bindText(ls("Build All"))
+                .setIcon("F_CLOCK_ALT")
+                .setEventHandler(event -> {
+                    for (final ProjectProfile profile : projectManager.getProfiles()) {
+                        projectSaver.getObject().save(profile);
+                        projectManager.profileProperty().set(profile);
+                        mavenBuilder.getObject()
+                                .setProfile(profile)
+                                .start();
+                    }
                 })
                 .bindDisabled(projectDisabled);
     }

@@ -19,15 +19,28 @@
 package org.marid.ide.panes.main;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.collections.WeakListChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.shape.Circle;
+import org.controlsfx.control.PopOver;
+import org.controlsfx.control.PopOver.ArrowLocation;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.LocalizedStrings;
+import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -41,6 +54,8 @@ import java.time.temporal.ChronoField;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static javafx.beans.binding.Bindings.size;
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -52,6 +67,9 @@ public class IdeStatusBar extends BorderPane {
     private final HBox right;
     private final ScrollPane scrollPane;
     private final HBox toolBar;
+    private final Button notificationsButton;
+    private final ObservableList<Node> notifications = FXCollections.observableArrayList();
+    private final ContextMenu contextMenu = new ContextMenu();
 
     public IdeStatusBar() {
         setPadding(new Insets(5, 5, 5, 5));
@@ -71,6 +89,24 @@ public class IdeStatusBar extends BorderPane {
         scrollPane.setPannable(true);
         scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
         scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
+
+        right.getChildren().add(notificationsButton = new Button());
+        final Circle circle = new Circle(24);
+        notificationsButton.setShape(circle);
+        notificationsButton.textProperty().bind(size(notifications).asString());
+        notificationsButton.disableProperty().bind(Bindings.isEmpty(notifications));
+        final Tooltip tooltip = new Tooltip();
+        tooltip.textProperty().bind(ls("Notifications"));
+        notificationsButton.setOnAction(event -> contextMenu.show(notificationsButton, Side.TOP, 0, 0));
+
+        {
+            final ContextMenu buttonContextMenu = new ContextMenu();
+            final MenuItem clearAllNotifications = new MenuItem(null, FontIcons.glyphIcon("D_CLOSE"));
+            clearAllNotifications.textProperty().bind(ls("Remove all notifications"));
+            clearAllNotifications.setOnAction(event -> notifications.clear());
+            buttonContextMenu.getItems().add(clearAllNotifications);
+            notificationsButton.setContextMenu(buttonContextMenu);
+        }
     }
 
     @Order(1)
@@ -118,5 +154,43 @@ public class IdeStatusBar extends BorderPane {
 
     public void remove(Button button) {
         toolBar.getChildren().remove(button);
+    }
+
+    public void addNotification(ObservableValue<String> text, Node node) {
+        notifications.add(node);
+
+        final MenuItem menuItem = new MenuItem();
+        final Button close = new Button(null, FontIcons.glyphIcon("D_CLOSE_CIRCLE"));
+        close.setOnAction(event -> {
+            contextMenu.getItems().remove(menuItem);
+            notifications.remove(node);
+            contextMenu.hide();
+        });
+        menuItem.textProperty().bind(text);
+        menuItem.setGraphic(close);
+        menuItem.setOnAction(event -> {
+            final PopOver popOver = new PopOver(node);
+            popOver.setHeaderAlwaysVisible(true);
+            popOver.titleProperty().bind(text);
+            popOver.setArrowLocation(ArrowLocation.RIGHT_BOTTOM);
+            popOver.show(notificationsButton);
+        });
+
+        contextMenu.getItems().add(0, menuItem);
+
+        final ListChangeListener<Node> changeListener = c -> {
+            while (c.next()) {
+                if (c.wasRemoved()) {
+                    for (final Node n : c.getRemoved()) {
+                        if (n == node) {
+                            contextMenu.getItems().remove(menuItem);
+                            break;
+                        }
+                    }
+                }
+            }
+        };
+        menuItem.setUserData(changeListener);
+        notifications.addListener(new WeakListChangeListener<>(changeListener));
     }
 }

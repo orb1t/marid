@@ -29,6 +29,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.MotionBlur;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.marid.ide.panes.main.IdeStatusBar;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
 public abstract class IdeService<V extends Node> extends Service<Duration> {
 
     private final SimpleObjectProperty<V> graphic = new SimpleObjectProperty<>();
-    private Button button;
+    protected Button button;
 
     @Autowired
     private void init(IdeStatusBar statusBar) {
@@ -63,7 +64,9 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
         addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, event -> {
             statusBar.remove(button);
             button = null;
-            n(INFO, "{0} succeeded in {1}", event.getSource().getTitle(), event.getSource().getValue());
+            final Duration duration = (Duration) event.getSource().getValue();
+            final String durationText = DurationFormatUtils.formatDurationHMS(duration.toMillis());
+            n(INFO, "{0} succeeded in {1}", event.getSource().getTitle(), durationText);
         });
         addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, event -> {
             statusBar.remove(button);
