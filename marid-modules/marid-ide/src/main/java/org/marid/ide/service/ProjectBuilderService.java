@@ -21,17 +21,20 @@ import javafx.geometry.Insets;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import org.apache.maven.cli.MaridTransferEvent;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.logging.IdeMavenLogHandler;
 import org.marid.ide.panes.main.IdeStatusBar;
+import org.marid.ide.project.ProjectMavenBuilder;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.status.IdeService;
 import org.marid.jfx.logging.LogComponent;
-import org.marid.maven.MavenProjectBuilder;
-import org.marid.maven.ProjectBuilder;
 import org.marid.spring.annotation.PrototypeComponent;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Logger;
@@ -46,13 +49,20 @@ public class ProjectBuilderService extends IdeService<HBox> {
 
     private final IdeLogHandler logHandler;
     private final IdeStatusBar statusBar;
+    private final ObjectFactory<ProjectMavenBuilder> builder;
+    private final ApplicationContext context;
 
     private ProjectProfile profile;
 
     @Autowired
-    public ProjectBuilderService(IdeLogHandler logHandler, IdeStatusBar statusBar) {
+    public ProjectBuilderService(IdeLogHandler logHandler,
+                                 IdeStatusBar statusBar,
+                                 ObjectFactory<ProjectMavenBuilder> builder,
+                                 ApplicationContext context) {
         this.logHandler = logHandler;
         this.statusBar = statusBar;
+        this.builder = builder;
+        this.context = context;
     }
 
     public ProjectBuilderService setProfile(ProjectProfile profile) {
@@ -70,13 +80,16 @@ public class ProjectBuilderService extends IdeService<HBox> {
 
     private class BuilderTask extends IdeTask {
 
+        private ApplicationListener<MaridTransferEvent> transferEventListener;
+
         private BuilderTask() {
             updateTitle(profile.getName());
         }
 
         @Override
         protected void execute() throws Exception {
-            final ProjectBuilder projectBuilder = new MavenProjectBuilder(profile.getPath())
+            final ProjectMavenBuilder projectBuilder = builder.getObject()
+                    .profile(profile)
                     .goals("clean", "install")
                     .profiles("conf");
             final int threadId = logHandler.registerBlockedThreadId();

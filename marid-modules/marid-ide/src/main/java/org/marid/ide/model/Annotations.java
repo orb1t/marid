@@ -47,7 +47,7 @@ public interface Annotations {
     }
 
     static boolean isLazy(NodeWithAnnotations<?> node) {
-        return node.getAnnotationByClass(Lazy.class)
+        return node.getAnnotationByName(Lazy.class.getName())
                 .map(a -> {
                     final Map<String, Expression> map = getMembers(a);
                     if (map.isEmpty()) {
@@ -61,7 +61,7 @@ public interface Annotations {
     }
 
     static boolean isPrototype(NodeWithAnnotations<?> node) {
-        return node.getAnnotationByClass(Scope.class)
+        return node.getAnnotationByName(Scope.class.getName())
                 .map(a -> {
                     final Map<String, Expression> map = getMembers(a);
                     if (map.isEmpty()) {
@@ -75,7 +75,7 @@ public interface Annotations {
     }
 
     static String value(NodeWithAnnotations<?> node) {
-        return node.getAnnotationByClass(Value.class)
+        return node.getAnnotationByName(Value.class.getName())
                 .flatMap(a -> {
                     final Map<String, Expression> map = getMembers(a);
                     if (map.isEmpty()) {
@@ -91,7 +91,7 @@ public interface Annotations {
     }
 
     static String qualifier(NodeWithAnnotations<?> node) {
-        return node.getAnnotationByClass(Qualifier.class)
+        return node.getAnnotationByName(Qualifier.class.getName())
                 .flatMap(a -> {
                     final Map<String, Expression> map = getMembers(a);
                     if (map.isEmpty()) {

@@ -14,18 +14,30 @@
  * limitations under the License.
  */
 
-package org.marid.maven;
+package org.apache.maven.cli;
 
-import java.util.function.Consumer;
+import org.eclipse.aether.transfer.TransferEvent;
+import org.marid.ide.project.ProjectProfile;
+import org.springframework.context.ApplicationEvent;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface ProjectBuilder {
+public class MaridTransferEvent extends ApplicationEvent {
 
-    ProjectBuilder goals(String... args);
+    private final TransferEvent event;
 
-    ProjectBuilder profiles(String... args);
+    public MaridTransferEvent(ProjectProfile profile, TransferEvent event) {
+        super(profile);
+        this.event = event;
+    }
 
-    void build(Consumer<MavenBuildResult> resultConsumer);
+    public TransferEvent getEvent() {
+        return event;
+    }
+
+    @Override
+    public ProjectProfile getSource() {
+        return (ProjectProfile) super.getSource();
+    }
 }

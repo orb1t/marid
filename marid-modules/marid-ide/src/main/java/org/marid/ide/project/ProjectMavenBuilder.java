@@ -16,72 +16,67 @@
 
 package org.marid.ide.project;
 
-import javafx.application.Platform;
-import org.marid.ide.logging.IdeLogHandler;
+import org.apache.maven.cli.MaridMavenCli;
+import org.apache.maven.cli.MaridMavenCliRequest;
+import org.marid.ide.common.Directories;
 import org.marid.maven.MavenBuildResult;
-import org.marid.maven.MavenProjectBuilder;
-import org.marid.maven.ProjectBuilder;
+import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@PrototypeComponent
 public class ProjectMavenBuilder {
 
-    private final IdeLogHandler ideLogHandler;
+    private final List<String> goals = new ArrayList<>();
+    private final List<String> profiles = new ArrayList<>();
+    private final ApplicationEventPublisher eventPublisher;
+    private final Directories directories;
+
+    private ProjectProfile profile;
 
     @Autowired
-    public ProjectMavenBuilder(IdeLogHandler ideLogHandler) {
-        this.ideLogHandler = ideLogHandler;
+    public ProjectMavenBuilder(ApplicationEventPublisher eventPublisher, Directories directories) {
+        this.eventPublisher = eventPublisher;
+        this.directories = directories;
     }
 
-    void build(ProjectProfile profile, Configuration configuration) {
-        final Thread thread = new Thread(() -> {
-            Platform.runLater(() -> profile.enabledProperty().set(false));
-            final ProjectBuilder projectBuilder = new MavenProjectBuilder(profile.getPath())
-                    .goals("clean", "install")
-                    .profiles("conf");
-            try {
-                final LogRecord logRecord = new LogRecord(Level.INFO, null);
-                final int threshold = configuration.level.intValue();
-                final int threadId = logRecord.getThreadID();
-                ideLogHandler.setFilter(r -> r.getThreadID() != threadId || r.getLevel().intValue() >= threshold);
-                projectBuilder.build(configuration.resultConsumer);
-            } finally {
-                ideLogHandler.setFilter(null);
-            }
-            Platform.runLater(() -> profile.enabledProperty().set(true));
-        });
-        thread.start();
+    public ProjectMavenBuilder goals(String... goals) {
+        Collections.addAll(this.goals, goals);
+        return this;
     }
 
-    public static final class Configuration {
+    public ProjectMavenBuilder profiles(String... ids) {
+        Collections.addAll(profiles, ids);
+        return this;
+    }
 
-        private Consumer<MavenBuildResult> resultConsumer = r -> {};
-        private Level level = Level.INFO;
+    public ProjectMavenBuilder profile(ProjectProfile profile) {
+        this.profile = profile;
+        return this;
+    }
 
-        public Consumer<MavenBuildResult> getResultConsumer() {
-            return resultConsumer;
+    public void build(Consumer<MavenBuildResult> consumer) {
+        final long start = System.currentTimeMillis();
+        final List<String> argList = new ArrayList<>();
+        argList.add("-P" + String.join(",", profiles));
+        argList.addAll(goals);
+        final String[] args = argList.toArray(new String[argList.size()]);
+        final List<Throwable> exceptions = new ArrayList<>();
+        final MaridMavenCliRequest request = new MaridMavenCliRequest(args, null).directory(profile.getPath());
+        final MaridMavenCli cli = new MaridMavenCli(null, eventPublisher, profile);
+        try {
+            cli.doMain(request);
+        } catch (Exception x) {
+            exceptions.add(x);
         }
-
-        public Configuration setResultConsumer(Consumer<MavenBuildResult> resultConsumer) {
-            this.resultConsumer = resultConsumer;
-            return this;
-        }
-
-        public Level getLevel() {
-            return level;
-        }
-
-        public Configuration setLevel(Level level) {
-            this.level = level;
-            return this;
-        }
+        consumer.accept(new MavenBuildResult(System.currentTimeMillis() - start, exceptions));
     }
 }
