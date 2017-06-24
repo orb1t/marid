@@ -16,12 +16,22 @@
 
 package org.marid.ide.service;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.geometry.Insets;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import org.apache.maven.cli.MaridTransferEvent;
+import org.controlsfx.control.PopOver;
+import org.controlsfx.control.PopOver.ArrowLocation;
+import org.eclipse.aether.transfer.TransferEvent;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.logging.IdeMavenLogHandler;
@@ -29,14 +39,16 @@ import org.marid.ide.panes.main.IdeStatusBar;
 import org.marid.ide.project.ProjectMavenBuilder;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.status.IdeService;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.logging.LogComponent;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.support.GenericApplicationContext;
 
 import javax.annotation.Nonnull;
+import java.util.ListIterator;
 import java.util.logging.Logger;
 
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -50,7 +62,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
     private final IdeLogHandler logHandler;
     private final IdeStatusBar statusBar;
     private final ObjectFactory<ProjectMavenBuilder> builder;
-    private final ApplicationContext context;
+    private final GenericApplicationContext context;
 
     private ProjectProfile profile;
 
@@ -58,7 +70,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
     public ProjectBuilderService(IdeLogHandler logHandler,
                                  IdeStatusBar statusBar,
                                  ObjectFactory<ProjectMavenBuilder> builder,
-                                 ApplicationContext context) {
+                                 GenericApplicationContext context) {
         this.logHandler = logHandler;
         this.statusBar = statusBar;
         this.builder = builder;
@@ -81,6 +93,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
     private class BuilderTask extends IdeTask {
 
         private ApplicationListener<MaridTransferEvent> transferEventListener;
+        private ObservableList<TransferEvent> events;
 
         private BuilderTask() {
             updateTitle(profile.getName());
@@ -102,6 +115,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
                 BorderPane.setMargin(logComponent, new Insets(5));
                 logComponent.setPrefSize(800, 600);
                 statusBar.addNotification(Bindings.format("%s: %s", profile.getName(), ls("Maven Build")), pane);
+                context.addApplicationListener(transferEventListener = new TransferListener());
             });
             try {
                 projectBuilder.build(result -> {
@@ -114,6 +128,9 @@ public class ProjectBuilderService extends IdeService<HBox> {
             } finally {
                 logHandler.unregisterBlockedThreadId(threadId);
                 root.removeHandler(mavenLogHandler);
+                if (transferEventListener != null) {
+                    context.getApplicationListeners().remove(transferEventListener);
+                }
             }
         }
 
@@ -126,6 +143,87 @@ public class ProjectBuilderService extends IdeService<HBox> {
         @Override
         protected ContextMenu contextMenu() {
             return new ContextMenu();
+        }
+
+        private class TransferListener implements ApplicationListener<MaridTransferEvent> {
+
+            @Override
+            public void onApplicationEvent(MaridTransferEvent event) {
+                if (event.getSource() != profile) {
+                    return;
+                }
+                Platform.runLater(() -> {
+                    if (events == null) {
+                        events = FXCollections.observableArrayList();
+
+                        final ListView<TransferEvent> view = new ListView<>(events);
+                        view.setPrefSize(400, 800);
+                        view.setCellFactory(param -> new ListCell<TransferEvent>() {
+                            @Override
+                            protected void updateItem(TransferEvent item, boolean empty) {
+                                super.updateItem(item, empty);
+                                if (empty || item == null) {
+                                    setText(null);
+                                    setGraphic(null);
+                                } else {
+                                    setText(item.getResource().getFile().getName());
+                                    switch (item.getType()) {
+                                        case STARTED:
+                                            setGraphic(FontIcons.glyphIcon("D_PLAY"));
+                                            break;
+                                        case CORRUPTED:
+                                            setGraphic(FontIcons.glyphIcon("M_BUG_REPORT"));
+                                            break;
+                                        case FAILED:
+                                            setGraphic(FontIcons.glyphIcon("M_SMS_FAILED"));
+                                            break;
+                                        case INITIATED:
+                                            setGraphic(FontIcons.glyphIcon("M_INSERT_INVITATION"));
+                                            break;
+                                        case PROGRESSED:
+                                            setGraphic(FontIcons.glyphIcon("D_MESSAGE_PROCESSING"));
+                                            break;
+                                        case SUCCEEDED:
+                                            setGraphic(FontIcons.glyphIcon("F_STOP"));
+                                            break;
+                                        default:
+                                            setGraphic(null);
+                                            break;
+                                    }
+                                }
+                            }
+                        });
+
+                        final PopOver popOver = new PopOver(view);
+                        popOver.setArrowLocation(ArrowLocation.BOTTOM_LEFT);
+
+                        addEventHandler(WorkerStateEvent.ANY, e -> {
+                            if (DONE_EVENT_TYPES.contains(e.getEventType())) {
+                                popOver.hide();
+                            }
+                        });
+
+                        events.addListener((ListChangeListener<TransferEvent>) c -> {
+                            while (c.next()) {
+                                if (c.wasAdded()) {
+                                    view.scrollTo(events.size());
+                                }
+                            }
+                        });
+
+                        popOver.show(button);
+                    }
+
+                    for (final ListIterator<TransferEvent> i = events.listIterator(); i.hasNext(); ) {
+                        final TransferEvent e = i.next();
+                        if (e.getResource() == event.getEvent().getResource()) {
+                            i.set(e);
+                            return;
+                        }
+                    }
+                    events.add(event.getEvent());
+                });
+            }
         }
     }
 }

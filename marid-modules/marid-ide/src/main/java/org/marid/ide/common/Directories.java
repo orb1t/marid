@@ -46,6 +46,8 @@ public class Directories {
     private void init() throws IOException {
         Files.createDirectories(profiles);
         Files.createDirectories(repo);
+
+        System.setProperty("maven.repo.local", repo.toAbsolutePath().toString());
     }
 
     public Path getUserHome() {

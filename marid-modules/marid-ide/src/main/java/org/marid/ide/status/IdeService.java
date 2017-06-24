@@ -16,11 +16,13 @@
 
 package org.marid.ide.status;
 
+import com.google.common.collect.ImmutableSet;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventType;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -34,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
@@ -49,6 +52,12 @@ import static org.marid.logging.Log.log;
  * @author Dmitry Ovchinnikov
  */
 public abstract class IdeService<V extends Node> extends Service<Duration> {
+
+    protected static final Set<EventType<?>> DONE_EVENT_TYPES = ImmutableSet.of(
+            WorkerStateEvent.WORKER_STATE_SUCCEEDED,
+            WorkerStateEvent.WORKER_STATE_FAILED,
+            WorkerStateEvent.WORKER_STATE_CANCELLED
+    );
 
     private final SimpleObjectProperty<V> graphic = new SimpleObjectProperty<>();
     private final CountDownLatch latch = new CountDownLatch(1);
