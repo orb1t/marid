@@ -24,8 +24,8 @@ import javafx.scene.input.KeyCombination;
 import org.marid.IdeDependants;
 import org.marid.dependant.project.ProjectParams;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
-import org.marid.dependant.project.runner.ProjectRunnerConfiguration;
 import org.marid.ide.service.ProjectBuilderService;
+import org.marid.ide.service.ProjectRunService;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.annotation.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -119,17 +119,17 @@ public class ProjectConfiguration {
 
     @IdeAction
     @Qualifier("profile")
-    public FxAction projectRunAction(IdeDependants dependants, ProjectManager manager, BooleanBinding projectDisabled) {
+    public FxAction projectRunAction(ProjectManager manager,
+                                     ObjectFactory<ProjectRunService> projectRunService,
+                                     BooleanBinding projectDisabled) {
         return new FxAction("projectBuild", "pb", "Project")
                 .setAccelerator(KeyCombination.valueOf("F5"))
                 .bindText(ls("Run"))
                 .setIcon("F_PLAY")
                 .setEventHandler(event -> {
-                    final ProjectProfile profile = manager.getProfile();
-                    dependants.start(ProjectRunnerConfiguration.class, new ProjectParams(profile), context -> {
-                        context.setId("projectRunner");
-                        context.setDisplayName("Project Runner");
-                    });
+                    projectRunService.getObject()
+                            .setProfile(manager.getProfile())
+                            .start();
                 })
                 .bindDisabled(projectDisabled);
     }

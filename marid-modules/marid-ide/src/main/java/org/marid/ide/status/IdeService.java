@@ -23,12 +23,12 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
+import javafx.geometry.Side;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.effect.MotionBlur;
+import javafx.scene.input.MouseEvent;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.marid.ide.panes.main.IdeStatusBar;
 import org.marid.jfx.icons.FontIcons;
@@ -36,6 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 
 import static java.util.logging.Level.INFO;
@@ -43,6 +45,7 @@ import static java.util.logging.Level.WARNING;
 import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.ide.IdeNotifications.n;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,15 +53,18 @@ import static org.marid.jfx.LocalizedStrings.ls;
 public abstract class IdeService<V extends Node> extends Service<Duration> {
 
     private final SimpleObjectProperty<V> graphic = new SimpleObjectProperty<>();
+    private final CountDownLatch latch = new CountDownLatch(1);
     protected Button button;
 
     @Autowired
     private void init(IdeStatusBar statusBar) {
         addEventHandler(WorkerStateEvent.WORKER_STATE_RUNNING, event -> {
             button = new Button();
+            button.setOnMousePressed(e -> button.getProperties().put("_lastEvent", e));
             button.textProperty().bind(titleProperty());
             button.graphicProperty().bind(graphic);
-            button.tooltipProperty().bind(createObjectBinding(() -> new Tooltip(getMessage()), messageProperty()));
+            button.tooltipProperty().bind(createObjectBinding(
+                    () -> StringUtils.isBlank(getMessage()) ? null : new Tooltip(getMessage()), messageProperty()));
             statusBar.add(button);
         });
         addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, event -> {
@@ -76,6 +82,20 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
         addEventHandler(WorkerStateEvent.WORKER_STATE_CANCELLED, event -> {
             button.setDisable(true);
             button.setEffect(new MotionBlur(0.1, 0.1));
+            final Thread thread = new Thread(null, () -> {
+                try {
+                    latch.await();
+                    LockSupport.parkNanos(1_000_000_000L);
+                    Platform.runLater(() -> {
+                        statusBar.remove(button);
+                        button = null;
+                    });
+                } catch (InterruptedException x) {
+                    log(WARNING, "Interrupted", x);
+                }
+            }, "Watcher: " + getTitle(), 96L * 1024L);
+            thread.setDaemon(true);
+            thread.start();
         });
     }
 
@@ -101,25 +121,39 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
 
         @Override
         protected Duration call() throws Exception {
-            final long startTime = System.nanoTime();
-            {
-                final V node = createGraphic();
-                final ContextMenu contextMenu = contextMenu();
-                final MenuItem cancelItem = new MenuItem();
-                cancelItem.setGraphic(FontIcons.glyphIcon("D_CLOSE_CIRCLE"));
-                cancelItem.textProperty().bind(ls("Cancel"));
-                cancelItem.setOnAction(event -> cancel());
-                Platform.runLater(() -> {
-                    graphic.set(node);
-                    button.setContextMenu(contextMenu);
-                });
-            }
             try {
-                execute();
+                final long startTime = System.nanoTime();
+                {
+                    final V node = createGraphic();
+                    final ContextMenu contextMenu = contextMenu();
+                    final MenuItem cancelItem = new MenuItem();
+                    cancelItem.setGraphic(FontIcons.glyphIcon("D_CLOSE_CIRCLE"));
+                    cancelItem.textProperty().bind(ls("Cancel"));
+                    cancelItem.setOnAction(event -> cancel());
+                    if (!contextMenu.getItems().isEmpty()) {
+                        contextMenu.getItems().add(new SeparatorMenuItem());
+                    }
+                    contextMenu.getItems().add(cancelItem);
+                    Platform.runLater(() -> {
+                        graphic.set(node);
+                        button.setContextMenu(contextMenu);
+                        button.setOnAction(event -> {
+                            final MouseEvent e = (MouseEvent) button.getProperties().remove("_lastEvent");
+                            final double x = e != null ? e.getX() : 0;
+                            final double y = e != null ? e.getY() : 0;
+                            contextMenu.show(button, Side.TOP, x, y);
+                        });
+                    });
+                }
+                try {
+                    execute();
+                } finally {
+                    Platform.runLater(() -> graphic.set(null));
+                }
+                return Duration.ofNanos(System.nanoTime() - startTime);
             } finally {
-                Platform.runLater(() -> graphic.set(null));
+                latch.countDown();
             }
-            return Duration.ofNanos(System.nanoTime() - startTime);
         }
     }
 }
