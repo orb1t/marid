@@ -451,6 +451,15 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.13</version>
+                <configuration>
+                    <excludedScopes>test,provided</excludedScopes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
