@@ -26,6 +26,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -45,7 +49,7 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 public class IdeContext {
 
     @Bean(destroyMethod = "shutdown")
-    public ScheduledThreadPoolExecutor scheduledExecutorService() {
+    public static ScheduledThreadPoolExecutor scheduledExecutorService() {
         return new ScheduledThreadPoolExecutor(1);
     }
 
@@ -79,5 +83,10 @@ public class IdeContext {
                 .map(IdeLogConsoleHandler.class::cast)
                 .findAny()
                 .orElseThrow(IllegalStateException::new);
+    }
+
+    @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
+    public static ApplicationEventMulticaster multicaster(GenericApplicationContext context) {
+        return new SimpleApplicationEventMulticaster(context.getBeanFactory());
     }
 }

@@ -19,7 +19,6 @@ package org.marid.ide.service;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.geometry.Insets;
@@ -45,7 +44,7 @@ import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.event.ApplicationEventMulticaster;
 
 import javax.annotation.Nonnull;
 import java.util.ListIterator;
@@ -62,7 +61,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
     private final IdeLogHandler logHandler;
     private final IdeStatusBar statusBar;
     private final ObjectFactory<ProjectMavenBuilder> builder;
-    private final GenericApplicationContext context;
+    private final ApplicationEventMulticaster multicaster;
 
     private ProjectProfile profile;
 
@@ -70,11 +69,11 @@ public class ProjectBuilderService extends IdeService<HBox> {
     public ProjectBuilderService(IdeLogHandler logHandler,
                                  IdeStatusBar statusBar,
                                  ObjectFactory<ProjectMavenBuilder> builder,
-                                 GenericApplicationContext context) {
+                                 ApplicationEventMulticaster multicaster) {
         this.logHandler = logHandler;
         this.statusBar = statusBar;
         this.builder = builder;
-        this.context = context;
+        this.multicaster = multicaster;
     }
 
     public ProjectBuilderService setProfile(ProjectProfile profile) {
@@ -94,6 +93,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
 
         private ApplicationListener<MaridTransferEvent> transferEventListener;
         private ObservableList<TransferEvent> events;
+        ListView<TransferEvent> view;
 
         private BuilderTask() {
             updateTitle(profile.getName());
@@ -115,7 +115,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
                 BorderPane.setMargin(logComponent, new Insets(5));
                 logComponent.setPrefSize(800, 600);
                 statusBar.addNotification(Bindings.format("%s: %s", profile.getName(), ls("Maven Build")), pane);
-                context.addApplicationListener(transferEventListener = new TransferListener());
+                multicaster.addApplicationListener(transferEventListener = new TransferListener());
             });
             try {
                 projectBuilder.build(result -> {
@@ -129,7 +129,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
                 logHandler.unregisterBlockedThreadId(threadId);
                 root.removeHandler(mavenLogHandler);
                 if (transferEventListener != null) {
-                    context.getApplicationListeners().remove(transferEventListener);
+                    multicaster.removeApplicationListener(transferEventListener);
                 }
             }
         }
@@ -156,7 +156,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
                     if (events == null) {
                         events = FXCollections.observableArrayList();
 
-                        final ListView<TransferEvent> view = new ListView<>(events);
+                        view = new ListView<>(events);
                         view.setPrefSize(400, 800);
                         view.setCellFactory(param -> new ListCell<TransferEvent>() {
                             @Override
@@ -199,15 +199,8 @@ public class ProjectBuilderService extends IdeService<HBox> {
 
                         addEventHandler(WorkerStateEvent.ANY, e -> {
                             if (DONE_EVENT_TYPES.contains(e.getEventType())) {
+                                events.clear();
                                 popOver.hide();
-                            }
-                        });
-
-                        events.addListener((ListChangeListener<TransferEvent>) c -> {
-                            while (c.next()) {
-                                if (c.wasAdded()) {
-                                    view.scrollTo(events.size());
-                                }
                             }
                         });
 
@@ -222,6 +215,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
                         }
                     }
                     events.add(event.getEvent());
+                    view.scrollTo(events.size() - 1);
                 });
             }
         }

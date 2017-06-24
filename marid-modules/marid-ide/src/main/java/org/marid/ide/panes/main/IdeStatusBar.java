@@ -19,6 +19,7 @@ package org.marid.ide.panes.main;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -37,7 +38,6 @@ import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -168,9 +168,24 @@ public class IdeStatusBar extends BorderPane {
         menuItem.setGraphic(close);
         menuItem.setOnAction(event -> {
             final PopOver popOver = new PopOver(node);
+            popOver.setHideOnEscape(true);
             popOver.setHeaderAlwaysVisible(true);
             popOver.titleProperty().bind(text);
             popOver.setArrowLocation(ArrowLocation.RIGHT_BOTTOM);
+            popOver.setAutoHide(false);
+
+            final ChangeListener<ContextMenu> menuChangeListener = (o, oV, nV) -> {
+                if (nV == null) {
+                    popOver.hide();
+                }
+            };
+            popOver.setOnHiding(e -> {
+                menuItem.parentPopupProperty().removeListener(menuChangeListener);
+                menuItem.setDisable(false);
+            });
+            popOver.setOnShowing(e -> menuItem.setDisable(true));
+            menuItem.parentPopupProperty().addListener(menuChangeListener);
+
             popOver.show(notificationsButton);
         });
 
