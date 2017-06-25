@@ -19,6 +19,7 @@ package org.marid.dependant.beaneditor;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import org.marid.jfx.LocalizedStrings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,5 +85,13 @@ public class BeanTable extends TableView<MethodDeclaration> {
         column.setMaxWidth(28);
         column.setCellValueFactory(param -> new SimpleStringProperty(isPrototype(param.getValue()) ? "\u25CF" : "\u25CB"));
         getColumns().add(column);
+    }
+
+    @Autowired
+    private void initRowFactory() {
+        setRowFactory(param -> {
+            final TableRow<MethodDeclaration> row = new TableRow<>();
+            return row;
+        });
     }
 }

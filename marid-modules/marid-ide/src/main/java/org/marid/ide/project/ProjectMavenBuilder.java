@@ -18,7 +18,6 @@ package org.marid.ide.project;
 
 import org.apache.maven.cli.MaridMavenCli;
 import org.apache.maven.cli.MaridMavenCliRequest;
-import org.marid.ide.common.Directories;
 import org.marid.maven.MavenBuildResult;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,14 +37,12 @@ public class ProjectMavenBuilder {
     private final List<String> goals = new ArrayList<>();
     private final List<String> profiles = new ArrayList<>();
     private final ApplicationEventPublisher eventPublisher;
-    private final Directories directories;
 
     private ProjectProfile profile;
 
     @Autowired
-    public ProjectMavenBuilder(ApplicationEventPublisher eventPublisher, Directories directories) {
+    public ProjectMavenBuilder(ApplicationEventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
-        this.directories = directories;
     }
 
     public ProjectMavenBuilder goals(String... goals) {
