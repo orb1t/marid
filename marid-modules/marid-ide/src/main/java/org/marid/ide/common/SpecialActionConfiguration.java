@@ -1,6 +1,3 @@
-/*
- *
- */
 package org.marid.ide.common;
 
 /*-

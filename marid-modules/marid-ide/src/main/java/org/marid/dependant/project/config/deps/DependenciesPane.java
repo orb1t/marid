@@ -1,7 +1,3 @@
-/*
- *
- */
-
 package org.marid.dependant.project.config.deps;
 
 /*-

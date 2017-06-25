@@ -1,7 +1,3 @@
-/*
- *
- */
-
 package org.marid.proto;
 
 /*-
