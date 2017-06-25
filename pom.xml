@@ -451,7 +451,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
-                    <licenseName>apache_v2</licenseName>
+                    <licenseName>agpl_v3</licenseName>
                     <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
                     <organizeLicensesByDependencies>true</organizeLicensesByDependencies>
                     <emptyLineAfterHeader>true</emptyLineAfterHeader>
