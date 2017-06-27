@@ -44,6 +44,7 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.status.IdeService;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.logging.LogComponent;
+import org.marid.l10n.L10n;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +101,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
         ListView<TransferEvent> view;
 
         private BuilderTask() {
-            updateTitle(profile.getName());
+            updateTitle(profile.getName() + ": " + L10n.s("Maven Build"));
         }
 
         @Override

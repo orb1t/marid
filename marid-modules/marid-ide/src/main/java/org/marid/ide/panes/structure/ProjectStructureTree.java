@@ -71,6 +71,7 @@ public class ProjectStructureTree extends TreeTableView<Path> {
         super(new TreeItem<>(directories.getProfiles()));
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         getRoot().setExpanded(true);
+        getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     }
 
     @Autowired
@@ -188,7 +189,7 @@ public class ProjectStructureTree extends TreeTableView<Path> {
 
     @EventListener
     private void onPathAdd(FileAddedEvent event) {
-        Platform.runLater(() -> onAdd(event.getSource(), getRoot()));
+        Platform.runLater(() -> doWithSelection(() -> onAdd(event.getSource(), getRoot())));
     }
 
     private void onAdd(Path path, TreeItem<Path> item) {
@@ -226,15 +227,15 @@ public class ProjectStructureTree extends TreeTableView<Path> {
 
     @EventListener
     private void onPathMove(FileMovedEvent event) {
-        Platform.runLater(() -> {
+        Platform.runLater(() -> doWithSelection(() -> {
             onDelete(event.getSource(), getRoot());
             onAdd(event.getTarget(), getRoot());
-        });
+        }));
     }
 
     @EventListener
     private void onPathRemove(FileRemovedEvent event) {
-        Platform.runLater(() -> onDelete(event.getSource(), getRoot()));
+        Platform.runLater(() -> doWithSelection(() -> onDelete(event.getSource(), getRoot())));
     }
 
     private void onDelete(Path path, TreeItem<Path> item) {
@@ -245,7 +246,7 @@ public class ProjectStructureTree extends TreeTableView<Path> {
 
     @EventListener
     private void onPathChange(FileChangedEvent event) {
-        Platform.runLater(() -> onChange(event.getSource(), getRoot()));
+        Platform.runLater(() -> doWithSelection(() -> onChange(event.getSource(), getRoot())));
     }
 
     private void onChange(Path path, TreeItem<Path> item) {
@@ -253,6 +254,22 @@ public class ProjectStructureTree extends TreeTableView<Path> {
             Event.fireEvent(item, new TreeModificationEvent<>(TreeItem.valueChangedEvent(), item));
         } else {
             item.getChildren().forEach(e -> onChange(path, e));
+        }
+    }
+
+    private void doWithSelection(Runnable runnable) {
+        final TreeItem<Path> selected = getSelectionModel().getSelectedItem();
+        getSelectionModel().clearSelection();
+        getFocusModel().focus(-1);
+        setDisable(true);
+        runnable.run();
+        setDisable(false);
+        if (selected != null) {
+            final int row = getRow(selected);
+            if (row >= 0) {
+                getSelectionModel().focus(row);
+                getSelectionModel().select(row);
+            }
         }
     }
 }
