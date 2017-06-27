@@ -24,8 +24,8 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
 import org.marid.jfx.LocalizedStrings;
+import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -37,12 +37,11 @@ import static org.marid.ide.model.Annotations.isPrototype;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanTable extends TableView<MethodDeclaration> {
+public class BeanTable extends MaridTableView<MethodDeclaration> {
 
     @Autowired
     public BeanTable(BeanEditorUpdater beanEditorUpdater) {
         super(beanEditorUpdater.getBeans());
-        setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
     }
 
     @Order(1)
@@ -92,10 +91,7 @@ public class BeanTable extends TableView<MethodDeclaration> {
     }
 
     @Autowired
-    private void initRowFactory() {
-        setRowFactory(param -> {
-            final TableRow<MethodDeclaration> row = new TableRow<>();
-            return row;
-        });
+    private void initRowFactory(BeanTableActions actions) {
+        initialize(new Initializer());
     }
 }

@@ -21,6 +21,7 @@
 
 package org.marid.jfx.table;
 
+import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableRow;
@@ -37,6 +38,11 @@ import java.util.function.Supplier;
  * @author Dmitry Ovchinnikov
  */
 public class MaridTableView<T> extends TableView<T> {
+
+    public MaridTableView(ObservableList<T> list) {
+        super(list);
+        setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
+    }
 
     protected void initialize(Initializer initializer) {
         setRowFactory(table -> {
@@ -69,7 +75,7 @@ public class MaridTableView<T> extends TableView<T> {
         });
     }
 
-    protected class Initializer {
+    public class Initializer {
 
         protected final Set<SpecialAction> actions = Collections.newSetFromMap(new IdentityHashMap<>());
 
