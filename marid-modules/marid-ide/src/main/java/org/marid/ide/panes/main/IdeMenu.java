@@ -30,7 +30,7 @@ import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,10 +38,10 @@ import java.util.Map;
 @Component
 public class IdeMenu extends MenuBar {
 
-    private final ObjectFactory<Map<String, FxAction>> menuActionsFactory;
+    private final ObjectFactory<List<FxAction>> menuActionsFactory;
 
     @Autowired
-    public IdeMenu(@IdeAction ObjectFactory<Map<String, FxAction>> menuActionsFactory) {
+    public IdeMenu(@IdeAction ObjectFactory<List<FxAction>> menuActionsFactory) {
         this.menuActionsFactory = menuActionsFactory;
     }
 

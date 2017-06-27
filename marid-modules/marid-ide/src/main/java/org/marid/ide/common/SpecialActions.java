@@ -28,8 +28,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -56,24 +57,24 @@ public class SpecialActions {
     }
 
     public <T> void setup(@Nonnull SelectionModel<T> selectionModel,
-                          @Nonnull Function<T, Map<String, FxAction>> actions) {
+                          @Nonnull Function<T, Collection<FxAction>> actions) {
         selectionModel.selectedItemProperty().addListener((o, oV, nV) -> {
-            final Map<String, FxAction> map = actions.apply(nV);
-            final Map<SpecialAction, Map<String, FxAction>> specialActions = new IdentityHashMap<>();
-            map.forEach((k, v) -> {
+            final Collection<FxAction> map = actions.apply(nV);
+            final Map<SpecialAction, Collection<FxAction>> specialActions = new IdentityHashMap<>();
+            map.forEach(v -> {
                 if (v.specialAction != null) {
-                    specialActions.computeIfAbsent(v.specialAction, key -> new LinkedHashMap<>()).put(k, v);
+                    specialActions.computeIfAbsent(v.specialAction, key -> new ArrayList<>()).add(v);
                 }
             });
             specialActions.forEach((k, v) -> {
                 if (v.size() == 1) {
-                    final FxAction action = v.values().iterator().next();
+                    final FxAction action = v.iterator().next();
                     k.reset();
                     k.copy(action);
                     k.update();
                 } else {
                     k.reset();
-                    k.children.putAll(v);
+                    k.children.addAll(v);
                     k.update();
                 }
             });

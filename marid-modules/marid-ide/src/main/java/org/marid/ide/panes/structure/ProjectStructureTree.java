@@ -49,10 +49,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -133,19 +130,19 @@ public class ProjectStructureTree extends TreeTableView<Path> {
 
     @Autowired
     private void initRowFactory(Map<String, FileEditor> fileEditors, SpecialActions specialActions) {
-        final Function<TreeItem<Path>, Map<String, FxAction>> function = item -> {
+        final Function<TreeItem<Path>, Collection<FxAction>> function = item -> {
             if (item == null) {
-                return Collections.emptyMap();
+                return Collections.emptyList();
             }
             final Path file = item.getValue();
             if (file == null) {
-                return Collections.emptyMap();
+                return Collections.emptyList();
             }
-            final TreeMap<String, FxAction> map = new TreeMap<>();
+            final Collection<FxAction> map = new ArrayList<>();
             fileEditors.forEach((name, editor) -> {
                 final Runnable task = editor.getEditAction(file);
                 if (task != null) {
-                    map.put(name, new FxAction(name, editor.getGroup(), "Actions")
+                    map.add(new FxAction(name, editor.getGroup(), "Actions")
                             .bindText(LocalizedStrings.ls(editor.getName()))
                             .bindIcon(new SimpleStringProperty(editor.getIcon()))
                             .bindDisabled(new SimpleBooleanProperty(false))
@@ -161,7 +158,7 @@ public class ProjectStructureTree extends TreeTableView<Path> {
             final TreeTableRow<Path> row = new TreeTableRow<>();
             row.focusedProperty().addListener((o, oV, nV) -> {
                 if (nV) {
-                    final Map<String, FxAction> actionMap = function.apply(row.getTreeItem());
+                    final Collection<FxAction> actionMap = function.apply(row.getTreeItem());
                     row.setContextMenu(new ContextMenu(MaridActions.contextMenu(actionMap)));
                 } else {
                     row.setContextMenu(null);

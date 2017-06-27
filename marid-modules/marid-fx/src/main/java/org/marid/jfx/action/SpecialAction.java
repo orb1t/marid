@@ -161,7 +161,7 @@ public class SpecialAction extends FxAction {
         if (action.icon != null) super.icon = action.icon;
         if (action.eventHandler != null) super.eventHandler = action.eventHandler;
 
-        children.putAll(action.children);
+        children.addAll(action.children);
     }
 
     public void update() {

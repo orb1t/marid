@@ -27,10 +27,7 @@ import javafx.application.Platform;
 import javafx.scene.control.*;
 import javafx.util.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -49,11 +46,11 @@ import static org.marid.jfx.LocalizedStrings.ls;
  */
 public interface MaridActions {
 
-    static Menu[] menus(Map<String, FxAction> actionMap) {
-        final Map<String, Map<String, Map<String, MenuItem>>> itemMap = new TreeMap<>();
-        actionMap.forEach((id, action) -> {
+    static Menu[] menus(Collection<FxAction> actions) {
+        final Map<String, Map<String, Collection<MenuItem>>> itemMap = new TreeMap<>();
+        for (final FxAction action : actions) {
             if (action.getMenu() == null) {
-                return;
+                continue;
             }
             final MenuItem menuItem = action.menuItem();
             if (!action.children.isEmpty()) {
@@ -61,7 +58,7 @@ public interface MaridActions {
                 final Menu[] subMenus = menus(action.children);
                 switch (subMenus.length) {
                     case 0:
-                        return;
+                        continue;
                     case 1:
                         menu.getItems().addAll(subMenus[0].getItems());
                         break;
@@ -72,15 +69,15 @@ public interface MaridActions {
             }
             itemMap
                     .computeIfAbsent(action.getMenu(), k -> new TreeMap<>())
-                    .computeIfAbsent(action.getGroup(), k -> new TreeMap<>())
-                    .put(id, menuItem);
-        });
+                    .computeIfAbsent(action.getGroup(), k -> new ArrayList<>())
+                    .add(menuItem);
+        };
         final List<Menu> menus = new ArrayList<>();
         itemMap.forEach((menu, groupMap) -> {
             final Menu m = new Menu();
             m.textProperty().bind(ls(menu));
             groupMap.forEach((group, menuItems) -> {
-                m.getItems().addAll(menuItems.values());
+                m.getItems().addAll(menuItems);
                 m.getItems().add(new SeparatorMenuItem());
             });
             if (!m.getItems().isEmpty()) {
@@ -91,31 +88,27 @@ public interface MaridActions {
         return menus.toArray(new Menu[menus.size()]);
     }
 
-    static MenuItem[] contextMenu(Map<String, FxAction> actionMap) {
+    static MenuItem[] contextMenu(Collection<FxAction> actions) {
         final AtomicBoolean first = new AtomicBoolean(true);
-        return Stream.of(menus(actionMap))
+        return Stream.of(menus(actions))
                 .flatMap(m -> first.compareAndSet(true, false)
                         ? m.getItems().stream()
                         : concat(of(new SeparatorMenuItem()), m.getItems().stream()))
                 .toArray(MenuItem[]::new);
     }
 
-    static void initToolbar(Map<String, FxAction> actionMap, ToolBar toolBar) {
-        final Map<String, Map<String, FxAction>> sorted = actionMap.entrySet().stream()
-                .filter(e -> e.getValue().getToolbarGroup() != null)
-                .collect(groupingBy(
-                        e -> e.getValue().getToolbarGroup(),
-                        TreeMap::new,
-                        toMap(Map.Entry::getKey, Map.Entry::getValue, (a1, a2) -> a2, TreeMap::new))
-                );
+    static void initToolbar(Collection<FxAction> actions, ToolBar toolBar) {
+        final Map<String, List<FxAction>> sorted = actions.stream()
+                .filter(e -> e.getToolbarGroup() != null)
+                .collect(groupingBy(FxAction::getToolbarGroup, TreeMap::new, toList()));
         sorted.values().stream()
-                .flatMap(v -> concat(v.values().stream().map(FxAction::button), of(new Separator())))
+                .flatMap(v -> concat(v.stream().map(FxAction::button), of(new Separator())))
                 .forEach(toolBar.getItems()::add);
     }
 
-    static ToolBar toolbar(Map<String, FxAction> actionMap) {
+    static ToolBar toolbar(Collection<FxAction> actions) {
         final ToolBar toolBar = new ToolBar();
-        initToolbar(actionMap, toolBar);
+        initToolbar(actions, toolBar);
         return toolBar;
     }
 

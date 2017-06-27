@@ -45,8 +45,7 @@ import org.marid.jfx.beans.AbstractObservable;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
@@ -60,7 +59,7 @@ public class FxAction extends AbstractObservable {
     public final String group;
     public final String menu;
 
-    public final Map<String, FxAction> children = new TreeMap<>();
+    public final List<FxAction> children = new ArrayList<>();
 
     protected ObservableValue<String> text;
     protected ObservableValue<KeyCombination> accelerator;

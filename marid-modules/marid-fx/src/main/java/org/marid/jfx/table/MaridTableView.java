@@ -33,6 +33,7 @@ import org.marid.jfx.action.SpecialAction;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -48,14 +49,10 @@ public class MaridTableView<T> extends TableView<T> {
         setRowFactory(table -> {
             final TableRow<T> row = initializer.rowSupplier.get();
             row.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                final Map<String, FxAction> actionMap = new TreeMap<>();
-                if (isFocused()) {
-                    actionMap.putAll(initializer.tableActions.get());
-                }
-                if (newValue) {
-                    actionMap.putAll(initializer.elementActions.apply(row.getItem()));
-                }
-                final MenuItem[] items = MaridActions.contextMenu(actionMap);
+                final List<FxAction> actions = new ArrayList<>();
+                if (isFocused()) actions.addAll(initializer.tableActions.get());
+                if (newValue) actions.addAll(initializer.elementActions.apply(row.getItem()));
+                final MenuItem[] items = MaridActions.contextMenu(actions);
                 row.setContextMenu(items.length == 0 ? null : new ContextMenu(items));
             });
             return row;
@@ -79,11 +76,11 @@ public class MaridTableView<T> extends TableView<T> {
 
         protected final Set<SpecialAction> actions = Collections.newSetFromMap(new IdentityHashMap<>());
 
-        protected Supplier<Map<String, FxAction>> tableActions = Collections::emptyMap;
-        protected Function<T, Map<String, FxAction>> elementActions = e -> Collections.emptyMap();
+        protected Supplier<Collection<FxAction>> tableActions = Collections::emptyList;
+        protected Function<T, Collection<FxAction>> elementActions = e -> Collections.emptyList();
         protected Supplier<TableRow<T>> rowSupplier = TableRow::new;
 
-        public Initializer setElementActions(Function<T, Map<String, FxAction>> elementActions) {
+        public Initializer setElementActions(Function<T, Collection<FxAction>> elementActions) {
             this.elementActions = elementActions;
             return this;
         }
@@ -93,7 +90,7 @@ public class MaridTableView<T> extends TableView<T> {
             return this;
         }
 
-        public Initializer setTableActions(Supplier<Map<String, FxAction>> tableActions) {
+        public Initializer setTableActions(Supplier<Collection<FxAction>> tableActions) {
             this.tableActions = tableActions;
             return this;
         }
@@ -107,13 +104,13 @@ public class MaridTableView<T> extends TableView<T> {
             }
         }
 
-        protected void assign(Map<SpecialAction, Map<String, FxAction>> map) {
+        protected void assign(Map<SpecialAction, Collection<FxAction>> map) {
             map.forEach((k, v) -> {
                 k.reset();
                 if (v.size() == 1) {
-                    k.copy(v.values().iterator().next());
+                    k.copy(v.iterator().next());
                 } else {
-                    k.children.putAll(v);
+                    k.children.addAll(v);
                 }
                 k.update();
             });
@@ -121,22 +118,18 @@ public class MaridTableView<T> extends TableView<T> {
         }
 
         protected void onSelect(T e) {
-            final Map<String, FxAction> actionMap = new TreeMap<>();
+            final Collection<FxAction> actions = new ArrayList<>();
             if (isFocused()) {
-                actionMap.putAll(tableActions.get());
+                actions.addAll(tableActions.get());
             }
-            actionMap.putAll(elementActions.apply(e));
-            assign(group(actionMap));
+            actions.addAll(elementActions.apply(e));
+            assign(group(actions));
         }
 
-        protected Map<SpecialAction, Map<String, FxAction>> group(Map<String, FxAction> map) {
-            final Map<SpecialAction, Map<String, FxAction>> specialActionMap = new IdentityHashMap<>();
-            map.forEach((k, v) -> {
-                if (v.specialAction != null) {
-                    specialActionMap.computeIfAbsent(v.specialAction, a -> new LinkedHashMap<>()).put(k, v);
-                }
-            });
-            return specialActionMap;
+        protected Map<SpecialAction, Collection<FxAction>> group(Collection<FxAction> actions) {
+            return actions.stream()
+                    .filter(v -> v.specialAction != null)
+                    .collect(Collectors.groupingBy(v -> v.specialAction, Collectors.toCollection(ArrayList::new)));
         }
     }
 }

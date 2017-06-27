@@ -45,7 +45,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.Map;
+import java.util.Collection;
 import java.util.stream.Stream;
 
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -66,7 +66,7 @@ public class ModbusSourceConfiguration {
 
     @Bean
     @Modbus
-    public ToolBar topToolbar(@Modbus Map<String, FxAction> actionMap) {
+    public ToolBar topToolbar(@Modbus Collection<FxAction> actionMap) {
         return MaridActions.toolbar(actionMap);
     }
 
@@ -96,7 +96,7 @@ public class ModbusSourceConfiguration {
 
     @Bean
     @Modbus
-    public MenuBar menuBar(@Modbus Map<String, FxAction> actionMap) {
+    public MenuBar menuBar(@Modbus Collection<FxAction> actionMap) {
         return new MenuBar(MaridActions.menus(actionMap));
     }
 
