@@ -165,6 +165,6 @@ public class SpecialAction extends FxAction {
     }
 
     public void update() {
-        fireInvalidate(this);
+        listeners.forEach(l -> l.invalidated(this));
     }
 }

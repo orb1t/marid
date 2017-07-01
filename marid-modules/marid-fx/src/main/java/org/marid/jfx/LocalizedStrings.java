@@ -21,12 +21,16 @@
 
 package org.marid.jfx;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import org.marid.jfx.beans.OProp;
 
 import java.util.Locale;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.marid.l10n.L10n.s;
@@ -36,26 +40,46 @@ import static org.marid.l10n.L10n.s;
  */
 public class LocalizedStrings {
 
-    public static final OProp<Locale> LOCALE = new OProp<>("locale", Locale.getDefault());
+    public static final ObjectProperty<Locale> LOCALE = new SimpleObjectProperty<>(null, "locale", Locale.getDefault());
 
     public static ObservableValue<String> ls(String text, Object... args) {
-        return Bindings.createStringBinding(() -> s(LOCALE.get(), text, args), LOCALE);
+        final Observable[] observables = Stream.of(args)
+                .filter(Observable.class::isInstance)
+                .map(Observable.class::cast)
+                .toArray(Observable[]::new);
+        return value(() -> {
+            final Object[] params = Stream.of(args)
+                    .map(o -> o instanceof ObservableValue<?> ? ((ObservableValue<?>) o).getValue() : o)
+                    .toArray();
+            return s(LOCALE.get(), text, params);
+        }, observables);
     }
 
     public static ObservableValue<String> fls(String format, String text, Object... args) {
         return Bindings.createStringBinding(() -> String.format(format, s(LOCALE.get(), text, args)), LOCALE);
     }
 
-    public static ObservableValue<String> fs(String text, Object... args) {
-        final Observable[] observables = Stream.concat(
-                Stream.of(LOCALE),
-                Stream.of(args).filter(Observable.class::isInstance).map(Observable.class::cast)
-        ).toArray(Observable[]::new);
-        return Bindings.createStringBinding(() -> {
-            final Object[] params = Stream.of(args)
-                    .map(o -> o instanceof ObservableValue<?> ? ((ObservableValue<?>) o).getValue() : o)
-                    .toArray();
-            return s(LOCALE.get(), text, params);
-        }, observables);
+    private static ObservableValue<String> value(Supplier<String> supplier, Observable... observables) {
+        return new SimpleStringProperty(supplier.get()) {
+
+            private final InvalidationListener listener = o -> set(supplier.get());
+
+            {
+                LOCALE.addListener(listener);
+
+                for (final Observable observable : observables) {
+                    observable.addListener(listener);
+                }
+            }
+
+            @Override
+            protected void finalize() throws Throwable {
+                LOCALE.removeListener(listener);
+
+                for (final Observable observable : observables) {
+                    observable.removeListener(listener);
+                }
+            }
+        };
     }
 }

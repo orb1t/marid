@@ -20,24 +20,23 @@
 
 package org.marid.ide.model;
 
-import org.marid.jfx.beans.AbstractObservable;
-import org.marid.jfx.beans.OProp;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 import java.nio.file.Path;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class TextFile extends AbstractObservable {
+public class TextFile {
 
-    public final OProp<Path> path = new OProp<>("path");
+    public final ObjectProperty<Path> path = new SimpleObjectProperty<>(null, "path");
 
     public TextFile(Path path) {
         this.path.set(path);
-        this.path.addListener(o -> fireInvalidate(this));
     }
 
-    public OProp<Path> pathProperty() {
+    public ObjectProperty<Path> pathProperty() {
         return path;
     }
 

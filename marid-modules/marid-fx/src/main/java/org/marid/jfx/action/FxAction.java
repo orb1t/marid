@@ -22,6 +22,7 @@
 package org.marid.jfx.action;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
@@ -41,7 +42,6 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.text.Text;
 import org.jetbrains.annotations.PropertyKey;
 import org.marid.jfx.LocalizedStrings;
-import org.marid.jfx.beans.AbstractObservable;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -53,7 +53,9 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class FxAction extends AbstractObservable {
+public class FxAction implements Observable {
+
+    protected final List<InvalidationListener> listeners = new ArrayList<>();
 
     public final String toolbarGroup;
     public final String group;
@@ -260,6 +262,16 @@ public class FxAction extends AbstractObservable {
         addListener(new WeakInvalidationListener(updater));
         updater.invalidated(this);
         return button;
+    }
+
+    @Override
+    public void addListener(InvalidationListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(InvalidationListener listener) {
+        listeners.remove(listener);
     }
 
     @Override
