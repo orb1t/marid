@@ -45,7 +45,9 @@ import org.marid.jfx.LocalizedStrings;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
@@ -55,7 +57,7 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
  */
 public class FxAction implements Observable {
 
-    protected final List<InvalidationListener> listeners = new ArrayList<>();
+    protected final Collection<InvalidationListener> listeners = new ConcurrentLinkedQueue<>();
 
     public final String toolbarGroup;
     public final String group;
