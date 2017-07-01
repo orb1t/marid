@@ -22,7 +22,9 @@ package org.marid.ide.common;
 
 import javafx.scene.input.KeyCombination;
 import org.marid.jfx.action.SpecialAction;
+import org.marid.jfx.action.SpecialActions;
 import org.marid.spring.annotation.IdeAction;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Component;
  * @since 0.8
  */
 @Component
+@Import({SpecialActions.class})
 public class SpecialActionConfiguration {
 
     @IdeAction

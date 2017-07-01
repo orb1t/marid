@@ -44,6 +44,9 @@ public class OCleaner {
 
     static {
         TIMER.schedule(new MaridTimerTask(t -> {
+            System.gc();
+            System.runFinalization();
+            System.gc();
             final Queue<OCleanable> cleanables = new ConcurrentLinkedQueue<>();
             CLEANABLES.removeIf(ref -> {
                 final OCleanable c = ref.get();

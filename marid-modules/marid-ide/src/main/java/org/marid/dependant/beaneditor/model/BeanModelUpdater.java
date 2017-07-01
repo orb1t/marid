@@ -23,6 +23,7 @@ package org.marid.dependant.beaneditor.model;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -30,6 +31,8 @@ import org.marid.dependant.beaneditor.BeanEditorProperties;
 import org.marid.ide.model.Annotations;
 import org.marid.java.JavaFileHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
@@ -75,6 +78,8 @@ public class BeanModelUpdater {
                         final BeanFactoryMethod bfm = new BeanFactoryMethod(m);
                         final int index = -(Collections.binarySearch(beans, bfm) + 1);
                         beans.add(index, bfm);
+                        bfm.lazy.addListener((o, oV, nV) -> initLazy(bfm, nV));
+                        bfm.prototype.addListener((o, oV, nV) -> initPrototype(bfm, nV));
                         return bfm;
                     });
 
@@ -142,5 +147,37 @@ public class BeanModelUpdater {
 
     public ObservableList<BeanFactoryMethod> getBeans() {
         return beans;
+    }
+
+    public void initLazy(BeanFactoryMethod method, boolean lazy) {
+        final MethodDeclaration declaration = method.method.get();
+        final Optional<AnnotationExpr> a = declaration.getAnnotationByClass(Lazy.class);
+        if (lazy) {
+            if (!a.isPresent()) {
+                declaration.addAnnotation(Annotations.lazy());
+                holder.save();
+            }
+        } else {
+            if (a.isPresent()) {
+                declaration.remove(a.get());
+                holder.save();
+            }
+        }
+    }
+
+    public void initPrototype(BeanFactoryMethod method, boolean prototype) {
+        final MethodDeclaration declaration = method.method.get();
+        final Optional<AnnotationExpr> a = declaration.getAnnotationByClass(Scope.class);
+        if (prototype) {
+            if (!a.isPresent()) {
+                declaration.addAnnotation(Annotations.prototype());
+                holder.save();
+            }
+        } else {
+            if (a.isPresent()) {
+                declaration.remove(a.get());
+                holder.save();
+            }
+        }
     }
 }

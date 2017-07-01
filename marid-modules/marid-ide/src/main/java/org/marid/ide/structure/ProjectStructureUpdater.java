@@ -23,6 +23,7 @@ package org.marid.ide.structure;
 import org.marid.ide.common.Directories;
 import org.marid.ide.event.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.ContextStartedEvent;
@@ -38,10 +39,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.*;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.attribute.UserDefinedFileAttributeView;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -49,6 +47,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.nio.file.StandardWatchEventKinds.*;
+import static java.util.Comparator.comparing;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static org.marid.logging.Log.log;
@@ -119,7 +118,7 @@ public class ProjectStructureUpdater implements Closeable {
 
     private void onModify(Path path) throws IOException {
         try {
-            if (Files.isHidden(path)) {
+            if (Files.isHidden(path) || path.getFileName().toString().startsWith(".")) {
                 return;
             }
             eventQueue.add(new FileChangedEvent(path));
@@ -175,11 +174,16 @@ public class ProjectStructureUpdater implements Closeable {
 
     @Scheduled(fixedDelay = 100L)
     public void pollQueue() throws IOException {
+        final Comparator<FileChangedEvent> comparator = comparing(FileChangedEvent::getSource)
+                .thenComparingLong(ApplicationEvent::getTimestamp);
+        final TreeSet<FileChangedEvent> events = new TreeSet<>(comparator);
         for (final Iterator<PropagatedEvent> i = eventQueue.iterator(); i.hasNext(); ) {
             final PropagatedEvent event = i.next();
             if (event instanceof FileChangedEvent) {
                 final FileChangedEvent fileChangedEvent = (FileChangedEvent) event;
-                eventPublisher.publishEvent(fileChangedEvent);
+                if (events.add(fileChangedEvent)) {
+                    eventPublisher.publishEvent(fileChangedEvent);
+                }
                 i.remove();
             } else if (event instanceof FileAddedEvent) {
                 final FileAddedEvent fileAddedEvent = (FileAddedEvent) event;
@@ -250,7 +254,7 @@ public class ProjectStructureUpdater implements Closeable {
                 .putLong(8, uuid.getLeastSignificantBits());
         final int len = xa.write("marid-file-id", buffer);
         if (len != 16) {
-            throw new IllegalStateException("Unable to write marid-file-id to " + xa);
+            throw new IllegalStateException("Unable to writeAtomically marid-file-id to " + xa);
         }
         return uuid;
     }

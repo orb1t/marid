@@ -76,6 +76,7 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
             final Path relativePath = baseDir.relativize(javaFile.getPath());
             return StreamSupport.stream(relativePath.spliterator(), false)
                     .map(Path::toString)
+                    .map(p -> p.replace(".java", ""))
                     .collect(Collectors.joining(".", "[" + profile + "] ", ""));
         });
     }

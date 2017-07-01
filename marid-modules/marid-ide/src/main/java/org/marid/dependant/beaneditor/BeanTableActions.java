@@ -77,7 +77,8 @@ public class BeanTableActions {
                             .addAnnotation(Annotations.bean());
                     updater.save();
                 })
-                .bindText("Add a bean");
+                .bindText("Add a bean")
+                .setDisabled(false);
     }
 
     @Bean
@@ -85,7 +86,7 @@ public class BeanTableActions {
     public Function<BeanFactoryMethod, Collection<FxAction>> tableActions(
             @Qualifier("beanTable") List<Function<MethodDeclaration, FxAction>> suppliers) {
         return m -> suppliers.stream()
-                .map(f -> f.apply(m.method.get()))
+                .map(f -> f.apply(m == null ? null : m.method.get()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }

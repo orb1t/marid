@@ -125,4 +125,8 @@ public interface Annotations {
     static AnnotationExpr lazy() {
         return new MarkerAnnotationExpr(parseName(Lazy.class.getName()));
     }
+
+    static AnnotationExpr prototype() {
+        return new SingleMemberAnnotationExpr(parseName(Scope.class.getName()), new StringLiteralExpr("prototype"));
+    }
 }

@@ -82,7 +82,6 @@ public class JavaFileHolder {
     public void save() {
         try {
             Files.write(javaFile.getPath(), prettyPrinter.print(getCompilationUnit()).getBytes(UTF_8));
-            log(INFO, "Saved {0}", javaFile);
         } catch (IOException x) {
             log(WARNING, "Unable to save {0}", x, javaFile);
         }

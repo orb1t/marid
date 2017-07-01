@@ -29,7 +29,9 @@ import javafx.scene.control.TableView;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.action.SpecialAction;
+import org.marid.jfx.action.SpecialActions;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -40,9 +42,17 @@ import java.util.stream.Collectors;
  */
 public class MaridTableView<T> extends TableView<T> {
 
+    private final List<SpecialAction> specialActions = new ArrayList<>();
+
     public MaridTableView(ObservableList<T> list) {
         super(list);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
+    }
+
+    @Resource
+    public void setSpecialActions(SpecialActions specialActions) {
+        this.specialActions.clear();
+        this.specialActions.addAll(specialActions.getActionList());
     }
 
     protected void initialize(Initializer initializer) {
@@ -62,10 +72,7 @@ public class MaridTableView<T> extends TableView<T> {
             if (newValue) {
                 final Collection<FxAction> actions = initializer.tableActions.apply(null);
                 setContextMenu(new ContextMenu(MaridActions.contextMenu(actions)));
-                final T e = getSelectionModel().getSelectedItem();
-                if (e == null) {
-                    initializer.assign(initializer.group(actions));
-                }
+                initializer.assign(initializer.group(actions));
             } else {
                 setContextMenu(null);
                 initializer.reset(Collections.emptySet());
@@ -74,8 +81,6 @@ public class MaridTableView<T> extends TableView<T> {
     }
 
     public class Initializer {
-
-        final Set<SpecialAction> actions = Collections.newSetFromMap(new IdentityHashMap<>());
 
         Function<T, Collection<FxAction>> tableActions = e -> Collections.emptyList();
         Supplier<TableRow<T>> rowSupplier = TableRow::new;
@@ -91,7 +96,7 @@ public class MaridTableView<T> extends TableView<T> {
         }
 
         protected void reset(Set<SpecialAction> set) {
-            for (final SpecialAction action : actions) {
+            for (final SpecialAction action : specialActions) {
                 if (!set.contains(action)) {
                     action.reset();
                     action.update();
@@ -100,6 +105,10 @@ public class MaridTableView<T> extends TableView<T> {
         }
 
         void assign(Map<SpecialAction, Collection<FxAction>> map) {
+            specialActions.forEach(a -> {
+                a.reset();
+                a.update();
+            });
             map.forEach((k, v) -> {
                 k.reset();
                 if (v.size() == 1) {

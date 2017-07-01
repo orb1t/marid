@@ -29,7 +29,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.TreeItem.TreeModificationEvent;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import org.marid.ide.common.Directories;
-import org.marid.ide.common.SpecialActions;
+import org.marid.jfx.action.SpecialActions;
 import org.marid.ide.event.FileAddedEvent;
 import org.marid.ide.event.FileChangedEvent;
 import org.marid.ide.event.FileMovedEvent;

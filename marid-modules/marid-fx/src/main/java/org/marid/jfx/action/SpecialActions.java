@@ -18,46 +18,27 @@
  * #L%
  */
 
-package org.marid.ide.common;
+package org.marid.jfx.action;
 
 import javafx.scene.control.SelectionModel;
-import org.marid.jfx.action.FxAction;
-import org.marid.jfx.action.SpecialAction;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.function.BiConsumer;
+import java.util.*;
 import java.util.function.Function;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
 public class SpecialActions {
 
-    private final Map<String, SpecialAction> actionMap;
+    private final List<SpecialAction> actionList;
 
-    @Autowired
-    public SpecialActions(Map<String, SpecialAction> actionMap) {
-        this.actionMap = actionMap;
+    public SpecialActions(List<SpecialAction> actionList) {
+        this.actionList = actionList;
     }
 
-    public void forEach(BiConsumer<String, FxAction> consumer) {
-        actionMap.forEach(consumer);
-    }
-
-    public FxAction get(String name) {
-        return actionMap.get(name);
-    }
-
-    public <T> void setup(@Nonnull SelectionModel<T> selectionModel,
-                          @Nonnull Function<T, Collection<FxAction>> actions) {
-        selectionModel.selectedItemProperty().addListener((o, oV, nV) -> {
+    public <T> void setup(@Nonnull SelectionModel<T> model, @Nonnull Function<T, Collection<FxAction>> actions) {
+        model.selectedItemProperty().addListener((o, oV, nV) -> {
             final Collection<FxAction> map = actions.apply(nV);
             final Map<SpecialAction, Collection<FxAction>> specialActions = new IdentityHashMap<>();
             map.forEach(v -> {
@@ -77,15 +58,19 @@ public class SpecialActions {
                     k.update();
                 }
             });
-            actionMap.values().stream().filter(v -> !specialActions.containsKey(v)).forEach(a -> {
+            actionList.stream().filter(v -> !specialActions.containsKey(v)).forEach(a -> {
                 a.reset();
                 a.update();
             });
         });
     }
 
+    public List<SpecialAction> getActionList() {
+        return actionList;
+    }
+
     public void reset() {
-        actionMap.values().forEach(a -> {
+        actionList.forEach(a -> {
             a.reset();
             a.update();
         });
