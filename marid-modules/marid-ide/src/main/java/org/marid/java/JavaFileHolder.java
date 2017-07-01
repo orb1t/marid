@@ -1,16 +1,34 @@
+/*-
+ * #%L
+ * marid-ide
+ * %%
+ * Copyright (C) 2012 - 2017 MARID software development group
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package org.marid.java;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.printer.PrettyPrinter;
 import javafx.application.Platform;
+import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.marid.ide.event.TextFileChangedEvent;
 import org.marid.ide.event.TextFileMovedEvent;
 import org.marid.ide.model.TextFile;
@@ -20,8 +38,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Comparator;
-import java.util.stream.Collectors;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.logging.Level.INFO;
@@ -61,23 +79,21 @@ public class JavaFileHolder {
         }
     }
 
-    public ObservableList<MethodDeclaration> getBeans() {
-        return compilationUnit.get().getTypes().stream()
-                .filter(TypeDeclaration::isTopLevelType)
-                .filter(t -> !t.isNestedType())
-                .findFirst()
-                .map(t -> t.getMethods().stream()
-                        .sorted(Comparator.comparing(NodeWithSimpleName::getNameAsString))
-                        .collect(Collectors.toCollection(FXCollections::observableArrayList)))
-                .orElseGet(FXCollections::observableArrayList);
-    }
-
     public void save() {
         try {
             Files.write(javaFile.getPath(), prettyPrinter.print(getCompilationUnit()).getBytes(UTF_8));
+            log(INFO, "Saved {0}", javaFile);
         } catch (IOException x) {
             log(WARNING, "Unable to save {0}", x, javaFile);
         }
+    }
+
+    public <T> Binding<T> binding(Supplier<T> supplier) {
+        return Bindings.createObjectBinding(supplier::get, compilationUnit);
+    }
+
+    public BooleanBinding binding(BooleanSupplier supplier) {
+        return Bindings.createBooleanBinding(supplier::getAsBoolean, compilationUnit);
     }
 
     @EventListener(condition = "@javaFile.path.equals(#event.source)")

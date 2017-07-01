@@ -20,10 +20,10 @@
 
 package org.marid.dependant.beaneditor;
 
-import com.github.javaparser.ast.body.MethodDeclaration;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TableColumn;
-import org.marid.java.JavaFileHolder;
+import javafx.scene.control.cell.CheckBoxTableCell;
+import org.marid.dependant.beaneditor.model.BeanFactoryMethod;
+import org.marid.dependant.beaneditor.model.BeanModelUpdater;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.table.MaridTableView;
@@ -35,68 +35,69 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 import java.util.function.Function;
 
-import static org.marid.ide.model.Annotations.isLazy;
-import static org.marid.ide.model.Annotations.isPrototype;
-
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanTable extends MaridTableView<MethodDeclaration> {
+public class BeanTable extends MaridTableView<BeanFactoryMethod> {
 
     @Autowired
-    public BeanTable(JavaFileHolder holder) {
-        super(holder::getBeans, holder.compilationUnitProperty());
+    public BeanTable(BeanModelUpdater updater) {
+        super(updater.getBeans());
+        setEditable(true);
     }
 
     @Order(1)
     @Autowired
     private void nameColumn() {
-        final TableColumn<MethodDeclaration, String> column = new TableColumn<>();
+        final TableColumn<BeanFactoryMethod, String> column = new TableColumn<>();
         column.textProperty().bind(LocalizedStrings.ls("Name"));
         column.setMinWidth(200);
         column.setPrefWidth(250);
         column.setMaxWidth(800);
-        column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getNameAsString()));
+        column.setCellValueFactory(param -> param.getValue().name);
         getColumns().add(column);
     }
 
     @Order(2)
     @Autowired
     private void typeColumn() {
-        final TableColumn<MethodDeclaration, String> column = new TableColumn<>();
+        final TableColumn<BeanFactoryMethod, String> column = new TableColumn<>();
         column.textProperty().bind(LocalizedStrings.ls("Type"));
         column.setMinWidth(300);
         column.setPrefWidth(350);
         column.setMaxWidth(800);
-        column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getType().toString()));
+        column.setCellValueFactory(param -> param.getValue().type);
         getColumns().add(column);
     }
 
     @Order(3)
     @Autowired
     private void lazyColumn() {
-        final TableColumn<MethodDeclaration, String> column = new TableColumn<>("L");
-        column.setMinWidth(20);
-        column.setPrefWidth(24);
-        column.setMaxWidth(28);
-        column.setCellValueFactory(param -> new SimpleStringProperty(isLazy(param.getValue()) ? "\u25CF" : "\u25CB"));
+        final TableColumn<BeanFactoryMethod, Boolean> column = new TableColumn<>("L");
+        column.setMinWidth(28);
+        column.setPrefWidth(32);
+        column.setMaxWidth(38);
+        column.setEditable(true);
+        column.setCellValueFactory(param -> param.getValue().lazy);
+        column.setCellFactory(CheckBoxTableCell.forTableColumn(column));
         getColumns().add(column);
     }
 
     @Order(4)
     @Autowired
     private void prototypeColumn() {
-        final TableColumn<MethodDeclaration, String> column = new TableColumn<>("P");
-        column.setMinWidth(20);
-        column.setPrefWidth(24);
-        column.setMaxWidth(28);
-        column.setCellValueFactory(param -> new SimpleStringProperty(isPrototype(param.getValue()) ? "\u25CF" : "\u25CB"));
+        final TableColumn<BeanFactoryMethod, Boolean> column = new TableColumn<>("P");
+        column.setMinWidth(28);
+        column.setPrefWidth(32);
+        column.setMaxWidth(38);
+        column.setCellValueFactory(param -> param.getValue().prototype);
+        column.setCellFactory(CheckBoxTableCell.forTableColumn(column));
         getColumns().add(column);
     }
 
     @Autowired
-    private void initRowFactory(@Qualifier("beanTable") Function<MethodDeclaration, Collection<FxAction>> actions) {
+    private void rowFactory(@Qualifier("beanTable") Function<BeanFactoryMethod, Collection<FxAction>> actions) {
         initialize(new Initializer().setTableActions(actions));
     }
 }

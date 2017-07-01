@@ -21,8 +21,6 @@
 
 package org.marid.jfx.table;
 
-import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -32,7 +30,6 @@ import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.action.SpecialAction;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -45,14 +42,6 @@ public class MaridTableView<T> extends TableView<T> {
 
     public MaridTableView(ObservableList<T> list) {
         super(list);
-    }
-
-    public MaridTableView(Supplier<ObservableList<T>> listSupplier, Observable... observables) {
-        itemsProperty().bind(Bindings.createObjectBinding(listSupplier::get, observables));
-    }
-
-    @PostConstruct
-    protected void onInit() {
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
     }
 
