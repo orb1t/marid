@@ -25,12 +25,16 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.common.collect.ImmutableMap;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 
+import javax.annotation.Generated;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+
+import static com.github.javaparser.JavaParser.parseName;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -51,7 +55,7 @@ public interface Annotations {
     }
 
     static boolean isLazy(NodeWithAnnotations<?> node) {
-        return node.getAnnotationByName(Lazy.class.getName())
+        return node.getAnnotationByClass(Lazy.class)
                 .map(a -> {
                     final Map<String, Expression> map = getMembers(a);
                     if (map.isEmpty()) {
@@ -65,7 +69,7 @@ public interface Annotations {
     }
 
     static boolean isPrototype(NodeWithAnnotations<?> node) {
-        return node.getAnnotationByName(Scope.class.getName())
+        return node.getAnnotationByClass(Scope.class)
                 .map(a -> {
                     final Map<String, Expression> map = getMembers(a);
                     if (map.isEmpty()) {
@@ -79,7 +83,7 @@ public interface Annotations {
     }
 
     static String value(NodeWithAnnotations<?> node) {
-        return node.getAnnotationByName(Value.class.getName())
+        return node.getAnnotationByClass(Value.class)
                 .flatMap(a -> {
                     final Map<String, Expression> map = getMembers(a);
                     if (map.isEmpty()) {
@@ -95,7 +99,7 @@ public interface Annotations {
     }
 
     static String qualifier(NodeWithAnnotations<?> node) {
-        return node.getAnnotationByName(Qualifier.class.getName())
+        return node.getAnnotationByClass(Qualifier.class)
                 .flatMap(a -> {
                     final Map<String, Expression> map = getMembers(a);
                     if (map.isEmpty()) {
@@ -108,5 +112,17 @@ public interface Annotations {
                     }
                 })
                 .orElse(null);
+    }
+
+    static AnnotationExpr bean() {
+        return new MarkerAnnotationExpr(parseName(Bean.class.getName()));
+    }
+
+    static AnnotationExpr generated(String generator) {
+        return new SingleMemberAnnotationExpr(parseName(Generated.class.getName()), new StringLiteralExpr(generator));
+    }
+
+    static AnnotationExpr lazy() {
+        return new MarkerAnnotationExpr(parseName(Lazy.class.getName()));
     }
 }

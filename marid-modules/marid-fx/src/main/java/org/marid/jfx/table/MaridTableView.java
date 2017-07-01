@@ -21,6 +21,8 @@
 
 package org.marid.jfx.table;
 
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -30,6 +32,7 @@ import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.action.SpecialAction;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -42,6 +45,14 @@ public class MaridTableView<T> extends TableView<T> {
 
     public MaridTableView(ObservableList<T> list) {
         super(list);
+    }
+
+    public MaridTableView(Supplier<ObservableList<T>> listSupplier, Observable... observables) {
+        itemsProperty().bind(Bindings.createObjectBinding(listSupplier::get, observables));
+    }
+
+    @PostConstruct
+    protected void onInit() {
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
     }
 
@@ -49,21 +60,22 @@ public class MaridTableView<T> extends TableView<T> {
         setRowFactory(table -> {
             final TableRow<T> row = initializer.rowSupplier.get();
             row.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                final List<FxAction> actions = new ArrayList<>();
-                if (isFocused()) actions.addAll(initializer.tableActions.get());
-                if (newValue) actions.addAll(initializer.elementActions.apply(row.getItem()));
-                final MenuItem[] items = MaridActions.contextMenu(actions);
+                final MenuItem[] items = MaridActions.contextMenu(initializer.tableActions.apply(row.getItem()));
                 row.setContextMenu(items.length == 0 ? null : new ContextMenu(items));
             });
             return row;
         });
-        getSelectionModel().selectedItemProperty().addListener((o, oldValue, newValue) -> initializer.onSelect(newValue));
+        getSelectionModel().selectedItemProperty().addListener((o, oldValue, newValue) -> {
+            final Collection<FxAction> actions = initializer.tableActions.apply(newValue);
+            initializer.assign(initializer.group(actions));
+        });
         focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                setContextMenu(new ContextMenu(MaridActions.contextMenu(initializer.tableActions.get())));
+                final Collection<FxAction> actions = initializer.tableActions.apply(null);
+                setContextMenu(new ContextMenu(MaridActions.contextMenu(actions)));
                 final T e = getSelectionModel().getSelectedItem();
                 if (e == null) {
-                    initializer.assign(initializer.group(initializer.tableActions.get()));
+                    initializer.assign(initializer.group(actions));
                 }
             } else {
                 setContextMenu(null);
@@ -74,23 +86,17 @@ public class MaridTableView<T> extends TableView<T> {
 
     public class Initializer {
 
-        protected final Set<SpecialAction> actions = Collections.newSetFromMap(new IdentityHashMap<>());
+        final Set<SpecialAction> actions = Collections.newSetFromMap(new IdentityHashMap<>());
 
-        protected Supplier<Collection<FxAction>> tableActions = Collections::emptyList;
-        protected Function<T, Collection<FxAction>> elementActions = e -> Collections.emptyList();
-        protected Supplier<TableRow<T>> rowSupplier = TableRow::new;
-
-        public Initializer setElementActions(Function<T, Collection<FxAction>> elementActions) {
-            this.elementActions = elementActions;
-            return this;
-        }
+        Function<T, Collection<FxAction>> tableActions = e -> Collections.emptyList();
+        Supplier<TableRow<T>> rowSupplier = TableRow::new;
 
         public Initializer setRowSupplier(Supplier<TableRow<T>> rowSupplier) {
             this.rowSupplier = rowSupplier;
             return this;
         }
 
-        public Initializer setTableActions(Supplier<Collection<FxAction>> tableActions) {
+        public Initializer setTableActions(Function<T, Collection<FxAction>> tableActions) {
             this.tableActions = tableActions;
             return this;
         }
@@ -104,7 +110,7 @@ public class MaridTableView<T> extends TableView<T> {
             }
         }
 
-        protected void assign(Map<SpecialAction, Collection<FxAction>> map) {
+        void assign(Map<SpecialAction, Collection<FxAction>> map) {
             map.forEach((k, v) -> {
                 k.reset();
                 if (v.size() == 1) {
@@ -115,15 +121,6 @@ public class MaridTableView<T> extends TableView<T> {
                 k.update();
             });
             reset(map.keySet());
-        }
-
-        protected void onSelect(T e) {
-            final Collection<FxAction> actions = new ArrayList<>();
-            if (isFocused()) {
-                actions.addAll(tableActions.get());
-            }
-            actions.addAll(elementActions.apply(e));
-            assign(group(actions));
         }
 
         protected Map<SpecialAction, Collection<FxAction>> group(Collection<FxAction> actions) {

@@ -32,10 +32,12 @@ import org.marid.ide.event.TextFileMovedEvent;
 import org.marid.ide.event.TextFileRemovedEvent;
 import org.marid.ide.model.TextFile;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.java.JavaFileHolder;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -51,6 +53,7 @@ import static org.marid.ide.common.IdeShapes.circle;
  */
 @Component
 @ComponentScan
+@Import({JavaFileHolder.class})
 public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorParam> {
 
     @Bean

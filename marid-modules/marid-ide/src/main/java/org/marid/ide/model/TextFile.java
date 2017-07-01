@@ -65,4 +65,9 @@ public class TextFile extends AbstractObservable {
             return that.path.get().equals(path.get());
         }
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(path.get());
+    }
 }

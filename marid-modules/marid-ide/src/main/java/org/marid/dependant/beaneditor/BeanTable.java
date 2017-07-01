@@ -23,12 +23,17 @@ package org.marid.dependant.beaneditor;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
+import org.marid.java.JavaFileHolder;
 import org.marid.jfx.LocalizedStrings;
+import org.marid.jfx.action.FxAction;
 import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.function.Function;
 
 import static org.marid.ide.model.Annotations.isLazy;
 import static org.marid.ide.model.Annotations.isPrototype;
@@ -40,8 +45,8 @@ import static org.marid.ide.model.Annotations.isPrototype;
 public class BeanTable extends MaridTableView<MethodDeclaration> {
 
     @Autowired
-    public BeanTable(BeanEditorUpdater beanEditorUpdater) {
-        super(beanEditorUpdater.getBeans());
+    public BeanTable(JavaFileHolder holder) {
+        super(holder::getBeans, holder.compilationUnitProperty());
     }
 
     @Order(1)
@@ -91,7 +96,7 @@ public class BeanTable extends MaridTableView<MethodDeclaration> {
     }
 
     @Autowired
-    private void initRowFactory(BeanTableActions actions) {
-        initialize(new Initializer());
+    private void initRowFactory(@Qualifier("beanTable") Function<MethodDeclaration, Collection<FxAction>> actions) {
+        initialize(new Initializer().setTableActions(actions));
     }
 }

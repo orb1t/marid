@@ -105,7 +105,13 @@ public class BeanPropertyTable extends TableView<Pair<String, String>> {
 
     @Autowired
     private void init(BeanEditorProperties properties, BeanTable beanTable) {
-        beanTable.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> init(properties, nV));
+        beanTable.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> {
+            if (nV == null) {
+                getItems().clear();
+            } else {
+                init(properties, nV);
+            }
+        });
         properties.properties.addListener((MapChangeListener<String, String>) change -> {
             final MethodDeclaration method = beanTable.getSelectionModel().getSelectedItem();
             if (method != null) {

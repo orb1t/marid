@@ -23,7 +23,6 @@ package org.marid.ide.common;
 import javafx.scene.input.KeyCombination;
 import org.marid.jfx.action.SpecialAction;
 import org.marid.spring.annotation.IdeAction;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -34,7 +33,6 @@ import org.springframework.stereotype.Component;
 public class SpecialActionConfiguration {
 
     @IdeAction
-    @Qualifier("specialAction")
     public SpecialAction editAction() {
         return new SpecialAction("edit", "ed", "Edit")
                 .bindText("Edit")
@@ -44,7 +42,6 @@ public class SpecialActionConfiguration {
     }
 
     @IdeAction
-    @Qualifier("specialAction")
     public SpecialAction addAction() {
         return new SpecialAction("mod", "mod", "Edit")
                 .bindText("Add")
@@ -54,7 +51,6 @@ public class SpecialActionConfiguration {
     }
 
     @IdeAction
-    @Qualifier("specialAction")
     public SpecialAction removeAction() {
         return new SpecialAction("mod", "mod", "Edit")
                 .bindText("Remove")
@@ -64,7 +60,6 @@ public class SpecialActionConfiguration {
     }
 
     @IdeAction
-    @Qualifier("specialAction")
     public SpecialAction cutAction() {
         return new SpecialAction("cp", "cp", "Edit")
                 .bindText("Cut")
@@ -74,7 +69,6 @@ public class SpecialActionConfiguration {
     }
 
     @IdeAction
-    @Qualifier("specialAction")
     public SpecialAction copyAction() {
         return new SpecialAction("cp", "cp", "Edit")
                 .bindText("Copy")
@@ -84,7 +78,6 @@ public class SpecialActionConfiguration {
     }
 
     @IdeAction
-    @Qualifier("specialAction")
     public SpecialAction pasteAction() {
         return new SpecialAction("cp", "cp", "Edit")
                 .bindText("Paste")
@@ -94,7 +87,6 @@ public class SpecialActionConfiguration {
     }
 
     @IdeAction
-    @Qualifier("specialAction")
     public SpecialAction clearAllAction() {
         return new SpecialAction("mod", "mod", "Edit")
                 .bindText("Clear All")
@@ -103,7 +95,6 @@ public class SpecialActionConfiguration {
     }
 
     @IdeAction
-    @Qualifier("specialAction")
     public SpecialAction renameAction() {
         return new SpecialAction("edit", "ed", "Edit")
                 .bindText("Rename")
@@ -113,7 +104,6 @@ public class SpecialActionConfiguration {
     }
 
     @IdeAction
-    @Qualifier("specialAction")
     public SpecialAction selectAllAction() {
         return new SpecialAction("sel", "sel", "Edit")
                 .bindText("Select All")

@@ -22,12 +22,9 @@ package org.marid.ide.structure.editor;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.expr.Name;
-import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
-import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.printer.PrettyPrinter;
 import javafx.scene.control.TextInputDialog;
+import org.marid.ide.model.Annotations;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.SpecialAction;
@@ -109,13 +106,10 @@ public class AddBeanFileEditor extends AbstractFileEditor<ProjectProfile> {
                 .map(Path::toString)
                 .collect(Collectors.joining("."));
 
-        final CompilationUnit compilationUnit = new CompilationUnit(packageName);
-        compilationUnit.addImport(Generated.class);
-
-        final ClassOrInterfaceDeclaration klass = compilationUnit.addClass(javaFileName, Modifier.PUBLIC);
-        klass.addAnnotation(new SingleMemberAnnotationExpr(new Name("Generated"), new StringLiteralExpr("Marid")));
-
-        final String source = prettyPrinter.print(compilationUnit);
+        final String source = prettyPrinter.print(new CompilationUnit(packageName)
+                .addClass(javaFileName, Modifier.PUBLIC)
+                .addAnnotation(Annotations.generated("org.marid"))
+        );
 
         final Path path = file.resolve(javaFileName + ".java");
         try {

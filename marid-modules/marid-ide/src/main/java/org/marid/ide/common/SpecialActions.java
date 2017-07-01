@@ -24,7 +24,6 @@ import javafx.scene.control.SelectionModel;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -44,7 +43,7 @@ public class SpecialActions {
     private final Map<String, SpecialAction> actionMap;
 
     @Autowired
-    public SpecialActions(@Qualifier("specialAction") Map<String, SpecialAction> actionMap) {
+    public SpecialActions(Map<String, SpecialAction> actionMap) {
         this.actionMap = actionMap;
     }
 
