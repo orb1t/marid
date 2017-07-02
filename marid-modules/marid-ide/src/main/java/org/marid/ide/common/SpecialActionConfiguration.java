@@ -24,16 +24,22 @@ import javafx.scene.input.KeyCombination;
 import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.action.SpecialActions;
 import org.marid.spring.annotation.IdeAction;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
  */
 @Component
-@Import({SpecialActions.class})
 public class SpecialActionConfiguration {
+
+    @Bean
+    public SpecialActions specialActions(List<SpecialAction> specialActions) {
+        return new SpecialActions(specialActions);
+    }
 
     @IdeAction
     public SpecialAction editAction() {

@@ -21,15 +21,16 @@
 package org.marid.ide.panes.structure;
 
 import javafx.application.Platform;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.Event;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeItem.TreeModificationEvent;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import org.marid.ide.common.Directories;
-import org.marid.jfx.action.SpecialActions;
 import org.marid.ide.event.FileAddedEvent;
 import org.marid.ide.event.FileChangedEvent;
 import org.marid.ide.event.FileMovedEvent;
@@ -39,7 +40,7 @@ import org.marid.ide.structure.editor.FileEditor;
 import org.marid.ide.structure.icons.FileIcons;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.action.MaridActions;
+import org.marid.jfx.table.MaridTreeTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -50,7 +51,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.logging.Level.WARNING;
@@ -61,12 +61,11 @@ import static org.marid.logging.Log.log;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class ProjectStructureTree extends TreeTableView<Path> {
+public class ProjectStructureTree extends MaridTreeTableView<Path> {
 
     @Autowired
     public ProjectStructureTree(Directories directories) {
         super(new TreeItem<>(directories.getProfiles()));
-        setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
         getRoot().setExpanded(true);
         getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     }
@@ -129,8 +128,8 @@ public class ProjectStructureTree extends TreeTableView<Path> {
     }
 
     @Autowired
-    private void initRowFactory(Map<String, FileEditor> fileEditors, SpecialActions specialActions) {
-        final Function<TreeItem<Path>, Collection<FxAction>> function = item -> {
+    private void init(Map<String, FileEditor> fileEditors) {
+        initialize(new Initializer().setTableActions(item -> {
             if (item == null) {
                 return Collections.emptyList();
             }
@@ -145,32 +144,14 @@ public class ProjectStructureTree extends TreeTableView<Path> {
                     map.add(new FxAction(name, editor.getGroup(), "Actions")
                             .bindText(LocalizedStrings.ls(editor.getName()))
                             .bindIcon(new SimpleStringProperty(editor.getIcon()))
-                            .bindDisabled(new SimpleBooleanProperty(false))
+                            .setDisabled(false)
                             .setSpecialAction(editor.getSpecialAction())
                             .setEventHandler(e -> task.run())
                     );
                 }
             });
             return map;
-        };
-        specialActions.setup(getSelectionModel(), function);
-        setRowFactory(param -> {
-            final TreeTableRow<Path> row = new TreeTableRow<>();
-            row.focusedProperty().addListener((o, oV, nV) -> {
-                if (nV) {
-                    final Collection<FxAction> actionMap = function.apply(row.getTreeItem());
-                    row.setContextMenu(new ContextMenu(MaridActions.contextMenu(actionMap)));
-                } else {
-                    row.setContextMenu(null);
-                }
-            });
-            return row;
-        });
-        focusedProperty().addListener((o, oV, nV) -> {
-            if (!nV) {
-                specialActions.reset();
-            }
-        });
+        }));
     }
 
     @Autowired

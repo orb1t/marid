@@ -21,11 +21,9 @@
 
 package org.marid.jfx.action;
 
-import javafx.scene.control.SelectionModel;
-
-import javax.annotation.Nonnull;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,34 +36,6 @@ public class SpecialActions {
         this.actionList = actionList;
     }
 
-    public <T> void setup(@Nonnull SelectionModel<T> model, @Nonnull Function<T, Collection<FxAction>> actions) {
-        model.selectedItemProperty().addListener((o, oV, nV) -> {
-            final Collection<FxAction> map = actions.apply(nV);
-            final Map<SpecialAction, Collection<FxAction>> specialActions = new IdentityHashMap<>();
-            map.forEach(v -> {
-                if (v.specialAction != null) {
-                    specialActions.computeIfAbsent(v.specialAction, key -> new ArrayList<>()).add(v);
-                }
-            });
-            specialActions.forEach((k, v) -> {
-                if (v.size() == 1) {
-                    final FxAction action = v.iterator().next();
-                    k.reset();
-                    k.copy(action);
-                    k.update();
-                } else {
-                    k.reset();
-                    k.children.addAll(v);
-                    k.update();
-                }
-            });
-            actionList.stream().filter(v -> !specialActions.containsKey(v)).forEach(a -> {
-                a.reset();
-                a.update();
-            });
-        });
-    }
-
     public List<SpecialAction> getActionList() {
         return actionList;
     }
@@ -74,6 +44,19 @@ public class SpecialActions {
         actionList.forEach(a -> {
             a.reset();
             a.update();
+        });
+    }
+
+    public void assign(Map<SpecialAction, Collection<FxAction>> map) {
+        reset();
+        map.forEach((k, v) -> {
+            k.reset();
+            if (v.size() == 1) {
+                k.copy(v.iterator().next());
+            } else {
+                k.children.addAll(v);
+            }
+            k.update();
         });
     }
 }

@@ -21,11 +21,7 @@
 
 package org.marid.jfx.table;
 
-import javafx.collections.ObservableList;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.action.SpecialAction;
@@ -43,10 +39,10 @@ import java.util.stream.Collectors;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridTableView<T> extends TableView<T> {
+public class MaridTreeTableView<T> extends TreeTableView<T> {
 
-    public MaridTableView(ObservableList<T> list) {
-        super(list);
+    public MaridTreeTableView(TreeItem<T> root) {
+        super(root);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
     }
 
@@ -61,10 +57,10 @@ public class MaridTableView<T> extends TableView<T> {
 
     protected void initialize(Initializer initializer) {
         setRowFactory(table -> {
-            final TableRow<T> row = initializer.rowSupplier.get();
+            final TreeTableRow<T> row = initializer.rowSupplier.get();
             row.selectedProperty().addListener((o, oV, nV) -> {
                 if (nV) {
-                    final Collection<FxAction> actions = initializer.tableActions.apply(row.getItem());
+                    final Collection<FxAction> actions = initializer.tableActions.apply(row.getTreeItem());
                     final MenuItem[] items = MaridActions.contextMenu(actions);
                     row.setContextMenu(items.length == 0 ? null : new ContextMenu(items));
                     getSpecialActions().assign(initializer.group(actions));
@@ -77,7 +73,7 @@ public class MaridTableView<T> extends TableView<T> {
         focusedProperty().addListener((o, oV, nV) -> {
             if (nV) {
                 if (getSelectionModel().isEmpty()) {
-                    final Collection<FxAction> actions = initializer.tableActions.apply(null);
+                    final Collection<FxAction> actions = initializer.tableActions.apply(new TreeItem<>());
                     getSpecialActions().assign(initializer.group(actions));
                     setContextMenu(new ContextMenu(MaridActions.contextMenu(actions)));
                 }
@@ -89,15 +85,15 @@ public class MaridTableView<T> extends TableView<T> {
 
     public class Initializer {
 
-        Function<T, Collection<FxAction>> tableActions = e -> Collections.emptyList();
-        Supplier<TableRow<T>> rowSupplier = TableRow::new;
+        Function<TreeItem<T>, Collection<FxAction>> tableActions = e -> Collections.emptyList();
+        Supplier<TreeTableRow<T>> rowSupplier = TreeTableRow::new;
 
-        public Initializer setRowSupplier(Supplier<TableRow<T>> rowSupplier) {
+        public Initializer setRowSupplier(Supplier<TreeTableRow<T>> rowSupplier) {
             this.rowSupplier = rowSupplier;
             return this;
         }
 
-        public Initializer setTableActions(Function<T, Collection<FxAction>> tableActions) {
+        public Initializer setTableActions(Function<TreeItem<T>, Collection<FxAction>> tableActions) {
             this.tableActions = tableActions;
             return this;
         }

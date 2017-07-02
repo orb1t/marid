@@ -238,28 +238,33 @@ public class FxAction implements Observable {
     }
 
     public Button button() {
-        final ArrayList<Runnable> updaters = new ArrayList<>();
         final Button button = new Button();
-        button.setFocusTraversable(false);
-        updaters.add(() -> {
+        final InvalidationListener updater = o -> {
             if (children.isEmpty()) {
                 button.disableProperty().unbind(); button.disableProperty().set(false);
                 button.onActionProperty().unbind(); button.onActionProperty().set(null);
                 if (disabled != null) button.disableProperty().bind(disabled);
                 if (eventHandler != null) button.onActionProperty().bind(eventHandler);
             } else {
-                button.disableProperty().bind(Bindings.createBooleanBinding(() -> false));
-                button.onActionProperty().bind(Bindings.createObjectBinding(() -> event -> {
+                button.disableProperty().unbind(); button.disableProperty().set(false);
+                button.onActionProperty().unbind(); button.setOnAction(event -> {
                     final ContextMenu contextMenu = new ContextMenu(MaridActions.contextMenu(children));
                     contextMenu.show(button, Side.BOTTOM, 0, 0);
-                }));
+                });
             }
             button.graphicProperty().unbind(); button.graphicProperty().set(null);
             button.tooltipProperty().unbind(); button.tooltipProperty().set(null);
             if (icon != null) button.graphicProperty().bind(icon(20));
-            if (hint != null) button.tooltipProperty().bind(hint);
-        });
-        final InvalidationListener updater = o -> updaters.forEach(Runnable::run);
+            if (hint != null) {
+                button.tooltipProperty().bind(hint);
+            } else if (text != null) {
+                button.tooltipProperty().bind(Bindings.createObjectBinding(() -> {
+                    final Tooltip tooltip = new Tooltip();
+                    tooltip.setText(text.getValue());
+                    return tooltip;
+                }, text));
+            }
+        };
         button.setUserData(updater);
         addListener(new WeakInvalidationListener(updater));
         updater.invalidated(this);
