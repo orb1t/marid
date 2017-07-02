@@ -63,6 +63,9 @@ public class MaridTableView<T> extends TableView<T> {
         setRowFactory(table -> {
             final TableRow<T> row = initializer.rowSupplier.get();
             row.selectedProperty().addListener((o, oV, nV) -> {
+                if (!isFocused()) {
+                    return;
+                }
                 if (nV) {
                     final Collection<FxAction> actions = initializer.tableActions.apply(row.getItem());
                     final MenuItem[] items = MaridActions.contextMenu(actions);
@@ -70,6 +73,7 @@ public class MaridTableView<T> extends TableView<T> {
                     getSpecialActions().assign(initializer.group(actions));
                 } else {
                     row.setContextMenu(null);
+                    getSpecialActions().reset();
                 }
             });
             return row;

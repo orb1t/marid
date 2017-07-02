@@ -59,6 +59,9 @@ public class MaridTreeTableView<T> extends TreeTableView<T> {
         setRowFactory(table -> {
             final TreeTableRow<T> row = initializer.rowSupplier.get();
             row.selectedProperty().addListener((o, oV, nV) -> {
+                if (!isFocused()) {
+                    return;
+                }
                 if (nV) {
                     final Collection<FxAction> actions = initializer.tableActions.apply(row.getTreeItem());
                     final MenuItem[] items = MaridActions.contextMenu(actions);
@@ -79,6 +82,7 @@ public class MaridTreeTableView<T> extends TreeTableView<T> {
                 }
             } else {
                 setContextMenu(null);
+                getSpecialActions().reset();
             }
         });
     }
