@@ -18,30 +18,21 @@
  * #L%
  */
 
-package org.marid.dependant.beaneditor;
+package org.marid.dependant.beaneditor.beans;
 
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
-import org.marid.dependant.beaneditor.model.BeanFactoryMethod;
 import org.marid.ide.model.Annotations;
 import org.marid.java.JavaFileHolder;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -57,9 +48,8 @@ public class BeanTableActions {
     }
 
     @Bean
-    @Qualifier("beanTable")
-    public Function<MethodDeclaration, FxAction> addActionSupplier(SpecialAction addAction) {
-        return m -> new FxAction("beans", "beans", "beans")
+    public MethodActionSupplier addActionSupplier(SpecialAction addAction) {
+        return (bfm, md) -> new FxAction("beans", "beans", "beans")
                 .setSpecialAction(addAction)
                 .setEventHandler(event -> {
                     final ClassOrInterfaceDeclaration type = updater.getCompilationUnit().getTypes().stream()
@@ -79,15 +69,5 @@ public class BeanTableActions {
                 })
                 .bindText("Add a bean")
                 .setDisabled(false);
-    }
-
-    @Bean
-    @Qualifier("beanTable")
-    public Function<BeanFactoryMethod, Collection<FxAction>> tableActions(
-            @Qualifier("beanTable") List<Function<MethodDeclaration, FxAction>> suppliers) {
-        return m -> suppliers.stream()
-                .map(f -> f.apply(m == null ? null : m.method.get()))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
     }
 }

@@ -18,10 +18,11 @@
  * #L%
  */
 
-package org.marid.dependant.beaneditor;
+package org.marid.dependant.beaneditor.parameters;
 
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import org.marid.dependant.beaneditor.beans.BeanTable;
 import org.marid.dependant.beaneditor.model.BeanParameter;
 import org.marid.jfx.LocalizedStrings;
 import org.springframework.beans.factory.annotation.Autowired;

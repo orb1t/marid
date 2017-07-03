@@ -80,11 +80,9 @@ public class MaridTableView<T> extends TableView<T> {
         });
         focusedProperty().addListener((o, oV, nV) -> {
             if (nV) {
-                if (getSelectionModel().isEmpty()) {
-                    final Collection<FxAction> actions = initializer.tableActions.apply(null);
-                    getSpecialActions().assign(initializer.group(actions));
-                    setContextMenu(new ContextMenu(MaridActions.contextMenu(actions)));
-                }
+                final Collection<FxAction> actions = initializer.tableActions.apply(null);
+                getSpecialActions().assign(initializer.group(actions));
+                setContextMenu(new ContextMenu(MaridActions.contextMenu(actions)));
             } else {
                 setContextMenu(null);
             }

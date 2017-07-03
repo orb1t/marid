@@ -27,7 +27,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.marid.dependant.beaneditor.BeanEditorProperties;
+import org.marid.dependant.beaneditor.properties.BeanEditorProperties;
 import org.marid.ide.model.Annotations;
 import org.marid.java.JavaFileHolder;
 import org.springframework.beans.factory.annotation.Autowired;

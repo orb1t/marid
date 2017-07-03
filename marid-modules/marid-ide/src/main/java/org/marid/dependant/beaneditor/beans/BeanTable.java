@@ -18,22 +18,21 @@
  * #L%
  */
 
-package org.marid.dependant.beaneditor;
+package org.marid.dependant.beaneditor.beans;
 
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import org.marid.dependant.beaneditor.model.BeanFactoryMethod;
 import org.marid.dependant.beaneditor.model.BeanModelUpdater;
 import org.marid.jfx.LocalizedStrings;
-import org.marid.jfx.action.FxAction;
 import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.function.Function;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -97,7 +96,11 @@ public class BeanTable extends MaridTableView<BeanFactoryMethod> {
     }
 
     @Autowired
-    private void rowFactory(@Qualifier("beanTable") Function<BeanFactoryMethod, Collection<FxAction>> actions) {
-        initialize(new Initializer().setTableActions(actions));
+    private void rowFactory(List<MethodActionSupplier> actions) {
+        initialize(new Initializer().setTableActions(e -> actions.stream()
+                .map(a -> a.apply(e))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList())
+        ));
     }
 }

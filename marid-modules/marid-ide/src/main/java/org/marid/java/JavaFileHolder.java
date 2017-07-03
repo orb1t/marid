@@ -32,6 +32,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import org.marid.ide.event.TextFileChangedEvent;
 import org.marid.ide.event.TextFileMovedEvent;
 import org.marid.ide.model.TextFile;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -56,6 +57,7 @@ public class JavaFileHolder {
     private final PrettyPrinter prettyPrinter;
     private final ObjectProperty<CompilationUnit> compilationUnit = new SimpleObjectProperty<>();
 
+    @Autowired
     public JavaFileHolder(TextFile javaFile, PrettyPrinter prettyPrinter) {
         this.javaFile = javaFile;
         this.prettyPrinter = prettyPrinter;

@@ -27,8 +27,10 @@ import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.HBox;
+import org.marid.dependant.beaneditor.beans.BeanTable;
+import org.marid.dependant.beaneditor.parameters.BeanParameterTable;
+import org.marid.dependant.beaneditor.properties.BeanPropertyTable;
 import org.marid.ide.common.IdeShapes;
-import org.marid.ide.event.TextFileMovedEvent;
 import org.marid.ide.event.TextFileRemovedEvent;
 import org.marid.ide.model.TextFile;
 import org.marid.ide.project.ProjectProfile;
@@ -107,15 +109,6 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
         return event -> {
             if (javaFile.getPath().equals(event.getSource())) {
                 Platform.runLater(ctx::close);
-            }
-        };
-    }
-
-    @Bean
-    private ApplicationListener<TextFileMovedEvent> renameListener(TextFile file) {
-        return event -> {
-            if (file.getPath().equals(event.getSource())) {
-                Platform.runLater(() -> file.path.set(event.getTarget()));
             }
         };
     }

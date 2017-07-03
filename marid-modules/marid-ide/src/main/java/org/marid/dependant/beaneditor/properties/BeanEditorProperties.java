@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.dependant.beaneditor;
+package org.marid.dependant.beaneditor.properties;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
