@@ -21,17 +21,23 @@
 
 package org.marid.jfx.table;
 
+import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.*;
+import javafx.scene.input.ContextMenuEvent;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
-import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.action.SpecialActions;
 
-import javax.annotation.Resource;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -41,71 +47,55 @@ import java.util.stream.Collectors;
  */
 public class MaridTreeTableView<T> extends TreeTableView<T> {
 
-    public MaridTreeTableView(TreeItem<T> root) {
+    protected final ObjectProperty<Supplier<TreeTableRow<T>>> rowSupplier = new SimpleObjectProperty<>(TreeTableRow::new);
+    protected final ObservableList<Function<TreeItem<T>, FxAction>> actions = FXCollections.observableArrayList();
+    protected final SpecialActions specialActions;
+    protected final List<Observable> observables = new ArrayList<>();
+
+    public MaridTreeTableView(TreeItem<T> root, SpecialActions specialActions) {
         super(root);
+        this.specialActions = specialActions;
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
     }
 
-    @Resource
-    public void setSpecialActions(SpecialActions specialActions) {
-        getProperties().put("#specialActions", specialActions);
-    }
-
-    public SpecialActions getSpecialActions() {
-        return (SpecialActions) getProperties().get("#specialActions");
-    }
-
-    protected void initialize(Initializer initializer) {
-        setRowFactory(table -> {
-            final TreeTableRow<T> row = initializer.rowSupplier.get();
-            row.selectedProperty().addListener((o, oV, nV) -> {
-                if (!isFocused()) {
-                    return;
-                }
-                if (nV) {
-                    final Collection<FxAction> actions = initializer.tableActions.apply(row.getTreeItem());
-                    final MenuItem[] items = MaridActions.contextMenu(actions);
-                    row.setContextMenu(items.length == 0 ? null : new ContextMenu(items));
-                    getSpecialActions().assign(initializer.group(actions));
-                } else {
-                    row.setContextMenu(null);
-                }
+    @PostConstruct
+    protected void initialize() {
+        observables.forEach(o -> o.addListener(this::onInvalidate));
+        setRowFactory(param -> {
+            final TreeTableRow<T> row = rowSupplier.get().get();
+            row.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
+                final Collection<FxAction> fxActions = actions(row.getTreeItem());
+                row.setContextMenu(fxActions.isEmpty() ? null : new ContextMenu(MaridActions.contextMenu(fxActions)));
             });
             return row;
         });
+        addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
+            final Collection<FxAction> fxActions = actions(new TreeItem<>());
+            setContextMenu(fxActions.isEmpty() ? null : new ContextMenu(MaridActions.contextMenu(fxActions)));
+        });
+        getSelectionModel().selectedItemProperty().addListener(this::onInvalidate);
         focusedProperty().addListener((o, oV, nV) -> {
             if (nV) {
-                if (getSelectionModel().isEmpty()) {
-                    final Collection<FxAction> actions = initializer.tableActions.apply(new TreeItem<>());
-                    getSpecialActions().assign(initializer.group(actions));
-                    setContextMenu(new ContextMenu(MaridActions.contextMenu(actions)));
-                }
+                onInvalidate(o);
             } else {
-                setContextMenu(null);
-                getSpecialActions().reset();
+                specialActions.reset();
             }
         });
     }
 
-    public class Initializer {
+    private Collection<FxAction> actions(TreeItem<T> element) {
+        return actions.stream()
+                .map(a -> a.apply(element))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
 
-        Function<TreeItem<T>, Collection<FxAction>> tableActions = e -> Collections.emptyList();
-        Supplier<TreeTableRow<T>> rowSupplier = TreeTableRow::new;
+    @PreDestroy
+    protected void onDestroy() {
+        observables.forEach(o -> o.removeListener(this::onInvalidate));
+    }
 
-        public Initializer setRowSupplier(Supplier<TreeTableRow<T>> rowSupplier) {
-            this.rowSupplier = rowSupplier;
-            return this;
-        }
-
-        public Initializer setTableActions(Function<TreeItem<T>, Collection<FxAction>> tableActions) {
-            this.tableActions = tableActions;
-            return this;
-        }
-
-        protected Map<SpecialAction, Collection<FxAction>> group(Collection<FxAction> actions) {
-            return actions.stream()
-                    .filter(v -> v.specialAction != null)
-                    .collect(Collectors.groupingBy(v -> v.specialAction, Collectors.toCollection(ArrayList::new)));
-        }
+    protected void onInvalidate(Observable observable) {
+        specialActions.assign(actions(getSelectionModel().getSelectedItem()));
     }
 }

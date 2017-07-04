@@ -21,6 +21,7 @@
 package org.marid.dependant.beaneditor.model;
 
 import com.github.javaparser.ast.body.Parameter;
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -47,5 +48,9 @@ public class BeanParameter implements Comparable<BeanParameter> {
     @Override
     public int compareTo(@Nonnull BeanParameter o) {
         return name.get().compareTo(o.name.get());
+    }
+
+    public Observable[] observables() {
+        return new Observable[] {parameter, name, type, value};
     }
 }

@@ -21,14 +21,15 @@
 package org.marid.dependant.beaneditor.model;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
+import javafx.beans.Observable;
 import javafx.beans.property.*;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.ide.model.Annotations;
 
 import javax.annotation.Nonnull;
 
 import static java.util.stream.Collectors.toList;
+import static javafx.collections.FXCollections.observableArrayList;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -40,8 +41,8 @@ public class BeanFactoryMethod implements Comparable<BeanFactoryMethod> {
     public final StringProperty type = new SimpleStringProperty(null, "type");
     public final BooleanProperty lazy = new SimpleBooleanProperty(null, "lazy");
     public final BooleanProperty prototype = new SimpleBooleanProperty(null, "prototype");
-    public final ObservableList<BeanParameter> parameters = FXCollections.observableArrayList();
-    public final ObservableList<BeanProperty> properties = FXCollections.observableArrayList();
+    public final ObservableList<BeanParameter> parameters = observableArrayList(BeanParameter::observables);
+    public final ObservableList<BeanProperty> properties = observableArrayList(BeanProperty::observables);
 
     public BeanFactoryMethod(MethodDeclaration declaration) {
         method.set(declaration);
@@ -55,5 +56,9 @@ public class BeanFactoryMethod implements Comparable<BeanFactoryMethod> {
     @Override
     public int compareTo(@Nonnull BeanFactoryMethod o) {
         return name.get().compareTo(o.name.get());
+    }
+
+    public Observable[] observables() {
+        return new Observable[] {method, name, type, lazy, prototype, parameters, properties};
     }
 }

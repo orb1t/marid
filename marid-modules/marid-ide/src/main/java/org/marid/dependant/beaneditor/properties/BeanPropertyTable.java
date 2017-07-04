@@ -65,6 +65,10 @@ public class BeanPropertyTable extends TableView<BeanProperty> {
 
     @Autowired
     private void init(BeanTable beanTable) {
-        beanTable.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> setItems(nV.properties));
+        beanTable.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> {
+            if (nV != null) {
+                setItems(nV.properties);
+            }
+        });
     }
 }

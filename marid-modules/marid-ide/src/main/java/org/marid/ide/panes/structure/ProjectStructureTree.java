@@ -40,6 +40,7 @@ import org.marid.ide.structure.editor.FileEditor;
 import org.marid.ide.structure.icons.FileIcons;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.action.SpecialActions;
 import org.marid.jfx.table.MaridTreeTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -50,7 +51,9 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.logging.Level.WARNING;
@@ -64,8 +67,8 @@ import static org.marid.logging.Log.log;
 public class ProjectStructureTree extends MaridTreeTableView<Path> {
 
     @Autowired
-    public ProjectStructureTree(Directories directories) {
-        super(new TreeItem<>(directories.getProfiles()));
+    public ProjectStructureTree(Directories directories, SpecialActions specialActions) {
+        super(new TreeItem<>(directories.getProfiles()), specialActions);
         getRoot().setExpanded(true);
         getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     }
@@ -129,29 +132,27 @@ public class ProjectStructureTree extends MaridTreeTableView<Path> {
 
     @Autowired
     private void init(Map<String, FileEditor> fileEditors) {
-        initialize(new Initializer().setTableActions(item -> {
-            if (item == null) {
-                return Collections.emptyList();
-            }
-            final Path file = item.getValue();
-            if (file == null) {
-                return Collections.emptyList();
-            }
-            final Collection<FxAction> map = new ArrayList<>();
-            fileEditors.forEach((name, editor) -> {
-                final Runnable task = editor.getEditAction(file);
-                if (task != null) {
-                    map.add(new FxAction(name, editor.getGroup(), "Actions")
-                            .bindText(LocalizedStrings.ls(editor.getName()))
-                            .bindIcon(new SimpleStringProperty(editor.getIcon()))
-                            .setDisabled(false)
-                            .setSpecialAction(editor.getSpecialAction())
-                            .setEventHandler(e -> task.run())
-                    );
+        fileEditors.forEach((name, editor) -> {
+            actions.add((item -> {
+                if (item == null || item.getValue() == null) {
+                    return null;
+                } else {
+                    final Path file = item.getValue();
+                    final Runnable task = editor.getEditAction(file);
+                    if (task != null) {
+                        return new FxAction(name, editor.getGroup(), "Actions")
+                                .bindText(LocalizedStrings.ls(editor.getName()))
+                                .bindIcon(new SimpleStringProperty(editor.getIcon()))
+                                .setDisabled(false)
+                                .setSpecialAction(editor.getSpecialAction())
+                                .setEventHandler(e -> task.run());
+                    } else {
+                        return null;
+                    }
                 }
-            });
-            return map;
-        }));
+            }));
+
+        });
     }
 
     @Autowired

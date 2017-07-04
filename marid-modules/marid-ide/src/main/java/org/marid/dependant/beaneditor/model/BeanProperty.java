@@ -20,6 +20,7 @@
 
 package org.marid.dependant.beaneditor.model;
 
+import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.jetbrains.annotations.NotNull;
@@ -40,5 +41,9 @@ public class BeanProperty implements Comparable<BeanProperty> {
     @Override
     public int compareTo(@NotNull BeanProperty o) {
         return name.get().compareTo(o.name.get());
+    }
+
+    public Observable[] observables() {
+        return new Observable[] {name, value};
     }
 }

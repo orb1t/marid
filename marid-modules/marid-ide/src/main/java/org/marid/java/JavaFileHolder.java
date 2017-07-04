@@ -22,11 +22,9 @@ package org.marid.java;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.printer.PrettyPrinter;
 import javafx.application.Platform;
-import javafx.beans.binding.Binding;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import org.marid.ide.event.TextFileChangedEvent;
@@ -39,8 +37,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.logging.Level.INFO;
@@ -56,6 +52,7 @@ public class JavaFileHolder {
     private final TextFile javaFile;
     private final PrettyPrinter prettyPrinter;
     private final ObjectProperty<CompilationUnit> compilationUnit = new SimpleObjectProperty<>();
+    private final ObjectProperty<ClassOrInterfaceDeclaration> type = new SimpleObjectProperty<>();
 
     @Autowired
     public JavaFileHolder(TextFile javaFile, PrettyPrinter prettyPrinter) {
@@ -71,10 +68,19 @@ public class JavaFileHolder {
         return compilationUnit.get();
     }
 
+    public ClassOrInterfaceDeclaration getType() {
+        return type.get();
+    }
+
     @PostConstruct
     public void update() {
         try {
             compilationUnit.set(JavaParser.parse(javaFile.getPath(), UTF_8));
+            type.set(compilationUnit.get().getTypes().stream()
+                .filter(ClassOrInterfaceDeclaration.class::isInstance)
+                .map(ClassOrInterfaceDeclaration.class::cast)
+                .findFirst()
+                .orElse(null));
             log(INFO, "Updated {0}", javaFile);
         } catch (Exception x) {
             log(WARNING, "Unable to parse {0}", x, javaFile);
@@ -87,14 +93,6 @@ public class JavaFileHolder {
         } catch (IOException x) {
             log(WARNING, "Unable to save {0}", x, javaFile);
         }
-    }
-
-    public <T> Binding<T> binding(Supplier<T> supplier) {
-        return Bindings.createObjectBinding(supplier::get, compilationUnit);
-    }
-
-    public BooleanBinding binding(BooleanSupplier supplier) {
-        return Bindings.createBooleanBinding(supplier::getAsBoolean, compilationUnit);
     }
 
     @EventListener(condition = "@javaFile.path.equals(#event.source)")

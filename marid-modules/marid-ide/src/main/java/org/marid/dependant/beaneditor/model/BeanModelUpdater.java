@@ -41,6 +41,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
+import static javafx.collections.FXCollections.observableArrayList;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,7 +51,7 @@ public class BeanModelUpdater {
 
     private final BeanEditorProperties properties;
     private final JavaFileHolder holder;
-    private final ObservableList<BeanFactoryMethod> beans = FXCollections.observableArrayList();
+    private final ObservableList<BeanFactoryMethod> beans = observableArrayList(BeanFactoryMethod::observables);
 
     @Autowired
     public BeanModelUpdater(BeanEditorProperties properties, JavaFileHolder holder) {

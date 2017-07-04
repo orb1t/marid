@@ -22,7 +22,6 @@ package org.marid.dependant.beaneditor.beans;
 
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
@@ -48,17 +47,11 @@ public class BeanTableActions {
     }
 
     @Bean
-    public MethodActionSupplier addActionSupplier(SpecialAction addAction) {
-        return (bfm, md) -> new FxAction("beans", "beans", "beans")
+    public MethodActionSupplier addBeanActionSupplier(SpecialAction addAction) {
+        return (bfm, md) -> new FxAction("beans", "beans", "Beans")
                 .setSpecialAction(addAction)
                 .setEventHandler(event -> {
-                    final ClassOrInterfaceDeclaration type = updater.getCompilationUnit().getTypes().stream()
-                            .filter(ClassOrInterfaceDeclaration.class::isInstance)
-                            .map(ClassOrInterfaceDeclaration.class::cast)
-                            .findFirst()
-                            .orElseThrow(IllegalStateException::new);
-
-                    type.addMethod("bean1", Modifier.PUBLIC)
+                    updater.getType().addMethod("bean1", Modifier.PUBLIC)
                             .setBody(new BlockStmt(NodeList.nodeList(
                                     new ReturnStmt(new NullLiteralExpr())
                             )))
@@ -68,6 +61,18 @@ public class BeanTableActions {
                     updater.save();
                 })
                 .bindText("Add a bean")
+                .setDisabled(false);
+    }
+
+    @Bean
+    public MethodActionSupplier removeBeanActionSupplier(SpecialAction removeAction) {
+        return (bfm, md) -> md == null ? null : new FxAction("beans", "beans", "Beans")
+                .setSpecialAction(removeAction)
+                .setEventHandler(event -> {
+                    updater.getType().remove(md);
+                    updater.save();
+                })
+                .bindText("Remove bean")
                 .setDisabled(false);
     }
 }

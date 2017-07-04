@@ -37,8 +37,8 @@ import java.util.List;
 public class SpecialActionConfiguration {
 
     @Bean
-    public SpecialActions specialActions(List<SpecialAction> specialActions) {
-        return new SpecialActions(specialActions);
+    public SpecialActions specialActions(List<SpecialAction> specialActions, SpecialAction miscAction) {
+        return new SpecialActions(specialActions, miscAction);
     }
 
     @IdeAction
@@ -118,6 +118,14 @@ public class SpecialActionConfiguration {
                 .bindText("Select All")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+A"))
                 .setIcon("D_SELECT_ALL")
+                .setDisabled(true);
+    }
+
+    @IdeAction
+    public SpecialAction miscAction() {
+        return new SpecialAction("misc", "misc", "Edit")
+                .bindText("Item action")
+                .setIcon("D_MARTINI")
                 .setDisabled(true);
     }
 }
