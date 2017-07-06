@@ -31,7 +31,6 @@ import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.Files;
@@ -109,6 +108,7 @@ public class AddBeanFileEditor extends AbstractFileEditor<ProjectProfile> {
         final String source = prettyPrinter.print(new CompilationUnit(packageName)
                 .addClass(javaFileName, Modifier.PUBLIC)
                 .addAnnotation(Annotations.generated("org.marid"))
+                .addAnnotation(Annotations.component())
         );
 
         final Path path = file.resolve(javaFileName + ".java");

@@ -98,6 +98,8 @@ public class MaridTableView<T> extends TableView<T> {
     }
 
     protected void onInvalidate(Observable observable) {
-        specialActions.assign(actions(getSelectionModel().getSelectedItem()));
+        if (isFocused()) {
+            specialActions.assign(actions(getSelectionModel().getSelectedItem()));
+        }
     }
 }

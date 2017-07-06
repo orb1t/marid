@@ -77,6 +77,10 @@ public class BeanParameterTable extends TableView<BeanParameter> {
 
     @Autowired
     private void init(BeanTable beanTable) {
-        beanTable.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> setItems(nV.parameters));
+        beanTable.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> {
+            if (nV != null) {
+                setItems(nV.parameters);
+            }
+        });
     }
 }

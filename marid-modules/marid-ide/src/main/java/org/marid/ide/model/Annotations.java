@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Generated;
 import java.util.Collections;
@@ -120,6 +121,10 @@ public interface Annotations {
 
     static AnnotationExpr generated(String generator) {
         return new SingleMemberAnnotationExpr(parseName(Generated.class.getName()), new StringLiteralExpr(generator));
+    }
+
+    static AnnotationExpr component() {
+        return new MarkerAnnotationExpr(parseName(Component.class.getName()));
     }
 
     static AnnotationExpr lazy() {

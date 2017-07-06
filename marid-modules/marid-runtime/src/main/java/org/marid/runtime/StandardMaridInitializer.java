@@ -50,7 +50,7 @@ public class StandardMaridInitializer implements ApplicationContextInitializer<A
 
     private void init(AnnotationConfigApplicationContext context) throws IOException, ClassNotFoundException {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        try (final InputStream stream = classLoader.getResourceAsStream("bean-classes.lst")) {
+        try (final InputStream stream = classLoader.getResourceAsStream("META-INF/marid/bean-classes.lst")) {
             if (stream != null) {
                 try (final Scanner scanner = new Scanner(stream, "UTF-8")) {
                     while (scanner.hasNextLine()) {
@@ -60,20 +60,6 @@ public class StandardMaridInitializer implements ApplicationContextInitializer<A
                         }
 
                         context.register(Class.forName(line, true, classLoader));
-                    }
-                }
-            }
-        }
-
-        try (final InputStream stream = classLoader.getResourceAsStream("bean-packages.lst")) {
-            if (stream != null) {
-                try (final Scanner scanner = new Scanner(stream, "UTF-8")) {
-                    while (scanner.hasNextLine()) {
-                        final String line = scanner.nextLine().trim();
-                        if (line.isEmpty() || line.startsWith("#")) {
-                            continue;
-                        }
-                        context.scan(line.substring(0, line.length() - 1));
                     }
                 }
             }

@@ -239,6 +239,7 @@ public class FxAction implements Observable {
 
     public Button button() {
         final Button button = new Button();
+        button.setFocusTraversable(false);
         final InvalidationListener updater = o -> {
             if (children.isEmpty()) {
                 button.disableProperty().unbind(); button.disableProperty().set(false);

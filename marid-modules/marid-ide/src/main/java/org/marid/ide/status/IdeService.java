@@ -130,6 +130,14 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
             }
         }
 
+        private MenuItem cancelItem() {
+            final MenuItem cancelItem = new MenuItem();
+            cancelItem.setGraphic(FontIcons.glyphIcon("D_CLOSE_CIRCLE"));
+            cancelItem.textProperty().bind(ls("Cancel"));
+            cancelItem.setOnAction(event -> cancel());
+            return cancelItem;
+        }
+
         @Override
         protected Duration call() throws Exception {
             try {
@@ -137,14 +145,10 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
                 {
                     final V node = createGraphic();
                     final ContextMenu contextMenu = contextMenu();
-                    final MenuItem cancelItem = new MenuItem();
-                    cancelItem.setGraphic(FontIcons.glyphIcon("D_CLOSE_CIRCLE"));
-                    cancelItem.textProperty().bind(ls("Cancel"));
-                    cancelItem.setOnAction(event -> cancel());
                     if (!contextMenu.getItems().isEmpty()) {
                         contextMenu.getItems().add(new SeparatorMenuItem());
                     }
-                    contextMenu.getItems().add(cancelItem);
+                    contextMenu.getItems().add(cancelItem());
                     Platform.runLater(() -> {
                         graphic.set(node);
                         button.setContextMenu(contextMenu);

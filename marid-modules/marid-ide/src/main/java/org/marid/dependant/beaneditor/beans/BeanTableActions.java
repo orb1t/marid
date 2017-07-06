@@ -33,6 +33,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import static java.util.logging.Level.INFO;
+import static org.marid.logging.Log.log;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -69,8 +72,10 @@ public class BeanTableActions {
         return (bfm, md) -> md == null ? null : new FxAction("beans", "beans", "Beans")
                 .setSpecialAction(removeAction)
                 .setEventHandler(event -> {
-                    updater.getType().remove(md);
-                    updater.save();
+                    if (updater.getType().remove(md)) {
+                        log(INFO, "Removed {0}", md.getSignature());
+                        updater.save();
+                    }
                 })
                 .bindText("Remove bean")
                 .setDisabled(false);

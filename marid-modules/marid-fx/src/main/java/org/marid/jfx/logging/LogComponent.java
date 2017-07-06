@@ -21,14 +21,15 @@
 
 package org.marid.jfx.logging;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.text.Font;
 import org.marid.jfx.icons.IconFactory;
 
 import java.util.logging.LogRecord;
 
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.l10n.L10n.m;
 
 /**
@@ -55,5 +56,26 @@ public class LogComponent extends ListView<LogRecord> {
             cell.setFont(Font.font("Monospaced", cell.getFont().getSize() * 0.75));
             return cell;
         });
+        setContextMenu(new ContextMenu(
+                removeItems(),
+                new SeparatorMenuItem(),
+                clearAllItem()
+        ));
+    }
+
+    private MenuItem clearAllItem() {
+        final MenuItem menuItem = new MenuItem();
+        menuItem.textProperty().bind(ls("Clear all"));
+        menuItem.setOnAction(event -> getItems().clear());
+        menuItem.disableProperty().bind(Bindings.isEmpty(getItems()));
+        return menuItem;
+    }
+
+    private MenuItem removeItems() {
+        final MenuItem menuItem = new MenuItem();
+        menuItem.textProperty().bind(ls("Remove selected items"));
+        menuItem.setOnAction(event -> getItems().retainAll(getSelectionModel().getSelectedItems()));
+        menuItem.disableProperty().bind(Bindings.isEmpty(getSelectionModel().getSelectedItems()));
+        return menuItem;
     }
 }

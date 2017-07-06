@@ -18,20 +18,17 @@
  * #L%
  */
 
-package org.marid.ide.logging;
+package org.marid.ide.types;
 
-import org.marid.jfx.logging.LogComponent;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import com.github.javaparser.ast.type.Type;
+
+import java.nio.file.Path;
+import java.util.SortedSet;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class IdeLogView extends LogComponent {
+public interface BeanNameResolver {
 
-    @Autowired
-    public IdeLogView() {
-        super(IdeLogHandler.LOG_RECORDS);
-    }
+    SortedSet<String> beanNames(Path javaFile, Type type);
 }

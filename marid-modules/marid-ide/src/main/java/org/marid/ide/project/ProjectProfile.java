@@ -29,10 +29,13 @@ import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.marid.misc.Urls;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -61,7 +64,7 @@ public class ProjectProfile {
     private final Path srcMainResources;
     private final Path srcTestJava;
     private final Path srcTestResources;
-    private final Path beansDirectory;
+    private final Path metaDirectory;
     private final Path repository;
     private final Logger logger;
     private final BooleanProperty enabled;
@@ -77,7 +80,7 @@ public class ProjectProfile {
         srcMainResources = srcMain.resolve("resources");
         srcTestJava = srcTest.resolve("java");
         srcTestResources = srcTest.resolve("resources");
-        beansDirectory = srcMainResources.resolve("META-INF").resolve("marid");
+        metaDirectory = srcMainResources.resolve("META-INF").resolve("marid");
         repository = path.resolve(".repo");
         logger = Logger.getLogger(getName());
         model = loadModel();
@@ -131,8 +134,12 @@ public class ProjectProfile {
         return repository;
     }
 
-    public Path getBeansDirectory() {
-        return beansDirectory;
+    public Path getMetaDirectory() {
+        return metaDirectory;
+    }
+
+    public Path getBeanClassesFile() {
+        return metaDirectory.resolve("bean-classes.lst");
     }
 
     public Path getSrc() {
@@ -185,9 +192,13 @@ public class ProjectProfile {
         return enabled;
     }
 
+    public URLClassLoader classPath() {
+        return new URLClassLoader(Urls.classpath(target.resolve("lib"), target.resolve("classes")).toArray(URL[]::new));
+    }
+
     private void createFileStructure() {
         try {
-            for (final Path dir : asList(srcMainJava, beansDirectory, srcTestJava, srcTestResources)) {
+            for (final Path dir : asList(srcMainJava, metaDirectory, srcTestJava, srcTestResources)) {
                 Files.createDirectories(dir);
             }
             final Path loggingProperties = srcMainResources.resolve("logging.properties");
@@ -218,6 +229,7 @@ public class ProjectProfile {
     public void save() {
         createFileStructure();
         savePomFile();
+        ProjectProfileUtils.saveBeanFiles(this);
     }
 
     void delete() {

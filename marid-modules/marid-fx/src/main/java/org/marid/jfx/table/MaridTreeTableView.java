@@ -96,6 +96,8 @@ public class MaridTreeTableView<T> extends TreeTableView<T> {
     }
 
     protected void onInvalidate(Observable observable) {
-        specialActions.assign(actions(getSelectionModel().getSelectedItem()));
+        if (isFocused()) {
+            specialActions.assign(actions(getSelectionModel().getSelectedItem()));
+        }
     }
 }
