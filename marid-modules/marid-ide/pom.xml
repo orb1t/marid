@@ -92,11 +92,6 @@
             <artifactId>modbus-slave-tcp</artifactId>
             <version>1.1.0</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -145,6 +140,28 @@
                 <configuration>
                     <licenseName>apache_v2</licenseName>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-test-spring</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                            <goal>list</goal>
+                        </goals>
+                        <phase>process-test-classes</phase>
+                        <configuration>
+                            <skip>${skipTests}</skip>
+                            <outputDirectory>${project.build.testOutputDirectory}/jars</outputDirectory>
+                            <outputFile>${project.build.testOutputDirectory}/jars/jars.lst</outputFile>
+                            <includeScope>compile</includeScope>
+                            <stripClassifier>true</stripClassifier>
+                            <stripVersion>true</stripVersion>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

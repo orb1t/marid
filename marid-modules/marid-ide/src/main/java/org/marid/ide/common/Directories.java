@@ -20,53 +20,18 @@
 
 package org.marid.ide.common;
 
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class Directories {
+public interface Directories {
 
-    private final Path userHome;
-    private final Path marid;
-    private final Path profiles;
-    private final Path repo;
+    Path getUserHome();
 
-    public Directories() {
-        userHome = Paths.get(System.getProperty("user.home"));
-        marid = userHome.resolve("marid");
-        profiles = marid.resolve("profiles");
-        repo = marid.resolve("repo");
-    }
+    Path getMarid();
 
-    @PostConstruct
-    private void init() throws IOException {
-        Files.createDirectories(profiles);
-        Files.createDirectories(repo);
+    Path getProfiles();
 
-        System.setProperty("maven.repo.local", repo.toAbsolutePath().toString());
-    }
-
-    public Path getUserHome() {
-        return userHome;
-    }
-
-    public Path getMarid() {
-        return marid;
-    }
-
-    public Path getProfiles() {
-        return profiles;
-    }
-
-    public Path getRepo() {
-        return repo;
-    }
+    Path getRepo();
 }

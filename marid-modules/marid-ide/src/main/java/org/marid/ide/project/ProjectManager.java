@@ -52,13 +52,14 @@ import static java.util.Collections.binarySearch;
 @Component
 public class ProjectManager {
 
+    private final Directories directories;
     private final ObjectProperty<ProjectProfile> profile = new SimpleObjectProperty<>();
     private final ObservableList<ProjectProfile> profiles = FXCollections.observableArrayList();
 
     @Autowired
     public ProjectManager(Directories directories) throws IOException {
-        try (final Stream<Path> stream = Files.list(directories.getProfiles())) {
-            stream.map(p -> new ProjectProfile(p.getFileName().toString())).forEach(profiles::add);
+        try (final Stream<Path> stream = Files.list((this.directories = directories).getProfiles())) {
+            stream.map(p -> new ProjectProfile(p.getParent(), p.getFileName().toString())).forEach(profiles::add);
         }
         profiles.sort(Comparator.comparing(ProjectProfile::getName));
     }
@@ -93,11 +94,11 @@ public class ProjectManager {
         return profiles;
     }
 
-    public ProjectProfile add(String name) {
+    private ProjectProfile add(String name) {
         final ProjectProfile profile = profiles.stream()
                 .filter(p -> name.equals(p.getName()))
                 .findFirst()
-                .orElseGet(() -> new ProjectProfile(name));
+                .orElseGet(() -> new ProjectProfile(directories.getProfiles(), name));
         if (profiles.contains(profile)) {
             return profile;
         }

@@ -23,19 +23,26 @@ package org.marid.ide.model;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.google.common.collect.ImmutableMap;
+import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.annotation.AnnotationBeanNameGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.type.StandardMethodMetadata;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Generated;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.github.javaparser.JavaParser.parseName;
+import static org.springframework.core.annotation.AnnotationAttributes.fromMap;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -133,5 +140,22 @@ public interface Annotations {
 
     static AnnotationExpr prototype() {
         return new SingleMemberAnnotationExpr(parseName(Scope.class.getName()), new StringLiteralExpr("prototype"));
+    }
+
+    static String beanName(Class<?> c) {
+        final AnnotatedGenericBeanDefinition definition = new AnnotatedGenericBeanDefinition(c);
+        final AnnotationBeanNameGenerator nameGenerator = new AnnotationBeanNameGenerator();
+        return nameGenerator.generateBeanName(definition, new DefaultListableBeanFactory());
+    }
+
+    static String[] beanName(Method method) {
+        final StandardMethodMetadata methodMetadata = new StandardMethodMetadata(method, true);
+        final AnnotationAttributes bean = fromMap(methodMetadata.getAnnotationAttributes(Bean.class.getName(), false));
+        if (bean == null) {
+            return null;
+        } else {
+            final String[] names = bean.getStringArray("name");
+            return names.length == 0 ? new String[] {method.getName()} : names;
+        }
     }
 }

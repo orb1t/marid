@@ -21,6 +21,7 @@
 package org.marid;
 
 import org.marid.ide.common.IdeValues;
+import org.marid.ide.common.MaridDirectories;
 import org.marid.ide.logging.IdeLogConsoleHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.logging.Logs;
@@ -69,6 +70,11 @@ public class IdeContext {
     public Logs logs(InjectionPoint injectionPoint) {
         final Logger logger = Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
         return () -> logger;
+    }
+
+    @Bean
+    public MaridDirectories directories() {
+        return new MaridDirectories();
     }
 
     @Bean

@@ -29,22 +29,17 @@ import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.marid.misc.Urls;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 import static java.util.Arrays.asList;
 import static java.util.logging.Level.WARNING;
-import static org.apache.commons.lang3.SystemUtils.USER_HOME;
 import static org.marid.logging.Log.log;
 import static org.marid.misc.Builder.build;
 
@@ -69,8 +64,8 @@ public class ProjectProfile {
     private final Logger logger;
     private final BooleanProperty enabled;
 
-    ProjectProfile(String name) {
-        path = Paths.get(USER_HOME, "marid", "profiles", name);
+    ProjectProfile(Path profilesDir, String name) {
+        path = profilesDir.resolve(name);
         pomFile = path.resolve("pom.xml");
         src = path.resolve("src");
         target = path.resolve("target");
@@ -190,10 +185,6 @@ public class ProjectProfile {
 
     public BooleanProperty enabledProperty() {
         return enabled;
-    }
-
-    public URLClassLoader classPath() {
-        return new URLClassLoader(Urls.classpath(target.resolve("lib"), target.resolve("classes")).toArray(URL[]::new));
     }
 
     private void createFileStructure() {

@@ -30,6 +30,8 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -87,12 +89,38 @@ public interface Urls {
     }
 
     @Nonnull
-    static Stream<URL> classpath(@Nonnull Path path, @Nonnull Path... paths) {
+    static Set<URL> classpath(@Nonnull Path path, @Nonnull Path... paths) {
         final Stream<URL> pathUrls = Stream.of(paths).filter(Files::isDirectory).map(Urls::url);
         try {
-            return concat(Files.list(path).filter(pathEndsWith(".jar")).map(Urls::url), pathUrls);
+            return concat(Files.list(path).filter(pathEndsWith(".jar")).map(Urls::url), pathUrls)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
         } catch (NotDirectoryException | NoSuchFileException x) {
-            return pathUrls;
+            return Collections.emptySet();
+        } catch (IOException x) {
+            throw new UncheckedIOException(x);
+        }
+    }
+
+    @Nonnull
+    static SortedSet<Path> jars(@Nonnull Path path) {
+        try {
+            try (final Stream<Path> stream = Files.list(path).filter(pathEndsWith(".jar"))) {
+                return stream.collect(Collectors.toCollection(TreeSet::new));
+            }
+        } catch (NotDirectoryException | NoSuchFileException x) {
+            return Collections.emptySortedSet();
+        } catch (IOException x) {
+            throw new UncheckedIOException(x);
+        }
+    }
+
+    @Nonnull
+    static SortedSet<Path> files(@Nonnull Path path, @Nonnull String ext) {
+        try {
+            return Files.find(path, 255, (p, a) -> p.getFileName().toString().endsWith("." + ext))
+                    .collect(Collectors.toCollection(TreeSet::new));
+        } catch (NotDirectoryException | NoSuchFileException x) {
+            return Collections.emptySortedSet();
         } catch (IOException x) {
             throw new UncheckedIOException(x);
         }
