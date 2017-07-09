@@ -38,13 +38,11 @@ import org.eclipse.aether.transfer.TransferEvent;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.logging.IdeMavenLogHandler;
-import org.marid.ide.panes.main.IdeStatusBar;
 import org.marid.ide.project.ProjectMavenBuilder;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.status.IdeService;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.logging.LogComponent;
-import org.marid.l10n.L10n;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +54,7 @@ import java.util.ListIterator;
 import java.util.logging.Logger;
 
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -64,7 +63,6 @@ import static org.marid.jfx.LocalizedStrings.ls;
 public class ProjectBuilderService extends IdeService<HBox> {
 
     private final IdeLogHandler logHandler;
-    private final IdeStatusBar statusBar;
     private final ObjectFactory<ProjectMavenBuilder> builder;
     private final ApplicationEventMulticaster multicaster;
 
@@ -72,11 +70,9 @@ public class ProjectBuilderService extends IdeService<HBox> {
 
     @Autowired
     public ProjectBuilderService(IdeLogHandler logHandler,
-                                 IdeStatusBar statusBar,
                                  ObjectFactory<ProjectMavenBuilder> builder,
                                  ApplicationEventMulticaster multicaster) {
         this.logHandler = logHandler;
-        this.statusBar = statusBar;
         this.builder = builder;
         this.multicaster = multicaster;
     }
@@ -90,7 +86,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
     }
 
     @Override
-    protected BuilderTask createTask() {
+    protected IdeTask createTask() {
         return new BuilderTask();
     }
 
@@ -101,7 +97,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
         ListView<TransferEvent> view;
 
         private BuilderTask() {
-            updateTitle(profile.getName() + ": " + L10n.s("Maven Build"));
+            updateTitle(profile.getName() + ": " + s("Maven Build"));
         }
 
         @Override

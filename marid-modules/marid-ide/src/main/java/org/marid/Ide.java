@@ -28,8 +28,7 @@ import javafx.stage.StageStyle;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
-import org.marid.jfx.list.MaridListActions;
-import org.marid.jfx.logging.LogComponent;
+import org.marid.splash.MaridSplash;
 import org.marid.spring.postprocessors.IdeAppContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -58,6 +57,7 @@ public class Ide extends Application {
             final SpringApplication application = new SpringApplication(IdeContext.class);
             application.setApplicationContextClass(IdeAppContext.class);
             context = application.run(args);
+            context.getBean(IdePane.class);
         }).start();
     }
 
@@ -65,13 +65,16 @@ public class Ide extends Application {
     public void start(Stage primaryStage) throws Exception {
         Ide.primaryStage = primaryStage;
 
-        final LogComponent logComponent = new LogComponent(IdeLogHandler.LOG_RECORDS);
-        final Runnable autoscrollUnregisterer = MaridListActions.autoScroll(logComponent);
+        final MaridSplash maridSplash = new MaridSplash(IdeLogHandler.LOG_RECORDS);
+
         final Stage splash = new Stage(StageStyle.UNDECORATED);
         splash.setTitle("Marid IDE");
         splash.getIcons().addAll(MaridIconFx.getIcons(24, 32));
-        splash.setScene(new Scene(logComponent, 600, 600));
+        splash.setScene(new Scene(maridSplash));
         splash.show();
+        maridSplash.init();
+
+        setUserAgentStylesheet(PREFERENCES.get("style", STYLESHEET_MODENA));
 
         final Thread contextStartThread = new Thread(() -> {
             while (context == null) {
@@ -86,11 +89,9 @@ public class Ide extends Application {
                     primaryStage.setScene(new Scene(context.getBean(IdePane.class), 1024, 768));
                     primaryStage.getIcons().addAll(MaridIconFx.getIcons(24, 32));
                     primaryStage.setMaximized(true);
-                    splash.hide();
-                    setUserAgentStylesheet(PREFERENCES.get("style", STYLESHEET_MODENA));
                     primaryStage.show();
                 } finally {
-                    autoscrollUnregisterer.run();
+                    maridSplash.close();
                 }
             });
         });

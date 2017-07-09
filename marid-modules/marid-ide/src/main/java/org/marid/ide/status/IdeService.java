@@ -27,30 +27,27 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventType;
-import javafx.geometry.Side;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.effect.MotionBlur;
-import javafx.scene.input.MouseEvent;
-import org.apache.commons.lang3.StringUtils;
+import javafx.scene.layout.HBox;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.marid.ide.panes.main.IdeStatusBar;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
-import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.ide.IdeNotifications.n;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -64,49 +61,67 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
     );
 
     private final SimpleObjectProperty<V> graphic = new SimpleObjectProperty<>();
-    private final CountDownLatch latch = new CountDownLatch(1);
-    protected Button button;
+    private final Label label = new Label();
+    private final ProgressBar progressBar = new ProgressBar();
+    protected final HBox button = new HBox(5, label);
+
+    protected IdeStatusBar statusBar;
+
+    @PostConstruct
+    private void init() {
+        button.setAlignment(Pos.CENTER_LEFT);
+        button.setPadding(new Insets(4));
+        button.getStyleClass().add("button");
+        button.setFocusTraversable(false);
+
+        label.textProperty().bind(titleProperty());
+        label.graphicProperty().bind(graphic);
+
+        progressBar.setVisible(false);
+        progressBar.setPrefWidth(50);
+        progressBar.setPrefHeight(24);
+
+        progressProperty().addListener((o, oV, nV) -> {
+            if (!progressBar.isVisible()) {
+                button.getChildren().add(button.getChildren().size() - 1, progressBar);
+                progressBar.setVisible(true);
+            }
+            if (nV.doubleValue() <= oV.doubleValue() || nV.doubleValue() < 0.01) {
+                progressBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS);
+            } else {
+                progressBar.setProgress(nV.doubleValue());
+            }
+        });
+
+        messageProperty().addListener((o, oV, nV) -> {
+            if (nV != null) {
+                if (label.getTooltip() == null) {
+                    label.setTooltip(new Tooltip());
+                }
+                label.getTooltip().setText(nV);
+            } else {
+                label.setTooltip(null);
+            }
+        });
+    }
 
     @Autowired
     private void init(IdeStatusBar statusBar) {
-        addEventHandler(WorkerStateEvent.WORKER_STATE_RUNNING, event -> {
-            button = new Button();
-            button.setOnMousePressed(e -> button.getProperties().put("_lastEvent", e));
-            button.textProperty().bind(titleProperty());
-            button.graphicProperty().bind(graphic);
-            button.tooltipProperty().bind(createObjectBinding(
-                    () -> StringUtils.isBlank(getMessage()) ? null : new Tooltip(getMessage()), messageProperty()));
-            statusBar.add(button);
-        });
+        this.statusBar = statusBar;
+        addEventHandler(WorkerStateEvent.WORKER_STATE_RUNNING, event -> statusBar.add(button));
         addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, event -> {
             statusBar.remove(button);
-            button = null;
             final Duration duration = (Duration) event.getSource().getValue();
             final String durationText = DurationFormatUtils.formatDurationHMS(duration.toMillis());
             n(INFO, "{0} succeeded in {1}", event.getSource().getTitle(), durationText);
         });
         addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, event -> {
             statusBar.remove(button);
-            button = null;
             n(WARNING, "{0} failed", event.getSource().getException(), event.getSource().getTitle());
         });
         addEventHandler(WorkerStateEvent.WORKER_STATE_CANCELLED, event -> {
             button.setDisable(true);
             button.setEffect(new MotionBlur(0.1, 0.1));
-            final Thread thread = new Thread(null, () -> {
-                try {
-                    latch.await();
-                    LockSupport.parkNanos(1_000_000_000L);
-                    Platform.runLater(() -> {
-                        statusBar.remove(button);
-                        button = null;
-                    });
-                } catch (InterruptedException x) {
-                    log(WARNING, "Interrupted", x);
-                }
-            }, "Watcher: " + getTitle(), 96L * 1024L);
-            thread.setDaemon(true);
-            thread.start();
         });
     }
 
@@ -130,14 +145,6 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
             }
         }
 
-        private MenuItem cancelItem() {
-            final MenuItem cancelItem = new MenuItem();
-            cancelItem.setGraphic(FontIcons.glyphIcon("D_CLOSE_CIRCLE"));
-            cancelItem.textProperty().bind(ls("Cancel"));
-            cancelItem.setOnAction(event -> cancel());
-            return cancelItem;
-        }
-
         @Override
         protected Duration call() throws Exception {
             try {
@@ -145,19 +152,20 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
                 {
                     final V node = createGraphic();
                     final ContextMenu contextMenu = contextMenu();
-                    if (!contextMenu.getItems().isEmpty()) {
-                        contextMenu.getItems().add(new SeparatorMenuItem());
-                    }
-                    contextMenu.getItems().add(cancelItem());
                     Platform.runLater(() -> {
                         graphic.set(node);
-                        button.setContextMenu(contextMenu);
-                        button.setOnAction(event -> {
-                            final MouseEvent e = (MouseEvent) button.getProperties().remove("_lastEvent");
-                            final double x = e != null ? e.getX() : 0;
-                            final double y = e != null ? e.getY() : 0;
-                            contextMenu.show(button, Side.TOP, x, y);
+                        label.setContextMenu(contextMenu);
+
+                        final Button cancel = new Button();
+                        cancel.setOnAction(event -> {
+                            cancel();
+                            button.getChildren().remove(cancel);
                         });
+                        final Tooltip tooltip = new Tooltip();
+                        tooltip.textProperty().bind(ls("Cancel"));
+                        cancel.setTooltip(tooltip);
+                        cancel.setGraphic(FontIcons.glyphIcon("D_CLOSE_CIRCLE", 16));
+                        button.getChildren().add(cancel);
                     });
                 }
                 try {
@@ -167,7 +175,7 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
                 }
                 return Duration.ofNanos(System.nanoTime() - startTime);
             } finally {
-                latch.countDown();
+                Platform.runLater(() -> statusBar.remove(button));
             }
         }
     }

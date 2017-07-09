@@ -28,15 +28,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import org.apache.maven.model.Model;
 import org.marid.ide.common.IdeShapes;
-import org.marid.ide.panes.main.IdeStatusBar;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.settings.JavaSettings;
 import org.marid.ide.status.IdeService;
 import org.marid.io.ProcessManager;
-import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.marid.jfx.track.Tracks;
-import org.marid.misc.Builder;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -65,14 +62,12 @@ import static org.marid.misc.Builder.build;
 public class ProjectRunService extends IdeService<HBox> {
 
     private final JavaSettings javaSettings;
-    private final IdeStatusBar statusBar;
 
     private ProjectProfile profile;
 
     @Autowired
-    public ProjectRunService(JavaSettings javaSettings, IdeStatusBar statusBar) {
+    public ProjectRunService(JavaSettings javaSettings) {
         this.javaSettings = javaSettings;
-        this.statusBar = statusBar;
     }
 
     public ProjectRunService setProfile(ProjectProfile profile) {

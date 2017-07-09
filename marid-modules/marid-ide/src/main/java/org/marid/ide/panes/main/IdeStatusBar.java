@@ -43,6 +43,7 @@ import org.controlsfx.control.PopOver.ArrowLocation;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
+import org.marid.misc.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -84,31 +85,29 @@ public class IdeStatusBar extends BorderPane {
         setMargin(right, new Insets(0, 5, 0, 5));
 
         right.setAlignment(Pos.CENTER_RIGHT);
+        right.getChildren().add(notificationsButton = new Button());
+
+        toolBar.setFillHeight(true);
         toolBar.setAlignment(Pos.CENTER_LEFT);
 
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
-        scrollPane.setPannable(true);
         scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
         scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
 
-        right.getChildren().add(notificationsButton = new Button());
-        final Circle circle = new Circle(24);
-        notificationsButton.setShape(circle);
+        notificationsButton.setShape(new Circle(24));
         notificationsButton.textProperty().bind(size(notifications).asString());
         notificationsButton.disableProperty().bind(Bindings.isEmpty(notifications));
-        final Tooltip tooltip = new Tooltip();
-        tooltip.textProperty().bind(ls("Notifications"));
-        notificationsButton.setOnAction(event -> contextMenu.show(notificationsButton, Side.TOP, 0, 0));
-
-        {
-            final ContextMenu buttonContextMenu = new ContextMenu();
+        notificationsButton.setTooltip(Builder.build(new Tooltip(), t -> {
+            t.textProperty().bind(ls("Notifications"));
+            notificationsButton.setOnAction(event -> contextMenu.show(notificationsButton, Side.TOP, 0, 0));
+        }));
+        notificationsButton.setContextMenu(Builder.build(new ContextMenu(), m -> {
             final MenuItem clearAllNotifications = new MenuItem(null, FontIcons.glyphIcon("D_CLOSE"));
             clearAllNotifications.textProperty().bind(ls("Remove all notifications"));
             clearAllNotifications.setOnAction(event -> notifications.clear());
-            buttonContextMenu.getItems().add(clearAllNotifications);
-            notificationsButton.setContextMenu(buttonContextMenu);
-        }
+            m.getItems().add(clearAllNotifications);
+        }));
     }
 
     @Order(1)
@@ -149,12 +148,12 @@ public class IdeStatusBar extends BorderPane {
         right.getChildren().add(timeLabel);
     }
 
-    public void add(Button button) {
+    public void add(Node button) {
         toolBar.getChildren().add(button);
-        HBox.setMargin(button, new Insets(0, 5, 0, 5));
+        HBox.setMargin(button, new Insets(5, 5, 5, 5));
     }
 
-    public void remove(Button button) {
+    public void remove(Node button) {
         toolBar.getChildren().remove(button);
     }
 
