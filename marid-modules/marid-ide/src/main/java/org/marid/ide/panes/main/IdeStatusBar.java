@@ -35,9 +35,13 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.shape.Circle;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import org.controlsfx.control.HiddenSidesPane;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 import org.marid.ide.project.ProjectManager;
@@ -68,6 +72,7 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 public class IdeStatusBar extends BorderPane {
 
     private final HBox right;
+    private final HiddenSidesPane sidesPane = new HiddenSidesPane();
     private final ScrollPane scrollPane;
     private final HBox toolBar;
     private final Button notificationsButton;
@@ -75,10 +80,11 @@ public class IdeStatusBar extends BorderPane {
     private final ContextMenu contextMenu = new ContextMenu();
 
     public IdeStatusBar() {
-        setPadding(new Insets(5, 5, 5, 5));
         setFocusTraversable(false);
+        getStyleClass().add("cell");
 
-        setCenter(scrollPane = new ScrollPane(toolBar = new HBox(5)));
+        sidesPane.setContent(scrollPane = new ScrollPane(toolBar = new HBox(5)));
+        setCenter(sidesPane);
         setRight(right = new HBox(10));
 
         setMargin(toolBar, new Insets(0, 5, 0, 5));
@@ -90,12 +96,18 @@ public class IdeStatusBar extends BorderPane {
         toolBar.setFillHeight(true);
         toolBar.setAlignment(Pos.CENTER_LEFT);
 
-        scrollPane.setFitToWidth(true);
+        scrollPane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
+        scrollPane.setFitToWidth(false);
         scrollPane.setFitToHeight(true);
+        scrollPane.setPannable(true);
         scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
         scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
 
-        notificationsButton.setShape(new Circle(24));
+        notificationsButton.setShape(Builder.build(new Rectangle(30, 30), r -> {
+            r.setArcWidth(10);
+            r.setArcHeight(10);
+        }));
+        notificationsButton.setMinSize(30, 30);
         notificationsButton.textProperty().bind(size(notifications).asString());
         notificationsButton.disableProperty().bind(Bindings.isEmpty(notifications));
         notificationsButton.setTooltip(Builder.build(new Tooltip(), t -> {
@@ -114,18 +126,20 @@ public class IdeStatusBar extends BorderPane {
     @Autowired
     public void initProfile(ProjectManager manager) {
         final ComboBox<ProjectProfile> combo = new ComboBox<>(manager.getProfiles());
+        combo.setMinHeight(30);
         final SelectionModel<ProjectProfile> selection = combo.getSelectionModel();
         selection.select(manager.getProfile());
         final ObjectProperty<ProjectProfile> profile = manager.profileProperty();
         profile.addListener((observable, oldValue, newValue) -> selection.select(newValue));
         selection.selectedItemProperty().addListener((observable, oldValue, newValue) -> profile.set(newValue));
         right.getChildren().add(combo);
+        HBox.setMargin(combo, new Insets(5));
     }
 
     @Order(2)
     @Autowired
     public void initDateTime(ScheduledExecutorService timer) throws Exception {
-        final Label timeLabel = new Label("", glyphIcon("O_CLOCK", 16));
+        final Label timeLabel = new Label("", glyphIcon("O_CLOCK", 18));
         final DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder()
                 .appendValue(ChronoField.YEAR, 4)
                 .appendLiteral('-')
@@ -146,11 +160,12 @@ public class IdeStatusBar extends BorderPane {
             Platform.runLater(() -> timeLabel.setText(time));
         }, 1_000L, 1_000L, TimeUnit.MILLISECONDS);
         right.getChildren().add(timeLabel);
+        HBox.setMargin(timeLabel, new Insets(5));
     }
 
     public void add(Node button) {
         toolBar.getChildren().add(button);
-        HBox.setMargin(button, new Insets(5, 5, 5, 5));
+        HBox.setMargin(button, new Insets(2));
     }
 
     public void remove(Node button) {

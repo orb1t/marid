@@ -116,6 +116,7 @@ public class MaridSplash extends BorderPane implements AutoCloseable {
         final ProgressBar progressBar = new ProgressBar();
         progressBar.setMaxWidth(Double.MAX_VALUE);
         progressBar.setPadding(new Insets(24));
+        progressBar.setBackground(new Background(new BackgroundFill(Color.DARKSLATEGREY, null, null)));
         setBottom(progressBar);
 
         monospaced = Font.font("Monospaced", FontWeight.NORMAL, 11);

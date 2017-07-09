@@ -39,7 +39,6 @@ import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -48,6 +47,7 @@ import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static org.marid.ide.IdeNotifications.n;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -67,8 +67,7 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
 
     protected IdeStatusBar statusBar;
 
-    @PostConstruct
-    private void init() {
+    public IdeService() {
         button.setAlignment(Pos.CENTER_LEFT);
         button.setPadding(new Insets(4));
         button.getStyleClass().add("button");
@@ -135,7 +134,9 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
         @Nonnull
         protected abstract V createGraphic();
 
-        protected abstract ContextMenu contextMenu();
+        protected ContextMenu contextMenu() {
+            return null;
+        }
 
         protected void updateGraphic(Consumer<V> consumer) {
             if (Platform.isFxApplicationThread()) {
@@ -146,15 +147,15 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
         }
 
         @Override
-        protected Duration call() throws Exception {
+        protected final Duration call() throws Exception {
+            updateTitle(s(IdeService.this.getClass().getSimpleName()));
             try {
                 final long startTime = System.nanoTime();
                 {
                     final V node = createGraphic();
-                    final ContextMenu contextMenu = contextMenu();
                     Platform.runLater(() -> {
                         graphic.set(node);
-                        label.setContextMenu(contextMenu);
+                        label.setContextMenu(contextMenu());
 
                         final Button cancel = new Button();
                         cancel.setOnAction(event -> {

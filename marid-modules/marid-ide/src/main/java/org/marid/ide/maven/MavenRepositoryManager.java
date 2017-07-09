@@ -23,15 +23,18 @@ package org.marid.ide.maven;
 import com.google.common.collect.ImmutableList;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.maven.index.Indexer;
+import org.apache.maven.index.IteratorSearchRequest;
+import org.apache.maven.index.IteratorSearchResponse;
 import org.apache.maven.index.context.IndexCreator;
 import org.apache.maven.index.context.IndexingContext;
+import org.apache.maven.index.expr.SourcedSearchExpression;
 import org.apache.maven.index.updater.IndexUpdater;
-import org.apache.maven.wagon.Wagon;
+import org.apache.maven.model.Dependency;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusConstants;
-import org.marid.ide.common.Directories;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -39,9 +42,20 @@ import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Files;
+import javax.annotation.Nonnull;
+import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
+import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
+import static org.apache.maven.index.MAVEN.CLASSIFIER;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,27 +64,17 @@ import java.util.List;
 @Lazy(false)
 public class MavenRepositoryManager implements AutoCloseable {
 
-    final Path cacheDir;
-    final Path indexDir;
-    final BooleanProperty updating = new SimpleBooleanProperty();
-    final DefaultPlexusContainer container;
+    private final ObjectFactory<MavenRepositoryService> service;
+    private final List<IndexingContext> contexts = new ArrayList<>();
+
     final Indexer indexer;
+    final DefaultPlexusContainer container;
+    final BooleanProperty updating = new SimpleBooleanProperty();
     final IndexUpdater indexUpdater;
-    final Wagon wagon;
-    final List<IndexCreator> indexCreators;
-    final IndexingContext context;
-    final ObjectFactory<MavenRepositoryService> service;
 
     @Autowired
-    public MavenRepositoryManager(Directories directories,
-                                  ObjectFactory<MavenRepositoryService> serviceFactory) throws Exception {
-        service = serviceFactory;
-        final Path dir = directories.getMarid().resolve("cache").resolve("repo");
-        cacheDir = dir.resolve("cache");
-        indexDir = dir.resolve("index");
-
-        Files.createDirectories(cacheDir);
-        Files.createDirectories(indexDir);
+    public MavenRepositoryManager(ObjectFactory<MavenRepositoryService> serv, MavenRepositories repositories) throws Exception {
+        service = serv;
 
         final DefaultContainerConfiguration configuration = new DefaultContainerConfiguration();
         configuration.setClassPathScanning(PlexusConstants.SCANNING_INDEX);
@@ -78,32 +82,56 @@ public class MavenRepositoryManager implements AutoCloseable {
         container = new DefaultPlexusContainer(configuration);
         indexer = container.lookup(Indexer.class);
         indexUpdater = container.lookup(IndexUpdater.class);
-        wagon = container.lookup(Wagon.class, "http");
 
-        indexCreators = ImmutableList.of(
-                container.lookup(IndexCreator.class, "min"),
-                container.lookup(IndexCreator.class, "jarContent")
-        );
+        final List<IndexCreator> min = ImmutableList.of(container.lookup(IndexCreator.class, "min"));
 
-        context = indexer.createIndexingContext(
-                "central-context",
-                "central",
-                cacheDir.toFile(),
-                indexDir.toFile(),
-                "http://repo1.maven.org/maven2",
-                null,
-                true,
-                true,
-                indexCreators
-        );
+        for (final MavenRepository r : repositories.getRepositories()) {
+            final Path base = repositories.getBaseDir().resolve(r.id);
+
+            final File index = base.resolve("index").toFile();
+            if (index.mkdirs()) {
+                log(INFO, "Created {0}", index);
+            }
+            if (r.directory.mkdirs()) {
+                log(INFO, "Created {0}", r.directory);
+            }
+
+            contexts.add(indexer.createIndexingContext(r.id, r.id, r.directory, index, r.url, null, true, true, min));
+        }
     }
 
     public void update() {
-        service.getObject().start();
+        for (final IndexingContext context : contexts) {
+            service.getObject()
+                    .setContext(context)
+                    .start();
+        }
     }
 
     public BooleanProperty updatingProperty() {
         return updating;
+    }
+
+    public List<Dependency> getMaridArtifacts(@Nonnull String classifier) {
+        final BooleanQuery query = new BooleanQuery();
+        query.setMinimumNumberShouldMatch(1);
+        query.add(indexer.constructQuery(CLASSIFIER, new SourcedSearchExpression(classifier)), SHOULD);
+        final IteratorSearchRequest request = new IteratorSearchRequest(query, contexts);
+        try (final IteratorSearchResponse response = indexer.searchIterator(request)) {
+            return StreamSupport.stream(response.spliterator(), false)
+                    .map(e -> {
+                        final Dependency dependency = new Dependency();
+                        dependency.setGroupId(e.groupId);
+                        dependency.setArtifactId(e.artifactId);
+                        dependency.setVersion(e.version);
+                        dependency.setClassifier(e.classifier);
+                        return dependency;
+                    })
+                    .collect(Collectors.toList());
+        } catch (Exception x) {
+            log(WARNING, "Unable to fetch artifacts", x);
+            return Collections.emptyList();
+        }
     }
 
     @EventListener
@@ -113,6 +141,16 @@ public class MavenRepositoryManager implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        container.dispose();
+        try {
+            for (final IndexingContext context : contexts) {
+                try {
+                    context.close(false);
+                } catch (Exception x) {
+                    log(WARNING, "Unable to close {0}", x, context.getId());
+                }
+            }
+        } finally {
+            container.dispose();
+        }
     }
 }
