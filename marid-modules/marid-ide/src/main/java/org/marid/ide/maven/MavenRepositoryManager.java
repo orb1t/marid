@@ -121,10 +121,10 @@ public class MavenRepositoryManager implements AutoCloseable {
             return StreamSupport.stream(response.spliterator(), false)
                     .map(e -> {
                         final Dependency dependency = new Dependency();
-                        dependency.setGroupId(e.groupId);
-                        dependency.setArtifactId(e.artifactId);
-                        dependency.setVersion(e.version);
-                        dependency.setClassifier(e.classifier);
+                        dependency.setGroupId(e.getGroupId());
+                        dependency.setArtifactId(e.getArtifactId());
+                        dependency.setVersion(e.getVersion());
+                        dependency.setClassifier(e.getClassifier());
                         return dependency;
                     })
                     .collect(Collectors.toList());

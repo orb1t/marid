@@ -80,10 +80,8 @@ public class IdeStatusBar extends BorderPane {
     private final ContextMenu contextMenu = new ContextMenu();
 
     public IdeStatusBar() {
-        setFocusTraversable(false);
-        getStyleClass().add("cell");
-
         sidesPane.setContent(scrollPane = new ScrollPane(toolBar = new HBox(5)));
+
         setCenter(sidesPane);
         setRight(right = new HBox(10));
 

@@ -20,7 +20,6 @@
 
 package org.marid.ide.logging;
 
-import javafx.geometry.Insets;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
@@ -42,7 +41,6 @@ public class IdeLogPane extends BorderPane {
         final LogComponent component = new LogComponent(IdeLogHandler.LOG_RECORDS);
         setCenter(component);
         component.scrollTo(component.getItems().size() - 1);
-        component.setPadding(new Insets(0));
         component.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
     }
 }

@@ -88,9 +88,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.maven.indexer</groupId>
+            <groupId>org.jboss.windup.org.apache.maven.indexer</groupId>
             <artifactId>indexer-core</artifactId>
-            <version>5.1.2-4333789</version>
+            <version>7.0.WINDUP</version>
         </dependency>
     </dependencies>
 
