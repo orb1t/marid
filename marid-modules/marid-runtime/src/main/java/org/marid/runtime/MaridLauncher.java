@@ -55,6 +55,7 @@ public class MaridLauncher {
 
         // Context
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.setClassLoader(Thread.currentThread().getContextClassLoader());
         final ConfigurableEnvironment env = context.getEnvironment();
         if (args.length > 0) {
             env.getPropertySources().addAfter("commandLine", new SimpleCommandLinePropertySource(args));

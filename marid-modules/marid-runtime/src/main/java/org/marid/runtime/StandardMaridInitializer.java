@@ -49,7 +49,7 @@ public class StandardMaridInitializer implements ApplicationContextInitializer<A
     }
 
     private void init(AnnotationConfigApplicationContext context) throws IOException, ClassNotFoundException {
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        final ClassLoader classLoader = context.getClassLoader();
         try (final InputStream stream = classLoader.getResourceAsStream("META-INF/marid/bean-classes.lst")) {
             if (stream != null) {
                 try (final Scanner scanner = new Scanner(stream, "UTF-8")) {
