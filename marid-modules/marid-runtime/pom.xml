@@ -11,16 +11,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.logmanager</groupId>
-            <artifactId>jboss-logmanager</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.marid</groupId>
             <artifactId>marid-util</artifactId>
             <version>${project.version}</version>

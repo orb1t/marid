@@ -24,7 +24,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.marid.ide.model.TextFile;
 import org.marid.ide.project.ProjectProfile;
 
 /**
@@ -33,11 +32,9 @@ import org.marid.ide.project.ProjectProfile;
 public class BeanEditorParam {
 
     public final ProjectProfile profile;
-    public final TextFile javaFile;
 
-    public BeanEditorParam(ProjectProfile profile, TextFile javaFile) {
+    public BeanEditorParam(ProjectProfile profile) {
         this.profile = profile;
-        this.javaFile = javaFile;
     }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")

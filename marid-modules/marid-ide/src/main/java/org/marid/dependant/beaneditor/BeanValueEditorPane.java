@@ -20,22 +20,13 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.beans.value.ObservableStringValue;
-import javafx.scene.Node;
-import org.marid.ide.tabs.IdeTab;
-import org.springframework.beans.factory.annotation.Autowired;
+import javafx.scene.layout.BorderPane;
 import org.springframework.stereotype.Component;
-
-import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanEditorTab extends IdeTab {
+public class BeanValueEditorPane extends BorderPane {
 
-    @Autowired
-    public BeanEditorTab(BeanSplitPane main, ObservableStringValue beanEditorTabText, Supplier<Node> beanEditorGraphic) {
-        super(main, beanEditorTabText, beanEditorGraphic);
-    }
 }

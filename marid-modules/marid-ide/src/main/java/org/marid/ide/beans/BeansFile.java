@@ -1,0 +1,66 @@
+/*-
+ * #%L
+ * marid-ide
+ * %%
+ * Copyright (C) 2012 - 2017 MARID software development group
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+package org.marid.ide.beans;
+
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import org.marid.ide.project.ProjectProfile;
+import org.marid.io.Xmls;
+import org.marid.runtime.beans.BeanInfo;
+import org.marid.runtime.context.MaridContext;
+import org.w3c.dom.Element;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
+
+/**
+ * @author Dmitry Ovchinnikov
+ */
+public class BeansFile {
+
+    public final StringProperty scriptingEngine = new SimpleStringProperty("js");
+    public final ObservableList<BeanData> beans = FXCollections.observableArrayList(BeanData::observables);
+
+    public void save(ProjectProfile profile) {
+        final MaridContext context = new MaridContext(beans.stream().map(BeanData::toInfo).toArray(BeanInfo[]::new));
+        Xmls.writeFormatted(d -> {
+            final Element root = d.createElement("beans");
+            d.appendChild(root);
+            context.writeTo(root);
+        }, profile.getMetaDirectory().resolve("beans.xml"));
+    }
+
+    public void load(ProjectProfile profile) {
+        final Path file = profile.getMetaDirectory().resolve("beans.xml");
+        if (Files.notExists(file)) {
+            save(profile);
+            return;
+        }
+        final AtomicReference<Element> elementRef = new AtomicReference<>();
+        Xmls.read(d -> elementRef.set(d.getDocumentElement()), file);
+        final MaridContext context = new MaridContext(elementRef.get());
+        beans.setAll(Stream.of(context.beans).map(BeanData::new).toArray(BeanData[]::new));
+    }
+}

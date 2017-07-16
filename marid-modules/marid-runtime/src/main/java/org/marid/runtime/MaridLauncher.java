@@ -22,23 +22,20 @@
 package org.marid.runtime;
 
 
-import org.jboss.logmanager.LogManager;
-import org.marid.misc.Casts;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.SimpleCommandLinePropertySource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourcePropertySource;
+import org.marid.io.Xmls;
+import org.marid.runtime.context.MaridContext;
+import org.marid.runtime.context.MaridRuntime;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 
-import static java.util.ServiceLoader.load;
-import static java.util.logging.Level.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Level.WARNING;
 import static org.marid.logging.Log.log;
 
 /**
@@ -47,42 +44,20 @@ import static org.marid.logging.Log.log;
 public class MaridLauncher {
 
     public static void main(String... args) throws Exception {
-        // Use JBoss LogManager instead of JUL
-        System.setProperty("java.util.logging.manager", LogManager.class.getName());
-
         // Use UTC
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 
         // Context
-        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        context.setClassLoader(Thread.currentThread().getContextClassLoader());
-        final ConfigurableEnvironment env = context.getEnvironment();
-        if (args.length > 0) {
-            env.getPropertySources().addAfter("commandLine", new SimpleCommandLinePropertySource(args));
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        final URL beansXmlUrl = classLoader.getResource("META-INF/marid/beans.xml");
+        if (beansXmlUrl == null) {
+            throw new IllegalStateException("No beans.xml file found");
         }
-        {
-            final Resource applicationProperties = context.getResource("application.properties");
-            if (applicationProperties.exists()) {
-                env.getPropertySources().addAfter("application", new ResourcePropertySource(applicationProperties));
-            }
-        }
-        try {
-            for (final ApplicationContextInitializer<?> initializer : load(ApplicationContextInitializer.class)) {
-                final ApplicationContextInitializer<ConfigurableApplicationContext> i = Casts.cast(initializer);
-                try {
-                    i.initialize(context);
-                    log(INFO, "Processed {0}", initializer.getClass().getSimpleName());
-                } catch (Exception x) {
-                    log(SEVERE, "Unable to run {0}", x, initializer);
-                    return;
-                }
-            }
-
-            context.refresh();
-            context.start();
-        } catch (Exception e) {
-            log(SEVERE, "Container initialization failed", e);
-            return;
+        final MaridRuntime runtime;
+        try (final Reader reader = new InputStreamReader(beansXmlUrl.openStream(), UTF_8)) {
+            final AtomicReference<MaridContext> contextRef = new AtomicReference<>();
+            Xmls.read(d -> contextRef.set(new MaridContext(d.getDocumentElement())), reader);
+            runtime = new MaridRuntime(contextRef.get(), classLoader);
         }
 
         // Input buffer
@@ -92,7 +67,7 @@ public class MaridLauncher {
         // Command processing loop
         try {
             COMMANDS:
-            while (context.isActive() && !Thread.interrupted()) {
+            while (runtime.isActive() && !Thread.interrupted()) {
                 while (reader.ready()) {
                     final int c = reader.read();
                     if (c < 0) {
@@ -118,7 +93,7 @@ public class MaridLauncher {
         } catch (Exception x) {
             log(WARNING, "Command processing error", x);
         } finally {
-            context.close();
+            runtime.close();
         }
     }
 }

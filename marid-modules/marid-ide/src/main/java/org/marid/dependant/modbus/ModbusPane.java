@@ -45,7 +45,7 @@ import java.io.File;
 import static java.util.Optional.of;
 import static java.util.logging.Level.WARNING;
 import static org.marid.logging.Log.log;
-import static org.marid.misc.Iterables.nodes;
+import static org.marid.io.Xmls.nodes;
 
 /**
  * @author Dmitry Ovchinnikov.

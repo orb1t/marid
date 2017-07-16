@@ -21,12 +21,14 @@
 
 package org.marid.jfx;
 
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
 
 import java.util.Locale;
@@ -42,7 +44,7 @@ public class LocalizedStrings {
 
     public static final ObjectProperty<Locale> LOCALE = new SimpleObjectProperty<>(null, "locale", Locale.getDefault());
 
-    public static ObservableValue<String> ls(String text, Object... args) {
+    public static ObservableStringValue ls(String text, Object... args) {
         final Observable[] observables = Stream.of(args)
                 .filter(Observable.class::isInstance)
                 .map(Observable.class::cast)
@@ -55,11 +57,11 @@ public class LocalizedStrings {
         }, observables);
     }
 
-    public static ObservableValue<String> fls(String format, String text, Object... args) {
+    public static ObservableStringValue fls(String format, String text, Object... args) {
         return Bindings.createStringBinding(() -> String.format(format, s(LOCALE.get(), text, args)), LOCALE);
     }
 
-    private static ObservableValue<String> value(Supplier<String> supplier, Observable... observables) {
+    private static ObservableStringValue value(Supplier<String> supplier, Observable... observables) {
         return new SimpleStringProperty(supplier.get()) {
 
             private final InvalidationListener listener = o -> set(supplier.get());
@@ -74,11 +76,13 @@ public class LocalizedStrings {
 
             @Override
             protected void finalize() throws Throwable {
-                LOCALE.removeListener(listener);
+                Platform.runLater(() -> {
+                    LOCALE.removeListener(listener);
 
-                for (final Observable observable : observables) {
-                    observable.removeListener(listener);
-                }
+                    for (final Observable observable : observables) {
+                        observable.removeListener(listener);
+                    }
+                });
             }
         };
     }
