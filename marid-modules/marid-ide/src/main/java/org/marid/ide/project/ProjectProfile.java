@@ -29,7 +29,7 @@ import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.marid.ide.beans.BeansFile;
+import org.marid.ide.model.BeansFile;
 
 import java.io.IOException;
 import java.io.InputStream;

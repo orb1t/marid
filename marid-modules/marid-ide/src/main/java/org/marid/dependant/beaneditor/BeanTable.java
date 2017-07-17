@@ -20,16 +20,19 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.beans.binding.Bindings;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.cell.CheckBoxTableCell;
-import org.marid.ide.beans.BeanData;
+import javafx.scene.control.cell.TextFieldTableCell;
+import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.SpecialActions;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -47,36 +50,49 @@ public class BeanTable extends MaridTableView<BeanData> {
     @Autowired
     private void nameColumn() {
         final TableColumn<BeanData, String> column = new TableColumn<>();
-        column.textProperty().bind(LocalizedStrings.ls("Name"));
-        column.setMinWidth(200);
-        column.setPrefWidth(250);
-        column.setMaxWidth(800);
+        column.textProperty().bind(ls("Name"));
+        column.setMinWidth(150);
+        column.setPrefWidth(200);
+        column.setMaxWidth(700);
         column.setCellValueFactory(param -> param.getValue().name);
         getColumns().add(column);
     }
 
     @Order(2)
     @Autowired
-    private void typeColumn() {
+    private void factoryColumn() {
         final TableColumn<BeanData, String> column = new TableColumn<>();
-        column.textProperty().bind(LocalizedStrings.ls("Type"));
+        column.textProperty().bind(ls("Factory"));
         column.setMinWidth(300);
         column.setPrefWidth(350);
         column.setMaxWidth(800);
-        column.setCellValueFactory(param -> param.getValue().type);
+        column.setCellValueFactory(param -> param.getValue().factory);
+        column.setCellFactory(param -> {
+            final TextFieldTableCell<BeanData, String> cell = new TextFieldTableCell<>();
+            cell.graphicProperty().bind(Bindings.createObjectBinding(() -> {
+                final String item = cell.getItem();
+                if (item == null) {
+                    return null;
+                } else if (item.contains(".")) {
+                    return FontIcons.glyphIcon("F_CUBE", 16);
+                } else {
+                    return FontIcons.glyphIcon("F_TREE", 16);
+                }
+            }, cell.itemProperty()));
+            return cell;
+        });
         getColumns().add(column);
     }
 
     @Order(3)
     @Autowired
-    private void temporaryColumn() {
-        final TableColumn<BeanData, Boolean> column = new TableColumn<>("T");
-        column.setMinWidth(28);
-        column.setPrefWidth(32);
-        column.setMaxWidth(38);
-        column.setEditable(true);
-        column.setCellValueFactory(param -> param.getValue().temporary);
-        column.setCellFactory(CheckBoxTableCell.forTableColumn(column));
+    private void producerColumn() {
+        final TableColumn<BeanData, String> column = new TableColumn<>();
+        column.textProperty().bind(ls("Producer"));
+        column.setMinWidth(200);
+        column.setPrefWidth(250);
+        column.setMaxWidth(800);
+        column.setCellValueFactory(param -> param.getValue().producer);
         getColumns().add(column);
     }
 }

@@ -18,15 +18,13 @@
  * #L%
  */
 
-package org.marid.ide.beans;
+package org.marid.ide.model;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.io.Xmls;
-import org.marid.runtime.beans.BeanInfo;
+import org.marid.runtime.beans.Bean;
 import org.marid.runtime.context.MaridContext;
 import org.w3c.dom.Element;
 
@@ -40,11 +38,10 @@ import java.util.stream.Stream;
  */
 public class BeansFile {
 
-    public final StringProperty scriptingEngine = new SimpleStringProperty("js");
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList(BeanData::observables);
 
     public void save(ProjectProfile profile) {
-        final MaridContext context = new MaridContext(beans.stream().map(BeanData::toInfo).toArray(BeanInfo[]::new));
+        final MaridContext context = new MaridContext(beans.stream().map(BeanData::toInfo).toArray(Bean[]::new));
         Xmls.writeFormatted(d -> {
             final Element root = d.createElement("beans");
             d.appendChild(root);

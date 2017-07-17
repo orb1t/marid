@@ -22,7 +22,7 @@
 package org.marid.runtime.context;
 
 import org.marid.runtime.beans.BeanEvent;
-import org.marid.runtime.beans.BeanInfo;
+import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanListener;
 
 import javax.annotation.Nonnull;
@@ -38,7 +38,7 @@ import static java.lang.String.format;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridRuntime implements AutoCloseable {
+public final class MaridRuntime implements AutoCloseable {
 
     final LinkedHashMap<String, Object> beans;
     private final ServiceLoader<BeanListener> beanListeners;
@@ -48,7 +48,7 @@ public class MaridRuntime implements AutoCloseable {
         this.beanListeners = ServiceLoader.load(BeanListener.class, classLoader);
 
         try (final MaridBeanCreationContext cc = new MaridBeanCreationContext(context, this, classLoader)) {
-            for (final BeanInfo bean : context.beans) {
+            for (final Bean bean : context.beans) {
                 cc.getOrCreate(bean.name);
             }
         } finally {

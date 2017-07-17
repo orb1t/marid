@@ -21,10 +21,12 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.beans.value.ObservableStringValue;
+import javafx.collections.FXCollections;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.LocalizedStrings;
+import org.marid.jfx.action.SpecialActions;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -49,6 +51,32 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
     @Bean
     public ObservableStringValue beanEditorTabText() {
         return LocalizedStrings.ls("Beans");
+    }
+
+    @Bean
+    public BeanMemberTable argTable(SpecialActions specialActions, BeanTable table) {
+        final BeanMemberTable memberTable = new BeanMemberTable(specialActions);
+        table.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> {
+            if (nV == null) {
+                memberTable.setItems(FXCollections.emptyObservableList());
+            } else {
+                memberTable.setItems(nV.args);
+            }
+        });
+        return memberTable;
+    }
+
+    @Bean
+    public BeanMemberTable propTable(SpecialActions specialActions, BeanTable table) {
+        final BeanMemberTable memberTable = new BeanMemberTable(specialActions);
+        table.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> {
+            if (nV == null) {
+                memberTable.setItems(FXCollections.emptyObservableList());
+            } else {
+                memberTable.setItems(nV.props);
+            }
+        });
+        return memberTable;
     }
 
     @Bean

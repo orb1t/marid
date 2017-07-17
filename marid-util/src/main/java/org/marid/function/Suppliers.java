@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-runtime
+ * marid-util
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -19,29 +19,28 @@
  * #L%
  */
 
-package org.marid.runtime.context;
+package org.marid.function;
 
-import java.util.function.BooleanSupplier;
-import java.util.function.Function;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class MaridObject {
+public interface Suppliers {
 
-    private final Function<String, Object> beanFunc;
-    private final BooleanSupplier active;
-
-    MaridObject(Function<String, Object> beanFunc, BooleanSupplier active) {
-        this.beanFunc = beanFunc;
-        this.active = active;
-    }
-
-    public Object getBean(String name) {
-        return beanFunc.apply(name);
-    }
-
-    public boolean isActive() {
-        return active.getAsBoolean();
+    static <T> Supplier<T> memoized(Supplier<T> supplier) {
+        final AtomicReference<T> ref = new AtomicReference<>();
+        final AtomicBoolean initialized = new AtomicBoolean();
+        return () -> {
+            if (initialized.compareAndSet(false, true)) {
+                final T value = supplier.get();
+                ref.set(value);
+                return value;
+            } else {
+                return ref.get();
+            }
+        };
     }
 }

@@ -18,56 +18,45 @@
  * #L%
  */
 
-package org.marid.ide.beans;
+package org.marid.ide.model;
 
 import javafx.beans.Observable;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.runtime.beans.BeanInfo;
+import org.marid.runtime.beans.BeanMember;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanData {
+public class BeanMemberData {
 
-    public final StringProperty name = new SimpleStringProperty();
     public final StringProperty type = new SimpleStringProperty();
+    public final StringProperty name = new SimpleStringProperty();
     public final StringProperty value = new SimpleStringProperty();
-    public final BooleanProperty temporary = new SimpleBooleanProperty();
 
-    public BeanData(BeanInfo beanInfo) {
-        name.set(beanInfo.name);
-
-    }
-
-    public String getName() {
-        return name.get();
+    public BeanMemberData(BeanMember member) {
+        type.set(member.type);
+        name.set(member.name);
+        value.set(member.value);
     }
 
     public String getType() {
         return type.get();
     }
 
+    public String getName() {
+        return name.get();
+    }
+
     public String getValue() {
         return value.get();
     }
 
-    public boolean isTemporary() {
-        return temporary.get();
-    }
-
-    public BeanInfo toInfo() {
-        return null;
+    public BeanMember toMember() {
+        return new BeanMember(getType(), getName(), getValue());
     }
 
     public Observable[] observables() {
-        return new Observable[] {name, type, value, temporary};
-    }
-
-    @Override
-    public String toString() {
-        return toInfo().toString();
+        return new Observable[] {type, name, value};
     }
 }

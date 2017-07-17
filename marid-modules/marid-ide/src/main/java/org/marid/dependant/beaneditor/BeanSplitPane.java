@@ -20,8 +20,7 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.geometry.Side;
-import org.controlsfx.control.MasterDetailPane;
+import javafx.scene.control.SplitPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,10 +28,10 @@ import org.springframework.stereotype.Component;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanSplitPane extends MasterDetailPane {
+public class BeanSplitPane extends SplitPane {
 
     @Autowired
-    public BeanSplitPane(BeanTable table, BeanValueEditorPane detailPane) {
-        super(Side.RIGHT, table, detailPane, true);
+    public BeanSplitPane(BeanTable table, BeanDetailsPane detailPane) {
+        super(table, detailPane);
     }
 }

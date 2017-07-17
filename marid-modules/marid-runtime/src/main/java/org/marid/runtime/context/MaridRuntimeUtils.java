@@ -27,7 +27,7 @@ import java.util.Comparator;
 /**
  * @author Dmitry Ovchinnikov
  */
-class MaridRuntimeUtils {
+interface MaridRuntimeUtils {
 
     static Comparator<Method> methodComparator() {
         return MaridRuntimeUtils::compare;

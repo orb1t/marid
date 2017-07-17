@@ -20,13 +20,18 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.scene.layout.BorderPane;
-import org.springframework.stereotype.Component;
+import javafx.collections.FXCollections;
+import org.marid.ide.model.BeanMemberData;
+import org.marid.jfx.action.SpecialActions;
+import org.marid.jfx.table.MaridTableView;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class BeanValueEditorPane extends BorderPane {
+public class BeanMemberTable extends MaridTableView<BeanMemberData> {
 
+    public BeanMemberTable(SpecialActions specialActions) {
+        super(FXCollections.observableArrayList(), specialActions);
+        setEditable(false);
+    }
 }

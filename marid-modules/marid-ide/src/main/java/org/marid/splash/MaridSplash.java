@@ -30,13 +30,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
-import javafx.scene.effect.InnerShadow;
 import javafx.scene.effect.MotionBlur;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
@@ -51,13 +47,16 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.LogRecord;
 
-import static javafx.scene.paint.Color.DARKGRAY;
+import static javafx.scene.layout.BorderStrokeStyle.SOLID;
+import static javafx.scene.paint.Color.GRAY;
 import static org.marid.l10n.L10n.m;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class MaridSplash extends BorderPane implements AutoCloseable {
+
+    private static final Color BACKGROUND = Color.DIMGRAY.darker().darker();
 
     private final ObservableList<LogRecord> records;
     private final ListChangeListener<LogRecord> listener;
@@ -70,8 +69,8 @@ public class MaridSplash extends BorderPane implements AutoCloseable {
     public MaridSplash(ObservableList<LogRecord> logRecords) {
         records = logRecords;
         maxCount = IdePrefs.PREFERENCES.getInt("splashMaxLogRecords", 100);
-        setBackground(new Background(new BackgroundFill(Color.DARKSLATEGREY, null, null)));
-        setEffect(new InnerShadow(32, Color.WHITE));
+        setBackground(new Background(new BackgroundFill(BACKGROUND, null, null)));
+        setBorder(new Border(new BorderStroke(GRAY, SOLID, null, new BorderWidths(3))));
         setCacheHint(CacheHint.SPEED);
 
         final ImageView image = new ImageView(MaridIconFx.getImage(32, Color.GREEN));
@@ -79,7 +78,7 @@ public class MaridSplash extends BorderPane implements AutoCloseable {
         image.setClip(new Circle(16, 16, 16));
 
         final Label title = new Label("Marid IDE", image);
-        title.setPadding(new Insets(24));
+        title.setPadding(new Insets(16));
         title.setGraphicTextGap(10);
         title.setPrefWidth(800);
         title.setTextFill(Color.WHITE);
@@ -93,7 +92,7 @@ public class MaridSplash extends BorderPane implements AutoCloseable {
         transition.setToAngle(360);
         transition.setCycleCount(Animation.INDEFINITE);
 
-        final Color background = DARKGRAY.darker().darker().darker();
+        final Color background = Color.BLACK;
         flow = new TextFlow();
         flow.setBackground(new Background(new BackgroundFill(background, null, null)));
         flow.setPrefHeight(400);
@@ -109,14 +108,14 @@ public class MaridSplash extends BorderPane implements AutoCloseable {
         scrollPane.setEffect(new MotionBlur(30, 2));
 
         final StackPane group = new StackPane(scrollPane);
-        group.setPadding(new Insets(0, 24, 0, 24));
+        group.setPadding(new Insets(0, 16, 0, 16));
 
         setCenter(group);
 
         final ProgressBar progressBar = new ProgressBar();
         progressBar.setMaxWidth(Double.MAX_VALUE);
-        progressBar.setPadding(new Insets(24));
-        progressBar.setBackground(new Background(new BackgroundFill(Color.DARKSLATEGREY, null, null)));
+        progressBar.setPadding(new Insets(16));
+        progressBar.setBackground(new Background(new BackgroundFill(BACKGROUND, null, null)));
         setBottom(progressBar);
 
         monospaced = Font.font("Monospaced", FontWeight.NORMAL, 11);

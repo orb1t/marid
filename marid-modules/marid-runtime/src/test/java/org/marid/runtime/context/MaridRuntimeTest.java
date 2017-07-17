@@ -23,8 +23,7 @@ package org.marid.runtime.context;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.marid.runtime.beans.BeanFactory;
-import org.marid.runtime.beans.BeanInfo;
+import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanMember;
 import org.marid.test.NormalTests;
 
@@ -42,42 +41,49 @@ import static org.junit.Assert.assertEquals;
 public class MaridRuntimeTest {
 
     @Test
-    public void simple() {
-        final BeanInfo[] beans = {
-                new BeanInfo(
+    public void simple() throws Exception {
+        final Bean[] beans = {
+                new Bean(
                         "bean2",
-                        new BeanFactory("bean", "bean1"),
-                        "getZ",
+                        "bean1",
+                        Bean.factory(Bean1.class.getMethod("getZ")),
                         ms(),
                         ms()
                 ),
-                new BeanInfo(
+                new Bean(
                         "bean1",
-                        new BeanFactory("class", Bean1.class.getName()),
-                        "new",
+                        Bean1.class.getName(),
+                        Bean.factory(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
                         ms(m("val", "x", "1"), m("val", "y", "abc"), m("val", "z", "1.23")),
                         ms(m("val", "setA", "true"))
                 ),
-                new BeanInfo(
+                new Bean(
                         "bean3",
-                        new BeanFactory("bean", "bean1"),
-                        "y",
+                        "bean1",
+                        Bean.factory(Bean1.class.getField("y")),
                         ms(),
                         ms()
                 ),
-                new BeanInfo(
+                new Bean(
                         "bean4",
-                        new BeanFactory("class", Bean1.class.getName()),
-                        "list",
+                        Bean1.class.getName(),
+                        Bean.factory(Bean1.class.getMethod("list")),
                         ms(),
                         ms(m("val", "add", "1"))
                 ),
-                new BeanInfo(
+                new Bean(
                         "bean5",
-                        new BeanFactory("class", Bean1.class.getName()),
-                        "list",
+                        Bean1.class.getName(),
+                        Bean.factory(Bean1.class.getMethod("list")),
                         ms(),
                         ms(m("val", "add", "1"), m("val", "add", "2"))
+                ),
+                new Bean(
+                        "bean6",
+                        String.class.getName() + ".class",
+                        Bean.factory(Class.class.getMethod("cast", Object.class)),
+                        ms(m("js", "arg0", "'a' + 1")),
+                        ms()
                 )
         };
         final MaridContext context = new MaridContext(beans);
@@ -87,6 +93,7 @@ public class MaridRuntimeTest {
             assertEquals("abc", runtime.beans.get("bean3"));
             assertEquals(singletonList(1), runtime.beans.get("bean4"));
             assertEquals(asList(1, 2), runtime.beans.get("bean5"));
+            assertEquals("a1", runtime.beans.get("bean6"));
         }
     }
 

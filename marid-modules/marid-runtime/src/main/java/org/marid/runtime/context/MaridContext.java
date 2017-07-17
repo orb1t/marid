@@ -22,7 +22,7 @@
 package org.marid.runtime.context;
 
 import org.marid.io.Xmls;
-import org.marid.runtime.beans.BeanInfo;
+import org.marid.runtime.beans.Bean;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -37,9 +37,9 @@ import static org.marid.misc.Builder.build;
 public final class MaridContext {
 
     @Nonnull
-    public final BeanInfo[] beans;
+    public final Bean[] beans;
 
-    public MaridContext(@Nonnull BeanInfo[] beans) {
+    public MaridContext(@Nonnull Bean[] beans) {
         this.beans = beans;
     }
 
@@ -48,12 +48,12 @@ public final class MaridContext {
                 .filter(e -> "beans".equals(e.getTagName()))
                 .flatMap(e -> Xmls.nodes(e, Element.class))
                 .filter(e -> "bean".equals(e.getTagName()))
-                .map(BeanInfo::new)
-                .toArray(BeanInfo[]::new);
+                .map(Bean::new)
+                .toArray(Bean[]::new);
     }
 
     public void writeTo(@Nonnull Element element) {
-        for (final BeanInfo bean : beans) {
+        for (final Bean bean : beans) {
             element.appendChild(build(element.getOwnerDocument().createElement("bean"), bean::writeTo));
         }
     }
@@ -61,7 +61,7 @@ public final class MaridContext {
     @Override
     public String toString() {
         return String.format("Context(%s)",
-                Stream.of(beans).map(BeanInfo::toString).collect(Collectors.joining(",\n\t", "\n\t", ""))
+                Stream.of(beans).map(Bean::toString).collect(Collectors.joining(",\n\t", "\n\t", ""))
         );
     }
 }
