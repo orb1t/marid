@@ -30,13 +30,17 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.ide.model.BeansFile;
+import org.marid.misc.Urls;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import static java.util.Arrays.asList;
@@ -65,6 +69,7 @@ public class ProjectProfile {
     private final Logger logger;
     private final BooleanProperty enabled;
     private final BeansFile beansFile;
+    private URLClassLoader classLoader;
 
     ProjectProfile(Path profilesDir, String name) {
         path = profilesDir.resolve(name);
@@ -86,9 +91,15 @@ public class ProjectProfile {
         createFileStructure();
         init();
         enabled = new SimpleBooleanProperty(true);
+        enabled.addListener((o, oV, nV) -> {
+            if (nV && !oV) {
+                updateClassLoader();
+            }
+        });
     }
 
     private void init() {
+        updateClassLoader();
         if (model.getProfiles().stream().noneMatch(p -> "conf".equals(p.getId()))) {
             final Profile profile = new Profile();
             profile.setId("conf");
@@ -237,6 +248,12 @@ public class ProjectProfile {
         } catch (Exception x) {
             log(logger, WARNING, "Unable to delete {0}", x, getName());
         }
+    }
+
+    private void updateClassLoader() {
+        final Set<URL> urls = Urls.classpath(target.resolve("lib"), target.resolve("classes"));
+        final ClassLoader parent = ClassLoader.getSystemClassLoader().getParent();
+        classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), parent);
     }
 
     @Override

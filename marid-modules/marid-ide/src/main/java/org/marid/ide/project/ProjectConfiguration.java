@@ -80,7 +80,7 @@ public class ProjectConfiguration {
     @IdeAction
     @Qualifier("profile")
     public FxAction projectBuildAction(ObjectFactory<ProjectBuilderService> mavenBuilder,
-                                       ObjectFactory<ProjectSaver> projectSaver,
+                                       ProjectSaver projectSaver,
                                        ProjectManager projectManager,
                                        BooleanBinding projectDisabled) {
         return new FxAction("projectBuild", "pb", "Project")
@@ -89,7 +89,7 @@ public class ProjectConfiguration {
                 .setIcon("D_CLOCK_FAST")
                 .setEventHandler(event -> {
                     final ProjectProfile profile = projectManager.getProfile();
-                    projectSaver.getObject().save(profile);
+                    projectSaver.save(profile);
                     mavenBuilder.getObject()
                             .setProfile(profile)
                             .start();
