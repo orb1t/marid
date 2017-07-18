@@ -92,11 +92,11 @@ public class MaridSplash extends BorderPane implements AutoCloseable {
         transition.setToAngle(360);
         transition.setCycleCount(Animation.INDEFINITE);
 
-        final Color background = Color.BLACK;
+        final Color background = Color.DARKGRAY.deriveColor(1, 1, 0.2, 1);
         flow = new TextFlow();
         flow.setBackground(new Background(new BackgroundFill(background, null, null)));
         flow.setPrefHeight(400);
-        flow.setLineSpacing(3);
+        flow.setLineSpacing(4);
 
         final ScrollPane scrollPane = new ScrollPane(flow);
         scrollPane.setPadding(new Insets(10));
@@ -118,7 +118,7 @@ public class MaridSplash extends BorderPane implements AutoCloseable {
         progressBar.setBackground(new Background(new BackgroundFill(BACKGROUND, null, null)));
         setBottom(progressBar);
 
-        monospaced = Font.font("Monospaced", FontWeight.NORMAL, 11);
+        monospaced = Font.font("Monospaced", FontWeight.NORMAL, 10);
         listener = c -> {
             progressBar.setProgress(Math.min(counter.getAndIncrement() / (double) maxCount, 1.0));
             while (c.next()) {

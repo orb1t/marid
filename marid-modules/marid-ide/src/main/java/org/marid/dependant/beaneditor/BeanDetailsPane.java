@@ -55,4 +55,13 @@ public class BeanDetailsPane extends Accordion {
         pane.setContent(propTable);
         getPanes().add(pane);
     }
+
+    @Order(3)
+    @Autowired
+    private void initInitializersPane() {
+        final TitledPane pane = new TitledPane();
+        pane.textProperty().bind(ls("Initializers"));
+        pane.setGraphic(FontIcons.glyphIcon("D_STAR", 16));
+        getPanes().add(pane);
+    }
 }

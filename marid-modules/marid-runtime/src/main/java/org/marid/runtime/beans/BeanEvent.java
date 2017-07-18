@@ -22,6 +22,7 @@
 package org.marid.runtime.beans;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.EventObject;
 
 /**
@@ -35,7 +36,7 @@ public final class BeanEvent extends EventObject {
     @Nonnull
     private final String type;
 
-    public BeanEvent(@Nonnull Object source, @Nonnull String name, @Nonnull String type) {
+    public BeanEvent(@Nullable Object source, @Nonnull String name, @Nonnull String type) {
         super(source);
         this.name = name;
         this.type = type;

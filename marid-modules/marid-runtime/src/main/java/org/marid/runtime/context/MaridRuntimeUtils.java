@@ -21,27 +21,10 @@
 
 package org.marid.runtime.context;
 
-import java.lang.reflect.Method;
-import java.util.Comparator;
-
 /**
  * @author Dmitry Ovchinnikov
  */
 interface MaridRuntimeUtils {
-
-    static Comparator<Method> methodComparator() {
-        return MaridRuntimeUtils::compare;
-    }
-
-    static int compare(Method m1, Method m2) {
-        if (m1.getDeclaringClass() == m2.getDeclaringClass()) {
-            return m1.getName().compareTo(m2.getName());
-        } else if (m1.getDeclaringClass().isAssignableFrom(m2.getDeclaringClass())) {
-            return 1;
-        } else {
-            return -1;
-        }
-    }
 
     static Object defaultValue(Class<?> type) {
         if (type.isPrimitive()) {

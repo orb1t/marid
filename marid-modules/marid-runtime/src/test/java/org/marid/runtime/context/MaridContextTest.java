@@ -94,6 +94,7 @@ public class MaridContextTest {
             assertEquals(singletonList(1), runtime.beans.get("bean4"));
             assertEquals(asList(1, 2), runtime.beans.get("bean5"));
             assertEquals("a1", runtime.beans.get("bean6"));
+            assertEquals(10, ((Bean1) runtime.beans.get("bean1")).q);
         }
     }
 

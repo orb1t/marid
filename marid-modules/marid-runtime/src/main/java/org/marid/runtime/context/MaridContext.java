@@ -21,16 +21,17 @@
 
 package org.marid.runtime.context;
 
-import org.marid.runtime.beans.BeanEvent;
+import org.marid.misc.Initializable;
 import org.marid.runtime.beans.Bean;
+import org.marid.runtime.beans.BeanEvent;
 import org.marid.runtime.beans.BeanListener;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.ServiceLoader;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
@@ -56,54 +57,20 @@ public final class MaridContext implements AutoCloseable {
         }
     }
 
-    void initialize(String name, Object bean) {
+    void initialize(String name, Object bean) throws Exception {
         beanListeners.forEach(l -> l.onEvent(new BeanEvent(bean, name, "PRE_INIT")));
-        final TreeSet<Method> initializers = new TreeSet<>(MaridRuntimeUtils::compare);
-        for (Class<?> c = bean.getClass(); c != null; c = c.getSuperclass()) {
-            for (final Method method : c.getDeclaredMethods()) {
-                if (method.getParameterCount() == 0) {
-                    if (method.isAnnotationPresent(PostConstruct.class)) {
-                        initializers.add(method);
-                    }
-                }
-            }
-        }
-        final IllegalStateException exception = new IllegalStateException(format("[%s] Initialization", name));
-        for (final Method method : initializers) {
-            try {
-                if (!method.isAccessible()) {
-                    method.setAccessible(true);
-                }
-                method.invoke(bean);
-            } catch (ReflectiveOperationException x) {
-                exception.addSuppressed(x.getCause());
-            }
-        }
-        if (exception.getSuppressed().length > 0) {
-            throw exception;
+        if (bean instanceof Initializable) {
+            ((Initializable) bean).init();
         }
         beanListeners.forEach(l -> l.onEvent(new BeanEvent(bean, name, "POST_INIT")));
     }
 
     private void destroy(String name, Object bean, Consumer<Throwable> errorConsumer) {
         beanListeners.forEach(l -> l.onEvent(new BeanEvent(bean, name, "PRE_DESTROY")));
-        final TreeSet<Method> destroyers = new TreeSet<>(MaridRuntimeUtils.methodComparator().reversed());
-        for (Class<?> c = bean.getClass(); c != null; c = c.getSuperclass()) {
-            for (final Method method : c.getDeclaredMethods()) {
-                if (method.getParameterCount() == 0) {
-                    if (method.isAnnotationPresent(PreDestroy.class) || "close".equals(method.getName())) {
-                        destroyers.add(method);
-                    }
-                }
-            }
-        }
-        for (final Method method : destroyers) {
+        if (bean instanceof AutoCloseable) {
             try {
-                if (!method.isAccessible()) {
-                    method.setAccessible(true);
-                }
-                method.invoke(bean);
-            } catch (ReflectiveOperationException x) {
+                ((AutoCloseable) bean).close();
+            } catch (Throwable x) {
                 errorConsumer.accept(x);
             }
         }

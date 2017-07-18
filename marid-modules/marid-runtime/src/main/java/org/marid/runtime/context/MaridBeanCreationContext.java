@@ -29,13 +29,12 @@ import java.lang.invoke.MethodHandle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.of;
-import static org.marid.runtime.context.MaridRuntimeUtils.defaultValue;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -60,7 +59,12 @@ final class MaridBeanCreationContext implements AutoCloseable {
     }
 
     Object getOrCreate(String name) {
-        return context.beans.computeIfAbsent(name, this::create);
+        try {
+            return context.beans.computeIfAbsent(name, this::create);
+        } catch (Throwable x) {
+            startException.addSuppressed(x);
+            throw x;
+        }
     }
 
     private Object create(String name) {
@@ -75,17 +79,15 @@ final class MaridBeanCreationContext implements AutoCloseable {
             try {
                 factoryClass = Class.forName(bean.factory, true, classLoader);
                 factoryObject = null;
-            } catch (ClassNotFoundException x1) {
-                throw new IllegalStateException(x1);
+            } catch (ClassNotFoundException x) {
+                throw new IllegalStateException(x);
             }
         }
         final MaridFactoryBean factoryBean = new MaridFactoryBean(bean);
         final MethodHandle constructor = factoryBean.findProducer(factoryClass, factoryObject);
         beanClasses.put(name, constructor.type().returnType());
-        final Class<?>[] argClasses = constructor.type().parameterArray();
-        final Object[] args = IntStream.range(0, argClasses.length)
-                .mapToObj(i -> bean.args[i].value == null ? defaultValue(argClasses[i]) : arg(bean.args[i]))
-                .toArray();
+        final Class<?>[] argTypes = constructor.type().parameterArray();
+        final Object[] args = range(0, argTypes.length).mapToObj(i -> arg(bean.args[i], argTypes[i])).toArray();
 
         try {
             final Object instance = constructor.invokeWithArguments(args);
@@ -93,7 +95,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
                 final MethodHandle[] properties = bean.findProperties(constructor);
                 for (int i = 0; i < bean.props.length; i++) {
                     final MethodHandle setter = properties[i].bindTo(instance);
-                    final Object value = arg(bean.props[i]);
+                    final Object value = arg(bean.props[i], properties[i].type().parameterType(0));
                     try {
                         setter.invokeWithArguments(value);
                     } catch (Throwable x) {
@@ -110,12 +112,16 @@ final class MaridBeanCreationContext implements AutoCloseable {
         }
     }
 
-    private Object arg(BeanMember member) {
-        final Function<String, ?> argFunc = convertersManager.getConverter(member.type);
-        if (argFunc != null) {
-            return argFunc.apply(member.value);
+    private Object arg(BeanMember member, Class<?> type) {
+        if (member.value == null) {
+            return MaridRuntimeUtils.defaultValue(type);
         } else {
-            throw new IllegalArgumentException("Unable to find converter for " + member.type);
+            final Function<String, ?> argFunc = convertersManager.getConverter(member.type);
+            if (argFunc != null) {
+                return argFunc.apply(member.value);
+            } else {
+                throw new IllegalArgumentException("Unable to find converter for " + member.type);
+            }
         }
     }
 

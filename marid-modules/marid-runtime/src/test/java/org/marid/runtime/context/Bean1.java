@@ -23,6 +23,7 @@ package org.marid.runtime.context;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.marid.misc.Initializable;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -31,12 +32,13 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Bean1 {
+public class Bean1 implements Initializable {
 
     private final int x;
     public final String y;
     private final BigDecimal z;
     private boolean a;
+    public transient int q;
 
     public Bean1(int x, String y, BigDecimal z) {
         this.x = x;
@@ -63,6 +65,11 @@ public class Bean1 {
     public Bean1 setA(boolean a) {
         this.a = a;
         return this;
+    }
+
+    @Override
+    public void init() throws Exception {
+        q = 10;
     }
 
     @Override
