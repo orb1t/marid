@@ -251,9 +251,13 @@ public class ProjectProfile {
     }
 
     private void updateClassLoader() {
-        final Set<URL> urls = Urls.classpath(target.resolve("lib"), target.resolve("classes"));
-        final ClassLoader parent = ClassLoader.getSystemClassLoader().getParent();
-        classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), parent);
+        try (final URLClassLoader old = classLoader) {
+            final Set<URL> urls = Urls.classpath(target.resolve("lib"), target.resolve("classes"));
+            final ClassLoader parent = ClassLoader.getSystemClassLoader().getParent();
+            classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), parent);
+        } catch (Exception x) {
+            log(logger, WARNING, "Unable to close class loader", x);
+        }
     }
 
     @Override

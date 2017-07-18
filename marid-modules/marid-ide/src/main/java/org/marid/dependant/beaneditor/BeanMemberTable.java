@@ -21,9 +21,14 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.collections.FXCollections;
+import javafx.scene.control.TableColumn;
 import org.marid.ide.model.BeanMemberData;
 import org.marid.jfx.action.SpecialActions;
 import org.marid.jfx.table.MaridTableView;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
+
+import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -33,5 +38,41 @@ public class BeanMemberTable extends MaridTableView<BeanMemberData> {
     public BeanMemberTable(SpecialActions specialActions) {
         super(FXCollections.observableArrayList(), specialActions);
         setEditable(false);
+    }
+
+    @Order(1)
+    @Autowired
+    private void initNameColumn() {
+        final TableColumn<BeanMemberData, String> column = new TableColumn<>();
+        column.textProperty().bind(ls("Name"));
+        column.setMinWidth(100);
+        column.setPrefWidth(150);
+        column.setPrefWidth(350);
+        column.setCellValueFactory(param -> param.getValue().name);
+        getColumns().add(column);
+    }
+
+    @Order(2)
+    @Autowired
+    private void initTypeColumn() {
+        final TableColumn<BeanMemberData, String> column = new TableColumn<>();
+        column.textProperty().bind(ls("Type"));
+        column.setMinWidth(100);
+        column.setPrefWidth(150);
+        column.setPrefWidth(350);
+        column.setCellValueFactory(param -> param.getValue().type);
+        getColumns().add(column);
+    }
+
+    @Order(3)
+    @Autowired
+    private void initValueColumn() {
+        final TableColumn<BeanMemberData, String> column = new TableColumn<>();
+        column.textProperty().bind(ls("Value"));
+        column.setMinWidth(200);
+        column.setPrefWidth(350);
+        column.setPrefWidth(1000);
+        column.setCellValueFactory(param -> param.getValue().value);
+        getColumns().add(column);
     }
 }
