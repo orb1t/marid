@@ -28,12 +28,13 @@ import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.reflect.*;
-import java.util.AbstractMap.SimpleImmutableEntry;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -139,97 +140,19 @@ public final class Bean {
         });
     }
 
-    private boolean matchArgs(String[] args, Executable executable) {
-        if (args.length == executable.getParameterCount()) {
-            final Class<?>[] argTypes = executable.getParameterTypes();
-            for (int i = 0; i < args.length; i++) {
-                if (!args[i].equals(argTypes[i].getName())) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public BeanConstructor findProducer(Entry<String, String[]> p, Class<?> type, Object target) {
+    public MethodHandle[] findProperties(MethodHandle constructor) {
+        final Class<?> targetClass = constructor.type().returnType();
         final Lookup l = MethodHandles.publicLookup();
-        try {
-            switch (p.getKey()) {
-                case "new": {
-                    for (final Constructor<?> c : type.getConstructors()) {
-                        if (matchArgs(p.getValue(), c)) {
-                            return new BeanConstructor(type, c.getGenericParameterTypes(), l.unreflectConstructor(c));
-                        }
-                    }
-                    break;
-                }
-                default: {
-                    for (final Method m : type.getMethods()) {
-                        if (m.getName().equals(p.getKey()) && matchArgs(p.getValue(), m)) {
-                            MethodHandle h = l.unreflect(m);
-                            if (!Modifier.isStatic(m.getModifiers())) {
-                                h = h.bindTo(target);
-                            }
-                            return new BeanConstructor(m.getGenericReturnType(), m.getGenericParameterTypes(), h);
-                        }
-                    }
-                    if (args.length == 0) {
-                        for (final Field f : type.getFields()) {
-                            if (f.getName().equals(p.getKey())) {
-                                MethodHandle h = l.unreflectGetter(f);
-                                if (!Modifier.isStatic(f.getModifiers())) {
-                                    h = h.bindTo(target);
-                                }
-                                return new BeanConstructor(f.getGenericType(), h.type().parameterArray(), h);
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-            throw new IllegalStateException(format("Not found: %s(%s)", p.getKey(), String.join(",", p.getValue())));
-        } catch (IllegalAccessException x) {
-            throw new IllegalStateException(x);
-        }
-    }
-
-    public BeanProperties findProperties(BeanConstructor constructor) {
-        final Type[] types = new Type[props.length];
-        final MethodHandle[] setters = new MethodHandle[props.length];
-        final Class<?> targetClass = constructor.handle.type().returnType();
-
-        final Function<Type, Type> genericTypeResolver = argType -> {
-            if (argType instanceof TypeVariable && constructor.type instanceof ParameterizedType) {
-                final ParameterizedType pt = (ParameterizedType) constructor.type;
-                final Type[] typeArgs = pt.getActualTypeArguments();
-                final TypeVariable<?>[] vars = targetClass.getTypeParameters();
-                if (typeArgs.length == vars.length) {
-                    for (int a = 0; a < vars.length; a++) {
-                        if (argType.equals(vars[a])) {
-                            return typeArgs[a];
-                        }
-                    }
-                }
-            }
-            return argType;
-        };
-        final Lookup l = MethodHandles.publicLookup();
-        final Function<BeanMember, Entry<MethodHandle, Type>> handleResolver = prop -> {
+        final Function<BeanMember, MethodHandle> handleResolver = prop -> {
             try {
                 for (final Method method : targetClass.getMethods()) {
                     if (method.getParameterCount() == 1 && method.getName().equals(prop.name)) {
-                        final MethodHandle h = l.unreflect(method);
-                        final Type t = genericTypeResolver.apply(method.getGenericParameterTypes()[0]);
-                        return new SimpleImmutableEntry<>(h, t);
+                        return l.unreflect(method);
                     }
                 }
                 for (final Field field : targetClass.getFields()) {
                     if (field.getName().equals(prop.name)) {
-                        final MethodHandle h = l.unreflectSetter(field);
-                        final Type t = genericTypeResolver.apply(field.getGenericType());
-                        return new SimpleImmutableEntry<>(h, t);
+                        return l.unreflectSetter(field);
                     }
                 }
                 throw new IllegalStateException(format("No property found: %s", prop));
@@ -237,15 +160,7 @@ public final class Bean {
                 throw new IllegalStateException(x);
             }
         };
-
-        for (int i = 0; i < props.length; i++) {
-            final BeanMember prop = props[i];
-            final Entry<MethodHandle, Type> e = handleResolver.apply(prop);
-            types[i] = e.getValue();
-            setters[i] = e.getKey();
-        }
-
-        return new BeanProperties(types, setters);
+        return Stream.of(props).map(handleResolver).toArray(MethodHandle[]::new);
     }
 
     public static String factory(Constructor<?> constructor) {

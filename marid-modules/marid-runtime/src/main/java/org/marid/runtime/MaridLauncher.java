@@ -23,8 +23,8 @@ package org.marid.runtime;
 
 
 import org.marid.io.Xmls;
+import org.marid.runtime.context.MaridConfiguration;
 import org.marid.runtime.context.MaridContext;
-import org.marid.runtime.context.MaridRuntime;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -53,11 +53,11 @@ public class MaridLauncher {
         if (beansXmlUrl == null) {
             throw new IllegalStateException("No beans.xml file found");
         }
-        final MaridRuntime runtime;
+        final MaridContext runtime;
         try (final Reader reader = new InputStreamReader(beansXmlUrl.openStream(), UTF_8)) {
-            final AtomicReference<MaridContext> contextRef = new AtomicReference<>();
-            Xmls.read(d -> contextRef.set(new MaridContext(d.getDocumentElement())), reader);
-            runtime = new MaridRuntime(contextRef.get(), classLoader);
+            final AtomicReference<MaridConfiguration> contextRef = new AtomicReference<>();
+            Xmls.read(d -> contextRef.set(new MaridConfiguration(d.getDocumentElement())), reader);
+            runtime = new MaridContext(contextRef.get(), classLoader);
         }
 
         // Input buffer

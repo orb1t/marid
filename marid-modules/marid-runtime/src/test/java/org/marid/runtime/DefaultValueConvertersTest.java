@@ -21,19 +21,15 @@
 
 package org.marid.runtime;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.marid.runtime.converter.DefaultValueConverters;
+import org.marid.runtime.context.MaridRuntime;
+import org.marid.runtime.converter.DefaultValueConvertersFactory;
+import org.marid.runtime.converter.ValueConverters;
 import org.marid.test.NormalTests;
 
-import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.SortedSet;
 import java.util.function.Function;
 
-import static java.util.Arrays.asList;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -43,39 +39,22 @@ import static org.junit.Assert.assertEquals;
 @Category({NormalTests.class})
 public class DefaultValueConvertersTest {
 
-    private static DefaultValueConverters converters;
-
-    private static Set<String> stringSetTypeField;
-    private static SortedSet<String> sortedStringSetTypeField;
-
-    @BeforeClass
-    public static void init() {
-        converters = new DefaultValueConverters();
-    }
+    private static final DefaultValueConvertersFactory FACTORY = new DefaultValueConvertersFactory();
+    private static final ValueConverters CONVERTERS = FACTORY.converters(new MaridRuntime(
+            v -> v,
+            () -> true,
+            Thread.currentThread().getContextClassLoader()
+    ));
 
     @Test
     public void testString() {
-        final Function<String, ?> function = converters.getConverter(String.class);
+        final Function<String, ?> function = CONVERTERS.getConverter("String");
         assertEquals("a", function.apply("a"));
     }
 
     @Test
     public void testIntArray() {
-        final Function<String, ?> function = converters.getConverter(int[].class);
+        final Function<String, ?> function = CONVERTERS.getConverter("int[]");
         assertArrayEquals(new int[] {1, 2}, (int[]) function.apply("1, 2"));
-    }
-
-    @Test
-    public void testStringSet() throws Exception {
-        final Type type = DefaultValueConvertersTest.class.getDeclaredField("stringSetTypeField").getGenericType();
-        final Function<String, ?> function = converters.getConverter(type);
-        assertEquals(new HashSet<>(asList("a", "b")), function.apply("a, b"));
-    }
-
-    @Test
-    public void testSortedSet() throws Exception {
-        final Type type = DefaultValueConvertersTest.class.getDeclaredField("sortedStringSetTypeField").getGenericType();
-        final Function<String, ?> function = converters.getConverter(type);
-        assertArrayEquals(new Object[] {"a", "b"}, ((Set) function.apply("b, a")).toArray());
     }
 }

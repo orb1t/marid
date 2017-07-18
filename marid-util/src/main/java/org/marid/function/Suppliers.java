@@ -23,6 +23,7 @@ package org.marid.function;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -42,5 +43,9 @@ public interface Suppliers {
                 return ref.get();
             }
         };
+    }
+
+    static <T, R> Function<T, R> elseFunc(Function<T, R> func) {
+        return v -> v == null ? null : func.apply(v);
     }
 }

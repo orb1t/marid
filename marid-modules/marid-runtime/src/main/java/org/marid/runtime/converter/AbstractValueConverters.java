@@ -21,13 +21,17 @@
 
 package org.marid.runtime.converter;
 
+import org.marid.annotation.MetaInfo;
+import org.marid.annotation.MetaLiteral;
 import org.marid.misc.Casts;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -35,32 +39,44 @@ import java.util.stream.Stream;
  */
 public abstract class AbstractValueConverters implements ValueConverters {
 
-    protected final HashMap<Type, Function<String, ?>> converters;
+    public static final Pattern COMMA = Pattern.compile(",");
 
-    public AbstractValueConverters(int manualEntriesCount) {
-        final Method[] methods = Stream.of(getClass().getMethods())
-                .filter(m -> m.getName().startsWith("convert"))
+    protected final HashMap<Type, Map<String, MetaLiteral>> converters = new HashMap<>();
+    protected final HashMap<String, Function<String, ?>> map = new HashMap<>();
+
+    public AbstractValueConverters() {
+        Stream.of(getClass().getMethods())
+                .filter(m -> m.isAnnotationPresent(MetaInfo.class))
                 .filter(m -> Function.class == m.getReturnType())
                 .filter(m -> m.getGenericReturnType() instanceof ParameterizedType)
                 .filter(m -> ((ParameterizedType) m.getGenericReturnType()).getActualTypeArguments().length == 2)
                 .filter(m -> ((ParameterizedType) m.getGenericReturnType()).getActualTypeArguments()[0] == String.class)
-                .toArray(Method[]::new);
-        converters = new HashMap<>(methods.length + manualEntriesCount);
+                .forEach(method -> {
+                    final MetaInfo info = method.getAnnotation(MetaInfo.class);
+                    final ParameterizedType pt = (ParameterizedType) method.getGenericReturnType();
+                    final Type type = pt.getActualTypeArguments()[1];
+                    converters.computeIfAbsent(type, k -> new TreeMap<>()).put(info.name(), new MetaLiteral(info));
+                    try {
+                        final Function<String, ?> function = Casts.cast(method.invoke(this));
+                        map.put(info.name(), function);
+                    } catch (ReflectiveOperationException x) {
+                        throw new IllegalStateException(x);
+                    }
+                });
+    }
 
-        for (final Method method : methods) {
-            final ParameterizedType pt = (ParameterizedType) method.getGenericReturnType();
-            final Type type = pt.getActualTypeArguments()[1];
-            try {
-                final Function<String, ?> function = Casts.cast(method.invoke(this));
-                converters.put(type, function);
-            } catch (ReflectiveOperationException x) {
-                throw new IllegalStateException(x);
-            }
-        }
+    protected <T> void register(MetaLiteral info, Class<T> type, Function<String, T> function) {
+        converters.computeIfAbsent(type, k -> new TreeMap<>()).put(info.name, info);
+        map.put(info.name, function);
     }
 
     @Override
-    public Function<String, ?> getConverter(Type type) {
-        return converters.get(type);
+    public Function<String, ?> getConverter(String name) {
+        return map.get(name);
+    }
+
+    @Override
+    public HashMap<Type, Map<String, MetaLiteral>> getConverters() {
+        return converters;
     }
 }

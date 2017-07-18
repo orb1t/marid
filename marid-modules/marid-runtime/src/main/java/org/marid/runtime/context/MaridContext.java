@@ -21,47 +21,112 @@
 
 package org.marid.runtime.context;
 
-import org.marid.io.Xmls;
+import org.marid.runtime.beans.BeanEvent;
 import org.marid.runtime.beans.Bean;
-import org.w3c.dom.Element;
+import org.marid.runtime.beans.BeanListener;
 
 import javax.annotation.Nonnull;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
 
-import static org.marid.misc.Builder.build;
+import static java.lang.String.format;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class MaridContext {
+public final class MaridContext implements AutoCloseable {
 
-    @Nonnull
-    public final Bean[] beans;
+    final LinkedHashMap<String, Object> beans;
+    private final ServiceLoader<BeanListener> beanListeners;
 
-    public MaridContext(@Nonnull Bean[] beans) {
-        this.beans = beans;
-    }
+    public MaridContext(@Nonnull MaridConfiguration context, @Nonnull ClassLoader classLoader) {
+        this.beans = new LinkedHashMap<>(context.beans.length);
+        this.beanListeners = ServiceLoader.load(BeanListener.class, classLoader);
 
-    public MaridContext(@Nonnull Element element) {
-        this.beans = Xmls.nodes(element, Element.class)
-                .filter(e -> "beans".equals(e.getTagName()))
-                .flatMap(e -> Xmls.nodes(e, Element.class))
-                .filter(e -> "bean".equals(e.getTagName()))
-                .map(Bean::new)
-                .toArray(Bean[]::new);
-    }
-
-    public void writeTo(@Nonnull Element element) {
-        for (final Bean bean : beans) {
-            element.appendChild(build(element.getOwnerDocument().createElement("bean"), bean::writeTo));
+        try (final MaridBeanCreationContext cc = new MaridBeanCreationContext(context, this, classLoader)) {
+            for (final Bean bean : context.beans) {
+                cc.getOrCreate(bean.name);
+            }
+        } finally {
+            beanListeners.reload();
         }
     }
 
+    void initialize(String name, Object bean) {
+        beanListeners.forEach(l -> l.onEvent(new BeanEvent(bean, name, "PRE_INIT")));
+        final TreeSet<Method> initializers = new TreeSet<>(MaridRuntimeUtils::compare);
+        for (Class<?> c = bean.getClass(); c != null; c = c.getSuperclass()) {
+            for (final Method method : c.getDeclaredMethods()) {
+                if (method.getParameterCount() == 0) {
+                    if (method.isAnnotationPresent(PostConstruct.class)) {
+                        initializers.add(method);
+                    }
+                }
+            }
+        }
+        final IllegalStateException exception = new IllegalStateException(format("[%s] Initialization", name));
+        for (final Method method : initializers) {
+            try {
+                if (!method.isAccessible()) {
+                    method.setAccessible(true);
+                }
+                method.invoke(bean);
+            } catch (ReflectiveOperationException x) {
+                exception.addSuppressed(x.getCause());
+            }
+        }
+        if (exception.getSuppressed().length > 0) {
+            throw exception;
+        }
+        beanListeners.forEach(l -> l.onEvent(new BeanEvent(bean, name, "POST_INIT")));
+    }
+
+    private void destroy(String name, Object bean, Consumer<Throwable> errorConsumer) {
+        beanListeners.forEach(l -> l.onEvent(new BeanEvent(bean, name, "PRE_DESTROY")));
+        final TreeSet<Method> destroyers = new TreeSet<>(MaridRuntimeUtils.methodComparator().reversed());
+        for (Class<?> c = bean.getClass(); c != null; c = c.getSuperclass()) {
+            for (final Method method : c.getDeclaredMethods()) {
+                if (method.getParameterCount() == 0) {
+                    if (method.isAnnotationPresent(PreDestroy.class) || "close".equals(method.getName())) {
+                        destroyers.add(method);
+                    }
+                }
+            }
+        }
+        for (final Method method : destroyers) {
+            try {
+                if (!method.isAccessible()) {
+                    method.setAccessible(true);
+                }
+                method.invoke(bean);
+            } catch (ReflectiveOperationException x) {
+                errorConsumer.accept(x);
+            }
+        }
+        beanListeners.forEach(l -> l.onEvent(new BeanEvent(bean, name, "POST_DESTROY")));
+    }
+
+    public boolean isActive() {
+        return !beans.isEmpty();
+    }
+
     @Override
-    public String toString() {
-        return String.format("Context(%s)",
-                Stream.of(beans).map(Bean::toString).collect(Collectors.joining(",\n\t", "\n\t", ""))
-        );
+    public void close() {
+        final IllegalStateException e = new IllegalStateException("Runtime close exception");
+        final List<Entry<String, Object>> entries = new ArrayList<>(beans.entrySet());
+        beans.clear();
+        for (int i = entries.size() - 1; i >= 0; i--) {
+            final Entry<String, Object> entry = entries.get(i);
+            final String name = entry.getKey();
+            final Object instance = entry.getValue();
+            destroy(name, instance, x -> e.addSuppressed(new IllegalStateException(format("[%s] Close", name), x)));
+        }
+        if (e.getSuppressed().length > 0) {
+            throw e;
+        }
     }
 }

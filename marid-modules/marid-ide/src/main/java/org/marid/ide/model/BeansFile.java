@@ -25,7 +25,7 @@ import javafx.collections.ObservableList;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.io.Xmls;
 import org.marid.runtime.beans.Bean;
-import org.marid.runtime.context.MaridContext;
+import org.marid.runtime.context.MaridConfiguration;
 import org.w3c.dom.Element;
 
 import java.nio.file.Files;
@@ -41,7 +41,7 @@ public class BeansFile {
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList(BeanData::observables);
 
     public void save(ProjectProfile profile) {
-        final MaridContext context = new MaridContext(beans.stream().map(BeanData::toInfo).toArray(Bean[]::new));
+        final MaridConfiguration context = new MaridConfiguration(beans.stream().map(BeanData::toInfo).toArray(Bean[]::new));
         Xmls.writeFormatted(d -> {
             final Element root = d.createElement("beans");
             d.appendChild(root);
@@ -57,7 +57,7 @@ public class BeansFile {
         }
         final AtomicReference<Element> elementRef = new AtomicReference<>();
         Xmls.read(d -> elementRef.set(d.getDocumentElement()), file);
-        final MaridContext context = new MaridContext(elementRef.get());
+        final MaridConfiguration context = new MaridConfiguration(elementRef.get());
         beans.setAll(Stream.of(context.beans).map(BeanData::new).toArray(BeanData[]::new));
     }
 }

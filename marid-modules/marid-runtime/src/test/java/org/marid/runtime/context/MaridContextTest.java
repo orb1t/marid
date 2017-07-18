@@ -38,14 +38,14 @@ import static org.junit.Assert.assertEquals;
  * @author Dmitry Ovchinnikov
  */
 @Category({NormalTests.class})
-public class MaridRuntimeTest {
+public class MaridContextTest {
 
     @Test
     public void simple() throws Exception {
         final Bean[] beans = {
                 new Bean(
                         "bean2",
-                        "bean1",
+                        "@bean1",
                         Bean.factory(Bean1.class.getMethod("getZ")),
                         ms(),
                         ms()
@@ -54,12 +54,12 @@ public class MaridRuntimeTest {
                         "bean1",
                         Bean1.class.getName(),
                         Bean.factory(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
-                        ms(m("val", "x", "1"), m("val", "y", "abc"), m("val", "z", "1.23")),
-                        ms(m("val", "setA", "true"))
+                        ms(m("int", "x", "1"), m("String", "y", "abc"), m("BigDecimal", "z", "1.23")),
+                        ms(m("boolean", "setA", "true"))
                 ),
                 new Bean(
                         "bean3",
-                        "bean1",
+                        "@bean1",
                         Bean.factory(Bean1.class.getField("y")),
                         ms(),
                         ms()
@@ -69,25 +69,25 @@ public class MaridRuntimeTest {
                         Bean1.class.getName(),
                         Bean.factory(Bean1.class.getMethod("list")),
                         ms(),
-                        ms(m("val", "add", "1"))
+                        ms(m("int", "add", "1"))
                 ),
                 new Bean(
                         "bean5",
                         Bean1.class.getName(),
                         Bean.factory(Bean1.class.getMethod("list")),
                         ms(),
-                        ms(m("val", "add", "1"), m("val", "add", "2"))
+                        ms(m("int", "add", "1"), m("int", "add", "2"))
                 ),
                 new Bean(
                         "bean6",
-                        String.class.getName() + ".class",
-                        Bean.factory(Class.class.getMethod("cast", Object.class)),
+                        String.class.getName(),
+                        Bean.factory(String.class.getMethod("valueOf", Object.class)),
                         ms(m("js", "arg0", "'a' + 1")),
                         ms()
                 )
         };
-        final MaridContext context = new MaridContext(beans);
-        try (final MaridRuntime runtime = new MaridRuntime(context, currentThread().getContextClassLoader())) {
+        final MaridConfiguration context = new MaridConfiguration(beans);
+        try (final MaridContext runtime = new MaridContext(context, currentThread().getContextClassLoader())) {
             assertEquals(new Bean1(1, "abc", new BigDecimal("1.23")).setA(true), runtime.beans.get("bean1"));
             assertEquals(new BigDecimal("1.23"), runtime.beans.get("bean2"));
             assertEquals("abc", runtime.beans.get("bean3"));

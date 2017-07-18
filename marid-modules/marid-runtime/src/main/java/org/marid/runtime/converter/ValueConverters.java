@@ -21,7 +21,10 @@
 
 package org.marid.runtime.converter;
 
+import org.marid.annotation.MetaLiteral;
+
 import java.lang.reflect.Type;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -29,5 +32,7 @@ import java.util.function.Function;
  */
 public interface ValueConverters {
 
-    Function<String, ?> getConverter(Type type);
+    Map<Type, Map<String, MetaLiteral>> getConverters();
+
+    Function<String, ?> getConverter(String name);
 }
