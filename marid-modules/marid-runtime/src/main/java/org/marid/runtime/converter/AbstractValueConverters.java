@@ -28,8 +28,6 @@ import org.marid.misc.Casts;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -41,8 +39,9 @@ public abstract class AbstractValueConverters implements ValueConverters {
 
     public static final Pattern COMMA = Pattern.compile(",");
 
-    protected final HashMap<Type, Map<String, MetaLiteral>> converters = new HashMap<>();
+    protected final HashMap<String, MetaLiteral> metaMap = new HashMap<>();
     protected final HashMap<String, Function<String, ?>> map = new HashMap<>();
+    protected final HashMap<String, Type> typeMap = new HashMap<>();
 
     public AbstractValueConverters() {
         Stream.of(getClass().getMethods())
@@ -55,7 +54,8 @@ public abstract class AbstractValueConverters implements ValueConverters {
                     final MetaInfo info = method.getAnnotation(MetaInfo.class);
                     final ParameterizedType pt = (ParameterizedType) method.getGenericReturnType();
                     final Type type = pt.getActualTypeArguments()[1];
-                    converters.computeIfAbsent(type, k -> new TreeMap<>()).put(info.name(), new MetaLiteral(info));
+                    metaMap.put(info.name(), new MetaLiteral(info));
+                    typeMap.put(info.name(), type);
                     try {
                         final Function<String, ?> function = Casts.cast(method.invoke(this));
                         map.put(info.name(), function);
@@ -66,7 +66,8 @@ public abstract class AbstractValueConverters implements ValueConverters {
     }
 
     protected <T> void register(MetaLiteral info, Class<T> type, Function<String, T> function) {
-        converters.computeIfAbsent(type, k -> new TreeMap<>()).put(info.name, info);
+        metaMap.put(info.name, info);
+        typeMap.put(info.name, type);
         map.put(info.name, function);
     }
 
@@ -76,7 +77,12 @@ public abstract class AbstractValueConverters implements ValueConverters {
     }
 
     @Override
-    public HashMap<Type, Map<String, MetaLiteral>> getConverters() {
-        return converters;
+    public HashMap<String, MetaLiteral> getMetaMap() {
+        return metaMap;
+    }
+
+    @Override
+    public HashMap<String, Type> getTypeMap() {
+        return typeMap;
     }
 }

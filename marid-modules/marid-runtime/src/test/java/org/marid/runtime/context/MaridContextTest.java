@@ -115,20 +115,4 @@ public class MaridContextTest {
             assertEquals("Bean circular reference detected: bean1 [bean1]", x.getMessage());
         }
     }
-
-    @Test
-    public void filtered() throws Exception {
-        final Bean[] beans = {
-                new Bean(
-                        "bean1",
-                        Bean1.class.getName() + "#getZ",
-                        Bean.factory(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
-                        ms(m("String", "x#length", "aa"), m("String", "y", "abc"), m("BigDecimal", "z", "1.23")),
-                        ms()
-                )
-        };
-        try (final MaridContext context = new MaridContext(new MaridConfiguration(beans))) {
-            assertEquals(new BigDecimal("1.23"), context.beans.get("bean1"));
-        }
-    }
 }

@@ -19,10 +19,9 @@
  * #L%
  */
 
-package org.marid.runtime.context;
+package org.marid.runtime.beans;
 
-import org.marid.runtime.beans.Bean;
-
+import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -35,20 +34,25 @@ import static java.lang.String.format;
 /**
  * @author Dmitry Ovchinnikov
  */
-final class MaridFactoryBean {
+public final class MaridFactoryBean {
 
-    private final String name;
-    private final String[] argTypes;
-    private final Lookup lookup = MethodHandles.publicLookup();
+    @Nonnull
+    public final String name;
 
-    MaridFactoryBean(Bean bean) {
-        final int index = bean.producer.indexOf('(');
+    @Nonnull
+    public final String[] argTypes;
+
+    @Nonnull
+    public final Lookup lookup = MethodHandles.publicLookup();
+
+    public MaridFactoryBean(@Nonnull String producer) {
+        final int index = producer.indexOf('(');
         if (index < 0) {
-            name = bean.producer;
+            name = producer;
             argTypes = new String[0];
         } else {
-            name = bean.producer.substring(0, index);
-            argTypes = Stream.of(bean.producer.substring(index + 1, bean.producer.length() - 1).split(","))
+            name = producer.substring(0, index);
+            argTypes = Stream.of(producer.substring(index + 1, producer.length() - 1).split(","))
                     .map(String::trim)
                     .filter(e -> !e.isEmpty())
                     .toArray(String[]::new);
@@ -104,7 +108,7 @@ final class MaridFactoryBean {
         return handles;
     }
 
-    MethodHandle filtered(String filter, MethodHandle handle) throws Exception {
+    public MethodHandle filtered(String filter, MethodHandle handle) throws Exception {
         if (filter == null) {
             return handle;
         } else {
@@ -129,12 +133,12 @@ final class MaridFactoryBean {
         }
     }
 
-    MethodHandle findProducer(Class<?> type, Object target, String filter) throws Exception {
+    public MethodHandle findProducer(Class<?> type) throws IllegalAccessException {
         switch (name) {
             case "new": {
                 for (final Constructor<?> c : type.getConstructors()) {
                     if (matches(c)) {
-                        return filtered(filter, lookup.unreflectConstructor(c));
+                        return lookup.unreflectConstructor(c);
                     }
                 }
                 break;
@@ -142,17 +146,13 @@ final class MaridFactoryBean {
             default: {
                 for (final Method m : type.getMethods()) {
                     if (m.getName().equals(name) && matches(m)) {
-                        return Modifier.isStatic(m.getModifiers()) ?
-                                filtered(filter, lookup.unreflect(m)) :
-                                filtered(filter, lookup.unreflect(m).bindTo(target));
+                        return lookup.unreflect(m);
                     }
                 }
                 if (argTypes.length == 0) {
                     for (final Field f : type.getFields()) {
                         if (f.getName().equals(name)) {
-                            return Modifier.isStatic(f.getModifiers())
-                                    ? filtered(filter, lookup.unreflectGetter(f))
-                                    : filtered(filter, lookup.unreflectGetter(f).bindTo(target));
+                            return lookup.unreflectGetter(f);
                         }
                     }
                 }

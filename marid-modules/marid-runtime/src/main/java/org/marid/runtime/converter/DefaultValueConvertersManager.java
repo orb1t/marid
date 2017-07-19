@@ -23,12 +23,13 @@ package org.marid.runtime.converter;
 
 import org.marid.runtime.context.MaridRuntime;
 
+import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static java.util.ServiceLoader.load;
+import static java.util.stream.StreamSupport.stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,7 +39,7 @@ public class DefaultValueConvertersManager {
     protected final ValueConverters[] valueConverters;
 
     public DefaultValueConvertersManager(ClassLoader classLoader, MaridRuntime runtime) {
-        valueConverters = StreamSupport.stream(load(ValueConvertersFactory.class, classLoader).spliterator(), false)
+        valueConverters = stream(load(ValueConvertersFactory.class, classLoader).spliterator(), false)
                 .map(c -> c.converters(runtime))
                 .toArray(ValueConverters[]::new);
     }
@@ -49,5 +50,15 @@ public class DefaultValueConvertersManager {
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("No converters found for name: " + name));
+    }
+
+    public Type getType(String name) {
+        for (final ValueConverters converters : valueConverters) {
+            final Type type = converters.getTypeMap().get(name);
+            if (type != null) {
+                return type;
+            }
+        }
+        return null;
     }
 }

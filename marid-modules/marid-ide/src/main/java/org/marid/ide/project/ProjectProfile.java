@@ -260,6 +260,10 @@ public class ProjectProfile {
         }
     }
 
+    public URLClassLoader getClassLoader() {
+        return classLoader;
+    }
+
     @Override
     public boolean equals(Object obj) {
         return obj instanceof ProjectProfile && (((ProjectProfile) obj).getName().equals(this.getName()));

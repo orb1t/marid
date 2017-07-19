@@ -38,8 +38,8 @@ import java.util.function.Function;
  */
 public class ScriptingValueConverters implements ValueConverters {
 
-    private final Map<String, MetaLiteral> info = new HashMap<>();
-    private final Map<String, Function<String, ?>> functions = new HashMap<>();
+    private final HashMap<String, MetaLiteral> info = new HashMap<>();
+    private final HashMap<String, Function<String, ?>> functions = new HashMap<>();
 
     public ScriptingValueConverters(MaridRuntime runtime) {
         final ScriptEngineManager manager = new ScriptEngineManager(runtime.classLoader);
@@ -68,12 +68,17 @@ public class ScriptingValueConverters implements ValueConverters {
     }
 
     @Override
-    public Map<Type, Map<String, MetaLiteral>> getConverters() {
-        return Collections.singletonMap(Object.class, info);
+    public Function<String, ?> getConverter(String name) {
+        return functions.get(name);
     }
 
     @Override
-    public Function<String, ?> getConverter(String name) {
-        return functions.get(name);
+    public Map<String, MetaLiteral> getMetaMap() {
+        return info;
+    }
+
+    @Override
+    public Map<String, Type> getTypeMap() {
+        return Collections.emptyMap();
     }
 }

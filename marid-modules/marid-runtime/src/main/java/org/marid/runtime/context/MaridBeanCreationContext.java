@@ -24,6 +24,7 @@ package org.marid.runtime.context;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanFactory;
 import org.marid.runtime.beans.BeanMember;
+import org.marid.runtime.beans.MaridFactoryBean;
 import org.marid.runtime.converter.DefaultValueConvertersManager;
 
 import java.lang.invoke.MethodHandle;
@@ -89,19 +90,19 @@ final class MaridBeanCreationContext implements AutoCloseable {
     }
 
     private Object create0(String name, Bean bean) throws Throwable {
-        lastMessage.set(() -> String.format("[%s] factory setup: %s", name, bean.factory));
-        final BeanFactory factory = new BeanFactory(bean.factory);
+        lastMessage.set(() -> String.format("[%s] f setup: %s", name, bean.factory));
+        final BeanFactory f = new BeanFactory(bean.factory);
         final Object factoryObject;
         final Class<?> factoryClass;
-        if (factory.ref != null) {
-            factoryObject = getOrCreate(factory.ref);
-            factoryClass = beanClasses.get(factory.ref);
+        if (f.ref != null) {
+            factoryObject = getOrCreate(f.ref);
+            factoryClass = beanClasses.get(f.ref);
         } else {
-            factoryClass = Class.forName(factory.factoryClass, true, classLoader);
+            factoryClass = Class.forName(f.factoryClass, true, classLoader);
             factoryObject = null;
         }
-        final MaridFactoryBean factoryBean = new MaridFactoryBean(bean);
-        final MethodHandle constructor = factoryBean.findProducer(factoryClass, factoryObject, factory.filter);
+        final MaridFactoryBean factoryBean = new MaridFactoryBean(bean.producer);
+        final MethodHandle constructor = bind(bean, factoryBean.findProducer(factoryClass), factoryObject);
 
         beanClasses.put(name, constructor.type().returnType());
         final Class<?>[] argTypes = constructor.type().parameterArray();
@@ -151,6 +152,14 @@ final class MaridBeanCreationContext implements AutoCloseable {
             final String filter = member.name.substring(filterIndex + 1);
             final MethodHandle argHandle = MethodHandles.constant(arg.getClass(), arg);
             return bean.filtered(filter, argHandle).invoke();
+        }
+    }
+
+    private MethodHandle bind(Bean bean, MethodHandle handle, Object instance) {
+        if (handle.type().parameterCount() == bean.args.length + 1) {
+            return handle.bindTo(instance);
+        } else {
+            return handle;
         }
     }
 

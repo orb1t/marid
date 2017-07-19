@@ -32,7 +32,9 @@ import java.util.function.Function;
  */
 public interface ValueConverters {
 
-    Map<Type, Map<String, MetaLiteral>> getConverters();
-
     Function<String, ?> getConverter(String name);
+
+    Map<String, MetaLiteral> getMetaMap();
+
+    Map<String, Type> getTypeMap();
 }
