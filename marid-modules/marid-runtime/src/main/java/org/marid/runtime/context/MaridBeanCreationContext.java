@@ -28,11 +28,10 @@ import org.marid.runtime.converter.DefaultValueConvertersManager;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
@@ -49,7 +48,8 @@ final class MaridBeanCreationContext implements AutoCloseable {
     private final Map<String, Bean> beanMap;
     private final Map<String, Class<?>> beanClasses = new HashMap<>();
     private final Set<String> creationBeanNames = new LinkedHashSet<>();
-    private final IllegalStateException startException = new IllegalStateException("Runtime start exception");
+    private final AtomicReference<Supplier<String>> lastMessage = new AtomicReference<>(() -> null);
+    private final List<Throwable> throwables = new ArrayList<>();
     private final DefaultValueConvertersManager convertersManager;
 
     MaridBeanCreationContext(MaridConfiguration configuration, MaridContext context, ClassLoader classLoader) {
@@ -66,7 +66,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
         try {
             return context.beans.computeIfAbsent(name, this::create);
         } catch (Throwable x) {
-            startException.addSuppressed(x);
+            throwables.add(x);
             throw x;
         }
     }
@@ -89,6 +89,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
     }
 
     private Object create0(String name, Bean bean) throws Throwable {
+        lastMessage.set(() -> String.format("[%s] factory setup: %s", name, bean.factory));
         final BeanFactory factory = new BeanFactory(bean.factory);
         final Object factoryObject;
         final Class<?> factoryClass;
@@ -106,15 +107,21 @@ final class MaridBeanCreationContext implements AutoCloseable {
         final Class<?>[] argTypes = constructor.type().parameterArray();
         final Object[] args = new Object[argTypes.length];
         for (int i = 0; i < args.length; i++) {
-            args[i] = arg(factoryBean, bean.args[i], argTypes[i]);
+            final BeanMember arg = bean.args[i];
+            lastMessage.set(() -> String.format("[%s] argument setup: %s", name, arg));
+            args[i] = arg(factoryBean, arg, argTypes[i]);
         }
 
+        lastMessage.set(() -> String.format("[%s] constructor", name));
         final Object instance = constructor.invokeWithArguments(args);
         if (instance != null) {
+            lastMessage.set(() -> String.format("[%s] properties lookup", name));
             final MethodHandle[] properties = factoryBean.findProperties(bean, constructor);
             for (int i = 0; i < bean.props.length; i++) {
                 final MethodHandle setter = properties[i].bindTo(instance);
-                final Object value = arg(factoryBean, bean.props[i], properties[i].type().parameterType(0));
+                final BeanMember prop = bean.props[i];
+                lastMessage.set(() -> String.format("[%s] setter [%s]", name, prop));
+                final Object value = arg(factoryBean, prop, properties[i].type().parameterType(0));
                 setter.invokeWithArguments(value);
             }
             context.initialize(name, instance);
@@ -149,13 +156,13 @@ final class MaridBeanCreationContext implements AutoCloseable {
 
     @Override
     public void close() {
-        if (startException.getSuppressed().length > 0) {
+        if (!throwables.isEmpty()) {
             try {
                 context.close();
             } catch (Throwable x) {
-                startException.addSuppressed(x);
+                throwables.add(x);
             }
-            throw startException;
+            throw new MaridContextException(lastMessage.get().get(), throwables);
         }
     }
 }

@@ -27,6 +27,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.*;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -158,6 +159,6 @@ final class MaridFactoryBean {
                 break;
             }
         }
-        throw new IllegalStateException(format("Not found: %s", this));
+        throw new IllegalStateException(format("Producer not found: %s(%s)", name, Arrays.toString(argTypes)));
     }
 }
