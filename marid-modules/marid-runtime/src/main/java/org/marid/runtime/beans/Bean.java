@@ -25,16 +25,11 @@ import org.marid.io.Xmls;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -138,29 +133,6 @@ public final class Bean {
                 });
             }
         });
-    }
-
-    public MethodHandle[] findProperties(MethodHandle constructor) {
-        final Class<?> targetClass = constructor.type().returnType();
-        final Lookup l = MethodHandles.publicLookup();
-        final Function<BeanMember, MethodHandle> handleResolver = prop -> {
-            try {
-                for (final Method method : targetClass.getMethods()) {
-                    if (method.getParameterCount() == 1 && method.getName().equals(prop.name)) {
-                        return l.unreflect(method);
-                    }
-                }
-                for (final Field field : targetClass.getFields()) {
-                    if (field.getName().equals(prop.name)) {
-                        return l.unreflectSetter(field);
-                    }
-                }
-                throw new IllegalStateException(format("No property found: %s", prop));
-            } catch (IllegalAccessException x) {
-                throw new IllegalStateException(x);
-            }
-        };
-        return Stream.of(props).map(handleResolver).toArray(MethodHandle[]::new);
     }
 
     public static String factory(Constructor<?> constructor) {

@@ -37,9 +37,14 @@ public final class BeanEvent extends EventObject {
     private final String type;
 
     public BeanEvent(@Nullable Object source, @Nonnull String name, @Nonnull String type) {
-        super(source);
+        super(source == null ? name : source);
         this.name = name;
         this.type = type;
+    }
+
+    @Override
+    public Object getSource() {
+        return super.getSource() == name ? null : super.getSource();
     }
 
     @Nonnull

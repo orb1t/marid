@@ -22,10 +22,12 @@
 package org.marid.runtime.context;
 
 import org.marid.runtime.beans.Bean;
+import org.marid.runtime.beans.BeanFactory;
 import org.marid.runtime.beans.BeanMember;
 import org.marid.runtime.converter.DefaultValueConvertersManager;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -35,7 +37,6 @@ import java.util.function.Function;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.of;
 
 /**
@@ -88,28 +89,32 @@ final class MaridBeanCreationContext implements AutoCloseable {
     }
 
     private Object create0(String name, Bean bean) throws Throwable {
+        final BeanFactory factory = new BeanFactory(bean.factory);
         final Object factoryObject;
         final Class<?> factoryClass;
-        if (bean.factory.startsWith("@")) {
-            final String beanName = bean.factory.substring(1);
-            factoryObject = getOrCreate(beanName);
-            factoryClass = beanClasses.get(beanName);
+        if (factory.ref != null) {
+            factoryObject = getOrCreate(factory.ref);
+            factoryClass = beanClasses.get(factory.ref);
         } else {
-            factoryClass = Class.forName(bean.factory, true, classLoader);
+            factoryClass = Class.forName(factory.factoryClass, true, classLoader);
             factoryObject = null;
         }
         final MaridFactoryBean factoryBean = new MaridFactoryBean(bean);
-        final MethodHandle constructor = factoryBean.findProducer(factoryClass, factoryObject);
+        final MethodHandle constructor = factoryBean.findProducer(factoryClass, factoryObject, factory.filter);
+
         beanClasses.put(name, constructor.type().returnType());
         final Class<?>[] argTypes = constructor.type().parameterArray();
-        final Object[] args = range(0, argTypes.length).mapToObj(i -> arg(bean.args[i], argTypes[i])).toArray();
+        final Object[] args = new Object[argTypes.length];
+        for (int i = 0; i < args.length; i++) {
+            args[i] = arg(factoryBean, bean.args[i], argTypes[i]);
+        }
 
         final Object instance = constructor.invokeWithArguments(args);
         if (instance != null) {
-            final MethodHandle[] properties = bean.findProperties(constructor);
+            final MethodHandle[] properties = factoryBean.findProperties(bean, constructor);
             for (int i = 0; i < bean.props.length; i++) {
                 final MethodHandle setter = properties[i].bindTo(instance);
-                final Object value = arg(bean.props[i], properties[i].type().parameterType(0));
+                final Object value = arg(factoryBean, bean.props[i], properties[i].type().parameterType(0));
                 setter.invokeWithArguments(value);
             }
             context.initialize(name, instance);
@@ -117,16 +122,28 @@ final class MaridBeanCreationContext implements AutoCloseable {
         return instance;
     }
 
-    private Object arg(BeanMember member, Class<?> type) {
+    private Object arg(MaridFactoryBean bean, BeanMember member, Class<?> type) throws Throwable {
+        final Object arg;
         if (member.value == null) {
-            return MaridRuntimeUtils.defaultValue(type);
+            arg = MaridRuntimeUtils.defaultValue(type);
         } else {
             final Function<String, ?> argFunc = convertersManager.getConverter(member.type);
             if (argFunc != null) {
-                return argFunc.apply(member.value);
+                arg = argFunc.apply(member.value);
             } else {
                 throw new IllegalArgumentException("Unable to find converter for " + member.type);
             }
+        }
+        if (arg == null) {
+            return null;
+        }
+        final int filterIndex = member.name.lastIndexOf('#');
+        if (filterIndex < 0) {
+            return arg;
+        } else {
+            final String filter = member.name.substring(filterIndex + 1);
+            final MethodHandle argHandle = MethodHandles.constant(arg.getClass(), arg);
+            return bean.filtered(filter, argHandle).invoke();
         }
     }
 
