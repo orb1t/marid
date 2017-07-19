@@ -20,10 +20,17 @@
 
 package org.marid.spring.postprocessors;
 
+import org.marid.ide.logging.IdeLogConsoleHandler;
+import org.marid.ide.logging.IdeLogHandler;
 import org.marid.misc.Builder;
 import org.marid.spring.dependant.IdeClassFilter;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import java.util.logging.Logger;
+
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,5 +45,8 @@ public class IdeAppContext extends AnnotationConfigApplicationContext {
         }));
         setAllowBeanDefinitionOverriding(true);
         setAllowCircularReferences(false);
+        Logger.getLogger("").addHandler(new IdeLogHandler());
+        Logger.getLogger("").addHandler(new IdeLogConsoleHandler());
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(WARNING, "Exception in {0}", e, t));
     }
 }

@@ -46,7 +46,8 @@ public class FontIcons {
     private static final Map<String, String> SYMBOLS = new HashMap<>();
 
     static {
-        final URL url = requireNonNull(ClassLoader.getSystemResource("fonts/meta.properties"));
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        final URL url = requireNonNull(classLoader.getResource("fonts/meta.properties"));
         try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), UTF_8))) {
             while (true) {
                 final String line = r.readLine();

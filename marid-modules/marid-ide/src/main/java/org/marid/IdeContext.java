@@ -24,7 +24,6 @@ import org.marid.ide.common.IdeValues;
 import org.marid.ide.common.MaridDirectories;
 import org.marid.ide.logging.IdeLogConsoleHandler;
 import org.marid.ide.logging.IdeLogHandler;
-import org.marid.logging.Logs;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -63,13 +62,6 @@ public class IdeContext {
     public Preferences preferences(InjectionPoint injectionPoint, IdeValues ideValues) {
         final Class<?> type = injectionPoint.getMember().getDeclaringClass();
         return Preferences.userNodeForPackage(type).node(type.getName()).node(ideValues.implementationVersion);
-    }
-
-    @Bean
-    @Scope(SCOPE_PROTOTYPE)
-    public Logs logs(InjectionPoint injectionPoint) {
-        final Logger logger = Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
-        return () -> logger;
     }
 
     @Bean

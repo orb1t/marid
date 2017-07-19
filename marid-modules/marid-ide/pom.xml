@@ -106,11 +106,6 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifest>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>org.marid.Ide</mainClass>
-                        </manifest>
                         <manifestEntries>
                             <JavaFX-Version>8.0</JavaFX-Version>
                         </manifestEntries>
@@ -119,22 +114,16 @@
             </plugin>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>1.5.4.RELEASE</version>
                 <executions>
                     <execution>
-                        <id>default-cli</id>
                         <goals>
-                            <goal>exec</goal>
+                            <goal>repackage</goal>
                         </goals>
                         <configuration>
-                            <executable>java</executable>
-                            <workingDirectory>${project.build.directory}/${project.build.finalName}</workingDirectory>
-                            <arguments>
-                                <argument>-agentlib:jdwp=${marid.debug.opts}</argument>
-                                <argument>-jar</argument>
-                                <argument>lib/${project.build.finalName}.jar</argument>
-                            </arguments>
+                            <mainClass>org.marid.Ide</mainClass>
                         </configuration>
                     </execution>
                 </executions>
@@ -171,71 +160,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>release</id>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>make-zip</id>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                                <phase>package</phase>
-                                <configuration>
-                                    <descriptors>
-                                        <descriptor>src/assembly/ide.xml</descriptor>
-                                    </descriptors>
-                                    <formats>
-                                        <format>zip</format>
-                                    </formats>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>development</id>
-
-            <activation>
-                <property>
-                    <name>!marid.release</name>
-                </property>
-            </activation>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>make-dir</id>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                                <phase>package</phase>
-                                <configuration>
-                                    <attach>false</attach>
-                                    <descriptors>
-                                        <descriptor>src/assembly/ide.xml</descriptor>
-                                    </descriptors>
-                                    <formats>
-                                        <format>dir</format>
-                                    </formats>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

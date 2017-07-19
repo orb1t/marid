@@ -30,9 +30,7 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.WARNING;
 import static org.marid.IdePrefs.PREFERENCES;
-import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -46,7 +44,6 @@ public class IdeLogHandler extends Handler {
 
     public IdeLogHandler() {
         maxRecords = PREFERENCES.getInt("maxLogRecords", 10_000);
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(WARNING, "Exception in {0}", e, t));
     }
 
     public int getMaxRecords() {
