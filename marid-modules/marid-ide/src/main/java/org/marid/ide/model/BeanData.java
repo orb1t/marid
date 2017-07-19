@@ -50,6 +50,9 @@ public class BeanData {
         props.setAll(Stream.of(bean.props).map(BeanMemberData::new).toArray(BeanMemberData[]::new));
     }
 
+    public BeanData() {
+    }
+
     public String getName() {
         return name.get();
     }

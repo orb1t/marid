@@ -60,4 +60,8 @@ public class BeansFile {
         final MaridConfiguration context = new MaridConfiguration(elementRef.get());
         beans.setAll(Stream.of(context.beans).map(BeanData::new).toArray(BeanData[]::new));
     }
+
+    public Bean[] toBeans() {
+        return beans.stream().map(BeanData::toInfo).toArray(Bean[]::new);
+    }
 }

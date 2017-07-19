@@ -32,6 +32,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.marid.runtime.beans.MaridFactoryBean.producer;
 import static org.marid.runtime.context.MaridContextTestUtils.m;
 import static org.marid.runtime.context.MaridContextTestUtils.ms;
 
@@ -47,42 +48,42 @@ public class MaridContextTest {
                 new Bean(
                         "bean2",
                         "@bean1",
-                        Bean.factory(Bean1.class.getMethod("getZ")),
+                        producer(Bean1.class.getMethod("getZ")),
                         ms(),
                         ms()
                 ),
                 new Bean(
                         "bean1",
                         Bean1.class.getName(),
-                        Bean.factory(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
+                        producer(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
                         ms(m("int", "x", "1"), m("String", "y", "abc"), m("BigDecimal", "z", "1.23")),
                         ms(m("boolean", "setA", "true"))
                 ),
                 new Bean(
                         "bean3",
                         "@bean1",
-                        Bean.factory(Bean1.class.getField("y")),
+                        producer(Bean1.class.getField("y")),
                         ms(),
                         ms()
                 ),
                 new Bean(
                         "bean4",
                         Bean1.class.getName(),
-                        Bean.factory(Bean1.class.getMethod("list")),
+                        producer(Bean1.class.getMethod("list")),
                         ms(),
                         ms(m("int", "add", "1"))
                 ),
                 new Bean(
                         "bean5",
                         Bean1.class.getName(),
-                        Bean.factory(Bean1.class.getMethod("list")),
+                        producer(Bean1.class.getMethod("list")),
                         ms(),
                         ms(m("int", "add", "1"), m("int", "add", "2"))
                 ),
                 new Bean(
                         "bean6",
                         String.class.getName(),
-                        Bean.factory(String.class.getMethod("valueOf", Object.class)),
+                        producer(String.class.getMethod("valueOf", Object.class)),
                         ms(m("js", "arg0", "'a' + 1")),
                         ms()
                 )
@@ -104,7 +105,7 @@ public class MaridContextTest {
                 new Bean(
                         "bean1",
                         Bean1.class.getName(),
-                        Bean.factory(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
+                        producer(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
                         ms(m("int", "x", "1"), m("js", "y", "bean('bean1').toString()"), m("BigDecimal", "z", "1.23")),
                         ms(m("boolean", "setA", "true"))
                 )

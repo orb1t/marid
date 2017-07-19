@@ -49,4 +49,8 @@ public class IdeValueConverterManager extends DefaultValueConvertersManager {
         }
         return result;
     }
+
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
 }

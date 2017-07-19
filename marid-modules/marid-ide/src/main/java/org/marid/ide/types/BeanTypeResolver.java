@@ -20,10 +20,13 @@
 
 package org.marid.ide.types;
 
+import com.fasterxml.classmate.MemberResolver;
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
-import javafx.util.Pair;
 import org.marid.ide.model.BeanData;
+import org.marid.ide.model.BeanMemberData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.misc.Calls;
 import org.marid.runtime.beans.BeanFactory;
@@ -34,7 +37,6 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.ClassUtils.resolveClassName;
@@ -70,7 +72,7 @@ public class BeanTypeResolver {
         final TypeToken<?> token;
         if (producerMember instanceof Constructor<?>) {
             final Constructor<?> c = (Constructor<?>) producerMember;
-            token = TypeToken.of(factoryClass);
+            token = TypeToken.of(factoryClass).constructor(c).getReturnType();
             args = c.getGenericParameterTypes();
         } else if (producerMember instanceof Method) {
             final Method m = (Method) producerMember;
@@ -82,10 +84,27 @@ public class BeanTypeResolver {
             args = new Type[0];
         }
         if (args.length == beanData.args.size()) {
-            final TypeResolver typeResolver = IntStream.range(0, args.length)
-                    .mapToObj(i -> new Pair<>(args[i], valueConverters.getType(beanData.args.get(i).getType())))
-                    .reduce(new TypeResolver(), (a, e) -> a.where(e.getKey(), e.getValue()), (v1, v2) -> v2);
-            return typeResolver.resolveType(token.getType());
+            final com.fasterxml.classmate.TypeResolver res = new com.fasterxml.classmate.TypeResolver();
+            final MemberResolver r = new MemberResolver(res);
+            TypeResolver resolver = new TypeResolver();
+            for (int i = 0; i < args.length; i++) {
+                final BeanMemberData beanArg = beanData.args.get(i);
+                final Type type;
+                switch (beanArg.getType()) {
+                    case "ref":
+                        type = resolve(beans, classLoader, beanArg.getValue());
+                        break;
+                    default:
+                        type = valueConverters.getType(beanArg.getType());
+                        break;
+                }
+                if (type != null) {
+                    //resolver = resolver.where(args[i], type);
+                }
+            }
+            final ResolvedTypeWithMembers members = r.resolve(res.resolve(token.getType()), null, null);
+
+            return resolver.resolveType(token.getType());
         } else {
             return token.getType();
         }

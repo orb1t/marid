@@ -25,16 +25,11 @@ import org.marid.io.Xmls;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Stream.of;
 import static org.marid.misc.Builder.build;
 
 /**
@@ -133,18 +128,6 @@ public final class Bean {
                 });
             }
         });
-    }
-
-    public static String factory(Constructor<?> constructor) {
-        return of(constructor.getParameterTypes()).map(Class::getName).collect(joining(",", "new(", ")"));
-    }
-
-    public static String factory(Method method) {
-        return of(method.getParameterTypes()).map(Class::getName).collect(joining(",", method.getName() + "(", ")"));
-    }
-
-    public static String factory(Field field) {
-        return field.getName();
     }
 
     @Override

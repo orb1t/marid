@@ -36,10 +36,12 @@ import static java.util.stream.StreamSupport.stream;
  */
 public class DefaultValueConvertersManager {
 
+    protected final ClassLoader classLoader;
     protected final ValueConverters[] valueConverters;
 
     public DefaultValueConvertersManager(ClassLoader classLoader, MaridRuntime runtime) {
-        valueConverters = stream(load(ValueConvertersFactory.class, classLoader).spliterator(), false)
+        this.classLoader = classLoader;
+        this.valueConverters = stream(load(ValueConvertersFactory.class, classLoader).spliterator(), false)
                 .map(c -> c.converters(runtime))
                 .toArray(ValueConverters[]::new);
     }

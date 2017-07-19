@@ -27,9 +27,10 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.*;
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Stream.of;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -52,11 +53,23 @@ public final class MaridFactoryBean {
             argTypes = new String[0];
         } else {
             name = producer.substring(0, index);
-            argTypes = Stream.of(producer.substring(index + 1, producer.length() - 1).split(","))
+            argTypes = of(producer.substring(index + 1, producer.length() - 1).split(","))
                     .map(String::trim)
                     .filter(e -> !e.isEmpty())
                     .toArray(String[]::new);
         }
+    }
+
+    public static String producer(Constructor<?> constructor) {
+        return of(constructor.getParameterTypes()).map(Class::getName).collect(joining(",", "new(", ")"));
+    }
+
+    public static String producer(Method method) {
+        return of(method.getParameterTypes()).map(Class::getName).collect(joining(",", method.getName() + "(", ")"));
+    }
+
+    public static String producer(Field field) {
+        return field.getName();
     }
 
     private boolean matches(Executable executable) {

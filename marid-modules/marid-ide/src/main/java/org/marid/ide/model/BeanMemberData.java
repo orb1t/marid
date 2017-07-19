@@ -40,6 +40,9 @@ public class BeanMemberData {
         value.set(member.value);
     }
 
+    public BeanMemberData() {
+    }
+
     public String getType() {
         return type.get();
     }

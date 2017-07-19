@@ -70,7 +70,7 @@ public class DefaultValueConverters extends AbstractValueConverters {
 
         register(l("String", "D_MESSAGE_TEXT", "String"), String.class, Function.identity());
 
-        register(l("bean", "D_SERVER", "Bean by name"), Object.class, object::getBean);
+        register(l("ref", "D_SERVER", "Bean by name"), Object.class, object::getBean);
         register(l("runtime", "D_RUN", "Runtime"), MaridRuntime.class, v -> object);
     }
 
