@@ -24,15 +24,16 @@ package org.marid.runtime.context;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.runtime.beans.Bean;
-import org.marid.runtime.beans.BeanMember;
 import org.marid.test.NormalTests;
 
 import java.math.BigDecimal;
 
-import static java.lang.Thread.currentThread;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.marid.runtime.context.MaridContextTestUtils.m;
+import static org.marid.runtime.context.MaridContextTestUtils.ms;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -86,8 +87,7 @@ public class MaridContextTest {
                         ms()
                 )
         };
-        final MaridConfiguration context = new MaridConfiguration(beans);
-        try (final MaridContext runtime = new MaridContext(context, currentThread().getContextClassLoader())) {
+        try (final MaridContext runtime = new MaridContext(new MaridConfiguration(beans))) {
             assertEquals(new Bean1(1, "abc", new BigDecimal("1.23")).setA(true), runtime.beans.get("bean1"));
             assertEquals(new BigDecimal("1.23"), runtime.beans.get("bean2"));
             assertEquals("abc", runtime.beans.get("bean3"));
@@ -98,11 +98,21 @@ public class MaridContextTest {
         }
     }
 
-    private static BeanMember m(String type, String name, String value) {
-        return new BeanMember(type, name, value);
-    }
-
-    private static BeanMember[] ms(BeanMember... members) {
-        return members;
+    @Test
+    public void circularReferenceDetection() throws Exception {
+        final Bean[] beans = {
+                new Bean(
+                        "bean1",
+                        Bean1.class.getName(),
+                        Bean.factory(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
+                        ms(m("int", "x", "1"), m("js", "y", "bean('bean1').toString()"), m("BigDecimal", "z", "1.23")),
+                        ms(m("boolean", "setA", "true"))
+                )
+        };
+        try (final MaridContext context = new MaridContext(new MaridConfiguration(beans))) {
+            assertNull(context);
+        } catch (IllegalStateException x) {
+            assertEquals("Bean circular reference detected: bean1 [bean1]", x.getMessage());
+        }
     }
 }

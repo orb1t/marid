@@ -44,17 +44,21 @@ public final class MaridContext implements AutoCloseable {
     final LinkedHashMap<String, Object> beans;
     private final ServiceLoader<BeanListener> beanListeners;
 
-    public MaridContext(@Nonnull MaridConfiguration context, @Nonnull ClassLoader classLoader) {
-        this.beans = new LinkedHashMap<>(context.beans.length);
+    public MaridContext(@Nonnull MaridConfiguration configuration, @Nonnull ClassLoader classLoader) {
+        this.beans = new LinkedHashMap<>(configuration.beans.length);
         this.beanListeners = ServiceLoader.load(BeanListener.class, classLoader);
 
-        try (final MaridBeanCreationContext cc = new MaridBeanCreationContext(context, this, classLoader)) {
-            for (final Bean bean : context.beans) {
+        try (final MaridBeanCreationContext cc = new MaridBeanCreationContext(configuration, this, classLoader)) {
+            for (final Bean bean : configuration.beans) {
                 cc.getOrCreate(bean.name);
             }
         } finally {
             beanListeners.reload();
         }
+    }
+
+    public MaridContext(@Nonnull MaridConfiguration configuration) {
+        this(configuration, Thread.currentThread().getContextClassLoader());
     }
 
     void initialize(String name, Object bean) throws Exception {

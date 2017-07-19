@@ -27,7 +27,9 @@ import org.marid.runtime.converter.DefaultValueConvertersManager;
 
 import java.lang.invoke.MethodHandle;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
@@ -45,6 +47,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
     private final MaridContext context;
     private final Map<String, Bean> beanMap;
     private final Map<String, Class<?>> beanClasses = new HashMap<>();
+    private final Set<String> creationBeanNames = new LinkedHashSet<>();
     private final IllegalStateException startException = new IllegalStateException("Runtime start exception");
     private final DefaultValueConvertersManager convertersManager;
 
@@ -69,6 +72,22 @@ final class MaridBeanCreationContext implements AutoCloseable {
 
     private Object create(String name) {
         final Bean bean = requireNonNull(beanMap.get(name), () -> "No such bean " + name);
+        if (creationBeanNames.add(name)) {
+            try {
+                return create0(name, bean);
+            } catch (RuntimeException x) {
+                throw x;
+            } catch (Throwable x) {
+                throw new IllegalStateException(x);
+            } finally {
+                creationBeanNames.remove(name);
+            }
+        } else {
+            throw new IllegalStateException("Bean circular reference detected: " + name + " " + creationBeanNames);
+        }
+    }
+
+    private Object create0(String name, Bean bean) throws Throwable {
         final Object factoryObject;
         final Class<?> factoryClass;
         if (bean.factory.startsWith("@")) {
@@ -76,12 +95,8 @@ final class MaridBeanCreationContext implements AutoCloseable {
             factoryObject = getOrCreate(beanName);
             factoryClass = beanClasses.get(beanName);
         } else {
-            try {
-                factoryClass = Class.forName(bean.factory, true, classLoader);
-                factoryObject = null;
-            } catch (ClassNotFoundException x) {
-                throw new IllegalStateException(x);
-            }
+            factoryClass = Class.forName(bean.factory, true, classLoader);
+            factoryObject = null;
         }
         final MaridFactoryBean factoryBean = new MaridFactoryBean(bean);
         final MethodHandle constructor = factoryBean.findProducer(factoryClass, factoryObject);
@@ -89,27 +104,17 @@ final class MaridBeanCreationContext implements AutoCloseable {
         final Class<?>[] argTypes = constructor.type().parameterArray();
         final Object[] args = range(0, argTypes.length).mapToObj(i -> arg(bean.args[i], argTypes[i])).toArray();
 
-        try {
-            final Object instance = constructor.invokeWithArguments(args);
-            if (instance != null) {
-                final MethodHandle[] properties = bean.findProperties(constructor);
-                for (int i = 0; i < bean.props.length; i++) {
-                    final MethodHandle setter = properties[i].bindTo(instance);
-                    final Object value = arg(bean.props[i], properties[i].type().parameterType(0));
-                    try {
-                        setter.invokeWithArguments(value);
-                    } catch (Throwable x) {
-                        throw new IllegalArgumentException("Unable to apply " + value + " to " + setter, x);
-                    }
-                }
-                context.initialize(name, instance);
+        final Object instance = constructor.invokeWithArguments(args);
+        if (instance != null) {
+            final MethodHandle[] properties = bean.findProperties(constructor);
+            for (int i = 0; i < bean.props.length; i++) {
+                final MethodHandle setter = properties[i].bindTo(instance);
+                final Object value = arg(bean.props[i], properties[i].type().parameterType(0));
+                setter.invokeWithArguments(value);
             }
-            return instance;
-        } catch (RuntimeException x) {
-            throw x;
-        } catch (Throwable x) {
-            throw new IllegalStateException(x);
+            context.initialize(name, instance);
         }
+        return instance;
     }
 
     private Object arg(BeanMember member, Class<?> type) {
