@@ -83,7 +83,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
                 creationBeanNames.remove(name);
             }
         } else {
-            throw new IllegalStateException("Bean circular reference detected: " + name + " " + creationBeanNames);
+            throw new CircularBeanReferenceException(creationBeanNames, name);
         }
     }
 

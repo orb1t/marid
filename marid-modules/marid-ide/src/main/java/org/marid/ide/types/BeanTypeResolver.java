@@ -23,10 +23,9 @@ package org.marid.ide.types;
 import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
-import org.marid.ide.model.BeanMemberData;
-import org.marid.ide.model.BeanProducerData;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.misc.Casts;
+import org.marid.runtime.beans.Bean;
+import org.marid.runtime.context.CircularBeanReferenceException;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandle;
@@ -34,14 +33,13 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.google.common.reflect.TypeToken.of;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Stream.of;
-import static org.marid.misc.Calls.call;
+import static org.marid.l10n.L10n.m;
 import static org.marid.runtime.beans.Bean.*;
 import static org.springframework.util.ClassUtils.resolveClassName;
 
@@ -51,76 +49,54 @@ import static org.springframework.util.ClassUtils.resolveClassName;
 @Component
 public class BeanTypeResolver {
 
-    public Type resolve(List<BeanData> beans, ClassLoader classLoader, String beanName) {
-        final BeanData beanData = beans.stream()
-                .filter(e -> beanName.equals(e.getName()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(beanName));
-        final IdeValueConverterManager valueConverters = new IdeValueConverterManager(classLoader);
-
-        final Class<?> factoryClass;
-        final TypeToken<?> factoryToken;
-        if (ref(beanData.getFactory()) != null) {
-            factoryToken = of(resolve(beans, classLoader, ref(beanData.getFactory())));
-            factoryClass = factoryToken.getRawType();
-        } else {
-            factoryClass = resolveClassName(requireNonNull(type(beanData.getFactory())), classLoader);
-            factoryToken = of(factoryClass).getSupertype(Casts.cast(factoryClass));
-        }
-
-        final MethodHandle returnHandle = call(() -> beanData.toBean().findProducer(factoryClass));
-        final Member returnMember = call(() -> MethodHandles.reflectAs(Member.class, returnHandle));
-        final Class<?> returnClass = returnHandle.type().returnType();
-        final Type genericReturnType = returnMember instanceof Field
-                ? ((Field) returnMember).getGenericType()
-                : ((Executable) returnMember).getAnnotatedReturnType().getType();
-        final TypeToken<?> genericReturnToken = genericReturnType instanceof Class<?>
-                ? of(genericReturnType).getSupertype(Casts.cast(returnClass))
-                : of(genericReturnType);
-        final Type returnType = factoryToken.resolveType(genericReturnToken.getType()).getType();
-
-        final List<TypePair> pairs = new ArrayList<>();
-        final BiConsumer<MethodHandle, BeanProducerData> filler = (handle, producerData) -> {
-            final Member member = call(() -> MethodHandles.reflectAs(Member.class, handle));
-            final Type[] formalTypes = member instanceof Field
-                    ? new Type[] {((Field) member).getGenericType()}
-                    : ((Executable) member).getGenericParameterTypes();
-            if (formalTypes.length != producerData.args.size()) {
-                return;
+    public Type resolve(BeanTypeResolverContext context, String beanName) {
+        final BeanData beanData = requireNonNull(context.beanMap.get(beanName), () -> m("No such bean: {0}", beanName));
+        return context.resolved.computeIfAbsent(beanName, name -> {
+            if (!context.processing.add(name)) {
+                throw new CircularBeanReferenceException(context.processing, name);
             }
-
-            final Type[] actualArgTypes = new Type[formalTypes.length];
-            for (int i = 0; i < actualArgTypes.length; i++) {
-                final BeanMemberData beanArg = producerData.args.get(i);
-                switch (beanArg.getType()) {
-                    case "ref":
-                        actualArgTypes[i] = resolve(beans, classLoader, beanArg.getValue());
-                        break;
-                    default:
-                        actualArgTypes[i] = valueConverters.getType(beanArg.getType()).orElse(null);
-                        break;
+            final Bean bean = beanData.toBean();
+            try {
+                final Class<?> factoryClass;
+                final TypeToken<?> factoryToken;
+                if (ref(beanData.getFactory()) != null) {
+                    factoryToken = of(resolve(context, ref(beanData.getFactory())));
+                    factoryClass = factoryToken.getRawType();
+                } else {
+                    factoryClass = resolveClassName(requireNonNull(type(beanData.getFactory())), context.getClassLoader());
+                    factoryToken = of(factoryClass).getSupertype(Casts.cast(factoryClass));
                 }
+                final MethodHandle returnHandle = beanData.toBean().findProducer(factoryClass);
+                final Member returnMember = MethodHandles.reflectAs(Member.class, returnHandle);
+                final Class<?> returnClass = returnHandle.type().returnType();
+                final Type genericReturnType = returnMember instanceof Field
+                        ? ((Field) returnMember).getGenericType()
+                        : ((Executable) returnMember).getAnnotatedReturnType().getType();
+                final TypeToken<?> genericReturnToken = genericReturnType instanceof Class<?>
+                        ? of(genericReturnType).getSupertype(Casts.cast(returnClass))
+                        : of(genericReturnType);
+                final Type returnType = factoryToken.resolveType(genericReturnToken.getType()).getType();
+
+                final List<TypePair> pairs = new ArrayList<>();
+                context.fill(this, pairs, returnHandle, beanData.getProducer(), factoryToken);
+                final MethodHandle[] initializers = findInitializers(returnHandle, bean.initializers);
+                for (int k = 0; k < initializers.length; k++) {
+                    context.fill(this, pairs, initializers[k], beanData.initializers.get(k), factoryToken);
+                }
+
+                final TypeResolver resolver = pairs.stream().reduce(new TypeResolver(), this::resolver, (r1, r2) -> r2);
+                final Type resolvedType = resolver.resolveType(returnType);
+                final TypeToken<?> resolvedToken = factoryToken.resolveType(resolvedType);
+                return resolvedToken.getType();
+            } catch (Exception x) {
+                throw new IllegalArgumentException(name, x);
+            } finally {
+                context.processing.remove(name);
             }
-            IntStream.range(0, formalTypes.length)
-                    .filter(i -> actualArgTypes[i] != null)
-                    .mapToObj(i -> new TypePair(of(actualArgTypes[i]), factoryToken.resolveType(formalTypes[i])))
-                    .forEach(pairs::add);
-        };
-
-        filler.accept(returnHandle, beanData.getProducer());
-        final MethodHandle[] initializers = call(() -> findInitializers(returnHandle, beanData.toBean().initializers));
-        for (int k = 0; k < initializers.length; k++) {
-            filler.accept(initializers[k], beanData.initializers.get(k));
-        }
-
-        final TypeResolver resolver = pairs.stream().reduce(new TypeResolver(), BeanTypeResolver::resolver, (r1, r2) -> r2);
-
-        final Type resolvedType = resolver.resolveType(returnType);
-        final TypeToken<?> resolvedToken = factoryToken.resolveType(resolvedType);
-        return resolvedToken.getType();
+        });
     }
 
-    private static TypeResolver resolver(TypeResolver resolver, TypePair pair) {
+    private TypeResolver resolver(TypeResolver resolver, TypePair pair) {
         if (pair.formal.isPrimitive()) {
             return resolver;
         } else if (pair.formal.isArray()) {
@@ -133,7 +109,7 @@ public class BeanTypeResolver {
             final TypeVariable<?> typeVariable = (TypeVariable<?>) pair.formal.getType();
             return Stream.of(typeVariable.getBounds())
                     .map(t -> new TypePair(pair.actual.getType(), t))
-                    .reduce(resolver, BeanTypeResolver::resolver, (r1, r2) -> r2)
+                    .reduce(resolver, this::resolver, (r1, r2) -> r2)
                     .where(pair.formal.getType(), pair.actual.getType());
         } else if (pair.formal.getType() instanceof ParameterizedType) {
             final Class<?> formalRaw = pair.formal.getRawType();
@@ -146,7 +122,7 @@ public class BeanTypeResolver {
                 final Type[] formalTypeArgs = formalParameterized.getActualTypeArguments();
                 return IntStream.range(0, actualTypeArgs.length)
                         .mapToObj(i -> new TypePair(actualTypeArgs[i], formalTypeArgs[i]))
-                        .reduce(resolver, BeanTypeResolver::resolver, (r1, r2) -> r2);
+                        .reduce(resolver, this::resolver, (r1, r2) -> r2);
             } else {
                 return resolver;
             }
@@ -154,17 +130,13 @@ public class BeanTypeResolver {
             final WildcardType wildcardType = (WildcardType) pair.formal.getType();
             return of(wildcardType.getUpperBounds())
                     .map(t -> new TypePair(pair.actual.getType(), t))
-                    .reduce(resolver, BeanTypeResolver::resolver, (r1, r2) -> r2);
+                    .reduce(resolver, this::resolver, (r1, r2) -> r2);
         } else {
             return resolver;
         }
     }
 
-    public Type resolve(ProjectProfile profile, String beanName) {
-        return resolve(profile.getBeansFile().beans, profile.getClassLoader(), beanName);
-    }
-
-    private static class TypePair {
+    static class TypePair {
 
         private final TypeToken<?> actual;
         private final TypeToken<?> formal;
@@ -175,8 +147,11 @@ public class BeanTypeResolver {
         }
 
         private TypePair(Type actual, Type formal) {
-            this.actual = of(actual);
-            this.formal = of(formal);
+            this(of(actual), of(formal));
+        }
+
+        TypePair(Type actual, TypeToken<?> formal) {
+            this(of(actual), formal);
         }
     }
 }

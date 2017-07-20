@@ -112,8 +112,8 @@ public class MaridContextTest {
         }
     }
 
-    @Test(expected = MaridContextException.class)
-    public void circularReferenceDetection() throws Exception {
+    @Test(expected = CircularBeanReferenceException.class)
+    public void circularReferenceDetection() throws Throwable {
         final Bean[] beans = {
                 new Bean(
                         "bean1",
@@ -131,8 +131,7 @@ public class MaridContextTest {
         try (final MaridContext context = new MaridContext(new MaridConfiguration(beans))) {
             assertNull(context);
         } catch (MaridContextException x) {
-            assertEquals("Bean circular reference detected: bean1 [bean1]", x.getSuppressed()[0].getMessage());
-            throw x;
+            throw x.getSuppressed()[0];
         }
     }
 }
