@@ -24,23 +24,25 @@ import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.model.BeanMemberData;
+import org.marid.ide.model.BeanProducerData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.misc.Casts;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
+import static com.google.common.reflect.TypeToken.of;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
 import static org.marid.misc.Calls.call;
-import static org.marid.runtime.beans.Bean.ref;
-import static org.marid.runtime.beans.Bean.type;
+import static org.marid.runtime.beans.Bean.*;
 import static org.springframework.util.ClassUtils.resolveClassName;
 
 /**
@@ -59,58 +61,56 @@ public class BeanTypeResolver {
         final Class<?> factoryClass;
         final TypeToken<?> factoryToken;
         if (ref(beanData.getFactory()) != null) {
-            factoryToken = TypeToken.of(resolve(beans, classLoader, ref(beanData.getFactory())));
+            factoryToken = of(resolve(beans, classLoader, ref(beanData.getFactory())));
             factoryClass = factoryToken.getRawType();
         } else {
             factoryClass = resolveClassName(requireNonNull(type(beanData.getFactory())), classLoader);
-            factoryToken = TypeToken.of(factoryClass).getSupertype(Casts.cast(factoryClass));
+            factoryToken = of(factoryClass).getSupertype(Casts.cast(factoryClass));
         }
 
-        final MethodHandle producerHandle = call(() -> beanData.toBean().findProducer(factoryClass));
-        final MethodType producerType = producerHandle.type();
+        final MethodHandle returnHandle = call(() -> beanData.toBean().findProducer(factoryClass));
+        final Member returnMember = call(() -> MethodHandles.reflectAs(Member.class, returnHandle));
+        final Class<?> returnClass = returnHandle.type().returnType();
+        final Type genericReturnType = returnMember instanceof Field
+                ? ((Field) returnMember).getGenericType()
+                : ((Executable) returnMember).getAnnotatedReturnType().getType();
+        final TypeToken<?> genericReturnToken = of(genericReturnType).getSupertype(Casts.cast(returnClass));
+        final Type returnType = factoryToken.resolveType(genericReturnToken.getType()).getType();
 
         final List<TypePair> pairs = new ArrayList<>();
-
-        final Member producerMember = call(() -> MethodHandles.reflectAs(Member.class, producerHandle));
-
-        if (producerMember instanceof Field) {
-            final Field field = (Field) producerMember;
-            return factoryToken.resolveType(field.getGenericType()).getType();
-        }
-
-        if (producerType.parameterCount() == 0 || producerType.parameterCount() != beanData.getProducer().args.size()) {
-            final Executable executable = (Executable) producerMember;
-            final Type type = executable.getAnnotatedReturnType().getType();
-            return factoryToken.resolveType(type).getType();
-        }
-
-        final Type[] actualArgTypes = new Type[producerType.parameterCount()];
-        for (int i = 0; i < actualArgTypes.length; i++) {
-            final BeanMemberData beanArg = beanData.getProducer().args.get(i);
-            switch (beanArg.getType()) {
-                case "ref":
-                    actualArgTypes[i] = resolve(beans, classLoader, beanArg.getValue());
-                    break;
-                default:
-                    actualArgTypes[i] = valueConverters.getType(beanArg.getType()).orElse(null);
-                    break;
+        final BiConsumer<MethodHandle, BeanProducerData> filler = (handle, producerData) -> {
+            final Member member = call(() -> MethodHandles.reflectAs(Member.class, handle));
+            if (handle.type().parameterCount() != producerData.args.size()) {
+                return;
             }
+            final Type[] formalTypes = member instanceof Field
+                    ? new Type[] {((Field) member).getGenericType()}
+                    : ((Executable) member).getGenericParameterTypes();
+            final Type[] actualArgTypes = new Type[formalTypes.length];
+            for (int i = 0; i < actualArgTypes.length; i++) {
+                final BeanMemberData beanArg = producerData.args.get(i);
+                switch (beanArg.getType()) {
+                    case "ref":
+                        actualArgTypes[i] = resolve(beans, classLoader, beanArg.getValue());
+                        break;
+                    default:
+                        actualArgTypes[i] = valueConverters.getType(beanArg.getType()).orElse(null);
+                        break;
+                }
+            }
+            IntStream.range(0, formalTypes.length)
+                    .filter(i -> actualArgTypes[i] != null)
+                    .mapToObj(i -> new TypePair(of(actualArgTypes[i]), factoryToken.resolveType(formalTypes[i])))
+                    .forEach(pairs::add);
+        };
+
+        filler.accept(returnHandle, beanData.getProducer());
+        final MethodHandle[] initializers = call(() -> findInitializers(returnHandle, beanData.toBean().initializers));
+        for (int k = 0; k < initializers.length; k++) {
+            filler.accept(initializers[k], beanData.initializers.get(k));
         }
-
-        final Executable executable = (Executable) producerMember;
-        final Type[] formalTypes = executable.getGenericParameterTypes();
-
-        IntStream.range(0, formalTypes.length)
-                .filter(i -> actualArgTypes[i] != null)
-                .mapToObj(i -> new TypePair(TypeToken.of(actualArgTypes[i]), factoryToken.resolveType(formalTypes[i])))
-                .forEach(pairs::add);
 
         final TypeResolver resolver = pairs.stream().reduce(new TypeResolver(), BeanTypeResolver::resolver, (r1, r2) -> r2);
-
-        final TypeToken<?> returnToken = TypeToken.of(executable.getAnnotatedReturnType().getType());
-        final Class<?> returnClass = returnToken.getRawType();
-        final TypeToken<?> genericReturnToken = returnToken.getSupertype(Casts.cast(returnClass));
-        final Type returnType = factoryToken.resolveType(genericReturnToken.getType()).getType();
 
         final Type resolvedType = resolver.resolveType(returnType);
         final TypeToken<?> resolvedToken = factoryToken.resolveType(resolvedType);
@@ -145,7 +145,7 @@ public class BeanTypeResolver {
             }
         } else if (pair.formal.getType() instanceof WildcardType) {
             final WildcardType wildcardType = (WildcardType) pair.formal.getType();
-            return Stream.concat(Stream.of(wildcardType.getLowerBounds()), Stream.of(wildcardType.getUpperBounds()))
+            return concat(of(wildcardType.getLowerBounds()), of(wildcardType.getUpperBounds()))
                     .map(t -> new TypePair(pair.actual.getType(), t))
                     .reduce(resolver, BeanTypeResolver::resolver, (r1, r2) -> r2);
         }
@@ -167,8 +167,8 @@ public class BeanTypeResolver {
         }
 
         private TypePair(Type actual, Type formal) {
-            this.actual = TypeToken.of(actual);
-            this.formal = TypeToken.of(formal);
+            this.actual = of(actual);
+            this.formal = of(formal);
         }
     }
 }
