@@ -19,15 +19,35 @@
  * #L%
  */
 
-package org.marid.runtime.beans;
+package org.marid.runtime.context;
 
-import java.util.EventListener;
+import org.marid.runtime.beans.BeanEvent;
+
+import static java.util.logging.Level.INFO;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface BeanListener extends EventListener {
+public class MaridLogContextListener implements MaridContextListener {
 
-    void onEvent(BeanEvent event);
+    @Override
+    public void onEvent(BeanEvent event) {
+        log(INFO, "{0}", event);
+    }
+
+    @Override
+    public void onStart() {
+        log(INFO, "Started");
+    }
+
+    @Override
+    public void onStop() {
+        log(INFO, "Stopped");
+    }
+
+    @Override
+    public int getOrder() {
+        return Integer.MAX_VALUE;
+    }
 }

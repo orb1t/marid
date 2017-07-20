@@ -42,7 +42,6 @@ import static java.util.stream.Stream.of;
  */
 final class MaridBeanCreationContext implements AutoCloseable {
 
-    private final ClassLoader classLoader;
     private final MaridContext context;
     private final Map<String, Bean> beanMap;
     private final Map<String, Class<?>> beanClasses = new HashMap<>();
@@ -51,13 +50,12 @@ final class MaridBeanCreationContext implements AutoCloseable {
     private final List<Throwable> throwables = new ArrayList<>();
     private final DefaultValueConvertersManager convertersManager;
 
-    MaridBeanCreationContext(MaridConfiguration configuration, MaridContext context, ClassLoader classLoader) {
-        this.classLoader = classLoader;
+    MaridBeanCreationContext(MaridConfiguration configuration, MaridContext context) {
         this.context = context;
         this.beanMap = of(configuration.beans).collect(toMap(e -> e.name, identity()));
         this.convertersManager = new DefaultValueConvertersManager(
-                classLoader,
-                new MaridRuntime(this::getOrCreate, context::isActive, classLoader)
+                context.classLoader,
+                new MaridRuntime(this::getOrCreate, context::isActive, context.classLoader)
         );
     }
 
@@ -92,7 +90,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
         final Object factoryObject;
         final Class<?> factoryClass;
         if (Bean.type(bean.factory) != null) {
-            factoryClass = Class.forName(Bean.type(bean.factory), true, classLoader);
+            factoryClass = context.classLoader.loadClass(Bean.type(bean.factory));
             factoryObject = null;
         } else {
             factoryObject = getOrCreate(Bean.ref(bean.factory));

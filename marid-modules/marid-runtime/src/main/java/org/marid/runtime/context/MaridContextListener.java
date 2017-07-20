@@ -19,18 +19,28 @@
  * #L%
  */
 
-package org.marid.runtime.beans;
+package org.marid.runtime.context;
 
-import static java.util.logging.Level.INFO;
-import static org.marid.logging.Log.log;
+import org.marid.runtime.beans.BeanEvent;
+
+import javax.annotation.Nonnull;
+import java.util.EventListener;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class LogBeanListener implements BeanListener {
+public interface MaridContextListener extends EventListener, Comparable<MaridContextListener> {
+
+    void onEvent(BeanEvent event);
+
+    void onStart();
+
+    void onStop();
+
+    int getOrder();
 
     @Override
-    public void onEvent(BeanEvent event) {
-        log(INFO, "{0}", event);
+    default int compareTo(@Nonnull MaridContextListener o) {
+        return Integer.compare(getOrder(), o.getOrder());
     }
 }

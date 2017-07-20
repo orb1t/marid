@@ -24,7 +24,6 @@ package org.marid.runtime.context;
 import org.marid.misc.Initializable;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanEvent;
-import org.marid.runtime.beans.BeanListener;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -33,8 +32,14 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static java.util.ServiceLoader.load;
+import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Level.WARNING;
+import static java.util.stream.StreamSupport.stream;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -42,22 +47,21 @@ import static java.lang.String.format;
 public final class MaridContext implements AutoCloseable {
 
     final LinkedHashMap<String, Object> beans;
-    private final ServiceLoader<BeanListener> beanListeners;
+    final ClassLoader classLoader;
 
     public MaridContext(@Nonnull MaridConfiguration configuration, @Nonnull ClassLoader classLoader) {
+        this.classLoader = classLoader;
         this.beans = new LinkedHashMap<>(configuration.beans.length);
-        this.beanListeners = ServiceLoader.load(BeanListener.class, classLoader);
 
-        try (final MaridBeanCreationContext cc = new MaridBeanCreationContext(configuration, this, classLoader)) {
+        try (final MaridBeanCreationContext cc = new MaridBeanCreationContext(configuration, this)) {
             for (final Bean bean : configuration.beans) {
                 try {
                     cc.getOrCreate(bean.name);
-                } catch (Exception x) {
-                    break;
+                } catch (Throwable x) {
+                    return;
                 }
             }
-        } finally {
-            beanListeners.reload();
+            fireEvent(MaridContextListener::onStart);
         }
     }
 
@@ -66,15 +70,15 @@ public final class MaridContext implements AutoCloseable {
     }
 
     void initialize(String name, Object bean) throws Exception {
-        beanListeners.forEach(l -> l.onEvent(new BeanEvent(bean, name, "PRE_INIT")));
+        fireEvent(l -> l.onEvent(new BeanEvent(bean, name, "PRE_INIT")));
         if (bean instanceof Initializable) {
             ((Initializable) bean).init();
         }
-        beanListeners.forEach(l -> l.onEvent(new BeanEvent(bean, name, "POST_INIT")));
+        fireEvent(l -> l.onEvent(new BeanEvent(bean, name, "POST_INIT")));
     }
 
     private void destroy(String name, Object bean, Consumer<Throwable> errorConsumer) {
-        beanListeners.forEach(l -> l.onEvent(new BeanEvent(bean, name, "PRE_DESTROY")));
+        fireEvent(l -> l.onEvent(new BeanEvent(bean, name, "PRE_DESTROY")));
         if (bean instanceof AutoCloseable) {
             try {
                 ((AutoCloseable) bean).close();
@@ -82,15 +86,35 @@ public final class MaridContext implements AutoCloseable {
                 errorConsumer.accept(x);
             }
         }
-        beanListeners.forEach(l -> l.onEvent(new BeanEvent(bean, name, "POST_DESTROY")));
+        fireEvent(l -> l.onEvent(new BeanEvent(bean, name, "POST_DESTROY")));
     }
 
     public boolean isActive() {
         return !beans.isEmpty();
     }
 
+    private void fireEvent(Consumer<MaridContextListener> event) {
+        final MaridContextListener[] listeners;
+        try {
+            final ServiceLoader<MaridContextListener> serviceLoader = load(MaridContextListener.class, classLoader);
+            final Stream<MaridContextListener> listenerStream = stream(serviceLoader.spliterator(), false);
+            listeners = listenerStream.sorted().toArray(MaridContextListener[]::new);
+        } catch (Throwable x) {
+            log(SEVERE, "Unable to load context listeners", x);
+            return;
+        }
+        for (final MaridContextListener listener : listeners) {
+            try {
+                event.accept(listener);
+            } catch (Throwable x) {
+                log(WARNING, "Error in {0}", x, listener);
+            }
+        }
+    }
+
     @Override
     public void close() {
+        fireEvent(MaridContextListener::onStop);
         final IllegalStateException e = new IllegalStateException("Runtime close exception");
         final List<Entry<String, Object>> entries = new ArrayList<>(beans.entrySet());
         beans.clear();
