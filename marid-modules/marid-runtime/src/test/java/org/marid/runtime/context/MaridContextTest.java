@@ -89,7 +89,7 @@ public class MaridContextTest {
                         ),
                         new BeanProducer(
                                 signature(List.class.getMethod("add", Object.class)),
-                                m("e", "int", "2")
+                                m("e", "String", "length", "22")
                         )
                 ),
                 new Bean(
