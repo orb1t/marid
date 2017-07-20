@@ -36,10 +36,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.google.common.reflect.TypeToken.of;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.marid.misc.Calls.call;
 import static org.marid.runtime.beans.Bean.*;
@@ -74,18 +74,21 @@ public class BeanTypeResolver {
         final Type genericReturnType = returnMember instanceof Field
                 ? ((Field) returnMember).getGenericType()
                 : ((Executable) returnMember).getAnnotatedReturnType().getType();
-        final TypeToken<?> genericReturnToken = of(genericReturnType).getSupertype(Casts.cast(returnClass));
+        final TypeToken<?> genericReturnToken = genericReturnType instanceof Class<?>
+                ? of(genericReturnType).getSupertype(Casts.cast(returnClass))
+                : of(genericReturnType);
         final Type returnType = factoryToken.resolveType(genericReturnToken.getType()).getType();
 
         final List<TypePair> pairs = new ArrayList<>();
         final BiConsumer<MethodHandle, BeanProducerData> filler = (handle, producerData) -> {
             final Member member = call(() -> MethodHandles.reflectAs(Member.class, handle));
-            if (handle.type().parameterCount() != producerData.args.size()) {
-                return;
-            }
             final Type[] formalTypes = member instanceof Field
                     ? new Type[] {((Field) member).getGenericType()}
                     : ((Executable) member).getGenericParameterTypes();
+            if (formalTypes.length != producerData.args.size()) {
+                return;
+            }
+
             final Type[] actualArgTypes = new Type[formalTypes.length];
             for (int i = 0; i < actualArgTypes.length; i++) {
                 final BeanMemberData beanArg = producerData.args.get(i);
@@ -127,7 +130,11 @@ public class BeanTypeResolver {
                 return resolver;
             }
         } else if (pair.formal.getType() instanceof TypeVariable<?>) {
-            return resolver.where(pair.formal.getType(), pair.actual.getType());
+            final TypeVariable<?> typeVariable = (TypeVariable<?>) pair.formal.getType();
+            return Stream.of(typeVariable.getBounds())
+                    .map(t -> new TypePair(pair.actual.getType(), t))
+                    .reduce(resolver, BeanTypeResolver::resolver, (r1, r2) -> r2)
+                    .where(pair.formal.getType(), pair.actual.getType());
         } else if (pair.formal.getType() instanceof ParameterizedType) {
             final Class<?> formalRaw = pair.formal.getRawType();
             final Class<?> actualRaw = pair.actual.getRawType();
@@ -145,11 +152,12 @@ public class BeanTypeResolver {
             }
         } else if (pair.formal.getType() instanceof WildcardType) {
             final WildcardType wildcardType = (WildcardType) pair.formal.getType();
-            return concat(of(wildcardType.getLowerBounds()), of(wildcardType.getUpperBounds()))
+            return of(wildcardType.getUpperBounds())
                     .map(t -> new TypePair(pair.actual.getType(), t))
                     .reduce(resolver, BeanTypeResolver::resolver, (r1, r2) -> r2);
+        } else {
+            return resolver;
         }
-        return resolver;
     }
 
     public Type resolve(ProjectProfile profile, String beanName) {
