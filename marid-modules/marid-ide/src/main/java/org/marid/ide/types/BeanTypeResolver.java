@@ -57,16 +57,18 @@ public class BeanTypeResolver {
             }
             final Bean bean = beanData.toBean();
             try {
+                final String factory = requireNonNull(beanData.getFactory(), () -> m("Factory is null: {0}", name));
                 final Class<?> factoryClass;
                 final TypeToken<?> factoryToken;
-                if (ref(beanData.getFactory()) != null) {
-                    factoryToken = of(resolve(context, ref(beanData.getFactory())));
+                if (ref(factory) != null) {
+                    factoryToken = of(resolve(context, ref(factory)));
                     factoryClass = factoryToken.getRawType();
                 } else {
-                    factoryClass = resolveClassName(requireNonNull(type(beanData.getFactory())), context.getClassLoader());
+                    final String className = requireNonNull(type(factory), () -> m("Factory class is null: {0}", name));
+                    factoryClass = resolveClassName(className, context.getClassLoader());
                     factoryToken = of(factoryClass).getSupertype(Casts.cast(factoryClass));
                 }
-                final MethodHandle returnHandle = beanData.toBean().findProducer(factoryClass);
+                final MethodHandle returnHandle = bean.findProducer(factoryClass);
                 final Member returnMember = MethodHandles.reflectAs(Member.class, returnHandle);
                 final Class<?> returnClass = returnHandle.type().returnType();
                 final Type genericReturnType = returnMember instanceof Field
