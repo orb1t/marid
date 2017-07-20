@@ -25,10 +25,13 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.runtime.beans.BeanMember;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanMemberData {
+public final class BeanMemberData {
 
     public final StringProperty name = new SimpleStringProperty();
     public final StringProperty type = new SimpleStringProperty();
@@ -67,5 +70,28 @@ public class BeanMemberData {
 
     public Observable[] observables() {
         return new Observable[] {name, type, filter, value};
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getType(), getFilter(), getValue());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof BeanMemberData) {
+            final BeanMemberData that = (BeanMemberData) obj;
+            return Arrays.equals(
+                    new Object[] {this.getName(), this.getType(), this.getFilter(), this.getValue()},
+                    new Object[] {that.getName(), that.getType(), that.getFilter(), that.getValue()}
+            );
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return toMember().toString();
     }
 }

@@ -60,12 +60,12 @@ public class BeanTypeResolver {
             factoryType = factoryClass = resolveClassName(requireNonNull(type(beanData.getFactory())), classLoader);
         }
 
-        final MethodHandle producerHandle = call(() -> beanData.toInfo().findProducer(factoryClass));
+        final MethodHandle producerHandle = call(() -> beanData.toBean().findProducer(factoryClass));
         final Member producerMember = call(() -> MethodHandles.reflectAs(Member.class, producerHandle));
 
-        final Type[] actualArgTypes = new Type[beanData.getArgs().size()];
+        final Type[] actualArgTypes = new Type[beanData.getProducer().args.size()];
         for (int i = 0; i < actualArgTypes.length; i++) {
-            final BeanMemberData beanArg = beanData.getArgs().get(i);
+            final BeanMemberData beanArg = beanData.getProducer().args.get(i);
             switch (beanArg.getType()) {
                 case "ref":
                     actualArgTypes[i] = resolve(beans, classLoader, beanArg.getValue());

@@ -8,6 +8,8 @@ import javafx.collections.ObservableList;
 import org.marid.runtime.beans.BeanMember;
 import org.marid.runtime.beans.BeanProducer;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -38,5 +40,28 @@ public class BeanProducerData {
 
     public BeanProducer toProducer() {
         return new BeanProducer(signature.get(), args.stream().map(BeanMemberData::toMember).toArray(BeanMember[]::new));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof BeanProducerData) {
+            final BeanProducerData that = (BeanProducerData) obj;
+            return Arrays.equals(
+                    new Object[] {this.getSignature(), this.args},
+                    new Object[] {that.getSignature(), that.args}
+            );
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getSignature(), args);
+    }
+
+    @Override
+    public String toString() {
+        return toProducer().toString();
     }
 }

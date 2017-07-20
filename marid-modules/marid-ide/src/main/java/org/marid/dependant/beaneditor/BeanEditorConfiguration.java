@@ -60,7 +60,7 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
             if (nV == null) {
                 memberTable.setItems(FXCollections.emptyObservableList());
             } else {
-                memberTable.setItems(nV.getArgs());
+                memberTable.setItems(nV.getProducer().args);
             }
         });
         return memberTable;

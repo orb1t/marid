@@ -22,6 +22,7 @@ package org.marid.ide.types;
 
 import org.marid.ide.model.BeanData;
 import org.marid.ide.model.BeanMemberData;
+import org.marid.ide.model.BeanProducerData;
 import org.marid.ide.model.BeansFile;
 import org.marid.runtime.context.MaridConfiguration;
 import org.marid.runtime.context.MaridContext;
@@ -56,11 +57,13 @@ public class BeanTypeResolverTestContext {
         return build(new BeanData(), b -> {
             b.name.set("bean1");
             b.factory.set(ArrayList.class.getName());
-            b.producer.signature.set(call(() -> signature(ArrayList.class.getConstructor(Collection.class))));
-            b.producer.args.add(build(new BeanMemberData(), a -> {
-                a.name.set("arg0");
-                a.type.set("ref");
-                a.value.set("bean2");
+            b.producer.set(build(new BeanProducerData(), p -> {
+                p.signature.set(call(() -> signature(ArrayList.class.getConstructor(Collection.class))));
+                p.args.add(build(new BeanMemberData(), a -> {
+                    a.name.set("arg0");
+                    a.type.set("ref");
+                    a.value.set("bean2");
+                }));
             }));
         });
     }
@@ -70,11 +73,13 @@ public class BeanTypeResolverTestContext {
         return build(new BeanData(), b -> {
             b.name.set("bean2");
             b.factory.set(Arrays.class.getName());
-            b.producer.signature.set(call(() -> signature(Arrays.class.getMethod("asList", Object[].class))));
-            b.producer.args.add(build(new BeanMemberData(), a -> {
-                a.name.set("arg0");
-                a.type.set("String[]");
-                a.value.set("a,b,c");
+            b.producer.set(build(new BeanProducerData(), p -> {
+                p.signature.set(call(() -> signature(Arrays.class.getMethod("asList", Object[].class))));
+                p.args.add(build(new BeanMemberData(), a -> {
+                    a.name.set("arg0");
+                    a.type.set("String[]");
+                    a.value.set("a,b,c");
+                }));
             }));
         });
     }

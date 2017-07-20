@@ -41,7 +41,7 @@ public class BeansFile {
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList(BeanData::observables);
 
     public void save(ProjectProfile profile) {
-        final MaridConfiguration context = new MaridConfiguration(beans.stream().map(BeanData::toInfo).toArray(Bean[]::new));
+        final MaridConfiguration context = new MaridConfiguration(beans.stream().map(BeanData::toBean).toArray(Bean[]::new));
         Xmls.writeFormatted(d -> {
             final Element root = d.createElement("beans");
             d.appendChild(root);
@@ -62,6 +62,6 @@ public class BeansFile {
     }
 
     public Bean[] toBeans() {
-        return beans.stream().map(BeanData::toInfo).toArray(Bean[]::new);
+        return beans.stream().map(BeanData::toBean).toArray(Bean[]::new);
     }
 }
