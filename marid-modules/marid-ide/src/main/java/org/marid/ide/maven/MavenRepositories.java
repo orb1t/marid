@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +48,7 @@ public class MavenRepositories {
         repositories.add(new MavenRepository("central", centralDir, "http://repo1.maven.org/maven2"));
 
         // local repository
-        final Path m2Repo = directories.getUserHome().resolve(".m2").resolve("repository");
-        if (Files.isDirectory(m2Repo)) {
-            repositories.add(new MavenRepository("local", m2Repo.toFile(), null));
-        }
+        repositories.add(new MavenRepository("local", directories.getRepo().toFile(), null));
     }
 
     public Path getBaseDir() {

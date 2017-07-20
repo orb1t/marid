@@ -509,7 +509,7 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
                 <type>pom</type>
-                <version>4.3.9.RELEASE</version>
+                <version>4.3.10.RELEASE</version>
                 <scope>import</scope>
             </dependency>
 
