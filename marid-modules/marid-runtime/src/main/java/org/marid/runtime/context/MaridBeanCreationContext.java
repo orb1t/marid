@@ -22,16 +22,14 @@
 package org.marid.runtime.context;
 
 import org.marid.runtime.beans.Bean;
-import org.marid.runtime.beans.BeanFactory;
 import org.marid.runtime.beans.BeanMember;
-import org.marid.runtime.beans.MaridFactoryBean;
+import org.marid.runtime.beans.BeanProducer;
 import org.marid.runtime.converter.DefaultValueConvertersManager;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
@@ -90,73 +88,75 @@ final class MaridBeanCreationContext implements AutoCloseable {
     }
 
     private Object create0(String name, Bean bean) throws Throwable {
-        lastMessage.set(() -> String.format("[%s] f setup: %s", name, bean.factory));
-        final BeanFactory f = new BeanFactory(bean.factory);
+        lastMessage.set(() -> String.format("[%s] factory setup: %s", name, bean.factory));
         final Object factoryObject;
         final Class<?> factoryClass;
-        if (f.ref != null) {
-            factoryObject = getOrCreate(f.ref);
-            factoryClass = beanClasses.get(f.ref);
-        } else {
-            factoryClass = Class.forName(f.factoryClass, true, classLoader);
+        if (Bean.type(bean.factory) != null) {
+            factoryClass = Class.forName(Bean.type(bean.factory), true, classLoader);
             factoryObject = null;
+        } else {
+            factoryObject = getOrCreate(Bean.ref(bean.factory));
+            factoryClass = beanClasses.get(Bean.ref(bean.factory));
         }
-        final MaridFactoryBean factoryBean = new MaridFactoryBean(bean.producer);
-        final MethodHandle constructor = bind(bean, factoryBean.findProducer(factoryClass), factoryObject);
+        lastMessage.set(() -> String.format("[%s] producer lookup: %s", name, bean.producer));
+        final MethodHandle constructor = bind(bean.producer, bean.findProducer(factoryClass), factoryObject);
 
         beanClasses.put(name, constructor.type().returnType());
-        final Class<?>[] argTypes = constructor.type().parameterArray();
-        final Object[] args = new Object[argTypes.length];
-        for (int i = 0; i < args.length; i++) {
-            final BeanMember arg = bean.args[i];
-            lastMessage.set(() -> String.format("[%s] argument setup: %s", name, arg));
-            args[i] = arg(factoryBean, arg, argTypes[i]);
+        final Object instance;
+        {
+            final Class<?>[] argTypes = constructor.type().parameterArray();
+            lastMessage.set(() -> String.format("[%s] arguments setup", name));
+            final Object[] args = new Object[argTypes.length];
+            for (int i = 0; i < args.length; i++) {
+                final BeanMember arg = bean.producer.args[i];
+                lastMessage.set(() -> String.format("[%s] argument setup: %s", name, arg));
+                args[i] = arg(arg, argTypes[i]);
+            }
+            lastMessage.set(() -> String.format("[%s] constructor invocation", name));
+            instance = constructor.invokeWithArguments(args);
         }
 
-        lastMessage.set(() -> String.format("[%s] constructor", name));
-        final Object instance = constructor.invokeWithArguments(args);
         if (instance != null) {
-            lastMessage.set(() -> String.format("[%s] properties lookup", name));
-            final MethodHandle[] properties = factoryBean.findProperties(bean, constructor);
-            for (int i = 0; i < bean.props.length; i++) {
-                final MethodHandle setter = properties[i].bindTo(instance);
-                final BeanMember prop = bean.props[i];
-                lastMessage.set(() -> String.format("[%s] setter [%s]", name, prop));
-                final Object value = arg(factoryBean, prop, properties[i].type().parameterType(0));
-                setter.invokeWithArguments(value);
+            lastMessage.set(() -> String.format("[%s] initializers", name));
+            final MethodHandle[] initializers = Bean.findInitializers(constructor, bean.initializers);
+            for (int k = 0; k < initializers.length; k++) {
+                final BeanProducer initializer = bean.initializers[k];
+                initializers[k] = bind(initializer, initializers[k], instance);
+                lastMessage.set(() -> String.format("%s initializer %s", name, initializer));
+                final Class<?>[] argTypes = initializers[k].type().parameterArray();
+                lastMessage.set(() -> String.format("[%s] arguments setup: %s", name, initializer));
+                final Object[] args = new Object[argTypes.length];
+                for (int i = 0; i < args.length; i++) {
+                    final BeanMember arg = initializer.args[i];
+                    lastMessage.set(() -> String.format("[%s] argument setup: %s", name, arg));
+                    args[i] = arg(arg, argTypes[i]);
+                }
+                lastMessage.set(() -> String.format("[%s] initializer invocation: %s", name, initializer));
+                initializers[k].invokeWithArguments(args);
             }
             context.initialize(name, instance);
         }
         return instance;
     }
 
-    private Object arg(MaridFactoryBean bean, BeanMember member, Class<?> type) throws Throwable {
+    private Object arg(BeanMember member, Class<?> type) throws Throwable {
         final Object arg;
         if (member.value == null) {
             arg = MaridRuntimeUtils.defaultValue(type);
         } else {
-            final Function<String, ?> argFunc = convertersManager.getConverter(member.type);
-            if (argFunc != null) {
-                arg = argFunc.apply(member.value);
-            } else {
-                throw new IllegalArgumentException("Unable to find converter for " + member.type);
-            }
+            arg = convertersManager.getConverter(member.type)
+                    .map(c -> c.apply(member.value))
+                    .orElseThrow(() -> new IllegalArgumentException("Unable to find converter for " + member.type));
         }
-        if (arg == null) {
-            return null;
-        }
-        final int filterIndex = member.name.lastIndexOf('#');
-        if (filterIndex < 0) {
+        if (arg == null || member.filter == null) {
             return arg;
-        } else {
-            final String filter = member.name.substring(filterIndex + 1);
-            final MethodHandle argHandle = MethodHandles.constant(arg.getClass(), arg);
-            return bean.filtered(filter, argHandle).invoke();
         }
+        final MethodHandle argHandle = MethodHandles.constant(arg.getClass(), arg);
+        return Bean.filtered(member.filter, argHandle).invoke();
     }
 
-    private MethodHandle bind(Bean bean, MethodHandle handle, Object instance) {
-        if (handle.type().parameterCount() == bean.args.length + 1) {
+    private MethodHandle bind(BeanProducer producer, MethodHandle handle, Object instance) {
+        if (handle.type().parameterCount() == producer.args.length + 1) {
             return handle.bindTo(instance);
         } else {
             return handle;

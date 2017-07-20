@@ -25,11 +25,19 @@ import org.marid.io.Xmls;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.Objects;
 
-import static java.lang.String.format;
+import static java.lang.invoke.MethodHandles.publicLookup;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Stream.of;
 import static org.marid.misc.Builder.build;
 
 /**
@@ -44,47 +52,38 @@ public final class Bean {
     public final String factory;
 
     @Nonnull
-    public final String producer;
+    public final BeanProducer producer;
 
     @Nonnull
-    public final BeanMember[] args;
-
-    @Nonnull
-    public final BeanMember[] props;
+    public final BeanProducer[] initializers;
 
     public Bean(@Nonnull String name,
                 @Nonnull String factory,
-                @Nonnull String producer,
-                @Nonnull BeanMember[] args,
-                @Nonnull BeanMember[] props) {
+                @Nonnull BeanProducer producer,
+                @Nonnull BeanProducer... initializers) {
         this.name = name;
         this.factory = factory;
         this.producer = producer;
-        this.args = args;
-        this.props = props;
+        this.initializers = initializers;
     }
 
     public Bean(@Nonnull Element element) {
         this.name = requireNonNull(element.getAttribute("name"));
         this.factory = requireNonNull(element.getAttribute("factory"));
-        this.producer = requireNonNull(element.getAttribute("producer"));
-        this.args = Xmls.nodes(element, Element.class)
-                .filter(e -> "args".equals(e.getTagName()))
-                .flatMap(e -> Xmls.nodes(e, Element.class))
-                .filter(e -> "arg".equals(e.getTagName()))
-                .map(BeanMember::new)
-                .toArray(BeanMember[]::new);
-        this.props = Xmls.nodes(element, Element.class)
-                .filter(e -> "props".equals(e.getTagName()))
-                .flatMap(e -> Xmls.nodes(e, Element.class))
-                .filter(e -> "prop".equals(e.getTagName()))
-                .map(BeanMember::new)
-                .toArray(BeanMember[]::new);
+        this.producer = Xmls.nodes(element, Element.class)
+                .filter(e -> "producer".equals(e.getTagName()))
+                .map(BeanProducer::new)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No producer for " + element));
+        this.initializers = Xmls.nodes(element, Element.class)
+                .filter(e -> "initializer".equals(e.getTagName()))
+                .map(BeanProducer::new)
+                .toArray(BeanProducer[]::new);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, factory, producer, args, props);
+        return Arrays.deepHashCode(new Object[]{name, factory, producer, initializers});
     }
 
     @Override
@@ -98,8 +97,8 @@ public final class Bean {
         } else {
             final Bean that = (Bean) obj;
             return Arrays.deepEquals(
-                    new Object[]{this.name, this.factory, this.producer, this.args, this.props},
-                    new Object[]{that.name, that.factory, that.producer, that.args, that.props}
+                    new Object[]{this.name, this.factory, this.producer, this.initializers},
+                    new Object[]{that.name, that.factory, that.producer, that.initializers}
             );
         }
     }
@@ -107,37 +106,101 @@ public final class Bean {
     public void writeTo(@Nonnull Element element) {
         element.setAttribute("name", name);
         element.setAttribute("factory", factory);
-        element.setAttribute("producer", producer);
 
-        build(element.getOwnerDocument().createElement("args"), argsElement -> {
-            element.appendChild(argsElement);
-            for (final BeanMember arg : args) {
-                build(element.getOwnerDocument().createElement("arg"), e -> {
-                    argsElement.appendChild(e);
-                    arg.writeTo(e);
-                });
-            }
-        });
+        producer.writeTo(build(element.getOwnerDocument().createElement("producer"), element::appendChild));
 
-        build(element.getOwnerDocument().createElement("props"), argsElement -> {
-            element.appendChild(argsElement);
-            for (final BeanMember prop : props) {
-                build(element.getOwnerDocument().createElement("prop"), e -> {
-                    argsElement.appendChild(e);
-                    prop.writeTo(e);
-                });
+        for (final BeanProducer i : initializers) {
+            i.writeTo(build(element.getOwnerDocument().createElement("initializer"), element::appendChild));
+        }
+    }
+
+    public static String ref(@Nonnull String factory) {
+        return factory.startsWith("@") ? factory.substring(1) : null;
+    }
+
+    public static String type(@Nonnull String factory) {
+        return factory.startsWith("@") ? null : factory;
+    }
+
+    public static String signature(Constructor<?> constructor) {
+        return of(constructor.getParameterTypes()).map(Class::getName).collect(joining(",", "new(", ")"));
+    }
+
+    public static String signature(Method method) {
+        return of(method.getParameterTypes()).map(Class::getName).collect(joining(",", method.getName() + "(", ")"));
+    }
+
+    public static String signature(Field field) {
+        return field.getName();
+    }
+
+    public static MethodHandle[] findInitializers(MethodHandle constructor, BeanProducer... initializers) throws Exception {
+        final Class<?> targetClass = constructor.type().returnType();
+        final MethodHandle[] handles = new MethodHandle[initializers.length];
+        for (int i = 0; i < handles.length; i++) {
+            handles[i] = findProducer(targetClass, initializers[i], false);
+        }
+        return handles;
+    }
+
+    public MethodHandle findProducer(Class<?> targetClass) throws Exception {
+        return findProducer(targetClass, producer, true);
+    }
+
+    public static MethodHandle findProducer(Class<?> targetClass, BeanProducer producer, boolean getters) throws Exception {
+        if (producer.name().equals("new")) {
+            for (final Constructor<?> constructor : targetClass.getConstructors()) {
+                if (producer.matches(constructor.getParameterTypes())) {
+                    return publicLookup().unreflectConstructor(constructor);
+                }
             }
-        });
+        } else {
+            for (final Method method : targetClass.getMethods()) {
+                if (method.getName().equals(producer.name()) && producer.matches(method.getParameterTypes())) {
+                    return publicLookup().unreflect(method);
+                }
+            }
+        }
+        if (producer.args.length == (getters ? 0 : 1)) {
+            for (final Field field : targetClass.getFields()) {
+                if (field.getName().equals(producer.name())) {
+                    return getters
+                            ? publicLookup().unreflectGetter(field)
+                            : publicLookup().unreflectSetter(field);
+                }
+            }
+        }
+        throw new IllegalStateException("No producers found for " + producer + " of " + targetClass);
+    }
+
+    public static MethodHandle filtered(String filter, MethodHandle handle) throws Exception {
+        final Lookup lookup = publicLookup();
+        if (filter == null) {
+            return handle;
+        } else {
+            final Class<?> type = handle.type().returnType();
+            try {
+                final Method method = type.getMethod(filter);
+                if (Modifier.isStatic(method.getModifiers())) {
+                    throw new NoSuchMethodException(filter);
+                }
+                return MethodHandles.filterReturnValue(handle, lookup.unreflect(method));
+            } catch (NoSuchMethodException e1) {
+                try {
+                    final Field field = type.getField(filter);
+                    if (Modifier.isStatic(field.getModifiers())) {
+                        throw new NoSuchFieldException(filter);
+                    }
+                    return MethodHandles.filterReturnValue(handle, lookup.unreflectGetter(field));
+                } catch (NoSuchFieldException x) {
+                    throw new IllegalArgumentException("No filters found: " + filter);
+                }
+            }
+        }
     }
 
     @Override
     public String toString() {
-        return format("Bean(%s,%s,%s,%s,%s)",
-                name,
-                factory,
-                producer,
-                Arrays.toString(args),
-                Arrays.toString(props)
-        );
+        return "Bean" + Arrays.deepToString(new Object[]{name, factory, producer, initializers});
     }
 }

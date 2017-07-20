@@ -25,10 +25,11 @@ import org.marid.runtime.context.MaridRuntime;
 
 import java.lang.reflect.Type;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static java.util.ServiceLoader.load;
+import static java.util.stream.Stream.of;
 import static java.util.stream.StreamSupport.stream;
 
 /**
@@ -46,21 +47,11 @@ public class DefaultValueConvertersManager {
                 .toArray(ValueConverters[]::new);
     }
 
-    public Function<String, ?> getConverter(String name) {
-        return Stream.of(valueConverters)
-                .map(c -> c.getConverter(name))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No converters found for name: " + name));
+    public Optional<? extends Function<String, ?>> getConverter(String name) {
+        return of(valueConverters).map(c -> c.getConverter(name)).filter(Objects::nonNull).findFirst();
     }
 
-    public Type getType(String name) {
-        for (final ValueConverters converters : valueConverters) {
-            final Type type = converters.getTypeMap().get(name);
-            if (type != null) {
-                return type;
-            }
-        }
-        return null;
+    public Optional<Type> getType(String name) {
+        return of(valueConverters).map(c -> c.getTypeMap().get(name)).filter(Objects::nonNull).findFirst();
     }
 }

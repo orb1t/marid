@@ -25,10 +25,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import org.marid.runtime.beans.Bean;
-import org.marid.runtime.beans.BeanMember;
+import org.marid.runtime.beans.BeanProducer;
 
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static javafx.collections.FXCollections.observableArrayList;
 
 /**
@@ -38,19 +39,18 @@ public class BeanData {
 
     public final StringProperty name = new SimpleStringProperty();
     public final StringProperty factory = new SimpleStringProperty();
-    public final StringProperty producer = new SimpleStringProperty();
-    public final ObservableList<BeanMemberData> args = observableArrayList(BeanMemberData::observables);
-    public final ObservableList<BeanMemberData> props = observableArrayList(BeanMemberData::observables);
+    public final BeanProducerData producer;
+    public final ObservableList<BeanProducerData> initializers = observableArrayList(BeanProducerData::observables);
 
     public BeanData(Bean bean) {
         name.set(bean.name);
         factory.set(bean.factory);
-        producer.set(bean.producer);
-        args.setAll(Stream.of(bean.args).map(BeanMemberData::new).toArray(BeanMemberData[]::new));
-        props.setAll(Stream.of(bean.props).map(BeanMemberData::new).toArray(BeanMemberData[]::new));
+        producer = new BeanProducerData(bean.producer);
+        initializers.setAll(Stream.of(bean.initializers).map(BeanProducerData::new).collect(toList()));
     }
 
     public BeanData() {
+        producer = new BeanProducerData();
     }
 
     public String getName() {
@@ -61,22 +61,25 @@ public class BeanData {
         return factory.get();
     }
 
-    public String getProducer() {
-        return producer.get();
+    public String getSignature() {
+        return producer.getSignature();
+    }
+
+    public ObservableList<BeanMemberData> getArgs() {
+        return producer.args;
     }
 
     public Bean toInfo() {
         return new Bean(
                 name.get(),
                 factory.get(),
-                producer.get(),
-                args.stream().map(BeanMemberData::toMember).toArray(BeanMember[]::new),
-                props.stream().map(BeanMemberData::toMember).toArray(BeanMember[]::new)
+                producer.toProducer(),
+                initializers.stream().map(BeanProducerData::toProducer).toArray(BeanProducer[]::new)
         );
     }
 
     public Observable[] observables() {
-        return new Observable[] {name, factory, producer, args, props};
+        return new Observable[] {name, factory, producer.signature, producer.args, initializers};
     }
 
     @Override

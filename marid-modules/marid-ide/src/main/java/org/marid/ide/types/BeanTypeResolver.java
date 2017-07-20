@@ -20,25 +20,22 @@
 
 package org.marid.ide.types;
 
-import com.fasterxml.classmate.MemberResolver;
-import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
-import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.model.BeanMemberData;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.misc.Calls;
-import org.marid.runtime.beans.BeanFactory;
-import org.marid.runtime.beans.MaridFactoryBean;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.*;
+import java.lang.reflect.Member;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
+import static org.marid.misc.Calls.call;
+import static org.marid.runtime.beans.Bean.ref;
+import static org.marid.runtime.beans.Bean.type;
 import static org.springframework.util.ClassUtils.resolveClassName;
 
 /**
@@ -52,62 +49,34 @@ public class BeanTypeResolver {
                 .filter(e -> beanName.equals(e.getName()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(beanName));
-        final MaridFactoryBean factoryBean = new MaridFactoryBean(beanData.getProducer());
-        final BeanFactory beanFactory = new BeanFactory(beanData.getFactory());
         final IdeValueConverterManager valueConverters = new IdeValueConverterManager(classLoader);
 
-        final TypeToken<?> factoryToken;
+        final Type factoryType;
         final Class<?> factoryClass;
-        if (beanFactory.ref != null) {
-            factoryToken = TypeToken.of(resolve(beans, classLoader, beanFactory.ref));
-            factoryClass = factoryToken.getRawType();
+        if (ref(beanData.getFactory()) != null) {
+            factoryType = resolve(beans, classLoader, ref(beanData.getFactory()));
+            factoryClass = TypeToken.of(factoryType).getRawType();
         } else {
-            factoryClass = resolveClassName(requireNonNull(beanFactory.factoryClass), classLoader);
-            factoryToken = TypeToken.of(factoryClass);
+            factoryType = factoryClass = resolveClassName(requireNonNull(type(beanData.getFactory())), classLoader);
         }
 
-        final MethodHandle producerHandle = Calls.call(() -> factoryBean.findProducer(factoryClass));
-        final Member producerMember = Calls.call(() -> MethodHandles.reflectAs(Member.class, producerHandle));
-        final Type[] args;
-        final TypeToken<?> token;
-        if (producerMember instanceof Constructor<?>) {
-            final Constructor<?> c = (Constructor<?>) producerMember;
-            token = TypeToken.of(factoryClass).constructor(c).getReturnType();
-            args = c.getGenericParameterTypes();
-        } else if (producerMember instanceof Method) {
-            final Method m = (Method) producerMember;
-            token = factoryToken.resolveType(m.getGenericReturnType());
-            args = m.getGenericParameterTypes();
-        } else {
-            final Field f = (Field) producerMember;
-            token = TypeToken.of(f.getGenericType());
-            args = new Type[0];
-        }
-        if (args.length == beanData.args.size()) {
-            final com.fasterxml.classmate.TypeResolver res = new com.fasterxml.classmate.TypeResolver();
-            final MemberResolver r = new MemberResolver(res);
-            TypeResolver resolver = new TypeResolver();
-            for (int i = 0; i < args.length; i++) {
-                final BeanMemberData beanArg = beanData.args.get(i);
-                final Type type;
-                switch (beanArg.getType()) {
-                    case "ref":
-                        type = resolve(beans, classLoader, beanArg.getValue());
-                        break;
-                    default:
-                        type = valueConverters.getType(beanArg.getType());
-                        break;
-                }
-                if (type != null) {
-                    //resolver = resolver.where(args[i], type);
-                }
+        final MethodHandle producerHandle = call(() -> beanData.toInfo().findProducer(factoryClass));
+        final Member producerMember = call(() -> MethodHandles.reflectAs(Member.class, producerHandle));
+
+        final Type[] actualArgTypes = new Type[beanData.getArgs().size()];
+        for (int i = 0; i < actualArgTypes.length; i++) {
+            final BeanMemberData beanArg = beanData.getArgs().get(i);
+            switch (beanArg.getType()) {
+                case "ref":
+                    actualArgTypes[i] = resolve(beans, classLoader, beanArg.getValue());
+                    break;
+                default:
+                    actualArgTypes[i] = valueConverters.getType(beanArg.getType()).orElse(null);
+                    break;
             }
-            final ResolvedTypeWithMembers members = r.resolve(res.resolve(token.getType()), null, null);
-
-            return resolver.resolveType(token.getType());
-        } else {
-            return token.getType();
         }
+
+        return MaridTypes.resolveType(producerMember, factoryType, actualArgTypes);
     }
 
     public Type resolve(ProjectProfile profile, String beanName) {

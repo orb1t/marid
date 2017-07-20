@@ -54,26 +54,13 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
     }
 
     @Bean
-    public BeanMemberTable argTable(SpecialActions specialActions, BeanTable table) {
-        final BeanMemberTable memberTable = new BeanMemberTable(specialActions);
+    public BeanArgsTable argTable(SpecialActions specialActions, BeanTable table) {
+        final BeanArgsTable memberTable = new BeanArgsTable(specialActions);
         table.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> {
             if (nV == null) {
                 memberTable.setItems(FXCollections.emptyObservableList());
             } else {
-                memberTable.setItems(nV.args);
-            }
-        });
-        return memberTable;
-    }
-
-    @Bean
-    public BeanMemberTable propTable(SpecialActions specialActions, BeanTable table) {
-        final BeanMemberTable memberTable = new BeanMemberTable(specialActions);
-        table.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> {
-            if (nV == null) {
-                memberTable.setItems(FXCollections.emptyObservableList());
-            } else {
-                memberTable.setItems(nV.props);
+                memberTable.setItems(nV.getArgs());
             }
         });
         return memberTable;

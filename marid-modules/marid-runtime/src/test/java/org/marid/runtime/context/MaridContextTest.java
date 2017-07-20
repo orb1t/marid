@@ -24,17 +24,18 @@ package org.marid.runtime.context;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.runtime.beans.Bean;
+import org.marid.runtime.beans.BeanProducer;
 import org.marid.test.NormalTests;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.marid.runtime.beans.MaridFactoryBean.producer;
+import static org.marid.runtime.beans.Bean.signature;
 import static org.marid.runtime.context.MaridContextTestUtils.m;
-import static org.marid.runtime.context.MaridContextTestUtils.ms;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -48,44 +49,56 @@ public class MaridContextTest {
                 new Bean(
                         "bean2",
                         "@bean1",
-                        producer(Bean1.class.getMethod("getZ")),
-                        ms(),
-                        ms()
+                        new BeanProducer(signature(Bean1.class.getMethod("getZ")))
                 ),
                 new Bean(
                         "bean1",
                         Bean1.class.getName(),
-                        producer(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
-                        ms(m("int", "x", "1"), m("String", "y", "abc"), m("BigDecimal", "z", "1.23")),
-                        ms(m("boolean", "setA", "true"))
+                        new BeanProducer(
+                                signature(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
+                                m("x", "int", "1"),
+                                m("y", "String", "abc"),
+                                m("z", "BigDecimal", "1.23")
+                        ),
+                        new BeanProducer(
+                                signature(Bean1.class.getMethod("setA", boolean.class)),
+                                m("a", "boolean", "true")
+                        )
                 ),
                 new Bean(
                         "bean3",
                         "@bean1",
-                        producer(Bean1.class.getField("y")),
-                        ms(),
-                        ms()
+                        new BeanProducer(signature(Bean1.class.getField("y")))
                 ),
                 new Bean(
                         "bean4",
                         Bean1.class.getName(),
-                        producer(Bean1.class.getMethod("list")),
-                        ms(),
-                        ms(m("int", "add", "1"))
+                        new BeanProducer(signature(Bean1.class.getMethod("list"))),
+                        new BeanProducer(
+                                signature(List.class.getMethod("add", Object.class)),
+                                m("e", "int", "1")
+                        )
                 ),
                 new Bean(
                         "bean5",
                         Bean1.class.getName(),
-                        producer(Bean1.class.getMethod("list")),
-                        ms(),
-                        ms(m("int", "add", "1"), m("int", "add", "2"))
+                        new BeanProducer(signature(Bean1.class.getMethod("list"))),
+                        new BeanProducer(
+                                signature(List.class.getMethod("add", Object.class)),
+                                m("e", "int", "1")
+                        ),
+                        new BeanProducer(
+                                signature(List.class.getMethod("add", Object.class)),
+                                m("e", "int", "2")
+                        )
                 ),
                 new Bean(
                         "bean6",
                         String.class.getName(),
-                        producer(String.class.getMethod("valueOf", Object.class)),
-                        ms(m("js", "arg0", "'a' + 1")),
-                        ms()
+                        new BeanProducer(
+                                signature(String.class.getMethod("valueOf", Object.class)),
+                                m("arg0", "js", "'a' + 1")
+                        )
                 )
         };
         try (final MaridContext runtime = new MaridContext(new MaridConfiguration(beans))) {
@@ -99,21 +112,27 @@ public class MaridContextTest {
         }
     }
 
-    @Test
+    @Test(expected = MaridContextException.class)
     public void circularReferenceDetection() throws Exception {
         final Bean[] beans = {
                 new Bean(
                         "bean1",
                         Bean1.class.getName(),
-                        producer(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
-                        ms(m("int", "x", "1"), m("js", "y", "bean('bean1').toString()"), m("BigDecimal", "z", "1.23")),
-                        ms(m("boolean", "setA", "true"))
+                        new BeanProducer(
+                                signature(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
+                                m("x", "int", "1"), m("y", "ref", "toString", "bean1"), m("BigDecimal", "z", "1.23")
+                        ),
+                        new BeanProducer(
+                                signature(Bean1.class.getMethod("setA", boolean.class)),
+                                m("a", "boolean", "true")
+                        )
                 )
         };
         try (final MaridContext context = new MaridContext(new MaridConfiguration(beans))) {
             assertNull(context);
-        } catch (IllegalStateException x) {
-            assertEquals("Bean circular reference detected: bean1 [bean1]", x.getMessage());
+        } catch (MaridContextException x) {
+            assertEquals("Bean circular reference detected: bean1 [bean1]", x.getSuppressed()[0].getMessage());
+            throw x;
         }
     }
 }

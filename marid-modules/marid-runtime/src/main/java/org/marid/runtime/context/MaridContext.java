@@ -50,7 +50,11 @@ public final class MaridContext implements AutoCloseable {
 
         try (final MaridBeanCreationContext cc = new MaridBeanCreationContext(configuration, this, classLoader)) {
             for (final Bean bean : configuration.beans) {
-                cc.getOrCreate(bean.name);
+                try {
+                    cc.getOrCreate(bean.name);
+                } catch (Exception x) {
+                    break;
+                }
             }
         } finally {
             beanListeners.reload();

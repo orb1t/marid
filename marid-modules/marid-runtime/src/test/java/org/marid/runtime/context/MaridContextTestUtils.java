@@ -28,11 +28,11 @@ import org.marid.runtime.beans.BeanMember;
  */
 class MaridContextTestUtils {
 
-    static BeanMember m(String type, String name, String value) {
-        return new BeanMember(type, name, value);
+    static BeanMember m(String name, String type, String filter, String value) {
+        return new BeanMember(name, type, filter, value);
     }
 
-    static BeanMember[] ms(BeanMember... members) {
-        return members;
+    static BeanMember m(String name, String type, String value) {
+        return new BeanMember(name, type, null, value);
     }
 }

@@ -33,9 +33,9 @@ import static org.marid.jfx.LocalizedStrings.ls;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanMemberTable extends MaridTableView<BeanMemberData> {
+public class BeanArgsTable extends MaridTableView<BeanMemberData> {
 
-    public BeanMemberTable(SpecialActions specialActions) {
+    public BeanArgsTable(SpecialActions specialActions) {
         super(FXCollections.observableArrayList(), specialActions);
         setEditable(false);
     }

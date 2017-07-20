@@ -26,6 +26,8 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import java.util.Objects;
+
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -34,34 +36,60 @@ import static java.util.Objects.requireNonNull;
 public final class BeanMember {
 
     @Nonnull
-    public final String type;
+    public final String name;
 
     @Nonnull
-    public final String name;
+    public final String type;
+
+    @Nullable
+    public final String filter;
 
     @Nullable
     public final String value;
 
-    public BeanMember(@Nonnull String type, @Nonnull String name, @Nullable String value) {
-        this.type = type;
+    public BeanMember(@Nonnull String name, @Nonnull String type, @Nullable String filter, @Nullable String value) {
         this.name = name;
+        this.type = type;
+        this.filter = filter;
         this.value = value;
     }
 
     public BeanMember(@Nonnull Element element) {
         type = requireNonNull(element.getAttribute("type"));
         name = requireNonNull(element.getAttribute("name"));
+        filter = element.getAttribute("filter");
         value = element.getTextContent();
     }
 
     public void writeTo(@Nonnull Element element) {
         element.setAttribute("type", type);
         element.setAttribute("name", name);
+        element.setAttribute("filter", filter);
         element.setTextContent(value);
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            final BeanMember that = (BeanMember) o;
+            return Objects.equals(name, that.name) &&
+                    Objects.equals(type, that.type) &&
+                    Objects.equals(filter, that.filter) &&
+                    Objects.equals(value, that.value);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, type, filter, value);
+    }
+
+    @Override
     public String toString() {
-        return String.format("Member(%s,%s,%s)", type, name, value);
+        return String.format("%s(%s,%s,%s)", name, type, filter, value);
     }
 }

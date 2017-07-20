@@ -30,13 +30,15 @@ import org.marid.runtime.beans.BeanMember;
  */
 public class BeanMemberData {
 
-    public final StringProperty type = new SimpleStringProperty();
     public final StringProperty name = new SimpleStringProperty();
+    public final StringProperty type = new SimpleStringProperty();
+    public final StringProperty filter = new SimpleStringProperty();
     public final StringProperty value = new SimpleStringProperty();
 
     public BeanMemberData(BeanMember member) {
-        type.set(member.type);
         name.set(member.name);
+        type.set(member.type);
+        filter.set(member.filter);
         value.set(member.value);
     }
 
@@ -55,11 +57,15 @@ public class BeanMemberData {
         return value.get();
     }
 
+    public String getFilter() {
+        return filter.get();
+    }
+
     public BeanMember toMember() {
-        return new BeanMember(getType(), getName(), getValue());
+        return new BeanMember(getName(), getType(), getFilter(), getValue());
     }
 
     public Observable[] observables() {
-        return new Observable[] {type, name, value};
+        return new Observable[] {name, type, filter, value};
     }
 }

@@ -37,7 +37,7 @@ public class BeanDetailsPane extends Accordion {
 
     @Order(1)
     @Autowired
-    private void initArgsPane(BeanMemberTable argTable) {
+    private void initArgsPane(BeanArgsTable argTable) {
         final TitledPane pane = new TitledPane();
         pane.textProperty().bind(ls("Arguments"));
         pane.setGraphic(FontIcons.glyphIcon("D_DISQUS", 16));
@@ -47,16 +47,6 @@ public class BeanDetailsPane extends Accordion {
     }
 
     @Order(2)
-    @Autowired
-    private void initPropPane(BeanMemberTable propTable) {
-        final TitledPane pane = new TitledPane();
-        pane.textProperty().bind(ls("Properties"));
-        pane.setGraphic(FontIcons.glyphIcon("D_MENU", 16));
-        pane.setContent(propTable);
-        getPanes().add(pane);
-    }
-
-    @Order(3)
     @Autowired
     private void initInitializersPane() {
         final TitledPane pane = new TitledPane();
