@@ -39,7 +39,7 @@ public final class MaridConfiguration {
     @Nonnull
     public final Bean[] beans;
 
-    public MaridConfiguration(@Nonnull Bean[] beans) {
+    public MaridConfiguration(@Nonnull Bean... beans) {
         this.beans = beans;
     }
 

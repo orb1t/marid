@@ -21,8 +21,12 @@
 
 package org.marid.runtime.context;
 
+import java.io.*;
+import java.util.Properties;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -32,11 +36,25 @@ public final class MaridRuntimeObject implements MaridRuntime {
     private final Function<String, Object> beanFunc;
     private final BooleanSupplier active;
     private final ClassLoader classLoader;
+    private final MaridPlaceholderResolver placeholderResolver;
 
     public MaridRuntimeObject(MaridContext context, Function<String, Object> beanFunc) {
         this.beanFunc = beanFunc;
         this.active = context::isActive;
         this.classLoader = context.classLoader;
+
+        final Properties properties = new Properties(System.getProperties());
+        try (final InputStream inputStream = context.classLoader.getResourceAsStream("application.properties")) {
+            if (inputStream != null) {
+                try (final Reader reader = new InputStreamReader(inputStream, UTF_8)) {
+                    properties.load(reader);
+                }
+            }
+        } catch (IOException x) {
+            throw new UncheckedIOException(x);
+        }
+
+        this.placeholderResolver = new MaridPlaceholderResolver(properties);
     }
 
     @Override
@@ -52,5 +70,10 @@ public final class MaridRuntimeObject implements MaridRuntime {
     @Override
     public ClassLoader getClassLoader() {
         return classLoader;
+    }
+
+    @Override
+    public String resolvePlaceholders(String value) {
+        return placeholderResolver.resolvePlaceholders(value);
     }
 }

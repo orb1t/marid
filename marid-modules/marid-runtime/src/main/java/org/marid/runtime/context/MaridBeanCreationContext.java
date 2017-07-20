@@ -80,7 +80,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
                 creationBeanNames.remove(name);
             }
         } else {
-            throw new CircularBeanReferenceException(creationBeanNames, name);
+            throw new MaridContext.CircularBeanReferenceException(creationBeanNames, name);
         }
     }
 
@@ -142,7 +142,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
             arg = MaridRuntimeUtils.defaultValue(type);
         } else {
             arg = convertersManager.getConverter(member.type)
-                    .map(c -> c.apply(member.value))
+                    .map(c -> c.apply(runtime.resolvePlaceholders(member.value)))
                     .orElseThrow(() -> new IllegalArgumentException("Unable to find converter for " + member.type));
         }
         if (arg == null || member.filter == null) {

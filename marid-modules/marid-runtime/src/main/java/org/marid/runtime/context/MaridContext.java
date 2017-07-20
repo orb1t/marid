@@ -26,11 +26,8 @@ import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanEvent;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -126,6 +123,13 @@ public final class MaridContext implements AutoCloseable {
         }
         if (e.getSuppressed().length > 0) {
             throw e;
+        }
+    }
+
+    public static class CircularBeanReferenceException extends RuntimeException {
+
+        public CircularBeanReferenceException(Set<String> current, String name) {
+            super(format("Circular bean reference: %s/%s", name, current));
         }
     }
 }

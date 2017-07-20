@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanProducer;
+import org.marid.runtime.context.MaridContext.CircularBeanReferenceException;
 import org.marid.test.NormalTests;
 
 import java.math.BigDecimal;

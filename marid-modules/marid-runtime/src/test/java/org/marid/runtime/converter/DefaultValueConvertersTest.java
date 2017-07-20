@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.runtime;
+package org.marid.runtime.converter;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;

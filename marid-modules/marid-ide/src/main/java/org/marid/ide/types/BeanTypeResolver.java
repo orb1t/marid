@@ -25,7 +25,7 @@ import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
 import org.marid.misc.Casts;
 import org.marid.runtime.beans.Bean;
-import org.marid.runtime.context.CircularBeanReferenceException;
+import org.marid.runtime.context.MaridContext.CircularBeanReferenceException;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandle;
