@@ -49,11 +49,12 @@ public class BeanData {
     public BeanData(Bean bean) {
         name.set(bean.name);
         factory.set(bean.factory);
-        producer.set(new BeanProducerData(bean.producer));
-        initializers.setAll(Stream.of(bean.initializers).map(BeanProducerData::new).collect(toList()));
+        producer.set(new BeanProducerData(this, bean.producer));
+        initializers.setAll(Stream.of(bean.initializers).map(p -> new BeanProducerData(this, p)).collect(toList()));
     }
 
     public BeanData() {
+        producer.set(new BeanProducerData(this));
     }
 
     public String getName() {

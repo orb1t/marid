@@ -52,6 +52,7 @@ public class BeanTypeResolverContext {
     final Map<String, BeanData> beanMap;
     final Map<String, Type> resolved = new HashMap<>();
     final LinkedHashSet<String> processing = new LinkedHashSet<>();
+    final Map<String, BeanFactoryInfo> factoryMap = new HashMap<>();
 
     public BeanTypeResolverContext(Iterable<BeanData> beans, ClassLoader classLoader) {
         converters = new IdeValueConverterManager(classLoader);
@@ -60,6 +61,15 @@ public class BeanTypeResolverContext {
 
     public BeanTypeResolverContext(ProjectProfile profile) {
         this(profile.getBeansFile().beans, profile.getClassLoader());
+    }
+
+    public BeanData getBean(String name) {
+        return beanMap.get(name);
+    }
+
+    public void reset(String name) {
+        resolved.remove(name);
+        factoryMap.remove(name);
     }
 
     ClassLoader getClassLoader() {

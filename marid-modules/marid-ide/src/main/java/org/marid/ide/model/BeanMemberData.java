@@ -25,6 +25,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.runtime.beans.BeanMember;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -33,19 +34,24 @@ import java.util.Objects;
  */
 public final class BeanMemberData {
 
+    @Nonnull
+    public final BeanProducerData parent;
+
     public final StringProperty name = new SimpleStringProperty();
     public final StringProperty type = new SimpleStringProperty();
     public final StringProperty filter = new SimpleStringProperty();
     public final StringProperty value = new SimpleStringProperty();
 
-    public BeanMemberData(BeanMember member) {
+    public BeanMemberData(@Nonnull BeanProducerData parent, BeanMember member) {
+        this(parent);
         name.set(member.name);
         type.set(member.type);
         filter.set(member.filter);
         value.set(member.value);
     }
 
-    public BeanMemberData() {
+    public BeanMemberData(@Nonnull BeanProducerData parent) {
+        this.parent = parent;
     }
 
     public String getType() {

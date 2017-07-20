@@ -20,17 +20,19 @@
 
 package org.marid.ide.types;
 
+import com.google.common.collect.ComputationException;
 import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
 import org.marid.misc.Casts;
-import org.marid.runtime.beans.Bean;
 import org.marid.runtime.context.MaridContext.CircularBeanReferenceException;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.*;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -40,8 +42,7 @@ import static com.google.common.reflect.TypeToken.of;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Stream.of;
 import static org.marid.l10n.L10n.m;
-import static org.marid.runtime.beans.Bean.*;
-import static org.springframework.util.ClassUtils.resolveClassName;
+import static org.marid.runtime.beans.Bean.findInitializers;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -55,40 +56,24 @@ public class BeanTypeResolver {
             if (!context.processing.add(name)) {
                 throw new CircularBeanReferenceException(context.processing, name);
             }
-            final Bean bean = beanData.toBean();
             try {
-                final String factory = requireNonNull(beanData.getFactory(), () -> m("Factory is null: {0}", name));
-                final Class<?> factoryClass;
-                final TypeToken<?> factoryToken;
-                if (ref(factory) != null) {
-                    factoryToken = of(resolve(context, ref(factory)));
-                    factoryClass = factoryToken.getRawType();
-                } else {
-                    final String className = requireNonNull(type(factory), () -> m("Factory class is null: {0}", name));
-                    factoryClass = resolveClassName(className, context.getClassLoader());
-                    factoryToken = of(factoryClass).getSupertype(Casts.cast(factoryClass));
+                final BeanFactoryInfo info;
+                try {
+                    info = context.factoryMap.computeIfAbsent(name, k -> new BeanFactoryInfo(beanData, this, context));
+                } catch (ComputationException x) {
+                    throw (Exception) x.getCause();
                 }
-                final MethodHandle returnHandle = bean.findProducer(factoryClass);
-                final Member returnMember = MethodHandles.reflectAs(Member.class, returnHandle);
-                final Class<?> returnClass = returnHandle.type().returnType();
-                final Type genericReturnType = returnMember instanceof Field
-                        ? ((Field) returnMember).getGenericType()
-                        : ((Executable) returnMember).getAnnotatedReturnType().getType();
-                final TypeToken<?> genericReturnToken = genericReturnType instanceof Class<?>
-                        ? of(genericReturnType).getSupertype(Casts.cast(returnClass))
-                        : of(genericReturnType);
-                final Type returnType = factoryToken.resolveType(genericReturnToken.getType()).getType();
 
                 final List<TypePair> pairs = new ArrayList<>();
-                context.fill(this, pairs, returnHandle, beanData.getProducer(), factoryToken);
-                final MethodHandle[] initializers = findInitializers(returnHandle, bean.initializers);
+                context.fill(this, pairs, info.returnHandle, beanData.getProducer(), info.factoryToken);
+                final MethodHandle[] initializers = findInitializers(info.returnHandle, info.bean.initializers);
                 for (int k = 0; k < initializers.length; k++) {
-                    context.fill(this, pairs, initializers[k], beanData.initializers.get(k), factoryToken);
+                    context.fill(this, pairs, initializers[k], beanData.initializers.get(k), info.factoryToken);
                 }
 
                 final TypeResolver resolver = pairs.stream().reduce(new TypeResolver(), this::resolver, (r1, r2) -> r2);
-                final Type resolvedType = resolver.resolveType(returnType);
-                final TypeToken<?> resolvedToken = factoryToken.resolveType(resolvedType);
+                final Type resolvedType = resolver.resolveType(info.returnType);
+                final TypeToken<?> resolvedToken = info.factoryToken.resolveType(resolvedType);
                 return resolvedToken.getType();
             } catch (Exception x) {
                 throw new IllegalArgumentException(name, x);
@@ -96,6 +81,11 @@ public class BeanTypeResolver {
                 context.processing.remove(name);
             }
         });
+    }
+
+    public BeanFactoryInfo factory(BeanTypeResolverContext context, String beanName) {
+        final BeanData beanData = requireNonNull(context.beanMap.get(beanName), () -> m("No such bean: {0}", beanName));
+        return context.factoryMap.computeIfAbsent(beanName, k -> new BeanFactoryInfo(beanData, this, context));
     }
 
     private TypeResolver resolver(TypeResolver resolver, TypePair pair) {

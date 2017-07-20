@@ -28,6 +28,7 @@ import javafx.collections.ObservableList;
 import org.marid.runtime.beans.BeanMember;
 import org.marid.runtime.beans.BeanProducer;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -39,15 +40,20 @@ import static java.util.stream.Collectors.toList;
  */
 public class BeanProducerData {
 
+    @Nonnull
+    public final BeanData parent;
+
     public final StringProperty signature = new SimpleStringProperty();
     public final ObservableList<BeanMemberData> args = FXCollections.observableArrayList(BeanMemberData::observables);
 
-    public BeanProducerData(BeanProducer producer) {
+    public BeanProducerData(@Nonnull BeanData parent, BeanProducer producer) {
+        this(parent);
         signature.set(producer.signature);
-        args.setAll(Stream.of(producer.args).map(BeanMemberData::new).collect(toList()));
+        args.setAll(Stream.of(producer.args).map(b -> new BeanMemberData(this, b)).collect(toList()));
     }
 
-    public BeanProducerData() {
+    public BeanProducerData(@Nonnull BeanData parent) {
+        this.parent = parent;
     }
 
     public String getSignature() {
