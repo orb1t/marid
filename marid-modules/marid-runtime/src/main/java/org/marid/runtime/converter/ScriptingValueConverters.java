@@ -42,7 +42,7 @@ public class ScriptingValueConverters implements ValueConverters {
     private final HashMap<String, Function<String, ?>> functions = new HashMap<>();
 
     public ScriptingValueConverters(MaridRuntime runtime) {
-        final ScriptEngineManager manager = new ScriptEngineManager(runtime.classLoader);
+        final ScriptEngineManager manager = new ScriptEngineManager(runtime.getClassLoader());
         manager.getEngineFactories().forEach(scriptEngineFactory -> {
             final String description = String.format("%s(%s) %s(%s)",
                     scriptEngineFactory.getEngineName(),
@@ -51,7 +51,7 @@ public class ScriptingValueConverters implements ValueConverters {
                     scriptEngineFactory.getLanguageVersion()
             );
             final ScriptEngine engine = scriptEngineFactory.getScriptEngine();
-            engine.put("bean", runtime.beanFunc);
+            engine.put("bean", (Function<String, Object>) runtime::getBean);
             engine.put("runtime", runtime);
             final Function<String, ?> function = script -> {
                 try {

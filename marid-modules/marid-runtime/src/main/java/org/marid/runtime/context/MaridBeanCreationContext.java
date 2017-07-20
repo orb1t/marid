@@ -49,14 +49,13 @@ final class MaridBeanCreationContext implements AutoCloseable {
     private final AtomicReference<Supplier<String>> lastMessage = new AtomicReference<>(() -> null);
     private final List<Throwable> throwables = new ArrayList<>();
     private final DefaultValueConvertersManager convertersManager;
+    private final MaridRuntimeObject runtime;
 
     MaridBeanCreationContext(MaridConfiguration configuration, MaridContext context) {
         this.context = context;
         this.beanMap = of(configuration.beans).collect(toMap(e -> e.name, identity()));
-        this.convertersManager = new DefaultValueConvertersManager(
-                context.classLoader,
-                new MaridRuntime(this::getOrCreate, context::isActive, context.classLoader)
-        );
+        this.runtime = new MaridRuntimeObject(context, this::getOrCreate);
+        this.convertersManager = new DefaultValueConvertersManager(context.classLoader, runtime);
     }
 
     Object getOrCreate(String name) {

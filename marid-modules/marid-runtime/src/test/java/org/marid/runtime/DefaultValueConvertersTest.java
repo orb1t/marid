@@ -27,6 +27,7 @@ import org.marid.runtime.context.MaridRuntime;
 import org.marid.runtime.converter.DefaultValueConvertersFactory;
 import org.marid.runtime.converter.ValueConverters;
 import org.marid.test.NormalTests;
+import org.mockito.Mockito;
 
 import java.util.function.Function;
 
@@ -40,11 +41,7 @@ import static org.junit.Assert.assertEquals;
 public class DefaultValueConvertersTest {
 
     private static final DefaultValueConvertersFactory FACTORY = new DefaultValueConvertersFactory();
-    private static final ValueConverters CONVERTERS = FACTORY.converters(new MaridRuntime(
-            v -> v,
-            () -> true,
-            Thread.currentThread().getContextClassLoader()
-    ));
+    private static final ValueConverters CONVERTERS = FACTORY.converters(Mockito.mock(MaridRuntime.class));
 
     @Test
     public void testString() {

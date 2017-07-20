@@ -28,13 +28,15 @@ import org.marid.runtime.converter.ValueConverters;
 import java.lang.reflect.Type;
 import java.util.TreeSet;
 
+import static com.google.common.reflect.Reflection.newProxy;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public class IdeValueConverterManager extends DefaultValueConvertersManager {
 
     public IdeValueConverterManager(ClassLoader classLoader) {
-        super(classLoader, new MaridRuntime(name -> null, () -> true, classLoader));
+        super(classLoader, newProxy(MaridRuntime.class, (proxy, method, args) -> null));
     }
 
     public TreeSet<String> getMatchedConverters(Type target) {
