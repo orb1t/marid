@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanMethod;
+import org.marid.runtime.exception.MaridCircularBeanException;
 import org.marid.test.NormalTests;
 
 import java.math.BigDecimal;
@@ -34,7 +35,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.marid.runtime.beans.Bean.signature;
 import static org.marid.runtime.context.MaridContextTestUtils.m;
 
 /**
@@ -46,59 +46,36 @@ public class MaridContextTest {
     @Test
     public void simple() throws Exception {
         final Bean[] beans = {
-                new Bean(
-                        "bean2",
-                        "@bean1",
-                        new BeanMethod(signature(Bean1.class.getMethod("getZ")))
-                ),
+                new Bean("bean2", "@bean1", new BeanMethod(Bean1.class.getMethod("getZ"))),
                 new Bean(
                         "bean1",
                         Bean1.class.getName(),
                         new BeanMethod(
-                                signature(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
+                                Bean1.class.getConstructor(int.class, String.class, BigDecimal.class),
                                 m("x", "int", "1"),
                                 m("y", "String", "abc"),
                                 m("z", "BigDecimal", "1.23")
                         ),
-                        new BeanMethod(
-                                signature(Bean1.class.getMethod("setA", boolean.class)),
-                                m("a", "boolean", "true")
-                        )
+                        new BeanMethod(Bean1.class.getMethod("setA", boolean.class), m("a", "boolean", "true"))
                 ),
-                new Bean(
-                        "bean3",
-                        "@bean1",
-                        new BeanMethod(signature(Bean1.class.getField("y")))
-                ),
+                new Bean("bean3", "@bean1", new BeanMethod(Bean1.class.getField("y"))),
                 new Bean(
                         "bean4",
                         Bean1.class.getName(),
-                        new BeanMethod(signature(Bean1.class.getMethod("list"))),
-                        new BeanMethod(
-                                signature(List.class.getMethod("add", Object.class)),
-                                m("e", "int", "1")
-                        )
+                        new BeanMethod(Bean1.class.getMethod("list")),
+                        new BeanMethod(List.class.getMethod("add", Object.class), m("e", "int", "1"))
                 ),
                 new Bean(
                         "bean5",
                         Bean1.class.getName(),
-                        new BeanMethod(signature(Bean1.class.getMethod("list"))),
-                        new BeanMethod(
-                                signature(List.class.getMethod("add", Object.class)),
-                                m("e", "int", "1")
-                        ),
-                        new BeanMethod(
-                                signature(List.class.getMethod("add", Object.class)),
-                                m("e", "String", "length", "22")
-                        )
+                        new BeanMethod(Bean1.class.getMethod("list")),
+                        new BeanMethod(List.class.getMethod("add", Object.class), m("e", "int", "1")),
+                        new BeanMethod(List.class.getMethod("add", Object.class), m("e", "String", "length", "22"))
                 ),
                 new Bean(
                         "bean6",
                         String.class.getName(),
-                        new BeanMethod(
-                                signature(String.class.getMethod("valueOf", Object.class)),
-                                m("arg0", "js", "'a' + 1")
-                        )
+                        new BeanMethod(String.class.getMethod("valueOf", Object.class), m("arg0", "js", "'a' + 1"))
                 )
         };
         try (final MaridContext runtime = new MaridContext(new MaridConfiguration(beans))) {
@@ -119,11 +96,11 @@ public class MaridContextTest {
                         "bean1",
                         Bean1.class.getName(),
                         new BeanMethod(
-                                signature(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
+                                Bean1.class.getConstructor(int.class, String.class, BigDecimal.class),
                                 m("x", "int", "1"), m("y", "ref", "toString", "bean1"), m("BigDecimal", "z", "1.23")
                         ),
                         new BeanMethod(
-                                signature(Bean1.class.getMethod("setA", boolean.class)),
+                                Bean1.class.getMethod("setA", boolean.class),
                                 m("a", "boolean", "true")
                         )
                 )

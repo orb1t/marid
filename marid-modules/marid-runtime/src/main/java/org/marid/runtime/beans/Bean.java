@@ -36,8 +36,6 @@ import java.util.Arrays;
 
 import static java.lang.invoke.MethodHandles.publicLookup;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Stream.of;
 import static org.marid.misc.Builder.build;
 
 /**
@@ -120,18 +118,6 @@ public final class Bean {
 
     public static String type(@Nonnull String factory) {
         return factory.startsWith("@") ? null : factory;
-    }
-
-    public static String signature(Constructor<?> constructor) {
-        return of(constructor.getParameterTypes()).map(Class::getName).collect(joining(",", "new(", ")"));
-    }
-
-    public static String signature(Method method) {
-        return of(method.getParameterTypes()).map(Class::getName).collect(joining(",", method.getName() + "(", ")"));
-    }
-
-    public static String signature(Field field) {
-        return field.getName();
     }
 
     public static MethodHandle[] findInitializers(MethodHandle constructor, BeanMethod... initializers) throws Exception {

@@ -19,25 +19,33 @@
  * #L%
  */
 
-package org.marid.runtime.context;
+package org.marid.runtime.exception;
 
 import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridCircularBeanException extends RuntimeException {
+public class MaridCircularPlaceholderException extends RuntimeException {
 
-    private final Set<String> current;
+    private final Set<String> passed;
     private final String name;
 
-    public MaridCircularBeanException(Set<String> current, String name) {
-        this.current = current;
+    public MaridCircularPlaceholderException(Set<String> passed, String name) {
+        this.passed = passed;
         this.name = name;
     }
 
     @Override
     public String getMessage() {
-        return name + "/" + current;
+        return name + "/" + passed;
+    }
+
+    public Set<String> getPassed() {
+        return passed;
+    }
+
+    public String getName() {
+        return name;
     }
 }

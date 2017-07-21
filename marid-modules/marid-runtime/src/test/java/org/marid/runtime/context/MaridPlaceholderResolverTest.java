@@ -23,6 +23,7 @@ package org.marid.runtime.context;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.marid.runtime.exception.MaridCircularPlaceholderException;
 import org.marid.test.NormalTests;
 
 import java.util.Properties;

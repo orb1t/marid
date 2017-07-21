@@ -29,6 +29,7 @@ import javafx.collections.ObservableList;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanMethod;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -46,15 +47,18 @@ public class BeanData {
     public final ObjectProperty<BeanMethodData> producer = new SimpleObjectProperty<>();
     public final ObservableList<BeanMethodData> initializers = observableArrayList(BeanMethodData::observables);
 
-    public BeanData(Bean bean) {
+    public BeanData(@Nonnull Bean bean) {
         name.set(bean.name);
         factory.set(bean.factory);
         producer.set(new BeanMethodData(this, bean.producer));
         initializers.setAll(Stream.of(bean.initializers).map(p -> new BeanMethodData(this, p)).collect(toList()));
     }
 
-    public BeanData() {
-        producer.set(new BeanMethodData(this));
+    public BeanData(@Nonnull String name,
+                    @Nonnull String factory,
+                    @Nonnull BeanMethod producer,
+                    @Nonnull BeanMethod... initializers) {
+        this(new Bean(name, factory, producer, initializers));
     }
 
     public String getName() {

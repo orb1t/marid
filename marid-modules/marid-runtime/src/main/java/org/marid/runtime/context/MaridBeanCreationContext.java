@@ -25,6 +25,7 @@ import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanMethodArg;
 import org.marid.runtime.beans.BeanMethod;
 import org.marid.runtime.converter.DefaultValueConvertersManager;
+import org.marid.runtime.exception.MaridCircularBeanException;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;

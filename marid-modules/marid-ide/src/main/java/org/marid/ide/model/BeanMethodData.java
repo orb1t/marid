@@ -25,8 +25,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.marid.runtime.beans.BeanMethodArg;
 import org.marid.runtime.beans.BeanMethod;
+import org.marid.runtime.beans.BeanMethodArg;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -46,14 +46,10 @@ public class BeanMethodData {
     public final StringProperty signature = new SimpleStringProperty();
     public final ObservableList<BeanMethodArgData> args = FXCollections.observableArrayList(BeanMethodArgData::observables);
 
-    public BeanMethodData(@Nonnull BeanData parent, BeanMethod producer) {
-        this(parent);
-        signature.set(producer.signature);
-        args.setAll(Stream.of(producer.args).map(b -> new BeanMethodArgData(this, b)).collect(toList()));
-    }
-
-    public BeanMethodData(@Nonnull BeanData parent) {
+    public BeanMethodData(@Nonnull BeanData parent, @Nonnull BeanMethod producer) {
         this.parent = parent;
+        this.signature.set(producer.signature);
+        this.args.setAll(Stream.of(producer.args).map(b -> new BeanMethodArgData(this, b)).collect(toList()));
     }
 
     public String getSignature() {
@@ -65,7 +61,7 @@ public class BeanMethodData {
     }
 
     public BeanMethod toProducer() {
-        return new BeanMethod(signature.get(), args.stream().map(BeanMethodArgData::toMember).toArray(BeanMethodArg[]::new));
+        return new BeanMethod(signature.get(), args.stream().map(BeanMethodArgData::toArg).toArray(BeanMethodArg[]::new));
     }
 
     @Override

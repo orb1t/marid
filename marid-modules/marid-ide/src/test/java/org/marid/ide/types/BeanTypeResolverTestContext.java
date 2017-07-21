@@ -21,9 +21,9 @@
 package org.marid.ide.types;
 
 import org.marid.ide.model.BeanData;
-import org.marid.ide.model.BeanMethodArgData;
-import org.marid.ide.model.BeanMethodData;
 import org.marid.ide.model.BeanFile;
+import org.marid.runtime.beans.BeanMethod;
+import org.marid.runtime.beans.BeanMethodArg;
 import org.marid.runtime.context.MaridConfiguration;
 import org.marid.runtime.context.MaridContext;
 import org.springframework.context.annotation.Bean;
@@ -35,8 +35,6 @@ import java.util.function.Function;
 
 import static java.lang.Thread.currentThread;
 import static org.marid.misc.Builder.build;
-import static org.marid.misc.Calls.call;
-import static org.marid.runtime.beans.Bean.signature;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -50,102 +48,70 @@ public class BeanTypeResolverTestContext {
     }
 
     @Bean
-    public BeanData bean1() {
-        return build(new BeanData(), b -> {
-            b.name.set("bean1");
-            b.factory.set(ArrayList.class.getName());
-            b.producer.set(build(new BeanMethodData(b), p -> {
-                p.signature.set(call(() -> signature(ArrayList.class.getConstructor(Collection.class))));
-                p.args.add(build(new BeanMethodArgData(p), a -> {
-                    a.name.set("arg0");
-                    a.type.set("ref");
-                    a.value.set("bean2");
-                }));
-            }));
-        });
+    public BeanData bean1() throws Exception {
+        return new BeanData(
+                "bean1",
+                ArrayList.class.getName(),
+                new BeanMethod(
+                        ArrayList.class.getConstructor(Collection.class),
+                        new BeanMethodArg("arg0", "ref", null, "bean2")
+                )
+        );
     }
 
     @Bean
-    public BeanData bean2() {
-        return build(new BeanData(), b -> {
-            b.name.set("bean2");
-            b.factory.set(Arrays.class.getName());
-            b.producer.set(build(new BeanMethodData(b), p -> {
-                p.signature.set(call(() -> signature(Arrays.class.getMethod("asList", Object[].class))));
-                p.args.add(build(new BeanMethodArgData(p), a -> {
-                    a.name.set("arg0");
-                    a.type.set("String[]");
-                    a.value.set("a,b,c");
-                }));
-            }));
-        });
+    public BeanData bean2() throws Exception {
+        return new BeanData(
+                "bean2",
+                Arrays.class.getName(),
+                new BeanMethod(
+                        Arrays.class.getMethod("asList", Object[].class),
+                        new BeanMethodArg("arg0", "String[]", null, "a,b,c")
+                )
+        );
     }
 
     @Bean
-    public BeanData bean3() {
-        return build(new BeanData(), b -> {
-            b.name.set("bean3");
-            b.factory.set(ArrayList.class.getName());
-            b.producer.set(build(new BeanMethodData(b), p -> {
-                p.signature.set(call(() -> signature(ArrayList.class.getConstructor())));
-            }));
-            b.initializers.add(build(new BeanMethodData(b), p -> {
-                p.signature.set(call(() -> signature(ArrayList.class.getMethod("add", Object.class))));
-                p.args.add(build(new BeanMethodArgData(p), a -> {
-                    a.name.set("arg0");
-                    a.type.set("ref");
-                    a.value.set("bean1");
-                }));
-            }));
-        });
+    public BeanData bean3() throws Exception {
+        return new BeanData(
+                "bean3",
+                ArrayList.class.getName(),
+                new BeanMethod(ArrayList.class.getConstructor()),
+                new BeanMethod(
+                        ArrayList.class.getMethod("add", Object.class),
+                        new BeanMethodArg("arg0", "ref", null, "bean1")
+                )
+        );
     }
 
     @Bean
-    public BeanData bean4() {
-        return build(new BeanData(), b -> {
-            b.name.set("bean4");
-            b.factory.set(ComplexBean.class.getName());
-            b.producer.set(build(new BeanMethodData(b), p -> {
-                p.signature.set(call(() -> signature(ComplexBean.class.getConstructor(java.util.Set.class, java.lang.Object.class))));
-                p.args.add(build(new BeanMethodArgData(p), a -> {
-                    a.name.set("arg0");
-                    a.type.set("ref");
-                    a.value.set("bean5");
-                }));
-                p.args.add(build(new BeanMethodArgData(p), a -> {
-                    a.name.set("arg1");
-                    a.type.set("Integer");
-                    a.value.set("8");
-                }));
-            }));
-        });
+    public BeanData bean4() throws Exception {
+        return new BeanData(
+                "bean4",
+                ComplexBean.class.getName(),
+                new BeanMethod(
+                        ComplexBean.class.getConstructor(Set.class, Object.class),
+                        new BeanMethodArg("arg0", "ref", null, "bean5"),
+                        new BeanMethodArg("arg1", "Integer", null, "8")
+                )
+        );
     }
 
     @Bean
-    public BeanData bean5() {
-        return build(new BeanData(), b -> {
-            b.name.set("bean5");
-            b.factory.set(Collections.class.getName());
-            b.producer.set(build(new BeanMethodData(b), p -> {
-                p.signature.set(call(() -> signature(Collections.class.getMethod("singleton", Object.class))));
-                p.args.add(build(new BeanMethodArgData(p), a -> {
-                    a.name.set("arg0");
-                    a.type.set("String");
-                    a.value.set("v");
-                }));
-            }));
-        });
+    public BeanData bean5() throws Exception {
+        return new BeanData(
+                "bean5",
+                Collections.class.getName(),
+                new BeanMethod(
+                        Collections.class.getMethod("singleton", Object.class),
+                        new BeanMethodArg("arg0", "String", null, "v")
+                )
+        );
     }
 
     @Bean
-    public BeanData bean6() {
-        return build(new BeanData(), b -> {
-            b.name.set("bean6");
-            b.factory.set("@bean4");
-            b.producer.set(build(new BeanMethodData(b), p -> {
-                p.signature.set(call(() -> signature(ComplexBean.class.getField("arg"))));
-            }));
-        });
+    public BeanData bean6() throws Exception {
+        return new BeanData("bean6", "@bean4", new BeanMethod(ComplexBean.class.getField("arg")));
     }
 
     @Bean

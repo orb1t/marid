@@ -25,7 +25,8 @@ import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.misc.Casts;
-import org.marid.runtime.context.MaridCircularBeanException;
+import org.marid.runtime.exception.MaridCircularBeanException;
+import org.marid.runtime.exception.MaridFilterNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandle;
@@ -119,11 +120,31 @@ public class BeanTypeResolver {
     }
 
     private Type actualType(BeanTypeResolverContext context, BeanMethodArgData arg) {
+        final Type type;
         switch (arg.getType()) {
             case "ref":
-                return resolve(context, arg.getValue());
+                type = resolve(context, arg.getValue());
+                break;
             default:
-                return context.converters.getType(arg.getType()).orElse(null);
+                type = context.converters.getType(arg.getType()).orElse(null);
+                break;
+        }
+        if (type == null || arg.getFilter() == null) {
+            return type;
+        } else {
+            final TypeToken<?> token = TypeToken.of(type);
+            final Class<?> raw = token.getRawType();
+            try {
+                final Method method = raw.getMethod(arg.getFilter());
+                return token.resolveType(method.getGenericReturnType()).getType();
+            } catch (NoSuchMethodException | NullPointerException mx) {
+                try {
+                    final Field field = raw.getField(arg.getFilter());
+                    return token.resolveType(field.getGenericType()).getType();
+                } catch (NoSuchFieldException | NullPointerException fx) {
+                    throw new MaridFilterNotFoundException(arg.toArg());
+                }
+            }
         }
     }
 

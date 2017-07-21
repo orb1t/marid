@@ -21,6 +21,8 @@
 
 package org.marid.runtime.context;
 
+import org.marid.runtime.exception.MaridCircularPlaceholderException;
+
 import java.util.LinkedHashSet;
 import java.util.Properties;
 

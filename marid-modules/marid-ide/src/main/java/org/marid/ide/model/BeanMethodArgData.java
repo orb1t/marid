@@ -42,16 +42,12 @@ public final class BeanMethodArgData {
     public final StringProperty filter = new SimpleStringProperty();
     public final StringProperty value = new SimpleStringProperty();
 
-    public BeanMethodArgData(@Nonnull BeanMethodData parent, BeanMethodArg member) {
-        this(parent);
-        name.set(member.name);
-        type.set(member.type);
-        filter.set(member.filter);
-        value.set(member.value);
-    }
-
-    public BeanMethodArgData(@Nonnull BeanMethodData parent) {
+    public BeanMethodArgData(@Nonnull BeanMethodData parent, @Nonnull BeanMethodArg member) {
         this.parent = parent;
+        this.name.set(member.name);
+        this.type.set(member.type);
+        this.filter.set(member.filter);
+        this.value.set(member.value);
     }
 
     public String getType() {
@@ -70,7 +66,7 @@ public final class BeanMethodArgData {
         return filter.get();
     }
 
-    public BeanMethodArg toMember() {
+    public BeanMethodArg toArg() {
         return new BeanMethodArg(getName(), getType(), getFilter(), getValue());
     }
 
@@ -98,6 +94,6 @@ public final class BeanMethodArgData {
 
     @Override
     public String toString() {
-        return toMember().toString();
+        return toArg().toString();
     }
 }

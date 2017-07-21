@@ -24,8 +24,13 @@ package org.marid.runtime.beans;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.marid.io.Xmls.nodes;
 import static org.marid.misc.Builder.build;
@@ -43,6 +48,25 @@ public class BeanMethod {
 
     public BeanMethod(@Nonnull String signature, @Nonnull BeanMethodArg... args) {
         this.signature = signature;
+        this.args = args;
+    }
+
+    public BeanMethod(@Nonnull Constructor<?> constructor, @Nonnull BeanMethodArg... args) {
+        this.signature = Stream.of(constructor.getParameterTypes())
+                .map(Class::getName)
+                .collect(Collectors.joining(",", "new(", ")"));
+        this.args = args;
+    }
+
+    public BeanMethod(@Nonnull Method method, @Nonnull BeanMethodArg... args) {
+        this.signature = Stream.of(method.getParameterTypes())
+                .map(Class::getName)
+                .collect(Collectors.joining(",", method.getName() + "(", ")"));
+        this.args = args;
+    }
+
+    public BeanMethod(@Nonnull Field field, @Nonnull BeanMethodArg... args) {
+        this.signature = field.getName();
         this.args = args;
     }
 
