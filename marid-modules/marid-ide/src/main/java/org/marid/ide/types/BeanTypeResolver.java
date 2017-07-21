@@ -40,9 +40,6 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import static com.google.common.reflect.TypeToken.of;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.IntStream.range;
-import static org.marid.l10n.L10n.m;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -55,7 +52,7 @@ public class BeanTypeResolver {
     }
 
     public BeanTypeInfo resolveInfo(BeanTypeResolverContext context, String beanName) {
-        final BeanData beanData = requireNonNull(context.beanMap.get(beanName), () -> m("No such bean: {0}", beanName));
+        final BeanData beanData = context.getBean(beanName);
         return context.typeInfoMap.computeIfAbsent(beanName, name -> {
             if (!context.processing.add(name)) {
                 throw new MaridCircularBeanException(context.processing, name);
@@ -68,6 +65,8 @@ public class BeanTypeResolver {
                 for (int i = 0; i < beanPs.length; i++) {
                     if (beanAs[i] != null) {
                         resolve(pairs, info.factoryToken.resolveType(beanPs[i]), of(beanAs[i]));
+                    } else {
+                        beanAs[i] = info.factoryToken.resolveType(beanPs[i]).getType();
                     }
                 }
                 final Type[][] initPs = new Type[info.bean.initializers.length][];
@@ -79,10 +78,12 @@ public class BeanTypeResolver {
                     for (int k = 0; k < as.length; k++) {
                         if (as[k] != null) {
                             resolve(pairs, info.factoryToken.resolveType(ps[k]), of(as[k]));
+                        } else {
+                            as[k] = info.factoryToken.resolveType(ps[k]).getType();
                         }
                     }
                     initPs[i] = ps;
-                    initAs[i] = range(0, as.length).mapToObj(n -> as[n] != null ? as[n] : ps[n]).toArray(Type[]::new);
+                    initAs[i] = as;
                 }
 
                 final TypeResolver r = pairs.entrySet().stream().reduce(
@@ -197,5 +198,44 @@ public class BeanTypeResolver {
                 resolve(map, of(bound), actual);
             }
         }
+    }
+
+    public static Stream<TypeVariable<?>> typeVariables(Type type) {
+        if (type instanceof TypeVariable<?>) {
+            final TypeVariable<?> var = (TypeVariable<?>) type;
+            return Stream.concat(
+                    Stream.of(var),
+                    Stream.of(var.getBounds()).flatMap(BeanTypeResolver::typeVariables)
+            );
+        } else if (type instanceof GenericArrayType) {
+            return typeVariables(((GenericArrayType) type).getGenericComponentType());
+        } else if (type instanceof ParameterizedType) {
+            final ParameterizedType pt = (ParameterizedType) type;
+            return Stream.of(pt.getActualTypeArguments()).flatMap(BeanTypeResolver::typeVariables);
+        } else if (type instanceof WildcardType) {
+            final WildcardType wildcardType = (WildcardType) type;
+            return Stream.concat(
+                    Stream.of(wildcardType.getUpperBounds()).flatMap(BeanTypeResolver::typeVariables),
+                    Stream.of(wildcardType.getLowerBounds()).flatMap(BeanTypeResolver::typeVariables)
+            );
+        } else {
+            return Stream.empty();
+        }
+    }
+
+    public static Type ground(Type type) {
+        return typeVariables(type).distinct().reduce(
+                new TypeResolver(),
+                BeanTypeResolver::upper,
+                (t1, t2) -> t2
+        ).resolveType(type);
+    }
+
+    private static TypeResolver upper(TypeResolver resolver, TypeVariable<?> variable) {
+        final Stream<Type> bounds = Stream.of(variable.getBounds());
+        return resolver.where(
+                variable,
+                bounds.map(BeanTypeResolver::ground).filter(b -> b != Object.class).findFirst().orElse(Object.class)
+        );
     }
 }

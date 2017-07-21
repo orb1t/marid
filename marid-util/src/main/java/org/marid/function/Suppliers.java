@@ -21,6 +21,7 @@
 
 package org.marid.function;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -47,5 +48,14 @@ public interface Suppliers {
 
     static <T, R> Function<T, R> elseFunc(Function<T, R> func) {
         return v -> v == null ? null : func.apply(v);
+    }
+
+    static <K, V, E extends Exception> V get(Map<K, V> map, K key, Function<K, E> exceptionFunc) throws E {
+        final V value = map.get(key);
+        if (value == null) {
+            throw exceptionFunc.apply(key);
+        } else {
+            return value;
+        }
     }
 }

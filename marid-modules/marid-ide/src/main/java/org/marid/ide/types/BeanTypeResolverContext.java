@@ -20,16 +20,18 @@
 
 package org.marid.ide.types;
 
+import org.marid.function.Suppliers;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.runtime.exception.MaridBeanNotFoundException;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.StreamSupport.stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,9 +43,9 @@ public class BeanTypeResolverContext {
     final LinkedHashSet<String> processing = new LinkedHashSet<>();
     final Map<String, BeanTypeInfo> typeInfoMap = new HashMap<>();
 
-    public BeanTypeResolverContext(Iterable<BeanData> beans, ClassLoader classLoader) {
+    public BeanTypeResolverContext(List<BeanData> beans, ClassLoader classLoader) {
         converters = new IdeValueConverterManager(classLoader);
-        beanMap = stream(beans.spliterator(), false).collect(toMap(BeanData::getName, identity()));
+        beanMap = beans.stream().collect(toMap(BeanData::getName, identity()));
     }
 
     public BeanTypeResolverContext(ProjectProfile profile) {
@@ -51,7 +53,7 @@ public class BeanTypeResolverContext {
     }
 
     public BeanData getBean(String name) {
-        return beanMap.get(name);
+        return Suppliers.get(beanMap, name, MaridBeanNotFoundException::new);
     }
 
     public void reset(String name) {

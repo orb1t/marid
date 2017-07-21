@@ -21,19 +21,16 @@
 
 package org.marid.runtime.context;
 
+import org.marid.function.Suppliers;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanMethod;
 import org.marid.runtime.beans.BeanMethodArg;
 import org.marid.runtime.converter.DefaultValueConvertersManager;
-import org.marid.runtime.exception.MaridBeanArgConverterNotFoundException;
-import org.marid.runtime.exception.MaridBeanMethodArgException;
-import org.marid.runtime.exception.MaridBeanMethodInvocationException;
-import org.marid.runtime.exception.MaridCircularBeanException;
+import org.marid.runtime.exception.*;
 
 import java.lang.invoke.MethodHandle;
 import java.util.*;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.of;
@@ -68,7 +65,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
     }
 
     private Object create(String name) {
-        final Bean bean = requireNonNull(beanMap.get(name), () -> "No such bean " + name);
+        final Bean bean = Suppliers.get(beanMap, name, MaridBeanNotFoundException::new);
         if (creationBeanNames.add(name)) {
             try {
                 return create0(name, bean);
