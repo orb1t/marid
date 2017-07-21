@@ -31,7 +31,6 @@ import org.marid.runtime.exception.MaridBeanMethodInvocationException;
 import org.marid.runtime.exception.MaridCircularBeanException;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.util.*;
 
 import static java.util.Objects.requireNonNull;
@@ -137,12 +136,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
                         .map(c -> c.apply(runtime.resolvePlaceholders(methodArg.value)))
                         .orElseThrow(() -> new MaridBeanArgConverterNotFoundException(bean, method, methodArg));
             }
-            if (arg == null || methodArg.filter == null) {
-                return arg;
-            }
-            final MethodHandle argHandle = MethodHandles.constant(arg.getClass(), arg);
-            final MethodHandle filtered = bean.filtered(method, methodArg, methodArg.filter, argHandle);
-            return filtered.invoke();
+            return bean.filtered(method, methodArg, methodArg.filter, arg);
         } catch (RuntimeException x) {
             throw x;
         } catch (Throwable x) {

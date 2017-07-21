@@ -17,6 +17,14 @@ public class MaridFilterNotFoundException extends RuntimeException {
         this.filterName = filterName;
     }
 
+    public MaridFilterNotFoundException(String beanName, String methodName, String argName, String filterName, Throwable cause) {
+        super(cause);
+        this.beanName = beanName;
+        this.methodName = methodName;
+        this.argName = argName;
+        this.filterName = filterName;
+    }
+
     public String getBeanName() {
         return beanName;
     }

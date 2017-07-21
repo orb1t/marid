@@ -158,7 +158,7 @@ public class BeanTypeResolver {
             return Stream.of(typeVariable.getBounds())
                     .map(t -> new TypePair(pair.actual.getType(), t))
                     .reduce(resolver, this::resolver, (r1, r2) -> r2)
-                    .where(pair.formal.getType(), pair.actual.getType());
+                    .where(pair.formal.getType(), pair.actual.wrap().getType());
         } else if (pair.formal.getType() instanceof ParameterizedType) {
             final Class<?> formalRaw = pair.formal.getRawType();
             final Class<?> actualRaw = pair.actual.getRawType();

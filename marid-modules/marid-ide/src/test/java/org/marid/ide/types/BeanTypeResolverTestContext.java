@@ -115,6 +115,18 @@ public class BeanTypeResolverTestContext {
     }
 
     @Bean
+    public BeanData bean7() throws Exception {
+        return new BeanData(
+                "bean7",
+                Collections.class.getName(),
+                new BeanMethod(
+                        Collections.class.getMethod("singleton", Object.class),
+                        new BeanMethodArg("arg0", "ref", "size", "bean5")
+                )
+        );
+    }
+
+    @Bean
     public BeanFile beansFile(List<BeanData> beans) {
         return build(new BeanFile(), f -> f.beans.setAll(beans));
     }

@@ -37,6 +37,8 @@ public interface MaridContextListener extends EventListener, Comparable<MaridCon
 
     void onStop();
 
+    void onFail();
+
     int getOrder();
 
     @Override

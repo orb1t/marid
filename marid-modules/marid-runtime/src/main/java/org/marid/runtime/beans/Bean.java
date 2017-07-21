@@ -28,8 +28,6 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -165,28 +163,52 @@ public final class Bean {
         throw new IllegalStateException("No producers found for " + producer + " of " + targetClass);
     }
 
-    public MethodHandle filtered(BeanMethod m, BeanMethodArg a, String filter, MethodHandle handle) {
-        final Lookup lookup = publicLookup();
-        if (filter == null) {
-            return handle;
+    public Object filtered(BeanMethod m, BeanMethodArg a, String filter, Object arg) {
+        if (arg == null || filter == null) {
+            return arg;
         } else {
-            final Class<?> type = handle.type().returnType();
-            try {
-                final Method method = type.getMethod(filter);
-                if (Modifier.isStatic(method.getModifiers())) {
-                    throw new NoSuchMethodException(filter);
-                }
-                return MethodHandles.filterReturnValue(handle, lookup.unreflect(method));
-            } catch (NoSuchMethodException | IllegalAccessException e1) {
-                try {
-                    final Field field = type.getField(filter);
-                    if (Modifier.isStatic(field.getModifiers())) {
-                        throw new NoSuchFieldException(filter);
+            for (Class<?> c = arg.getClass(); c != null; c = c.getSuperclass()) {
+                if (Modifier.isPublic(c.getModifiers())) {
+                    try {
+                        return f(c, arg, filter);
+                    } catch (NoSuchMethodException x) {
+                        // continue
+                    } catch (Throwable x) {
+                        throw new MaridFilterNotFoundException(name, m.name(), a.name, filter, x);
                     }
-                    return MethodHandles.filterReturnValue(handle, lookup.unreflectGetter(field));
-                } catch (NoSuchFieldException | IllegalAccessException x) {
-                    throw new MaridFilterNotFoundException(name, m.name(), a.name, filter);
                 }
+            }
+            for (final Class<?> c : arg.getClass().getInterfaces()) {
+                try {
+                    return f(c, arg, filter);
+                } catch (NoSuchMethodException x) {
+                    // continue
+                } catch (Throwable x) {
+                    throw new MaridFilterNotFoundException(name, m.name(), a.name, filter, x);
+                }
+            }
+            throw new MaridFilterNotFoundException(name, m.name(), a.name, filter);
+        }
+    }
+
+    private Object f(Class<?> type, Object arg, String name) throws ReflectiveOperationException {
+        try {
+            final Method method = type.getMethod(name);
+            if (!Modifier.isStatic(method.getModifiers())) {
+                return method.invoke(arg);
+            } else {
+                throw new NoSuchMethodException(name);
+            }
+        } catch (NoSuchMethodException nsmx) {
+            try {
+                final Field field = type.getField(name);
+                if (!Modifier.isStatic(field.getModifiers())) {
+                    return field.get(arg);
+                } else {
+                    throw new NoSuchFieldException(name);
+                }
+            } catch (NoSuchFieldException nsfx) {
+                throw nsmx;
             }
         }
     }

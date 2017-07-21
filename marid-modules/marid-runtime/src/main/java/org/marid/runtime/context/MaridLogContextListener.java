@@ -24,6 +24,7 @@ package org.marid.runtime.context;
 import org.marid.runtime.beans.BeanEvent;
 
 import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
 import static org.marid.logging.Log.log;
 
 /**
@@ -44,6 +45,11 @@ public class MaridLogContextListener implements MaridContextListener {
     @Override
     public void onStop() {
         log(INFO, "Stopped");
+    }
+
+    @Override
+    public void onFail() {
+        log(WARNING, "Failed");
     }
 
     @Override
