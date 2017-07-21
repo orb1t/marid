@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeansFile {
+public class BeanFile {
 
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList(BeanData::observables);
 

@@ -27,7 +27,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import org.marid.runtime.beans.Bean;
-import org.marid.runtime.beans.BeanProducer;
+import org.marid.runtime.beans.BeanMethod;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -43,18 +43,18 @@ public class BeanData {
 
     public final StringProperty name = new SimpleStringProperty();
     public final StringProperty factory = new SimpleStringProperty();
-    public final ObjectProperty<BeanProducerData> producer = new SimpleObjectProperty<>();
-    public final ObservableList<BeanProducerData> initializers = observableArrayList(BeanProducerData::observables);
+    public final ObjectProperty<BeanMethodData> producer = new SimpleObjectProperty<>();
+    public final ObservableList<BeanMethodData> initializers = observableArrayList(BeanMethodData::observables);
 
     public BeanData(Bean bean) {
         name.set(bean.name);
         factory.set(bean.factory);
-        producer.set(new BeanProducerData(this, bean.producer));
-        initializers.setAll(Stream.of(bean.initializers).map(p -> new BeanProducerData(this, p)).collect(toList()));
+        producer.set(new BeanMethodData(this, bean.producer));
+        initializers.setAll(Stream.of(bean.initializers).map(p -> new BeanMethodData(this, p)).collect(toList()));
     }
 
     public BeanData() {
-        producer.set(new BeanProducerData(this));
+        producer.set(new BeanMethodData(this));
     }
 
     public String getName() {
@@ -65,7 +65,7 @@ public class BeanData {
         return factory.get();
     }
 
-    public BeanProducerData getProducer() {
+    public BeanMethodData getProducer() {
         return producer.get();
     }
 
@@ -74,11 +74,11 @@ public class BeanData {
                 getName(),
                 getFactory(),
                 getProducer().toProducer(),
-                initializers.stream().map(BeanProducerData::toProducer).toArray(BeanProducer[]::new)
+                initializers.stream().map(BeanMethodData::toProducer).toArray(BeanMethod[]::new)
         );
     }
 
-    public Stream<BeanMemberData> getArgs(int initializer) {
+    public Stream<BeanMethodArgData> getArgs(int initializer) {
         return initializers.get(initializer).args.stream();
     }
 

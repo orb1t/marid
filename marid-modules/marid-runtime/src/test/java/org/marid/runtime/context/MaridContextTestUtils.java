@@ -21,18 +21,18 @@
 
 package org.marid.runtime.context;
 
-import org.marid.runtime.beans.BeanMember;
+import org.marid.runtime.beans.BeanMethodArg;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 class MaridContextTestUtils {
 
-    static BeanMember m(String name, String type, String filter, String value) {
-        return new BeanMember(name, type, filter, value);
+    static BeanMethodArg m(String name, String type, String filter, String value) {
+        return new BeanMethodArg(name, type, filter, value);
     }
 
-    static BeanMember m(String name, String type, String value) {
-        return new BeanMember(name, type, null, value);
+    static BeanMethodArg m(String name, String type, String value) {
+        return new BeanMethodArg(name, type, null, value);
     }
 }

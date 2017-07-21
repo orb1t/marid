@@ -20,7 +20,7 @@
 
 package org.marid.dependant.beaneditor;
 
-import org.marid.ide.model.BeanMemberData;
+import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.types.BeanTypeResolver;
 import org.marid.ide.types.BeanTypeResolverContext;
 
@@ -33,9 +33,9 @@ public class BeanTypes {
 
     private final BeanTypeResolverContext resolverContext;
     private final BeanTypeResolver typeResolver;
-    private final BeanMemberData arg;
+    private final BeanMethodArgData arg;
 
-    public BeanTypes(BeanTypeResolverContext resolverContext, BeanTypeResolver resolver, BeanMemberData arg) {
+    public BeanTypes(BeanTypeResolverContext resolverContext, BeanTypeResolver resolver, BeanMethodArgData arg) {
         this.resolverContext = resolverContext;
         this.typeResolver = resolver;
         this.arg = arg;

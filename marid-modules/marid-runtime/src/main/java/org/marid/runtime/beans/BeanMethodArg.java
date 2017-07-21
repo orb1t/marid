@@ -33,7 +33,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class BeanMember {
+public final class BeanMethodArg {
 
     @Nonnull
     public final String name;
@@ -47,14 +47,14 @@ public final class BeanMember {
     @Nullable
     public final String value;
 
-    public BeanMember(@Nonnull String name, @Nonnull String type, @Nullable String filter, @Nullable String value) {
+    public BeanMethodArg(@Nonnull String name, @Nonnull String type, @Nullable String filter, @Nullable String value) {
         this.name = name;
         this.type = type;
         this.filter = filter;
         this.value = value;
     }
 
-    public BeanMember(@Nonnull Element element) {
+    public BeanMethodArg(@Nonnull Element element) {
         type = requireNonNull(element.getAttribute("type"));
         name = requireNonNull(element.getAttribute("name"));
         filter = element.getAttribute("filter");
@@ -75,7 +75,7 @@ public final class BeanMember {
         } else if (o == null || getClass() != o.getClass()) {
             return false;
         } else {
-            final BeanMember that = (BeanMember) o;
+            final BeanMethodArg that = (BeanMethodArg) o;
             return Objects.equals(name, that.name) &&
                     Objects.equals(type, that.type) &&
                     Objects.equals(filter, that.filter) &&

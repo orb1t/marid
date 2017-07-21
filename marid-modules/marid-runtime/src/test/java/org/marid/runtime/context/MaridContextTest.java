@@ -24,7 +24,7 @@ package org.marid.runtime.context;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.runtime.beans.Bean;
-import org.marid.runtime.beans.BeanProducer;
+import org.marid.runtime.beans.BeanMethod;
 import org.marid.test.NormalTests;
 
 import java.math.BigDecimal;
@@ -49,18 +49,18 @@ public class MaridContextTest {
                 new Bean(
                         "bean2",
                         "@bean1",
-                        new BeanProducer(signature(Bean1.class.getMethod("getZ")))
+                        new BeanMethod(signature(Bean1.class.getMethod("getZ")))
                 ),
                 new Bean(
                         "bean1",
                         Bean1.class.getName(),
-                        new BeanProducer(
+                        new BeanMethod(
                                 signature(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
                                 m("x", "int", "1"),
                                 m("y", "String", "abc"),
                                 m("z", "BigDecimal", "1.23")
                         ),
-                        new BeanProducer(
+                        new BeanMethod(
                                 signature(Bean1.class.getMethod("setA", boolean.class)),
                                 m("a", "boolean", "true")
                         )
@@ -68,13 +68,13 @@ public class MaridContextTest {
                 new Bean(
                         "bean3",
                         "@bean1",
-                        new BeanProducer(signature(Bean1.class.getField("y")))
+                        new BeanMethod(signature(Bean1.class.getField("y")))
                 ),
                 new Bean(
                         "bean4",
                         Bean1.class.getName(),
-                        new BeanProducer(signature(Bean1.class.getMethod("list"))),
-                        new BeanProducer(
+                        new BeanMethod(signature(Bean1.class.getMethod("list"))),
+                        new BeanMethod(
                                 signature(List.class.getMethod("add", Object.class)),
                                 m("e", "int", "1")
                         )
@@ -82,12 +82,12 @@ public class MaridContextTest {
                 new Bean(
                         "bean5",
                         Bean1.class.getName(),
-                        new BeanProducer(signature(Bean1.class.getMethod("list"))),
-                        new BeanProducer(
+                        new BeanMethod(signature(Bean1.class.getMethod("list"))),
+                        new BeanMethod(
                                 signature(List.class.getMethod("add", Object.class)),
                                 m("e", "int", "1")
                         ),
-                        new BeanProducer(
+                        new BeanMethod(
                                 signature(List.class.getMethod("add", Object.class)),
                                 m("e", "String", "length", "22")
                         )
@@ -95,7 +95,7 @@ public class MaridContextTest {
                 new Bean(
                         "bean6",
                         String.class.getName(),
-                        new BeanProducer(
+                        new BeanMethod(
                                 signature(String.class.getMethod("valueOf", Object.class)),
                                 m("arg0", "js", "'a' + 1")
                         )
@@ -118,11 +118,11 @@ public class MaridContextTest {
                 new Bean(
                         "bean1",
                         Bean1.class.getName(),
-                        new BeanProducer(
+                        new BeanMethod(
                                 signature(Bean1.class.getConstructor(int.class, String.class, BigDecimal.class)),
                                 m("x", "int", "1"), m("y", "ref", "toString", "bean1"), m("BigDecimal", "z", "1.23")
                         ),
-                        new BeanProducer(
+                        new BeanMethod(
                                 signature(Bean1.class.getMethod("setA", boolean.class)),
                                 m("a", "boolean", "true")
                         )

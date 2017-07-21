@@ -22,7 +22,7 @@ package org.marid.dependant.beaneditor;
 
 import javafx.collections.FXCollections;
 import javafx.scene.control.TableColumn;
-import org.marid.ide.model.BeanMemberData;
+import org.marid.ide.model.BeanMethodArgData;
 import org.marid.jfx.action.SpecialActions;
 import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanArgsTable extends MaridTableView<BeanMemberData> {
+public class BeanArgsTable extends MaridTableView<BeanMethodArgData> {
 
     public BeanArgsTable(SpecialActions specialActions) {
         super(FXCollections.observableArrayList(), specialActions);
@@ -43,7 +43,7 @@ public class BeanArgsTable extends MaridTableView<BeanMemberData> {
     @Order(1)
     @Autowired
     private void initNameColumn() {
-        final TableColumn<BeanMemberData, String> column = new TableColumn<>();
+        final TableColumn<BeanMethodArgData, String> column = new TableColumn<>();
         column.textProperty().bind(ls("Name"));
         column.setMinWidth(100);
         column.setPrefWidth(150);
@@ -55,7 +55,7 @@ public class BeanArgsTable extends MaridTableView<BeanMemberData> {
     @Order(2)
     @Autowired
     private void initTypeColumn() {
-        final TableColumn<BeanMemberData, String> column = new TableColumn<>();
+        final TableColumn<BeanMethodArgData, String> column = new TableColumn<>();
         column.textProperty().bind(ls("Type"));
         column.setMinWidth(100);
         column.setPrefWidth(150);
@@ -67,7 +67,7 @@ public class BeanArgsTable extends MaridTableView<BeanMemberData> {
     @Order(3)
     @Autowired
     private void initValueColumn() {
-        final TableColumn<BeanMemberData, String> column = new TableColumn<>();
+        final TableColumn<BeanMethodArgData, String> column = new TableColumn<>();
         column.textProperty().bind(ls("Value"));
         column.setMinWidth(200);
         column.setPrefWidth(350);

@@ -22,7 +22,7 @@ package org.marid.ide.types;
 
 import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
-import org.marid.ide.model.BeanProducerData;
+import org.marid.ide.model.BeanMethodData;
 import org.marid.misc.Casts;
 import org.marid.runtime.beans.Bean;
 
@@ -50,7 +50,7 @@ public class BeanFactoryInfo {
     public final Bean bean;
 
     @Nonnull
-    public final BeanProducerData producer;
+    public final BeanMethodData producer;
 
     @Nonnull
     public final String factory;

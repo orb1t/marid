@@ -23,7 +23,7 @@ package org.marid.ide.model;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.runtime.beans.BeanMember;
+import org.marid.runtime.beans.BeanMethodArg;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -32,17 +32,17 @@ import java.util.Objects;
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class BeanMemberData {
+public final class BeanMethodArgData {
 
     @Nonnull
-    public final BeanProducerData parent;
+    public final BeanMethodData parent;
 
     public final StringProperty name = new SimpleStringProperty();
     public final StringProperty type = new SimpleStringProperty();
     public final StringProperty filter = new SimpleStringProperty();
     public final StringProperty value = new SimpleStringProperty();
 
-    public BeanMemberData(@Nonnull BeanProducerData parent, BeanMember member) {
+    public BeanMethodArgData(@Nonnull BeanMethodData parent, BeanMethodArg member) {
         this(parent);
         name.set(member.name);
         type.set(member.type);
@@ -50,7 +50,7 @@ public final class BeanMemberData {
         value.set(member.value);
     }
 
-    public BeanMemberData(@Nonnull BeanProducerData parent) {
+    public BeanMethodArgData(@Nonnull BeanMethodData parent) {
         this.parent = parent;
     }
 
@@ -70,8 +70,8 @@ public final class BeanMemberData {
         return filter.get();
     }
 
-    public BeanMember toMember() {
-        return new BeanMember(getName(), getType(), getFilter(), getValue());
+    public BeanMethodArg toMember() {
+        return new BeanMethodArg(getName(), getType(), getFilter(), getValue());
     }
 
     public Observable[] observables() {
@@ -85,8 +85,8 @@ public final class BeanMemberData {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof BeanMemberData) {
-            final BeanMemberData that = (BeanMemberData) obj;
+        if (obj instanceof BeanMethodArgData) {
+            final BeanMethodArgData that = (BeanMethodArgData) obj;
             return Arrays.equals(
                     new Object[] {this.getName(), this.getType(), this.getFilter(), this.getValue()},
                     new Object[] {that.getName(), that.getType(), that.getFilter(), that.getValue()}

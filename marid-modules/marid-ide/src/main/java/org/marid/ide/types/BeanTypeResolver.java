@@ -23,7 +23,7 @@ package org.marid.ide.types;
 import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
-import org.marid.ide.model.BeanMemberData;
+import org.marid.ide.model.BeanMethodArgData;
 import org.marid.misc.Casts;
 import org.marid.runtime.context.MaridCircularBeanException;
 import org.springframework.stereotype.Component;
@@ -118,7 +118,7 @@ public class BeanTypeResolver {
                 : ((Executable) m).getGenericParameterTypes();
     }
 
-    private Type actualType(BeanTypeResolverContext context, BeanMemberData arg) {
+    private Type actualType(BeanTypeResolverContext context, BeanMethodArgData arg) {
         switch (arg.getType()) {
             case "ref":
                 return resolve(context, arg.getValue());

@@ -52,15 +52,15 @@ public final class Bean {
     public final String factory;
 
     @Nonnull
-    public final BeanProducer producer;
+    public final BeanMethod producer;
 
     @Nonnull
-    public final BeanProducer[] initializers;
+    public final BeanMethod[] initializers;
 
     public Bean(@Nonnull String name,
                 @Nonnull String factory,
-                @Nonnull BeanProducer producer,
-                @Nonnull BeanProducer... initializers) {
+                @Nonnull BeanMethod producer,
+                @Nonnull BeanMethod... initializers) {
         this.name = name;
         this.factory = factory;
         this.producer = producer;
@@ -72,13 +72,13 @@ public final class Bean {
         this.factory = requireNonNull(element.getAttribute("factory"));
         this.producer = Xmls.nodes(element, Element.class)
                 .filter(e -> "producer".equals(e.getTagName()))
-                .map(BeanProducer::new)
+                .map(BeanMethod::new)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("No producer for " + element));
         this.initializers = Xmls.nodes(element, Element.class)
                 .filter(e -> "initializer".equals(e.getTagName()))
-                .map(BeanProducer::new)
-                .toArray(BeanProducer[]::new);
+                .map(BeanMethod::new)
+                .toArray(BeanMethod[]::new);
     }
 
     @Override
@@ -109,7 +109,7 @@ public final class Bean {
 
         producer.writeTo(build(element.getOwnerDocument().createElement("producer"), element::appendChild));
 
-        for (final BeanProducer i : initializers) {
+        for (final BeanMethod i : initializers) {
             i.writeTo(build(element.getOwnerDocument().createElement("initializer"), element::appendChild));
         }
     }
@@ -134,7 +134,7 @@ public final class Bean {
         return field.getName();
     }
 
-    public static MethodHandle[] findInitializers(MethodHandle constructor, BeanProducer... initializers) throws Exception {
+    public static MethodHandle[] findInitializers(MethodHandle constructor, BeanMethod... initializers) throws Exception {
         final Class<?> targetClass = constructor.type().returnType();
         final MethodHandle[] handles = new MethodHandle[initializers.length];
         for (int i = 0; i < handles.length; i++) {
@@ -147,7 +147,7 @@ public final class Bean {
         return findProducer(targetClass, producer, true);
     }
 
-    public static MethodHandle findProducer(Class<?> targetClass, BeanProducer producer, boolean getters) throws Exception {
+    public static MethodHandle findProducer(Class<?> targetClass, BeanMethod producer, boolean getters) throws Exception {
         if (producer.name().equals("new")) {
             for (final Constructor<?> constructor : targetClass.getConstructors()) {
                 if (producer.matches(constructor.getParameterTypes())) {

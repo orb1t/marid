@@ -22,8 +22,8 @@
 package org.marid.runtime.context;
 
 import org.marid.runtime.beans.Bean;
-import org.marid.runtime.beans.BeanMember;
-import org.marid.runtime.beans.BeanProducer;
+import org.marid.runtime.beans.BeanMethodArg;
+import org.marid.runtime.beans.BeanMethod;
 import org.marid.runtime.converter.DefaultValueConvertersManager;
 
 import java.lang.invoke.MethodHandle;
@@ -105,7 +105,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
             lastMessage.set(() -> String.format("[%s] arguments setup", name));
             final Object[] args = new Object[argTypes.length];
             for (int i = 0; i < args.length; i++) {
-                final BeanMember arg = bean.producer.args[i];
+                final BeanMethodArg arg = bean.producer.args[i];
                 lastMessage.set(() -> String.format("[%s] argument setup: %s", name, arg));
                 args[i] = arg(arg, argTypes[i]);
             }
@@ -117,14 +117,14 @@ final class MaridBeanCreationContext implements AutoCloseable {
             lastMessage.set(() -> String.format("[%s] initializers", name));
             final MethodHandle[] initializers = Bean.findInitializers(constructor, bean.initializers);
             for (int k = 0; k < initializers.length; k++) {
-                final BeanProducer initializer = bean.initializers[k];
+                final BeanMethod initializer = bean.initializers[k];
                 initializers[k] = bind(initializer, initializers[k], instance);
                 lastMessage.set(() -> String.format("%s initializer %s", name, initializer));
                 final Class<?>[] argTypes = initializers[k].type().parameterArray();
                 lastMessage.set(() -> String.format("[%s] arguments setup: %s", name, initializer));
                 final Object[] args = new Object[argTypes.length];
                 for (int i = 0; i < args.length; i++) {
-                    final BeanMember arg = initializer.args[i];
+                    final BeanMethodArg arg = initializer.args[i];
                     lastMessage.set(() -> String.format("[%s] argument setup: %s", name, arg));
                     args[i] = arg(arg, argTypes[i]);
                 }
@@ -136,7 +136,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
         return instance;
     }
 
-    private Object arg(BeanMember member, Class<?> type) throws Throwable {
+    private Object arg(BeanMethodArg member, Class<?> type) throws Throwable {
         final Object arg;
         if (member.value == null) {
             arg = MaridRuntimeUtils.defaultValue(type);
@@ -152,7 +152,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
         return Bean.filtered(member.filter, argHandle).invoke();
     }
 
-    private MethodHandle bind(BeanProducer producer, MethodHandle handle, Object instance) {
+    private MethodHandle bind(BeanMethod producer, MethodHandle handle, Object instance) {
         if (handle.type().parameterCount() == producer.args.length + 1) {
             return handle.bindTo(instance);
         } else {

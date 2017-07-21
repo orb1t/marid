@@ -25,8 +25,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.marid.runtime.beans.BeanMember;
-import org.marid.runtime.beans.BeanProducer;
+import org.marid.runtime.beans.BeanMethodArg;
+import org.marid.runtime.beans.BeanMethod;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -38,21 +38,21 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanProducerData {
+public class BeanMethodData {
 
     @Nonnull
     public final BeanData parent;
 
     public final StringProperty signature = new SimpleStringProperty();
-    public final ObservableList<BeanMemberData> args = FXCollections.observableArrayList(BeanMemberData::observables);
+    public final ObservableList<BeanMethodArgData> args = FXCollections.observableArrayList(BeanMethodArgData::observables);
 
-    public BeanProducerData(@Nonnull BeanData parent, BeanProducer producer) {
+    public BeanMethodData(@Nonnull BeanData parent, BeanMethod producer) {
         this(parent);
         signature.set(producer.signature);
-        args.setAll(Stream.of(producer.args).map(b -> new BeanMemberData(this, b)).collect(toList()));
+        args.setAll(Stream.of(producer.args).map(b -> new BeanMethodArgData(this, b)).collect(toList()));
     }
 
-    public BeanProducerData(@Nonnull BeanData parent) {
+    public BeanMethodData(@Nonnull BeanData parent) {
         this.parent = parent;
     }
 
@@ -64,14 +64,14 @@ public class BeanProducerData {
         return new Observable[] {signature, args};
     }
 
-    public BeanProducer toProducer() {
-        return new BeanProducer(signature.get(), args.stream().map(BeanMemberData::toMember).toArray(BeanMember[]::new));
+    public BeanMethod toProducer() {
+        return new BeanMethod(signature.get(), args.stream().map(BeanMethodArgData::toMember).toArray(BeanMethodArg[]::new));
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof BeanProducerData) {
-            final BeanProducerData that = (BeanProducerData) obj;
+        if (obj instanceof BeanMethodData) {
+            final BeanMethodData that = (BeanMethodData) obj;
             return Arrays.equals(
                     new Object[] {this.getSignature(), this.args},
                     new Object[] {that.getSignature(), that.args}

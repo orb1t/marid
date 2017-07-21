@@ -21,9 +21,9 @@
 package org.marid.ide.types;
 
 import org.marid.ide.model.BeanData;
-import org.marid.ide.model.BeanMemberData;
-import org.marid.ide.model.BeanProducerData;
-import org.marid.ide.model.BeansFile;
+import org.marid.ide.model.BeanMethodArgData;
+import org.marid.ide.model.BeanMethodData;
+import org.marid.ide.model.BeanFile;
 import org.marid.runtime.context.MaridConfiguration;
 import org.marid.runtime.context.MaridContext;
 import org.springframework.context.annotation.Bean;
@@ -54,9 +54,9 @@ public class BeanTypeResolverTestContext {
         return build(new BeanData(), b -> {
             b.name.set("bean1");
             b.factory.set(ArrayList.class.getName());
-            b.producer.set(build(new BeanProducerData(b), p -> {
+            b.producer.set(build(new BeanMethodData(b), p -> {
                 p.signature.set(call(() -> signature(ArrayList.class.getConstructor(Collection.class))));
-                p.args.add(build(new BeanMemberData(p), a -> {
+                p.args.add(build(new BeanMethodArgData(p), a -> {
                     a.name.set("arg0");
                     a.type.set("ref");
                     a.value.set("bean2");
@@ -70,9 +70,9 @@ public class BeanTypeResolverTestContext {
         return build(new BeanData(), b -> {
             b.name.set("bean2");
             b.factory.set(Arrays.class.getName());
-            b.producer.set(build(new BeanProducerData(b), p -> {
+            b.producer.set(build(new BeanMethodData(b), p -> {
                 p.signature.set(call(() -> signature(Arrays.class.getMethod("asList", Object[].class))));
-                p.args.add(build(new BeanMemberData(p), a -> {
+                p.args.add(build(new BeanMethodArgData(p), a -> {
                     a.name.set("arg0");
                     a.type.set("String[]");
                     a.value.set("a,b,c");
@@ -86,12 +86,12 @@ public class BeanTypeResolverTestContext {
         return build(new BeanData(), b -> {
             b.name.set("bean3");
             b.factory.set(ArrayList.class.getName());
-            b.producer.set(build(new BeanProducerData(b), p -> {
+            b.producer.set(build(new BeanMethodData(b), p -> {
                 p.signature.set(call(() -> signature(ArrayList.class.getConstructor())));
             }));
-            b.initializers.add(build(new BeanProducerData(b), p -> {
+            b.initializers.add(build(new BeanMethodData(b), p -> {
                 p.signature.set(call(() -> signature(ArrayList.class.getMethod("add", Object.class))));
-                p.args.add(build(new BeanMemberData(p), a -> {
+                p.args.add(build(new BeanMethodArgData(p), a -> {
                     a.name.set("arg0");
                     a.type.set("ref");
                     a.value.set("bean1");
@@ -105,14 +105,14 @@ public class BeanTypeResolverTestContext {
         return build(new BeanData(), b -> {
             b.name.set("bean4");
             b.factory.set(ComplexBean.class.getName());
-            b.producer.set(build(new BeanProducerData(b), p -> {
+            b.producer.set(build(new BeanMethodData(b), p -> {
                 p.signature.set(call(() -> signature(ComplexBean.class.getConstructor(java.util.Set.class, java.lang.Object.class))));
-                p.args.add(build(new BeanMemberData(p), a -> {
+                p.args.add(build(new BeanMethodArgData(p), a -> {
                     a.name.set("arg0");
                     a.type.set("ref");
                     a.value.set("bean5");
                 }));
-                p.args.add(build(new BeanMemberData(p), a -> {
+                p.args.add(build(new BeanMethodArgData(p), a -> {
                     a.name.set("arg1");
                     a.type.set("Integer");
                     a.value.set("8");
@@ -126,9 +126,9 @@ public class BeanTypeResolverTestContext {
         return build(new BeanData(), b -> {
             b.name.set("bean5");
             b.factory.set(Collections.class.getName());
-            b.producer.set(build(new BeanProducerData(b), p -> {
+            b.producer.set(build(new BeanMethodData(b), p -> {
                 p.signature.set(call(() -> signature(Collections.class.getMethod("singleton", Object.class))));
-                p.args.add(build(new BeanMemberData(p), a -> {
+                p.args.add(build(new BeanMethodArgData(p), a -> {
                     a.name.set("arg0");
                     a.type.set("String");
                     a.value.set("v");
@@ -142,25 +142,25 @@ public class BeanTypeResolverTestContext {
         return build(new BeanData(), b -> {
             b.name.set("bean6");
             b.factory.set("@bean4");
-            b.producer.set(build(new BeanProducerData(b), p -> {
+            b.producer.set(build(new BeanMethodData(b), p -> {
                 p.signature.set(call(() -> signature(ComplexBean.class.getField("arg"))));
             }));
         });
     }
 
     @Bean
-    public BeansFile beansFile(List<BeanData> beans) {
-        return build(new BeansFile(), f -> f.beans.setAll(beans));
+    public BeanFile beansFile(List<BeanData> beans) {
+        return build(new BeanFile(), f -> f.beans.setAll(beans));
     }
 
     @Bean
-    public MaridContext maridContext(BeansFile beansFile) {
-        return new MaridContext(new MaridConfiguration(beansFile.toBeans()));
+    public MaridContext maridContext(BeanFile beanFile) {
+        return new MaridContext(new MaridConfiguration(beanFile.toBeans()));
     }
 
     @Bean
-    public BeanTypeResolverContext beanTypeResolverContext(BeansFile beansFile) {
-        return new BeanTypeResolverContext(beansFile.beans, currentThread().getContextClassLoader());
+    public BeanTypeResolverContext beanTypeResolverContext(BeanFile beanFile) {
+        return new BeanTypeResolverContext(beanFile.beans, currentThread().getContextClassLoader());
     }
 
     @Bean

@@ -47,7 +47,7 @@ public class BeanTypeResolverContext {
     }
 
     public BeanTypeResolverContext(ProjectProfile profile) {
-        this(profile.getBeansFile().beans, profile.getClassLoader());
+        this(profile.getBeanFile().beans, profile.getClassLoader());
     }
 
     public BeanData getBean(String name) {

@@ -20,8 +20,8 @@
 
 package org.marid.ide.types;
 
-import org.marid.ide.model.BeanMemberData;
-import org.marid.ide.model.BeanProducerData;
+import org.marid.ide.model.BeanMethodArgData;
+import org.marid.ide.model.BeanMethodData;
 
 import java.lang.reflect.Type;
 
@@ -52,23 +52,23 @@ public class BeanTypeInfo {
         return type;
     }
 
-    public Type[] getParameters(BeanProducerData producer) {
+    public Type[] getParameters(BeanMethodData producer) {
         return producer.parent.getProducer() == producer
                 ? parameters
                 : initializerParameters[producer.parent.initializers.indexOf(producer)];
     }
 
-    public Type[] getArguments(BeanProducerData producer) {
+    public Type[] getArguments(BeanMethodData producer) {
         return producer.parent.getProducer() == producer
                 ? arguments
                 : initializerArguments[producer.parent.initializers.indexOf(producer)];
     }
 
-    public Type getParameter(BeanMemberData parameter) {
+    public Type getParameter(BeanMethodArgData parameter) {
         return getParameters(parameter.parent)[parameter.parent.args.indexOf(parameter)];
     }
 
-    public Type getArgument(BeanMemberData argument) {
+    public Type getArgument(BeanMethodArgData argument) {
         return getArguments(argument.parent)[argument.parent.args.indexOf(argument)];
     }
 }

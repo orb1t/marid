@@ -23,7 +23,7 @@ package org.marid.ide.types;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.ide.model.BeanData;
-import org.marid.ide.model.BeansFile;
+import org.marid.ide.model.BeanFile;
 import org.marid.test.NormalTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -46,7 +46,7 @@ public class BeanTypeResolverTest extends AbstractJUnit4SpringContextTests {
     private Function<String, Type> typeResolver;
 
     @Autowired
-    private BeansFile file;
+    private BeanFile file;
 
     @Test
     public void allBeans() {

@@ -33,25 +33,25 @@ import static org.marid.misc.Builder.build;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanProducer {
+public class BeanMethod {
 
     @Nonnull
     public final String signature;
 
     @Nonnull
-    public final BeanMember[] args;
+    public final BeanMethodArg[] args;
 
-    public BeanProducer(@Nonnull String signature, @Nonnull BeanMember... args) {
+    public BeanMethod(@Nonnull String signature, @Nonnull BeanMethodArg... args) {
         this.signature = signature;
         this.args = args;
     }
 
-    public BeanProducer(@Nonnull Element element) {
+    public BeanMethod(@Nonnull Element element) {
         signature = element.getAttribute("signature");
         args = nodes(element, Element.class)
                 .filter(e -> "arg".equals(e.getTagName()))
-                .map(BeanMember::new)
-                .toArray(BeanMember[]::new);
+                .map(BeanMethodArg::new)
+                .toArray(BeanMethodArg[]::new);
     }
 
     public String name() {
@@ -75,7 +75,7 @@ public class BeanProducer {
 
     public void writeTo(@Nonnull Element element) {
         element.setAttribute("signature", signature);
-        for (final BeanMember arg : args) {
+        for (final BeanMethodArg arg : args) {
             arg.writeTo(build(element.getOwnerDocument().createElement("arg"), element::appendChild));
         }
     }
@@ -101,7 +101,7 @@ public class BeanProducer {
         } else if (o == null || getClass() != o.getClass()) {
             return false;
         } else {
-            final BeanProducer that = (BeanProducer) o;
+            final BeanMethod that = (BeanMethod) o;
             return Objects.equals(signature, that.signature) && Arrays.equals(args, that.args);
         }
     }

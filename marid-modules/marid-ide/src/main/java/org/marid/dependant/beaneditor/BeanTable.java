@@ -42,7 +42,7 @@ public class BeanTable extends MaridTableView<BeanData> {
 
     @Autowired
     public BeanTable(ProjectProfile profile, SpecialActions specialActions) {
-        super(profile.getBeansFile().beans, specialActions);
+        super(profile.getBeanFile().beans, specialActions);
         setEditable(true);
     }
 

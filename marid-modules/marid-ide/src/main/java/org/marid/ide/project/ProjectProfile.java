@@ -29,7 +29,7 @@ import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.marid.ide.model.BeansFile;
+import org.marid.ide.model.BeanFile;
 import org.marid.misc.Urls;
 
 import java.io.IOException;
@@ -68,7 +68,7 @@ public class ProjectProfile {
     private final Path repository;
     private final Logger logger;
     private final BooleanProperty enabled;
-    private final BeansFile beansFile;
+    private final BeanFile beanFile;
     private URLClassLoader classLoader;
 
     ProjectProfile(Path profilesDir, String name) {
@@ -87,7 +87,7 @@ public class ProjectProfile {
         logger = Logger.getLogger(getName());
         model = loadModel();
         model.setModelVersion("4.0.0");
-        beansFile = new BeansFile();
+        beanFile = new BeanFile();
         createFileStructure();
         init();
         enabled = new SimpleBooleanProperty(true);
@@ -217,7 +217,7 @@ public class ProjectProfile {
             if (Files.notExists(beansProperties)) {
                 Files.createFile(beansProperties);
             }
-            beansFile.load(this);
+            beanFile.load(this);
         } catch (Exception x) {
             log(logger, WARNING, "Unable to create file structure", x);
         }
@@ -235,11 +235,11 @@ public class ProjectProfile {
     public void save() {
         createFileStructure();
         savePomFile();
-        beansFile.save(this);
+        beanFile.save(this);
     }
 
-    public BeansFile getBeansFile() {
-        return beansFile;
+    public BeanFile getBeanFile() {
+        return beanFile;
     }
 
     void delete() {
