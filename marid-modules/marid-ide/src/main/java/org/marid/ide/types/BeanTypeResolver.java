@@ -60,33 +60,26 @@ public class BeanTypeResolver {
             try {
                 final BeanFactoryInfo info = new BeanFactoryInfo(beanData, this, context);
                 final List<TypePair> pairs = new ArrayList<>();
-                final Type[] beanPs = formalTypes(info.returnHandle);
+                final Type[] beanPs = formalTypes(info.returnHandle, true);
                 final Type[] beanAs = info.producer.args.stream().map(a -> actualType(context, a)).toArray(Type[]::new);
-                if (beanPs.length == beanAs.length) {
-                    for (int i = 0; i < beanPs.length; i++) {
-                        if (beanAs[i] != null) {
-                            pairs.add(new TypePair(beanAs[i], info.factoryToken.resolveType(beanPs[i])));
-                        }
+                for (int i = 0; i < beanPs.length; i++) {
+                    if (beanAs[i] != null) {
+                        pairs.add(new TypePair(beanAs[i], info.factoryToken.resolveType(beanPs[i])));
                     }
                 }
                 final Type[][] initPs = new Type[info.bean.initializers.length][];
                 final Type[][] initAs = new Type[info.bean.initializers.length][];
                 for (int i = 0; i < info.bean.initializers.length; i++) {
                     final MethodHandle handle = info.bean.findInitializer(info.returnHandle, info.bean.initializers[i]);
-                    final Type[] ps = formalTypes(handle);
+                    final Type[] ps = formalTypes(handle, false);
                     final Type[] as = beanData.getArgs(i).map(a -> actualType(context, a)).toArray(Type[]::new);
-                    if (ps.length == as.length) {
-                        for (int k = 0; k < as.length; k++) {
-                            if (as[k] != null) {
-                                pairs.add(new TypePair(as[k], info.factoryToken.resolveType(ps[k])));
-                            }
+                    for (int k = 0; k < as.length; k++) {
+                        if (as[k] != null) {
+                            pairs.add(new TypePair(as[k], info.factoryToken.resolveType(ps[k])));
                         }
-                        initPs[i] = ps;
-                        initAs[i] = as;
-                    } else {
-                        initPs[i] = ps;
-                        initAs[i] = ps;
                     }
+                    initPs[i] = ps;
+                    initAs[i] = as;
                 }
 
                 final TypeResolver r = pairs.stream().reduce(new TypeResolver(), this::resolver, (r1, r2) -> r2);
@@ -101,7 +94,7 @@ public class BeanTypeResolver {
                         initPs,
                         initAs
                 );
-            } catch (RuntimeException x){
+            } catch (RuntimeException x) {
                 throw x;
             } catch (Exception x) {
                 throw new IllegalArgumentException(name, x);
@@ -111,10 +104,10 @@ public class BeanTypeResolver {
         });
     }
 
-    private Type[] formalTypes(MethodHandle handle) throws IllegalAccessException {
+    private Type[] formalTypes(MethodHandle handle, boolean getters) throws IllegalAccessException {
         final Member m = MethodHandles.reflectAs(Member.class, handle);
         return m instanceof Field
-                ? new Type[]{((Field) m).getGenericType()}
+                ? (getters ? new Type[0] : new Type[]{((Field) m).getGenericType()})
                 : ((Executable) m).getGenericParameterTypes();
     }
 
