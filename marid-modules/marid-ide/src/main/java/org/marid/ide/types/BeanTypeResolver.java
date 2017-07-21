@@ -32,8 +32,12 @@ import org.springframework.stereotype.Component;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import static com.google.common.reflect.TypeToken.of;
 import static java.util.Objects.requireNonNull;
@@ -57,7 +61,7 @@ public class BeanTypeResolver {
             }
             try {
                 final BeanFactoryInfo info = new BeanFactoryInfo(beanData, this, context);
-                final Map<TypeToken<?>, TypeToken<?>> pairs = new LinkedHashMap<>();
+                final Map<TypeToken<?>, List<TypeToken<?>>> pairs = new LinkedHashMap<>();
                 final Type[] beanPs = formalTypes(info.returnHandle, true);
                 final Type[] beanAs = info.producer.args.stream().map(a -> actualType(context, a)).toArray(Type[]::new);
                 for (int i = 0; i < beanPs.length; i++) {
@@ -82,7 +86,7 @@ public class BeanTypeResolver {
 
                 final TypeResolver r = pairs.entrySet().stream().reduce(
                         new TypeResolver(),
-                        (a, e) -> a.where(e.getKey().getType(), e.getValue().getType()),
+                        (a, e) -> a.where(e.getKey().getType(), commonAncestor(e).getType()),
                         (r1, r2) -> r2
                 );
                 final Type resolvedType = r.resolveType(info.returnType);
@@ -100,29 +104,27 @@ public class BeanTypeResolver {
         });
     }
 
-    private TypeToken<?> lower(TypeToken<?> oldType, TypeToken<?> newType) {
-        if (oldType == null) {
-            return newType;
+    private TypeToken<?> commonAncestor(Entry<TypeToken<?>, List<TypeToken<?>>> entry) {
+        final List<TypeToken<?>> tokens = entry.getValue();
+        if (tokens.size() == 1 || tokens.stream().allMatch(t -> t.equals(tokens.get(0)))) {
+            return tokens.get(0);
         } else {
-            if (newType.isSubtypeOf(oldType)) {
-                return oldType;
-            } else if (newType.isSupertypeOf(oldType)) {
-                return newType;
-            } else if (oldType.isSubtypeOf(newType)) {
-                return newType;
-            } else if (oldType.isSupertypeOf(newType)) {
-                return oldType;
-            } else if (oldType.equals(newType)) {
-                return oldType;
-            } else {
-                final Class<?> oldClass = oldType.getRawType();
-                final Class<?> newClass = newType.getRawType();
-                if (oldClass.isAssignableFrom(newClass)) {
-                    return oldType;
-                } else {
-                    return newType;
+            final TypeToken<?>[][] sets = tokens.stream()
+                    .map(TypeToken::getTypes)
+                    .map(s -> s.toArray(new TypeToken<?>[s.size()]))
+                    .toArray(TypeToken<?>[][]::new);
+            final int max = Stream.of(sets).mapToInt(s -> s.length).max().orElse(0);
+            for (int i = 0; i < max; i++) {
+                for (final TypeToken<?>[] set : sets) {
+                    if (i < set.length) {
+                        final TypeToken<?> candidate = set[i];
+                        if (tokens.stream().allMatch(t -> t.isSubtypeOf(candidate))) {
+                            return candidate;
+                        }
+                    }
                 }
             }
+            return entry.getKey();
         }
     }
 
@@ -166,7 +168,7 @@ public class BeanTypeResolver {
         }
     }
 
-    private void resolve(Map<TypeToken<?>, TypeToken<?>> map, TypeToken<?> formal, TypeToken<?> actual) {
+    private void resolve(Map<TypeToken<?>, List<TypeToken<?>>> map, TypeToken<?> formal, TypeToken<?> actual) {
         if (formal.isArray() && actual.isArray()) {
             resolve(map, formal.getComponentType(), actual.getComponentType());
         } else if (formal.getType() instanceof TypeVariable<?>) {
@@ -174,7 +176,7 @@ public class BeanTypeResolver {
             for (final Type bound : typeVariable.getBounds()) {
                 resolve(map, of(bound), actual);
             }
-            map.merge(formal, actual.wrap(), this::lower);
+            map.computeIfAbsent(formal, k -> new ArrayList<>()).add(actual.wrap());
         } else if (formal.getType() instanceof ParameterizedType) {
             final Class<?> formalRaw = formal.getRawType();
             final Class<?> actualRaw = actual.getRawType();
