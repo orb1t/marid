@@ -20,9 +20,9 @@
 
 package org.marid.ide.types;
 
-import com.google.common.collect.ComputationException;
 import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
+import org.marid.ide.model.BeanProducerData;
 import org.marid.misc.Casts;
 import org.marid.runtime.beans.Bean;
 
@@ -48,6 +48,9 @@ public class BeanFactoryInfo {
 
     @Nonnull
     public final Bean bean;
+
+    @Nonnull
+    public final BeanProducerData producer;
 
     @Nonnull
     public final String factory;
@@ -76,32 +79,27 @@ public class BeanFactoryInfo {
     @Nonnull
     public final Type returnType;
 
-    public BeanFactoryInfo(BeanData beanData, BeanTypeResolver resolver, BeanTypeResolverContext context) {
-        try {
-            bean = beanData.toBean();
-            factory = requireNonNull(beanData.getFactory(), () -> m("Factory is null: {0}", bean.name));
-            if (ref(factory) != null) {
-                factoryToken = of(resolver.resolve(context, ref(factory)));
-                factoryClass = factoryToken.getRawType();
-            } else {
-                final String className = requireNonNull(type(factory), () -> m("Factory class is null: {0}", bean.name));
-                factoryClass = resolveClassName(className, context.getClassLoader());
-                factoryToken = of(factoryClass).getSupertype(Casts.cast(factoryClass));
-            }
-            returnHandle = bean.findProducer(factoryClass);
-            returnMember = MethodHandles.reflectAs(Member.class, returnHandle);
-            returnClass = returnHandle.type().returnType();
-            genericReturnType = returnMember instanceof Field
-                    ? ((Field) returnMember).getGenericType()
-                    : ((Executable) returnMember).getAnnotatedReturnType().getType();
-            genericReturnToken = genericReturnType instanceof Class<?>
-                    ? of(genericReturnType).getSupertype(Casts.cast(returnClass))
-                    : of(genericReturnType);
-            returnType = factoryToken.resolveType(genericReturnToken.getType()).getType();
-        } catch (RuntimeException x) {
-            throw x;
-        } catch (Exception x) {
-            throw new ComputationException(x);
+    public BeanFactoryInfo(BeanData beanData, BeanTypeResolver resolver, BeanTypeResolverContext context) throws Exception {
+        producer = beanData.getProducer();
+        bean = beanData.toBean();
+        factory = requireNonNull(beanData.getFactory(), () -> m("Factory is null: {0}", bean.name));
+        if (ref(factory) != null) {
+            factoryToken = of(resolver.resolve(context, ref(factory)));
+            factoryClass = factoryToken.getRawType();
+        } else {
+            final String className = requireNonNull(type(factory), () -> m("Factory class is null: {0}", bean.name));
+            factoryClass = resolveClassName(className, context.getClassLoader());
+            factoryToken = of(factoryClass).getSupertype(Casts.cast(factoryClass));
         }
+        returnHandle = bean.findProducer(factoryClass);
+        returnMember = MethodHandles.reflectAs(Member.class, returnHandle);
+        returnClass = returnHandle.type().returnType();
+        genericReturnType = returnMember instanceof Field
+                ? ((Field) returnMember).getGenericType()
+                : ((Executable) returnMember).getAnnotatedReturnType().getType();
+        genericReturnToken = genericReturnType instanceof Class<?>
+                ? of(genericReturnType).getSupertype(Casts.cast(returnClass))
+                : of(genericReturnType);
+        returnType = factoryToken.resolveType(genericReturnToken.getType()).getType();
     }
 }

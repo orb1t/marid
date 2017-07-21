@@ -23,7 +23,6 @@ package org.marid.runtime.context;
 
 import java.util.LinkedHashSet;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -92,14 +91,8 @@ public class MaridPlaceholderResolver {
             passed.remove(name);
             return result;
         } else {
-            throw new CircularPlaceholderException(passed, name);
+            throw new MaridCircularPlaceholderException(passed, name);
         }
     }
 
-    public static class CircularPlaceholderException extends RuntimeException {
-
-        private CircularPlaceholderException(Set<String> passed, String name) {
-            super(name + "/" + passed);
-        }
-    }
 }

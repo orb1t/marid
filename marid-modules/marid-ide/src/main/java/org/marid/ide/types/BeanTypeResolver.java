@@ -20,25 +20,22 @@
 
 package org.marid.ide.types;
 
-import com.google.common.collect.ComputationException;
 import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
+import org.marid.ide.model.BeanMemberData;
 import org.marid.misc.Casts;
-import org.marid.runtime.context.MaridContext.CircularBeanReferenceException;
+import org.marid.runtime.context.MaridCircularBeanException;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.google.common.reflect.TypeToken.of;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Stream.of;
 import static org.marid.l10n.L10n.m;
@@ -51,36 +48,83 @@ import static org.marid.runtime.beans.Bean.findInitializers;
 public class BeanTypeResolver {
 
     public Type resolve(BeanTypeResolverContext context, String beanName) {
+        return resolveInfo(context, beanName).getType();
+    }
+
+    public BeanTypeInfo resolveInfo(BeanTypeResolverContext context, String beanName) {
         final BeanData beanData = requireNonNull(context.beanMap.get(beanName), () -> m("No such bean: {0}", beanName));
-        return context.resolved.computeIfAbsent(beanName, name -> {
+        return context.typeInfoMap.computeIfAbsent(beanName, name -> {
             if (!context.processing.add(name)) {
-                throw new CircularBeanReferenceException(context.processing, name);
+                throw new MaridCircularBeanException(context.processing, name);
             }
             try {
-                final BeanFactoryInfo info;
-                try {
-                    info = context.factoryMap.computeIfAbsent(name, k -> new BeanFactoryInfo(beanData, this, context));
-                } catch (ComputationException x) {
-                    throw (Exception) x.getCause();
-                }
-
+                final BeanFactoryInfo info = new BeanFactoryInfo(beanData, this, context);
                 final List<TypePair> pairs = new ArrayList<>();
-                context.fill(this, pairs, info.returnHandle, beanData.getProducer(), info.factoryToken);
+                final Type[] beanPs = formalTypes(info.returnHandle);
+                final Type[] beanAs = info.producer.args.stream().map(a -> actualType(context, a)).toArray(Type[]::new);
+                if (beanPs.length == beanAs.length) {
+                    for (int i = 0; i < beanPs.length; i++) {
+                        if (beanAs[i] != null) {
+                            pairs.add(new TypePair(beanAs[i], info.factoryToken.resolveType(beanPs[i])));
+                        }
+                    }
+                }
                 final MethodHandle[] initializers = findInitializers(info.returnHandle, info.bean.initializers);
-                for (int k = 0; k < initializers.length; k++) {
-                    context.fill(this, pairs, initializers[k], beanData.initializers.get(k), info.factoryToken);
+                final Type[][] initPs = new Type[initializers.length][];
+                final Type[][] initAs = new Type[initializers.length][];
+                for (int i = 0; i < initializers.length; i++) {
+                    final Type[] ps = formalTypes(initializers[i]);
+                    final Type[] as = beanData.getArgs(i).map(a -> actualType(context, a)).toArray(Type[]::new);
+                    if (ps.length == as.length) {
+                        for (int k = 0; k < as.length; k++) {
+                            if (as[k] != null) {
+                                pairs.add(new TypePair(as[k], info.factoryToken.resolveType(ps[k])));
+                            }
+                        }
+                        initPs[i] = ps;
+                        initAs[i] = as;
+                    } else {
+                        initPs[i] = ps;
+                        initAs[i] = ps;
+                    }
                 }
 
-                final TypeResolver resolver = pairs.stream().reduce(new TypeResolver(), this::resolver, (r1, r2) -> r2);
-                final Type resolvedType = resolver.resolveType(info.returnType);
+                final TypeResolver r = pairs.stream().reduce(new TypeResolver(), this::resolver, (r1, r2) -> r2);
+                final Type resolvedType = r.resolveType(info.returnType);
                 final TypeToken<?> resolvedToken = info.factoryToken.resolveType(resolvedType);
-                return resolvedToken.getType();
+                final Type type = resolvedToken.getType();
+
+                return new BeanTypeInfo(
+                        type,
+                        beanPs,
+                        beanPs.length == beanAs.length ? beanAs : beanPs,
+                        initPs,
+                        initAs
+                );
+            } catch (RuntimeException x){
+                throw x;
             } catch (Exception x) {
                 throw new IllegalArgumentException(name, x);
             } finally {
                 context.processing.remove(name);
             }
         });
+    }
+
+    private Type[] formalTypes(MethodHandle handle) throws IllegalAccessException {
+        final Member m = MethodHandles.reflectAs(Member.class, handle);
+        return m instanceof Field
+                ? new Type[]{((Field) m).getGenericType()}
+                : ((Executable) m).getGenericParameterTypes();
+    }
+
+    private Type actualType(BeanTypeResolverContext context, BeanMemberData arg) {
+        switch (arg.getType()) {
+            case "ref":
+                return resolve(context, arg.getValue());
+            default:
+                return context.converters.getType(arg.getType()).orElse(null);
+        }
     }
 
     private TypeResolver resolver(TypeResolver resolver, TypePair pair) {
@@ -120,25 +164,6 @@ public class BeanTypeResolver {
                     .reduce(resolver, this::resolver, (r1, r2) -> r2);
         } else {
             return resolver;
-        }
-    }
-
-    static class TypePair {
-
-        private final TypeToken<?> actual;
-        private final TypeToken<?> formal;
-
-        private TypePair(TypeToken<?> actual, TypeToken<?> formal) {
-            this.actual = actual;
-            this.formal = formal;
-        }
-
-        private TypePair(Type actual, Type formal) {
-            this(of(actual), of(formal));
-        }
-
-        TypePair(Type actual, TypeToken<?> formal) {
-            this(of(actual), formal);
         }
     }
 }

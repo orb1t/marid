@@ -21,7 +21,6 @@
 package org.marid.dependant.beaneditor;
 
 import org.marid.ide.model.BeanMemberData;
-import org.marid.ide.types.BeanFactoryInfo;
 import org.marid.ide.types.BeanTypeResolver;
 import org.marid.ide.types.BeanTypeResolverContext;
 
@@ -52,7 +51,6 @@ public class BeanTypes {
 
     public Type getActualArgType() {
         final Type beanType = getBeanType();
-        final BeanFactoryInfo factoryInfo = resolverContext.factory(arg.parent.parent.getName());
         final int argIndex = arg.parent.args.indexOf(arg);
         return null;
     }

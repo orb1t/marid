@@ -126,10 +126,4 @@ public final class MaridContext implements AutoCloseable {
         }
     }
 
-    public static class CircularBeanReferenceException extends RuntimeException {
-
-        public CircularBeanReferenceException(Set<String> current, String name) {
-            super(format("Circular bean reference: %s/%s", name, current));
-        }
-    }
 }

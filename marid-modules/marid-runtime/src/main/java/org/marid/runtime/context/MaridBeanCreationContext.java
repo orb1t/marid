@@ -80,7 +80,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
                 creationBeanNames.remove(name);
             }
         } else {
-            throw new MaridContext.CircularBeanReferenceException(creationBeanNames, name);
+            throw new MaridCircularBeanException(creationBeanNames, name);
         }
     }
 

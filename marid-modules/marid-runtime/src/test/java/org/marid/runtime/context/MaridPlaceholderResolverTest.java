@@ -23,7 +23,6 @@ package org.marid.runtime.context;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.marid.runtime.context.MaridPlaceholderResolver.CircularPlaceholderException;
 import org.marid.test.NormalTests;
 
 import java.util.Properties;
@@ -36,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 @Category({NormalTests.class})
 public class MaridPlaceholderResolverTest {
 
-    @Test(expected = CircularPlaceholderException.class)
+    @Test(expected = MaridCircularPlaceholderException.class)
     public void circular1() {
         final Properties properties = new Properties();
         properties.setProperty("x1", "2");
@@ -46,7 +45,7 @@ public class MaridPlaceholderResolverTest {
         resolver.resolvePlaceholders("abc ${x2}");
     }
 
-    @Test(expected = CircularPlaceholderException.class)
+    @Test(expected = MaridCircularPlaceholderException.class)
     public void circular2() {
         final Properties properties = new Properties();
         properties.setProperty("x1", "2");

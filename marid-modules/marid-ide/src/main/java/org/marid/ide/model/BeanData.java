@@ -78,6 +78,10 @@ public class BeanData {
         );
     }
 
+    public Stream<BeanMemberData> getArgs(int initializer) {
+        return initializers.get(initializer).args.stream();
+    }
+
     public Observable[] observables() {
         return new Observable[] {name, factory, producer, initializers};
     }
