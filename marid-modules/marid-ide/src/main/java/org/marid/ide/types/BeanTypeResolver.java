@@ -41,6 +41,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.reflect.TypeToken.of;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.IntStream.range;
 import static org.marid.l10n.L10n.m;
 
 /**
@@ -81,7 +82,7 @@ public class BeanTypeResolver {
                         }
                     }
                     initPs[i] = ps;
-                    initAs[i] = as;
+                    initAs[i] = range(0, as.length).mapToObj(n -> as[n] != null ? as[n] : ps[n]).toArray(Type[]::new);
                 }
 
                 final TypeResolver r = pairs.entrySet().stream().reduce(

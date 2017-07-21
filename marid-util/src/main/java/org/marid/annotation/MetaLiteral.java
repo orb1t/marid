@@ -21,6 +21,7 @@
 
 package org.marid.annotation;
 
+import java.lang.annotation.Annotation;
 import java.util.Objects;
 
 /**
@@ -40,6 +41,17 @@ public class MetaLiteral {
 
     public MetaLiteral(MetaInfo metaInfo) {
         this(metaInfo.name(), metaInfo.icon(), metaInfo.description());
+    }
+
+    public MetaLiteral(Annotation annotation) {
+        final Class<? extends Annotation> type = annotation.annotationType();
+        try {
+            name = type.getMethod("name").invoke(annotation).toString();
+            icon = type.getMethod("icon").invoke(annotation).toString();
+            description = type.getMethod("description").invoke(annotation).toString();
+        } catch (ReflectiveOperationException x) {
+            throw new IllegalStateException(x);
+        }
     }
 
     @Override
