@@ -67,6 +67,10 @@ public class BeanTypeResolverContext {
         return beanMap.get(name);
     }
 
+    public BeanFactoryInfo factory(String name) {
+        return factoryMap.get(name);
+    }
+
     public void reset(String name) {
         resolved.remove(name);
         factoryMap.remove(name);

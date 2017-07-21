@@ -83,11 +83,6 @@ public class BeanTypeResolver {
         });
     }
 
-    public BeanFactoryInfo factory(BeanTypeResolverContext context, String beanName) {
-        final BeanData beanData = requireNonNull(context.beanMap.get(beanName), () -> m("No such bean: {0}", beanName));
-        return context.factoryMap.computeIfAbsent(beanName, k -> new BeanFactoryInfo(beanData, this, context));
-    }
-
     private TypeResolver resolver(TypeResolver resolver, TypePair pair) {
         if (pair.formal.isPrimitive()) {
             return resolver;

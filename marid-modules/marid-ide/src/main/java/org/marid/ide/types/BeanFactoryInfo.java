@@ -26,6 +26,7 @@ import org.marid.ide.model.BeanData;
 import org.marid.misc.Casts;
 import org.marid.runtime.beans.Bean;
 
+import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Executable;
@@ -45,15 +46,34 @@ import static org.springframework.util.ClassUtils.resolveClassName;
  */
 public class BeanFactoryInfo {
 
+    @Nonnull
     public final Bean bean;
+
+    @Nonnull
     public final String factory;
+
+    @Nonnull
     public final Class<?> factoryClass;
+
+    @Nonnull
     public final TypeToken<?> factoryToken;
+
+    @Nonnull
     public final MethodHandle returnHandle;
+
+    @Nonnull
     public final Member returnMember;
+
+    @Nonnull
     public final Class<?> returnClass;
+
+    @Nonnull
     public final Type genericReturnType;
+
+    @Nonnull
     public final TypeToken<?> genericReturnToken;
+
+    @Nonnull
     public final Type returnType;
 
     public BeanFactoryInfo(BeanData beanData, BeanTypeResolver resolver, BeanTypeResolverContext context) {

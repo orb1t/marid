@@ -52,7 +52,8 @@ public class BeanTypes {
 
     public Type getActualArgType() {
         final Type beanType = getBeanType();
-        final BeanFactoryInfo factoryInfo = typeResolver.factory(resolverContext, arg.parent.parent.getName());
+        final BeanFactoryInfo factoryInfo = resolverContext.factory(arg.parent.parent.getName());
+        final int argIndex = arg.parent.args.indexOf(arg);
         return null;
     }
 }
