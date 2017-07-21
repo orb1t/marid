@@ -46,12 +46,15 @@ public class BeanTypeResolverTest extends AbstractJUnit4SpringContextTests {
     private Function<String, Type> typeResolver;
 
     @Autowired
+    private Function<String, BeanTypeInfo> typeInfoResolver;
+
+    @Autowired
     private BeanFile file;
 
     @Test
     public void allBeans() {
         for (final BeanData bean : file.beans) {
-            final Type type = typeResolver.apply(bean.getName());
+            final BeanTypeInfo type = typeInfoResolver.apply(bean.getName());
             log(INFO, "{0}: {1}", bean.getName(), type);
         }
     }

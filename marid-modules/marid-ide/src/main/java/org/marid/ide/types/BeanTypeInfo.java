@@ -24,6 +24,10 @@ import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.model.BeanMethodData;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Formatter;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.UnaryOperator;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -36,16 +40,31 @@ public class BeanTypeInfo {
     private final Type[][] initializerParameters;
     private final Type[][] initializerArguments;
 
-    public BeanTypeInfo(Type type,
+    public BeanTypeInfo(UnaryOperator<Type> resolver,
+                        Type type,
                         Type[] parameters,
                         Type[] arguments,
                         Type[][] initializerParameters,
                         Type[][] initializerArguments) {
-        this.type = type;
+        this.type = resolver.apply(type);
         this.parameters = parameters;
         this.arguments = arguments;
         this.initializerParameters = initializerParameters;
         this.initializerArguments = initializerArguments;
+
+        for (int i = 0; i < arguments.length; i++) {
+            final Type parameter = resolver.apply(parameters[i]);
+            arguments[i] = arguments[i] == null ? parameter : resolver.apply(arguments[i]);
+        }
+
+        for (int i = 0; i < initializerArguments.length; i++) {
+            final Type[] iParameters = initializerParameters[i];
+            final Type[] iArguments = initializerArguments[i];
+            for (int k = 0; k < iArguments.length; k++) {
+                final Type p = resolver.apply(iParameters[k]);
+                iArguments[k] = iArguments[k] == null ? p : resolver.apply(iArguments[k]);
+            }
+        }
     }
 
     public Type getType() {
@@ -70,5 +89,28 @@ public class BeanTypeInfo {
 
     public Type getArgument(BeanMethodArgData argument) {
         return getArguments(argument.parent)[argument.parent.args.indexOf(argument)];
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        final AtomicBoolean empty = new AtomicBoolean(true);
+        try (final Formatter formatter = new Formatter(builder)) {
+            formatter.format("%s{", type);
+            if (parameters.length > 0) {
+                if (empty.compareAndSet(true, false)) formatter.format("%n");
+                formatter.format("\t%s%n", Arrays.toString(parameters));
+                formatter.format("\t%s%n", Arrays.toString(arguments));
+            }
+            for (int i = 0; i < initializerParameters.length; i++) {
+                if (initializerParameters[i].length > 0) {
+                    if (empty.compareAndSet(true, false)) formatter.format("%n");
+                    formatter.format("\t%s%n", Arrays.toString(initializerParameters[i]));
+                    formatter.format("\t%s%n", Arrays.toString(initializerArguments[i]));
+                }
+            }
+            formatter.format("}");
+        }
+        return builder.toString();
     }
 }

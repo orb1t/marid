@@ -158,4 +158,9 @@ public class BeanTypeResolverTestContext {
     public Function<String, Type> typeResolver(BeanTypeResolver resolver, BeanTypeResolverContext context) {
         return name -> resolver.resolve(context, name);
     }
+
+    @Bean
+    public Function<String, BeanTypeInfo> typeInfoResolver(BeanTypeResolver resolver, BeanTypeResolverContext context) {
+        return name -> resolver.resolveInfo(context, name);
+    }
 }

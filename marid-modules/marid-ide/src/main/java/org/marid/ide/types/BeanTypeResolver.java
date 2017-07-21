@@ -37,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static com.google.common.reflect.TypeToken.of;
@@ -65,8 +66,6 @@ public class BeanTypeResolver {
                 for (int i = 0; i < beanPs.length; i++) {
                     if (beanAs[i] != null) {
                         resolve(pairs, info.factoryToken.resolveType(beanPs[i]), of(beanAs[i]));
-                    } else {
-                        beanAs[i] = info.factoryToken.resolveType(beanPs[i]).getType();
                     }
                 }
                 final Type[][] initPs = new Type[info.bean.initializers.length][];
@@ -78,8 +77,6 @@ public class BeanTypeResolver {
                     for (int k = 0; k < as.length; k++) {
                         if (as[k] != null) {
                             resolve(pairs, info.factoryToken.resolveType(ps[k]), of(as[k]));
-                        } else {
-                            as[k] = info.factoryToken.resolveType(ps[k]).getType();
                         }
                     }
                     initPs[i] = ps;
@@ -91,11 +88,8 @@ public class BeanTypeResolver {
                         (a, e) -> a.where(e.getKey().getType(), commonAncestor(e).getType()),
                         (r1, r2) -> r2
                 );
-                final Type resolvedType = r.resolveType(info.returnType);
-                final TypeToken<?> resolvedToken = info.factoryToken.resolveType(resolvedType);
-                final Type type = resolvedToken.getType();
-
-                return new BeanTypeInfo(type, beanPs, beanPs, initPs, initAs);
+                final UnaryOperator<Type> resolverFunc = t -> info.factoryToken.resolveType(r.resolveType(t)).getType();
+                return new BeanTypeInfo(resolverFunc, info.returnType, beanPs, beanPs, initPs, initAs);
             } catch (RuntimeException x) {
                 throw x;
             } catch (Exception x) {
