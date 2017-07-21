@@ -105,17 +105,14 @@ final class MaridBeanCreationContext implements AutoCloseable {
         }
 
         if (instance != null) {
-            final MethodHandle[] initializers = bean.findInitializers(constructor, bean.initializers);
-            for (int k = 0; k < initializers.length; k++) {
-                final BeanMethod initializer = bean.initializers[k];
-                initializers[k] = bind(initializer, initializers[k], instance);
-                final Class<?>[] argTypes = initializers[k].type().parameterArray();
+            for (final BeanMethod initializer : bean.initializers) {
+                final MethodHandle handle = bind(initializer, bean.findInitializer(constructor, initializer), instance);
+                final Class<?>[] argTypes = handle.type().parameterArray();
                 final Object[] args = new Object[argTypes.length];
                 for (int i = 0; i < args.length; i++) {
-                    final BeanMethodArg arg = initializer.args[i];
-                    args[i] = arg(bean, initializer, arg, argTypes[i]);
+                    args[i] = arg(bean, initializer, initializer.args[i], argTypes[i]);
                 }
-                invoke(bean, initializer, initializers[k], args);
+                invoke(bean, initializer, handle, args);
             }
             context.initialize(name, instance);
         }

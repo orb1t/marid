@@ -69,11 +69,11 @@ public class BeanTypeResolver {
                         }
                     }
                 }
-                final MethodHandle[] initializers = info.bean.findInitializers(info.returnHandle, info.bean.initializers);
-                final Type[][] initPs = new Type[initializers.length][];
-                final Type[][] initAs = new Type[initializers.length][];
-                for (int i = 0; i < initializers.length; i++) {
-                    final Type[] ps = formalTypes(initializers[i]);
+                final Type[][] initPs = new Type[info.bean.initializers.length][];
+                final Type[][] initAs = new Type[info.bean.initializers.length][];
+                for (int i = 0; i < info.bean.initializers.length; i++) {
+                    final MethodHandle handle = info.bean.findInitializer(info.returnHandle, info.bean.initializers[i]);
+                    final Type[] ps = formalTypes(handle);
                     final Type[] as = beanData.getArgs(i).map(a -> actualType(context, a)).toArray(Type[]::new);
                     if (ps.length == as.length) {
                         for (int k = 0; k < as.length; k++) {

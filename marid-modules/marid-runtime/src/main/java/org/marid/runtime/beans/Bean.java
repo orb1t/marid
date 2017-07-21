@@ -122,28 +122,24 @@ public final class Bean {
         return factory.startsWith("@") ? null : factory;
     }
 
-    public MethodHandle[] findInitializers(MethodHandle constructor, BeanMethod... initializers) {
+    public MethodHandle findInitializer(MethodHandle constructor, BeanMethod initializer) {
         final Class<?> targetClass = constructor.type().returnType();
-        final MethodHandle[] handles = new MethodHandle[initializers.length];
-        for (int i = 0; i < handles.length; i++) {
-            try {
-                handles[i] = findProducer(targetClass, initializers[i], false);
-            } catch (Throwable x) {
-                throw new MaridMethodNotFoundException(name, initializers[i].name(), x);
-            }
+        try {
+            return findMethod(targetClass, initializer, false);
+        } catch (Throwable x) {
+            throw new MaridMethodNotFoundException(name, initializer.name(), x);
         }
-        return handles;
     }
 
     public MethodHandle findProducer(Class<?> targetClass) {
         try {
-            return findProducer(targetClass, producer, true);
+            return findMethod(targetClass, producer, true);
         } catch (Throwable x) {
             throw new MaridMethodNotFoundException(name, producer.name(), x);
         }
     }
 
-    private MethodHandle findProducer(Class<?> targetClass, BeanMethod producer, boolean getters) throws Exception {
+    private MethodHandle findMethod(Class<?> targetClass, BeanMethod producer, boolean getters) throws Exception {
         if (producer.name().equals("new")) {
             for (final Constructor<?> constructor : targetClass.getConstructors()) {
                 if (producer.matches(constructor.getParameterTypes())) {
