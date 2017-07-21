@@ -40,7 +40,6 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Stream.of;
 import static org.marid.l10n.L10n.m;
-import static org.marid.runtime.beans.Bean.findInitializers;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -70,7 +69,7 @@ public class BeanTypeResolver {
                         }
                     }
                 }
-                final MethodHandle[] initializers = findInitializers(info.returnHandle, info.bean.initializers);
+                final MethodHandle[] initializers = info.bean.findInitializers(info.returnHandle, info.bean.initializers);
                 final Type[][] initPs = new Type[initializers.length][];
                 final Type[][] initAs = new Type[initializers.length][];
                 for (int i = 0; i < initializers.length; i++) {
@@ -142,7 +141,11 @@ public class BeanTypeResolver {
                     final Field field = raw.getField(arg.getFilter());
                     return token.resolveType(field.getGenericType()).getType();
                 } catch (NoSuchFieldException | NullPointerException fx) {
-                    throw new MaridFilterNotFoundException(arg.toArg());
+                    throw new MaridFilterNotFoundException(
+                            arg.parent.parent.getName(),
+                            arg.parent.toProducer().name(),
+                            arg.getName(),
+                            arg.getFilter());
                 }
             }
         }

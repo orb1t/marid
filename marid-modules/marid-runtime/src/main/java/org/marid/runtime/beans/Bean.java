@@ -22,6 +22,8 @@
 package org.marid.runtime.beans;
 
 import org.marid.io.Xmls;
+import org.marid.runtime.exception.MaridFilterNotFoundException;
+import org.marid.runtime.exception.MaridMethodNotFoundException;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -120,20 +122,28 @@ public final class Bean {
         return factory.startsWith("@") ? null : factory;
     }
 
-    public static MethodHandle[] findInitializers(MethodHandle constructor, BeanMethod... initializers) throws Exception {
+    public MethodHandle[] findInitializers(MethodHandle constructor, BeanMethod... initializers) {
         final Class<?> targetClass = constructor.type().returnType();
         final MethodHandle[] handles = new MethodHandle[initializers.length];
         for (int i = 0; i < handles.length; i++) {
-            handles[i] = findProducer(targetClass, initializers[i], false);
+            try {
+                handles[i] = findProducer(targetClass, initializers[i], false);
+            } catch (Throwable x) {
+                throw new MaridMethodNotFoundException(name, initializers[i].name(), x);
+            }
         }
         return handles;
     }
 
-    public MethodHandle findProducer(Class<?> targetClass) throws Exception {
-        return findProducer(targetClass, producer, true);
+    public MethodHandle findProducer(Class<?> targetClass) {
+        try {
+            return findProducer(targetClass, producer, true);
+        } catch (Throwable x) {
+            throw new MaridMethodNotFoundException(name, producer.name(), x);
+        }
     }
 
-    public static MethodHandle findProducer(Class<?> targetClass, BeanMethod producer, boolean getters) throws Exception {
+    private MethodHandle findProducer(Class<?> targetClass, BeanMethod producer, boolean getters) throws Exception {
         if (producer.name().equals("new")) {
             for (final Constructor<?> constructor : targetClass.getConstructors()) {
                 if (producer.matches(constructor.getParameterTypes())) {
@@ -159,7 +169,7 @@ public final class Bean {
         throw new IllegalStateException("No producers found for " + producer + " of " + targetClass);
     }
 
-    public static MethodHandle filtered(String filter, MethodHandle handle) throws Exception {
+    public MethodHandle filtered(BeanMethod m, BeanMethodArg a, String filter, MethodHandle handle) {
         final Lookup lookup = publicLookup();
         if (filter == null) {
             return handle;
@@ -171,15 +181,15 @@ public final class Bean {
                     throw new NoSuchMethodException(filter);
                 }
                 return MethodHandles.filterReturnValue(handle, lookup.unreflect(method));
-            } catch (NoSuchMethodException e1) {
+            } catch (NoSuchMethodException | IllegalAccessException e1) {
                 try {
                     final Field field = type.getField(filter);
                     if (Modifier.isStatic(field.getModifiers())) {
                         throw new NoSuchFieldException(filter);
                     }
                     return MethodHandles.filterReturnValue(handle, lookup.unreflectGetter(field));
-                } catch (NoSuchFieldException x) {
-                    throw new IllegalArgumentException("No filters found: " + filter);
+                } catch (NoSuchFieldException | IllegalAccessException x) {
+                    throw new MaridFilterNotFoundException(name, m.name(), a.name, filter);
                 }
             }
         }

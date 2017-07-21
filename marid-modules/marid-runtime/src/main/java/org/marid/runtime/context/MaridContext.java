@@ -66,7 +66,7 @@ public final class MaridContext implements AutoCloseable {
         this(configuration, Thread.currentThread().getContextClassLoader());
     }
 
-    void initialize(String name, Object bean) throws Exception {
+    void initialize(String name, Object bean) {
         fireEvent(l -> l.onEvent(new BeanEvent(bean, name, "PRE_INIT")));
         if (bean instanceof Initializable) {
             ((Initializable) bean).init();

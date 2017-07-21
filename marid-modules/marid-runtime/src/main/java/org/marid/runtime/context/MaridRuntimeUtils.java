@@ -21,6 +21,8 @@
 
 package org.marid.runtime.context;
 
+import org.marid.runtime.exception.MaridBeanClassLoadingException;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -40,5 +42,13 @@ interface MaridRuntimeUtils {
             }
         }
         return null;
+    }
+
+    static Class<?> loadClass(ClassLoader classLoader, String beanName, String className) {
+        try {
+            return classLoader.loadClass(className);
+        } catch (Exception x) {
+            throw new MaridBeanClassLoadingException(beanName, className, x);
+        }
     }
 }

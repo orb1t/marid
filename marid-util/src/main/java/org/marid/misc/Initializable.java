@@ -26,5 +26,5 @@ package org.marid.misc;
  */
 public interface Initializable {
 
-    void init() throws Exception;
+    void init();
 }

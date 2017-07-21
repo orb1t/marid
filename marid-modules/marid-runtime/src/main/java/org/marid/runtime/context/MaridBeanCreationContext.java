@@ -22,16 +22,17 @@
 package org.marid.runtime.context;
 
 import org.marid.runtime.beans.Bean;
-import org.marid.runtime.beans.BeanMethodArg;
 import org.marid.runtime.beans.BeanMethod;
+import org.marid.runtime.beans.BeanMethodArg;
 import org.marid.runtime.converter.DefaultValueConvertersManager;
+import org.marid.runtime.exception.MaridBeanArgConverterNotFoundException;
+import org.marid.runtime.exception.MaridBeanMethodArgException;
+import org.marid.runtime.exception.MaridBeanMethodInvocationException;
 import org.marid.runtime.exception.MaridCircularBeanException;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
@@ -47,7 +48,6 @@ final class MaridBeanCreationContext implements AutoCloseable {
     private final Map<String, Bean> beanMap;
     private final Map<String, Class<?>> beanClasses = new HashMap<>();
     private final Set<String> creationBeanNames = new LinkedHashSet<>();
-    private final AtomicReference<Supplier<String>> lastMessage = new AtomicReference<>(() -> null);
     private final List<Throwable> throwables = new ArrayList<>();
     private final DefaultValueConvertersManager convertersManager;
     private final MaridRuntimeObject runtime;
@@ -85,72 +85,72 @@ final class MaridBeanCreationContext implements AutoCloseable {
         }
     }
 
-    private Object create0(String name, Bean bean) throws Throwable {
-        lastMessage.set(() -> String.format("[%s] factory setup: %s", name, bean.factory));
-        final Object factoryObject;
-        final Class<?> factoryClass;
-        if (Bean.type(bean.factory) != null) {
-            factoryClass = context.classLoader.loadClass(Bean.type(bean.factory));
-            factoryObject = null;
-        } else {
-            factoryObject = getOrCreate(Bean.ref(bean.factory));
-            factoryClass = beanClasses.get(Bean.ref(bean.factory));
-        }
-        lastMessage.set(() -> String.format("[%s] producer lookup: %s", name, bean.producer));
+    private Object create0(String name, Bean bean) {
+        final Object factoryObject = bean.factory.startsWith("@") ? getOrCreate(bean.factory.substring(1)) : null;
+        final Class<?> factoryClass = bean.factory.startsWith("@")
+                ? beanClasses.get(bean.factory.substring(1))
+                : MaridRuntimeUtils.loadClass(context.classLoader, name, bean.factory);
         final MethodHandle constructor = bind(bean.producer, bean.findProducer(factoryClass), factoryObject);
 
         beanClasses.put(name, constructor.type().returnType());
         final Object instance;
         {
             final Class<?>[] argTypes = constructor.type().parameterArray();
-            lastMessage.set(() -> String.format("[%s] arguments setup", name));
             final Object[] args = new Object[argTypes.length];
             for (int i = 0; i < args.length; i++) {
                 final BeanMethodArg arg = bean.producer.args[i];
-                lastMessage.set(() -> String.format("[%s] argument setup: %s", name, arg));
-                args[i] = arg(arg, argTypes[i]);
+                args[i] = arg(bean, bean.producer, arg, argTypes[i]);
             }
-            lastMessage.set(() -> String.format("[%s] constructor invocation", name));
-            instance = constructor.invokeWithArguments(args);
+            instance = invoke(bean, bean.producer, constructor, args);
         }
 
         if (instance != null) {
-            lastMessage.set(() -> String.format("[%s] initializers", name));
-            final MethodHandle[] initializers = Bean.findInitializers(constructor, bean.initializers);
+            final MethodHandle[] initializers = bean.findInitializers(constructor, bean.initializers);
             for (int k = 0; k < initializers.length; k++) {
                 final BeanMethod initializer = bean.initializers[k];
                 initializers[k] = bind(initializer, initializers[k], instance);
-                lastMessage.set(() -> String.format("%s initializer %s", name, initializer));
                 final Class<?>[] argTypes = initializers[k].type().parameterArray();
-                lastMessage.set(() -> String.format("[%s] arguments setup: %s", name, initializer));
                 final Object[] args = new Object[argTypes.length];
                 for (int i = 0; i < args.length; i++) {
                     final BeanMethodArg arg = initializer.args[i];
-                    lastMessage.set(() -> String.format("[%s] argument setup: %s", name, arg));
-                    args[i] = arg(arg, argTypes[i]);
+                    args[i] = arg(bean, initializer, arg, argTypes[i]);
                 }
-                lastMessage.set(() -> String.format("[%s] initializer invocation: %s", name, initializer));
-                initializers[k].invokeWithArguments(args);
+                invoke(bean, initializer, initializers[k], args);
             }
             context.initialize(name, instance);
         }
         return instance;
     }
 
-    private Object arg(BeanMethodArg member, Class<?> type) throws Throwable {
-        final Object arg;
-        if (member.value == null) {
-            arg = MaridRuntimeUtils.defaultValue(type);
-        } else {
-            arg = convertersManager.getConverter(member.type)
-                    .map(c -> c.apply(runtime.resolvePlaceholders(member.value)))
-                    .orElseThrow(() -> new IllegalArgumentException("Unable to find converter for " + member.type));
+    private Object invoke(Bean bean, BeanMethod method, MethodHandle handle, Object... args) {
+        try {
+            return handle.invokeWithArguments(args);
+        } catch (Throwable x) {
+            throw new MaridBeanMethodInvocationException(bean.name, method.name(), x);
         }
-        if (arg == null || member.filter == null) {
-            return arg;
+    }
+
+    private Object arg(Bean bean, BeanMethod method, BeanMethodArg methodArg, Class<?> type) {
+        try {
+            final Object arg;
+            if (methodArg.value == null) {
+                arg = MaridRuntimeUtils.defaultValue(type);
+            } else {
+                arg = convertersManager.getConverter(methodArg.type)
+                        .map(c -> c.apply(runtime.resolvePlaceholders(methodArg.value)))
+                        .orElseThrow(() -> new MaridBeanArgConverterNotFoundException(bean, method, methodArg));
+            }
+            if (arg == null || methodArg.filter == null) {
+                return arg;
+            }
+            final MethodHandle argHandle = MethodHandles.constant(arg.getClass(), arg);
+            final MethodHandle filtered = bean.filtered(method, methodArg, methodArg.filter, argHandle);
+            return filtered.invoke();
+        } catch (RuntimeException x) {
+            throw x;
+        } catch (Throwable x) {
+            throw new MaridBeanMethodArgException(bean.name, method.name(), methodArg.name, x);
         }
-        final MethodHandle argHandle = MethodHandles.constant(arg.getClass(), arg);
-        return Bean.filtered(member.filter, argHandle).invoke();
     }
 
     private MethodHandle bind(BeanMethod producer, MethodHandle handle, Object instance) {
@@ -169,7 +169,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
             } catch (Throwable x) {
                 throwables.add(x);
             }
-            throw new MaridContextException(lastMessage.get().get(), throwables);
+            throw new MaridContextException("Context initialization failed", throwables);
         }
     }
 }

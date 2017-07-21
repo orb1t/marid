@@ -68,7 +68,7 @@ public class Bean1 implements Initializable {
     }
 
     @Override
-    public void init() throws Exception {
+    public void init() {
         q = 10;
     }
 
