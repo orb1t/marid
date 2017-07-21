@@ -127,6 +127,19 @@ public class BeanTypeResolverTestContext {
     }
 
     @Bean
+    public BeanData bean8() throws Exception {
+        return new BeanData(
+                "bean8",
+                AnotherComplexBean.class.getName(),
+                new BeanMethod(
+                        AnotherComplexBean.class.getConstructor(Object.class, Object.class),
+                        new BeanMethodArg("arg0", "int", null, "1"),
+                        new BeanMethodArg("arg0", "long", null, "2")
+                )
+        );
+    }
+
+    @Bean
     public BeanFile beansFile(List<BeanData> beans) {
         return build(new BeanFile(), f -> f.beans.setAll(beans));
     }
