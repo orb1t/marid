@@ -21,7 +21,10 @@
 
 package org.marid.runtime.annotation;
 
-import javax.annotation.processing.*;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -30,8 +33,8 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
+import static javax.tools.Diagnostic.Kind.NOTE;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 
 /**
@@ -41,30 +44,19 @@ import static javax.tools.StandardLocation.CLASS_OUTPUT;
 @SupportedAnnotationTypes({"org.marid.runtime.annotation.MaridBean"})
 public class MaridAnnotationProcessor extends AbstractProcessor {
 
-    private final AtomicBoolean started = new AtomicBoolean();
-
-    private Filer filer;
-    private FileObject beanListFile;
-
-    @Override
-    public synchronized void init(ProcessingEnvironment processingEnv) {
-        super.init(processingEnv);
-        filer = processingEnv.getFiler();
-    }
-
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        if (!roundEnv.getRootElements().isEmpty()) {
+        final Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(MaridBean.class);
+        if (!elements.isEmpty()) {
             try {
-                if (started.compareAndSet(false, true)) {
-                    beanListFile = filer.createResource(CLASS_OUTPUT, "META-INF.marid", "bean-classes.lst");
-                } else {
-                    beanListFile = filer.getResource(CLASS_OUTPUT, "META-INF.marid", "bean-classes.lst");
-                }
-                try (final BufferedWriter writer = new BufferedWriter(beanListFile.openWriter())) {
-                    for (final Element element : roundEnv.getRootElements()) {
+                final FileObject file = processingEnv
+                        .getFiler()
+                        .createResource(CLASS_OUTPUT, "", "META-INF/marid/bean-classes.lst");
+                try (final BufferedWriter writer = new BufferedWriter(file.openWriter())) {
+                    for (final Element element : elements) {
                         writer.write(element.toString());
                         writer.newLine();
+                        processingEnv.getMessager().printMessage(NOTE, "Bean found", element);
                     }
                 }
             } catch (IOException x) {

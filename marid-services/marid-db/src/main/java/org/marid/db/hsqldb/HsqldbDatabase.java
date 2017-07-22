@@ -26,6 +26,8 @@ import org.hsqldb.DatabaseManager;
 import org.hsqldb.jdbc.JDBCSessionDataSource;
 import org.hsqldb.server.Server;
 import org.hsqldb.server.ServerConstants;
+import org.marid.runtime.annotation.MaridBean;
+import org.marid.runtime.annotation.MaridBeanProducer;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -37,11 +39,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.locks.LockSupport;
-import java.util.stream.Collectors;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -53,6 +55,7 @@ import static org.marid.logging.Log.log;
 /**
  * @author Dmitry Ovchinnikov.
  */
+@MaridBean(name = "HSQLDB Database", icon = "D_DATABASE")
 public final class HsqldbDatabase implements Closeable {
 
     private final Server server;
@@ -63,6 +66,7 @@ public final class HsqldbDatabase implements Closeable {
     private PrintWriter outWriter;
     private PrintWriter errWriter;
 
+    @MaridBeanProducer(name = "HSQLDB Database", icon = "D_DATABASE")
     public HsqldbDatabase(HsqldbProperties properties) throws MalformedURLException {
         log(INFO, "{0}", properties);
         directory = properties.getDirectory();
@@ -156,8 +160,9 @@ public final class HsqldbDatabase implements Closeable {
         }
     }
 
+    @MaridBeanProducer(name = "Data Source", icon = "D_DATABASE_OUTLINE")
     public DataSource dataSource(String name) {
-        final int dbIndex = databaseNameToIndex.keySet().stream().collect(Collectors.toList()).indexOf(name);
+        final int dbIndex = new ArrayList<>(databaseNameToIndex.keySet()).indexOf(name);
         final Database database = DatabaseManager.getDatabase(dbIndex);
         return new JDBCSessionDataSource(database, "PUBLIC");
     }

@@ -25,7 +25,6 @@ import org.marid.runtime.exception.MaridBeanClassLoadingException;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Comparator;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -65,10 +64,10 @@ public interface MaridRuntimeUtils {
                                    @Nonnull Predicate<Method> filter,
                                    @Nonnull Comparator<Method> methodComparator) {
         final TreeSet<Method> methods = new TreeSet<>(methodComparator);
-        final Consumer<Class<?>> consumer = c -> Stream.of(c.getMethods())
+        final Consumer<Class<?>> consumer = c -> Stream.of(c.getDeclaredMethods())
                 .filter(m -> m.getParameterCount() == 0)
-                .filter(m -> Modifier.isPublic(m.getDeclaringClass().getModifiers()))
                 .filter(filter)
+                .peek(m -> m.setAccessible(true))
                 .forEach(methods::add);
         for (Class<?> c = bean.getClass(); c != null; c = c.getSuperclass()) {
             consumer.accept(c);
