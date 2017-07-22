@@ -23,20 +23,14 @@ package org.marid.dependant.beaneditor;
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.util.Pair;
-import org.marid.annotation.MetaLiteral;
+import org.marid.dependant.beaneditor.dao.LibraryBeanDao;
+import org.marid.dependant.beaneditor.model.LibraryBean;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.types.BeanTypeInfo;
 import org.marid.ide.types.BeanTypeResolver;
 import org.marid.ide.types.BeanTypeResolverContext;
-import org.marid.runtime.annotation.MaridBean;
-import org.marid.runtime.beans.Bean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Type;
@@ -50,17 +44,18 @@ public class BeanEditorContext {
 
     private final ProjectProfile profile;
     private final BeanTypeResolver resolver;
-    private final ObservableList<Pair<Bean, MetaLiteral>> discoveredBeans = FXCollections.observableArrayList();
+    private final LibraryBeanDao libraryBeanDao;
+
+    public final ObservableList<LibraryBean> discoveredBeans = FXCollections.observableArrayList();
 
     private BeanTypeResolverContext context;
     private BeanTypeResolverContext discoveredContext;
 
     @Autowired
-    public BeanEditorContext(ProjectProfile profile, BeanTypeResolver resolver) {
+    public BeanEditorContext(ProjectProfile profile, BeanTypeResolver resolver, LibraryBeanDao libraryBeanDao) {
         this.profile = profile;
         this.resolver = resolver;
-        this.context = new BeanTypeResolverContext(profile);
-        this.discoveredContext = new BeanTypeResolverContext(profile);
+        this.libraryBeanDao = libraryBeanDao;
 
         profile.enabledProperty().addListener(this::onProfileEnabledChange);
         CompletableFuture.runAsync(this::onProfileUpdate);
@@ -97,8 +92,6 @@ public class BeanEditorContext {
         context = new BeanTypeResolverContext(profile);
         discoveredContext = new BeanTypeResolverContext(profile);
 
-        final ClassPathScanningCandidateComponentProvider p = new ClassPathScanningCandidateComponentProvider(false);
-        p.setResourceLoader(new PathMatchingResourcePatternResolver(context.getClassLoader()));
-        p.addIncludeFilter(new AnnotationTypeFilter(MaridBean.class));
+        discoveredBeans.setAll(libraryBeanDao.beans());
     }
 }

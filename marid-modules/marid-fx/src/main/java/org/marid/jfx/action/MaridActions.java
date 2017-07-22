@@ -31,8 +31,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
@@ -53,9 +51,9 @@ public interface MaridActions {
                 continue;
             }
             final MenuItem menuItem = action.menuItem();
-            if (!action.children.isEmpty()) {
+            if (!action.getChildren().isEmpty()) {
                 final Menu menu = (Menu) menuItem;
-                final Menu[] subMenus = menus(action.children);
+                final Menu[] subMenus = menus(action.getChildren());
                 switch (subMenus.length) {
                     case 0:
                         continue;
@@ -89,12 +87,15 @@ public interface MaridActions {
     }
 
     static MenuItem[] contextMenu(Collection<FxAction> actions) {
-        final AtomicBoolean first = new AtomicBoolean(true);
-        return Stream.of(menus(actions))
-                .flatMap(m -> first.compareAndSet(true, false)
-                        ? m.getItems().stream()
-                        : concat(of(new SeparatorMenuItem()), m.getItems().stream()))
-                .toArray(MenuItem[]::new);
+        final Menu[] menus = menus(actions);
+        switch (menus.length) {
+            case 0:
+                return menus;
+            case 1:
+                return menus[0].getItems().toArray(new MenuItem[menus[0].getItems().size()]);
+            default:
+                return menus;
+        }
     }
 
     static void initToolbar(Collection<FxAction> actions, ToolBar toolBar) {

@@ -42,7 +42,7 @@ import static org.marid.logging.Log.log;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(name = "Random Numeric DAQ Generator", icon = "D_RADIO", description = "Generates random sequences of numbers")
+@MaridBean(group = "DAQ Generators", name = "Random Numeric DAQ Generator", icon = "D_RADIO", description = "Generates random sequences of numbers")
 public class RandomNumericDaqGenerator {
 
     private final NumericWriter numericWriter;

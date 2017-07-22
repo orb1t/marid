@@ -33,6 +33,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.TYPE, ElementType.METHOD})
 public @interface MetaInfo {
 
+    String group() default "";
+
     String name() default "";
 
     String description() default "";

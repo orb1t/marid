@@ -57,7 +57,7 @@ public class SpecialActions {
             if (v.size() == 1) {
                 k.copy(v.get(0));
             } else {
-                k.children.addAll(v);
+                k.setChildren(v);
             }
             k.update();
         });

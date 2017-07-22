@@ -61,7 +61,7 @@ public class ScriptingValueConverters implements ValueConverters {
                 }
             };
             scriptEngineFactory.getExtensions().forEach(ext -> {
-                info.put(ext, new MetaLiteral(ext, "D_SCRIPT", description));
+                info.put(ext, new MetaLiteral("Scripting", ext, "D_SCRIPT", description));
                 functions.put(ext, function);
             });
         });

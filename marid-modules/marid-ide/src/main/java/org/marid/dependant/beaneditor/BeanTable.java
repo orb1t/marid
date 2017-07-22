@@ -20,11 +20,14 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.FxAction;
+import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.action.SpecialActions;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.table.MaridTableView;
@@ -94,5 +97,25 @@ public class BeanTable extends MaridTableView<BeanData> {
         column.setMaxWidth(800);
         column.setCellValueFactory(param -> param.getValue().getProducer().signature);
         getColumns().add(column);
+    }
+
+    @Autowired
+    private void initAdd(SpecialAction addAction, BeanEditorContext context) {
+        final FxAction action = new FxAction("add", "add", "add")
+                .setSpecialAction(addAction)
+                .bindText("Add a bean")
+                .setIcon("D_SERVER_PLUS")
+                .setDisabled(false);
+        final InvalidationListener listener = o -> {
+            final FxAction[] childen = context.discoveredBeans.stream()
+                    .map(bean -> new FxAction("bean", bean.literal.group)
+                            .setIcon(bean.literal.icon)
+                            .bindText(ls("%s: %s", ls(bean.literal.name), ls(bean.literal.description))))
+                    .toArray(FxAction[]::new);
+            action.setChildren(childen);
+        };
+        context.discoveredBeans.addListener(listener);
+        listener.invalidated(null);
+        actions.add(data -> action);
     }
 }

@@ -43,13 +43,13 @@ import javafx.scene.text.Text;
 import org.jetbrains.annotations.PropertyKey;
 import org.marid.jfx.LocalizedStrings;
 
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -63,7 +63,7 @@ public class FxAction implements Observable {
     public final String group;
     public final String menu;
 
-    public final List<FxAction> children = new ArrayList<>();
+    protected final ObservableList<FxAction> children = observableArrayList();
 
     protected ObservableValue<String> text;
     protected ObservableValue<KeyCombination> accelerator;
@@ -76,22 +76,20 @@ public class FxAction implements Observable {
 
     public SpecialAction specialAction;
 
-    public FxAction(@Nonnull String toolbarGroup, @Nonnull String group, @Nonnull String menu) {
+    public FxAction(String toolbarGroup, String group, String menu) {
         this.toolbarGroup = toolbarGroup;
         this.group = group;
         this.menu = menu;
+
+        children.addListener((InvalidationListener) observable -> listeners.forEach(l -> l.invalidated(observable)));
     }
 
-    public FxAction(@Nonnull String toolbarGroup) {
-        this.toolbarGroup = toolbarGroup;
-        this.group = null;
-        this.menu = null;
+    public FxAction(String toolbarGroup) {
+        this(toolbarGroup, null, null);
     }
 
-    public FxAction(@Nonnull String group, @Nonnull String menu) {
-        this.toolbarGroup = null;
-        this.group = group;
-        this.menu = menu;
+    public FxAction(String group, String menu) {
+        this(null, group, menu);
     }
 
     public String getToolbarGroup() {
@@ -280,6 +278,18 @@ public class FxAction implements Observable {
     @Override
     public void removeListener(InvalidationListener listener) {
         listeners.remove(listener);
+    }
+
+    public List<FxAction> getChildren() {
+        return Collections.unmodifiableList(children);
+    }
+
+    public void setChildren(FxAction... actions) {
+        children.setAll(actions);
+    }
+
+    public void setChildren(Collection<? extends FxAction> actions) {
+        children.setAll(actions);
     }
 
     @Override

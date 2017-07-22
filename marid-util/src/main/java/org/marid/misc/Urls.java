@@ -21,6 +21,8 @@
 
 package org.marid.misc;
 
+import org.marid.io.IOFunction;
+
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -31,6 +33,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -124,5 +127,43 @@ public interface Urls {
         } catch (IOException x) {
             throw new UncheckedIOException(x);
         }
+    }
+
+    @Nonnull
+    static Stream<URL> urls(@Nonnull ClassLoader classLoader, @Nonnull String resource) {
+        final Stream.Builder<URL> urls = Stream.builder();
+        try {
+            for (final Enumeration<URL> e = classLoader.getResources(resource); e.hasMoreElements(); ) {
+                urls.accept(e.nextElement());
+            }
+        } catch (IOException x) {
+            throw new UncheckedIOException(x);
+        }
+        return urls.build();
+    }
+
+    @Nonnull
+    static <E> Stream<E> urls(@Nonnull ClassLoader loader,
+                              @Nonnull String resource,
+                              @Nonnull Function<Scanner, E> scannerExtractor) {
+        return urls(loader, resource)
+                .map((IOFunction<URL, E>) url -> {
+                    try (final Scanner scanner = new Scanner(url.openStream(), "UTF-8")) {
+                        return scannerExtractor.apply(scanner);
+                    }
+                });
+    }
+
+    @Nonnull
+    static <E> Stream<E> lines(@Nonnull ClassLoader classLoader,
+                               @Nonnull String resource,
+                               @Nonnull Function<String, E> lineExtractor) {
+        return urls(classLoader, resource, scanner -> {
+            final Stream.Builder<String> builder = Stream.builder();
+            while (scanner.hasNextLine()) {
+                builder.accept(scanner.nextLine().trim());
+            }
+            return builder.build();
+        }).flatMap(Function.identity()).map(lineExtractor);
     }
 }

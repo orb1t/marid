@@ -33,9 +33,11 @@ import java.lang.annotation.Target;
 @Target({ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.FIELD})
 public @interface MaridBeanProducer {
 
-    String name();
+    String group() default "";
 
-    String icon();
+    String name() default "";
+
+    String icon() default "";
 
     String description() default "";
 }
