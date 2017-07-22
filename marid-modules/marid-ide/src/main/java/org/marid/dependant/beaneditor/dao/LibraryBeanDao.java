@@ -23,7 +23,6 @@ package org.marid.dependant.beaneditor.dao;
 import org.marid.annotation.MetaLiteral;
 import org.marid.dependant.beaneditor.model.LibraryBean;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.misc.Urls;
 import org.marid.runtime.annotation.MaridBean;
 import org.marid.runtime.annotation.MaridBeanProducer;
 import org.marid.runtime.beans.Bean;
@@ -32,15 +31,13 @@ import org.marid.runtime.beans.BeanMethodArg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.function.BiConsumer;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
 import java.util.stream.Stream;
 
 import static java.util.logging.Level.WARNING;
 import static org.marid.logging.Log.log;
+import static org.marid.misc.Urls.lines;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -58,47 +55,60 @@ public class LibraryBeanDao {
     }
 
     public LibraryBean[] beans() {
-        return Urls.lines(profile.getClassLoader(), BEAN_CLASSES, line -> {
-            if (line.isEmpty() || line.startsWith("#")) {
-                return Stream.<LibraryBean>empty();
+        return lines(profile.getClassLoader(), BEAN_CLASSES, this::beans).flatMap(v -> v).toArray(LibraryBean[]::new);
+    }
+
+    public Stream<LibraryBean> beans(String type) {
+        if (type.isEmpty() || type.startsWith("#")) {
+            return Stream.empty();
+        }
+        final Class<?> c;
+        try {
+            c = Class.forName(type, false, profile.getClassLoader());
+        } catch (ClassNotFoundException x) {
+            log(WARNING, "Class {0} is not found", x, type);
+            return Stream.empty();
+        }
+        final MaridBean maridBean = c.getAnnotation(MaridBean.class);
+        if (maridBean == null) {
+            log(WARNING, "{0} is not annotated with {1}", c, MaridBean.class.getName());
+            return Stream.empty();
+        }
+        final Stream.Builder<LibraryBean> builder = Stream.builder();
+        for (final Constructor<?> constructor: c.getConstructors()) {
+            final Annotation annotation = constructor.getParameterCount() == 0
+                    ? maridBean
+                    : constructor.getAnnotation(MaridBeanProducer.class);
+            if (annotation == null) {
+                continue;
             }
-            final Class<?> c;
-            try {
-                c = Class.forName(line, false, profile.getClassLoader());
-            } catch (ClassNotFoundException x) {
-                log(WARNING, "Class {0} is not found", x, line);
-                return Stream.<LibraryBean>empty();
-            }
-            final MaridBean maridBean = c.getAnnotation(MaridBean.class);
-            if (maridBean == null) {
-                log(WARNING, "{0} is not annotated with {1}", c, MaridBean.class.getName());
-                return Stream.<LibraryBean>empty();
-            }
-            final Stream.Builder<LibraryBean> builder = Stream.builder();
-            final BiConsumer<Executable, BeanMethod> consumer = (executable, method) -> {
-                final MaridBeanProducer maridProducer = executable.getAnnotation(MaridBeanProducer.class);
-                if (maridProducer == null) {
-                    return;
+            final MetaLiteral literal = new MetaLiteral(c, "D_SERVER_NETWORK", maridBean, annotation);
+            final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(constructor, args(constructor)));
+            builder.accept(new LibraryBean(bean, literal));
+        }
+        for (final Method method : c.getMethods()) {
+            if (Modifier.isStatic(method.getModifiers())) {
+                final MaridBeanProducer annotation = method.getAnnotation(MaridBeanProducer.class);
+                if (annotation == null) {
+                    continue;
                 }
-                final MetaLiteral literal = new MetaLiteral(
-                        c.getSimpleName(),
-                        "D_SERVER_NETWORK",
-                        c.getName(),
-                        maridBean, maridProducer
-                );
-                final Bean bean = new Bean(literal.name, c.getName(), method);
+                final MetaLiteral literal = new MetaLiteral(c, "D_SERVER_NETWORK", maridBean, annotation);
+                final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(method, args(method)));
                 builder.accept(new LibraryBean(bean, literal));
-            };
-            for (final Constructor<?> constructor: c.getConstructors()) {
-                consumer.accept(constructor, new BeanMethod(constructor, args(constructor)));
             }
-            for (final Method method : c.getMethods()) {
-                if (Modifier.isStatic(method.getModifiers())) {
-                    consumer.accept(method, new BeanMethod(method, args(method)));
+        }
+        for (final Field field : c.getFields()) {
+            if (Modifier.isStatic(field.getModifiers())) {
+                final MaridBeanProducer annotation = field.getAnnotation(MaridBeanProducer.class);
+                if (annotation == null) {
+                    continue;
                 }
+                final MetaLiteral literal = new MetaLiteral(c, "D_SERVER_NETWORK", maridBean, annotation);
+                final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(field));
+                builder.accept(new LibraryBean(bean, literal));
             }
-            return builder.build();
-        }).flatMap(v -> v).toArray(LibraryBean[]::new);
+        }
+        return builder.build();
     }
 
     public static BeanMethodArg[] args(Executable executable) {
