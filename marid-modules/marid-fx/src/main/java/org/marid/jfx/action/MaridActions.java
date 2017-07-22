@@ -24,10 +24,15 @@ package org.marid.jfx.action;
 import com.google.common.collect.ComputationException;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
 import javafx.application.Platform;
-import javafx.scene.control.*;
+import javafx.scene.control.Menu;
+import javafx.scene.control.Separator;
+import javafx.scene.control.ToolBar;
 import javafx.util.Pair;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +42,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.jfx.action.FxAction.grouped;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -45,57 +51,14 @@ import static org.marid.jfx.LocalizedStrings.ls;
 public interface MaridActions {
 
     static Menu[] menus(Collection<FxAction> actions) {
-        final Map<String, Map<String, Collection<MenuItem>>> itemMap = new TreeMap<>();
-        for (final FxAction action : actions) {
-            if (action.getMenu() == null) {
-                continue;
-            }
-            final MenuItem menuItem = action.menuItem();
-            if (!action.getChildren().isEmpty()) {
-                final Menu menu = (Menu) menuItem;
-                final Menu[] subMenus = menus(action.getChildren());
-                switch (subMenus.length) {
-                    case 0:
-                        continue;
-                    case 1:
-                        menu.getItems().addAll(subMenus[0].getItems());
-                        break;
-                    default:
-                        menu.getItems().addAll(subMenus);
-                        break;
-                }
-            }
-            itemMap
-                    .computeIfAbsent(action.getMenu(), k -> new TreeMap<>())
-                    .computeIfAbsent(action.getGroup(), k -> new ArrayList<>())
-                    .add(menuItem);
-        };
-        final List<Menu> menus = new ArrayList<>();
-        itemMap.forEach((menu, groupMap) -> {
-            final Menu m = new Menu();
-            m.textProperty().bind(ls(menu));
-            groupMap.forEach((group, menuItems) -> {
-                m.getItems().addAll(menuItems);
-                m.getItems().add(new SeparatorMenuItem());
-            });
-            if (!m.getItems().isEmpty()) {
-                m.getItems().remove(m.getItems().size() - 1);
-            }
-            menus.add(m);
-        });
-        return menus.toArray(new Menu[menus.size()]);
-    }
-
-    static MenuItem[] contextMenu(Collection<FxAction> actions) {
-        final Menu[] menus = menus(actions);
-        switch (menus.length) {
-            case 0:
-                return menus;
-            case 1:
-                return menus[0].getItems().toArray(new MenuItem[menus[0].getItems().size()]);
-            default:
-                return menus;
-        }
+        return actions.stream().collect(groupingBy(a -> a.menu, TreeMap::new, toList())).entrySet().stream()
+                .map(e -> {
+                    final Menu menu = new Menu();
+                    menu.textProperty().bind(ls(e.getKey()));
+                    menu.getItems().addAll(grouped(e.getValue()));
+                    return menu;
+                })
+                .toArray(Menu[]::new);
     }
 
     static void initToolbar(Collection<FxAction> actions, ToolBar toolBar) {

@@ -31,7 +31,6 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.ContextMenuEvent;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.action.MaridActions;
 import org.marid.jfx.action.SpecialActions;
 
 import javax.annotation.PostConstruct;
@@ -67,13 +66,13 @@ public class MaridTableView<T> extends TableView<T> {
             final TableRow<T> row = rowSupplier.get().get();
             row.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
                 final Collection<FxAction> fxActions = actions(row.getItem());
-                row.setContextMenu(fxActions.isEmpty() ? null : new ContextMenu(MaridActions.contextMenu(fxActions)));
+                row.setContextMenu(fxActions.isEmpty() ? null : new ContextMenu(FxAction.grouped(fxActions)));
             });
             return row;
         });
         addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
             final Collection<FxAction> fxActions = actions(null);
-            setContextMenu(fxActions.isEmpty() ? null : new ContextMenu(MaridActions.contextMenu(fxActions)));
+            setContextMenu(fxActions.isEmpty() ? null : new ContextMenu(FxAction.grouped(fxActions)));
         });
         getSelectionModel().selectedItemProperty().addListener(this::onInvalidate);
         focusedProperty().addListener((o, oV, nV) -> {

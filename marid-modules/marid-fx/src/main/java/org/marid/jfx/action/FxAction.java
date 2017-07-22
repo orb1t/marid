@@ -43,11 +43,10 @@ import javafx.scene.text.Text;
 import org.jetbrains.annotations.PropertyKey;
 import org.marid.jfx.LocalizedStrings;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
@@ -184,6 +183,23 @@ public class FxAction implements Observable {
         }, icon);
     }
 
+    public static MenuItem[] grouped(Collection<FxAction> actions) {
+        final Map<String, List<FxAction>> map = actions.stream()
+                .collect(Collectors.groupingBy(a -> a.group, TreeMap::new, Collectors.toList()));
+        return map.values().stream()
+                .reduce(new ArrayList<MenuItem>(), (a, e) -> {
+                    if (!a.isEmpty()) {
+                        a.add(new SeparatorMenuItem());
+                    }
+                    a.addAll(e.stream().map(FxAction::menuItem).collect(Collectors.toList()));
+                    return a;
+                }, (a1, a2) -> a2).toArray(new MenuItem[0]);
+    }
+
+    public MenuItem[] grouped() {
+        return grouped(children);
+    }
+
     public MenuItem menuItem() {
         final MenuItem item;
         if (selected != null) {
@@ -199,15 +215,7 @@ public class FxAction implements Observable {
         } else if (!children.isEmpty()) {
             final Menu menu = new Menu();
             item = menu;
-            final Menu[] menus = MaridActions.menus(children);
-            for (int i = 0; i < menus.length; i++) {
-                if (i > 0) {
-                    menu.getItems().add(new SeparatorMenuItem());
-                }
-                final MenuItem[] items = menus[i].getItems().toArray(new MenuItem[0]);
-                menus[i].getItems().clear();
-                menu.getItems().addAll(items);
-            }
+            menu.getItems().setAll(grouped(children));
         } else {
             item = new MenuItem();
             if (eventHandler != null) item.onActionProperty().bind(eventHandler);
@@ -247,7 +255,7 @@ public class FxAction implements Observable {
             } else {
                 button.disableProperty().unbind(); button.disableProperty().set(false);
                 button.onActionProperty().unbind(); button.setOnAction(event -> {
-                    final ContextMenu contextMenu = new ContextMenu(MaridActions.contextMenu(children));
+                    final ContextMenu contextMenu = new ContextMenu(grouped());
                     contextMenu.show(button, Side.BOTTOM, 0, 0);
                 });
             }

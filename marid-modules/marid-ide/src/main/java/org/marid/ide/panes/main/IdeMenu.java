@@ -47,6 +47,6 @@ public class IdeMenu extends MenuBar {
 
     @EventListener
     private void onIdeStart(ContextStartedEvent event) {
-        getMenus().addAll(MaridActions.menus(actionFactory.get()));
+        getMenus().setAll(MaridActions.menus(actionFactory.get()));
     }
 }
