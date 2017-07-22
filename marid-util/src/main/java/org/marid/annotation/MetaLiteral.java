@@ -86,7 +86,6 @@ public class MetaLiteral {
                                                                       @Nonnull String group,
                                                                       @Nonnull String name,
                                                                       @Nonnull String icon,
-                                                                      @Nonnull String description,
                                                                       @Nonnull E... elements) {
         final MetaLiteral[] v = of(elements)
                 .flatMap(e -> of(e.getDeclaringClass().getPackage(), e.getDeclaringClass(), e))
@@ -100,7 +99,7 @@ public class MetaLiteral {
                 of(v).map(e -> e.group).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(group),
                 of(v).map(e -> e.name).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(name),
                 of(v).map(e -> e.icon).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(icon),
-                of(v).map(e -> e.description).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(description)
+                of(v).map(e -> e.description).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse("")
         );
     }
 
@@ -110,7 +109,7 @@ public class MetaLiteral {
                                                                       @Nonnull Class<?> type,
                                                                       @Nonnull String icon,
                                                                       @Nonnull E... elements) {
-        return l(metaType, group, type.getSimpleName(), icon, type.getName(), elements);
+        return l(metaType, group, type.getSimpleName(), icon, elements);
     }
 
     @Override

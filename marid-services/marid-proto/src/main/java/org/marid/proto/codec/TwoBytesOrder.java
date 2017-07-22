@@ -21,14 +21,25 @@
 
 package org.marid.proto.codec;
 
+import org.marid.runtime.annotation.MaridBean;
+import org.marid.runtime.annotation.MaridBeanProducer;
+
 /**
  * @author Dmitry Ovchinnikov
  */
+@MaridBean(description = "Converts a byte array to four bytes")
 public enum TwoBytesOrder implements Codec<byte[]> {
 
+    @MaridBeanProducer
     ABCD(0, 1, 2, 3),
+
+    @MaridBeanProducer
     BADC(1, 0, 3, 2),
+
+    @MaridBeanProducer
     DCBA(3, 2, 1, 0),
+
+    @MaridBeanProducer
     CDAB(2, 3, 0, 1);
 
     private final int[] indices;

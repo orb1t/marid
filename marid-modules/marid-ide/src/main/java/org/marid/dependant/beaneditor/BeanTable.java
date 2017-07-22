@@ -22,7 +22,6 @@ package org.marid.dependant.beaneditor;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
-import javafx.scene.control.Menu;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.marid.dependant.beaneditor.model.LibraryBean;
@@ -117,9 +116,16 @@ public class BeanTable extends MaridTableView<BeanData> {
                 .setIcon("D_SERVER_PLUS")
                 .setDisabled(false);
         final InvalidationListener listener = o -> {
+            final Function<LibraryBean, Object[]> textFunc = bean -> {
+                if (bean.literal.description.isEmpty()) {
+                    return new Object[] {ls(bean.literal.name), "", ""};
+                } else {
+                    return new Object[] {ls(bean.literal.name), ": ", ls(bean.literal.description)};
+                }
+            };
             final Function<LibraryBean, FxAction> function = bean -> new FxAction("bean", bean.literal.group)
                     .setIcon(bean.literal.icon)
-                    .bindText(ls("%s: %s", ls(bean.literal.name), ls(bean.literal.description)));
+                    .bindText(ls("%s%s%s", textFunc.apply(bean)));
             final Map<String, List<FxAction>> grouped = context.discoveredBeans.stream()
                     .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
             switch (grouped.size()) {

@@ -21,6 +21,9 @@
 
 package org.marid.proto.codec;
 
+import org.marid.runtime.annotation.MaridBean;
+import org.marid.runtime.annotation.MaridBeanProducer;
+
 import java.nio.ByteBuffer;
 import java.util.Base64;
 
@@ -28,10 +31,12 @@ import java.util.Base64;
  * @author Dmitry Ovchinnikov.
  * @since 0.9
  */
+@MaridBean
 public class DoubleCodec implements Codec<Double> {
 
     private final int size;
 
+    @MaridBeanProducer(name = "Double-Precision Number Codec", icon = "D_NUMERIC")
     public DoubleCodec(int size) {
         this.size = size;
         if (size != 4 && size != 8) {

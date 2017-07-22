@@ -21,11 +21,14 @@
 
 package org.marid.proto.codec;
 
+import org.marid.runtime.annotation.MaridBean;
+
 import java.nio.ByteBuffer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@MaridBean
 public class IntCodec implements Codec<Integer> {
 
     @Override

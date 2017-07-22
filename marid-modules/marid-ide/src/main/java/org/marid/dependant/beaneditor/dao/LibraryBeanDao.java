@@ -87,7 +87,7 @@ public class LibraryBeanDao {
                 if (!method.isAnnotationPresent(MaridBeanProducer.class)) {
                     continue;
                 }
-                final MetaLiteral literal = l("Bean", "Other", c, "D_SERVER_NETWORK", method);
+                final MetaLiteral literal = l("Bean", "Other", method.getName(), "D_SERVER_NETWORK", method);
                 final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(method, args(method)));
                 builder.accept(new LibraryBean(bean, literal));
             }
@@ -97,7 +97,7 @@ public class LibraryBeanDao {
                 if (!field.isAnnotationPresent(MaridBeanProducer.class)) {
                     continue;
                 }
-                final MetaLiteral literal = l("Bean", "Other", c, "D_SERVER_NETWORK", field);
+                final MetaLiteral literal = l("Bean", "Other", field.getName(), "D_SERVER_NETWORK", field);
                 final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(field));
                 builder.accept(new LibraryBean(bean, literal));
             }
